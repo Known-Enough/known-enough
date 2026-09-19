@@ -1,0 +1,76 @@
+[
+  {
+    "ok": true,
+    "requestId": "request-synthetic",
+    "status": "APPLIED",
+    "version": {
+      "contextToken": "ctx_Q7c2M9k1",
+      "decisionRevision": 1,
+      "controlVersion": 2
+    }
+  },
+  {
+    "ok": false,
+    "requestId": "request-synthetic",
+    "error": {
+      "code": "UNAUTHENTICATED",
+      "httpStatus": 401
+    }
+  },
+  {
+    "ok": false,
+    "requestId": "request-synthetic",
+    "error": {
+      "code": "FORBIDDEN",
+      "httpStatus": 403
+    }
+  },
+  {
+    "ok": false,
+    "requestId": "request-synthetic",
+    "error": {
+      "code": "NOT_FOUND",
+      "httpStatus": 404
+    }
+  },
+  {
+    "ok": false,
+    "requestId": "request-synthetic",
+    "error": {
+      "code": "STALE_CONTEXT",
+      "httpStatus": 409
+    }
+  },
+  {
+    "ok": false,
+    "requestId": "request-synthetic",
+    "error": {
+      "code": "STALE_PROPOSAL",
+      "httpStatus": 409
+    }
+  },
+  {
+    "ok": false,
+    "requestId": "request-synthetic",
+    "error": {
+      "code": "IDEMPOTENCY_CONFLICT",
+      "httpStatus": 409
+    }
+  },
+  {
+    "ok": false,
+    "requestId": "request-synthetic",
+    "error": {
+      "code": "INVALID_COMMAND",
+      "httpStatus": 422
+    }
+  },
+  {
+    "ok": false,
+    "requestId": "request-synthetic",
+    "error": {
+      "code": "NEEDS_CLARIFICATION",
+      "httpStatus": 422
+    }
+  }
+]

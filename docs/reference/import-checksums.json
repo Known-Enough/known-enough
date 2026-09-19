@@ -1,0 +1,30 @@
+[
+  {
+    "path": "docs/Deal-Table-TeamTable-plan.md",
+    "sha256": "22cae5217392fc3913f8b3d0b666a5c475820c43be5c71708c0da89f47ad86f1"
+  },
+  {
+    "path": "docs/Deal-Table-two-developer-architecture.md",
+    "sha256": "2eb14dab6101809ebcbec341809c58238e198e54d23feb457ae56b739e8b11a0"
+  },
+  {
+    "path": "planning-checks/teamtable-fixture-check.mjs",
+    "sha256": "1c99e26557ea2c8701a4de565fa86bbfbaedd5edb380d50d7689eb6b2ea58522"
+  },
+  {
+    "path": "docs/reference/deal-table-teamtable.html",
+    "sha256": "b42baf5693595bfb5a64005b665062bf5d049533231150b0e0f5bb1978535c20"
+  },
+  {
+    "path": "docs/reference/hackathon-research-sept16.txt",
+    "sha256": "f6fe6fd05358d1e7a1b71ef81e1e84b545f5813dc8103203aec0aa5565850b82"
+  },
+  {
+    "path": "docs/reference/astra-bootstrap-task.md",
+    "sha256": "6bed51479008be7755bfcdf0d8150b672c01015a00ec7b9cfa3273343bb2904b"
+  },
+  {
+    "path": "docs/reference/developer-B-start.md",
+    "sha256": "9b050a05022bfe54282da083a17ba2e3e6ab5afdd67ff6ae67b4082ec5743d7d"
+  }
+]

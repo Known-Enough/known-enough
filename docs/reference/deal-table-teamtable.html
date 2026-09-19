@@ -1,0 +1,150 @@
+<div id="dt-teamtable" aria-label="Deal Table interactive storyboard">
+  <style>
+    #dt-teamtable { --dt-bg:light-dark(#f7f8f6,#151c1a); --dt-panel:light-dark(#ffffff,#202925); --dt-text:light-dark(#172f28,#e5f1eb); --dt-muted:light-dark(#53685f,#b4c8bd); --dt-line:light-dark(#d8e3dc,#40534a); --dt-accent:light-dark(#096750,#9ae4c8); --dt-accent-bg:light-dark(#dff3e9,#234b3c); --dt-warn:light-dark(#82570a,#f6d183); --dt-warn-bg:light-dark(#fff2d8,#44371e); --dt-radius:18px; color:var(--dt-text); font-family:system-ui,sans-serif; background:var(--dt-bg); border:1px solid var(--dt-line); border-radius:var(--dt-radius); overflow:hidden; }
+    #dt-teamtable * { box-sizing:border-box; }
+    #dt-teamtable [hidden] { display:none!important; }
+    #dt-teamtable header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; padding:20px 24px; border-bottom:1px solid var(--dt-line); background:var(--dt-panel); }
+    #dt-teamtable h2,#dt-teamtable h3,#dt-teamtable p { margin:0; }
+    #dt-teamtable .dt-muted { color:var(--dt-muted); }
+    #dt-teamtable .dt-brand { display:flex; align-items:center; gap:10px; }
+    #dt-teamtable .dt-mark { width:34px; height:34px; border-radius:50%; background:var(--dt-accent-bg); color:var(--dt-accent); display:grid; place-items:center; }
+    #dt-teamtable .dt-badge { background:var(--dt-accent-bg); color:var(--dt-accent); padding:6px 10px; border-radius:20px; display:inline-block; }
+    #dt-teamtable .dt-warning { background:var(--dt-warn-bg); color:var(--dt-warn); }
+    #dt-teamtable .dt-layout { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(250px,1fr); }
+    #dt-teamtable .dt-table { padding:24px; min-width:0; }
+    #dt-teamtable .dt-topline { display:flex; align-items:center; flex-wrap:wrap; justify-content:space-between; gap:10px; margin-bottom:22px; }
+    #dt-teamtable .dt-seats { display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin:22px 0; }
+    #dt-teamtable .dt-seat { text-align:center; display:grid; justify-items:center; gap:5px; }
+    #dt-teamtable .dt-avatar { width:40px; height:40px; border-radius:50%; background:var(--dt-panel); border:1px solid var(--dt-line); display:grid; place-items:center; }
+    #dt-teamtable .dt-seat[data-approved="true"] .dt-avatar { background:var(--dt-accent-bg); border-color:var(--dt-accent); }
+    #dt-teamtable .dt-stage { background:var(--dt-panel); border:1px solid var(--dt-line); border-radius:var(--dt-radius); padding:22px; display:grid; gap:18px; }
+    #dt-teamtable .dt-slots { display:flex; gap:8px; flex-wrap:wrap; }
+    #dt-teamtable .dt-slot { padding:10px 12px; border:1px solid var(--dt-line); border-radius:10px; }
+    #dt-teamtable .dt-slot[data-active="true"] { background:var(--dt-accent-bg); border-color:var(--dt-accent); }
+    #dt-teamtable .dt-assignments { display:grid; gap:10px; }
+    #dt-teamtable .dt-assignment { display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; border-top:1px solid var(--dt-line); padding-top:12px; }
+    #dt-teamtable .dt-actionbar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:18px; }
+    #dt-teamtable button { font:inherit; color:var(--dt-text); background:var(--dt-panel); border:1px solid var(--dt-line); border-radius:10px; padding:10px 14px; min-height:44px; }
+    #dt-teamtable button.dt-primary { background:var(--dt-accent); color:var(--dt-bg); border-color:var(--dt-accent); }
+    #dt-teamtable button:disabled { opacity:.5; cursor:not-allowed; }
+    #dt-teamtable aside { min-width:0; border-left:1px solid var(--dt-line); padding:24px; background:var(--dt-panel); display:grid; align-content:start; gap:18px; }
+    #dt-teamtable .dt-phone { background:var(--dt-bg); border:1px solid var(--dt-line); border-radius:var(--dt-radius); padding:20px; display:grid; gap:18px; }
+    #dt-teamtable .dt-phone section { display:grid; gap:10px; }
+    #dt-teamtable blockquote { margin:0; padding:12px 0 12px 14px; border-left:3px solid var(--dt-accent); }
+    #dt-teamtable .dt-ledger { padding-top:14px; border-top:1px solid var(--dt-line); display:grid; gap:8px; }
+    #dt-teamtable footer { display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; padding:16px 24px; border-top:1px solid var(--dt-line); color:var(--dt-muted); }
+    #dt-teamtable .dt-controls { display:flex; flex-wrap:wrap; gap:8px; }
+    #dt-teamtable[data-compact="true"] .dt-stage,#dt-teamtable[data-compact="true"] .dt-phone { padding:16px; gap:12px; }
+    @media(max-width:680px) { #dt-teamtable .dt-layout{grid-template-columns:1fr;} #dt-teamtable aside{border-left:0;border-top:1px solid var(--dt-line);} #dt-teamtable header,#dt-teamtable .dt-table,#dt-teamtable aside,#dt-teamtable footer{padding:16px;} }
+    @media(prefers-reduced-motion:no-preference) { #dt-teamtable .dt-avatar,#dt-teamtable .dt-slot { transition:background-color .25s,border-color .25s; } }
+  </style>
+  <header>
+    <div class="dt-brand"><span class="dt-mark" aria-hidden="true"><i data-lucide="handshake"></i></span><div><h2>Deal Table</h2><span class="dt-muted">TeamTable · Launch rehearsal</span></div></div>
+    <span class="dt-badge">Interactive storyboard</span>
+  </header>
+  <div class="dt-layout">
+    <main class="dt-table">
+      <div class="dt-topline"><span>Shared table</span><span class="dt-badge dt-warning" id="dt-status">No agreement yet</span></div>
+      <div class="dt-seats">
+        <div class="dt-seat" data-person="Maya"><span class="dt-avatar">M</span><span>Maya</span><span class="dt-muted" data-seat-state="Maya">Submitted</span></div>
+        <div class="dt-seat" data-person="Leo"><span class="dt-avatar">L</span><span>Leo</span><span class="dt-muted" data-seat-state="Leo">Submitted</span></div>
+        <div class="dt-seat" data-person="Nina"><span class="dt-avatar">N</span><span>Nina</span><span class="dt-muted" data-seat-state="Nina">Submitted</span></div>
+      </div>
+      <section class="dt-stage" aria-label="Current shared proposal">
+        <h3 id="dt-headline">Three people. No workable plan.</h3>
+        <p id="dt-summary" class="dt-muted">No candidate meets the current confirmed conditions.</p>
+        <div class="dt-slots" aria-label="Thursday October 8 meeting choices"><span class="dt-slot">Thu 10:00</span><span class="dt-slot" id="dt-chosen-slot">Thu 11:00</span><span class="dt-slot">Thu 14:00</span></div>
+        <div class="dt-assignments">
+          <div class="dt-assignment"><span>Saturday · Launch lead<br><span class="dt-muted">Oct 10 · 10:00–12:00</span></span><span id="dt-lead">Unassigned</span></div>
+          <div class="dt-assignment"><span>Sunday · Follow-up<br><span class="dt-muted">Oct 11 · 10:00–11:00</span></span><span id="dt-followup">Unassigned</span></div>
+        </div>
+        <span class="dt-muted">Agreed policy: balance recent duty load</span>
+      </section>
+      <div class="dt-actionbar" id="dt-shared-actions"><button class="dt-primary cursor-interaction" id="dt-ask" type="button">Explore a private trade</button><button class="cursor-interaction" id="dt-change" type="button" hidden>Change meeting to 60 minutes</button></div>
+      <p id="dt-live" aria-live="polite" class="dt-muted" style="margin-top:14px">Meeting times: America/Mexico_City.</p>
+    </main>
+    <aside aria-label="Fictional demo observer view">
+      <div><h3>Private view · Nina</h3><span class="dt-muted">Demo observer only</span></div>
+      <div class="dt-phone">
+        <section id="dt-private-wait"><span class="dt-badge">Your conditions stay on your side</span><p>The table can ask about an exception. You decide whether to allow it.</p></section>
+        <section id="dt-private-ask" hidden><span class="dt-badge dt-warning">A conditional trade</span><p>Could you meet Thursday at 11:00 for 30 minutes if you take neither weekend duty?</p><span class="dt-muted">This room and decision version only. Not final acceptance.</span><div class="dt-controls"><button type="button" class="dt-primary cursor-interaction" id="dt-allow">Allow this trade</button><button type="button" class="cursor-interaction" id="dt-decline">Keep my availability</button></div></section>
+        <section id="dt-private-disclose" hidden><span class="dt-badge">Separate permission</span><p>May I share this with Maya and Leo?</p><blockquote>“A conditional availability exception makes the proposed plan possible.”</blockquote><span class="dt-muted">They might infer who changed availability. Declining this announcement does not cancel your trade.</span><div class="dt-controls"><button type="button" class="dt-primary cursor-interaction" id="dt-no-disclosure">Continue without announcing</button><button type="button" class="cursor-interaction" id="dt-disclose">Allow that sentence</button></div></section>
+        <section id="dt-private-result" hidden><span class="dt-badge" id="dt-private-badge">Exception allowed</span><p id="dt-private-message">You have not yet accepted the final plan.</p></section>
+      </div>
+      <section id="dt-approvals" hidden><h3>Demo · independent approvals</h3><div class="dt-controls" style="margin-top:10px"><button type="button" class="cursor-interaction" data-approve="Maya">Maya: accept</button><button type="button" class="cursor-interaction" data-approve="Leo">Leo: accept</button><button type="button" class="cursor-interaction" data-approve="Nina">Nina: accept</button></div></section>
+      <div class="dt-ledger"><span>Optional disclosure ledger</span><p id="dt-ledger-text" class="dt-muted">Nothing published.</p></div>
+    </aside>
+  </div>
+  <footer><span>Fictional participants · October 2026</span><span>Local concept preview · no live Alexa or AWS</span></footer>
+  <script>
+  (() => {
+    const root = document.getElementById('dt-teamtable');
+    const names = ['Maya','Leo','Nina'];
+    const initial = { phase:'blocked', grant:false, disclosed:false, approvals:[], duration:30 };
+    let state = {...initial};
+    const design = {radius:18, compact:false};
+    const el = id => root.querySelector('#'+id);
+    function restore(snapshot) {
+      const saved = snapshot?.privateContent;
+      if (!saved || saved.version !== 1) return;
+      if (!['blocked','ask','disclose','proposed','agreed','declined','changed'].includes(saved.phase)) return;
+      state = {phase:saved.phase,grant:!!saved.grant,disclosed:!!saved.disclosed,approvals:Array.isArray(saved.approvals)?names.filter(n=>saved.approvals.includes(n)):[],duration:saved.duration===60?60:30};
+    }
+    function save() {
+      if(window.openai?.setWidgetState) window.openai.setWidgetState({modelContent:{concept:'Deal Table TeamTable',stage:state.phase,optionalAnnouncementAllowed:state.disclosed,approvalCount:state.approvals.length},privateContent:{version:1,...state}}).catch(()=>{});
+    }
+    function candidates() {
+      const result=[];
+      for(const start of [600,660,840]) for(const lead of ['Maya','Leo']) for(const followup of names) {
+        if(lead===followup || start<660 || start>660) continue;
+        if(!state.grant || state.duration!==30 || followup==='Nina') continue;
+        const loads=names.map(n=>(n==='Leo'?3:0)+(n===lead?2:0)+(n===followup?1:0));
+        result.push({lead,followup,load:Math.max(...loads)});
+      }
+      return result.sort((a,b)=>a.load-b.load);
+    }
+    function render() {
+      root.style.setProperty('--dt-radius',design.radius+'px');
+      root.dataset.compact=String(design.compact);
+      const active=['proposed','agreed'].includes(state.phase);
+      const plan=active?candidates()[0]:undefined;
+      const changed=state.phase==='changed';
+      const denied=state.phase==='declined';
+      const status={blocked:'No agreement yet',ask:'Private review',disclose:'Private review',proposed:state.approvals.length+'/3 approvals',agreed:'Agreement reached',declined:'No agreement',changed:'Previous agreement invalid'};
+      el('dt-status').textContent=status[state.phase];
+      el('dt-status').classList.toggle('dt-warning',state.phase!=='agreed');
+      el('dt-headline').textContent=state.phase==='agreed'?'One plan. Three approvals.':plan?'A plan everyone can review.':changed?'The terms changed. So did consent.':denied?'No deal is a valid outcome.':'Three people. No workable plan.';
+      el('dt-summary').textContent=plan?'Thursday Oct 8 · 11:00–11:30. Duties selected using the agreed load-balancing policy.':changed?'The 30-minute permission does not cover a 60-minute meeting. A fresh review is required.':denied?'No plan meets the current conditions. No hard limit has been changed.':state.phase==='blocked'?'No candidate meets the current confirmed conditions.':'A private review is in progress. Personal conditions remain off the shared table.';
+      el('dt-chosen-slot').dataset.active=String(!!plan);
+      el('dt-chosen-slot').textContent=changed?'Thu 11:00 · 60 min':'Thu 11:00';
+      el('dt-lead').textContent=plan?plan.lead:'Unassigned';
+      el('dt-followup').textContent=plan?plan.followup:'Unassigned';
+      el('dt-ask').hidden=state.phase!=='blocked';
+      el('dt-change').hidden=state.phase!=='agreed';
+      el('dt-private-wait').hidden=state.phase!=='blocked';
+      el('dt-private-ask').hidden=state.phase!=='ask';
+      el('dt-private-disclose').hidden=state.phase!=='disclose';
+      el('dt-private-result').hidden=!['proposed','agreed','declined','changed'].includes(state.phase);
+      el('dt-private-badge').textContent=changed?'Permission expired':denied?'Availability unchanged':'Scoped exception allowed';
+      el('dt-private-message').textContent=changed?'Your permission and all final approvals belonged to the previous version.':denied?'Your refusal was not attributed to you on the shared table.':state.phase==='agreed'?'You approved this exact plan. You have no weekend duties.':'Your exception is active. Final acceptance is a separate choice.';
+      el('dt-approvals').hidden=!active;
+      root.querySelectorAll('[data-approve]').forEach(button=>{const name=button.dataset.approve;button.disabled=state.approvals.includes(name)||state.phase==='agreed';button.textContent=state.approvals.includes(name)?name+': accepted':name+': accept';});
+      root.querySelectorAll('[data-person]').forEach(seat=>{const accepted=active&&state.approvals.includes(seat.dataset.person);seat.dataset.approved=String(accepted);seat.querySelector('[data-seat-state]').textContent=accepted?'Accepted':changed?'Review required':active?'Reviewing':'Submitted';});
+      el('dt-ledger-text').textContent=state.disclosed?'Published to Maya and Leo: “A conditional availability exception makes the proposed plan possible.”'+(changed?' Historical record; not permission for the revised plan.':''):'Nothing published. Optional disclosure is independent of the trade.';
+      el('dt-live').textContent=state.phase==='agreed'?'Planning agreement only. No deployment or calendar changes made.':changed?'All earlier approvals cleared. No automatic acceptance.':'America/Mexico_City · '+status[state.phase];
+    }
+    const act = fn => {fn();render();save();};
+    el('dt-ask').addEventListener('click',()=>act(()=>{state.phase='ask';}));
+    el('dt-allow').addEventListener('click',()=>act(()=>{state.grant=true;state.phase='disclose';}));
+    el('dt-decline').addEventListener('click',()=>act(()=>{state.grant=false;state.phase='declined';}));
+    el('dt-no-disclosure').addEventListener('click',()=>act(()=>{state.disclosed=false;state.phase='proposed';}));
+    el('dt-disclose').addEventListener('click',()=>act(()=>{state.disclosed=true;state.phase='proposed';}));
+    root.querySelectorAll('[data-approve]').forEach(button=>button.addEventListener('click',()=>act(()=>{if(state.phase!=='proposed')return;const name=button.dataset.approve;if(!state.approvals.includes(name))state.approvals.push(name);if(state.approvals.length===3)state.phase='agreed';})));
+    el('dt-change').addEventListener('click',()=>act(()=>{state.duration=60;state.grant=false;state.approvals=[];state.phase='changed';}));
+    restore(window.openai?.widgetState);
+    render();
+    window.addEventListener('openai:set_globals',event=>{if(event.detail?.globals?.widgetState){restore(event.detail.globals.widgetState);render();}});
+    if(globalThis.Tweak){const tweak=new Tweak({container:root,onChange:render});tweak.addSlider(design,'radius',{label:'Surface corners',min:6,max:24,unit:'px'});tweak.addToggle(design,'compact',{label:'Compact spacing'});}
+  })();
+  </script>
+</div>

@@ -1,0 +1,6 @@
+{
+  "name": "@deal-table/domain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module"
+}

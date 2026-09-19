@@ -1,0 +1,203 @@
+I did a deep pass over the Devpost page, official rules, resources, current discussion threads, Fire TV/Vega documentation, Alexa+ MCP documentation, Bee developer tools, and Ring APIs. As of **September 16, 2026**, this is a serious hackathon: the page currently shows roughly **8,000 registered participants**, though that number is registrations rather than finished submissions, and the project gallery has not yet been published. 
+
+## 1. Core facts that matter
+
+The submission deadline is **October 23, 2026 at 12:00 PM PDT**. Judging runs **November 9–20**, with winners expected around **December 3**. There are four primary tracks: Fire TV, Alexa+, Bee, and Ring. There are also two stackable mini-challenges, AWS Builder and Open Source. Amazon says a project can receive at most one primary-track prize plus one mini-challenge prize. 
+
+The prize structure is substantial:
+
+| Track | 1st | 2nd | 3rd |
+|---|---:|---:|---:|
+| Fire TV | $25K + $15K AWS credits | $15K + $5K AWS | $4K + $1K AWS |
+| Alexa+ | $25K + $15K AWS credits | $15K + $5K AWS | $4K + $1K AWS |
+| Bee | $12K | $8K | — |
+| Ring | $12K | $8K | — |
+| AWS Builder | $5K + $5K AWS credits | — | — |
+| Open Source | $5K + $5K AWS credits | — | — |
+
+Amazon advertises **$138K cash** and approximately **$190K total value including AWS credits**. 
+
+There is also **$150 in AWS promotional credits available to registered participants while supplies last**. The request deadline is **October 21 at noon PT**, two days before submissions close. 
+
+## 2. How judging actually works
+
+This is probably the most important discovery.
+
+Stage 1 is pass/fail: the project has to genuinely fit the track and use the required technology. Stage 2 has four **equally weighted** criteria: Tech Implementation, Design, Potential Impact, and Quality of the Idea. Amazon explicitly gives judges examples of what it considers “obvious” versus more creative uses of each platform. 
+
+There is another major lever: **friction logs can add up to 10% to the final judging score**. Amazon wants actual developer feedback: task attempted, steps, expected behavior, actual behavior, severity, workaround, and a concrete recommendation. This means documenting development problems is part of competition strategy rather than administrative overhead. 
+
+If scores tie, the criteria are considered in their listed order, beginning with **Tech Implementation**. 
+
+Also important: judges are explicitly **not required to run your project**. They may judge solely from the description, images, and demo video. Therefore the three-minute video is effectively part of the product. 
+
+## 3. Track analysis
+
+### Alexa+: lowest infrastructure barrier
+
+There are two ways in.
+
+The full route is a self-hosted MCP server implementing **MCP 2025-11-25 or later using Streamable HTTP**, or an Agent Skill. Amazon specifically wants richer agentic workflows rather than basic API wrappers or single-turn Q&A. MCP Apps, persistent context, orchestration, media/cards and transactional flows are specifically identified as stronger examples. 
+
+The second route is unusually permissive: a **simulated Alexa+ web experience**. Amazon staff clarified in the Devpost discussions that the simulation does not need to visually duplicate Alexa+, voice input/output is optional, custom interfaces are allowed, and you can have a completely functional backend while simulating only the Alexa layer. 
+
+That gives Alexa+ probably the fastest route from idea → polished demo.
+
+However, a generic “AI assistant” will be weak because Amazon explicitly identifies basic Q&A and thin MCP wrappers as obvious submissions. 
+
+Alexa+'s real design model is multimodal: voice plus visual surfaces, with Lists, Carousels, Cards, fullscreen views and other UI. Amazon's design guidance recommends designing specifically around these interaction patterns rather than treating Alexa as a web chatbot. 
+
+### Bee: potentially extremely interesting, but hardware/data gated
+
+Bee exposes considerably more data than a simple recording API.
+
+Its CLI currently provides conversations, real-time utterance streams, daily summaries, facts, todos, journals, insights, location history, photos and semantic search. The CLI also runs as an MCP server, and there is a Bee Agent Skill. 
+
+Amazon's judging examples explicitly mention sophisticated Bee concepts such as cross-device orchestration, ambient context driving productivity workflows, education coaching, real-time functions, facts/insights, self-improvement workflows and synchronized meeting insights. 
+
+The constraint is important: your submission must use data from a **real Bee device or an Apple Watch running Bee software**. Static/mock Bee data is insufficient. 
+
+I also found a very current Bee issue in the official hackathon discussion. Amazon's team confirmed that very short recordings—currently around fewer than 50 words—may remain briefly visible while being captured and later disappear because they are treated as probable noise/far-field hallucination. One participant is already persisting live transcript fragments locally before they disappear. That is exactly the sort of finding worth logging in the friction log if your project encounters it. 
+
+### Ring: excellent event-driven architecture possibilities
+
+Ring is considerably richer than “doorbell notification.”
+
+The API provides signed webhooks for motion, human-classified motion, button presses, device addition/removal and online/offline state. Ring requires HMAC verification and provides unique request IDs for deduplication. 
+
+There is also a snapshot API supporting JPEG/PNG output and configurable resolution, and authorization scopes include video streaming, device discovery/status, notification subscriptions and configuration access. 
+
+Amazon itself suggests uses extending into visitor/access control, foot-traffic analytics, queues, staff scheduling, delivery/package tracking, workplace safety, residential package rooms, parking, pets and home automation. 
+
+A physical Ring device is not required by the hackathon. A simulator documented/accepted by Ring can satisfy the track requirement. 
+
+This makes Ring attractive for systems that combine **event → reasoning → automation → human action**.
+
+### Fire TV/Vega: strongest visual-demo potential
+
+Fire TV projects can use Fire OS or Vega OS, with React Native, web technologies, Kotlin/Java or other suitable frameworks. Amazon specifically prioritizes AI-enhanced viewing, sports, fitness, family entertainment, multimodal interfaces and computer vision. 
+
+Vega has a usable Virtual Device, so physical Fire TV hardware is unnecessary for the hackathon demo. Amazon also provides strong starter repositories including multi-TV React Native, video apps, sports apps, audio apps and TV interface patterns. 
+
+There is one technical catch: the Vega Virtual Device only supports a subset of Fire TV integrations. Amazon says some middleware such as Login with Amazon and Launcher integrations are unavailable in the virtual environment. Projects heavily dependent on system integrations therefore have more testing risk than a self-contained TV application. 
+
+## 4. Strong project directions
+
+I would currently evaluate these concepts as follows. “Strength” here means alignment with Amazon's published judging criteria, not a prediction of results.
+
+| Concept | Track | Build difficulty | Demo strength | Rule/priority alignment |
+|---|---|---:|---:|---:|
+| **Meeting Memory Operator** — Bee watches a meeting, extracts decisions/owners/deadlines in real time, compares them against past commitments and produces follow-up workflows | Bee + AWS | Medium | Very high | Excellent |
+| **Adaptive Sports Companion** — Fire TV companion experience dynamically explains plays, players, strategy and statistics according to viewer knowledge level | Fire TV + AWS | Medium | Very high | Excellent |
+| **Accessibility Door Concierge** — Ring detects arrival, analyzes context/snapshot and converts the event into simplified visual/audio/haptic information for users with accessibility needs | Ring + AWS | Medium | Very high | Excellent |
+| **Household Operations Agent** — Alexa+ maintains state around groceries, events, chores, home projects and multi-step tasks rather than answering isolated questions | Alexa+ + AWS | Medium | High | Excellent |
+| **Personal Learning Loop** — Bee turns real-world lectures/conversations into recall questions, identifies knowledge gaps over time and schedules personalized reviews | Bee + AWS | Medium | High | Excellent |
+| **Package Intelligence System** — Ring detects delivery events, associates them with expected deliveries and manages apartment/package-room handoffs | Ring + AWS | Medium | High | Very good |
+| **AI Family Game Night** — Fire TV uses voice + remote + visuals to generate personalized cooperative games that adapt to participants | Fire TV | Medium | Very high | Very good |
+| **Visual Project Manager for Alexa+** — conversational agent decomposes a goal into tasks, invokes services, tracks state and renders interactive Alexa-style cards | Alexa+ + AWS | Low/Medium | High | Very good |
+| **Small-Business Arrival OS** — Ring events drive visitor check-in, customer flow, staff alerts and operational analytics | Ring | Medium | High | Very good |
+| **Ambient Household OS** — Ring detects what happens at the door, Bee understands the user's ongoing context, Alexa+ orchestrates actions and Fire TV displays the household state | Multi-track + AWS | Very high | Extremely high | Exceptional, but risky |
+
+## 5. The concepts I would investigate first
+
+### A. Bee Meeting Memory Operator
+
+This concept aligns almost perfectly with language Amazon itself uses in the judging examples: real-time Bee functionality, facts/insights and synchronized meeting information across teams. 
+
+The flow could be:
+
+**Bee live utterances → event processor → decision/action detection → Bedrock/Strands agent → persistent meeting graph → Bee todos/facts → post-meeting dashboard.**
+
+The differentiator should be **memory across meetings**.
+
+For example:
+
+“Three weeks ago Alex committed to deliver the API by September 15. In today's meeting Alex said integration is still blocked by authentication. Should I update the milestone and prepare a follow-up?”
+
+That demonstrates ambient context, historical reasoning, actions, and real customer value.
+
+It also gives you an obvious AWS Builder implementation: Bedrock + AgentCore/Strands + DynamoDB/S3 or similar.
+
+### B. Alexa+ Household Operations Agent
+
+This is probably the safest sophisticated build.
+
+Avoid creating another chatbot. Create an **agent that operates a household process over time**.
+
+Example:
+
+“I'm having eight people over Saturday.”
+
+The system can construct a meal plan, check dietary constraints from memory, generate shopping items, ask approval, divide preparation tasks, build a timeline and maintain state until Saturday.
+
+The web simulation can show Alexa-style cards/carousels while the backend is genuinely agentic. Amazon explicitly permits this simulation approach. 
+
+This project can be built without specialized hardware.
+
+### C. Ring Accessibility Concierge
+
+A Ring button/motion event triggers an AWS workflow. It obtains a snapshot, derives useful context, then converts it into the presentation appropriate to the user.
+
+Examples could include a simplified visual alert for someone with hearing impairment, voice description for someone with impaired vision, or trusted-person escalation for a caretaker.
+
+Ring's webhooks and snapshot APIs provide the underlying event and media primitives, while accessibility/caretaking are directly named priority categories. 
+
+This also produces a very clean three-minute demo.
+
+## 6. Highest-upside ambitious concept
+
+The most technically interesting option is a **cross-device ambient orchestration system**.
+
+Imagine:
+
+**Ring** sees a delivery arrive.
+
+**Bee** knows you are currently in an important meeting.
+
+An AWS agent determines the delivery is expected.
+
+**Alexa+** waits rather than interrupting, then asks after the meeting whether the package should be brought inside.
+
+**Fire TV** later shows a household briefing including the delivery.
+
+This directly embodies Amazon's own message about connecting “the living room, the front door, and the cloud,” while its judging guidance specifically praises cross-device Bee orchestration. 
+
+The problem is scope. Four integrations create four possible failure surfaces. I would only choose this architecture with enough development capacity to make every required track integration genuinely functional.
+
+A more controlled version would use **one primary platform + AWS**, while simulating secondary surfaces where rules permit.
+
+## 7. What I would avoid
+
+A streaming interface, ordinary video player, simple TV remote game, Alexa Q&A bot, thin MCP wrapper, Bee notification relay, Bee logging dashboard, Ring motion notification app, generic Bedrock call or trivial open-source README change are almost directly the examples Amazon tells judges to treat as obvious. 
+
+Also avoid depending heavily on an Amazon capability that is not publicly available. A current Alexa+ discussion illustrates the risk: a participant asked about triggering Alexa-to-Alexa Calling/Drop In, and an Amazon representative said add-ons cannot currently invoke that functionality. It can be represented in a simulation, but not implemented as an actual add-on call today. 
+
+## 8. Competition strategy
+
+Because the gallery is currently hidden, there is no reliable information yet about submission distribution among Fire TV, Alexa+, Bee and Ring. The roughly 8,000 participant number therefore should not be interpreted as 8,000 competing finished projects. 
+
+The strongest strategy from the published rules is to optimize the submission around all four scoring dimensions simultaneously:
+
+**Working Amazon integration → polished platform-native UX → one very specific user problem → non-obvious use of the platform.**
+
+Then add **AWS Builder** naturally rather than as an ornamental Bedrock call, create a meaningful small open-source contribution if feasible, and maintain the friction log from the first installation onward. Amazon explicitly says a trivial AWS call or trivial OSS edit is considered the obvious version of those mini-challenges. 
+
+## 9. Submission requirements that cannot be missed
+
+You need a **public GitHub repository**, complete source/assets/setup instructions, and an open-source license visible from the repository page. Alexa+, Bee and Ring submissions must actually call the relevant required technology in code. Fire TV instead needs visible proof that it runs on Fire OS/Vega. The public demo video must be under three minutes and hosted on YouTube or Vimeo. Submission materials must be in English or accompanied by English translations. Existing projects are permitted only when the new hackathon work is clearly identified and constitutes a significant update. Multiple submissions are allowed, but each must be substantially different. 
+
+Also maintain access until judging finishes, because private services must provide judge credentials/testing access free of charge. 
+
+Official pages: [Hackathon overview](https://amazonappdev2026.devpost.com/?utm_source=chatgpt.com) · [Official rules](https://amazonappdev2026.devpost.com/rules?utm_source=chatgpt.com) · [Developer resources](https://amazonappdev2026.devpost.com/resources?utm_source=chatgpt.com) · [Current discussions](https://amazonappdev2026.devpost.com/forum_topics?utm_source=chatgpt.com)
+
+### Current direction I would take
+
+For a **solo/small team without specialized hardware**, I would begin with **Alexa+ Household Operations Agent + AWS Builder**.
+
+With reliable Bee/Apple Watch access, I would seriously consider **Bee Meeting Memory Operator + AWS Builder**, because the API surface is unusually rich and the idea maps directly onto what Amazon says it considers creative.
+
+For a system-oriented backend developer, **Ring Accessibility Concierge + AWS Builder** provides an excellent combination of actual events, computer vision/media, webhooks, automation and a clear customer story.
+
+The next step should be to take these three concepts and perform a **second-level technical feasibility analysis**: exact APIs/endpoints, AWS architecture, repository structure, UI screens, three-minute demo storyboard, development schedule through October 23, estimated costs, risks, and what specifically would qualify for both AWS Builder and Open Source.
+
+I can also monitor the Devpost gallery, discussions and rule updates and notify you when Amazon publishes submissions or important technical clarifications.

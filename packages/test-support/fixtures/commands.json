@@ -1,0 +1,335 @@
+[
+  {
+    "schemaVersion": 1,
+    "roomId": "room-synthetic",
+    "requestId": "request-synthetic",
+    "idempotencyKey": "retry-synthetic",
+    "expected": {
+      "contextToken": "ctx_Q7c2M9k1",
+      "decisionRevision": 1,
+      "controlVersion": 2
+    },
+    "type": "SUBMIT_INPUT_DRAFT",
+    "payload": {
+      "expectedOwnerRevision": 1,
+      "values": {
+        "conditions": [
+          {
+            "id": "condition-synthetic",
+            "kind": "NEGOTIABLE_UNAVAILABLE",
+            "interval": {
+              "date": "2026-10-08",
+              "timezone": "America/Mexico_City",
+              "startMinute": 660,
+              "endMinute": 690
+            },
+            "inviteException": true
+          }
+        ],
+        "dutyCosts": [
+          {
+            "dutyId": "followup",
+            "cost": 0
+          }
+        ]
+      }
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "roomId": "room-synthetic",
+    "requestId": "request-synthetic",
+    "idempotencyKey": "retry-synthetic",
+    "expected": {
+      "contextToken": "ctx_Q7c2M9k1",
+      "decisionRevision": 1,
+      "controlVersion": 2
+    },
+    "type": "CONFIRM_INPUTS",
+    "payload": {
+      "draftId": "draft-synthetic",
+      "draftRevision": 1,
+      "expectedOwnerRevision": 1
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "roomId": "room-synthetic",
+    "requestId": "request-synthetic",
+    "idempotencyKey": "retry-synthetic",
+    "expected": {
+      "contextToken": "ctx_Q7c2M9k1",
+      "decisionRevision": 1,
+      "controlVersion": 2
+    },
+    "type": "ACCEPT_CONTEXT",
+    "payload": {
+      "policy": "BALANCE_RECENT_LOAD"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "roomId": "room-synthetic",
+    "requestId": "request-synthetic",
+    "idempotencyKey": "retry-synthetic",
+    "expected": {
+      "contextToken": "ctx_Q7c2M9k1",
+      "decisionRevision": 1,
+      "controlVersion": 2
+    },
+    "type": "REQUEST_SOLVE",
+    "payload": {}
+  },
+  {
+    "schemaVersion": 1,
+    "roomId": "room-synthetic",
+    "requestId": "request-synthetic",
+    "idempotencyKey": "retry-synthetic",
+    "expected": {
+      "contextToken": "ctx_Q7c2M9k1",
+      "decisionRevision": 1,
+      "controlVersion": 2
+    },
+    "type": "DECIDE_EXCEPTION",
+    "payload": {
+      "offerId": "offer-synthetic",
+      "offerVersion": 1,
+      "decision": "ALLOW",
+      "scope": {
+        "conditionId": "condition-synthetic",
+        "roomId": "room-synthetic",
+        "contextToken": "ctx_Q7c2M9k1",
+        "decisionRevision": 1,
+        "inputRevision": 1,
+        "rosterMemberIds": [
+          "maya",
+          "leo",
+          "nina"
+        ],
+        "policy": "BALANCE_RECENT_LOAD",
+        "meeting": {
+          "id": "slot-660",
+          "interval": {
+            "date": "2026-10-08",
+            "timezone": "America/Mexico_City",
+            "startMinute": 660,
+            "endMinute": 690
+          }
+        },
+        "predicate": "OWNER_HAS_NO_WEEKEND_DUTIES",
+        "expiresAt": "2026-10-08T15:00:00Z"
+      }
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "roomId": "room-synthetic",
+    "requestId": "request-synthetic",
+    "idempotencyKey": "retry-synthetic",
+    "expected": {
+      "contextToken": "ctx_Q7c2M9k1",
+      "decisionRevision": 1,
+      "controlVersion": 2
+    },
+    "type": "DECIDE_DISCLOSURE",
+    "payload": {
+      "preview": {
+        "id": "preview-synthetic",
+        "text": "A conditional availability exception makes the proposed plan possible.",
+        "textHash": "3914698185f1d172061ca50290f9fdee09f4d88995863f449fdc4b65056d7771",
+        "audienceMemberIds": [
+          "maya",
+          "leo",
+          "nina"
+        ],
+        "roomId": "room-synthetic",
+        "contextToken": "ctx_Q7c2M9k1",
+        "decisionRevision": 1,
+        "expiresAt": "2026-10-08T15:00:00Z",
+        "inferenceWarning": "People may infer who changed availability from the plan. Published words cannot be made secret again."
+      },
+      "decision": "DECLINE"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "roomId": "room-synthetic",
+    "requestId": "request-synthetic",
+    "idempotencyKey": "retry-synthetic",
+    "expected": {
+      "contextToken": "ctx_Q7c2M9k1",
+      "decisionRevision": 1,
+      "controlVersion": 2
+    },
+    "type": "REVOKE_EXCEPTION",
+    "payload": {
+      "grantId": "grant-synthetic",
+      "grantVersion": 1
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "roomId": "room-synthetic",
+    "requestId": "request-synthetic",
+    "idempotencyKey": "retry-synthetic",
+    "expected": {
+      "contextToken": "ctx_Q7c2M9k1",
+      "decisionRevision": 1,
+      "controlVersion": 2
+    },
+    "type": "REVOKE_DISCLOSURE",
+    "payload": {
+      "grantId": "grant-synthetic",
+      "grantVersion": 1
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "roomId": "room-synthetic",
+    "requestId": "request-synthetic",
+    "idempotencyKey": "retry-synthetic",
+    "expected": {
+      "contextToken": "ctx_Q7c2M9k1",
+      "decisionRevision": 1,
+      "controlVersion": 2
+    },
+    "type": "PUBLISH_DISCLOSURE",
+    "payload": {
+      "grantId": "grant-synthetic",
+      "grantVersion": 1
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "roomId": "room-synthetic",
+    "requestId": "request-synthetic",
+    "idempotencyKey": "retry-synthetic",
+    "expected": {
+      "contextToken": "ctx_Q7c2M9k1",
+      "decisionRevision": 1,
+      "controlVersion": 2
+    },
+    "type": "ACCEPT_PROPOSAL",
+    "payload": {
+      "proposalId": "proposal-A",
+      "proposalVersion": 1,
+      "planHash": "27e5ade267f9fa2ee39ba863cd22608a6dbb5a0522596a5eb65b945f5ccc5081"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "roomId": "room-synthetic",
+    "requestId": "request-synthetic",
+    "idempotencyKey": "retry-synthetic",
+    "expected": {
+      "contextToken": "ctx_Q7c2M9k1",
+      "decisionRevision": 1,
+      "controlVersion": 2
+    },
+    "type": "WITHDRAW_APPROVAL",
+    "payload": {
+      "proposalId": "proposal-A",
+      "proposalVersion": 1,
+      "planHash": "27e5ade267f9fa2ee39ba863cd22608a6dbb5a0522596a5eb65b945f5ccc5081"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "roomId": "room-synthetic",
+    "requestId": "request-synthetic",
+    "idempotencyKey": "retry-synthetic",
+    "expected": {
+      "contextToken": "ctx_Q7c2M9k1",
+      "decisionRevision": 1,
+      "controlVersion": 2
+    },
+    "type": "REVISE_DECISION",
+    "payload": {
+      "schedule": {
+        "slots": [
+          {
+            "id": "slot-600",
+            "interval": {
+              "date": "2026-10-08",
+              "timezone": "America/Mexico_City",
+              "startMinute": 600,
+              "endMinute": 630
+            }
+          },
+          {
+            "id": "slot-660",
+            "interval": {
+              "date": "2026-10-08",
+              "timezone": "America/Mexico_City",
+              "startMinute": 660,
+              "endMinute": 690
+            }
+          },
+          {
+            "id": "slot-840",
+            "interval": {
+              "date": "2026-10-08",
+              "timezone": "America/Mexico_City",
+              "startMinute": 840,
+              "endMinute": 870
+            }
+          }
+        ],
+        "duties": [
+          {
+            "id": "lead",
+            "label": "Launch rehearsal lead",
+            "interval": {
+              "date": "2026-10-10",
+              "timezone": "America/Mexico_City",
+              "startMinute": 600,
+              "endMinute": 720
+            },
+            "loadPoints": 2,
+            "qualifiedMemberIds": [
+              "maya",
+              "leo"
+            ]
+          },
+          {
+            "id": "followup",
+            "label": "Follow-up check",
+            "interval": {
+              "date": "2026-10-11",
+              "timezone": "America/Mexico_City",
+              "startMinute": 600,
+              "endMinute": 660
+            },
+            "loadPoints": 1,
+            "qualifiedMemberIds": [
+              "maya",
+              "leo",
+              "nina"
+            ]
+          }
+        ]
+      },
+      "roster": [
+        {
+          "id": "maya",
+          "displayName": "Maya",
+          "submitted": false,
+          "sharedPriorLoad": 0
+        },
+        {
+          "id": "leo",
+          "displayName": "Leo",
+          "submitted": false,
+          "sharedPriorLoad": 3
+        },
+        {
+          "id": "nina",
+          "displayName": "Nina",
+          "submitted": false,
+          "sharedPriorLoad": 0
+        }
+      ],
+      "policy": "BALANCE_RECENT_LOAD"
+    }
+  }
+]

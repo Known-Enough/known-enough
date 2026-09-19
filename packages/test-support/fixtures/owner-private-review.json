@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "roomId": "room-synthetic",
+  "contextToken": "ctx_Q7c2M9k1",
+  "ownerMemberId": "nina",
+  "ownerRevision": 1,
+  "controlVersion": 2,
+  "confirmedInputs": {
+    "values": {
+      "conditions": [
+        {
+          "id": "condition-synthetic",
+          "kind": "NEGOTIABLE_UNAVAILABLE",
+          "interval": {
+            "date": "2026-10-08",
+            "timezone": "America/Mexico_City",
+            "startMinute": 660,
+            "endMinute": 690
+          },
+          "inviteException": true
+        }
+      ],
+      "dutyCosts": [
+        {
+          "dutyId": "followup",
+          "cost": 0
+        }
+      ]
+    },
+    "confirmed": true,
+    "confirmedAt": "2026-10-01T12:00:00Z",
+    "inputRevision": 1,
+    "contextToken": "ctx_Q7c2M9k1"
+  },
+  "draft": null,
+  "pendingOffers": [
+    {
+      "id": "offer-synthetic",
+      "version": 1,
+      "scope": {
+        "conditionId": "condition-synthetic",
+        "roomId": "room-synthetic",
+        "contextToken": "ctx_Q7c2M9k1",
+        "decisionRevision": 1,
+        "inputRevision": 1,
+        "rosterMemberIds": [
+          "maya",
+          "leo",
+          "nina"
+        ],
+        "policy": "BALANCE_RECENT_LOAD",
+        "meeting": {
+          "id": "slot-660",
+          "interval": {
+            "date": "2026-10-08",
+            "timezone": "America/Mexico_City",
+            "startMinute": 660,
+            "endMinute": 690
+          }
+        },
+        "predicate": "OWNER_HAS_NO_WEEKEND_DUTIES",
+        "expiresAt": "2026-10-08T15:00:00Z"
+      }
+    }
+  ],
+  "disclosurePreviews": [
+    {
+      "id": "preview-synthetic",
+      "text": "A conditional availability exception makes the proposed plan possible.",
+      "textHash": "3914698185f1d172061ca50290f9fdee09f4d88995863f449fdc4b65056d7771",
+      "audienceMemberIds": [
+        "maya",
+        "leo",
+        "nina"
+      ],
+      "roomId": "room-synthetic",
+      "contextToken": "ctx_Q7c2M9k1",
+      "decisionRevision": 1,
+      "expiresAt": "2026-10-08T15:00:00Z",
+      "inferenceWarning": "People may infer who changed availability from the plan. Published words cannot be made secret again."
+    }
+  ],
+  "exceptionGrants": [],
+  "disclosureGrants": [],
+  "ownApproval": null
+}
