@@ -56,3 +56,24 @@ Final exit status: **0**, approximately 2026-09-20 01:52 UTC / September 19 19:5
 | Assignment consistency | All 18 task models match the execution table and exposed model identifiers |
 
 The contract fix rejects revision commands claiming prior submissions or qualifications outside their supplied roster. The tooling fixes preserve exact imported line endings and enforce allowed, declared server workspace imports while keeping test fixtures out of browser/production code. Passing these checks does not establish backend identity, transactional consent, cloud behavior or inference resistance. F00–F02 remain REVIEW for human acceptance; A01/B01 implementation has not started.
+
+## A01 verification — September 20, 2026
+
+Executed on `task/a01`, based on foundation review commit `ca9fb636974030bfd8a620cec2b3d8581b3c8114`, in the macOS 12.7.6 checkout. Lead: Astra; UI implementation agent: `gpt-5.6-terra` with high reasoning. Astra independently reviewed browser data separation, stale controls and consent presentation, wrote the browser checks and integrated fixes. Contracts, backend packages, dependencies, lockfile and immutable references are unchanged.
+
+Installed the exact Node 24.21.0/npm 11.19.0 runtime with nvm; download checksum matched. `npm ci` passed (150 packages installed, 159 audited, zero reported vulnerabilities). Playwright's pinned Chromium installation explicitly failed because macOS 12 is unsupported. The supported local test path uses the already installed Google Chrome **150.0.7871.125**, with `PLAYWRIGHT_CHANNEL=chrome`. This option uses one worker to reduce startup pressure; CI's default pinned Chromium configuration is unchanged.
+
+Initial integrated verification passed all non-browser stages, then had four Chrome startup timeouts and one nondeterministic loading assertion (12/17 browser tests passed). The loading test now pauses Playwright's clock before navigation. A strict TypeScript error in the optional worker configuration was corrected with a conditional property. The subsequent focused typecheck/build/browser run exited 0, with all **17/17 browser tests passing**.
+
+Browser coverage includes public/owner loading, empty, failure/retry, stale/refresh; disabled stale owner controls; local draft retention; independent exception/disclosure feedback; unavailable acceptance without an exact proposal; shared proposal/approval/superseded snapshots; keyboard navigation; mobile/desktop layouts at 390/1280px; no owner chunk request on the shared page; and no external requests or page exceptions in the shared smoke checks. Screenshot artifacts are produced under ignored `test-results/`; Astra visually inspected shared mobile and owner desktop/mobile captures.
+
+These are synthetic UI checks, not authentication, authorization, solver, expiry, transaction, real HTTP or cloud tests. No server fixture is imported by browser code; browser owner demo values remain downloadable synthetic examples, not a security boundary. A01 stays REVIEW pending human acceptance. A02 still requires B02/B03 for real behavior.
+
+Final integrated command:
+
+```sh
+PATH=/Users/martelaxe/.nvm/versions/node/v24.21.0/bin:$PATH \
+PLAYWRIGHT_CHANNEL=chrome npm run check
+```
+
+Final exit status: **0**. All 7 reference hashes, 15 planning checks, ESLint/import boundaries (22 references), strict typecheck, **70/70 unit tests across 4 files**, production build/private marker scan, and **17/17 browser tests** passed. The final browser phase completed in 46.9 seconds. Build: 123 modules; public entry 332.46 kB (99.38 kB gzip), separate owner chunk 10.69 kB (3.71 kB gzip). `git diff --check` also passed. Remote CI and bundled Chromium on a supported host were not run in this session.

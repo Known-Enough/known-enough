@@ -44,8 +44,16 @@ Assigned September 19, 2026 at the user's request. These are actual model identi
 - Final full run after the F01 escalation correction exited 0 at approximately 2026-09-20 01:52 UTC (September 19 local): seven reference hashes, 15 arithmetic checks, lint/boundaries, typecheck, 66 unit tests in three files, build/bundle scan and two Chromium smoke tests at 390/1280px. See [current verification evidence](verification.md#foundation-review-verification--september-19-2026-local).
 - Historical bootstrap evidence in verification.md remains historical. Backend solver/auth/cloud behavior is still unimplemented; foundation checks make no claims about it.
 
-## Current handoff
+## Foundation review handoff (historical)
 
 F00–F02 review fixes are integrated locally and verified, with status REVIEW pending human acceptance of the current diff. All later tickets retain their existing dependency gates; none of their implementation agents has been launched. The next eligible implementation pair after accepted F02 is A01 (`gpt-5.6-terra`) and B01 (`gpt-5.6-sol`) in separate developer lanes. The observed Sol usage limit may require a retry or an explicitly reported escalation when that task becomes eligible; Terra/Luna availability has not been exercised by a task yet.
 
 Human review remains required by AGENTS.md and the task dependencies; agent reviews and passing checks do not mark tasks DONE or authorize merging. Cloud work still requires its separately specified authorization. The immutable architecture/task-board import was left byte-for-byte unchanged; this file and the individual mutable tickets contain the current model assignments.
+
+## A01 execution — September 20, 2026
+
+- The live remote `main` and `task/foundation-review` both contained `ca9fb636974030bfd8a620cec2b3d8581b3c8114`. After the user explicitly requested A01, the coordinator fast-forwarded the clean local main and created `task/a01` from that foundation. This authorization permits A01 to proceed despite historical foundation tickets still recording REVIEW; it does not record acceptance by the other developer or start B's tickets.
+- Working lead: Astra. Bounded implementation agent: `a01_ui`, `gpt-5.6-terra`, high reasoning, owning only `apps/web/**`. No additional agents or model substitutions. Terra implemented separate mock screens/adapters and focused unit tests. Astra wrote browser tests, reviewed the implementation, resolved integration issues and maintained task/handoff evidence.
+- Review corrections: actual local draft values, independent exception/disclosure feedback, unavailable final acceptance without an exact proposal, full scope/audience display, real disclosure text hash, asynchronous read cleanup, explicit date/timezone accessibility labels, and wrapping long receipt hashes. No backend permissions, public projection implementation, solver, authentication or cloud behavior was added.
+- Coordinated root configuration change: an explicit `PLAYWRIGHT_CHANNEL=chrome` fallback and one worker for installed-browser runs. Pinned Chromium is unsupported on this macOS 12 host; CI keeps its existing default browser. Dependencies, lockfile, contracts and immutable references are unchanged.
+- Current status: A01 REVIEW, with [verification evidence](verification.md#a01-verification--september-20-2026) and [A handoff](handoff-A.md). A02 remains gated by review and B02/B03. No push, PR, deployment or paid resources are authorized by this execution.

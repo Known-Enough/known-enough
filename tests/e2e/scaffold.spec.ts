@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 for (const width of [390, 1280]) {
-  test(`public scaffold renders at ${width}px without private data or external requests`, async ({ page }) => {
+  test(`shared table renders at ${width}px without private data or external requests`, async ({ page }, testInfo) => {
     await page.setViewportSize({ width, height: 900 });
     const errors: string[] = [];
     const external: string[] = [];
@@ -12,10 +12,11 @@ for (const width of [390, 1280]) {
     await expect(page.getByRole('list', { name: 'Three meeting slots' }).getByRole('listitem')).toHaveCount(3);
     await expect(page.getByText('Unassigned', { exact: true })).toHaveCount(2);
     await expect(page.getByText('All times: America/Mexico_City')).toBeVisible();
-    await expect(page.getByText('Local mock · fictional data')).toBeVisible();
-    await expect(page.getByText('No agreement yet · mock')).toBeVisible();
+    await expect(page.getByText('Shared table · local demo')).toBeVisible();
+    await expect(page.getByText('Collecting shared confirmations').first()).toBeVisible();
     expect(await page.locator('body').innerText()).not.toMatch(/condition-synthetic|offer-synthetic|no weekend duties|currently unavailable/i);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     expect(errors).toEqual([]); expect(external).toEqual([]);
+    await page.screenshot({ path: testInfo.outputPath(`shared-${width}.png`), fullPage: true });
   });
 }

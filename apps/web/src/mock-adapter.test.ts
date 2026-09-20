@@ -10,3 +10,17 @@ it('returns independently validated public-only mock snapshots', async () => {
   expect(next.proposal).toBeNull();
   expect(next).not.toHaveProperty('confirmedInputs');
 });
+
+it('selects public scenarios without adding owner fields', async () => {
+  const proposed = await publicMockClient.readPublicRoom('proposed');
+  const empty = await publicMockClient.readPublicRoom('empty');
+  await expect(publicMockClient.readPublicRoom('failure')).rejects.toThrow('Synthetic public mock failure');
+  expect(proposed.value?.status).toBe('PROPOSED');
+  expect(proposed.value).not.toHaveProperty('pendingOffers');
+  expect(empty).toEqual({ value: null, freshness: 'fresh' });
+});
+
+it('marks stale reads and resolves the same scenario fresh after refresh', async () => {
+  await expect(publicMockClient.readPublicRoom('stale')).resolves.toMatchObject({ freshness: 'stale', value: { status: 'COLLECTING' } });
+  await expect(publicMockClient.readPublicRoom('stale', { refresh: true })).resolves.toMatchObject({ freshness: 'fresh', value: { status: 'COLLECTING' } });
+});
