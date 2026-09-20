@@ -56,3 +56,29 @@ Final exit status: **0**, approximately 2026-09-20 01:52 UTC / September 19 19:5
 | Assignment consistency | All 18 task models match the execution table and exposed model identifiers |
 
 The contract fix rejects revision commands claiming prior submissions or qualifications outside their supplied roster. The tooling fixes preserve exact imported line endings and enforce allowed, declared server workspace imports while keeping test fixtures out of browser/production code. Passing these checks does not establish backend identity, transactional consent, cloud behavior or inference resistance. F00–F02 remain REVIEW for human acceptance; A01/B01 implementation has not started.
+
+## B01 verification — September 20, 2026
+
+The foundation was subsequently committed/integrated to main as `ca9fb636974030bfd8a620cec2b3d8581b3c8114` at the user's request. The user then authorized B01. This run verifies B01's local `task/b01` diff against that accepted baseline; previous sections above describe their historical task state.
+
+The assigned `gpt-5.6-sol` agent wrote the initial implementation, then reached its usage limit. The coordinating lead reported this limitation and, after the user resumed work, explicitly escalated completion to `gpt-6-astra`. A separate `gpt-6-astra` reviewer resumed and independently checked the final source/tests, ran 64 focused tests and six additional assertions, and found no remaining supported actionable issues. Initial review findings included hard-condition precedence, meeting/duty double booking, reviewed-coverage gaps and shared fixture objects; the final tests cover the corrected behavior.
+
+The coordinator ran `npm run check` with the exact Node 24.21.0/npm 11.19.0 and isolated Chromium/library environment documented above. The temporary environment was restored for this task. Final exit status **0** at approximately 2026-09-20 19:24 UTC / 13:24 America/Mexico_City.
+
+| Check | Actual result |
+| --- | --- |
+| Imported reference SHA-256 | 7/7 unchanged |
+| Planning arithmetic | 15/15 passed |
+| ESLint/import boundaries | Passed, 23 import references |
+| TypeScript | Passed |
+| Full Vitest suite | 116/116 in five files: 49 domain, 51 contracts, 14 tooling, one fixture-isolation, one web-adapter test |
+| Production build/bundle marker scan | Passed, 114 modules; browser bundle unchanged from the accepted foundation |
+| Chromium browser smoke | 2/2 passed at 390/1280px |
+| Production solver demo | Both policies: 12 structural candidates, NO_AGREEMENT at baseline, two feasible after the scoped exception; inconvenience selects B, balanced load selects A |
+| Working diff whitespace | git diff --check passed |
+
+The executable demo is `npm run demo --workspace @deal-table/test-support`. Focused tests are `npm test -- packages/domain packages/test-support`. Tests independently check exact assignments and ranking vectors, hard impossibility, zero-concession success, expiry/status/scope failures, 60-minute clarification, full meeting/duty coverage, gaps, deterministic ties/order, nonmutation and disclosure independence. Fixture copies prevent a schedule edit from silently changing a grant or another owner's input.
+
+No wire contract changes. The internal owner `availabilityReview` binds explicitly confirmed coverage to the current context/input revision; B02 must obtain it from authoritative confirmation, never infer it from the entire schedule. Root coordination added only existing workspace dependencies to the lockfile and `allowImportingTsExtensions` to the existing noEmit TypeScript configuration for the direct Node demo. No external dependencies, runtime cloud resources or browser solver imports were added.
+
+The named implementation diff is `/tmp/b01-ca9fb63-review.patch` against the accepted baseline, SHA-256 `f2b354c277db77e140df7fc867691eda021c3f74eb2bc34a87bdf02f26e42bcb`. It includes source, tests, package docs/manifests and coordinated lock/TypeScript changes, including untracked files. No B01 commit, push or merge was performed. B01 remains REVIEW for human acceptance. These checks do not establish B02 authorization/projections/state transitions, DynamoDB race safety or cloud/auth behavior.

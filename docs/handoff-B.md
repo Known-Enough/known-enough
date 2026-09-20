@@ -1,11 +1,19 @@
-# Developer B handoff — B01 next
+# Developer B handoff — B01 review, B02 next
 
-Select **GPT-6 Astra** as lead; follow [agent-workflow.md](agent-workflow.md). Astra chooses available local subagents and verifies their integrated work. Start by asking: “Read AGENTS.md and execute docs/tasks/B01.md within its scope and dependency gates.”
+B01 is functional on `task/b01`, based on accepted foundation `ca9fb636974030bfd8a620cec2b3d8581b3c8114`, and remains **REVIEW** pending human acceptance. No B01 commit, push or merge was performed.
 
-Use this shared bootstrap after human review; do not create another scaffold. The bootstrap was originally created as local uncommitted work; the existing review baseline is commit `972386395618ec0ed81581d38082ebeb15d66142` on `main`. After human acceptance, work from that shared baseline in your own clone on task/b01. Read AGENTS.md, both plans, docs/contracts.md, docs/tasks/B01.md and docs/reference/developer-B-start.md.
+The coordinating lead used the assigned `gpt-5.6-sol` for initial implementation, then explicitly escalated completion to `gpt-6-astra` after Sol reached its usage limit. A separate Astra reviewer found no remaining supported actionable issues. See [execution record](task-execution.md) and [verification evidence](verification.md#b01-verification--september-20-2026).
 
-B01 scope: packages/domain and packages/test-support. Implement pure exhaustive enumeration and both rankings with explicit clock/context and complete dated intervals. Acceptance: 12 structural plans; zero baseline; two under valid scoped exception; inconvenience selects B; recent-load selects A. Test expired/revoked/wrong-context/wrong-policy/wrong-roster/changed-duration grants, Nina duty, qualifications, distinct duties, stable ties, hard-impossible, zero-concession success and disclosure refusal independence. No AWS, React, model or implicit system-clock dependencies.
+`packages/domain` exports structural enumeration, stable internal plan IDs and `solveDecision`. `packages/test-support` supplies isolated synthetic fixtures and the executable demo:
 
-Shared baseline: @deal-table/contracts 0.1.0/schemaVersion 1 provides strict DTOs, command/error shapes and canonical public SHA-256. Relevant files: packages/contracts/src/index.ts, its contract tests, server-only synthetic examples in test-support/fixtures, public examples in apps/web/src/mocks/public. Contracts transfer to B after bootstrap; A reviews breaking changes. Root manifests/lockfile/CI and web are A-owned; request dependency changes rather than silently editing them.
+```sh
+npm run demo --workspace @deal-table/test-support
+```
 
-The dated bootstrap record reports that npm run check passed: 49 unit tests, 2 Chromium tests, 15 arithmetic checks, lint/typecheck/build and seven reference checks. Treat that as historical evidence and rerun the required checks against the current review state. Arithmetic is not a production solver/security suite. B01 is unimplemented. Run your independent domain tests plus the existing checks. Leave application commands, projections, repositories and transactional permissions to B02 after review; cloud race/auth claims require later real-adapter tests.
+Observed: 12 structural plans, zero baseline feasible, two with Nina's valid scoped exception; inconvenience selects B, recent-load balance A. Hard restrictions remain immutable, grants require exact current scope and explicit time, and incomplete coverage/costs require clarification.
+
+Final `npm run check` passed: 116 tests, two Chromium tests, seven reference hashes, 15 arithmetic checks, lint/boundaries, typecheck and build. Independent Astra verification also passed 64 focused tests and six additional assertions.
+
+No wire-contract changes. Coordinated root changes only refresh existing workspace dependency entries and enable explicit TypeScript import extensions. `availabilityReview` is a new internal owner-confirmed coverage record bound to context/input revision; B02 must persist authoritative confirmation, never populate it automatically from all schedule options.
+
+After human acceptance, B02 owns application commands, projections, repositories, independent consent state and transaction guards. Domain scores, candidates, grant references and clarification details are private server results, never public DTOs. B01 does not authenticate callers or finalize agreement. Follow [agent-workflow.md](agent-workflow.md).

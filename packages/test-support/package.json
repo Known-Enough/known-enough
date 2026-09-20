@@ -2,5 +2,15 @@
   "name": "@deal-table/test-support",
   "version": "0.1.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "exports": {
+    ".": "./src/teamtable-fixture.ts"
+  },
+  "scripts": {
+    "demo": "node --experimental-strip-types src/demo.ts"
+  },
+  "devDependencies": {
+    "@deal-table/contracts": "0.1.0",
+    "@deal-table/domain": "0.1.0"
+  }
 }

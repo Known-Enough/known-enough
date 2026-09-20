@@ -1,6 +1,6 @@
 # Deal Table · TeamTable
 
-Local F00–F02 foundation: React/Vite public table, strict runtime contracts and independent developer lanes. All people/data are fictional. **Mocked identities are not authentication. No solver, backend, Alexa integration or cloud services are implemented/deployed.**
+Local React/Vite foundation with strict runtime contracts and the B01 deterministic domain solver. All people/data are fictional. **Mocked identities are not authentication. HTTP/application services, Alexa integration and cloud deployment remain unimplemented.**
 
 ## Setup and launch
 
@@ -32,12 +32,21 @@ See the [dated bootstrap verification evidence](docs/verification.md). It record
 
 - `apps/web`: A's minimal public-only page and mock adapter; public sample responses are in `src/mocks/public`.
 - `packages/contracts`: runtime DTO/command/error validators and canonical public hashing; B owns after bootstrap, A reviews breaking changes.
-- `apps/api`, `apps/workers`, `packages/domain`, `packages/application`, `packages/adapters`, `infra`: empty implementation boundaries reserved for B.
+- `packages/domain`: B01 pure enumeration, scoped-exception feasibility and both ranking policies; see [the domain API](packages/domain/README.md).
+- `apps/api`, `apps/workers`, `packages/application`, `packages/adapters`, `infra`: empty implementation boundaries reserved for B.
 - `packages/test-support`: synthetic owner/command examples for tests/server only; never browser imports.
 - `tests/e2e`, `tests/integration`: A's browser smoke checks and B's reserved integration area.
 - `docs`: immutable source references, [contracts](docs/contracts.md), [decisions/risks](docs/decisions.md), 18 [task files](docs/tasks), and [A](docs/handoff-A.md)/[B](docs/handoff-B.md) handoffs.
 
-A starts **A01**, the shared/owner UI with mock adapters and loading/error/stale states. B starts **B01**, exhaustive solver and ranking tests. Both use this same reviewed foundation in separate clones; do not scaffold a second project. A owns root config, lockfile and CI. The bootstrap was originally created as local uncommitted work; the existing review baseline is commit `972386395618ec0ed81581d38082ebeb15d66142` on `main`. F00–F02 stay REVIEW pending human integration; downstream tasks remain gated by accepted dependencies.
+A starts **A01**, the shared/owner UI with mock adapters and loading/error/stale states. B01 is implemented on `task/b01`; **B02** application commands follow human acceptance of B01. Both developers use the same accepted foundation in separate clones; do not scaffold a second project. A owns root config, lockfile and CI. The foundation was integrated to `main` as `ca9fb636974030bfd8a620cec2b3d8581b3c8114` at the user's direction. Subsequent tasks retain their review and dependency gates.
+
+Run the synthetic B01 solver demo with the pinned Node/npm runtime:
+
+```sh
+npm run demo --workspace @deal-table/test-support
+```
+
+It enumerates 12 structural plans, reports no baseline agreement, and finds two plans after the valid exception. Lowest inconvenience selects Leo as lead/Maya for follow-up; balanced recent load selects Maya as lead/Leo for follow-up. This is a server-side domain demonstration; the browser still displays its public-only mock. See [solver input and privacy boundaries](packages/domain/README.md).
 
 The product plan governs semantics; the two-developer plan governs ownership and sequence. Existing planning dates/research are historical references requiring current checks before release. Private outcomes can still be inferred from final plan facts. Later work must implement verified owner identity, public projections, independent consents, expiry, idempotency and atomic versioned acceptance.
 
