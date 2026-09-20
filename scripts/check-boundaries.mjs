@@ -2,6 +2,26 @@ import ts from 'typescript';
 import { readdirSync, readFileSync } from 'node:fs';
 import { resolve, dirname, relative, sep } from 'node:path';
 const root = process.cwd();
+const areas = [
+  'apps/web',
+  'packages/contracts',
+  'packages/domain',
+  'packages/application',
+  'packages/adapters',
+  'apps/api',
+  'apps/workers',
+];
+const strictDependencies = {
+  'apps/web': ['@deal-table/contracts', 'react', 'react-dom', 'vite'],
+  'packages/contracts': ['zod'],
+  'packages/domain': ['@deal-table/contracts'],
+  'packages/application': ['@deal-table/contracts', '@deal-table/domain'],
+};
+const serverWorkspaceDependencies = {
+  'packages/adapters': ['@deal-table/contracts', '@deal-table/domain', '@deal-table/application'],
+  'apps/api': ['@deal-table/contracts', '@deal-table/application', '@deal-table/adapters'],
+  'apps/workers': ['@deal-table/contracts', '@deal-table/application', '@deal-table/adapters'],
+};
 function files(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap(e => {
     if (['node_modules', 'dist'].includes(e.name)) return [];
@@ -10,15 +30,25 @@ function files(dir) {
   });
 }
 const under = (file, dir) => file === dir || file.startsWith(`${dir}${sep}`);
+const packageName = spec => {
+  const parts = spec.split('/');
+  return spec.startsWith('@') ? parts.slice(0, 2).join('/') : parts[0];
+};
+const matchesPackage = (spec, dep) => spec === dep || spec.startsWith(`${dep}/`);
 let count = 0;
-for (const area of ['apps/web', 'packages/contracts', 'packages/domain', 'packages/application', 'packages/adapters', 'apps/api', 'apps/workers']) {
+for (const area of areas) {
   const manifest = JSON.parse(readFileSync(`${area}/package.json`, 'utf8'));
-  const allowed = area === 'apps/web' ? ['@deal-table/contracts', 'react', 'react-dom', 'vite']
-    : area === 'packages/contracts' ? ['zod']
-    : area === 'packages/domain' ? ['@deal-table/contracts']
-    : area === 'packages/application' ? ['@deal-table/contracts', '@deal-table/domain'] : null;
-  if (allowed) for (const dep of Object.keys({ ...manifest.dependencies, ...manifest.devDependencies })) {
-    if (!allowed.includes(dep)) throw new Error(`Unapproved ${area} dependency: ${dep}`);
+  const declaredDependencies = new Set(Object.keys({ ...manifest.dependencies, ...manifest.devDependencies }));
+  const strictAllowed = strictDependencies[area];
+  const workspaceAllowed = serverWorkspaceDependencies[area];
+  for (const dep of declaredDependencies) {
+    // Server tests may declare fixtures; production source still uses the allowlists below.
+    if (area !== 'apps/web' && dep === '@deal-table/test-support'
+      && !Object.hasOwn(manifest.dependencies ?? {}, dep)) continue;
+    if (strictAllowed && !strictAllowed.includes(dep)) throw new Error(`Unapproved ${area} dependency: ${dep}`);
+    if (workspaceAllowed && dep.startsWith('@deal-table/') && !workspaceAllowed.includes(dep)) {
+      throw new Error(`Unapproved ${area} workspace dependency: ${dep}`);
+    }
   }
   for (const file of files(area).filter(p => /\.(?:[cm]?[jt]sx?|html)$/.test(p) && !p.endsWith('.test.ts'))) {
     if (file.endsWith('.html')) {
@@ -31,8 +61,16 @@ for (const area of ['apps/web', 'packages/contracts', 'packages/domain', 'packag
       if (spec.startsWith('.')) {
         const target = resolve(dirname(file), spec);
         if (!under(target, resolve(area))) throw new Error(`Cross-boundary relative import ${file}: ${spec}`);
-      } else if (allowed && !allowed.some(dep => spec === dep || spec.startsWith(`${dep}/`))) {
+      } else if (strictAllowed && !strictAllowed.some(dep => matchesPackage(spec, dep))) {
         throw new Error(`Forbidden import ${file}: ${spec}`);
+      } else if (workspaceAllowed) {
+        const importedPackage = packageName(spec);
+        if (importedPackage.startsWith('@deal-table/') && !workspaceAllowed.includes(importedPackage)) {
+          throw new Error(`Forbidden workspace import ${file}: ${spec}`);
+        }
+        if (!spec.startsWith('node:') && !declaredDependencies.has(importedPackage)) {
+          throw new Error(`Undeclared import ${file}: ${spec}`);
+        }
       }
       if (/test-support|planning-checks|docs\/reference/.test(spec)) throw new Error(`Private/reference import ${file}: ${spec}`);
     }

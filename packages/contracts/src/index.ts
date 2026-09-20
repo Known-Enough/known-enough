@@ -112,6 +112,16 @@ export const OwnerSnapshot = z.strictObject({
 const expected = z.strictObject({ contextToken: Id, decisionRevision: Version, controlVersion: Version });
 const envelope = { schemaVersion: z.literal(1), requestId: Id, roomId: Id, idempotencyKey: Id, expected };
 const approvalTarget = { proposalId: Id, proposalVersion: Version, planHash: Hash };
+const RevisionParticipant = Participant.extend({ submitted: z.literal(false) });
+const RevisionDecisionPayload = z.strictObject({
+  schedule: Schedule,
+  roster: z.array(RevisionParticipant).length(3).refine(x => unique(x.map(p => p.id))),
+  policy: Policy,
+}).superRefine((x, ctx) => {
+  const members = x.roster.map(p => p.id);
+  if (x.schedule.duties.some(duty => duty.qualifiedMemberIds.some(id => !members.includes(id))))
+    ctx.addIssue({ code: 'custom', message: 'Qualified members must belong to revised roster', path: ['schedule', 'duties'] });
+});
 export const CommandEnvelope = z.discriminatedUnion('type', [
   z.strictObject({ ...envelope, type: z.literal('SUBMIT_INPUT_DRAFT'), payload: z.strictObject({ expectedOwnerRevision: Version, values: InputValues }) }),
   z.strictObject({ ...envelope, type: z.literal('CONFIRM_INPUTS'), payload: z.strictObject({ draftId: Id, draftRevision: Version, expectedOwnerRevision: Version }) }),
@@ -124,7 +134,7 @@ export const CommandEnvelope = z.discriminatedUnion('type', [
   z.strictObject({ ...envelope, type: z.literal('PUBLISH_DISCLOSURE'), payload: z.strictObject({ grantId: Id, grantVersion: Version }) }),
   z.strictObject({ ...envelope, type: z.literal('ACCEPT_PROPOSAL'), payload: z.strictObject(approvalTarget) }),
   z.strictObject({ ...envelope, type: z.literal('WITHDRAW_APPROVAL'), payload: z.strictObject(approvalTarget) }),
-  z.strictObject({ ...envelope, type: z.literal('REVISE_DECISION'), payload: z.strictObject({ schedule: Schedule, roster: z.array(Participant).length(3).refine(x => unique(x.map(p => p.id))), policy: Policy }) }),
+  z.strictObject({ ...envelope, type: z.literal('REVISE_DECISION'), payload: RevisionDecisionPayload }),
 ]);
 export const ErrorCode = z.enum(['UNAUTHENTICATED', 'FORBIDDEN', 'NOT_FOUND', 'STALE_CONTEXT', 'STALE_PROPOSAL', 'IDEMPOTENCY_CONFLICT', 'INVALID_COMMAND', 'NEEDS_CLARIFICATION']);
 export const ERROR_HTTP_STATUS = {

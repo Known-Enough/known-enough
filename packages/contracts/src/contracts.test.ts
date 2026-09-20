@@ -84,6 +84,24 @@ describe('command/error shapes (no authorization execution)', () => {
     expect(CommandEnvelope.safeParse({ ...command, idempotencyKey: '' }).success).toBe(false);
     expect(CommandEnvelope.safeParse({ ...command, expected: { ...command.expected, controlVersion: -1 } }).success).toBe(false);
   });
+  it('accepts a revision fixture with reset submission indicators', () => {
+    const command = commands.find(value => value.type === 'REVISE_DECISION');
+    expect(command).toBeDefined();
+    expect(CommandEnvelope.parse(command)).toEqual(command);
+  });
+  it('rejects a revision that claims a member has already submitted', () => {
+    const command = CommandEnvelope.parse(commands.find(value => value.type === 'REVISE_DECISION'));
+    if (command.type !== 'REVISE_DECISION') throw new Error('Missing REVISE_DECISION fixture');
+    const roster = command.payload.roster.map((member, index) => index === 0 ? { ...member, submitted: true } : member);
+    expect(CommandEnvelope.safeParse({ ...command, payload: { ...command.payload, roster } }).success).toBe(false);
+  });
+  it('rejects revised duty qualifications outside the revised roster', () => {
+    const command = CommandEnvelope.parse(commands.find(value => value.type === 'REVISE_DECISION'));
+    if (command.type !== 'REVISE_DECISION') throw new Error('Missing REVISE_DECISION fixture');
+    const value = clone(command);
+    value.payload.schedule.duties[0]!.qualifiedMemberIds = ['outsider'];
+    expect(CommandEnvelope.safeParse(value).success).toBe(false);
+  });
   for (const result of results) it(`validates result ${result.ok ? 'APPLIED' : result.error!.code}`, () => expect(CommandResult.parse(result)).toEqual(result));
   it('rejects status mismatches and error detail leaks', () => {
     expect(CommandResult.safeParse({ ok: false, requestId: 'r', error: { code: 'STALE_CONTEXT', httpStatus: 422 } }).success).toBe(false);

@@ -1,0 +1,8 @@
+# These imported inputs are checksum-pinned as exact bytes. Disable Git EOL conversion.
+docs/Deal-Table-TeamTable-plan.md -text
+docs/Deal-Table-two-developer-architecture.md -text
+planning-checks/teamtable-fixture-check.mjs -text
+docs/reference/deal-table-teamtable.html -text
+docs/reference/hackathon-research-sept16.txt -text
+docs/reference/astra-bootstrap-task.md -text
+docs/reference/developer-B-start.md -text
