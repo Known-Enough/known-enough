@@ -4,6 +4,13 @@ A writes this log; B writes [its own log](work-log-B.md), including frontend wor
 
 Entry format: UTC time | task/state | developer/model/effort | baseline/commit/diff | files | outcome/decision | checks (actual command, exit/results) | blockers/next action. For a transfer include released task, saved untracked files, receiving developer, and confirmation that the old writer stopped.
 
+## 2026-09-21T18:01:51Z — A02 / REVIEW — A03.5 R1–R5 follow-up
+
+- Actual worker: A / Codex GPT-5 (scheduled gpt-5.6-terra/medium unavailable). Baseline reviewed artifact: `df1e8761774b76923e9d3b69927025cbdc41c753`; current local diff on `main`, no commit/push/merge. Changed `apps/web/src/command-client.ts`, `apps/web/src/owner-screen.tsx`, `apps/web/src/style.css`, focused unit tests and `tests/e2e/a01.spec.ts`, plus coordinated A02/board/handoff records.
+- R1: acceptance now requires and displays a matching current public proposal's meeting, assignments, policy, expiry and hash; a receipt remains history/withdrawal-only. R2: availability radio maps to complete hard-availability or negotiable-unavailable conditions. R3: exception preview renders its bound policy. R4: invalid result shapes after dispatch become `UnknownTransportError`, retaining the exact command for explicit retry; structured rejections remain normal errors. R5: a draft has an explicit checkbox review and `CONFIRM_INPUTS` action bound to draft ID/revision, owner revision and assessed full intervals; changing duration clears that review.
+- Checks using Node 24.21.0/npm 11.19.0: focused unit tests exit 0 (11/11); typecheck exit 0; focused/full `tests/e2e/a01.spec.ts` exit 0 (21/21); build exit 0 (124 modules; privacy scan passed); `PLAYWRIGHT_CHANNEL=chrome npm run check` completed successfully with references 7/7, planning 15/15, lint/boundaries 47 references, typecheck, unit/integration 156/156, build/privacy scan, browser 25/25; the final changed-policy assertion then brought current full unit coverage to 157/157. `git diff --check` exit 0.
+- Limit/next: synthetic mock and intercepted-HTTP preparation only; no authentication, server enforcement or live acceptance is asserted. Leave A02/A03 in REVIEW and request independent follow-up review of the local changed artifact before releasing A02.5/A04/A05. Human acceptance and publication remain pending.
+
 ## 2026-09-21T16:56:02Z — A03.5 / IN_PROGRESS
 
 - User-assigned independent A-lane reviewer: GPT-6 Astra / high; this session did not implement A02/A03. Review base `f36df74`, head `df1e8761774b76923e9d3b69927025cbdc41c753` (A02 `6499ec4`, A03 `df1e876`). Clean main matched fetched origin/main; no merge/push performed.

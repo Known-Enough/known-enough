@@ -6,7 +6,7 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 
 ## Work available now
 
-- A: A02/A03 remain REVIEW. [A03.5](reviews/A03.5.md) requests five corrections from owner A before A02.5/A04/A05 can be released; no implementation follow-up is claimed by the reviewer. A06 remains ready. Serialize overlapping frontend files.
+- A: A02/A03 remain REVIEW. Owner A has a local R1–R5 correction diff responding to [A03.5](reviews/A03.5.md); it requires independent follow-up review before A02.5/A04/A05 can be released. A06 remains ready. Serialize overlapping frontend files.
 - B: claim B03 (Terra medium) for the local HTTP boundary after the recorded B02.5 verdict. B may instead claim an available A task when A lacks tokens; synchronize claims first.
 - No new implementation task is claimed by this planning update. B02’s completed claim is released. Separate clones use main for future work; the integrated legacy task branches are historical pointers; no new work belongs on them.
 

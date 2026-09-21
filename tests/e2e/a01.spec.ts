@@ -62,7 +62,67 @@ test('owner forms send independent structured commands through intercepted HTTP'
   expect(commands.map(value => (value as { type: string }).type)).toEqual(['SUBMIT_INPUT_DRAFT', 'DECIDE_EXCEPTION', 'DECIDE_DISCLOSURE']);
   expect(JSON.stringify(commands)).not.toContain('ownerMemberId');
   expect((commands[0] as { payload: { values: { dutyCosts: { cost: number }[] } } }).payload.values.dutyCosts[0]?.cost).toBe(3);
-  await expect(page.getByRole('button', { name: 'Await an exact shared proposal' })).toBeDisabled();
+  expect((commands[0] as { payload: { values: { conditions: { kind: string; availableIntervals?: unknown[] }[] } } }).payload.values.conditions[0]).toMatchObject({ kind: 'HARD_AVAILABILITY', availableIntervals: [{ date: '2026-10-08', startMinute: 660, endMinute: 690, timezone: 'America/Mexico_City' }] });
+  await expect(page.getByRole('button', { name: 'Accept reviewed current proposal' })).toBeEnabled();
+});
+
+test('owner review confirms explicitly checked draft intervals and binds the displayed policy', async ({ page }) => {
+  const commands: unknown[] = [];
+  await page.route('**/rooms/room-synthetic/commands', async route => {
+    const body = route.request().postDataJSON();
+    commands.push(body);
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, requestId: body.requestId, status: 'APPLIED', version: body.expected }) });
+  });
+  await page.goto('/?view=owner&owner=draft');
+  const review = page.getByRole('region', { name: 'Confirm reviewed inputs' });
+  await expect(review).toContainText('draft-nina-2, revision 2');
+  const confirmation = review.getByRole('button', { name: 'Confirm these reviewed intervals' });
+  await expect(confirmation).toBeDisabled();
+  await review.getByRole('checkbox', { name: /I reviewed 2026-10-08.*11:00–11:30/i }).check();
+  await expect(confirmation).toBeEnabled();
+  await confirmation.click();
+  expect(commands[0]).toMatchObject({ type: 'CONFIRM_INPUTS', payload: { draftId: 'draft-nina-2', draftRevision: 2, expectedOwnerRevision: 2, reviewedIntervals: [{ date: '2026-10-08', timezone: 'America/Mexico_City', startMinute: 660, endMinute: 690 }] } });
+  const exception = page.getByRole('region', { name: 'Exception' });
+  await expect(exception).toContainText('Balance recent duty load');
+  await page.getByRole('button', { name: 'Accept reviewed current proposal' }).click();
+  expect(commands[1]).toMatchObject({ type: 'ACCEPT_PROPOSAL', payload: { proposalId: 'proposal-A', proposalVersion: 1, planHash: '27e5ade267f9fa2ee39ba863cd22608a6dbb5a0522596a5eb65b945f5ccc5081' } });
+});
+
+test('a changed duration requires checking the newly assessed interval again', async ({ page }) => {
+  await page.goto('/?view=owner&owner=draft');
+  const review = page.getByRole('region', { name: 'Confirm reviewed inputs' });
+  await review.getByRole('checkbox').check();
+  await expect(review.getByRole('button', { name: 'Confirm these reviewed intervals' })).toBeEnabled();
+  await page.getByRole('combobox', { name: 'Meeting duration' }).selectOption('60');
+  await expect(review.getByRole('button', { name: 'Confirm these reviewed intervals' })).toBeDisabled();
+});
+
+for (const [label, body] of [['malformed JSON', '{'], ['unrecognized JSON', JSON.stringify({ upstream: 'unknown' })]] as const) {
+  test(`an ${label} command result preserves the unchanged retry envelope`, async ({ page }) => {
+    const requests: { idempotencyKey: string; payload: unknown }[] = [];
+    await page.route('**/rooms/room-synthetic/commands', async route => {
+      const request = route.request().postDataJSON() as { idempotencyKey: string; payload: unknown };
+      requests.push(request);
+      await route.fulfill({ status: 502, contentType: 'application/json', body });
+    });
+    await page.goto('/?view=owner');
+    await page.getByRole('button', { name: 'Allow scoped exception' }).click();
+    await expect(page.getByRole('status')).toContainText('outcome is unknown');
+    await page.getByRole('button', { name: 'Retry unchanged request' }).click();
+    await expect.poll(() => requests).toHaveLength(2);
+    expect(requests[1]).toEqual(requests[0]);
+  });
+}
+
+test('a structured server rejection is shown without an unknown-result retry', async ({ page }) => {
+  await page.route('**/rooms/room-synthetic/commands', async route => {
+    const body = route.request().postDataJSON();
+    await route.fulfill({ status: 422, contentType: 'application/json', body: JSON.stringify({ ok: false, requestId: body.requestId, error: { code: 'INVALID_COMMAND', httpStatus: 422 } }) });
+  });
+  await page.goto('/?view=owner');
+  await page.getByRole('button', { name: 'Allow scoped exception' }).click();
+  await expect(page.getByRole('status')).toContainText('not applied (INVALID_COMMAND)');
+  await expect(page.getByRole('button', { name: 'Retry unchanged request' })).toHaveCount(0);
 });
 
 test('a stale command refreshes but never replays against a latest version', async ({ page }) => {

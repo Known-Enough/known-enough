@@ -1,4 +1,4 @@
-import { CommandEnvelope, CommandResult, type CommandEnvelope as CommandEnvelopeType, type CommandResult as CommandResultType, type DisclosurePreview, type ExceptionOffer, type FinalApproval, type InputValues, type OwnerSnapshot, type ProposalView } from '@deal-table/contracts';
+import { CommandEnvelope, CommandResult, type CommandEnvelope as CommandEnvelopeType, type CommandResult as CommandResultType, type DisclosurePreview, type ExceptionOffer, type FinalApproval, type InputValues, type Interval, type OwnerSnapshot, type ProposalView } from '@deal-table/contracts';
 
 export interface CommandTransport {
   post(path: string, body: CommandEnvelopeType): Promise<unknown>;
@@ -62,6 +62,15 @@ export function submitInputDraft(room: OwnerSnapshot, context: OwnerCommandConte
   return envelope(room, context, ids, 'SUBMIT_INPUT_DRAFT', { expectedOwnerRevision: room.ownerRevision, values });
 }
 
+export function confirmInputs(room: OwnerSnapshot, context: OwnerCommandContext, draft: NonNullable<OwnerSnapshot['draft']>, reviewedIntervals: Interval[], ids = browserCommandIds): CommandEnvelopeType {
+  return envelope(room, context, ids, 'CONFIRM_INPUTS', {
+    draftId: draft.draftId,
+    draftRevision: draft.draftRevision,
+    expectedOwnerRevision: room.ownerRevision,
+    reviewedIntervals,
+  });
+}
+
 export function decideException(room: OwnerSnapshot, context: OwnerCommandContext, offer: ExceptionOffer, decision: 'ALLOW' | 'DECLINE', ids = browserCommandIds): CommandEnvelopeType {
   return envelope(room, context, ids, 'DECIDE_EXCEPTION', { offerId: offer.id, offerVersion: offer.version, decision, scope: offer.scope });
 }
@@ -70,11 +79,12 @@ export function decideDisclosure(room: OwnerSnapshot, context: OwnerCommandConte
   return envelope(room, context, ids, 'DECIDE_DISCLOSURE', { preview, decision });
 }
 
-export function acceptProposal(room: OwnerSnapshot, context: OwnerCommandContext, proposal: ProposalView | FinalApproval, ids = browserCommandIds): CommandEnvelopeType {
-  const target = 'facts' in proposal
-    ? { proposalId: proposal.id, proposalVersion: proposal.facts.proposalVersion, planHash: proposal.planHash }
-    : { proposalId: proposal.proposalId, proposalVersion: proposal.proposalVersion, planHash: proposal.planHash };
-  return envelope(room, context, ids, 'ACCEPT_PROPOSAL', target);
+export function acceptProposal(room: OwnerSnapshot, context: OwnerCommandContext, proposal: ProposalView, ids = browserCommandIds): CommandEnvelopeType {
+  return envelope(room, context, ids, 'ACCEPT_PROPOSAL', {
+    proposalId: proposal.id,
+    proposalVersion: proposal.facts.proposalVersion,
+    planHash: proposal.planHash,
+  });
 }
 
 export function withdrawApproval(room: OwnerSnapshot, context: OwnerCommandContext, approval: FinalApproval, ids = browserCommandIds): CommandEnvelopeType {
@@ -83,5 +93,11 @@ export function withdrawApproval(room: OwnerSnapshot, context: OwnerCommandConte
 
 export async function sendCommand(transport: CommandTransport, command: CommandEnvelopeType): Promise<CommandResultType> {
   const result = await transport.post(`/rooms/${encodeURIComponent(command.roomId)}/commands`, command);
-  return CommandResult.parse(result);
+  try {
+    return CommandResult.parse(result);
+  } catch {
+    // A response outside the command-result contract may have followed dispatch.
+    // Keep the exact serialized envelope available for an explicit retry.
+    throw new UnknownTransportError(command);
+  }
 }

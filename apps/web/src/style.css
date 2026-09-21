@@ -47,6 +47,7 @@ small { display: block; margin-top: 6px; }
 .owner-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .owner-card { margin: 0; }
 .owner-card, .owner-card label { min-width: 0; }
+.owner-card p, .owner-card li { overflow-wrap: anywhere; }
 .owner-card fieldset { display: grid; gap: 12px; border: 0; padding: 0; margin: 18px 0 0; }
 .owner-card legend { font-weight: 800; margin-bottom: 10px; }
 .owner-card label { display: flex; align-items: center; gap: 8px; line-height: 1.4; }
