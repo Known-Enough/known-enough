@@ -2,24 +2,24 @@
 
 Scheduling revision: September 20, 2026. Tickets are authoritative for detailed gates/status; update this summary when handing off. Model means the human-selected DIRECT worker, with no mandatory Astra coordinator. A/B prefixes identify subsystems; B can implement available A tasks using the [transfer procedure](agent-workflow.md#b-can-cover-a-when-capacity-changes).
 
-Current knowledge: A01 implemented and REVIEW here; B01 completed and B02 in progress according to the user. B's code, commit IDs and verification are not present in this clone. Do not restart B01/B02 or claim their checks passed locally. The accepted foundation enables current work despite historical review records; final human acceptance of A01 remains outstanding.
+Current integration: foundation, A01, workflow refactor and B01 source/evidence are consolidated on main at the user’s direction. See [main integration](main-integration.md) for fresh check results and publication state. B02 is confirmed still in progress in B’s clone, not available for this merge; preserve its active claim.
 
 ## Work available now
 
 - A: claim A02 (Terra medium) for HTTP client/forms preparation. A03 (Luna medium) and A06 (Luna medium) are also ready alternatives. Serialize overlapping frontend files.
 - B: continue B02 (Astra high, already active). Present a reviewable slice for B02.5 without restarting. When safely between implementation tasks, B can claim an available A task, especially if A lacks tokens.
-- No new implementation task is claimed by this planning update. B02's existing B claim is preserved. Separate clones use main for future work; legacy task branches await authorized integration.
+- No new implementation task is claimed by this planning update. B02's existing B claim is preserved. Separate clones use main for future work; the integrated legacy task branches are historical pointers; no new work belongs on them.
 
 ## First parallel batch: local product
 
 | Task | Direct model / effort | Prerequisite | Outcome / current state |
 | --- | --- | --- | --- |
-| [A01](tasks/A01.md) | Terra / medium | Foundation | Existing UI, REVIEW |
+| [A01](tasks/A01.md) | Terra / medium | Foundation | DONE; integrated UI, combined checks passed |
 | [A02](tasks/A02.md) | Terra / medium | A01 implementation available | Client/forms against contracts; READY |
 | [A03](tasks/A03.md) | Luna / medium | A01 implementation available | Receipts/accessibility with mocks; READY |
 | [A06](tasks/A06.md) | Luna / medium | A01 implementation available | Demo/trial/setup drafts; READY |
-| [B01](tasks/B01.md) | Sol / high | Foundation | REPORTED_DONE; synchronize evidence |
-| [B02](tasks/B02.md) | Astra / high | B01 in B's clone | REPORTED_IN_PROGRESS; B retains claim |
+| [B01](tasks/B01.md) | Sol / high | Foundation | DONE; source/evidence integrated, combined checks passed |
+| [B02](tasks/B02.md) | Astra / high | B01 on main | REPORTED_IN_PROGRESS; B retains claim |
 | [B02.5](tasks/B02.5.md) | Astra / high | Reviewable B02 slice | Consent/projection midpoint; evidence needed here |
 | [B03](tasks/B03.md) | Terra / medium | B02 usable implementation | Local server; B02.5 required for integration acceptance |
 | [A03.5](tasks/A03.5.md) | Astra / high | A02 + A03 preparation | Independent frontend boundary checkpoint |

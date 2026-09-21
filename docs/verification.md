@@ -86,3 +86,37 @@ Final exit status: **0**. All 7 reference hashes, 15 planning checks, ESLint/imp
 - `/Users/martelaxe/.nvm/versions/node/v24.21.0/bin/node scripts/check-references.mjs` exited 0: all seven imported checksums match. Historical execution entries in task-execution.md were compared to HEAD and remain verbatim.
 - `npm run check` was not run: only Markdown changed; the revised workflow specifies documentation/link/reference checks for this case. Earlier application test results remain historical. No B01/B02 implementation, model or test evidence from B's clone was verified here.
 - No task branch was created/switched, commit made, remote fetched/pushed, merge performed, deployment made or money spent. The legacy task/a01 checkout remains intact pending authorized integration.
+
+## B01 verification — September 20, 2026
+
+The foundation was subsequently committed/integrated to main as `ca9fb636974030bfd8a620cec2b3d8581b3c8114` at the user's request. The user then authorized B01. This run verifies B01's local `task/b01` diff against that accepted baseline; previous sections above describe their historical task state.
+
+The assigned `gpt-5.6-sol` agent wrote the initial implementation, then reached its usage limit. The coordinating lead reported this limitation and, after the user resumed work, explicitly escalated completion to `gpt-6-astra`. A separate `gpt-6-astra` reviewer resumed and independently checked the final source/tests, ran 64 focused tests and six additional assertions, and found no remaining supported actionable issues. Initial review findings included hard-condition precedence, meeting/duty double booking, reviewed-coverage gaps and shared fixture objects; the final tests cover the corrected behavior.
+
+The coordinator ran `npm run check` with the exact Node 24.21.0/npm 11.19.0 and isolated Chromium/library environment documented above. The temporary environment was restored for this task. Final exit status **0** at approximately 2026-09-20 19:24 UTC / 13:24 America/Mexico_City.
+
+| Check | Actual result |
+| --- | --- |
+| Imported reference SHA-256 | 7/7 unchanged |
+| Planning arithmetic | 15/15 passed |
+| ESLint/import boundaries | Passed, 23 import references |
+| TypeScript | Passed |
+| Full Vitest suite | 116/116 in five files: 49 domain, 51 contracts, 14 tooling, one fixture-isolation, one web-adapter test |
+| Production build/bundle marker scan | Passed, 114 modules; browser bundle unchanged from the accepted foundation |
+| Chromium browser smoke | 2/2 passed at 390/1280px |
+| Production solver demo | Both policies: 12 structural candidates, NO_AGREEMENT at baseline, two feasible after the scoped exception; inconvenience selects B, balanced load selects A |
+| Working diff whitespace | git diff --check passed |
+
+The executable demo is `npm run demo --workspace @deal-table/test-support`. Focused tests are `npm test -- packages/domain packages/test-support`. Tests independently check exact assignments and ranking vectors, hard impossibility, zero-concession success, expiry/status/scope failures, 60-minute clarification, full meeting/duty coverage, gaps, deterministic ties/order, nonmutation and disclosure independence. Fixture copies prevent a schedule edit from silently changing a grant or another owner's input.
+
+No wire contract changes. The internal owner `availabilityReview` binds explicitly confirmed coverage to the current context/input revision; B02 must obtain it from authoritative confirmation, never infer it from the entire schedule. Root coordination added only existing workspace dependencies to the lockfile and `allowImportingTsExtensions` to the existing noEmit TypeScript configuration for the direct Node demo. No external dependencies, runtime cloud resources or browser solver imports were added.
+
+The named implementation diff is `/tmp/b01-ca9fb63-review.patch` against the accepted baseline, SHA-256 `f2b354c277db77e140df7fc867691eda021c3f74eb2bc34a87bdf02f26e42bcb`. It includes source, tests, package docs/manifests and coordinated lock/TypeScript changes, including untracked files. No B01 commit, push or merge was performed. B01 remains REVIEW for human acceptance. These checks do not establish B02 authorization/projections/state transitions, DynamoDB race safety or cloud/auth behavior.
+
+## Combined main integration — September 20, 2026 local
+
+At 2026-09-21T03:31:02Z, Astra integrated A01/workflow (`45aaf11`) with B01 (`04c87d7`) at the user’s direction. Documentation-only conflicts were reconciled while preserving both historical verification records; source/config contents match their original branches. No new implementation subagent or duplicate B01 review was run; B01’s shared independent Astra review remains recorded above.
+
+Pinned Node 24.21.0/npm 11.19.0: npm ci passed. Bundled Chromium installation failed because macOS 12 is unsupported; installed Google Chrome 150.0.7871.125 provided the documented fallback. `PLAYWRIGHT_CHANNEL=chrome npm run check` exited 0: seven reference hashes, 15 arithmetic checks, lint/boundaries (35 references), typecheck, 120 tests in six files, build/bundle scan (123 modules), and 17 browser tests. Solver demo exited 0 with 12/0/2 candidates and the expected policy selections. See [integration details](main-integration.md).
+
+B02 is confirmed still in progress only in B’s clone. No B02/auth/cloud checks or remote CI results are claimed. The integration record distinguishes local main from remote publication.

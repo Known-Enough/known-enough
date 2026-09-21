@@ -20,3 +20,10 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Verification: Markdown targets resolve; 25 direct model/effort/claim declarations match the plan; historical execution text preserved; reference check exits 0 with seven matches; git diff --check exits 0. See [verification record](verification.md#workflow-and-task-refactor--september-20-2026-local). No application suite run for this documentation-only change.
 - Review corrections: distinguish future model assignments from actual historical use; retain B01/B02 report qualification; preserve exact solver expectations and exception/approval invalidation; require B06 operational evidence before live trials/release.
 - Next: human review and authorized sharing of this workflow to B. A may start A02 with Terra/medium against its available A01 implementation; B continues B02 and prepares B02.5 evidence, or safely hands off before claiming available frontend work. No push/merge or task implementation occurred in this refactor.
+
+## 2026-09-21T03:31:02Z — main integration update
+
+- Recorded by Astra in A’s integration session; user explicitly requested all available task work on main. This entry updates shared integration facts, not another clone’s private progress.
+- Included A01/workflow 45aaf11 and B01 04c87d7. Both source sets preserved unchanged; conflicts were documentation-only. Combined check passed 120 unit tests and 17 browser tests plus references/arithmetic/lint/typecheck/build; solver demo passed. See [main integration](main-integration.md).
+- A01/B01 are DONE under the user’s integration direction. B02 remains active in B’s clone, confirmed by the user; preserve its claim and saved work before synchronizing. Do not duplicate it.
+- Future task work uses main in separate clones. Source task branches are historical pointers. Local integration is distinct from publication; this session has not pushed.

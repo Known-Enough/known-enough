@@ -1,6 +1,6 @@
 # Deal Table · TeamTable
 
-Local foundation and A01 UI: React/Vite shared and owner demo screens, separate mock adapters, strict runtime contracts and independent developer lanes. All people/data are fictional. **Mocked identities are not authentication. This checkout contains no backend implementation or deployed services. The user reports B01 complete and B02 in progress in B’s separate clone; that code and evidence have not been synchronized here.**
+Main combines the A01 React/Vite mock UI, strict runtime contracts, B01’s deterministic solver and synthetic demo, and the current parallel task workflow. All people/data are fictional. **Mock identities are not authentication. The UI is not yet connected to the solver; B02 is still in progress in B’s clone. No cloud services are deployed.**
 
 ## Setup and launch
 
@@ -25,6 +25,14 @@ The default page is the shared table. Follow **Open private owner demo** for a f
 
 Exception permission, disclosure permission, and final acceptance remain separate. These mock screens exercise the interface only; client/forms preparation belongs to A02, with real command integration in A02.5/B02/B03.
 
+## Solver demo
+
+```sh
+npm run demo --workspace @deal-table/test-support
+```
+
+This runs B01 independently of the browser: 12 structural candidates, zero feasible at baseline, two with the valid scoped exception; inconvenience selects B and balanced load selects A. Application commands and owner authorization remain B02 work.
+
 ## Checks
 
 ```sh
@@ -44,12 +52,13 @@ See the [dated bootstrap verification evidence](docs/verification.md). It record
 
 - `apps/web`: A's shared and lazy-loaded owner demo screens with separate adapters; public sample responses are in `src/mocks/public`. Browser owner examples are synthetic UI-only values, never imports from server fixtures.
 - `packages/contracts`: runtime DTO/command/error validators and canonical public hashing; B owns after bootstrap, A reviews breaking changes.
-- `apps/api`, `apps/workers`, `packages/domain`, `packages/application`, `packages/adapters`, `infra`: empty implementation boundaries reserved for B.
-- `packages/test-support`: synthetic owner/command examples for tests/server only; never browser imports.
+- `packages/domain`: B01 structural enumeration, deterministic feasibility/ranking and domain tests.
+- `apps/api`, `apps/workers`, `packages/application`, `packages/adapters`, `infra`: reserved backend boundaries in this checkout; B02 work is still in B’s clone.
+- `packages/test-support`: isolated synthetic domain fixtures and executable solver demo; server/test-only, never browser imports.
 - `tests/e2e`, `tests/integration`: A's browser smoke checks and B's reserved integration area.
 - `docs`: immutable source references, [contracts](docs/contracts.md), [decisions/risks](docs/decisions.md), [task files](docs/tasks), and [A](docs/handoff-A.md)/[B](docs/handoff-B.md) handoffs.
 
-The foundation review was integrated on remote main at `ca9fb636974030bfd8a620cec2b3d8581b3c8114`. A01 is implemented on the legacy `task/a01` branch and awaits human acceptance. Future work uses **main in separate clones**, with no mandatory task branches; preserve existing work until authorized integration. B01 is user-reported complete and B02 in progress elsewhere. Do not mistake this checkout's empty backend folders for a request to redo B's work.
+**Use main in separate clones for all new work.** A01, the workflow refactor and B01 are consolidated here at the user’s direction. The old task branches are historical pointers, not active work queues. See [main integration](docs/main-integration.md) for source commits, verification and publication state. Preserve B’s active B02 changes when synchronizing; do not restart them.
 
 The [current task board](docs/task-board.md) and [workflow](docs/agent-workflow.md) govern execution and supersede dated branch/model/ownership/sequencing instructions in imported references. Product/security semantics remain unchanged. A02/A03/A06 preparation can proceed while B works; separate integration tickets retain real API/auth checks. B can take available A work through a recorded handoff when A lacks tokens.
 
