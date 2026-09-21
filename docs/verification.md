@@ -82,3 +82,26 @@ The executable demo is `npm run demo --workspace @deal-table/test-support`. Focu
 No wire contract changes. The internal owner `availabilityReview` binds explicitly confirmed coverage to the current context/input revision; B02 must obtain it from authoritative confirmation, never infer it from the entire schedule. Root coordination added only existing workspace dependencies to the lockfile and `allowImportingTsExtensions` to the existing noEmit TypeScript configuration for the direct Node demo. No external dependencies, runtime cloud resources or browser solver imports were added.
 
 The named implementation diff is `/tmp/b01-ca9fb63-review.patch` against the accepted baseline, SHA-256 `f2b354c277db77e140df7fc867691eda021c3f74eb2bc34a87bdf02f26e42bcb`. It includes source, tests, package docs/manifests and coordinated lock/TypeScript changes, including untracked files. No B01 commit, push or merge was performed. B01 remains REVIEW for human acceptance. These checks do not establish B02 authorization/projections/state transitions, DynamoDB race safety or cloud/auth behavior.
+
+## B02 verification — September 20, 2026
+
+B02 is local on `task/b02`, based on B01 commit `04c87d761d13f29643e287392e520ca38af940d0`. The user authorized this task after B01 was committed. Earlier sections retain their historical status.
+
+Final integrated `npm run check` exited 0 at approximately 22:43 UTC using pinned Node 24.21.0/npm 11.19.0. The runtime, Chromium, fonts and required Linux libraries were reused from the isolated `/tmp/deal-table-runtime` setup documented above. The browser preview required an approved sandbox escalation to bind localhost.
+
+- Seven imported reference checksums unchanged; all 15 original arithmetic checks passed.
+- ESLint and import/dependency boundaries passed (32 references).
+- TypeScript passed. The first completion check found two readonly-array type errors in new tests; the coordinator corrected those before this final successful run.
+- 144 tests passed in seven files: 53 contracts, 49 domain, 11 application/transaction, 15 integration, 14 import-boundary, one fixture and one web mock test.
+- Production build passed: 114 modules, JavaScript 318.57 kB (97.00 kB gzip); browser bundle marker check passed.
+- Both existing Chromium smoke tests passed at 390px and 1280px. These verify the public scaffold, not a connected B02 browser flow.
+
+The integration suite uses real application methods, the in-memory repository and the deterministic solver. It exercises explicit owner confirmations, the private exception round, independent disclosure refusal, exact three-person approval, owner/display/organizer scopes, removed membership before replay, same-key changed-body conflicts including rejected commands, publication audiences, retained receipts, expiry, duration invalidation, stale jobs, both finalization/revocation orderings and closed rooms. Focused application tests add no-concession success, hard/uninvited impossibility, unknown coverage, offer substitution, policy reconfirmation, duplicate/pre-start stale jobs, expiry across asynchronous hashing and repository rollback/isolation.
+
+Named implementation artifact: `/tmp/b02-04c87d7-review.patch`, 104,937 bytes, SHA-256 `eca0b98c448696642ef48e8093e86507e92c600e12f7d9845e139903a56f1c4a`; per-file hashes in `/tmp/b02-04c87d7-review-files.json`. It covers 19 implementation, contract, test, package-documentation and coordinated configuration files against B01, including new files. Final task/verification/handoff records are excluded to avoid self-referential evidence.
+
+Required CONFIRM_INPUTS.reviewedIntervals and OwnerSnapshot.availabilityReview extend the pre-release v1 owner/command contract; public DTOs and B01 ConfirmedInputs are unchanged. Current web consumers use only public snapshots. Human A compatibility review remains required. Root coordination registered integration discovery and existing workspace dependencies in the lockfile; no external dependencies were introduced.
+
+The assigned Astra implementation agent reached its usage limit after writing the code/tests. The coordinator retained its work, completed documentation and test type corrections, then ran the full check. The separate Astra reviewer identified organizer disclosure outside its approved audience and failure-result replay inconsistency; both were corrected with regressions. Final independent Astra review found no remaining actionable findings in the named diff, verified its base/size/SHA and all 19 per-file hashes, passed the reverse patch check, and independently ran 79 focused tests across three files.
+
+B02 remains REVIEW. No B02 commit, push, merge, HTTP server, Cognito authentication, DynamoDB verification, AWS deployment or paid resource was performed. Synthetic trusted principals are not authentication; in-memory serialization is not proof of distributed/cloud transaction safety. The browser remains the public mock until A02/B03 integration.

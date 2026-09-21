@@ -1,19 +1,13 @@
-# Developer B handoff — B01 review, B02 next
+# Developer B handoff — B02 review, B03 next
 
-B01 is functional on `task/b01`, based on accepted foundation `ca9fb636974030bfd8a620cec2b3d8581b3c8114`, and remains **REVIEW** pending human acceptance. No B01 commit, push or merge was performed.
+B02 is functional locally on `task/b02`, based on committed B01 `04c87d761d13f29643e287392e520ca38af940d0`, and remains **REVIEW**. No B02 commit/push/merge was performed.
 
-The coordinating lead used the assigned `gpt-5.6-sol` for initial implementation, then explicitly escalated completion to `gpt-6-astra` after Sol reached its usage limit. A separate Astra reviewer found no remaining supported actionable issues. See [execution record](task-execution.md) and [verification evidence](verification.md#b01-verification--september-20-2026).
+Application commands now drive draft/coverage confirmation, context acceptance, the deterministic solver, a bounded private exception round, independent disclosure consent and exact unanimous agreement. An in-memory repository serializes transitions, replay records, finalization and revocation. Owner/public projections enforce membership and audience boundaries. Clock-controlled tests cover expiry, stale work, closed rooms, withdrawal and semantic invalidation. See [application API](../packages/application/README.md).
 
-`packages/domain` exports structural enumeration, stable internal plan IDs and `solveDecision`. `packages/test-support` supplies isolated synthetic fixtures and the executable demo:
+Assigned `gpt-6-astra` implemented the core and focused tests, then reached its usage limit. The coordinating lead finished documentation/type corrections, integrated independent tests and ran checks. A separate `gpt-6-astra` reviewer verified both fixes and reported no remaining actionable findings, with 79 independent focused tests passing; see [verification](verification.md#b02-verification--september-20-2026) for final review evidence and the named 19-file patch.
 
-```sh
-npm run demo --workspace @deal-table/test-support
-```
+`npm run check` passed: 144 tests, two Chromium smoke tests, seven immutable hashes, 15 arithmetic checks, lint/boundaries, typecheck and build.
 
-Observed: 12 structural plans, zero baseline feasible, two with Nina's valid scoped exception; inconvenience selects B, recent-load balance A. Hard restrictions remain immutable, grants require exact current scope and explicit time, and incomplete coverage/costs require clarification.
+Contract additions: required CONFIRM_INPUTS.reviewedIntervals and owner availabilityReview receipt. Public DTOs remain unchanged; human A compatibility review is required. Coordinated root changes register integration tests and existing workspace lock entries.
 
-Final `npm run check` passed: 116 tests, two Chromium tests, seven reference hashes, 15 arithmetic checks, lint/boundaries, typecheck and build. Independent Astra verification also passed 64 focused tests and six additional assertions.
-
-No wire-contract changes. Coordinated root changes only refresh existing workspace dependency entries and enable explicit TypeScript import extensions. `availabilityReview` is a new internal owner-confirmed coverage record bound to context/input revision; B02 must persist authoritative confirmation, never populate it automatically from all schedule options.
-
-After human acceptance, B02 owns application commands, projections, repositories, independent consent state and transaction guards. Domain scores, candidates, grant references and clarification details are private server results, never public DTOs. B01 does not authenticate callers or finalize agreement. Follow [agent-workflow.md](agent-workflow.md).
+After review, B03 adds local HTTP/test-identity composition; A02 connects UI after A01. No real authentication, durable persistence or cloud tests are claimed. New roster names do not create authenticated memberships. The browser still uses its public mock.

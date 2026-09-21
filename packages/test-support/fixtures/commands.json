@@ -49,7 +49,15 @@
     "payload": {
       "draftId": "draft-synthetic",
       "draftRevision": 1,
-      "expectedOwnerRevision": 1
+      "expectedOwnerRevision": 1,
+      "reviewedIntervals": [
+        {
+          "date": "2026-10-08",
+          "timezone": "America/Mexico_City",
+          "startMinute": 660,
+          "endMinute": 690
+        }
+      ]
     }
   },
   {

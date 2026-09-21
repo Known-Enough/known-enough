@@ -51,6 +51,11 @@ describe('public wire boundary', () => {
   });
 });
 describe('owner-only values and finite predicates', () => {
+  it('binds the explicit review receipt to inputs while allowing stale owner confirmations', () => {
+    expect(OwnerSnapshot.safeParse({ ...owner, contextToken: 'new-context' }).success).toBe(true);
+    expect(OwnerSnapshot.safeParse({ ...owner, availabilityReview: { ...owner.availabilityReview, inputRevision: 99 } }).success).toBe(false);
+    expect(OwnerSnapshot.safeParse({ ...owner, confirmedInputs: null }).success).toBe(false);
+  });
   it('validates synthetic owner view without accepting it as public', () => {
     expect(OwnerSnapshot.parse(owner)).toEqual(owner);
     expect(PublicRoomSnapshot.safeParse(owner).success).toBe(false);
@@ -73,6 +78,12 @@ describe('owner-only values and finite predicates', () => {
   });
 });
 describe('command/error shapes (no authorization execution)', () => {
+  it('requires explicit bounded full-interval review when confirming inputs', () => {
+    const command = commands.find(x => x.type === 'CONFIRM_INPUTS')!;
+    for (const reviewedIntervals of [undefined, [], Array(21).fill(facts.plan.meeting.interval), [{ ...facts.plan.meeting.interval, endMinute: 660 }]]) {
+      expect(CommandEnvelope.safeParse({ ...command, payload: { ...command.payload, reviewedIntervals } }).success).toBe(false);
+    }
+  });
   for (const command of commands) it(`validates ${command.type} and rejects supplied owner identity`, () => {
     expect(CommandEnvelope.parse(command)).toEqual(command);
     expect(CommandEnvelope.safeParse({ ...command, ownerMemberId: 'other' }).success).toBe(false);

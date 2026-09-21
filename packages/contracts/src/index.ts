@@ -100,14 +100,17 @@ export const ExceptionOffer = z.strictObject({ id: Id, version: Version, scope: 
 export const ExceptionGrant = z.strictObject({ id: Id, version: Version, scope: ExceptionScope, status: PermissionStatus });
 export const DisclosureGrant = z.strictObject({ id: Id, version: Version, preview: DisclosurePreview, status: PermissionStatus, publishedAt: Timestamp.nullable() });
 export const FinalApproval = z.strictObject({ proposalId: Id, proposalVersion: Version, contextToken: Id, planHash: Hash, acceptedAt: Timestamp });
+export const AvailabilityReview = z.strictObject({ contextToken: Id, inputRevision: Version, intervals: z.array(Interval).min(1).max(20) });
 export const OwnerSnapshot = z.strictObject({
   schemaVersion: z.literal(1), roomId: Id, contextToken: Id, ownerMemberId: Id,
   ownerRevision: Version, controlVersion: Version,
-  confirmedInputs: ConfirmedInputs.nullable(), draft: InputDraft.nullable(),
+  confirmedInputs: ConfirmedInputs.nullable(), availabilityReview: AvailabilityReview.nullable(), draft: InputDraft.nullable(),
   pendingOffers: z.array(ExceptionOffer), disclosurePreviews: z.array(DisclosurePreview),
   exceptionGrants: z.array(ExceptionGrant), disclosureGrants: z.array(DisclosureGrant),
   ownApproval: FinalApproval.nullable(),
-});
+}).refine(x => !x.availabilityReview || (x.confirmedInputs !== null
+  && x.availabilityReview.contextToken === x.confirmedInputs.contextToken
+  && x.availabilityReview.inputRevision === x.confirmedInputs.inputRevision), 'Review must bind to confirmed inputs');
 
 const expected = z.strictObject({ contextToken: Id, decisionRevision: Version, controlVersion: Version });
 const envelope = { schemaVersion: z.literal(1), requestId: Id, roomId: Id, idempotencyKey: Id, expected };
@@ -124,7 +127,7 @@ const RevisionDecisionPayload = z.strictObject({
 });
 export const CommandEnvelope = z.discriminatedUnion('type', [
   z.strictObject({ ...envelope, type: z.literal('SUBMIT_INPUT_DRAFT'), payload: z.strictObject({ expectedOwnerRevision: Version, values: InputValues }) }),
-  z.strictObject({ ...envelope, type: z.literal('CONFIRM_INPUTS'), payload: z.strictObject({ draftId: Id, draftRevision: Version, expectedOwnerRevision: Version }) }),
+  z.strictObject({ ...envelope, type: z.literal('CONFIRM_INPUTS'), payload: z.strictObject({ draftId: Id, draftRevision: Version, expectedOwnerRevision: Version, reviewedIntervals: z.array(Interval).min(1).max(20) }) }),
   z.strictObject({ ...envelope, type: z.literal('ACCEPT_CONTEXT'), payload: z.strictObject({ policy: Policy }) }),
   z.strictObject({ ...envelope, type: z.literal('REQUEST_SOLVE'), payload: z.strictObject({}) }),
   z.strictObject({ ...envelope, type: z.literal('DECIDE_EXCEPTION'), payload: z.strictObject({ offerId: Id, offerVersion: Version, decision: z.enum(['ALLOW', 'DECLINE']), scope: ExceptionScope }) }),

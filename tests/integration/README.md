@@ -1,3 +1,5 @@
-# Reserved for Developer B
+# B02 application integration
 
-No cloud resources or backend implementation in F00–F02.
+Run `npm test -- tests/integration` with the pinned Node/npm runtime. These tests drive the real application, in-memory repository and B01 solver through public methods with synthetic identities and an injected clock. They cover negotiation, independent permissions, owner/public boundaries, exact approvals, replay, expiry, semantic changes and competing mutations. `npm run check` includes this directory.
+
+Trusted principals in these tests are supplied by the test composition root; they are not authentication. No HTTP, Cognito, DynamoDB or cloud tests are claimed.

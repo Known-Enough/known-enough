@@ -51,3 +51,15 @@ The foundation was committed as `ca9fb636974030bfd8a620cec2b3d8581b3c8114` and i
 B01 evidence: 116 tests in five files, two Chromium smoke tests, seven immutable reference hashes, 15 arithmetic checks, lint/boundaries, typecheck and build all passed. The demo reports 12 structural plans, zero baseline feasible, two after the valid exception, and the expected B/A policy selections. Independent review verified 64 focused tests and six additional assertions. Named implementation diff: `/tmp/b01-ca9fb63-review.patch`, 66,665 bytes, SHA-256 `f2b354c277db77e140df7fc867691eda021c3f74eb2bc34a87bdf02f26e42bcb`, including all 15 implementation/config/doc files in scope. See [B01 verification](verification.md#b01-verification--september-20-2026) and [B handoff](handoff-B.md). No B01 commit/push/merge was performed; B02 remains gated by acceptance of B01.
 
 Human review remains required by AGENTS.md and the task dependencies; agent reviews and passing checks do not mark tasks DONE or authorize merging. Cloud work still requires its separately specified authorization. The immutable architecture/task-board import was left byte-for-byte unchanged; this file and the individual mutable tickets contain the current model assignments.
+
+## B02 execution — September 20, 2026
+
+The user authorized B02 from B01 commit `04c87d761d13f29643e287392e520ca38af940d0`. The coordinating lead created local branch `task/b02`; no B02 commit/push/merge was requested or performed.
+
+- B02 → `gpt-6-astra`: `b02_implementation` (high reasoning) implements application commands, the in-memory adapter, focused lifecycle/transaction tests and package documentation.
+- Contract/privacy review → `gpt-6-astra`: `b02_contract_review` (high reasoning), read-only. Reviewed explicit interval coverage and owner receipt compatibility, then independently examined identity, projection, permissions, replay and transaction behavior.
+- Coordinator: integrated the narrow contract/fixture changes, registered integration tests in the root runner, refreshed existing workspace lock dependencies and wrote independent application integration tests. Root/contract changes are explicit coordination proposals; human A compatibility review is still required before integration.
+
+Review identified an out-of-audience organizer disclosure and uncached rejected-command key reuse; both received implementation corrections and regression tests. The coordinator also required expiry rechecks after asynchronous hashing. See [B02 verification](verification.md#b02-verification--september-20-2026) for final evidence and the named diff. Historical B01 status descriptions above predate its subsequent commit and this authorization.
+
+B02 completion: `b02_implementation` reached its usage limit after the implementation/test edits; no substitute model was used. The coordinating lead completed package docs and two readonly test-type corrections. Full `npm run check` passed 144 tests, two Chromium tests, references/arithmetic, lint, typecheck and build. Final review evidence is in verification.md. B02 remains REVIEW.
