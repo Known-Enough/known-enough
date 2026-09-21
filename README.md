@@ -1,6 +1,6 @@
 # Deal Table · TeamTable
 
-Local foundation and A01 UI: React/Vite shared and owner demo screens, separate mock adapters, strict runtime contracts and independent developer lanes. All people/data are fictional. **Mocked identities are not authentication. No solver, backend, Alexa integration or cloud services are implemented/deployed.**
+Local foundation and A01 UI: React/Vite shared and owner demo screens, separate mock adapters, strict runtime contracts and independent developer lanes. All people/data are fictional. **Mocked identities are not authentication. This checkout contains no backend implementation or deployed services. The user reports B01 complete and B02 in progress in B’s separate clone; that code and evidence have not been synchronized here.**
 
 ## Setup and launch
 
@@ -23,7 +23,7 @@ The default page is the shared table. Follow **Open private owner demo** for a f
 - Owner examples: `/?view=owner&owner=review`, `draft`, or `approval`.
 - For either adapter, use `empty`, `failure`, or `stale` as its scenario value to inspect recovery states. Retry loads the default example; refreshing a stale example clears its stale marker. A short mock delay exposes loading feedback.
 
-Exception permission, disclosure permission, and final acceptance remain separate. These mock screens exercise the interface only; real command handling belongs to A02/B02/B03.
+Exception permission, disclosure permission, and final acceptance remain separate. These mock screens exercise the interface only; client/forms preparation belongs to A02, with real command integration in A02.5/B02/B03.
 
 ## Checks
 
@@ -47,12 +47,14 @@ See the [dated bootstrap verification evidence](docs/verification.md). It record
 - `apps/api`, `apps/workers`, `packages/domain`, `packages/application`, `packages/adapters`, `infra`: empty implementation boundaries reserved for B.
 - `packages/test-support`: synthetic owner/command examples for tests/server only; never browser imports.
 - `tests/e2e`, `tests/integration`: A's browser smoke checks and B's reserved integration area.
-- `docs`: immutable source references, [contracts](docs/contracts.md), [decisions/risks](docs/decisions.md), 18 [task files](docs/tasks), and [A](docs/handoff-A.md)/[B](docs/handoff-B.md) handoffs.
+- `docs`: immutable source references, [contracts](docs/contracts.md), [decisions/risks](docs/decisions.md), [task files](docs/tasks), and [A](docs/handoff-A.md)/[B](docs/handoff-B.md) handoffs.
 
-The foundation review is integrated on remote `main` at `ca9fb636974030bfd8a620cec2b3d8581b3c8114`. The user authorized **A01** on September 20; its work is on `task/a01`. **B01** remains B's solver/ranking task in a separate clone. A owns root config, lockfile and CI. After A01 review, **A02** still needs B02/B03 for real HTTP integration. Individual tickets record review gates; passing agent checks does not replace human acceptance.
+The foundation review was integrated on remote main at `ca9fb636974030bfd8a620cec2b3d8581b3c8114`. A01 is implemented on the legacy `task/a01` branch and awaits human acceptance. Future work uses **main in separate clones**, with no mandatory task branches; preserve existing work until authorized integration. B01 is user-reported complete and B02 in progress elsewhere. Do not mistake this checkout's empty backend folders for a request to redo B's work.
 
-The product plan governs semantics; the two-developer plan governs ownership and sequence. Existing planning dates/research are historical references requiring current checks before release. Private outcomes can still be inferred from final plan facts. Later work must implement verified owner identity, public projections, independent consents, expiry, idempotency and atomic versioned acceptance.
+The [current task board](docs/task-board.md) and [workflow](docs/agent-workflow.md) govern execution and supersede dated branch/model/ownership/sequencing instructions in imported references. Product/security semantics remain unchanged. A02/A03/A06 preparation can proceed while B works; separate integration tickets retain real API/auth checks. B can take available A work through a recorded handoff when A lacks tokens.
 
-## Starting tasks with Astra
+## Starting a task
 
-Both developers select **GPT-6 Astra** as lead in their own Codex session and ask it to read AGENTS.md and execute their assigned task file (A: `docs/tasks/A01.md`; B: `docs/tasks/B01.md`). Every task explicitly authorizes Astra to select available local subagent models and reasoning effort as useful. Astra integrates the work, runs checks and reports actual outcomes. For small tasks it may work directly. See [the shared execution policy](docs/agent-workflow.md) and [task assignments and execution record](docs/task-execution.md). Model/tool availability depends on each session; task files do not switch models or configure accounts. Existing dependency and human-review gates still apply.
+Choose a READY task from the board, select its named model and reasoning effort as the **direct worker**, and ask: “Read AGENTS.md and execute docs/tasks/A02.md within its scope.” Use your own clone and log the claim. Terra handles most implementation; Luna handles narrow UI/docs; Sol handles difficult backend work; Astra handles architecture and explicit checkpoints. No routine Astra manager or subagents are required. Files do not switch the selected session model.
+
+See [A handoff](docs/handoff-A.md), [B handoff](docs/handoff-B.md), [A log](docs/work-log-A.md), [B log](docs/work-log-B.md) and [review records](docs/reviews/README.md). B02 keeps its active assignment. Sharing logs/code requires authorized synchronization; no cross-account access or live messaging is configured. Agent checks do not replace human acceptance or authorize pushing, integration, deployment or spending.

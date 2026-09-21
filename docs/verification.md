@@ -77,3 +77,12 @@ PLAYWRIGHT_CHANNEL=chrome npm run check
 ```
 
 Final exit status: **0**. All 7 reference hashes, 15 planning checks, ESLint/import boundaries (22 references), strict typecheck, **70/70 unit tests across 4 files**, production build/private marker scan, and **17/17 browser tests** passed. The final browser phase completed in 46.9 seconds. Build: 123 modules; public entry 332.46 kB (99.38 kB gzip), separate owner chunk 10.69 kB (3.71 kB gzip). `git diff --check` also passed. Remote CI and bundled Chromium on a supported host were not run in this session.
+
+## Workflow and task refactor — September 20, 2026 local
+
+- Documentation-only change reviewed at 2026-09-21T03:00:47Z; working diff against `39c1885df7f00282884c26aad34782ee45f9913a`, including new board/log/review-template and seven new tickets. Status: REVIEW for human acceptance.
+- Actual workers: Astra lead for workflow/integration/review; `refactor_tickets`, `gpt-5.6-terra`, medium effort for bounded task-file edits. No application code, contracts, root tooling, dependencies, lockfile or imported reference content changed.
+- Validation: local Markdown link targets resolve; all 25 tickets specify the intended direct model/effort, claim state and current workflow/board links; `git diff --check` passed. Dependency review distinguishes preparation, midpoint review and live acceptance, with no circular completion requirement for B02.5/B04.5.
+- `/Users/martelaxe/.nvm/versions/node/v24.21.0/bin/node scripts/check-references.mjs` exited 0: all seven imported checksums match. Historical execution entries in task-execution.md were compared to HEAD and remain verbatim.
+- `npm run check` was not run: only Markdown changed; the revised workflow specifies documentation/link/reference checks for this case. Earlier application test results remain historical. No B01/B02 implementation, model or test evidence from B's clone was verified here.
+- No task branch was created/switched, commit made, remote fetched/pushed, merge performed, deployment made or money spent. The legacy task/a01 checkout remains intact pending authorized integration.

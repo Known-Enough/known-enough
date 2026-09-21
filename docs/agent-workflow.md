@@ -1,40 +1,54 @@
-# Astra-led task execution
+# Task execution and collaboration
 
-User-requested working policy, September 19, 2026. Applies to every task in docs/tasks and both developer lanes. This updates agent allocation only; product semantics, file ownership, dependencies, review gates and approval boundaries remain in force. Imported planning references remain unchanged.
+Effective September 20, 2026, by user instruction. Replaces the earlier Astra-led-every-task policy and mandatory task branches. This is the current authority for execution, ownership transfers and scheduling; imported plans remain unchanged and authoritative for product/security semantics. [Task board](task-board.md) lists parallel work; each ticket owns its requirements and status.
 
-## Starting a task
+## Start and model selection
 
-Each developer selects **GPT-6 Astra** as the lead model in their own Codex session, opens their own project copy and asks it to execute the relevant task file. A Markdown instruction does not change the session model or enable unavailable tools. If Astra is unavailable, report that limitation and ask the developer to select an available lead; do not pretend another model is Astra.
+1. Open your own clone. Read AGENTS.md, this policy once per session, your current handoff/log, the board and assigned ticket. Read only relevant plan/contract sections and changed requirements; do not repeatedly load the whole history.
+2. Check local changes, current commit and shared task claims. Select the ticket's named model/effort as the direct worker. The human selects the session model; Markdown does not change it. If unavailable or different, report the actual model and resolve selection before claiming the assigned model was used.
+3. Claim one eligible task, recording developer, model, allowed files and baseline in your log and ticket. READY means eligible to claim, not accepted. Do not start a task already claimed elsewhere.
+4. Implement, run focused checks, self-review and produce evidence. Run npm run check before code handoff. Documentation-only work needs link/reference/consistency checks. A full check is required at integration checkpoints. Preserve prior results as dated evidence, never relabel them as a new run.
 
-Read AGENTS.md, this policy, the task and its referenced requirements. Check the task's dependency/status gate and existing work before implementation. Astra owns the task end to end: understand requirements, implement useful work, delegate where appropriate, integrate results, verify acceptance and produce the handoff. It is a working lead for this task, not a permanent manager or a reason to stop at planning.
-
-## Delegation authority and model choice
-
-The user explicitly authorizes Astra to spawn local subagents for bounded work within the selected task and to choose their available model and reasoning effort without asking for each delegation. Astra decides whether delegation is useful; small or tightly coupled work can be done directly. Use only tools/models exposed in the current developer's session. Never assume another developer's account or machine is available.
-
-The following are project preferences, not fixed assignments or guaranteed performance claims:
-
-| Work | Suggested starting choice |
+| Work | Starting choice |
 | --- | --- |
-| Narrow UI components, mechanical edits, focused tests/docs | Luna |
-| Routine implementation, integration, scoped investigation | Terra |
-| Difficult domain reasoning, multi-step failures, substantial reviews | Sol |
-| Ambiguous architecture, consent/privacy/concurrency decisions and critical review | Astra, or Sol with Astra's final review |
+| Narrow components, styling, mechanical edits and docs | Luna, low/medium |
+| Routine implementation, forms, adapters and tests | Terra, medium |
+| Difficult solver/backend work and debugging | Sol, high |
+| Architecture, critical consent/auth decisions and checkpoint reviews | Astra, high |
 
-Astra may select a stronger or different available model when risk, dependencies or observed results justify it. Choose supported reasoning effort explicitly when useful. If a selected model fails to resolve a subtask after two substantive attempts, reassess the approach and move it to Astra or a stronger available model. Do not silently substitute models: report what was actually used.
+Existing B02 keeps its active Astra assignment; do not restart or downgrade it. No permanent manager, automatic polling, or default subagents. If delegation helps independent work, the current worker may use available same-session agents with bounded file ownership and report their actual model; never start another account's agents. After two substantive failed attempts, log the failure and escalate narrowly. Avoid re-running successful checks without changed code or new evidence. Record usage only when actually exposed; never invent cost/token figures.
 
-Briefly state each delegation's objective, selected model and file ownership. Give each subagent a concrete deliverable, necessary context, allowed files, acceptance checks and non-goals. Prefer independent subtasks that can run alongside useful local work. Respect session concurrency limits; use the fewest agents that help. Do not create recursive delegation chains, permanent monitoring or duplicate implementations.
+## Main and parallel work
 
-## Ownership, integration and review
+Each developer uses a separate clone on main; task IDs identify work, not branches. Never share a writable checkout or synchronized working directory. Use small coherent local commits and keep shared main usable. Before an authorized push, fetch/inspect the shared head, incorporate incoming changes without discarding local work, resolve conflicts and run affected checks. Git history integration/push remains subject to the user's authorization; no force-push. A task request alone does not authorize publishing or merging. Preserve existing task branches; migrate their work only through separately authorized integration, not reset/overwrite.
 
-Subagents inherit the current ticket's limits. Developer A's agents cannot consume B's tickets, and B's agents cannot change A-owned files without coordination. Model choice does not change human ownership. In a shared checkout, give parallel writers disjoint files; serialize edits to shared files and root configuration. A read-only reviewer must not rewrite the author's changes.
+A and B normally own disjoint subsystems. One implementation writer per task and file set. Shared contracts, root config, lockfile and CI require a named coordinated owner before editing. An approved contract baseline lets A prepare against synthetic responses while B builds enforcement. Missing backend implementation blocks live acceptance, not independent frontend preparation. Internal dependencies still apply; the two queues meet at explicit integration checkpoints.
 
-Astra inspects subagent output, resolves integration issues and runs the task's required checks against the integrated result. A subagent's success report alone is insufficient. Critical identity, access, projection, grant, version/hash, transaction, IAM or secret-handling changes retain the architecture's strong-model review requirement; use a separate read-only Astra/Sol reviewer where available. Report missing review and leave the task REVIEW rather than claiming completion. Agent review does not replace required human review or authorize merging.
+## B can cover A when capacity changes
 
-The final handoff names the lead and any subagents actually used, their subtasks, changed files/contracts, actual verification results, outstanding risks and next dependency. If subagent tools or model overrides are unavailable, say so and continue directly with Astra within scope; do not block ordinary implementation or claim delegation happened. Report any required review that could not be performed.
+The user reports that B has more tokens and explicitly authorizes B to take frontend tasks. Subsystem stewardship stays A/frontend and B/backend; the implementing developer may change. B need not ask again for ordinary eligible A work within this policy.
 
-## Account and external-action boundaries
+- B first finishes or safely pauses its active task; B02 is already active and must not be duplicated.
+- A READY task with no current claim can be taken by B once both developers' latest shared claims establish it is available. A claim must be visible to the other developer through an authorized shared update or human handoff before concurrent work proceeds. Unsynchronized logs are not a lock; if availability is uncertain, obtain a human ownership clarification instead of guessing.
+- For active A work, A or the user explicitly releases it. Record PAUSED, exact baseline plus commit/diff artifact (including untracked files), changed files, tests actually run, remaining work, and destination developer. B records the takeover and becomes the sole writer; A does not resume without a reverse handoff.
+- If A has exhausted tokens, the user may release/assign the task and supply its saved work. Silence, an old log or token exhaustion alone does not prove local work is available. Never overwrite missing work or assume another clone can be read.
+- B follows the claimed A ticket's model, scope and tests. After finishing, B records its frontend changes in B's log; the A handoff points to them at the next coordinated update. B may then continue the next eligible task. No account sharing or separately billed workflows are authorized.
 
-Delegation stays within the current developer's authorized Codex session and its existing limits. This does not authorize purchasing credits, changing billing, starting separately billed API workflows, publishing, pushing, merging, deploying or creating paid resources. Do not modify private/global Codex configuration to force model access. Each developer starts their own Astra session; share reviewed repository changes through the agreed workflow, not cross-account agents.
+B should prioritize finishing backend work that unlocks integration, but may take a ready A task while waiting on a review or when A has no capacity. A budget shortage does not require every task to use Astra. If A is unavailable, a separate Astra reviewer may perform technical public-contract compatibility review for B's cross-lane work. Human acceptance and external-action permissions still apply.
 
-Codex supports per-subagent model/effort selection subject to available tools and configuration; see [official OpenAI documentation on subagents](https://developers.openai.com/es-419/docs/agent-configuration/subagents). These files express project instructions, not a promise that both accounts have identical model access.
+## Checkpoints and acceptance
+
+- B02.5: review the current consent/projection/version design at the next reviewable B02 slice; recheck subsequent critical changes before B03 integration acceptance. Does not restart B02 or block unrelated frontend work.
+- A03.5: after A02/A03 preparation, inspect client privacy/consent boundaries and evidence before downstream frontend/live integration work. Mock evidence establishes frontend behavior only.
+- B04.5: midway through B04, review its design and first implementation before extending the identity/transaction approach. B04.5 requires that slice, not completed B04; B04 resumes after findings are addressed.
+- G01: actual local negotiation across UI/API/domain. G02: actual identity/privacy/persistence before external testers. G03: final release evidence. These are direct Astra review tasks.
+
+Use an independent reviewer session/agent for critical code, preferably in B's available budget. Review a named base/head commit or reproducible diff artifact, requirements, focused code, test output and unresolved issues. Logs supplement code inspection. Do not self-certify critical work; if independent review is unavailable, leave the checkpoint pending. Fixes stay with the named implementation owner. Record findings, reviewed artifact, PASS/CHANGES_REQUESTED/BLOCKED, commands and limitations in docs/reviews/<checkpoint>.md. A changed reviewed diff needs follow-up review. Only affected dependent work waits. No model review replaces human acceptance or authorizes publication.
+
+States: READY, IN_PROGRESS, PAUSED, REVIEW, BLOCKED, DONE. DONE needs recorded human acceptance/integration; externally reported progress is labeled REPORTED_DONE/REPORTED_IN_PROGRESS until its artifact is synchronized. A preparation task can reach REVIEW while its separate live-integration ticket stays BLOCKED. Historical F00–F02/A01 evidence remains valid as dated evidence; do not redo accepted work merely to fit the new schedule.
+
+## Compact logs and handoffs
+
+Each developer writes only their own work log. Update at claim, meaningful change/blocker, checkpoint, transfer and handoff, not after every shell command. Include UTC time, task, actual developer/model/effort, baseline or diff, changed files, result/decision, checks with exit/results, limitations and next action. Link to long test output only when useful; no transcript dumps, secrets or participant data. The ticket owns status/claim; the board summarizes it. Update shared board/handoffs in a coordinated batch; do not turn all records into competing status sources.
+
+Logs in separate clones become visible only after an authorized share or human transfer. This workflow creates no live messaging, locks, cross-account access or background agents. A dated report is not proof of another clone's current state.

@@ -1,36 +1,12 @@
-# Task model assignments and execution evidence
+# Model selection and historical execution evidence
 
-Assigned September 19, 2026 at the user's request. These are actual model identifiers exposed by this session's subagent tool. The coordinating lead retains integration and verification responsibility. Assignments do not mark tasks accepted or bypass dependencies, human review, ownership, or cloud authorization. Additional narrow helpers may support the assigned task agent; report their actual models when used.
+Current policy, September 20, 2026: humans select the direct model/effort printed in each [task ticket](task-board.md). See [workflow](agent-workflow.md). Terra handles routine implementation, Luna narrow UI/docs, Sol difficult backend work, Astra architecture and explicit critical checkpoints. No required Astra coordinator or subagent. B02 retains its ongoing Astra assignment; B01 is user-reported complete. Model selection does not change task state or establish verified results.
 
-| Task | Assigned subagent model | Scope / reason |
-| --- | --- | --- |
-| F00 | `gpt-5.6-sol` | Review reference import and documentation foundation. |
-| F01 | `gpt-5.6-sol` | Review tooling, workspace boundaries and CI foundation. |
-| F02 | `gpt-5.6-sol` | Review strict contracts, public hashing and fixture separation. |
-| A01 | `gpt-5.6-terra` | Integrate shared/owner UI and mock adapters; Luna may assist with isolated components. |
-| B01 | `gpt-5.6-sol` | Implement exhaustive feasibility, rankings and independent edge-case tests. |
-| B02 | `gpt-6-astra` | Implement coupled consent, projection and concurrency semantics. |
-| A02 | `gpt-5.6-terra` | Connect HTTP client and form commands to established contracts. |
-| B03 | `gpt-5.6-terra` | Implement local HTTP boundary; Sol independently reviews authorization. |
-| G01 | `gpt-5.6-sol` | Review complete local negotiation across UI/API/domain. |
-| A03 | `gpt-5.6-luna` | Implement bounded receipt UI, responsive layout and browser regressions. |
-| B04 | `gpt-6-astra` | Implement identity and transactional persistence; Sol independently reviews critical changes. |
-| A04 | `gpt-5.6-terra` | Integrate sessions, reconnect and error handling. |
-| B05 | `gpt-5.6-sol` | Implement asynchronous extraction and routing with privacy/staleness boundaries. |
-| A05 | `gpt-5.6-terra` | Integrate confirmed draft UX and form fallback. |
-| G02 | `gpt-6-astra` | Independently review privacy, identity and stale-consent behavior. |
-| B06 | `gpt-5.6-sol` | Prepare cloud infrastructure and operational limits; Astra reviews IAM/secrets; deployment requires explicit authorization. |
-| A06 | `gpt-5.6-luna` | Prepare presentation, trial materials and setup docs; humans conduct real trials. |
-| G03 | `gpt-6-astra` | Review release evidence, threat model and readiness; human acceptance remains required. |
+Current claims/progress belong in the tickets and [A](work-log-A.md)/[B](work-log-B.md) logs. B may take eligible A tasks via recorded ownership transfer. Main in separate clones replaces mandatory task branches. This scheduling update does not move branches, change a running B session or share files automatically.
 
-## Dependency and review gates
+## Historical record — prior policy, not current instructions
 
-- F00–F02 currently have implementation in the repository and remain REVIEW pending human acceptance. Start with independent reviews of the existing artifacts and current verification.
-- After accepted F02, A01 and B01 can start in their respective developer lanes. B02 follows accepted B01. A02 can begin after A01/B02, but real HTTP verification also needs B03. G01 requires A02/B03.
-- After G01, A03 and B04 can proceed independently. A04 requires A03/B04; B05 requires B04; A05 requires A04 and B05 for its live path. G02 requires A04/B04.
-- B06 requires B05 and explicit cloud authorization. A06 preparation can follow G01; live trials require G02/B06. G03 requires A05/A06/B06.
-- Critical changes need independent Astra/Sol review. Model review does not replace human acceptance. No task is marked DONE merely because a subagent reports success.
-- On failure, retain findings, make a bounded retry, and escalate after two substantive failed attempts (or immediately for critical uncertainty): Luna → Terra/Sol; Terra → Sol; Sol → Astra. Record actual models and evidence; never silently substitute.
+The entries below are preserved verbatim as execution provenance. Their historical statements about mandatory Astra leads, task branches, blocked A preparation or unimplemented B work are superseded by the current workflow and the user's September 20 progress report. Do not use them to restart work or override current tickets.
 
 ## Execution record
 
