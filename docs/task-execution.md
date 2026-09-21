@@ -55,3 +55,13 @@ The user authorized B02 from B01 commit `04c87d761d13f29643e287392e520ca38af940d
 Review identified an out-of-audience organizer disclosure and uncached rejected-command key reuse; both received implementation corrections and regression tests. The coordinator also required expiry rechecks after asynchronous hashing. See [B02 verification](verification.md#b02-verification--september-20-2026) for final evidence and the named diff. Historical B01 status descriptions above predate its subsequent commit and this authorization.
 
 B02 completion: `b02_implementation` reached its usage limit after the implementation/test edits; no substitute model was used. The coordinating lead completed package docs and two readonly test-type corrections. Full `npm run check` passed 144 tests, two Chromium tests, references/arithmetic, lint, typecheck and build. Final review evidence is in verification.md. B02 remains REVIEW.
+
+## B03 execution — September 21, 2026
+
+User requested B03 from committed B02 `47b97eb`; lead Astra created local branch `task/b03`. Human acceptance/integration remains separate.
+
+- `b03_implementation`: GPT-5.6 Terra, high reasoning, owns `apps/api/**` implementation and API documentation.
+- `b03_review`: GPT-5.6 Sol, high reasoning, independent read-only authorization/privacy review.
+- Astra lead: HTTP integration tests, exact existing-workspace lock coordination, review integration, verification and handoff records.
+
+The fixed non-production identity map is privately reconstructed after validation following Sol's mutation finding. All 156 tests and two Chromium scaffold checks passed under the pinned runtime. See [B03 verification](verification.md#b03-verification--september-21-2026) for exact artifact/check evidence. B03 remains REVIEW; G01 still requires A02 and human review. No commit, push, merge or deployment occurred.

@@ -2,5 +2,15 @@
   "name": "@deal-table/api",
   "version": "0.1.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "dev": "node --experimental-transform-types src/local.ts",
+    "start": "node --experimental-transform-types src/local.ts"
+  },
+  "dependencies": {
+    "@deal-table/contracts": "0.1.0",
+    "@deal-table/application": "0.1.0",
+    "@deal-table/adapters": "0.1.0"
+  }
 }

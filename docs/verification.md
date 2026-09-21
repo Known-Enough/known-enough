@@ -151,3 +151,25 @@ Evidence reconciled at 2026-09-21T15:21:01Z. User authorized the final merge and
 Actual workers: Astra integration lead; `b02_ui_compat`, Terra/medium, apps/web-only compatibility fix. Terra reported 3 focused owner tests and web build passing. Lead inspected the diff and ran clean npm ci plus `PLAYWRIGHT_CHANNEL=chrome npm run check`: exit 0, 149 tests in eight files, 17 browser tests, seven reference hashes, 15 arithmetic checks, lint/boundaries (44 references), typecheck and build/bundle scan (123 modules). Runtime Node 24.21.0/npm 11.19.0; installed Chrome 150.0.7871.125 uses the previously documented macOS 12 fallback.
 
 [B02.5 evidence](reviews/B02.5.md) adopts B’s supplied independent final Astra review and adds actual integration inspection/tests. No second full backend audit or cloud/auth verification is claimed. B02 is integrated, B03 READY; A02 can proceed independently. [Main integration](main-integration.md) contains source and synchronization instructions.
+## B03 verification — September 21, 2026
+
+User authorized local B03 from committed B02 `47b97eb`, on `task/b03`. B02's prior human review status is not rewritten by this implementation. Lead: GPT-6 Astra; implementation: GPT-5.6 Terra; independent read-only authorization review: GPT-5.6 Sol.
+
+Final integrated `npm run check` exited 0 at approximately 17:45 UTC. Runtime: Node 24.21.0/npm 11.19.0 under `/tmp/node-v24.21.0-linux-x64`; Node archive matched the official SHA-256 manifest. Installed Playwright Chromium under `/tmp/b03-playwright`; missing Linux libraries were downloaded/unpacked under `/tmp/b03-browser-libs`, with no system package installation. Local socket tests and browser preview required sandbox escalation. Full output: `/tmp/b03-check.log`.
+
+- Seven immutable reference hashes and 15 arithmetic checks passed.
+- ESLint/import boundaries passed (40 references), TypeScript passed.
+- 156 tests in eight files passed, including 12 new real HTTP integration tests.
+- Build passed (114 modules, JavaScript 318.57 kB / 97.00 kB gzip); private fixture marker scan passed.
+- Two existing Chromium scaffold smoke tests passed at 390px/1280px. They do not claim connected A02/G01 browser behavior.
+- Terra separately started `npm run start --workspace @deal-table/api` on loopback port 8787, then stopped it. Startup uses Node's transform-types flag for the existing application's parameter properties.
+
+HTTP integration tests cover every documented error code/status, missing/unknown identities, malformed JSON/schema/body-room mismatch, oversized input and wrong media type, owner substitution, missing/cross-room/other-owner nonenumeration, display writes (including malformed bodies), organizer/service escalation, current authorization before replay, changed-body idempotency, local CORS/no-store headers, production startup rejection, and full solver negotiation through HTTP with disclosure refusal, three exact approvals and duration invalidation. A configuration regression verifies that mutating the caller's identity map or principal after startup cannot change the private server mapping or add an HTTP service identity.
+
+Initial review/checks found and corrected a missing default request cap, display validation ordering, Node startup flag, type errors and use of the asset-boundary checker’s restricted URL constructor. The HTTP parser uses URL.parse. Sol identified the mutable caller identity map; the implementation now reconstructs allowlisted principals into a private map. Only the runnable entry/listenLocalApi enforce loopback binding; the unbound server factory is a trusted composition API.
+
+Named seven-file implementation artifact (including new source/tests): `/tmp/b03-47b97eb-review.patch`, 33,169 bytes, SHA-256 `f7546bcbe467dbe3a6c19c897fcbf4a3e3ccf129973ad50c1df5e9e9b751dcc2`; per-file hashes: `/tmp/b03-review-files.json`. Mutable task/handoff/evidence records are excluded to avoid self-reference. No wire contract changes. The only root-owned change is the coordinated lock entry for three existing workspace dependencies.
+
+B03 remains REVIEW pending human acceptance/integration. Test identities are not authentication; in-memory operations do not establish DynamoDB safety. No cloud, Cognito, external participant trial, publishing, commit, push, merge, deployment or spending was performed. G01 requires A02's connected UI as well as B03.
+
+Final independent Sol review examined the exact named patch, verified all seven file hashes and reverse patch applicability, and reported no remaining actionable authorization/privacy findings. Sol confirmed the identity-map correction and regression; it reviewed the lead's full-check evidence without rerunning the suite independently. Agent review does not replace human acceptance.
