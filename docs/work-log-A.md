@@ -4,6 +4,19 @@ A writes this log; B writes [its own log](work-log-B.md), including frontend wor
 
 Entry format: UTC time | task/state | developer/model/effort | baseline/commit/diff | files | outcome/decision | checks (actual command, exit/results) | blockers/next action. For a transfer include released task, saved untracked files, receiving developer, and confirmation that the old writer stopped.
 
+## 2026-09-21T16:56:02Z — A03.5 / IN_PROGRESS
+
+- User-assigned independent A-lane reviewer: GPT-6 Astra / high; this session did not implement A02/A03. Review base `f36df74`, head `df1e8761774b76923e9d3b69927025cbdc41c753` (A02 `6499ec4`, A03 `df1e876`). Clean main matched fetched origin/main; no merge/push performed.
+- Allowed writes: `docs/reviews/A03.5.md`, this log, coordinated task/board/handoff records. Read frontend, browser tests, contracts, product/architecture semantics, build/import checks and implementation evidence. Fixes remain with the implementation owner A.
+- A02/A03 are reviewable; A03.5 claimed under the user's explicit assignment. Pinned Node 24.21.0/npm 11.19.0 available. Next: independent code/browser review and full checkpoint checks; no live/authentication acceptance implied.
+
+## 2026-09-21T16:58:49Z — A03.5 / REVIEW / CHANGES_REQUESTED
+
+- Independent reviewer: A lane / GPT-6 Astra / high, reviewing base `f36df74` through `df1e8761774b76923e9d3b69927025cbdc41c753`. No implementation edits or subagents. Added [review evidence](reviews/A03.5.md) and coordinated A task/board/handoff records; B's log and imported references untouched.
+- Five open findings assigned to owner A: R1 receipt-only final acceptance (P1); R2 ignored availability selection, R3 omitted exception policy, R4 invalid JSON result loses original retry, R5 missing explicit draft-confirmation/coverage preparation (P2). Review claim is finished; implementation follow-up remains unclaimed. A02/A03 stay REVIEW; A02.5/A04/A05 stay BLOCKED. B03/A06 remain independent.
+- Fresh pinned Node 24.21.0/npm 11.19.0 checks: bundled Chromium install exit 1 (unsupported mac12); documented Chrome 150.0.7871.125 fallback `PLAYWRIGHT_CHANNEL=chrome npm run check` exit 0 — references 7/7, planning 15/15, lint/imports 46 references, TypeScript, unit/integration 152/152, build/privacy scan, browser 20/20. Separate production-browser probe command exit 0 reproduced R1–R4 and confirmed exact network retry, separate withdrawal, and public isolation across six scenarios. Additional built-chunk assertions exit 0; source review confirmed R5. Probe exit 0 confirms reproduction, not acceptance.
+- Limits/next: mock behavior only; no server identity/live acceptance. Owner A addresses findings, followed by independent review of the changed artifact and current checkpoint checks. Human acceptance pending. Documentation links/status consistency/reference hashes and `git diff --check` verified at final handoff; no push, PR, merge or deployment.
+
 ## September 20, 2026 — scheduling revision
 
 - User authorized cheaper direct workers, main in separate clones, parallel preparation and B coverage when A lacks tokens.
