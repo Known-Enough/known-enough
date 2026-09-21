@@ -2,13 +2,13 @@
 
 Scheduling revision: September 20, 2026. Tickets are authoritative for detailed gates/status; update this summary when handing off. Model means the human-selected DIRECT worker, with no mandatory Astra coordinator. A/B prefixes identify subsystems; B can implement available A tasks using the [transfer procedure](agent-workflow.md#b-can-cover-a-when-capacity-changes).
 
-Current integration: foundation, A01, workflow refactor and B01 source/evidence are consolidated on main at the user’s direction. See [main integration](main-integration.md) for fresh check results and publication state. B02 is confirmed still in progress in B’s clone, not available for this merge; preserve its active claim.
+Current integration: foundation, A01, workflow refactor, B01 and B02 are on main at the user’s direction. See [main integration](main-integration.md) for combined verification/publication state and [B02.5](reviews/B02.5.md) for review evidence. No new implementation task is claimed by integration.
 
 ## Work available now
 
 - A: claim A02 (Terra medium) for HTTP client/forms preparation. A03 (Luna medium) and A06 (Luna medium) are also ready alternatives. Serialize overlapping frontend files.
-- B: continue B02 (Astra high, already active). Present a reviewable slice for B02.5 without restarting. When safely between implementation tasks, B can claim an available A task, especially if A lacks tokens.
-- No new implementation task is claimed by this planning update. B02's existing B claim is preserved. Separate clones use main for future work; the integrated legacy task branches are historical pointers; no new work belongs on them.
+- B: claim B03 (Terra medium) for the local HTTP boundary after the recorded B02.5 verdict. B may instead claim an available A task when A lacks tokens; synchronize claims first.
+- No new implementation task is claimed by this planning update. B02’s completed claim is released. Separate clones use main for future work; the integrated legacy task branches are historical pointers; no new work belongs on them.
 
 ## First parallel batch: local product
 
@@ -19,9 +19,9 @@ Current integration: foundation, A01, workflow refactor and B01 source/evidence 
 | [A03](tasks/A03.md) | Luna / medium | A01 implementation available | Receipts/accessibility with mocks; READY |
 | [A06](tasks/A06.md) | Luna / medium | A01 implementation available | Demo/trial/setup drafts; READY |
 | [B01](tasks/B01.md) | Sol / high | Foundation | DONE; source/evidence integrated, combined checks passed |
-| [B02](tasks/B02.md) | Astra / high | B01 on main | REPORTED_IN_PROGRESS; B retains claim |
-| [B02.5](tasks/B02.5.md) | Astra / high | Reviewable B02 slice | Consent/projection midpoint; evidence needed here |
-| [B03](tasks/B03.md) | Terra / medium | B02 usable implementation | Local server; B02.5 required for integration acceptance |
+| [B02](tasks/B02.md) | Astra / high | B01 on main | DONE; integrated and verified |
+| [B02.5](tasks/B02.5.md) | Astra / high | Reviewable B02 slice | DONE; PASS, evidence reconciled |
+| [B03](tasks/B03.md) | Terra / medium | B02 usable implementation | READY; local HTTP implementation next |
 | [A03.5](tasks/A03.5.md) | Astra / high | A02 + A03 preparation | Independent frontend boundary checkpoint |
 | [A02.5](tasks/A02.5.md) | Terra / medium | A02, A03.5, reviewed B02/B02.5, B03 | Actual local API integration |
 | [G01](tasks/G01.md) | Astra / high | A02.5, A03.5, B03, B02.5 current evidence | Local end-to-end acceptance checkpoint |

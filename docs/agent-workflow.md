@@ -16,11 +16,11 @@ Effective September 20, 2026, by user instruction. Replaces the earlier Astra-le
 | Difficult solver/backend work and debugging | Sol, high |
 | Architecture, critical consent/auth decisions and checkpoint reviews | Astra, high |
 
-Existing B02 keeps its active Astra assignment; do not restart or downgrade it. No permanent manager, automatic polling, or default subagents. If delegation helps independent work, the current worker may use available same-session agents with bounded file ownership and report their actual model; never start another account's agents. After two substantive failed attempts, log the failure and escalate narrowly. Avoid re-running successful checks without changed code or new evidence. Record usage only when actually exposed; never invent cost/token figures.
+B02’s original Astra execution is preserved in its history; it is now included on main and must not be restarted. No permanent manager, automatic polling, or default subagents. If delegation helps independent work, the current worker may use available same-session agents with bounded file ownership and report their actual model; never start another account's agents. After two substantive failed attempts, log the failure and escalate narrowly. Avoid re-running successful checks without changed code or new evidence. Record usage only when actually exposed; never invent cost/token figures.
 
 ## Main and parallel work
 
-Each developer uses a separate clone on main; task IDs identify work, not branches. A01/workflow and available B01 work are now consolidated; [main integration](main-integration.md) records verification/publication state and safe synchronization for B’s active B02 clone. Never share a writable checkout or synchronized working directory. Use small coherent local commits and keep shared main usable. Before an authorized push, fetch/inspect the shared head, incorporate incoming changes without discarding local work, resolve conflicts and run affected checks. Git history integration/push remains subject to the user's authorization; no force-push. A task request alone does not authorize publishing or merging. Preserve existing task branches; migrate their work only through separately authorized integration, not reset/overwrite.
+Each developer uses a separate clone on main; task IDs identify work, not branches. A01/workflow, B01 and B02 are now consolidated; [main integration](main-integration.md) records verification/publication state and safe synchronization for both clones. Never share a writable checkout or synchronized working directory. Use small coherent local commits and keep shared main usable. Before an authorized push, fetch/inspect the shared head, incorporate incoming changes without discarding local work, resolve conflicts and run affected checks. Git history integration/push remains subject to the user's authorization; no force-push. A task request alone does not authorize publishing or merging. Preserve existing task branches; migrate their work only through separately authorized integration, not reset/overwrite.
 
 A and B normally own disjoint subsystems. One implementation writer per task and file set. Shared contracts, root config, lockfile and CI require a named coordinated owner before editing. An approved contract baseline lets A prepare against synthetic responses while B builds enforcement. Missing backend implementation blocks live acceptance, not independent frontend preparation. Internal dependencies still apply; the two queues meet at explicit integration checkpoints.
 
@@ -28,7 +28,7 @@ A and B normally own disjoint subsystems. One implementation writer per task and
 
 The user reports that B has more tokens and explicitly authorizes B to take frontend tasks. Subsystem stewardship stays A/frontend and B/backend; the implementing developer may change. B need not ask again for ordinary eligible A work within this policy.
 
-- B first finishes or safely pauses its active task; B02 is already active and must not be duplicated.
+- B first finishes or safely pauses any active task. B02 is integrated; do not duplicate it.
 - A READY task with no current claim can be taken by B once both developers' latest shared claims establish it is available. A claim must be visible to the other developer through an authorized shared update or human handoff before concurrent work proceeds. Unsynchronized logs are not a lock; if availability is uncertain, obtain a human ownership clarification instead of guessing.
 - For active A work, A or the user explicitly releases it. Record PAUSED, exact baseline plus commit/diff artifact (including untracked files), changed files, tests actually run, remaining work, and destination developer. B records the takeover and becomes the sole writer; A does not resume without a reverse handoff.
 - If A has exhausted tokens, the user may release/assign the task and supply its saved work. Silence, an old log or token exhaustion alone does not prove local work is available. Never overwrite missing work or assume another clone can be read.
@@ -38,7 +38,7 @@ B should prioritize finishing backend work that unlocks integration, but may tak
 
 ## Checkpoints and acceptance
 
-- B02.5: review the current consent/projection/version design at the next reviewable B02 slice; recheck subsequent critical changes before B03 integration acceptance. Does not restart B02 or block unrelated frontend work.
+- B02.5: reconcile the supplied independent final B02 review with the integrated contract/browser checks. See its recorded verdict; recheck later critical changes before B03 integration acceptance. Do not restart B02 or block unrelated frontend work.
 - A03.5: after A02/A03 preparation, inspect client privacy/consent boundaries and evidence before downstream frontend/live integration work. Mock evidence establishes frontend behavior only.
 - B04.5: midway through B04, review its design and first implementation before extending the identity/transaction approach. B04.5 requires that slice, not completed B04; B04 resumes after findings are addressed.
 - G01: actual local negotiation across UI/API/domain. G02: actual identity/privacy/persistence before external testers. G03: final release evidence. These are direct Astra review tasks.

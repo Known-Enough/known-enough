@@ -1,6 +1,6 @@
 # Deal Table · TeamTable
 
-Main combines the A01 React/Vite mock UI, strict runtime contracts, B01’s deterministic solver and synthetic demo, and the current parallel task workflow. All people/data are fictional. **Mock identities are not authentication. The UI is not yet connected to the solver; B02 is still in progress in B’s clone. No cloud services are deployed.**
+Main combines the A01 React/Vite mock UI, strict runtime contracts, B01’s deterministic solver, B02’s local application/in-memory repository, and the current parallel task workflow. All people/data are fictional. **Mock identities are not authentication. The UI still uses mocks; the local HTTP boundary and connected browser flow are next. No cloud services are deployed.**
 
 ## Setup and launch
 
@@ -31,7 +31,7 @@ Exception permission, disclosure permission, and final acceptance remain separat
 npm run demo --workspace @deal-table/test-support
 ```
 
-This runs B01 independently of the browser: 12 structural candidates, zero feasible at baseline, two with the valid scoped exception; inconvenience selects B and balanced load selects A. Application commands and owner authorization remain B02 work.
+This runs B01 independently of the browser: 12 structural candidates, zero feasible at baseline, two with the valid scoped exception; inconvenience selects B and balanced load selects A. B02 implements local application commands and stored membership checks using trusted synthetic principals; verified credential authentication is later work.
 
 ## Checks
 
@@ -53,12 +53,13 @@ See the [dated bootstrap verification evidence](docs/verification.md). It record
 - `apps/web`: A's shared and lazy-loaded owner demo screens with separate adapters; public sample responses are in `src/mocks/public`. Browser owner examples are synthetic UI-only values, never imports from server fixtures.
 - `packages/contracts`: runtime DTO/command/error validators and canonical public hashing; B owns after bootstrap, A reviews breaking changes.
 - `packages/domain`: B01 structural enumeration, deterministic feasibility/ranking and domain tests.
-- `apps/api`, `apps/workers`, `packages/application`, `packages/adapters`, `infra`: reserved backend boundaries in this checkout; B02 work is still in B’s clone.
+- `packages/application`, `packages/adapters`: B02 command lifecycle, allowlisted snapshots, independent permissions and an isolated in-memory transaction repository.
+- `apps/api`, `apps/workers`, `infra`: reserved HTTP/worker/cloud boundaries; no deployed service.
 - `packages/test-support`: isolated synthetic domain fixtures and executable solver demo; server/test-only, never browser imports.
 - `tests/e2e`, `tests/integration`: A's browser smoke checks and B's reserved integration area.
 - `docs`: immutable source references, [contracts](docs/contracts.md), [decisions/risks](docs/decisions.md), [task files](docs/tasks), and [A](docs/handoff-A.md)/[B](docs/handoff-B.md) handoffs.
 
-**Use main in separate clones for all new work.** A01, the workflow refactor and B01 are consolidated here at the user’s direction. The old task branches are historical pointers, not active work queues. See [main integration](docs/main-integration.md) for source commits, verification and publication state. Preserve B’s active B02 changes when synchronizing; do not restart them.
+**Use main in separate clones for all new work.** A01, the workflow refactor, B01 and B02 are consolidated here at the user’s direction. The old task branches are historical pointers, not active work queues. See [main integration](docs/main-integration.md) for source commits, verification and publication state. Synchronize your separate clone before claiming the next task; do not continue work on the old task branches.
 
 The [current task board](docs/task-board.md) and [workflow](docs/agent-workflow.md) govern execution and supersede dated branch/model/ownership/sequencing instructions in imported references. Product/security semantics remain unchanged. A02/A03/A06 preparation can proceed while B works; separate integration tickets retain real API/auth checks. B can take available A work through a recorded handoff when A lacks tokens.
 
@@ -66,4 +67,4 @@ The [current task board](docs/task-board.md) and [workflow](docs/agent-workflow.
 
 Choose a READY task from the board, select its named model and reasoning effort as the **direct worker**, and ask: “Read AGENTS.md and execute docs/tasks/A02.md within its scope.” Use your own clone and log the claim. Terra handles most implementation; Luna handles narrow UI/docs; Sol handles difficult backend work; Astra handles architecture and explicit checkpoints. No routine Astra manager or subagents are required. Files do not switch the selected session model.
 
-See [A handoff](docs/handoff-A.md), [B handoff](docs/handoff-B.md), [A log](docs/work-log-A.md), [B log](docs/work-log-B.md) and [review records](docs/reviews/README.md). B02 keeps its active assignment. Sharing logs/code requires authorized synchronization; no cross-account access or live messaging is configured. Agent checks do not replace human acceptance or authorize pushing, integration, deployment or spending.
+See [A handoff](docs/handoff-A.md), [B handoff](docs/handoff-B.md), [A log](docs/work-log-A.md), [B log](docs/work-log-B.md) and [review records](docs/reviews/README.md). B02 is integrated; B03 is ready for the next backend claim. Sharing logs/code requires authorized synchronization; no cross-account access or live messaging is configured. Agent checks do not replace human acceptance or authorize pushing, integration, deployment or spending.

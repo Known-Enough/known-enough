@@ -82,5 +82,17 @@
   ],
   "exceptionGrants": [],
   "disclosureGrants": [],
-  "ownApproval": null
+  "ownApproval": null,
+  "availabilityReview": {
+    "contextToken": "ctx_Q7c2M9k1",
+    "inputRevision": 1,
+    "intervals": [
+      {
+        "date": "2026-10-08",
+        "timezone": "America/Mexico_City",
+        "startMinute": 660,
+        "endMinute": 690
+      }
+    ]
+  }
 }

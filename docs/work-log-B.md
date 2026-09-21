@@ -17,3 +17,9 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Included A01/workflow 45aaf11 and B01 04c87d7. Both source sets preserved unchanged; conflicts were documentation-only. Combined check passed 120 unit tests and 17 browser tests plus references/arithmetic/lint/typecheck/build; solver demo passed. See [main integration](main-integration.md).
 - A01/B01 are DONE under the user’s integration direction. B02 remains active in B’s clone, confirmed by the user; preserve its claim and saved work before synchronizing. Do not duplicate it.
 - Future task work uses main in separate clones. Source task branches are historical pointers. Local integration is distinct from publication; this session has not pushed.
+
+## 2026-09-21T15:21:01Z — shared integration update recorded by A
+
+- User confirmed B published B02 and authorized final main integration. Source 47b97eb and original independent-review evidence are now included. This supersedes the earlier report that B02 was only in B’s clone.
+- Fresh combined check passed 149 unit/integration tests and 17 browser tests plus required checks. A01’s owner-mock compatibility was corrected; B02 source remains unchanged. [Main integration](main-integration.md) and [B02.5 PASS](reviews/B02.5.md).
+- B02 claim is complete/released. Next eligible B task: B03, Terra/medium; alternatively use the documented claim procedure for available A work. Synchronize main and preserve any newer unshared changes first. No new task is claimed automatically.

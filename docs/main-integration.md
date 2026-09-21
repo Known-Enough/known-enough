@@ -1,43 +1,56 @@
-# Main integration — September 20, 2026 local
+# Shared main — integrated baseline
 
-The user explicitly requested that existing A work and available B tasks be integrated onto main. This document is the current integration record; older task-branch references describe historical executions.
+Main is the single active development branch, in separate clones. The user authorized the final merge and update of shared origin/main. Old task branches are preserved only as historical pointers; do not start new work on them.
 
 ## Included work
 
-- Foundation: `ca9fb636974030bfd8a620cec2b3d8581b3c8114`.
-- A01 UI: `39c1885df7f00282884c26aad34782ee45f9913a`.
-- Workflow/task refactor: `45aaf11` (former task/a01 tip).
-- B01 solver, synthetic fixtures/demo and tests: `04c87d7` from origin/task/b01. Its recorded independent Astra review and historical test evidence are preserved in verification.md and task-execution.md.
-- B02 is still in progress in B's clone, confirmed by the user during integration. No B02 implementation is available remotely; it is not merged, restarted or claimed complete.
+| Source | Included result |
+| --- | --- |
+| ca9fb63 | Accepted foundation |
+| 39c1885 | A01 mock UI and browser tests |
+| 45aaf11 | Direct-model workflow, parallel tasks, logs and checkpoints |
+| 04c87d7 | B01 solver and synthetic fixtures/demo |
+| 5abdc49 | First consolidation of A01/workflow and B01 |
+| 47b97eb | B02 commands, in-memory repository, projections, consent and integration tests |
 
-## Conflict resolution and review
+All available published task work is included. B02 is now supplied and integrated, superseding earlier logs that correctly described it as still in B's clone. No A02/B03 implementation is implied; the browser still uses mocks.
 
-Conflicts were limited to README and documentation. Keep the new direct-model/main/transfer workflow, append B01's original execution and verification evidence, and update current status separately from historical claims. B's source/tests and A's source/tests are retained unchanged. A reviews B01's coordinated lockfile/TypeScript changes: only existing workspace dependencies and noEmit import-extension support; no external dependency or wire-contract changes.
+## Integration changes and review
 
-## Working on main
+Conflicts were documentation-only. Retain the current main/direct-model/transfer policy and both developers' dated evidence. Backend source, contracts and coordinated root files are unchanged from B's B02 commit. Its root changes register integration tests and existing workspace dependencies, without new external packages.
 
-Use main in separate clones for future tasks. Old task branches are historical pointers; do not continue new tasks there. They need not be deleted to make main authoritative. No branch deletion or force-push is part of this integration.
+B02 adds required CONFIRM_INPUTS.reviewedIntervals and owner-only availabilityReview; public DTOs are unchanged. A01's synthetic owner adapter was updated to supply a receipt bound to its confirmed context/revision, with focused scenario tests. A02 must collect explicit owner-reviewed intervals, never infer them from schedule options. [B02.5](reviews/B02.5.md) records imported independent Astra review plus the integration compatibility review.
 
-B must preserve its active B02 changes before synchronizing: save a commit or transferable diff including untracked files, then incorporate the new shared main when available and continue B02 once. Never reset an active clone. Existing B02 work should not be duplicated or abandoned merely to change branch names. Claim transfers and direct-model selection follow agent-workflow.md.
+## Verification
 
-## Verification and publication
-
-Verification finished at 2026-09-21T03:31:02Z, Node 24.21.0/npm 11.19.0 on macOS 12. `npm ci` passed. `npx playwright install chromium` could not install because this OS is unsupported; the already documented fallback used installed Google Chrome 150.0.7871.125.
-
-`PLAYWRIGHT_CHANNEL=chrome npm run check` exited 0:
+Final integration evidence recorded 2026-09-21T15:21:01Z. Pinned Node 24.21.0/npm 11.19.0; clean npm ci succeeded. `PLAYWRIGHT_CHANNEL=chrome npm run check` exited 0 using installed Google Chrome 150.0.7871.125 (the documented macOS 12 fallback):
 
 | Check | Result |
 | --- | --- |
-| Imported references | 7/7 unchanged |
+| Immutable references | 7/7 matched |
 | Planning arithmetic | 15/15 passed |
-| Lint/import boundaries | Passed, 35 references |
+| Lint/import boundaries | Passed, 44 references |
 | TypeScript | Passed |
-| Unit tests | 120/120 in 6 files |
-| Build/private-marker scan | Passed, 123 modules |
-| Browser tests | 17/17 passed using installed Chrome |
+| Unit/integration tests | 149/149 in 8 files |
+| Production build/bundle scan | Passed, 123 modules |
+| Browser tests | 17/17 passed |
 
-`npm run demo --workspace @deal-table/test-support` also exited 0: 12 structural candidates, zero baseline feasible, two with the valid scoped exception; inconvenience B, balanced load A. Git comparisons confirm A’s app/browser files equal task/a01 and B’s domain/test-support/root integration files equal origin/task/b01. No contract/source rewrite was needed.
+Astra coordinated integration and reviewed the compatibility diff. Terra/medium made the bounded owner-mock fix, passing 3 focused tests and a web build before the full check. Imported B02 independent-review evidence is retained; its critical backend code is unchanged. B02 and B02.5 are complete for this local application scope under the user’s integration direction. B03 is READY; real HTTP/auth/cloud gates remain open.
 
-A01 and B01 are DONE under the user’s explicit integration direction and fresh combined checks. This does not close B02 or G01: the browser still uses mocks and no live API, authentication, persistence or cloud behavior is established.
+The earlier 5abdc49 consolidation’s 120-test result is historical and superseded for the combined baseline by this run.
 
-The merge commit containing this record consolidates both histories on local main. No push has been performed by this integration session; origin/main remains unchanged until separately authorized publication. Old branches remain historical pointers. The later command/output reported to the user is authoritative for any subsequent push.
+## Continue on main
+
+For a clean clone already on main:
+
+```sh
+git fetch origin
+git switch main
+git pull --ff-only origin main
+```
+
+If there are uncommitted or unshared changes, save them first in a commit or transferable diff including untracked files. Inspect the history before synchronizing; do not reset or force-push. A clone still on task/b02 should preserve any newer local work, then switch to main and fast-forward it from origin/main. The published task/b02 source is already included; do not merge or reimplement it a second time.
+
+A can claim A02 (Terra/medium); B can claim B03 (Terra/medium) once the recorded review/check verdict is PASS. A03/A06 remain ready alternatives. B may cover unclaimed A work using the logged transfer procedure. No new task is claimed automatically by integration.
+
+Shared destination: origin/main. The integration session must verify the remote tip after its authorized push before reporting completion. This record covers included source and checks; deployment, external access and future pushes retain their own authorization requirements.

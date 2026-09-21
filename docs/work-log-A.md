@@ -27,3 +27,10 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Included A01/workflow 45aaf11 and B01 04c87d7. Both source sets preserved unchanged; conflicts were documentation-only. Combined check passed 120 unit tests and 17 browser tests plus references/arithmetic/lint/typecheck/build; solver demo passed. See [main integration](main-integration.md).
 - A01/B01 are DONE under the user’s integration direction. B02 remains active in B’s clone, confirmed by the user; preserve its claim and saved work before synchronizing. Do not duplicate it.
 - Future task work uses main in separate clones. Source task branches are historical pointers. Local integration is distinct from publication; this session has not pushed.
+
+## 2026-09-21T15:21:01Z — final main integration
+
+- User authorized merging B’s published work and updating shared main. Base: 5abdc49; incoming B02: 47b97eb. Preserve all earlier evidence as historical.
+- Astra resolved documentation and reviewed compatibility; Terra/medium changed only the owner mock and its focused tests to satisfy the required availabilityReview field. Backend/contracts/root files match B’s published source.
+- Clean install and full check passed: 149 unit/integration tests, 17 browser tests, references/arithmetic/lint/typecheck/build. [Integration record](main-integration.md), [B02.5 PASS](reviews/B02.5.md).
+- B02 is complete for local application scope; B03 and A02 are ready unclaimed parallel work. B’s previous in-progress report is superseded by its supplied commit. Both developers continue from main after safe synchronization; publication uses the user-authorized origin/main update.
