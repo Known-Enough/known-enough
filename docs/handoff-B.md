@@ -1,8 +1,8 @@
-# Developer B handoff — continue B02; frontend coverage available
+# Developer B handoff — B03 integrated; live integration next
 
 Current integration: A01/workflow, B01 (04c87d7) and B02 (47b97eb) are consolidated on main at the user’s direction. See [integration results](main-integration.md) and [B02.5 review evidence](reviews/B02.5.md). B02 is no longer an active implementation claim; preserve any newer unshared changes before synchronizing.
 
-Next B work is B03 with Terra/medium: local HTTP composition and explicitly non-production test identities. B02 provides command execution and owner/public snapshots, not HTTP endpoints or real credential verification. A can independently do A02 with Terra/medium. B can take an unclaimed A task through the existing handoff process.
+B03 `27a110c` is now integrated on main by explicit user request. It provides local HTTP composition and fixed non-production test identities; see [API instructions](../apps/api/README.md). B03 remains REVIEW for live acceptance. A02.5/G01 depend on resolving the existing A03.5 frontend findings; this integration does not close them. Real authentication/persistence remain B04 work. No new task is claimed.
 
 ## More capacity can cover frontend work
 

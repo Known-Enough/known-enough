@@ -13,7 +13,7 @@ Main is the single active development branch, in separate clones. The user autho
 | 5abdc49 | First consolidation of A01/workflow and B01 |
 | 47b97eb | B02 commands, in-memory repository, projections, consent and integration tests |
 
-All available published task work is included. B02 is now supplied and integrated, superseding earlier logs that correctly described it as still in B's clone. No A02/B03 implementation is implied; the browser still uses mocks.
+The initial consolidation included B02, superseding earlier reports that it was only in B’s clone. Subsequent A02/A03 frontend preparation and B03 local HTTP integration are recorded below; live UI/API acceptance remains separate.
 
 ## Integration changes and review
 
@@ -54,3 +54,11 @@ If there are uncommitted or unshared changes, save them first in a commit or tra
 A can claim A02 (Terra/medium); B can claim B03 (Terra/medium) once the recorded review/check verdict is PASS. A03/A06 remain ready alternatives. B may cover unclaimed A work using the logged transfer procedure. No new task is claimed automatically by integration.
 
 Shared destination: origin/main. The integration session must verify the remote tip after its authorized push before reporting completion. This record covers included source and checks; deployment, external access and future pushes retain their own authorization requirements.
+
+## B03 integration — 2026-09-21T17:58:42Z
+
+User explicitly requested all completed work on main and a main-branch check before future pushes. Integrated `task/b03` source `27a110c` into main baseline `7eb2b86`, preserving A02/A03 and A03.5 findings. B01/B02 were already ancestors of main. Conflicts were documentation-only; the reviewed B03 API and HTTP tests are unchanged. AGENTS.md now requires verifying main is checked out and using an explicit `origin main` destination before authorized pushes.
+
+Fresh combined `npm run check` exited 0 with pinned Node 24.21.0/npm 11.19.0: seven reference hashes, 15 arithmetic checks, lint/boundaries (54 references), typecheck, 164 unit/integration tests in ten files, build (124 modules)/bundle scan, and 20 Chromium browser tests. Chromium and required libraries used the documented B03 `/tmp` setup. Log: `/tmp/b03-main-check.log`.
+
+B03 remains REVIEW for live acceptance. A03.5 findings and A02.5/G01 remain open; intercepted/mock browser tests do not establish a connected local negotiation. No new task, real authentication or cloud work is claimed. Source branches are preserved as historical pointers. Publication is authorized for this integration; verify origin/main equals the resulting local main commit after pushing.

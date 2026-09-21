@@ -23,3 +23,10 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - User confirmed B published B02 and authorized final main integration. Source 47b97eb and original independent-review evidence are now included. This supersedes the earlier report that B02 was only in B’s clone.
 - Fresh combined check passed 149 unit/integration tests and 17 browser tests plus required checks. A01’s owner-mock compatibility was corrected; B02 source remains unchanged. [Main integration](main-integration.md) and [B02.5 PASS](reviews/B02.5.md).
 - B02 claim is complete/released. Next eligible B task: B03, Terra/medium; alternatively use the documented claim procedure for available A work. Synchronize main and preserve any newer unshared changes first. No new task is claimed automatically.
+
+## 2026-09-21T17:58:42Z — B03 main integration
+
+- User authorized all completed work on main and requested checking main before every future push. Astra integrated B03 source `27a110c` into main `7eb2b86`; B01/B02 already included. No new implementation claim or frontend takeover.
+- Preserved current direct-worker/main workflow and both sets of historical evidence while resolving documentation-only conflicts. Reviewed backend source/tests unchanged. Added persistent pre-push main verification to AGENTS.md.
+- Combined `npm run check` exited 0: 164 unit/integration tests, 20 Chromium tests, seven references, 15 arithmetic checks, lint/typecheck/build/bundle scan. See [main integration](main-integration.md).
+- B03 REVIEW for live acceptance; A03.5 fixes and A02.5/G01 remain separate. Push explicitly to origin/main under this user authorization, then verify the remote tip. No force push or branch deletion.
