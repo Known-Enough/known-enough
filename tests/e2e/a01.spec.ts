@@ -41,33 +41,52 @@ test('public proposal shows dated assignments and separate approval count', asyn
   await expect(page.getByRole('region', { name: 'Current proposal' })).toHaveCount(0);
 });
 
-test('local drafts retain values and consent feedback stays independent', async ({ page }) => {
+test('owner forms send independent structured commands through intercepted HTTP', async ({ page }) => {
+  const commands: unknown[] = [];
+  await page.route('**/rooms/room-synthetic/commands', async route => {
+    const body = route.request().postDataJSON();
+    commands.push(body);
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, requestId: body.requestId, status: 'APPLIED', version: body.expected }) });
+  });
   await page.goto('/?view=owner');
   const inputs = page.getByRole('region', { name: 'Your inputs' });
   await inputs.getByRole('radio', { name: /2026-10-08.*is available\./ }).check();
   await inputs.getByRole('combobox', { name: 'Follow-up duty cost' }).selectOption('3');
-  await inputs.getByRole('button', { name: 'Save local input draft' }).click();
-  await expect(inputs.getByRole('status')).toContainText('available');
-  await expect(inputs.getByRole('status')).toContainText('cost 3');
+  await inputs.getByRole('button', { name: 'Submit input draft' }).click();
+  await expect(page.getByRole('status')).toContainText('Command accepted by the transport');
   await page.getByRole('button', { name: 'Allow scoped exception' }).click();
+  await expect(page.getByRole('status')).toContainText('Command accepted by the transport');
   await page.getByRole('button', { name: 'Use exception without announcement' }).click();
-  await expect(page.getByRole('region', { name: 'Exception', exact: true }).getByRole('status')).toContainText('exception marked allowed');
-  await expect(page.getByRole('region', { name: 'Disclosure', exact: true }).getByRole('status')).toContainText('without this announcement');
+  await expect(page.getByRole('status')).toContainText('Command accepted by the transport');
+  expect(commands).toHaveLength(3);
+  expect(commands.map(value => (value as { type: string }).type)).toEqual(['SUBMIT_INPUT_DRAFT', 'DECIDE_EXCEPTION', 'DECIDE_DISCLOSURE']);
+  expect(JSON.stringify(commands)).not.toContain('ownerMemberId');
+  expect((commands[0] as { payload: { values: { dutyCosts: { cost: number }[] } } }).payload.values.dutyCosts[0]?.cost).toBe(3);
   await expect(page.getByRole('button', { name: 'Await an exact shared proposal' })).toBeDisabled();
-  await page.getByRole('link', { name: 'Return to shared table' }).click();
-  await expect(page.getByRole('heading', { name: 'Around the table' })).toBeVisible();
-  await expect(page.locator('body')).not.toContainText('exception marked allowed');
-  await expect(page.locator('body')).not.toContainText('cost 3');
+});
+
+test('a stale command refreshes but never replays against a latest version', async ({ page }) => {
+  let calls = 0;
+  await page.route('**/rooms/room-synthetic/commands', async route => {
+    calls += 1;
+    const body = route.request().postDataJSON();
+    await route.fulfill({ contentType: 'application/json', status: 409, body: JSON.stringify({ ok: false, requestId: body.requestId, error: { code: 'STALE_CONTEXT', httpStatus: 409 } }) });
+  });
+  await page.goto('/?view=owner');
+  await page.getByRole('button', { name: 'Allow scoped exception' }).click();
+  await expect(page.getByRole('status')).toContainText(/stale.*refreshed/i);
+  await expect(page.getByRole('heading', { name: 'Your inputs' })).toBeVisible();
+  expect(calls).toBe(1);
 });
 
 test('stale owner data disables local editing and permissions until refreshed', async ({ page }) => {
   await page.goto('/?view=owner&owner=stale');
   await expect(page.getByRole('button', { name: 'Allow scoped exception' })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Allow this wording' })).toBeDisabled();
-  await expect(page.getByRole('button', { name: 'Save local input draft' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Submit input draft' })).toBeDisabled();
   await page.getByRole('button', { name: 'Refresh private example' }).click();
   await expect(page.getByRole('button', { name: 'Allow scoped exception' })).toBeEnabled();
-  await expect(page.getByRole('button', { name: 'Save local input draft' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Submit input draft' })).toBeEnabled();
 });
 
 for (const view of ['public', 'owner']) {

@@ -21,6 +21,13 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Review corrections: distinguish future model assignments from actual historical use; retain B01/B02 report qualification; preserve exact solver expectations and exception/approval invalidation; require B06 operational evidence before live trials/release.
 - Next: human review and authorized sharing of this workflow to B. A may start A02 with Terra/medium against its available A01 implementation; B continues B02 and prepares B02.5 evidence, or safely hands off before claiming available frontend work. No push/merge or task implementation occurred in this refactor.
 
+## 2026-09-21T15:51:20Z — A02 / REVIEW
+
+- Actual worker: A / Codex/GPT-5 (the scheduled Terra/medium worker was unavailable; this entry does not represent a Terra run). Baseline: `f36df74`; reviewed local artifact committed on `main`.
+- Changed `apps/web/src/command-client.ts`, `apps/web/src/command-client.test.ts`, `apps/web/src/owner-screen.tsx`, `tests/e2e/a01.spec.ts`, and coordinated A02 tracking/handoff records. The client validates v1 envelopes/results around injected transport; owner input, exception, disclosure, and recorded-approval withdrawal stay independent. Unknown transport outcomes retain the exact envelope/idempotency key for explicit retry. Stale results refresh but do not replay; the user must reconfirm current terms.
+- Checks using pinned Node 24.21.0/npm 11.19.0: `npm test -- --run apps/web/src/command-client.test.ts` exit 0 (3/3); `npm run lint` exit 0 (46 boundary references); `npm run typecheck` exit 0; `npm run build` exit 0 (124 modules, bundle privacy scan passed); `PLAYWRIGHT_CHANNEL=chrome npx playwright test tests/e2e/a01.spec.ts --grep 'owner forms|stale command'` exit 0 (2/2); `PLAYWRIGHT_CHANNEL=chrome npm run check` exit 0 — references 7/7, planning 15/15, lint/boundaries, typecheck, unit/integration 152/152, build/privacy scan, browser 18/18.
+- Limitation/next action: command decision revision is an explicitly injected synthetic public context because the private owner DTO intentionally omits it; A02.5 must wire it to an authorized current public snapshot with B03. Leave this task in REVIEW for human review/integration. No push, merge, deployment, authentication, or live API assertion.
+
 ## 2026-09-21T03:31:02Z — main integration update
 
 - Recorded by Astra in A’s integration session; user explicitly requested all available task work on main. This entry updates shared integration facts, not another clone’s private progress.
