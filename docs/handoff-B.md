@@ -1,13 +1,11 @@
-# Developer B handoff — B02 review, B03 next
+# Developer B handoff — B03 review, G01 with A02 next
 
-B02 is functional locally on `task/b02`, based on committed B01 `04c87d761d13f29643e287392e520ca38af940d0`, and remains **REVIEW**. No B02 commit/push/merge was performed.
+B03 is implemented on `task/b03` from committed B02 `47b97eb` and remains **REVIEW**. The user authorized this local task on September 21, 2026. No B03 commit, push or merge was performed.
 
-Application commands now drive draft/coverage confirmation, context acceptance, the deterministic solver, a bounded private exception round, independent disclosure consent and exact unanimous agreement. An in-memory repository serializes transitions, replay records, finalization and revocation. Owner/public projections enforce membership and audience boundaries. Clock-controlled tests cover expiry, stale work, closed rooms, withdrawal and semantic invalidation. See [application API](../packages/application/README.md).
+The local Node HTTP server exposes authorized public/owner snapshots and strict commands with fixed, explicitly non-production test identities. It runs queued solver jobs internally; clients refetch snapshots after commands. Start with `npm run dev --workspace @deal-table/api`; see [API conventions](../apps/api/README.md) for routes, headers and limitations.
 
-Assigned `gpt-6-astra` implemented the core and focused tests, then reached its usage limit. The coordinating lead finished documentation/type corrections, integrated independent tests and ran checks. A separate `gpt-6-astra` reviewer verified both fixes and reported no remaining actionable findings, with 79 independent focused tests passing; see [verification](verification.md#b02-verification--september-20-2026) for final review evidence and the named 19-file patch.
+Astra led/integrated and wrote HTTP integration tests; Terra implemented `apps/api`; Sol independently reviewed authorization. The review's mutable identity-map finding was corrected with a regression. No wire contract changes; API dependencies and matching lock entries reference only existing workspaces.
 
-`npm run check` passed: 144 tests, two Chromium smoke tests, seven immutable hashes, 15 arithmetic checks, lint/boundaries, typecheck and build.
+`npm run check` passed: 156 tests, two Chromium scaffold tests, seven reference hashes, 15 arithmetic checks, lint/boundaries, typecheck and build. Named diff and review evidence: [B03 verification](verification.md#b03-verification--september-21-2026).
 
-Contract additions: required CONFIRM_INPUTS.reviewedIntervals and owner availabilityReview receipt. Public DTOs remain unchanged; human A compatibility review is required. Coordinated root changes register integration tests and existing workspace lock entries.
-
-After review, B03 adds local HTTP/test-identity composition; A02 connects UI after A01. No real authentication, durable persistence or cloud tests are claimed. New roster names do not create authenticated memberships. The browser still uses its public mock.
+G01 requires human review and A02's connected UI. Existing browser tests cover only the scaffold. No real credential verification, durable persistence or cloud tests are claimed; those remain B04 work after G01. B02's owner/confirmation contract additions still require human A compatibility review.
