@@ -6,7 +6,7 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 
 ## Work available now
 
-- A: A02 is REVIEW with injected HTTP/forms preparation; A03 (Luna medium) and A06 (Luna medium) are ready alternatives. Serialize overlapping frontend files.
+- A: A02 is REVIEW with injected HTTP/forms preparation; A03 (Codex GPT-5, actual worker; scheduled Luna unavailable) is REVIEW and A06 remains ready. Serialize overlapping frontend files.
 - B: claim B03 (Terra medium) for the local HTTP boundary after the recorded B02.5 verdict. B may instead claim an available A task when A lacks tokens; synchronize claims first.
 - No new implementation task is claimed by this planning update. B02’s completed claim is released. Separate clones use main for future work; the integrated legacy task branches are historical pointers; no new work belongs on them.
 
@@ -16,7 +16,7 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 | --- | --- | --- | --- |
 | [A01](tasks/A01.md) | Terra / medium | Foundation | DONE; integrated UI, combined checks passed |
 | [A02](tasks/A02.md) | Terra / medium | A01 implementation available | Client/forms against contracts; REVIEW (actual worker recorded in ticket/log) |
-| [A03](tasks/A03.md) | Luna / medium | A01 implementation available | Receipts/accessibility with mocks; READY |
+| [A03](tasks/A03.md) | Luna / medium | A01 implementation available | Receipts/accessibility with mocks; REVIEW (actual worker: Codex GPT-5) |
 | [A06](tasks/A06.md) | Luna / medium | A01 implementation available | Demo/trial/setup drafts; READY |
 | [B01](tasks/B01.md) | Sol / high | Foundation | DONE; source/evidence integrated, combined checks passed |
 | [B02](tasks/B02.md) | Astra / high | B01 on main | DONE; integrated and verified |

@@ -41,3 +41,10 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Astra resolved documentation and reviewed compatibility; Terra/medium changed only the owner mock and its focused tests to satisfy the required availabilityReview field. Backend/contracts/root files match B’s published source.
 - Clean install and full check passed: 149 unit/integration tests, 17 browser tests, references/arithmetic/lint/typecheck/build. [Integration record](main-integration.md), [B02.5 PASS](reviews/B02.5.md).
 - B02 is complete for local application scope; B03 and A02 are ready unclaimed parallel work. B’s previous in-progress report is superseded by its supplied commit. Both developers continue from main after safe synchronization; publication uses the user-authorized origin/main update.
+
+## 2026-09-21T16:35:48Z — A03 / REVIEW
+
+- Actual worker: A / Codex GPT-5; scheduled gpt-5.6-luna was unavailable. Baseline: `6499ec4` on `main`. Claimed A03 as sole frontend writer after confirming the task was unclaimed.
+- Changed `apps/web/src/owner-screen.tsx`, `apps/web/src/owner-mock-adapter.ts`, `apps/web/src/style.css`, `tests/e2e/a03.spec.ts`, and coordinated A03 tracking records. The private owner screen now renders exception, disclosure, and final-approval receipts from allowlisted owner fields; the approval mock supplies active synthetic permission records; mobile receipt cards stack and action buttons wrap; reduced-motion users receive near-zero transitions and automatic scrolling.
+- Checks under Node `24.21.0` (npm `8.19.2` was the available npm binary; repository requires Node `24.21.0`): `npm run check` exit 0 — references 7/7, planning 15/15, lint/boundaries, typecheck, 152 unit/integration tests, build/bundle privacy scan, and 20/20 browser tests. Focused browser tests `PLAYWRIGHT_CHANNEL=chrome npx playwright test tests/e2e/a03.spec.ts` exit 0 (2/2). `git diff --check` exit 0.
+- Limitation/next action: this remains synthetic UI/mock evidence only; no server authentication or live API claim. A03 is left REVIEW for human review/integration; next checkpoint is A03.5.

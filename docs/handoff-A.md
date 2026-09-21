@@ -8,6 +8,10 @@ A01 is included in the user-authorized main integration; see [current results](m
 
 Historical file scope: apps/web/src, tests/e2e, supporting documentation and explicit installed-Chrome fallback in playwright.config.ts. Contracts, dependencies and lockfile were unchanged. The later user-authorized main integration supersedes its old pending-branch state; historical checks remain dated evidence. Its existing implementation now enables independent frontend preparation.
 
+## Current A03 handoff
+
+A03 is in REVIEW on the current `main` checkout. Its private owner mock now displays exception, disclosure, and final-approval receipts while the shared view remains receipt-free. Responsive receipt cards stack at mobile widths, action buttons wrap, and reduced-motion preferences disable meaningful transitions/scroll animation. Evidence is recorded in [A03](tasks/A03.md) and [work log A](work-log-A.md); full `npm run check` passed with 20 browser tests. This is mock/UI evidence only and does not establish server authentication or live API behavior. A03.5 is the next checkpoint.
+
 ## Next work and transfer
 
 A02's local preparation supplies strict command construction, injected browser transport, exact idempotent unknown-outcome retry, stale refresh/reconfirmation, and intercepted HTTP browser coverage. It uses only synthetic owner data and does not prove a live API or authentication. A03 adds receipt/accessibility preparation. A06 prepares demo/trial/setup drafts. These no longer wait for B02/G01. A03.5 reviews frontend boundaries; A02.5 retains real API verification with B03, followed by G01. A04/A05 preparation can then proceed independently of the later backend implementation; their .5 tickets retain live verification.

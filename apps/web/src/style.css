@@ -57,6 +57,14 @@ blockquote { margin: 12px 0; padding: 12px 15px; border-left: 3px solid #2b8065;
 .secondary:hover { background: #eaf3ed; }
 .accepted, .local-note { color: #075440; background: #e5f2e9; border-radius: 8px; padding: 10px; overflow-wrap: anywhere; }
 .local-note { margin: 14px 0 0; }
+.receipts { grid-column: 1 / -1; }
+.receipt-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.receipt { border: 1px solid #d4dfd7; border-radius: 12px; padding: 14px; min-width: 0; }
+.receipt-title { font-weight: 800; margin: 0 0 10px; }
+.receipt-status { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; font-size: .875rem; }
+.receipt-status .status-pill { color: #075440; background: #ddefe5; }
+.receipt-empty { color: #53665c; font-size: .875rem; margin-bottom: 0; }
 footer { margin-top: 36px; border-top: 1px solid #d4dfd7; padding-top: 20px; }
-@media (max-width: 650px) { main { padding: 24px 16px; } .masthead, .stale-banner { align-items: flex-start; flex-direction: column; } .header-actions { justify-content: flex-start; } .table, .proposal-card, .consent-boundary, .owner-card { padding: 18px; } .slots, .owner-grid { grid-template-columns: 1fr; } .slots li { text-align: left; } small { display: inline; margin-left: 12px; } .duties li, .proposal-card li, .ledger li { align-items: flex-start; flex-direction: column; } .ledger span { text-align: left; } }
+@media (max-width: 650px) { main { padding: 24px 16px; } .masthead, .stale-banner { align-items: flex-start; flex-direction: column; } .header-actions { justify-content: flex-start; } .table, .proposal-card, .consent-boundary, .owner-card { padding: 18px; } .slots, .owner-grid, .receipt-grid { grid-template-columns: 1fr; } .slots li { text-align: left; } small { display: inline; margin-left: 12px; } .duties li, .proposal-card li, .ledger li { align-items: flex-start; flex-direction: column; } .ledger span { text-align: left; } .button-row button { flex: 1 1 100%; } }
 @media (prefers-reduced-motion: no-preference) { .table, .proposal-card, .owner-card { transition: box-shadow 250ms ease; } .table:hover, .proposal-card:hover, .owner-card:hover { box-shadow: 0 8px 22px rgb(24 55 46 / 8%); } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; } }

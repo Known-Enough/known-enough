@@ -34,8 +34,17 @@ function buildOwnerSnapshot(scenario: Exclude<OwnerMockScenario, 'empty' | 'fail
     draft: scenario === 'draft' ? { draftId: 'draft-nina-2', draftRevision: 2, values: draftValues } : null,
     pendingOffers: [{ id: 'offer-nina-1', version: 1, scope: { conditionId: condition.id, roomId: 'room-synthetic', contextToken: 'ctx_Q7c2M9k1', decisionRevision: 1, inputRevision: 1, rosterMemberIds: ['maya', 'leo', 'nina'], policy: 'BALANCE_RECENT_LOAD', meeting, predicate: 'OWNER_HAS_NO_WEEKEND_DUTIES', expiresAt } }],
     disclosurePreviews: [{ id: 'disclosure-nina-1', text: 'A conditional availability exception makes the proposed plan possible.', textHash: '3914698185f1d172061ca50290f9fdee09f4d88995863f449fdc4b65056d7771', audienceMemberIds: ['maya', 'leo', 'nina'], roomId: 'room-synthetic', contextToken: 'ctx_Q7c2M9k1', decisionRevision: 1, expiresAt, inferenceWarning }],
-    exceptionGrants: [],
-    disclosureGrants: [],
+    exceptionGrants: scenario === 'approval' ? [{ id: 'grant-exception-nina-1', version: 1, scope: {
+      conditionId: condition.id, roomId: 'room-synthetic', contextToken: 'ctx_Q7c2M9k1', decisionRevision: 1,
+      inputRevision: 1, rosterMemberIds: ['maya', 'leo', 'nina'], policy: 'BALANCE_RECENT_LOAD', meeting,
+      predicate: 'OWNER_HAS_NO_WEEKEND_DUTIES', expiresAt,
+    }, status: 'ACTIVE' }] : [],
+    disclosureGrants: scenario === 'approval' ? [{ id: 'grant-disclosure-nina-1', version: 1, preview: {
+      id: 'disclosure-nina-1', text: 'A conditional availability exception makes the proposed plan possible.',
+      textHash: '3914698185f1d172061ca50290f9fdee09f4d88995863f449fdc4b65056d7771',
+      audienceMemberIds: ['maya', 'leo', 'nina'], roomId: 'room-synthetic', contextToken: 'ctx_Q7c2M9k1',
+      decisionRevision: 1, expiresAt, inferenceWarning,
+    }, status: 'ACTIVE', publishedAt: null }] : [],
     ownApproval: scenario === 'approval' ? { proposalId: 'proposal-A', proposalVersion: 1, contextToken: 'ctx_Q7c2M9k1', planHash: '27e5ade267f9fa2ee39ba863cd22608a6dbb5a0522596a5eb65b945f5ccc5081', acceptedAt: '2026-10-08T14:30:00Z' } : null,
   };
   return OwnerSnapshot.parse(snapshot);
