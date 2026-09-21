@@ -4,6 +4,11 @@ A writes this log; B writes [its own log](work-log-B.md), including frontend wor
 
 Entry format: UTC time | task/state | developer/model/effort | baseline/commit/diff | files | outcome/decision | checks (actual command, exit/results) | blockers/next action. For a transfer include released task, saved untracked files, receiving developer, and confirmation that the old writer stopped.
 
+## 2026-09-21T18:08:16Z — main synchronization / REVIEW
+
+- A / Codex GPT-5 preserved the R1–R5 follow-up as `64cdf4f`, then merged fetched `origin/main` (`39c701c`, including B03) into local `main` as `121e0da`. The only conflict was `docs/task-board.md`; its resolution retains both A03.5's required independent follow-up review and B03's integrated REVIEW status. No task acceptance state changed.
+- Post-merge checks: `npm run check:references` exit 0 (7/7); `npm run lint` exit 0 (55 boundary references); `npm test` exit 0 (169/169 across 10 files); `git diff --check` exit 0. No push, PR, deployment, or human acceptance occurred. Next: independent review of the A02/A03 changed artifact; push only with separate user authorization.
+
 ## 2026-09-21T18:01:51Z — A02 / REVIEW — A03.5 R1–R5 follow-up
 
 - Actual worker: A / Codex GPT-5 (scheduled gpt-5.6-terra/medium unavailable). Baseline reviewed artifact: `df1e8761774b76923e9d3b69927025cbdc41c753`; current local diff on `main`, no commit/push/merge. Changed `apps/web/src/command-client.ts`, `apps/web/src/owner-screen.tsx`, `apps/web/src/style.css`, focused unit tests and `tests/e2e/a01.spec.ts`, plus coordinated A02/board/handoff records.
