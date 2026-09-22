@@ -46,5 +46,5 @@ const application = new DealTableApplication({
   ids: { next: () => crypto.randomUUID() },
 });
 await application.createRoom(seed);
-await listenLocalApi({ application, identities: createNonProductionIdentities(roomId), port: port() });
+await listenLocalApi({ application, identities: createNonProductionIdentities(roomId), port: port(), debug: true });
 console.log(`Deal Table local non-production API listening on http://127.0.0.1:${port()}`);

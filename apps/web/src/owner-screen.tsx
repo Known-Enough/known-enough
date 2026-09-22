@@ -17,6 +17,11 @@ const intervalsFor = (values: InputValues): Interval[] => {
   return values.conditions.flatMap(condition => condition.kind === 'HARD_AVAILABILITY' ? condition.availableIntervals : [condition.interval])
     .filter(interval => !seen.has(intervalKey(interval)) && (seen.add(intervalKey(interval)), true));
 };
+export function reviewIntervalsFor(values: InputValues, publicRoom: PublicRoomSnapshot): Interval[] {
+  const seen = new Set<string>();
+  return [...intervalsFor(values), ...publicRoom.schedule.slots.map(slot => slot.interval), ...publicRoom.schedule.duties.map(duty => duty.interval)]
+    .filter(interval => !seen.has(intervalKey(interval)) && (seen.add(intervalKey(interval)), true));
+}
 type AvailabilityTarget = { conditionId: string; interval: Interval };
 
 export function editableAvailabilityFor(values: InputValues): AvailabilityTarget & { availability: 'exception' | 'available' } | null {
@@ -61,7 +66,16 @@ export function valuesForAvailability(values: InputValues, availability: 'except
 function initialValues(room: OwnerSnapshot, publicRoom: PublicRoomSnapshot, availability: 'exception' | 'available', target: AvailabilityTarget, cost: number): InputValues {
   // A local participant must explicitly choose this broad synthetic coverage in
   // the browser; it is never derived from a private server fixture.
-  const coverage = [target.interval, ...publicRoom.schedule.duties.map(duty => duty.interval)]
+  // Keep the fictional local roster aligned with the solver fixture: Maya can
+  // use 11:00/14:00, Leo can use 10:00/11:00, and Nina can use all slots but
+  // marks 11:00 as negotiably unavailable. This leaves 11:00 as the only
+  // shared meeting that requires Nina's scoped exception.
+  const meetingCoverage = room.ownerMemberId === 'maya'
+    ? publicRoom.schedule.slots.slice(1)
+    : room.ownerMemberId === 'leo'
+      ? publicRoom.schedule.slots.slice(0, 2)
+      : publicRoom.schedule.slots;
+  const coverage = [...meetingCoverage.map(slot => slot.interval), ...publicRoom.schedule.duties.map(duty => duty.interval)]
     .map(interval => ({ ...interval }));
   const conditions: InputValues['conditions'] = [{ id: `${room.ownerMemberId}-local-coverage`, kind: 'HARD_AVAILABILITY', availableIntervals: coverage }];
   if (availability === 'exception') conditions.push({ id: `${room.ownerMemberId}-local-exception`, kind: 'NEGOTIABLE_UNAVAILABLE', interval: { ...target.interval }, inviteException: true });
@@ -145,7 +159,9 @@ export function OwnerScreen({ initialScenario, localIdentity = null }: { initial
       ? valuesForAvailability(inputValues, availability, availabilityTarget, selectedInterval, Number(cost))
       : initialValues(room, publicRoom, availability, { conditionId: availabilityTarget.conditionId, interval: selectedInterval }, Number(cost));
   };
-  const draftIntervals = room?.draft ? intervalsFor(room.draft.values) : [];
+  const draftIntervals = room?.draft
+    ? localIdentity && publicRoom ? reviewIntervalsFor(room.draft.values, publicRoom) : intervalsFor(room.draft.values)
+    : [];
   const candidateProposal = publicRoom?.proposal ?? null;
   const currentProposal = room && proposalMatchesOwner(room, candidateProposal) ? candidateProposal : null;
   // Owner DTOs intentionally exclude decision revisions. Commands bind the

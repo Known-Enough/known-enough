@@ -183,6 +183,7 @@ export class DealTableApplication {
       const closed = room.status === 'CLOSED';
       this.sweep(room, this.now());
       if (closed) room.status = 'CLOSED';
+      else if (room.status === 'COLLECTING') this.collectingStatus(room);
       return PublicRoomSnapshot.parse({
         schemaVersion: 1, roomId: room.roomId, contextToken: room.contextToken,
         decisionRevision: room.decisionRevision, controlVersion: room.controlVersion,

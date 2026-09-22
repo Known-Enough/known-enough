@@ -91,7 +91,7 @@ test('three local people complete an initial negotiation in the browser with ind
   }
 
   await maya.goto('/?local=display');
-  await expect(maya.getByText('Agreement recorded for this local example')).toBeVisible();
+  await expect(maya.getByText('Agreement recorded for this local example').first()).toBeVisible();
   await expect(maya.getByRole('region', { name: 'Current proposal' })).toContainText('3 of 3 separate acceptances recorded');
   await expect(maya.getByRole('region', { name: 'Published disclosure ledger' })).toHaveCount(0);
   await Promise.all([maya.close(), leo.close(), nina.close()]);

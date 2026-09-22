@@ -1,5 +1,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
-import { ERROR_HTTP_STATUS, Id, type CommandResult } from '@deal-table/contracts';
+import {
+  ERROR_HTTP_STATUS, Id, type CommandResult, type OwnerSnapshot, type PublicRoomSnapshot,
+} from '@deal-table/contracts';
 import {
   ApplicationError, DealTableApplication, type TrustedPrincipal,
 } from '@deal-table/application';
@@ -21,6 +23,8 @@ export interface LocalApiOptions {
    */
   readonly identities?: ReadonlyMap<string, HttpIdentity>;
   readonly maxBodyBytes?: number;
+  /** Emit safe local-flow diagnostics without private input values. */
+  readonly debug?: boolean;
 }
 
 export interface LocalApiServerOptions extends LocalApiOptions {
@@ -76,6 +80,36 @@ function bodyRequestId(body: unknown, fallback: string): string {
 
 function errorBody(code: ApplicationError['code'], id: string): ErrorResult {
   return { ok: false, requestId: id, error: { code, httpStatus: ERROR_HTTP_STATUS[code] } };
+}
+
+type DebugValue = string | number | boolean;
+
+function debugLog(enabled: boolean, event: string, details: Record<string, DebugValue>): void {
+  if (!enabled) return;
+  const suffix = Object.entries(details).map(([key, value]) => `${key}=${JSON.stringify(value)}`).join(' ');
+  console.log(`[deal-table] ${event}${suffix ? ` ${suffix}` : ''}`);
+}
+
+function actor(principal: HttpIdentity): string {
+  return principal.kind === 'display' ? 'display' : principal.subject;
+}
+
+function logPublicSnapshot(enabled: boolean, principal: HttpIdentity, snapshot: PublicRoomSnapshot): void {
+  debugLog(enabled, 'public-snapshot', {
+    actor: actor(principal), room: snapshot.roomId, status: snapshot.status,
+    decisionRevision: snapshot.decisionRevision, controlVersion: snapshot.controlVersion,
+    setup: snapshot.roster.map(member => `${member.id}:${member.submitted ? 'confirmed' : 'pending'}`).join(','),
+  });
+}
+
+function logOwnerSnapshot(enabled: boolean, principal: HttpIdentity, snapshot: OwnerSnapshot): void {
+  debugLog(enabled, 'owner-snapshot', {
+    actor: actor(principal), room: snapshot.roomId, ownerRevision: snapshot.ownerRevision,
+    input: snapshot.confirmedInputs ? 'confirmed' : snapshot.draft ? 'draft' : 'missing',
+    reviewedIntervals: snapshot.availabilityReview?.intervals.length ?? 0,
+    exceptionOffers: snapshot.pendingOffers.length, disclosurePreviews: snapshot.disclosurePreviews.length,
+    finalApproval: snapshot.ownApproval !== null,
+  });
 }
 
 function applicationError(error: unknown, id: string): ErrorResult {
@@ -145,12 +179,17 @@ async function authorizeRoute(
   await application.getPublicSnapshot(principal, roomId);
 }
 
-async function runQueuedWork(application: DealTableApplication, roomId: string): Promise<void> {
+async function runQueuedWork(application: DealTableApplication, roomId: string, debug: boolean): Promise<void> {
   const worker: TrustedPrincipal = {
     kind: 'service', subject: 'local-non-production-worker', roomIds: [roomId],
   };
   const job = await application.pendingSolveJob(worker, roomId);
-  if (job) await application.runSolveJob(worker, roomId, job.id);
+  if (!job) {
+    debugLog(debug, 'solve-job-skipped', { room: roomId, reason: 'NO_PENDING_JOB' });
+    return;
+  }
+  const result = await application.runSolveJob(worker, roomId, job.id);
+  debugLog(debug, 'solve-job-result', { room: roomId, result });
 }
 
 /**
@@ -163,6 +202,7 @@ export function createLocalApiHandler(options: LocalApiOptions): (request: Incom
   }
   const { application } = options;
   const { identities, maxBodyBytes } = validateOptions(options);
+  const debug = options.debug ?? false;
   return (request, response) => {
     void (async () => {
       setCors(response, request);
@@ -192,14 +232,18 @@ export function createLocalApiHandler(options: LocalApiOptions): (request: Incom
 
       try {
         if (request.method === 'GET' && route.view === 'public') {
-          sendJson(response, 200, await application.getPublicSnapshot(principal, route.roomId));
+          const snapshot = await application.getPublicSnapshot(principal, route.roomId);
+          logPublicSnapshot(debug, principal, snapshot);
+          sendJson(response, 200, snapshot);
           return;
         }
         if (request.method === 'GET' && route.view === 'me') {
           // authorizeRoute makes display/organizer and nonmember failures happen
           // before any private owner projection is considered.
           await authorizeRoute(application, principal, route.roomId);
-          sendJson(response, 200, await application.getOwnerSnapshot(principal, route.roomId));
+          const snapshot = await application.getOwnerSnapshot(principal, route.roomId);
+          logOwnerSnapshot(debug, principal, snapshot);
+          sendJson(response, 200, snapshot);
           return;
         }
         if (request.method !== 'POST' || route.view !== 'commands') {
@@ -217,14 +261,22 @@ export function createLocalApiHandler(options: LocalApiOptions): (request: Incom
         const commandRequestId = bodyRequestId(body, id);
         if (body === null || typeof body !== 'object' || Array.isArray(body)
           || (body as Record<string, unknown>).roomId !== route.roomId) {
+          debugLog(debug, 'command-rejected', { actor: actor(principal), room: route.roomId, error: 'INVALID_COMMAND' });
           sendJson(response, 422, errorBody('INVALID_COMMAND', commandRequestId));
           return;
         }
+        const commandType = typeof (body as Record<string, unknown>).type === 'string'
+          ? (body as Record<string, unknown>).type as string : 'INVALID_COMMAND';
+        debugLog(debug, 'command-received', { actor: actor(principal), room: route.roomId, type: commandType });
         const result = await application.execute(principal, body);
-        if (result.ok && result.status === 'QUEUED') await runQueuedWork(application, route.roomId);
+        if (result.ok && result.status === 'QUEUED') await runQueuedWork(application, route.roomId, debug);
+        debugLog(debug, result.ok ? 'command-result' : 'command-rejected', result.ok
+          ? { actor: actor(principal), room: route.roomId, type: commandType, status: result.status, controlVersion: result.version.controlVersion }
+          : { actor: actor(principal), room: route.roomId, type: commandType, error: result.error.code });
         sendJson(response, result.ok ? 200 : result.error.httpStatus, result);
       } catch (error) {
         const result = applicationError(error, id);
+        debugLog(debug, 'request-error', { actor: actor(principal), room: route.roomId, error: result.error.code });
         sendJson(response, result.error.httpStatus, result);
       }
     })();
