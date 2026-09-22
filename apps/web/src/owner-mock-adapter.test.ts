@@ -37,13 +37,34 @@ it('keeps the review receipt bound to confirmed inputs in every populated scenar
   }
 });
 
-it('maps either availability choice to its complete finite condition without changing unrelated inputs', async () => {
+it('maps either availability choice to its displayed finite interval without changing unrelated inputs', async () => {
   const room = await ownerMockClient.getOwnerRoom();
   const interval = { date: '2026-10-08', timezone: 'America/Mexico_City' as const, startMinute: 660, endMinute: 720 };
-  const available = valuesForAvailability(room.confirmedInputs!.values, 'available', interval, 3);
-  const exception = valuesForAvailability(available, 'exception', interval, 1);
+  const initial = room.confirmedInputs!.values.conditions[0]!;
+  if (initial.kind !== 'NEGOTIABLE_UNAVAILABLE') throw new Error('fixture must supply a negotiable condition');
+  const target = { conditionId: 'condition-nina-1100', interval: initial.interval };
+  const available = valuesForAvailability(room.confirmedInputs!.values, 'available', target, interval, 3);
+  const exception = valuesForAvailability(available, 'exception', { conditionId: target.conditionId, interval }, interval, 1);
   expect(available).toMatchObject({ conditions: [{ id: 'condition-nina-1100', kind: 'HARD_AVAILABILITY', availableIntervals: [interval] }], dutyCosts: [{ dutyId: 'followup', cost: 3 }] });
-  expect(exception).toMatchObject({ conditions: [{ id: 'condition-nina-1100', kind: 'NEGOTIABLE_UNAVAILABLE', interval, inviteException: true }], dutyCosts: [{ dutyId: 'followup', cost: 1 }] });
+  expect(exception).toMatchObject({ conditions: [
+    { id: 'condition-nina-1100', kind: 'HARD_AVAILABILITY', availableIntervals: [interval] },
+    { id: 'condition-nina-1100-exception', kind: 'NEGOTIABLE_UNAVAILABLE', interval, inviteException: true },
+  ], dutyCosts: [{ dutyId: 'followup', cost: 1 }] });
+});
+
+it('targets the editable condition and preserves unrelated hard intervals and conditions', async () => {
+  const room = await ownerMockClient.getOwnerRoom();
+  const thursday = { date: '2026-10-08', timezone: 'America/Mexico_City' as const, startMinute: 660, endMinute: 690 };
+  const sunday = { date: '2026-10-11', timezone: 'America/Mexico_City' as const, startMinute: 600, endMinute: 660 };
+  const negotiable = room.confirmedInputs!.values.conditions[0]!;
+  if (negotiable.kind !== 'NEGOTIABLE_UNAVAILABLE') throw new Error('fixture must supply a negotiable condition');
+  const values = { ...room.confirmedInputs!.values, conditions: [{ id: 'hard-thursday', kind: 'HARD_AVAILABILITY' as const, availableIntervals: [thursday, sunday] }, negotiable] };
+  const edited = valuesForAvailability(values, 'available', { conditionId: negotiable.id, interval: negotiable.interval }, { ...negotiable.interval, endMinute: 720 }, 2);
+  expect(edited.conditions).toEqual([
+    { id: 'hard-thursday', kind: 'HARD_AVAILABILITY', availableIntervals: [thursday, sunday] },
+    { id: negotiable.id, kind: 'HARD_AVAILABILITY', availableIntervals: [{ ...negotiable.interval, endMinute: 720 }] },
+  ]);
+  expect(edited.dutyCosts).toEqual([{ dutyId: 'followup', cost: 2 }]);
 });
 
 it('does not let a receipt enable acceptance without a matching current proposal', async () => {

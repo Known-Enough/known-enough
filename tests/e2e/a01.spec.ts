@@ -89,12 +89,41 @@ test('owner review confirms explicitly checked draft intervals and binds the dis
 });
 
 test('a changed duration requires checking the newly assessed interval again', async ({ page }) => {
+  const commands: unknown[] = [];
+  await page.route('**/rooms/room-synthetic/commands', async route => {
+    const body = route.request().postDataJSON();
+    commands.push(body);
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, requestId: body.requestId, status: 'APPLIED', version: body.expected }) });
+  });
   await page.goto('/?view=owner&owner=draft');
   const review = page.getByRole('region', { name: 'Confirm reviewed inputs' });
   await review.getByRole('checkbox').check();
   await expect(review.getByRole('button', { name: 'Confirm these reviewed intervals' })).toBeEnabled();
   await page.getByRole('combobox', { name: 'Meeting duration' }).selectOption('60');
+  await expect(page.getByRole('radio', { name: /11:00–12:00.*is unavailable/i })).toBeVisible();
   await expect(review.getByRole('button', { name: 'Confirm these reviewed intervals' })).toBeDisabled();
+  await page.getByRole('button', { name: 'Submit input draft' }).click();
+  await expect(page.getByRole('status')).toContainText('Command accepted by the transport');
+  await expect(review).toContainText('has not been returned as a current private snapshot');
+  await expect(review.getByRole('checkbox')).toBeDisabled();
+  await expect(review.getByRole('button', { name: 'Confirm these reviewed intervals' })).toBeDisabled();
+  expect(commands).toHaveLength(1);
+  expect(commands[0]).toMatchObject({ type: 'SUBMIT_INPUT_DRAFT', payload: { values: { conditions: [{ kind: 'NEGOTIABLE_UNAVAILABLE', interval: { startMinute: 660, endMinute: 720 } }] } } });
+});
+
+test('availability and cost edits cannot reconfirm a saved draft', async ({ page }) => {
+  await page.goto('/?view=owner&owner=draft');
+  const review = page.getByRole('region', { name: 'Confirm reviewed inputs' });
+  const confirmation = review.getByRole('button', { name: 'Confirm these reviewed intervals' });
+  await review.getByRole('checkbox').check();
+  await expect(confirmation).toBeEnabled();
+  await page.getByRole('combobox', { name: 'Follow-up duty cost' }).selectOption('3');
+  await expect(confirmation).toBeDisabled();
+  await page.reload();
+  await review.getByRole('checkbox').check();
+  await expect(confirmation).toBeEnabled();
+  await page.getByRole('radio', { name: /is available/i }).check();
+  await expect(confirmation).toBeDisabled();
 });
 
 for (const [label, body] of [['malformed JSON', '{'], ['unrecognized JSON', JSON.stringify({ upstream: 'unknown' })]] as const) {

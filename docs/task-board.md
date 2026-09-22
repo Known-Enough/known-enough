@@ -6,7 +6,7 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 
 ## Work available now
 
-- A: A02/A03 remain REVIEW. Owner A has a local R1–R5 correction diff responding to [A03.5](reviews/A03.5.md); it requires independent follow-up review before A02.5/A04/A05 can be released. A06 remains ready. Serialize overlapping frontend files.
+- A: A02/A03 remain REVIEW. Independent [A03.5 follow-up](reviews/A03.5.md) on current main `c79faeb` (fix `64cdf4f`) remains CHANGES_REQUESTED: R1/R3/R4 closed; the local R2/R5/V1 correction artifact now awaits a fresh independent review. A02.5/A04/A05 remain BLOCKED; A06 remains ready. Serialize overlapping frontend files.
 - B: B03 source `27a110c` is integrated into main; REVIEW pending live A02.5/G01 acceptance. No new B task is claimed. B may claim eligible available work using the existing procedure.
 - No new implementation task is claimed by this planning update. B02’s completed claim is released. Separate clones use main for future work; the integrated legacy task branches are historical pointers; no new work belongs on them.
 
@@ -22,7 +22,7 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 | [B02](tasks/B02.md) | Astra / high | B01 on main | DONE; integrated and verified |
 | [B02.5](tasks/B02.5.md) | Astra / high | Reviewable B02 slice | DONE; PASS, evidence reconciled |
 | [B03](tasks/B03.md) | Terra / medium | B02 usable implementation | REVIEW; local HTTP integrated from `27a110c`, live acceptance pending |
-| [A03.5](tasks/A03.5.md) | Astra / high | A02 + A03 preparation | REVIEW; CHANGES_REQUESTED on `df1e876`, R1–R5 open |
+| [A03.5](tasks/A03.5.md) | Astra / high | A02 + A03 preparation | REVIEW; CHANGES_REQUESTED on `c79faeb`; R2/R5 and V1 open, R1/R3/R4 closed |
 | [A02.5](tasks/A02.5.md) | Terra / medium | A02, A03.5, reviewed B02/B02.5, B03 | Actual local API integration |
 | [G01](tasks/G01.md) | Astra / high | A02.5, A03.5, B03, B02.5 current evidence | Local end-to-end acceptance checkpoint |
 

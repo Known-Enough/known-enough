@@ -6,7 +6,8 @@ test('private approval mock exposes independent receipts without public leakage'
   await expect(page.getByRole('article', { name: 'Exception receipt' })).toContainText('Active');
   await expect(page.getByRole('article', { name: 'Disclosure receipt' })).toContainText('Active');
   await expect(page.getByRole('article', { name: 'Final approval receipt' })).toContainText('Recorded');
-  await expect(page.getByText('Synthetic local receipt:')).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Final plan acceptance' })).toContainText('Proposal proposal-A, version 1');
+  await expect(page.getByRole('region', { name: 'Final plan acceptance' })).toContainText('11:00–11:30');
   await page.goto('/?public=collecting');
   await expect(page.getByRole('heading', { name: 'Deal Table', exact: true })).toBeVisible();
   await expect(page.locator('body')).not.toContainText('Your private receipts');

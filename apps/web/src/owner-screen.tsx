@@ -12,6 +12,7 @@ const statusLabel = (status: string) => status[0] + status.slice(1).toLowerCase(
 export const policyLabel = (policy: 'LOWEST_INCONVENIENCE' | 'BALANCE_RECENT_LOAD') => policy === 'BALANCE_RECENT_LOAD' ? 'Balance recent duty load' : 'Lowest declared inconvenience';
 const intervalKey = (interval: Interval) => `${interval.date}:${interval.timezone}:${interval.startMinute}:${interval.endMinute}`;
 const intervalsFor = (values: InputValues): Interval[] => values.conditions.flatMap(condition => condition.kind === 'HARD_AVAILABILITY' ? condition.availableIntervals : [condition.interval]);
+type AvailabilityTarget = { conditionId: string; interval: Interval };
 
 export function proposalMatchesOwner(room: OwnerSnapshot, proposal: ProposalView | null): proposal is ProposalView {
   if (!proposal || proposal.facts.roomId !== room.roomId || proposal.facts.contextToken !== room.contextToken) return false;
@@ -22,15 +23,24 @@ export function proposalMatchesOwner(room: OwnerSnapshot, proposal: ProposalView
     && receipt.contextToken === proposal.facts.contextToken);
 }
 
-export function valuesForAvailability(values: InputValues, availability: 'exception' | 'available', interval: Interval, cost: number): InputValues {
-  const [first, ...rest] = values.conditions;
-  if (!first) return { ...values, dutyCosts: values.dutyCosts.map(item => item.dutyId === 'followup' ? { ...item, cost } : item) };
+export function valuesForAvailability(values: InputValues, availability: 'exception' | 'available', target: AvailabilityTarget, interval: Interval, cost: number): InputValues {
   const selected = availability === 'available'
-    ? { id: first.id, kind: 'HARD_AVAILABILITY' as const, availableIntervals: [interval] }
-    : { id: first.id, kind: 'NEGOTIABLE_UNAVAILABLE' as const, interval, inviteException: true };
+    ? { id: target.conditionId, kind: 'HARD_AVAILABILITY' as const, availableIntervals: [interval] }
+    : { id: target.conditionId, kind: 'NEGOTIABLE_UNAVAILABLE' as const, interval, inviteException: true };
+  const targetCondition = values.conditions.find(condition => condition.id === target.conditionId);
+  if (!targetCondition) return { ...values, dutyCosts: values.dutyCosts.map(item => item.dutyId === 'followup' ? { ...item, cost } : { ...item }) };
+  const conditions = targetCondition.kind === 'HARD_AVAILABILITY' && availability === 'exception'
+    // A hard availability condition must not be discarded to create an exception request.
+    // Keep it intact and add a separately identified negotiable condition for the selected interval.
+    ? [...values.conditions.map(item => item.kind === 'HARD_AVAILABILITY' ? { ...item, availableIntervals: item.availableIntervals.map(value => ({ ...value })) } : { ...item, interval: { ...item.interval } }), { ...selected, id: `${target.conditionId}-exception` }]
+    : values.conditions.map(item => {
+      if (item.id !== target.conditionId) return item.kind === 'HARD_AVAILABILITY' ? { ...item, availableIntervals: item.availableIntervals.map(value => ({ ...value })) } : { ...item, interval: { ...item.interval } };
+      if (item.kind === 'HARD_AVAILABILITY') return { ...item, availableIntervals: item.availableIntervals.map(value => intervalKey(value) === intervalKey(target.interval) ? interval : { ...value }) };
+      return selected;
+    });
   return {
     ...values,
-    conditions: [selected, ...rest.map(item => item.kind === 'NEGOTIABLE_UNAVAILABLE' ? { ...item, interval: { ...item.interval } } : { ...item, availableIntervals: item.availableIntervals.map(value => ({ ...value })) })],
+    conditions,
     dutyCosts: values.dutyCosts.map(item => item.dutyId === 'followup' ? { ...item, cost } : { ...item }),
   };
 }
@@ -47,6 +57,7 @@ export function OwnerScreen({ initialScenario }: { initialScenario: string | nul
   const [cost, setCost] = useState('0');
   const [duration, setDuration] = useState('30');
   const [reviewedIntervals, setReviewedIntervals] = useState<string[]>([]);
+  const [hasUnsavedEdits, setHasUnsavedEdits] = useState(false);
   const [publicRoom, setPublicRoom] = useState<PublicRoomSnapshot | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [retryCommand, setRetryCommand] = useState<CommandEnvelope | null>(null);
@@ -66,6 +77,7 @@ export function OwnerScreen({ initialScenario }: { initialScenario: string | nul
         setCost(String(values?.dutyCosts.find(item => item.dutyId === 'followup')?.cost ?? 0));
         if (initialInterval) setDuration(String(initialInterval.endMinute - initialInterval.startMinute));
         setReviewedIntervals([]);
+        setHasUnsavedEdits(false);
       }
     }).catch(() => { if (id === request.current) setState({ kind: 'failure' }); });
   };
@@ -74,7 +86,9 @@ export function OwnerScreen({ initialScenario }: { initialScenario: string | nul
   const stale = state.kind === 'loaded' && state.stale;
   const disabled = stale || !room || pending;
   const inputValues = room?.draft?.values ?? room?.confirmedInputs?.values ?? null;
-  const condition = inputValues?.conditions[0];
+  // The explicitly editable condition is a negotiable condition when one exists;
+  // hard availability conditions are retained rather than being used as a disposable slot.
+  const condition = inputValues?.conditions.find(item => item.kind === 'NEGOTIABLE_UNAVAILABLE') ?? inputValues?.conditions[0];
   const interval = condition?.kind === 'HARD_AVAILABILITY' ? condition.availableIntervals[0] : condition?.interval;
   const run = async (command: CommandEnvelope) => {
     setPending(true); setNotice(null); setRetryCommand(null);
@@ -91,7 +105,7 @@ export function OwnerScreen({ initialScenario }: { initialScenario: string | nul
     } finally { setPending(false); }
   };
   const selectedInterval = interval && { ...interval, endMinute: interval.startMinute + Number(duration) };
-  const values = (): InputValues | null => inputValues && selectedInterval ? valuesForAvailability(inputValues, availability, selectedInterval, Number(cost)) : null;
+  const values = (): InputValues | null => inputValues && condition && interval && selectedInterval ? valuesForAvailability(inputValues, availability, { conditionId: condition.id, interval }, selectedInterval, Number(cost)) : null;
   const draftIntervals = room?.draft ? intervalsFor(room.draft.values) : [];
   const candidateProposal = publicRoom?.proposal ?? null;
   const currentProposal = room && proposalMatchesOwner(room, candidateProposal) ? candidateProposal : null;
@@ -105,8 +119,8 @@ export function OwnerScreen({ initialScenario }: { initialScenario: string | nul
     {stale && <section role="alert" className="stale-banner"><strong>This private local snapshot is stale.</strong><span>Commands are disabled until it is refreshed.</span><button type="button" onClick={() => load(true)}>Refresh private example</button></section>}
     {state.kind === 'loaded' && !room && <section role="status" className="state-card"><h2>No private example selected</h2><p>This local scenario has no owner snapshot.</p><button type="button" onClick={() => load(true)}>Refresh private example</button></section>}
     {room && <div className="owner-grid">
-      <section className="owner-card" aria-labelledby="inputs"><p className="eyebrow">OWNER REVISION {room.ownerRevision}</p><h2 id="inputs">Your inputs</h2><p>Keep reasons private. Record a condition or preference without explaining why.</p><fieldset disabled={disabled}><legend>Meeting availability</legend><label><input type="radio" name="availability" checked={availability === 'exception'} onChange={() => { setAvailability('exception'); setReviewedIntervals([]); }} /> {interval ? `${interval.date} · ${time(interval.startMinute)}–${time(interval.endMinute)} · ${interval.timezone} is unavailable, but you may ask about a scoped exception.` : 'A scoped availability question is available.'}</label><label><input type="radio" name="availability" checked={availability === 'available'} onChange={() => { setAvailability('available'); setReviewedIntervals([]); }} /> {interval ? `${interval.date} · ${time(interval.startMinute)}–${time(interval.endMinute)} · ${interval.timezone} is available.` : 'This exact interval is available.'}</label><label>Meeting duration <select value={duration} onChange={event => { setDuration(event.target.value); setReviewedIntervals([]); }}><option value="30">30 minutes</option><option value="60">60 minutes</option></select></label><label>Follow-up duty cost <select value={cost} onChange={event => setCost(event.target.value)}><option value="0">0 — no added inconvenience</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label><button type="button" onClick={() => { const next = values(); if (next) void run(submitInputDraft(room, context, next)); }}>Submit input draft</button></fieldset><p className="timezone">Submitting creates a versioned private draft; it does not grant an exception, authorize disclosure, or accept a plan.</p></section>
-      {room.draft && <section className="owner-card" aria-labelledby="confirm-inputs"><p className="eyebrow">DRAFT REVIEW</p><h2 id="confirm-inputs">Confirm reviewed inputs</h2><p>Review the exact dated intervals in draft {room.draft.draftId}, revision {room.draft.draftRevision}. Changing the duration or availability requires a fresh review.</p>{draftIntervals.map(value => <label key={intervalKey(value)}><input type="checkbox" checked={reviewedIntervals.includes(intervalKey(value))} onChange={event => setReviewedIntervals(current => event.target.checked ? [...current, intervalKey(value)] : current.filter(key => key !== intervalKey(value)))} /> I reviewed {value.date} · {time(value.startMinute)}–{time(value.endMinute)} · {value.timezone}.</label>)}<div className="button-row"><button type="button" disabled={disabled || reviewedIntervals.length !== draftIntervals.length} onClick={() => void run(confirmInputs(room, context, room.draft!, draftIntervals.filter(value => reviewedIntervals.includes(intervalKey(value))))) }>Confirm these reviewed intervals</button></div></section>}
+      <section className="owner-card" aria-labelledby="inputs"><p className="eyebrow">OWNER REVISION {room.ownerRevision}</p><h2 id="inputs">Your inputs</h2><p>Keep reasons private. Record a condition or preference without explaining why.</p><fieldset disabled={disabled}><legend>Meeting availability</legend><label><input type="radio" name="availability" checked={availability === 'exception'} onChange={() => { setAvailability('exception'); setReviewedIntervals([]); setHasUnsavedEdits(true); }} /> {selectedInterval ? `${selectedInterval.date} · ${time(selectedInterval.startMinute)}–${time(selectedInterval.endMinute)} · ${selectedInterval.timezone} is unavailable, but you may ask about a scoped exception.` : 'A scoped availability question is available.'}</label><label><input type="radio" name="availability" checked={availability === 'available'} onChange={() => { setAvailability('available'); setReviewedIntervals([]); setHasUnsavedEdits(true); }} /> {selectedInterval ? `${selectedInterval.date} · ${time(selectedInterval.startMinute)}–${time(selectedInterval.endMinute)} · ${selectedInterval.timezone} is available.` : 'This exact interval is available.'}</label><label>Meeting duration <select value={duration} onChange={event => { setDuration(event.target.value); setReviewedIntervals([]); setHasUnsavedEdits(true); }}><option value="30">30 minutes</option><option value="60">60 minutes</option></select></label><label>Follow-up duty cost <select value={cost} onChange={event => { setCost(event.target.value); setReviewedIntervals([]); setHasUnsavedEdits(true); }}><option value="0">0 — no added inconvenience</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label><button type="button" onClick={() => { const next = values(); if (next) void run(submitInputDraft(room, context, next)); }}>Submit input draft</button></fieldset><p className="timezone">Submitting creates a versioned private draft; it does not grant an exception, authorize disclosure, or accept a plan.</p></section>
+      {room.draft && <section className="owner-card" aria-labelledby="confirm-inputs"><p className="eyebrow">DRAFT REVIEW</p><h2 id="confirm-inputs">Confirm reviewed inputs</h2><p>Review the exact dated intervals in draft {room.draft.draftId}, revision {room.draft.draftRevision}. {hasUnsavedEdits ? 'Your edited draft has not been returned as a current private snapshot, so it cannot be confirmed yet.' : 'Changing any input requires a fresh current draft review.'}</p>{draftIntervals.map(value => <label key={intervalKey(value)}><input type="checkbox" disabled={hasUnsavedEdits} checked={reviewedIntervals.includes(intervalKey(value))} onChange={event => setReviewedIntervals(current => event.target.checked ? [...current, intervalKey(value)] : current.filter(key => key !== intervalKey(value)))} /> I reviewed {value.date} · {time(value.startMinute)}–{time(value.endMinute)} · {value.timezone}.</label>)}<div className="button-row"><button type="button" disabled={disabled || hasUnsavedEdits || reviewedIntervals.length !== draftIntervals.length} onClick={() => void run(confirmInputs(room, context, room.draft!, draftIntervals.filter(value => reviewedIntervals.includes(intervalKey(value))))) }>Confirm these reviewed intervals</button></div></section>}
       <section className="owner-card" aria-labelledby="exception"><p className="eyebrow">CHANGE PERMISSION</p><h2 id="exception">Exception</h2>{room.pendingOffers.map(offer => <div key={offer.id} className="scope"><p>Would {offer.scope.meeting.interval.date} at {time(offer.scope.meeting.interval.startMinute)}–{time(offer.scope.meeting.interval.endMinute)} ({offer.scope.meeting.interval.timezone}) work only if you take neither weekend duty in this plan?</p><p>{exceptionScopeSummary(offer.scope)}</p><div className="button-row"><button type="button" disabled={disabled} onClick={() => void run(decideException(room, context, offer, 'ALLOW'))}>Allow scoped exception</button><button type="button" className="secondary" disabled={disabled} onClick={() => void run(decideException(room, context, offer, 'DECLINE'))}>Decline exception</button></div></div>)}</section>
       <section className="owner-card" aria-labelledby="disclosure"><p className="eyebrow">DISCLOSURE PERMISSION</p><h2 id="disclosure">Disclosure</h2>{room.disclosurePreviews.map(preview => <div key={preview.id} className="scope"><p>May the shared table say:</p><blockquote>{preview.text}</blockquote><p>Audience: {preview.audienceMemberIds.map(id => names[id] ?? id).join(', ')}. Decision revision {preview.decisionRevision}; expires {preview.expiresAt}. {preview.inferenceWarning}</p><div className="button-row"><button type="button" disabled={disabled} onClick={() => void run(decideDisclosure(room, context, preview, 'ALLOW'))}>Allow this wording</button><button type="button" className="secondary" disabled={disabled} onClick={() => void run(decideDisclosure(room, context, preview, 'DECLINE'))}>Use exception without announcement</button></div></div>)}</section>
       <section className="owner-card" aria-labelledby="approval"><p className="eyebrow">FINAL ACCEPTANCE</p><h2 id="approval">Final plan acceptance</h2><p>Final acceptance is separate from both choices above. Review the current public proposal before accepting.</p>{currentProposal ? <><p>Proposal {currentProposal.id}, version {currentProposal.facts.proposalVersion}; {currentProposal.policyLabel}; valid until {currentProposal.validUntil}.</p><p>Meeting: {currentProposal.facts.plan.meeting.interval.date} · {time(currentProposal.facts.plan.meeting.interval.startMinute)}–{time(currentProposal.facts.plan.meeting.interval.endMinute)} · {currentProposal.facts.plan.meeting.interval.timezone}.</p><ul>{currentProposal.facts.plan.assignments.map(assignment => <li key={assignment.duty.id}>{assignment.duty.label}: {names[assignment.participantId] ?? assignment.participantId}, {assignment.duty.interval.date} {time(assignment.duty.interval.startMinute)}–{time(assignment.duty.interval.endMinute)}.</li>)}</ul><p>Plan hash: {currentProposal.planHash}</p><div className="button-row"><button type="button" disabled={disabled} onClick={() => void run(acceptProposal(room, context, currentProposal))}>Accept reviewed current proposal</button>{room.ownApproval && <button type="button" className="secondary" disabled={disabled} onClick={() => void run(withdrawApproval(room, context, room.ownApproval!))}>Withdraw recorded approval</button>}</div></> : <><p>No matching current proposal is available. A receipt is history only and cannot enable acceptance.</p><button type="button" disabled>Await an exact shared proposal</button>{room.ownApproval && <button type="button" className="secondary" disabled={disabled} onClick={() => void run(withdrawApproval(room, context, room.ownApproval!))}>Withdraw recorded approval</button>}</>}</section>
