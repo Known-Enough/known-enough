@@ -1,4 +1,4 @@
-import { CommandEnvelope, CommandResult, type CommandEnvelope as CommandEnvelopeType, type CommandResult as CommandResultType, type DisclosurePreview, type ExceptionOffer, type FinalApproval, type InputValues, type Interval, type OwnerSnapshot, type ProposalView } from '@deal-table/contracts';
+import { CommandEnvelope, CommandResult, type CommandEnvelope as CommandEnvelopeType, type CommandResult as CommandResultType, type DisclosurePreview, type ExceptionOffer, type FinalApproval, type InputValues, type Interval, type OwnerSnapshot, type Policy, type ProposalView } from '@deal-table/contracts';
 
 export interface CommandTransport {
   post(path: string, body: CommandEnvelopeType): Promise<unknown>;
@@ -71,6 +71,14 @@ export function confirmInputs(room: OwnerSnapshot, context: OwnerCommandContext,
     expectedOwnerRevision: room.ownerRevision,
     reviewedIntervals,
   });
+}
+
+export function acceptContext(room: OwnerSnapshot, context: OwnerCommandContext, policy: Policy, ids = browserCommandIds): CommandEnvelopeType {
+  return envelope(room, context, ids, 'ACCEPT_CONTEXT', { policy });
+}
+
+export function requestSolve(room: OwnerSnapshot, context: OwnerCommandContext, ids = browserCommandIds): CommandEnvelopeType {
+  return envelope(room, context, ids, 'REQUEST_SOLVE', {});
 }
 
 export function decideException(room: OwnerSnapshot, context: OwnerCommandContext, offer: ExceptionOffer, decision: 'ALLOW' | 'DECLINE', ids = browserCommandIds): CommandEnvelopeType {

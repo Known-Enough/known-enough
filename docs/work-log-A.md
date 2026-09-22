@@ -4,6 +4,13 @@ A writes this log; B writes [its own log](work-log-B.md), including frontend wor
 
 Entry format: UTC time | task/state | developer/model/effort | baseline/commit/diff | files | outcome/decision | checks (actual command, exit/results) | blockers/next action. For a transfer include released task, saved untracked files, receiving developer, and confirmation that the old writer stopped.
 
+## 2026-09-22T16:00:00Z — A02.5 / IN_PROGRESS — current-revision live browser verification
+
+- Actual worker: A / Codex GPT-5; scheduled `gpt-5.6-terra` medium unavailable. Baseline `0bb8a0f` on `main`; no commit, push, deployment, or production-authentication claim.
+- Replaced the local client's unbound browser `fetch` call (which failed with `Illegal invocation`) and bind owner commands to the concurrently refreshed public `decisionRevision`, not the previous hard-coded value. Added local UI controls for explicit context confirmation and a solver request, and an isolated Playwright loopback-server scenario using Maya, Leo, and Nina labels.
+- Actual checks: `npm run typecheck` exited 0. `PLAYWRIGHT_CHANNEL=chrome npx playwright test tests/e2e/a02.5-live.spec.ts` currently exits 1. The browser reaches all three private screens, submits/refreshes commands and sends current revision envelopes, but the fresh local composition remains `COLLECTING` after the solver request, with no Nina exception offer. This is a real integration finding, not successful live acceptance.
+- Blocker/next: determine why the fresh-server input sequence cannot produce the expected private-review offer before claiming the three-person negotiation; preserve the failing reproducible browser test. A02.5 remains IN_PROGRESS/REVIEW; do not claim G01 or human acceptance.
+
 ## 2026-09-22T02:07:41Z — A02.5 / REVIEW — loopback local UI/API integration
 
 - Actual worker: A / Codex GPT-5; scheduled `gpt-5.6-terra` medium unavailable. Preserved the pre-existing reviewed A03.5 correction/tracking artifact on `main` at `cfb3371`; no subagents, commit, push, PR, deployment, or production-authentication claim.
