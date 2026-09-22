@@ -126,6 +126,80 @@ test('availability and cost edits cannot reconfirm a saved draft', async ({ page
   await expect(confirmation).toBeDisabled();
 });
 
+test('a hard-first draft initializes and submits the same negotiable condition', async ({ page }) => {
+  const commands: { type: string; payload: { values: { conditions: unknown[] } } }[] = [];
+  await page.route('**/rooms/room-synthetic/commands', async route => {
+    const body = route.request().postDataJSON();
+    commands.push(body);
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, requestId: body.requestId, status: 'APPLIED', version: body.expected }) });
+  });
+  await page.goto('/?view=owner&owner=hard-first-draft');
+  const inputs = page.getByRole('region', { name: 'Your inputs' });
+  await expect(inputs.getByRole('radio', { name: /11:00–11:30.*is unavailable/i })).toBeChecked();
+  await inputs.getByRole('button', { name: 'Submit input draft' }).click();
+  await expect.poll(() => commands).toHaveLength(1);
+  expect(commands[0]?.payload.values.conditions).toEqual([
+    { id: 'hard-owner', kind: 'HARD_AVAILABILITY', availableIntervals: [
+      { date: '2026-10-08', timezone: 'America/Mexico_City', startMinute: 660, endMinute: 720 },
+      { date: '2026-10-11', timezone: 'America/Mexico_City', startMinute: 600, endMinute: 660 },
+    ] },
+    { id: 'condition-nina-1100', kind: 'NEGOTIABLE_UNAVAILABLE', interval: { date: '2026-10-08', timezone: 'America/Mexico_City', startMinute: 660, endMinute: 690 }, inviteException: true },
+  ]);
+
+  await inputs.getByRole('combobox', { name: 'Meeting duration' }).selectOption('60');
+  await inputs.getByRole('radio', { name: /11:00–12:00.*is available/i }).check();
+  await inputs.getByRole('button', { name: 'Submit input draft' }).click();
+  await expect.poll(() => commands).toHaveLength(2);
+  expect(commands[1]?.payload.values.conditions).toEqual([
+    { id: 'hard-owner', kind: 'HARD_AVAILABILITY', availableIntervals: [
+      { date: '2026-10-08', timezone: 'America/Mexico_City', startMinute: 660, endMinute: 720 },
+      { date: '2026-10-11', timezone: 'America/Mexico_City', startMinute: 600, endMinute: 660 },
+    ] },
+    { id: 'condition-nina-1100', kind: 'HARD_AVAILABILITY', availableIntervals: [
+      { date: '2026-10-08', timezone: 'America/Mexico_City', startMinute: 660, endMinute: 720 },
+    ] },
+  ]);
+});
+
+test('an accepted no-edit draft submission invalidates the prior confirmation', async ({ page }) => {
+  const commands: { type: string }[] = [];
+  await page.route('**/rooms/room-synthetic/commands', async route => {
+    const body = route.request().postDataJSON();
+    commands.push(body);
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, requestId: body.requestId, status: 'APPLIED', version: body.expected }) });
+  });
+  await page.goto('/?view=owner&owner=draft');
+  const review = page.getByRole('region', { name: 'Confirm reviewed inputs' });
+  await review.getByRole('checkbox').check();
+  await expect(review.getByRole('button', { name: 'Confirm these reviewed intervals' })).toBeEnabled();
+  await page.getByRole('button', { name: 'Submit input draft' }).click();
+  await expect(page.getByRole('status')).toContainText('Command accepted by the transport');
+  await expect(review).toContainText('has not been returned as a current private snapshot');
+  await expect(review.getByRole('checkbox')).toBeDisabled();
+  await expect(review.getByRole('button', { name: 'Confirm these reviewed intervals' })).toBeDisabled();
+  expect(commands.map(command => command.type)).toEqual(['SUBMIT_INPUT_DRAFT']);
+});
+
+test('an unknown no-edit draft submission keeps confirmation invalid and retries unchanged', async ({ page }) => {
+  const requests: unknown[] = [];
+  await page.route('**/rooms/room-synthetic/commands', async route => {
+    requests.push(route.request().postDataJSON());
+    await route.abort('failed');
+  });
+  await page.goto('/?view=owner&owner=draft');
+  const review = page.getByRole('region', { name: 'Confirm reviewed inputs' });
+  await review.getByRole('checkbox').check();
+  await expect(review.getByRole('button', { name: 'Confirm these reviewed intervals' })).toBeEnabled();
+  await page.getByRole('button', { name: 'Submit input draft' }).click();
+  await expect(page.getByRole('status')).toContainText('outcome is unknown');
+  await expect(review.getByRole('checkbox')).toBeDisabled();
+  await expect(review.getByRole('button', { name: 'Confirm these reviewed intervals' })).toBeDisabled();
+  await page.getByRole('button', { name: 'Retry unchanged request' }).click();
+  await expect.poll(() => requests).toHaveLength(2);
+  expect(requests[1]).toEqual(requests[0]);
+  await expect(review.getByRole('button', { name: 'Confirm these reviewed intervals' })).toBeDisabled();
+});
+
 for (const [label, body] of [['malformed JSON', '{'], ['unrecognized JSON', JSON.stringify({ upstream: 'unknown' })]] as const) {
   test(`an ${label} command result preserves the unchanged retry envelope`, async ({ page }) => {
     const requests: { idempotencyKey: string; payload: unknown }[] = [];

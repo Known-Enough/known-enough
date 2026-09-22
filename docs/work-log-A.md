@@ -4,6 +4,39 @@ A writes this log; B writes [its own log](work-log-B.md), including frontend wor
 
 Entry format: UTC time | task/state | developer/model/effort | baseline/commit/diff | files | outcome/decision | checks (actual command, exit/results) | blockers/next action. For a transfer include released task, saved untracked files, receiving developer, and confirmation that the old writer stopped.
 
+## 2026-09-22T02:07:41Z — A02.5 / REVIEW — loopback local UI/API integration
+
+- Actual worker: A / Codex GPT-5; scheduled `gpt-5.6-terra` medium unavailable. Preserved the pre-existing reviewed A03.5 correction/tracking artifact on `main` at `cfb3371`; no subagents, commit, push, PR, deployment, or production-authentication claim.
+- Added a browser-only local API client and explicit `local` routes: owner labels (`maya`, `leo`, `nina`) and public `display` use B03's `127.0.0.1:8787` surface with its fixed `NON_PRODUCTION` header. Successful local commands refetch both snapshots; mocks remain the default. Browser tests now use Vite's permitted 5173 loopback origin. No server fixture or backend import entered browser source.
+- Pinned Node 24.21.0/npm 11.19.0 with installed Chrome fallback: focused typecheck, lint/boundaries and 28 focused unit/integration tests passed; build/privacy scan passed; `PLAYWRIGHT_CHANNEL=chrome npm run check` passed (reference hashes 7/7, planning 15/15, lint/boundaries, types, unit/integration, build/privacy scan, and browser suite). Existing B03 HTTP integration covers real initial negotiation, independent disclosure refusal, three approvals, and schedule-duration invalidation of grants and approvals.
+- The changed frontend/config artifact needs independent follow-up review under the workflow; leave A02.5 REVIEW and do not claim human acceptance, production authentication, persistence, or G01 completion.
+
+## 2026-09-21T00:00:00Z — A02.5 / IN_PROGRESS — live local UI/API integration
+
+- Actual worker: A / Codex GPT-5; the scheduled `gpt-5.6-terra` medium session is unavailable. Baseline `cfb337104cff4d760986c849ab55606bf8ba0afa` on `main`, plus the pre-existing reviewed uncommitted A03.5 correction and tracking records; preserve all of them. No subagents, commit, push, publication, deployment, or production-authentication claim.
+- Scope: connect the browser only to B03's loopback non-production HTTP surface through explicit local mode, retain mock scenarios as defaults, add real local browser coverage for negotiation and invalidation, then run focused and full checks. The local identity label is explicit and not authentication.
+
+## 2026-09-22T01:12:43Z — A03.5 / REVIEW / PASS — independent uncommitted correction review
+
+- User-assigned independent A-lane reviewer: GPT-6; variant/effort not independently exposed. Baseline/unchanged HEAD `cfb337104cff4d760986c849ab55606bf8ba0afa` on main; preserved the pre-existing dirty source/test/tracking work. No implementation edits, subagents, fetch, commit, merge, push or publication.
+- [Review](reviews/A03.5.md) identifies the four-file source/test diff by SHA-256 `a33345f2d7277d94af8327a18ecbe9ae0f8fcc5175682139e0f31b59119539e3`. R2/R5 closed for preparation, other closures retained. Inspected implementation/tests and surrounding load/retry/application-revision semantics, not only logs.
+- Pinned Node 24.21.0/npm 11.19.0: Chromium install exit 1 (unsupported mac12); documented Chrome 150.0.7871.125 fallback full check exit 0 (references 7/7, planning 15/15, boundaries 55, types, 171/171 unit/integration, 124-module build/privacy scan, browser 29/29). Focused owner/client unit 13/13 and A01/A03 browser 27/27; 11 independent browser probes, all exit 0. Probes include independent schema-validated hard-first injection, pending dispatch, success, rejection, unknown results and successful unchanged retries.
+- Final validation: 99 local link targets resolve; task gates consistent; historical review preserved verbatim; source hashes and HEAD unchanged; reference hashes 7/7 and `git diff --check` pass. Temporary probe servers stopped.
+- Documentation-only review/ticket/board/handoff updates; prior review and implementation log evidence retained. A02/A03/A03.5 stay REVIEW pending human acceptance. A02.5/A04/A05 checkpoint blocks released; READY/unclaimed with own prerequisites intact. Safe pending-read behavior passes preparation; current server reads, real negotiation and authentication remain later gates.
+
+## 2026-09-22T00:51:34Z — A02/A03 / REVIEW — R2/R5 correction handoff
+
+- Actual worker: A / Codex GPT-5; scheduled Terra/medium unavailable. Baseline `cfb337104cff4d760986c849ab55606bf8ba0afa`; current uncommitted local diff changes the owner screen, strict synthetic owner adapter, focused unit/browser regressions, and coordinated A tracking. No subagents, commit, push, PR, deployment or publication.
+- R2: `editableAvailabilityFor` resolves one explicit target, preferring the later negotiable condition, and now drives initialization, displayed interval and serialization. A strict `OwnerSnapshot` hard-first draft reproduces the review's Thursday/Sunday hard intervals plus later 11:00–11:30 negotiable condition; unchanged submission preserves every term, while an explicit 60-minute/available edit preserves unrelated hard coverage.
+- R5: draft submission clears checked coverage and invalidates the saved confirmation before dispatch, including unchanged values. Accepted and aborted/unknown responses leave the old draft unconfirmable pending a fresh read; unknown retry retains the exact serialized envelope.
+- Checks with pinned Node 24.21.0/npm 11.19.0 and installed Chrome fallback: focused `npm test -- apps/web/src/owner-mock-adapter.test.ts apps/web/src/command-client.test.ts` exit 0 (13/13); typecheck exit 0; build/privacy scan exit 0; exact browser grep exit 0 (3/3); `PLAYWRIGHT_CHANNEL=chrome npm run check` exit 0 (references 7/7, planning 15/15, lint/boundaries 55, typecheck, 171/171 unit/integration, 124-module build/privacy scan, 29/29 browser). An earlier focused browser invocation ran before rebuilding and therefore exercised the prior bundle; the rebuild, targeted rerun and full check supersede it. `git diff --check` exit 0.
+- A02/A03 stay REVIEW and A03.5 stays CHANGES_REQUESTED until fresh independent review of this changed artifact. A02.5/A04/A05 remain BLOCKED. Synthetic/intercepted transport evidence does not establish live API, authentication or server acceptance; human acceptance remains pending.
+
+## 2026-09-22T00:44:23Z — A02/A03 / R2/R5 correction IN_PROGRESS
+
+- Actual worker: A / Codex GPT-5; the ticket's Terra/medium selection is unavailable in this session. Clean `main` baseline `cfb337104cff4d760986c849ab55606bf8ba0afa`; no subagents. User assigned the remaining R2/R5 correction and exact browser regressions.
+- Scope: make one explicit editable condition/interval drive owner-form initialization, display and serialization; invalidate saved-draft confirmation on every draft dispatch; cover hard-first/later-negotiable input plus accepted and unknown no-edit submissions. Writes are limited to the existing owner frontend/mocks/tests and coordinated A tracking. A03.5 remains CHANGES_REQUESTED pending fresh independent review; no publication or live/authentication claim.
+
 ## 2026-09-22T00:40:46Z — A03.5 / REVIEW / CHANGES_REQUESTED — correction review
 
 - Independent A-lane GPT-6 Astra session; effort not independently exposed. Reviewed `1119d9d29db9b5d00658e145a6a01e51c6ac1d45` against `c79faeb`, clean main at start. No implementation edits or subagents; documentation-only review/task/board/handoff updates. No fetch, commit, push, merge or publication.

@@ -4,6 +4,7 @@ export default defineConfig({
   // Installed-browser fallback also limits startup pressure on older local hosts.
   ...(process.env.PLAYWRIGHT_CHANNEL ? { workers: 1 } : {}),
   // Optional installed-browser fallback for hosts unsupported by bundled Chromium.
-  use: { baseURL: 'http://127.0.0.1:4173', browserName: 'chromium', channel: process.env.PLAYWRIGHT_CHANNEL },
-  webServer: { command: 'npm run preview --workspace @deal-table/web -- --port 4173 --strictPort', url: 'http://127.0.0.1:4173', reuseExistingServer: false },
+  use: { baseURL: 'http://127.0.0.1:5173', browserName: 'chromium', channel: process.env.PLAYWRIGHT_CHANNEL },
+  // B03 permits only Vite's loopback origin for its explicit local test labels.
+  webServer: { command: 'npm run dev --workspace @deal-table/web -- --port 5173 --strictPort', url: 'http://127.0.0.1:5173', reuseExistingServer: false },
 });

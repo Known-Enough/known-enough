@@ -2,7 +2,7 @@ import { expect, it } from 'vitest';
 import { createHash } from 'node:crypto';
 import { ownerMockClient } from './owner-mock-adapter';
 import { publicMockClient } from './mock-adapter';
-import { exceptionScopeSummary, proposalMatchesOwner, valuesForAvailability } from './owner-screen';
+import { editableAvailabilityFor, exceptionScopeSummary, proposalMatchesOwner, valuesForAvailability } from './owner-screen';
 import { decideException } from './command-client';
 
 it('builds an independently validated synthetic owner snapshot', async () => {
@@ -65,6 +65,15 @@ it('targets the editable condition and preserves unrelated hard intervals and co
     { id: negotiable.id, kind: 'HARD_AVAILABILITY', availableIntervals: [{ ...negotiable.interval, endMinute: 720 }] },
   ]);
   expect(edited.dutyCosts).toEqual([{ dutyId: 'followup', cost: 2 }]);
+});
+
+it('resolves the later negotiable condition when a hard condition appears first', async () => {
+  const { value: room } = await ownerMockClient.readOwnerRoom('hard-first-draft');
+  expect(editableAvailabilityFor(room!.draft!.values)).toEqual({
+    conditionId: 'condition-nina-1100',
+    availability: 'exception',
+    interval: { date: '2026-10-08', timezone: 'America/Mexico_City', startMinute: 660, endMinute: 690 },
+  });
 });
 
 it('does not let a receipt enable acceptance without a matching current proposal', async () => {

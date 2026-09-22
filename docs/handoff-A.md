@@ -1,6 +1,6 @@
 # Developer A handoff — parallel frontend preparation
 
-Use the direct model/effort printed in the [ticket](task-board.md); no Astra manager is required. A02/A03 are REVIEW. A03.5 requests corrections from owner A; A06 remains a ready alternative. Read [workflow](agent-workflow.md) and [A log](work-log-A.md), then claim one task.
+Use the direct model/effort printed in the [ticket](task-board.md); no Astra manager is required. A02/A03 are REVIEW. A03.5 records PASS for the exact reviewed uncommitted correction; A02.5/A04/A05 are ready subject to their own prerequisites, and A06 remains ready. Read [workflow](agent-workflow.md) and [A log](work-log-A.md), then claim one task.
 
 ## Existing A01 evidence
 
@@ -14,15 +14,15 @@ A03 is in REVIEW on the current `main` checkout. Its private owner mock now disp
 
 ## A03.5 review handoff
 
-Independent correction review of `1119d9d29db9b5d00658e145a6a01e51c6ac1d45`: **CHANGES_REQUESTED**. Reviewer: independent A-lane GPT-6 Astra session; effort not independently exposed. [Current evidence and preserved prior reviews](reviews/A03.5.md).
+Independent review of the uncommitted R2/R5 correction against `cfb337104cff4d760986c849ab55606bf8ba0afa`: **PASS**. Reviewer: independent A-lane GPT-6 session; variant/effort not independently exposed. [Exact reviewed diff/hash, fresh results and historical evidence](reviews/A03.5.md).
 
-V1 is closed. R2 now preserves unrelated hard intervals and displays the submitted duration, but initializes from the first condition while submitting against a later negotiable condition. R5 safely blocks confirmation after edits, but unchanged submissions still allow confirmation of the old draft after accepted or unknown outcomes. A owns the remaining corrections. R1/R3/R4 retain preparation closures.
+R2/R5 are closed for preparation; R1/R3/R4/V1 retain their closures. One explicit condition/interval now drives initialization, display and serialization. Every draft submission invalidates checked coverage and confirmation, including unchanged submissions and unknown-outcome retries. Confirmation remains unavailable pending a current snapshot; actual API refresh and subsequent fresh review belong to A02.5.
 
-Fresh pinned full check passes: 170/170 unit/integration, 26/26 browser, references/planning/lint/types/build/privacy scan. Focused checks pass 12/12 unit and 24/24 browser. Eight independent observations confirm both fixed paths and remaining defects. Review claim finished; no implementation claim taken. A02/A03/A03.5 remain REVIEW; A02.5/A04/A05 stay BLOCKED; B03/A06 retain separate gates. Mock evidence is not live/API/authentication acceptance; human acceptance remains pending.
+Fresh reviewer evidence with pinned Node/npm and the documented Chrome fallback: full check 171/171 unit/integration and 29/29 browser; focused 13/13 unit and 27/27 browser; 11 independent probes passed. A02/A03/A03.5 remain REVIEW pending human acceptance. A02.5/A04/A05 checkpoint blocks are released and tickets are READY/unclaimed, subject to their own prerequisites and synchronization of the exact reviewed artifact. No implementation task claimed, implementation files changed, commit or publication performed by this review.
 
 ## Next work and transfer
 
-A02's local preparation supplies strict command construction, injected browser transport, network-failure retry, stale refresh without automatic replay, and intercepted HTTP browser coverage, subject to the open A03.5 findings above. It uses only synthetic owner data and does not prove a live API or authentication. A03 adds receipt/accessibility preparation. A06 prepares demo/trial/setup drafts. These no longer wait for B02/G01. A03.5 reviews frontend boundaries; A02.5 retains real API verification with B03, followed by G01. After A03.5 PASS, A04/A05 preparation can proceed independently of the later backend implementation; their .5 tickets retain live verification.
+A02.5 is now REVIEW: `?view=owner&local=<maya|leo|nina>` and `?local=display` read B03's loopback API using its explicit fixed non-production labels; command success refreshes both private and public snapshots. Mock routes remain the default and no browser source imports server fixtures. The existing B03 HTTP integration flow verifies the real negotiation, independent disclosure refusal, three approvals and duration invalidation; the full UI suite and full check pass. This changed source requires a fresh independent follow-up review before G01. It is not production authentication. A03 adds receipt/accessibility preparation; A06 prepares demo/trial/setup drafts. A04/A05 retain their own gates.
 
 B01 source and prior review evidence are now included from 04c87d7. B02 source and final independent review evidence are also available from 47b97eb; the user authorized their integration. B must not restart those tasks. B has standing authorization to implement an available A task when A lacks tokens, after finishing/pausing its own task and recording the claim or explicit transfer. Active A work needs a saved diff/commit and a release; never infer release from silence. B records its work in [B log](work-log-B.md).
 

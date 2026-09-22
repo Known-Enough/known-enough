@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { PublicRoomSnapshot } from '@deal-table/contracts';
 import { publicMockClient, type PublicMockScenario } from './mock-adapter';
+import { LocalApiClient } from './local-api-client';
 
 type LoadState = { kind: 'loading' } | { kind: 'failure' } | { kind: 'loaded'; value: PublicRoomSnapshot | null; stale: boolean };
 
@@ -20,7 +21,7 @@ export function isPublicMockScenario(value: string | null): value is PublicMockS
     || value === 'private-review' || value === 'proposed' || value === 'agreed' || value === 'superseded';
 }
 
-export function PublicScreen({ initialScenario }: { initialScenario: PublicMockScenario }) {
+export function PublicScreen({ initialScenario, local = false }: { initialScenario: PublicMockScenario; local?: boolean }) {
   const [scenario, setScenario] = useState(initialScenario);
   const [state, setState] = useState<LoadState>({ kind: 'loading' });
   const request = useRef(0);
@@ -28,7 +29,10 @@ export function PublicScreen({ initialScenario }: { initialScenario: PublicMockS
   const load = (refresh = false, nextScenario = scenario) => {
     const requestId = ++request.current;
     setState({ kind: 'loading' });
-    publicMockClient.readPublicRoom(nextScenario, { refresh }).then(result => {
+    const read = local
+      ? new LocalApiClient('display').publicRoom().then(value => ({ value, freshness: 'fresh' as const }))
+      : publicMockClient.readPublicRoom(nextScenario, { refresh });
+    read.then(result => {
       if (requestId === request.current) setState({ kind: 'loaded', value: result.value, stale: result.freshness === 'stale' });
     }).catch(() => { if (requestId === request.current) setState({ kind: 'failure' }); });
   };
@@ -36,7 +40,7 @@ export function PublicScreen({ initialScenario }: { initialScenario: PublicMockS
   useEffect(() => {
     load();
     return () => { request.current += 1; };
-  }, [initialScenario]);
+  }, [initialScenario, local]);
 
   const retry = () => { setScenario('collecting'); load(false, 'collecting'); };
   const refresh = () => load(true);
@@ -44,9 +48,9 @@ export function PublicScreen({ initialScenario }: { initialScenario: PublicMockS
   const stale = state.kind === 'loaded' && state.stale;
 
   return <main>
-    <header className="masthead"><div><p className="eyebrow">TEAMTABLE · LAUNCH REHEARSAL</p><h1>Deal Table</h1></div><div className="header-actions"><span className="badge">Shared table · local demo</span><a className="quiet-link" href="?view=owner&owner=review">Open private owner demo</a></div></header>
+    <header className="masthead"><div><p className="eyebrow">TEAMTABLE · LAUNCH REHEARSAL</p><h1>Deal Table</h1></div><div className="header-actions"><span className="badge">{local ? 'Loopback API · non-production identity' : 'Shared table · local demo'}</span><a className="quiet-link" href={local ? '?view=owner&local=nina' : '?view=owner&owner=review'}>Open private owner demo</a></div></header>
     <p className="promise">Agree on the work without having to explain your life.</p>
-    <p className="notice">Fictional data for an interface demo. This shared screen uses only public fields. Local examples are not authentication and do not change anyone’s permissions.</p>
+    <p className="notice">Fictional data for an interface demo. This shared screen uses only public fields. {local ? 'The fixed display label is a local non-production identity, not authentication.' : 'Local examples are not authentication and do not change anyone’s permissions.'}</p>
     {state.kind === 'loading' && <p role="status" className="state-card">Loading shared local example…</p>}
     {state.kind === 'failure' && <section role="alert" className="state-card failure"><h2>Shared example unavailable</h2><p>The local fixture did not load. Retry uses the default successful example.</p><button type="button" onClick={retry}>Retry local example</button></section>}
     {stale && <section role="alert" className="stale-banner"><strong>This local snapshot is stale.</strong><span>Refresh before using any simulated control.</span><button type="button" onClick={refresh}>Refresh shared example</button></section>}

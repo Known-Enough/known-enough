@@ -6,9 +6,9 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 
 ## Work available now
 
-- A: A02/A03 remain REVIEW. Independent [A03.5 correction review](reviews/A03.5.md) on `1119d9d` remains CHANGES_REQUESTED: R2/R5 have remaining initialization/submission defects; V1 closed and full check passes. R1/R3/R4 retain preparation closures. A02.5/A04/A05 remain BLOCKED; A06 remains ready. Corrections belong to A; serialize overlapping frontend files.
+- A: A02/A03/A03.5 remain REVIEW pending human acceptance. Independent [A03.5 review](reviews/A03.5.md) records PASS for the exact uncommitted R2/R5 correction against `cfb3371`; all preparation findings closed. Fresh full check: 171/171 unit/integration, 29/29 browser. A02.5/A04/A05 are READY, unclaimed, subject to their own prerequisites and synchronization of this artifact; A06 remains ready.
 - B: B03 source `27a110c` is integrated into main; REVIEW pending live A02.5/G01 acceptance. No new B task is claimed. B may claim eligible available work using the existing procedure.
-- No new implementation task is claimed by this planning update. B02’s completed claim is released. Separate clones use main for future work; the integrated legacy task branches are historical pointers; no new work belongs on them.
+- A02.5 is REVIEW by A / Codex GPT-5 (scheduled Terra/medium unavailable): explicit local UI/API transport and refreshed snapshots are implemented, with full-check evidence recorded. Its source changes require independent follow-up review; human acceptance and G01 remain separate. B02’s completed claim is released. Separate clones use main for future work; the integrated legacy task branches are historical pointers; no new work belongs on them.
 
 ## First parallel batch: local product
 
@@ -22,7 +22,7 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 | [B02](tasks/B02.md) | Astra / high | B01 on main | DONE; integrated and verified |
 | [B02.5](tasks/B02.5.md) | Astra / high | Reviewable B02 slice | DONE; PASS, evidence reconciled |
 | [B03](tasks/B03.md) | Terra / medium | B02 usable implementation | REVIEW; local HTTP integrated from `27a110c`, live acceptance pending |
-| [A03.5](tasks/A03.5.md) | Astra / high | A02 + A03 preparation | REVIEW; CHANGES_REQUESTED on `1119d9d`; R2/R5 open, V1 closed; full check passes |
+| [A03.5](tasks/A03.5.md) | Astra / high | A02 + A03 preparation | REVIEW; PASS on exact uncommitted correction against `cfb3371`; human acceptance pending |
 | [A02.5](tasks/A02.5.md) | Terra / medium | A02, A03.5, reviewed B02/B02.5, B03 | Actual local API integration |
 | [G01](tasks/G01.md) | Astra / high | A02.5, A03.5, B03, B02.5 current evidence | Local end-to-end acceptance checkpoint |
 
@@ -44,7 +44,7 @@ A02/A03/A06 do not wait for B02/B03/G01. A03.5 does not wait for backend code. B
 | [A06.5](tasks/A06.5.md) | Terra / medium | A06, G01, G02, operational B06 | Integrated transitions, human trials, recording evidence |
 | [G03](tasks/G03.md) | Astra / high | A05.5, A06.5, operational B06, G02 | Release readiness; no automatic publish |
 
-A04/A05 preparation can start before G01 when their own prerequisites are ready; currently A03.5 findings keep A04/A05 and A02.5 BLOCKED. B04.5 is a milestone inside B04, not a requirement to finish B04 before reviewing it. Only the remaining critical B04 implementation waits for that review. External testers still require G02 and the relevant operational readiness.
+A04/A05 preparation can start before G01 when their own prerequisites are ready; A03.5 now passes for the exact recorded artifact and releases its A04/A05/A02.5 blocks. A04 still requires an agreed session interface before relying on it. B04.5 is a milestone inside B04; remaining critical B04 implementation waits for that review. External testers still require G02 and operational readiness.
 
 ## Tracking and evidence
 

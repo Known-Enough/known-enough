@@ -37,6 +37,8 @@ export function browserCommandTransport(fetcher: typeof fetch = fetch): CommandT
   };
 }
 
+export function commandTransport(post: CommandTransport['post']): CommandTransport { return { post }; }
+
 function randomId(prefix: string): string {
   return `${prefix}-${globalThis.crypto.randomUUID()}`;
 }
