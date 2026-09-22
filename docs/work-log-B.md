@@ -59,4 +59,4 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 
 - Documentation update requested by the user; direct worker: Codex GPT-5. Baseline: clean `main` at the start of the task. Added `docs/tutorials/local-negotiation.md` covering frontend/API startup, four local tabs, sequential negotiation and refusal paths, mock/recovery screens, accessibility checks, the duration-selector caveat, and failure evidence fields. Linked it from `README.md`.
 - Documentation-only checks: `npm run check:references` passed; `npm run check:planning` passed. No application files changed and no live-flow result is claimed by this documentation update.
-- Next: commit the tutorial changes after reviewing the diff, verify `main` and the remote tip, then push explicitly to `origin main` under the user’s authorization.
+- Publication: reviewed the diff, verified the checked-out branch was `main`, fetched and confirmed the remote tip, then pushed explicitly to `origin main`. Tutorial commit `2fa71a9` is now synchronized with `origin/main`.
