@@ -1,5 +1,13 @@
 # Bootstrap decisions and risks
 
+## September 22, 2026 — shared task pool and AI facilitator extension
+
+User instruction replaces A/B user assignments with one shared pool. Either user may claim any eligible unclaimed task; existing claims, independent reviews, separate clones and external-action permissions remain. Historical task IDs and personal log filenames are preserved. [Workflow](agent-workflow.md) and [board](task-board.md) govern current scheduling; older ownership statements below are historical.
+
+Private extraction already belongs to A05/B05/A05.5. New [T01](tasks/T01.md) defines shared-objective clarification, solver-supported private suggestions and explanations drawn only from authorized public facts; [T02](tasks/T02.md) implements/evaluates that experience using the existing AWS plan. Neither task promises unrestricted negotiation, hidden-reason disclosure or autonomous consent. This update records scope, not implementation, live AWS evidence or human acceptance.
+
+## Historical decisions
+
 - Intended application workspace: the user's open, empty `/home/martelaxe/known-enough`. Inspection found no existing files, applicable parent AGENTS or enclosing Git repository. Initialized a local main branch only. No existing work overwritten, no remote configured, no publish or commit performed.
 - All seven requested references were accessible under the WSL Windows mount. The user-supplied task path omitted the separators before `.codex` and `.chatgpt-projects`; the task's own source list resolved correctly. Copied, never moved. Source/destination byte equality was checked at import; SHA-256 manifest supports portable integrity checks. Original absolute paths remain in immutable source documents as provenance, never in scripts/config/runtime imports. No account configuration or source mirror AGENTS imported.
 - Product and architecture were read completely; no material consent/privacy contradiction found. Two-developer sequence supersedes historical solo tickets. F00–F02 provides contracts and a minimal page; B01/B02 remain unimplemented. Imported storyboard is visual reference only and is never served/imported by the app.

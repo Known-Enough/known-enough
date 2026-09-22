@@ -1,8 +1,8 @@
 # Model selection and historical execution evidence
 
-Current policy, September 20, 2026: humans select the direct model/effort printed in each [task ticket](task-board.md). See [workflow](agent-workflow.md). Terra handles routine implementation, Luna narrow UI/docs, Sol difficult backend work, Astra architecture and explicit critical checkpoints. No required Astra coordinator or subagent. B02 retains its ongoing Astra assignment; B01 source and prior execution evidence are now integrated from 04c87d7; current results are in [main integration](main-integration.md). Model selection does not change task state or establish verified results.
+Current policy, September 22, 2026: humans select the direct model/effort printed in each [task ticket](task-board.md). See [workflow](agent-workflow.md). Terra handles routine implementation, Luna narrow UI/docs, Sol difficult backend work, Astra architecture and explicit critical checkpoints. No required Astra coordinator or subagent. B02 retains its ongoing Astra assignment; B01 source and prior execution evidence are now integrated from 04c87d7; current results are in [main integration](main-integration.md). Model selection does not change task state or establish verified results.
 
-Current claims/progress belong in the tickets and [A](work-log-A.md)/[B](work-log-B.md) logs. B may take eligible A tasks via recorded ownership transfer. Main in separate clones replaces mandatory task branches. This scheduling update does not move branches, change a running B session or share files automatically.
+Current claims/progress belong in the tickets and [A](work-log-A.md)/[B](work-log-B.md) logs. Either user may claim any eligible unclaimed task from the shared pool; active work still requires an explicit transfer. Main in separate clones replaces mandatory task branches. This scheduling update does not move branches, change a running B session or share files automatically.
 
 ## Historical record — prior policy, not current instructions
 

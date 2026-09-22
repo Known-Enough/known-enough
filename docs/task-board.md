@@ -1,14 +1,16 @@
-# Parallel task board
+# Shared task pool
 
-Scheduling revision: September 20, 2026. Tickets are authoritative for detailed gates/status; update this summary when handing off. Model means the human-selected DIRECT worker, with no mandatory Astra coordinator. A/B prefixes identify subsystems; B can implement available A tasks using the [transfer procedure](agent-workflow.md#b-can-cover-a-when-capacity-changes).
+Scheduling revision: September 22, 2026. Both users choose from this single pool. A/B task prefixes are stable historical IDs, not user assignments or permanent subsystem ownership. Tickets are authoritative for status, prerequisites and current claims; follow the [shared claim/transfer procedure](agent-workflow.md#shared-pool-claims-and-transfers). Model means the human-selected DIRECT worker. Existing active claims and independent review requirements remain in force.
 
 Current integration: foundation, A01, workflow refactor, B01 and B02 are on main at the user’s direction. See [main integration](main-integration.md) for combined verification/publication state and [B02.5](reviews/B02.5.md) for review evidence. No new implementation task is claimed by integration.
 
 ## Work available now
 
-- A: A02/A03/A03.5 remain REVIEW pending human acceptance. Independent [A03.5 review](reviews/A03.5.md) records PASS for the exact uncommitted R2/R5 correction against `cfb3371`; all preparation findings closed. Fresh full check: 171/171 unit/integration, 29/29 browser. A02.5/A04/A05 are READY, unclaimed, subject to their own prerequisites and synchronization of this artifact; A06 remains ready.
-- B: B03 source `27a110c` is integrated into main; REVIEW pending live A02.5/G01 acceptance. No new B task is claimed. B may claim eligible available work using the existing procedure.
-- A02.5 is REVIEW by A / Codex GPT-5 (scheduled Terra/medium unavailable): explicit local UI/API transport and refreshed snapshots are implemented, with full-check evidence recorded. Its source changes require independent follow-up review; human acceptance and G01 remain separate. B02’s completed claim is released. Separate clones use main for future work; the integrated legacy task branches are historical pointers; no new work belongs on them.
+- Either user may claim [T01](tasks/T01.md) (Astra/high): define the shared-objective AI facilitator, verified private suggestions and public-only explanations. This is design work; it can proceed before live AI integration.
+- [A04](tasks/A04.md), [A05](tasks/A05.md) and [A06](tasks/A06.md) are READY candidates for either user, subject to ticket prerequisites and synchronized claims. A04 still requires an agreed session interface. Serialize overlapping frontend files.
+- [A02.5](tasks/A02.5.md) retains its existing A claim and authoritative IN_PROGRESS status. The newer [local readiness fix record](issues/2026-09-22-local-plan-stuck.md) reports successful negotiation and checks, while the ticket still records the earlier failure. The current claimant must reconcile the evidence/status and hand off for independent review; this scheduling change does not release or accept the task. G01 remains BLOCKED.
+- A02/A03/A03.5 remain REVIEW pending human acceptance. A03.5 records preparation PASS rechecked on `bc02dc6`; changed integration code still needs follow-up review.
+- B03 source `27a110c` is integrated and remains REVIEW pending A02.5/G01 live acceptance. No new implementation claim is created by this scheduling update. Finished B01/B02 work must not be restarted.
 
 ## First parallel batch: local product
 
@@ -22,8 +24,8 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 | [B02](tasks/B02.md) | Astra / high | B01 on main | DONE; integrated and verified |
 | [B02.5](tasks/B02.5.md) | Astra / high | Reviewable B02 slice | DONE; PASS, evidence reconciled |
 | [B03](tasks/B03.md) | Terra / medium | B02 usable implementation | REVIEW; local HTTP integrated from `27a110c`, live acceptance pending |
-| [A03.5](tasks/A03.5.md) | Astra / high | A02 + A03 preparation | REVIEW; PASS on exact uncommitted correction against `cfb3371`; human acceptance pending |
-| [A02.5](tasks/A02.5.md) | Terra / medium | A02, A03.5, reviewed B02/B02.5, B03 | Actual local API integration |
+| [A03.5](tasks/A03.5.md) | Astra / high | A02 + A03 preparation | REVIEW; preparation PASS rechecked on `bc02dc6`; human acceptance pending |
+| [A02.5](tasks/A02.5.md) | Terra / medium | A02, A03.5, reviewed B02/B02.5, B03 | IN_PROGRESS; existing claim preserved; reconcile newer fix evidence before handoff |
 | [G01](tasks/G01.md) | Astra / high | A02.5, A03.5, B03, B02.5 current evidence | Local end-to-end acceptance checkpoint |
 
 A02/A03/A06 do not wait for B02/B03/G01. A03.5 does not wait for backend code. B03 acceptance still requires review of B02's final critical delta. Integration and human review cannot be replaced with synthetic browser tests.
@@ -41,10 +43,21 @@ A02/A03/A06 do not wait for B02/B03/G01. A03.5 does not wait for backend code. B
 | [B05](tasks/B05.md) | Sol / high | Reviewed B04/B04.5 | Owner extraction/jobs and safe routing |
 | [A05.5](tasks/A05.5.md) | Terra / medium | A05, B05, A04.5 | Live extraction with owner confirmation |
 | [B06](tasks/B06.md) | Sol / high | B05; explicit approval for cloud actions | Infrastructure/operations and authorized deployment |
-| [A06.5](tasks/A06.5.md) | Terra / medium | A06, G01, G02, operational B06 | Integrated transitions, human trials, recording evidence |
-| [G03](tasks/G03.md) | Astra / high | A05.5, A06.5, operational B06, G02 | Release readiness; no automatic publish |
+| [A06.5](tasks/A06.5.md) | Terra / medium | A06, G01, G02, operational B06, T02 | Integrated transitions, human trials, recording evidence |
+| [G03](tasks/G03.md) | Astra / high | A05.5, A06.5, operational B06, G02, T02 | Release readiness; no automatic publish |
 
 A04/A05 preparation can start before G01 when their own prerequisites are ready; A03.5 now passes for the exact recorded artifact and releases its A04/A05/A02.5 blocks. A04 still requires an agreed session interface before relying on it. B04.5 is a milestone inside B04; remaining critical B04 implementation waits for that review. External testers still require G02 and operational readiness.
+
+## AI facilitator extension
+
+Existing A05/B05/A05.5 cover private extraction and confirmation. These neutral-ID tasks add the missing shared-objective and explanation experience without duplicating that work.
+
+| Task | Direct model / effort | Prerequisite | Outcome / current state |
+| --- | --- | --- | --- |
+| [T01](tasks/T01.md) | Astra / high | Current product/contracts; existing AI ticket scope | READY, unclaimed; bounded interaction/privacy design and evaluation specification |
+| [T02](tasks/T02.md) | Sol / high | Reviewed T01, B05, A05.5, G02; authorized live calls | BLOCKED; implement and verify AI facilitator; independent review of new boundaries |
+
+A06 can draft a clearly labeled future AI narrative after T01; A06.5's final integrated recording and G03 require T02 evidence. Initial G02 enables T02; T02's changed boundaries require follow-up G02 review before release. This is not a dependency cycle or authorization to deploy/spend.
 
 ## Tracking and evidence
 

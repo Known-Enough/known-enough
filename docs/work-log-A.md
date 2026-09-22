@@ -1,8 +1,17 @@
 # Developer A work log
 
-A writes this log; B writes [its own log](work-log-B.md), including frontend work it takes over. Ticket status/claim is authoritative. Entries are progress summaries, not private reasoning or a live inter-clone lock. Use the [workflow](agent-workflow.md).
+A writes this log; B writes [its own log](work-log-B.md), regardless of task prefix in the shared pool. Ticket status/claim is authoritative. Entries are progress summaries, not private reasoning or a live inter-clone lock. Use the [workflow](agent-workflow.md).
 
 Entry format: UTC time | task/state | developer/model/effort | baseline/commit/diff | files | outcome/decision | checks (actual command, exit/results) | blockers/next action. For a transfer include released task, saved untracked files, receiving developer, and confirmation that the old writer stopped.
+
+
+## 2026-09-22T18:17:59Z — shared pool / AI task planning — REVIEW
+
+- User-authorized documentation update; actual worker: Codex GPT-6 in this user session (variant/effort not independently exposed), recording in the existing A personal log. Baseline `4b11851` on `main`, initially clean. No application task claimed, subagents, implementation edits or task acceptance.
+- Replaced permanent A/B assignments and asymmetric coverage with a single shared pool across AGENTS, workflow, all existing tickets, board, handoffs, README and mutable ownership guidance. Historical task IDs and actual claims/evidence remain; existing active A02.5 claim is protected. B's personal log and imported references are unchanged.
+- Existing A05/B05/A05.5 already cover private extraction. Added [T01](tasks/T01.md) READY (Astra/high) for objective/suggestion/public-explanation design and [T02](tasks/T02.md) BLOCKED (Sol/high) for implementation and live evaluation. Wired final demo/release dependencies; no live AI, cloud access or spending is implied. Public-only model context, solver-verified suggestions, separate permissions and independent review are explicit acceptance requirements.
+- Documentation checks: pinned Node 24.21.0/npm 11.19.0 `npm run check:references` exit 0 (7/7); temporary local link/task checker exit 0 (all changed-document local targets/anchors, 27 shared-pool tickets, prerequisite graph, protected active claim and unchanged B log); `git diff --check` exit 0. Application suite not run because only Markdown changed. The checker distinguishes prerequisite sentences from references to later integration/midpoint work.
+- Handoff: either user may claim T01 or another eligible READY task after synchronizing claims. A02.5's ticket still says IN_PROGRESS while newer issue evidence reports a fix; the board flags this for its claimant without releasing the task or asserting fresh verification. Review/share this documentation through the existing authorized process; no commit, push, merge, deployment or external message performed.
 
 ## 2026-09-22T16:00:00Z — A02.5 / IN_PROGRESS — current-revision live browser verification
 

@@ -1,18 +1,20 @@
-# Developer B handoff — B03 integrated; live integration next
+# User B handoff — shared task pool
+
+Current scheduling (September 22): either user may claim any eligible unclaimed task from the [shared board](task-board.md). Existing active claims remain protected; historical A/B IDs and these personal handoff filenames do not assign work. Check the authoritative ticket before claiming. [T01](tasks/T01.md) defines the AI facilitator extension; [T02](tasks/T02.md) implements it after its prerequisites.
 
 Current integration: A01/workflow, B01 (04c87d7) and B02 (47b97eb) are consolidated on main at the user’s direction. See [integration results](main-integration.md) and [B02.5 review evidence](reviews/B02.5.md). B02 is no longer an active implementation claim; preserve any newer unshared changes before synchronizing.
 
-B03 `27a110c` is now integrated on main by explicit user request. It provides local HTTP composition and fixed non-production test identities; see [API instructions](../apps/api/README.md). B03 remains REVIEW for live acceptance. A02.5/G01 depend on resolving the existing A03.5 frontend findings; this integration does not close them. Real authentication/persistence remain B04 work. No new task is claimed.
+B03 `27a110c` is now integrated on main by explicit user request. It provides local HTTP composition and fixed non-production test identities; see [API instructions](../apps/api/README.md). B03 remains REVIEW for live acceptance. A02.5/G01 retain their current ticket gates and follow-up review requirements. Real authentication/persistence remain B04 work. No new task is claimed.
 
-## More capacity can cover frontend work
+## Selecting shared work
 
-The user explicitly authorizes B to take eligible A tasks. First finish or safely pause the active implementation task, synchronize current claims, then claim a READY unclaimed task or an explicitly released task. A02 (Terra medium), A03 (Luna medium) and A06 (Luna medium) are initial candidates; this handoff does not claim them for B. If A is actively editing, obtain a release and exact saved work before resuming. Follow [the transfer procedure](agent-workflow.md#b-can-cover-a-when-capacity-changes), the selected ticket's file limits/tests and its model assignment. B's larger token budget does not imply using Astra for routine frontend work.
+Finish or safely pause your current task, then check the shared board and both users' latest claims. Either user may take any eligible READY task. Follow the [claim and transfer procedure](agent-workflow.md#shared-pool-claims-and-transfers), the ticket's model and file scope, and independent-review requirements.
 
 A01 and the revised workflow are now included on main. If the clone has any changes beyond published B02, save them in a commit or transferable diff including untracked files before incorporating shared main. Do not reset or discard local work. Old task branches are historical; use main for subsequent tasks. No automatic access to A's clone or credentials exists. Shared log updates require authorized sharing; they are not live locks.
 
 ## Boundaries and acceptance
 
-B remains backend/contracts steward; A remains frontend/root steward. Claims transfer implementation ownership. Coordinate shared contract/root edits before changing them; a separate Astra reviewer can cover technical compatibility if A lacks capacity. Human acceptance is still required. Browser code imports contracts only, never backend/private fixtures. Public projections, independent consent, stale-version/idempotency enforcement and atomic acceptance retain their checks.
+The recorded task claimant owns the agreed implementation scope. Coordinate overlapping files and shared contract/root edits before changing them; critical compatibility changes require independent review. Human acceptance is still required. Browser code imports contracts only, never backend/private fixtures. Public projections, independent consent, stale-version/idempotency enforcement and atomic acceptance retain their checks.
 
 Use main in your separate clone for future work. Preserve any legacy branch/uncommitted work until authorized integration. No publication, push, PR, merge, deployment or paid-resource authorization is granted by this handoff. Actual auth/cloud/transaction results belong to later tested integration tasks, not mock preparation.
 

@@ -1,6 +1,6 @@
 # Contract v1 — B02 local application
 
-Executable authority: [schemas and hash implementation](../packages/contracts/src/index.ts). Ownership transfers to B after bootstrap, with A reviewing breaking changes. Package version 0.1.0, wire schemaVersion 1. B02 implements local application transitions and an in-memory repository. B03 provides the future HTTP boundary; verified authentication and durable transactions remain later adapter work.
+Executable authority: [schemas and hash implementation](../packages/contracts/src/index.ts). Either user may claim contract work through the shared pool, with coordinated consumer review for breaking changes. Package version 0.1.0, wire schemaVersion 1. B02 implements local application transitions and an in-memory repository. B03 provides the future HTTP boundary; verified authentication and durable transactions remain later adapter work.
 
 ## Examples and boundaries
 
@@ -12,9 +12,9 @@ OwnerSnapshot contains only the authenticated caller's confirmed structures, exp
 
 Finite conditions: HARD_AVAILABILITY lists explicitly covered full intervals; NEGOTIABLE_UNAVAILABLE blocks an interval unless expressly authorized and may invite one exception question. Duty costs are integers 0–3. No reasons required. Availability outside confirmed coverage is unknown. Dates are valid ISO calendar dates; integer minutes and explicit America/Mexico_City are never converted to browser timezone. Wire slots support 30 or 60 minutes so the seeded duration revision can be represented; the initial domain supports 30-minute choices. A 60-minute edit is a new context requiring reconfirmed full-interval coverage, never extrapolated acceptance.
 
-ExceptionScope binds condition, room, opaque context, decision/input revisions, exact roster set, policy, exact dated meeting interval, owner-no-weekend-duty predicate and expiry. B must verify the affected condition is negotiable and belongs to the caller, the offer is current, and every candidate satisfies it. The predicate is a finite enum, not executable code.
+ExceptionScope binds condition, room, opaque context, decision/input revisions, exact roster set, policy, exact dated meeting interval, owner-no-weekend-duty predicate and expiry. The backend must verify the affected condition is negotiable and belongs to the caller, the offer is current, and every candidate satisfies it. The predicate is a finite enum, not executable code.
 
-DisclosurePreview binds exact normalized sentence, SHA-256 text hash, explicit audience member set, room/context/revision, expiry and an inference warning. Normalize Unicode NFC, CRLF/CR to LF and trim outer whitespace **before** preview; preserve internal spaces/case/punctuation. UTF-8 SHA-256 hashes that exact text. B must verify hash and current audience/grant immediately before publication. Declining disclosure does not cancel the exception or prevent an otherwise feasible proposal. Revocation stops future publication; it cannot erase what people already read. Public receipts contain only actually published text/audience/time/version, never private grant IDs.
+DisclosurePreview binds exact normalized sentence, SHA-256 text hash, explicit audience member set, room/context/revision, expiry and an inference warning. Normalize Unicode NFC, CRLF/CR to LF and trim outer whitespace **before** preview; preserve internal spaces/case/punctuation. UTF-8 SHA-256 hashes that exact text. The backend must verify hash and current audience/grant immediately before publication. Declining disclosure does not cancel the exception or prevent an otherwise feasible proposal. Revocation stops future publication; it cannot erase what people already read. Public receipts contain only actually published text/audience/time/version, never private grant IDs.
 
 ## Versions and proposal hash
 

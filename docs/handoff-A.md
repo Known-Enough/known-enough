@@ -1,6 +1,8 @@
-# Developer A handoff — parallel frontend preparation
+# User A handoff — shared task pool
 
-Use the direct model/effort printed in the [ticket](task-board.md); no Astra manager is required. A02/A03 are REVIEW. A03.5 records PASS for the exact reviewed uncommitted correction; A02.5/A04/A05 are ready subject to their own prerequisites, and A06 remains ready. Read [workflow](agent-workflow.md) and [A log](work-log-A.md), then claim one task.
+Current scheduling (September 22): either user may claim any eligible unclaimed task from the [shared board](task-board.md). Existing active claims remain protected; historical A/B IDs and these personal handoff filenames do not assign work. Check the authoritative ticket before claiming. [T01](tasks/T01.md) defines the AI facilitator extension; [T02](tasks/T02.md) implements it after its prerequisites.
+
+Use the direct model/effort printed in the [ticket](task-board.md); no Astra manager is required. A02/A03 are REVIEW. A03.5 records PASS for the exact reviewed uncommitted correction; A04/A05/A06 remain preparation candidates subject to prerequisites and current claims; A02.5 retains its existing claim. Read [workflow](agent-workflow.md) and [A log](work-log-A.md), then claim one task.
 
 ## Existing A01 evidence
 
@@ -22,9 +24,9 @@ Fresh reviewer evidence with pinned Node/npm and the documented Chrome fallback:
 
 ## Next work and transfer
 
-A02.5 is now REVIEW: `?view=owner&local=<maya|leo|nina>` and `?local=display` read B03's loopback API using its explicit fixed non-production labels; command success refreshes both private and public snapshots. Mock routes remain the default and no browser source imports server fixtures. The existing B03 HTTP integration flow verifies the real negotiation, independent disclosure refusal, three approvals and duration invalidation; the full UI suite and full check pass. This changed source requires a fresh independent follow-up review before G01. It is not production authentication. A03 adds receipt/accessibility preparation; A06 prepares demo/trial/setup drafts. A04/A05 retain their own gates.
+Earlier A02.5 implementation handoff (superseded for scheduling by its current IN_PROGRESS claim; see the board's evidence discrepancy): `?view=owner&local=<maya|leo|nina>` and `?local=display` read B03's loopback API using its explicit fixed non-production labels; command success refreshes both private and public snapshots. Mock routes remain the default and no browser source imports server fixtures. The existing B03 HTTP integration flow verifies the real negotiation, independent disclosure refusal, three approvals and duration invalidation; the full UI suite and full check pass. This changed source requires a fresh independent follow-up review before G01. It is not production authentication. A03 adds receipt/accessibility preparation; A06 prepares demo/trial/setup drafts. A04/A05 retain their own gates.
 
-B01 source and prior review evidence are now included from 04c87d7. B02 source and final independent review evidence are also available from 47b97eb; the user authorized their integration. B must not restart those tasks. B has standing authorization to implement an available A task when A lacks tokens, after finishing/pausing its own task and recording the claim or explicit transfer. Active A work needs a saved diff/commit and a release; never infer release from silence. B records its work in [B log](work-log-B.md).
+B01 source and prior review evidence are now included from 04c87d7. B02 source and final independent review evidence are also available from 47b97eb; the user authorized their integration. Neither user should restart those completed tasks. Use the shared-pool claim/transfer procedure; active work needs an explicit release and saved artifact. Each user records work in their own log, regardless of task prefix.
 
 This checkout uses main. A01, the workflow refactor and B01/B02 work are consolidated at the user’s direction; historical branches are retained without new work. See [integration/publication state](main-integration.md). Future tasks use main in separate clones and retain their review/authorization gates.
 
