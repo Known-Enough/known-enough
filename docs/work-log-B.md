@@ -1,5 +1,18 @@
 # Developer B work log
 
+## 2026-09-22 — A02.5 repair takeover / IN_PROGRESS
+
+- User resumed work after the explicit release question; B records authorization to repair the three G01 blockers. Baseline `0bb8a0f` plus preserved documentation-only G01 assessment (including untracked review). A's existing source and historical evidence remain intact. Actual GPT-6; variant/effort unavailable. B owns `apps/web/**`, `tests/e2e/**` and task/board/B-handoff/log/review records. No backend, shared contracts or root configuration changes planned.
+- Remaining work: fresh-owner inputs and explicit context/solve actions, coherent live revision binding, unknown-outcome retry, real browser regression flow, full check and independent follow-up. B04 remains blocked pending G01.
+
+## 2026-09-22T08:56:21Z — next B task / G01 readiness review
+
+- User requested next B build work. Clean `main` baseline `0bb8a0f`; B04 is next but requires G01. B started bounded prerequisite verification and documentation, with an independent read-only reviewer as required by the checkpoint workflow. Both actual workers report GPT-6; variant/effort not exposed, no claim of scheduled Sol/high or Astra/high selection.
+- Allowed/changed files: `docs/reviews/G01.md`, G01/B04 tickets, task board, B handoff and this log. No application source, A log, root configuration or imported references changed. No commit/push/publication.
+- Independent review: CHANGES_REQUESTED on A02.5, G01 BLOCKED. Fresh-owner submission is a no-op and context/solve controls are absent; live commands use revision 1; local unknown outcomes lose retry. Details and repair criteria in [G01](reviews/G01.md). Requested explicit A02.5 release before B repairs; no active implementation claim or takeover.
+- Restored checksum-verified pinned Node/npm in `/tmp`. Focused HTTP/client tests: sandbox attempt failed on loopback EPERM; authorized loopback rerun passed 17/17, exit 0. Three actual local-client transport probes reproduced missing unchanged retry, exit 0 (defect evidence). No browser/full application acceptance claimed. `npm run check:references` passed all seven immutable hashes; changed documentation links/status checks and `git diff --check` passed, exit 0.
+- Next: A02.5 repairs by named owner, independent follow-up, G01 live browser acceptance, then B04 first slice and B04.5. B04 remains unclaimed/BLOCKED.
+
 B owns ongoing entries in this file, including any A tasks it takes over. This initial entry is the user's report recorded by the planning agent, not an inspection of B's clone. See the [workflow](agent-workflow.md) for claim/transfer rules and the [A log](work-log-A.md) for its latest shared status.
 
 Entry format: UTC time | task/state | developer/model/effort | baseline/commit/diff | files | outcome/decision | checks (actual command, exit/results) | blockers/next action. Record takeover artifacts and stop/resume ownership explicitly. Do not include secrets or private participant data.
@@ -54,3 +67,15 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Final `npm run check` exited 0: 171 unit/integration tests and 29 Chromium tests plus all required checks. Independent Astra/high review confirmed the prior findings closed for mock preparation and approved the two test-only deltas. Application source/contracts remain unchanged from `bc02dc6`.
 - Terra hit a usage limit during the loading-test refinement; Astra completed clock synchronization, passed focused tests, and ran the final full suite. Intermediate origin, clock and port-conflict failures are recorded in the review; no failed run is represented as passing.
 - All pending documentation from this session is preserved. User explicitly authorized commit/push to main; verify checked-out branch and remote tip before reporting publication. A02.5/G01 live acceptance remains separate; no new implementation claim.
+
+
+## 2026-09-22T18:16:17Z — A02.5 repairs / G01 technical PASS / REVIEW
+
+- B / GPT-6 (variant/effort not exposed), baseline `0bb8a0f` plus preserved G01 documentation. User's repeated “resume work” continued the authorized A02.5 repair takeover. A02.5 and G01 now REVIEW; human acceptance/integration pending. B04 remains unclaimed pending G01 acceptance.
+- Changed web command/client/owner UI, added initial-input form and local-client tests, extended owner helper tests, added real browser suite; updated A02.5/G01/B04 tickets, board, A/B handoffs, review and this log. No backend/contracts/root/lockfile/imported references changed. No commit/push.
+- Initial browser setup failed on missing Linux libraries; installed Chromium and extracted Ubuntu shared libraries under `/tmp` only. Live loads then exposed native fetch's illegal receiver; source diagnosis was escalated to the independent reviewer after the failed flow/diagnostic attempt, confirmed in browser, fixed with a global fetch wrapper. Reviewer also found a new do-not-ask preservation bug; added explicit unavailable state and unit/browser regressions. All failures are retained as historical evidence, not acceptance.
+- Fresh focused checks: typecheck exit 0; 18 unit tests exit 0; seven real browser tests exit 0 (`/tmp/g01-browser-check.log`). Final `npm run check` exit 0 (`/tmp/g01-full-check.log`): seven reference hashes, 15 planning checks, lint/boundaries, typecheck, 176 unit/integration tests, build/bundle scan, 36 Chromium browser tests. Pinned Node 24.21.0/npm 11.19.0, Chromium build 1243 and isolated shared libraries; loopback checks used approved sandbox escalation.
+- Independent GPT-6 reviewer (variant/effort not exposed) resumed after a usage-limit interruption and verified the final seven-file manifest and completed logs: PASS, no remaining blocking findings. Exact hashes and limitations in [G01](reviews/G01.md); manifest SHA-256 `e9912fd6237ac889fea63c3eb0939ad9857e0e1e16d1e73f0cc89dda957e9406`.
+- Verified real fresh-room browser inputs/confirmations/setup/solve, independent refusal/disclosure, three approvals, organizer API duration invalidation reflected in browser, exact replay after lost applied responses, no-invitation preservation and incoherent-read blocking. This does not claim organizer editing UI or production identity/persistence/transaction evidence. Next: human G01 acceptance, then B04 under its model and midpoint-review requirements.
+
+- Final documentation validation: all seven reference hashes, changed Markdown links/task states, reviewed source hashes and `git diff --check` pass. Source/test bytes still match the independently reviewed manifest after handoff edits.

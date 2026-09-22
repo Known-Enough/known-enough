@@ -1,4 +1,5 @@
 import { CommandResult, OwnerSnapshot, PublicRoomSnapshot, type CommandEnvelope, type CommandResult as CommandResultType, type OwnerSnapshot as OwnerSnapshotType, type PublicRoomSnapshot as PublicRoomSnapshotType } from '@deal-table/contracts';
+import { UnknownTransportError } from './command-client';
 
 export const LOCAL_API_ORIGIN = 'http://127.0.0.1:8787';
 
@@ -13,7 +14,7 @@ async function json(response: Response): Promise<unknown> {
 }
 
 export class LocalApiClient {
-  constructor(readonly identity: LocalIdentity, readonly origin = LOCAL_API_ORIGIN, readonly fetcher: typeof fetch = fetch) {}
+  constructor(readonly identity: LocalIdentity, readonly origin = LOCAL_API_ORIGIN, readonly fetcher: typeof fetch = (input, init) => globalThis.fetch(input, init)) {}
 
   async publicRoom(roomId = 'room-synthetic'): Promise<PublicRoomSnapshotType> {
     const response = await this.fetcher(`${this.origin}/rooms/${encodeURIComponent(roomId)}/public`, { headers: identityHeader(this.identity) });
@@ -26,12 +27,11 @@ export class LocalApiClient {
   }
 
   async command(command: CommandEnvelope): Promise<CommandResultType> {
-    let response: Response;
     try {
-      response = await this.fetcher(`${this.origin}/rooms/${encodeURIComponent(command.roomId)}/commands`, {
+      const response = await this.fetcher(`${this.origin}/rooms/${encodeURIComponent(command.roomId)}/commands`, {
         method: 'POST', headers: { ...identityHeader(this.identity), 'content-type': 'application/json', 'x-request-id': command.requestId }, body: JSON.stringify(command),
       });
-    } catch { throw new Error('Local API request did not complete'); }
-    return CommandResult.parse(await json(response));
+      return CommandResult.parse(await json(response));
+    } catch { throw new UnknownTransportError(command); }
   }
 }

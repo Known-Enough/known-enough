@@ -6,9 +6,9 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 
 ## Work available now
 
-- A: A02/A03/A03.5 remain REVIEW pending human acceptance. Independent [A03.5 review](reviews/A03.5.md) records PASS for the exact uncommitted R2/R5 correction against `cfb3371`; all preparation findings closed. Fresh full check: 171/171 unit/integration, 29/29 browser. A02.5/A04/A05 are READY, unclaimed, subject to their own prerequisites and synchronization of this artifact; A06 remains ready.
-- B: B03 source `27a110c` is integrated into main; REVIEW pending live A02.5/G01 acceptance. No new B task is claimed. B may claim eligible available work using the existing procedure.
-- A02.5 is REVIEW by A / Codex GPT-5 (scheduled Terra/medium unavailable): explicit local UI/API transport and refreshed snapshots are implemented, with full-check evidence recorded. Its source changes require independent follow-up review; human acceptance and G01 remain separate. B02’s completed claim is released. Separate clones use main for future work; the integrated legacy task branches are historical pointers; no new work belongs on them.
+- A: A02/A03/A03.5 remain REVIEW pending human acceptance. Independent [A03.5 review](reviews/A03.5.md) records PASS for the exact uncommitted R2/R5 correction against `cfb3371`; all preparation findings closed. Fresh full check: 171/171 unit/integration, 29/29 browser. A04/A05 are READY, unclaimed, subject to their own prerequisites and synchronization of this artifact; A06 remains ready.
+- B: A02.5 repairs completed by B after user release; independent [G01 technical review](reviews/G01.md) PASS on the exact uncommitted artifact against `0bb8a0f`. Fresh full check: 176 unit/integration, 36 browser tests. A02.5/G01 are REVIEW pending human acceptance/integration. B04 is next, unclaimed pending that checkpoint acceptance.
+- A02.5 is REVIEW by B / GPT-6 (variant/effort not exposed) after the user-authorized repair takeover. Fresh inputs, setup acceptance, solver invocation, current versions and exact retries now pass real UI/API tests; independent follow-up PASS is recorded. Historical A implementation/evidence remains preserved. B02’s completed claim is released. Separate clones use main for future work; the integrated legacy task branches are historical pointers; no new work belongs on them.
 
 ## First parallel batch: local product
 
@@ -23,8 +23,8 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 | [B02.5](tasks/B02.5.md) | Astra / high | Reviewable B02 slice | DONE; PASS, evidence reconciled |
 | [B03](tasks/B03.md) | Terra / medium | B02 usable implementation | REVIEW; local HTTP integrated from `27a110c`, live acceptance pending |
 | [A03.5](tasks/A03.5.md) | Astra / high | A02 + A03 preparation | REVIEW; PASS on exact uncommitted correction against `cfb3371`; human acceptance pending |
-| [A02.5](tasks/A02.5.md) | Terra / medium | A02, A03.5, reviewed B02/B02.5, B03 | Actual local API integration |
-| [G01](tasks/G01.md) | Astra / high | A02.5, A03.5, B03, B02.5 current evidence | Local end-to-end acceptance checkpoint |
+| [A02.5](tasks/A02.5.md) | Terra / medium | A02, A03.5, reviewed B02/B02.5, B03 | REVIEW by B; live repairs and independent follow-up PASS |
+| [G01](tasks/G01.md) | Astra / high | A02.5, A03.5, B03, B02.5 current evidence | REVIEW; independent technical PASS, human acceptance pending |
 
 A02/A03/A06 do not wait for B02/B03/G01. A03.5 does not wait for backend code. B03 acceptance still requires review of B02's final critical delta. Integration and human review cannot be replaced with synthetic browser tests.
 

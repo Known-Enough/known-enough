@@ -1,5 +1,7 @@
 # Developer A handoff — parallel frontend preparation
 
+Latest A02.5 transfer, 2026-09-22: user released the three G01 repairs to B and resumed work. B completed the exact uncommitted repair artifact against `0bb8a0f`; A02.5/G01 are REVIEW with independent technical PASS and full check 176 unit/integration, 36 browser tests. See [B handoff](handoff-B.md) and [G01 evidence](reviews/G01.md). B remains the repair owner until a reverse handoff; preserve the earlier A implementation/evidence below. Human acceptance/integration remains pending.
+
 Use the direct model/effort printed in the [ticket](task-board.md); no Astra manager is required. A02/A03 are REVIEW. A03.5 records PASS for the exact reviewed uncommitted correction; A02.5/A04/A05 are ready subject to their own prerequisites, and A06 remains ready. Read [workflow](agent-workflow.md) and [A log](work-log-A.md), then claim one task.
 
 ## Existing A01 evidence

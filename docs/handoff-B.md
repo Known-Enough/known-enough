@@ -1,5 +1,7 @@
 # Developer B handoff — B03 integrated; live integration next
 
+Latest handoff, 2026-09-22: **A02.5 repaired by B; G01 technical PASS, human acceptance pending.** User authorized B's repair takeover. The exact uncommitted seven-file artifact against `0bb8a0f` passes independent review and the full check (176 unit/integration, 36 browser tests). [G01 evidence and artifact hashes](reviews/G01.md). Initial inputs, explicit setup/solve actions, coherent revisions, unchanged retries, do-not-ask preservation and native browser fetch are verified. B04 is next, unclaimed pending human checkpoint acceptance. No publication or B04 implementation. Earlier paragraphs below retain historical integration context.
+
 Current integration: A01/workflow, B01 (04c87d7) and B02 (47b97eb) are consolidated on main at the user’s direction. See [integration results](main-integration.md) and [B02.5 review evidence](reviews/B02.5.md). B02 is no longer an active implementation claim; preserve any newer unshared changes before synchronizing.
 
 B03 `27a110c` is now integrated on main by explicit user request. It provides local HTTP composition and fixed non-production test identities; see [API instructions](../apps/api/README.md). B03 remains REVIEW for live acceptance. A02.5/G01 depend on resolving the existing A03.5 frontend findings; this integration does not close them. Real authentication/persistence remain B04 work. No new task is claimed.

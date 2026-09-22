@@ -91,3 +91,16 @@ it('renders the same policy that an exception command binds, including a changed
   expect(exceptionScopeSummary(changed.scope)).toContain('policy Lowest declared inconvenience');
   expect(command.payload).toMatchObject({ scope: { policy: 'LOWEST_INCONVENIENCE' } });
 });
+
+it('preserves a do-not-ask condition when editing only a duty cost', async () => {
+  const room = await ownerMockClient.getOwnerRoom();
+  const original = room.confirmedInputs!.values;
+  const condition = original.conditions[0]!;
+  if (condition.kind !== 'NEGOTIABLE_UNAVAILABLE') throw new Error('Expected unavailable condition');
+  const values = { ...original, conditions: [{ ...condition, inviteException: false }] };
+  const target = editableAvailabilityFor(values)!;
+  expect(target.availability).toBe('unavailable');
+  const edited = valuesForAvailability(values, target.availability, target, target.interval, 3);
+  expect(edited.conditions).toEqual(values.conditions);
+  expect(edited.dutyCosts[0]?.cost).toBe(3);
+});

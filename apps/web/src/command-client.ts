@@ -64,6 +64,14 @@ export function submitInputDraft(room: OwnerSnapshot, context: OwnerCommandConte
   return envelope(room, context, ids, 'SUBMIT_INPUT_DRAFT', { expectedOwnerRevision: room.ownerRevision, values });
 }
 
+export function acceptContext(room: OwnerSnapshot, context: OwnerCommandContext, policy: 'LOWEST_INCONVENIENCE' | 'BALANCE_RECENT_LOAD', ids = browserCommandIds): CommandEnvelopeType {
+  return envelope(room, context, ids, 'ACCEPT_CONTEXT', { policy });
+}
+
+export function requestSolve(room: OwnerSnapshot, context: OwnerCommandContext, ids = browserCommandIds): CommandEnvelopeType {
+  return envelope(room, context, ids, 'REQUEST_SOLVE', {});
+}
+
 export function confirmInputs(room: OwnerSnapshot, context: OwnerCommandContext, draft: NonNullable<OwnerSnapshot['draft']>, reviewedIntervals: Interval[], ids = browserCommandIds): CommandEnvelopeType {
   return envelope(room, context, ids, 'CONFIRM_INPUTS', {
     draftId: draft.draftId,
