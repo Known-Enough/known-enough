@@ -1,8 +1,8 @@
-# Developer A handoff — parallel frontend preparation
+# User A handoff — shared task pool
 
-Latest A02.5 transfer, 2026-09-22: user released the three G01 repairs to B and resumed work. B completed the exact uncommitted repair artifact against `0bb8a0f`; A02.5/G01 are REVIEW with independent technical PASS and full check 176 unit/integration, 36 browser tests. See [B handoff](handoff-B.md) and [G01 evidence](reviews/G01.md). B remains the repair owner until a reverse handoff; preserve the earlier A implementation/evidence below. Human acceptance/integration remains pending.
+Current scheduling (September 22): either user may claim any eligible unclaimed task from the [shared board](task-board.md). Existing active claims remain protected; historical A/B IDs and these personal handoff filenames do not assign work. Check the authoritative ticket before claiming. [T01](tasks/T01.md) defines the AI facilitator extension; [T02](tasks/T02.md) implements it after its prerequisites.
 
-Use the direct model/effort printed in the [ticket](task-board.md); no Astra manager is required. A02/A03 are REVIEW. A03.5 records PASS for the exact reviewed uncommitted correction; A02.5/A04/A05 are ready subject to their own prerequisites, and A06 remains ready. Read [workflow](agent-workflow.md) and [A log](work-log-A.md), then claim one task.
+Use the direct model/effort printed in the [ticket](task-board.md); no Astra manager is required. A02/A03 are REVIEW. A03.5 records PASS for the exact reviewed uncommitted correction; A04/A05/A06 remain preparation candidates subject to prerequisites and current claims; A02.5 retains its existing claim. Read [workflow](agent-workflow.md) and [A log](work-log-A.md), then claim one task.
 
 ## Existing A01 evidence
 
@@ -24,10 +24,14 @@ Fresh reviewer evidence with pinned Node/npm and the documented Chrome fallback:
 
 ## Next work and transfer
 
-A02.5 is now REVIEW: `?view=owner&local=<maya|leo|nina>` and `?local=display` read B03's loopback API using its explicit fixed non-production labels; command success refreshes both private and public snapshots. Mock routes remain the default and no browser source imports server fixtures. The existing B03 HTTP integration flow verifies the real negotiation, independent disclosure refusal, three approvals and duration invalidation; the full UI suite and full check pass. This changed source requires a fresh independent follow-up review before G01. It is not production authentication. A03 adds receipt/accessibility preparation; A06 prepares demo/trial/setup drafts. A04/A05 retain their own gates.
+Earlier A02.5 implementation handoff (superseded for scheduling by its current IN_PROGRESS claim; see the board's evidence discrepancy): `?view=owner&local=<maya|leo|nina>` and `?local=display` read B03's loopback API using its explicit fixed non-production labels; command success refreshes both private and public snapshots. Mock routes remain the default and no browser source imports server fixtures. The existing B03 HTTP integration flow verifies the real negotiation, independent disclosure refusal, three approvals and duration invalidation; the full UI suite and full check pass. This changed source requires a fresh independent follow-up review before G01. It is not production authentication. A03 adds receipt/accessibility preparation; A06 prepares demo/trial/setup drafts. A04/A05 retain their own gates.
 
-B01 source and prior review evidence are now included from 04c87d7. B02 source and final independent review evidence are also available from 47b97eb; the user authorized their integration. B must not restart those tasks. B has standing authorization to implement an available A task when A lacks tokens, after finishing/pausing its own task and recording the claim or explicit transfer. Active A work needs a saved diff/commit and a release; never infer release from silence. B records its work in [B log](work-log-B.md).
+B01 source and prior review evidence are now included from 04c87d7. B02 source and final independent review evidence are also available from 47b97eb; the user authorized their integration. Neither user should restart those completed tasks. Use the shared-pool claim/transfer procedure; active work needs an explicit release and saved artifact. Each user records work in their own log, regardless of task prefix.
 
 This checkout uses main. A01, the workflow refactor and B01/B02 work are consolidated at the user’s direction; historical branches are retained without new work. See [integration/publication state](main-integration.md). Future tasks use main in separate clones and retain their review/authorization gates.
 
 B02 compatibility: owner snapshots require availabilityReview, and CONFIRM_INPUTS requires explicit reviewedIntervals. A02 must collect owner-reviewed coverage; it must not infer it from all schedule options. A01’s synthetic owner adapter is updated during integration; public DTOs are unchanged.
+
+## Authorized synchronized repair handoff
+
+User authorized integration/publication of B’s reviewed `d042d8f` with published `8371e7b`. Both histories and the September 22 shared-pool policy are retained. A02.5/G01 are REVIEW; see [B handoff](handoff-B.md) and [current G01 evidence](reviews/G01.md) for the combined artifact/checks. No new task is claimed; human acceptance remains separate.

@@ -51,7 +51,7 @@ git pull --ff-only origin main
 
 If there are uncommitted or unshared changes, save them first in a commit or transferable diff including untracked files. Inspect the history before synchronizing; do not reset or force-push. A clone still on task/b02 should preserve any newer local work, then switch to main and fast-forward it from origin/main. The published task/b02 source is already included; do not merge or reimplement it a second time.
 
-A can claim A02 (Terra/medium); B can claim B03 (Terra/medium) once the recorded review/check verdict is PASS. A03/A06 remain ready alternatives. B may cover unclaimed A work using the logged transfer procedure. No new task is claimed automatically by integration.
+Current scheduling uses the September 22 shared pool: either user may claim an eligible unclaimed task from the [board](task-board.md), subject to its ticket and synchronized claims. The integration history above does not establish current availability. No task is claimed automatically by integration.
 
 Shared destination: origin/main. The integration session must verify the remote tip after its authorized push before reporting completion. This record covers included source and checks; deployment, external access and future pushes retain their own authorization requirements.
 

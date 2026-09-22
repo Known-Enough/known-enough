@@ -79,3 +79,18 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Verified real fresh-room browser inputs/confirmations/setup/solve, independent refusal/disclosure, three approvals, organizer API duration invalidation reflected in browser, exact replay after lost applied responses, no-invitation preservation and incoherent-read blocking. This does not claim organizer editing UI or production identity/persistence/transaction evidence. Next: human G01 acceptance, then B04 under its model and midpoint-review requirements.
 
 - Final documentation validation: all seven reference hashes, changed Markdown links/task states, reviewed source hashes and `git diff --check` pass. Source/test bytes still match the independently reviewed manifest after handoff edits.
+
+## 2026-09-22 — local negotiation tutorial
+
+- Documentation update requested by the user; direct worker: Codex GPT-5. Baseline: clean `main` at the start of the task. Added `docs/tutorials/local-negotiation.md` covering frontend/API startup, four local tabs, sequential negotiation and refusal paths, mock/recovery screens, accessibility checks, the duration-selector caveat, and failure evidence fields. Linked it from `README.md`.
+- Documentation-only checks: `npm run check:references` passed; `npm run check:planning` passed. No application files changed and no live-flow result is claimed by this documentation update.
+- Publication: reviewed the diff, verified the checked-out branch was `main`, fetched and confirmed the remote tip, then pushed explicitly to `origin main`. Tutorial commit `2fa71a9` is now synchronized with `origin/main`.
+
+
+## September 22, 2026 — authorized commit/push and synchronization
+
+- User explicitly requested commit and push. Verified `main`, preserved reviewed changes in `d042d8f`, fetched origin and discovered five newer commits through `8371e7b`. Initial fetch was blocked by read-only `.git/FETCH_HEAD`; approved sandbox escalation succeeded. No automatic approval rejection occurred.
+- Integration preserves both histories, new shared-pool policy and published readiness/debug/tutorial work. B owns this bounded conflict resolution, not a new task. Kept per-interval answers, coherent snapshots, exact retry, native fetch and no-invitation handling. Retained explicit coverage questions/unit regression. Consolidated incoming separate-browser-page test into the fresh-server suite to prevent port collisions; updated tutorial controls and answers. Restricted debug command types to schema-validated values and added a no-private-canary regression.
+- Actual GPT-6 implementer/reviewer; exact variant/effort not exposed. Independent source follow-up found no blocking issues on the 12-file combined manifest in [G01](reviews/G01.md). Fresh combined full check runs before the merge commit/push; historical 176/36 results are not relabeled as combined evidence. Human checkpoint acceptance remains separate from publication authorization.
+
+- Final combined check exited 0: 179 unit/integration and 37 browser tests plus references/planning/lint/boundaries/typecheck/build. Independent final PASS on manifest `2c9ceb2f127d4a0d4c45437df39a663e0afacaaf684dbfa73e3864ebfec056eb`; links and whitespace checks passed. Complete merge index, verify checked-out main and fetch synchronization again, commit the integration and push explicitly to origin/main under the user authorization. No force push.

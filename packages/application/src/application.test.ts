@@ -120,6 +120,13 @@ describe('application finite lifecycle', () => {
     expect((await h.owner('nina')).availabilityReview!.contextToken).not.toBe(old.availabilityReview!.contextToken);
   });
 
+  it('repairs a stale collecting status when all setup confirmations are present', async () => {
+    const h = await setup();
+    await h.confirm();
+    await h.repository.transaction(roomId, room => { room!.status = 'COLLECTING'; });
+    expect((await h.view()).status).toBe('READY');
+  });
+
   it('consumes duplicate solver deliveries once and refuses service cross-room use', async () => {
     const h = await setup(); await h.confirm(); await h.ok('maya', 'REQUEST_SOLVE', {});
     const job = (await h.app.pendingSolveJob(service, roomId))!;

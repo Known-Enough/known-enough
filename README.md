@@ -50,21 +50,21 @@ See the [dated bootstrap verification evidence](docs/verification.md). It record
 
 ## Workspace and next work
 
-- `apps/web`: A's shared and lazy-loaded owner demo screens with separate adapters; public sample responses are in `src/mocks/public`. Browser owner examples are synthetic UI-only values, never imports from server fixtures.
-- `packages/contracts`: runtime DTO/command/error validators and canonical public hashing; B owns after bootstrap, A reviews breaking changes.
+- `apps/web`: shared and lazy-loaded owner demo screens with separate adapters; public sample responses are in `src/mocks/public`. Browser owner examples are synthetic UI-only values, never imports from server fixtures.
+- `packages/contracts`: runtime DTO/command/error validators and canonical public hashing; shared-pool ownership with coordinated review of breaking changes.
 - `packages/domain`: B01 structural enumeration, deterministic feasibility/ranking and domain tests.
 - `packages/application`, `packages/adapters`: B02 command lifecycle, allowlisted snapshots, independent permissions and an isolated in-memory transaction repository.
 - `apps/api`, `apps/workers`, `infra`: reserved HTTP/worker/cloud boundaries; no deployed service.
 - `packages/test-support`: isolated synthetic domain fixtures and executable solver demo; server/test-only, never browser imports.
-- `tests/e2e`, `tests/integration`: A's browser smoke checks and B's reserved integration area.
-- `docs`: immutable source references, [contracts](docs/contracts.md), [decisions/risks](docs/decisions.md), [task files](docs/tasks), and [A](docs/handoff-A.md)/[B](docs/handoff-B.md) handoffs.
+- `tests/e2e`, `tests/integration`: browser smoke checks and integration tests.
+- `docs`: immutable source references, [contracts](docs/contracts.md), [decisions/risks](docs/decisions.md), [task files](docs/tasks), [local negotiation tutorial](docs/tutorials/local-negotiation.md), and [A](docs/handoff-A.md)/[B](docs/handoff-B.md) handoffs.
 
 **Use main in separate clones for all new work.** A01, the workflow refactor, B01 and B02 are consolidated here at the user’s direction. The old task branches are historical pointers, not active work queues. See [main integration](docs/main-integration.md) for source commits, verification and publication state. Synchronize your separate clone before claiming the next task; do not continue work on the old task branches.
 
-The [current task board](docs/task-board.md) and [workflow](docs/agent-workflow.md) govern execution and supersede dated branch/model/ownership/sequencing instructions in imported references. Product/security semantics remain unchanged. A02/A03/A06 preparation can proceed while B works; separate integration tickets retain real API/auth checks. B can take available A work through a recorded handoff when A lacks tokens.
+The [current task board](docs/task-board.md) and [workflow](docs/agent-workflow.md) govern execution and supersede dated branch/model/ownership/sequencing instructions in imported references. Product/security semantics remain unchanged. Both users select from one shared task pool; A/B task prefixes are historical identifiers, not user assignments. Existing claims remain protected. Separate integration tickets retain real API/auth checks. The AI facilitator extension is tracked in [T01](docs/tasks/T01.md) and [T02](docs/tasks/T02.md).
 
 ## Starting a task
 
 Choose a READY task from the board, select its named model and reasoning effort as the **direct worker**, and ask: “Read AGENTS.md and execute docs/tasks/A02.md within its scope.” Use your own clone and log the claim. Terra handles most implementation; Luna handles narrow UI/docs; Sol handles difficult backend work; Astra handles architecture and explicit checkpoints. No routine Astra manager or subagents are required. Files do not switch the selected session model.
 
-See [A handoff](docs/handoff-A.md), [B handoff](docs/handoff-B.md), [A log](docs/work-log-A.md), [B log](docs/work-log-B.md) and [review records](docs/reviews/README.md). B02 is integrated; B03 is ready for the next backend claim. Sharing logs/code requires authorized synchronization; no cross-account access or live messaging is configured. Agent checks do not replace human acceptance or authorize pushing, integration, deployment or spending.
+See [A handoff](docs/handoff-A.md), [B handoff](docs/handoff-B.md), [A log](docs/work-log-A.md), [B log](docs/work-log-B.md) and [review records](docs/reviews/README.md). Use ticket statuses and current shared claims to select work; completed or actively claimed tasks must not be restarted. Sharing logs/code requires authorized synchronization; no cross-account access or live messaging is configured. Agent checks do not replace human acceptance or authorize pushing, integration, deployment or spending.

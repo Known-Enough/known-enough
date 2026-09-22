@@ -2,7 +2,7 @@ import { expect, it } from 'vitest';
 import { createHash } from 'node:crypto';
 import { ownerMockClient } from './owner-mock-adapter';
 import { publicMockClient } from './mock-adapter';
-import { editableAvailabilityFor, exceptionScopeSummary, proposalMatchesOwner, valuesForAvailability } from './owner-screen';
+import { editableAvailabilityFor, exceptionScopeSummary, proposalMatchesOwner, reviewIntervalsFor, valuesForAvailability } from './owner-screen';
 import { decideException } from './command-client';
 
 it('builds an independently validated synthetic owner snapshot', async () => {
@@ -50,6 +50,15 @@ it('maps either availability choice to its displayed finite interval without cha
     { id: 'condition-nina-1100', kind: 'HARD_AVAILABILITY', availableIntervals: [interval] },
     { id: 'condition-nina-1100-exception', kind: 'NEGOTIABLE_UNAVAILABLE', interval, inviteException: true },
   ], dutyCosts: [{ dutyId: 'followup', cost: 1 }] });
+});
+
+it('reviews every shared meeting slot without changing private availability coverage', async () => {
+  const room = await ownerMockClient.getOwnerRoom();
+  const { value: publicRoom } = await publicMockClient.readPublicRoom('collecting');
+  expect(publicRoom).not.toBeNull();
+  const intervals = reviewIntervalsFor(room.confirmedInputs!.values, publicRoom!);
+  expect(intervals).toHaveLength(5);
+  expect(intervals).toContainEqual({ date: '2026-10-08', timezone: 'America/Mexico_City', startMinute: 600, endMinute: 630 });
 });
 
 it('targets the editable condition and preserves unrelated hard intervals and conditions', async () => {

@@ -14,6 +14,10 @@ const statusLabel = (status: string) => status[0] + status.slice(1).toLowerCase(
 export const policyLabel = (policy: 'LOWEST_INCONVENIENCE' | 'BALANCE_RECENT_LOAD') => policy === 'BALANCE_RECENT_LOAD' ? 'Balance recent duty load' : 'Lowest declared inconvenience';
 const intervalKey = (interval: Interval) => `${interval.date}:${interval.timezone}:${interval.startMinute}:${interval.endMinute}`;
 const intervalsFor = (values: InputValues): Interval[] => [...new Map(values.conditions.flatMap(condition => condition.kind === 'HARD_AVAILABILITY' ? condition.availableIntervals : [condition.interval]).map(interval => [intervalKey(interval), interval])).values()];
+export function reviewIntervalsFor(values: InputValues, publicRoom: PublicRoomSnapshot | null): Interval[] {
+  const intervals = [...intervalsFor(values), ...(publicRoom ? [...publicRoom.schedule.slots, ...publicRoom.schedule.duties].map(item => item.interval) : [])];
+  return [...new Map(intervals.map(interval => [intervalKey(interval), interval])).values()];
+}
 type AvailabilityTarget = { conditionId: string; interval: Interval };
 
 export function editableAvailabilityFor(values: InputValues): AvailabilityTarget & { availability: 'exception' | 'available' | 'unavailable' } | null {
@@ -121,7 +125,7 @@ export function OwnerScreen({ initialScenario, localIdentity = null }: { initial
   };
   const selectedInterval = availabilityTarget && { ...availabilityTarget.interval, endMinute: availabilityTarget.interval.startMinute + Number(duration) };
   const values = (): InputValues | null => inputValues && availabilityTarget && selectedInterval ? valuesForAvailability(inputValues, availability, availabilityTarget, selectedInterval, Number(cost)) : null;
-  const draftIntervals = room?.draft ? intervalsFor(room.draft.values) : [];
+  const draftIntervals = room?.draft ? reviewIntervalsFor(room.draft.values, localIdentity ? publicRoom : null) : [];
   const candidateProposal = publicRoom?.proposal ?? null;
   const currentProposal = room && proposalMatchesOwner(room, candidateProposal) ? candidateProposal : null;
   // Live mutations require matching public and owner snapshots; the server still guards races after this read.

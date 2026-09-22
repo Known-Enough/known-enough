@@ -1,5 +1,5 @@
 import { createServer, type Server } from 'node:http';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DealTableApplication, type TrustedPrincipal } from '@deal-table/application';
 import { InMemoryRoomRepository } from '@deal-table/adapters';
 import { CommandResult, OwnerSnapshot, PublicRoomSnapshot, type CommandEnvelope } from '@deal-table/contracts';
@@ -14,7 +14,7 @@ afterEach(async () => {
     server.closeAllConnections();
   })));
 });
-async function harness(identities?: LocalApiOptions['identities']) {
+async function harness(identities?: LocalApiOptions['identities'], debug = false) {
   const fixture = buildTeamTableFixture();
   let sequence = 0;
   const repository = new InMemoryRoomRepository();
@@ -22,7 +22,7 @@ async function harness(identities?: LocalApiOptions['identities']) {
   const seed = { roomId, schedule: fixture.schedule, roster: fixture.roster.map(member => ({ ...member, submitted: false })), policy: fixture.policy, organizerSubject: 'organizer', memberships: fixture.roster.map(member => ({ subject: member.id, memberId: member.id })) };
   await application.createRoom(seed);
   await application.createRoom({ ...seed, roomId: 'other-room', organizerSubject: 'other-organizer', memberships: fixture.roster.map(member => ({ subject: `other-${member.id}`, memberId: member.id })) });
-  const server = createServer(createLocalApiHandler({ application, ...(identities ? { identities } : {}) }));
+  const server = createServer(createLocalApiHandler({ application, debug, ...(identities ? { identities } : {}) }));
   servers.push(server);
   await new Promise<void>((resolve, reject) => {
     server.once('error', reject);
@@ -77,6 +77,18 @@ function error(result: { status: number; data: unknown }, code: string, status: 
 }
 
 describe('B03 real local HTTP boundary (non-production test identities)', () => {
+  it('logs only validated command names when local diagnostics are enabled', async () => {
+    const h = await harness(undefined, true);
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      const body = await h.envelope('ACCEPT_CONTEXT', { policy: h.fixture.policy });
+      error(await h.post('maya', { ...body, type: 'private-diagnostic-canary' }), 'INVALID_COMMAND', 422);
+      const output = log.mock.calls.map(args => args.join(' ')).join('\n');
+      expect(output).not.toContain('private-diagnostic-canary');
+      expect(output).toContain('INVALID_COMMAND');
+    } finally { log.mockRestore(); }
+  });
+
   it('requires an allowlisted identity before exposing malformed-body diagnostics', async () => {
     const h = await harness();
     for (const identity of [null, 'unknown', 'service', 'participant:nina', 'display:other-room']) {

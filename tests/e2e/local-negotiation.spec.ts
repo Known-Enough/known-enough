@@ -120,6 +120,45 @@ test.describe('G01 real local UI/API negotiation', () => {
     for (const checkbox of await review.getByRole('checkbox').all()) await expect(checkbox).not.toBeChecked();
   });
 
+  // Retains the incoming a02.5-live.spec.ts scenario with three isolated browser pages,
+  // using this suite's exclusive fresh-server lifecycle to avoid port collisions.
+  test('three local people negotiate in separate browser contexts', async ({ browser, request }) => {
+    const pages = await Promise.all(['maya', 'leo', 'nina'].map(() => browser.newPage()));
+    const members = ['maya', 'leo', 'nina'];
+    try {
+      for (const [index, member] of members.entries()) {
+        const page = pages[index]!;
+        await open(page, member);
+        await fillInitial(page, member);
+        await clickApplied(page, 'Submit input draft');
+      }
+      for (const [index, member] of members.entries()) {
+        const page = pages[index]!;
+        await open(page, member);
+        const review = page.getByRole('region', { name: 'Confirm reviewed inputs', exact: true });
+        for (const checkbox of await review.getByRole('checkbox').all()) await checkbox.check();
+        await clickApplied(page, 'Confirm these reviewed intervals');
+      }
+      for (const [index, member] of members.entries()) {
+        await open(pages[index]!, member);
+        await clickApplied(pages[index]!, 'Accept reviewed setup');
+      }
+      await open(pages[0]!, 'maya');
+      await clickApplied(pages[0]!, 'Find a plan');
+      await open(pages[2]!, 'nina');
+      await clickApplied(pages[2]!, 'Allow scoped exception');
+      await clickApplied(pages[2]!, 'Use exception without announcement');
+      for (const [index, member] of members.entries()) {
+        await open(pages[index]!, member);
+        await clickApplied(pages[index]!, 'Accept reviewed current proposal');
+      }
+      expect((await publicView(request)).status).toBe('AGREED');
+      await pages[0]!.goto('/?local=display');
+      await expect(pages[0]!.getByRole('region', { name: 'Current proposal' })).toContainText('3 of 3');
+      await expect(pages[0]!.getByRole('region', { name: 'Published disclosure ledger' })).toHaveCount(0);
+    } finally { await Promise.all(pages.map(page => page.close())); }
+  });
+
   test('exception refusal ends negotiation without disclosing a private refusal', async ({ page, request }) => {
     await offer(page, request);
     await clickApplied(page, 'Decline exception');
