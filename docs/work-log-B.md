@@ -30,3 +30,27 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Preserved current direct-worker/main workflow and both sets of historical evidence while resolving documentation-only conflicts. Reviewed backend source/tests unchanged. Added persistent pre-push main verification to AGENTS.md.
 - Combined `npm run check` exited 0: 164 unit/integration tests, 20 Chromium tests, seven references, 15 arithmetic checks, lint/typecheck/build/bundle scan. See [main integration](main-integration.md).
 - B03 REVIEW for live acceptance; A03.5 fixes and A02.5/G01 remain separate. Push explicitly to origin/main under this user authorization, then verify the remote tip. No force push or branch deletion.
+
+## September 21, 2026 — next-task check / A03.5 follow-up
+
+- User requested the next eligible task using recorded recommendations. Clean main fast-forwarded to `c79faeb`, including A's published corrections `64cdf4f`; no new push/commit authorized or performed in this follow-up.
+- Astra coordinator plus independent read-only Astra/high reviewer examined the A03.5 gate before A02.5. R1/R3/R4 addressed; R2 interval display/preservation and R5 old-draft confirmation remain actionable. Full check exited 1: 169 unit tests pass, 24 browser tests pass, stale A03 receipt assertion fails. [Follow-up evidence](reviews/A03.5.md).
+- Requested explicit ownership handoff before B edits A's remaining corrections. A02.5 remains blocked; no implementation claim taken while waiting. Typesafe evaluation was read-only; no install, account, API call or spending occurred.
+
+## 2026-09-22T00:04:32Z — B03 resumed verification / REVIEW
+
+- User redirected work to B03. Astra inspected its current scope/status on main `c79faeb`; source matches previously reviewed B03 `27a110c` across API/application/adapters/contracts/integration tests. No new implementation needed; prior frontend review notes preserved.
+- Fresh focused command: `npm test -- tests/integration/http.test.ts tests/integration/application.test.ts packages/application/src/application.test.ts`, exit 0, 38/38 tests in three files under pinned Node 24.21.0/npm 11.19.0. HTTP tests required local loopback permission.
+- Updated B03 ticket evidence only. Latest full-check failure remains the separately recorded A03 receipt assertion; no source change justified repeating that same full run. B03 stays REVIEW pending the separate live integration gates. No commit/push or frontend takeover.
+
+## September 22, 2026 — finish/publish A03.5 follow-up
+
+- User explicitly authorized finishing and pushing the latest work after B03, resolving the earlier ownership question for this bounded follow-up. Fetched/synchronized published main `bc02dc6`; A had already supplied the R2/R5 corrections and an independent preparation PASS, plus separate initial A02.5 work. Preserved our pending observations as historical evidence instead of duplicating A's fixes.
+- Astra coordinates verification/publication; independent Astra/high rechecks the prior A03.5 findings on the current named commit. Terra/medium owns only `tests/e2e/scaffold.spec.ts` to replace a stale hardcoded origin with the configured exact origin. No application/backend/contract edits or new downstream task claim.
+- Initial current check: 171 unit/integration tests and 27 browser tests passed, two scaffold tests failed because the configured server moved from port 4173 to 5173. The narrow correction retains the external-request/privacy assertions. Final evidence and review follow before the authorized push to main.
+
+### Completion and authorized publication
+
+- Final `npm run check` exited 0: 171 unit/integration tests and 29 Chromium tests plus all required checks. Independent Astra/high review confirmed the prior findings closed for mock preparation and approved the two test-only deltas. Application source/contracts remain unchanged from `bc02dc6`.
+- Terra hit a usage limit during the loading-test refinement; Astra completed clock synchronization, passed focused tests, and ran the final full suite. Intermediate origin, clock and port-conflict failures are recorded in the review; no failed run is represented as passing.
+- All pending documentation from this session is preserved. User explicitly authorized commit/push to main; verify checked-out branch and remote tip before reporting publication. A02.5/G01 live acceptance remains separate; no new implementation claim.

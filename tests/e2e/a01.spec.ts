@@ -260,6 +260,12 @@ for (const view of ['public', 'owner']) {
     await page.clock.pauseAt(new Date('2026-10-01T12:00:01Z'));
     await page.goto(`${prefix}${view === 'owner' ? 'review' : 'collecting'}`);
     await expect(page.getByRole('status')).toContainText(/loading/i);
+    // Lazy-module/Suspense callbacks also use the paused clock. Advance in
+    // steps shorter than mock latency until the mounted screen is loading.
+    await expect.poll(async () => {
+      await page.clock.runFor(50);
+      return page.getByRole('status').textContent();
+    }).toBe(view === 'owner' ? 'Loading private local example…' : 'Loading shared local example…');
     await page.clock.runFor(1000);
     await expect(page.getByRole('heading', { name: view === 'owner' ? /your inputs/i : 'Around the table' })).toBeVisible();
   });

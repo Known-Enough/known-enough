@@ -4,8 +4,11 @@ for (const width of [390, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     const errors: string[] = [];
     const external: string[] = [];
+    const configuredBaseUrl = testInfo.project.use.baseURL;
+    if (typeof configuredBaseUrl !== 'string') throw new Error('Playwright baseURL must be configured for the mock privacy check');
+    const configuredOrigin = new URL(configuredBaseUrl).origin;
     page.on('pageerror', e => errors.push(e.message));
-    page.on('request', r => { if (!r.url().startsWith('http://127.0.0.1:4173/')) external.push(r.url()); });
+    page.on('request', r => { if (new URL(r.url()).origin !== configuredOrigin) external.push(r.url()); });
     await page.goto('/');
     await expect(page.getByRole('heading', { name: 'Deal Table', exact: true })).toBeVisible();
     for (const name of ['Maya', 'Leo', 'Nina']) await expect(page.getByText(name, { exact: true })).toBeVisible();
