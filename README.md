@@ -57,7 +57,7 @@ See the [dated bootstrap verification evidence](docs/verification.md). It record
 - `apps/api`, `apps/workers`, `infra`: reserved HTTP/worker/cloud boundaries; no deployed service.
 - `packages/test-support`: isolated synthetic domain fixtures and executable solver demo; server/test-only, never browser imports.
 - `tests/e2e`, `tests/integration`: A's browser smoke checks and B's reserved integration area.
-- `docs`: immutable source references, [contracts](docs/contracts.md), [decisions/risks](docs/decisions.md), [task files](docs/tasks), and [A](docs/handoff-A.md)/[B](docs/handoff-B.md) handoffs.
+- `docs`: immutable source references, [contracts](docs/contracts.md), [decisions/risks](docs/decisions.md), [task files](docs/tasks), [local negotiation tutorial](docs/tutorials/local-negotiation.md), and [A](docs/handoff-A.md)/[B](docs/handoff-B.md) handoffs.
 
 **Use main in separate clones for all new work.** A01, the workflow refactor, B01 and B02 are consolidated here at the user’s direction. The old task branches are historical pointers, not active work queues. See [main integration](docs/main-integration.md) for source commits, verification and publication state. Synchronize your separate clone before claiming the next task; do not continue work on the old task branches.
 

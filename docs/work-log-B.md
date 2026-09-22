@@ -54,3 +54,9 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Final `npm run check` exited 0: 171 unit/integration tests and 29 Chromium tests plus all required checks. Independent Astra/high review confirmed the prior findings closed for mock preparation and approved the two test-only deltas. Application source/contracts remain unchanged from `bc02dc6`.
 - Terra hit a usage limit during the loading-test refinement; Astra completed clock synchronization, passed focused tests, and ran the final full suite. Intermediate origin, clock and port-conflict failures are recorded in the review; no failed run is represented as passing.
 - All pending documentation from this session is preserved. User explicitly authorized commit/push to main; verify checked-out branch and remote tip before reporting publication. A02.5/G01 live acceptance remains separate; no new implementation claim.
+
+## 2026-09-22 — local negotiation tutorial
+
+- Documentation update requested by the user; direct worker: Codex GPT-5. Baseline: clean `main` at the start of the task. Added `docs/tutorials/local-negotiation.md` covering frontend/API startup, four local tabs, sequential negotiation and refusal paths, mock/recovery screens, accessibility checks, the duration-selector caveat, and failure evidence fields. Linked it from `README.md`.
+- Documentation-only checks: `npm run check:references` passed; `npm run check:planning` passed. No application files changed and no live-flow result is claimed by this documentation update.
+- Next: commit the tutorial changes after reviewing the diff, verify `main` and the remote tip, then push explicitly to `origin main` under the user’s authorization.
