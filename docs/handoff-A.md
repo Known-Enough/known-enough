@@ -14,11 +14,11 @@ A03 is in REVIEW on the current `main` checkout. Its private owner mock now disp
 
 ## A03.5 review handoff
 
-Independent follow-up on current main `c79faeb130ab4be5327212605197d621f572e71d`, including owner A's correction `64cdf4f`: **CHANGES_REQUESTED**. Actual follow-up reviewer: GPT-6; variant/effort not exposed. [Current evidence and preserved initial review](reviews/A03.5.md).
+Independent correction review of `1119d9d29db9b5d00658e145a6a01e51c6ac1d45`: **CHANGES_REQUESTED**. Reviewer: independent A-lane GPT-6 Astra session; effort not independently exposed. [Current evidence and preserved prior reviews](reviews/A03.5.md).
 
-R1/R3/R4 are closed for frontend preparation. A local R2/R5/V1 correction artifact now awaits fresh independent review: availability labels use the submitted duration and the mapper retains unrelated hard conditions; edits make the saved draft unconfirmable until a current snapshot returns a new draft; and the A03 assertion now checks the separate receipt history and reviewed proposal terms. No checkpoint verdict changes until that review.
+V1 is closed. R2 now preserves unrelated hard intervals and displays the submitted duration, but initializes from the first condition while submitting against a later negotiable condition. R5 safely blocks confirmation after edits, but unchanged submissions still allow confirmation of the old draft after accepted or unknown outcomes. A owns the remaining corrections. R1/R3/R4 retain preparation closures.
 
-Fresh pinned full check: 169/169 unit/integration, 24/25 browser; focused A03 rerun: 1/2 with the same missing-text failure. Independent probes made 20 asserted observations covering remaining defects, closed cases and public isolation; four owner markers stayed confined to the owner production chunk. Prior author results remain in the work log. The review claim is finished and no new implementation claim is taken. A02/A03/A03.5 remain REVIEW; A02.5/A04/A05 stay BLOCKED; B03/A06 retain their separate gates. Mock evidence does not establish live negotiation or authentication. Human acceptance remains pending.
+Fresh pinned full check passes: 170/170 unit/integration, 26/26 browser, references/planning/lint/types/build/privacy scan. Focused checks pass 12/12 unit and 24/24 browser. Eight independent observations confirm both fixed paths and remaining defects. Review claim finished; no implementation claim taken. A02/A03/A03.5 remain REVIEW; A02.5/A04/A05 stay BLOCKED; B03/A06 retain separate gates. Mock evidence is not live/API/authentication acceptance; human acceptance remains pending.
 
 ## Next work and transfer
 

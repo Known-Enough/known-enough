@@ -4,6 +4,19 @@ A writes this log; B writes [its own log](work-log-B.md), including frontend wor
 
 Entry format: UTC time | task/state | developer/model/effort | baseline/commit/diff | files | outcome/decision | checks (actual command, exit/results) | blockers/next action. For a transfer include released task, saved untracked files, receiving developer, and confirmation that the old writer stopped.
 
+## 2026-09-22T00:40:46Z — A03.5 / REVIEW / CHANGES_REQUESTED — correction review
+
+- Independent A-lane GPT-6 Astra session; effort not independently exposed. Reviewed `1119d9d29db9b5d00658e145a6a01e51c6ac1d45` against `c79faeb`, clean main at start. No implementation edits or subagents; documentation-only review/task/board/handoff updates. No fetch, commit, push, merge or publication.
+- [Verdict](reviews/A03.5.md): V1 closed; R2/R5 remain open P2 with narrower reproductions. R2 initializes from the first condition but submits a different negotiable target, silently changing it on unchanged submit. R5 edit guards work, but an unchanged submission (accepted or unknown) leaves confirmation enabled for the old draft/revision. R1/R3/R4 retain preparation closures.
+- Actual pinned Node 24.21.0/npm 11.19.0 checks: Chromium installation exit 1 (unsupported mac12); Chrome 150.0.7871.125 fallback full check exit 0 — references 7/7, planning 15/15, boundaries 55, typecheck, 170/170 unit/integration, 124-module build/privacy scan, 26/26 browser. Focused unit 12/12; focused A01/A03 browser 24/24, both exit 0. Independent probe script exit 0: eight asserted observations of corrected paths and remaining defects; this is reproduction evidence, not PASS. Commands and machine-local diagnostics are in the review.
+- Final documentation validation exit 0: 97 local file-link targets across 10 documents resolve; reference hashes 7/7; task gates consistent; historical review preserved verbatim; HEAD unchanged; `git diff --check` clean. Temporary probe servers stopped.
+- Review claim finished. Corrections remain with A. A02/A03/A03.5 stay REVIEW, A02.5/A04/A05 BLOCKED. Human acceptance pending; mock/intercepted HTTP behavior does not establish live negotiation, server enforcement or authentication.
+
+## 2026-09-22T00:36:32Z — A03.5 / independent follow-up IN_PROGRESS
+
+- User-assigned A-lane GPT-6 Astra reviewer; effort not independently exposed. Clean main at `1119d9d29db9b5d00658e145a6a01e51c6ac1d45`, base `c79faeb`. This session did not implement the fixes and uses no subagents.
+- Scope: inspect R2/R5/V1 correction code/tests, run focused and full checkpoint checks plus independent probes; write review, A log and coordinated tracking only. Implementation remains with A; no publication authorized.
+
 ## 2026-09-21T20:29:13Z — A02/A03 / REVIEW — A03.5 R2/R5/V1 correction
 
 - Actual worker: A / Codex GPT-5 (the ticket's Terra/medium selection is unavailable in this session). Baseline: current local `main` at `c79faeb130ab4be5327212605197d621f572e71d`, plus the pre-existing uncommitted A03.5 review/tracking documentation. Changed only `apps/web/src/owner-screen.tsx`, `apps/web/src/owner-mock-adapter.test.ts`, `tests/e2e/a01.spec.ts`, and `tests/e2e/a03.spec.ts`; the review document is preserved unchanged.
