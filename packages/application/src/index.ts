@@ -246,7 +246,9 @@ export class DealTableApplication {
         const command = parsed.data;
         const { requestId: _requestId, ...bodyData } = command;
         void _requestId;
-        const body = canonical(bodyData);
+        // Retain payload equality for retries without persisting the private
+        // command values a second time in the idempotency ledger.
+        const body = await this.textHash(canonical(bodyData));
         const key = canonical([principal.kind, principal.subject, room.roomId, command.type, command.idempotencyKey]);
         const replay = room.replays.find(record => record.key === key);
         if (replay) {

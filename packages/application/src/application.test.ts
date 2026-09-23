@@ -61,6 +61,26 @@ async function setup(solver?: ApplicationOptions['solver']) {
 }
 
 describe('application finite lifecycle', () => {
+  it('keeps idempotency payloads comparable without retaining command values in replay state', async () => {
+    const h = await setup();
+    const values = h.fixture.owners[0]!.confirmedInputs.values;
+    const command = await h.command('SUBMIT_INPUT_DRAFT', { expectedOwnerRevision: 0, values }) as Extract<CommandEnvelope, { type: 'SUBMIT_INPUT_DRAFT' }>;
+
+    const first = await h.app.execute(participant('maya'), command);
+    const duplicate = await h.app.execute(participant('maya'), command);
+
+    expect(first.ok).toBe(true);
+    expect(duplicate).toEqual(first);
+    const replay = await h.repository.transaction(roomId, room => room!.replays[0]!);
+    expect(replay.body).toMatch(/^[0-9a-f]{64}$/);
+    expect(JSON.stringify(replay)).not.toContain(JSON.stringify(values));
+
+    const changed = { ...command, payload: { ...command.payload, values: { ...values, conditions: values.conditions.slice(1) } } };
+    expect(await h.app.execute(participant('maya'), changed)).toMatchObject({
+      ok: false, error: { code: 'IDEMPOTENCY_CONFLICT' },
+    });
+  });
+
   it('proposes without a concession when all hard conditions already permit the plan', async () => {
     const h = await setup();
     h.fixture.owners[2]!.confirmedInputs.values.conditions.splice(1);

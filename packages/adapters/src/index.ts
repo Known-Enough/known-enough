@@ -1,4 +1,5 @@
 import type { RoomRecord, RoomRepository } from '@deal-table/application';
+export { ConcurrentRoomUpdateError, DynamoDBRoomRepository, RoomAlreadyExistsError } from './dynamodb-room-repository.ts';
 
 /** Local process only: no cross-process or DynamoDB transaction guarantee. */
 export class InMemoryRoomRepository implements RoomRepository {

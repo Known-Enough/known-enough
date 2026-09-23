@@ -3,6 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts" },
-  "dependencies": { "@deal-table/application": "0.1.0" }
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "3.1138.0",
+    "@aws-sdk/lib-dynamodb": "3.1138.0",
+    "@deal-table/application": "0.1.0"
+  }
 }
