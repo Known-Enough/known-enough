@@ -5,6 +5,7 @@ import {
 import {
   ApplicationError, DealTableApplication, type TrustedPrincipal,
 } from '@deal-table/application';
+import { createCognitoIdentityResolver, type CognitoIdentityOptions } from './cognito.ts';
 
 const IDENTITY_HEADER = 'x-deal-table-test-identity';
 const REQUEST_ID_HEADER = 'x-request-id';
@@ -30,6 +31,13 @@ export interface LocalApiOptions {
 export interface LocalApiServerOptions extends LocalApiOptions {
   readonly host?: string;
   readonly port?: number;
+}
+
+export interface CognitoApiOptions extends CognitoIdentityOptions {
+  readonly application: DealTableApplication;
+  readonly allowedOrigins: readonly string[];
+  readonly maxBodyBytes?: number;
+  readonly debug?: boolean;
 }
 
 export function createNonProductionIdentities(roomId: string): ReadonlyMap<string, HttpIdentity> {
@@ -91,14 +99,16 @@ function debugLog(enabled: boolean, event: string, details: Record<string, Debug
 }
 
 function actor(principal: HttpIdentity): string {
-  return principal.kind === 'display' ? 'display' : principal.subject;
+  // Do not put the stable Cognito subject or any personal identifier in logs.
+  return principal.kind;
 }
 
 function logPublicSnapshot(enabled: boolean, principal: HttpIdentity, snapshot: PublicRoomSnapshot): void {
   debugLog(enabled, 'public-snapshot', {
     actor: actor(principal), room: snapshot.roomId, status: snapshot.status,
     decisionRevision: snapshot.decisionRevision, controlVersion: snapshot.controlVersion,
-    setup: snapshot.roster.map(member => `${member.id}:${member.submitted ? 'confirmed' : 'pending'}`).join(','),
+    setupConfirmed: snapshot.roster.filter(member => member.submitted).length,
+    setupPending: snapshot.roster.filter(member => !member.submitted).length,
   });
 }
 
@@ -118,14 +128,18 @@ function applicationError(error: unknown, id: string): ErrorResult {
     : errorBody('INVALID_COMMAND', id);
 }
 
-function setCors(response: ServerResponse, request: IncomingMessage): void {
+function setCors(
+  response: ServerResponse, request: IncomingMessage, allowedOrigins: readonly string[], includeTestIdentity: boolean,
+): void {
   const origin = request.headers.origin;
-  if (origin === 'http://127.0.0.1:5173' || origin === 'http://localhost:5173') {
+  if (typeof origin === 'string' && allowedOrigins.includes(origin)) {
     response.setHeader('access-control-allow-origin', origin);
     response.setHeader('vary', 'Origin');
   }
   response.setHeader('access-control-allow-methods', 'GET, POST, OPTIONS');
-  response.setHeader('access-control-allow-headers', 'Content-Type, X-Deal-Table-Test-Identity, X-Request-Id');
+  response.setHeader('access-control-allow-headers', includeTestIdentity
+    ? 'Authorization, Content-Type, X-Deal-Table-Test-Identity, X-Request-Id'
+    : 'Authorization, Content-Type, X-Request-Id');
 }
 
 function sendJson(response: ServerResponse, status: number, body: unknown): void {
@@ -196,16 +210,36 @@ async function runQueuedWork(application: DealTableApplication, roomId: string, 
  * Local-only HTTP adapter. It accepts a fixed synthetic identity label and is
  * deliberately unsuitable for production authentication.
  */
-export function createLocalApiHandler(options: LocalApiOptions): (request: IncomingMessage, response: ServerResponse) => void {
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('The local non-production API cannot run with NODE_ENV=production');
-  }
+function validateAllowedOrigins(origins: readonly string[]): readonly string[] {
+  if (!Array.isArray(origins) || origins.length === 0) throw new Error('At least one exact API origin is required');
+  const clean = origins.map(origin => {
+    const parsed = URL.parse(origin);
+    if (!parsed) throw new Error('Invalid allowed API origin');
+    if (parsed.origin !== origin || (parsed.protocol !== 'https:'
+      && !(parsed.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname)))) {
+      throw new Error('Allowed API origins must be HTTPS or loopback HTTP origins');
+    }
+    return origin;
+  });
+  if (new Set(clean).size !== clean.length) throw new Error('Duplicate allowed API origin');
+  return Object.freeze(clean);
+}
+
+function createApiHandler(
+  options: Pick<LocalApiOptions, 'application' | 'maxBodyBytes' | 'debug'>,
+  authenticate: (request: IncomingMessage) => Promise<HttpIdentity | null>,
+  allowedOrigins: readonly string[],
+  includeTestIdentity: boolean,
+): (request: IncomingMessage, response: ServerResponse) => void {
   const { application } = options;
-  const { identities, maxBodyBytes } = validateOptions(options);
+  const maxBodyBytes = options.maxBodyBytes ?? DEFAULT_MAX_BODY_BYTES;
+  if (!Number.isSafeInteger(maxBodyBytes) || maxBodyBytes < 1 || maxBodyBytes > 1024 * 1024) {
+    throw new Error('maxBodyBytes must be an integer between 1 and 1048576');
+  }
   const debug = options.debug ?? false;
   return (request, response) => {
     void (async () => {
-      setCors(response, request);
+      setCors(response, request, allowedOrigins, includeTestIdentity);
       if (request.method === 'OPTIONS') {
         response.statusCode = 204;
         response.end();
@@ -213,7 +247,7 @@ export function createLocalApiHandler(options: LocalApiOptions): (request: Incom
       }
 
       const id = requestId(request);
-      const principal = identity(request, identities);
+      const principal = await authenticate(request);
       if (!principal) {
         sendJson(response, 401, errorBody('UNAUTHENTICATED', id));
         return;
@@ -281,6 +315,26 @@ export function createLocalApiHandler(options: LocalApiOptions): (request: Incom
       }
     })();
   };
+}
+
+export function createLocalApiHandler(options: LocalApiOptions): (request: IncomingMessage, response: ServerResponse) => void {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('The local non-production API cannot run with NODE_ENV=production');
+  }
+  const { identities } = validateOptions(options);
+  return createApiHandler(options, async request => identity(request, identities),
+    ['http://127.0.0.1:5173', 'http://localhost:5173'], true);
+}
+
+/** Production HTTP adapter: only verified Cognito bearer tokens authenticate requests. */
+export function createCognitoApiHandler(options: CognitoApiOptions): (request: IncomingMessage, response: ServerResponse) => void {
+  const allowedOrigins = validateAllowedOrigins(options.allowedOrigins);
+  const resolveIdentity = createCognitoIdentityResolver({
+    userPoolId: options.userPoolId,
+    participantClientId: options.participantClientId,
+    displayClientId: options.displayClientId,
+  });
+  return createApiHandler(options, request => resolveIdentity(request.headers.authorization), allowedOrigins, false);
 }
 
 export function createLocalApiServer(options: LocalApiOptions): Server {

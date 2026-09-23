@@ -56,3 +56,26 @@ The library exports `createLocalApiHandler`, `createLocalApiServer`, and
 and the runnable entry bind loopback addresses only; `createLocalApiServer`
 returns an unbound Node server, so a custom composition must also bind it only
 to loopback. Never import this server package into the browser.
+
+## Cognito HTTP adapter (B04, local verification only)
+
+`createCognitoApiHandler` accepts a verified Cognito access token from the
+`Authorization: Bearer` header. Configure one participant app client and a
+separate display app client from the same user pool, plus exact HTTPS
+`allowedOrigins`. Participant principals use the signed `sub`; room membership
+is still loaded and checked by the application. Display principals require the
+display client and exactly one signed administrator-managed group named
+`deal-table-display-<roomId>`. Display identities cannot read `/me` or send
+commands. The adapter never falls back to the local test-identity header.
+
+The verifier uses `aws-jwt-verify` with access-token use, the configured pool,
+configured client IDs, and zero expiry grace. Authentication failures return
+401 without token or claim details in logs or responses. Removal from a Cognito
+group does not revoke already issued self-contained tokens; live configuration
+must bound access-token lifetime and document the remaining revocation delay.
+
+This handler has no configured user pool or deployed runtime yet. The signed
+JWT integration tests use a generated local RSA key and cached test JWKS; they
+do not contact Cognito or prove user-pool administration, live group scope,
+network availability, DynamoDB, IAM, or deployment configuration. The
+`NON_PRODUCTION` handler remains for local negotiation only.

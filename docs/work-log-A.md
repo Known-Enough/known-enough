@@ -198,3 +198,19 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - User requested finishing G01 after the current project gate had been identified as human acceptance. Recorded the request as acceptance of the bounded G01 local UI/API integration checkpoint; no production-readiness claim follows.
 - Independent read-only follow-up PASS checked A05's two changed files against the prior G01 manifest and confirmed the live localIdentity branch and G01 acceptance flow remain intact. Updated manifest SHA-256: `934a7df164a20ce3e94b7151514a0ca47a8d2dc594b9b3328cfe50c333d7fab2`. Details and file hashes: [G01 review](reviews/G01.md). Reviewer did not rerun tests.
 - Existing full check on current integrated source passed: 181 unit/integration and 41 browser tests, plus references, planning, lint/boundaries, typecheck and build/privacy scan. No application source changed in this acceptance step. G01 status is DONE; B04 is next per the project queue.
+
+
+## 2026-09-23T09:03:34Z — B04 / IN_PROGRESS — initial claim
+
+- Claimed B04 after G01 was recorded DONE. Baseline: clean `main` at `8e6d1c4`. Actual worker: A / Codex GPT-6; variant/effort not exposed, so the ticket's scheduled GPT-6-Sol/high is not claimed.
+- Bounded scope: `packages/adapters/**`, `apps/api/**`, `tests/integration/**`, `infra/**`, and coordinated B04/task-board/work-log records. No cloud resources or deployment.
+- Required stop: complete the design and first reviewable implementation slice, then pause for B04.5 independent review before extending identity, transaction or IAM approach.
+
+
+## 2026-09-23T09:31:00Z — B04 / PAUSED — B04.5 midpoint
+
+- Actual worker: A / Codex GPT-6; variant/effort not exposed, not reported as the ticket's scheduled GPT-6-Sol/high. Baseline `8e6d1c4` on clean `main`. B04 is paused after the design and first reviewable implementation slice for independent B04.5 review.
+- Added pinned `aws-jwt-verify` 5.2.1, a Cognito access-token resolver, and a production HTTP handler that does not accept the local mock identity header. Participant IDs come only from verified `sub`; display scope needs a separate app client and exactly one room-specific, admin-managed group. Local RSA/JWKS tests verify with the real library. Redacted stable subjects and roster IDs from HTTP diagnostics, replacing them with actor type and counts.
+- Recorded the unimplemented DynamoDB state/guard transaction design, item-size/history concern, display-token revocation delay, and proposed API IAM boundary in `infra/README.md` for review. No live user pool, DynamoDB adapter, IAM policy, or cloud setup.
+- Focused checks: `npm test -- tests/integration/cognito.test.ts tests/integration/http.test.ts` passed 19/19; `npm run typecheck` passed; `git diff --check` passed. Final full check with pinned Node 24.21.0/npm 11.19.0 and Chromium 1243 under `/tmp` exited 0: references 7/7, planning 15/15, lint/import boundaries 69, typecheck, 187 unit/integration, web build/privacy scan, and 41 browser tests. Chromium used previously extracted `/tmp/a05-browser-libs`; no system packages changed. One first-run browser attempt was blocked by missing `libnspr4`; after using the temporary libraries, the final complete run passed.
+- Next: independent B04.5 review of the committed design/slice, including display group administration and token expiry, DynamoDB size/transaction semantics, retry safety, and IAM key conditions. Resume B04 only after findings are recorded and addressed. No push or deployment.

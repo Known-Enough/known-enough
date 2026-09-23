@@ -4,7 +4,7 @@ import { DealTableApplication, type TrustedPrincipal } from '@deal-table/applica
 import { InMemoryRoomRepository } from '@deal-table/adapters';
 import { CommandResult, OwnerSnapshot, PublicRoomSnapshot, type CommandEnvelope } from '@deal-table/contracts';
 import { buildTeamTableFixture } from '@deal-table/test-support';
-import { createLocalApiHandler, createNonProductionIdentities, type LocalApiOptions } from '../../apps/api/src/http.ts';
+import { createCognitoApiHandler, createLocalApiHandler, createNonProductionIdentities, type LocalApiOptions } from '../../apps/api/src/http.ts';
 
 const roomId = 'room-synthetic';
 const servers: Server[] = [];
@@ -76,6 +76,40 @@ function error(result: { status: number; data: unknown }, code: string, status: 
   expect(Object.keys(parsed).sort()).toEqual(['error', 'ok', 'requestId']);
 }
 
+describe('B04 Cognito HTTP boundary', () => {
+  it('does not accept the local test identity header and omits it from production CORS', async () => {
+    const h = await harness();
+    const handler = createCognitoApiHandler({
+      application: h.application,
+      userPoolId: 'us-east-1_TestPool123',
+      participantClientId: 'participant-client-123',
+      displayClientId: 'display-client-456',
+      allowedOrigins: ['https://app.example'],
+    });
+    const server = createServer(handler);
+    servers.push(server);
+    await new Promise<void>((resolve, reject) => {
+      server.once('error', reject);
+      server.listen(0, '127.0.0.1', () => { server.off('error', reject); resolve(); });
+    });
+    const address = server.address();
+    if (!address || typeof address === 'string') throw new Error('Missing test listener');
+    const base = `http://127.0.0.1:${address.port}`;
+    const response = await fetch(`${base}/rooms/${roomId}/public`, {
+      headers: { 'X-Deal-Table-Test-Identity': 'NON_PRODUCTION maya' },
+    });
+    expect(response.status).toBe(401);
+    expect(await response.json()).toMatchObject({ ok: false, error: { code: 'UNAUTHENTICATED' } });
+
+    const preflight = await fetch(`${base}/rooms/${roomId}/public`, {
+      method: 'OPTIONS', headers: { Origin: 'https://app.example', 'Access-Control-Request-Headers': 'authorization,x-deal-table-test-identity' },
+    });
+    expect(preflight.status).toBe(204);
+    expect(preflight.headers.get('access-control-allow-origin')).toBe('https://app.example');
+    expect(preflight.headers.get('access-control-allow-headers')).not.toContain('X-Deal-Table-Test-Identity');
+  });
+});
+
 describe('B03 real local HTTP boundary (non-production test identities)', () => {
   it('logs only validated command names when local diagnostics are enabled', async () => {
     const h = await harness(undefined, true);
@@ -85,6 +119,7 @@ describe('B03 real local HTTP boundary (non-production test identities)', () => 
       error(await h.post('maya', { ...body, type: 'private-diagnostic-canary' }), 'INVALID_COMMAND', 422);
       const output = log.mock.calls.map(args => args.join(' ')).join('\n');
       expect(output).not.toContain('private-diagnostic-canary');
+      expect(output).not.toContain('maya');
       expect(output).toContain('INVALID_COMMAND');
     } finally { log.mockRestore(); }
   });
