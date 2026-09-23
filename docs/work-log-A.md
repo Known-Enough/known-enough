@@ -4,6 +4,20 @@ A writes this log; B writes [its own log](work-log-B.md), regardless of task pre
 
 Entry format: UTC time | task/state | developer/model/effort | baseline/commit/diff | files | outcome/decision | checks (actual command, exit/results) | blockers/next action. For a transfer include released task, saved untracked files, receiving developer, and confirmation that the old writer stopped.
 
+## 2026-09-23T16:13:02Z — B04 / IN_PROGRESS — first-slice claim
+
+- A / Ricardo, at the user's direction; baseline `8e6d1c4` on clean `main`. Actual session model is GPT-6 Codex; exact variant/effort are not exposed. B04's direct-worker target remains `gpt-6-sol`, high, and is not represented as runtime-verified.
+- Synchronized claim check: fetched `origin/main` and confirmed local `main` equals `origin/main` at `8e6d1c4`. G01 is DONE after human acceptance on 2026-09-23. B04's ticket was stale BLOCKED; the claim and current handoff are now IN_PROGRESS. No other active implementation/review claim appears in the synchronized board/tickets.
+- Tracking updates: B04 ticket, task board, agent workflow, G01 ticket/review and A/B handoffs. Historical September 22 pending-acceptance statements are explicitly labeled historical; immutable imported references and implementation files have not changed yet.
+- Next: one bounded Cognito identity slice; pause B04 for independent B04.5 review before broadening the identity, transaction, or IAM approach. No commit, push, deployment, cloud account call, or spend.
+
+## 2026-09-23T16:27:31Z — B04 / PAUSED — first Cognito identity slice
+
+- A / Ricardo; baseline `8e6d1c4` on `main`. Actual session model: GPT-6 Codex, exact variant/effort not exposed; this does not attest the ticket's `gpt-6-sol` / high selection.
+- Implemented the initial Cognito identity seam: `aws-jwt-verify@5.2.1`, access-token resolver configured for the pool and app client, signed `sub` mapping, one strict room-scoped display group, and a generic server handler that authorizes before body parsing and application replay. The local synthetic handler remains separate. Added resolver mapping tests plus authenticated HTTP scope/order regressions. Updated API README and task records.
+- Checks under Node 24.21.0/npm 11.19.0: focused API/HTTP tests passed 19/19. `PLAYWRIGHT_CHANNEL=chrome npm run check` exited 0: references 7/7, planning 15/15, lint/import boundaries, typecheck, 187 unit/integration tests, build/privacy scan, 41 browser tests. Chromium install was unsupported on macOS 12; used the documented system Chrome fallback. An initial npm install under default Node 19/npm 8 failed its engine check without changing manifests; retry with the pinned runtime succeeded and npm reported 0 vulnerabilities.
+- No independent review yet. Per the B04 midpoint requirement, B04 is now PAUSED and B04.5 is READY/unclaimed. No AWS credentials/account calls, cloud resources, commits, or publication.
+
 
 ## 2026-09-22T18:17:59Z — shared pool / AI task planning — REVIEW
 

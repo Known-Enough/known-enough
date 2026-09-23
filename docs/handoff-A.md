@@ -1,6 +1,6 @@
 # User A handoff — shared task pool
 
-Current scheduling (September 23): both users follow the same [project-wide priority queue](task-board.md), with one active task at a time. A/B IDs and personal handoff filenames do not assign ownership. G01 is DONE for the reviewed local integration checkpoint after user acceptance; B04 is the next implementation, with a pause for B04.5 after its first slice. A05 mock preparation remains REVIEW pending separate human acceptance. [T01](tasks/T01.md) and [T02](tasks/T02.md) remain later AI-extension work.
+Current scheduling (September 23): both users follow the same [project-wide priority queue](task-board.md), with one active task at a time. A/B IDs and personal handoff filenames do not assign ownership. G01 is DONE for the reviewed local integration checkpoint after user acceptance. B04's first Cognito identity slice is complete and PAUSED; A/Ricardo retains the implementation claim. B04.5 is READY for independent `gpt-6-astra` / high review; B04 must not resume until that review completes. A05 mock preparation remains REVIEW pending separate human acceptance. [T01](tasks/T01.md) and [T02](tasks/T02.md) remain later AI-extension work.
 
 Use the direct model/effort printed in the ticket. A02/A03 remain REVIEW. A03.5 records PASS for the exact reviewed correction; A04/A06 remain candidates subject to prerequisites, while A05 is REVIEW. Read [workflow](agent-workflow.md) and [A log](work-log-A.md), then take only the current highest-priority task. No parallel task or subagent work.
 

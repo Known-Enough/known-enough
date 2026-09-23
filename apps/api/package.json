@@ -3,14 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts" },
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "dev": "node --experimental-transform-types src/local.ts",
     "start": "node --experimental-transform-types src/local.ts"
   },
   "dependencies": {
-    "@deal-table/contracts": "0.1.0",
+    "@deal-table/adapters": "0.1.0",
     "@deal-table/application": "0.1.0",
-    "@deal-table/adapters": "0.1.0"
+    "@deal-table/contracts": "0.1.0",
+    "aws-jwt-verify": "5.2.1"
   }
 }

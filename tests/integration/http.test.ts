@@ -4,7 +4,7 @@ import { DealTableApplication, type TrustedPrincipal } from '@deal-table/applica
 import { InMemoryRoomRepository } from '@deal-table/adapters';
 import { CommandResult, OwnerSnapshot, PublicRoomSnapshot, type CommandEnvelope } from '@deal-table/contracts';
 import { buildTeamTableFixture } from '@deal-table/test-support';
-import { createLocalApiHandler, createNonProductionIdentities, type LocalApiOptions } from '../../apps/api/src/http.ts';
+import { createApiHandler, createLocalApiHandler, createNonProductionIdentities, type ApiIdentityResolver, type LocalApiOptions } from '../../apps/api/src/http.ts';
 
 const roomId = 'room-synthetic';
 const servers: Server[] = [];
@@ -14,7 +14,7 @@ afterEach(async () => {
     server.closeAllConnections();
   })));
 });
-async function harness(identities?: LocalApiOptions['identities'], debug = false) {
+async function harness(identities?: LocalApiOptions['identities'], debug = false, identityResolver?: ApiIdentityResolver) {
   const fixture = buildTeamTableFixture();
   let sequence = 0;
   const repository = new InMemoryRoomRepository();
@@ -22,7 +22,10 @@ async function harness(identities?: LocalApiOptions['identities'], debug = false
   const seed = { roomId, schedule: fixture.schedule, roster: fixture.roster.map(member => ({ ...member, submitted: false })), policy: fixture.policy, organizerSubject: 'organizer', memberships: fixture.roster.map(member => ({ subject: member.id, memberId: member.id })) };
   await application.createRoom(seed);
   await application.createRoom({ ...seed, roomId: 'other-room', organizerSubject: 'other-organizer', memberships: fixture.roster.map(member => ({ subject: `other-${member.id}`, memberId: member.id })) });
-  const server = createServer(createLocalApiHandler({ application, debug, ...(identities ? { identities } : {}) }));
+  const handler = identityResolver
+    ? createApiHandler({ application, identityResolver, debug })
+    : createLocalApiHandler({ application, debug, ...(identities ? { identities } : {}) });
+  const server = createServer(handler);
   servers.push(server);
   await new Promise<void>((resolve, reject) => {
     server.once('error', reject);
@@ -34,7 +37,10 @@ async function harness(identities?: LocalApiOptions['identities'], debug = false
   async function request(path: string, identity: string | null = 'maya', body?: unknown, raw = false) {
     const response = await fetch(`${base}${path}`, {
       method: body === undefined ? 'GET' : 'POST',
-      headers: { ...(identity === null ? {} : { 'X-Deal-Table-Test-Identity': `NON_PRODUCTION ${identity}` }), ...(body === undefined ? {} : { 'Content-Type': 'application/json' }) },
+      headers: {
+        ...(identity === null ? {} : identityResolver ? { Authorization: identity } : { 'X-Deal-Table-Test-Identity': `NON_PRODUCTION ${identity}` }),
+        ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+      },
       ...(body === undefined ? {} : { body: raw ? String(body) : JSON.stringify(body) }),
     });
     const data: unknown = await response.json();
@@ -231,5 +237,35 @@ describe('B03 real local HTTP boundary (non-production test identities)', () => 
     const view = await h.publicView();
     expect(view.status).toBe('NO_AGREEMENT');
     expect(JSON.stringify(view)).not.toMatch(/DECLINED|offerId|conditionId|refusal/);
+  });
+});
+
+describe('B04 authenticated API handler boundary', () => {
+  it('resolves identity before malformed-body handling and fails closed on unknown credentials', async () => {
+    const resolved: Array<string | undefined> = [];
+    const identityResolver: ApiIdentityResolver = async authorization => {
+      resolved.push(authorization);
+      return authorization === 'Bearer valid-maya'
+        ? { kind: 'participant', subject: 'maya' }
+        : null;
+    };
+    const h = await harness(undefined, false, identityResolver);
+
+    error(await h.request(`/rooms/${roomId}/commands`, 'Bearer invalid-token', '{private malformed', true), 'UNAUTHENTICATED', 401);
+    expect(resolved).toEqual(['Bearer invalid-token']);
+    error(await h.request(`/rooms/${roomId}/commands`, 'Bearer valid-maya', '{private malformed', true), 'INVALID_COMMAND', 422);
+    expect(resolved).toEqual(['Bearer invalid-token', 'Bearer valid-maya']);
+  });
+
+  it('keeps authenticated display principals room-scoped and read-only', async () => {
+    const identityResolver: ApiIdentityResolver = async authorization => authorization === 'Bearer display-token'
+      ? { kind: 'display', subject: 'display-subject', roomId }
+      : null;
+    const h = await harness(undefined, false, identityResolver);
+
+    expect((await h.request(`/rooms/${roomId}/public`, 'Bearer display-token')).status).toBe(200);
+    error(await h.request(`/rooms/${roomId}/me`, 'Bearer display-token'), 'FORBIDDEN', 403);
+    error(await h.request(`/rooms/other-room/public`, 'Bearer display-token'), 'NOT_FOUND', 404);
+    error(await h.request(`/rooms/${roomId}/commands`, 'Bearer display-token', '{private malformed', true), 'FORBIDDEN', 403);
   });
 });

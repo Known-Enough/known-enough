@@ -5,13 +5,14 @@ import {
 import {
   ApplicationError, DealTableApplication, type TrustedPrincipal,
 } from '@deal-table/application';
+import type { ApiIdentityResolver, ApiPrincipal } from './cognito-identity.ts';
 
 const IDENTITY_HEADER = 'x-deal-table-test-identity';
 const REQUEST_ID_HEADER = 'x-request-id';
 const DEFAULT_MAX_BODY_BYTES = 64 * 1024;
 const LOCAL_IDENTITY_LABEL = /^NON_PRODUCTION [A-Za-z0-9_-]{1,80}$/;
 
-type HttpIdentity = Exclude<TrustedPrincipal, { kind: 'service' }>;
+type HttpIdentity = ApiPrincipal;
 type ErrorResult = Extract<CommandResult, { ok: false }>;
 
 export interface LocalApiOptions {
@@ -32,6 +33,14 @@ export interface LocalApiServerOptions extends LocalApiOptions {
   readonly port?: number;
 }
 
+/** Server handler options for an authenticated composition such as Cognito. */
+export interface ApiHandlerOptions {
+  readonly application: DealTableApplication;
+  readonly identityResolver: ApiIdentityResolver;
+  readonly maxBodyBytes?: number;
+  readonly debug?: boolean;
+}
+
 export function createNonProductionIdentities(roomId: string): ReadonlyMap<string, HttpIdentity> {
   const checkedRoomId = Id.parse(roomId);
   return new Map([
@@ -43,13 +52,18 @@ export function createNonProductionIdentities(roomId: string): ReadonlyMap<strin
   ]);
 }
 
+function validateMaxBodyBytes(maxBodyBytes: number | undefined): number {
+  const checkedMaxBodyBytes = maxBodyBytes ?? DEFAULT_MAX_BODY_BYTES;
+  if (!Number.isSafeInteger(checkedMaxBodyBytes) || checkedMaxBodyBytes < 1 || checkedMaxBodyBytes > 1024 * 1024) {
+    throw new Error('maxBodyBytes must be an integer between 1 and 1048576');
+  }
+  return checkedMaxBodyBytes;
+}
+
 function validateOptions(options: LocalApiOptions): { identities: ReadonlyMap<string, HttpIdentity>; maxBodyBytes: number } {
   const identities = options.identities ?? createNonProductionIdentities('room-synthetic');
   const cleanIdentities = new Map<string, HttpIdentity>();
-  const maxBodyBytes = options.maxBodyBytes ?? DEFAULT_MAX_BODY_BYTES;
-  if (!Number.isSafeInteger(maxBodyBytes) || maxBodyBytes < 1 || maxBodyBytes > 1024 * 1024) {
-    throw new Error('maxBodyBytes must be an integer between 1 and 1048576');
-  }
+  const maxBodyBytes = validateMaxBodyBytes(options.maxBodyBytes);
   for (const [label, principal] of identities) {
     if (!LOCAL_IDENTITY_LABEL.test(label) || !principal.subject
       || (principal.kind !== 'participant' && principal.kind !== 'display')) {
@@ -125,7 +139,7 @@ function setCors(response: ServerResponse, request: IncomingMessage): void {
     response.setHeader('vary', 'Origin');
   }
   response.setHeader('access-control-allow-methods', 'GET, POST, OPTIONS');
-  response.setHeader('access-control-allow-headers', 'Content-Type, X-Deal-Table-Test-Identity, X-Request-Id');
+  response.setHeader('access-control-allow-headers', 'Authorization, Content-Type, X-Deal-Table-Test-Identity, X-Request-Id');
 }
 
 function sendJson(response: ServerResponse, status: number, body: unknown): void {
@@ -196,13 +210,12 @@ async function runQueuedWork(application: DealTableApplication, roomId: string, 
  * Local-only HTTP adapter. It accepts a fixed synthetic identity label and is
  * deliberately unsuitable for production authentication.
  */
-export function createLocalApiHandler(options: LocalApiOptions): (request: IncomingMessage, response: ServerResponse) => void {
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('The local non-production API cannot run with NODE_ENV=production');
-  }
-  const { application } = options;
-  const { identities, maxBodyBytes } = validateOptions(options);
-  const debug = options.debug ?? false;
+function createRequestHandler(
+  application: DealTableApplication,
+  maxBodyBytes: number,
+  debug: boolean,
+  resolveIdentity: (request: IncomingMessage) => Promise<HttpIdentity | null>,
+): (request: IncomingMessage, response: ServerResponse) => void {
   return (request, response) => {
     void (async () => {
       setCors(response, request);
@@ -213,7 +226,12 @@ export function createLocalApiHandler(options: LocalApiOptions): (request: Incom
       }
 
       const id = requestId(request);
-      const principal = identity(request, identities);
+      let principal: HttpIdentity | null = null;
+      try {
+        principal = await resolveIdentity(request);
+      } catch {
+        // Identity infrastructure failures fail closed without exposing details.
+      }
       if (!principal) {
         sendJson(response, 401, errorBody('UNAUTHENTICATED', id));
         return;
@@ -283,6 +301,31 @@ export function createLocalApiHandler(options: LocalApiOptions): (request: Incom
   };
 }
 
+/** Build an API handler around a verified server-side identity resolver. */
+export function createApiHandler(options: ApiHandlerOptions): (request: IncomingMessage, response: ServerResponse) => void {
+  const maxBodyBytes = validateMaxBodyBytes(options.maxBodyBytes);
+  return createRequestHandler(
+    options.application,
+    maxBodyBytes,
+    options.debug ?? false,
+    request => options.identityResolver(request.headers.authorization),
+  );
+}
+
+/** Local-only HTTP adapter for fixed synthetic identities. */
+export function createLocalApiHandler(options: LocalApiOptions): (request: IncomingMessage, response: ServerResponse) => void {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('The local non-production API cannot run with NODE_ENV=production');
+  }
+  const { identities, maxBodyBytes } = validateOptions(options);
+  return createRequestHandler(
+    options.application,
+    maxBodyBytes,
+    options.debug ?? false,
+    request => Promise.resolve(identity(request, identities)),
+  );
+}
+
 export function createLocalApiServer(options: LocalApiOptions): Server {
   return createServer(createLocalApiHandler(options));
 }
@@ -302,3 +345,5 @@ export async function listenLocalApi(options: LocalApiServerOptions): Promise<Se
   });
   return server;
 }
+
+export { createCognitoIdentityResolver, createCognitoIdentityResolverFromEnv } from './cognito-identity.ts';

@@ -6,7 +6,7 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 
 ## Project-wide priority
 
-- **Current implementation: B04** (`gpt-6-sol`, high), identity and persistence. G01’s local integration checkpoint received independent follow-up PASS and user acceptance on 2026-09-23. Pause after B04’s first slice for [B04.5](tasks/B04.5.md) (`gpt-6-astra`, high), address findings, then resume B04.
+- **Current gate: B04.5** (`gpt-6-astra`, high), independent review of B04's first identity slice; **READY, unclaimed**. B04 is **PAUSED**, with its implementation claim retained by A/Ricardo. G01’s local integration checkpoint received independent follow-up PASS and user acceptance on 2026-09-23. Resume B04 only after the midpoint review and required fixes.
 - A05 mock preparation is complete and remains REVIEW after independent A03.5 privacy follow-up PASS; its own human acceptance remains pending.
 - Then follow the critical path through [A04](tasks/A04.md) → [A04.5](tasks/A04.5.md) → [G02](tasks/G02.md), then [A05](tasks/A05.md) → [B05](tasks/B05.md) → [A05.5](tasks/A05.5.md). B06 follows B05 when its cloud actions are explicitly authorized. Continue with the AI extension [T01](tasks/T01.md) → [T02](tasks/T02.md) after their prerequisites, then trial/demo integration [A06](tasks/A06.md) → [A06.5](tasks/A06.5.md) → [G03](tasks/G03.md).
 - A04, A06 and T01 remain READY candidates only when their ticket prerequisites hold. The queue order applies equally to either user; A/B prefixes do not decide ownership. A02/A03/A03.5, A02.5 and B03 remain REVIEW; G01 is DONE. Do not restart completed B01/B02.
@@ -29,7 +29,7 @@ These rows record dependency and review state. They are not simultaneous work la
 | [A02.5](tasks/A02.5.md) | `gpt-6-sol` / medium | A02, A03.5, reviewed B02/B02.5, B03 | REVIEW; synchronized repairs, combined evidence in G01 |
 | [G01](tasks/G01.md) | `gpt-6-astra` / high | A02.5, A03.5, B03, B02.5 current evidence | DONE; local integration checkpoint independently reviewed and human accepted 2026-09-23 |
 
-Task prerequisites determine eligibility; the project-wide priority above determines order. B04 is next after G01 acceptance. B03 acceptance still requires review of B02's final critical delta. Integration and human review cannot be replaced with synthetic browser tests.
+Task prerequisites determine eligibility; the project-wide priority above determines order. G01 is accepted; B04's first reviewable slice is complete and B04.5 is next. B03 acceptance still requires review of B02's final critical delta. Integration and human review cannot be replaced with synthetic browser tests.
 
 ## Authenticated product and later gates
 
@@ -39,8 +39,8 @@ Work through these tasks in priority order, one at a time, after their stated pr
 | --- | --- | --- | --- |
 | [A04](tasks/A04.md) | `gpt-6-luna` / medium | A03.5; agreed session interface | Session/reconnect UX using injected responses |
 | [A05](tasks/A05.md) | `gpt-6-luna` / medium | A02, A03.5 | REVIEW; host-simulation language draft and form fallback; A03.5 privacy follow-up PASS |
-| [B04](tasks/B04.md) | `gpt-6-sol` / high | G01 | Identity/persistence implementation |
-| [B04.5](tasks/B04.5.md) | `gpt-6-astra` / high | G01 + B04 design/first implementation | Midpoint before extending critical approach |
+| [B04](tasks/B04.md) | `gpt-6-sol` / high | G01 | First Cognito identity slice complete; PAUSED, implementation claim retained by A/Ricardo |
+| [B04.5](tasks/B04.5.md) | `gpt-6-astra` / high | G01 + B04 design/first implementation | READY, unclaimed; independent midpoint review before B04 resumes |
 | [A04.5](tasks/A04.5.md) | `gpt-6-luna` / medium | A04, completed B04, B04.5, G01 | Real sessions across browser contexts |
 | [G02](tasks/G02.md) | `gpt-6-astra` / high | A04.5, B04, B04.5 | Privacy/security gate before external testers |
 | [B05](tasks/B05.md) | `gpt-6-sol` / high | Reviewed B04/B04.5 | Owner extraction/jobs and safe routing |
