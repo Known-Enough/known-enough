@@ -77,3 +77,8 @@ B04 first implementation slice is locally committed at 747aac2: strict DynamoDB 
 ## B04.5 first-code-slice review — 2026-09-23
 
 B04.5 returned CHANGES_REQUESTED on `5297118..747aac2` with four reproducible P2 findings R7–R10. Owner A resumed B04 only to correct those findings: supported `requiredGrants` count, idempotency under exhausted receipt quota, preserving permission evidence/lifetime accounting for departed owners after roster revision, and deterministic transaction cancellation classification. Current bounded claim and reviewer evidence are in [B04](tasks/B04.md) and [B04.5](reviews/B04.5.md). Regressions and focused checks are required; after the pinned full check, pause for independent Astra/high follow-up. No live cloud evidence or push.
+
+
+## B04 R7–R10 correction handoff — 2026-09-23
+
+The four first-code-review findings are fixed in local commit `f88b4a0` and pinned full check passed (216 unit/integration and 41 browser tests; adapter suite 17/17). B04 is paused for Astra/high independent B04.5 follow-up of `747aac2..f88b4a0`. The archive keeps retired exception grants and disclosure decision hashes/status/metadata, but omits unshared wording and all drafts/confirmations. This is local fake-client evidence only; no AWS/Cognito/IAM/live acceptance or push. See [B04 ticket](tasks/B04.md) and [review](reviews/B04.5.md).
