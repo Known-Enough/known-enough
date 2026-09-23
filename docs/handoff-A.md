@@ -97,3 +97,8 @@ The mixed-reason classifier fix is committed at b78aab9; adapter tests passed 21
 ## B04.5 fresh R10 follow-up — 2026-09-23T22:38:42Z
 
 **PASS on `f88b4a0..b78aab9`**. Independent configured gpt-6-astra / high reviewed the classifier, both callers, exact new/old tests and owner full-check evidence. R10 closed; R7–R9 remain closed. Fresh adapter suite **21/21** and **35 classifier assertions** passed, with references 7/7 and planning 15/15. [Review evidence](reviews/B04.5.md) records exact hashes and limits. Reviewer claim finished; B04 stays PAUSED with this code gate cleared pending owner resumption. Remaining implementation, final review, human acceptance and G02/live gates still apply. No implementation edits, live cloud acceptance or publication.
+
+
+## B04 near-limit response-path claim — 2026-09-23
+
+After the fresh B04.5 R10 PASS, B04 resumed for one bounded local acceptance case: keep a real exception ALLOW and its later disclosure DECLINE recordable near the byte/reservation ceiling across the intervening solver-job write. Scope is the adapter integration test and current infra evidence summary. See [B04 ticket](tasks/B04.md), [board](task-board.md), and [infra status/design](../infra/README.md). No production fix will be made under this test-only claim if a defect is exposed; no cloud/IAM/live acceptance or push.
