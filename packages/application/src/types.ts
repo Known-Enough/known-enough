@@ -53,10 +53,31 @@ export interface RoomRecord extends RoomSeed {
   job: { id: string; contextToken: string; epoch: number; completed: boolean } | null;
   replays: { keyHash: string; bodyHash: string; result: CommandResult }[];
 }
+
+/** Used by durable repositories to expose only the matching candidate receipt to a transition. */
+export interface ReplayCandidate {
+  keyHash: Promise<string>;
+  commandType: string;
+}
+export interface RoomTransactionOptions {
+  replay?: ReplayCandidate;
+}
+
+/** A deterministic admission failure: no STATE, GUARD, or REPLAY item was committed. */
+export class RepositoryCapacityError extends Error {
+  constructor() {
+    super('ROOM_CAPACITY_REACHED');
+    this.name = 'RepositoryCapacityError';
+  }
+}
 /** Callback transitions are isolated, serialized and committed together, including replays. */
 export interface RoomRepository {
   create(room: RoomRecord): Promise<void>;
-  transaction<T>(roomId: string, transition: (room: RoomRecord | null) => Promise<T> | T): Promise<T>;
+  transaction<T>(
+    roomId: string,
+    transition: (room: RoomRecord | null) => Promise<T> | T,
+    options?: RoomTransactionOptions,
+  ): Promise<T>;
 }
 export interface ApplicationOptions {
   repository: RoomRepository;

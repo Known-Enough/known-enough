@@ -7,10 +7,12 @@ import type {
 } from '@deal-table/contracts';
 import { solveDecision } from '@deal-table/domain';
 import type { OwnedExceptionGrant, SolveDecisionInput } from '@deal-table/domain';
+import { RepositoryCapacityError } from './types.ts';
 import type {
   ApplicationOptions, ErrorCode, ExpectedVersion, OwnerRecord, RoomRecord, RoomSeed, TrustedPrincipal,
 } from './types.ts';
 export type * from './types.ts';
+export { RepositoryCapacityError } from './types.ts';
 
 export class ApplicationError extends Error {
   readonly httpStatus: number;
@@ -248,6 +250,10 @@ export class DealTableApplication {
     try {
       if (!principal?.subject) fail('UNAUTHENTICATED');
       const roomId = typeof raw.roomId === 'string' ? raw.roomId : '';
+      const replayCandidate = typeof raw.type === 'string' && typeof raw.idempotencyKey === 'string'
+        ? { keyHash: sha256(canonical([principal.kind, principal.subject, roomId, raw.type, raw.idempotencyKey])),
+          commandType: raw.type }
+        : undefined;
       return await this.options.repository.transaction(roomId, async stored => {
         const room = this.authorize(principal, stored, typeof raw.type === 'string' ? raw.type : 'INVALID');
         const parsed = CommandEnvelope.safeParse(input);
@@ -283,8 +289,11 @@ export class DealTableApplication {
         }
         room.replays.push({ keyHash, bodyHash, result });
         return result;
-      });
+      }, replayCandidate ? { replay: replayCandidate } : undefined);
     } catch (error) {
+      if (error instanceof RepositoryCapacityError) {
+        return { ok: false, requestId, error: { code: 'ROOM_CAPACITY_REACHED', httpStatus: 409 } };
+      }
       if (!(error instanceof ApplicationError)) throw error;
       return { ok: false, requestId, error: { code: error.code, httpStatus: ERROR_HTTP_STATUS[error.code] } };
     }

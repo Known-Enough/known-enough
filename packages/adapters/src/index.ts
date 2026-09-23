@@ -1,4 +1,6 @@
 import type { RoomRecord, RoomRepository } from '@deal-table/application';
+export { DynamoDBRoomRepository, RepositoryStorageError } from './dynamodb.ts';
+export type { DynamoDBRoomRepositoryOptions } from './dynamodb.ts';
 
 /** Local process only: no cross-process or DynamoDB transaction guarantee. */
 export class InMemoryRoomRepository implements RoomRepository {
