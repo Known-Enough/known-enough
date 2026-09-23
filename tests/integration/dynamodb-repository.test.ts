@@ -34,6 +34,9 @@ const display: TrustedPrincipal = { kind: 'display', subject: 'display-device', 
 function stringValue(value: AttributeValue | undefined): string | undefined {
   return value && 'S' in value ? value.S : undefined;
 }
+function numberValue(value: AttributeValue | undefined): number {
+  return value && 'N' in value ? Number(value.N) : 0;
+}
 function storageKey(value: Item): string {
   return (stringValue(value.PK) ?? '') + '#' + (stringValue(value.SK) ?? '');
 }
@@ -372,6 +375,75 @@ describe('reserved STATE capacity', () => {
     })).rejects.toBeInstanceOf(RepositoryCapacityError);
     expect(JSON.stringify(h.client.item(roomId, 'STATE'))).toBe(beforeState);
     expect(JSON.stringify(h.client.item(roomId, 'GUARD'))).toBe(beforeGuard);
+  });
+
+  it('preserves an issued exception response near the ceiling across ALLOW, solver write, and disclosure DECLINE', async () => {
+    const h = await harness();
+    await h.createOffer();
+    const decoded = decodeStateItem(h.client.item(roomId, 'STATE')!, roomId);
+    let selected: ReturnType<typeof inflateForCapacity> | undefined;
+    let selectedHistoryCount = 0;
+    let selectedCombinedBytes = 0;
+    for (let history = 60; history <= 92; history += 1) {
+      for (let publicCount = 0; publicCount <= 32; publicCount += 1) {
+        const candidate = inflateForCapacity(decoded, h.fixture, history, publicCount);
+        const bytes = stateItemSizeBytes(candidate);
+        const combinedBytes = bytes + pendingResponseByteReservations(candidate);
+        if (bytes <= 352 * 1024 && combinedBytes <= 360 * 1024 && combinedBytes > selectedCombinedBytes) {
+          selected = candidate;
+          selectedHistoryCount = history;
+          selectedCombinedBytes = combinedBytes;
+        }
+      }
+    }
+    expect(selected, 'construct a valid near-limit issued-offer state').toBeDefined();
+    expect(selectedCombinedBytes).toBeGreaterThanOrEqual(356 * 1024);
+    const selectedRoom = selected!;
+    const nina = selectedRoom.owners.find(owner => owner.memberId === 'nina')!;
+    const offer = nina.offers[0]!;
+    expect(nina.offers).toHaveLength(1);
+    h.client.replace(roomId, 'STATE', encodeStateItem(selectedRoom));
+    const priorGuard = h.client.item(roomId, 'GUARD')!;
+    h.client.setCounters(roomId, {
+      ordinary: numberValue(priorGuard.ordinaryReceipts),
+      permission: numberValue(priorGuard.permissionHistoryReceipts) + selectedHistoryCount,
+      safety: numberValue(priorGuard.safetyReserveReceipts),
+      total: numberValue(priorGuard.totalReceipts) + selectedHistoryCount,
+    });
+
+    expect(await h.applied('nina', 'DECIDE_EXCEPTION', {
+      offerId: offer.id, offerVersion: offer.version, scope: offer.scope, decision: 'ALLOW',
+    })).toMatchObject({ ok: true });
+    const afterAllow = decodeStateItem(h.client.item(roomId, 'STATE')!, roomId);
+    const afterAllowBytes = stateItemSizeBytes({ ...afterAllow, replays: [] });
+    expect(afterAllow.owners.find(owner => owner.memberId === 'nina')!.exceptions).toHaveLength(1);
+    expect(afterAllow.owners.find(owner => owner.memberId === 'nina')!.previews).toHaveLength(1);
+    expect(afterAllowBytes + pendingResponseByteReservations(afterAllow)).toBeLessThanOrEqual(360 * 1024);
+
+    const job = await h.app.pendingSolveJob(service, roomId);
+    expect(job).not.toBeNull();
+    expect(await h.app.runSolveJob(service, roomId, job!.id)).toBe('PUBLISHED');
+    const afterSolve = decodeStateItem(h.client.item(roomId, 'STATE')!, roomId);
+    const afterSolveBytes = stateItemSizeBytes({ ...afterSolve, replays: [] });
+    const afterSolveNina = afterSolve.owners.find(owner => owner.memberId === 'nina')!;
+    expect(afterSolveNina.previews).toHaveLength(1);
+    expect(afterSolveNina.exceptions).toHaveLength(1);
+    expect(afterSolveBytes).toBeLessThanOrEqual(352 * 1024);
+    expect(afterSolveBytes + pendingResponseByteReservations(afterSolve)).toBeLessThanOrEqual(360 * 1024);
+
+    const preview = (await h.owner('nina')).disclosurePreviews[0]!;
+    expect(await h.applied('nina', 'DECIDE_DISCLOSURE', { preview, decision: 'DECLINE' })).toMatchObject({ ok: true });
+    const afterDecline = decodeStateItem(h.client.item(roomId, 'STATE')!, roomId);
+    const afterDeclineNina = afterDecline.owners.find(owner => owner.memberId === 'nina')!;
+    expect(afterDecline.proposal).not.toBeNull();
+    expect(afterDeclineNina.exceptions).toMatchObject([{ status: 'ACTIVE' }]);
+    expect(afterDeclineNina.disclosures.find(grant => grant.preview.id === preview.id)).toMatchObject({
+      status: 'DECLINED', preview: { id: preview.id },
+    });
+    expect(permissionHistoryCount(afterDecline)).toBe(selectedHistoryCount + 2);
+    expect(pendingResponseByteReservations(afterDecline)).toBe(0);
+    expect(stateItemSizeBytes({ ...afterDecline, replays: [] })).toBeLessThanOrEqual(360 * 1024);
+    expect(h.client.item(roomId, 'GUARD')!.permissionHistoryReceipts).toEqual({ N: String(selectedHistoryCount + 2) });
   });
 
   it('keeps a pending decline executable near the ceiling and consumes its reservation', async () => {

@@ -1,8 +1,8 @@
 # User A handoff — shared task pool
 
-Current scheduling (September 23): both users follow the same [project-wide priority queue](task-board.md), with one active task at a time. A/B IDs and personal handoff filenames do not assign ownership. G01 is DONE for the reviewed local integration checkpoint after user acceptance. B04.5 independently PASSed the local midpoint design on `5297118`, closing R5b with R6 and earlier closures preserved. Owner A has resumed B04 implementation from that reviewed baseline; adapter enforcement, code review and live/G02 acceptance remain required. A05 mock preparation remains REVIEW pending separate human acceptance. [T01](tasks/T01.md) and [T02](tasks/T02.md) remain later AI-extension work.
+Current scheduling (September 23): both users follow the same [project-wide priority queue](task-board.md), with one active task at a time. A/B IDs and personal handoff filenames do not assign ownership. G01 is DONE for the reviewed local integration checkpoint after user acceptance. B04.5 PASSed the local midpoint design on `5297118` and the R10 code follow-up on `f88b4a0..b78aab9`. Owner A completed a near-limit local permission-response regression and paused at a new B04.5 follow-up review; remaining adapter work, final code review and live/G02 acceptance remain required. A05 mock preparation remains REVIEW pending separate human acceptance. [T01](tasks/T01.md) and [T02](tasks/T02.md) remain later AI-extension work.
 
-Use the direct model/effort printed in the ticket. A02/A03 remain REVIEW. A03.5 records PASS for the exact reviewed correction; A04/A06 remain candidates subject to prerequisites, while A05 is REVIEW. Read [workflow](agent-workflow.md) and [A log](work-log-A.md), then take only the current highest-priority task. No parallel task or subagent work.
+Use the direct model/effort printed in the ticket. A02/A03 remain REVIEW. A03.5 records PASS for the exact reviewed correction; A04/A06 remain candidates subject to prerequisites, while A05 is REVIEW. Read [workflow](agent-workflow.md) and [A log](work-log-A.md), then take only the current highest-priority task. No parallel implementation work; required independent reviews run sequentially.
 
 ## Existing A01 evidence
 
@@ -101,4 +101,9 @@ The mixed-reason classifier fix is committed at b78aab9; adapter tests passed 21
 
 ## B04 near-limit response-path claim — 2026-09-23
 
-After the fresh B04.5 R10 PASS, B04 resumed for one bounded local acceptance case: keep a real exception ALLOW and its later disclosure DECLINE recordable near the byte/reservation ceiling across the intervening solver-job write. Scope is the adapter integration test and current infra evidence summary. See [B04 ticket](tasks/B04.md), [board](task-board.md), and [infra status/design](../infra/README.md). No production fix will be made under this test-only claim if a defect is exposed; no cloud/IAM/live acceptance or push.
+After the fresh B04.5 R10 PASS, B04 resumed for one bounded local acceptance case: keep a real exception ALLOW and its later disclosure DECLINE recordable near the byte/reservation ceiling across the intervening solver-job write. The fake-client regression passes; focused adapter tests are 22/22 and the pinned full check passed 221 unit/integration and 41 browser tests. B04 is now paused for independent review of this exact test artifact. See [B04 ticket](tasks/B04.md), [board](task-board.md), and [infra status/design](../infra/README.md). This is local evidence only; no cloud/IAM/live acceptance or push.
+
+
+## B04 near-limit permission-response acceptance — 2026-09-23T22:59:37Z
+
+The local fake-client regression now covers the real issued-offer path through exception ALLOW, the queued solver-job STATE write, and decline of the generated disclosure preview near the encoded STATE/reservation ceiling. Focused adapter suite passed 22/22; pinned full check passed 221 unit/integration and 41 browser tests, plus references, planning, lint/boundaries, typecheck and build/privacy scan. Active exception, proposal, history and guard counts were verified. B04 is paused for independent B04.5 inspection of this exact test artifact before continuing. No production defect or live/cloud evidence is claimed; no publication.
