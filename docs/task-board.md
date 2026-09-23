@@ -6,7 +6,7 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 
 ## Project-wide priority
 
-- **Current task: B04.5** (`gpt-6-astra`, high), sequential review claimed by `/root/b04_5_review` for B04 persistence slice `cb2dbf9`. B04 is PAUSED after the conditional DynamoDB aggregate/replay-minimization slice; no cloud resources or deployment.
+- **Next: B04 owner resumption.** Independent [B04.5 persistence review](reviews/B04.5.md) is **REVIEW / PASS** for bounded slice `a3e7261..cb2dbf9`; the review claim is released. B04 remains PAUSED with A/Ricardo retaining ownership. Capacity/retention, semantic races, session/invite lifecycle and IAM remain open before G02; no cloud acceptance or deployment.
 - A05 mock preparation is complete and remains REVIEW after independent A03.5 privacy follow-up PASS; its own human acceptance remains pending.
 - Then follow the critical path through [A04](tasks/A04.md) → [A04.5](tasks/A04.5.md) → [G02](tasks/G02.md), then [A05](tasks/A05.md) → [B05](tasks/B05.md) → [A05.5](tasks/A05.5.md). B06 follows B05 when its cloud actions are explicitly authorized. Continue with the AI extension [T01](tasks/T01.md) → [T02](tasks/T02.md) after their prerequisites, then trial/demo integration [A06](tasks/A06.md) → [A06.5](tasks/A06.5.md) → [G03](tasks/G03.md).
 - A04, A06 and T01 remain READY candidates only when their ticket prerequisites hold. The queue order applies equally to either user; A/B prefixes do not decide ownership. A02/A03/A03.5, A02.5 and B03 remain REVIEW; G01 is DONE. Do not restart completed B01/B02.
@@ -39,8 +39,8 @@ Work through these tasks in priority order, one at a time, after their stated pr
 | --- | --- | --- | --- |
 | [A04](tasks/A04.md) | `gpt-6-luna` / medium | A03.5; agreed session interface | Session/reconnect UX using injected responses |
 | [A05](tasks/A05.md) | `gpt-6-luna` / medium | A02, A03.5 | REVIEW; host-simulation language draft and form fallback; A03.5 privacy follow-up PASS |
-| [B04](tasks/B04.md) | `gpt-6-sol` / high | G01 | PAUSED at `cb2dbf9`; conditional DynamoDB repository/replay slice ready for independent review |
-| [B04.5](tasks/B04.5.md) | `gpt-6-astra` / high | G01 + B04 design/first implementation | IN_PROGRESS; sequential persistence-slice review of `cb2dbf9` |
+| [B04](tasks/B04.md) | `gpt-6-sol` / high | G01 | PAUSED; bounded persistence review PASS, A/Ricardo retains ownership for remaining scope |
+| [B04.5](tasks/B04.5.md) | `gpt-6-astra` / high | G01 + paused B04 slice | REVIEW / PASS on bounded persistence slice `cb2dbf9`; review claim released, G02 delta recorded |
 | [A04.5](tasks/A04.5.md) | `gpt-6-luna` / medium | A04, completed B04, B04.5, G01 | Real sessions across browser contexts |
 | [G02](tasks/G02.md) | `gpt-6-astra` / high | A04.5, B04, B04.5 | Privacy/security gate before external testers |
 | [B05](tasks/B05.md) | `gpt-6-sol` / high | Reviewed B04/B04.5 | Owner extraction/jobs and safe routing |
