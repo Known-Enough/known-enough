@@ -248,3 +248,16 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Resumed the existing B04 claim from `b91ff76` after the independent B04.5 review recorded CHANGES_REQUESTED. Actual worker: A / Codex GPT-6; variant/effort not exposed, not claimed as the ticket's scheduled GPT-6-Sol/high. Scope was limited to `infra/README.md` and coordinated task/board/handoff records.
 - R5b: specified full DynamoDB STATE item byte measurement, worst-case per-prompt response reservations, ordinary-write headroom protection, and reservation consumption when each response commits. R6: specified ordinary-first accounting, lifetime permission-history accounting, and safety-reserve increments only after ordinary capacity is exhausted. Proved the maximum reserve-funded safety commands is 195 (192 revocations plus at most 3 approvals already present); receipt-free snapshot/job/expiry maintenance does not increment replay counters. Explicitly recorded codec and GUARD enforcement as unimplemented design requirements.
 - Documentation checks passed: references 7/7, planning 15/15, and `git diff --check`. No executable files changed, so no application suite was run. No cloud activity or push. B04 is paused for independent B04.5 review of the exact local commit before adapter expansion.
+
+
+## 2026-09-23T20:24:18Z — B04 / IN_PROGRESS — full-path R5b correction claim
+
+- Resumed B04 after fresh independent B04.5 review of `b91ff76..98877e1` returned CHANGES_REQUESTED. R6 and its 195-action bound passed; R5b needs the exception-offer reservation to include a new preview's later disclosure-history response. Actual worker: A / Codex GPT-6; variant/effort not exposed, not claimed as the scheduled GPT-6-Sol/high.
+- Bounded scope: `infra/README.md` and coordinated B04/task-board/A-log/handoff records. Define the complete exception ALLOW/DECLINE path through any created disclosure preview response, plus atomic transfer/release of the shared owner/context reservation. No adapter expansion, cloud activity or push before independent follow-up clears.
+
+
+## 2026-09-23T20:28:18Z — B04 / PAUSED — R5b follow-up review handoff
+
+- Resumed from `98877e1` after the configured independent `gpt-6-astra` / high B04.5 follow-up returned CHANGES_REQUESTED. R6 closed; R5b requires budgeting the future disclosure response before issuing its exception offer. Actual worker: A / Codex GPT-6; variant/effort not exposed, not claimed as the ticket's scheduled GPT-6-Sol/high.
+- Updated only `infra/README.md` and coordinated B04/task/board/handoff records. Exception admission now reserves the complete ALLOW chain through disclosure response; overlapping offers share one owner/context disclosure obligation, which transfers atomically to a created preview. All intermediate STATE sizes and remaining reservations are included.
+- Documentation checks passed: reference hashes 7/7, planning 15/15, 285 local Markdown targets, B04/B04.5 status consistency, and `git diff --check`. No executable files changed, so no application suite was run. No cloud work or push. B04 is PAUSED for independent review of the exact local correction commit; adapter expansion remains gated.

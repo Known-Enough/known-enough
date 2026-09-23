@@ -135,3 +135,23 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Fresh seven-suite focused check passed 120/120; typecheck passed. Actual-application inline probe completed 321 partial-plan accept/withdraw cycles with 0 agreement receipts and 653 replay rows, proving the lifetime-withdrawal bound cannot come from agreementHistory. Full implementer-reported 199/41 suite not rerun. No cloud checks.
 - [Review](reviews/B04.5.md) records exact artifact hashes, finding locations, method, corrections and limits. Claim finished; next owner A takes bounded R5b/R6 design corrections and returns for review. No implementation edits, commit or publication.
 - Final documentation validation passed: reference hashes 7/7, planning 15/15, 105 local links, task/board consistency and whitespace.
+
+
+## 2026-09-23T10:59:19Z — B04.5 / IN_PROGRESS — R5b/R6 design review
+
+- Independent design-only review from clean `ff69e9c`, comparing `b91ff76..ff69e9c`; owner A paused. Actual B / Codex GPT-6, variant/effort unexposed. No executable delta or cloud activity. Review/tracking documentation only.
+
+
+## 2026-09-23T20:19:27Z — B04.5 / IN_PROGRESS — fresh independent R5b/R6 review
+
+- Previous 10:59:19Z attempt hit its usage limit without substantive review; preserve its evidence and record the explicit user-authorized handoff to this fresh reviewer.
+- Configured `gpt-6-astra` / high, confirmed by coordinating session launch metadata; separate runtime variant telemetry and human identity are not exposed. Exact target `b91ff76..98877e1` on main; owner A paused. Read design, relevant application/contracts/tests and evidence; write reviewer documentation plus coordinated task/board/handoff status only. No implementation, commit or publication.
+
+
+## 2026-09-23T20:21:21Z — B04.5 / REVIEW — fresh design follow-up CHANGES_REQUESTED
+
+- Reviewed exact `b91ff76..98877e1`; configured independent `gpt-6-astra` / high, launch metadata confirmed, separate runtime variant telemetry and human identity unexposed. Preserved and explicitly handed off the interrupted prior attempt. Owner A paused.
+- R6 closes: ordinary-first counting, independent lifetime permission count, reserve-only safety count, at most 192 revocations + 3 current withdrawals, and 4,608 allocated replay rows. Maintenance writes do not consume replay quota. Other byte-preservation clauses and known-no-commit errors are coherent.
+- R5b remains narrowly open: exception offer admission budgets exception history + preview creation but must also reserve that future preview's history-response obligation. A final candidate check can otherwise reject an already-issued ALLOW. This is a design proof gap, not a reproduced adapter overflow. Exact finding, correction formula, required future regression and artifact hashes are in [B04.5 review](reviews/B04.5.md).
+- Fresh pinned checks: references 7/7, planning 15/15, committed diff whitespace passed. No application suite rerun for docs-only delta; no live cloud or adapter evidence. Claim finished; owner A may claim bounded R5b correction before follow-up review. No implementation/design edits, commit or publication.
+- Final coordinated documentation validation passed: 119 local Markdown targets, review/task/board/handoff consistency and preserved interrupted-attempt evidence, plus `git diff --check`. The reviewed design hash is unchanged.

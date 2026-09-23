@@ -1,6 +1,6 @@
 # User B handoff — shared task pool
 
-Current scheduling (September 23): both users follow the same [project-wide priority queue](task-board.md), with one active task at a time. A/B IDs and personal handoff filenames do not assign ownership. Current top gate: human acceptance of G01; B04 follows acceptance. If that gate remains pending and agent implementation is requested, A05 is the next ready build task after its prerequisites are confirmed. [T01](tasks/T01.md) and [T02](tasks/T02.md) remain later AI-extension work.
+Current scheduling (September 23): both users follow the same [project-wide priority queue](task-board.md), with one active task at a time. A/B IDs and personal handoff filenames do not assign ownership. Current top gate: the bounded B04 R5b design correction following independent CHANGES_REQUESTED on `98877e1`, then B04.5 follow-up. R6 is closed for design; the reviewer claim has finished. G01 is human accepted; A05 preparation remains REVIEW. [T01](tasks/T01.md) and [T02](tasks/T02.md) remain later AI-extension work.
 
 Latest handoff, 2026-09-22: **A02.5/G01 synchronized repairs, REVIEW for human acceptance.** User explicitly authorized commit/push. Reviewed repairs are preserved in `d042d8f`; integration includes published `8371e7b`, shared-pool policy, readiness/debug changes and tutorial. [G01 combined artifact and evidence](reviews/G01.md) records conflict decisions, exact hashes, fresh checks and independent review. No B04 implementation or new task claim. Earlier paragraphs retain historical context.
 
@@ -27,3 +27,8 @@ Shared evidence records initial Sol implementation, Astra completion after a usa
 Wire contracts are unchanged. Internal owner `availabilityReview` binds confirmed coverage to context/input revision; B02 must obtain it from authoritative owner confirmation, never infer it from the schedule. Domain scores, candidate/grant references and clarification details remain server-only and must not enter public DTOs. B01 does not authenticate callers or finalize agreements.
 
 B02 now implements availabilityReview from explicitly confirmed reviewedIntervals, independent consent, local solve jobs, replay checks and in-memory transaction isolation. Its imported independent Astra review found no remaining actionable findings after two regression fixes. Current combined verification and remaining HTTP/auth/cloud limits are recorded separately from B’s historical run.
+
+
+## B04.5 fresh independent review handoff — 2026-09-23T20:21:21Z
+
+Configured `gpt-6-astra` / high review of `b91ff76..98877e1`: **CHANGES_REQUESTED**. R6 passes; R5b must reserve the future disclosure response before its parent exception offer is issued. Preserved the interrupted attempt and recorded the explicit handoff. [Review evidence](reviews/B04.5.md) contains precise scope, hashes, checks and required future regression. Review claim finished; B04 stays PAUSED until owner A claims the bounded correction. No implementation or cloud acceptance, commit or publication.
