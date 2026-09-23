@@ -72,3 +72,8 @@ B04.5 PASSed the local midpoint design on `5297118`; owner A resumed B04 from th
 ## B04 first storage implementation slice — 2026-09-23
 
 B04 first implementation slice is locally committed at 747aac2: strict DynamoDB STATE/GUARD/REPLAY codec, conditional repository transactions, guarded counters and response-byte reservations, plus 11 tests using actual SDK transaction commands against a deterministic local fake. The full pinned check passed 210 unit/integration and 41 browser tests. The independent B04.5 design checkpoint PASS on 5297118 remains valid; B04 is now PAUSED while B04.5 performs its mandatory code/test review of 5297118..747aac2. No live AWS, DynamoDB Local, Cognito, IAM simulation, deployment, or publication evidence exists. Human acceptance and G02/live gates remain separate.
+
+
+## B04.5 first-code-slice review — 2026-09-23
+
+B04.5 returned CHANGES_REQUESTED on `5297118..747aac2` with four reproducible P2 findings R7–R10. Owner A resumed B04 only to correct those findings: supported `requiredGrants` count, idempotency under exhausted receipt quota, preserving permission evidence/lifetime accounting for departed owners after roster revision, and deterministic transaction cancellation classification. Current bounded claim and reviewer evidence are in [B04](tasks/B04.md) and [B04.5](reviews/B04.5.md). Regressions and focused checks are required; after the pinned full check, pause for independent Astra/high follow-up. No live cloud evidence or push.
