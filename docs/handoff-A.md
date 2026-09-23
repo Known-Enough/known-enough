@@ -87,3 +87,8 @@ The four first-code-review findings are fixed in local commit `f88b4a0` and pinn
 ## B04 R10 mixed-reason correction — 2026-09-23
 
 The fresh independent Astra/high follow-up closed R7–R9 and reproduced one remaining R10 edge case: mixed cancellation reasons are retried if any conflict/throttle reason is present. B04 is resumed solely to classify the complete reason list with fail-closed precedence and add adapter regressions. Claim, reviewed evidence and scope are recorded in [B04](tasks/B04.md), [B04.5](reviews/B04.5.md), and the [board](task-board.md). After focused and full checks, pause for another independent B04.5 follow-up. Local fake evidence only; no AWS/cloud work or push.
+
+
+## B04 R10 correction handoff — 2026-09-23
+
+The mixed-reason classifier fix is committed at b78aab9; adapter tests passed 21/21 and the pinned full check passed 220 unit/integration plus 41 Chromium tests. B04 is paused for the fresh user-authorized Astra/high B04.5 follow-up on f88b4a0..b78aab9. Local fake evidence only; no live AWS/Cognito/IAM acceptance or push. See [current task status](task-board.md), [B04](tasks/B04.md), and [review evidence](reviews/B04.5.md).

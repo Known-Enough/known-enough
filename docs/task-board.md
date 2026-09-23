@@ -6,7 +6,7 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 
 ## Project-wide priority
 
-- **Current task: B04 bounded R10 mixed-reason correction** (direct worker assignment `gpt-6-sol` / high; actual session variant/effort unexposed). B04.5 follow-up on `747aac2..f88b4a0` closed R7–R9 but returned CHANGES_REQUESTED on R10: cancellation lists mixing retryable reasons with item-size, arbitrary-validation, or unknown reasons are classified by the first matching retryable reason. The reviewer claim is finished; B04 resumes only the classifier and focused regression work, then pauses for independent Astra/high follow-up. The prior design checkpoint PASSed on 5297118. G01 received independent follow-up PASS and user acceptance on 2026-09-23.
+- **Current task: B04.5 fresh independent Astra/high follow-up** of exact B04 R10 fix f88b4a0..b78aab9. The prior follow-up closed R7–R9 and left R10 open because mixed cancellation lists could retry despite a deterministic capacity or arbitrary validation reason. B04 has applied full-list fail-closed precedence and four regression variants, then paused at b78aab9 for this review. Owner checks passed: focused adapter 21/21; pinned full check 220 unit/integration + 41 browser. The user explicitly authorized a fresh Astra/high reviewer after the prior reviewer reached its usage limit. The prior design checkpoint PASSed on 5297118. G01 received independent follow-up PASS and user acceptance on 2026-09-23.
 - A05 mock preparation is complete and remains REVIEW after independent A03.5 privacy follow-up PASS; its own human acceptance remains pending.
 - Then follow the critical path through [A04](tasks/A04.md) → [A04.5](tasks/A04.5.md) → [G02](tasks/G02.md), then [A05](tasks/A05.md) → [B05](tasks/B05.md) → [A05.5](tasks/A05.5.md). B06 follows B05 when its cloud actions are explicitly authorized. Continue with the AI extension [T01](tasks/T01.md) → [T02](tasks/T02.md) after their prerequisites, then trial/demo integration [A06](tasks/A06.md) → [A06.5](tasks/A06.5.md) → [G03](tasks/G03.md).
 - A04, A06 and T01 remain READY candidates only when their ticket prerequisites hold. The queue order applies equally to either user; A/B prefixes do not decide ownership. A02/A03/A03.5, A02.5 and B03 remain REVIEW; G01 is DONE. Do not restart completed B01/B02.
@@ -29,7 +29,7 @@ These rows record dependency and review state. They are not simultaneous work la
 | [A02.5](tasks/A02.5.md) | `gpt-6-sol` / medium | A02, A03.5, reviewed B02/B02.5, B03 | REVIEW; synchronized repairs, combined evidence in G01 |
 | [G01](tasks/G01.md) | `gpt-6-astra` / high | A02.5, A03.5, B03, B02.5 current evidence | DONE; local integration checkpoint independently reviewed and human accepted 2026-09-23 |
 
-Task prerequisites determine eligibility; the project-wide priority above determines order. B04 is active only for the bounded R10 mixed-reason correction; no broader identity/IAM work resumes before independent follow-up clears it. B03 acceptance still requires review of B02 final critical delta. Integration and human review cannot be replaced with synthetic browser tests.
+Task prerequisites determine eligibility; the project-wide priority above determines order. B04 is paused after the bounded R10 correction while B04.5 reviews the exact code/test delta; broader identity/IAM work remains gated. B03 acceptance still requires review of B02 final critical delta. Integration and human review cannot be replaced with synthetic browser tests.
 
 ## Authenticated product and later gates
 
@@ -39,8 +39,8 @@ Work through these tasks in priority order, one at a time, after their stated pr
 | --- | --- | --- | --- |
 | [A04](tasks/A04.md) | `gpt-6-luna` / medium | A03.5; agreed session interface | Session/reconnect UX using injected responses |
 | [A05](tasks/A05.md) | `gpt-6-luna` / medium | A02, A03.5 | REVIEW; host-simulation language draft and form fallback; A03.5 privacy follow-up PASS |
-| [B04](tasks/B04.md) | `gpt-6-sol` / high | G01 | IN_PROGRESS; bounded R10 mixed-reason fix on `f88b4a0` |
-| [B04.5](tasks/B04.5.md) | `gpt-6-astra` / high | G01 + B04 design/first implementation | REVIEW / CHANGES_REQUESTED; R7–R9 closed, R10 follow-up needed |
+| [B04](tasks/B04.md) | gpt-6-sol / high | G01 | PAUSED at b78aab9; R10 fix and local checks complete |
+| [B04.5](tasks/B04.5.md) | gpt-6-astra / high | G01 + B04 design/first implementation | IN_PROGRESS; independent follow-up on f88b4a0..b78aab9 |
 | [A04.5](tasks/A04.5.md) | `gpt-6-luna` / medium | A04, completed B04, B04.5, G01 | Real sessions across browser contexts |
 | [G02](tasks/G02.md) | `gpt-6-astra` / high | A04.5, B04, B04.5 | Privacy/security gate before external testers |
 | [B05](tasks/B05.md) | `gpt-6-sol` / high | Reviewed B04/B04.5 | Owner extraction/jobs and safe routing |
@@ -49,7 +49,7 @@ Work through these tasks in priority order, one at a time, after their stated pr
 | [A06.5](tasks/A06.5.md) | `gpt-6-luna` / medium | A06, G01, G02, operational B06, T02 | Integrated transitions, human trials, recording evidence |
 | [G03](tasks/G03.md) | `gpt-6-astra` / high | A05.5, A06.5, operational B06, G02, T02 | Release readiness; no automatic publish |
 
-A04/A05 preparation does not technically depend on G01, and A03.5 passes for the exact recorded artifact. G01 is DONE for the reviewed local checkpoint; B04 is active only for its R10 correction after the independent follow-up. A05 mock preparation remains REVIEW pending its separate human acceptance. A04 still requires an agreed session interface. External testers still require G02 and operational readiness.
+A04/A05 preparation does not technically depend on G01, and A03.5 passes for the exact recorded artifact. G01 is DONE for the reviewed local checkpoint; B04 is paused at b78aab9 for independent R10 follow-up. A05 mock preparation remains REVIEW pending its separate human acceptance. A04 still requires an agreed session interface. External testers still require G02 and operational readiness.
 
 ## AI facilitator extension
 
