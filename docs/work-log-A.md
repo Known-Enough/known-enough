@@ -261,3 +261,9 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Resumed from `98877e1` after the configured independent `gpt-6-astra` / high B04.5 follow-up returned CHANGES_REQUESTED. R6 closed; R5b requires budgeting the future disclosure response before issuing its exception offer. Actual worker: A / Codex GPT-6; variant/effort not exposed, not claimed as the ticket's scheduled GPT-6-Sol/high.
 - Updated only `infra/README.md` and coordinated B04/task/board/handoff records. Exception admission now reserves the complete ALLOW chain through disclosure response; overlapping offers share one owner/context disclosure obligation, which transfers atomically to a created preview. All intermediate STATE sizes and remaining reservations are included.
 - Documentation checks passed: reference hashes 7/7, planning 15/15, 285 local Markdown targets, B04/B04.5 status consistency, and `git diff --check`. No executable files changed, so no application suite was run. No cloud work or push. B04 is PAUSED for independent review of the exact local correction commit; adapter expansion remains gated.
+
+
+## 2026-09-23T20:36:58Z — B04 / IN_PROGRESS — implementation resumption
+
+- Resumed B04 after B04.5 PASSed the local midpoint design on `5297118`. Actual worker: A / Codex GPT-6; variant/effort not exposed, not claimed as scheduled `gpt-6-sol` / high. Baseline code is `5297118`; reviewer-owned PASS status changes are present in the worktree and will be preserved in the checkpoint.
+- Initial bounded implementation: strict DynamoDB STATE/GUARD/REPLAY codec and repository transaction enforcement for the reviewed design, plus focused local adapter tests. Scope includes `packages/adapters/**`, relevant application/contracts/API/integration/infra files, and task tracking. No cloud activity or publication.

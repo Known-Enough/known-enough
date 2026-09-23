@@ -1,6 +1,6 @@
 # User A handoff — shared task pool
 
-Current scheduling (September 23): both users follow the same [project-wide priority queue](task-board.md), with one active task at a time. A/B IDs and personal handoff filenames do not assign ownership. G01 is DONE for the reviewed local integration checkpoint after user acceptance. B04.5 reviewed `98877e1`: R6 is closed for design; R5b must reserve the future disclosure response before issuing its parent exception offer. The owner has added that full-path reservation and paused B04 for follow-up review before adapter expansion. A05 mock preparation remains REVIEW pending separate human acceptance. [T01](tasks/T01.md) and [T02](tasks/T02.md) remain later AI-extension work.
+Current scheduling (September 23): both users follow the same [project-wide priority queue](task-board.md), with one active task at a time. A/B IDs and personal handoff filenames do not assign ownership. G01 is DONE for the reviewed local integration checkpoint after user acceptance. B04.5 independently PASSed the local midpoint design on `5297118`, closing R5b with R6 and earlier closures preserved. Owner A has resumed B04 implementation from that reviewed baseline; adapter enforcement, code review and live/G02 acceptance remain required. A05 mock preparation remains REVIEW pending separate human acceptance. [T01](tasks/T01.md) and [T02](tasks/T02.md) remain later AI-extension work.
 
 Use the direct model/effort printed in the ticket. A02/A03 remain REVIEW. A03.5 records PASS for the exact reviewed correction; A04/A06 remain candidates subject to prerequisites, while A05 is REVIEW. Read [workflow](agent-workflow.md) and [A log](work-log-A.md), then take only the current highest-priority task. No parallel task or subagent work.
 
@@ -57,3 +57,13 @@ The owner documented conservative encoded-STATE headroom for every pending permi
 ## B04 R5b full-path reservation handoff — 2026-09-23
 
 Exception-offer admission now budgets exception history and the full possible ALLOW path through creating and resolving the shared owner/context disclosure preview. The prospective preview-response reservation transfers atomically to the created preview, remains protected across intermediate states and overlapping offers, and releases only when no path can create it or context invalidation closes it. The bound uses every intermediate strict STATE outcome and unaffected pending-response reservations; a final size check cannot strand an issued ALLOW. Documentation checks: references 7/7, planning 15/15, 285 local Markdown targets, task/review/board consistency, and `git diff --check` passed. This is a design requirement only; no DynamoDB codec or adapter enforcement exists. B04 is PAUSED for independent B04.5 review of the exact commit. No cloud work or publication.
+
+
+## B04.5 final design follow-up — 2026-09-23T20:33:46Z
+
+**PASS on `5297118` for the local midpoint design**. R5b now budgets every response-path prefix, future disclosure response, unaffected obligations and STATE/GUARD metadata; shared reservations transfer atomically. R6 remains closed. [Independent evidence and implementation requirements](reviews/B04.5.md). Review claim finished; B04 design gate cleared, with the owner to record sequential implementation resumption. Human acceptance, actual adapter enforcement, final critical review and G02/live acceptance remain outstanding. Nothing committed or published by this review.
+
+
+## B04 implementation resumption — 2026-09-23
+
+B04.5 PASSed the local midpoint design on `5297118`; owner A resumed B04 from that reviewed baseline. Actual worker: Codex GPT-6, variant/effort not exposed; scheduled `gpt-6-sol` / high is not claimed. Initial scope is the strict DynamoDB STATE/GUARD/REPLAY codec and repository transaction enforcement with focused local adapter tests, within the B04 ticket files. No cloud resources, live Cognito, IAM deployment or publication. The adapter and near-limit/concurrency checks are not implemented yet.

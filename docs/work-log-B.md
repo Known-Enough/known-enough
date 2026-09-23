@@ -155,3 +155,16 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - R5b remains narrowly open: exception offer admission budgets exception history + preview creation but must also reserve that future preview's history-response obligation. A final candidate check can otherwise reject an already-issued ALLOW. This is a design proof gap, not a reproduced adapter overflow. Exact finding, correction formula, required future regression and artifact hashes are in [B04.5 review](reviews/B04.5.md).
 - Fresh pinned checks: references 7/7, planning 15/15, committed diff whitespace passed. No application suite rerun for docs-only delta; no live cloud or adapter evidence. Claim finished; owner A may claim bounded R5b correction before follow-up review. No implementation/design edits, commit or publication.
 - Final coordinated documentation validation passed: 119 local Markdown targets, review/task/board/handoff consistency and preserved interrupted-attempt evidence, plus `git diff --check`. The reviewed design hash is unchanged.
+
+
+## 2026-09-23T20:33:01Z — B04.5 / IN_PROGRESS — R5b response-path follow-up
+
+- Same configured independent `gpt-6-astra` / high reviewer; separate runtime variant telemetry and human identity unexposed. Clean main at `5297118`; inspect `98877e1..5297118`, with owner A paused. Review the full response-path bound and reservation transfer; preserve R6 closure unless changed. Reviewer/tracking documentation only; no design or implementation edits, commit or publication.
+
+
+## 2026-09-23T20:33:46Z — B04.5 / REVIEW — R5b follow-up PASS
+
+- Independent configured `gpt-6-astra` / high reviewed exact `98877e1..5297118`; runtime variant telemetry and human identity remain separately unexposed. R5b closes: offer-time budget includes every response-path prefix, future disclosure-history response and all remaining obligations. Atomic shared-budget transfer and release match the application transitions; corresponding STATE/GUARD item measurements are explicit. R6 and all earlier closures remain unchanged.
+- Fresh references 7/7, planning 15/15 and committed-diff whitespace passed. No executable changes or application suite rerun; no adapter/live-cloud evidence. [Review](reviews/B04.5.md) records the inequality proof, exact hashes, required implementation regressions and limits.
+- Claim finished. B04.5 is REVIEW / PASS for local midpoint design; B04 stays PAUSED with its design gate cleared, pending the owner's sequential resumption claim. No design/code edit, commit or publication. Human acceptance and G02 remain outstanding.
+- Final coordinated validation passed: 123 local Markdown targets, PASS/PAUSED task/board/handoff consistency, finished review claim, unchanged design hash and `git diff --check`.
