@@ -1,9 +1,15 @@
 # @deal-table/adapters
 
-`InMemoryRoomRepository` implements the application `RoomRepository` port for local B02 development. Never import this server package into the browser.
+This server-only package must never be imported by the browser. Both repositories are trusted storage infrastructure, not authorized client APIs. Call the application to enforce membership, room scope, versions, and permissions; do not expose repository methods or log stored records.
 
-Each room has a serialized transaction queue. A transition receives a cloned room; successful completion atomically replaces stored state and returns a detached value. A thrown error discards the working copy and releases the queue. Creation also uses the same per-room queue and rejects duplicate rooms. Different rooms are independent.
+## In-memory repository
 
-The repository is trusted server infrastructure, not an authorized client API. Call application methods to enforce membership, scopes, versions and permissions. Do not expose `transaction` directly to browser callers. Stored state is private and must never be logged or spread into public responses.
+InMemoryRoomRepository implements the application port for local development. It serializes callbacks per room, clones state before transitions, commits on successful completion, and discards a working copy when a callback throws. State is lost on process restart; it provides no cross-process transaction or durability guarantee.
 
-State is process-local and lost on restart. There is no DynamoDB, cross-process lock, credential verification or cloud deployment. B04 must independently implement and verify durable conditional transaction behavior; these tests do not establish cloud safety.
+## DynamoDB repository
+
+DynamoDBRoomRepository accepts a low-level AWS SDK DynamoDBClient and one table name. It reads STATE, GUARD, and only the candidate REPLAY item with TransactGetItems. Changed transitions atomically write STATE, conditionally update the observed GUARD version/counters, and conditionally insert a new REPLAY receipt with TransactWriteItems. It retries bounded transaction conflicts and returns a redacted retryable error for storage failures or unknown outcomes.
+
+The codec allowlists and validates the versioned private STATE envelope and exact STATE/GUARD/REPLAY keys. Replay rows contain only hashes, incarnation, and a strict command result. Candidate receipts are supplied to the application only after the application callback authorizes against current membership. Pending exception/disclosure decisions reserve history and encoded STATE capacity; ordinary, permission-history, safety-reserve, and total receipt counters are guarded with every write. No TTL is used for consent or replay retention.
+
+The adapter does not create tables, configure IAM/Cognito, deploy infrastructure, or establish live cloud behavior. Its integration tests send the actual SDK transaction commands to a deterministic local transactional fake; those tests do not replace DynamoDB Local or a live account review. B04 remains subject to its B04.5 code review, human acceptance, and G02/live gates.

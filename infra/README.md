@@ -1,6 +1,6 @@
-# B04 production adapter design — pending B04.5 follow-up
+# B04 production adapter design — B04.5 design PASS; code review in progress
 
-This is a local design proposal for B04. No AWS resources have been created and no cloud behavior is claimed as verified. B04.5 returned CHANGES_REQUESTED on the first design/slice; prior revisions addressed R1–R4 and R5 history-slot admission, and this follow-up specifies the remaining R5b encoded-size and R6 safety-quota corrections. Do not expand the DynamoDB adapter until independent review clears.
+This is the reviewed local design for B04, not cloud evidence. No AWS resources have been created and no cloud behavior is claimed as verified. B04.5 design follow-up PASSed on 5297118 after the recorded R1–R6 corrections. The first strict DynamoDB codec/repository slice is committed locally as 747aac2 and is paused for independent B04.5 code review before the remaining identity/IAM approach expands.
 
 ## Identity boundary
 
@@ -74,4 +74,6 @@ JWKS retrieval uses Cognito's public HTTPS JWKS endpoint and requires no Cognito
 
 ## Evidence state
 
-The current B04 slice has local signature and HTTP tests. The pending B04.5 follow-up must inspect the known-no-commit capacity outcomes, absent STATE/GUARD semantics, history and encoded-byte reservations for pending decisions, replay quota accounting, production verifier tests, and proposed transaction/IAM policy before a DynamoDB adapter is added. The adapter, race tests, codec tests (including near-limit prompt/decline size, revocation at capacity, duplicate replay and malformed/mismatched rows), IAM policy, user-pool setup, and live cloud acceptance remain unimplemented. These encoded-byte reservations and GUARD accounting rules are design requirements; current application code reserves history counts but does not implement the STATE byte codec, reservation accounting, or DynamoDB transaction. No cloud credentials or deployment have been used.
+At the design-review checkpoint on 5297118, the strict storage codec, DynamoDB repository, adapter races, and encoded-state tests were still unimplemented. The first code slice is now locally committed at 747aac2; B04 is paused for independent B04.5 review of that exact code/test artifact before further identity/IAM implementation.
+
+The adapter uses the official DynamoDB SDK command client but has only been exercised against a deterministic local transactional test client. The 11 focused adapter tests cover strict/malformed/partial records, candidate-only replay lookup, orphan receipt concealment, exact duplicate recovery, membership changes, cross-room isolation, conditional write races, byte reservations, ordinary/permission/safety receipt quotas, and application-clock expiry. The full pinned check passed 210 unit/integration and 41 browser tests, along with references, planning, lint/boundaries, typecheck, and the browser build/privacy scan. This is not DynamoDB Local, IAM simulation, live Cognito/DynamoDB, or cloud evidence. No AWS resources, credentials, deployment, or push were used.

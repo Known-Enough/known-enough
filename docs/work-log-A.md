@@ -267,3 +267,11 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 
 - Resumed B04 after B04.5 PASSed the local midpoint design on `5297118`. Actual worker: A / Codex GPT-6; variant/effort not exposed, not claimed as scheduled `gpt-6-sol` / high. Baseline code is `5297118`; reviewer-owned PASS status changes are present in the worktree and will be preserved in the checkpoint.
 - Initial bounded implementation: strict DynamoDB STATE/GUARD/REPLAY codec and repository transaction enforcement for the reviewed design, plus focused local adapter tests. Scope includes `packages/adapters/**`, relevant application/contracts/API/integration/infra files, and task tracking. No cloud activity or publication.
+
+
+## 2026-09-23T21:34:56Z — B04 / PAUSED — first DynamoDB implementation slice
+
+- Actual worker: A / Codex GPT-6; variant/effort not exposed, not claimed as the ticket's scheduled GPT-6-Sol/high. Baseline 5297118; exact implementation commit 747aac2.
+- Implemented strict STATE/GUARD/REPLAY codecs, transactional DynamoDB room repository, lazy candidate replay-key plumbing, commit counters, conservative pending-response byte reservations, and 11 adapter integration tests. The tests exercise actual AWS SDK command objects through a local transactional fake; no AWS endpoint or cloud resource was used.
+- Full pinned npm run check passed: references 7/7, planning 15/15, lint/import boundaries (85 references), typecheck, 210 unit/integration tests, 127 web modules plus privacy scan, and 41 browser tests. Focused adapter suite passed 11/11.
+- B04 is paused at the mandatory first-code-slice checkpoint for independent B04.5 review of 5297118..747aac2. Remaining B04 work includes full production identity/API composition, reviewed IAM, live persistence/concurrency acceptance, and final critical review. No AWS resources, IAM simulation, live Cognito, deployment, or push.

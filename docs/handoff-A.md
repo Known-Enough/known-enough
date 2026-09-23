@@ -67,3 +67,8 @@ Exception-offer admission now budgets exception history and the full possible AL
 ## B04 implementation resumption — 2026-09-23
 
 B04.5 PASSed the local midpoint design on `5297118`; owner A resumed B04 from that reviewed baseline. Actual worker: Codex GPT-6, variant/effort not exposed; scheduled `gpt-6-sol` / high is not claimed. Initial scope is the strict DynamoDB STATE/GUARD/REPLAY codec and repository transaction enforcement with focused local adapter tests, within the B04 ticket files. No cloud resources, live Cognito, IAM deployment or publication. The adapter and near-limit/concurrency checks are not implemented yet.
+
+
+## B04 first storage implementation slice — 2026-09-23
+
+B04 first implementation slice is locally committed at 747aac2: strict DynamoDB STATE/GUARD/REPLAY codec, conditional repository transactions, guarded counters and response-byte reservations, plus 11 tests using actual SDK transaction commands against a deterministic local fake. The full pinned check passed 210 unit/integration and 41 browser tests. The independent B04.5 design checkpoint PASS on 5297118 remains valid; B04 is now PAUSED while B04.5 performs its mandatory code/test review of 5297118..747aac2. No live AWS, DynamoDB Local, Cognito, IAM simulation, deployment, or publication evidence exists. Human acceptance and G02/live gates remain separate.
