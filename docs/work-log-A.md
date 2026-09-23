@@ -189,4 +189,12 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 
 - User authorized publishing A05. Fetched `origin/main` from `e11bac9` to `acbbd5e` while local `main` contained A05 commit `4b2a44b`. Merged without dropping either history; conflicts were limited to `docs/task-board.md` and `docs/work-log-A.md`. Preserved the incoming sequential priority policy and recorded A05 as REVIEW after its preparation PASS.
 - Full pinned `npm run check` on the merged worktree exited 0: 7 reference hashes, 15 planning checks, lint/import boundaries, typecheck, 181 unit/integration tests, build/bundle privacy scan, 41 Chromium browser tests. No application source changed during synchronization.
-- Current branch is `main`; merge commit and authorized `origin main` push are the remaining publication steps.
+- Pushed explicitly to `origin main`; post-push fetch confirmed `HEAD` and `origin/main` both equal `7db9307ab82f0f759eaba42625a2a65568a9a4a7`. The worktree was clean.
+
+
+## 2026-09-23T08:23:02Z — G01 / DONE — local checkpoint acceptance
+
+- Actual worker: A / Codex GPT-6; variant/effort not exposed. Documentation scope only; no application source changed.
+- User requested finishing G01 after the current project gate had been identified as human acceptance. Recorded the request as acceptance of the bounded G01 local UI/API integration checkpoint; no production-readiness claim follows.
+- Independent read-only follow-up PASS checked A05's two changed files against the prior G01 manifest and confirmed the live localIdentity branch and G01 acceptance flow remain intact. Updated manifest SHA-256: `934a7df164a20ce3e94b7151514a0ca47a8d2dc594b9b3328cfe50c333d7fab2`. Details and file hashes: [G01 review](reviews/G01.md). Reviewer did not rerun tests.
+- Existing full check on current integrated source passed: 181 unit/integration and 41 browser tests, plus references, planning, lint/boundaries, typecheck and build/privacy scan. No application source changed in this acceptance step. G01 status is DONE; B04 is next per the project queue.

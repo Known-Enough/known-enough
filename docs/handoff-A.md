@@ -1,8 +1,8 @@
 # User A handoff — shared task pool
 
-Current scheduling (September 23): both users follow the same [project-wide priority queue](task-board.md), with one active task at a time. A/B IDs and personal handoff filenames do not assign ownership. Current top gate: human acceptance of G01; B04 follows acceptance. If that gate remains pending and agent implementation is requested, A05 is the next ready build task after its prerequisites are confirmed. [T01](tasks/T01.md) and [T02](tasks/T02.md) remain later AI-extension work.
+Current scheduling (September 23): both users follow the same [project-wide priority queue](task-board.md), with one active task at a time. A/B IDs and personal handoff filenames do not assign ownership. G01 is DONE for the reviewed local integration checkpoint after user acceptance; B04 is the next implementation, with a pause for B04.5 after its first slice. A05 mock preparation remains REVIEW pending separate human acceptance. [T01](tasks/T01.md) and [T02](tasks/T02.md) remain later AI-extension work.
 
-Use the direct model/effort printed in the ticket. A02/A03 are REVIEW. A03.5 records PASS for the exact reviewed correction; A04/A05/A06 remain candidates subject to prerequisites. Read [workflow](agent-workflow.md) and [A log](work-log-A.md), then take only the current highest-priority task. No parallel task or subagent work.
+Use the direct model/effort printed in the ticket. A02/A03 remain REVIEW. A03.5 records PASS for the exact reviewed correction; A04/A06 remain candidates subject to prerequisites, while A05 is REVIEW. Read [workflow](agent-workflow.md) and [A log](work-log-A.md), then take only the current highest-priority task. No parallel task or subagent work.
 
 ## Existing A01 evidence
 
@@ -34,4 +34,4 @@ B02 compatibility: owner snapshots require availabilityReview, and CONFIRM_INPUT
 
 ## Authorized synchronized repair handoff
 
-User authorized integration/publication of B’s reviewed `d042d8f` with published `8371e7b`. Both histories and the September 22 shared-pool policy are retained. A02.5/G01 are REVIEW; see [B handoff](handoff-B.md) and [current G01 evidence](reviews/G01.md) for the combined artifact/checks. No new task is claimed; human acceptance remains separate.
+User authorized integration/publication of B’s reviewed `d042d8f` with published `8371e7b`. Both histories and the September 22 shared-pool policy are retained. A02.5 remains REVIEW; G01 is DONE for its accepted local checkpoint. See [B handoff](handoff-B.md) and [current G01 evidence](reviews/G01.md) for the combined artifact/checks. No new task is claimed.

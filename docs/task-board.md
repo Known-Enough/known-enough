@@ -6,11 +6,10 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 
 ## Project-wide priority
 
-- **Current gate: human acceptance of G01.** Its combined technical check and independent review passed; human acceptance remains pending. This is the highest-priority next action and does not change a task status by itself.
-- **Next implementation after G01 acceptance: B04** (`gpt-6-sol`, high), identity and persistence. Pause after its first implementation slice for [B04.5](tasks/B04.5.md) (`gpt-6-astra`, high), address findings, then resume B04.
-- A05 mock preparation is complete and remains REVIEW after independent A03.5 privacy follow-up PASS; human acceptance remains pending. This does not change the priority of the G01 acceptance gate.
+- **Current implementation: B04** (`gpt-6-sol`, high), identity and persistence. G01’s local integration checkpoint received independent follow-up PASS and user acceptance on 2026-09-23. Pause after B04’s first slice for [B04.5](tasks/B04.5.md) (`gpt-6-astra`, high), address findings, then resume B04.
+- A05 mock preparation is complete and remains REVIEW after independent A03.5 privacy follow-up PASS; its own human acceptance remains pending.
 - Then follow the critical path through [A04](tasks/A04.md) → [A04.5](tasks/A04.5.md) → [G02](tasks/G02.md), then [A05](tasks/A05.md) → [B05](tasks/B05.md) → [A05.5](tasks/A05.5.md). B06 follows B05 when its cloud actions are explicitly authorized. Continue with the AI extension [T01](tasks/T01.md) → [T02](tasks/T02.md) after their prerequisites, then trial/demo integration [A06](tasks/A06.md) → [A06.5](tasks/A06.5.md) → [G03](tasks/G03.md).
-- A04, A06 and T01 remain READY candidates only when their ticket prerequisites hold. The queue order applies equally to either user; A/B prefixes do not decide ownership. A02/A03/A03.5, A02.5, B03 and G01 remain REVIEW; do not restart completed B01/B02.
+- A04, A06 and T01 remain READY candidates only when their ticket prerequisites hold. The queue order applies equally to either user; A/B prefixes do not decide ownership. A02/A03/A03.5, A02.5 and B03 remain REVIEW; G01 is DONE. Do not restart completed B01/B02.
 
 ## Foundation and local product
 
@@ -28,9 +27,9 @@ These rows record dependency and review state. They are not simultaneous work la
 | [B03](tasks/B03.md) | `gpt-6-sol` / medium | B02 usable implementation | REVIEW; local HTTP integrated from `27a110c`, live acceptance pending |
 | [A03.5](tasks/A03.5.md) | `gpt-6-astra` / high | A02 + A03 preparation | REVIEW; preparation PASS rechecked on `bc02dc6`; human acceptance pending |
 | [A02.5](tasks/A02.5.md) | `gpt-6-sol` / medium | A02, A03.5, reviewed B02/B02.5, B03 | REVIEW; synchronized repairs, combined evidence in G01 |
-| [G01](tasks/G01.md) | `gpt-6-astra` / high | A02.5, A03.5, B03, B02.5 current evidence | REVIEW; combined technical evidence, human acceptance pending |
+| [G01](tasks/G01.md) | `gpt-6-astra` / high | A02.5, A03.5, B03, B02.5 current evidence | DONE; local integration checkpoint independently reviewed and human accepted 2026-09-23 |
 
-Task prerequisites determine eligibility; the project-wide priority above determines order. G01/B04 take precedence over independent local preparation. B03 acceptance still requires review of B02's final critical delta. Integration and human review cannot be replaced with synthetic browser tests.
+Task prerequisites determine eligibility; the project-wide priority above determines order. B04 is next after G01 acceptance. B03 acceptance still requires review of B02's final critical delta. Integration and human review cannot be replaced with synthetic browser tests.
 
 ## Authenticated product and later gates
 
@@ -50,7 +49,7 @@ Work through these tasks in priority order, one at a time, after their stated pr
 | [A06.5](tasks/A06.5.md) | `gpt-6-luna` / medium | A06, G01, G02, operational B06, T02 | Integrated transitions, human trials, recording evidence |
 | [G03](tasks/G03.md) | `gpt-6-astra` / high | A05.5, A06.5, operational B06, G02, T02 | Release readiness; no automatic publish |
 
-A04/A05 preparation does not technically depend on G01, and A03.5 passes for the exact recorded artifact. The sequential priority queue keeps G01 and B04 ahead; A05 mock preparation is complete and remains REVIEW pending human acceptance. A04 still requires an agreed session interface. B04 must pause for B04.5 before its critical implementation continues. External testers still require G02 and operational readiness.
+A04/A05 preparation does not technically depend on G01, and A03.5 passes for the exact recorded artifact. G01 is DONE for the reviewed local checkpoint; B04 is next. A05 mock preparation remains REVIEW pending its separate human acceptance. A04 still requires an agreed session interface. B04 must pause for B04.5 before its critical implementation continues. External testers still require G02 and operational readiness.
 
 ## AI facilitator extension
 
