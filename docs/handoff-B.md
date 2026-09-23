@@ -1,6 +1,6 @@
 # User B handoff — shared task pool
 
-Current scheduling (September 22): either user may claim any eligible unclaimed task from the [shared board](task-board.md). Existing active claims remain protected; historical A/B IDs and these personal handoff filenames do not assign work. Check the authoritative ticket before claiming. [T01](tasks/T01.md) defines the AI facilitator extension; [T02](tasks/T02.md) implements it after its prerequisites.
+Current scheduling (September 23): both users follow the same [project-wide priority queue](task-board.md), with one active task at a time. A/B IDs and personal handoff filenames do not assign ownership. Current top gate: human acceptance of G01; B04 follows acceptance. If that gate remains pending and agent implementation is requested, A05 is the next ready build task after its prerequisites are confirmed. [T01](tasks/T01.md) and [T02](tasks/T02.md) remain later AI-extension work.
 
 Latest handoff, 2026-09-22: **A02.5/G01 synchronized repairs, REVIEW for human acceptance.** User explicitly authorized commit/push. Reviewed repairs are preserved in `d042d8f`; integration includes published `8371e7b`, shared-pool policy, readiness/debug changes and tutorial. [G01 combined artifact and evidence](reviews/G01.md) records conflict decisions, exact hashes, fresh checks and independent review. No B04 implementation or new task claim. Earlier paragraphs retain historical context.
 
@@ -8,9 +8,9 @@ Current integration: A01/workflow, B01 (04c87d7) and B02 (47b97eb) are consolida
 
 B03 `27a110c` is now integrated on main by explicit user request. It provides local HTTP composition and fixed non-production test identities; see [API instructions](../apps/api/README.md). B03 remains REVIEW for live acceptance. A02.5/G01 retain their current ticket gates and follow-up review requirements. Real authentication/persistence remain B04 work. No new task is claimed.
 
-## Selecting shared work
+## Selecting the next task
 
-Finish or safely pause your current task, then check the shared board and both users' latest claims. Either user may take any eligible READY task. Follow the [claim and transfer procedure](agent-workflow.md#shared-pool-claims-and-transfers), the ticket's model and file scope, and independent-review requirements.
+Check the project-wide queue and both users' latest claims. Either user gets the same highest-priority actionable task, regardless of A/B prefix. Do not start another task while one is active. Follow the [claim and transfer procedure](agent-workflow.md#shared-pool-claims-and-transfers), the ticket's model and file scope, and independent-review requirements.
 
 A01 and the revised workflow are now included on main. If the clone has any changes beyond published B02, save them in a commit or transferable diff including untracked files before incorporating shared main. Do not reset or discard local work. Old task branches are historical; use main for subsequent tasks. No automatic access to A's clone or credentials exists. Shared log updates require authorized sharing; they are not live locks.
 

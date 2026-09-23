@@ -1,18 +1,20 @@
-# Shared task pool
+# Shared task queue
 
-Scheduling revision: September 22, 2026; current model IDs aligned September 23, 2026. Both users choose from this single pool. A/B task prefixes are stable historical IDs, not user assignments or permanent subsystem ownership. Tickets are authoritative for status, prerequisites and current claims; follow the [shared claim/transfer procedure](agent-workflow.md#shared-pool-claims-and-transfers). Model means the human-selected DIRECT worker. Existing active claims and independent review requirements remain in force.
+Scheduling revision: September 22, 2026; sequential priority and current model IDs aligned September 23, 2026. Both users follow one project-wide queue, with one active task at a time. A/B task prefixes are stable historical IDs, not user assignments or permanent subsystem ownership. Tickets are authoritative for status, prerequisites and current claims; follow the [sequential claim/transfer procedure](agent-workflow.md#shared-pool-claims-and-transfers). Either user gets the same next task. Existing active claims and independent review requirements remain in force.
 
 Current integration: foundation, A01, workflow refactor, B01 and B02 are on main at the user’s direction. See [main integration](main-integration.md) for combined verification/publication state and [B02.5](reviews/B02.5.md) for review evidence. No new implementation task is claimed by integration.
 
-## Work available now
+## Project-wide priority
 
-- Either user may claim [T01](tasks/T01.md) (`gpt-6-luna`/medium draft, followed by independent `gpt-6-astra` privacy/consent review): define the shared-objective AI facilitator, verified private suggestions and public-only explanations. This is design work; it can proceed before live AI integration.
-- [A04](tasks/A04.md), [A05](tasks/A05.md) and [A06](tasks/A06.md) are READY candidates for either user, subject to ticket prerequisites and synchronized claims. A04 still requires an agreed session interface. Serialize overlapping frontend files.
-- [A02.5](tasks/A02.5.md) and [G01](tasks/G01.md) are REVIEW after user-authorized integration of published work through `8371e7b` and reviewed B repairs `d042d8f`. Both histories are preserved; [G01 evidence](reviews/G01.md) records combined full-check PASS (179 unit/integration, 37 browser) and independent technical PASS. Human acceptance remains separate. No new shared-pool task is claimed.
-- A02/A03/A03.5 remain REVIEW pending human acceptance. A03.5 records preparation PASS rechecked on `bc02dc6`; changed integration code still needs follow-up review.
-- B03 source `27a110c` is integrated and remains REVIEW pending A02.5/G01 live acceptance. No new implementation claim is created by this scheduling update. Finished B01/B02 work must not be restarted.
+- **Current gate: human acceptance of G01.** Its combined technical check and independent review passed; human acceptance remains pending. This is the highest-priority next action and does not change a task status by itself.
+- **Next implementation after G01 acceptance: B04** (`gpt-6-sol`, high), identity and persistence. Pause after its first implementation slice for [B04.5](tasks/B04.5.md) (`gpt-6-astra`, high), address findings, then resume B04.
+- If G01 acceptance is still pending and agent implementation is requested, take [A05](tasks/A05.md) (`gpt-6-luna`, medium) as the next ready product task, after confirming A02/A03.5 prerequisites and the current claim. Do not start another task alongside it.
+- Then follow the critical path through [A04](tasks/A04.md) → [A04.5](tasks/A04.5.md) → [G02](tasks/G02.md), then [A05](tasks/A05.md) → [B05](tasks/B05.md) → [A05.5](tasks/A05.5.md). B06 follows B05 when its cloud actions are explicitly authorized. Continue with the AI extension [T01](tasks/T01.md) → [T02](tasks/T02.md) after their prerequisites, then trial/demo integration [A06](tasks/A06.md) → [A06.5](tasks/A06.5.md) → [G03](tasks/G03.md).
+- A04/A05/A06 and T01 remain READY candidates only when their ticket prerequisites hold. The queue order applies equally to either user; A/B prefixes do not decide ownership. A02/A03/A03.5, A02.5, B03 and G01 remain REVIEW; do not restart completed B01/B02 work.
 
-## First parallel batch: local product
+## Foundation and local product
+
+These rows record dependency and review state. They are not simultaneous work lanes; only one task may be active project-wide.
 
 | Task | Direct model / effort | Prerequisite | Outcome / current state |
 | --- | --- | --- | --- |
@@ -28,9 +30,11 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 | [A02.5](tasks/A02.5.md) | `gpt-6-sol` / medium | A02, A03.5, reviewed B02/B02.5, B03 | REVIEW; synchronized repairs, combined evidence in G01 |
 | [G01](tasks/G01.md) | `gpt-6-astra` / high | A02.5, A03.5, B03, B02.5 current evidence | REVIEW; combined technical evidence, human acceptance pending |
 
-A02/A03/A06 do not wait for B02/B03/G01. A03.5 does not wait for backend code. B03 acceptance still requires review of B02's final critical delta. Integration and human review cannot be replaced with synthetic browser tests.
+Task prerequisites determine eligibility; the project-wide priority above determines order. G01/B04 take precedence over independent local preparation. B03 acceptance still requires review of B02's final critical delta. Integration and human review cannot be replaced with synthetic browser tests.
 
-## Second parallel batch: authenticated product
+## Authenticated product and later gates
+
+Work through these tasks in priority order, one at a time, after their stated prerequisites are satisfied.
 
 | Task | Direct model / effort | Prerequisite | Outcome |
 | --- | --- | --- | --- |
@@ -46,11 +50,11 @@ A02/A03/A06 do not wait for B02/B03/G01. A03.5 does not wait for backend code. B
 | [A06.5](tasks/A06.5.md) | `gpt-6-luna` / medium | A06, G01, G02, operational B06, T02 | Integrated transitions, human trials, recording evidence |
 | [G03](tasks/G03.md) | `gpt-6-astra` / high | A05.5, A06.5, operational B06, G02, T02 | Release readiness; no automatic publish |
 
-A04/A05 preparation can start before G01 when their own prerequisites are ready; A03.5 now passes for the exact recorded artifact and releases its A04/A05/A02.5 blocks. A04 still requires an agreed session interface before relying on it. B04.5 is a milestone inside B04; remaining critical B04 implementation waits for that review. External testers still require G02 and operational readiness.
+A04/A05 preparation does not technically depend on G01, and A03.5 passes for the exact recorded artifact. The sequential priority queue keeps G01 and B04 ahead; A05 is the fallback build while G01 human acceptance is pending. A04 still requires an agreed session interface. B04 must pause for B04.5 before its critical implementation continues. External testers still require G02 and operational readiness.
 
 ## AI facilitator extension
 
-Existing A05/B05/A05.5 cover private extraction and confirmation. These neutral-ID tasks add the missing shared-objective and explanation experience without duplicating that work.
+Existing A05/B05/A05.5 cover private extraction and confirmation. These neutral-ID tasks add the missing shared-objective and explanation experience without duplicating that work. This extension follows the core identity, persistence and privacy gates in the single queue.
 
 | Task | Direct model / effort | Prerequisite | Outcome / current state |
 | --- | --- | --- | --- |

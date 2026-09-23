@@ -1,6 +1,6 @@
 # Deal Table · TeamTable
 
-Main combines the A01 React/Vite mock UI, strict runtime contracts, B01’s deterministic solver, B02’s local application/in-memory repository, and the current parallel task workflow. All people/data are fictional. **Mock identities are not authentication. The UI still uses mocks; the local HTTP boundary and connected browser flow are next. No cloud services are deployed.**
+Main combines the A01 React/Vite mock UI, strict runtime contracts, B01’s deterministic solver, B02’s local application/in-memory repository, and the current sequential task workflow. All people/data are fictional. **Mock identities are not authentication. The UI still uses mocks; the local HTTP boundary and connected browser flow are next. No cloud services are deployed.**
 
 ## Setup and launch
 
@@ -61,7 +61,7 @@ See the [dated bootstrap verification evidence](docs/verification.md). It record
 
 **Use main in separate clones for all new work.** A01, the workflow refactor, B01 and B02 are consolidated here at the user’s direction. The old task branches are historical pointers, not active work queues. See [main integration](docs/main-integration.md) for source commits, verification and publication state. Synchronize your separate clone before claiming the next task; do not continue work on the old task branches.
 
-The [current task board](docs/task-board.md) and [workflow](docs/agent-workflow.md) govern execution and supersede dated branch/model/ownership/sequencing instructions in imported references. Product/security semantics remain unchanged. Both users select from one shared task pool; A/B task prefixes are historical identifiers, not user assignments. Existing claims remain protected. Separate integration tickets retain real API/auth checks. The AI facilitator extension is tracked in [T01](docs/tasks/T01.md) and [T02](docs/tasks/T02.md).
+The [current task board](docs/task-board.md) and [workflow](docs/agent-workflow.md) govern execution and supersede dated branch/model/ownership/sequencing instructions in imported references. Product/security semantics remain unchanged. Both users follow the same project-wide priority queue, one task at a time; A/B task prefixes are historical identifiers, not user assignments. Existing claims remain protected. Separate integration tickets retain real API/auth checks. The AI facilitator extension is tracked in [T01](docs/tasks/T01.md) and [T02](docs/tasks/T02.md).
 
 ## Starting a task
 
