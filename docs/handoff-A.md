@@ -82,3 +82,8 @@ B04.5 returned CHANGES_REQUESTED on `5297118..747aac2` with four reproducible P2
 ## B04 R7–R10 correction handoff — 2026-09-23
 
 The four first-code-review findings are fixed in local commit `f88b4a0` and pinned full check passed (216 unit/integration and 41 browser tests; adapter suite 17/17). B04 is paused for Astra/high independent B04.5 follow-up of `747aac2..f88b4a0`. The archive keeps retired exception grants and disclosure decision hashes/status/metadata, but omits unshared wording and all drafts/confirmations. This is local fake-client evidence only; no AWS/Cognito/IAM/live acceptance or push. See [B04 ticket](tasks/B04.md) and [review](reviews/B04.5.md).
+
+
+## B04 R10 mixed-reason correction — 2026-09-23
+
+The fresh independent Astra/high follow-up closed R7–R9 and reproduced one remaining R10 edge case: mixed cancellation reasons are retried if any conflict/throttle reason is present. B04 is resumed solely to classify the complete reason list with fail-closed precedence and add adapter regressions. Claim, reviewed evidence and scope are recorded in [B04](tasks/B04.md), [B04.5](reviews/B04.5.md), and the [board](task-board.md). After focused and full checks, pause for another independent B04.5 follow-up. Local fake evidence only; no AWS/cloud work or push.
