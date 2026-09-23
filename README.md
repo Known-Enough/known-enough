@@ -65,6 +65,6 @@ The [current task board](docs/task-board.md) and [workflow](docs/agent-workflow.
 
 ## Starting a task
 
-Choose a READY task from the board, select its named model and reasoning effort as the **direct worker**, and ask: “Read AGENTS.md and execute docs/tasks/A02.md within its scope.” Use your own clone and log the claim. Terra handles most implementation; Luna handles narrow UI/docs; Sol handles difficult backend work; Astra handles architecture and explicit checkpoints. No routine Astra manager or subagents are required. Files do not switch the selected session model.
+Choose a READY task from the board, select its named model and reasoning effort as the **direct worker**, and ask: “Read AGENTS.md and execute docs/tasks/A02.md within its scope.” Use your own clone and log the claim. Use `gpt-6-luna` for narrow UI/docs work, `gpt-6-sol` for routine implementation and difficult backend work, and `gpt-6-astra` for architecture and explicit checkpoints. No routine Astra manager or subagents are required. Files do not switch the selected session model.
 
 See [A handoff](docs/handoff-A.md), [B handoff](docs/handoff-B.md), [A log](docs/work-log-A.md), [B log](docs/work-log-B.md) and [review records](docs/reviews/README.md). Use ticket statuses and current shared claims to select work; completed or actively claimed tasks must not be restarted. Sharing logs/code requires authorized synchronization; no cross-account access or live messaging is configured. Agent checks do not replace human acceptance or authorize pushing, integration, deployment or spending.

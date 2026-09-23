@@ -11,10 +11,12 @@ Effective September 22, 2026, by user instruction. One shared task pool supersed
 
 | Work | Starting choice |
 | --- | --- |
-| Narrow components, styling, mechanical edits and docs | Luna, low/medium |
-| Routine implementation, forms, adapters and tests | Terra, medium |
-| Difficult solver/backend work and debugging | Sol, high |
-| Architecture, critical consent/auth decisions and checkpoint reviews | Astra, high |
+| Narrow components, styling, mechanical edits and docs | `gpt-6-luna`, low/medium |
+| Routine implementation, forms, adapters and tests | `gpt-6-sol`, medium |
+| Difficult solver/backend work and debugging | `gpt-6-sol`, high |
+| Architecture, critical consent/auth decisions and checkpoint reviews | `gpt-6-astra`, high |
+
+These are the current direct-worker model IDs. `gpt-6-sol` replaces the unavailable Terra assignment for routine implementation. Historical model names in completed work, reviews and imported references remain as evidence and are not rewritten.
 
 B02’s original Astra execution is preserved in its history; it is now included on main and must not be restarted. No permanent manager, automatic polling, or default subagents. If delegation helps independent work, the current worker may use available same-session agents with bounded file ownership and report their actual model; never start another account's agents. After two substantive failed attempts, log the failure and escalate narrowly. Avoid re-running successful checks without changed code or new evidence. Record usage only when actually exposed; never invent cost/token figures.
 
@@ -38,7 +40,7 @@ All tasks belong to one shared pool. Either user can work on frontend, backend, 
 - B02.5: reconcile the supplied independent final B02 review with the integrated contract/browser checks. See its recorded verdict; recheck later critical changes before B03 integration acceptance. Do not restart B02 or block unrelated frontend work.
 - A03.5: after A02/A03 preparation, inspect client privacy/consent boundaries and evidence before downstream frontend/live integration work. Mock evidence establishes frontend behavior only.
 - B04.5: midway through B04, review its design and first implementation before extending the identity/transaction approach. B04.5 requires that slice, not completed B04; B04 resumes after findings are addressed.
-- G01: actual local negotiation across UI/API/domain. G02: actual identity/privacy/persistence before external testers. G03: final release evidence. These are direct Astra review tasks.
+- G01: actual local negotiation across UI/API/domain. G02: actual identity/privacy/persistence before external testers. G03: final release evidence. These are direct `gpt-6-astra` review tasks.
 
 Use an independent reviewer session/agent for critical code, regardless of which user implemented the task. Review a named base/head commit or reproducible diff artifact, requirements, focused code, test output and unresolved issues. Logs supplement code inspection. Do not self-certify critical work; if independent review is unavailable, leave the checkpoint pending. Fixes stay with the named implementation owner. Record findings, reviewed artifact, PASS/CHANGES_REQUESTED/BLOCKED, commands and limitations in docs/reviews/<checkpoint>.md. A changed reviewed diff needs follow-up review. Only affected dependent work waits. No model review replaces human acceptance or authorizes publication.
 
