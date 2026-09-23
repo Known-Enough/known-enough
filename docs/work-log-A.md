@@ -170,6 +170,11 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Checks: `node scripts/check-references.mjs` passed 7/7 using available Node 23.3.0; `git diff --check` passed; final documentation audit passed for all 27 ticket assignments, matching board rows, and 147 local Markdown targets. The first audit attempt counted historical F00–F02 narrative mentions as assignment rows; the corrected audit checks actual board table rows and passed. Application suite not run because this is documentation-only.
 - No commit, push, publication, or deployment. Next: select a task using its updated GPT-6 model ID and effort.
 
+## 2026-09-23T07:03:52Z — sequential project priority update / REVIEW
+
+- User-directed documentation update. Actual worker: A / Codex GPT-6; variant/effort not exposed. Baseline `20a8dbb` on `main`, preserving the in-progress GPT-6 model-alignment diff. Updated AGENTS, workflow, task board, README, current task-execution policy, and both handoffs to require one active project task across A/B and the same priority order regardless of task prefix. G01 human acceptance is the current top gate; B04 follows acceptance, with B04.5 as its sequential midpoint review. A05 is the next ready build if G01 remains pending and agent implementation is requested. No task claim/status or application code changed; historical execution and immutable references remain untouched.
+- Checks: `node scripts/check-references.mjs` passed 7/7; `git diff --check` passed; corrected Markdown audit passed 106 local targets/anchors and 27 ticket statuses/priority consistency. An initial substring-only anchor probe produced false positives for existing heading slugs; corrected heading-slug validation passed. Application suite not run because this is documentation-only.
+- No parallel work, commit, push, publication, or deployment performed. Either user asking “what next?” receives the same highest-priority gate/task.
 
 ## 2026-09-23T07:10:42Z — A05 / REVIEW — host-simulation language draft
 
@@ -177,4 +182,11 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Added an injectable, deterministic mock extractor and private review UI using existing `InputValues`. The exact synthetic sample produces only the stated dated availability; unsupported wording falls back to the structured form. DTO validation is strict. Text does not leave the browser demo; no LLM, service, backend, shared contract, consent or public payload was added.
 - Independent review found two issues: prior interval checks could survive sentence edits/preparation, and the sample did not require an exact end time. Both were corrected; regressions cover edit/prepare invalidation and same-start/different-duration rejection.
 - Checks under pinned Node 24.21.0/npm 11.19.0: focused owner unit tests 12/12; focused A05 browser tests 4/4; full `npm run check` exit 0 with 181 unit/integration and 41 browser tests, reference hashes 7/7, planning 15/15, lint/boundaries, typecheck, build/bundle scan. Chromium 1243 used temporary `/tmp` libraries after initial launch identified missing `libnspr4`; no system packages installed. `git diff --check` passed.
-- Independent A03.5 privacy follow-up: PASS against `e11bac9` for the corrected source and regressions. The reviewer found both earlier findings closed, verified restore invalidation by source inspection, and recorded hashes for the reviewed UI, extractor and tests in [A05](tasks/A05.md); the reviewer did not rerun tests. A05 stays REVIEW pending human acceptance and live gates. No push, publication, or live extraction claim.
+- Independent A03.5 privacy follow-up: PASS against `e11bac9` for the corrected source and regressions. The reviewer found both earlier findings closed, verified restore invalidation by source inspection, and recorded hashes for the reviewed UI, extractor and tests in [A05](tasks/A05.md); the reviewer did not rerun tests. A05 stays REVIEW pending human acceptance and live gates. No external service, deployment or live extraction claim.
+
+
+## 2026-09-23T07:35:34Z — A05 / synchronized integration check
+
+- User authorized publishing A05. Fetched `origin/main` from `e11bac9` to `acbbd5e` while local `main` contained A05 commit `4b2a44b`. Merged without dropping either history; conflicts were limited to `docs/task-board.md` and `docs/work-log-A.md`. Preserved the incoming sequential priority policy and recorded A05 as REVIEW after its preparation PASS.
+- Full pinned `npm run check` on the merged worktree exited 0: 7 reference hashes, 15 planning checks, lint/import boundaries, typecheck, 181 unit/integration tests, build/bundle privacy scan, 41 Chromium browser tests. No application source changed during synchronization.
+- Current branch is `main`; merge commit and authorized `origin main` push are the remaining publication steps.
