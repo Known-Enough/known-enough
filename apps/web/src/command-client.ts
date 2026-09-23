@@ -104,7 +104,9 @@ export function withdrawApproval(room: OwnerSnapshot, context: OwnerCommandConte
 export async function sendCommand(transport: CommandTransport, command: CommandEnvelopeType): Promise<CommandResultType> {
   const result = await transport.post(`/rooms/${encodeURIComponent(command.roomId)}/commands`, command);
   try {
-    return CommandResult.parse(result);
+    const parsed = CommandResult.parse(result);
+    if (!parsed.ok && parsed.error.httpStatus >= 500) throw new UnknownTransportError(command);
+    return parsed;
   } catch {
     // A response outside the command-result contract may have followed dispatch.
     // Keep the exact serialized envelope available for an explicit retry.

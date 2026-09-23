@@ -24,6 +24,16 @@ describe('local mutation outcomes', () => {
     expect(sent).toEqual([JSON.stringify(command), JSON.stringify(command)]);
   });
 
+  it('turns a server result with uncertain commit status into an exact-envelope retry', async () => {
+    const room = (await ownerMockClient.readOwnerRoom('draft')).value!;
+    const command = submitInputDraft(room, { decisionRevision: 4 }, room.draft!.values);
+    const response = { ok: false, requestId: command.requestId,
+      error: { code: 'RETRYABLE_SERVER_ERROR', httpStatus: 503 } };
+    const client = new LocalApiClient('maya', undefined, async () => new Response(JSON.stringify(response), { status: 503 }));
+    const transport = commandTransport((_path, body) => client.command(body));
+    await expect(sendCommand(transport, command)).rejects.toMatchObject({ command });
+  });
+
   it('keeps a structured rejection distinct from an unknown outcome', async () => {
     const room = (await ownerMockClient.readOwnerRoom('draft')).value!;
     const command = submitInputDraft(room, { decisionRevision: 4 }, room.draft!.values);

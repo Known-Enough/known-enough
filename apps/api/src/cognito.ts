@@ -1,4 +1,5 @@
 import { CognitoJwtVerifier } from 'aws-jwt-verify';
+import type { JwksCache } from 'aws-jwt-verify/jwk';
 import { Id } from '@deal-table/contracts';
 import type { TrustedPrincipal } from '@deal-table/application';
 
@@ -59,6 +60,7 @@ function bearerToken(value: string | string[] | undefined): string | null {
  */
 export function createCognitoIdentityResolver(
   rawOptions: CognitoIdentityOptions,
+  jwksCache?: JwksCache,
 ): (authorization: string | string[] | undefined) => Promise<HttpIdentity | null> {
   const options = checkedOptions(rawOptions);
   const tokenVerifier = CognitoJwtVerifier.create({
@@ -66,7 +68,7 @@ export function createCognitoIdentityResolver(
     tokenUse: 'access',
     clientId: [options.participantClientId, options.displayClientId],
     graceSeconds: 0,
-  });
+  }, jwksCache ? { jwksCache } : undefined);
   return async authorization => {
     const token = bearerToken(authorization);
     if (!token) return null;

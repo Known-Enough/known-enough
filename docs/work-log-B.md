@@ -94,3 +94,18 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Actual GPT-6 implementer/reviewer; exact variant/effort not exposed. Independent source follow-up found no blocking issues on the 12-file combined manifest in [G01](reviews/G01.md). Fresh combined full check runs before the merge commit/push; historical 176/36 results are not relabeled as combined evidence. Human checkpoint acceptance remains separate from publication authorization.
 
 - Final combined check exited 0: 179 unit/integration and 37 browser tests plus references/planning/lint/boundaries/typecheck/build. Independent final PASS on manifest `2c9ceb2f127d4a0d4c45437df39a663e0afacaaf684dbfa73e3864ebfec056eb`; links and whitespace checks passed. Complete merge index, verify checked-out main and fetch synchronization again, commit the integration and push explicitly to origin/main under the user authorization. No force push.
+
+
+## 2026-09-23T09:34:04Z — B04.5 / IN_PROGRESS — independent midpoint review
+
+- Assigned sequential independent review of committed `8e6d1c4..2df501d`; implementation owner A is paused. Actual reviewer: B / Codex GPT-6, exact variant/effort not exposed; scheduled Astra/high not claimed.
+- Read scope: B04 code/design/tests/security contracts. Write scope: B04.5 review/ticket, this log, coordinated board only. No implementation edits, commit, publication or cloud operations.
+
+
+## 2026-09-23T09:36:29Z — B04.5 / REVIEW — CHANGES_REQUESTED
+
+- Independent sequential review of `8e6d1c4..2df501d`, actual B / Codex GPT-6 (variant/effort not exposed); implementation owner A remained paused. Source/tests/design inspected directly; no implementation edits. Exact changed-file hashes and complete findings: [B04.5](reviews/B04.5.md).
+- R1: proposed IAM transaction API names must become underlying item actions with transaction/key restrictions. R2: specify bounded storage/history/replay and validated decoding before implementing STATE/GUARD. R3: storage exhaustion currently maps to 422 INVALID_COMMAND, contradicting the retry design. R4: signed-token tests bypass the production resolver; actual authenticated handler composition needs local signed-token coverage.
+- Fresh checks: focused Cognito/HTTP tests exit 0 (19/19), typecheck exit 0. Synthetic shared-handler storage-error probe exit 0 reproduces 422 INVALID_COMMAND. Implementer-reported full check 187 unit/integration and 41 browser tests was not rerun. No live Cognito, DynamoDB, IAM or cloud verification.
+- Review claim finished. B04.5 REVIEW/CHANGES_REQUESTED; B04 remains PAUSED at the gate. Next owner A takes bounded corrections and obtains sequential follow-up review before approach expansion. No commit, push or deployment.
+- Documentation validation: reference hashes 7/7, planning checks 15/15, whitespace, 74 local Markdown targets, and B04/B04.5 status consistency passed.

@@ -51,7 +51,7 @@ export interface RoomRecord extends RoomSeed {
   roundUsed: boolean;
   solveEpoch: number;
   job: { id: string; contextToken: string; epoch: number; completed: boolean } | null;
-  replays: { key: string; body: string; result: CommandResult }[];
+  replays: { keyHash: string; bodyHash: string; result: CommandResult }[];
 }
 /** Callback transitions are isolated, serialized and committed together, including replays. */
 export interface RoomRepository {

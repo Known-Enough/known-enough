@@ -114,6 +114,12 @@ describe('command/error shapes (no authorization execution)', () => {
     expect(CommandEnvelope.safeParse(value).success).toBe(false);
   });
   for (const result of results) it(`validates result ${result.ok ? 'APPLIED' : result.error!.code}`, () => expect(CommandResult.parse(result)).toEqual(result));
+  it('accepts retryable server failures and bounded-history capacity results with exact status codes', () => {
+    expect(CommandResult.parse({ ok: false, requestId: 'r', error: { code: 'RETRYABLE_SERVER_ERROR', httpStatus: 503 } }))
+      .toEqual({ ok: false, requestId: 'r', error: { code: 'RETRYABLE_SERVER_ERROR', httpStatus: 503 } });
+    expect(CommandResult.parse({ ok: false, requestId: 'r', error: { code: 'ROOM_CAPACITY_REACHED', httpStatus: 409 } }))
+      .toEqual({ ok: false, requestId: 'r', error: { code: 'ROOM_CAPACITY_REACHED', httpStatus: 409 } });
+  });
   it('rejects status mismatches and error detail leaks', () => {
     expect(CommandResult.safeParse({ ok: false, requestId: 'r', error: { code: 'STALE_CONTEXT', httpStatus: 422 } }).success).toBe(false);
     expect(CommandResult.safeParse({ ok: false, requestId: 'r', error: { code: 'NOT_FOUND', httpStatus: 404, ownerExists: true } }).success).toBe(false);

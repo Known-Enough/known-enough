@@ -29,6 +29,15 @@ function canonical(value: unknown): string {
     .map(([key, item]) => `${JSON.stringify(key)}:${canonical(item)}`).join(',')}}`;
   return JSON.stringify(value);
 }
+const MAX_PERMISSION_GRANTS_PER_OWNER = 32;
+const MAX_AGREEMENT_RECEIPTS_PER_ROOM = 64;
+const MAX_PUBLISHED_DISCLOSURES_PER_ROOM = 32;
+
+async function sha256(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
 const version = (room: RoomRecord): ExpectedVersion => ({
   contextToken: room.contextToken, decisionRevision: room.decisionRevision, controlVersion: room.controlVersion,
 });
@@ -246,11 +255,11 @@ export class DealTableApplication {
         const command = parsed.data;
         const { requestId: _requestId, ...bodyData } = command;
         void _requestId;
-        const body = canonical(bodyData);
-        const key = canonical([principal.kind, principal.subject, room.roomId, command.type, command.idempotencyKey]);
-        const replay = room.replays.find(record => record.key === key);
+        const bodyHash = await sha256(canonical(bodyData));
+        const keyHash = await sha256(canonical([principal.kind, principal.subject, room.roomId, command.type, command.idempotencyKey]));
+        const replay = room.replays.find(record => record.keyHash === keyHash);
         if (replay) {
-          if (replay.body !== body) fail('IDEMPOTENCY_CONFLICT');
+          if (replay.bodyHash !== bodyHash) fail('IDEMPOTENCY_CONFLICT');
           return replay.result;
         }
         const now = this.now();
@@ -272,7 +281,7 @@ export class DealTableApplication {
           if (!(error instanceof ApplicationError)) throw error;
           result = { ok: false, requestId, error: { code: error.code, httpStatus: ERROR_HTTP_STATUS[error.code] } };
         }
-        room.replays.push({ key, body, result });
+        room.replays.push({ keyHash, bodyHash, result });
         return result;
       });
     } catch (error) {
@@ -310,6 +319,7 @@ export class DealTableApplication {
       const publicationTime = this.now();
       if (Date.parse(grant.preview.expiresAt) <= Date.parse(publicationTime)) fail('STALE_CONTEXT');
       if (!grant.publishedAt) {
+        if (room.publishedDisclosures.length >= MAX_PUBLISHED_DISCLOSURES_PER_ROOM) fail('ROOM_CAPACITY_REACHED');
         room.publishedDisclosures.push({ text: grant.preview.text, audienceMemberIds: [...grant.preview.audienceMemberIds],
           publishedAt: publicationTime, contextToken: room.contextToken, decisionRevision: room.decisionRevision });
         grant.publishedAt = publicationTime;
@@ -361,6 +371,7 @@ export class DealTableApplication {
         if (offer.version !== command.payload.offerVersion || !same(offer.scope, command.payload.scope)
           || offer.scope.contextToken !== room.contextToken || Date.parse(offer.scope.expiresAt) <= Date.parse(now)) fail('STALE_CONTEXT');
         owner.offers = owner.offers.filter(o => o.id !== offer.id);
+        if (owner.exceptions.length >= MAX_PERMISSION_GRANTS_PER_OWNER) fail('ROOM_CAPACITY_REACHED');
         owner.exceptions.push({ id: this.id(), version: 1, scope: structuredClone(offer.scope),
           status: command.payload.decision === 'ALLOW' ? 'ACTIVE' : 'DECLINED' });
         if (command.payload.decision === 'DECLINE') {
@@ -379,6 +390,7 @@ export class DealTableApplication {
         if (!same(preview, command.payload.preview) || preview.contextToken !== room.contextToken
           || Date.parse(preview.expiresAt) <= Date.parse(now)) fail('STALE_CONTEXT');
         owner.previews = owner.previews.filter(p => p.id !== preview.id);
+        if (owner.disclosures.length >= MAX_PERMISSION_GRANTS_PER_OWNER) fail('ROOM_CAPACITY_REACHED');
         owner.disclosures.push({ id: this.id(), version: 1, preview: structuredClone(preview),
           status: command.payload.decision === 'ALLOW' ? 'ACTIVE' : 'DECLINED', publishedAt: null });
         return 'APPLIED';
@@ -425,8 +437,11 @@ export class DealTableApplication {
         });
         if (unanimous) {
           if (!this.dependenciesActive(room, this.now())) fail('STALE_PROPOSAL');
-          if (room.status !== 'AGREED') room.agreementHistory.push({ proposal: structuredClone(proposal),
+          if (room.status !== 'AGREED') {
+            if (room.agreementHistory.length >= MAX_AGREEMENT_RECEIPTS_PER_ROOM) fail('ROOM_CAPACITY_REACHED');
+            room.agreementHistory.push({ proposal: structuredClone(proposal),
             approvals: room.owners.map(o => structuredClone(o.approval!)), agreedAt: now });
+          }
           room.status = 'AGREED';
         } else room.status = 'APPROVING';
         return 'APPLIED';

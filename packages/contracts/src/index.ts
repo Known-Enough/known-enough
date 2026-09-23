@@ -49,7 +49,7 @@ export const PublicRoomSnapshot = z.strictObject({
   roster: z.array(Participant).length(3), policy: Policy, status: PublicStatus,
   proposal: ProposalView.nullable(),
   approvedMemberIds: z.array(Id).max(3).refine(unique),
-  publishedDisclosures: z.array(PublishedDisclosure),
+  publishedDisclosures: z.array(PublishedDisclosure).max(32),
 }).superRefine((x, ctx) => {
   const members = x.roster.map(p => p.id);
   const issue = (message: string) => ctx.addIssue({ code: 'custom', message });
@@ -139,14 +139,15 @@ export const CommandEnvelope = z.discriminatedUnion('type', [
   z.strictObject({ ...envelope, type: z.literal('WITHDRAW_APPROVAL'), payload: z.strictObject(approvalTarget) }),
   z.strictObject({ ...envelope, type: z.literal('REVISE_DECISION'), payload: RevisionDecisionPayload }),
 ]);
-export const ErrorCode = z.enum(['UNAUTHENTICATED', 'FORBIDDEN', 'NOT_FOUND', 'STALE_CONTEXT', 'STALE_PROPOSAL', 'IDEMPOTENCY_CONFLICT', 'INVALID_COMMAND', 'NEEDS_CLARIFICATION']);
+export const ErrorCode = z.enum(['UNAUTHENTICATED', 'FORBIDDEN', 'NOT_FOUND', 'STALE_CONTEXT', 'STALE_PROPOSAL', 'IDEMPOTENCY_CONFLICT', 'INVALID_COMMAND', 'NEEDS_CLARIFICATION', 'ROOM_CAPACITY_REACHED', 'RETRYABLE_SERVER_ERROR']);
 export const ERROR_HTTP_STATUS = {
   UNAUTHENTICATED: 401, FORBIDDEN: 403, NOT_FOUND: 404, STALE_CONTEXT: 409,
-  STALE_PROPOSAL: 409, IDEMPOTENCY_CONFLICT: 409, INVALID_COMMAND: 422, NEEDS_CLARIFICATION: 422,
+  STALE_PROPOSAL: 409, IDEMPOTENCY_CONFLICT: 409, ROOM_CAPACITY_REACHED: 409,
+  INVALID_COMMAND: 422, NEEDS_CLARIFICATION: 422, RETRYABLE_SERVER_ERROR: 503,
 } as const;
 export const CommandResult = z.discriminatedUnion('ok', [
   z.strictObject({ ok: z.literal(true), requestId: Id, status: z.enum(['APPLIED', 'QUEUED']), version: expected }),
-  z.strictObject({ ok: z.literal(false), requestId: Id, error: z.strictObject({ code: ErrorCode, httpStatus: z.union([z.literal(401), z.literal(403), z.literal(404), z.literal(409), z.literal(422)]) }) }),
+  z.strictObject({ ok: z.literal(false), requestId: Id, error: z.strictObject({ code: ErrorCode, httpStatus: z.union([z.literal(401), z.literal(403), z.literal(404), z.literal(409), z.literal(422), z.literal(503)]) }) }),
 ]).refine(x => x.ok || x.error.httpStatus === ERROR_HTTP_STATUS[x.error.code], 'Error/status mismatch');
 
 // Internal helper only: callers hash validated, allowlisted public facts.

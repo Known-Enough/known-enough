@@ -214,3 +214,17 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Recorded the unimplemented DynamoDB state/guard transaction design, item-size/history concern, display-token revocation delay, and proposed API IAM boundary in `infra/README.md` for review. No live user pool, DynamoDB adapter, IAM policy, or cloud setup.
 - Focused checks: `npm test -- tests/integration/cognito.test.ts tests/integration/http.test.ts` passed 19/19; `npm run typecheck` passed; `git diff --check` passed. Final full check with pinned Node 24.21.0/npm 11.19.0 and Chromium 1243 under `/tmp` exited 0: references 7/7, planning 15/15, lint/import boundaries 69, typecheck, 187 unit/integration, web build/privacy scan, and 41 browser tests. Chromium used previously extracted `/tmp/a05-browser-libs`; no system packages changed. One first-run browser attempt was blocked by missing `libnspr4`; after using the temporary libraries, the final complete run passed.
 - Next: independent B04.5 review of the committed design/slice, including display group administration and token expiry, DynamoDB size/transaction semantics, retry safety, and IAM key conditions. Resume B04 only after findings are recorded and addressed. No push or deployment.
+
+## 2026-09-23T09:48:28Z — B04 / IN_PROGRESS — bounded B04.5 corrections
+
+- Resumed the existing claim after the independent review finished. Baseline `2df501d`; review-only tracking changes remain present and are preserved. Actual worker: A / Codex GPT-6; variant/effort not exposed, so the scheduled GPT-6-Sol/high is not claimed.
+- Correction scope: IAM transaction actions/key conditions; bounded private-state, replay/history and codec design; retryable unknown server outcomes with exact-envelope retention; signed local tokens through the real production verifier and HTTP handler. Coordinated contract and command-client updates are included. No DynamoDB adapter expansion until B04.5 follow-up review.
+- Next: focused regressions, pinned full `npm run check`, named local commit, then independent B04.5 follow-up review. No push or cloud operations.
+
+
+## 2026-09-23T10:07:50Z — B04 / PAUSED — B04.5 follow-up
+
+- Actual worker: A / Codex GPT-6; variant/effort not exposed, not claimed as GPT-6-Sol/high. Baseline `2df501d`; exact correction artifact is the ensuing local commit. Addressed R1–R4: corrected transaction IAM actions and conditions; bounded histories and replay/storage/codec design; typed redacted retryable 503 with exact-command retry preservation; verified signed tokens through the production Cognito resolver and HTTP handler. The public API entrypoint does not export the test JWKS seam.
+- Changed `packages/application/**`, `packages/contracts/**`, `apps/api/**`, `apps/web/src/command-client.ts` and its focused test, `tests/integration/**`, `infra/README.md`, and coordinated B04 review/task/board/handoff records. Reviewer-owned review evidence and log were preserved and included with the checkpoint update.
+- Focused checks: seven suites, 116 tests passed; `npm run typecheck` passed; `git diff --check` passed. Full pinned `npm run check` passed: reference hashes 7/7, planning 15/15, import boundaries 73, typecheck, 195 unit/integration tests, web build and bundle privacy scan, 41 browser tests.
+- Review limitation: DynamoDB adapter, IAM deployment/simulation, live Cognito, and near-limit/race/codec adapter tests remain unimplemented. No cloud activity or push. Next: independent B04.5 follow-up on the exact correction commit; do not expand the adapter until cleared.

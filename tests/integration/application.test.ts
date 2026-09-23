@@ -106,6 +106,12 @@ describe('B02 integrated application boundaries and consent', () => {
     const command = await h.envelope('SUBMIT_INPUT_DRAFT', { expectedOwnerRevision: 0, values: h.fixture.owners[0]!.confirmedInputs.values }) as Record<string, unknown>;
     const first = await h.app.execute(actor('maya'), command);
     expect(first.ok).toBe(true);
+    const receipts = await h.repository.transaction(roomId, room => room!.replays);
+    expect(receipts).toHaveLength(1);
+    expect(receipts[0]).toMatchObject({ keyHash: expect.stringMatching(/^[a-f0-9]{64}$/), bodyHash: expect.stringMatching(/^[a-f0-9]{64}$/) });
+    expect(receipts[0]).not.toHaveProperty('key');
+    expect(receipts[0]).not.toHaveProperty('body');
+    expect(JSON.stringify(receipts)).not.toContain('maya');
     expect(await h.app.execute(actor('maya'), { ...command, requestId: 'retry-correlation' })).toEqual(first);
     expect(await h.app.execute(actor('maya'), { ...command, payload: { expectedOwnerRevision: 99, values: h.fixture.owners[0]!.confirmedInputs.values } })).toMatchObject({ ok: false, error: { code: 'IDEMPOTENCY_CONFLICT' } });
     const roster = h.fixture.roster.map(member => ({ ...member, submitted: false as const, id: member.id === 'maya' ? 'new-member' : member.id }));
@@ -113,6 +119,48 @@ describe('B02 integrated application boundaries and consent', () => {
     for (const duty of schedule.duties) duty.qualifiedMemberIds = duty.qualifiedMemberIds.map(id => id === 'maya' ? 'new-member' : id);
     await h.applied('organizer', 'REVISE_DECISION', { schedule, roster, policy: h.fixture.policy });
     expect(await h.app.execute(actor('maya'), command)).toMatchObject({ ok: false, error: { code: 'NOT_FOUND' } });
+  });
+
+  it('caps private grant history without disabling revocation at the cap', async () => {
+    const h = await harness();
+    const offer = await h.offer();
+    await h.repository.transaction(roomId, room => {
+      const owner = room!.owners.find(value => value.memberId === 'nina')!;
+      owner.exceptions = Array.from({ length: 32 }, (_, index) => ({
+        id: `history-grant-${index}`, version: 1, scope: structuredClone(offer.scope),
+        status: index === 31 ? 'ACTIVE' as const : 'DECLINED' as const,
+      }));
+    });
+    const decision = await h.envelope('DECIDE_EXCEPTION', {
+      offerId: offer.id, offerVersion: offer.version, decision: 'ALLOW', scope: offer.scope,
+    });
+    expect(await h.app.execute(actor('nina'), decision)).toMatchObject({
+      ok: false, error: { code: 'ROOM_CAPACITY_REACHED', httpStatus: 409 },
+    });
+    expect((await h.owner('nina')).pendingOffers).toHaveLength(1);
+
+    const revoke = await h.envelope('REVOKE_EXCEPTION', { grantId: 'history-grant-31', grantVersion: 1 });
+    expect(await h.app.execute(actor('nina'), revoke)).toMatchObject({ ok: true });
+    expect((await h.owner('nina')).exceptionGrants.find(grant => grant.id === 'history-grant-31')?.status).toBe('REVOKED');
+  });
+
+  it('caps immutable agreement receipts without partially recording another final approval', async () => {
+    const h = await harness();
+    const target = await h.propose();
+    const proposal = (await h.publicView()).proposal!;
+    await h.repository.transaction(roomId, room => {
+      room!.agreementHistory = Array.from({ length: 64 }, () => ({
+        proposal: structuredClone(proposal), approvals: [], agreedAt: h.fixture.now,
+      }));
+    });
+    await h.applied('maya', 'ACCEPT_PROPOSAL', target);
+    await h.applied('leo', 'ACCEPT_PROPOSAL', target);
+    expect(await h.send('nina', 'ACCEPT_PROPOSAL', target)).toMatchObject({
+      ok: false, error: { code: 'ROOM_CAPACITY_REACHED', httpStatus: 409 },
+    });
+    expect((await h.publicView()).status).toBe('APPROVING');
+    expect((await h.owner('nina')).ownApproval).toBeNull();
+    expect(await h.repository.transaction(roomId, room => room!.agreementHistory)).toHaveLength(64);
   });
 
   it('requires fresh context consent without broadening explicitly reviewed intervals', async () => {

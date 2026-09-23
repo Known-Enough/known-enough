@@ -49,10 +49,19 @@ describe('owner command client', () => {
     await expect(sendCommand(unknownResult, command)).rejects.toMatchObject({ command });
   });
 
-  it('returns a structured server rejection rather than offering an unknown retry', async () => {
+  it('returns a structured client rejection rather than offering an unknown retry', async () => {
     const room = await ownerMockClient.getOwnerRoom();
     const command = decideException(room, context, room.pendingOffers[0]!, 'ALLOW', ids);
     const transport: CommandTransport = { post: async () => ({ ok: false, requestId: command.requestId, error: { code: 'INVALID_COMMAND', httpStatus: 422 } }) };
     await expect(sendCommand(transport, command)).resolves.toMatchObject({ ok: false, error: { code: 'INVALID_COMMAND' } });
+  });
+
+  it('keeps the exact envelope when a safe server result says the outcome may be unknown', async () => {
+    const room = await ownerMockClient.getOwnerRoom();
+    const command = decideException(room, context, room.pendingOffers[0]!, 'ALLOW', ids);
+    const transport: CommandTransport = { post: async () => ({
+      ok: false, requestId: command.requestId, error: { code: 'RETRYABLE_SERVER_ERROR', httpStatus: 503 },
+    }) };
+    await expect(sendCommand(transport, command)).rejects.toMatchObject({ command });
   });
 });

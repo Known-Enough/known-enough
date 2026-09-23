@@ -5,6 +5,8 @@ import { InMemoryRoomRepository } from '@deal-table/adapters';
 import { CommandResult, OwnerSnapshot, PublicRoomSnapshot, type CommandEnvelope } from '@deal-table/contracts';
 import { buildTeamTableFixture } from '@deal-table/test-support';
 import { createCognitoApiHandler, createLocalApiHandler, createNonProductionIdentities, type LocalApiOptions } from '../../apps/api/src/http.ts';
+import { createCognitoApiHandlerWithJwksCache } from '../../apps/api/src/http-core.ts';
+import { cognitoOptions, cognitoToken, testJwksCache } from './cognito-fixtures.ts';
 
 const roomId = 'room-synthetic';
 const servers: Server[] = [];
@@ -107,6 +109,136 @@ describe('B04 Cognito HTTP boundary', () => {
     expect(preflight.status).toBe(204);
     expect(preflight.headers.get('access-control-allow-origin')).toBe('https://app.example');
     expect(preflight.headers.get('access-control-allow-headers')).not.toContain('X-Deal-Table-Test-Identity');
+  });
+
+  it('verifies real signed tokens through the production HTTP composition and authorizes before parsing or replay', async () => {
+    const h = await harness();
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const handler = createCognitoApiHandlerWithJwksCache({
+      application: h.application, ...cognitoOptions, allowedOrigins: ['https://app.example'], debug: true,
+    }, testJwksCache());
+    const server = createServer(handler);
+    servers.push(server);
+    await new Promise<void>((resolve, reject) => {
+      server.once('error', reject);
+      server.listen(0, '127.0.0.1', () => { server.off('error', reject); resolve(); });
+    });
+    const address = server.address();
+    if (!address || typeof address === 'string') throw new Error('Missing test listener');
+    const base = `http://127.0.0.1:${address.port}`;
+    const send = async (path: string, token: string | null, body?: string) => {
+      const response = await fetch(`${base}${path}`, {
+        method: body === undefined ? 'GET' : 'POST',
+        headers: { ...(token === null ? {} : { Authorization: `Bearer ${token}` }), ...(body === undefined ? {} : { 'Content-Type': 'application/json' }) },
+        ...(body === undefined ? {} : { body }),
+      });
+      return { status: response.status, data: await response.json() as unknown };
+    };
+    try {
+      const mayaToken = cognitoToken({ sub: 'maya' });
+      const owner = await send(`/rooms/${roomId}/me?ownerMemberId=leo`, mayaToken);
+      expect(owner.status).toBe(200);
+      expect(OwnerSnapshot.parse(owner.data).ownerMemberId).toBe('maya');
+      const forgedOwnerCommand = await h.envelope('SUBMIT_INPUT_DRAFT', {
+        expectedOwnerRevision: 0, values: h.fixture.owners[0]!.confirmedInputs.values, ownerMemberId: 'leo',
+      });
+      const forgedOwner = await send(`/rooms/${roomId}/commands`, mayaToken, JSON.stringify(forgedOwnerCommand));
+      expect(forgedOwner.status).toBe(422);
+      expect(forgedOwner.data).toMatchObject({ ok: false, error: { code: 'INVALID_COMMAND' } });
+      expect((await h.owner('leo')).draft).toBeNull();
+
+      const displayToken = cognitoToken({ client_id: cognitoOptions.displayClientId,
+        'cognito:groups': [`deal-table-display-${roomId}`] });
+      const display = await send(`/rooms/${roomId}/public`, displayToken);
+      expect(display.status).toBe(200);
+      expect(PublicRoomSnapshot.parse(display.data).roomId).toBe(roomId);
+      expect((await send(`/rooms/${roomId}/me`, displayToken)).status).toBe(403);
+      expect((await send('/rooms/other-room/public', displayToken)).status).toBe(404);
+      const deniedDisplayBody = await send(`/rooms/${roomId}/commands`, displayToken, '{"private-diagnostic-canary"');
+      expect(deniedDisplayBody.status).toBe(403);
+      expect(deniedDisplayBody.data).toMatchObject({ ok: false, error: { code: 'FORBIDDEN' } });
+
+      const invalidTokens = [
+        cognitoToken({ iss: 'https://attacker.example/pool' }),
+        cognitoToken({ client_id: 'other-client' }),
+        cognitoToken({ token_use: 'id' }),
+        cognitoToken({ exp: Math.floor(Date.now() / 1000) - 1 }),
+        cognitoToken({}, {}, 'other'),
+      ];
+      for (const token of invalidTokens) {
+        const denied = await send(`/rooms/${roomId}/commands`, token, '{"private-diagnostic-canary"');
+        expect(denied.status).toBe(401);
+        expect(denied.data).toMatchObject({ ok: false, error: { code: 'UNAUTHENTICATED' } });
+      }
+      const noToken = await send(`/rooms/${roomId}/commands`, null, '{"private-diagnostic-canary"');
+      expect(noToken.status).toBe(401);
+      const outsider = await send(`/rooms/${roomId}/commands`, cognitoToken({ sub: 'outsider' }), '{"private-diagnostic-canary"');
+      expect(outsider.status).toBe(404);
+      expect(outsider.data).toMatchObject({ ok: false, error: { code: 'NOT_FOUND' } });
+
+      const command = await h.envelope('SUBMIT_INPUT_DRAFT', {
+        expectedOwnerRevision: 0, values: h.fixture.owners[0]!.confirmedInputs.values,
+      });
+      const first = await send(`/rooms/${roomId}/commands`, mayaToken, JSON.stringify(command));
+      expect(first.status).toBe(200);
+      await h.repository.transaction(roomId, room => {
+        room!.memberships = room!.memberships.filter(member => member.subject !== 'maya');
+      });
+      const replayAfterRemoval = await send(`/rooms/${roomId}/commands`, mayaToken, JSON.stringify(command));
+      expect(replayAfterRemoval.status).toBe(404);
+      expect(replayAfterRemoval.data).toMatchObject({ ok: false, error: { code: 'NOT_FOUND' } });
+
+      const diagnostics = log.mock.calls.map(args => args.join(' ')).join('\n');
+      expect(diagnostics).not.toContain(mayaToken);
+      expect(diagnostics).not.toContain('private-diagnostic-canary');
+      expect(diagnostics).not.toContain('outsider');
+      expect(diagnostics).not.toContain('cognito:groups');
+    } finally { log.mockRestore(); }
+  });
+
+  it('maps an unknown server/storage failure to a redacted retryable 503', async () => {
+    const h = await harness(undefined, true);
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(h.application, 'getPublicSnapshot').mockRejectedValue(new Error('synthetic private storage detail'));
+    try {
+      const result = await h.request(`/rooms/${roomId}/public`, 'maya');
+      expect(result.status).toBe(503);
+      expect(result.data).toMatchObject({ ok: false, error: { code: 'RETRYABLE_SERVER_ERROR', httpStatus: 503 } });
+      expect(JSON.stringify(result.data)).not.toContain('synthetic private storage detail');
+      expect(log.mock.calls.map(args => args.join(' ')).join('\n')).not.toContain('synthetic private storage detail');
+    } finally { log.mockRestore(); }
+  });
+
+  it('returns a redacted retryable 503 and replays a command committed before its response was lost', async () => {
+    const h = await harness(undefined, true);
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const command = await h.envelope('SUBMIT_INPUT_DRAFT', {
+      expectedOwnerRevision: 0, values: h.fixture.owners[0]!.confirmedInputs.values,
+    });
+    const execute = h.application.execute.bind(h.application);
+    const interrupted = vi.spyOn(h.application, 'execute').mockImplementationOnce(async (principal, input) => {
+      await execute(principal, input);
+      throw new Error('synthetic storage and private payload detail');
+    });
+    try {
+      const first = await h.post('maya', command);
+      expect(first.status).toBe(503);
+      expect(first.data).toEqual({ ok: false, requestId: command.requestId,
+        error: { code: 'RETRYABLE_SERVER_ERROR', httpStatus: 503 } });
+      expect(JSON.stringify(first.data)).not.toContain('synthetic storage');
+      expect(await h.repository.transaction(roomId, room => room!.replays)).toHaveLength(1);
+
+      const retry = await h.post('maya', command);
+      expect(retry.status).toBe(200);
+      expect(retry.data).toMatchObject({ ok: true, requestId: command.requestId });
+      expect(await h.repository.transaction(roomId, room => room!.replays)).toHaveLength(1);
+      expect((await h.owner('maya')).draft?.values).toEqual(h.fixture.owners[0]!.confirmedInputs.values);
+      expect(interrupted).toHaveBeenCalledTimes(2);
+
+      const diagnostics = log.mock.calls.map(args => args.join(' ')).join('\n');
+      expect(diagnostics).not.toContain('synthetic storage');
+      expect(diagnostics).not.toContain('private payload');
+    } finally { log.mockRestore(); }
   });
 });
 

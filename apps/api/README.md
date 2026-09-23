@@ -74,8 +74,10 @@ configured client IDs, and zero expiry grace. Authentication failures return
 group does not revoke already issued self-contained tokens; live configuration
 must bound access-token lifetime and document the remaining revocation delay.
 
-This handler has no configured user pool or deployed runtime yet. The signed
-JWT integration tests use a generated local RSA key and cached test JWKS; they
-do not contact Cognito or prove user-pool administration, live group scope,
-network availability, DynamoDB, IAM, or deployment configuration. The
-`NON_PRODUCTION` handler remains for local negotiation only.
+This handler has no configured user pool or deployed runtime yet. Signed JWT
+integration tests use the real verifier with a generated local RSA key and
+cached test JWKS. They exercise production HTTP composition through an internal
+test seam omitted from the package entrypoint; they do not contact Cognito or
+prove user-pool administration, live group scope, network availability,
+DynamoDB, IAM, or deployment configuration. The `NON_PRODUCTION` handler
+remains for local negotiation only.
