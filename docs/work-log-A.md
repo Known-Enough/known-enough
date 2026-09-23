@@ -18,6 +18,12 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Checks under Node 24.21.0/npm 11.19.0: focused API/HTTP tests passed 19/19. `PLAYWRIGHT_CHANNEL=chrome npm run check` exited 0: references 7/7, planning 15/15, lint/import boundaries, typecheck, 187 unit/integration tests, build/privacy scan, 41 browser tests. Chromium install was unsupported on macOS 12; used the documented system Chrome fallback. An initial npm install under default Node 19/npm 8 failed its engine check without changing manifests; retry with the pinned runtime succeeded and npm reported 0 vulnerabilities.
 - No independent review yet. Per the B04 midpoint requirement, B04 is now PAUSED and B04.5 is READY/unclaimed. No AWS credentials/account calls, cloud resources, commits, or publication.
 
+## 2026-09-23T16:31:34Z — B04 / PAUSED — midpoint handoff
+
+- Local commit `11ed27d` records the first-slice artifact from base `8e6d1c4` on `main`; full check passed against this exact source/test commit. The commit remains local and is not published.
+- B04 remains PAUSED with A/Ricardo retaining implementation ownership. B04.5 is READY and unclaimed for independent `gpt-6-astra` / high review of identity, group-derived display scope, request ordering, tests, and operational limits. Do not extend B04 before that review.
+- No application source or tests changed after `11ed27d`; only ticket/handoff/log references to the review head are being recorded. No push, external message, AWS account call, resource creation, or spend.
+
 
 ## 2026-09-22T18:17:59Z — shared pool / AI task planning — REVIEW
 
