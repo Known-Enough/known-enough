@@ -168,3 +168,16 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Fresh references 7/7, planning 15/15 and committed-diff whitespace passed. No executable changes or application suite rerun; no adapter/live-cloud evidence. [Review](reviews/B04.5.md) records the inequality proof, exact hashes, required implementation regressions and limits.
 - Claim finished. B04.5 is REVIEW / PASS for local midpoint design; B04 stays PAUSED with its design gate cleared, pending the owner's sequential resumption claim. No design/code edit, commit or publication. Human acceptance and G02 remain outstanding.
 - Final coordinated validation passed: 123 local Markdown targets, PASS/PAUSED task/board/handoff consistency, finished review claim, unchanged design hash and `git diff --check`.
+
+
+## 2026-09-23T22:30:28Z — B04.5 / IN_PROGRESS — fresh R10 follow-up claim
+
+- Took the explicit fresh-review assignment recorded in the B04.5 ticket, with owner A paused. Separate clone `/tmp/b04-r10-review` on main at `7104681ac2322a0f961fef8e25e4bceab7143048`; exact code diff `f88b4a0..b78aab99307fda1eda41776cf7bf260c72971a2a`. Reviewer configured gpt-6-astra / high, confirmed by coordinating-session launch metadata; runtime variant telemetry remains unexposed. Bounded write scope: B04.5 review, this B log, B04/B04.5 tickets, board and coordinated A/B handoffs. No implementation/test edits or publication.
+
+## 2026-09-23T22:38:42Z — B04.5 / REVIEW — R10 follow-up PASS
+
+- Inspected full-list cancellation classification, both callers, exact four new regression variants, old cancellation/race/unknown-outcome tests and application/HTTP error mapping. **R10 closed / PASS**; malformed/unknown/arbitrary validation dominates capacity, capacity dominates retry, all recognized failures retry, empty/all-None does not. Prior R7–R9 closures remain valid.
+- Independently ran pinned Node 24.21.0/npm 11.19.0: adapter suite **21/21**, inline probe of unmodified production classifier **35 assertions**, references **7/7**, planning **15/15**; all exited 0. Owner full npm-check evidence was inspected (220 unit/integration + 41 browser, with successful cached-Chromium rerun); it was not independently rerun. Exact artifact hashes and limitations are in [B04.5](reviews/B04.5.md). Sandbox startup failed due to the WSL host mount; approved escalation allowed the same local commands.
+- Claim finished. B04.5 is REVIEW/PASS for this correction; B04 remains PAUSED with the code gate cleared pending owner sequential resumption. Remaining B04, final critical review, human and G02/live gates persist. No implementation edits, cloud work or publication. A local documentation-only review commit is authorized.
+
+Final documentation validation: **145 local Markdown targets**, current B04.5 REVIEW/PASS and B04 PAUSED status consistency, and `git diff --check` passed. Imported reference hashes remained 7/7. The only pre-existing untracked entry is the supplied `node_modules` symlink; it is excluded from the review commit.

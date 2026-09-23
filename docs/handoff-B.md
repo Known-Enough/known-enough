@@ -1,6 +1,6 @@
 # User B handoff — shared task pool
 
-Current scheduling (September 23): both users follow the same [project-wide priority queue](task-board.md), with one active task at a time. A/B IDs and personal handoff filenames do not assign ownership. Current next task: sequential B04 implementation resumption after independent B04.5 PASS on `5297118` for the local midpoint design. R5b/R6 are closed; the reviewer claim has finished. B04 remains PAUSED until its owner records resumption. G01 is human accepted; A05 preparation remains REVIEW. [T01](tasks/T01.md) and [T02](tasks/T02.md) remain later AI-extension work.
+Current scheduling (September 23): both users follow the same [project-wide priority queue](task-board.md), with one active task at a time. A/B IDs and personal handoff filenames do not assign ownership. Current next task: sequential B04 implementation resumption after independent B04.5 PASS on R10 code correction `f88b4a0..b78aab9`. R7–R10 are closed for their reviewed artifacts; the reviewer claim has finished. The design PASS on `5297118` remains valid. B04 remains PAUSED until its owner records resumption. G01 is human accepted; A05 preparation remains REVIEW. [T01](tasks/T01.md) and [T02](tasks/T02.md) remain later AI-extension work.
 
 Latest handoff, 2026-09-22: **A02.5/G01 synchronized repairs, REVIEW for human acceptance.** User explicitly authorized commit/push. Reviewed repairs are preserved in `d042d8f`; integration includes published `8371e7b`, shared-pool policy, readiness/debug changes and tutorial. [G01 combined artifact and evidence](reviews/G01.md) records conflict decisions, exact hashes, fresh checks and independent review. No B04 implementation or new task claim. Earlier paragraphs retain historical context.
 
@@ -37,3 +37,8 @@ Configured `gpt-6-astra` / high review of `b91ff76..98877e1`: **CHANGES_REQUESTE
 ## B04.5 final design follow-up — 2026-09-23T20:33:46Z
 
 **PASS on `5297118` for the local midpoint design** from the configured independent `gpt-6-astra` / high reviewer. Full response-path reservation and atomic transfer close R5b; R6 remains closed. [Evidence and outstanding implementation/live gates](reviews/B04.5.md). Review claim finished; B04 design gate cleared, with sequential implementation resumption next. No design/code edits, commit, publication or live acceptance.
+
+
+## B04.5 fresh R10 follow-up — 2026-09-23T22:38:42Z
+
+**PASS on `f88b4a0..b78aab9`**. Independent configured gpt-6-astra / high reviewed the classifier, both callers, exact new/old tests and owner full-check evidence. R10 closed; R7–R9 remain closed. Fresh adapter suite **21/21** and **35 classifier assertions** passed, with references 7/7 and planning 15/15. [Review evidence](reviews/B04.5.md) records exact hashes and limits. Reviewer claim finished; B04 stays PAUSED with this code gate cleared pending owner resumption. Remaining implementation, final review, human acceptance and G02/live gates still apply. No implementation edits, live cloud acceptance or publication.
