@@ -38,7 +38,6 @@ export interface ApiHandlerOptions {
   readonly application: DealTableApplication;
   readonly identityResolver: ApiIdentityResolver;
   readonly maxBodyBytes?: number;
-  readonly debug?: boolean;
 }
 
 export function createNonProductionIdentities(roomId: string): ReadonlyMap<string, HttpIdentity> {
@@ -307,7 +306,7 @@ export function createApiHandler(options: ApiHandlerOptions): (request: Incoming
   return createRequestHandler(
     options.application,
     maxBodyBytes,
-    options.debug ?? false,
+    false,
     request => options.identityResolver(request.headers.authorization),
   );
 }

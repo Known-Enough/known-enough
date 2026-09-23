@@ -1,4 +1,5 @@
 import { CognitoJwtVerifier } from 'aws-jwt-verify';
+import type { JwksCache } from 'aws-jwt-verify/jwk';
 import { Id } from '@deal-table/contracts';
 import type { TrustedPrincipal } from '@deal-table/application';
 
@@ -31,16 +32,24 @@ export function createCognitoIdentityResolver(options: {
   userPoolId: string;
   clientId: string;
   verifier?: CognitoAccessTokenVerifier;
+  /** Trusted server-side cache override, useful for offline tests and managed key caches. */
+  jwksCache?: JwksCache;
 }): ApiIdentityResolver {
   if (!options.userPoolId.trim() || !options.clientId.trim()) {
     throw new Error('Cognito user pool ID and app client ID are required');
   }
 
-  const verifier = options.verifier ?? CognitoJwtVerifier.create({
-    userPoolId: options.userPoolId,
-    clientId: options.clientId,
-    tokenUse: 'access',
-  });
+  const verifier = options.verifier ?? (options.jwksCache
+    ? CognitoJwtVerifier.create({
+      userPoolId: options.userPoolId,
+      clientId: options.clientId,
+      tokenUse: 'access',
+    }, { jwksCache: options.jwksCache })
+    : CognitoJwtVerifier.create({
+      userPoolId: options.userPoolId,
+      clientId: options.clientId,
+      tokenUse: 'access',
+    }));
 
   return async authorizationHeader => {
     const token = bearerToken(authorizationHeader);
@@ -72,11 +81,12 @@ export function createCognitoIdentityResolver(options: {
 /** Build a production verifier from non-secret deployment configuration. */
 export function createCognitoIdentityResolverFromEnv(
   env: NodeJS.ProcessEnv = process.env,
+  jwksCache?: JwksCache,
 ): ApiIdentityResolver {
   const userPoolId = env.COGNITO_USER_POOL_ID;
   const clientId = env.COGNITO_CLIENT_ID;
   if (!userPoolId || !clientId) {
     throw new Error('COGNITO_USER_POOL_ID and COGNITO_CLIENT_ID must be configured');
   }
-  return createCognitoIdentityResolver({ userPoolId, clientId });
+  return createCognitoIdentityResolver({ userPoolId, clientId, ...(jwksCache ? { jwksCache } : {}) });
 }

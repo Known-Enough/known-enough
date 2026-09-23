@@ -4,6 +4,7 @@ import { DealTableApplication, type TrustedPrincipal } from '@deal-table/applica
 import { InMemoryRoomRepository } from '@deal-table/adapters';
 import { CommandResult, OwnerSnapshot, PublicRoomSnapshot, type CommandEnvelope } from '@deal-table/contracts';
 import { buildTeamTableFixture } from '@deal-table/test-support';
+import { createCognitoIdentityResolverFromEnv } from '../../apps/api/src/cognito-identity.ts';
 import { createApiHandler, createLocalApiHandler, createNonProductionIdentities, type ApiIdentityResolver, type LocalApiOptions } from '../../apps/api/src/http.ts';
 
 const roomId = 'room-synthetic';
@@ -22,9 +23,13 @@ async function harness(identities?: LocalApiOptions['identities'], debug = false
   const seed = { roomId, schedule: fixture.schedule, roster: fixture.roster.map(member => ({ ...member, submitted: false })), policy: fixture.policy, organizerSubject: 'organizer', memberships: fixture.roster.map(member => ({ subject: member.id, memberId: member.id })) };
   await application.createRoom(seed);
   await application.createRoom({ ...seed, roomId: 'other-room', organizerSubject: 'other-organizer', memberships: fixture.roster.map(member => ({ subject: `other-${member.id}`, memberId: member.id })) });
-  const handler = identityResolver
-    ? createApiHandler({ application, identityResolver, debug })
-    : createLocalApiHandler({ application, debug, ...(identities ? { identities } : {}) });
+  let handler: ReturnType<typeof createApiHandler>;
+  if (identityResolver) {
+    const authenticatedOptions = { application, identityResolver, debug };
+    handler = createApiHandler(authenticatedOptions);
+  } else {
+    handler = createLocalApiHandler({ application, debug, ...(identities ? { identities } : {}) });
+  }
   const server = createServer(handler);
   servers.push(server);
   await new Promise<void>((resolve, reject) => {
@@ -241,6 +246,36 @@ describe('B03 real local HTTP boundary (non-production test identities)', () => 
 });
 
 describe('B04 authenticated API handler boundary', () => {
+  it('never emits local diagnostics for authenticated reads, commands or errors, even if runtime options request debug', async () => {
+    const identityResolver: ApiIdentityResolver = async authorization => authorization === 'Bearer valid-maya'
+      ? { kind: 'participant', subject: 'maya' }
+      : null;
+    const h = await harness(undefined, true, identityResolver);
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      const snapshotResponse = await h.request(`/rooms/${roomId}/public`, 'Bearer valid-maya');
+      expect(snapshotResponse.status).toBe(200);
+      expect((await h.request(`/rooms/${roomId}/me`, 'Bearer valid-maya')).status).toBe(200);
+      const snapshot = PublicRoomSnapshot.parse(snapshotResponse.data);
+      const command = {
+        schemaVersion: 1,
+        requestId: 'authenticated-debug-command',
+        idempotencyKey: 'authenticated-debug-key',
+        roomId,
+        expected: {
+          contextToken: snapshot.contextToken,
+          decisionRevision: snapshot.decisionRevision,
+          controlVersion: snapshot.controlVersion,
+        },
+        type: 'SUBMIT_INPUT_DRAFT',
+        payload: { expectedOwnerRevision: 0, values: h.fixture.owners[0]!.confirmedInputs.values },
+      };
+      expect((await h.post('Bearer valid-maya', command)).status).toBe(200);
+      error(await h.request(`/rooms/${roomId}/commands`, 'Bearer valid-maya', '{private-error-canary', true), 'INVALID_COMMAND', 422);
+      expect(log).not.toHaveBeenCalled();
+    } finally { log.mockRestore(); }
+  });
+
   it('resolves identity before malformed-body handling and fails closed on unknown credentials', async () => {
     const resolved: Array<string | undefined> = [];
     const identityResolver: ApiIdentityResolver = async authorization => {
@@ -255,6 +290,31 @@ describe('B04 authenticated API handler boundary', () => {
     expect(resolved).toEqual(['Bearer invalid-token']);
     error(await h.request(`/rooms/${roomId}/commands`, 'Bearer valid-maya', '{private malformed', true), 'INVALID_COMMAND', 422);
     expect(resolved).toEqual(['Bearer invalid-token', 'Bearer valid-maya']);
+  });
+
+  it('returns generic 401 and does not log identity resolver details', async () => {
+    const identityResolver = createCognitoIdentityResolverFromEnv({
+      COGNITO_USER_POOL_ID: 'us-east-1_testPool',
+      COGNITO_CLIENT_ID: 'test-client',
+    });
+    const h = await harness(undefined, true, identityResolver);
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      const result = await h.request(`/rooms/${roomId}/public`, 'Bearer raw-token-canary');
+      error(result, 'UNAUTHENTICATED', 401);
+      const output = JSON.stringify(result.data) + log.mock.calls.flat().join(' ')
+        + errorLog.mock.calls.flat().join(' ') + warn.mock.calls.flat().join(' ');
+      expect(output).not.toContain('raw-token-canary');
+      expect(log).not.toHaveBeenCalled();
+      expect(errorLog).not.toHaveBeenCalled();
+      expect(warn).not.toHaveBeenCalled();
+    } finally {
+      log.mockRestore();
+      errorLog.mockRestore();
+      warn.mockRestore();
+    }
   });
 
   it('keeps authenticated display principals room-scoped and read-only', async () => {

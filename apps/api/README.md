@@ -66,6 +66,11 @@ creates a read-only display principal for that room; malformed or multiple
 display groups fail closed. Configure the environment factory with
 `COGNITO_USER_POOL_ID` and `COGNITO_CLIENT_ID`.
 
+The authenticated handler does not emit the local debug diagnostics, even if a
+caller supplies an extra runtime `debug` property. The environment factory
+accepts an optional trusted server-side JWKS cache for offline verification
+tests or a managed cache; never populate it from request data.
+
 An authenticated handler still needs a durable repository and a secure hosting
 composition before it is suitable for production. `listenLocalApi`
 and the runnable entry bind loopback addresses only; `createLocalApiServer`
