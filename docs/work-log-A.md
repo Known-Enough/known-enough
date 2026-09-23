@@ -218,3 +218,44 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - User requested finishing G01 after the current project gate had been identified as human acceptance. Recorded the request as acceptance of the bounded G01 local UI/API integration checkpoint; no production-readiness claim follows.
 - Independent read-only follow-up PASS checked A05's two changed files against the prior G01 manifest and confirmed the live localIdentity branch and G01 acceptance flow remain intact. Updated manifest SHA-256: `934a7df164a20ce3e94b7151514a0ca47a8d2dc594b9b3328cfe50c333d7fab2`. Details and file hashes: [G01 review](reviews/G01.md). Reviewer did not rerun tests.
 - Existing full check on current integrated source passed: 181 unit/integration and 41 browser tests, plus references, planning, lint/boundaries, typecheck and build/privacy scan. No application source changed in this acceptance step. G01 status is DONE; B04 is next per the project queue.
+
+
+## 2026-09-23T16:35:24Z — B04.5 / IN_PROGRESS
+
+- Independent sequential reviewer in A/Ricardo's review session; assigned `gpt-6-astra` / high, actual reported family GPT-6 Codex (runtime variant/effort not independently exposed). This reviewer did not implement B04. B04 remains PAUSED with A/Ricardo's implementation claim retained.
+- Baseline `611079a` on main; clean worktree before review. Review exact implementation artifact `8e6d1c4..11ed27d`; subsequent commit changes tracking docs only. Allowed writes: `docs/reviews/B04.5.md`, A log, and coordinated ticket/board/handoff records. No application/test edits or cloud calls.
+- Next: inspect identity/HTTP code, application enforcement, tests and design assumptions; run pinned focused API/HTTP tests and record an independent verdict.
+
+
+## 2026-09-23T16:38:19Z — B04.5 / REVIEW / CHANGES_REQUESTED
+
+- Independent sequential reviewer, assigned `gpt-6-astra` / high; actual reported family GPT-6 Codex, runtime variant/effort not independently exposed. Reviewed `8e6d1c4..11ed27d` on main at `611079a`; exact eight-file SHA-256 manifest and findings are in [B04.5](reviews/B04.5.md). No application/test edits.
+- R1/P1: the new authenticated handler exposes local debug logging of verified subjects and private owner metadata; independently reproduced with synthetic loopback HTTP and captured logs. R2/P2: committed mapper/HTTP tests bypass actual Cognito configuration; require durable offline verifier/configuration regressions. Current real factory passed an independent generated-key/cached-JWKS probe for valid token, wrong client/issuer/token use, expiry, nbf, invalid signature and missing env.
+- Fresh pinned Node 24.21.0/npm 11.19.0 `npm test -- apps/api/src/cognito-identity.test.ts tests/integration/http.test.ts` exited 0, 19/19. Inline offline verifier/privacy probe exited 0. Author's full 187 unit/integration + 41 browser check inspected as historical evidence, not rerun or relabeled. Documentation reference hashes (7/7), local targets/statuses/source manifest and `git diff --check` passed.
+- Review claim released. B04 stays PAUSED; A/Ricardo retains ownership for bounded R1/R2 corrections and independent follow-up before further implementation. No other task started. No live Cognito, DynamoDB, IAM, deployment, cross-process race evidence or human acceptance claimed; no cloud calls, commit or publication. Remaining production/G02 obligations are explicitly recorded in the review.
+
+
+## 2026-09-23T16:43:38Z — B04 / IN_PROGRESS — bounded B04.5 corrections claimed
+
+- User directed: solve the B04.5 tracking mismatch, start B04, and continue to the next eligible task after finishing. Source baseline is `611079a` on local `main`; worktree contains the independent review's documented handoff changes, with no source/test edits after reviewed head `11ed27d`.
+- A / Ricardo resumes B04 only for R1/R2: suppress diagnostics for authenticated handlers even when runtime extras request debug; add offline generated-key signed-token tests through the actual Cognito environment factory and assert generic 401/no token-verifier details in logs. B04.5 pauses after CHANGES_REQUESTED for independent follow-up. Bounded source files are the API handler, Cognito resolver/test and HTTP integration test, plus coordinated status records.
+- Actual session model: GPT-6 Codex; exact variant and effort are not exposed. Ticket target is `gpt-6-sol` / high; target runtime selection is not claimed as verified.
+- No checks rerun and no source changed at claim time. Next: implement both findings, focused tests, full `npm run check`, then independent follow-up. No cloud calls or publication.
+
+
+## 2026-09-23T16:58:13Z — B04 / PAUSED — corrections ready for B04.5 follow-up
+
+- Corrective source/test/documentation artifact committed locally as `bfeb448` (`611079a..bfeb448`) on `main`. Files: authenticated API composition, Cognito resolver, Cognito resolver tests, HTTP integration tests, and API README. B04 is paused; independent B04.5 follow-up is now the single active project task. No push or publication.
+- R1: removed `debug` from authenticated handler options and force diagnostics off there. Regression requests authenticated public/private reads, a valid command and an error while a runtime extra requests debug; no console diagnostic is emitted. Local synthetic debug behavior remains.
+- R2: added synthetic RSA key/JWKS offline tests using the real `CognitoJwtVerifier` through `createCognitoIdentityResolverFromEnv`; covers valid access token, wrong issuer/pool/client, ID token, expiry, nbf, wrong signature key, and missing/invalid configuration. HTTP integration uses the real environment factory and checks invalid credentials yield generic 401 with no token/verifier detail logging.
+- Actual session model GPT-6 Codex; variant/effort not exposed. Target `gpt-6-sol` / high is not claimed as verified. Pinned runtime Node 24.21.0/npm 11.19.0.
+- Focused `npm test -- apps/api/src/cognito-identity.test.ts tests/integration/http.test.ts`: 23/23 passed. Final full `PLAYWRIGHT_CHANNEL=chrome npm run check`: exit 0; references 7/7, planning 15/15, lint/import boundaries 72 references, typecheck, 191 unit/integration, production build/privacy scan, 41 browser tests. Used system Chrome fallback; bundled Chromium install is unsupported on this macOS 12 host. Final `git diff --check` passed. No AWS/Cognito/DynamoDB/IAM calls or cloud resources.
+- Next: independent `gpt-6-astra` / high review on the exact `611079a..bfeb448` corrective source diff. Resume B04 only after recorded follow-up PASS.
+
+
+## 2026-09-23T17:01:52Z — B04.5 / IN_PROGRESS — independent follow-up claimed
+
+- B04 remains PAUSED after corrective commit `bfeb448`; independent reviewer `/root/b04_5_review` now owns the next sequential task on `611079a..bfeb448`, assigned `gpt-6-astra` / high. No B04 implementation changes during review.
+- Coordinated task/board/handoff records reflect B04 paused and B04.5 follow-up active. Initial CHANGES_REQUESTED review remains historical and is preserved in [B04.5](reviews/B04.5.md).
+- Documentation verification: changed Markdown links and B04/B04.5 status consistency passed; imported reference hashes passed 7/7; `git diff --check` passed. Application checks for `bfeb448` are listed above. No push or publication.
+- Next: independent reviewer inspects corrective source and tests, reruns focused API/HTTP tests and records a follow-up verdict. Resume B04 only after PASS.
