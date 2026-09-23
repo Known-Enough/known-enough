@@ -109,3 +109,29 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Fresh checks: focused Cognito/HTTP tests exit 0 (19/19), typecheck exit 0. Synthetic shared-handler storage-error probe exit 0 reproduces 422 INVALID_COMMAND. Implementer-reported full check 187 unit/integration and 41 browser tests was not rerun. No live Cognito, DynamoDB, IAM or cloud verification.
 - Review claim finished. B04.5 REVIEW/CHANGES_REQUESTED; B04 remains PAUSED at the gate. Next owner A takes bounded corrections and obtains sequential follow-up review before approach expansion. No commit, push or deployment.
 - Documentation validation: reference hashes 7/7, planning checks 15/15, whitespace, 74 local Markdown targets, and B04/B04.5 status consistency passed.
+
+
+## 2026-09-23T10:10:44Z — B04.5 / IN_PROGRESS — R1–R4 follow-up
+
+- Sequential independent review of `2df501d..35d57e7`; implementation owner A paused. Actual B / Codex GPT-6, variant/effort not exposed; scheduled Astra/high not claimed. Review scope: corrections, actual source/tests and infrastructure design. Write scope: reviewer evidence/log and coordinated tracking only. No implementation edits, commit, push or cloud activity.
+
+
+## 2026-09-23T10:13:06Z — B04.5 / REVIEW — follow-up CHANGES_REQUESTED
+
+- Independent review of `2df501d..35d57e7`; actual B / Codex GPT-6 (variant/effort not exposed), owner A paused. R1/R3/R4 closed for local design/error/verifier scope. R2a: known capacity must not enter the client's unknown-outcome retry lock. R2b: both absent rows must preserve normal NOT_FOUND. R5: full history blocks pending decline; actual-application probe returned ROOM_CAPACITY_REACHED with the offer still open.
+- Fresh focused seven-suite check passed 116/116; typecheck passed. Inline Node synthetic cap/decline probe reproduced R5. Implementer-reported full check 195 unit/integration and 41 browser tests was not rerun. No live Cognito, DynamoDB or IAM evidence.
+- Exact committed artifact, precise paths, correction requirements and limitations: [B04.5 review](reviews/B04.5.md). No implementation edits, commit, push or cloud activity. Follow-up claim finished; B04 remains paused while owner A takes bounded R2a/R2b/R5 corrections and returns for independent review.
+- Documentation checks passed: reference hashes 7/7, planning 15/15, local Markdown links, task/board consistency and whitespace. Current B04 task and A handoff point to the open follow-up findings; historical implementation evidence remains intact.
+
+
+## 2026-09-23T10:43:26Z — B04.5 / IN_PROGRESS — capacity/refusal correction review
+
+- Review `35d57e7..b91ff76` independently; current documentation head `f2a8bf6`. Actual B / Codex GPT-6, variant/effort not exposed. Owner A paused. Preserve earlier reviewer-owned working changes. Scope is source/tests/design reads and reviewer/tracking documentation only.
+
+
+## 2026-09-23T10:44:51Z — B04.5 / REVIEW — second follow-up CHANGES_REQUESTED
+
+- Independently reviewed exact `35d57e7..b91ff76` with status head `f2a8bf6`, owner A paused. Actual B / Codex GPT-6, variant/effort unexposed. R2a/R2b and implemented R5 history-slot admission closed; R1/R3/R4 closures preserved. Remaining design findings: R5b must reserve encoded bytes for pending responses; R6 must distinguish ordinary-funded safety successes from reserved-safety accounting and prove the bound.
+- Fresh seven-suite focused check passed 120/120; typecheck passed. Actual-application inline probe completed 321 partial-plan accept/withdraw cycles with 0 agreement receipts and 653 replay rows, proving the lifetime-withdrawal bound cannot come from agreementHistory. Full implementer-reported 199/41 suite not rerun. No cloud checks.
+- [Review](reviews/B04.5.md) records exact artifact hashes, finding locations, method, corrections and limits. Claim finished; next owner A takes bounded R5b/R6 design corrections and returns for review. No implementation edits, commit or publication.
+- Final documentation validation passed: reference hashes 7/7, planning 15/15, 105 local links, task/board consistency and whitespace.
