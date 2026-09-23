@@ -36,12 +36,25 @@ export interface OwnerRecord {
   disclosures: DisclosureGrant[];
   approval: FinalApproval | null;
 }
+/** Maximum lifetime exception/disclosure decisions retained for a room. */
+export const MAX_PERMISSION_HISTORY_RECORDS = 192;
+
+export type RetiredDisclosureGrant = Omit<DisclosureGrant, 'preview'> & {
+  preview: Omit<DisclosurePreview, 'text'>;
+};
+/** Private, immutable permission evidence retained after an owner leaves the roster. */
+export interface RetiredPermissionHistory {
+  ownerMemberId: string;
+  exceptions: ExceptionGrant[];
+  disclosures: RetiredDisclosureGrant[];
+}
 export interface RoomRecord extends RoomSeed {
   contextToken: string;
   decisionRevision: number;
   controlVersion: number;
   status: PublicRoomSnapshot['status'];
   owners: OwnerRecord[];
+  retiredPermissionHistory: RetiredPermissionHistory[];
   proposal: ProposalView | null;
   proposalVersion: number;
   requiredGrants: RequiredGrantReference[];

@@ -3,16 +3,16 @@ import {
   hashPublicProposal, normalizeDisclosureText,
 } from '@deal-table/contracts';
 import type {
-  CommandResult, ExceptionScope, Interval, PublicHashPayload, PublicPlanFacts,
+  CommandResult, DisclosureGrant, ExceptionScope, Interval, PublicHashPayload, PublicPlanFacts,
 } from '@deal-table/contracts';
 import { solveDecision } from '@deal-table/domain';
 import type { OwnedExceptionGrant, SolveDecisionInput } from '@deal-table/domain';
-import { RepositoryCapacityError } from './types.ts';
+import { MAX_PERMISSION_HISTORY_RECORDS, RepositoryCapacityError } from './types.ts';
 import type {
-  ApplicationOptions, ErrorCode, ExpectedVersion, OwnerRecord, RoomRecord, RoomSeed, TrustedPrincipal,
+  ApplicationOptions, ErrorCode, ExpectedVersion, OwnerRecord, RetiredDisclosureGrant, RoomRecord, RoomSeed, TrustedPrincipal,
 } from './types.ts';
 export type * from './types.ts';
-export { RepositoryCapacityError } from './types.ts';
+export { MAX_PERMISSION_HISTORY_RECORDS, RepositoryCapacityError } from './types.ts';
 
 export class ApplicationError extends Error {
   readonly httpStatus: number;
@@ -47,6 +47,24 @@ const freshOwner = (memberId: string): OwnerRecord => ({
   memberId, revision: 0, acceptedContext: null, confirmed: null, reviewedIntervals: null,
   draft: null, offers: [], previews: [], exceptions: [], disclosures: [], approval: null,
 });
+function archiveDisclosureGrant(grant: DisclosureGrant): RetiredDisclosureGrant {
+  return {
+    id: grant.id,
+    version: grant.version,
+    preview: {
+      id: grant.preview.id,
+      textHash: grant.preview.textHash,
+      audienceMemberIds: [...grant.preview.audienceMemberIds],
+      roomId: grant.preview.roomId,
+      contextToken: grant.preview.contextToken,
+      decisionRevision: grant.preview.decisionRevision,
+      expiresAt: grant.preview.expiresAt,
+      inferenceWarning: grant.preview.inferenceWarning,
+    },
+    status: grant.status,
+    publishedAt: grant.publishedAt,
+  };
+}
 function copyInterval(value: Interval): Interval {
   return { date: value.date, timezone: value.timezone, startMinute: value.startMinute, endMinute: value.endMinute };
 }
@@ -95,7 +113,7 @@ export class DealTableApplication {
       roomId: clean.roomId, schedule: clean.schedule, roster: clean.roster, policy: clean.policy,
       organizerSubject: seed.organizerSubject, memberships: structuredClone(seed.memberships),
       contextToken: clean.contextToken, decisionRevision: 1, controlVersion: 0, status: 'COLLECTING',
-      owners: clean.roster.map(p => freshOwner(p.id)), proposal: null, proposalVersion: 0,
+      owners: clean.roster.map(p => freshOwner(p.id)), retiredPermissionHistory: [], proposal: null, proposalVersion: 0,
       requiredGrants: [], publishedDisclosures: [], agreementHistory: [], roundUsed: false,
       solveEpoch: 0, job: null, replays: [],
     });
@@ -305,6 +323,22 @@ export class DealTableApplication {
       // Membership provisioning remains a trusted composition concern. A revision
       // cannot invent authenticated bindings for newly supplied public names.
       this.invalidate(room);
+      const nextOwnerIds = new Set(command.payload.roster.map(participant => participant.id));
+      for (const departed of room.owners) {
+        if (nextOwnerIds.has(departed.memberId)
+          || (departed.exceptions.length === 0 && departed.disclosures.length === 0)) continue;
+        const archived = room.retiredPermissionHistory.find(history => history.ownerMemberId === departed.memberId);
+        if (archived) {
+          archived.exceptions.push(...structuredClone(departed.exceptions));
+          archived.disclosures.push(...departed.disclosures.map(archiveDisclosureGrant));
+        } else {
+          room.retiredPermissionHistory.push({
+            ownerMemberId: departed.memberId,
+            exceptions: structuredClone(departed.exceptions),
+            disclosures: departed.disclosures.map(archiveDisclosureGrant),
+          });
+        }
+      }
       room.schedule = structuredClone(command.payload.schedule);
       room.roster = structuredClone(command.payload.roster);
       room.policy = command.payload.policy;
@@ -559,6 +593,17 @@ export class DealTableApplication {
   private canReservePermissionResponses(room: RoomRecord, grants: OwnedExceptionGrant[]): boolean {
     const additionalOffers = new Map<string, number>();
     for (const grant of grants) additionalOffers.set(grant.ownerMemberId, (additionalOffers.get(grant.ownerMemberId) ?? 0) + 1);
+    const retainedHistory = room.retiredPermissionHistory.reduce(
+      (sum, history) => sum + history.exceptions.length + history.disclosures.length, 0,
+    ) + room.owners.reduce((sum, owner) => sum + owner.exceptions.length + owner.disclosures.length, 0);
+    const pendingResponses = room.owners.reduce((sum, owner) => {
+      const pendingOffers = owner.offers.length + (additionalOffers.get(owner.memberId) ?? 0);
+      const alreadyHasDisclosureResponse = owner.previews.length > 0
+        || owner.disclosures.some(grant => grant.preview.contextToken === room.contextToken);
+      const disclosureReservation = pendingOffers > 0 && !alreadyHasDisclosureResponse ? 1 : 0;
+      return sum + pendingOffers + owner.previews.length + disclosureReservation;
+    }, 0);
+    if (retainedHistory + pendingResponses > MAX_PERMISSION_HISTORY_RECORDS) return false;
     return room.owners.every(owner => {
       const newOffers = additionalOffers.get(owner.memberId) ?? 0;
       const pendingOffers = owner.offers.length + newOffers;

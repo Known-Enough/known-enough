@@ -38,8 +38,11 @@ function storageKey(value: Item): string {
   return (stringValue(value.PK) ?? '') + '#' + (stringValue(value.SK) ?? '');
 }
 function canceled(): Error {
-  const error = new Error('conditional transaction conflict');
+  const error = new Error('conditional transaction conflict') as Error & {
+    CancellationReasons: { Code: string; Message?: string }[];
+  };
   error.name = 'TransactionCanceledException';
+  error.CancellationReasons = [{ Code: 'ConditionalCheckFailed', Message: 'The conditional request failed.' }];
   return error;
 }
 
@@ -104,9 +107,12 @@ class FakeDynamoDBClient {
   private rows = new Map<string, Item>();
   private writeTail: Promise<void> = Promise.resolve();
   readonly commands: string[] = [];
+  writeAttempts = 0;
   private loseNextWriteResponse = false;
+  private nextWriteError: Error | null = null;
 
   failNextWriteAfterCommit(): void { this.loseNextWriteResponse = true; }
+  failNextWrite(error: Error): void { this.nextWriteError = error; }
   item(room: string, sortKey: string): Item | undefined {
     const found = this.rows.get('ROOM#' + room + '#' + sortKey);
     return found ? structuredClone(found) : undefined;
@@ -145,11 +151,17 @@ class FakeDynamoDBClient {
   }
 
   private async write(input: FakeInput): Promise<object> {
+    this.writeAttempts += 1;
     const previous = this.writeTail;
     let release!: () => void;
     this.writeTail = new Promise(resolve => { release = resolve; });
     await previous;
     try {
+      if (this.nextWriteError) {
+        const error = this.nextWriteError;
+        this.nextWriteError = null;
+        throw error;
+      }
       const next = new Map([...this.rows.entries()].map(([key, value]) => [key, structuredClone(value)]));
       for (const action of input.TransactItems) {
         if (action.Put) {
@@ -395,6 +407,27 @@ describe('reserved STATE capacity', () => {
 });
 
 describe('DynamoDB conditional repository transactions', () => {
+  it('persists every supported overlapping grant through solver completion', async () => {
+    const h = await harness();
+    const nina = h.fixture.owners.find(owner => owner.ownerMemberId === 'nina')!;
+    const overlapping = nina.confirmedInputs.values.conditions.find(condition => condition.id === 'nina-thursday-1100')!;
+    for (let index = 1; index <= 3; index += 1)
+      nina.confirmedInputs.values.conditions.push({ ...structuredClone(overlapping), id: 'overlap-' + index });
+
+    await h.createOffer();
+    const offers = (await h.owner('nina')).pendingOffers;
+    expect(offers).toHaveLength(4);
+    for (const offer of offers) await h.applied('nina', 'DECIDE_EXCEPTION', {
+      offerId: offer.id, offerVersion: offer.version, scope: offer.scope, decision: 'ALLOW',
+    });
+    const job = await h.app.pendingSolveJob(service, roomId);
+    expect(job).not.toBeNull();
+    await h.app.runSolveJob(service, roomId, job!.id);
+    const state = decodeStateItem(h.client.item(roomId, 'STATE')!, roomId);
+    expect(state.requiredGrants).toHaveLength(4);
+    expect((await h.publicView()).status).not.toBe('SOLVING');
+  });
+
   it('atomically creates one replay under duplicate concurrent commands and replays exact results', async () => {
     const h = await harness();
     const command = await h.envelope('SUBMIT_INPUT_DRAFT', {
@@ -490,6 +523,102 @@ describe('DynamoDB conditional repository transactions', () => {
     expect((await h.publicView()).controlVersion).toBe(3);
   });
 
+  it('does not return an unreceipted semantic rejection after ordinary receipts are exhausted', async () => {
+    const h = await harness();
+    const offer = await h.createOffer();
+    h.client.setCounters(roomId, { ordinary: 4096, permission: 0, safety: 0, total: 4096 });
+    const stateBefore = JSON.stringify(h.client.item(roomId, 'STATE'));
+    const guardBefore = JSON.stringify(h.client.item(roomId, 'GUARD'));
+    const replayCountBefore = h.client.items(roomId).filter(item => stringValue(item.SK)?.startsWith('REPLAY#')).length;
+    const command = await h.envelope('DECIDE_EXCEPTION', {
+      offerId: offer.id, offerVersion: offer.version + 1, scope: offer.scope, decision: 'ALLOW',
+    }, 'same-key-at-capacity');
+
+    expect(await h.app.execute(actor('nina'), command)).toMatchObject({
+      ok: false, error: { code: 'ROOM_CAPACITY_REACHED', httpStatus: 409 },
+    });
+    expect(JSON.stringify(h.client.item(roomId, 'STATE'))).toBe(stateBefore);
+    expect(JSON.stringify(h.client.item(roomId, 'GUARD'))).toBe(guardBefore);
+    expect(h.client.items(roomId).filter(item => stringValue(item.SK)?.startsWith('REPLAY#'))).toHaveLength(replayCountBefore);
+
+    const corrected = await h.envelope('DECIDE_EXCEPTION', {
+      offerId: offer.id, offerVersion: offer.version, scope: offer.scope, decision: 'ALLOW',
+    }, command.idempotencyKey);
+    expect(await h.app.execute(actor('nina'), corrected)).toMatchObject({ ok: true });
+  });
+
+  it('reserves permission-response capacity against lifetime history archived from prior owners', async () => {
+    const h = await harness();
+    const room = decodeStateItem(h.client.item(roomId, 'STATE')!, roomId);
+    const scope = makeCapacityOffer(room, h.fixture).scope;
+    room.retiredPermissionHistory = [{
+      ownerMemberId: 'departed-owner',
+      exceptions: Array.from({ length: 191 }, (_, index) => ({
+        id: 'retired-grant-' + index, version: 1,
+        scope: { ...scope, conditionId: 'retired-condition-' + index }, status: 'SUPERSEDED' as const,
+      })),
+      disclosures: [],
+    }];
+    h.client.replace(roomId, 'STATE', encodeStateItem({ ...room, replays: [] }));
+    h.client.setCounters(roomId, { ordinary: 0, permission: 191, safety: 0, total: 191 });
+
+    for (const input of h.fixture.owners) {
+      await h.applied(input.ownerMemberId, 'SUBMIT_INPUT_DRAFT', {
+        expectedOwnerRevision: (await h.owner(input.ownerMemberId)).ownerRevision,
+        values: input.confirmedInputs.values,
+      });
+      const owner = await h.owner(input.ownerMemberId);
+      await h.applied(input.ownerMemberId, 'CONFIRM_INPUTS', {
+        draftId: owner.draft!.draftId, draftRevision: owner.draft!.draftRevision,
+        expectedOwnerRevision: owner.ownerRevision,
+        reviewedIntervals: input.availabilityReview.intervals,
+      });
+    }
+    for (const member of h.fixture.roster)
+      await h.applied(member.id, 'ACCEPT_CONTEXT', { policy: h.fixture.policy });
+    await h.applied('maya', 'REQUEST_SOLVE', {});
+    const job = await h.app.pendingSolveJob(service, roomId);
+    expect(job).not.toBeNull();
+    await h.app.runSolveJob(service, roomId, job!.id);
+
+    const after = decodeStateItem(h.client.item(roomId, 'STATE')!, roomId);
+    expect(after.owners.flatMap(owner => owner.offers)).toHaveLength(0);
+    expect(permissionHistoryCount(after)).toBe(191);
+    expect(h.client.item(roomId, 'GUARD')!.permissionHistoryReceipts).toEqual({ N: '191' });
+  });
+
+  it('retains departed-owner permission evidence and lifetime counters through roster revision', async () => {
+    const h = await harness();
+    const offer = await h.createOffer();
+    expect(await h.applied('nina', 'DECIDE_EXCEPTION', {
+      offerId: offer.id, offerVersion: offer.version, scope: offer.scope, decision: 'ALLOW',
+    })).toMatchObject({ ok: true });
+    const preview = (await h.owner('nina')).disclosurePreviews[0]!;
+    expect(await h.applied('nina', 'DECIDE_DISCLOSURE', { preview, decision: 'DECLINE' })).toMatchObject({ ok: true });
+    const before = decodeStateItem(h.client.item(roomId, 'STATE')!, roomId);
+    expect(permissionHistoryCount(before)).toBe(2);
+
+    const roster = h.fixture.roster.map(member => ({
+      ...member, submitted: false, id: member.id === 'nina' ? 'new-nina' : member.id,
+    }));
+    const schedule = structuredClone(h.fixture.schedule);
+    for (const duty of schedule.duties)
+      duty.qualifiedMemberIds = duty.qualifiedMemberIds.map(memberId => memberId === 'nina' ? 'new-nina' : memberId);
+    const revision = await h.envelope('REVISE_DECISION', { roster, schedule, policy: h.fixture.policy });
+    expect(await h.app.execute(actor('organizer'), revision)).toMatchObject({ ok: true });
+
+    const after = decodeStateItem(h.client.item(roomId, 'STATE')!, roomId);
+    expect(after.owners.some(owner => owner.memberId === 'nina')).toBe(false);
+    expect(after.retiredPermissionHistory).toHaveLength(1);
+    expect(after.retiredPermissionHistory[0]).toMatchObject({
+      ownerMemberId: 'nina', exceptions: [{ status: 'SUPERSEDED' }],
+      disclosures: [{ status: 'DECLINED', preview: { textHash: expect.any(String) } }],
+    });
+    expect(after.retiredPermissionHistory[0]!.disclosures[0]!.preview).not.toHaveProperty('text');
+    expect(permissionHistoryCount(after)).toBe(2);
+    expect(h.client.item(roomId, 'GUARD')!.permissionHistoryReceipts).toEqual({ N: '2' });
+  });
+
   it('returns known no-commit capacity at ordinary exhaustion but still admits consent and safety reserves', async () => {
     const h = await harness();
     const command = await h.envelope('SUBMIT_INPUT_DRAFT', {
@@ -528,6 +657,55 @@ describe('DynamoDB conditional repository transactions', () => {
     expect(consent.client.item(roomId, 'GUARD')).toMatchObject({
       ordinaryReceipts: { N: '4096' }, safetyReserveReceipts: { N: '1' }, totalReceipts: { N: '4097' },
     });
+  });
+
+  it('maps deterministic item-size cancellation to known-no-commit capacity without retrying', async () => {
+    const h = await harness();
+    const command = await h.envelope('SUBMIT_INPUT_DRAFT', {
+      expectedOwnerRevision: 0, values: h.fixture.owners[0]!.confirmedInputs.values,
+    });
+    const beforeState = JSON.stringify(h.client.item(roomId, 'STATE'));
+    const beforeGuard = JSON.stringify(h.client.item(roomId, 'GUARD'));
+    const attemptsBefore = h.client.writeAttempts;
+    const error = new Error('DynamoDB rejected item size') as Error & {
+      CancellationReasons: { Code: string; Message?: string }[];
+    };
+    error.name = 'TransactionCanceledException';
+    error.CancellationReasons = [
+      { Code: 'ValidationError', Message: 'Item size to update has exceeded the maximum allowed size.' },
+      { Code: 'None' },
+      { Code: 'None' },
+    ];
+    h.client.failNextWrite(error);
+
+    expect(await h.app.execute(actor('maya'), command)).toMatchObject({
+      ok: false, error: { code: 'ROOM_CAPACITY_REACHED', httpStatus: 409 },
+    });
+    expect(h.client.writeAttempts - attemptsBefore).toBe(1);
+    expect(JSON.stringify(h.client.item(roomId, 'STATE'))).toBe(beforeState);
+    expect(JSON.stringify(h.client.item(roomId, 'GUARD'))).toBe(beforeGuard);
+    expect(h.client.items(roomId).filter(item => stringValue(item.SK)?.startsWith('REPLAY#'))).toHaveLength(0);
+  });
+
+  it('does not retry unclassified validation cancellations or expose their details', async () => {
+    const h = await harness();
+    const command = await h.envelope('SUBMIT_INPUT_DRAFT', {
+      expectedOwnerRevision: 0, values: h.fixture.owners[0]!.confirmedInputs.values,
+    });
+    const attemptsBefore = h.client.writeAttempts;
+    const error = new Error('synthetic invalid expression') as Error & {
+      CancellationReasons: { Code: string; Message?: string }[];
+    };
+    error.name = 'TransactionCanceledException';
+    error.CancellationReasons = [
+      { Code: 'ValidationError', Message: 'The update expression is invalid.' },
+      { Code: 'None' },
+      { Code: 'None' },
+    ];
+    h.client.failNextWrite(error);
+
+    await expect(h.app.execute(actor('maya'), command)).rejects.toThrow('RETRYABLE_SERVER_ERROR');
+    expect(h.client.writeAttempts - attemptsBefore).toBe(1);
   });
 
   it('returns 503 for an unknown write outcome and recovers by exact replay on retry', async () => {

@@ -1,10 +1,10 @@
 import type { AttributeValue } from '@aws-sdk/client-dynamodb';
 import {
   CommandResult, ConfirmedInputs, DisclosureGrant, DisclosurePreview, ExceptionOffer,
-  FinalApproval, Id, InputDraft, Interval, Participant, Policy, ProposalView,
+  ExceptionGrant, FinalApproval, Id, InputDraft, Interval, Participant, Policy, ProposalView,
   PublicStatus, PublishedDisclosure, Schedule, Timestamp, Version,
 } from '@deal-table/contracts';
-import type { RoomRecord } from '@deal-table/application';
+import { MAX_PERMISSION_HISTORY_RECORDS, type RoomRecord } from '@deal-table/application';
 import { z } from 'zod';
 
 const ownerSchema = z.strictObject({
@@ -25,6 +25,14 @@ const ownerSchema = z.strictObject({
   approval: FinalApproval.nullable(),
 });
 const requiredGrantSchema = z.strictObject({ id: Id, version: Version, ownerMemberId: Id });
+const retiredDisclosureGrantSchema = DisclosureGrant.extend({
+  preview: DisclosurePreview.omit({ text: true }),
+});
+const retiredPermissionHistorySchema = z.strictObject({
+  ownerMemberId: Id,
+  exceptions: z.array(ExceptionGrant).max(MAX_PERMISSION_HISTORY_RECORDS),
+  disclosures: z.array(retiredDisclosureGrantSchema).max(MAX_PERMISSION_HISTORY_RECORDS),
+});
 const agreementSchema = z.strictObject({
   proposal: ProposalView,
   approvals: z.array(FinalApproval).length(3),
@@ -45,9 +53,11 @@ const roomRecordSchema = z.strictObject({
   controlVersion: Version,
   status: PublicStatus,
   owners: z.array(ownerSchema).length(3),
+  retiredPermissionHistory: z.array(retiredPermissionHistorySchema).max(MAX_PERMISSION_HISTORY_RECORDS),
   proposal: ProposalView.nullable(),
   proposalVersion: Version,
-  requiredGrants: z.array(requiredGrantSchema).max(3),
+  // Up to 20 supported conditions per each of the three room owners may require a grant.
+  requiredGrants: z.array(requiredGrantSchema).max(60),
   publishedDisclosures: z.array(PublishedDisclosure).max(32),
   agreementHistory: z.array(agreementSchema).max(64),
   roundUsed: z.boolean(),
@@ -67,6 +77,16 @@ const roomRecordSchema = z.strictObject({
   // not authorize stale bindings; the application checks both binding and roster.
   if (new Set(membershipIds).size !== membershipIds.length || new Set(subjects).size !== subjects.length)
     add(['memberships'], 'Membership subject and member bindings must be unique');
+  const retiredOwnerIds = room.retiredPermissionHistory.map(history => history.ownerMemberId);
+  if (new Set(retiredOwnerIds).size !== retiredOwnerIds.length)
+    add(['retiredPermissionHistory'], 'Retired owner histories must be consolidated by member');
+  if (room.retiredPermissionHistory.some(history => history.exceptions.length + history.disclosures.length === 0))
+    add(['retiredPermissionHistory'], 'Empty retired owner histories are not retained');
+  const retainedPermissionHistory = room.retiredPermissionHistory.reduce(
+    (sum, history) => sum + history.exceptions.length + history.disclosures.length, 0,
+  ) + room.owners.reduce((sum, owner) => sum + owner.exceptions.length + owner.disclosures.length, 0);
+  if (retainedPermissionHistory > MAX_PERMISSION_HISTORY_RECORDS)
+    add(['retiredPermissionHistory'], 'Lifetime permission history exceeds the room limit');
   for (const owner of room.owners) {
     const hasCurrentDisclosure = owner.disclosures.some(grant => grant.preview.contextToken === room.contextToken);
     const prospectivePreview = owner.offers.length > 0 && owner.previews.length === 0 && !hasCurrentDisclosure ? 1 : 0;
@@ -94,7 +114,7 @@ const roomRecordSchema = z.strictObject({
 export type DynamoRoomRecord = Omit<RoomRecord, 'replays'>;
 type DynamoItem = Record<string, AttributeValue>;
 
-export const STATE_SCHEMA_VERSION = 2;
+export const STATE_SCHEMA_VERSION = 3;
 export const GUARD_SCHEMA_VERSION = 1;
 export const REPLAY_SCHEMA_VERSION = 1;
 
@@ -352,7 +372,10 @@ export function pendingResponseByteReservations(room: DynamoRoomRecord): number 
 }
 
 export function permissionHistoryCount(room: DynamoRoomRecord): number {
-  return room.owners.reduce((sum, owner) => sum + owner.exceptions.length + owner.disclosures.length, 0);
+  const active = room.owners.reduce((sum, owner) => sum + owner.exceptions.length + owner.disclosures.length, 0);
+  return active + room.retiredPermissionHistory.reduce(
+    (sum, history) => sum + history.exceptions.length + history.disclosures.length, 0,
+  );
 }
 
 export function pendingPermissionResponseCount(room: DynamoRoomRecord): number {
@@ -365,7 +388,7 @@ export function pendingPermissionResponseCount(room: DynamoRoomRecord): number {
 
 export function validateStateGuard(room: DynamoRoomRecord, guard: GuardRecord): void {
   if (room.roomId === '' || guard.permissionHistoryReceipts !== permissionHistoryCount(room)
-    || permissionHistoryCount(room) + pendingPermissionResponseCount(room) > 192)
+    || permissionHistoryCount(room) + pendingPermissionResponseCount(room) > MAX_PERMISSION_HISTORY_RECORDS)
     throw new CorruptDynamoRecordError();
 }
 

@@ -3,7 +3,7 @@ import {
   type AttributeValue, type TransactGetItemsCommandInput, type TransactWriteItemsCommandInput,
 } from '@aws-sdk/client-dynamodb';
 import {
-  RepositoryCapacityError,
+  MAX_PERMISSION_HISTORY_RECORDS, RepositoryCapacityError,
   type RoomRecord, type RoomRepository, type RoomTransactionOptions,
 } from '@deal-table/application';
 import { CommandResult, Id } from '@deal-table/contracts';
@@ -16,7 +16,7 @@ import {
 } from './dynamodb-codec.ts';
 
 const ORDINARY_RECEIPT_LIMIT = 4096;
-const PERMISSION_RECEIPT_LIMIT = 192;
+const PERMISSION_RECEIPT_LIMIT = MAX_PERMISSION_HISTORY_RECORDS;
 const SAFETY_RECEIPT_LIMIT = 320;
 const TOTAL_RECEIPT_LIMIT = 4608;
 const ORDINARY_STATE_LIMIT_BYTES = 352 * 1024;
@@ -46,7 +46,7 @@ class RoomAlreadyExistsError extends Error {
 export interface DynamoDBRoomRepositoryOptions {
   client: DynamoDBClient;
   tableName: string;
-  /** Retries only transaction/condition conflicts; unknown outcomes return 503 immediately. */
+  /** Bounded retries only for recognized conflict/throttle reasons; unknown outcomes return 503 immediately. */
   maxAttempts?: number;
   random?: () => number;
   pause?: (milliseconds: number) => Promise<void>;
@@ -81,9 +81,27 @@ function errorName(error: unknown): string | undefined {
   if (typeof named.Code === 'string') return named.Code;
   return typeof named.code === 'string' ? named.code : undefined;
 }
-function isTransactionConflict(error: unknown): boolean {
-  return ['TransactionCanceledException', 'TransactionConflictException', 'ConditionalCheckFailedException']
-    .includes(errorName(error) ?? '');
+type TransactionDisposition = 'retry' | 'capacity' | 'other';
+function transactionDisposition(error: unknown): TransactionDisposition {
+  const name = errorName(error) ?? '';
+  if (['TransactionConflictException', 'ConditionalCheckFailedException', 'TransactionInProgressException',
+    'ProvisionedThroughputExceededException', 'ThrottlingException', 'RequestLimitExceeded'].includes(name))
+    return 'retry';
+  if (name !== 'TransactionCanceledException' || error === null || typeof error !== 'object') return 'other';
+  const reasons = (error as { CancellationReasons?: unknown }).CancellationReasons;
+  if (!Array.isArray(reasons)) return 'other';
+  const parsed = reasons.flatMap(reason => {
+    if (reason === null || typeof reason !== 'object' || Array.isArray(reason)) return [];
+    const value = reason as { Code?: unknown; Message?: unknown };
+    return [{ code: typeof value.Code === 'string' ? value.Code : '',
+      message: typeof value.Message === 'string' ? value.Message.toLowerCase() : '' }];
+  });
+  if (parsed.some(reason => ['ConditionalCheckFailed', 'TransactionConflict', 'ProvisionedThroughputExceeded',
+    'ThrottlingError'].includes(reason.code))) return 'retry';
+  if (parsed.some(reason => reason.code === 'ItemCollectionSizeLimitExceeded'
+    || (reason.code === 'ValidationError' && reason.message.includes('item size')
+      && (reason.message.includes('exceed') || reason.message.includes('size limit'))))) return 'capacity';
+  return 'other';
 }
 function stable(value: unknown): string {
   if (Array.isArray(value)) return '[' + value.map(stable).join(',') + ']';
@@ -197,7 +215,9 @@ export class DynamoDBRoomRepository implements RoomRepository {
     } catch (error) {
       if (error instanceof RepositoryCapacityError) throw error;
       if (error instanceof CorruptDynamoRecordError) throw new InvalidRoomCreationError();
-      if (isTransactionConflict(error)) throw new RoomAlreadyExistsError();
+      const disposition = transactionDisposition(error);
+      if (disposition === 'capacity') throw new RepositoryCapacityError();
+      if (disposition === 'retry') throw new RoomAlreadyExistsError();
       throw new RepositoryStorageError();
     }
   }
@@ -264,8 +284,8 @@ export class DynamoDBRoomRepository implements RoomRepository {
               nextCounters.permission += 1;
             }
           } else if (!parsedResult.data.ok) {
-            // Authenticated semantic failures remain visible, but do not spend an exhausted receipt quota.
-            return structuredClone(result);
+            // Do not return an unreceipted semantic outcome that callers could later change under this key.
+            throw new RepositoryCapacityError();
           } else if (PERMISSION_COMMANDS.has(candidate.commandType) && historyDelta === 1) {
             if (nextCounters.permission >= PERMISSION_RECEIPT_LIMIT) throw new RepositoryCapacityError();
             nextCounters.permission += 1;
@@ -342,7 +362,9 @@ export class DynamoDBRoomRepository implements RoomRepository {
       } catch (error) {
         if (error instanceof RepositoryCapacityError) throw error;
         if (error instanceof CorruptDynamoRecordError) throw new RepositoryStorageError();
-        if (isTransactionConflict(error)) {
+        const disposition = transactionDisposition(error);
+        if (disposition === 'capacity') throw new RepositoryCapacityError();
+        if (disposition === 'retry') {
           if (attempt === this.maxAttempts) throw new RepositoryStorageError();
           const baseDelay = Math.min(160, 4 * (2 ** (attempt - 1)));
           const jitter = 0.5 + Math.max(0, Math.min(1, this.random()));
