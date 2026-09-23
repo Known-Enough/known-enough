@@ -89,19 +89,40 @@ function transactionDisposition(error: unknown): TransactionDisposition {
     return 'retry';
   if (name !== 'TransactionCanceledException' || error === null || typeof error !== 'object') return 'other';
   const reasons = (error as { CancellationReasons?: unknown }).CancellationReasons;
-  if (!Array.isArray(reasons)) return 'other';
-  const parsed = reasons.flatMap(reason => {
-    if (reason === null || typeof reason !== 'object' || Array.isArray(reason)) return [];
+  if (!Array.isArray(reasons) || reasons.length === 0) return 'other';
+
+  const retryableCodes = new Set([
+    'ConditionalCheckFailed', 'TransactionConflict', 'ProvisionedThroughputExceeded', 'ThrottlingError',
+  ]);
+  let hasFailure = false;
+  let hasCapacityFailure = false;
+  for (const reason of reasons) {
+    if (reason === null || typeof reason !== 'object' || Array.isArray(reason)) return 'other';
     const value = reason as { Code?: unknown; Message?: unknown };
-    return [{ code: typeof value.Code === 'string' ? value.Code : '',
-      message: typeof value.Message === 'string' ? value.Message.toLowerCase() : '' }];
-  });
-  if (parsed.some(reason => ['ConditionalCheckFailed', 'TransactionConflict', 'ProvisionedThroughputExceeded',
-    'ThrottlingError'].includes(reason.code))) return 'retry';
-  if (parsed.some(reason => reason.code === 'ItemCollectionSizeLimitExceeded'
-    || (reason.code === 'ValidationError' && reason.message.includes('item size')
-      && (reason.message.includes('exceed') || reason.message.includes('size limit'))))) return 'capacity';
-  return 'other';
+    if (typeof value.Code !== 'string' || (value.Message !== undefined && typeof value.Message !== 'string'))
+      return 'other';
+    if (value.Code === 'None') continue;
+    hasFailure = true;
+
+    if (value.Code === 'ValidationError') {
+      const message = (value.Message as string | undefined)?.toLowerCase() ?? '';
+      if (message.includes('item size')
+        && (message.includes('exceed') || message.includes('size limit'))) {
+        hasCapacityFailure = true;
+        continue;
+      }
+      return 'other';
+    }
+    if (value.Code === 'ItemCollectionSizeLimitExceeded') {
+      hasCapacityFailure = true;
+      continue;
+    }
+    if (!retryableCodes.has(value.Code)) return 'other';
+  }
+
+  if (!hasFailure) return 'other';
+  if (hasCapacityFailure) return 'capacity';
+  return 'retry';
 }
 function stable(value: unknown): string {
   if (Array.isArray(value)) return '[' + value.map(stable).join(',') + ']';

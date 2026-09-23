@@ -37,13 +37,16 @@ function stringValue(value: AttributeValue | undefined): string | undefined {
 function storageKey(value: Item): string {
   return (stringValue(value.PK) ?? '') + '#' + (stringValue(value.SK) ?? '');
 }
-function canceled(): Error {
-  const error = new Error('conditional transaction conflict') as Error & {
-    CancellationReasons: { Code: string; Message?: string }[];
+function canceledWith(reasons: unknown[]): Error {
+  const error = new Error('synthetic transaction cancellation') as Error & {
+    CancellationReasons: unknown[];
   };
   error.name = 'TransactionCanceledException';
-  error.CancellationReasons = [{ Code: 'ConditionalCheckFailed', Message: 'The conditional request failed.' }];
+  error.CancellationReasons = reasons;
   return error;
+}
+function canceled(): Error {
+  return canceledWith([{ Code: 'ConditionalCheckFailed', Message: 'The conditional request failed.' }]);
 }
 
 function inflateForCapacity(base: ReturnType<typeof decodeStateItem>, fixture: ReturnType<typeof buildTeamTableFixture>, historyCount: number, publicCount: number) {
@@ -705,6 +708,52 @@ describe('DynamoDB conditional repository transactions', () => {
     h.client.failNextWrite(error);
 
     await expect(h.app.execute(actor('maya'), command)).rejects.toThrow('RETRYABLE_SERVER_ERROR');
+    expect(h.client.writeAttempts - attemptsBefore).toBe(1);
+  });
+
+  it('prioritizes known item-size capacity over a mixed retryable cancellation reason', async () => {
+    const h = await harness();
+    const command = await h.envelope('SUBMIT_INPUT_DRAFT', {
+      expectedOwnerRevision: 0, values: h.fixture.owners[0]!.confirmedInputs.values,
+    });
+    const beforeState = JSON.stringify(h.client.item(roomId, 'STATE'));
+    const beforeGuard = JSON.stringify(h.client.item(roomId, 'GUARD'));
+    const attemptsBefore = h.client.writeAttempts;
+    h.client.failNextWrite(canceledWith([
+      { Code: 'ValidationError', Message: 'Item size to update has exceeded the maximum allowed size.' },
+      { Code: 'ConditionalCheckFailed', Message: 'The condition did not match.' },
+      { Code: 'None' },
+    ]));
+
+    expect(await h.app.execute(actor('maya'), command)).toMatchObject({
+      ok: false, error: { code: 'ROOM_CAPACITY_REACHED', httpStatus: 409 },
+    });
+    expect(h.client.writeAttempts - attemptsBefore).toBe(1);
+    expect(JSON.stringify(h.client.item(roomId, 'STATE'))).toBe(beforeState);
+    expect(JSON.stringify(h.client.item(roomId, 'GUARD'))).toBe(beforeGuard);
+    expect(h.client.items(roomId).filter(item => stringValue(item.SK)?.startsWith('REPLAY#'))).toHaveLength(0);
+  });
+
+  it.each([
+    ['arbitrary validation', { Code: 'ValidationError', Message: 'The update expression is invalid.' }],
+    ['unknown reason', { Code: 'FutureDynamoReason', Message: 'synthetic provider detail' }],
+    ['malformed reason', null],
+  ])('does not retry a mixed %s and throttling cancellation', async (_description, firstReason) => {
+    const h = await harness();
+    const command = await h.envelope('SUBMIT_INPUT_DRAFT', {
+      expectedOwnerRevision: 0, values: h.fixture.owners[0]!.confirmedInputs.values,
+    });
+    const attemptsBefore = h.client.writeAttempts;
+    h.client.failNextWrite(canceledWith([
+      firstReason,
+      { Code: 'ThrottlingError', Message: 'synthetic throttle detail' },
+      { Code: 'None' },
+    ]));
+
+    const failure = await h.app.execute(actor('maya'), command).catch(error => error);
+    expect(failure).toBeInstanceOf(Error);
+    expect((failure as Error).message).toBe('RETRYABLE_SERVER_ERROR');
+    expect((failure as Error).message).not.toContain('synthetic');
     expect(h.client.writeAttempts - attemptsBefore).toBe(1);
   });
 
