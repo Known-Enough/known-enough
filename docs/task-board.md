@@ -7,7 +7,7 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 ## Work available now
 
 - Either user may claim [T01](tasks/T01.md) (`gpt-6-luna`/medium draft, followed by independent `gpt-6-astra` privacy/consent review): define the shared-objective AI facilitator, verified private suggestions and public-only explanations. This is design work; it can proceed before live AI integration.
-- [A04](tasks/A04.md), [A05](tasks/A05.md) and [A06](tasks/A06.md) are READY candidates for either user, subject to ticket prerequisites and synchronized claims. A04 still requires an agreed session interface. Serialize overlapping frontend files.
+- [A04](tasks/A04.md) and [A06](tasks/A06.md) are READY candidates for either user, subject to ticket prerequisites and synchronized claims. [A05](tasks/A05.md) is REVIEW after mock preparation and independent A03.5 privacy follow-up PASS; human acceptance remains pending. A04 still requires an agreed session interface. Serialize overlapping frontend files.
 - [A02.5](tasks/A02.5.md) and [G01](tasks/G01.md) are REVIEW after user-authorized integration of published work through `8371e7b` and reviewed B repairs `d042d8f`. Both histories are preserved; [G01 evidence](reviews/G01.md) records combined full-check PASS (179 unit/integration, 37 browser) and independent technical PASS. Human acceptance remains separate. No new shared-pool task is claimed.
 - A02/A03/A03.5 remain REVIEW pending human acceptance. A03.5 records preparation PASS rechecked on `bc02dc6`; changed integration code still needs follow-up review.
 - B03 source `27a110c` is integrated and remains REVIEW pending A02.5/G01 live acceptance. No new implementation claim is created by this scheduling update. Finished B01/B02 work must not be restarted.
@@ -35,7 +35,7 @@ A02/A03/A06 do not wait for B02/B03/G01. A03.5 does not wait for backend code. B
 | Task | Direct model / effort | Prerequisite | Outcome |
 | --- | --- | --- | --- |
 | [A04](tasks/A04.md) | `gpt-6-luna` / medium | A03.5; agreed session interface | Session/reconnect UX using injected responses |
-| [A05](tasks/A05.md) | `gpt-6-luna` / medium | A02, A03.5 | Draft review/form fallback preparation |
+| [A05](tasks/A05.md) | `gpt-6-luna` / medium | A02, A03.5 | REVIEW; host-simulation language draft and form fallback; A03.5 privacy follow-up PASS |
 | [B04](tasks/B04.md) | `gpt-6-sol` / high | G01 | Identity/persistence implementation |
 | [B04.5](tasks/B04.5.md) | `gpt-6-astra` / high | G01 + B04 design/first implementation | Midpoint before extending critical approach |
 | [A04.5](tasks/A04.5.md) | `gpt-6-luna` / medium | A04, completed B04, B04.5, G01 | Real sessions across browser contexts |

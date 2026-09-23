@@ -2,8 +2,10 @@ import { expect, it } from 'vitest';
 import { createHash } from 'node:crypto';
 import { ownerMockClient } from './owner-mock-adapter';
 import { publicMockClient } from './mock-adapter';
+import { PublicRoomSnapshot } from '@deal-table/contracts';
 import { editableAvailabilityFor, exceptionScopeSummary, proposalMatchesOwner, reviewIntervalsFor, valuesForAvailability } from './owner-screen';
 import { decideException } from './command-client';
+import { HOST_LANGUAGE_SAMPLE, hostSimulationExtractor, validateOwnerDraftResponse } from './owner-draft-extractor';
 
 it('builds an independently validated synthetic owner snapshot', async () => {
   const first = await ownerMockClient.getOwnerRoom();
@@ -112,4 +114,24 @@ it('preserves a do-not-ask condition when editing only a duty cost', async () =>
   const edited = valuesForAvailability(values, target.availability, target, target.interval, 3);
   expect(edited.conditions).toEqual(values.conditions);
   expect(edited.dutyCosts[0]?.cost).toBe(3);
+});
+
+it('maps the fixed host-simulation sentence to only the stated dated availability', async () => {
+  const room = await publicMockClient.getPublicRoom();
+  const values = await hostSimulationExtractor(HOST_LANGUAGE_SAMPLE, room);
+  expect(values).toEqual({
+    conditions: [{ id: 'sample-thursday-1100', kind: 'HARD_AVAILABILITY', availableIntervals: [
+      { date: '2026-10-08', timezone: 'America/Mexico_City', startMinute: 660, endMinute: 690 },
+    ] }],
+    dutyCosts: [],
+  });
+  expect(validateOwnerDraftResponse(values)).toEqual(values);
+});
+
+it('does not infer interval duration from a mismatching schedule or invent unsupported responses', async () => {
+  const room = await publicMockClient.getPublicRoom();
+  const longSlot = PublicRoomSnapshot.parse({ ...room, schedule: { ...room.schedule, slots: room.schedule.slots.map(slot => slot.id === 'slot-660' ? { ...slot, interval: { ...slot.interval, endMinute: 720 } } : slot) } });
+  await expect(hostSimulationExtractor(HOST_LANGUAGE_SAMPLE, longSlot)).rejects.toThrow();
+  await expect(hostSimulationExtractor('I cannot do the weekend.', room)).rejects.toThrow();
+  expect(validateOwnerDraftResponse({ conditions: [{ reason: 'private' }], dutyCosts: [] })).toBeNull();
 });

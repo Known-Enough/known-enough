@@ -1,7 +1,7 @@
 :root { font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #17352d; background: #f4f6f2; font-synthesis: none; }
 * { box-sizing: border-box; }
 body { margin: 0; }
-button, select, input { font: inherit; }
+button, select, input, textarea { font: inherit; }
 button, .quiet-link { min-height: 42px; border-radius: 9px; padding: 9px 14px; font-weight: 700; }
 button { cursor: pointer; border: 1px solid #12614b; color: #fff; background: #12614b; }
 button:hover { background: #0b4c3a; }
@@ -51,7 +51,12 @@ small { display: block; margin-top: 6px; }
 .owner-card fieldset { display: grid; gap: 12px; border: 0; padding: 0; margin: 18px 0 0; }
 .owner-card legend { font-weight: 800; margin-bottom: 10px; }
 .owner-card label { display: flex; align-items: center; gap: 8px; line-height: 1.4; }
-.owner-card select { border: 1px solid #94aaa0; border-radius: 7px; padding: 7px; background: #fff; }
+.owner-card select, .owner-card textarea { border: 1px solid #94aaa0; border-radius: 7px; padding: 9px; background: #fff; }
+.owner-card textarea { display: block; width: 100%; min-height: 88px; resize: vertical; }
+.language-draft { display: grid; gap: 10px; margin: 18px 0; padding: 16px; border: 1px solid #c9d7ce; border-radius: 12px; background: #f8fbf8; }
+.language-draft p, .language-draft h3 { margin: 0; }
+.suggested-draft { border-top: 1px solid #d4dfd7; padding-top: 14px; }
+.suggested-draft h4 { margin: 0 0 8px; }
 .scope { border-top: 1px solid #d4dfd7; padding-top: 12px; }
 blockquote { margin: 12px 0; padding: 12px 15px; border-left: 3px solid #2b8065; background: #edf5f0; line-height: 1.5; }
 .secondary { color: #075440; background: #fff; border-color: #86ad9d; }
