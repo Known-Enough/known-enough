@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { CommandEnvelope } from '@deal-table/contracts';
-import { browserCommandTransport, confirmInputs, decideDisclosure, decideException, sendCommand, submitInputDraft, type CommandIds, type CommandTransport, UnknownTransportError } from './command-client';
+import { browserCommandTransport, confirmInputs, decideDisclosure, decideException, sendCommand, submitInputDraft, withdrawApproval, type CommandIds, type CommandTransport, UnknownTransportError } from './command-client';
 import { ownerMockClient } from './owner-mock-adapter';
 
 const ids: CommandIds = { requestId: () => 'request-test', idempotencyKey: () => 'key-test' };
@@ -54,6 +54,28 @@ describe('owner command client', () => {
     const command = decideException(room, context, room.pendingOffers[0]!, 'ALLOW', ids);
     const transport: CommandTransport = { post: async () => ({ ok: false, requestId: command.requestId, error: { code: 'INVALID_COMMAND', httpStatus: 422 } }) };
     await expect(sendCommand(transport, command)).resolves.toMatchObject({ ok: false, error: { code: 'INVALID_COMMAND' } });
+  });
+
+  it('allows a safety action after a known no-commit capacity rejection', async () => {
+    const room = await ownerMockClient.getOwnerRoom();
+    const approvalRoom = (await ownerMockClient.readOwnerRoom('approval')).value!;
+    const calls: CommandEnvelope[] = [];
+    const transport: CommandTransport = { post: async (_path, body) => {
+      calls.push(body);
+      if (calls.length === 1) return {
+        ok: false, requestId: body.requestId, error: { code: 'ROOM_CAPACITY_REACHED', httpStatus: 409 },
+      };
+      return { ok: true, requestId: body.requestId, status: 'APPLIED', version: body.expected };
+    } };
+
+    const full = decideException(room, context, room.pendingOffers[0]!, 'ALLOW', ids);
+    await expect(sendCommand(transport, full)).resolves.toMatchObject({
+      ok: false, error: { code: 'ROOM_CAPACITY_REACHED', httpStatus: 409 },
+    });
+
+    const withdrawal = withdrawApproval(approvalRoom, context, approvalRoom.ownApproval!, ids);
+    await expect(sendCommand(transport, withdrawal)).resolves.toMatchObject({ ok: true, status: 'APPLIED' });
+    expect(calls.map(command => command.type)).toEqual(['DECIDE_EXCEPTION', 'WITHDRAW_APPROVAL']);
   });
 
   it('keeps the exact envelope when a safe server result says the outcome may be unknown', async () => {

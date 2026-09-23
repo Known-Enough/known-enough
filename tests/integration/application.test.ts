@@ -67,6 +67,48 @@ async function harness(solver?: (input: SolveDecisionInput) => SolveDecisionResu
   return { app, fixture, repository, publicView, owner, envelope, send, applied, confirmAll, runJob, offer, propose, setTime: (value: string) => { time = value; } };
 }
 
+async function seedExceptionHistory(h: Awaited<ReturnType<typeof harness>>, count: number) {
+  const current = await h.publicView();
+  const scope = {
+    conditionId: 'nina-thursday-1100', roomId, contextToken: current.contextToken,
+    decisionRevision: current.decisionRevision, inputRevision: 5,
+    rosterMemberIds: current.roster.map(member => member.id), policy: current.policy,
+    meeting: structuredClone(h.fixture.schedule.slots[1]!), predicate: 'OWNER_HAS_NO_WEEKEND_DUTIES' as const,
+    expiresAt: new Date(Date.parse(h.fixture.now) + 15 * 60_000).toISOString(),
+  };
+  await h.repository.transaction(roomId, room => {
+    const owner = room!.owners.find(value => value.memberId === 'nina')!;
+    owner.exceptions = Array.from({ length: count }, (_, index) => ({
+      id: `history-exception-${index}`, version: 1, scope: structuredClone(scope), status: 'DECLINED' as const,
+    }));
+  });
+}
+
+async function seedDisclosureHistory(h: Awaited<ReturnType<typeof harness>>, count: number) {
+  const current = await h.publicView();
+  const preview = {
+    id: 'history-preview', text: 'A prior-context private disclosure.',
+    textHash: 'a'.repeat(64), audienceMemberIds: current.roster.map(member => member.id),
+    roomId, contextToken: 'previous-context', decisionRevision: 1,
+    expiresAt: new Date(Date.parse(h.fixture.now) + 15 * 60_000).toISOString(),
+    inferenceWarning: 'People may infer who changed availability from the plan. Published words cannot be made secret again.' as const,
+  };
+  await h.repository.transaction(roomId, room => {
+    const owner = room!.owners.find(value => value.memberId === 'nina')!;
+    owner.disclosures = Array.from({ length: count }, (_, index) => ({
+      id: `history-disclosure-${index}`, version: 1, preview: structuredClone(preview),
+      status: 'DECLINED' as const, publishedAt: null,
+    }));
+  });
+}
+
+function addOverlappingNinaCondition(h: Awaited<ReturnType<typeof harness>>) {
+  const nina = h.fixture.owners.find(owner => owner.ownerMemberId === 'nina')!;
+  const condition = nina.confirmedInputs.values.conditions.find(value => value.id === 'nina-thursday-1100');
+  if (!condition || condition.kind !== 'NEGOTIABLE_UNAVAILABLE') throw new Error('Expected Nina fixture condition');
+  nina.confirmedInputs.values.conditions.push({ ...structuredClone(condition), id: 'nina-thursday-1100-overlap' });
+}
+
 describe('B02 integrated application boundaries and consent', () => {
   it('completes the actual solver negotiation with independent disclosure refusal and three exact approvals', async () => {
     const h = await harness();
@@ -142,6 +184,78 @@ describe('B02 integrated application boundaries and consent', () => {
     const revoke = await h.envelope('REVOKE_EXCEPTION', { grantId: 'history-grant-31', grantVersion: 1 });
     expect(await h.app.execute(actor('nina'), revoke)).toMatchObject({ ok: true });
     expect((await h.owner('nina')).exceptionGrants.find(grant => grant.id === 'history-grant-31')?.status).toBe('REVOKED');
+  });
+
+  it('keeps exception refusal available at the final reserved history slot', async () => {
+    const h = await harness();
+    const offer = await h.offer();
+    await seedExceptionHistory(h, 31);
+
+    await h.applied('nina', 'DECIDE_EXCEPTION', {
+      offerId: offer.id, offerVersion: offer.version, scope: offer.scope, decision: 'DECLINE',
+    });
+
+    const owner = await h.owner('nina');
+    expect(owner.exceptionGrants).toHaveLength(32);
+    expect(owner.exceptionGrants.at(-1)?.status).toBe('DECLINED');
+    expect(owner.pendingOffers).toEqual([]);
+    expect((await h.publicView()).status).toBe('NO_AGREEMENT');
+  });
+
+  it('does not create prompts without exception or disclosure response capacity, including overlapping offers', async () => {
+    const fullExceptions = await harness();
+    await fullExceptions.confirmAll();
+    await seedExceptionHistory(fullExceptions, 32);
+    await fullExceptions.applied('maya', 'REQUEST_SOLVE', {});
+    await fullExceptions.runJob();
+    expect((await fullExceptions.owner('nina')).pendingOffers).toEqual([]);
+    expect((await fullExceptions.publicView()).status).toBe('NO_AGREEMENT');
+
+    const fullDisclosures = await harness();
+    await fullDisclosures.confirmAll();
+    await seedDisclosureHistory(fullDisclosures, 32);
+    await fullDisclosures.applied('maya', 'REQUEST_SOLVE', {});
+    await fullDisclosures.runJob();
+    expect((await fullDisclosures.owner('nina')).pendingOffers).toEqual([]);
+    expect((await fullDisclosures.publicView()).status).toBe('NO_AGREEMENT');
+
+    const overlapping = await harness();
+    addOverlappingNinaCondition(overlapping);
+    await overlapping.confirmAll();
+    await overlapping.applied('maya', 'REQUEST_SOLVE', {});
+    await overlapping.runJob();
+    expect((await overlapping.owner('nina')).pendingOffers).toHaveLength(2);
+
+    const oneSlot = await harness();
+    addOverlappingNinaCondition(oneSlot);
+    await oneSlot.confirmAll();
+    await seedExceptionHistory(oneSlot, 31);
+    await oneSlot.applied('maya', 'REQUEST_SOLVE', {});
+    await oneSlot.runJob();
+    expect((await oneSlot.owner('nina')).pendingOffers).toEqual([]);
+    expect((await oneSlot.publicView()).status).toBe('NO_AGREEMENT');
+  });
+
+  it('keeps disclosure refusal available at the final reserved history slot while preserving the exception', async () => {
+    const h = await harness();
+    await h.confirmAll();
+    await seedDisclosureHistory(h, 31);
+    await h.applied('maya', 'REQUEST_SOLVE', {});
+    await h.runJob();
+    const offer = (await h.owner('nina')).pendingOffers[0]!;
+    await h.applied('nina', 'DECIDE_EXCEPTION', {
+      offerId: offer.id, offerVersion: offer.version, scope: offer.scope, decision: 'ALLOW',
+    });
+    const preview = (await h.owner('nina')).disclosurePreviews[0]!;
+    expect(preview).toBeDefined();
+
+    await h.applied('nina', 'DECIDE_DISCLOSURE', { preview, decision: 'DECLINE' });
+
+    const owner = await h.owner('nina');
+    expect(owner.disclosureGrants).toHaveLength(32);
+    expect(owner.disclosureGrants.at(-1)?.status).toBe('DECLINED');
+    expect(owner.exceptionGrants.at(-1)?.status).toBe('ACTIVE');
+    expect(owner.disclosurePreviews).toEqual([]);
   });
 
   it('caps immutable agreement receipts without partially recording another final approval', async () => {

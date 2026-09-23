@@ -470,6 +470,7 @@ export class DealTableApplication {
   }
   private async addDisclosurePreview(room: RoomRecord, owner: OwnerRecord, now: string, expiresAt: string): Promise<void> {
     if (owner.previews.length || owner.disclosures.some(g => g.preview.contextToken === room.contextToken)) return;
+    if (owner.disclosures.length + owner.previews.length >= MAX_PERMISSION_GRANTS_PER_OWNER) fail('ROOM_CAPACITY_REACHED');
     const text = normalizeDisclosureText('A conditional availability exception makes the proposed plan possible.');
     owner.previews.push({ id: this.id(), text, textHash: await this.textHash(text),
       audienceMemberIds: room.roster.map(p => p.id), roomId: room.roomId, contextToken: room.contextToken,
@@ -545,6 +546,21 @@ export class DealTableApplication {
     });
   }
 
+  /** Reserve bounded history for every pending exception decision and its one possible disclosure preview. */
+  private canReservePermissionResponses(room: RoomRecord, grants: OwnedExceptionGrant[]): boolean {
+    const additionalOffers = new Map<string, number>();
+    for (const grant of grants) additionalOffers.set(grant.ownerMemberId, (additionalOffers.get(grant.ownerMemberId) ?? 0) + 1);
+    return room.owners.every(owner => {
+      const newOffers = additionalOffers.get(owner.memberId) ?? 0;
+      const pendingOffers = owner.offers.length + newOffers;
+      if (owner.exceptions.length + pendingOffers > MAX_PERMISSION_GRANTS_PER_OWNER) return false;
+      const alreadyHasDisclosureResponse = owner.previews.length > 0
+        || owner.disclosures.some(grant => grant.preview.contextToken === room.contextToken);
+      const disclosureReservation = pendingOffers > 0 && !alreadyHasDisclosureResponse ? 1 : 0;
+      return owner.disclosures.length + owner.previews.length + disclosureReservation <= MAX_PERMISSION_GRANTS_PER_OWNER;
+    });
+  }
+
   /** Finite exhaustive search: 3 meeting slots x 7 nonempty owner subsets.
    * All overlapping invited conditions for a selected owner are covered together.
    * No hard condition is ever relaxed, and only a proven feasible set is offered.
@@ -566,7 +582,8 @@ export class DealTableApplication {
       }) ?? []);
       for (let mask = 1; mask < 1 << room.owners.length; mask += 1) {
         const grants = byOwner.flatMap((group, index) => mask & 1 << index ? group : []);
-        if (grants.length && solveDecision({ ...input, exceptionGrants: [...input.exceptionGrants, ...grants] }).status === 'SOLVED') alternatives.push(grants);
+        if (grants.length && this.canReservePermissionResponses(room, grants)
+          && solveDecision({ ...input, exceptionGrants: [...input.exceptionGrants, ...grants] }).status === 'SOLVED') alternatives.push(grants);
       }
     }
     alternatives.sort((a, b) => a.length - b.length);
