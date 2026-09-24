@@ -21,24 +21,23 @@ const DISPLAY_GROUP_PREFIX = 'deal-table-display-';
 const MAX_BEARER_HEADER_LENGTH = 8192;
 
 function checkedOptions(options: CognitoIdentityOptions): CognitoIdentityOptions {
-  if (!options.userPoolId || !options.participantClientId || !options.displayClientId
+  if (!options.userPoolId.trim() || !options.participantClientId.trim() || !options.displayClientId.trim()
     || options.participantClientId === options.displayClientId) {
     throw new Error('Cognito pool and distinct participant/display app clients are required');
   }
   return Object.freeze({ ...options });
 }
 
-/** Internal claim mapper; call only after CognitoJwtVerifier.verify succeeds. */
+/** Map only claims from an already verified Cognito access token. */
 export function mapVerifiedCognitoClaims(payload: unknown, options: CognitoIdentityOptions): HttpIdentity | null {
   if (payload === null || typeof payload !== 'object' || Array.isArray(payload)) return null;
   const claims = payload as Claims;
   if (claims.token_use !== 'access' || typeof claims.sub !== 'string' || !Id.safeParse(claims.sub).success) return null;
-  if (claims.client_id === options.participantClientId) {
-    return { kind: 'participant', subject: claims.sub };
-  }
-  if (claims.client_id !== options.displayClientId || !Array.isArray(claims['cognito:groups'])
-    || claims['cognito:groups'].some(group => typeof group !== 'string')) return null;
-  const scopedRooms = (claims['cognito:groups'] as string[])
+  const rawGroups = claims['cognito:groups'];
+  if (rawGroups !== undefined && (!Array.isArray(rawGroups) || rawGroups.some(group => typeof group !== 'string'))) return null;
+  if (claims.client_id === options.participantClientId) return { kind: 'participant', subject: claims.sub };
+  if (claims.client_id !== options.displayClientId || !Array.isArray(rawGroups)) return null;
+  const scopedRooms = (rawGroups as string[])
     .filter(group => group.startsWith(DISPLAY_GROUP_PREFIX))
     .map(group => group.slice(DISPLAY_GROUP_PREFIX.length));
   if (scopedRooms.length !== 1 || !Id.safeParse(scopedRooms[0]).success) return null;
@@ -53,10 +52,8 @@ function bearerToken(value: string | string[] | undefined): string | null {
 
 /**
  * Verify Cognito access tokens before mapping them to application principals.
- * Participant identity uses signed `sub`; room membership is still resolved by
- * the application from persisted server-side bindings. Display access requires
- * the separate display app client and one admin-managed Cognito group named
- * `deal-table-display-<roomId>`.
+ * Participant identity uses the signed `sub`; display scope requires a
+ * separate client and exactly one admin-managed deal-table-display-<roomId> group.
  */
 export function createCognitoIdentityResolver(
   rawOptions: CognitoIdentityOptions,
@@ -79,4 +76,18 @@ export function createCognitoIdentityResolver(
       return null;
     }
   };
+}
+
+/** Build the production verifier from non-secret deployment configuration. */
+export function createCognitoIdentityResolverFromEnv(
+  env: NodeJS.ProcessEnv = process.env,
+  jwksCache?: JwksCache,
+): (authorization: string | string[] | undefined) => Promise<HttpIdentity | null> {
+  const userPoolId = env.COGNITO_USER_POOL_ID;
+  const participantClientId = env.COGNITO_PARTICIPANT_CLIENT_ID;
+  const displayClientId = env.COGNITO_DISPLAY_CLIENT_ID;
+  if (!userPoolId || !participantClientId || !displayClientId) {
+    throw new Error('COGNITO_USER_POOL_ID, COGNITO_PARTICIPANT_CLIENT_ID and COGNITO_DISPLAY_CLIENT_ID must be configured');
+  }
+  return createCognitoIdentityResolver({ userPoolId, participantClientId, displayClientId }, jwksCache);
 }

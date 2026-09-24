@@ -1,6 +1,6 @@
 import { createPublicKey, generateKeyPairSync, sign } from 'node:crypto';
 import { SimpleJwksCache, type Jwk } from 'aws-jwt-verify/jwk';
-import type { CognitoIdentityOptions } from '../../apps/api/src/cognito.ts';
+import type { CognitoIdentityOptions } from '../../apps/api/src/cognito-identity.ts';
 
 export const cognitoOptions: CognitoIdentityOptions = {
   userPoolId: 'us-east-1_TestPool123',

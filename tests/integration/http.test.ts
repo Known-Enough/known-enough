@@ -114,9 +114,10 @@ describe('B04 Cognito HTTP boundary', () => {
   it('verifies real signed tokens through the production HTTP composition and authorizes before parsing or replay', async () => {
     const h = await harness();
     const log = vi.spyOn(console, 'log').mockImplementation(() => {});
-    const handler = createCognitoApiHandlerWithJwksCache({
+    const optionsWithLegacyDebug = {
       application: h.application, ...cognitoOptions, allowedOrigins: ['https://app.example'], debug: true,
-    }, testJwksCache());
+    } as Parameters<typeof createCognitoApiHandlerWithJwksCache>[0];
+    const handler = createCognitoApiHandlerWithJwksCache(optionsWithLegacyDebug, testJwksCache());
     const server = createServer(handler);
     servers.push(server);
     await new Promise<void>((resolve, reject) => {
@@ -193,6 +194,7 @@ describe('B04 Cognito HTTP boundary', () => {
       expect(diagnostics).not.toContain('private-diagnostic-canary');
       expect(diagnostics).not.toContain('outsider');
       expect(diagnostics).not.toContain('cognito:groups');
+      expect(log).not.toHaveBeenCalled();
     } finally { log.mockRestore(); }
   });
 

@@ -318,3 +318,78 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Added only `tests/integration/dynamodb-repository.test.ts` in the implementation slice; updated `infra/README.md` and coordinated B04/task-board/handoff evidence. No production implementation defect was exposed.
 - Focused adapter suite passed 22/22. Pinned `npm run check` passed reference checks 7/7, planning 15/15, lint/import boundaries (85 references), typecheck, 221 unit/integration tests, build/privacy scan (127 modules), and 41 browser tests. `git diff --check` passed.
 - Evidence is from a deterministic local transactional fake only. No DynamoDB Local, AWS, Cognito, IAM simulation, deployment or push. Exact checked artifact is paused for independent B04.5 follow-up review; owner stops pending that review.
+
+
+---
+
+## Preserved published-line B04 history (historical; not the current implementation)
+
+## 2026-09-23T16:35:24Z — B04.5 / IN_PROGRESS
+
+- Independent sequential reviewer in A/Ricardo's review session; assigned `gpt-6-astra` / high, actual reported family GPT-6 Codex (runtime variant/effort not independently exposed). This reviewer did not implement B04. B04 remains PAUSED with A/Ricardo's implementation claim retained.
+- Baseline `611079a` on main; clean worktree before review. Review exact implementation artifact `8e6d1c4..11ed27d`; subsequent commit changes tracking docs only. Allowed writes: `docs/reviews/B04.5.md`, A log, and coordinated ticket/board/handoff records. No application/test edits or cloud calls.
+- Next: inspect identity/HTTP code, application enforcement, tests and design assumptions; run pinned focused API/HTTP tests and record an independent verdict.
+
+
+## 2026-09-23T16:38:19Z — B04.5 / REVIEW / CHANGES_REQUESTED
+
+- Independent sequential reviewer, assigned `gpt-6-astra` / high; actual reported family GPT-6 Codex, runtime variant/effort not independently exposed. Reviewed `8e6d1c4..11ed27d` on main at `611079a`; exact eight-file SHA-256 manifest and findings are in [B04.5](reviews/B04.5.md). No application/test edits.
+- R1/P1: the new authenticated handler exposes local debug logging of verified subjects and private owner metadata; independently reproduced with synthetic loopback HTTP and captured logs. R2/P2: committed mapper/HTTP tests bypass actual Cognito configuration; require durable offline verifier/configuration regressions. Current real factory passed an independent generated-key/cached-JWKS probe for valid token, wrong client/issuer/token use, expiry, nbf, invalid signature and missing env.
+- Fresh pinned Node 24.21.0/npm 11.19.0 `npm test -- apps/api/src/cognito-identity.test.ts tests/integration/http.test.ts` exited 0, 19/19. Inline offline verifier/privacy probe exited 0. Author's full 187 unit/integration + 41 browser check inspected as historical evidence, not rerun or relabeled. Documentation reference hashes (7/7), local targets/statuses/source manifest and `git diff --check` passed.
+- Review claim released. B04 stays PAUSED; A/Ricardo retains ownership for bounded R1/R2 corrections and independent follow-up before further implementation. No other task started. No live Cognito, DynamoDB, IAM, deployment, cross-process race evidence or human acceptance claimed; no cloud calls, commit or publication. Remaining production/G02 obligations are explicitly recorded in the review.
+
+
+## 2026-09-23T16:43:38Z — B04 / IN_PROGRESS — bounded B04.5 corrections claimed
+
+- User directed: solve the B04.5 tracking mismatch, start B04, and continue to the next eligible task after finishing. Source baseline is `611079a` on local `main`; worktree contains the independent review's documented handoff changes, with no source/test edits after reviewed head `11ed27d`.
+- A / Ricardo resumes B04 only for R1/R2: suppress diagnostics for authenticated handlers even when runtime extras request debug; add offline generated-key signed-token tests through the actual Cognito environment factory and assert generic 401/no token-verifier details in logs. B04.5 pauses after CHANGES_REQUESTED for independent follow-up. Bounded source files are the API handler, Cognito resolver/test and HTTP integration test, plus coordinated status records.
+- Actual session model: GPT-6 Codex; exact variant and effort are not exposed. Ticket target is `gpt-6-sol` / high; target runtime selection is not claimed as verified.
+- No checks rerun and no source changed at claim time. Next: implement both findings, focused tests, full `npm run check`, then independent follow-up. No cloud calls or publication.
+
+
+## 2026-09-23T16:58:13Z — B04 / PAUSED — corrections ready for B04.5 follow-up
+
+- Corrective source/test/documentation artifact committed locally as `bfeb448` (`611079a..bfeb448`) on `main`. Files: authenticated API composition, Cognito resolver, Cognito resolver tests, HTTP integration tests, and API README. B04 is paused; independent B04.5 follow-up is now the single active project task. No push or publication.
+- R1: removed `debug` from authenticated handler options and force diagnostics off there. Regression requests authenticated public/private reads, a valid command and an error while a runtime extra requests debug; no console diagnostic is emitted. Local synthetic debug behavior remains.
+- R2: added synthetic RSA key/JWKS offline tests using the real `CognitoJwtVerifier` through `createCognitoIdentityResolverFromEnv`; covers valid access token, wrong issuer/pool/client, ID token, expiry, nbf, wrong signature key, and missing/invalid configuration. HTTP integration uses the real environment factory and checks invalid credentials yield generic 401 with no token/verifier detail logging.
+- Actual session model GPT-6 Codex; variant/effort not exposed. Target `gpt-6-sol` / high is not claimed as verified. Pinned runtime Node 24.21.0/npm 11.19.0.
+- Focused `npm test -- apps/api/src/cognito-identity.test.ts tests/integration/http.test.ts`: 23/23 passed. Final full `PLAYWRIGHT_CHANNEL=chrome npm run check`: exit 0; references 7/7, planning 15/15, lint/import boundaries 72 references, typecheck, 191 unit/integration, production build/privacy scan, 41 browser tests. Used system Chrome fallback; bundled Chromium install is unsupported on this macOS 12 host. Final `git diff --check` passed. No AWS/Cognito/DynamoDB/IAM calls or cloud resources.
+- Next: independent `gpt-6-astra` / high review on the exact `611079a..bfeb448` corrective source diff. Resume B04 only after recorded follow-up PASS.
+
+
+## 2026-09-23T17:01:52Z — B04.5 / IN_PROGRESS — independent follow-up claimed
+
+- B04 remains PAUSED after corrective commit `bfeb448`; independent reviewer `/root/b04_5_review` now owns the next sequential task on `611079a..bfeb448`, assigned `gpt-6-astra` / high. No B04 implementation changes during review.
+- Coordinated task/board/handoff records reflect B04 paused and B04.5 follow-up active. Initial CHANGES_REQUESTED review remains historical and is preserved in [B04.5](reviews/B04.5.md).
+- Documentation verification: changed Markdown links and B04/B04.5 status consistency passed; imported reference hashes passed 7/7; `git diff --check` passed. Application checks for `bfeb448` are listed above. No push or publication.
+- Next: independent reviewer inspects corrective source and tests, reruns focused API/HTTP tests and records a follow-up verdict. Resume B04 only after PASS.
+
+
+## 2026-09-23T17:12:40Z — B04 / IN_PROGRESS — resumed after B04.5 PASS
+
+- Independent B04.5 follow-up PASS on `611079a..bfeb448` is recorded in commit `590ae57`; R1/R2 are closed and the review claim is released. B04 resumes at local `main` baseline `590ae57`. Actual session model GPT-6 Codex, variant/effort unavailable; `gpt-6-sol` / high target is not claimed as verified.
+- One bounded implementation slice: conditional per-room DynamoDB persistence plus replay-data minimization and focused adapter/application tests. Allowed files: `packages/adapters/**`, `packages/application/src/index.ts`, `packages/application/src/application.test.ts`, root `package-lock.json`, `infra/README.md`, and coordinated B04/board/handoff records. The ticket scope now records application/lockfile coordination. No browser, contract, AWS infrastructure or IAM edits in this slice.
+- Design read against product/architecture plans and contracts: preserve the existing atomic `RoomRepository` aggregate callback. Store one room aggregate item with an internal storage-version fence and use conditional writes for optimistic concurrency; retry bounded conflicts from a fresh consistent read. Hash stored canonical replay bodies so durable replay records do not duplicate private command payloads. Enforce all domain expiry checks in application reads/mutations; DynamoDB TTL is cleanup only and is not an authorization guard. Record the 400 KB item bound and hot-room contention limitation.
+- Official AWS docs reviewed: conditional optimistic locking and item-size/transaction limits; no cross-account/cloud calls. Docker is installed but its daemon is unavailable; the system Java launcher reports no runtime. Checking an isolated local test route before claiming adapter race coverage.
+- No implementation changes or checks at claim time. No AWS account/resources, spend, deployment, or publication. Next: add pinned DynamoDB SDK adapter and test it against a local DynamoDB-compatible service if an isolated runtime can be obtained; otherwise keep limitations explicit and do not claim service race verification.
+
+
+## 2026-09-23T18:26:00Z — B04 / PAUSED — conditional DynamoDB persistence slice
+
+- A / Ricardo retained B04 on `main`; exact source artifact is `cb2dbf9` (`a3e7261..cb2dbf9`). Actual session model: GPT-6 Codex, variant/effort not exposed; direct-worker target remains `gpt-6-sol` / high and is not claimed runtime-verified.
+- Added pinned AWS SDK v3 DocumentClient dependencies and `DynamoDBRoomRepository`: one room aggregate per `(PK, SK)` item, conditional create, strongly consistent read, private monotonic storage-version CAS, bounded jittered conflict retry and detached/rollback behavior. Application replay ledger now stores a SHA-256 digest of the canonical command body. Added fake conditional-write tests, opt-in loopback endpoint-checked DynamoDB Local SDK integration test, replay privacy/idempotency regression and adapter limitations/400 KB documentation.
+- Focused `npm test -- packages/adapters/src/dynamodb-room-repository.test.ts packages/adapters/src/dynamodb-room-repository.local.test.ts packages/application/src/application.test.ts`: 18 passed, 1 opt-in Local test skipped; `npm run typecheck` passed. One initial full-check attempt stopped at boundary lint because the first digest implementation imported `node:crypto`; changed it to the app's existing Web Crypto helper and reran from that source.
+- Verified Corretto 17.0.20.1 and DynamoDB Local 3.3.1 archive checksums from official downloads. `DYNAMODB_LOCAL_ENDPOINT=http://127.0.0.1:8009 npm test -- packages/adapters/src/dynamodb-room-repository.local.test.ts` passed 1/1 using the real AWS SDK, ephemeral table, synthetic fixture and documented dummy credentials. The test deleted its table and the DynamoDB Local process was stopped after the run. This is emulator evidence, not managed-service evidence.
+- Final pinned `PLAYWRIGHT_CHANNEL=chrome npm run check` on exact source head `cb2dbf9`: exit 0; imported reference hashes 7/7, planning 15/15, lint/import boundaries 76 references, typecheck, 197 unit/integration tests passed with the opt-in Local test skipped, build/privacy scan, 41/41 browser tests using installed system Chrome. `git diff --cached --check` passed. No AWS account/service, cloud resource, IAM, deployment, push or publication.
+- B04 is paused per the sequential checkpoint policy. B04.5 `/root/b04_5_review` is the current independent task reviewing the new diff before B04 expansion; current ticket, board and handoff are synchronized.
+
+## 2026-09-23 — B04 divergent-line integration
+
+- Root cause: separate clones independently implemented B04 from common base `8e6d1c4`. Local main was at `d6c4a90` and origin/main at `2087331`; each contained unique commits and overlapping edits, including incompatible DynamoDB persistence designs. The active rebase surfaced those overlapping text and architecture changes as conflicts.
+- Integrated with a history-preserving local merge; both parent histories remain reachable. Canonical current storage is the locally reviewed strict STATE/GUARD/REPLAY adapter. The published single-item adapter is retired from the resulting tree, and its useful DynamoDB Local scenario is ported to the canonical adapter. Published-line reviews and emulator results remain explicitly historical and do not certify the merge.
+- Authenticated API composition keeps diagnostics disabled and fails closed if authentication infrastructure throws; integration coverage asserts no production console logs. B04 remains paused for fresh independent B04.5 review of the exact unified commit.
+- Added the universal `git pull --ff-only origin main` pre-development gate to workflow and every task ticket. This does not replace preserving/handling existing local changes or an active rebase/merge before synchronization.
+- Actual session model: GPT-6 Codex; exact variant and effort are not exposed, so no Luna/Sol/Astra target is claimed as the implementation model.
+- Focused API/authentication and canonical adapter command passed: 26 tests passed; the opt-in DynamoDB Local test was skipped because `DYNAMODB_LOCAL_ENDPOINT` was unset.
+- Full pinned `npm run check` passed: imported reference hashes 7/7, planning checks 15/15, lint/import boundaries 87 references, typecheck, 226 unit/integration tests passed with 1 opt-in test skipped, browser build/privacy scan (127 modules), and all 41 Playwright tests. `git diff --cached --check` passed.
+- The previous published-line DynamoDB Local run is preserved as historical evidence for its old adapter only. No DynamoDB Local service, AWS/Cognito/IAM call, cloud resource, deployment, or push was performed in this integration.

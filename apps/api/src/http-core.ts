@@ -5,7 +5,7 @@ import {
 import {
   ApplicationError, DealTableApplication, type TrustedPrincipal,
 } from '@deal-table/application';
-import { createCognitoIdentityResolver, type CognitoIdentityOptions } from './cognito.ts';
+import { createCognitoIdentityResolver, type CognitoIdentityOptions } from './cognito-identity.ts';
 import type { JwksCache } from 'aws-jwt-verify/jwk';
 
 const IDENTITY_HEADER = 'x-deal-table-test-identity';
@@ -38,7 +38,6 @@ export interface CognitoApiOptions extends CognitoIdentityOptions {
   readonly application: DealTableApplication;
   readonly allowedOrigins: readonly string[];
   readonly maxBodyBytes?: number;
-  readonly debug?: boolean;
 }
 
 export function createNonProductionIdentities(roomId: string): ReadonlyMap<string, HttpIdentity> {
@@ -237,7 +236,9 @@ function createApiHandler(
   if (!Number.isSafeInteger(maxBodyBytes) || maxBodyBytes < 1 || maxBodyBytes > 1024 * 1024) {
     throw new Error('maxBodyBytes must be an integer between 1 and 1048576');
   }
-  const debug = options.debug ?? false;
+  // Authenticated compositions never emit local diagnostics, even if a runtime
+  // caller passes an extra `debug` property from older configuration.
+  const debug = includeTestIdentity ? options.debug ?? false : false;
   return (request, response) => {
     void (async () => {
       setCors(response, request, allowedOrigins, includeTestIdentity);
@@ -248,7 +249,12 @@ function createApiHandler(
       }
 
       const id = requestId(request);
-      const principal = await authenticate(request);
+      let principal: HttpIdentity | null = null;
+      try {
+        principal = await authenticate(request);
+      } catch {
+        // Authentication infrastructure failures fail closed without exposing details.
+      }
       if (!principal) {
         sendJson(response, 401, errorBody('UNAUTHENTICATED', id));
         return;

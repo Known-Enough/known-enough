@@ -1,8 +1,11 @@
 # @deal-table/api
 
 The local API is a Node HTTP composition for the synthetic TeamTable room. It
-is deliberately non-production: it has no credential verifier, persistence or
-cloud deployment. It refuses to start when `NODE_ENV=production`.
+remains deliberately non-production: its local handler uses fixed test labels,
+an in-memory repository and no cloud deployment. It refuses to start when
+`NODE_ENV=production`. B04's first slice also exports a separate authenticated
+handler and Cognito access-token resolver; those do not provide durable
+persistence, infrastructure, or a complete production composition.
 
 Run it with the pinned Node runtime:
 
@@ -52,7 +55,25 @@ are `422`; application stale/idempotency errors retain their contract `409` or
 `error.httpStatus`; no message or resource diagnostic is emitted.
 
 The library exports `createLocalApiHandler`, `createLocalApiServer`, and
-`listenLocalApi` for integration tests and local composition. `listenLocalApi`
+`listenLocalApi` for integration tests and local composition. It also exports
+`createCognitoApiHandler` for the authenticated server composition, and
+`createCognitoIdentityResolver` / `createCognitoIdentityResolverFromEnv`.
+The Cognito resolver verifies access-token signatures and required pool/client
+claims before reading the signed `sub` and `cognito:groups` claims. Tokens from the participant app client become participant principals whose
+room membership is still checked by the application. Tokens from the separate
+display client require exactly one valid room-scoped display group. Exactly one such group
+creates a read-only display principal for that room; malformed or multiple
+display groups fail closed. Configure the environment factory with
+`COGNITO_USER_POOL_ID`, `COGNITO_PARTICIPANT_CLIENT_ID`, and
+`COGNITO_DISPLAY_CLIENT_ID`.
+
+The authenticated handler does not emit the local debug diagnostics, even if a
+caller supplies an extra runtime `debug` property. The environment factory
+accepts an optional trusted server-side JWKS cache for offline verification
+tests or a managed cache; never populate it from request data.
+
+An authenticated handler still needs a durable repository and a secure hosting
+composition before it is suitable for production. `listenLocalApi`
 and the runnable entry bind loopback addresses only; `createLocalApiServer`
 returns an unbound Node server, so a custom composition must also bind it only
 to loopback. Never import this server package into the browser.

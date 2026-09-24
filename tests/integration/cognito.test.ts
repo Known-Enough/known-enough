@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createCognitoIdentityResolver } from '../../apps/api/src/cognito.ts';
+import { createCognitoIdentityResolver } from '../../apps/api/src/cognito-identity.ts';
 import { cognitoOptions, cognitoToken, testJwksCache } from './cognito-fixtures.ts';
 
 const resolveAuthorization = createCognitoIdentityResolver(cognitoOptions, testJwksCache());

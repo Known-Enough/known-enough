@@ -1,6 +1,6 @@
 # Shared main — integrated baseline
 
-Main is the single active development branch, in separate clones. The user authorized the final merge and update of shared origin/main. Old task branches are preserved only as historical pointers; do not start new work on them.
+Main is the single active development branch, in separate clones. Earlier user-authorized consolidations are historical and do not authorize new publication. Old task branches are preserved only as historical pointers; do not start new work on them.
 
 ## Included work
 
@@ -62,3 +62,10 @@ User explicitly requested all completed work on main and a main-branch check bef
 Fresh combined `npm run check` exited 0 with pinned Node 24.21.0/npm 11.19.0: seven reference hashes, 15 arithmetic checks, lint/boundaries (54 references), typecheck, 164 unit/integration tests in ten files, build (124 modules)/bundle scan, and 20 Chromium browser tests. Chromium and required libraries used the documented B03 `/tmp` setup. Log: `/tmp/b03-main-check.log`.
 
 B03 remains REVIEW for live acceptance. A03.5 findings and A02.5/G01 remain open; intercepted/mock browser tests do not establish a connected local negotiation. No new task, real authentication or cloud work is claimed. Source branches are preserved as historical pointers. Publication is authorized for this integration; verify origin/main equals the resulting local main commit after pushing.
+
+
+## B04 divergent-line integration — 2026-09-23
+
+The local and published `main` lines independently developed overlapping B04 work from common base `8e6d1c4` (local `d6c4a90`, published `2087331`). They therefore had separate commits touching the same API, application, persistence, test, and tracking files, plus incompatible DynamoDB designs. This caused the rebase conflict set; it was not a single bad commit or a corrupt shared history.
+
+A history-preserving local merge now retains both lines as parents. The current tree selects the stricter multi-item STATE/GUARD/REPLAY adapter and authenticated API composition, removes the duplicate single-item adapter, and ports the published line’s opt-in DynamoDB Local scenario to the selected adapter. Old reviews remain tied to their exact pre-merge artifacts. The unified artifact requires fresh independent B04.5 review. The user requested local unification; no push is authorized by that request.
