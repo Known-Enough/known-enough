@@ -6,7 +6,7 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 
 ## Project-wide priority
 
-- **Current task: independent B04.5 review** of the unified local integration commit. The earlier R10 PASS is scoped to `f88b4a0..b78aab9`; the published-line persistence PASS is scoped to `a3e7261..cb2dbf9`. Neither reviewed the merged code. B04 is paused; no new implementation proceeds until the merged API, canonical adapter, and tests pass an independent follow-up review.
+- **Current task: independent B04.5 review** (fresh Astra/high reviewer claimed) of unified local integration commit `2dd036a`. The earlier R10 PASS is scoped to `f88b4a0..b78aab9`; the published-line persistence PASS is scoped to `a3e7261..cb2dbf9`. Neither reviewed the merged code. B04 is paused; no new implementation proceeds until the merged API, canonical adapter, and tests pass an independent follow-up review.
 - A05 mock preparation is complete and remains REVIEW after independent A03.5 privacy follow-up PASS; its own human acceptance remains pending.
 - Then follow the critical path through [A04](tasks/A04.md) → [A04.5](tasks/A04.5.md) → [G02](tasks/G02.md), then [A05](tasks/A05.md) → [B05](tasks/B05.md) → [A05.5](tasks/A05.5.md). B06 follows B05 when its cloud actions are explicitly authorized. Continue with the AI extension [T01](tasks/T01.md) → [T02](tasks/T02.md) after their prerequisites, then trial/demo integration [A06](tasks/A06.md) → [A06.5](tasks/A06.5.md) → [G03](tasks/G03.md).
 - A04, A06 and T01 remain READY candidates only when their ticket prerequisites hold. The queue order applies equally to either user; A/B prefixes do not decide ownership. A02/A03/A03.5, A02.5 and B03 remain REVIEW; G01 is DONE. Do not restart completed B01/B02.
