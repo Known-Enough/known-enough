@@ -2,7 +2,7 @@ import { createServer, type Server } from 'node:http';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DealTableApplication, type TrustedPrincipal } from '@deal-table/application';
 import { InMemoryRoomRepository } from '@deal-table/adapters';
-import { CommandResult, OwnerSnapshot, PublicRoomSnapshot, type CommandEnvelope } from '@deal-table/contracts';
+import { CommandResult, OwnerSnapshot, PublicRoomSnapshot, RoomInvitationIssueResponse, RoomInvitationRedeemResponse, type CommandEnvelope } from '@deal-table/contracts';
 import { buildTeamTableFixture } from '@deal-table/test-support';
 import { createCognitoApiHandler, createLocalApiHandler, createNonProductionIdentities, type LocalApiOptions } from '../../apps/api/src/http.ts';
 import { createCognitoApiHandlerWithJwksCache } from '../../apps/api/src/http-core.ts';
@@ -16,12 +16,12 @@ afterEach(async () => {
     server.closeAllConnections();
   })));
 });
-async function harness(identities?: LocalApiOptions['identities'], debug = false) {
+async function harness(identities?: LocalApiOptions['identities'], debug = false, pendingMembers: string[] = []) {
   const fixture = buildTeamTableFixture();
   let sequence = 0;
   const repository = new InMemoryRoomRepository();
   const application = new DealTableApplication({ repository, clock: { now: () => fixture.now }, ids: { next: () => `http-id-${++sequence}` } });
-  const seed = { roomId, schedule: fixture.schedule, roster: fixture.roster.map(member => ({ ...member, submitted: false })), policy: fixture.policy, organizerSubject: 'organizer', memberships: fixture.roster.map(member => ({ subject: member.id, memberId: member.id })) };
+  const seed = { roomId, schedule: fixture.schedule, roster: fixture.roster.map(member => ({ ...member, submitted: false })), policy: fixture.policy, organizerSubject: 'organizer', memberships: fixture.roster.map(member => ({ subject: member.id, memberId: member.id, ...(pendingMembers.includes(member.id) ? { status: 'PENDING' as const } : {}) })) };
   await application.createRoom(seed);
   await application.createRoom({ ...seed, roomId: 'other-room', organizerSubject: 'other-organizer', memberships: fixture.roster.map(member => ({ subject: `other-${member.id}`, memberId: member.id })) });
   const server = createServer(createLocalApiHandler({ application, debug, ...(identities ? { identities } : {}) }));
@@ -198,6 +198,41 @@ describe('B04 Cognito HTTP boundary', () => {
     } finally { log.mockRestore(); }
   });
 
+  it('binds invitation redemption to the verified Cognito subject on the production composition', async () => {
+    const h = await harness(undefined, false, ['maya']);
+    const handler = createCognitoApiHandlerWithJwksCache({
+      application: h.application, ...cognitoOptions, allowedOrigins: ['https://app.example'],
+    }, testJwksCache());
+    const server = createServer(handler);
+    servers.push(server);
+    await new Promise<void>((resolve, reject) => {
+      server.once('error', reject);
+      server.listen(0, '127.0.0.1', () => { server.off('error', reject); resolve(); });
+    });
+    const address = server.address();
+    if (!address || typeof address === 'string') throw new Error('Missing test listener');
+    const base = `http://127.0.0.1:${address.port}`;
+    const send = async (path: string, sub: string, body?: unknown) => {
+      const response = await fetch(`${base}${path}`, {
+        method: body === undefined ? 'GET' : 'POST',
+        headers: { Authorization: `Bearer ${cognitoToken({ sub })}`, ...(body === undefined ? {} : { 'Content-Type': 'application/json' }) },
+        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+      });
+      return { status: response.status, data: await response.json() as unknown };
+    };
+    const issued = await send(`/rooms/${roomId}/invitations`, 'organizer', { requestId: 'cognito-issue', memberId: 'maya' });
+    expect(issued.status).toBe(201);
+    const issue = RoomInvitationIssueResponse.parse(issued.data);
+    expect(issue.requestId).toBe('cognito-issue');
+    expect((await send(`/rooms/${roomId}/invitations/redeem`, 'leo', { requestId: 'cognito-wrong', token: issue.token })))
+      .toMatchObject({ status: 404, data: { ok: false, error: { code: 'NOT_FOUND' } } });
+    const redeemed = await send(`/rooms/${roomId}/invitations/redeem`, 'maya', { requestId: 'cognito-redeem', token: issue.token });
+    expect(redeemed.status).toBe(200);
+    expect(RoomInvitationRedeemResponse.parse(redeemed.data)).toEqual({ requestId: 'cognito-redeem', accepted: true });
+    expect((await send(`/rooms/${roomId}/invitations/redeem`, 'maya', { requestId: 'cognito-replay', token: issue.token })))
+      .toMatchObject({ status: 404, data: { ok: false, error: { code: 'NOT_FOUND' } } });
+  });
+
   it('maps an unknown server/storage failure to a redacted retryable 503', async () => {
     const h = await harness(undefined, true);
     const log = vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -245,6 +280,36 @@ describe('B04 Cognito HTTP boundary', () => {
 });
 
 describe('B03 real local HTTP boundary (non-production test identities)', () => {
+  it('issues and redeems a single-use invitation only for its configured verified subject', async () => {
+    const h = await harness(undefined, true, ['maya']);
+    const logs = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const unauthorized = await h.request(`/rooms/${roomId}/invitations`, 'maya', '{', true);
+    error(unauthorized, 'FORBIDDEN', 403);
+    const before = await h.request(`/rooms/${roomId}/public`, 'maya');
+    error(before, 'NOT_FOUND', 404);
+
+    error(await h.request(`/rooms/${roomId}/invitations`, 'organizer', { requestId: 'invalid', memberId: 'maya', ownerMemberId: 'leo' }), 'INVALID_COMMAND', 422);
+    const issue = await h.request(`/rooms/${roomId}/invitations`, 'organizer', { requestId: 'invite-issue', memberId: 'maya' });
+    expect(issue.status).toBe(201);
+    const issuedDto = RoomInvitationIssueResponse.parse(issue.data);
+    expect(issuedDto.requestId).toBe('invite-issue');
+    const token = issuedDto.token;
+    expect(logs.mock.calls.flat().join(' ')).not.toContain(token);
+    const wrongSubject = await h.request(`/rooms/${roomId}/invitations/redeem`, 'leo', { requestId: 'wrong', token });
+    error(wrongSubject, 'NOT_FOUND', 404);
+    const otherRoom = await h.request('/rooms/other-room/invitations/redeem', 'maya', { requestId: 'other-room', token });
+    error(otherRoom, 'NOT_FOUND', 404);
+
+    const redeemed = await h.request(`/rooms/${roomId}/invitations/redeem`, 'maya', { requestId: 'redeem', token });
+    expect(redeemed.status).toBe(200);
+    expect(RoomInvitationRedeemResponse.parse(redeemed.data)).toEqual({ requestId: 'redeem', accepted: true });
+    const replay = await h.request(`/rooms/${roomId}/invitations/redeem`, 'maya', { requestId: 'replay', token });
+    error(replay, 'NOT_FOUND', 404);
+    await expect(h.owner('maya')).resolves.toMatchObject({ ownerMemberId: 'maya' });
+    expect(logs.mock.calls.flat().join(' ')).not.toContain(token);
+    logs.mockRestore();
+  });
+
   it('logs only validated command names when local diagnostics are enabled', async () => {
     const h = await harness(undefined, true);
     const log = vi.spyOn(console, 'log').mockImplementation(() => {});

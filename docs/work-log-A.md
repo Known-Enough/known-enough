@@ -1,3 +1,10 @@
+## 2026-09-24T19:47:00Z — B04 / IN_PROGRESS — invitation issuance/redemption claimed
+
+- User directed resumption and selected proceeding with this session under its exposed model. Actual worker: GPT-6 Codex; exact variant/effort not exposed. Ticket target is `gpt-6-sol` / high and is not claimed as the actual session model.
+- Clean separate clone on `main` at `30132974c457c6472290e64b35a495c676901b0e`, after successful `git pull --ff-only origin main`; no active claim was recorded for another task. This clone is `/tmp/known-enough-b04-resume`.
+- Bounded scope: add single-use invitation issuance/redemption for pre-provisioned pending room memberships. The configured organizer can issue/reissue for a pending roster member only; verified subject binding is fixed before issuance. Redemption requires that exact verified subject, activates only its stored member mapping and atomically consumes the invite. Store only token hashes; enforce expiry with the application clock; return indistinguishable not-found outcomes for invalid, wrong-subject, expired and replayed invites. Update contracts, application, API, DynamoDB state/codec, focused/integration tests, infra notes, B04/ticket board and this handoff/log. Pause after the first reviewable slice for the sequential B04.5 independent review.
+- Claim only; no implementation changes or checks yet. No AWS/Cognito/IAM calls, cloud resources, deployment, commit publication or push.
+
 # Developer A work log
 
 A writes this log; B writes [its own log](work-log-B.md), regardless of task prefix in the shared pool. Ticket status/claim is authoritative. Entries are progress summaries, not private reasoning or a live inter-clone lock. Use the [workflow](agent-workflow.md).

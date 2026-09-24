@@ -21,7 +21,7 @@ export interface RoomSeed {
   roster: Participant[];
   policy: Policy;
   organizerSubject: string;
-  memberships: { subject: string; memberId: string }[];
+  memberships: { subject: string; memberId: string; status?: 'PENDING' | 'ACTIVE' }[];
 }
 export interface OwnerRecord {
   memberId: string;
@@ -48,7 +48,14 @@ export interface RetiredPermissionHistory {
   exceptions: ExceptionGrant[];
   disclosures: RetiredDisclosureGrant[];
 }
-export interface RoomRecord extends RoomSeed {
+export interface RoomMembership { subject: string; memberId: string; status: 'PENDING' | 'ACTIVE' }
+export interface RoomInvitationRecord { memberId: string; tokenHash: string; expiresAt: string; redeemedAt: string | null }
+export interface RoomInvitationIssueResult { token: string; expiresAt: string }
+export interface RoomInvitationRedeemResult { accepted: true }
+
+export interface RoomRecord extends Omit<RoomSeed, 'memberships'> {
+  memberships: RoomMembership[];
+  invitations: RoomInvitationRecord[];
   contextToken: string;
   decisionRevision: number;
   controlVersion: number;
@@ -99,4 +106,5 @@ export interface ApplicationOptions {
   solver?: (input: SolveDecisionInput) => SolveDecisionResult | Promise<SolveDecisionResult>;
   permissionTtlMs?: number;
   proposalTtlMs?: number;
+  invitationTtlMs?: number;
 }

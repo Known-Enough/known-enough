@@ -143,6 +143,8 @@ function commandResult(value: unknown): ReturnType<typeof CommandResult.safePars
 }
 function isSafeTransition(before: DynamoRoomRecord, after: DynamoRoomRecord): boolean {
   if (before.contextToken !== after.contextToken || before.status === 'CLOSED' || after.status === 'CLOSED') return true;
+  if (stable(before.memberships) !== stable(after.memberships)
+    || stable(before.invitations) !== stable(after.invitations)) return true;
   if (before.owners.some(owner => owner.approval !== null
     && after.owners.find(next => next.memberId === owner.memberId)?.approval === null)) return true;
   for (const owner of before.owners) {

@@ -1,6 +1,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import {
-  CommandEnvelope, ERROR_HTTP_STATUS, Id, type CommandResult, type OwnerSnapshot, type PublicRoomSnapshot,
+  CommandEnvelope, ERROR_HTTP_STATUS, Id, RoomInvitationIssueRequest, RoomInvitationRedeemRequest,
+  type CommandResult, type OwnerSnapshot, type PublicRoomSnapshot,
 } from '@deal-table/contracts';
 import {
   ApplicationError, DealTableApplication, type TrustedPrincipal,
@@ -175,11 +176,11 @@ async function readJson(request: IncomingMessage, maxBodyBytes: number): Promise
   }
 }
 
-function roomPath(url: URL): { roomId: string; view: 'public' | 'me' | 'commands' } | null {
-  const match = /^\/rooms\/([^/]+)\/(public|me|commands)$/.exec(url.pathname);
+function roomPath(url: URL): { roomId: string; view: 'public' | 'me' | 'commands' | 'invitations' | 'invitations/redeem' } | null {
+  const match = /^\/rooms\/([^/]+)\/(public|me|commands|invitations\/redeem|invitations)$/.exec(url.pathname);
   if (!match?.[1] || !match[2]) return null;
   try {
-    return { roomId: decodeURIComponent(match[1]), view: match[2] as 'public' | 'me' | 'commands' };
+    return { roomId: decodeURIComponent(match[1]), view: match[2] as 'public' | 'me' | 'commands' | 'invitations' | 'invitations/redeem' };
   } catch {
     return null;
   }
@@ -273,6 +274,31 @@ function createApiHandler(
 
       let responseId = id;
       try {
+        if (request.method === 'POST' && route.view === 'invitations') {
+          await application.authorizeRoomInvitationIssue(principal, route.roomId);
+          const rawBody = await readJson(request, maxBodyBytes);
+          const parsed = RoomInvitationIssueRequest.safeParse(rawBody);
+          if (!parsed.success) {
+            sendJson(response, 422, errorBody('INVALID_COMMAND', id));
+            return;
+          }
+          responseId = parsed.data.requestId;
+          const issued = await application.issueRoomInvitation(principal, route.roomId, parsed.data);
+          sendJson(response, 201, { requestId: parsed.data.requestId, token: issued.token, expiresAt: issued.expiresAt });
+          return;
+        }
+        if (request.method === 'POST' && route.view === 'invitations/redeem') {
+          const rawBody = await readJson(request, maxBodyBytes);
+          const parsed = RoomInvitationRedeemRequest.safeParse(rawBody);
+          if (!parsed.success) {
+            sendJson(response, 422, errorBody('INVALID_COMMAND', id));
+            return;
+          }
+          responseId = parsed.data.requestId;
+          await application.redeemRoomInvitation(principal, route.roomId, parsed.data);
+          sendJson(response, 200, { requestId: parsed.data.requestId, accepted: true });
+          return;
+        }
         if (request.method === 'GET' && route.view === 'public') {
           const snapshot = await application.getPublicSnapshot(principal, route.roomId);
           logPublicSnapshot(debug, principal, snapshot);

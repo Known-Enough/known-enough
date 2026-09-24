@@ -46,7 +46,7 @@ async function roomRecord(): Promise<RoomRecord> {
     roster: [...fixture.roster],
     policy: fixture.policy,
     organizerSubject: 'local-organizer',
-    memberships: fixture.roster.map(member => ({ subject: member.id, memberId: member.id })),
+    memberships: fixture.roster.map(member => ({ subject: member.id, memberId: member.id, ...(member.id === 'maya' ? { status: 'PENDING' as const } : {}) })),
   });
   return inMemory.transaction(roomId, room => structuredClone(room!));
 }
@@ -103,5 +103,26 @@ describe.skipIf(!enabled)('DynamoDBRoomRepository against explicitly enabled Dyn
       ConsistentRead: true,
     }));
     expect(decodeGuardItem(stored.Item, roomId).version).toBe(12);
+
+    let inviteSequence = 0;
+    const inviteApp = new DealTableApplication({
+      repository, clock: { now: () => buildTeamTableFixture().now },
+      ids: { next: () => `local-invite-${++inviteSequence}` },
+    });
+    const issued = await inviteApp.issueRoomInvitation(
+      { kind: 'participant', subject: 'local-organizer' }, roomId,
+      { requestId: 'local-issue', memberId: 'maya' },
+    );
+    const attempts = await Promise.allSettled([
+      inviteApp.redeemRoomInvitation({ kind: 'participant', subject: 'maya' }, roomId,
+        { requestId: 'local-redeem-a', token: issued.token }),
+      inviteApp.redeemRoomInvitation({ kind: 'participant', subject: 'maya' }, roomId,
+        { requestId: 'local-redeem-b', token: issued.token }),
+    ]);
+    expect(attempts.filter(value => value.status === 'fulfilled')).toHaveLength(1);
+    expect(attempts.filter(value => value.status === 'rejected')).toHaveLength(1);
+    const activated = await repository.transaction(roomId, room => room!);
+    expect(activated.memberships.find(value => value.memberId === 'maya')?.status).toBe('ACTIVE');
+    expect(activated.invitations[0]?.redeemedAt).not.toBeNull();
   });
 });

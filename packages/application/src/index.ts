@@ -1,6 +1,6 @@
 import {
   CommandEnvelope, ERROR_HTTP_STATUS, Id, OwnerSnapshot, PublicRoomSnapshot,
-  hashPublicProposal, normalizeDisclosureText,
+  RoomInvitationIssueRequest, RoomInvitationRedeemRequest, hashPublicProposal, normalizeDisclosureText,
 } from '@deal-table/contracts';
 import type {
   CommandResult, DisclosureGrant, ExceptionScope, Interval, PublicHashPayload, PublicPlanFacts,
@@ -9,7 +9,8 @@ import { solveDecision } from '@deal-table/domain';
 import type { OwnedExceptionGrant, SolveDecisionInput } from '@deal-table/domain';
 import { MAX_PERMISSION_HISTORY_RECORDS, RepositoryCapacityError } from './types.ts';
 import type {
-  ApplicationOptions, ErrorCode, ExpectedVersion, OwnerRecord, RetiredDisclosureGrant, RoomRecord, RoomSeed, TrustedPrincipal,
+  ApplicationOptions, ErrorCode, ExpectedVersion, OwnerRecord, RetiredDisclosureGrant,
+  RoomInvitationIssueResult, RoomInvitationRedeemResult, RoomRecord, RoomSeed, TrustedPrincipal,
 } from './types.ts';
 export type * from './types.ts';
 export { MAX_PERMISSION_HISTORY_RECORDS, RepositoryCapacityError } from './types.ts';
@@ -82,11 +83,13 @@ export class DealTableApplication {
   private readonly solver;
   private readonly permissionTtlMs;
   private readonly proposalTtlMs;
+  private readonly invitationTtlMs;
   constructor(private readonly options: ApplicationOptions) {
     this.solver = options.solver ?? solveDecision;
     this.permissionTtlMs = options.permissionTtlMs ?? 15 * 60_000;
     this.proposalTtlMs = options.proposalTtlMs ?? 15 * 60_000;
-    if (![this.permissionTtlMs, this.proposalTtlMs].every(x => Number.isSafeInteger(x) && x > 0))
+    this.invitationTtlMs = options.invitationTtlMs ?? 24 * 60 * 60_000;
+    if (![this.permissionTtlMs, this.proposalTtlMs, this.invitationTtlMs].every(x => Number.isSafeInteger(x) && x > 0))
       throw new Error('Positive finite lifetimes required');
   }
   private id(): string { return Id.parse(this.options.ids.next()); }
@@ -107,22 +110,79 @@ export class DealTableApplication {
     });
     if (!seed.organizerSubject || new Set(seed.memberships.map(m => m.subject)).size !== seed.memberships.length
       || new Set(seed.memberships.map(m => m.memberId)).size !== seed.memberships.length
-      || seed.memberships.some(m => !m.subject || !clean.roster.some(p => p.id === m.memberId))
+      || seed.memberships.some(m => !m.subject || !clean.roster.some(p => p.id === m.memberId)
+        || (m.status !== undefined && !['PENDING', 'ACTIVE'].includes(m.status)))
       || clean.roster.some(p => !seed.memberships.some(m => m.memberId === p.id))) fail('INVALID_COMMAND');
     await this.options.repository.create({
       roomId: clean.roomId, schedule: clean.schedule, roster: clean.roster, policy: clean.policy,
-      organizerSubject: seed.organizerSubject, memberships: structuredClone(seed.memberships),
+      organizerSubject: seed.organizerSubject, memberships: seed.memberships.map(m => ({ ...m, status: m.status ?? 'ACTIVE' })),
+      invitations: [],
       contextToken: clean.contextToken, decisionRevision: 1, controlVersion: 0, status: 'COLLECTING',
       owners: clean.roster.map(p => freshOwner(p.id)), retiredPermissionHistory: [], proposal: null, proposalVersion: 0,
       requiredGrants: [], publishedDisclosures: [], agreementHistory: [], roundUsed: false,
       solveEpoch: 0, job: null, replays: [],
     });
   }
+  private authorizeInvitationOrganizer(principal: TrustedPrincipal | null, room: RoomRecord | null): RoomRecord {
+    if (!principal?.subject) fail('UNAUTHENTICATED');
+    if (!room) fail('NOT_FOUND');
+    if (principal.kind !== 'participant' || principal.subject !== room.organizerSubject) fail('FORBIDDEN');
+    return room;
+  }
+  async authorizeRoomInvitationIssue(principal: TrustedPrincipal | null, roomId: string): Promise<void> {
+    await this.options.repository.transaction(roomId, room => {
+      this.authorizeInvitationOrganizer(principal, room);
+    });
+  }
+  async issueRoomInvitation(
+    principal: TrustedPrincipal | null, roomId: string, rawRequest: unknown,
+  ): Promise<RoomInvitationIssueResult> {
+    return this.options.repository.transaction(roomId, async current => {
+      const room = this.authorizeInvitationOrganizer(principal, current);
+      const parsed = RoomInvitationIssueRequest.safeParse(rawRequest);
+      if (!parsed.success) fail('INVALID_COMMAND');
+      const request = parsed.data;
+      const membership = room.memberships.find(value => value.memberId === request.memberId);
+      if (room.status === 'CLOSED' || !membership || membership.status !== 'PENDING'
+        || !room.roster.some(value => value.id === request.memberId)) fail('NOT_FOUND');
+      const now = this.now();
+      const previous = room.invitations.find(value => value.memberId === request.memberId);
+      if (previous && previous.redeemedAt === null && Date.parse(previous.expiresAt) > Date.parse(now))
+        fail('IDEMPOTENCY_CONFLICT');
+      const token = this.id();
+      const expiresAt = this.until(now, this.invitationTtlMs);
+      room.invitations = room.invitations.filter(value => value.memberId !== request.memberId);
+      room.invitations.push({ memberId: request.memberId, tokenHash: await sha256(token), expiresAt, redeemedAt: null });
+      return { token, expiresAt };
+    });
+  }
+  async redeemRoomInvitation(
+    principal: TrustedPrincipal | null, roomId: string, rawRequest: unknown,
+  ): Promise<RoomInvitationRedeemResult> {
+    const request = RoomInvitationRedeemRequest.safeParse(rawRequest);
+    if (!request.success) fail('INVALID_COMMAND');
+    const tokenHash = await sha256(request.data.token);
+    return this.options.repository.transaction(roomId, room => {
+      if (!principal?.subject) fail('UNAUTHENTICATED');
+      if (principal.kind !== 'participant' || !room || room.status === 'CLOSED') fail('NOT_FOUND');
+      const membership = room.memberships.find(value => value.subject === principal.subject);
+      if (!membership || membership.status !== 'PENDING'
+        || !room.roster.some(value => value.id === membership.memberId)) fail('NOT_FOUND');
+      const invitation = room.invitations.find(value => value.memberId === membership.memberId
+        && value.tokenHash === tokenHash);
+      const now = this.now();
+      if (!invitation || invitation.redeemedAt !== null || Date.parse(invitation.expiresAt) <= Date.parse(now))
+        fail('NOT_FOUND');
+      membership.status = 'ACTIVE';
+      invitation.redeemedAt = now;
+      return { accepted: true };
+    });
+  }
   private authorize(principal: TrustedPrincipal | null, room: RoomRecord | null, operation: string): RoomRecord {
     if (!principal?.subject) fail('UNAUTHENTICATED');
     if (!room) fail('NOT_FOUND');
     const isMember = principal.kind === 'participant' && room.memberships.some(m =>
-      m.subject === principal.subject && room.roster.some(p => p.id === m.memberId));
+      m.subject === principal.subject && m.status === 'ACTIVE' && room.roster.some(p => p.id === m.memberId));
     const isOrganizer = principal.kind === 'participant' && room.organizerSubject === principal.subject;
     const isDisplay = principal.kind === 'display' && principal.roomId === room.roomId;
     const isService = principal.kind === 'service' && principal.roomIds.includes(room.roomId);

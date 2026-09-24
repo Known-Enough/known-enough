@@ -1,7 +1,7 @@
 import type { AttributeValue } from '@aws-sdk/client-dynamodb';
 import {
   CommandResult, ConfirmedInputs, DisclosureGrant, DisclosurePreview, ExceptionOffer,
-  ExceptionGrant, FinalApproval, Id, InputDraft, Interval, Participant, Policy, ProposalView,
+  ExceptionGrant, FinalApproval, Hash, Id, InputDraft, Interval, Participant, Policy, ProposalView,
   PublicStatus, PublishedDisclosure, Schedule, Timestamp, Version,
 } from '@deal-table/contracts';
 import { MAX_PERMISSION_HISTORY_RECORDS, type RoomRecord } from '@deal-table/application';
@@ -38,7 +38,8 @@ const agreementSchema = z.strictObject({
   approvals: z.array(FinalApproval).length(3),
   agreedAt: Timestamp,
 });
-const membershipSchema = z.strictObject({ subject: Id, memberId: Id });
+const membershipSchema = z.strictObject({ subject: Id, memberId: Id, status: z.enum(['PENDING', 'ACTIVE']) });
+const invitationSchema = z.strictObject({ memberId: Id, tokenHash: Hash, expiresAt: Timestamp, redeemedAt: Timestamp.nullable() });
 const jobSchema = z.strictObject({ id: Id, contextToken: Id, epoch: Version, completed: z.boolean() });
 
 const roomRecordSchema = z.strictObject({
@@ -48,6 +49,7 @@ const roomRecordSchema = z.strictObject({
   policy: Policy,
   organizerSubject: Id,
   memberships: z.array(membershipSchema).length(3),
+  invitations: z.array(invitationSchema).max(3),
   contextToken: Id,
   decisionRevision: Version,
   controlVersion: Version,
@@ -68,6 +70,8 @@ const roomRecordSchema = z.strictObject({
   const ownerIds = room.owners.map(owner => owner.memberId);
   const membershipIds = room.memberships.map(binding => binding.memberId);
   const subjects = room.memberships.map(binding => binding.subject);
+  const invitationMemberIds = room.invitations.map(invitation => invitation.memberId);
+  const invitationTokenHashes = room.invitations.map(invitation => invitation.tokenHash);
   const add = (path: (string | number)[], message: string) => ctx.addIssue({ code: 'custom', path, message });
   if (new Set(rosterIds).size !== rosterIds.length) add(['roster'], 'Duplicate room member');
   if (new Set(ownerIds).size !== ownerIds.length || [...rosterIds].sort().join() !== [...ownerIds].sort().join())
@@ -77,6 +81,12 @@ const roomRecordSchema = z.strictObject({
   // not authorize stale bindings; the application checks both binding and roster.
   if (new Set(membershipIds).size !== membershipIds.length || new Set(subjects).size !== subjects.length)
     add(['memberships'], 'Membership subject and member bindings must be unique');
+  if (new Set(invitationMemberIds).size !== invitationMemberIds.length
+    || new Set(invitationTokenHashes).size !== invitationTokenHashes.length
+    || room.invitations.some(invitation => {
+      const membership = room.memberships.find(value => value.memberId === invitation.memberId);
+      return !membership || (invitation.redeemedAt === null) !== (membership.status === 'PENDING');
+    })) add(['invitations'], 'Invitations must uniquely match their pending or redeemed membership');
   const retiredOwnerIds = room.retiredPermissionHistory.map(history => history.ownerMemberId);
   if (new Set(retiredOwnerIds).size !== retiredOwnerIds.length)
     add(['retiredPermissionHistory'], 'Retired owner histories must be consolidated by member');
@@ -114,7 +124,7 @@ const roomRecordSchema = z.strictObject({
 export type DynamoRoomRecord = Omit<RoomRecord, 'replays'>;
 type DynamoItem = Record<string, AttributeValue>;
 
-export const STATE_SCHEMA_VERSION = 3;
+export const STATE_SCHEMA_VERSION = 4;
 export const GUARD_SCHEMA_VERSION = 1;
 export const REPLAY_SCHEMA_VERSION = 1;
 

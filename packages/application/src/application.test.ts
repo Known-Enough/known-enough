@@ -10,14 +10,14 @@ const roomId = 'room-synthetic';
 const display: TrustedPrincipal = { kind: 'display', subject: 'display', roomId };
 const service: TrustedPrincipal = { kind: 'service', subject: 'worker', roomIds: [roomId] };
 const expected = (s: PublicRoomSnapshot) => ({ contextToken: s.contextToken, decisionRevision: s.decisionRevision, controlVersion: s.controlVersion });
-async function setup(solver?: ApplicationOptions['solver']) {
+async function setup(solver?: ApplicationOptions['solver'], pendingMembers: string[] = []) {
   const fixture = buildTeamTableFixture();
   let sequence = 0;
   let clock = () => fixture.now;
   const repository = new InMemoryRoomRepository();
   const app = new DealTableApplication({ repository, clock: { now: () => clock() }, ids: { next: () => `opaque-${++sequence}` }, ...(solver ? { solver } : {}) });
   await app.createRoom({ roomId, schedule: fixture.schedule, roster: [...fixture.roster], policy: fixture.policy,
-    organizerSubject: 'organizer', memberships: fixture.roster.map(p => ({ subject: p.id, memberId: p.id })) });
+    organizerSubject: 'organizer', memberships: fixture.roster.map(p => ({ subject: p.id, memberId: p.id, ...(pendingMembers.includes(p.id) ? { status: 'PENDING' as const } : {}) })) });
   const view = () => app.getPublicSnapshot(display, roomId);
   const owner = (member: string) => app.getOwnerSnapshot(participant(member), roomId);
   async function command(type: CommandEnvelope['type'], payload: unknown) {
@@ -61,6 +61,60 @@ async function setup(solver?: ApplicationOptions['solver']) {
 }
 
 describe('application finite lifecycle', () => {
+  it('issues subject-bound single-use invitations and activates only the mapped pending member', async () => {
+    const h = await setup(undefined, ['maya']);
+    await expect(h.app.getOwnerSnapshot(participant('maya'), roomId)).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await expect(h.app.issueRoomInvitation(participant('maya'), roomId, { requestId: 'issue-denied', memberId: 'maya' }))
+      .rejects.toMatchObject({ code: 'FORBIDDEN' });
+    await expect(h.app.issueRoomInvitation(participant('organizer'), roomId, { requestId: 'issue-active', memberId: 'leo' }))
+      .rejects.toMatchObject({ code: 'NOT_FOUND' });
+
+    const issued = await h.app.issueRoomInvitation(participant('organizer'), roomId, { requestId: 'issue-maya', memberId: 'maya' });
+    expect(issued.expiresAt).toBe('2026-10-02T12:00:00.000Z');
+    const before = await h.repository.transaction(roomId, room => room!);
+    expect(before.memberships.find(value => value.memberId === 'maya')).toMatchObject({ subject: 'maya', status: 'PENDING' });
+    expect(before.invitations).toEqual([{ memberId: 'maya', tokenHash: expect.stringMatching(/^[a-f0-9]{64}$/), expiresAt: issued.expiresAt, redeemedAt: null }]);
+    expect(JSON.stringify(before)).not.toContain(issued.token);
+
+    await expect(h.app.redeemRoomInvitation(participant('leo'), roomId, { requestId: 'wrong-subject', token: issued.token }))
+      .rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await expect(h.app.redeemRoomInvitation(participant('organizer'), roomId, { requestId: 'organizer', token: issued.token }))
+      .rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await expect(h.app.redeemRoomInvitation(participant('maya'), 'different-room', { requestId: 'cross-room', token: issued.token }))
+      .rejects.toMatchObject({ code: 'NOT_FOUND' });
+
+    expect(await h.app.redeemRoomInvitation(participant('maya'), roomId, { requestId: 'redeem-maya', token: issued.token }))
+      .toEqual({ accepted: true });
+    await expect(h.app.redeemRoomInvitation(participant('maya'), roomId, { requestId: 'replay', token: issued.token }))
+      .rejects.toMatchObject({ code: 'NOT_FOUND' });
+    expect((await h.repository.transaction(roomId, room => room!)).memberships.find(value => value.memberId === 'maya')?.status)
+      .toBe('ACTIVE');
+    await expect(h.app.getOwnerSnapshot(participant('maya'), roomId)).resolves.toMatchObject({ ownerMemberId: 'maya' });
+  });
+
+  it('rotates expired pending invitations and serializes competing redemptions to one use', async () => {
+    const h = await setup(undefined, ['maya']);
+    const first = await h.app.issueRoomInvitation(participant('organizer'), roomId, { requestId: 'first', memberId: 'maya' });
+    await expect(h.app.issueRoomInvitation(participant('organizer'), roomId, { requestId: 'duplicate-issue', memberId: 'maya' }))
+      .rejects.toMatchObject({ code: 'IDEMPOTENCY_CONFLICT' });
+    h.setClock(() => '2026-10-02T12:00:00.000Z');
+    await expect(h.app.redeemRoomInvitation(participant('maya'), roomId, { requestId: 'expired-token', token: first.token }))
+      .rejects.toMatchObject({ code: 'NOT_FOUND' });
+    const second = await h.app.issueRoomInvitation(participant('organizer'), roomId, { requestId: 'reissue', memberId: 'maya' });
+    expect(second.token).not.toBe(first.token);
+    await expect(h.app.redeemRoomInvitation(participant('maya'), roomId, { requestId: 'old-token', token: first.token }))
+      .rejects.toMatchObject({ code: 'NOT_FOUND' });
+    const results = await Promise.allSettled([
+      h.app.redeemRoomInvitation(participant('maya'), roomId, { requestId: 'concurrent-a', token: second.token }),
+      h.app.redeemRoomInvitation(participant('maya'), roomId, { requestId: 'concurrent-b', token: second.token }),
+    ]);
+    expect(results.filter(value => value.status === 'fulfilled')).toHaveLength(1);
+    expect(results.filter(value => value.status === 'rejected')).toHaveLength(1);
+    const state = await h.repository.transaction(roomId, room => room!);
+    expect(state.invitations).toHaveLength(1);
+    expect(state.memberships.find(value => value.memberId === 'maya')?.status).toBe('ACTIVE');
+  });
+
   it('keeps idempotency payloads comparable without retaining command values in replay state', async () => {
     const h = await setup();
     const values = h.fixture.owners[0]!.confirmedInputs.values;

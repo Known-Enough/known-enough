@@ -139,6 +139,10 @@ export const CommandEnvelope = z.discriminatedUnion('type', [
   z.strictObject({ ...envelope, type: z.literal('WITHDRAW_APPROVAL'), payload: z.strictObject(approvalTarget) }),
   z.strictObject({ ...envelope, type: z.literal('REVISE_DECISION'), payload: RevisionDecisionPayload }),
 ]);
+export const RoomInvitationIssueRequest = z.strictObject({ requestId: Id, memberId: Id });
+export const RoomInvitationIssueResponse = z.strictObject({ requestId: Id, token: Id, expiresAt: Timestamp });
+export const RoomInvitationRedeemRequest = z.strictObject({ requestId: Id, token: Id });
+export const RoomInvitationRedeemResponse = z.strictObject({ requestId: Id, accepted: z.literal(true) });
 export const ErrorCode = z.enum(['UNAUTHENTICATED', 'FORBIDDEN', 'NOT_FOUND', 'STALE_CONTEXT', 'STALE_PROPOSAL', 'IDEMPOTENCY_CONFLICT', 'INVALID_COMMAND', 'NEEDS_CLARIFICATION', 'ROOM_CAPACITY_REACHED', 'RETRYABLE_SERVER_ERROR']);
 export const ERROR_HTTP_STATUS = {
   UNAUTHENTICATED: 401, FORBIDDEN: 403, NOT_FOUND: 404, STALE_CONTEXT: 409,

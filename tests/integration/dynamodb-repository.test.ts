@@ -300,8 +300,19 @@ async function harness() {
 describe('DynamoDB strict storage codec', () => {
   it('round-trips an allowlisted versioned state and rejects extra or mismatched fields', async () => {
     const h = await harness();
+    await h.repository.transaction(roomId, room => {
+      room!.memberships.find(value => value.memberId === 'maya')!.status = 'PENDING';
+    });
+    const issued = await h.app.issueRoomInvitation(actor('organizer'), roomId,
+      { requestId: 'codec-invite', memberId: 'maya' });
     const item = h.client.item(roomId, 'STATE')!;
     const record = decodeStateItem(item, roomId);
+    expect(record.invitations).toHaveLength(1);
+    expect(record.invitations[0]?.tokenHash).toMatch(/^[a-f0-9]{64}$/);
+    expect(record.invitations[0]?.tokenHash).not.toBe(issued.token);
+    const payload = JSON.parse((item.payload as { S: string }).S) as { record: { invitations: Record<string, unknown>[] } };
+    payload.record.invitations[0]!.token = issued.token;
+    expect(() => decodeStateItem({ ...item, payload: { S: JSON.stringify(payload) } }, roomId)).toThrow();
     expect(record.roomId).toBe(roomId);
     expect('replays' in record).toBe(false);
     expect(() => decodeStateItem({ ...item, unexpected: { S: 'private' } }, roomId)).toThrow();
