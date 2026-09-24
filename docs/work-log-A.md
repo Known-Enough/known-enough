@@ -1,3 +1,10 @@
+## 2026-09-24T23:57:17Z — B04 / IN_PROGRESS — resume R11/R12 corrections
+
+- Independent B04.5 review returned CHANGES_REQUESTED on `30132974c457c6472290e64b35a495c676901b0e..13707c2794491666989059cf23dcaa8bcd7e2075`. P2 R11: organizer invitation authorization distinguishes existing from missing room to unrelated authenticated subjects. P2 R12: invitation issuance and redemption capacity errors become retryable 503 instead of safe known-no-commit 409. Exact reproductions, affected lines and review evidence are in `docs/reviews/B04.5.md`.
+- Resumed only these fixes from clean synchronized `main`; `git pull --ff-only origin main` succeeded at `8d13cff3a9dc5bff6f5654df25b03c517a2ac232` before edits. Actual worker is GPT-6 Codex; variant/effort not exposed, so the scheduled `gpt-6-sol` / high target is not claimed as runtime model. Bounded files: application authorization/error mapping, HTTP/application regression tests, and coordinated B04/B04.5/task-board/A-log/infra documentation.
+- Independent reviewer configured gpt-6-astra/high separately and released its review claim after the CHANGES_REQUESTED verdict. Fresh reported results: 86 focused tests, DynamoDB Local 1/1, typecheck, references 7/7, planning 15/15, codec/privacy probes. Full author suite was not independently rerun. No implementation changes yet in this claim entry.
+- Next: fix only R11/R12, run affected checks and required full check, update evidence, pause for fresh independent B04.5 follow-up. No push/cloud work is authorized by this resumption.
+
 ## 2026-09-24T20:46:23Z — B04 / PAUSED — invitation implementation handed to independent review
 
 - Local implementation checkpoint: commit `13707c2794491666989059cf23dcaa8bcd7e2075` on `main`, parent/baseline `30132974c457c6472290e64b35a495c676901b0e`. Actual worker: GPT-6 Codex; variant and effort unexposed, not claimed as the ticket's `gpt-6-sol` / high target. Commit author was set per-command as `Codex GPT-6 <codex@localhost>`; repository git config was not changed.
