@@ -6,7 +6,7 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 
 ## Project-wide priority
 
-- **Current task: B04 invitation issuance/redemption.** Claim recorded at baseline `3013297` on clean `main`; actual worker is GPT-6 Codex with variant/effort unexposed (not claimed as the ticket's `gpt-6-sol` / high target). Bounded behavior: organizer issues single-use invites only for pre-provisioned pending memberships; redemption requires the membership's exact verified subject and atomically activates that member. Token storage is hash-only, expiry is application-enforced, and invalid/wrong-subject/expired/replayed tokens share a generic response. Pause after the first reviewable implementation slice for sequential B04.5 review. No cloud action or publication is implied.
+- **Current task: fresh B04.5 independent follow-up.** B04 is PAUSED after invitation issuance/redemption landed in local commit `13707c2`; its new security slice needs critical review before B04 can resume. B04.5 is READY and unclaimed for the exact implementation artifact `13707c2794491666989059cf23dcaa8bcd7e2075`. The earlier PASS on `a058cc5` remains scoped to that prior artifact. No cloud action or publication is implied.
 - A05 mock preparation is complete and remains REVIEW after independent A03.5 privacy follow-up PASS; its own human acceptance remains pending.
 - Then follow the critical path through [A04](tasks/A04.md) → [A04.5](tasks/A04.5.md) → [G02](tasks/G02.md), then [A05](tasks/A05.md) → [B05](tasks/B05.md) → [A05.5](tasks/A05.5.md). B06 follows B05 when its cloud actions are explicitly authorized. Continue with the AI extension [T01](tasks/T01.md) → [T02](tasks/T02.md) after their prerequisites, then trial/demo integration [A06](tasks/A06.md) → [A06.5](tasks/A06.5.md) → [G03](tasks/G03.md).
 - A04, A06 and T01 remain READY candidates only when their ticket prerequisites hold. The queue order applies equally to either user; A/B prefixes do not decide ownership. A02/A03/A03.5, A02.5 and B03 remain REVIEW; G01 is DONE. Do not restart completed B01/B02.
@@ -29,7 +29,7 @@ These rows record dependency and review state. They are not simultaneous work la
 | [A02.5](tasks/A02.5.md) | `gpt-6-sol` / medium | A02, A03.5, reviewed B02/B02.5, B03 | REVIEW; synchronized repairs, combined evidence in G01 |
 | [G01](tasks/G01.md) | `gpt-6-astra` / high | A02.5, A03.5, B03, B02.5 current evidence | DONE; local integration checkpoint independently reviewed and human accepted 2026-09-23 |
 
-Task prerequisites determine eligibility; the project-wide priority above determines order. G01 is accepted. B04's exact unified code correction passed independent B04.5 review, but B04 remains REVIEW pending human acceptance/integration and real-adapter evidence. B03 acceptance still requires review of B02 final critical delta. Integration and human review cannot be replaced with synthetic browser tests.
+Task prerequisites determine eligibility; the project-wide priority above determines order. G01 is accepted. B04's earlier unified correction passed B04.5 review; the new invitation slice is PAUSED for fresh B04.5 follow-up. B03 acceptance still requires review of B02 final critical delta. Integration and human review cannot be replaced with synthetic browser tests.
 
 ## Authenticated product and later gates
 
@@ -39,8 +39,8 @@ Work through these tasks in priority order, one at a time, after their stated pr
 | --- | --- | --- | --- |
 | [A04](tasks/A04.md) | `gpt-6-luna` / medium | A03.5; agreed session interface | Session/reconnect UX using injected responses |
 | [A05](tasks/A05.md) | `gpt-6-luna` / medium | A02, A03.5 | REVIEW; host-simulation language draft and form fallback; A03.5 privacy follow-up PASS |
-| [B04](tasks/B04.md) | `gpt-6-sol` / high | G01 | IN_PROGRESS; local checks pass; single-use room-invitation replay/redemption is not implemented |
-| [B04.5](tasks/B04.5.md) | `gpt-6-astra` / high | G01 + B04 design/first implementation | REVIEW; exact-code follow-up PASS on `a058cc5` |
+| [B04](tasks/B04.md) | `gpt-6-sol` / high | G01 | PAUSED for fresh B04.5 review of invitation issuance/redemption |
+| [B04.5](tasks/B04.5.md) | `gpt-6-astra` / high | G01 + B04 design/first implementation | READY; independent follow-up needed on `13707c2` |
 | [A04.5](tasks/A04.5.md) | `gpt-6-luna` / medium | A04, completed B04, B04.5, G01 | Real sessions across browser contexts |
 | [G02](tasks/G02.md) | `gpt-6-astra` / high | A04.5, B04, B04.5 | Privacy/security gate before external testers |
 | [B05](tasks/B05.md) | `gpt-6-sol` / high | Reviewed B04/B04.5 | Owner extraction/jobs and safe routing |
@@ -49,7 +49,7 @@ Work through these tasks in priority order, one at a time, after their stated pr
 | [A06.5](tasks/A06.5.md) | `gpt-6-luna` / medium | A06, G01, G02, operational B06, T02 | Integrated transitions, human trials, recording evidence |
 | [G03](tasks/G03.md) | `gpt-6-astra` / high | A05.5, A06.5, operational B06, G02, T02 | Release readiness; no automatic publish |
 
-A04/A05 preparation does not technically depend on G01, and A03.5 passes for the exact recorded artifact. G01 is DONE for the reviewed local checkpoint; B04 is paused for the sequential B04.5 review of the unified artifact. Earlier B04.5 verdicts remain scoped to their named branch artifacts. A05 mock preparation remains REVIEW pending its separate human acceptance. A04 still requires an agreed session interface. External testers still require G02 and operational readiness.
+A04/A05 preparation does not technically depend on G01, and A03.5 passes for the exact recorded artifact. G01 is DONE for the reviewed local checkpoint; B04.5 is READY for the sequential review of B04 invitation commit `13707c2`. Earlier B04.5 verdicts remain scoped to their named branch artifacts. A05 mock preparation remains REVIEW pending its separate human acceptance. A04 still requires an agreed session interface. External testers still require G02 and operational readiness.
 
 ## AI facilitator extension
 

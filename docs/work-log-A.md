@@ -1,3 +1,11 @@
+## 2026-09-24T20:46:23Z — B04 / PAUSED — invitation implementation handed to independent review
+
+- Local implementation checkpoint: commit `13707c2794491666989059cf23dcaa8bcd7e2075` on `main`, parent/baseline `30132974c457c6472290e64b35a495c676901b0e`. Actual worker: GPT-6 Codex; variant and effort unexposed, not claimed as the ticket's `gpt-6-sol` / high target. Commit author was set per-command as `Codex GPT-6 <codex@localhost>`; repository git config was not changed.
+- Scope: strict invitation issue/redeem contracts and HTTP routes, organizer-only issue for pending pre-provisioned membership, exact verified-subject redemption, app-clock expiry/reissue after expiration, hash-only token persistence, one-time activation in STATE/GUARD CAS, v4 strict codec, tests and adapter notes.
+- Focused app + signed-Cognito HTTP + repository suites passed **56/56**. Typecheck passed. Lint/import boundaries passed (**89 references**). Full pinned `npm run check`: reference hashes 7/7, planning 15/15, lint/import boundaries, typecheck, 231 unit/integration tests with the opt-in emulator test skipped in that full run, browser build/privacy scan (127 modules), and 41 Playwright tests all passed. Separate opt-in DynamoDB Local 3.3.1 SDK suite passed **1/1** with 12 guarded writers and a two-request invitation redemption race; exactly one redemption succeeded. Emulator endpoint was published only at `127.0.0.1:8000` and the temporary table was deleted by the test.
+- Self-review found no remaining local scope changes. The implementation assumes a trusted bootstrap prebinds subject to member and does not implement invitation delivery or provisioning. Schema v3 has no automatic migration; no live service, IAM, deployment, cloud acceptance, push or human acceptance is claimed.
+- B04 is PAUSED for fresh sequential independent B04.5 review of the exact commit. B04.5 is READY and unclaimed; prior PASSes are not extended to this code.
+
 ## 2026-09-24T19:47:00Z — B04 / IN_PROGRESS — invitation issuance/redemption claimed
 
 - User directed resumption and selected proceeding with this session under its exposed model. Actual worker: GPT-6 Codex; exact variant/effort not exposed. Ticket target is `gpt-6-sol` / high and is not claimed as the actual session model.
