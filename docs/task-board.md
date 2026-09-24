@@ -6,7 +6,7 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 
 ## Project-wide priority
 
-- **Current task: B04 local adapter verification.** B04.5 follow-up returned PASS on exact correction commit `a058cc5`. The bounded B04 claim is to run the migrated SDK-backed duplicate-create and competing STATE/GUARD transaction scenario against loopback DynamoDB Local, then record evidence. This remains local acceptance only; no cloud action or publication is implied.
+- **Current task: close B04’s invitation-replay acceptance gap.** Its local identity/scope/replay/expiry checks, DynamoDB Local duplicate-create/12-way STATE-GUARD scenario, and full `npm run check` pass. But the current API has no room-invite issuance/redemption model, while B04 acceptance and the product plan require single-use invitations. Clarify/implement that bounded behavior before B04 can enter REVIEW. No cloud action or publication is implied.
 - A05 mock preparation is complete and remains REVIEW after independent A03.5 privacy follow-up PASS; its own human acceptance remains pending.
 - Then follow the critical path through [A04](tasks/A04.md) → [A04.5](tasks/A04.5.md) → [G02](tasks/G02.md), then [A05](tasks/A05.md) → [B05](tasks/B05.md) → [A05.5](tasks/A05.5.md). B06 follows B05 when its cloud actions are explicitly authorized. Continue with the AI extension [T01](tasks/T01.md) → [T02](tasks/T02.md) after their prerequisites, then trial/demo integration [A06](tasks/A06.md) → [A06.5](tasks/A06.5.md) → [G03](tasks/G03.md).
 - A04, A06 and T01 remain READY candidates only when their ticket prerequisites hold. The queue order applies equally to either user; A/B prefixes do not decide ownership. A02/A03/A03.5, A02.5 and B03 remain REVIEW; G01 is DONE. Do not restart completed B01/B02.
@@ -39,7 +39,7 @@ Work through these tasks in priority order, one at a time, after their stated pr
 | --- | --- | --- | --- |
 | [A04](tasks/A04.md) | `gpt-6-luna` / medium | A03.5; agreed session interface | Session/reconnect UX using injected responses |
 | [A05](tasks/A05.md) | `gpt-6-luna` / medium | A02, A03.5 | REVIEW; host-simulation language draft and form fallback; A03.5 privacy follow-up PASS |
-| [B04](tasks/B04.md) | `gpt-6-sol` / high | G01 | REVIEW; merged code passed B04.5 follow-up; human acceptance and DynamoDB Local evidence pending |
+| [B04](tasks/B04.md) | `gpt-6-sol` / high | G01 | IN_PROGRESS; local checks pass; single-use room-invitation replay/redemption is not implemented |
 | [B04.5](tasks/B04.5.md) | `gpt-6-astra` / high | G01 + B04 design/first implementation | REVIEW; exact-code follow-up PASS on `a058cc5` |
 | [A04.5](tasks/A04.5.md) | `gpt-6-luna` / medium | A04, completed B04, B04.5, G01 | Real sessions across browser contexts |
 | [G02](tasks/G02.md) | `gpt-6-astra` / high | A04.5, B04, B04.5 | Privacy/security gate before external testers |
