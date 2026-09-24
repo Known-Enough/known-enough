@@ -424,3 +424,9 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Independently verified package exports and public type import; manifest/lock SDK 3.1135.0, all 196 registry entries' resolved/integrity fields and dependency edges, all 171 installed registry versions, and SRI for 30 cached tarballs. Related auth/replay/transaction behavior inspected.
 - Focused command passed 82 tests with 1 opt-in DynamoDB Local skip; typecheck, reference checks 7/7, planning 15/15, runtime/type probes and diff checks passed. The reviewer inspected but did not rerun the author's full suite (227 unit/integration + 1 skipped, 41 browser tests). No clean reinstall; 166 registry tarballs unavailable in cache.
 - No DynamoDB Local endpoint, AWS/Cognito/IAM request, deployment or live acceptance. B04 is REVIEW pending human acceptance/integration and real-adapter evidence. No push.
+
+
+## 2026-09-24T03:15:20Z — B04 / IN_PROGRESS — DynamoDB Local adapter verification claim
+
+- Resumed from clean/pulled `main` at `4616b421f4ed68384c732445d679476277c6dab1`, after the user requested completion of B04. Actual worker is GPT-6 Codex; variant/effort are not exposed, so the scheduled `gpt-6-sol` / high is not claimed as the session model.
+- Bounded scope is the already migrated SDK-backed `packages/adapters/src/dynamodb.local.test.ts`: run its duplicate-create and concurrent STATE/GUARD transaction scenario against a loopback-only DynamoDB Local endpoint; make a focused test change only if the scenario exposes a concrete defect. Record resulting evidence and return to REVIEW. No AWS/cloud actions or publication.
