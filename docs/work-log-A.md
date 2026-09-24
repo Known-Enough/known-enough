@@ -400,3 +400,11 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Per prior user approval, a fresh independent `gpt-6-astra` / high reviewer was started for exact local merge artifact `2dd036a`. B04 remains paused.
 - Reviewer scope: inspect the merged API/authentication code, application replay/capacity behavior, canonical strict STATE/GUARD/REPLAY DynamoDB adapter, tests, both parent histories, and documented limitations. The ported opt-in DynamoDB Local test is compiled by the full check but skipped without `DYNAMODB_LOCAL_ENDPOINT`.
 - The full implementation check has already passed on this exact source tree; the reviewer will independently inspect relevant tests/code. No implementation files or live/cloud resources are changed for this review.
+
+
+## 2026-09-24T02:15:00Z — B04.5 / REVIEW / CHANGES_REQUESTED — unified merge review
+
+- Fresh independent reviewer configured as `gpt-6-astra` / high inspected merge `2dd036a` from separate clone. One P2: Cognito resolver value/type exports were missing from `@deal-table/api` entrypoint. Reviewer reproduced `undefined undefined` on package import. The integration otherwise retains one strict adapter and reviewed auth/replay/capacity behavior.
+- Validation correction: package manifest/lock selected SDK 3.1138.0, but actual node_modules had 3.1135.0; the npm-generated lock omitted resolved/integrity metadata for 170 registry entries. Exact reviewed tests had therefore run on 3.1135.0. Correcting by pinning the already verified 3.1135.0 and restoring the complete parent lock metadata.
+- Review focused run: 81 passed, 1 skipped; typecheck, references 7/7, planning 15/15 and diff checks passed. No full browser/application rerun by reviewer. Emulator was not available. Other auth, adapter, privacy/logging, and history-preservation checks had no additional findings.
+- Resumed bounded B04 claim at 2026-09-24T02:15:25Z (baseline `436c4ae`) for package exports/test and SDK/lock alignment only. Pause for fresh B04.5 follow-up after full checks.

@@ -6,7 +6,7 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 
 ## Project-wide priority
 
-- **Current task: independent B04.5 review** (fresh Astra/high reviewer claimed) of unified local integration commit `2dd036a`. The earlier R10 PASS is scoped to `f88b4a0..b78aab9`; the published-line persistence PASS is scoped to `a3e7261..cb2dbf9`. Neither reviewed the merged code. B04 is paused; no new implementation proceeds until the merged API, canonical adapter, and tests pass an independent follow-up review.
+- **Current task: B04 bounded P2 correction** after independent B04.5 review of `2dd036a` found missing public Cognito resolver exports and a manifest/lock-versus-installed SDK mismatch. Restore/test the package exports and align the dependency lock, then pause for independent B04.5 follow-up. The reviewer otherwise found the canonical adapter and reviewed boundaries intact.
 - A05 mock preparation is complete and remains REVIEW after independent A03.5 privacy follow-up PASS; its own human acceptance remains pending.
 - Then follow the critical path through [A04](tasks/A04.md) → [A04.5](tasks/A04.5.md) → [G02](tasks/G02.md), then [A05](tasks/A05.md) → [B05](tasks/B05.md) → [A05.5](tasks/A05.5.md). B06 follows B05 when its cloud actions are explicitly authorized. Continue with the AI extension [T01](tasks/T01.md) → [T02](tasks/T02.md) after their prerequisites, then trial/demo integration [A06](tasks/A06.md) → [A06.5](tasks/A06.5.md) → [G03](tasks/G03.md).
 - A04, A06 and T01 remain READY candidates only when their ticket prerequisites hold. The queue order applies equally to either user; A/B prefixes do not decide ownership. A02/A03/A03.5, A02.5 and B03 remain REVIEW; G01 is DONE. Do not restart completed B01/B02.
@@ -29,7 +29,7 @@ These rows record dependency and review state. They are not simultaneous work la
 | [A02.5](tasks/A02.5.md) | `gpt-6-sol` / medium | A02, A03.5, reviewed B02/B02.5, B03 | REVIEW; synchronized repairs, combined evidence in G01 |
 | [G01](tasks/G01.md) | `gpt-6-astra` / high | A02.5, A03.5, B03, B02.5 current evidence | DONE; local integration checkpoint independently reviewed and human accepted 2026-09-23 |
 
-Task prerequisites determine eligibility; the project-wide priority above determines order. G01 is accepted. B04 is paused at the unified local integration artifact; independent B04.5 review is next. B03 acceptance still requires review of B02 final critical delta. Integration and human review cannot be replaced with synthetic browser tests.
+Task prerequisites determine eligibility; the project-wide priority above determines order. G01 is accepted. B04 is addressing bounded B04.5 P2 findings on the unified local artifact; the independent follow-up follows immediately after the fix. B03 acceptance still requires review of B02 final critical delta. Integration and human review cannot be replaced with synthetic browser tests.
 
 ## Authenticated product and later gates
 
@@ -39,8 +39,8 @@ Work through these tasks in priority order, one at a time, after their stated pr
 | --- | --- | --- | --- |
 | [A04](tasks/A04.md) | `gpt-6-luna` / medium | A03.5; agreed session interface | Session/reconnect UX using injected responses |
 | [A05](tasks/A05.md) | `gpt-6-luna` / medium | A02, A03.5 | REVIEW; host-simulation language draft and form fallback; A03.5 privacy follow-up PASS |
-| [B04](tasks/B04.md) | `gpt-6-sol` / high | G01 | PAUSED; unified local implementation is awaiting independent B04.5 review |
-| [B04.5](tasks/B04.5.md) | `gpt-6-astra` / high | G01 + B04 design/first implementation | REVIEW / independent review of the unified merge artifact is pending |
+| [B04](tasks/B04.md) | `gpt-6-sol` / high | G01 | IN_PROGRESS; bounded package export and dependency-lock corrections after B04.5 P2 |
+| [B04.5](tasks/B04.5.md) | `gpt-6-astra` / high | G01 + B04 design/first implementation | REVIEW / CHANGES_REQUESTED on unified merge `2dd036a`; follow-up after bounded fix |
 | [A04.5](tasks/A04.5.md) | `gpt-6-luna` / medium | A04, completed B04, B04.5, G01 | Real sessions across browser contexts |
 | [G02](tasks/G02.md) | `gpt-6-astra` / high | A04.5, B04, B04.5 | Privacy/security gate before external testers |
 | [B05](tasks/B05.md) | `gpt-6-sol` / high | Reviewed B04/B04.5 | Owner extraction/jobs and safe routing |
