@@ -3,6 +3,7 @@ import { CognitoJwtVerifier } from 'aws-jwt-verify';
 import { SimpleJwksCache, type Jwk } from 'aws-jwt-verify/jwk';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { createCognitoIdentityResolver, createCognitoIdentityResolverFromEnv } from './cognito-identity.ts';
+import { createCognitoIdentityResolver as exportedResolver, createCognitoIdentityResolverFromEnv as exportedResolverFromEnv } from '@deal-table/api';
 
 const options = {
   userPoolId: 'us-east-1_testPool',
@@ -56,6 +57,11 @@ function signedToken(
 }
 
 describe('B04 Cognito access-token principal mapping', () => {
+  it('exports the identity resolver through the public API package entrypoint', () => {
+    expect(exportedResolver).toBe(createCognitoIdentityResolver);
+    expect(exportedResolverFromEnv).toBe(createCognitoIdentityResolverFromEnv);
+  });
+
   it('verifies a signed participant access token with configured pool and client', async () => {
     const resolver = createCognitoIdentityResolverFromEnv(testEnv(), cachedKeys());
     await expect(resolver(`Bearer ${signedToken()}`)).resolves.toEqual({

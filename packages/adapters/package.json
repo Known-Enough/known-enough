@@ -7,7 +7,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "3.1138.0",
+    "@aws-sdk/client-dynamodb": "3.1135.0",
     "@deal-table/application": "0.1.0",
     "@deal-table/contracts": "0.1.0",
     "zod": "4.6.5"

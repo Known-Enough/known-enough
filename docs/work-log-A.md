@@ -408,3 +408,10 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Validation correction: package manifest/lock selected SDK 3.1138.0, but actual node_modules had 3.1135.0; the npm-generated lock omitted resolved/integrity metadata for 170 registry entries. Exact reviewed tests had therefore run on 3.1135.0. Correcting by pinning the already verified 3.1135.0 and restoring the complete parent lock metadata.
 - Review focused run: 81 passed, 1 skipped; typecheck, references 7/7, planning 15/15 and diff checks passed. No full browser/application rerun by reviewer. Emulator was not available. Other auth, adapter, privacy/logging, and history-preservation checks had no additional findings.
 - Resumed bounded B04 claim at 2026-09-24T02:15:25Z (baseline `436c4ae`) for package exports/test and SDK/lock alignment only. Pause for fresh B04.5 follow-up after full checks.
+
+
+## 2026-09-24T02:20:50Z — B04 / PAUSED — B04.5 P2 corrections complete
+
+- Actual worker: GPT-6 Codex; variant/effort not exposed. Bounded baseline was `436c4ae`; restored both Cognito resolver functions and the options type from the public API entrypoint and added an `@deal-table/api` import regression. Focused suite: 5/5.
+- Matched the manifest and full lock to DynamoDB SDK 3.1135.0, which the local package files actually contain and the B04 implementation used. The restored 213-entry lock has complete registry `resolved`/`integrity` metadata. `npm ls` and the installed package both report 3.1135.0 after removing npm's stale generated hidden lock. Offline npm install could not complete because zod 4.6.5 is not cached; the existing installed dependency tree remained usable and matched the SDK pin.
+- Full `npm run check` passed: references 7/7, planning 15/15, boundaries 89, typecheck, 227 unit/integration + 1 skipped opt-in emulator case, 127-module build/privacy scan, 41 browser tests. No actual DynamoDB Local endpoint or cloud evidence. B04 paused for fresh independent B04.5 follow-up.
