@@ -107,3 +107,9 @@ After the fresh B04.5 R10 PASS, B04 resumed for one bounded local acceptance cas
 ## B04 near-limit permission-response acceptance — 2026-09-23T22:59:37Z
 
 The local fake-client regression now covers the real issued-offer path through exception ALLOW, the queued solver-job STATE write, and decline of the generated disclosure preview near the encoded STATE/reservation ceiling. Focused adapter suite passed 22/22; pinned full check passed 221 unit/integration and 41 browser tests, plus references, planning, lint/boundaries, typecheck and build/privacy scan. Active exception, proposal, history and guard counts were verified. B04 is paused for independent B04.5 inspection of this exact test artifact before continuing. No production defect or live/cloud evidence is claimed; no publication.
+
+## B04 correction review and local acceptance handoff — 2026-09-25
+
+B04.5 **PASS** on exact R11/R12 correction source range `04bd1db..f6b93bc`; the independent follow-up closed both findings with no new bounded issue. Fresh evidence: 87/87 focused tests, DynamoDB Local 1/1, nine injected adapter-to-HTTP failure scenarios, authorization/scope probes, typecheck, references 7/7 and planning 15/15. The author full/browser check remains summary-only independent evidence (232 unit/integration passes plus one opt-in skip; 41/41 browsers after the documented serial fallback).
+
+The owner assessed B04's local acceptance evidence; B04 and B04.5 are REVIEW pending human acceptance/integration. No implementation files changed in this assessment. Managed AWS/Cognito/IAM, production deployment and G02/live acceptance remain outstanding. The implementation fix (`f6b93bc`) and independent review record (`1c4ea45`) are local; this status handoff is documentation-only. No push/publication. See [B04](tasks/B04.md), [B04.5 review](reviews/B04.5.md) and [task board](task-board.md).

@@ -6,7 +6,7 @@ Current integration: foundation, A01, workflow refactor, B01 and B02 are on main
 
 ## Project-wide priority
 
-- **Current gate: B04.5 correction follow-up PASS; B04 awaits owner resumption/acceptance assessment.** Independent review of exact `04bd1db..f6b93bc` closed R11/R12 with no new bounded findings. Review claim finished; B04 remains PAUSED and B04.5 REVIEW pending human acceptance. Fresh focused suites 87/87, DynamoDB Local 1/1 and targeted failure/authorization probes passed. The author-reported full check (232 unit/integration passes plus one skip; 41 browsers after serial fallback) was inspected as a summary, not independently rerun. No cloud acceptance or publication is implied.
+- **Current gate: B04 and B04.5 REVIEW, pending human acceptance/integration.** The owner assessed B04 local acceptance evidence after independent PASS on exact correction diff `04bd1db..f6b93bc`; R11/R12 are closed with no new bounded findings. Fresh focused suites 87/87, DynamoDB Local 1/1 and targeted failure/authorization probes passed. The author-reported full check (232 unit/integration passes plus one skip; 41 browsers after serial fallback) was reviewed as a summary, not independently rerun. Managed-service, deployment and G02/live acceptance remain outstanding; no publication is implied.
 - A05 mock preparation is complete and remains REVIEW after independent A03.5 privacy follow-up PASS; its own human acceptance remains pending.
 - Then follow the critical path through [A04](tasks/A04.md) → [A04.5](tasks/A04.5.md) → [G02](tasks/G02.md), then [A05](tasks/A05.md) → [B05](tasks/B05.md) → [A05.5](tasks/A05.5.md). B06 follows B05 when its cloud actions are explicitly authorized. Continue with the AI extension [T01](tasks/T01.md) → [T02](tasks/T02.md) after their prerequisites, then trial/demo integration [A06](tasks/A06.md) → [A06.5](tasks/A06.5.md) → [G03](tasks/G03.md).
 - A04, A06 and T01 remain READY candidates only when their ticket prerequisites hold. The queue order applies equally to either user; A/B prefixes do not decide ownership. A02/A03/A03.5, A02.5 and B03 remain REVIEW; G01 is DONE. Do not restart completed B01/B02.
@@ -39,7 +39,7 @@ Work through these tasks in priority order, one at a time, after their stated pr
 | --- | --- | --- | --- |
 | [A04](tasks/A04.md) | `gpt-6-luna` / medium | A03.5; agreed session interface | Session/reconnect UX using injected responses |
 | [A05](tasks/A05.md) | `gpt-6-luna` / medium | A02, A03.5 | REVIEW; host-simulation language draft and form fallback; A03.5 privacy follow-up PASS |
-| [B04](tasks/B04.md) | `gpt-6-sol` / high | G01 | PAUSED; R11/R12 corrections in `f6b93bc` passed B04.5; owner resumption pending |
+| [B04](tasks/B04.md) | `gpt-6-sol` / high | G01 | REVIEW; local acceptance evidence assessed, pending human acceptance/integration |
 | [B04.5](tasks/B04.5.md) | `gpt-6-astra` / high | G01 + B04 design/first implementation | REVIEW; independent PASS on `04bd1db..f6b93bc`, R11/R12 closed |
 | [A04.5](tasks/A04.5.md) | `gpt-6-luna` / medium | A04, completed B04, B04.5, G01 | Real sessions across browser contexts |
 | [G02](tasks/G02.md) | `gpt-6-astra` / high | A04.5, B04, B04.5 | Privacy/security gate before external testers |
