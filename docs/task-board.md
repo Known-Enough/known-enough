@@ -29,7 +29,7 @@ These rows record dependency and review state. They are not simultaneous work la
 | [A02.5](tasks/A02.5.md) | `gpt-6-sol` / medium | A02, A03.5, reviewed B02/B02.5, B03 | REVIEW; synchronized repairs, combined evidence in G01 |
 | [G01](tasks/G01.md) | `gpt-6-astra` / high | A02.5, A03.5, B03, B02.5 current evidence | DONE; local integration checkpoint independently reviewed and human accepted 2026-09-23 |
 
-Task prerequisites determine eligibility; the project-wide priority above determines order. G01 is accepted. B04’s invitation corrections R11/R12 in `f6b93bc` passed fresh B04.5 review; B04 remains paused until owner resumption. B03 acceptance still requires review of B02 final critical delta. Integration and human review cannot be replaced with synthetic browser tests.
+Task prerequisites determine eligibility; the project-wide priority above determines order. G01 is accepted. B04’s invitation corrections R11/R12 in `f6b93bc` passed fresh B04.5 review; B04 is REVIEW pending human acceptance/integration. B03 acceptance still requires review of B02 final critical delta. Integration and human review cannot be replaced with synthetic browser tests.
 
 ## Authenticated product and later gates
 
@@ -49,7 +49,7 @@ Work through these tasks in priority order, one at a time, after their stated pr
 | [A06.5](tasks/A06.5.md) | `gpt-6-luna` / medium | A06, G01, G02, operational B06, T02 | Integrated transitions, human trials, recording evidence |
 | [G03](tasks/G03.md) | `gpt-6-astra` / high | A05.5, A06.5, operational B06, G02, T02 | Release readiness; no automatic publish |
 
-A04/A05 preparation does not technically depend on G01, and A03.5 passes for the exact recorded artifact. G01 is DONE for the reviewed local checkpoint; B04.5's R11/R12 follow-up passed on `04bd1db..f6b93bc`; its earlier CHANGES_REQUESTED on `13707c2` remains historical evidence. B04 is paused until its owner records resumption; review claim is released. Earlier B04.5 verdicts remain scoped to their named branch artifacts. A05 mock preparation remains REVIEW pending its separate human acceptance. A04 still requires an agreed session interface. External testers still require G02 and operational readiness.
+A04/A05 preparation does not technically depend on G01, and A03.5 passes for the exact recorded artifact. G01 is DONE for the reviewed local checkpoint; B04.5's R11/R12 follow-up passed on `04bd1db..f6b93bc`; its earlier CHANGES_REQUESTED on `13707c2` remains historical evidence. B04 and B04.5 are REVIEW pending human acceptance/integration; the correction review claim is released. Earlier B04.5 verdicts remain scoped to their named artifacts. A05 mock preparation remains REVIEW pending its separate human acceptance. A04 still requires an agreed session interface. External testers still require G02 and operational readiness.
 
 ## AI facilitator extension
 
