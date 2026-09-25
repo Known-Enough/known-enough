@@ -124,20 +124,30 @@ export class DealTableApplication {
     });
   }
   private authorizeInvitationOrganizer(principal: TrustedPrincipal | null, room: RoomRecord | null): RoomRecord {
-    if (!principal?.subject) fail('UNAUTHENTICATED');
-    if (!room) fail('NOT_FOUND');
-    if (principal.kind !== 'participant' || principal.subject !== room.organizerSubject) fail('FORBIDDEN');
-    return room;
+    const scopedRoom = this.authorize(principal, room, 'ISSUE_INVITATION');
+    if (principal?.kind !== 'participant' || principal.subject !== scopedRoom.organizerSubject) fail('FORBIDDEN');
+    return scopedRoom;
+  }
+  private async invitationTransaction<T>(
+    roomId: string,
+    transition: (room: RoomRecord | null) => Promise<T> | T,
+  ): Promise<T> {
+    try {
+      return await this.options.repository.transaction(roomId, transition);
+    } catch (error) {
+      if (error instanceof RepositoryCapacityError) fail('ROOM_CAPACITY_REACHED');
+      throw error;
+    }
   }
   async authorizeRoomInvitationIssue(principal: TrustedPrincipal | null, roomId: string): Promise<void> {
-    await this.options.repository.transaction(roomId, room => {
+    await this.invitationTransaction(roomId, room => {
       this.authorizeInvitationOrganizer(principal, room);
     });
   }
   async issueRoomInvitation(
     principal: TrustedPrincipal | null, roomId: string, rawRequest: unknown,
   ): Promise<RoomInvitationIssueResult> {
-    return this.options.repository.transaction(roomId, async current => {
+    return this.invitationTransaction(roomId, async current => {
       const room = this.authorizeInvitationOrganizer(principal, current);
       const parsed = RoomInvitationIssueRequest.safeParse(rawRequest);
       if (!parsed.success) fail('INVALID_COMMAND');
@@ -162,7 +172,7 @@ export class DealTableApplication {
     const request = RoomInvitationRedeemRequest.safeParse(rawRequest);
     if (!request.success) fail('INVALID_COMMAND');
     const tokenHash = await sha256(request.data.token);
-    return this.options.repository.transaction(roomId, room => {
+    return this.invitationTransaction(roomId, room => {
       if (!principal?.subject) fail('UNAUTHENTICATED');
       if (principal.kind !== 'participant' || !room || room.status === 'CLOSED') fail('NOT_FOUND');
       const membership = room.memberships.find(value => value.subject === principal.subject);
@@ -186,7 +196,11 @@ export class DealTableApplication {
     const isOrganizer = principal.kind === 'participant' && room.organizerSubject === principal.subject;
     const isDisplay = principal.kind === 'display' && principal.roomId === room.roomId;
     const isService = principal.kind === 'service' && principal.roomIds.includes(room.roomId);
-    if (!isMember && !isOrganizer && !isDisplay && !isService) fail('NOT_FOUND');
+    const isPendingInvitationMember = operation === 'ISSUE_INVITATION' && principal.kind === 'participant'
+      && room.memberships.some(m => m.subject === principal.subject && m.status === 'PENDING'
+        && room.roster.some(p => p.id === m.memberId));
+    if (!isMember && !isOrganizer && !isDisplay && !isService && !isPendingInvitationMember) fail('NOT_FOUND');
+    if (operation === 'ISSUE_INVITATION') return room;
     if (operation === 'PUBLIC' && (isMember || isOrganizer || isDisplay)) return room;
     if (['PUBLISH_DISCLOSURE', 'JOB'].includes(operation) && isService) return room;
     if (['REVISE_DECISION', 'CLOSE'].includes(operation) && isOrganizer) return room;

@@ -1,6 +1,6 @@
 import { createServer, type Server } from 'node:http';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DealTableApplication, type TrustedPrincipal } from '@deal-table/application';
+import { DealTableApplication, RepositoryCapacityError, type TrustedPrincipal } from '@deal-table/application';
 import { InMemoryRoomRepository } from '@deal-table/adapters';
 import { CommandResult, OwnerSnapshot, PublicRoomSnapshot, RoomInvitationIssueResponse, RoomInvitationRedeemResponse, type CommandEnvelope } from '@deal-table/contracts';
 import { buildTeamTableFixture } from '@deal-table/test-support';
@@ -173,9 +173,20 @@ describe('B04 Cognito HTTP boundary', () => {
       }
       const noToken = await send(`/rooms/${roomId}/commands`, null, '{"private-diagnostic-canary"');
       expect(noToken.status).toBe(401);
-      const outsider = await send(`/rooms/${roomId}/commands`, cognitoToken({ sub: 'outsider' }), '{"private-diagnostic-canary"');
+      const outsiderToken = cognitoToken({ sub: 'outsider' });
+      const outsider = await send('/rooms/' + roomId + '/commands', outsiderToken, '{"private-diagnostic-canary"');
       expect(outsider.status).toBe(404);
       expect(outsider.data).toMatchObject({ ok: false, error: { code: 'NOT_FOUND' } });
+
+      const outOfScopeDisplayToken = cognitoToken({ client_id: cognitoOptions.displayClientId,
+        'cognito:groups': ['deal-table-display-other-room'] });
+      for (const token of [outsiderToken, outOfScopeDisplayToken]) {
+        for (const targetRoomId of [roomId, 'missing-room']) {
+          const response = await send('/rooms/' + targetRoomId + '/invitations', token, '{');
+          expect(response).toMatchObject({ status: 404, data: { ok: false, error: { code: 'NOT_FOUND' } } });
+        }
+      }
+      expect(await h.repository.transaction(roomId, room => room!.invitations)).toEqual([]);
 
       const command = await h.envelope('SUBMIT_INPUT_DRAFT', {
         expectedOwnerRevision: 0, values: h.fixture.owners[0]!.confirmedInputs.values,
@@ -308,6 +319,55 @@ describe('B03 real local HTTP boundary (non-production test identities)', () => 
     await expect(h.owner('maya')).resolves.toMatchObject({ ownerMemberId: 'maya' });
     expect(logs.mock.calls.flat().join(' ')).not.toContain(token);
     logs.mockRestore();
+  });
+
+  it('maps deterministic invitation capacity failures to known-no-commit 409 responses', async () => {
+    const issueHarness = await harness(undefined, true, ['maya']);
+    const originalIssueTransaction = issueHarness.repository.transaction.bind(issueHarness.repository);
+    let issueTransactions = 0;
+    const issueCapacity = vi.spyOn(issueHarness.repository, 'transaction').mockImplementation(async (targetRoomId, transition) => {
+      issueTransactions += 1;
+      if (issueTransactions === 2) throw new RepositoryCapacityError();
+      return originalIssueTransaction(targetRoomId, transition);
+    });
+    const issueResult = await (async () => {
+      try {
+        return await issueHarness.request('/rooms/' + roomId + '/invitations', 'organizer',
+          { requestId: 'capacity-issue', memberId: 'maya' });
+      } finally {
+        issueCapacity.mockRestore();
+      }
+    })();
+    error(issueResult, 'ROOM_CAPACITY_REACHED', 409);
+    expect(issueResult.data).toEqual({ ok: false, requestId: 'capacity-issue',
+      error: { code: 'ROOM_CAPACITY_REACHED', httpStatus: 409 } });
+    expect(issueTransactions).toBe(2);
+    expect(await issueHarness.repository.transaction(roomId, room => room!.invitations)).toEqual([]);
+
+    const redeemHarness = await harness(undefined, true, ['maya']);
+    const issued = await redeemHarness.request('/rooms/' + roomId + '/invitations', 'organizer',
+      { requestId: 'prepare-capacity-redeem', memberId: 'maya' });
+    expect(issued.status).toBe(201);
+    const token = RoomInvitationIssueResponse.parse(issued.data).token;
+    const redeemCapacity = vi.spyOn(redeemHarness.repository, 'transaction').mockImplementation(async () => {
+      throw new RepositoryCapacityError();
+    });
+    const redemption = await (async () => {
+      try {
+        return await redeemHarness.request('/rooms/' + roomId + '/invitations/redeem', 'maya',
+          { requestId: 'capacity-redeem', token });
+      } finally {
+        redeemCapacity.mockRestore();
+      }
+    })();
+    error(redemption, 'ROOM_CAPACITY_REACHED', 409);
+    expect(redemption.data).toEqual({ ok: false, requestId: 'capacity-redeem',
+      error: { code: 'ROOM_CAPACITY_REACHED', httpStatus: 409 } });
+    const stored = await redeemHarness.repository.transaction(roomId, room => room!);
+    expect(stored.memberships.find(value => value.memberId === 'maya')?.status).toBe('PENDING');
+    expect(stored.invitations.find(value => value.memberId === 'maya')).toMatchObject({
+      tokenHash: expect.any(String), redeemedAt: null,
+    });
   });
 
   it('logs only validated command names when local diagnostics are enabled', async () => {
