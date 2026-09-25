@@ -1,3 +1,11 @@
+## 2026-09-25T00:20:21Z — B04 / PAUSED — R11/R12 fixes handed to fresh review
+
+- Code correction committed locally as `f6b93bc77ecf7b0680a1abcab4bc99d7fa836515` on `main`, parent/result baseline `04bd1db`. Exact follow-up code diff for independent review: `04bd1db..f6b93bc`.
+- R11: invitation issuance now resolves room scope before organizer-only denial. Unrelated signed participants and display principals scoped to another room get the same 404 on existing/missing rooms; room-scoped non-organizers retain 403. The pre-body authorization and transaction-time recheck remain.
+- R12: deterministic RepositoryCapacityError at invitation issue/redeem maps to ApplicationError ROOM_CAPACITY_REACHED/409. Unknown/storage errors continue to surface as redacted 503. New HTTP regressions assert response requestId/code and unchanged invitation/membership state on known no-commit.
+- Full `npm run check` passed in pinned Node 24.21.0/npm 11.19.0 container with `PLAYWRIGHT_CHANNEL=chromium`: references 7/7; planning 15/15; lint/import boundaries 89; typecheck; 232 unit/integration tests plus one opt-in DynamoDB Local skip; 127-module build/privacy scan; Playwright 41/41. Initial default-parallel run timed out one browser startup; isolated scenario passed 1/1 and the final serial full check passed 41/41. No emulator rerun because adapter code did not change; the independent previous review ran DynamoDB Local for `13707c2`.
+- No managed AWS/Cognito/IAM, deployment, cloud, push or human acceptance. B04 is PAUSED; B04.5 fresh independent follow-up is READY and unclaimed on this exact correction.
+
 ## 2026-09-24T23:57:17Z — B04 / IN_PROGRESS — resume R11/R12 corrections
 
 - Independent B04.5 review returned CHANGES_REQUESTED on `30132974c457c6472290e64b35a495c676901b0e..13707c2794491666989059cf23dcaa8bcd7e2075`. P2 R11: organizer invitation authorization distinguishes existing from missing room to unrelated authenticated subjects. P2 R12: invitation issuance and redemption capacity errors become retryable 503 instead of safe known-no-commit 409. Exact reproductions, affected lines and review evidence are in `docs/reviews/B04.5.md`.
