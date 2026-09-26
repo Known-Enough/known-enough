@@ -1,3 +1,5 @@
+> **Historical TeamTable local demonstration.** These instructions exercise the retained local fixture and non-production identities. The [Known Enough product](../known-enough-product.md) is the new direction; this tutorial does not demonstrate generic AI, managed authentication or deployed AWS.
+
 # Local negotiation tutorial
 
 This tutorial exercises both the mock screens and the current local negotiation flow. The local flow uses fictional test identities and a loopback API; it is not real authentication or a production deployment.

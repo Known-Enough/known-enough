@@ -1,0 +1,1986 @@
+# Known Enough — AI-First Product Pivot and Repository Restructuring Plan
+
+## Mission
+
+Restructure the existing Deal Table / TeamTable project into **Known Enough**, an AI-first system for helping groups make decisions when participants have information, limits, preferences, or motivations they do not want to disclose directly to one another.
+
+The new product vision is:
+
+> **Known Enough helps people decide together without everyone needing to know everything.**
+
+The application should support a broad class of group decisions through natural conversation rather than through hand-coded domain-specific workflows.
+
+Examples include:
+
+- a family deciding where to spend Christmas while keeping budgets and interpersonal constraints private;
+- friends deciding where to live together while keeping individual budgets private;
+- several parties exploring a shared purchase while keeping contribution limits private;
+- founders negotiating responsibilities or commitments;
+- teams allocating responsibilities;
+- travel groups balancing private budgets, dates, and preferences;
+- the existing TeamTable meeting-and-duty scenario.
+
+The product must be designed as a **general AI-mediated decision system**, while the hackathon implementation remains deliberately bounded enough to be complete, testable, understandable, and demonstrable.
+
+Do not rewrite the repository from scratch.
+
+Preserve every existing component that provides durable value.
+
+---
+
+# 1. Strategic product decision
+
+The former architecture centers the product around TeamTable:
+
+> fixed meeting slots + fixed duties + deterministic enumeration + narrowly scoped exception.
+
+That implementation becomes a **historical reference scenario and regression fixture**.
+
+It must no longer define the product architecture.
+
+The new abstraction is:
+
+> **A group has an objective.**
+> **Participants privately communicate what matters to them.**
+> **AI constructs a model of the decision, reasons about candidate agreements, and proposes outcomes.**
+> **A small deterministic trust kernel validates universal invariants.**
+> **Humans remain authoritative over their own confirmed constraints, disclosures, and final approval.**
+
+The application should feel AI-first.
+
+Users should ordinarily never construct predicates, equations, schemas, or solver objects manually.
+
+The primary creation experience should begin with:
+
+> **What are you trying to decide?**
+
+Example:
+
+> “Five of us want to figure out where to spend Christmas.”
+
+Known Enough should determine what it needs to know, clarify the shared objective, invite participants, hold separate private conversations, identify relevant tradeoffs, and construct possible agreements.
+
+---
+
+# 2. Product positioning
+
+Rename the product from **Deal Table** to:
+
+# Known Enough
+
+Use **Known Enough** in all new product-facing work.
+
+The name expresses the fundamental concept:
+
+> Everyone does not need to know everything about everyone else. The group needs enough information to make a decision together.
+
+Do not perform a blind repository-wide rename during the restructuring task.
+
+Historical documentation, Git history, fixture names, test provenance, hashes, and accepted evidence must remain truthful.
+
+Package names such as `@deal-table/...` may remain temporarily while the architectural pivot is underway.
+
+Rename technical package identifiers only in a later bounded task if the benefit exceeds migration risk.
+
+User-visible product strings should transition to Known Enough much earlier.
+
+---
+
+# 3. Hackathon positioning
+
+Primary track remains:
+
+**Alexa+**
+
+Primary experience:
+
+**stateful AI group-decision facilitator**
+
+Secondary target:
+
+**AWS Builder mini-challenge**, using actual AWS services such as Bedrock, Cognito, DynamoDB, Lambda/API Gateway and SQS where implemented.
+
+The Alexa experience should demonstrate an ongoing, stateful decision rather than a single-turn bot.
+
+The strongest hackathon story is:
+
+1. A group asks Known Enough to help make a decision.
+2. Known Enough dynamically structures the problem.
+3. Participants privately provide information.
+4. The AI discovers a possible compromise.
+5. A participant receives a private conditional question.
+6. The participant authorizes it.
+7. A valid group proposal appears.
+8. The shared Alexa-style assistant can explain the result without exposing private information.
+9. Everyone separately approves the final proposal.
+
+The technical story is:
+
+> **AI understands and negotiates.**
+> **The trust layer protects consent and privacy.**
+
+Avoid presenting the project primarily as a solver, calendar application, security architecture, or generic chatbot.
+
+---
+
+# 4. Product scope for the hackathon
+
+The long-term product vision is:
+
+> **Any bounded group decision involving multiple participants, shared objectives, private information, and potential tradeoffs.**
+
+The hackathon implementation should demonstrate generality through **two scenarios**, not dozens.
+
+## Scenario A — primary live demo
+
+### Family Christmas
+
+Five family members need to decide:
+
+- destination;
+- dates;
+- approximate accommodation level;
+- trip duration;
+- possibly one or two additional options.
+
+Participants may privately provide:
+
+- maximum budget;
+- preferred budget;
+- unavailable dates;
+- destination preferences;
+- accessibility needs;
+- maximum trip length;
+- interpersonal or logistical constraints they do not want publicly attributed;
+- conditions such as “I would accept destination B if we shorten the trip.”
+
+This scenario should be the principal demo because it is:
+
+- immediately understandable;
+- low regulatory risk;
+- emotionally relatable;
+- clearly multi-party;
+- rich enough for conditional negotiation;
+- capable of demonstrating privacy without dealing with employment or financial execution.
+
+## Scenario B — proof of generality
+
+### Shared Purchase Exploration
+
+Several people are exploring whether they could jointly purchase an asset.
+
+Private information can include:
+
+- maximum contribution;
+- preferred contribution;
+- minimum ownership expectation;
+- timing;
+- willingness to finance;
+- conditional contribution ranges.
+
+Known Enough can construct hypothetical acceptable structures.
+
+This scenario is **planning/exploration only**.
+
+The application must not claim to provide legal, tax, mortgage, securities, contractual, or financial-advisory conclusions.
+
+A possible result is:
+
+> “This hypothetical contribution structure satisfies all participants' currently confirmed conditions.”
+
+It must not be:
+
+> “You should buy the property this way.”
+
+Use this scenario to communicate long-term product potential, not to create unnecessary regulated-domain scope.
+
+## Historical Scenario C
+
+### TeamTable
+
+Keep TeamTable as:
+
+- a regression fixture;
+- a known deterministic benchmark;
+- evidence that the earlier system worked;
+- optionally a hidden developer/demo template.
+
+Do not make TeamTable the product identity.
+
+---
+
+# 5. AI authority model
+
+Known Enough should be aggressively AI-first.
+
+The AI should be responsible for:
+
+- understanding the shared objective;
+- identifying missing information;
+- deciding what questions to ask;
+- creating the initial structured decision representation;
+- identifying candidate variables;
+- interpreting participant statements;
+- identifying hard constraints, preferences and negotiable conditions;
+- generating candidate proposals;
+- discovering possible trades;
+- selecting useful private clarification questions;
+- proposing conditional exchanges;
+- explaining proposals;
+- summarizing tradeoffs;
+- answering public questions from authorized information;
+- adapting its reasoning to different decision domains.
+
+Avoid writing a separate domain solver for:
+
+- travel;
+- property;
+- scheduling;
+- household decisions;
+- founder decisions;
+- purchases;
+- event planning.
+
+The AI should handle the semantics.
+
+---
+
+# 6. The deterministic trust kernel
+
+Do not give the AI authority over a small number of operations whose correctness is inexpensive to enforce mechanically.
+
+The deterministic layer should remain intentionally small.
+
+It protects:
+
+### Identity
+
+The caller is the authenticated participant represented by the verified session.
+
+### Ownership
+
+A participant can confirm or alter only their own private information and permissions.
+
+### Confirmed constraints
+
+AI output is initially a draft.
+
+A participant must confirm the structured interpretation before it becomes authoritative.
+
+AI cannot silently edit an already confirmed hard condition.
+
+### Disclosure
+
+Private information cannot be published to another participant or the shared surface unless the relevant permission exists.
+
+### Final approval
+
+AI cannot approve a proposal.
+
+An organizer cannot approve for someone else.
+
+Every required participant approves the same current proposal.
+
+### Revision integrity
+
+Material changes invalidate stale proposal/permission authority.
+
+### Proposal identity
+
+Final approval binds an exact proposal/version/context.
+
+### Basic machine-checkable invariants
+
+Examples:
+
+- percentages total correctly;
+- monetary totals satisfy declared totals;
+- dates are valid;
+- values respect explicitly confirmed numeric hard bounds;
+- enumerated options exist;
+- references point to actual participants/options;
+- one participant is not accidentally assigned mutually exclusive roles;
+- AI output satisfies the validated schema.
+
+Do not recreate a massive deterministic optimizer.
+
+The objective is a **small universal trust kernel surrounding powerful AI reasoning**.
+
+---
+
+# 7. AI-generated internal decision representation
+
+Introduce a generic representation.
+
+The exact schema should be designed during the contract task, but conceptually it should include:
+
+## Decision
+
+- ID
+- title
+- public objective
+- public description
+- participants
+- status
+- revision/context
+- AI-created variables
+- public options
+- current proposal
+- policy/explanation metadata where relevant
+
+## DecisionVariable
+
+Examples:
+
+- destination
+- tripStart
+- tripEnd
+- participantContribution
+- participantOwnership
+- selectedProperty
+- meetingTime
+
+Variables should be typed using a bounded family such as:
+
+- number
+- money
+- percentage
+- date
+- datetime
+- duration
+- boolean
+- enum
+- participant
+- list/set of enum values
+
+Avoid arbitrary executable code.
+
+## ConfirmedParticipantConstraint
+
+Conceptually:
+
+- owner
+- natural-language source summary
+- structured interpretation
+- classification:
+  - HARD
+  - PREFERENCE
+  - NEGOTIABLE
+- validation representation
+- current revision
+- confirmed timestamp
+- active/superseded status
+
+## ValidationRule
+
+Keep the machine-executable vocabulary small.
+
+Likely primitives:
+
+- comparison
+- equality/inequality
+- membership
+- numeric range
+- sum
+- implication
+- mutual exclusion
+- all-different
+- required/optional
+- arithmetic equality
+- references to confirmed values
+
+The AI may create these rules.
+
+Only known validated rule types may execute.
+
+No generated JavaScript, Python, SQL, shell code, arbitrary expressions or `eval`.
+
+## CandidateProposal
+
+Contains:
+
+- AI-generated proposal values;
+- current decision context;
+- relevant public explanation;
+- validation results;
+- required private dependencies represented internally;
+- proposal identity/hash/version.
+
+## NegotiationQuestion
+
+Contains:
+
+- intended participant;
+- reason category;
+- exact proposed adjustment;
+- affected confirmed/negotiable constraint;
+- decision context;
+- expiry;
+- whether answering it creates a permission/grant.
+
+## DisclosurePermission
+
+Retain the existing architecture's exact-text/audience concept where applicable.
+
+## FinalApproval
+
+Retain current authenticated proposal-bound approval semantics.
+
+---
+
+# 8. Separate AI contexts
+
+Privacy is between participants, and the system must be honest that Known Enough itself processes private information.
+
+Define at least three model contexts.
+
+## A. Owner-private AI context
+
+Receives:
+
+- authenticated participant identity;
+- that participant's private conversation;
+- public decision objective;
+- that participant's previous confirmed constraints;
+- questions intended for that participant.
+
+Does not receive another participant's raw private conversation.
+
+Purpose:
+
+- understand private needs;
+- clarify;
+- draft constraints;
+- explain private requests.
+
+## B. Trusted negotiation AI context
+
+Receives:
+
+- public decision definition;
+- confirmed structured constraints from all participants;
+- confirmed preferences;
+- current grants;
+- current proposal state;
+- no unnecessary raw private explanations.
+
+Purpose:
+
+- generate candidate proposals;
+- reason across participants;
+- identify potential trades;
+- propose private negotiation questions.
+
+This is a trusted backend processing context.
+
+The user-facing privacy explanation must make clear that Known Enough processes the confirmed private information to facilitate the decision.
+
+## C. Public/shared AI context
+
+Receives only:
+
+- public decision facts;
+- current public proposal;
+- public status;
+- public approval indicators if allowed;
+- explicitly published disclosures.
+
+Never receives:
+
+- raw private conversations;
+- unapproved constraints;
+- rejected disclosures;
+- private motivations;
+- owner-attributed conflict diagnostics;
+- hidden ratings;
+- private grant IDs.
+
+This separation is one of the most valuable components of the existing system and must be retained.
+
+---
+
+# 9. Core user journey
+
+The generic application should support this journey.
+
+## Step 1 — Create
+
+User:
+
+> “Our family wants to decide where to spend Christmas.”
+
+Known Enough:
+
+- identifies that this is a group destination/date/budget decision;
+- asks a small number of public clarification questions;
+- creates a draft decision model.
+
+## Step 2 — Confirm shared objective
+
+The group confirms the public decision frame.
+
+Example:
+
+> Choose one destination and a five-to-seven-day period during December 20–30 for five participants.
+
+The AI may propose the decision model.
+
+The public decision frame becomes authoritative only after the required confirmation mechanism.
+
+## Step 3 — Invite participants
+
+Existing invitation/authentication machinery should be reused.
+
+## Step 4 — Private conversations
+
+Each participant privately explains what matters.
+
+Example:
+
+> “I don't want everyone discussing my finances. Keep me below $1,600. I'd rather spend less than $1,200. Mexico is fine, but I really don't want an eight-day trip.”
+
+The AI creates a structured summary.
+
+Example:
+
+Hard:
+
+- trip budget ≤ $1,600
+- trip duration ≤ 7 days
+
+Preference:
+
+- trip budget ≤ $1,200
+
+Destination:
+
+- Mexico acceptable
+
+The participant confirms or edits it.
+
+## Step 5 — Readiness
+
+Once enough information is confirmed, Known Enough reasons over the decision.
+
+## Step 6 — Proposal generation
+
+AI generates candidate outcomes.
+
+The trust kernel checks:
+
+- schema;
+- confirmed hard bounds;
+- public structure;
+- arithmetic;
+- current context.
+
+Invalid AI proposals are discarded or returned for repair.
+
+## Step 7 — Private negotiation
+
+If no satisfactory candidate exists, AI identifies an explicitly negotiable area.
+
+Example:
+
+> “Would December 23–29 work if the destination stays within your preferred budget?”
+
+This goes only to the affected participant.
+
+No repeated pressure after refusal.
+
+## Step 8 — Proposal
+
+Known Enough presents an outcome.
+
+Example:
+
+> Cancún
+> Dec 23–29
+> Shared villa
+> Estimated individual cost range: within each participant's confirmed limits
+
+Do not reveal everyone's individual budget.
+
+## Step 9 — Explain
+
+The shared Alexa-style assistant can answer:
+
+> “Why this option?”
+
+with:
+
+> “It satisfies all currently confirmed hard requirements and best matches the group's expressed preferences among the evaluated options.”
+
+If asked:
+
+> “Who couldn't afford Europe?”
+
+it must not reveal private attribution.
+
+## Step 10 — Approve
+
+Each participant separately approves the exact current proposal.
+
+Only then is it an agreement.
+
+---
+
+# 10. Repository migration philosophy
+
+Do not perform a rewrite.
+
+Classify existing work into:
+
+## KEEP
+
+Preserve almost unchanged:
+
+- Cognito/JWT verification
+- authenticated participant identity
+- invitation issuance/redemption
+- room membership
+- display/public scope
+- DynamoDB repository pattern
+- STATE/GUARD/REPLAY concepts
+- concurrency protection
+- idempotency
+- stale-context behavior
+- transaction handling
+- redacted server errors
+- public/private projection discipline
+- disclosure permission
+- proposal hashing/versioning concepts
+- individual final approvals
+- revision invalidation
+- SQS/job architecture concepts
+- test infrastructure
+- CI/check scripts
+- import/privacy boundaries
+- accessibility/reduced-motion work
+- current review/evidence discipline
+
+## ADAPT
+
+Generalize:
+
+- room → decision/session terminology where appropriate;
+- schedule-specific PublicRoomSnapshot fields;
+- owner confirmed-input structures;
+- ExceptionScope;
+- proposal payload;
+- solver port;
+- domain types;
+- AI extraction DTO;
+- frontend shared table;
+- participant form;
+- shared explanation;
+- ranking-policy assumptions;
+- application readiness rules.
+
+## RETAIN AS LEGACY/REGRESSION
+
+- TeamTable fixture
+- 12-plan exhaustive enumeration tests
+- load-balance/inconvenience ranking tests
+- existing TeamTable screenshots/storyboard
+- historical product specification
+- historical review records
+
+These remain evidence and regression assets.
+
+## SUPERSEDE FOR FUTURE WORK
+
+Do not execute unstarted future tasks merely because they exist in the old queue.
+
+In particular, old future work for:
+
+- A04/A04.5
+- B05
+- A05.5
+- B06
+- T01/T02
+- A06/A06.5
+- G02/G03
+
+must be re-evaluated against the Known Enough architecture.
+
+Preserve the task files as historical planning evidence.
+
+Replace their active scheduling role with new Known Enough tasks.
+
+---
+
+# 11. Source-of-truth restructuring
+
+Create these new authoritative documents:
+
+## `docs/known-enough-product.md`
+
+Authoritative product definition.
+
+Contains:
+
+- product promise;
+- intended users;
+- AI-first interaction;
+- privacy promise;
+- boundaries;
+- two hackathon scenarios;
+- Alexa+ role;
+- what the product does and does not claim.
+
+## `docs/known-enough-architecture.md`
+
+Authoritative architecture.
+
+Contains:
+
+- generic decision model;
+- AI contexts;
+- trust kernel;
+- authorization model;
+- state machine;
+- Bedrock/job architecture;
+- persistence;
+- public/private projections;
+- proposal lifecycle;
+- validators;
+- known limitations.
+
+## `docs/known-enough-pivot.md`
+
+Migration record.
+
+Contains:
+
+- why product direction changed;
+- what is preserved;
+- what becomes historical;
+- old → new task mapping;
+- source-of-truth precedence;
+- migration risks.
+
+## `docs/known-enough-demo.md`
+
+Hackathon narrative.
+
+Contains:
+
+- primary Christmas flow;
+- optional shared-purchase proof;
+- Alexa+ interaction;
+- target <3 minute recording;
+- exact sequence of visible state changes;
+- truthful labels for simulated/live components.
+
+Do not delete:
+
+- `Deal-Table-TeamTable-plan.md`
+- architecture history
+- historical review files
+- work logs
+- old task files.
+
+Add prominent historical/superseded banners where needed without rewriting historical evidence.
+
+---
+
+# 12. New task status model
+
+Preserve:
+
+- READY
+- IN\_PROGRESS
+- PAUSED
+- REVIEW
+- BLOCKED
+- DONE
+
+Add:
+
+- **SUPERSEDED**
+
+Meaning:
+
+> The task remains historical evidence but its planned future work was intentionally replaced by the Known Enough product pivot.
+
+A SUPERSEDED task is not a failed task and must not be restarted.
+
+Completed historical tasks remain DONE for their original scope.
+
+---
+
+# 13. New project queue
+
+Use neutral Known Enough IDs.
+
+Only one implementation/review task remains active project-wide unless the human explicitly changes that workflow.
+
+## KE00 — Pivot Audit and Authority Reset
+
+Model:
+
+**strongest architecture model available; repository currently expects an Astra/high-class review model**
+
+Purpose:
+
+- inspect current main;
+- inspect pending/unintegrated B04 state;
+- build keep/adapt/supersede inventory;
+- write new authority documents;
+- restructure task board;
+- no production implementation.
+
+Acceptance:
+
+- every current active/future task mapped;
+- no historical evidence deleted;
+- no code behavior changed;
+- source-of-truth precedence documented;
+- all Markdown links valid;
+- current checks unchanged;
+- exact Git baseline recorded.
+
+This is the first task.
+
+---
+
+## KE01 — Generic Decision Contracts
+
+Model:
+
+strong architecture/backend model, high reasoning.
+
+Purpose:
+
+define generic runtime-validated contracts.
+
+Deliver:
+
+- DecisionDefinition
+- DecisionVariable
+- PublicDecisionSnapshot
+- OwnerDecisionSnapshot
+- ConfirmedConstraint
+- AIConstraintDraft
+- ValidationRule
+- CandidateProposal
+- NegotiationQuestion
+- DisclosurePermission
+- FinalApproval
+- command envelopes
+- context/version semantics.
+
+Requirements:
+
+- strict schemas;
+- unknown fields rejected;
+- no raw private data in public DTOs;
+- no arbitrary executable expressions;
+- proposal hash remains stable and testable;
+- generic values can express both Christmas and TeamTable;
+- TeamTable compatibility adapter may exist temporarily.
+
+Acceptance:
+
+- schema tests;
+- invalid/private-leak fixtures rejected;
+- Christmas fixture parses;
+- TeamTable fixture can be represented;
+- no AWS dependency.
+
+---
+
+## KE02 — Trust Kernel
+
+Purpose:
+
+implement the small deterministic invariant layer.
+
+It should validate:
+
+- schemas;
+- variable references;
+- numeric ranges;
+- totals;
+- percentages;
+- enumerated options;
+- confirmed hard constraints;
+- current context;
+- proposal identity;
+- permission requirements.
+
+Do not attempt general optimization.
+
+The trust kernel answers:
+
+> “Is this candidate mechanically valid under the confirmed rules we know how to enforce?”
+
+It does not answer:
+
+> “Is this the best human decision?”
+
+Acceptance:
+
+- generic validator tests;
+- arithmetic/property tests;
+- stale-context rejection;
+- hard-limit rejection;
+- TeamTable regression bridge;
+- Christmas fixture validation;
+- shared-purchase hypothetical validation.
+
+---
+
+## KE03 — Generic Application State
+
+Generalize the application layer from TeamTable-specific negotiation into generic decision state.
+
+Preserve:
+
+- authenticated actor model;
+- idempotency;
+- concurrency control;
+- proposal/approval flow;
+- disclosure flow;
+- revision invalidation;
+- repository abstraction.
+
+Introduce a lifecycle approximately:
+
+CREATING
+→ DEFINING
+→ COLLECTING\_PRIVATE\_INPUT
+→ READY
+→ REASONING
+→ PRIVATE\_NEGOTIATION
+→ PROPOSED
+→ APPROVING
+→ AGREED
+
+Alternative:
+
+NEEDS\_CLARIFICATION
+NO\_AGREEMENT
+SUPERSEDED
+CLOSED
+
+AI jobs must bind the exact decision context.
+
+Stale jobs cannot publish results.
+
+---
+
+## KE04 — Historical Compatibility / TeamTable Regression
+
+Re-express the existing TeamTable fixture using the generic contracts.
+
+Goal:
+
+prove that generalization did not destroy the validated existing behavior.
+
+Do not require the new AI path here.
+
+Acceptance:
+
+- old structural fixture still has the expected baseline behavior;
+- existing grants/approval/privacy invariants remain testable;
+- historical tests either remain intact or are replaced with explicitly mapped equivalents;
+- differences are documented.
+
+This task is a migration safety net, not the new product experience.
+
+---
+
+## KE05 — Known Enough Product Shell
+
+Rename visible product experience.
+
+Build:
+
+- Known Enough home/create screen;
+- “What are you trying to decide?” entry;
+- decision lobby;
+- participant list;
+- private/public navigation;
+- decision status;
+- new brand copy;
+- generic proposal surface.
+
+Remove TeamTable-specific visual assumptions from the default UX.
+
+Do not delete legacy routes needed by migration tests yet.
+
+---
+
+## KE06 — AI Decision Architect, Local/Injected Version
+
+Before Bedrock integration, implement an injected AI interface.
+
+Given:
+
+> “Five of us want to choose where to spend Christmas.”
+
+produce a validated DecisionDefinition draft.
+
+Support:
+
+- clarification questions;
+- decision variables;
+- public options;
+- participant information requirements;
+- supported validation rules.
+
+Use deterministic fixtures/fake AI responses in tests.
+
+The production application must treat all AI output as untrusted structured input until schema validation.
+
+Acceptance includes malformed AI output, invented participant IDs, unsupported rule types, prompt injection and stale result tests.
+
+---
+
+## KE07 — Private Participant AI Experience
+
+Create the private conversational workflow.
+
+Participant can say:
+
+> “I don't want the others to know my budget. Keep me below $1,500 and I would rather stay around $1,000.”
+
+AI drafts:
+
+- hard budget maximum;
+- preferred budget;
+- private metadata.
+
+The participant sees exactly what Known Enough understood.
+
+They can:
+
+- confirm;
+- edit;
+- reject;
+- continue clarifying.
+
+No AI interpretation becomes authoritative without confirmation.
+
+Raw explanations should not be retained indefinitely unless necessary.
+
+Preserve the existing A05 work where useful rather than rebuilding its review/confirmation UX blindly.
+
+---
+
+## KE08 — AI Proposal / Negotiation Engine
+
+Introduce an interface where the trusted negotiation AI receives:
+
+- current public decision;
+- confirmed structured private constraints;
+- preferences;
+- active negotiated permissions;
+- current context.
+
+It returns:
+
+- candidate proposals;
+- validation rules invoked;
+- private suggested questions;
+- public explanation draft.
+
+Each candidate runs through KE02.
+
+AI can retry/repair invalid candidates within bounded limits.
+
+AI may identify a potential concession.
+
+It may not grant it.
+
+---
+
+## KE09 — Privacy and Consent Review Gate
+
+Independent high-effort architecture/privacy review.
+
+Review:
+
+- raw private inputs;
+- model context construction;
+- cross-owner access;
+- public assistant context;
+- logs;
+- retries;
+- queues;
+- disclosure;
+- stale outputs;
+- proposal approval;
+- prompt injection;
+- decision-model poisoning.
+
+Required before real model integration is considered release-grade.
+
+---
+
+## KE10 — Bedrock + Async AI Runtime
+
+Replace injected AI with actual Bedrock integration.
+
+Reuse SQS/job infrastructure concepts from former B05.
+
+Implement:
+
+- owner-private extraction job;
+- decision-architect job;
+- negotiation/proposal job;
+- safe public explanation job if needed;
+- stale-result rejection;
+- bounded retries;
+- redacted logs;
+- model/request metadata;
+- kill switch;
+- cost/concurrency limits.
+
+Record actual model/region/configuration.
+
+Maintain a deterministic fallback path where feasible.
+
+No model output directly mutates participant consent.
+
+---
+
+## KE11 — Authenticated Multi-Participant Experience
+
+Fold the useful parts of former A04/A04.5 into the generic product.
+
+Demonstrate:
+
+- separate participant sessions;
+- shared display/public surface;
+- reconnect;
+- stale tab handling;
+- token/session errors;
+- invitation redemption;
+- no cross-owner access;
+- public assistant cannot call owner consent operations.
+
+Use real authenticated context when available.
+
+---
+
+## KE12 — Alexa+ Simulated Experience
+
+Build the shared conversational interface specifically for the Alexa+ track.
+
+The interaction must clearly be labeled as a simulated Alexa+ experience if native Alexa+ is not actually used.
+
+It should demonstrate stateful behavior such as:
+
+User:
+
+> “Alexa, ask Known Enough whether we have a plan.”
+
+Assistant:
+
+> “A proposal is ready and is awaiting two approvals.”
+
+User:
+
+> “Why did we choose Cancún?”
+
+Assistant:
+
+> “It satisfies everyone's confirmed requirements and currently best matches the group's approved decision criteria.”
+
+User:
+
+> “Who couldn't afford Europe?”
+
+Assistant:
+
+> “I can't disclose another participant's private constraints. I can explain the public reasons for the current proposal.”
+
+This interface must read only the public projection and authorized disclosures.
+
+---
+
+## KE13 — AWS Deployment and Operations
+
+Adapt former B06.
+
+Deploy the actual architecture that is required for the submission.
+
+Potential components:
+
+- Cognito
+- API Gateway/Lambda
+- DynamoDB
+- SQS/DLQ
+- Bedrock
+- S3/CloudFront
+- CloudWatch
+- CDK
+
+Acceptance requires evidence of actual deployment, not only infrastructure code.
+
+Include:
+
+- bounded model calls;
+- expiry;
+- redacted metrics;
+- retry behavior;
+- synthetic judge accounts;
+- judge setup instructions;
+- cost controls.
+
+No real private participant information in judge fixtures.
+
+---
+
+## KE14 — Scenario Qualification
+
+Run two complete synthetic scenarios.
+
+### Christmas
+
+Must show:
+
+- AI-created decision;
+- five participants;
+- at least three materially different private constraints;
+- at least one private condition;
+- at least one private negotiated question;
+- valid candidate;
+- public explanation;
+- unanimous acceptance.
+
+### Shared Purchase
+
+Need not have identical polish.
+
+Must show the same engine can represent:
+
+- contribution variables;
+- ownership;
+- numeric private limits;
+- conditional flexibility;
+- a hypothetical candidate structure.
+
+No legal/financial execution claim.
+
+This task proves genericity.
+
+---
+
+## KE15 — Human Trials and UX Corrections
+
+Use synthetic/non-sensitive test scenarios with volunteers.
+
+Observe:
+
+- whether they understand what Known Enough knows;
+- whether they understand what other participants can see;
+- whether AI interpretation is clear;
+- whether they trust confirmation;
+- whether a private negotiation question feels useful;
+- whether the group understands proposal vs agreement;
+- whether “Known Enough” communicates the product.
+
+Do not ask participants to provide genuinely sensitive financial/medical/personal information during hackathon testing.
+
+Record concrete friction.
+
+---
+
+## KE16 — Hackathon Demo / Submission
+
+Produce a maximum-three-minute narrative.
+
+Target approximately 2:30–2:45.
+
+Suggested structure:
+
+0:00–0:15
+Problem.
+
+> “Groups make bad compromises because people either reveal information they would rather keep private, or stay silent.”
+
+0:15–0:30
+Known Enough.
+
+> “Tell Known Enough what your group is trying to decide.”
+
+0:30–0:50
+Christmas decision created dynamically.
+
+0:50–1:15
+Several private conversations.
+
+Show one private budget/condition.
+
+0:15–1:35
+AI reports that no acceptable proposal currently exists and privately asks one participant a conditional question.
+
+1:35–1:50
+Participant allows it.
+
+1:50–2:05
+Proposal appears.
+
+2:05–2:20
+Shared Alexa-style assistant explains the proposal.
+
+Ask a deliberately private question and demonstrate privacy boundary.
+
+2:20–2:32
+Separate approvals → AGREED.
+
+2:32–2:43
+Very short second-domain glimpse:
+
+> “Same engine. Different decision.”
+
+Show shared-purchase candidate.
+
+2:43–2:55
+Architecture labels:
+
+Bedrock
+Cognito
+DynamoDB
+Lambda/API
+SQS
+Alexa+ simulated experience
+
+2:55–3:00
+Close:
+
+> **Known Enough — decide together without knowing everything.**
+
+Put the strongest visual interaction before the first minute.
+
+---
+
+## KE17 — Final Release Gate
+
+Independent final review.
+
+Verify:
+
+- current deployed artifact;
+- repository instructions;
+- clean setup;
+- track requirement;
+- simulated Alexa+ labeling;
+- AWS runtime use;
+- judge credentials;
+- no secrets;
+- no private fixture leakage;
+- current source hashes;
+- full automated checks;
+- real model smoke;
+- real cloud smoke;
+- public/private separation;
+- current demo matches actual behavior;
+- submission text is truthful;
+- friction logs included;
+- product feedback included.
+
+No feature work after this gate except release-blocking fixes.
+
+---
+
+# 14. What happens to current tasks
+
+During KE00 create an explicit mapping.
+
+Initial proposed mapping:
+
+F00/F01/F02
+→ preserve as DONE historical foundation.
+
+A01
+→ preserve useful UI/scaffold work; historical DONE.
+
+B01
+→ preserve deterministic TeamTable regression logic; historical DONE.
+
+B02/B02.5
+→ preserve application state/permission/idempotency principles and code where generic.
+
+B03
+→ preserve HTTP boundary.
+
+G01
+→ preserve as accepted historical local TeamTable checkpoint.
+
+A02/A03/A03.5/A02.5
+→ preserve relevant UI, consent and accessibility work; do not force completion under old product requirements.
+
+B04/B04.5
+→ critical retained foundation. Resolve human acceptance/integration before large new backend implementation.
+
+A05
+→ preserve its reviewed private AI-draft UI patterns and tests.
+
+A04/A04.5
+→ superseded by KE11.
+
+B05
+→ superseded by KE10.
+
+A05.5
+→ absorbed into KE07/KE10.
+
+B06
+→ superseded by KE13.
+
+T01/T02
+→ superseded by KE06/KE08/KE10/KE12.
+
+A06/A06.5
+→ superseded by KE14/KE15/KE16.
+
+G02
+→ conceptually replaced by KE09 plus post-Bedrock security re-review.
+
+G03
+→ replaced by KE17.
+
+Do not mark these automatically without inspecting exact current ticket content.
+
+KE00 must produce the authoritative final mapping.
+
+---
+
+# 15. Implementation sequencing
+
+The critical path should become:
+
+KE00
+→ KE01
+→ KE02
+→ KE03
+→ KE04
+→ KE05
+→ KE06
+→ KE07
+→ KE08
+→ KE09
+→ KE10
+→ KE11
+→ KE12
+→ KE13
+→ KE14
+→ KE15
+→ KE16
+→ KE17
+
+However, architecture review may permit small preparation tasks to move earlier if they do not create parallel incompatible writers.
+
+Preserve the repository's current single-active-task discipline until humans explicitly change it.
+
+---
+
+# 16. Suggested calendar
+
+Current planning should optimize for the October 23 submission deadline.
+
+## September 25–28
+
+Pivot and architecture.
+
+Complete:
+
+- KE00
+- KE01
+- KE02 design
+
+Goal:
+
+Know exactly what is preserved before large code changes.
+
+## September 29–October 4
+
+Generic core.
+
+Complete:
+
+- KE02
+- KE03
+- KE04
+- KE05
+
+Goal:
+
+Existing system runs through generic decision abstractions.
+
+## October 5–10
+
+AI-first local product.
+
+Complete:
+
+- KE06
+- KE07
+- KE08
+- KE09
+
+Goal:
+
+Christmas scenario works locally using injected/mock model responses through the real generic application.
+
+## October 11–15
+
+Real AI + sessions.
+
+Complete:
+
+- KE10
+- KE11
+- KE12
+
+Goal:
+
+real Bedrock-backed AI flow and polished Alexa+ simulated experience.
+
+## October 16–18
+
+Cloud and second-domain proof.
+
+Complete:
+
+- KE13
+- KE14
+
+Goal:
+
+deployed working product and proof that Known Enough is not a scheduling application.
+
+## October 19–20
+
+Human validation.
+
+Complete:
+
+- KE15
+- key UX fixes.
+
+## October 21
+
+Feature freeze.
+
+Complete first final recording candidates.
+
+## October 22
+
+Final demo, documentation, judge access, submission fields, friction log, product feedback.
+
+## October 23
+
+Verification/contingency only.
+
+No architectural work.
+
+---
+
+# 17. Cut order if behind
+
+Protect, in this order:
+
+1. private participant AI conversations;
+2. generic DecisionDefinition;
+3. AI-generated proposal;
+4. trust kernel;
+5. consent/privacy;
+6. exact final approvals;
+7. Christmas scenario;
+8. real Bedrock integration;
+9. Alexa+ simulated shared experience;
+10. working repository/setup;
+11. AWS operational evidence.
+
+Cut first:
+
+- native Alexa MCP if simulation satisfies track strategy;
+- extra animation;
+- sophisticated ranking;
+- additional domains beyond Christmas + minimal purchase proof;
+- elaborate analytics;
+- generic user-authored validator UI;
+- large optimization engines;
+- third scenario;
+- voice-specific polish;
+- unnecessary repository renames.
+
+Never cut:
+
+- honest simulation labeling;
+- authorization;
+- private/public isolation;
+- explicit confirmation;
+- no-impersonation approval;
+- stale-context protection;
+- submission reproducibility.
+
+---
+
+# 18. Model strategy
+
+Use the strongest architecture/review model available for:
+
+- KE00
+- KE01
+- KE02 design
+- KE09
+- KE17
+- difficult security/consent changes.
+
+The repository currently refers to this class of work as `gpt-6-astra` / high.
+
+Use a strong implementation model for:
+
+- KE02 implementation
+- KE03
+- KE06–KE13.
+
+Use cheaper/faster models only for bounded:
+
+- copy edits;
+- CSS;
+- documentation cleanup;
+- mechanical migrations;
+- straightforward tests.
+
+Do not let a model name become evidence.
+
+Always record the actual model that performed the work when exposed.
+
+Independent privacy/security review must remain independent from the implementation session.
+
+---
+
+# 19. Coding principles for the pivot
+
+Do not begin by renaming everything.
+
+Do not begin by deleting TeamTable.
+
+Do not begin by writing a universal DSL.
+
+Do not begin by integrating ten external APIs.
+
+Do not begin with native Alexa.
+
+Do not begin with a property-purchase experience.
+
+Start with the generic information model.
+
+Then prove Christmas.
+
+Then prove the same architecture can express a materially different second decision.
+
+Prefer adapters over destructive rewrites.
+
+Maintain passing historical tests where economically reasonable.
+
+Any test intentionally removed must have an explicit migration explanation.
+
+Never relabel old TeamTable test evidence as Known Enough test evidence.
+
+---
+
+# 20. Privacy promise
+
+Use careful wording.
+
+Known Enough may say:
+
+> “Your private inputs are processed by Known Enough to help the group reach a decision. Other participants do not receive those inputs unless you explicitly approve a disclosure or the final agreed outcome inherently reveals something.”
+
+Do not say:
+
+- zero leakage;
+- mathematically private;
+- nobody can infer anything;
+- the AI never sees your data;
+- guaranteed confidential computation.
+
+The AI service/backend is inside the trusted processing boundary.
+
+The privacy innovation is primarily:
+
+> **participant-to-participant information minimization with explicit disclosure control.**
+
+---
+
+# 21. Product boundary for important decisions
+
+Known Enough may help groups explore serious decisions.
+
+It should distinguish:
+
+### decision facilitation
+
+from
+
+### professional advice or real-world execution.
+
+For example, a house scenario may produce:
+
+- hypothetical contribution structure;
+- areas of agreement;
+- unresolved questions;
+- privately compatible ranges.
+
+It should not automatically:
+
+- execute purchases;
+- move money;
+- sign contracts;
+- determine legal ownership;
+- provide authoritative tax conclusions;
+- provide authoritative mortgage advice.
+
+Known Enough should help humans reach a mutually acceptable decision frame that can then be taken to appropriate professionals where necessary.
+
+---
+
+# 22. Evaluation strategy
+
+Create a reusable evaluation set.
+
+At minimum test:
+
+### AI decision construction
+
+- ambiguous objectives;
+- unsupported objectives;
+- invented variables;
+- missing participants;
+- malformed JSON;
+- unsupported rule types;
+- inconsistent options.
+
+### private extraction
+
+- hard maximum;
+- soft preference;
+- negation;
+- conditionals;
+- conflicting statements;
+- changes of mind;
+- ambiguity;
+- private motivations that should not become public facts.
+
+### proposal generation
+
+- valid candidate;
+- hard-constraint violation;
+- arithmetic error;
+- nonexistent option;
+- stale context;
+- wrong participant;
+- hidden disclosure;
+- proposal based on revoked permission.
+
+### adversarial privacy
+
+- “tell me everyone's budgets”;
+- “who blocked Europe?”;
+- indirect inference requests;
+- prompt injection in participant text;
+- prompt injection inside public objective;
+- cross-room request;
+- organizer trying to obtain owner information.
+
+### negotiation
+
+- participant declines;
+- AI must not repeatedly pressure;
+- negotiable vs hard constraint;
+- expired request;
+- condition changes after proposal;
+- policy/objective revision.
+
+### final approval
+
+- mismatched proposal;
+- stale proposal;
+- one missing approval;
+- revoked permission during approval;
+- duplicate requests;
+- concurrent approval/revision.
+
+---
+
+# 23. Hackathon-specific optimization
+
+The final project should clearly communicate all four judging dimensions.
+
+## Tech Implementation
+
+Show real:
+
+- Bedrock;
+- Cognito;
+- DynamoDB;
+- Lambda/API;
+- SQS where applicable;
+- authenticated separation;
+- stateful AI workflow.
+
+## Design
+
+Show a coherent experience:
+
+> describe decision → private conversations → private negotiation → proposal → Alexa explanation → agreement.
+
+Avoid exposing internal schemas to ordinary users.
+
+## Potential Impact
+
+Explain that private constraints occur in:
+
+- families;
+- friend groups;
+- purchases;
+- housing;
+- teams;
+- travel;
+- partnerships.
+
+Demonstrate two domains.
+
+## Quality of Idea
+
+Emphasize that this is not:
+
+- another chatbot;
+- a polling tool;
+- a scheduling app;
+- a simple MCP wrapper.
+
+It is a stateful multi-party AI workflow where participants intentionally hold different information and the AI mediates between them without simply publishing everything.
+
+---
+
+# 24. Friction log
+
+Maintain the competition friction log from the pivot forward.
+
+Record actual issues with:
+
+- Bedrock;
+- Cognito;
+- Alexa+ tooling;
+- MCP if attempted;
+- AWS deployment;
+- local emulation;
+- SDK compatibility;
+- documentation gaps.
+
+Each entry should include:
+
+- attempted task;
+- steps;
+- expected result;
+- actual result;
+- severity;
+- workaround;
+- actionable recommendation.
+
+### Never invent friction entries.
+
+---
+
+# 25. First Codex/Astra execution task
+
+For the first session, perform **KE00 only**.
+
+Do not implement generic product code.
+
+Exact work:
+
+1. Synchronize/inspect current `main` according to repository workflow.
+2. Record current Git state.
+3. Read:
+   - AGENTS.md
+   - agent-workflow\.md
+   - task-board.md
+   - Deal-Table-TeamTable-plan.md
+   - Deal-Table-two-developer-architecture.md
+   - contracts.md
+   - decisions.md
+   - main-integration.md
+   - handoff-A.md
+   - handoff-B.md
+   - latest B04/B04.5 evidence
+   - A05
+   - B05
+   - T01/T02
+   - B06
+   - G02/G03
+4. Confirm which B04 source is currently integrated, local-only or pending.
+5. Create a keep/adapt/supersede table with exact file/package/task references.
+6. Draft:
+   - `docs/known-enough-product.md`
+   - `docs/known-enough-architecture.md`
+   - `docs/known-enough-pivot.md`
+7. Create KE01–KE17 task files.
+8. Rewrite the active task-board queue around Known Enough while preserving historical task evidence.
+9. Update workflow only as required to add the SUPERSEDED state and new source-of-truth precedence.
+10. Update README product description carefully.
+11. Add historical/superseded banners to relevant planning docs without changing their historical body text.
+12. Run documentation/reference consistency checks.
+13. Run the existing full repository check only if the restructuring changed files that those checks cover or current workflow requires it.
+14. Produce a handoff containing:
+    - exact baseline;
+    - changed files;
+    - task mapping;
+    - unresolved architectural decisions;
+    - checks actually run;
+    - current blocker;
+    - recommended KE01 start.
+15. Do not push, deploy, create AWS resources, call paid models, or modify external systems unless separately authorized.
+
+Stop after KE00 for human review.
+
+Do not silently begin KE01.
+
+---
+
+# 26. Success condition for the restructuring
+
+The restructuring is successful when a new engineer can read the repository and accurately conclude:
+
+> Known Enough is an AI-first private group-decision facilitator.
+
+They should no longer conclude:
+
+> This is a meeting scheduler being generalized.
+
+At the same time, they should clearly see that the project did not discard substantial validated engineering merely to perform a product rename.
+
+The result should preserve the strongest existing assets:
+
+- identity;
+- privacy;
+- consent;
+- permission boundaries;
+- concurrency;
+- versioning;
+- persistence;
+- review discipline;
+
+while replacing the most limiting assumptions:
+
+- fixed meetings;
+- fixed duties;
+- handcrafted decision domains;
+- deterministic solver as primary intelligence;
+- TeamTable as product identity.
+
+The intended architecture is:
+
+> **Powerful AI for understanding and negotiating arbitrary bounded group decisions, surrounded by a small rigorous trust kernel for privacy, consent, validation, and exact approval.**
+
+That is the new Known Enough project.

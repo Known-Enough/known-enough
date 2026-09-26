@@ -1,72 +1,51 @@
-# Shared task queue
+# Known Enough — shared task queue
 
-Scheduling revision: September 22, 2026; sequential priority and current model IDs aligned September 23, 2026. Both users follow one project-wide queue, with one active task at a time. A/B task prefixes are stable historical IDs, not user assignments or permanent subsystem ownership. Tickets are authoritative for status, prerequisites and current claims; follow the [sequential claim/transfer procedure](agent-workflow.md#shared-pool-claims-and-transfers). Either user gets the same next task. Existing active claims and independent review requirements remain in force.
+One project-wide priority queue, one active implementation or review at a time. Either user gets the same next eligible task. Tickets own status, prerequisites and claims; the [workflow](agent-workflow.md) governs synchronization and transfer. The [pivot record](known-enough-pivot.md) maps every old ticket and distinguishes source presence from acceptance. New product work follows [product](known-enough-product.md) and [architecture](known-enough-architecture.md).
 
-Current integration: foundation, A01, workflow refactor, B01 and B02 are on main at the user’s direction. See [main integration](main-integration.md) for combined verification/publication state and [B02.5](reviews/B02.5.md) for review evidence. No new implementation task is claimed by integration.
+## Current gate and claim
 
-## Project-wide priority
+**KE00 REVIEW: documentation-only pivot audit complete**, performed by the initiating user / A log, actual Codex GPT-6 (exact variant/effort unexposed), clean synchronized main `65359ebd19c8ae81007a4b502cce955d5d8ff292`. The claim is finished; no implementation/review task remains active. The user directed KE00 only; its local documentation artifact is ready for human acceptance. KE01 is BLOCKED until that acceptance and a fresh claim.
 
-- **Current gate: B04 and B04.5 REVIEW, pending human acceptance/integration.** The owner assessed B04 local acceptance evidence after independent PASS on exact correction diff `04bd1db..f6b93bc`; R11/R12 are closed with no new bounded findings. Fresh focused suites 87/87, DynamoDB Local 1/1 and targeted failure/authorization probes passed. The author-reported full check (232 unit/integration passes plus one skip; 41 browsers after serial fallback) was reviewed as a summary, not independently rerun. Managed-service, deployment and G02/live acceptance remain outstanding; no publication is implied.
-- A05 mock preparation is complete and remains REVIEW after independent A03.5 privacy follow-up PASS; its own human acceptance remains pending.
-- Then follow the critical path through [A04](tasks/A04.md) → [A04.5](tasks/A04.5.md) → [G02](tasks/G02.md), then [A05](tasks/A05.md) → [B05](tasks/B05.md) → [A05.5](tasks/A05.5.md). B06 follows B05 when its cloud actions are explicitly authorized. Continue with the AI extension [T01](tasks/T01.md) → [T02](tasks/T02.md) after their prerequisites, then trial/demo integration [A06](tasks/A06.md) → [A06.5](tasks/A06.5.md) → [G03](tasks/G03.md).
-- A04, A06 and T01 remain READY candidates only when their ticket prerequisites hold. The queue order applies equally to either user; A/B prefixes do not decide ownership. A02/A03/A03.5, A02.5 and B03 remain REVIEW; G01 is DONE. Do not restart completed B01/B02.
+**Retained foundation gate:** B04/B04.5 remain REVIEW pending human acceptance. Their source and latest independent R11/R12 PASS are already integrated through origin/main `65359eb`; there is no local-only B04 delta in this checkout. KE01 may define contracts after KE00 acceptance; KE02 and later backend implementation additionally require the retained B04/B04.5 human gate. Managed Cognito/DynamoDB/IAM and deployment acceptance remain future evidence, not prerequisites disguised as completed tests.
 
-## Foundation and local product
+## Sequential Known Enough queue
 
-These rows record dependency and review state. They are not simultaneous work lanes; only one task may be active project-wide.
+Implementation successors require acceptance of the preceding scope. The independent KE09 review starts from KE08 REVIEW with the writer paused, then its verdict and human acceptance gate KE10; implementation REVIEW never releases downstream implementation on its own. Preparation/mock evidence never substitutes for required live evidence. No later task may be claimed by skipping an unresolved gate.
 
-| Task | Direct model / effort | Prerequisite | Outcome / current state |
+| Task | Direct model / effort | Prerequisite / gate | Status and outcome |
 | --- | --- | --- | --- |
-| [A01](tasks/A01.md) | `gpt-6-sol` / medium | Foundation | DONE; integrated UI, combined checks passed |
-| [A02](tasks/A02.md) | `gpt-6-sol` / medium | A01 implementation available | Client/forms against contracts; REVIEW (actual worker recorded in ticket/log) |
-| [A03](tasks/A03.md) | `gpt-6-luna` / medium | A01 implementation available | Receipts/accessibility with mocks; REVIEW (actual worker: Codex GPT-5) |
-| [A06](tasks/A06.md) | `gpt-6-luna` / medium | A01 implementation available | Demo/trial/setup drafts; READY |
-| [B01](tasks/B01.md) | `gpt-6-sol` / high | Foundation | DONE; source/evidence integrated, combined checks passed |
-| [B02](tasks/B02.md) | `gpt-6-astra` / high | B01 on main | DONE; integrated and verified |
-| [B02.5](tasks/B02.5.md) | `gpt-6-astra` / high | Reviewable B02 slice | DONE; PASS, evidence reconciled |
-| [B03](tasks/B03.md) | `gpt-6-sol` / medium | B02 usable implementation | REVIEW; local HTTP integrated from `27a110c`, live acceptance pending |
-| [A03.5](tasks/A03.5.md) | `gpt-6-astra` / high | A02 + A03 preparation | REVIEW; preparation PASS rechecked on `bc02dc6`; human acceptance pending |
-| [A02.5](tasks/A02.5.md) | `gpt-6-sol` / medium | A02, A03.5, reviewed B02/B02.5, B03 | REVIEW; synchronized repairs, combined evidence in G01 |
-| [G01](tasks/G01.md) | `gpt-6-astra` / high | A02.5, A03.5, B03, B02.5 current evidence | DONE; local integration checkpoint independently reviewed and human accepted 2026-09-23 |
+| [KE00](tasks/KE00.md) | `gpt-6-astra` / high scheduled; actual GPT-6, variant unexposed | User-directed first task | REVIEW — pivot audit and authority reset; human acceptance pending |
+| [KE01](tasks/KE01.md) | `gpt-6-astra` / high | KE00 human acceptance | BLOCKED — generic contracts and critical review |
+| [KE02](tasks/KE02.md) | `gpt-6-astra` / high design, then `gpt-6-sol` / high implementation | KE01 + B04/B04.5 human acceptance | BLOCKED — small trust kernel |
+| [KE03](tasks/KE03.md) | `gpt-6-sol` / high | KE02 | BLOCKED — application and versioned storage adaptation |
+| [KE04](tasks/KE04.md) | `gpt-6-sol` / medium | KE03 | BLOCKED — TeamTable regression bridge |
+| [KE05](tasks/KE05.md) | `gpt-6-luna` / medium | KE04 | BLOCKED — Known Enough product shell |
+| [KE06](tasks/KE06.md) | `gpt-6-sol` / high | KE05 | BLOCKED — injected AI decision architect |
+| [KE07](tasks/KE07.md) | `gpt-6-sol` / high | KE06 | BLOCKED — private participant conversation/confirmation |
+| [KE08](tasks/KE08.md) | `gpt-6-sol` / high | KE07 | BLOCKED — candidate generation/private negotiation |
+| [KE09](tasks/KE09.md) | `gpt-6-astra` / high, independent session | KE08 paused for review | BLOCKED — privacy/consent gate; later sequential follow-ups |
+| [KE10](tasks/KE10.md) | `gpt-6-sol` / high | Accepted KE09 + authorized real model calls for live acceptance | BLOCKED — Bedrock and async jobs |
+| [KE11](tasks/KE11.md) | `gpt-6-sol` / high | KE10 + current critical follow-up | BLOCKED — authenticated multi-participant sessions |
+| [KE12](tasks/KE12.md) | `gpt-6-sol` / high | KE11 | BLOCKED — stateful simulated Alexa+ shared assistant |
+| [KE13](tasks/KE13.md) | `gpt-6-sol` / high | KE12 + explicit cloud/deployment authorization | BLOCKED — deployed AWS/operations evidence |
+| [KE14](tasks/KE14.md) | `gpt-6-sol` / high | KE13 operational acceptance | BLOCKED — Christmas and hypothetical purchase qualification |
+| [KE15](tasks/KE15.md) | `gpt-6-luna` / medium | KE14 + current independent privacy gate + authorized volunteer access | BLOCKED — actual synthetic-data trials/UX corrections |
+| [KE16](tasks/KE16.md) | `gpt-6-luna` / medium | KE15 | BLOCKED — truthful demo/submission materials |
+| [KE17](tasks/KE17.md) | `gpt-6-astra` / high, independent session | KE16 and all current review/live evidence | BLOCKED — final release gate |
 
-Task prerequisites determine eligibility; the project-wide priority above determines order. G01 is accepted. B04’s invitation corrections R11/R12 in `f6b93bc` passed fresh B04.5 review; B04 is REVIEW pending human acceptance/integration. B03 acceptance still requires review of B02 final critical delta. Integration and human review cannot be replaced with synthetic browser tests.
+Independent reviews are sequential gates, including KE01/KE02/KE03 critical changes and KE09 follow-ups after KE10–KE13. An implementation pauses while its reviewer claims the single active slot. Final human acceptance/publication authorization is separate from PASS. No model name is evidence of execution.
 
-## Authenticated product and later gates
+## Retained acceptance and historical evidence
 
-Work through these tasks in priority order, one at a time, after their stated prerequisites are satisfied.
+| Tickets | Current retained status | Meaning |
+| --- | --- | --- |
+| [F00](tasks/F00.md), [F01](tasks/F01.md), [F02](tasks/F02.md), [A01](tasks/A01.md), [B01](tasks/B01.md), [B02](tasks/B02.md), [B02.5](tasks/B02.5.md), [G01](tasks/G01.md) | DONE | Historical foundation/local TeamTable acceptance; do not restart |
+| [A02](tasks/A02.md), [A03](tasks/A03.md), [A03.5](tasks/A03.5.md), [A02.5](tasks/A02.5.md), [B03](tasks/B03.md) | REVIEW | Preserve exact implementation/review scope and pending human acceptance; adapt useful work through KE tasks |
+| [A05](tasks/A05.md) | REVIEW | Reviewed mock draft UX and A03.5 follow-up PASS; human/live acceptance not inferred |
+| [B04](tasks/B04.md), [B04.5](tasks/B04.5.md) | REVIEW | Integrated retained identity/storage foundation; independent correction PASS, human acceptance pending |
 
-| Task | Direct model / effort | Prerequisite | Outcome |
-| --- | --- | --- | --- |
-| [A04](tasks/A04.md) | `gpt-6-luna` / medium | A03.5; agreed session interface | Session/reconnect UX using injected responses |
-| [A05](tasks/A05.md) | `gpt-6-luna` / medium | A02, A03.5 | REVIEW; host-simulation language draft and form fallback; A03.5 privacy follow-up PASS |
-| [B04](tasks/B04.md) | `gpt-6-sol` / high | G01 | REVIEW; local acceptance evidence assessed, pending human acceptance/integration |
-| [B04.5](tasks/B04.5.md) | `gpt-6-astra` / high | G01 + B04 design/first implementation | REVIEW; independent PASS on `04bd1db..f6b93bc`, R11/R12 closed |
-| [A04.5](tasks/A04.5.md) | `gpt-6-luna` / medium | A04, completed B04, B04.5, G01 | Real sessions across browser contexts |
-| [G02](tasks/G02.md) | `gpt-6-astra` / high | A04.5, B04, B04.5 | Privacy/security gate before external testers |
-| [B05](tasks/B05.md) | `gpt-6-sol` / high | Reviewed B04/B04.5 | Owner extraction/jobs and safe routing |
-| [A05.5](tasks/A05.5.md) | `gpt-6-luna` / medium | A05, B05, A04.5 | Live extraction with owner confirmation |
-| [B06](tasks/B06.md) | `gpt-6-sol` / high | B05; explicit approval for cloud actions | Infrastructure/operations and authorized deployment |
-| [A06.5](tasks/A06.5.md) | `gpt-6-luna` / medium | A06, G01, G02, operational B06, T02 | Integrated transitions, human trials, recording evidence |
-| [G03](tasks/G03.md) | `gpt-6-astra` / high | A05.5, A06.5, operational B06, G02, T02 | Release readiness; no automatic publish |
+[All eleven replaced future tasks](known-enough-pivot.md#complete-old-task-mapping) are SUPERSEDED: A04, A04.5, B05, A05.5, B06, T01, T02, A06, A06.5, G02 and G03. Their historical bodies/statuses remain visible for provenance but cannot schedule work. G02's protection survives in KE09 and post-model/session/cloud follow-up; G03 becomes KE17. No old REVIEW task is automatically accepted or forced through obsolete requirements.
 
-A04/A05 preparation does not technically depend on G01, and A03.5 passes for the exact recorded artifact. G01 is DONE for the reviewed local checkpoint; B04.5's R11/R12 follow-up passed on `04bd1db..f6b93bc`; its earlier CHANGES_REQUESTED on `13707c2` remains historical evidence. B04 and B04.5 are REVIEW pending human acceptance/integration; the correction review claim is released. Earlier B04.5 verdicts remain scoped to their named artifacts. A05 mock preparation remains REVIEW pending its separate human acceptance. A04 still requires an agreed session interface. External testers still require G02 and operational readiness.
+## Tracking
 
-## AI facilitator extension
-
-Existing A05/B05/A05.5 cover private extraction and confirmation. These neutral-ID tasks add the missing shared-objective and explanation experience without duplicating that work. This extension follows the core identity, persistence and privacy gates in the single queue.
-
-| Task | Direct model / effort | Prerequisite | Outcome / current state |
-| --- | --- | --- | --- |
-| [T01](tasks/T01.md) | `gpt-6-luna` / medium + `gpt-6-astra` independent review | Current product/contracts; existing AI ticket scope | READY, unclaimed; bounded interaction/privacy design and evaluation specification |
-| [T02](tasks/T02.md) | `gpt-6-sol` / high | Reviewed T01, B05, A05.5, G02; authorized live calls | BLOCKED; implement and verify AI facilitator; independent review of new boundaries |
-
-A06 can draft a clearly labeled future AI narrative after T01; A06.5's final integrated recording and G03 require T02 evidence. Initial G02 enables T02; T02's changed boundaries require follow-up G02 review before release. This is not a dependency cycle or authorization to deploy/spend.
-
-## Tracking and evidence
-
-- [A handoff](handoff-A.md) / [A log](work-log-A.md)
-- [B handoff](handoff-B.md) / [B log](work-log-B.md)
-- [Review records](reviews/README.md)
-- [Historical execution](task-execution.md) / [verification](verification.md)
-
-Foundation tickets [F00](tasks/F00.md), [F01](tasks/F01.md), [F02](tasks/F02.md) preserve historical evidence. Their displayed models apply only to future follow-up; do not rerun completed foundation tasks because assignments changed.
+[KE00 handoff / A](handoff-A.md), [A log](work-log-A.md), [B historical handoff](handoff-B.md), [B log](work-log-B.md), [review records](reviews/README.md), [integration](main-integration.md), [verification history](verification.md), [original queue](reference/pre-pivot/task-board-2026-09-26.md.txt). Historical handoffs do not override this queue or ticket status. Sharing/pushing remains separately authorized; local logs are not cross-clone locks.

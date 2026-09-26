@@ -1,3 +1,5 @@
+> **HISTORICAL — superseded for new work by Known Enough (2026-09-26).** Read the [product](known-enough-product.md), [architecture](known-enough-architecture.md), [pivot mapping](known-enough-pivot.md) and [current queue](task-board.md). The unchanged historical body below records its original scope and evidence; it does not schedule new work. The [exact imported original](reference/pre-pivot/Deal-Table-two-developer-architecture.md.txt) retains its original checksum.
+
 # Deal Table — two-developer architecture and delivery plan
 
 Prepared September 19, 2026. Status: implementation proposal, not deployed software.

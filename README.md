@@ -1,6 +1,12 @@
-# Deal Table · TeamTable
+# Known Enough
 
-Main combines the A01 React/Vite mock UI, strict runtime contracts, B01’s deterministic solver, B02’s local application/in-memory repository, and the current sequential task workflow. All people/data are fictional. **Mock identities are not authentication. The UI still uses mocks; the local HTTP boundary and connected browser flow are next. No cloud services are deployed.**
+**Decide together without everyone needing to know everything.** Known Enough is an AI-first group-decision facilitator: people describe a shared objective, privately explain what matters, confirm the AI's interpretation, consider proposals and individually approve an exact outcome. A small trust kernel protects identity, consent, supported hard conditions and current approval authority.
+
+The [product definition](docs/known-enough-product.md), [architecture direction](docs/known-enough-architecture.md) and [pivot record](docs/known-enough-pivot.md) describe the new direction: Family Christmas first, Shared Purchase Exploration as a second-domain proof. Private inputs are processed by Known Enough/its permitted AI service; other participants receive authorized public facts and disclosures, and outcomes can permit inference.
+
+**Current implementation:** the retained TeamTable prototype includes the React/Vite UI, strict contracts, deterministic fixture, local application/HTTP flow and reviewed local Cognito/DynamoDB adapter code. Default UI routes use synthetic mocks; explicit local routes use fixed non-production identities. B04/B04.5 await human acceptance. Generic Known Enough AI, Bedrock/SQS runtime and cloud deployment are future tasks; KE00 changes documentation only. All demo people/data are fictional. Mock identities are not authentication.
+
+Read the [current queue](docs/task-board.md) before starting work. KE00 stops for human review; KE01 is next only after acceptance. Package names such as `@deal-table/...` remain intentionally unchanged during the migration.
 
 ## Setup and launch
 
@@ -15,23 +21,17 @@ npm run dev
 
 Open **http://127.0.0.1:5173**. Stop with Ctrl+C. Windows users can install the pinned Node/npm directly and run the npm commands in the application folder. No Windows source paths, AWS account, API keys or environment variables are needed after import. A different Node/npm is rejected by engine-strict; change to the pinned runtime first. The root folder name need not match the app name.
 
-## A01 local UI examples
+## Historical TeamTable demonstrations
 
-The default page is the shared table. Follow **Open private owner demo** for a fixed fictional owner; it is not an identity switch or login. The personal screen loads separately and never changes the public mock result. Local form choices reset on navigation/reload.
+The default page is the synthetic shared table. **Open private owner demo** opens a fixed fictional owner, not a login. Shared scenarios use `/?public=collecting` (also `blocked`, `private-review`, `proposed`, `agreed`, `superseded`); owner scenarios use `/?view=owner&owner=review` (also `draft`, `approval`). Both adapters support `empty`, `failure` and `stale` recovery examples.
 
-- Shared examples: `/?public=collecting`, `blocked`, `private-review`, `proposed`, `agreed`, or `superseded`.
-- Owner examples: `/?view=owner&owner=review`, `draft`, or `approval`.
-- For either adapter, use `empty`, `failure`, or `stale` as its scenario value to inspect recovery states. Retry loads the default example; refreshing a stale example clears its stale marker. A short mock delay exposes loading feedback.
-
-Exception permission, disclosure permission, and final acceptance remain separate. These mock screens exercise the interface only; client/forms preparation belongs to A02, with real command integration in A02.5/B02/B03.
-
-## Solver demo
+For the connected local UI/API demonstration, use the [local negotiation tutorial](docs/tutorials/local-negotiation.md) and [API setup](apps/api/README.md). These routes exercise actual local application state with explicit non-production identity labels; they are not managed authentication or cloud evidence. Exception, disclosure and final acceptance are separate.
 
 ```sh
 npm run demo --workspace @deal-table/test-support
 ```
 
-This runs B01 independently of the browser: 12 structural candidates, zero feasible at baseline, two with the valid scoped exception; inconvenience selects B and balanced load selects A. B02 implements local application commands and stored membership checks using trusted synthetic principals; verified credential authentication is later work.
+The deterministic historical fixture has 12 structural candidates, zero feasible at baseline and two after the scoped exception; inconvenience selects B and balanced load selects A. Preserve it as regression evidence, separate from the new generic AI scenarios.
 
 ## Checks
 
@@ -48,23 +48,19 @@ On a host unsupported by Playwright's bundled Chromium (such as macOS 12), an in
 
 See the [dated bootstrap verification evidence](docs/verification.md). It records the original local run and is not a fresh result for the current checkout. CI is defined to run the same checks without cloud credentials. The arithmetic reference is not a production solver/security audit, and passing contract shapes does not prove authorization or race safety.
 
-## Workspace and next work
+## Workspace and migration
 
-- `apps/web`: shared and lazy-loaded owner demo screens with separate adapters; public sample responses are in `src/mocks/public`. Browser owner examples are synthetic UI-only values, never imports from server fixtures.
-- `packages/contracts`: runtime DTO/command/error validators and canonical public hashing; shared-pool ownership with coordinated review of breaking changes.
-- `packages/domain`: B01 structural enumeration, deterministic feasibility/ranking and domain tests.
-- `packages/application`, `packages/adapters`: B02 command lifecycle, allowlisted snapshots, independent permissions and an isolated in-memory transaction repository.
-- `apps/api`, `apps/workers`, `infra`: reserved HTTP/worker/cloud boundaries; no deployed service.
-- `packages/test-support`: isolated synthetic domain fixtures and executable solver demo; server/test-only, never browser imports.
-- `tests/e2e`, `tests/integration`: browser smoke checks and integration tests.
-- `docs`: immutable source references, [contracts](docs/contracts.md), [decisions/risks](docs/decisions.md), [task files](docs/tasks), [local negotiation tutorial](docs/tutorials/local-negotiation.md), and [A](docs/handoff-A.md)/[B](docs/handoff-B.md) handoffs.
+| Boundary | Current value / next adaptation |
+| --- | --- |
+| `apps/web` | Separate shared/private surfaces, confirmation/receipts, retry/accessibility behavior; generic shell in KE05 |
+| `packages/contracts` | Strict DTOs, commands and public hashes; generic contracts in KE01 |
+| `packages/domain` | TeamTable solver/benchmark retained; small universal kernel in KE02 |
+| `packages/application` | Commands, allowlisted snapshots, independent consent and guarded lifecycle; generic state in KE03 |
+| `packages/adapters`, `apps/api` | Retained in-memory/DynamoDB repositories, verified Cognito identity, HTTP and subject-bound invitations; human/live gates remain |
+| `apps/workers`, `infra` | Worker placeholder and infrastructure design; actual Bedrock/jobs/deployment in KE10/KE13 |
+| `packages/test-support`, `tests` | Synthetic private fixtures and regression/integration/browser tests; never import server fixtures into web |
+| `docs` | Known Enough direction, baseline contracts, immutable source evidence, current tasks and dated reviews/logs |
 
-**Use main in separate clones for all new work.** A01, the workflow refactor, B01 and B02 are consolidated here at the user’s direction. The old task branches are historical pointers, not active work queues. See [main integration](docs/main-integration.md) for source commits, verification and publication state. Synchronize your separate clone before claiming the next task; do not continue work on the old task branches.
+Use `main` in separate clones, one active project task at a time. On clean main, successfully run `git pull --ff-only origin main` before task development, then claim the highest-priority eligible task in the [queue](docs/task-board.md). Select its named direct worker model/effort; files do not change the session model. Independent critical reviews run sequentially. The [workflow](docs/agent-workflow.md) and [authority mapping](docs/known-enough-pivot.md#authority-and-evidence) supersede historical domain, ownership, branch and scheduling instructions.
 
-The [current task board](docs/task-board.md) and [workflow](docs/agent-workflow.md) govern execution and supersede dated branch/model/ownership/sequencing instructions in imported references. Product/security semantics remain unchanged. Both users follow the same project-wide priority queue, one task at a time; A/B task prefixes are historical identifiers, not user assignments. Existing claims remain protected. Separate integration tickets retain real API/auth checks. The AI facilitator extension is tracked in [T01](docs/tasks/T01.md) and [T02](docs/tasks/T02.md).
-
-## Starting a task
-
-Choose a READY task from the board, select its named model and reasoning effort as the **direct worker**, and ask: “Read AGENTS.md and execute docs/tasks/A02.md within its scope.” Use your own clone and log the claim. Use `gpt-6-luna` for narrow UI/docs work, `gpt-6-sol` for routine implementation and difficult backend work, and `gpt-6-astra` for architecture and explicit checkpoints. No routine Astra manager or subagents are required. Files do not switch the selected session model.
-
-See [A handoff](docs/handoff-A.md), [B handoff](docs/handoff-B.md), [A log](docs/work-log-A.md), [B log](docs/work-log-B.md) and [review records](docs/reviews/README.md). Use ticket statuses and current shared claims to select work; completed or actively claimed tasks must not be restarted. Sharing logs/code requires authorized synchronization; no cross-account access or live messaging is configured. Agent checks do not replace human acceptance or authorize pushing, integration, deployment or spending.
+[A handoff](docs/handoff-A.md), [B historical handoff](docs/handoff-B.md), [A log](docs/work-log-A.md), [B log](docs/work-log-B.md), [integration record](docs/main-integration.md) and [reviews](docs/reviews/README.md) retain evidence and acceptance boundaries. Check current ticket claims; local logs are not a shared lock. Human acceptance, publication, merging, deployment, spending and external messages require their own authorization. No blind repository/package rename or historical evidence rewrite is part of the pivot.

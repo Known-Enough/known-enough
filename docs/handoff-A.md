@@ -1,5 +1,19 @@
 # User A handoff — shared task pool
 
+## Current handoff — KE00 REVIEW — 2026-09-26T20:36:07Z
+
+Known Enough's documentation restructuring is ready for human review. Baseline: clean synchronized `main` and `origin/main` at `65359ebd19c8ae81007a4b502cce955d5d8ff292`, after successful `git pull --ff-only origin main`. Actual worker: Codex GPT-6, exact variant/effort unexposed. Claim finished; no parallel task or independent-security-review claim.
+
+Added product/architecture/pivot/demo direction, KE01–KE17 and a friction-log starter; rewrote README/queue and authority precedence; mapped all 27 old tickets (11 unstarted tasks SUPERSEDED); preserved historical bodies, reviews and original reference bytes/hashes. [Exact changed-file manifest and fresh evidence](tasks/KE00.md#review-artifact-and-checks); [task mapping and unresolved decisions](known-enough-pivot.md).
+
+B04 corrections/review are already integrated on origin/main. B04/B04.5 remain REVIEW for human acceptance; managed-service evidence remains outstanding. Old “local/unpushed” statements are dated history.
+
+Fresh pinned Node 24.21.0/npm 11.19.0: references 7/7, planning arithmetic 15/15, all local Markdown links/anchors, task/status/dependency consistency, original-body preservation, documentation-only scope and whitespace checks passed. No application suite was run because no executable files changed and this was not an integration checkpoint. Historical test results are not new KE00 evidence.
+
+Current blocker: KE00 human acceptance. Recommended next start: claim KE01 alone after acceptance/synchronization, settle bounded rule/value/publication semantics and legacy compatibility, then implement strict contracts/fixtures. KE02 additionally requires B04/B04.5 human acceptance. Unresolved decisions include frame confirmation, qualitative conditions, precision/time, disclosure of proposal values, refusal equivalence and storage migration/capacity.
+
+No KE01 work, commit, push, merge, deployment, paid call, resource creation or external message occurred. Older handoffs below remain historical.
+
 Latest scheduling checkpoint (2026-09-25 UTC): both users follow the same [project-wide priority queue](task-board.md), with one active task at a time. G01 is DONE for its accepted local checkpoint. B04 invitation issuance/redemption and the bounded R11/R12 fixes are in local main commits `13707c2` and `f6b93bc`; B04 is PAUSED for fresh independent B04.5 review of `04bd1db..f6b93bc`. Full pinned checks passed, including 232 unit/integration tests (one opt-in emulator skip) and 41 browser tests. Actual implementation worker was GPT-6 Codex with variant/effort unexposed, not claimed as `gpt-6-sol` / high. No managed cloud acceptance, deployment, push or human acceptance is claimed.
 
 Use the direct model/effort printed in the ticket. A02/A03 remain REVIEW. A03.5 records PASS for the exact reviewed correction; A04/A06 remain candidates subject to prerequisites, while A05 is REVIEW. Read [workflow](agent-workflow.md) and [A log](work-log-A.md), then take only the current highest-priority task. No parallel implementation work; required independent reviews run sequentially.

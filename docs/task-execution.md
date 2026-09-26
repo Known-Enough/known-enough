@@ -1,3 +1,5 @@
+> **HISTORICAL execution plan.** Product and future queue superseded by the [Known Enough pivot](known-enough-pivot.md). Follow the [current workflow](agent-workflow.md) and [task board](task-board.md); preserve the body below as dated evidence.
+
 # Model selection and historical execution evidence
 
 Current policy, September 23, 2026: humans select the direct model/effort printed in each [task ticket](task-board.md). See [workflow](agent-workflow.md). Use `gpt-6-luna` for narrow UI/docs work, `gpt-6-sol` for routine implementation and difficult backend work, and `gpt-6-astra` for architecture and explicit critical checkpoints. B01/B02 source and prior execution evidence are integrated; current results are in [main integration](main-integration.md). Model selection does not change task state or establish verified results.

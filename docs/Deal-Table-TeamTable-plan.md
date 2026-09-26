@@ -1,3 +1,5 @@
+> **HISTORICAL — superseded for new work by Known Enough (2026-09-26).** Read the [product](known-enough-product.md), [architecture](known-enough-architecture.md), [pivot mapping](known-enough-pivot.md) and [current queue](task-board.md). The unchanged historical body below records its original scope and evidence; it does not schedule new work. The [exact imported original](reference/pre-pivot/Deal-Table-TeamTable-plan.md.txt) retains its original checksum.
+
 # Deal Table: TeamTable — active hackathon build plan
 
 Version 2, September 19, 2026. Original solo capacity: 25–35 hours/week. This supersedes the weekend-trip scenario in `Deal-Table-build-plan.md`. Product and technical specification, not an implemented or deployed application.

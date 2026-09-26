@@ -1,3 +1,18 @@
+## 2026-09-26T20:36:07Z — KE00 / REVIEW — pivot documentation handoff
+
+- Actual worker: Codex GPT-6, exact variant/effort unexposed; scheduled Astra/high not claimed. Completed only the user-directed KE00 scope over synchronized main `65359ebd19c8ae81007a4b502cce955d5d8ff292`; claim finished. No subagents, implementation or independent-security-verdict claim.
+- Added Known Enough product/architecture/pivot/demo direction, source request, KE00–KE17 and empty actual-friction framework; rewrote the shared queue/README/authority; mapped all 27 old tickets. Eleven unstarted tasks are SUPERSEDED; 16 prior DONE/REVIEW statuses retained. Historical ticket bodies, imported source hashes, B records and review evidence preserved. [Exact file manifest](tasks/KE00.md#exact-changed-files).
+- Audit corrected source-state interpretation: B04 merge/fixes and independent R11/R12 PASS are already ancestors of origin/main. No local-only B04 code is pending integration here; human acceptance and managed-service acceptance remain separate unresolved gates.
+- Fresh pinned Node 24.21.0/npm 11.19.0 checks: references 7/7, planning 15/15, repository Markdown links/anchors, task/queue/status/dependency consistency, original-byte/body preservation, scope and `git diff --check` passed. No executable edit or integration checkpoint, so no application suite/browser run. Earlier 232/41 and 87/1 evidence remains historical, not freshly rerun.
+- [KE00 handoff](handoff-A.md) records baseline, changed files, mapping, open architecture decisions and next task. Stop REVIEW for human acceptance; KE01 remains BLOCKED. Retained B04/B04.5 acceptance required before KE02/backend work. No commit, push, merge, paid call, cloud/deployment/resource action or external message.
+
+## 2026-09-26T20:21:52Z — KE00 / IN_PROGRESS — user-directed pivot
+
+- Claimant: initiating user / A log, actual Codex GPT-6; exact variant/effort unexposed, not claimed as the scheduled Astra/high. One documentation task; no delegation or other implementation claim.
+- Clean main successfully pulled with `git pull --ff-only origin main`; local and remote baseline `65359ebd19c8ae81007a4b502cce955d5d8ff292`, zero commits ahead/behind. Latest B04/B04.5 claims finished and both tickets REVIEW. User explicitly directs KE00 despite the pending acceptance gate; that gate remains for new backend implementation.
+- Bounded files: README/AGENTS; product/architecture/pivot/demo direction; workflow/board; KE00–KE17 and old-ticket annotations; historical plan banners with exact original copies/checksums; integration annotation; A handoff and this log. Preserve B log, independent reviews, application/config/test sources and historical bodies.
+- User handoff is visible in this session; no remote claim publication is authorized or claimed. Stop after reviewable KE00; KE01 requires human acceptance and a new claim.
+
 ## 2026-09-25T00:20:21Z — B04 / PAUSED — R11/R12 fixes handed to fresh review
 
 - Code correction committed locally as `f6b93bc77ecf7b0680a1abcab4bc99d7fa836515` on `main`, parent/result baseline `04bd1db`. Exact follow-up code diff for independent review: `04bd1db..f6b93bc`.

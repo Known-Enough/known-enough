@@ -1,5 +1,11 @@
 # Bootstrap decisions and risks
 
+## September 26, 2026 — Known Enough product pivot
+
+User-directed KE00 makes Known Enough the AI-first group-decision product; Christmas is the primary demo, Shared Purchase Exploration proves generality and TeamTable remains regression history. [Product](known-enough-product.md), [architecture](known-enough-architecture.md) and [migration mapping](known-enough-pivot.md) supersede older domain restrictions and queue instructions. Existing contract/source behavior is unchanged. Technical package names remain `@deal-table/...`.
+
+B04 correction `f6b93bc` and review record `1c4ea45` are already ancestors of synchronized main `65359eb`; no local-only B04 source remains in this checkout. Human acceptance remains pending for B04/B04.5 local scope. No cloud acceptance or generic AI implementation is implied. KE00 stops REVIEW; KE01 awaits human acceptance, and backend implementation additionally awaits the retained B04 gate. Historical decisions below retain their date and evidence.
+
 ## September 22, 2026 — shared task pool and AI facilitator extension
 
 User instruction replaces A/B user assignments with one shared pool. Either user may claim any eligible unclaimed task; existing claims, independent reviews, separate clones and external-action permissions remain. Historical task IDs and personal log filenames are preserved. [Workflow](agent-workflow.md) and [board](task-board.md) govern current scheduling; older ownership statements below are historical.

@@ -1,3 +1,5 @@
+> **Implementation baseline / historical TeamTable semantics (2026-09-26).** The document below retains its dated B02 description; executable schemas/source and B04 evidence describe later implementation. New generic contracts belong to [KE01](tasks/KE01.md) under the [Known Enough architecture](known-enough-architecture.md). No generic contract is implemented by KE00. See the [baseline audit](known-enough-pivot.md#b04-foundation-integrated-source-pending-acceptance).
+
 # Contract v1 — B02 local application
 
 Executable authority: [schemas and hash implementation](../packages/contracts/src/index.ts). Either user may claim contract work through the shared pool, with coordinated consumer review for breaking changes. Package version 0.1.0, wire schemaVersion 1. B02 implements local application transitions and an in-memory repository. B03 provides the future HTTP boundary; verified authentication and durable transactions remain later adapter work.
