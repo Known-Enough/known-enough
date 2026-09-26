@@ -1,6 +1,16 @@
 # User A handoff — shared task pool
 
-## Current handoff — KE00 REVIEW — 2026-09-26T20:36:07Z
+## Current handoff — KE13C REVIEW — 2026-09-26T23:40:22Z
+
+The user accepted KE00 and KE13A, then explicitly authorized proceeding with a Stage 0 preview deployment and said account credits are available. Actual worker: current Codex GPT-6, exact variant/effort unexposed. Baseline: a clean separate clone on `main` at `a5d1833ff6bf818e963acac6f0a6b6ad923eafa4`, after successful `git pull --ff-only origin main`. No push.
+
+The bounded [KE13C](tasks/KE13C.md) implementation is complete and paused for independent sequential review. Its separate hosted build contains the public synthetic mock only and passes static and browser checks. Stage 0 is private S3 behind CloudFront/OAC in `us-east-1`, about `$0–$3/month` under the `$25/month` planning ceiling. This does not start KE13B API/DynamoDB or satisfy live KE13 acceptance.
+
+Installed AWS CLI v2.37.4 via the official WSL/Linux installer; installer verified its signature. Initial PATH/Windows install-location checks found no pre-existing CLI. The user configured `known-enough-staging` via `aws login`, verified root, and logged out that cached root session. The user then configured the Identity Center user `martelaxe` and `ReadOnlyAccess` assignment. Device-code SSO login succeeded in `known-enough-staging-ro`; explicit-profile STS verified the `AWSReservedSSO_ReadOnlyAccess` assumed role in the intended account. `us-east-1` is both the separately confirmed Identity Center primary region and deployment region. The user made the Identity Center changes; the agent made no AWS IAM/resource changes. No Known Enough app resources, CDK bootstrap, deployment, paid call or model call occurred.
+
+Pinned full `npm run check` passed under Node 24.21.0/npm 11.19.0: 232 unit tests passed (one opt-in emulator skip), one hosted-preview browser test passed, and all 41 existing browser tests passed, along with references, planning, lint/import boundaries, typecheck and both build scans. No AWS resource, budget, permission set, bootstrap or deployment change occurred. A fresh read-only check confirms no S3 buckets, CloudFront distributions, or AWS Budgets currently exist. The authenticated `ReadOnlyAccess` role cannot deploy. Independent critical review is the next gate.
+
+## Prior handoff — KE00 REVIEW — 2026-09-26T20:36:07Z
 
 Known Enough's documentation restructuring is ready for human review. Baseline: clean synchronized `main` and `origin/main` at `65359ebd19c8ae81007a4b502cce955d5d8ff292`, after successful `git pull --ff-only origin main`. Actual worker: Codex GPT-6, exact variant/effort unexposed. Claim finished; no parallel task or independent-security-review claim.
 

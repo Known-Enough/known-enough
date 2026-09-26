@@ -21,7 +21,8 @@
     "check:references": "node scripts/check-references.mjs",
     "check:planning": "node planning-checks/teamtable-fixture-check.mjs",
     "build": "npm run build --workspace @deal-table/web && node scripts/check-bundle.mjs",
-    "check": "npm run check:references && npm run check:planning && npm run lint && npm run typecheck && npm test && npm run build && npm run test:e2e"
+    "check:hosted-preview": "npm run build:hosted-preview --workspace @deal-table/web && node scripts/check-hosted-preview-bundle.mjs && playwright test --config=playwright.hosted-preview.config.ts",
+    "check": "npm run check:references && npm run check:planning && npm run lint && npm run typecheck && npm test && npm run build && npm run check:hosted-preview && npm run test:e2e"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

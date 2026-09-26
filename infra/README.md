@@ -1,5 +1,9 @@
 # B04 DynamoDB adapter and invitation implementation — local checks pass; independent review pending
 
+## Current Known Enough staging sequence
+
+The B04 material below records the local adapter/authentication baseline only; it does not describe a deployed AWS environment. [KE13A staging preparation](staging-runbook.md) records the staged HTTPS mock preview, later authenticated API/DynamoDB plan, profile setup instructions and cost/cleanup controls. [KE13B](../docs/tasks/KE13B.md) is the future sequential `gpt-6-sol` / high backend/authentication/persistence/IAM implementation handoff. [KE13](../docs/tasks/KE13.md) remains separate live deployment and operational acceptance. No AWS resources, profile, login, identity or cloud behavior are claimed here.
+
 Historical B04.5 verdicts remain scoped to their named commits. The current invitation issuance/redemption slice is locally implemented and awaits independent B04.5 review. This document records design and local verification only; no AWS resources have been created and no cloud behavior is claimed as verified.
 
 ## Identity boundary
@@ -9,6 +13,7 @@ Historical B04.5 verdicts remain scoped to their named commits. The current invi
 - A separate display app client maps to a read-only display principal only when the signed `cognito:groups` claim contains exactly one `deal-table-display-<roomId>` group. Group membership is an administrator-managed entitlement; the display client must not allow public sign-up or client-side group assignment. No display principal can read `/me` or write commands.
 - Group removal cannot revoke an already issued self-contained access token. Before live use, configure a short access-token lifetime (proposed maximum 15 minutes), document that revocation delay, and verify it against the deployed user-pool configuration. G02 must review this bound. No user-pool configuration exists yet.
 - The local `NON_PRODUCTION` header identity handler remains loopback-only and refuses to start when `NODE_ENV=production`. It is not used as a fallback by the Cognito handler.
+- The Stage 0 hosted preview uses a separate Vite entry and output at `apps/web/dist-hosted-preview/`. Only this artifact may be uploaded for the public mock preview; it is fixed to public synthetic fixture data, disables local identity modes and has no shared state. See the [staging runbook](staging-runbook.md).
 - Room invitation issuance is restricted to the configured organizer and a pre-provisioned pending roster membership. The subject-to-member binding is fixed by trusted room provisioning; the issue request accepts only a member ID, never a subject or owner override. The invite token is returned once, stored only as a SHA-256 hash, and expires after 24 hours according to the application clock. Reissue is allowed only after expiry; an unexpired invite returns a conflict. Redemption requires the exact verified Cognito subject already bound to the pending member, activates only that member, and consumes the token in the guarded STATE transaction. Invalid, wrong-subject, expired and replayed tokens share the same not-found response. The token is not included in diagnostics or public snapshots. This flow cannot create or rebind memberships; production provisioning remains a trusted control-plane responsibility.
 
 ## Persistence and transaction design

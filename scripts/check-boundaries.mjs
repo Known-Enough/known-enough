@@ -24,7 +24,7 @@ const serverWorkspaceDependencies = {
 };
 function files(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap(e => {
-    if (['node_modules', 'dist'].includes(e.name)) return [];
+    if (['node_modules', 'dist', 'dist-hosted-preview'].includes(e.name)) return [];
     const path = `${dir}/${e.name}`;
     return e.isDirectory() ? files(path) : [path];
   });

@@ -1,0 +1,32 @@
+# KE13C — hosted public-only mock preview
+
+- Status: REVIEW — hosted preview build complete; independent review pending.
+- Claim: finished 2026-09-26T23:40:22Z. Claimant/worker: current Codex GPT-6 session; exact variant and effort are not exposed. No claim that a named model was used.
+- Baseline: clean `main` at `a5d1833ff6bf818e963acac6f0a6b6ad923eafa4`; `git pull --ff-only origin main` succeeded after verifying clean `main`. This baseline includes the permitted local KE00 documentation checkpoint. The local prep docs were brought forward and their human acceptance recorded; nothing was pushed.
+- Authorization: the user accepted KE00 and KE13A, then explicitly asked to proceed with staging deployment and said credits are available. Scope is Stage 0 static public-fixture preview only in `us-east-1`, with the `$25/month` planning ceiling. No API, Cognito, DynamoDB, paid model, bootstrap, or cloud-resource writes are in this task.
+- Scope: `apps/web/hosted-preview/index.html`, `apps/web/src/hosted-preview.tsx`, the preview branch in `apps/web/src/public-screen.tsx`, the fail-closed `apps/web/src/hosted-local-api-stub.ts`, `apps/web/vite.hosted-preview.config.ts`, web/root package scripts, `.gitignore`, `eslint.config.mjs`, the generated-bundle boundary checker, a dedicated Playwright config/spec, this ticket, task board, A handoff/log and staging runbook. Preserve the existing local demo for local development. No change to backend authentication or persistence.
+
+## Goal
+
+Produce a deployable web artifact that displays only the reviewed public synthetic fixture screen. The hosted URL must ignore `?view=owner`, `?local=...`, and query-selected scenarios; contain no owner-demo bundle, local identity header/client, API endpoint, server/private fixture, or navigation into a local-only route. It must say **“Hosted mock preview — simulated data, no shared state.”** This is a mock preview and cannot synchronize state between browsers.
+
+## Acceptance
+
+1. A dedicated build entry and output directory exist; ordinary local development keeps its existing demo behavior.
+2. The hosted artifact uses only the public fixture adapter and fixed safe scenario. Query strings cannot activate owner/local/demo modes or change the selected fixture.
+3. The hosted artifact contains no `OwnerScreen`, `NON_PRODUCTION` identity, `X-Deal-Table-Test-Identity`, local API URL/client, or server/private fixture import. The preview UI has no link to an owner/local route.
+4. The screen clearly labels simulated data and lack of shared state. No fetch/XHR/WebSocket to an API is made.
+5. Focused checks inspect the built artifact and selected URL variants. Run the pinned project checks required by the workflow before handoff. Evidence is local/build-only; it is not cloud or deployment acceptance.
+6. The author run and browser checks pass. Pause in REVIEW for the required independent sequential critical review of the public/private and local/hosted boundary. Do not mark KE13 live operations accepted.
+
+## Verification and handoff
+
+Pinned Node 24.21.0/npm 11.19.0, installed with `npm ci` in the clean task clone. `npm run check` passed: 7/7 imported reference hashes; 15/15 planning checks; ESLint and 94 import/dependency boundary references; TypeScript; 232 unit tests passed with one opt-in emulator test skipped; standard build/privacy scan; hosted build static bundle scan; hosted browser test passed; and 41 existing browser tests passed. Hosted output contains three files: `hosted-preview/index.html`, one CSS bundle and one JS bundle. The artifact scan found none of the local identity header, `NON_PRODUCTION`, local API origin, `OwnerScreen`, or owner navigation markers. Browser smoke tried owner, local identity and scenario query strings; each rendered the collecting public fixture and issued no external request.
+
+No AWS resource, budget, permission set, bootstrap or deployment change occurred. A separate read-only check verified the existing `ReadOnlyAccess` role and found no S3 buckets, CloudFront distributions or AWS Budgets. The role cannot create Stage 0 resources. The next gate is an independent sequential `gpt-6-astra` / high review of the exact code, generated hosted artifact and checks. After that, prepare the scoped Stage 0 Identity Center permission set and budget alerts; deploy only the preview scope authorized by the user. KE13B backend work and KE13 operational acceptance remain separate.
+
+## Cloud boundary and handoff
+
+The user authorized proceeding with the Stage 0 plan: private S3 build bucket behind CloudFront with Origin Access Control, HTTPS through the CloudFront domain, in `us-east-1`; estimated low-traffic hosting is approximately `$0–$3/month`, within the `$25/month` planning ceiling. Cost alerts are not a hard cap. No resources exist yet. The current `known-enough-staging-ro` profile is authenticated as `ReadOnlyAccess` and cannot create resources. After the artifact is reviewed, prepare the exact scoped Identity Center permission set and then deploy only after the writer has the required role. Keep KE13B API/DynamoDB and KE13 live operational acceptance separate.
+
+Follow the [workflow](../agent-workflow.md), [board](../task-board.md), and [staging runbook](../../infra/staging-runbook.md).

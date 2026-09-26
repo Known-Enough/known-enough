@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
-    "preview": "vite preview --host 127.0.0.1"
+    "build:hosted-preview": "vite build --config vite.hosted-preview.config.ts",
+    "preview": "vite preview --host 127.0.0.1",
+    "preview:hosted": "vite preview --config vite.hosted-preview.config.ts --host 127.0.0.1"
   },
   "dependencies": {
     "@deal-table/contracts": "0.1.0",
