@@ -1,8 +1,8 @@
-## Current handoff — KE03 complete; KE04 next — 2026-09-27T18:16:56Z
+## Current claim — KE04 TeamTable regression bridge — 2026-09-27T18:22:56Z
 
-KE03 is DONE on its recorded technical criteria. User A claimed it from synchronized `main` baseline `a3488c3` (claim checkpoint `5019604`); direct worker was Codex GPT-6, exact runtime variant/effort unexposed, so the requested Luna/high runtime was not claimed. Generic application lifecycle and HTTP paths, strict STATE v5 codec/repository alongside legacy v4, contracts, tests and architecture notes are recorded in [KE03](tasks/KE03.md). The pinned Node 24.21.0/npm 11.19.0 full check passed: 277 tests passed, two opt-in DynamoDB Local tests skipped, hosted browser test 1/1 and E2E 41/41. No DynamoDB Local endpoint, managed AWS services, cloud changes, paid calls or deployments were exercised.
+KE04 is IN_PROGRESS, claimed by User A from clean synchronized `main` baseline `5159770` after `git pull --ff-only origin main` succeeded. Actual worker is Codex GPT-6; exact runtime variant/effort are unexposed, so the user-directed `gpt-6-luna` / high target is not claimed as verified runtime selection. Bounded scope is the domain compatibility bridge, server/test-only legacy fixtures, focused generic/legacy regression tests, and architecture/ticket/board/handoff/log updates. No API, web product, cloud, paid call or deployment changes are in scope. See the [ticket](tasks/KE04.md).
 
-No task is active. [KE04](tasks/KE04.md) is READY and unclaimed as the next task. Include this exact KE03 artifact with KE01/KE02 in the single KE09 post-MVP review bundle; there is no separate KE03 review. B04/B04.5 remain REVIEW, and no acceptance state was changed. Before work, the other clone must fast-forward `main` from `origin/main` and claim KE04.
+KE03 is DONE and will be included with KE01/KE02 in the single KE09 post-MVP review bundle; no separate KE03 review is scheduled. B04/B04.5 remain REVIEW, and no acceptance state was changed. No other task may start until KE04 completes or is explicitly paused and handed off.
 
 ## Prior handoff — main synchronization before KE03 — 2026-09-27
 

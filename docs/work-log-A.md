@@ -1,3 +1,9 @@
+## 2026-09-27T18:22:56Z — KE04 / IN_PROGRESS
+
+- User A claimed KE04 from clean synchronized `main` baseline `5159770`; `git pull --ff-only origin main` succeeded and HEAD/origin were 0/0. The board and current handoff show KE03 DONE and no competing active task.
+- Actual worker: Codex GPT-6; exact runtime variant/effort unexposed, so the user-directed `gpt-6-luna` / high target is not claimed as verified runtime selection. Bounded scope: `packages/domain/**`, TeamTable/known-enough server/test fixtures and relevant tests, plus KE04, board, current handoff/log and focused architecture migration notes. No API/web product, root config, lockfile, CI or cloud changes planned.
+- Next: bridge the deterministic TeamTable case through generic contracts/kernel and prove the 12/0/2 structural/feasibility counts, historical policy rankings, privacy boundaries, and retained constraint/permission/approval/invalidation assertions. No implementation changes yet.
+
 ## 2026-09-27T18:16:56Z — KE03 / DONE
 
 - Completed the User A KE03 claim from synchronized `main` baseline `a3488c3` (claim checkpoint `5019604`). Actual worker: Codex GPT-6; runtime variant/effort unexposed, so the requested `gpt-6-luna` / high selection is not claimed. Bounded scope stayed within generic contracts, application, DynamoDB adapter/codec, API, focused tests and the ticket/architecture/board/handoff/log.
