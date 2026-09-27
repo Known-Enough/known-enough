@@ -1,3 +1,9 @@
+## 2026-09-27T19:40:10Z — KE07 / IN_PROGRESS
+
+- User A claimed KE07 after KE06 DONE. Created `/tmp/known-enough-ke07` as a separate clone on `main`; `git pull --ff-only origin main` succeeded and the clean baseline is `0c86a2d53d2d7f58f769afbbb9253afb63625d37`. Actual worker: Codex GPT-6, runtime variant/effort unexposed; Luna/high remains the directed target, not a verified runtime selection. This is the sole active task.
+- Bounded files: `packages/application/src/owner-conversation.ts` and tests; `packages/contracts/src/known-enough.ts` and tests only for a narrow owner-private DTO if needed; `apps/api/src/{http-core.ts,local.ts,known-enough-http.test.ts}` for an injected local-only adapter if needed; `apps/web/src/{known-enough-home.tsx,owner-draft-extractor.ts,owner-screen.tsx,owner-mock-adapter.ts,owner-mock-adapter.test.ts,style.css}`; `tests/e2e/{scaffold.spec.ts,a05.spec.ts}` and focused KE07 browser coverage if needed; retention docs; KE07 ticket, board, handoff and this log. No domain kernel, root manifest/lock, CI, cloud, live model, real identity or shared persistence. Coordinate if a wider contract/root change is required.
+- Next: implement synthetic, injected owner-language interpretation with clear hard/preferred/negotiable distinctions; owner confirmation/edit/reject/clarify and stale-review invalidation; strict owner/context isolation; explicit retention limits. Preserve local-only identity restrictions and A05 evidence.
+
 ## 2026-09-27T19:34:53Z — KE06 / DONE
 
 - Completed KE06 from synchronized claim baseline `0c0c4c643f1d0a09f05077a8abb4b68fc5cc6f69` (`2e4bddf` claim checkpoint). Actual worker: Codex GPT-6, variant/effort unexposed; user-requested Luna/high is not claimed as the runtime. Scope stayed within application architect, API local injection/handler, Known Enough home and tests, plus KE06/KE07 tracking.

@@ -1,4 +1,8 @@
-## Current handoff — KE06 DONE; KE07 next — 2026-09-27
+## Current claim — KE07 private participant conversation — 2026-09-27T19:40:10Z
+
+KE07 is IN_PROGRESS, claimed by User A from clean synchronized `main` baseline `0c86a2d53d2d7f58f769afbbb9253afb63625d37` after `git pull --ff-only origin main` succeeded in `/tmp/known-enough-ke07`. This is the sole active task. Actual worker: Codex GPT-6; runtime variant/effort unexposed, so Luna/high is recorded as the user-directed target, not verified runtime selection. Bounded scope: private owner conversation service/tests; narrow owner contract/test additions if required; injected local API adapter/tests if needed; generic home and A05 owner draft UI/mock/tests; focused browser coverage and retention documentation; KE07/board/current handoff/A log. No domain kernel, root manifest/lock, CI, cloud, live model, real identity or shared persistence. Stop and coordinate if a wider contract/root change is needed. See [KE07](tasks/KE07.md). KE00 remains DONE and B04/B04.5 remain REVIEW.
+
+## Prior handoff — KE06 DONE; KE07 next — 2026-09-27
 
 KE06 is DONE. It adds a public-only, contract-validated injected architect, safe clarification/participant-information summaries, stale request rejection, an optional authenticated HTTP route, and a deterministic local fixture model. The default UI uses only the loopback development API and reports that the model is simulated; no decision is persisted or confirmed. The local route returned HTTP 200 in a smoke request. Pinned `npm run check` passed (references 7/7; planning 15/15; boundaries 117; typecheck; 285 unit pass / 2 opt-in skips; build/scanners; hosted browser 1/1; E2E 43/43). No paid AI or cloud action. Actual worker: Codex GPT-6, runtime variant/effort unexposed; Luna/high not claimed. See the [KE06 ticket](tasks/KE06.md) and [A log](work-log-A.md).
 
