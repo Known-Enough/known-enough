@@ -6,6 +6,10 @@ At the start of this update, local `/tmp/known-enough-stage0-guard/main` was cle
 
 Actual worker: Codex GPT-6; exact variant/effort unexposed. Bounded claim: revise the shared sync/push instructions and publish only under the new standing authorization after docs checks. Current changed files and final remote verification are recorded in the A log. No AWS mutation or deployment.
 
+## Current claim — KE03 generic application and persistence — 2026-09-27T16:52:15Z
+
+KE03 is IN_PROGRESS, claimed by User A from clean synchronized `main` `a3488c3` after `git pull --ff-only origin main` succeeded. No other task is active. Direct worker is current Codex GPT-6; exact runtime variant/effort are unexposed, so the user-directed `gpt-6-luna` / high target is not claimed as verified runtime selection. Scope and next actions are in the [ticket](tasks/KE03.md) and [A work log](work-log-A.md). No AWS, paid calls, deployment or external actions are authorized by this claim.
+
 ## Current handoff — KE01 ready; routine review flow streamlined — 2026-09-27
 
 The user asked to reduce routine human/reviewer checkpoints and move quickly toward a testable MVP. On 2026-09-27, the user set KE01–KE08 direct work to Luna/high, reserving Astra for post-MVP architectural/release checkpoints if needed; current model policy is in the workflow and board. [KE01](tasks/KE01.md) is READY and designated to User B for this ticket only; B should run the clean-main pull/claim procedure before implementation. No task is active yet. KE00 remains DONE and accepted.
