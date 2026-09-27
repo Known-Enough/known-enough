@@ -1,11 +1,13 @@
 # KE13A-P — Stage 0 provisioning permission candidate
 
-- Status: REVIEW — candidate preparation finished; independent critical review pending. Assignment remains blocked by the documented CloudFront creation/specification/cost limitation.
+- Status: REVIEW — candidate preparation finished; independent critical review CHANGES_REQUESTED (R1, wrong inspection profile in runbook). Assignment remains blocked by the documented CloudFront creation/specification/cost limitation.
 - Claim: finished 2026-09-27T01:28:01Z; initiating user / A log, started 2026-09-27T01:23:03Z; one sequential task, transferred by coordinating session. User explicitly requested the complex IAM work as a sequential Sol/high task. Actual worker identifies as Codex GPT-6; exact variant/effort is unexposed and is not inferred from the request.
 - Baseline: clean isolated `main` in `/tmp/known-enough-stage0-guard` at `01592c4`; `git pull --ff-only origin main` succeeded (already up to date). Board reported no active task; prior policy review claim finished.
 - Authorization: user authorized creating the scoped staging provisioning permission via CLI. This preparation phase is restricted to local candidate policy/docs and read-only AWS inspection with `--profile known-enough-staging-bootstrap --region us-east-1`; independent critical review must precede any permission-set creation, policy attachment or account assignment.
 - Bounded files: `infra/permissions/ke13a-stage0-provisioner.json`, `infra/stage0-provisioner-permission.md`, `infra/staging-runbook.md`, this ticket, `docs/tasks/KE13A.md`, `docs/task-board.md`, `docs/handoff-A.md`, `docs/work-log-A.md`.
 - Exclusions: no AWS mutations, application resources, deployment, spending, paid calls, push or application source changes. Accepted KE13A/KE13C evidence remains dated and intact; KE13B and KE13 operational acceptance remain separate.
+
+- Independent review claim: finished 2026-09-27T01:32:13Z; started 2026-09-27T01:31:00Z; initiating user / A log; separate reviewer in `/tmp/known-enough-ke13ap-independent-review`; exact range `01592c461c5fc4e59c1f56a76632db5572bb12c8..4f76570887ded1e0cf17fb12bb99dec9a117b772`. Actual Codex GPT-6, exact variant/effort unexposed. Clean `main` pulled successfully from GitHub `origin/main` (`65359eb`) before recording; local review head preserved. Bounded writes: this ticket, board, A handoff/log, and `docs/reviews/KE13A-provisioner-policy.md`; reviewed source remains unchanged.
 
 ## Acceptance and handoff
 
@@ -25,3 +27,8 @@ Review reproducible local diff over baseline `01592c4`, including all three untr
 - AWS evidence: explicit bootstrap-profile/us-east-1 STS and read-only Identity Center/inventory/default-protection checks as detailed in the design. Access Analyzer is validation, not an IAM write. No policy creation/attachment/assignment, app resource, cost-control, deployment, paid call or push occurred. Effective SCPs/boundaries and live authorization remain unverified.
 
 Next: an independent sequential critical reviewer inspects this exact artifact, especially wildcard creation, past-expiry rendering, tag scope, omitted bucket-policy authority and trusted installation path. Resolve the requested one-preview/$25 constraint before assignment. Do not infer approval from JSON validation or original KE13A/KE13C acceptance. Then resume only the previously user-authorized IAM creation/assignment phase under a fresh claim; application provisioning/deployment remains a separate bounded phase.
+
+
+## Independent critical review
+
+[Review verdict](../reviews/KE13A-provisioner-policy.md): CHANGES_REQUESTED on exact `01592c4..4f76570`. R1/P2: release ARN lookup uses the provisioner, which lacks `cloudfront:GetDistribution`; switch inspection to the verified read-only profile without broadening the policy. Fresh Access Analyzer returned no findings. Candidate JSON remains unchanged and deliberately expired. Claim finished; return correction to implementation owner, then focused follow-up review. CloudFront residual-authority decision and all assignment/cloud gates remain pending.

@@ -1,6 +1,10 @@
 # User A handoff — shared task pool
 
-## Current handoff — KE13A-P REVIEW; assignment blocked — 2026-09-27
+## Current handoff — KE13A-P independent CHANGES_REQUESTED — 2026-09-27T01:32:13Z
+
+Independent review of `01592c4..4f76570` found [R1/P2](reviews/KE13A-provisioner-policy.md): the runbook reads the release distribution ARN through a provisioner profile with no `cloudfront:GetDistribution`. Use the verified read-only profile and preserve ARN/origin/OAC validation; do not broaden the role. Fresh Access Analyzer returned no findings; the 16-action candidate and its expired deadline remain unchanged. Separate clean main clone `/tmp/known-enough-ke13ap-independent-review` successfully pulled GitHub origin/main before recording. Actual Codex GPT-6, exact variant/effort unexposed. No AWS writes or push. Review claim finished/released; implementation correction and focused follow-up precede IAM creation. The documented CloudFront count/configuration/spend decision remains unresolved, and all assignment/deployment gates remain.
+
+## Prior handoff — KE13A-P candidate REVIEW; assignment blocked — 2026-09-27
 
 The user explicitly authorized creating the staging provisioning permission via CLI and requested sequential Sol/high IAM work. Actual worker identifies as Codex GPT-6; exact variant/effort is unexposed. Clean isolated main at `01592c4` successfully pulled before this single claim. [KE13A-P](tasks/KE13A-provisioner-policy.md) owns the bounded candidate policy/docs and read-only inspection phase; original KE13A/KE13C acceptance is retained. See [candidate design and exact phases](../infra/stage0-provisioner-permission.md).
 

@@ -4,7 +4,7 @@ One project-wide priority queue, one active implementation or review at a time. 
 
 ## Current gate and claim
 
-**No active task. [KE13A-P](tasks/KE13A-provisioner-policy.md) is REVIEW** for independent critical review of the expired provisioning candidate. Assignment remains blocked by the documented CloudFront creation/specification/cost limitation. Initiating user / A log; requested sequential Sol/high, actual Codex GPT-6 variant/effort unexposed; baseline `01592c4`; no AWS writes.
+**No active task. [KE13A-P](tasks/KE13A-provisioner-policy.md) is REVIEW with independent CHANGES_REQUESTED** on `01592c4..4f76570`: [R1/P2](reviews/KE13A-provisioner-policy.md) corrects the release ARN lookup to use the read-only profile. Candidate policy remains expired/unassigned; CloudFront creation/specification/cost limitation still blocks assignment. Initiating user / A log, actual Codex GPT-6 variant/effort unexposed; no AWS writes.
 
 **[KE13C policy follow-up](tasks/KE13C-policy-followup.md) remains REVIEW with independent PASS** on exact `f1893e3..6238700`; P1/P2 are closed for the draft. See [the follow-up verdict](reviews/KE13C-policy-followup.md). Assignment/deployment remain blocked by human acceptance, rendered exact-ARN revalidation and the separate cloud-change gates. The accepted hosted preview build remains DONE and unchanged: user accepted the reported PASS on `a5d1833..a625498` on 2026-09-27. Reviewer is reported by the user as Sol; exact model/effort is unexposed. The build review records two non-blocking test-coverage gaps. No AWS resources or deployment yet. See [KE13C](tasks/KE13C.md), [build review](reviews/KE13C.md), and [policy review](reviews/KE13C-policy.md).
 
@@ -18,7 +18,7 @@ One project-wide priority queue, one active implementation or review at a time. 
 | --- | --- | --- | --- |
 | [KE13C](tasks/KE13C.md) | Current Codex GPT-6; exact variant/effort unexposed | User-authorized Stage 0; KE00 and KE13A accepted | DONE — build PASS reviewed and accepted by user; no cloud deployment |
 | [KE13C policy follow-up](tasks/KE13C-policy-followup.md) | Current Codex GPT-6; exact variant/effort unexposed | Reported CHANGES_REQUESTED against `f1893e3`; accepted build stays separate | REVIEW — independent focused PASS; human acceptance/rendered ARN/cloud gates pending; no AWS writes |
-| [KE13A-P](tasks/KE13A-provisioner-policy.md) | Requested sequential Sol/high; actual Codex GPT-6 variant/effort unexposed | Explicit IAM CLI authorization; independent review before writes | REVIEW — candidate prepared; independent critical review and CloudFront creation/cost decision block assignment |
+| [KE13A-P](tasks/KE13A-provisioner-policy.md) | Requested sequential Sol/high; actual Codex GPT-6 variant/effort unexposed | Explicit IAM CLI authorization; independent review before writes | REVIEW — independent CHANGES_REQUESTED (R1 profile correction); CloudFront creation/cost decision also blocks assignment |
 | [KE13A](tasks/KE13A.md) | Current Codex GPT-6; exact variant/effort unexposed | User-authorized early preparation | DONE — prep and read-only SSO STS check complete; user accepted |
 | [KE13B](tasks/KE13B.md) | `gpt-6-sol` / high, selected by the human at claim | Accepted KE00, B04/B04.5 and KE12; reviewed KE13A handoff; explicit bounded implementation/cloud authorization | BLOCKED — authenticated API, DynamoDB persistence and least-privilege IAM implementation; sequential independent review required |
 
