@@ -1,15 +1,51 @@
 # Known Enough AWS staging runbook
 
-Status: KE13A preparation and KE13C hosted build remain accepted. The separate KE13C release/bucket-policy follow-up has independent PASS on `f1893e3..6238700`; human acceptance and exact rendered ARN checks remain separate. [KE13A-P](../docs/tasks/KE13A-provisioner-policy.md) now prepares a [temporary provisioning permission candidate](stage0-provisioner-permission.md) under the user's explicit IAM CLI authorization. **Assignment is blocked:** CloudFront creation cannot enforce the single-preview specification or $25 planning ceiling through IAM, and the candidate requires independent critical review. The template has a past expiry and must not be assigned as-is. This remains a plan, not deployed infrastructure. No resource, permission-set, assignment, budget or deployment writes occurred. The bootstrap profile is root and was used only for read-only discovery; future authorized IAM bootstrap is distinct from application provisioning through a scoped SSO identity. All service commands use an explicit profile and `us-east-1`.
+## Live Stage 0 deployment — 2026-09-27
+
+**Status: deployed and reachable over HTTPS.** This is the accepted static mock preview only. It has no login, authenticated API, DynamoDB, or shared application state. Each visitor sees the same fixed synthetic fixture; local-only demo identities remain disabled.
+
+| Resource | Deployed value |
+| --- | --- |
+| AWS account / deployment region | `092954139775` / `us-east-1` (N. Virginia) |
+| S3 bucket | `known-enough-preview-20260927-7f94b6a1` (private; Block Public Access on; owner-enforced; SSE-S3; versioning and 14-day noncurrent-version expiry) |
+| CloudFront distribution | `E61V9RN1W6E0` (`PriceClass_100`, HTTPS redirect, default root `hosted-preview/index.html`) |
+| CloudFront hostname | [`https://d23eowhnwtqts3.cloudfront.net/`](https://d23eowhnwtqts3.cloudfront.net/) |
+| Origin Access Control | `E10RFHXAY9PCCP` (SigV4, always sign) |
+| Release SSO role | `AWSReservedSSO_KnownEnoughStage0Release_7b9815dcafb9e5f6/martelaxe` via `known-enough-staging-deploy` |
+| Cleanup tag date | `2026-10-04` |
+
+The exact reviewed artifact from `a625498` was uploaded without `--delete`; invalidation `I7D8IJ7JLX46A8DR8XNRWLL5Q1` completed. HTTPS checks returned 200 for the root page and JavaScript asset. The uploaded files were `hosted-preview/index.html` (`574954696e5098f34cfedb1fda0e2942f7df781a4e07e58bc6adb366a51c32fe`), `assets/index-CohlOwP-.js` (`eccc59393bcda465c1dfa3e20f38fe28f7013ef21be998323cb095db061de379`), and `assets/index-Bh2GWqRh.css` (`786e7c506ddb978f62cac8cc40ea0e67e28e74489701c9d8dc76ace55c2fee23`).
+
+Authentication recorded before deployment: AWS CLI v2.37.4; `known-enough-staging-ro` verified as `AWSReservedSSO_ReadOnlyAccess_4a73ffa8d53b9573/martelaxe`; the explicitly authorized temporary provisioning permission set was created/assigned for setup, then its assignment and permission set were removed. The deployment profile above remains. The root bootstrap profile was used only for the specifically authorized setup actions, including installing the exact reviewed bucket policy and tagging the distribution. No credentials, tokens or login codes are stored here.
+
+Current profile names from `aws configure list-profiles`: `known-enough-staging`, `known-enough-staging-ro`, `known-enough-staging-bootstrap`, and `known-enough-staging-deploy`. The `known-enough-staging` root-login session was logged out; its profile stanza remains. `known-enough-staging-bootstrap` is the root bootstrap profile. `known-enough-staging-ro` is the read-only SSO profile. `known-enough-staging-deploy` maps to the named release role in the table above. Always specify `--profile` and deployment `--region us-east-1` explicitly. The Identity Center primary/SSO region is separately `us-east-1`.
+
+The user's earlier `$25/month` planning ceiling is **superseded** by the later instruction to proceed using available credits. No AWS Budget was created and no hard spend cap is configured. The user reported approximately `$250` in credits; this balance and current billing amount were not verified. Actual usage may incur charges. SSO region and deployment region are both `us-east-1` and are separate settings.
+
+Deployment sequence completed through AWS CLI: verified the explicit staging identity; created the private S3 bucket with public-access blocks, owner enforcement, encryption, versioning and lifecycle; created OAC and the CloudFront distribution; installed the exact OAC-only bucket policy with expected-owner validation; tagged the distribution; uploaded only the three reviewed hosted-preview files; invalidated CloudFront and checked HTTPS responses. The temporary setup permission assignment/set was then removed. No browser-console infrastructure edits were used.
+
+**Next:** visit the HTTPS URL above to view the preview. For a later authorized static release, these are the exact CLI commands (run from the repository root after the hosted artifact has passed its checks):
+
+```sh
+npm run build:hosted-preview --workspace @deal-table/web
+node scripts/check-hosted-preview-bundle.mjs
+aws s3 cp apps/web/dist-hosted-preview/hosted-preview/index.html s3://known-enough-preview-20260927-7f94b6a1/hosted-preview/index.html --content-type text/html --cache-control no-cache --profile known-enough-staging-deploy --region us-east-1 --no-cli-pager
+aws s3 cp apps/web/dist-hosted-preview/assets/ s3://known-enough-preview-20260927-7f94b6a1/assets/ --recursive --cache-control 'public,max-age=31536000,immutable' --profile known-enough-staging-deploy --region us-east-1 --no-cli-pager
+aws cloudfront create-invalidation --distribution-id E61V9RN1W6E0 --paths /hosted-preview/index.html '/assets/*' --profile known-enough-staging-deploy --region us-east-1 --no-cli-pager
+```
+
+Wait for that invalidation to complete, then verify `curl -fsSI https://d23eowhnwtqts3.cloudfront.net/` and the referenced JS asset. Never upload the ordinary app build or use `--delete`. API/authentication/DynamoDB work belongs to KE13B and remains gated; final live operational acceptance remains KE13.
+
+## Decisions and boundary
 
 ## Decisions and boundary
 
 - Deployment region: `us-east-1` (N. Virginia), selected as a North America planning default with current public pricing examples. The IAM Identity Center **SSO region is also `us-east-1`**, confirmed separately as the Identity Center primary region.
-- Monthly staging spend planning ceiling: **$25 USD**. The estimate below is for low traffic and is not a guaranteed hard limit. AWS Budgets data can update up to three times daily, typically with an 8–12 hour delay, so charges can pass an alert threshold before notification; budget actions also do not immediately stop every service or charge. See [AWS Budgets data freshness and alert timing](https://docs.aws.amazon.com/cost-management/latest/userguide/bcm-lite-use-budget.html).
+- The former `$25/month` estimate below is historical planning only; the user later waived that ceiling in favor of available credits. No budget or hard cap exists. The reported credit balance is unverified; check account billing before future stages. Any budget alert is informational, not a guaranteed stop.
 - Stage 0 is an HTTPS static **hosted mock preview** backed only by public synthetic fixtures. Each browser sees mock state; it does not provide shared application state, authentication, or durable writes.
 - Stage 1 adds verified Cognito identity, HTTPS API and durable DynamoDB state only after the required code, review gates and separate cloud-change approval. Separate sessions must read/write the same DynamoDB room state to demonstrate shared application state.
 - SQS/DLQ is deferred until a real asynchronous worker exists. Bedrock/model calls are excluded and remain disabled until separately implemented and authorized.
-- No Known Enough application resources, CDK bootstrap, deployment, paid call or external message has happened in KE13A. The user separately set up an IAM Identity Center directory user and assigned `ReadOnlyAccess`; the agent did not make these account/IAM changes.
+- Stage 0 S3/CloudFront resources are now deployed as recorded above. No CDK bootstrap, authenticated API, Cognito pool, DynamoDB table, SQS queue, or paid model call was created.
 
 ## Current repository readiness
 
@@ -85,9 +121,9 @@ The CLI may display a one-time code in the terminal; enter it only at the AWS de
 
 After login, first run only the STS command above. Stop if the AWS account or role is not the intended staging authority. Record verified account/role details only in a human-approved private operations record, not a public frontend, browser payload, source code or credential file. **Current result: `known-enough-staging-ro` verifies as the `ReadOnlyAccess` assumed role.** This identity permits read-only verification, not staging deployment; request a separate scoped write permission set only after the stage and exact resources are approved.
 
-## Proposed resource inventory
+## Staged resource inventory
 
-Names are examples only; apply a unique suffix after account/region identity is confirmed. Tag supported staging resources with `Project=KnownEnough`, `Environment=staging`, `Stage=preview` or `Stage=api`, and a cleanup date. The candidate CloudFront procedure creates untagged, then grants tagging on its observed exact ARN; this exception requires review. OAC has no supported tag operation in the inspected authorization reference.
+The Stage 0 values are listed above. Future API names are examples only and must be selected after a fresh identity check. Tag supported staging resources with `Project=KnownEnough`, `Environment=staging`, `Stage=preview` or `Stage=api`, and a cleanup date. OAC has no supported tag operation in the inspected authorization reference.
 
 | Stage | Resource | Purpose and limits |
 | --- | --- | --- |
@@ -105,80 +141,25 @@ Names are examples only; apply a unique suffix after account/region identity is 
 
 ## Deployment sequence
 
-No AWS deployment step below has been run. The user authorized Stage 0 only: one private S3 preview bucket and one CloudFront distribution with OAC in `us-east-1`, using the reviewed artifact and the stated low-traffic estimate under the `$25/month` planning ceiling. This authorization does not include a custom domain, API, Cognito, Lambda, DynamoDB, CDK bootstrap, Bedrock, or other stages. KE13A/KE13C do not perform a deployment.
+The following sequence records how Stage 0 was deployed. The `$25/month` planning ceiling was later waived by the user; API, Cognito, Lambda, DynamoDB, CDK bootstrap, Bedrock, and other stages were not included in this deployment.
 
 1. **Confirm local auth and account.** Run `aws sso login --profile known-enough-staging-ro --use-device-code`, then `aws sts get-caller-identity --profile known-enough-staging-ro --no-cli-pager` and `aws configure get region --profile known-enough-staging-ro`. Stop unless the account and role are the intended account and `ReadOnlyAccess`. Cost Explorer previously reported estimated unblended cost of `$0` from 2026-09-01 through 2026-09-27; read-only inventory found no S3 buckets, CloudFront distributions or AWS Budgets. This does not reveal the remaining credit balance.
-2. **Create the preview cost alert through the AWS CLI before resource creation.** An authorized billing-administrator profile must run `aws budgets create-budget` with a monthly `$25 USD` budget filtered to S3 and CloudFront, actual alerts at `$12.50`, `$20` and `$25`, and an 80% forecast alert sent to the account owner's confirmed email. Use that profile explicitly on the command. AWS Budgets alerts are not a guaranteed spend cap. Cost Explorer found no current service spend and no budget. AWS's [Budgets authorization reference](https://docs.aws.amazon.com/service-authorization/latest/reference/list_budgets.html) maps `CreateBudget` to `aws-portal:ModifyBilling` as well as `budgets:ModifyBudget`; because the former is broader than one budget, do not add it to the release role. No authorized billing-administrator profile is currently verified.
+2. **Budget alert (skipped).** The user later waived the `$25/month` planning ceiling in favor of available credits. No budget was created, the credit balance was not verified, and no hard stop exists. The old command/design notes below are historical and are not a requirement for the deployed preview.
 3. **Use the reviewed hosted-only mock build.** The accepted commit is `a625498`. It builds the fixed public fixture in `apps/web/dist-hosted-preview/`, ignores owner/local/scenario query strings and displays “Hosted mock preview — simulated data, no shared state.” Upload only this directory. The reviewer’s reported probes and two non-blocking permanent-check gaps are recorded in [KE13C build review](../docs/reviews/KE13C.md), with current output hashes.
-4. **Resolve provisioning authority before resource creation.** Follow the [candidate policy and phase design](stage0-provisioner-permission.md). The proposed `KnownEnoughStage0Provisioner` is independent of the release permission set and has no IAM, Billing, bucket-policy, ACL, Block Public Access, ownership, encryption or object permissions. Its retained bucket writes are exact-name retention/tag configuration; inspect S3 default protections and stop on mismatch. It cannot install the bucket resource policy. Its CloudFront create actions necessarily have `Resource: "*"` and cannot constrain count, origin, configuration or cost; do not assign or use the candidate until independent review and an explicit residual-authority decision. The user authorized the IAM creation path, but this preparation phase makes no writes. Once those gates close, the exceptional bootstrap profile may create/assign only the reviewed permission set; application provisioning must use the separately authenticated scoped SSO profile. Initial CloudFront creation is untagged to avoid wildcard `TagResource`; after verifying its returned ARN, replace provisioning powers with exact-ARN tagging only. No application resource call is part of KE13A-P.
+4. **Provisioning authority (completed; candidate policy not used).** The user authorized CLI setup. A temporary Identity Center permission set/assignment was created for setup and removed after use. The expired [KE13A-P candidate](../docs/tasks/KE13A-provisioner-policy.md) was not assigned or used. The trusted setup identity created the named bucket, OAC and distribution; installed the exact reviewed OAC-only bucket policy and applied tags. The remaining command snippets below are reference material, not commands to rerun against the deployed resources.
 
    After a later authorized provisioning session returns actual IDs, fail closed on every lookup: reject failed, empty, null, placeholder, foreign-account or ID-mismatched output; verify the ARN format and S3/OAC origin against the reviewed request. Render [the OAC-only bucket resource policy](permissions/ke13c-preview-bucket-policy.json) using only that verified ARN. A separate trusted administrator must review the rendered policy, install exactly that document with `--expected-bucket-owner 092954139775`, and read it back; no reusable provisioning/release role gets `s3:PutBucketPolicy`. The permission design documents this remaining trusted CLI gate. Initial defaults, versioning/lifecycle/tags, OAC settings, HTTPS behavior and the exact accepted build must be verified before upload. Use explicit `--profile "$STAGE0_PROVISIONER_PROFILE" --region us-east-1 --no-cli-pager` for the authorized provisioner; the separate bucket-policy action requires its own authorized trusted profile.
 
-5. **Create the separate incremental-release permission set through the Identity Center CLI.** After the distribution exists, render the release policy to a temporary file using its exact ARN; keep the reviewed template unchanged:
+5. **Release role setup (completed).** `known-enough-staging-deploy` is assigned and verified for `AWSReservedSSO_KnownEnoughStage0Release_7b9815dcafb9e5f6/martelaxe`. Its reviewed policy is restricted to the hosted-preview/assets prefixes and the exact distribution ARN. The temporary setup permission set was deleted; the KE13A-P candidate was not used.
+6. **Initial release (completed).** The accepted hosted-only build was uploaded without `--delete`, the distribution invalidated, and HTTPS root/JavaScript responses returned 200. Use the reusable commands in the “Next” section above for future static releases; do not recreate permission sets or rerun provisioning.
 
-   ```bash
-   # Requires Bash (uses [[ =~ ]] and here-strings).
-   STAGE0_READONLY_PROFILE=known-enough-staging-ro
-   : "${STAGE0_DISTRIBUTION_ID:?set the ID returned when the distribution was created}"
-   : "${STAGE0_BUCKET_NAME:?set the exact provisioned S3 bucket name}"
-   : "${STAGE0_EXPECTED_OAC_ID:?set the OAC ID returned when the OAC was created}"
+7. **Wait for KE13B and required reviews/acceptance.** Implement authenticated composition, durable adapter wiring, least-privilege IAM and focused checks. Retain KE00, B04/B04.5 and KE09 privacy/security gates.
+8. **Request Stage 1 authorization.** Present the exact API/Cognito/Lambda/DynamoDB (and only if implemented, SQS/DLQ) resource list, exact account/region, permission diff, current estimate and rollback/cleanup plan. Do not bootstrap CDK, create service resources, deploy or call Bedrock until the user approves that concrete scope.
+9. **Deploy the authenticated backend after approval.** Create the user pool and clients, API, Lambda and role, table and log groups; use a separate scoped setup identity and exact resource ARNs. No public sign-up, no `NON_PRODUCTION` fallback, no broad account admin policy on runtime. Store secrets only in an approved secret service if the implemented adapter requires them; avoid secrets for this first slice.
+10. **Verify shared state with synthetic identities.** Provision fixed synthetic participants through the trusted control plane; authenticate separate clients; read the same room, commit a harmless authorized change from one client, and verify a separately authenticated client sees committed current state. Exercise cross-room/member denials, idempotent replay, conflict/retry, expiry and redacted errors. Verify DynamoDB persistence survives function cold starts; verify no private inputs appear in public projection/logs. These are live tests only when run against the deployed artifact and recorded as such.
+11. **Operational review and acceptance.** Record account/role, region, artifact hash, exact resources, IAM policy hash, test identities as synthetic labels, logs/metrics, observed costs, failure/retry evidence, access lifetime and cleanup date. Run independent KE09 cloud-boundary follow-up; pause KE13 for human acceptance. KE13A/KE13B completion does not accept KE13.
 
-   # Bash-only: allow only nonempty alphanumeric service IDs, then reject
-   # common sentinels case-insensitively before any ARN is constructed.
-   valid_cloudfront_id() {
-     local value="$1" lowered
-     [[ "$value" =~ ^[A-Za-z0-9]+$ ]] || return 1
-     lowered="${value,,}"
-     [[ ! "$lowered" =~ ^(null|none|undefined|replace_|placeholder|exact_|your_) ]]
-   }
-   valid_cloudfront_id "$STAGE0_DISTRIBUTION_ID" || { printf '%s\n' 'Stop: distribution ID is empty, malformed, or a placeholder.' >&2; exit 1; }
-   valid_cloudfront_id "$STAGE0_EXPECTED_OAC_ID" || { printf '%s\n' 'Stop: expected OAC ID is empty, malformed, or a placeholder.' >&2; exit 1; }
-
-   STAGE0_CALLER_ARN="$(aws sts get-caller-identity --query Arn --output text --profile "$STAGE0_READONLY_PROFILE" --region us-east-1 --no-cli-pager)" || exit 1
-   case "$STAGE0_CALLER_ARN" in
-     arn:aws:sts::092954139775:assumed-role/AWSReservedSSO_ReadOnlyAccess_*/*) ;;
-     *) printf '%s\n' 'Stop: this is not the expected account ReadOnlyAccess role.' >&2; exit 1 ;;
-   esac
-
-   STAGE0_DISTRIBUTION="$(aws cloudfront get-distribution --id "$STAGE0_DISTRIBUTION_ID" --query Distribution --output json --profile "$STAGE0_READONLY_PROFILE" --region us-east-1 --no-cli-pager)" || exit 1
-   STAGE0_ACTUAL_ID="$(jq -er '.Id | select(type == "string" and length > 0)' <<<"$STAGE0_DISTRIBUTION")" || exit 1
-   STAGE0_DISTRIBUTION_ARN="$(jq -er '.ARN | select(type == "string" and length > 0)' <<<"$STAGE0_DISTRIBUTION")" || exit 1
-   valid_cloudfront_id "$STAGE0_ACTUAL_ID" || { printf '%s\n' 'Stop: returned distribution ID is malformed or a placeholder.' >&2; exit 1; }
-   valid_cloudfront_id "$(jq -er '.ARN | select(type == "string") | split("/") | last' <<<"$STAGE0_DISTRIBUTION")" || { printf '%s\n' 'Stop: ARN distribution ID is malformed or a placeholder.' >&2; exit 1; }
-   STAGE0_ORIGIN_COUNT="$(jq -er '.DistributionConfig.Origins.Quantity' <<<"$STAGE0_DISTRIBUTION")" || exit 1
-   STAGE0_ORIGIN_DOMAIN="$(jq -er '.DistributionConfig.Origins.Items[0].DomainName | select(type == "string" and length > 0)' <<<"$STAGE0_DISTRIBUTION")" || exit 1
-   STAGE0_ACTUAL_OAC_ID="$(jq -er '.DistributionConfig.Origins.Items[0].OriginAccessControlId | select(type == "string" and length > 0)' <<<"$STAGE0_DISTRIBUTION")" || exit 1
-   valid_cloudfront_id "$STAGE0_ACTUAL_OAC_ID" || { printf '%s\n' 'Stop: returned OAC ID is malformed or a placeholder.' >&2; exit 1; }
-
-   test "$STAGE0_ACTUAL_ID" = "$STAGE0_DISTRIBUTION_ID" || { printf '%s\n' 'Stop: distribution ID mismatch.' >&2; exit 1; }
-   test "$STAGE0_DISTRIBUTION_ARN" = "arn:aws:cloudfront::092954139775:distribution/$STAGE0_DISTRIBUTION_ID" || { printf '%s\n' 'Stop: distribution ARN is empty, malformed, or belongs to another account/ID.' >&2; exit 1; }
-   test "$STAGE0_ORIGIN_COUNT" = 1 || { printf '%s\n' 'Stop: expected exactly one distribution origin.' >&2; exit 1; }
-   test "$STAGE0_ORIGIN_DOMAIN" = "$STAGE0_BUCKET_NAME.s3.us-east-1.amazonaws.com" || { printf '%s\n' 'Stop: origin is not the expected regional S3 bucket.' >&2; exit 1; }
-   test "$STAGE0_ACTUAL_OAC_ID" = "$STAGE0_EXPECTED_OAC_ID" || { printf '%s\n' 'Stop: origin access control does not match the created OAC.' >&2; exit 1; }
-
-   jq --arg arn "$STAGE0_DISTRIBUTION_ARN" 'if ([.Statement[] | select(.Sid == "ReadAndInvalidateOnlyProvisionedPreviewDistribution")] | length) != 1 then error("expected exactly one release distribution statement") else (.Statement[] | select(.Sid == "ReadAndInvalidateOnlyProvisionedPreviewDistribution") | .Resource) = $arn end' infra/permissions/ke13c-stage0-deploy.json > /tmp/ke13c-stage0-release-policy.json
-   ```
-
-   An authorized Identity Center administrator can use `aws sso-admin list-instances`, `create-permission-set` (name `KnownEnoughStage0Release`, duration `PT1H`), `put-inline-policy-to-permission-set`, `create-account-assignment` for user `martelaxe` and the staging account, and `describe-account-assignment-creation-status`. Resolve `InstanceArn`, `IdentityStoreId` and the user's ID with the corresponding `aws sso-admin list-instances` and `aws identitystore list-users` read commands; pass `--profile "$STAGE0_IDENTITY_CENTER_ADMIN_PROFILE" --region us-east-1 --no-cli-pager` on each command. Attach the rendered `/tmp/ke13c-stage0-release-policy.json` with `--inline-policy file:///tmp/ke13c-stage0-release-policy.json`. Keep `ReadOnlyAccess`; do not include `s3:PutBucketPolicy`, resource creation/configuration, tagging, deletion, or wildcard distribution resources. The draft received independent PASS; assignment still needs its human acceptance and reviewed exact-ARN rendering. The distribution inspection above uses the verified read-only profile because the provisioner has no `cloudfront:GetDistribution` permission.
-6. **Authenticate the release profile.** Configure `known-enough-staging-deploy` with `aws configure sso --profile known-enough-staging-deploy`, selecting the same access portal, SSO region `us-east-1`, staging account, `KnownEnoughStage0Release`, and deployment region `us-east-1`. Then run `aws sso login --profile known-enough-staging-deploy --use-device-code` and verify with `aws sts get-caller-identity --profile known-enough-staging-deploy --no-cli-pager`. Stop unless STS shows the intended account and generated `AWSReservedSSO_KnownEnoughStage0Release_…` role.
-7. **Release the accepted build through AWS CLI only.** With `apps/web/dist-hosted-preview/` built from the accepted commit, run these from the repository root:
-
-   ```sh
-   aws s3 sync apps/web/dist-hosted-preview/hosted-preview/ s3://known-enough-preview-20260927-7f94b6a1/hosted-preview/ --profile known-enough-staging-deploy --region us-east-1 --no-cli-pager
-   aws s3 sync apps/web/dist-hosted-preview/assets/ s3://known-enough-preview-20260927-7f94b6a1/assets/ --profile known-enough-staging-deploy --region us-east-1 --no-cli-pager
-   aws cloudfront create-invalidation --distribution-id EXACT_DISTRIBUTION_ID --paths / /hosted-preview/index.html --profile known-enough-staging-deploy --region us-east-1 --no-cli-pager
-   aws cloudfront wait invalidation-completed --distribution-id EXACT_DISTRIBUTION_ID --id INVALIDATION_ID --profile known-enough-staging-deploy --region us-east-1
-   aws cloudfront get-distribution --id EXACT_DISTRIBUTION_ID --query Distribution.DomainName --output text --profile known-enough-staging-deploy --region us-east-1 --no-cli-pager
-   ```
-
-   Replace both placeholders with values from the provisioning output. Do not use `--delete`; the release policy has no object-delete permission. No custom domain, ACM, Route 53, API, Cognito, Lambda or DynamoDB are in scope. Smoke-check TLS, page load, fixture behavior, no API calls, no test identity header and no private data in browser assets/logs. Record the distribution URL and build hash. A preview URL is not an authenticated app.
-8. **Wait for KE13B and required reviews/acceptance.** Implement authenticated composition, durable adapter wiring, least-privilege IAM and focused checks. Retain KE00, B04/B04.5 and KE09 privacy/security gates.
-9. **Request Stage 1 authorization.** Present the exact API/Cognito/Lambda/DynamoDB (and only if implemented, SQS/DLQ) resource list, exact account/region, permission diff, current estimate and rollback/cleanup plan. Do not bootstrap CDK, create service resources, deploy or call Bedrock until the user approves that concrete scope.
-10. **Deploy the authenticated backend after approval.** Create the user pool and clients, API, Lambda and role, table and log groups; use a separate scoped setup identity and exact resource ARNs. No public sign-up, no `NON_PRODUCTION` fallback, no broad account admin policy on runtime. Store secrets only in an approved secret service if the implemented adapter requires them; avoid secrets for this first slice.
-11. **Verify shared state with synthetic identities.** Provision fixed synthetic participants through the trusted control plane; authenticate separate clients; read the same room, commit a harmless authorized change from one client, and verify a separately authenticated client sees committed current state. Exercise cross-room/member denials, idempotent replay, conflict/retry, expiry and redacted errors. Verify DynamoDB persistence survives function cold starts; verify no private inputs appear in public projection/logs. These are live tests only when run against the deployed artifact and recorded as such.
-12. **Operational review and acceptance.** Record account/role, region, artifact hash, exact resources, IAM policy hash, test identities as synthetic labels, logs/metrics, observed costs, failure/retry evidence, access lifetime and cleanup date. Run independent KE09 cloud-boundary follow-up; pause KE13 for human acceptance. KE13A/KE13B completion does not accept KE13.
-
-## Cost estimate for the $25/month planning ceiling
+## Historical cost estimate (original $25/month planning assumption)
 
 Planning estimate dated 2026-09-26, in USD, for `us-east-1`; use the AWS Pricing Calculator with the actual account/usage before any creation. Assumptions: one small static build (<1 GB), ≤10 GB/month page delivery and ≤100,000 HTTPS requests; after Stage 1, ≤10,000 HTTP API calls/month, ≤10 synthetic monthly active users, one small on-demand table with 1–10 KB average items, ≤0.5 GB logs/month, no more than 10,000 async jobs if SQS is later added, no Bedrock, no SMS, no cross-region traffic and no purchased domain.
 
@@ -201,18 +182,18 @@ Official references: [AWS CLI v2 install](https://docs.aws.amazon.com/cli/latest
 
 ## Required permissions
 
-The existing `ReadOnlyAccess` profile cannot deploy. The bootstrap profile is root; current work used it only for read-only inspection. The user's explicit IAM CLI authorization supports a later reviewed permission-set bootstrap phase, not application provisioning as root. Do not attach `AdministratorAccess`. The [provisioner candidate](permissions/ke13a-stage0-provisioner.json) and [limitations/phase design](stage0-provisioner-permission.md) require independent review and resolution of the CloudFront creation/spend limitation before assignment. The separate [release policy](permissions/ke13c-stage0-deploy.json) has independent PASS and retains its exact distribution placeholder until provisioning; it has no creation/configuration/tagging/Billing/IAM authority. A separately reviewed trusted action installs [the OAC-only bucket policy](permissions/ke13c-preview-bucket-policy.json). Neither reusable role can change it.
+The `known-enough-staging-ro` `ReadOnlyAccess` profile is for identity/inventory checks. The bootstrap profile was root and used only for the user-authorized setup operations described above; do not use it for incremental application releases. The temporary provisioning permission set is deleted. The active `known-enough-staging-deploy` role uses the exact reviewed [release policy](permissions/ke13c-stage0-deploy.json); it cannot create/configure/tag/delete the distribution, administer IAM/billing, or change the bucket policy. The exact [OAC-only bucket policy](permissions/ke13c-preview-bucket-policy.json) is installed. Do not attach `AdministratorAccess`.
 
 | Actor/stage | Permission families to request after review |
 | --- | --- |
 | Read-only verification | `sts:GetCallerIdentity`; no service mutation permission. |
-| Preview initial provisioning (Stage 0) | Proposed temporary SSO permission set: exact named-bucket creation/retention/tagging plus create-only CloudFront/OAC; subsequent exact-ARN distribution tagging. Candidate is not assignable pending independent review and the documented uncapped creation limitation. Safe defaults are inspected; bucket policy installation and budget creation remain separate trusted administrator actions. Root is limited to the later explicitly authorized IAM bootstrap phase. |
+| Preview initial provisioning (Stage 0) | Complete. A temporary setup permission set/assignment was created through CLI and removed after provisioning. The unaccepted KE13A-P candidate was not used and must not be assigned. Exact deployed resources are listed above. |
 | Preview incremental release | The [Stage 0 release policy](permissions/ke13c-stage0-deploy.json), after recorded independent PASS, human acceptance and rendered revalidation, substitutes the exact provisioned distribution ARN. It allows `s3:ListBucket` only with either allowed prefix, `s3:GetObject`/`s3:PutObject` only under `hosted-preview/*` and `assets/*`, and distribution read/invalidation actions only on that exact distribution ARN. It has no bucket-policy, bucket-configuration, create, tag, delete or wildcard-distribution action. |
 | API staging control plane | API Gateway HTTP API create/update/delete; Lambda create/update/delete and pass execution role; Cognito user-pool/app-client/group provisioning; DynamoDB table create/describe/update/delete and billing-mode/on-demand limit configuration; CloudWatch log-group/retention/alarm management; optional SQS queue/DLQ create/update/delete only when worker code exists; AWS Budgets and cost-allocation-tag activation as authorized. IAM role/policy creation and `iam:PassRole` must be constrained to the exact staging roles and intended services. |
 | Runtime API role | Existing adapter’s transaction-scoped DynamoDB item actions only: `dynamodb:GetItem`, `dynamodb:PutItem`, `dynamodb:UpdateItem` on the exact table ARN, with `dynamodb:EnclosingOperation` limited to `TransactGetItems`/`TransactWriteItems` and `dynamodb:LeadingKeys` limited to `ROOM#*`. Add only exact log-group write actions. No table administration, `DeleteItem`, `Query`, `Scan`, IAM, Cognito admin or broad resource wildcard. |
 | Runtime worker role, only if implemented | Only the specific queue’s send/read/delete/get-attributes actions, exact table transaction needs and exact log group. No raw prompt text in the queue; do not grant Bedrock until its separate KE10 scope is authorized. |
 
-The S3 bucket candidate is `known-enough-preview-20260927-7f94b6a1`. An explicit-profile `HeadBucket` check returned 404 on 2026-09-27. General-purpose S3 bucket names use a global namespace, so the name could be claimed before creation; if AWS returns `BucketAlreadyExists`, stop, select another name and edit the exact S3 ARNs in the policy before continuing.
+Before deployment, an explicit-profile `HeadBucket` check returned 404 for the now-deployed bucket `known-enough-preview-20260927-7f94b6a1`. General-purpose bucket names use a global namespace; the name was available at creation. If a future account returns `BucketAlreadyExists`, stop and choose a new bucket name before rendering exact S3 ARNs.
 
 The runtime IAM row reflects the current [`infra/README.md`](README.md) adapter design and is still a review example; re-check it against KE13B’s actual SDK commands and table ARN before authorizing. A key-prefix condition does not replace application membership authorization.
 
@@ -230,10 +211,9 @@ Use synthetic test records only. Set a dated cleanup reminder at creation. Clean
 8. Remove the optional ACM certificate after distribution/API associations are removed. Delete only staging Route 53 records. Do not delete a shared hosted zone or register/transfer a domain as part of cleanup.
 9. Remove staging-specific budget filters, alarm targets and cost-allocation tags only if they were created solely for this stage; retain any account-wide budget or shared control. Verify the AWS bill and resource inventory after cleanup; record residual charges and the cleanup date.
 
-## Open blockers / next action
+## Remaining work / next action
 
-- [KE13A-P](../docs/tasks/KE13A-provisioner-policy.md) is the current bounded candidate-policy task. Pause for independent critical review; no AWS writes are authorized in this preparation phase. The policy is deliberately expired and its tag ARN unresolved. CloudFront create permissions cannot enforce one distribution, the allowed origin/configuration or the $25 planning ceiling. Do not assign without resolving that limitation explicitly; the candidate is not a hard cost boundary.
-- The user authorized creation of a scoped staging provisioning permission via CLI. Bootstrap STS confirms root in the intended account; only read-only operations were performed. No scoped provisioning role exists yet. Assignment must preserve the original read-only set, use only the reviewed new inline policy, and verify the generated SSO role; the bootstrap profile does not provision application resources.
-- The accepted hosted build remains public synthetic mock data. The separate release/bucket-policy correction has independent PASS; its human acceptance, exact-resource rendering and validation remain prerequisites. The new provisioner policy does not inherit that PASS.
-- A confirmed $25 S3/CloudFront budget alert and a trusted exact bucket-policy installation path remain needed before preview delivery. Alerts do not guarantee a hard cap. Fresh account-level S3 BPA lookup found no configuration; the candidate preserves and verifies bucket-level defaults rather than granting writes to weaken them.
+- Stage 0 cleanup is scheduled by the `CleanupAfter=2026-10-04` tag; do not delete resources without explicit cleanup authorization. Follow the procedure below and empty all bucket versions before bucket removal.
+- The historical KE13A-P candidate policy was not used for deployment; its temporary permission set was created for setup and deleted afterward. Do not assign that expired candidate. The exact release profile and trusted bucket-policy installation path used for Stage 0 are documented above.
+- The accepted preview remains public synthetic mock data. No account-level hard spend cap or budget alert was created. Before a future API stage, recheck current cost, permissions, and sequential task gates.
 - KE00 and KE13A remain accepted; B04/B04.5 remain REVIEW. KE13B, KE12 and final live KE13 gates are unchanged. No API/authentication/persistence/model work is authorized by the preview permission task.

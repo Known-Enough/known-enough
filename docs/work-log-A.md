@@ -1,3 +1,10 @@
+## 2026-09-27 — Stage 0 deployment documentation / REVIEW
+
+- Bounded claim: update current KE13 staging/task/handoff records with the already completed AWS CLI deployment; preserve review gates and do not change KE00, B04/B04.5, or KE13 operational acceptance. Actual worker: Codex GPT-6; exact variant/effort unexposed. Baseline: local `main` synchronized at `fb3d0b0`, preserving local `c20fe3c` and merging remote documentation commit `a13447c` after `git pull --ff-only origin main` reported divergence. No push.
+- Recorded in `infra/staging-runbook.md`, `infra/README.md`, `docs/tasks/KE13A.md`, `docs/tasks/KE13C.md`, `docs/tasks/KE13.md`, `docs/task-board.md`, this log and A handoff: account/region, deployed private S3/CloudFront/OAC IDs, exact hosted artifact hashes, deployment/release identities, HTTPS 200 checks, expired candidate/temporary setup permission cleanup, credit caveat, and the next step. Clarified that Stage 0 is a fixed public synthetic mock with no auth/API/DynamoDB/shared state. User-reported `$250` credits remain unverified; no budget or hard spending cap exists.
+- Task statuses preserved: KE13A/KE13C accepted; KE13 final operational acceptance still BLOCKED; KE00 and B04/B04.5 unchanged; no task active. KE13B remains sequential and gated. No source/tests/IAM policy changes, AWS calls, model calls, resource creation, deploy, or push during this documentation update.
+- Documentation-only checks passed: `node scripts/check-references.mjs` matched 7/7 hashes; local-link check resolved 176 paths across eight changed docs; task/status consistency passed; `git diff --check` passed. No application suite was requested or run.
+
 ## 2026-09-26T20:36:07Z — KE00 / REVIEW — pivot documentation handoff
 
 - Actual worker: Codex GPT-6, exact variant/effort unexposed; scheduled Astra/high not claimed. Completed only the user-directed KE00 scope over synchronized main `65359ebd19c8ae81007a4b502cce955d5d8ff292`; claim finished. No subagents, implementation or independent-security-verdict claim.

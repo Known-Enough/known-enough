@@ -2,9 +2,9 @@
 
 ## Current Known Enough staging sequence
 
-The B04 material below records the local adapter/authentication baseline only; it does not describe a deployed AWS environment. [KE13A staging preparation](staging-runbook.md) records the staged HTTPS mock preview, later authenticated API/DynamoDB plan, profile setup instructions and cost/cleanup controls. [KE13B](../docs/tasks/KE13B.md) is the future sequential `gpt-6-sol` / high backend/authentication/persistence/IAM implementation handoff. [KE13](../docs/tasks/KE13.md) remains separate live deployment and operational acceptance. No AWS resources, profile, login, identity or cloud behavior are claimed here.
+The B04 material below records the local adapter/authentication baseline only; it does not describe deployed backend behavior. [KE13A staging preparation](staging-runbook.md) records the deployed HTTPS mock preview and later authenticated API/DynamoDB plan. Stage 0 uses a private S3 bucket and CloudFront OAC; it has no login, API or shared state. [KE13B](../docs/tasks/KE13B.md) is the future sequential `gpt-6-sol` / high backend/authentication/persistence/IAM implementation handoff. [KE13](../docs/tasks/KE13.md) remains separate live operational acceptance. No AWS backend behavior is claimed here.
 
-Historical B04.5 verdicts remain scoped to their named commits. The current invitation issuance/redemption slice is locally implemented and awaits independent B04.5 review. This document records design and local verification only; no AWS resources have been created and no cloud behavior is claimed as verified.
+Historical B04.5 verdicts remain scoped to their named commits. The current invitation issuance/redemption slice is locally implemented and awaits independent B04.5 review. This document records design and local verification only; no AWS resources were created for that code slice, and no cloud behavior for the authenticated backend is claimed as verified.
 
 ## Identity boundary
 
