@@ -1,5 +1,10 @@
 # User B handoff — shared task pool
 
+## KE02 start claim — 2026-09-27T09:53:50Z
+
+KE02 is the sole active project task. Clean `main` synchronized with `origin/main` at `b91cb2e79e9011c819f52b542edacccb3944c417`; `git pull --ff-only origin main` succeeded, ahead/behind 0/0. Board/ticket and A/B current handoffs show no competing active claim. Direct worker is Codex GPT-6; exact variant/effort telemetry is unavailable, so assigned `gpt-6-luna` / high is the target, not a verified runtime selection. Bounded files are `packages/domain/src/index.ts`, new `known-enough-kernel.ts` and its test, `docs/known-enough-architecture.md`, KE02 ticket, board, this handoff and B log. The kernel test will consume existing synthetic v2 fixtures; no fixture/schema edits are claimed. Work proceeds through design then implementation, with no separate reviewer session.
+
+
 ## KE01 completion handoff — 2026-09-27T09:41:50Z
 
 KE01 is DONE on the implementation diff over synchronized `main` baseline `2455ef01f46423afdd27a0d234a6f05da8b71c41`. Direct worker is Codex GPT-6; exact runtime variant/effort were not exposed, so the requested `gpt-6-luna` / high target is not claimed as observed. See [ticket](tasks/KE01.md), [`KnownEnough` v2 source](../packages/contracts/src/known-enough.ts) and [contract decisions](contracts.md#ke01-generic-contract-v2).
