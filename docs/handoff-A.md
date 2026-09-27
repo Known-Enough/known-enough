@@ -1,6 +1,10 @@
 # User A handoff — shared task pool
 
-## Current handoff — KE13A-P R1 correction complete; follow-up review pending — 2026-09-27T01:36:18Z
+## Current handoff — KE13A-P focused CHANGES_REQUESTED — 2026-09-27T01:38:35Z
+
+[Independent follow-up](reviews/KE13A-provisioner-profile-followup.md) of exact `b92024b..e05ef8b` confirms the verified RO profile correction and unchanged IAM policies. Remaining P2: equality guards accept matching malformed/placeholder identifiers; four synthetic cases render, including a wildcard distribution ARN. Add the already documented explicit ARN/ID format and placeholder checks, preserve identity/origin/OAC validation, and clarify the Bash-only syntax. Twenty-four offline cases inspected; no AWS calls. Fresh separate clean-main clone successfully pulled from the current local-main source, preserving unpushed commits. Actual Codex GPT-6, exact variant/effort unexposed. Review claim released; owner correction and independent follow-up are next. Wildcard CloudFront creation and the $25 cap remain unresolved; expired candidate must remain unassigned.
+
+## Prior handoff — KE13A-P R1 correction complete; follow-up review pending — 2026-09-27T01:36:18Z
 
 Independent [review R1/P2](reviews/KE13A-provisioner-policy.md) found the runbook used the provisioner profile to inspect a CloudFront distribution, though that role has no `cloudfront:GetDistribution`. The correction now uses verified `known-enough-staging-ro` and retains fail-closed checks for account/read-only role, ARN/ID, single expected S3 origin and observed OAC. Root / current Codex GPT-6; exact variant/effort unexposed; baseline `b92024b`. Bash syntax, seven reference hashes, local Markdown link paths and unchanged policy documents passed. No AWS writes. Candidate remains expired/unassigned; focused follow-up review and the separate CloudFront creation/cost decision remain pending.
 
