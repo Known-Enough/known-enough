@@ -1,3 +1,9 @@
+## 2026-09-27 — KE01 designated to User B / task queue clarification
+
+- User directed that User B perform KE01 and asked for an easy Luna task in parallel. Actual worker: Codex GPT-6; exact variant/effort unexposed. Bounded scope: record the one-ticket KE01 designation, clarify the first Luna ticket and explain the retained B04/B04.5 gate. Baseline `6f3dc28`, clean local `main`; `git pull --ff-only origin main` succeeded before edits. No implementation task claimed by this worker.
+- KE01 remains READY and unstarted, designated to B only; B records model/effort, baseline and active claim at start. KE05 is the earliest Luna/medium task, but is blocked by KE04, and the project rule allows one active task at a time; no parallel Luna implementation was started. B04/B04.5 remain REVIEW pending human acceptance; no gate/status was changed.
+- Changed `docs/tasks/KE01.md`, `docs/task-board.md`, this handoff and this log. Documentation-only checks passed: 142 local Markdown links/anchors resolved; imported reference hashes 7/7; KE01 remains READY/designated to B, KE05 remains BLOCKED, and KE00/B04/B04.5 statuses are unchanged; `git diff --check` passed. No application suite, AWS/cloud action or push.
+
 ## 2026-09-27 — streamline routine task handoffs / documentation checkpoint
 
 - User asked for the next task and fewer human review steps to reach a testable MVP. Actual worker: Codex GPT-6; exact variant/effort unexposed. Bounded scope: simplify routine completion/handoff rules across KE01–KE17, set KE01 READY after accepted KE00, and preserve explicit foundation, architecture/privacy, cloud/IAM and final-release gates. Baseline: `4718dbc` on local `main`; clean working tree and `git pull --ff-only origin main` succeeded before edits. No implementation task claimed.

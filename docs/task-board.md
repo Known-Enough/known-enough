@@ -10,7 +10,7 @@ One project-wide priority queue, one active implementation or review at a time. 
 
 **[KE13C policy follow-up](tasks/KE13C-policy-followup.md) remains REVIEW with independent PASS** on exact `f1893e3..6238700`; P1/P2 are closed for that draft. Its reviewed release policy and exact OAC-only bucket policy were used for the Stage 0 deployment. This does not accept KE13 operational evidence. The hosted-preview build remains DONE and unchanged: user accepted the reported PASS on `a5d1833..a625498` on 2026-09-27. The review records two non-blocking permanent-check gaps. See [KE13C](tasks/KE13C.md), [build review](reviews/KE13C.md), and [policy review](reviews/KE13C-policy.md).
 
-**KE00 DONE**: user accepted the documentation-only pivot audit on 2026-09-26. **KE01 is the next task and is READY to claim**; no task is currently active.
+**KE00 DONE**: user accepted the documentation-only pivot audit on 2026-09-26. **KE01 is READY and designated for User B by the user's direction on 2026-09-27**; B must record the normal start claim before implementation. No task is currently active. This is a one-ticket designation, not a change to the shared-pool policy.
 
 **Retained foundation gate:** B04/B04.5 remain REVIEW pending human acceptance. Their source and latest independent R11/R12 PASS are already integrated through origin/main `65359eb`; there is no local-only B04 delta in this checkout. KE01 may define contracts after KE00 acceptance; KE02 and later backend implementation additionally require the retained B04/B04.5 human gate. Managed Cognito/DynamoDB/IAM and deployment acceptance remain future evidence, not prerequisites disguised as completed tests.
 
@@ -31,11 +31,11 @@ Routine implementation successors become eligible when the prior task reaches DO
 | Task | Direct model / effort | Prerequisite / gate | Status and outcome |
 | --- | --- | --- | --- |
 | [KE00](tasks/KE00.md) | `gpt-6-astra` / high scheduled; actual GPT-6, variant unexposed | User-directed first task | DONE — user accepted the pivot audit on 2026-09-26 |
-| [KE01](tasks/KE01.md) | `gpt-6-astra` / high | KE00 accepted | READY — next task: generic contracts; focused checks, no per-task review |
+| [KE01](tasks/KE01.md) | `gpt-6-astra` / high | KE00 accepted; user-designated to B | READY — B's next task: generic contracts; focused checks, no per-task review |
 | [KE02](tasks/KE02.md) | `gpt-6-astra` / high design, then `gpt-6-sol` / high implementation | KE01 + B04/B04.5 human acceptance | BLOCKED — small trust kernel |
 | [KE03](tasks/KE03.md) | `gpt-6-sol` / high | KE02 | BLOCKED — application and versioned storage adaptation |
 | [KE04](tasks/KE04.md) | `gpt-6-sol` / medium | KE03 | BLOCKED — TeamTable regression bridge |
-| [KE05](tasks/KE05.md) | `gpt-6-luna` / medium | KE04 | BLOCKED — Known Enough product shell |
+| [KE05](tasks/KE05.md) | `gpt-6-luna` / medium | KE04 | BLOCKED — first Luna task; product shell waits for KE04 |
 | [KE06](tasks/KE06.md) | `gpt-6-sol` / high | KE05 | BLOCKED — injected AI decision architect |
 | [KE07](tasks/KE07.md) | `gpt-6-sol` / high | KE06 | BLOCKED — private participant conversation/confirmation |
 | [KE08](tasks/KE08.md) | `gpt-6-sol` / high | KE07 | BLOCKED — candidate generation/private negotiation |
