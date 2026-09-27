@@ -18,9 +18,31 @@ describe('Known Enough v2 generic contracts', () => {
     expect(JSON.stringify(fixture.publicSnapshot)).not.toContain('maya-budget-limit');
     expect(JSON.stringify(fixture.publicSnapshot)).not.toContain('older relative');
     expect(KE.PublicDecisionSnapshot.parse(fixture.publicSnapshot)).toEqual(fixture.publicSnapshot);
+    expect(KE.PublicDecisionSnapshot.safeParse({ ...fixture.publicSnapshot, status: 'PRIVATE_NEGOTIATION' }).success).toBe(true);
     expect(fixture.publicSnapshot).not.toHaveProperty('inputReadiness');
     const unknownViewer = { ...fixture.publicSnapshot, viewerParticipantId: 'outsider' };
     expect(KE.PublicDecisionSnapshot.safeParse(unknownViewer).success).toBe(false);
+  });
+
+  it('accepts private-negotiation state and version-bound revocation commands', () => {
+    const fixture = buildChristmasFixture();
+    expect(KE.PublicDecisionSnapshot.safeParse({
+      ...fixture.publicSnapshot, status: 'PRIVATE_NEGOTIATION',
+    }).success).toBe(true);
+    for (const type of ['REVOKE_NEGOTIATION', 'REVOKE_DISCLOSURE'] as const) {
+      expect(KE.DecisionCommand.safeParse({
+        schemaVersion: KE.KE_SCHEMA_VERSION, type,
+        requestId: 'request-revoke', decisionId: fixture.definition.decisionId,
+        idempotencyKey: `key-${type}`,
+        expected: {
+          contextToken: fixture.definition.contextToken,
+          semanticVersion: fixture.definition.semanticVersion,
+          controlVersion: 0,
+          ownerVersion: 0,
+        },
+        payload: { permissionId: 'permission-1', permissionVersion: 1 },
+      }).success).toBe(true);
+    }
   });
 
   it('rejects unknown fields recursively, malformed values, duplicate IDs, and cross-reference errors', () => {

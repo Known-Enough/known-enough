@@ -6,8 +6,10 @@ import {
   DynamoDBClient,
   GetItemCommand,
 } from '@aws-sdk/client-dynamodb';
-import { DealTableApplication, type RoomRecord } from '@deal-table/application';
+import { DealTableApplication, KnownEnoughApplication, type RoomRecord } from '@deal-table/application';
+import { KnownEnough as KE } from '@deal-table/contracts';
 import { buildTeamTableFixture } from '@deal-table/test-support';
+import { buildChristmasFixture } from '../../test-support/src/known-enough-fixtures.ts';
 import { DynamoDBRoomRepository } from './dynamodb.ts';
 import { decodeGuardItem } from './dynamodb-codec.ts';
 import { InMemoryRoomRepository } from './index.ts';
@@ -37,7 +39,7 @@ async function roomRecord(): Promise<RoomRecord> {
   const inMemory = new InMemoryRoomRepository();
   const source = new DealTableApplication({
     repository: inMemory,
-    clock: { now: () => fixture.now },
+    clock: { now: () => '2026-10-01T12:00:00.000Z' },
     ids: { next: () => `local-id-${++sequence}` },
   });
   await source.createRoom({
@@ -124,5 +126,64 @@ describe.skipIf(!enabled)('DynamoDBRoomRepository against explicitly enabled Dyn
     const activated = await repository.transaction(roomId, room => room!);
     expect(activated.memberships.find(value => value.memberId === 'maya')?.status).toBe('ACTIVE');
     expect(activated.invitations[0]?.redeemedAt).not.toBeNull();
+  });
+
+  it('runs the generic STATE v5 path, guarded concurrency, and exact command replay through DynamoDB Local', async () => {
+    const fixture = buildChristmasFixture();
+    let sourceSequence = 0;
+    const sourceRepository = new InMemoryRoomRepository();
+    const sourceApplication = new KnownEnoughApplication({
+      repository: sourceRepository,
+      clock: { now: () => '2026-10-01T12:00:00.000Z' },
+      ids: { next: () => `local-ke03-source-${++sourceSequence}` },
+    });
+    await sourceApplication.createDecision({
+      definition: fixture.definition,
+      creatorSubject: 'subject-maya',
+      memberships: fixture.definition.participants.map(person => ({
+        subject: `subject-${person.id}`, participantId: person.id, active: true,
+      })),
+    });
+    const initial = await sourceRepository.transactionDecision(fixture.definition.decisionId, decision => structuredClone(decision!));
+    await repository.createDecision(initial);
+    await expect(repository.createDecision(initial)).rejects.toThrow('Room already exists');
+
+    let appSequence = 0;
+    const application = new KnownEnoughApplication({
+      repository,
+      clock: { now: () => '2026-10-01T12:00:00.000Z' },
+      ids: { next: () => `local-ke03-command-${++appSequence}` },
+    });
+    const principal = { kind: 'participant' as const, subject: 'subject-maya' };
+    const owner = await application.getOwnerSnapshot(principal, fixture.definition.decisionId);
+    const command = {
+      schemaVersion: KE.KE_SCHEMA_VERSION, type: 'CONFIRM_FRAME' as const,
+      requestId: 'local-ke03-request', decisionId: fixture.definition.decisionId,
+      idempotencyKey: 'local-ke03-confirm-frame',
+      expected: {
+        contextToken: owner.publicSnapshot.contextToken, semanticVersion: owner.publicSnapshot.semanticVersion,
+        controlVersion: owner.controlVersion, ownerVersion: owner.ownerVersion,
+      },
+      payload: { frameVersion: owner.publicSnapshot.frame.frameVersion },
+    };
+    const first = await application.execute(principal, command);
+    expect(first.ok).toBe(true);
+    expect(await application.execute(principal, command)).toEqual(first);
+
+    await Promise.all(Array.from({ length: 12 }, () => repository.transactionDecision(
+      fixture.definition.decisionId, async decision => {
+        const prior = decision!.controlVersion;
+        await Promise.resolve();
+        decision!.controlVersion = prior + 1;
+      },
+    )));
+    const current = await repository.transactionDecision(fixture.definition.decisionId, decision => decision!);
+    expect(current.controlVersion).toBe(initial.controlVersion + 13);
+    const stored = await lowLevel.send(new GetItemCommand({
+      TableName: tableName,
+      Key: { PK: { S: `ROOM#${fixture.definition.decisionId}` }, SK: { S: 'GUARD' } },
+      ConsistentRead: true,
+    }));
+    expect(decodeGuardItem(stored.Item, fixture.definition.decisionId).version).toBe(13);
   });
 });

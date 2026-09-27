@@ -715,7 +715,7 @@ const PublishedDisclosure = z.discriminatedUnion('kind', [
 
 export const PublicDecisionStatus = z.enum([
   'CREATING', 'DEFINING', 'COLLECTING_FRAME_CONFIRMATION', 'COLLECTING_PRIVATE_INPUT',
-  'NEEDS_CLARIFICATION', 'READY', 'REASONING', 'PROPOSED', 'APPROVING', 'AGREED',
+  'NEEDS_CLARIFICATION', 'READY', 'REASONING', 'PRIVATE_NEGOTIATION', 'PROPOSED', 'APPROVING', 'AGREED',
   'NO_AGREEMENT', 'SUPERSEDED', 'CLOSED',
 ]);
 
@@ -751,7 +751,7 @@ export const PublicDecisionSnapshot = z.strictObject({
   });
   const confirmedIds = new Set(confirmationIds);
   const allFramesConfirmed = required.every(id => confirmedIds.has(id));
-  if (['COLLECTING_PRIVATE_INPUT', 'NEEDS_CLARIFICATION', 'READY', 'REASONING', 'PROPOSED', 'APPROVING', 'AGREED', 'NO_AGREEMENT'].includes(snapshot.status)
+  if (['COLLECTING_PRIVATE_INPUT', 'NEEDS_CLARIFICATION', 'READY', 'REASONING', 'PRIVATE_NEGOTIATION', 'PROPOSED', 'APPROVING', 'AGREED', 'NO_AGREEMENT'].includes(snapshot.status)
     && !allFramesConfirmed)
     issue('Private input and proposals require every required participant’s current frame confirmation', ['frameConfirmations']);
   if (snapshot.approvedParticipantIds.some(id => !required.includes(id)))
@@ -1037,6 +1037,18 @@ export const DecisionCommand = z.discriminatedUnion('type', [
     requestId: Id, decisionId: Id, idempotencyKey: Id,
     expected: z.strictObject({ contextToken: ContextToken, semanticVersion: Version, controlVersion: Version, ownerVersion: Version }),
     payload: z.strictObject({ permissionId: Id, permissionVersion: Version, decision: z.enum(['ALLOW', 'DECLINE']) }),
+  }),
+  z.strictObject({
+    schemaVersion: z.literal(KE_SCHEMA_VERSION), type: z.literal('REVOKE_NEGOTIATION'),
+    requestId: Id, decisionId: Id, idempotencyKey: Id,
+    expected: z.strictObject({ contextToken: ContextToken, semanticVersion: Version, controlVersion: Version, ownerVersion: Version }),
+    payload: z.strictObject({ permissionId: Id, permissionVersion: Version }),
+  }),
+  z.strictObject({
+    schemaVersion: z.literal(KE_SCHEMA_VERSION), type: z.literal('REVOKE_DISCLOSURE'),
+    requestId: Id, decisionId: Id, idempotencyKey: Id,
+    expected: z.strictObject({ contextToken: ContextToken, semanticVersion: Version, controlVersion: Version, ownerVersion: Version }),
+    payload: z.strictObject({ permissionId: Id, permissionVersion: Version }),
   }),
   z.strictObject({
     schemaVersion: z.literal(KE_SCHEMA_VERSION), type: z.literal('APPROVE_PROPOSAL'),

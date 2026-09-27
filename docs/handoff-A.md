@@ -1,4 +1,10 @@
-## Current handoff — main synchronization — 2026-09-27
+## Current handoff — KE03 complete; KE04 next — 2026-09-27T18:16:56Z
+
+KE03 is DONE on its recorded technical criteria. User A claimed it from synchronized `main` baseline `a3488c3` (claim checkpoint `5019604`); direct worker was Codex GPT-6, exact runtime variant/effort unexposed, so the requested Luna/high runtime was not claimed. Generic application lifecycle and HTTP paths, strict STATE v5 codec/repository alongside legacy v4, contracts, tests and architecture notes are recorded in [KE03](tasks/KE03.md). The pinned Node 24.21.0/npm 11.19.0 full check passed: 277 tests passed, two opt-in DynamoDB Local tests skipped, hosted browser test 1/1 and E2E 41/41. No DynamoDB Local endpoint, managed AWS services, cloud changes, paid calls or deployments were exercised.
+
+No task is active. [KE04](tasks/KE04.md) is READY and unclaimed as the next task. Include this exact KE03 artifact with KE01/KE02 in the single KE09 post-MVP review bundle; there is no separate KE03 review. B04/B04.5 remain REVIEW, and no acceptance state was changed. Before work, the other clone must fast-forward `main` from `origin/main` and claim KE04.
+
+## Prior handoff — main synchronization before KE03 — 2026-09-27
 
 The user has now authorized a standing workflow: completed task work, verified docs-only changes, and checked reviewable checkpoints should be committed and pushed to `origin/main` after their checks, without another push approval. Do not mark REVIEW/BLOCKED work accepted because it is pushed; keep downstream gates. AWS deployments, paid resources, spending and external messages still require their own authorization. The other clone must pull before its next task.
 
@@ -6,11 +12,11 @@ At the start of this update, local `/tmp/known-enough-stage0-guard/main` was cle
 
 Actual worker: Codex GPT-6; exact variant/effort unexposed. Bounded claim: revise the shared sync/push instructions and publish only under the new standing authorization after docs checks. Current changed files and final remote verification are recorded in the A log. No AWS mutation or deployment.
 
-## Current claim — KE03 generic application and persistence — 2026-09-27T16:52:15Z
+## KE03 claim record — generic application and persistence — 2026-09-27T16:52:15Z
 
-KE03 is IN_PROGRESS, claimed by User A from clean synchronized `main` `a3488c3` after `git pull --ff-only origin main` succeeded. No other task is active. Direct worker is current Codex GPT-6; exact runtime variant/effort are unexposed, so the user-directed `gpt-6-luna` / high target is not claimed as verified runtime selection. Scope and next actions are in the [ticket](tasks/KE03.md) and [A work log](work-log-A.md). No AWS, paid calls, deployment or external actions are authorized by this claim.
+KE03 was claimed by User A from clean synchronized `main` `a3488c3` after `git pull --ff-only origin main` succeeded. No other task was active then. Direct worker was Codex GPT-6; exact runtime variant/effort were unexposed, so the user-directed `gpt-6-luna` / high target is not claimed as verified runtime selection. Scope and completed outcome are in the [ticket](tasks/KE03.md) and [A work log](work-log-A.md). No AWS, paid calls, deployment or external actions occurred.
 
-## Current handoff — KE01 ready; routine review flow streamlined — 2026-09-27
+## Prior handoff — KE01 ready; routine review flow streamlined — 2026-09-27
 
 The user asked to reduce routine human/reviewer checkpoints and move quickly toward a testable MVP. On 2026-09-27, the user set KE01–KE08 direct work to Luna/high, reserving Astra for post-MVP architectural/release checkpoints if needed; current model policy is in the workflow and board. [KE01](tasks/KE01.md) is READY and designated to User B for this ticket only; B should run the clean-main pull/claim procedure before implementation. No task is active yet. KE00 remains DONE and accepted.
 
@@ -18,7 +24,7 @@ Tasks KE01–KE07 now hand off directly when ticket criteria and focused checks 
 
 Actual worker: Codex GPT-6; exact variant/effort unexposed. Bounded claim: documentation-only task-flow update for KE01–KE17, preserving existing explicit gates and historical acceptance/status records. Baseline `4718dbc`, clean local `main`; `git pull --ff-only origin main` succeeded before edits. Changed workflow, board, KE01–KE17 tickets, this handoff and A log. Local checks are recorded in the current A log entry. No application changes, cloud actions, push or external messages.
 
-## Current handoff — Stage 0 mock preview deployed — 2026-09-27
+## Prior handoff — Stage 0 mock preview deployed — 2026-09-27
 
 The user authorized CLI staging setup, later waived the earlier `$25/month` estimate in favor of available credits, and asked to keep cloud work low-cost in tokens. The HTTPS preview is live: [https://d23eowhnwtqts3.cloudfront.net/](https://d23eowhnwtqts3.cloudfront.net/). It is a static synthetic mock with no authentication/API/DynamoDB/shared state. Open that URL as the next immediate step. The [runbook](../infra/staging-runbook.md) has the resource IDs, CLI profile roles, artifact hashes, checks, cleanup date and future release steps.
 

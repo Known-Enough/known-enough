@@ -4,6 +4,7 @@ import type {
   Participant, Policy, ProposalView, PublicRoomSnapshot, Schedule,
 } from '@deal-table/contracts';
 import type { RequiredGrantReference, SolveDecisionInput, SolveDecisionResult } from '@deal-table/domain';
+import type { KnownEnough as KE } from '@deal-table/contracts';
 
 /** Constructed only by a trusted identity adapter; this is not authentication. */
 export type TrustedPrincipal =
@@ -107,4 +108,79 @@ export interface ApplicationOptions {
   permissionTtlMs?: number;
   proposalTtlMs?: number;
   invitationTtlMs?: number;
+}
+
+/** Subject-to-participant mapping comes from trusted provisioning, never a command body. */
+export interface DecisionMembership { subject: string; participantId: string; active: boolean }
+export interface KnownEnoughOwnerRecord {
+  participantId: string;
+  ownerVersion: number;
+  readiness: 'NOT_STARTED' | 'NEEDS_CLARIFICATION' | 'READY';
+  draftVersion: number | null;
+  draft: KE.AIConstraintDraft | null;
+  confirmedConstraints: KE.ConfirmedConstraint[];
+  pendingQuestions: KE.NegotiationQuestion[];
+  refusedRequests: KE.RefusedNegotiationRequest[];
+  negotiationPermissions: KE.NegotiationPermission[];
+  disclosurePermissions: KE.DisclosurePermission[];
+  approval: KE.FinalApproval | null;
+}
+export interface DecisionAgreementReceipt {
+  proposal: KE.CandidateProposal;
+  approvals: KE.FinalApproval[];
+  agreedAt: string;
+}
+export interface RetiredDecisionPermissions {
+  participantId: string;
+  refusedRequests: KE.RefusedNegotiationRequest[];
+  negotiationPermissions: KE.NegotiationPermission[];
+  disclosurePermissions: KE.DisclosurePermission[];
+}
+export interface DecisionReplayRecord {
+  keyHash: string;
+  bodyHash: string;
+  result: KE.DecisionCommandResult;
+}
+export interface DecisionJob {
+  id: string;
+  contextToken: string;
+  semanticVersion: number;
+  epoch: number;
+}
+/** Versioned generic state stored alongside legacy STATE v4 records. */
+export interface KnownEnoughRecord {
+  decisionId: string;
+  creatorSubject: string;
+  memberships: DecisionMembership[];
+  definition: KE.DecisionDefinition;
+  status: KE.PublicDecisionSnapshot['status'];
+  publicRevision: number;
+  controlVersion: number;
+  frameConfirmations: KE.FrameConfirmation[];
+  owners: KnownEnoughOwnerRecord[];
+  pendingCandidate: KE.CandidateProposal | null;
+  candidate: KE.CandidateProposal | null;
+  publicProposal: KE.PublicCandidateProposal | null;
+  proposalVersion: number;
+  supersededCandidates: KE.CandidateProposal[];
+  agreementHistory: DecisionAgreementReceipt[];
+  retiredPermissions: RetiredDecisionPermissions[];
+  publishedDisclosures: KE.PublicDecisionSnapshot['publishedDisclosures'];
+  solveEpoch: number;
+  job: DecisionJob | null;
+  replays: DecisionReplayRecord[];
+}
+export interface DecisionReplayCandidate {
+  keyHash: Promise<string>;
+  commandType: KE.DecisionCommand['type'];
+}
+export interface DecisionTransactionOptions { replay?: DecisionReplayCandidate }
+/** Same serialized STATE/GUARD/REPLAY transaction boundary as the legacy application. */
+export interface KnownEnoughRepository {
+  createDecision(decision: KnownEnoughRecord): Promise<void>;
+  transactionDecision<T>(
+    decisionId: string,
+    transition: (decision: KnownEnoughRecord | null) => Promise<T> | T,
+    options?: DecisionTransactionOptions,
+  ): Promise<T>;
 }

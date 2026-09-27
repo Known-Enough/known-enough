@@ -102,3 +102,21 @@ test seam omitted from the package entrypoint; they do not contact Cognito or
 prove user-pool administration, live group scope, network availability,
 DynamoDB, IAM, or deployment configuration. The `NON_PRODUCTION` handler
 remains for local negotiation only.
+
+## Generic Known Enough application routes (KE03)
+
+The API package also exports `createLocalKnownEnoughApiHandler` and
+`createCognitoKnownEnoughApiHandler` for the generic decision application. They
+serve `GET /decisions/:decisionId/public`, `GET
+/decisions/:decisionId/me`, and `POST /decisions/:decisionId/commands`. The
+command path checks verified participant membership before parsing the body
+or consulting idempotency state. Owner views use the server's
+subject-to-participant binding. Displays can read only the public snapshot and
+cannot issue commands.
+
+The local generic handler accepts only fixed `NON_PRODUCTION ...` identities;
+these labels remain demo conveniences and do not confer an authenticated
+identity. The Cognito handler uses the verified bearer-token resolver described
+above. Both still need the separately configured durable repository and
+service composition before deployment. This handler does not call an AI
+provider or run a background worker.

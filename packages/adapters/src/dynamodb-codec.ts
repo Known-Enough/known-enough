@@ -2,9 +2,12 @@ import type { AttributeValue } from '@aws-sdk/client-dynamodb';
 import {
   CommandResult, ConfirmedInputs, DisclosureGrant, DisclosurePreview, ExceptionOffer,
   ExceptionGrant, FinalApproval, Hash, Id, InputDraft, Interval, Participant, Policy, ProposalView,
-  PublicStatus, PublishedDisclosure, Schedule, Timestamp, Version,
+  PublicStatus, PublishedDisclosure, Schedule, Timestamp, Version, KnownEnough as KE,
 } from '@deal-table/contracts';
-import { MAX_PERMISSION_HISTORY_RECORDS, type RoomRecord } from '@deal-table/application';
+import {
+  MAX_PERMISSION_HISTORY_RECORDS,
+  type DecisionReplayRecord, type KnownEnoughRecord, type RoomRecord,
+} from '@deal-table/application';
 import { z } from 'zod';
 
 const ownerSchema = z.strictObject({
@@ -122,9 +125,11 @@ const roomRecordSchema = z.strictObject({
 });
 
 export type DynamoRoomRecord = Omit<RoomRecord, 'replays'>;
+export type DynamoKnownEnoughRecord = Omit<KnownEnoughRecord, 'replays'>;
 type DynamoItem = Record<string, AttributeValue>;
 
 export const STATE_SCHEMA_VERSION = 4;
+export const KNOWN_ENOUGH_STATE_SCHEMA_VERSION = 5;
 export const GUARD_SCHEMA_VERSION = 1;
 export const REPLAY_SCHEMA_VERSION = 1;
 
@@ -142,6 +147,107 @@ export interface ReplayRecord {
   bodyHash: string;
   result: RoomRecord['replays'][number]['result'];
 }
+export type KnownEnoughReplayRecord = DecisionReplayRecord;
+
+const decisionOwnerSchema = z.strictObject({
+  participantId: Id,
+  ownerVersion: Version,
+  readiness: z.enum(['NOT_STARTED', 'NEEDS_CLARIFICATION', 'READY']),
+  draftVersion: Version.nullable(),
+  draft: KE.AIConstraintDraft.nullable(),
+  confirmedConstraints: z.array(KE.ConfirmedConstraint).max(KE.MAX_PRIVATE_CONSTRAINTS),
+  pendingQuestions: z.array(KE.NegotiationQuestion).max(32),
+  refusedRequests: z.array(KE.RefusedNegotiationRequest).max(64),
+  negotiationPermissions: z.array(KE.NegotiationPermission).max(64),
+  disclosurePermissions: z.array(KE.DisclosurePermission).max(64),
+  approval: KE.FinalApproval.nullable(),
+});
+const retiredDecisionPermissionsSchema = z.strictObject({
+  participantId: Id,
+  refusedRequests: z.array(KE.RefusedNegotiationRequest).max(64),
+  negotiationPermissions: z.array(KE.NegotiationPermission).max(64),
+  disclosurePermissions: z.array(KE.DisclosurePermission).max(64),
+});
+const decisionAgreementSchema = z.strictObject({
+  proposal: KE.CandidateProposal,
+  approvals: z.array(KE.FinalApproval).max(KE.MAX_DECISION_PARTICIPANTS),
+  agreedAt: Timestamp,
+});
+const decisionMembershipSchema = z.strictObject({ subject: Id, participantId: Id, active: z.boolean() });
+const decisionJobSchema = z.strictObject({ id: Id, contextToken: Hash, semanticVersion: Version, epoch: Version });
+const decisionRecordSchema = z.strictObject({
+  decisionId: Id,
+  creatorSubject: Id,
+  memberships: z.array(decisionMembershipSchema).max(KE.MAX_DECISION_PARTICIPANTS),
+  definition: KE.DecisionDefinition,
+  status: KE.PublicDecisionStatus,
+  publicRevision: Version,
+  controlVersion: Version,
+  frameConfirmations: z.array(KE.FrameConfirmation).max(KE.MAX_DECISION_PARTICIPANTS),
+  owners: z.array(decisionOwnerSchema).max(KE.MAX_DECISION_PARTICIPANTS),
+  pendingCandidate: KE.CandidateProposal.nullable(),
+  candidate: KE.CandidateProposal.nullable(),
+  publicProposal: KE.PublicCandidateProposal.nullable(),
+  proposalVersion: Version,
+  supersededCandidates: z.array(KE.CandidateProposal).max(64),
+  agreementHistory: z.array(decisionAgreementSchema).max(64),
+  retiredPermissions: z.array(retiredDecisionPermissionsSchema).max(MAX_PERMISSION_HISTORY_RECORDS),
+  publishedDisclosures: KE.PublicDecisionSnapshot.shape.publishedDisclosures,
+  solveEpoch: Version,
+  job: decisionJobSchema.nullable(),
+}).superRefine((decision, ctx) => {
+  const participants = decision.definition.participants.map(item => item.id);
+  const membershipIds = decision.memberships.map(item => item.participantId);
+  const subjects = decision.memberships.map(item => item.subject);
+  const owners = decision.owners.map(item => item.participantId);
+  const issue = (path: (string | number)[], message: string) => ctx.addIssue({ code: 'custom', path, message });
+  if (decision.decisionId !== decision.definition.decisionId) issue(['definition', 'decisionId'], 'State and definition IDs must match');
+  if (new Set(participants).size !== participants.length
+    || [...participants].sort().join('|') !== [...membershipIds].sort().join('|')
+    || new Set(membershipIds).size !== membershipIds.length
+    || new Set(subjects).size !== subjects.length)
+    issue(['memberships'], 'Memberships must uniquely bind every current participant');
+  if ([...participants].sort().join('|') !== [...owners].sort().join('|') || new Set(owners).size !== owners.length)
+    issue(['owners'], 'Owner records must match the current participant roster');
+  const confirmationIds = decision.frameConfirmations.map(item => item.participantId);
+  if (new Set(confirmationIds).size !== confirmationIds.length || decision.frameConfirmations.some(item =>
+    item.decisionId !== decision.decisionId || item.frameVersion !== decision.definition.frameVersion
+      || item.semanticVersion !== decision.definition.semanticVersion || item.contextToken !== decision.definition.contextToken
+      || !participants.includes(item.participantId)))
+    issue(['frameConfirmations'], 'Frame confirmations must bind uniquely to the current frame');
+  const activeConstraints = decision.owners.reduce((sum, owner) => sum + owner.confirmedConstraints
+    .filter(item => item.status === 'ACTIVE').length, 0);
+  if (activeConstraints > 64) issue(['owners'], 'Active confirmed constraints exceed the shared decision bound');
+  const retiredOwnerIds = decision.retiredPermissions.map(owner => owner.participantId);
+  if (new Set(retiredOwnerIds).size !== retiredOwnerIds.length)
+    issue(['retiredPermissions'], 'Retired participant histories must be consolidated');
+  const currentPermissionCount = decision.owners.reduce((sum, owner) =>
+    sum + owner.refusedRequests.length + owner.negotiationPermissions.length + owner.disclosurePermissions.length, 0);
+  const retiredPermissionCount = decision.retiredPermissions.reduce((sum, owner) =>
+    sum + owner.refusedRequests.length + owner.negotiationPermissions.length + owner.disclosurePermissions.length, 0);
+  if (currentPermissionCount + retiredPermissionCount > MAX_PERMISSION_HISTORY_RECORDS)
+    issue(['retiredPermissions'], 'Decision permission history exceeds the retained room bound');
+  const activeProposal = ['PROPOSED', 'APPROVING', 'AGREED'].includes(decision.status);
+  if (activeProposal !== (decision.candidate !== null && decision.publicProposal !== null))
+    issue(['candidate'], 'Only an active proposal state carries both private and public proposal records');
+  if (decision.candidate && decision.publicProposal
+    && (decision.candidate.proposalId !== decision.publicProposal.proposalId
+      || decision.candidate.proposalVersion !== decision.publicProposal.facts.proposalVersion
+      || decision.candidate.contextToken !== decision.publicProposal.facts.contextToken))
+    issue(['publicProposal'], 'Public and private proposals must bind to the exact candidate');
+  const approved = decision.owners.filter(owner => owner.approval !== null).map(owner => owner.participantId);
+  if (approved.some(id => !decision.definition.requiredParticipantIds.includes(id))
+    || (decision.status === 'AGREED' && decision.definition.requiredParticipantIds.some(id => !approved.includes(id))))
+    issue(['owners'], 'Current agreement requires exact approvals from every required participant');
+  if (decision.job && (decision.job.contextToken !== decision.definition.contextToken
+    || decision.job.semanticVersion !== decision.definition.semanticVersion || decision.job.epoch !== decision.solveEpoch))
+    issue(['job'], 'Candidate jobs must bind to the current semantic context and epoch');
+});
+const decisionStateEnvelopeSchema = z.strictObject({
+  schemaVersion: z.literal(KNOWN_ENOUGH_STATE_SCHEMA_VERSION),
+  decisionId: Id,
+  record: decisionRecordSchema,
+});
 
 export class CorruptDynamoRecordError extends Error {
   constructor() {
@@ -185,6 +291,11 @@ const replayValueSchema = z.strictObject({
   keyHash: z.string().regex(/^[a-f0-9]{64}$/),
   bodyHash: z.string().regex(/^[a-f0-9]{64}$/),
   result: CommandResult,
+});
+const decisionReplayValueSchema = z.strictObject({
+  keyHash: z.string().regex(/^[a-f0-9]{64}$/),
+  bodyHash: z.string().regex(/^[a-f0-9]{64}$/),
+  result: KE.DecisionCommandResult,
 });
 const MAX_SAFE = Number.MAX_SAFE_INTEGER;
 const MAX_ID_A = 'a'.repeat(80);
@@ -272,6 +383,35 @@ export function encodeStateItem(room: RoomRecord): DynamoItem {
   return item;
 }
 
+function cleanDecisionRecord(decision: KnownEnoughRecord): DynamoKnownEnoughRecord {
+  const { replays: _replays, ...record } = decision;
+  void _replays;
+  const parsed = decisionRecordSchema.safeParse(record);
+  if (!parsed.success) throw new CorruptDynamoRecordError();
+  return parsed.data;
+}
+
+export function encodeDecisionStateItem(decision: KnownEnoughRecord): DynamoItem {
+  const record = cleanDecisionRecord(decision);
+  const payload = JSON.stringify({
+    schemaVersion: KNOWN_ENOUGH_STATE_SCHEMA_VERSION,
+    decisionId: record.decisionId,
+    record,
+  });
+  const item: DynamoItem = {
+    PK: string(roomKey(record.decisionId)),
+    SK: string('STATE'),
+    schemaVersion: number(KNOWN_ENOUGH_STATE_SCHEMA_VERSION),
+    payload: string(payload),
+  };
+  dynamoItemSize(item);
+  return item;
+}
+
+export function decisionStateItemSizeBytes(decision: KnownEnoughRecord): number {
+  return dynamoItemSize(encodeDecisionStateItem(decision));
+}
+
 export function stateItemSizeBytes(room: RoomRecord): number {
   return dynamoItemSize(encodeStateItem(room));
 }
@@ -283,6 +423,16 @@ export function decodeStateItem(value: unknown, expectedRoomId: string): DynamoR
   const envelope = stateEnvelopeSchema.safeParse(parseJson(item.data.payload.S));
   if (!envelope.success || envelope.data.roomId !== expectedRoomId
     || envelope.data.record.roomId !== expectedRoomId) throw new CorruptDynamoRecordError();
+  return envelope.data.record;
+}
+
+export function decodeDecisionStateItem(value: unknown, expectedDecisionId: string): DynamoKnownEnoughRecord {
+  const item = roomItemSchema.safeParse(value);
+  if (!item.success || item.data.PK.S !== roomKey(expectedDecisionId) || item.data.SK.S !== 'STATE'
+    || item.data.schemaVersion.N !== String(KNOWN_ENOUGH_STATE_SCHEMA_VERSION)) throw new CorruptDynamoRecordError();
+  const envelope = decisionStateEnvelopeSchema.safeParse(parseJson(item.data.payload.S));
+  if (!envelope.success || envelope.data.decisionId !== expectedDecisionId
+    || envelope.data.record.decisionId !== expectedDecisionId) throw new CorruptDynamoRecordError();
   return envelope.data.record;
 }
 
@@ -344,6 +494,20 @@ export function encodeReplayItem(roomId: string, incarnation: string, replay: Re
   return item;
 }
 
+export function encodeDecisionReplayItem(roomId: string, incarnation: string, replay: KnownEnoughReplayRecord): DynamoItem {
+  const parsed = decisionReplayValueSchema.safeParse(replay);
+  if (!parsed.success) throw new CorruptDynamoRecordError();
+  return {
+    PK: string(roomKey(roomId)),
+    SK: string('REPLAY#' + parsed.data.keyHash),
+    schemaVersion: number(REPLAY_SCHEMA_VERSION),
+    incarnation: string(incarnation),
+    keyHash: string(parsed.data.keyHash),
+    bodyHash: string(parsed.data.bodyHash),
+    result: string(JSON.stringify(parsed.data.result)),
+  };
+}
+
 export function decodeReplayItem(
   value: unknown,
   roomId: string,
@@ -357,6 +521,27 @@ export function decodeReplayItem(
     || item.data.keyHash.S !== expectedKeyHash
     || item.data.incarnation.S !== expectedIncarnation) throw new CorruptDynamoRecordError();
   const replay = replayValueSchema.safeParse({
+    keyHash: item.data.keyHash.S,
+    bodyHash: item.data.bodyHash.S,
+    result: parseJson(item.data.result.S),
+  });
+  if (!replay.success) throw new CorruptDynamoRecordError();
+  return replay.data;
+}
+
+export function decodeDecisionReplayItem(
+  value: unknown,
+  decisionId: string,
+  expectedKeyHash: string,
+  expectedIncarnation: string,
+): KnownEnoughReplayRecord {
+  const item = replayItemSchema.safeParse(value);
+  if (!item.success || item.data.PK.S !== roomKey(decisionId)
+    || item.data.SK.S !== 'REPLAY#' + expectedKeyHash
+    || item.data.schemaVersion.N !== String(REPLAY_SCHEMA_VERSION)
+    || item.data.keyHash.S !== expectedKeyHash
+    || item.data.incarnation.S !== expectedIncarnation) throw new CorruptDynamoRecordError();
+  const replay = decisionReplayValueSchema.safeParse({
     keyHash: item.data.keyHash.S,
     bodyHash: item.data.bodyHash.S,
     result: parseJson(item.data.result.S),
@@ -396,14 +581,43 @@ export function pendingPermissionResponseCount(room: DynamoRoomRecord): number {
   }, 0);
 }
 
+export function decisionPermissionHistoryCount(decision: DynamoKnownEnoughRecord): number {
+  const current = decision.owners.reduce((sum, owner) => sum + owner.refusedRequests.length
+    + owner.negotiationPermissions.length + owner.disclosurePermissions.filter(item => item.status !== 'PENDING').length, 0);
+  return current + decision.retiredPermissions.reduce((sum, owner) =>
+    sum + owner.refusedRequests.length + owner.negotiationPermissions.length + owner.disclosurePermissions.length, 0);
+}
+
+export function pendingDecisionResponseCount(decision: DynamoKnownEnoughRecord): number {
+  return decision.owners.reduce((sum, owner) => sum
+    + owner.pendingQuestions.filter(question => question.status === 'PENDING').length
+    + owner.disclosurePermissions.filter(permission => permission.status === 'PENDING').length, 0);
+}
+
+/** Conservative transfer reservation: every pending response may consume a full bounded command envelope. */
+export function pendingDecisionResponseByteReservations(decision: DynamoKnownEnoughRecord): number {
+  return pendingDecisionResponseCount(decision) * (KE.MAX_COMMAND_WIRE_BYTES + RESERVATION_TRANSITION_OVERHEAD_BYTES);
+}
+
 export function validateStateGuard(room: DynamoRoomRecord, guard: GuardRecord): void {
   if (room.roomId === '' || guard.permissionHistoryReceipts !== permissionHistoryCount(room)
     || permissionHistoryCount(room) + pendingPermissionResponseCount(room) > MAX_PERMISSION_HISTORY_RECORDS)
     throw new CorruptDynamoRecordError();
 }
 
+export function validateDecisionStateGuard(decision: DynamoKnownEnoughRecord, guard: GuardRecord): void {
+  const permissionCount = decisionPermissionHistoryCount(decision);
+  if (decision.decisionId === '' || guard.permissionHistoryReceipts !== permissionCount
+    || permissionCount + pendingDecisionResponseCount(decision) > MAX_PERMISSION_HISTORY_RECORDS)
+    throw new CorruptDynamoRecordError();
+}
+
 export function encodedStateRecord(room: RoomRecord): DynamoRoomRecord {
   return cleanRoomRecord(room);
+}
+
+export function encodedDecisionStateRecord(decision: KnownEnoughRecord): DynamoKnownEnoughRecord {
+  return cleanDecisionRecord(decision);
 }
 
 export function estimateItemBytes(item: DynamoItem): number {

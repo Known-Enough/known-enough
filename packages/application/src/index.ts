@@ -735,3 +735,6 @@ export class DealTableApplication {
     });
   }
 }
+
+export { KnownEnoughApplication, KnownEnoughApplicationError } from './known-enough.ts';
+export type { KnownEnoughApplicationOptions } from './known-enough.ts';

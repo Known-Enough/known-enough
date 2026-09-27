@@ -4,15 +4,20 @@ import {
 } from '@aws-sdk/client-dynamodb';
 import {
   MAX_PERMISSION_HISTORY_RECORDS, RepositoryCapacityError,
+  type DecisionTransactionOptions, type KnownEnoughRecord, type KnownEnoughRepository,
   type RoomRecord, type RoomRepository, type RoomTransactionOptions,
 } from '@deal-table/application';
-import { CommandResult, Id } from '@deal-table/contracts';
+import { CommandResult, Id, KnownEnough as KE } from '@deal-table/contracts';
 import {
-  CorruptDynamoRecordError, decodeGuardItem, decodeReplayItem, decodeStateItem,
-  encodeGuardItem, encodeReplayItem, encodeStateItem, encodedStateRecord,
-  estimateItemBytes, pendingResponseByteReservations,
-  permissionHistoryCount, stateItemSizeBytes, validateStateGuard,
-  type DynamoRoomRecord, type GuardRecord, type ReplayRecord,
+  CorruptDynamoRecordError, decodeDecisionReplayItem, decodeDecisionStateItem,
+  decodeGuardItem, decodeReplayItem, decodeStateItem,
+  encodeDecisionReplayItem, encodeDecisionStateItem, encodeGuardItem, encodeReplayItem,
+  encodeStateItem, encodedDecisionStateRecord, encodedStateRecord,
+  estimateItemBytes, pendingDecisionResponseByteReservations, pendingDecisionResponseCount,
+  pendingResponseByteReservations, decisionPermissionHistoryCount, permissionHistoryCount,
+  decisionStateItemSizeBytes, stateItemSizeBytes, validateDecisionStateGuard, validateStateGuard,
+  type DynamoKnownEnoughRecord, type DynamoRoomRecord, type GuardRecord,
+  type KnownEnoughReplayRecord, type ReplayRecord,
 } from './dynamodb-codec.ts';
 
 const ORDINARY_RECEIPT_LIMIT = 4096;
@@ -27,6 +32,12 @@ const SAFETY_COMMANDS = new Set(['REVOKE_EXCEPTION', 'REVOKE_DISCLOSURE', 'WITHD
 const PROTECTED_COMMANDS = new Set([
   'DECIDE_EXCEPTION', 'DECIDE_DISCLOSURE', 'REVOKE_EXCEPTION', 'REVOKE_DISCLOSURE',
   'WITHDRAW_APPROVAL', 'REVISE_DECISION',
+]);
+const DECISION_PERMISSION_COMMANDS = new Set(['ANSWER_NEGOTIATION', 'DECIDE_DISCLOSURE']);
+const DECISION_SAFETY_COMMANDS = new Set(['REVOKE_NEGOTIATION', 'REVOKE_DISCLOSURE', 'WITHDRAW_APPROVAL']);
+const DECISION_PROTECTED_COMMANDS = new Set([
+  'ANSWER_NEGOTIATION', 'DECIDE_DISCLOSURE', 'REVOKE_NEGOTIATION', 'REVOKE_DISCLOSURE',
+  'WITHDRAW_APPROVAL', 'CONFIRM_FRAME', 'CONFIRM_CONSTRAINTS',
 ]);
 
 export class RepositoryStorageError extends Error {
@@ -56,6 +67,11 @@ interface LoadedRoom {
   room: RoomRecord | null;
   guard: GuardRecord | null;
   replay: ReplayRecord | null;
+}
+interface LoadedDecision {
+  decision: KnownEnoughRecord | null;
+  guard: GuardRecord | null;
+  replay: KnownEnoughReplayRecord | null;
 }
 
 type DynamoItem = Record<string, AttributeValue>;
@@ -135,11 +151,61 @@ function stable(value: unknown): string {
 function roomStateEqual(a: RoomRecord, b: RoomRecord): boolean {
   return stable(encodedStateRecord(a)) === stable(encodedStateRecord(b));
 }
-function replayEqual(a: ReplayRecord | undefined, b: ReplayRecord | undefined): boolean {
+function replayEqual(a: unknown, b: unknown): boolean {
   return a === undefined ? b === undefined : b !== undefined && stable(a) === stable(b);
 }
 function commandResult(value: unknown): ReturnType<typeof CommandResult.safeParse> {
   return CommandResult.safeParse(value);
+}
+function decisionStateEqual(a: KnownEnoughRecord, b: KnownEnoughRecord): boolean {
+  return stable(encodedDecisionStateRecord(a)) === stable(encodedDecisionStateRecord(b));
+}
+function decisionCommandResult(value: unknown): ReturnType<typeof KE.DecisionCommandResult.safeParse> {
+  return KE.DecisionCommandResult.safeParse(value);
+}
+function isSafeDecisionTransition(before: DynamoKnownEnoughRecord, after: DynamoKnownEnoughRecord): boolean {
+  if (before.definition.contextToken !== after.definition.contextToken
+    || before.status === 'CLOSED' || after.status === 'CLOSED') return true;
+  if (stable(before.memberships) !== stable(after.memberships)) return true;
+  if (before.owners.some(owner => owner.approval !== null
+    && after.owners.find(next => next.participantId === owner.participantId)?.approval === null)) return true;
+  for (const owner of before.owners) {
+    const next = after.owners.find(value => value.participantId === owner.participantId);
+    if (!next) return true;
+    if (owner.pendingQuestions.some(question => question.status === 'PENDING'
+      && !next.pendingQuestions.some(value => value.questionId === question.questionId && value.status === 'PENDING'))
+      || owner.disclosurePermissions.some(permission => permission.status === 'PENDING'
+        && !next.disclosurePermissions.some(value => value.permissionId === permission.permissionId && value.status === 'PENDING')))
+      return true;
+    for (const permission of owner.negotiationPermissions) {
+      const updated = next.negotiationPermissions.find(value => value.permissionId === permission.permissionId);
+      if (permission.status === 'ACTIVE' && updated && ['REVOKED', 'EXPIRED', 'SUPERSEDED'].includes(updated.status)) return true;
+    }
+    for (const permission of owner.disclosurePermissions) {
+      const updated = next.disclosurePermissions.find(value => value.permissionId === permission.permissionId);
+      if (permission.status === 'ACTIVE' && updated && ['REVOKED', 'EXPIRED', 'SUPERSEDED'].includes(updated.status)) return true;
+    }
+  }
+  return false;
+}
+function newDecisionPromptCount(decision: DynamoKnownEnoughRecord): number {
+  return pendingDecisionResponseCount(decision);
+}
+function makeDecisionGuard(
+  prior: GuardRecord,
+  nextDecision: DynamoKnownEnoughRecord,
+  ordinaryReceipts: number,
+  permissionHistoryReceipts: number,
+  safetyReserveReceipts: number,
+  totalReceipts: number,
+): GuardRecord {
+  if (prior.version >= Number.MAX_SAFE_INTEGER) throw new RepositoryStorageError();
+  const next: GuardRecord = {
+    version: prior.version + 1, incarnation: prior.incarnation,
+    ordinaryReceipts, permissionHistoryReceipts, safetyReserveReceipts, totalReceipts,
+  };
+  validateDecisionStateGuard(nextDecision, next);
+  return next;
 }
 function isSafeTransition(before: DynamoRoomRecord, after: DynamoRoomRecord): boolean {
   if (before.contextToken !== after.contextToken || before.status === 'CLOSED' || after.status === 'CLOSED') return true;
@@ -187,7 +253,7 @@ function makeGuard(
   return next;
 }
 
-export class DynamoDBRoomRepository implements RoomRepository {
+export class DynamoDBRoomRepository implements RoomRepository, KnownEnoughRepository {
   private readonly maxAttempts: number;
   private readonly random: () => number;
   private readonly pause: (milliseconds: number) => Promise<void>;
@@ -243,6 +309,197 @@ export class DynamoDBRoomRepository implements RoomRepository {
       if (disposition === 'retry') throw new RoomAlreadyExistsError();
       throw new RepositoryStorageError();
     }
+  }
+
+  async createDecision(decision: KnownEnoughRecord): Promise<void> {
+    try {
+      if (decision.replays.length !== 0) throw new CorruptDynamoRecordError();
+      const record = encodedDecisionStateRecord(decision);
+      const stateBytes = decisionStateItemSizeBytes(decision);
+      const reservationBytes = pendingDecisionResponseByteReservations(record);
+      if (stateBytes > ORDINARY_STATE_LIMIT_BYTES
+        || stateBytes + reservationBytes > PROTECTED_STATE_LIMIT_BYTES) throw new RepositoryCapacityError();
+      const guard: GuardRecord = {
+        version: 0,
+        incarnation: decision.definition.contextToken,
+        ordinaryReceipts: 0,
+        permissionHistoryReceipts: 0,
+        safetyReserveReceipts: 0,
+        totalReceipts: 0,
+      };
+      validateDecisionStateGuard(record, guard);
+      const request: TransactWriteItemsCommandInput = {
+        TransactItems: [
+          { Put: {
+            TableName: this.options.tableName,
+            Item: encodeDecisionStateItem(decision),
+            ConditionExpression: 'attribute_not_exists(#pk)',
+            ExpressionAttributeNames: { '#pk': 'PK' },
+          } },
+          { Put: {
+            TableName: this.options.tableName,
+            Item: encodeGuardItem(decision.decisionId, guard),
+            ConditionExpression: 'attribute_not_exists(#pk)',
+            ExpressionAttributeNames: { '#pk': 'PK' },
+          } },
+        ],
+      };
+      await this.options.client.send(new TransactWriteItemsCommand(request));
+    } catch (error) {
+      if (error instanceof RepositoryCapacityError) throw error;
+      if (error instanceof CorruptDynamoRecordError) throw new InvalidRoomCreationError();
+      const disposition = transactionDisposition(error);
+      if (disposition === 'capacity') throw new RepositoryCapacityError();
+      if (disposition === 'retry') throw new RoomAlreadyExistsError();
+      throw new RepositoryStorageError();
+    }
+  }
+
+  async transactionDecision<T>(
+    decisionId: string,
+    transition: (decision: KnownEnoughRecord | null) => Promise<T> | T,
+    transactionOptions?: DecisionTransactionOptions,
+  ): Promise<T> {
+    if (!Id.safeParse(decisionId).success) return structuredClone(await transition(null));
+    const candidate = transactionOptions?.replay;
+    const candidateHash = candidate ? await candidate.keyHash : undefined;
+    const replayKeyHash = candidateHash && REPLAY_KEY_HASH.test(candidateHash) ? candidateHash : undefined;
+    for (let attempt = 1; attempt <= this.maxAttempts; attempt += 1) {
+      const loaded = await this.loadDecision(decisionId, replayKeyHash);
+      if (!loaded.decision || !loaded.guard) return structuredClone(await transition(null));
+      const beforeDecision = loaded.decision;
+      const nextDecision = structuredClone(beforeDecision);
+      const result = await transition(nextDecision);
+      try {
+        const beforeRecord = encodedDecisionStateRecord(beforeDecision);
+        const nextRecord = encodedDecisionStateRecord(nextDecision);
+        const stateChanged = !decisionStateEqual(beforeDecision, nextDecision);
+        const beforeReplay = loaded.replay ?? undefined;
+        const resultingReplay = replayKeyHash
+          ? nextDecision.replays.find(receipt => receipt.keyHash === replayKeyHash)
+          : undefined;
+        if (candidate && !replayKeyHash && nextDecision.replays.length) throw new CorruptDynamoRecordError();
+        if (!candidate && nextDecision.replays.length) throw new CorruptDynamoRecordError();
+        if (beforeReplay && !replayEqual(beforeReplay, resultingReplay)) throw new CorruptDynamoRecordError();
+        if (resultingReplay && !beforeReplay && nextDecision.replays.length !== 1) throw new CorruptDynamoRecordError();
+        if (nextDecision.replays.length > 1) throw new CorruptDynamoRecordError();
+
+        const newReplay = resultingReplay && !beforeReplay ? resultingReplay : undefined;
+        if (!stateChanged && !newReplay) return structuredClone(result);
+        const historyBefore = decisionPermissionHistoryCount(beforeRecord);
+        const historyAfter = decisionPermissionHistoryCount(nextRecord);
+        if (historyAfter < historyBefore || historyAfter - historyBefore > 1) throw new CorruptDynamoRecordError();
+        const historyDelta = historyAfter - historyBefore;
+        const parsedResult = newReplay ? decisionCommandResult(result) : undefined;
+        const nextCounters = {
+          ordinary: loaded.guard.ordinaryReceipts,
+          permission: loaded.guard.permissionHistoryReceipts,
+          safety: loaded.guard.safetyReserveReceipts,
+          total: loaded.guard.totalReceipts,
+        };
+
+        if (newReplay) {
+          if (!candidate || newReplay.keyHash !== replayKeyHash) throw new CorruptDynamoRecordError();
+          if (!parsedResult?.success) throw new CorruptDynamoRecordError();
+          if (nextCounters.total >= TOTAL_RECEIPT_LIMIT) throw new RepositoryCapacityError();
+          if (nextCounters.ordinary < ORDINARY_RECEIPT_LIMIT) {
+            nextCounters.ordinary += 1;
+            if (historyDelta === 1) {
+              if (!DECISION_PERMISSION_COMMANDS.has(candidate.commandType) || !parsedResult.data.ok
+                || nextCounters.permission >= PERMISSION_RECEIPT_LIMIT) throw new RepositoryCapacityError();
+              nextCounters.permission += 1;
+            }
+          } else if (!parsedResult.data.ok) {
+            throw new RepositoryCapacityError();
+          } else if (DECISION_PERMISSION_COMMANDS.has(candidate.commandType) && historyDelta === 1) {
+            if (nextCounters.permission >= PERMISSION_RECEIPT_LIMIT) throw new RepositoryCapacityError();
+            nextCounters.permission += 1;
+          } else if (DECISION_SAFETY_COMMANDS.has(candidate.commandType) && stateChanged) {
+            if (nextCounters.safety >= SAFETY_RECEIPT_LIMIT) throw new RepositoryCapacityError();
+            nextCounters.safety += 1;
+          } else {
+            throw new RepositoryCapacityError();
+          }
+          nextCounters.total += 1;
+        } else if (historyDelta !== 0) {
+          throw new CorruptDynamoRecordError();
+        }
+
+        const guard = makeDecisionGuard(loaded.guard, nextRecord, nextCounters.ordinary,
+          nextCounters.permission, nextCounters.safety, nextCounters.total);
+        const stateBytes = decisionStateItemSizeBytes(nextDecision);
+        const reservationBytes = pendingDecisionResponseByteReservations(nextRecord);
+        const isPromptAdmission = newDecisionPromptCount(nextRecord) > newDecisionPromptCount(beforeRecord);
+        const protectedWrite = isPromptAdmission || (candidate
+          ? DECISION_PROTECTED_COMMANDS.has(candidate.commandType)
+          : isSafeDecisionTransition(beforeRecord, nextRecord));
+        if (stateBytes + reservationBytes > PROTECTED_STATE_LIMIT_BYTES
+          || (!protectedWrite && stateBytes > ORDINARY_STATE_LIMIT_BYTES)) throw new RepositoryCapacityError();
+
+        const replayItem = newReplay
+          ? encodeDecisionReplayItem(decisionId, guard.incarnation, newReplay)
+          : undefined;
+        if (replayItem && estimateItemBytes(replayItem) > 8 * 1024) throw new RepositoryCapacityError();
+        const guardItem = encodeGuardItem(decisionId, guard);
+        if (estimateItemBytes(guardItem) > 8 * 1024) throw new RepositoryStorageError();
+        const write: TransactWriteItemsCommandInput = {
+          TransactItems: [
+            { Put: {
+              TableName: this.options.tableName,
+              Item: encodeDecisionStateItem(nextDecision),
+              ConditionExpression: 'attribute_exists(#pk)',
+              ExpressionAttributeNames: { '#pk': 'PK' },
+            } },
+            { Update: {
+              TableName: this.options.tableName,
+              Key: key(decisionId, 'GUARD'),
+              UpdateExpression: 'SET #version = :nextVersion, #ordinary = :nextOrdinary, #permission = :nextPermission, #safety = :nextSafety, #total = :nextTotal',
+              ConditionExpression: '#version = :oldVersion AND #incarnation = :incarnation AND #ordinary = :oldOrdinary AND #permission = :oldPermission AND #safety = :oldSafety AND #total = :oldTotal',
+              ExpressionAttributeNames: {
+                '#version': 'version', '#incarnation': 'incarnation',
+                '#ordinary': 'ordinaryReceipts', '#permission': 'permissionHistoryReceipts',
+                '#safety': 'safetyReserveReceipts', '#total': 'totalReceipts',
+              },
+              ExpressionAttributeValues: {
+                ':nextVersion': { N: String(guard.version) },
+                ':nextOrdinary': { N: String(guard.ordinaryReceipts) },
+                ':nextPermission': { N: String(guard.permissionHistoryReceipts) },
+                ':nextSafety': { N: String(guard.safetyReserveReceipts) },
+                ':nextTotal': { N: String(guard.totalReceipts) },
+                ':oldVersion': { N: String(loaded.guard.version) },
+                ':incarnation': { S: loaded.guard.incarnation },
+                ':oldOrdinary': { N: String(loaded.guard.ordinaryReceipts) },
+                ':oldPermission': { N: String(loaded.guard.permissionHistoryReceipts) },
+                ':oldSafety': { N: String(loaded.guard.safetyReserveReceipts) },
+                ':oldTotal': { N: String(loaded.guard.totalReceipts) },
+              },
+            } },
+            ...(replayItem ? [{ Put: {
+              TableName: this.options.tableName,
+              Item: replayItem,
+              ConditionExpression: 'attribute_not_exists(#pk)',
+              ExpressionAttributeNames: { '#pk': 'PK' },
+            } }] : []),
+          ],
+        };
+        await this.options.client.send(new TransactWriteItemsCommand(write));
+        return structuredClone(result);
+      } catch (error) {
+        if (error instanceof RepositoryCapacityError) throw error;
+        if (error instanceof CorruptDynamoRecordError) throw new RepositoryStorageError();
+        const disposition = transactionDisposition(error);
+        if (disposition === 'capacity') throw new RepositoryCapacityError();
+        if (disposition === 'retry') {
+          if (attempt === this.maxAttempts) throw new RepositoryStorageError();
+          const baseDelay = Math.min(160, 4 * (2 ** (attempt - 1)));
+          const jitter = 0.5 + Math.max(0, Math.min(1, this.random()));
+          await this.pause(Math.floor(baseDelay * jitter));
+          continue;
+        }
+        throw new RepositoryStorageError();
+      }
+    }
+    throw new RepositoryStorageError();
   }
 
   async transaction<T>(
@@ -428,6 +685,34 @@ export class DynamoDBRoomRepository implements RoomRepository {
       return { room, guard, replay };
     } catch (error) {
       if (error instanceof CorruptDynamoRecordError) throw new RepositoryStorageError();
+      throw new RepositoryStorageError();
+    }
+  }
+
+  private async loadDecision(decisionId: string, replayKeyHash?: string): Promise<LoadedDecision> {
+    try {
+      const requests: TransactGetItemsCommandInput['TransactItems'] = [
+        { Get: { TableName: this.options.tableName, Key: key(decisionId, 'STATE') } },
+        { Get: { TableName: this.options.tableName, Key: key(decisionId, 'GUARD') } },
+        ...(replayKeyHash
+          ? [{ Get: { TableName: this.options.tableName, Key: key(decisionId, 'REPLAY#' + replayKeyHash) } }]
+          : []),
+      ];
+      const response = await this.options.client.send(new TransactGetItemsCommand({ TransactItems: requests }));
+      const items = responseItems(response, requests.length);
+      const stateItem = items[0];
+      const guardItem = items[1];
+      if (stateItem === undefined && guardItem === undefined) return { decision: null, guard: null, replay: null };
+      if (stateItem === undefined || guardItem === undefined) throw new CorruptDynamoRecordError();
+      const record = decodeDecisionStateItem(stateItem, decisionId);
+      const guard = decodeGuardItem(guardItem, decisionId);
+      validateDecisionStateGuard(record, guard);
+      const replayItem = replayKeyHash ? items[2] : undefined;
+      const replay = replayItem === undefined ? null
+        : decodeDecisionReplayItem(replayItem, decisionId, replayKeyHash!, guard.incarnation);
+      const decision: KnownEnoughRecord = { ...record, replays: replay ? [replay] : [] };
+      return { decision, guard, replay };
+    } catch {
       throw new RepositoryStorageError();
     }
   }

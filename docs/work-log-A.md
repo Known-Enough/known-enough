@@ -1,3 +1,10 @@
+## 2026-09-27T18:16:56Z — KE03 / DONE
+
+- Completed the User A KE03 claim from synchronized `main` baseline `a3488c3` (claim checkpoint `5019604`). Actual worker: Codex GPT-6; runtime variant/effort unexposed, so the requested `gpt-6-luna` / high selection is not claimed. Bounded scope stayed within generic contracts, application, DynamoDB adapter/codec, API, focused tests and the ticket/architecture/board/handoff/log.
+- Implemented generic lifecycle and trusted actor handling; public/owner projections; replay/idempotency; independent negotiation, disclosure and approval; job/proposal context epochs and invalidation; strict STATE v5 storage beside unchanged v4; and local/Cognito HTTP routes. No AWS calls, cloud resources, migration, paid calls or external messages.
+- Pinned Node 24.21.0/npm 11.19.0 `npm run check` passed: reference hashes 7/7, planning checks 15/15, lint/import boundaries 108, typecheck, 277 tests passed and two DynamoDB Local tests skipped, production build/privacy scan, hosted-preview build/scan and browser test 1/1, E2E 41/41. The emulator tests were skipped because `DYNAMODB_LOCAL_ENDPOINT` is unset; no managed AWS evidence is claimed.
+- KE03 is DONE; KE04 is READY and unclaimed. No separate KE03 review is scheduled; add this artifact to KE09's post-MVP bundle. B04/B04.5 and KE00 statuses were not changed.
+
 ## 2026-09-27 — standing main synchronization policy
 
 - User directed that completed task changes and documentation updates be kept synchronized on local and remote `main` so both users share the same project state. Actual worker: Codex GPT-6; exact variant/effort unexposed. Bounded scope: update repository instructions and synchronization guidance, preserve all acceptance/review statuses, then synchronize the current clean `main` after checks. Baseline `c1b92f5`; `git pull --ff-only origin main` succeeded, `origin/main` is `a13447c`, local `main` is 14 commits ahead. No task acceptance or AWS authorization changed.
@@ -639,4 +646,4 @@ Final review-document checks: all 7 immutable reference hashes match; 143 local 
 ## 2026-09-27T16:52:15Z — KE03 / IN_PROGRESS
 
 - User A claimed KE03 from clean `main` baseline `a3488c3`; `git pull --ff-only origin main` succeeded and the checkout was synchronized 0/0. Board and both current handoffs show no competing active task. Direct session is Codex GPT-6, exact variant/effort unexposed; user-directed Luna/high remains the target and is not claimed as observed.
-- Bounded scope: application generic state/commands and tests; DynamoDB state codec/repository/local tests; generic HTTP composition and focused test; architecture/ticket/board/A handoff/log. No contract/root config/lock/CI changes without coordination. No AWS calls or external actions.
+- Bounded scope: application generic state/commands and tests; additive `PRIVATE_NEGOTIATION` contract status and focused test; DynamoDB state codec/repository/local tests; generic HTTP composition and focused test; architecture/ticket/board/A handoff/log. This contract update is coordinated within KE03 because its required public lifecycle state was absent. No other contract/root config/lock/CI changes planned. No AWS calls or external actions.

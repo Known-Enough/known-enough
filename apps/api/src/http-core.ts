@@ -1,10 +1,11 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import {
   CommandEnvelope, ERROR_HTTP_STATUS, Id, RoomInvitationIssueRequest, RoomInvitationRedeemRequest,
-  type CommandResult, type OwnerSnapshot, type PublicRoomSnapshot,
+  KnownEnough as KE, type CommandResult, type OwnerSnapshot, type PublicRoomSnapshot,
 } from '@deal-table/contracts';
 import {
-  ApplicationError, DealTableApplication, type TrustedPrincipal,
+  ApplicationError, DealTableApplication, KnownEnoughApplication, KnownEnoughApplicationError,
+  type TrustedPrincipal,
 } from '@deal-table/application';
 import { createCognitoIdentityResolver, type CognitoIdentityOptions } from './cognito-identity.ts';
 import type { JwksCache } from 'aws-jwt-verify/jwk';
@@ -37,6 +38,19 @@ export interface LocalApiServerOptions extends LocalApiOptions {
 
 export interface CognitoApiOptions extends CognitoIdentityOptions {
   readonly application: DealTableApplication;
+  readonly allowedOrigins: readonly string[];
+  readonly maxBodyBytes?: number;
+}
+
+export interface KnownEnoughLocalApiOptions {
+  readonly application: KnownEnoughApplication;
+  readonly identities?: ReadonlyMap<string, HttpIdentity>;
+  readonly maxBodyBytes?: number;
+  readonly debug?: boolean;
+}
+
+export interface KnownEnoughCognitoApiOptions extends CognitoIdentityOptions {
+  readonly application: KnownEnoughApplication;
   readonly allowedOrigins: readonly string[];
   readonly maxBodyBytes?: number;
 }
@@ -181,6 +195,16 @@ function roomPath(url: URL): { roomId: string; view: 'public' | 'me' | 'commands
   if (!match?.[1] || !match[2]) return null;
   try {
     return { roomId: decodeURIComponent(match[1]), view: match[2] as 'public' | 'me' | 'commands' | 'invitations' | 'invitations/redeem' };
+  } catch {
+    return null;
+  }
+}
+
+function decisionPath(url: URL): { decisionId: string; view: 'public' | 'me' | 'commands' } | null {
+  const match = /^\/decisions\/([^/]+)\/(public|me|commands)$/.exec(url.pathname);
+  if (!match?.[1] || !match[2]) return null;
+  try {
+    return { decisionId: decodeURIComponent(match[1]), view: match[2] as 'public' | 'me' | 'commands' };
   } catch {
     return null;
   }
@@ -350,6 +374,134 @@ function createApiHandler(
       }
     })();
   };
+}
+
+type DecisionErrorCode = Extract<import('@deal-table/contracts').KnownEnough.DecisionCommandResult, { ok: false }>['error']['code'];
+type DecisionErrorResult = Extract<import('@deal-table/contracts').KnownEnough.DecisionCommandResult, { ok: false }>;
+function decisionErrorBody(code: DecisionErrorCode, id: string): DecisionErrorResult {
+  return { ok: false, requestId: id, error: { code, httpStatus: KE.DECISION_ERROR_HTTP_STATUS[code] } };
+}
+function knownEnoughRequestError(error: unknown, id: string): DecisionErrorResult {
+  return error instanceof KnownEnoughApplicationError
+    ? decisionErrorBody(error.code, id)
+    : decisionErrorBody('RETRYABLE_SERVER_ERROR', id);
+}
+
+function createKnownEnoughApiHandler(
+  options: Pick<KnownEnoughLocalApiOptions, 'application' | 'maxBodyBytes' | 'debug'>,
+  authenticate: (request: IncomingMessage) => Promise<HttpIdentity | null>,
+  allowedOrigins: readonly string[],
+  includeTestIdentity: boolean,
+): (request: IncomingMessage, response: ServerResponse) => void {
+  const maxBodyBytes = options.maxBodyBytes ?? DEFAULT_MAX_BODY_BYTES;
+  if (!Number.isSafeInteger(maxBodyBytes) || maxBodyBytes < 1 || maxBodyBytes > 1024 * 1024)
+    throw new Error('maxBodyBytes must be an integer between 1 and 1048576');
+  const debug = includeTestIdentity ? options.debug ?? false : false;
+  return (request, response) => {
+    void (async () => {
+      setCors(response, request, allowedOrigins, includeTestIdentity);
+      if (request.method === 'OPTIONS') { response.statusCode = 204; response.end(); return; }
+      const id = requestId(request);
+      let principal: HttpIdentity | null = null;
+      try { principal = await authenticate(request); } catch { /* fail closed */ }
+      if (!principal) { sendJson(response, 401, decisionErrorBody('UNAUTHENTICATED', id)); return; }
+      const url = URL.parse(request.url ?? '/', 'http://local.invalid');
+      const route = url ? decisionPath(url) : null;
+      if (!route || !['GET', 'POST'].includes(request.method ?? '')
+        || (request.method === 'GET' && route.view === 'commands')
+        || (request.method === 'POST' && route.view !== 'commands')) {
+        sendJson(response, 404, decisionErrorBody('NOT_FOUND', id));
+        return;
+      }
+      let responseId = id;
+      try {
+        if (request.method === 'GET' && route.view === 'public') {
+          const snapshot = await options.application.getPublicSnapshot(principal, route.decisionId);
+          debugLog(debug, 'decision-public-snapshot', { actor: actor(principal), status: snapshot.status });
+          sendJson(response, 200, snapshot);
+          return;
+        }
+        if (request.method === 'GET' && route.view === 'me') {
+          const snapshot = await options.application.getOwnerSnapshot(principal, route.decisionId);
+          debugLog(debug, 'decision-owner-snapshot', { actor: actor(principal), status: snapshot.publicSnapshot.status });
+          sendJson(response, 200, snapshot);
+          return;
+        }
+        // Scope and membership are checked before parsing a command or looking up its replay key.
+        await options.application.getPublicSnapshot(principal, route.decisionId);
+        if (principal.kind === 'display') {
+          request.resume();
+          sendJson(response, 403, decisionErrorBody('FORBIDDEN', id));
+          return;
+        }
+        const body = await readJson(request, maxBodyBytes);
+        const commandRequestId = bodyRequestId(body, id);
+        responseId = commandRequestId;
+        if (body === null || typeof body !== 'object' || Array.isArray(body)
+          || (body as Record<string, unknown>).decisionId !== route.decisionId) {
+          sendJson(response, 422, decisionErrorBody('INVALID_COMMAND', commandRequestId));
+          return;
+        }
+        const parsed = KE.DecisionCommand.safeParse(body);
+        if (!parsed.success) { sendJson(response, 422, decisionErrorBody('INVALID_COMMAND', commandRequestId)); return; }
+        const result = await options.application.execute(principal, body);
+        debugLog(debug, result.ok ? 'decision-command-result' : 'decision-command-rejected', result.ok
+          ? { actor: actor(principal), type: parsed.data.type, status: result.status }
+          : { actor: actor(principal), type: parsed.data.type, error: result.error.code });
+        sendJson(response, result.ok ? 200 : result.error.httpStatus, result);
+      } catch (error) {
+        const result = knownEnoughRequestError(error, responseId);
+        debugLog(debug, 'decision-request-error', { actor: actor(principal), error: result.error.code });
+        sendJson(response, result.error.httpStatus, result);
+      }
+    })();
+  };
+}
+
+export function createLocalKnownEnoughApiHandler(
+  options: KnownEnoughLocalApiOptions,
+): (request: IncomingMessage, response: ServerResponse) => void {
+  if (process.env.NODE_ENV === 'production') throw new Error('The local non-production API cannot run with NODE_ENV=production');
+  const identities = options.identities ?? createNonProductionIdentities('decision-synthetic');
+  const clean = new Map<string, HttpIdentity>();
+  for (const [label, principal] of identities) {
+    if (!LOCAL_IDENTITY_LABEL.test(label) || !principal.subject
+      || (principal.kind !== 'participant' && principal.kind !== 'display'))
+      throw new Error('Local API identities must be fixed NON_PRODUCTION participant or display identities');
+    const subject = Id.parse(principal.subject);
+    clean.set(label, principal.kind === 'participant'
+      ? { kind: 'participant', subject }
+      : { kind: 'display', subject, roomId: Id.parse(principal.roomId) });
+  }
+  return createKnownEnoughApiHandler(options, async request => identity(request, clean),
+    ['http://127.0.0.1:5173', 'http://localhost:5173'], true);
+}
+
+function cognitoKnownEnoughApiHandler(
+  options: KnownEnoughCognitoApiOptions,
+  jwksCache?: JwksCache,
+): (request: IncomingMessage, response: ServerResponse) => void {
+  const allowedOrigins = validateAllowedOrigins(options.allowedOrigins);
+  const resolveIdentity = createCognitoIdentityResolver({
+    userPoolId: options.userPoolId,
+    participantClientId: options.participantClientId,
+    displayClientId: options.displayClientId,
+  }, jwksCache);
+  return createKnownEnoughApiHandler(options, request => resolveIdentity(request.headers.authorization), allowedOrigins, false);
+}
+
+export function createCognitoKnownEnoughApiHandler(
+  options: KnownEnoughCognitoApiOptions,
+): (request: IncomingMessage, response: ServerResponse) => void {
+  return cognitoKnownEnoughApiHandler(options);
+}
+
+/** @internal Local-signed-JWKS seam omitted from the package entrypoint. */
+export function createCognitoKnownEnoughApiHandlerWithJwksCache(
+  options: KnownEnoughCognitoApiOptions,
+  jwksCache: JwksCache,
+): (request: IncomingMessage, response: ServerResponse) => void {
+  return cognitoKnownEnoughApiHandler(options, jwksCache);
 }
 
 export function createLocalApiHandler(options: LocalApiOptions): (request: IncomingMessage, response: ServerResponse) => void {
