@@ -1,5 +1,21 @@
 # User B handoff — shared task pool
 
+## KE01 completion handoff — 2026-09-27T09:41:50Z
+
+KE01 is DONE on the implementation diff over synchronized `main` baseline `2455ef01f46423afdd27a0d234a6f05da8b71c41`. Direct worker is Codex GPT-6; exact runtime variant/effort were not exposed, so the requested `gpt-6-luna` / high target is not claimed as observed. See [ticket](tasks/KE01.md), [`KnownEnough` v2 source](../packages/contracts/src/known-enough.ts) and [contract decisions](contracts.md#ke01-generic-contract-v2).
+
+- Added strict v2 values, frame/owner/public DTOs, bounded typed rules, confirmation/version/permission/approval/command contracts and canonical public/refusal identities. Kept existing v1 exports/hash behavior intact.
+- Added synthetic five-person Christmas and contribution/ownership fixtures plus a TeamTable compatibility bridge, including a legacy grant mapping. Per-owner clarification readiness and public disclosure views are audience scoped.
+- `npm run check` passed with pinned Node 24.21.0/npm 11.19.0: 7 reference checks, 15 planning checks, lint/boundaries (96 references), typecheck, 247 passing tests / 1 skipped, production/hosted builds, hosted-preview Chromium 1/1, and end-to-end Chromium 41/41. Focused KE01 suite passed 15/15.
+- Chromium 153.0.8010.12 and missing Ubuntu runtime libraries were staged only under `/tmp`. One initial lint/type failure and the Node type-strip loader incompatibility were corrected before the final full pass; first browser startup also exposed missing container libraries, resolved through temporary extraction. No migration, AWS/model calls, external messages, dependencies, root config or lockfile changes.
+
+Next eligible task: KE02, `gpt-6-luna` / high. It may start after this main sync and should use retained B04/B04.5 technical evidence; project sign-off is deferred. KE01 source/tests and remaining persistence/auth/transaction/retention/evaluation decisions belong in the single KE09 bundle after the MVP. No separate KE01 review is scheduled.
+
+
+## Original KE01 start claim — 2026-09-27T08:38:18Z
+
+The current user directed KE01 start. Clean `main` synchronized with `origin/main` at `2455ef01f46423afdd27a0d234a6f05da8b71c41`; `git pull --ff-only origin main` succeeded and ahead/behind is 0/0. Direct worker is Codex GPT-6; exact model variant and effort are not exposed, so the requested `gpt-6-luna` / high target is not claimed as runtime telemetry. Bounded files: contracts index and new Known Enough schema/test files; new Known Enough fixture/test files; `docs/contracts.md`, `docs/known-enough-architecture.md`, the KE01 ticket, shared board, this handoff and B's work log. No app migration, dependencies, lockfile, root config, CI, cloud, paid calls or external messages. Focused contract/hash/fixture checks, reference/boundary checks and pinned `npm run check` are required before marking the task DONE. Next: settle and implement the generic closed contract vocabulary while preserving the legacy wire/hash implementation behind an explicit compatibility boundary.
+
 Latest scheduling checkpoint (2026-09-25 UTC): both users follow the same [project-wide priority queue](task-board.md), with one active task at a time. G01 is DONE for its accepted local checkpoint. B04 added subject-bound invitations in `13707c2`; B04.5 requested R11/R12 corrections, implemented locally in `f6b93bc`. B04 is PAUSED for fresh independent B04.5 follow-up on `04bd1db..f6b93bc`. Full pinned checks passed, including 232 unit/integration tests (one opt-in emulator skip) and 41 browser tests. Earlier verdicts remain scoped to their named artifacts. No cloud acceptance, deployment or publication is claimed.
 
 Latest handoff, 2026-09-22: **A02.5/G01 synchronized repairs, REVIEW for human acceptance.** User explicitly authorized commit/push. Reviewed repairs are preserved in `d042d8f`; integration includes published `8371e7b`, shared-pool policy, readiness/debug changes and tutorial. [G01 combined artifact and evidence](reviews/G01.md) records conflict decisions, exact hashes, fresh checks and independent review. No B04 implementation or new task claim. Earlier paragraphs retain historical context.

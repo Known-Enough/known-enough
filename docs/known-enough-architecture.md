@@ -1,6 +1,6 @@
 # Known Enough — architecture direction
 
-Status: KE00 design direction, 2026-09-26. The generic contracts and runtime described here are not implemented. [KE01](tasks/KE01.md) defines the executable contracts; later tasks implement them. The [pivot audit](known-enough-pivot.md) distinguishes existing source from targets. Preserve the current repository and adapt its boundaries.
+Status: KE00/KE01 direction, updated 2026-09-27. KE01 implements the v2 generic runtime schemas, strict projection DTOs and canonical identities; KE02/KE03 implement evaluation and application/storage behavior. [Contract v2](contracts.md#ke01-generic-contract-v2) is the executable boundary. The [pivot audit](known-enough-pivot.md) distinguishes existing source from targets. Preserve the current repository and adapt its boundaries.
 
 ## Responsibility split
 
@@ -10,7 +10,7 @@ Mechanical validity means “valid under the confirmed rules this system support
 
 ## Proposed records
 
-These names establish contract scope, not a finalized wire format or an executable DSL.
+The names below are implemented as schema-version-2 runtime contracts in `KnownEnough`; they do not implement persistence, authentication or the decision runtime.
 
 | Record | Required semantics | Visibility |
 | --- | --- | --- |
@@ -26,9 +26,9 @@ These names establish contract scope, not a finalized wire format or an executab
 | PublicDecisionSnapshot | Allowlisted frame, coarse status, public proposal, permitted approval indicators and published disclosures | Current members/scoped display/shared AI |
 | OwnerDecisionSnapshot | Current caller's drafts, confirmed conditions, questions, permissions and approval | Verified owner only |
 
-Candidate variable types: number, money, percentage, date, datetime, duration, boolean, enum, participant and bounded enum list/set. KE01 must settle integer/decimal representation, currency/rounding, date/timezone meaning, duration units, null/unknown semantics and list ordering before hashing. Do not mix currencies or assume commercial prices are verified.
+The v2 value vocabulary, exact arithmetic and ordering rules are recorded in [Contract v2](contracts.md#values-missing-data-and-bounded-rules). Values use an exact safe integer coefficient/scale or integer minor units/basis points/seconds, explicit units/currency, Gregorian date or canonical UTC instant plus display timezone. Missing and unknown are distinct; unknown and unsupported conditions block readiness. No currency conversion or implicit rounding is performed.
 
-Candidate rule primitives: comparison, equality/inequality, membership, range, sum, implication, mutual exclusion, all-different, required/optional and arithmetic equality with references to confirmed values. KE01 selects the smallest sufficient subset, with depth/count/size limits and decidable evaluation. Unsupported operators and arbitrary expressions fail closed; no generated JavaScript, Python, SQL, shell, `eval` or dynamic code execution.
+The closed v2 operators are COMPARE, IN, RANGE, SUM_EQUALS, ALL_DIFFERENT, MUTUALLY_EXCLUSIVE and two-literal IMPLIES. Preferences are separate from hard admissibility. The contracts validate structure and references; KE02 implements evaluation. No arbitrary expression or executable code is accepted.
 
 ## Three AI contexts
 
@@ -38,11 +38,11 @@ Candidate rule primitives: comparison, equality/inequality, membership, range, s
 | Trusted negotiation | Public definition, all current confirmed structured conditions/preferences, active grants, proposal state | Unnecessary raw explanations, provider secrets | Candidate and question generation; no consent mutation |
 | Public/shared | Allowlisted public facts, current public proposal/status, permitted approval indicators, published disclosures authorized for the audience | Private conditions, budgets, motivations, hidden ratings, refused disclosures, conflict attribution and private grant IDs | Read/explain public state only |
 
-Construct separate contexts and tool sets on the server. Partition conversation memory, caches, retries, traces and job storage as well as initial prompts. Participant text and public objectives are untrusted input. Prompt instructions or model safety features cannot replace authorization and projections.
+The v2 shared snapshot omits per-participant private-input readiness; only an owner's own snapshot carries that status. The shared coarse status may say clarification is needed without identifying the owner or exposing the unsupported condition. Construct separate contexts and tool sets on the server. Partition conversation memory, caches, retries, traces and job storage as well as initial prompts. Participant text and public objectives are untrusted input. Prompt instructions or model safety features cannot replace authorization and projections.
 
 **Explanation boundary:** trusted negotiation output is potentially private even when labeled “public explanation.” It must not be copied directly into a public DTO. Rebuild explanation inputs from allowlisted public facts and currently published disclosures, then use approved templates or the public-only context. Validate structured claims against current state. Do not expose free-form private-context prose as public output merely because a model labeled it safe.
 
-**Owner-question boundary:** a negotiation model has access to other owners' structured constraints. Its free-form suggested question is therefore not automatically safe to send even to the intended owner. Carry only validated references to that owner's negotiable condition, a proposed bounded adjustment and public facts into the owner-private wording context/template. Reject cross-owner references and explanations of other participants' hidden needs. Proposed values derived from private inputs also need an explicit publication/visibility policy before appearing in any shared candidate; final approval must not retroactively authorize an earlier leak. KE01 defines this policy and KE09 tests both boundaries.
+**Owner-question boundary:** a negotiation model has access to other owners' structured constraints. Its free-form suggested question is therefore not automatically safe to send even to the intended owner. Carry only validated references to that owner's negotiable condition, a proposed bounded adjustment and public facts into the owner-private wording context/template. Reject cross-owner references and explanations of other participants' hidden needs. Proposed values derived from private inputs also need an explicit publication/visibility policy before appearing in any shared candidate; final approval must not retroactively authorize an earlier leak. The KE01 contracts enforce owner-scoped references and public allowlists; KE09 tests these boundaries against the implemented code and application flows.
 
 ## Trust kernel and enforcement
 
@@ -89,4 +89,4 @@ Keep raw private conversations only as necessary; KE07/KE10 specify retention, d
 
 [KE09](tasks/KE09.md) independently reviews local generic code and tests. After Bedrock, session, shared-assistant or cloud changes, sequential follow-up review must cover those exact artifacts before external testers or release. Project-level sign-off is temporarily deferred; participant approvals and explicit external-action authorization remain separate. [KE17](tasks/KE17.md) reviews the actual release artifact; old TeamTable PASSes are never relabeled as new privacy evidence.
 
-KE01 must settle the shared-frame confirmation mechanism, supported rule subset and bounds, qualitative-condition handling, visibility of proposal values (especially individual contributions), money/date canonicalization, equivalent-request refusal policy and persistence migration approach. Ranking claims must name approved criteria and evaluated candidates; no claim of global optimality from heuristic AI search. The B04/B04.5 technical baseline remains available for KE02; project sign-off is deferred and does not block it. Cloud changes still require explicit authorization. All details and risk owners are in the [pivot record](known-enough-pivot.md).
+KE01 settles the shared-frame confirmation contract, bounded rule subset, qualitative clarification, private/public contribution projection, exact value/hash semantics and equivalent-request refusal identity. Ranking policy, pure evaluation and storage migration remain for KE02/KE03 and the later KE09 bundle. Ranking claims must name approved criteria and evaluated candidates; no claim of global optimality follows from heuristic AI search. The B04/B04.5 technical baseline remains available for KE02; project sign-off is deferred and does not block it. Cloud changes still require explicit authorization. Remaining decisions and risk owners are in the [pivot record](known-enough-pivot.md).

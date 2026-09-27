@@ -1,5 +1,21 @@
 # Developer B work log
 
+## 2026-09-27T09:41:50Z — KE01 / DONE
+
+- Completed over synchronized `main` baseline `2455ef01f46423afdd27a0d234a6f05da8b71c41`. User-directed claim and exact bounded scope are recorded below. Actual session was GPT-6; exact variant/effort are unexposed; assigned `gpt-6-luna` / high remains a target, not a verified selection.
+- Implemented `KnownEnough` schema-v2 types and strict privacy/version cross-checks, preserved v1 behavior, added Christmas, TeamTable and hypothetical contribution fixtures, plus contract/fixture tests. Added contract semantics, compatibility notes and KE09 follow-up list. No application migration or dependencies.
+- Focused contract/fixture tests: 14/14. Final `npm run check` exit 0: seven references, 15 planning checks, lint/boundaries 96 refs, typecheck, 247 tests passed/1 skipped, build + hosted-preview build, hosted-preview browser 1/1, Chromium e2e 41/41. Documentation links/task status and `git diff --check` verified. An earlier full check found the extensionless namespace export incompatible with Node's type-stripping loader; corrected to an explicit `.ts` specifier. Final full run includes that correction.
+- Playwright Chromium 153.0.8010.12 and official Ubuntu runtime libraries absent from this container were staged/extracted in `/tmp` only. No system packages were installed. No paid/model/AWS/external actions.
+- Next: KE02 READY, direct target `gpt-6-luna` / high, using retained B04/B04.5 technical baseline. KE01 source/tests and unresolved persistence/auth/transaction/retention/evaluation questions join KE09's single bundle after KE08.
+
+
+## 2026-09-27T08:38:18Z — KE01 / IN_PROGRESS
+
+- User-directed start after checking the shared queue: no active project claim. Clean `main` synchronized at `2455ef01f46423afdd27a0d234a6f05da8b71c41`; `git pull --ff-only origin main` succeeded and ahead/behind is 0/0.
+- Direct worker: Codex GPT-6; exact model variant and effort are not exposed. Ticket target `gpt-6-luna` / high is recorded but not claimed as verified runtime selection.
+- Bounded files: `packages/contracts/src/index.ts`, new `packages/contracts/src/known-enough.ts` and `known-enough.test.ts`, `packages/contracts/src/contracts.test.ts`, new `packages/test-support/src/known-enough-fixtures.ts` and `known-enough-fixtures.test.ts`, `docs/contracts.md`, `docs/known-enough-architecture.md`, `docs/known-enough-pivot.md`, `docs/tasks/KE01.md`, `docs/task-board.md`, `docs/handoff-B.md`, and this log. No application migration, package dependency, root config, lockfile or CI changes planned.
+- Next: define strict, bounded generic contracts and public/owner projections; keep existing v1 wire/hash behavior intact; implement synthetic Christmas, TeamTable compatibility and contribution/ownership examples; then run ticket checks and pinned `npm run check`.
+
 ## 2026-09-22 — A02.5 repair takeover / IN_PROGRESS
 
 - User resumed work after the explicit release question; B records authorization to repair the three G01 blockers. Baseline `0bb8a0f` plus preserved documentation-only G01 assessment (including untracked review). A's existing source and historical evidence remain intact. Actual GPT-6; variant/effort unavailable. B owns `apps/web/**`, `tests/e2e/**` and task/board/B-handoff/log/review records. No backend, shared contracts or root configuration changes planned.

@@ -198,3 +198,6 @@ export type ExceptionOffer = z.infer<typeof ExceptionOffer>;
 export type ExceptionGrant = z.infer<typeof ExceptionGrant>;
 export type DisclosureGrant = z.infer<typeof DisclosureGrant>;
 export type FinalApproval = z.infer<typeof FinalApproval>;
+
+// New Known Enough schemas are namespaced so the pre-pivot v1 wire schemas and hash API remain unchanged.
+export * as KnownEnough from './known-enough.ts';

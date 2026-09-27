@@ -79,8 +79,8 @@ All 27 pre-pivot tickets were inspected. DONE remains DONE for its original scop
 | [A03](tasks/A03.md) | REVIEW → REVIEW | Retain receipts/accessibility; KE05/KE07 |
 | [A03.5](tasks/A03.5.md) | REVIEW → REVIEW | Retain preparation/A05 privacy PASS; new boundaries KE09 |
 | [A02.5](tasks/A02.5.md) | REVIEW → REVIEW | Preserve local integration evidence and G01; new sessions KE11 |
-| [B04](tasks/B04.md) | REVIEW → REVIEW | Critical integrated identity/storage foundation; human gate before KE02; adapt KE03/KE11/KE13 |
-| [B04.5](tasks/B04.5.md) | REVIEW → REVIEW | Preserve latest independent correction PASS; human acceptance remains |
+| [B04](tasks/B04.md) | REVIEW → REVIEW | Retained identity/storage technical baseline; project sign-off deferred; adapt KE03/KE11/KE13 |
+| [B04.5](tasks/B04.5.md) | REVIEW → REVIEW | Preserve latest independent correction PASS; project sign-off deferred |
 | [A05](tasks/A05.md) | REVIEW → REVIEW | Reviewed mock draft UX retained for KE07/KE10; no live extraction claim |
 | [A04](tasks/A04.md) | READY → SUPERSEDED | Session/reconnect preparation moves to KE11 |
 | [A04.5](tasks/A04.5.md) | BLOCKED → SUPERSEDED | Real authenticated browser acceptance moves to KE11 |
@@ -117,4 +117,4 @@ Retained REVIEW tickets remain acceptance records, not an instruction to finish 
 
 Current reviewable artifact is the local documentation diff over the exact baseline above, including new files. [KE00](tasks/KE00.md) and [A handoff](handoff-A.md) record fresh checks and changed paths. No production implementation or new independent security verdict is part of this audit.
 
-Historical instruction at the September 26 audit: KE00 was awaiting review. Current status is KE00 DONE and KE01 READY; follow the current board, synchronize and claim KE01 alone. Decide rule/value/public-projection semantics and the TeamTable compatibility boundary, then add strict generic schemas and fixtures without changing existing runtime behavior. KE02 follows KE01 technical checks and may use retained B04/B04.5 technical evidence; project sign-off is deferred. No old SUPERSEDED task may be restarted from a historical handoff.
+Historical instruction at the September 26 audit: KE00 was awaiting review and KE01 had not started. Current implementation and queue state are authoritative in the [task board](task-board.md) and [KE01 ticket](tasks/KE01.md). KE01 defines the v2 contracts while preserving v1 runtime/hash behavior; KE02 follows after recorded ticket checks and uses retained B04/B04.5 technical evidence. Project-level sign-off is deferred. No old SUPERSEDED task may be restarted from a historical handoff.
