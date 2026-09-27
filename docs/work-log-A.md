@@ -1,3 +1,11 @@
+## 2026-09-27T19:07:10Z — KE05 / DONE
+
+- Completed from the recorded clean synchronized `main` claim at `3369345` (`d27331a` claim checkpoint). Actual worker: Codex GPT-6, exact variant/effort unexposed; the user-directed Luna/high target is not claimed as runtime. Bounded scope stayed in the web app, relevant E2E tests and KE05/board/A handoff/log.
+- Replaced the default Deal Table view with a generic Known Enough create/home flow and local-only decision overview, private-space placeholder and proposal state. The draft status uses the public decision contract type; no contract schemas, server/private fixtures, authentication, storage, API call, or live AI are used by the new default path. Existing TeamTable public/private routes and receipts/separate permissions remain for regression coverage, with synthetic identities explicitly local and non-authenticated.
+- Changed `apps/web/src/App.tsx`, `apps/web/src/known-enough-home.tsx`, `apps/web/src/style.css`, `tests/e2e/a01.spec.ts`, `tests/e2e/scaffold.spec.ts`, `docs/tasks/KE05.md`, `docs/tasks/KE06.md`, `docs/task-board.md`, this handoff and this log. No cloud, paid, deployment, API/backend or external action.
+- Pinned Node 24.21.0/npm 11.19.0 `npm run check` passed: reference hashes 7/7, planning checks 15/15, lint/import boundaries 111, typecheck, 280 unit tests passed / 2 opt-in DynamoDB Local skipped, build/bundle scan, hosted-preview scan/browser 1/1, E2E 43/43. Final focused scaffold tests passed 4/4 after the last UI edit. No live AWS/shared-state evidence claimed.
+- KE05 is DONE; KE06 is READY and unclaimed. This completion has no separate review or project acceptance gate. Preserve KE00 and B04/B04.5 statuses. Next step: synchronize this completion, then resolve the actual direct-worker model for KE06 before a claim.
+
 ## 2026-09-27T18:49:31Z — KE05 / IN_PROGRESS
 
 - User A claimed KE05 from clean synchronized `main` baseline `3369345`; `git pull --ff-only origin main` succeeded and HEAD/origin were 0/0. KE04 is DONE and no competing task is active.

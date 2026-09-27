@@ -5,7 +5,7 @@ button, select, input, textarea { font: inherit; }
 button, .quiet-link { min-height: 42px; border-radius: 9px; padding: 9px 14px; font-weight: 700; }
 button { cursor: pointer; border: 1px solid #12614b; color: #fff; background: #12614b; }
 button:hover { background: #0b4c3a; }
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #e7a846; outline-offset: 3px; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid #e7a846; outline-offset: 3px; }
 button:disabled { cursor: not-allowed; opacity: .55; }
 main { max-width: 1020px; margin: auto; padding: 40px 24px; }
 .masthead, .section-heading, .header-actions, .button-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
@@ -70,7 +70,28 @@ blockquote { margin: 12px 0; padding: 12px 15px; border-left: 3px solid #2b8065;
 .receipt-status { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; font-size: .875rem; }
 .receipt-status .status-pill { color: #075440; background: #ddefe5; }
 .receipt-empty { color: #53665c; font-size: .875rem; margin-bottom: 0; }
+.ke-home { max-width: 1120px; }
+.ke-masthead { margin-bottom: 36px; }
+.ke-hero { max-width: 780px; padding: clamp(24px, 5vw, 48px); border-radius: 22px; background: #e8f1eb; }
+.ke-hero h2 { margin: 12px 0; font-size: clamp(1.7rem, 4vw, 2.5rem); line-height: 1.12; letter-spacing: -.035em; }
+.ke-hero > p:not(.eyebrow) { max-width: 620px; color: #42594e; }
+.ke-create { display: grid; justify-items: start; gap: 10px; margin-top: 24px; }
+.ke-create label { font-weight: 750; }
+.ke-create textarea { width: min(100%, 640px); min-height: 104px; resize: vertical; border: 1px solid #94aaa0; border-radius: 10px; padding: 12px; background: #fff; line-height: 1.5; }
+.ke-privacy { max-width: 900px; margin: 28px 0; }
+.ke-card { min-width: 0; border: 1px solid #d4dfd7; border-radius: 16px; padding: 24px; background: #fff; }
+.ke-empty { max-width: 780px; background: #fff; }
+.ke-empty h2 { margin: 6px 0; }
+.ke-workspace { display: grid; gap: 14px; }
+.ke-participant-list { margin: 8px 0 20px; }
+.ke-participant-list li { border: 1px dashed #b5c7bc; border-radius: 10px; padding: 14px; color: #4d6158; background: #f8fbf8; }
+.ke-decision-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+.ke-decision-heading h2 { margin: 7px 0 0; overflow-wrap: anywhere; }
+.ke-tabs { display: flex; flex-wrap: wrap; gap: 9px; }
+.ke-tabs button[aria-pressed="true"] { box-shadow: 0 0 0 2px #e7a846 inset; }
+.ke-next { margin-bottom: 0; padding-top: 12px; border-top: 1px solid #d4dfd7; }
+.ke-footer a { display: inline-block; margin-left: 8px; color: #075440; }
 footer { margin-top: 36px; border-top: 1px solid #d4dfd7; padding-top: 20px; }
-@media (max-width: 650px) { main { padding: 24px 16px; } .masthead, .stale-banner { align-items: flex-start; flex-direction: column; } .header-actions { justify-content: flex-start; } .table, .proposal-card, .consent-boundary, .owner-card { padding: 18px; } .slots, .owner-grid, .receipt-grid { grid-template-columns: 1fr; } .slots li { text-align: left; } small { display: inline; margin-left: 12px; } .duties li, .proposal-card li, .ledger li { align-items: flex-start; flex-direction: column; } .ledger span { text-align: left; } .button-row button { flex: 1 1 100%; } }
+@media (max-width: 650px) { main { padding: 24px 16px; } .masthead, .stale-banner { align-items: flex-start; flex-direction: column; } .header-actions { justify-content: flex-start; } .table, .proposal-card, .consent-boundary, .owner-card, .ke-card { padding: 18px; } .slots, .owner-grid, .receipt-grid { grid-template-columns: 1fr; } .slots li { text-align: left; } small { display: inline; margin-left: 12px; } .duties li, .proposal-card li, .ledger li { align-items: flex-start; flex-direction: column; } .ledger span { text-align: left; } .button-row button { flex: 1 1 100%; } }
 @media (prefers-reduced-motion: no-preference) { .table, .proposal-card, .owner-card { transition: box-shadow 250ms ease; } .table:hover, .proposal-card:hover, .owner-card:hover { box-shadow: 0 8px 22px rgb(24 55 46 / 8%); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; } }

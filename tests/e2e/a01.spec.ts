@@ -13,7 +13,7 @@ test('shared surface never loads the owner screen or owner mock chunk', async ({
 });
 
 test('keyboard navigation reaches the owner demo and returns to the shared surface', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/?legacy=teamtable');
   await page.keyboard.press('Tab');
   const ownerLink = page.getByRole('link', { name: 'Open private owner demo' });
   await expect(ownerLink).toBeFocused();

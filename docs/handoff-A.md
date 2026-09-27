@@ -1,8 +1,12 @@
-## Current claim — KE05 Known Enough product shell — 2026-09-27T18:49:31Z
+## Current handoff — KE05 DONE; KE06 next — 2026-09-27
 
-KE05 is IN_PROGRESS, claimed by User A from clean synchronized `main` baseline `3369345` after `git pull --ff-only origin main` succeeded. Actual worker is Codex GPT-6; exact runtime variant/effort are unexposed, so the user-directed `gpt-6-luna` / high target is not claimed as verified runtime selection. Bounded scope is `apps/web/**`, relevant UI/browser tests, and current ticket/board/handoff/log tracking. No backend, API, contract, AWS/cloud, paid call or deployment changes are in scope. See the [ticket](tasks/KE05.md).
+KE05 is DONE on its technical criteria. The default page now offers a generic Known Enough local-only create, overview, private-space and proposal shell, typed against the accepted public decision-status contract. Drafts are not persisted; no sign-in, participants, private-input controls, model, server or shared state is wired. TeamTable's public and private regression demos remain reachable through explicit legacy routes, including the local-only synthetic owner permission/receipt flow. The final pinned full check passed (references 7/7; planning 15/15; boundaries 111; typecheck; 280 unit passed / 2 opt-in skipped; build and scanners; hosted test 1/1; E2E 43/43). Actual worker: Codex GPT-6; exact runtime variant/effort unexposed, so Luna/high is not claimed as verified runtime selection. See the [KE05 ticket](tasks/KE05.md) and [A log](work-log-A.md).
 
-KE03 and KE04 are DONE on their recorded technical criteria. No task may run in parallel with KE05. The other clone should pull the synchronized claim before starting further project work.
+KE06 is READY and unclaimed. It is the next task and the only implementation task that may be claimed. The ticket specifies `gpt-6-luna` / high; the actual runtime must be recorded and resolved before claiming that setting. The other clone should pull the synchronized completion before any next-task claim. KE00 and B04/B04.5 statuses are unchanged. No cloud actions, deployment, paid calls or external messages occurred.
+
+## Prior claim — KE05 Known Enough product shell — 2026-09-27T18:49:31Z
+
+KE05 was claimed by User A from clean synchronized `main` baseline `3369345` after `git pull --ff-only origin main` succeeded. Actual worker was Codex GPT-6; exact runtime variant/effort were unexposed, so the user-directed `gpt-6-luna` / high target was not claimed as verified runtime selection. Bounded scope was `apps/web/**`, relevant UI/browser tests, and current ticket/board/handoff/log tracking. No backend, API, contract, AWS/cloud, paid call or deployment changes were in scope.
 
 ## Prior handoff — KE04 complete; KE05 next — 2026-09-27T18:44:49Z
 
