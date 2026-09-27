@@ -2,6 +2,8 @@
 
 KE00, 2026-09-26. The user supplied the AI-first product pivot and explicitly limited its first execution to this audit/documentation task, then human review. Known Enough becomes the product direction; TeamTable becomes historical evidence and a regression scenario. Preserve durable engineering rather than rewrite it.
 
+**Policy update, 2026-09-27:** project-level human acceptance/sign-off checkpoints are temporarily deferred at the user's direction. Keep recorded statuses and evidence accurate; B04/B04.5 stay REVIEW but their sign-off no longer blocks KE02. Continue to require participant permissions/approvals, named independent technical reviews and explicit authorization for cloud, spending or publication actions. The current queue and workflow supersede sign-off dependencies below that conflict with this update; dated audit notes remain historical.
+
 ## Authority and evidence
 
 1. Current explicit user instructions govern scope and authorization. The September 26 pivot supersedes old product/domain restrictions; the September 22/23 single shared queue and sequential claims remain.
@@ -27,15 +29,15 @@ The two imported plans receive prominent historical banners, with their entire p
 
 This inspection establishes this clone and fetched shared history only. It does not discover another user's unshared work or authorize access to their account. Claim is communicated through the current user session and local ticket/log, not a published remote lock.
 
-## B04 foundation: integrated source, pending acceptance
+## B04 foundation: integrated source and retained REVIEW status
 
 Both former B04 lines are retained by merge `2dd036a`: the selected implementation is the strict multi-item STATE/GUARD/REPLAY adapter. The alternate single-item design remains in Git history; do not resurrect it as another active implementation. Export/lock correction `a058cc5`, invitations `13707c2`, fixes `f6b93bc` and review record `1c4ea45` are all ancestors of synchronized main. There is **no local-only B04 source delta in this checkout** and no missing B04 branch to integrate.
 
-Earlier records saying “local/unpushed” or “paused for review” describe their date, not September 26 state. Preserve them and add current annotations. The B04/B04.5 tickets remain REVIEW: shared source presence does not establish human acceptance, production readiness or a new integration-check verdict.
+Earlier records saying “local/unpushed” or “paused for review” describe their date, not September 26 state. Preserve them and add current annotations. B04/B04.5 remain REVIEW. Under the September 27 direction, project sign-off is deferred and no longer blocks KE02; retained technical evidence does not establish production readiness or a new integration-check verdict.
 
 Latest [independent B04.5 evidence](reviews/B04.5.md) is PASS on `04bd1db..f6b93bc`, closing R11/R12. Recorded reviewer results: 87/87 focused tests, DynamoDB Local 1/1, nine failure-path combinations and authorization probes, typecheck, seven reference hashes and 15 arithmetic checks. The author's full-check summary reports 232 unit/integration passes plus one emulator skip and 41/41 browsers after serial fallback; raw full output was unavailable to that reviewer. These are **historical results inspected by KE00**, not fresh tests run here.
 
-Outstanding: human acceptance of retained B04/B04.5 local scope; managed Cognito/DynamoDB/IAM and operational acceptance; production migration/retention; trusted invitation provisioning/delivery and response-loss recovery. KE01 may define contracts after KE00 acceptance; KE02 and subsequent backend implementation require the B04/B04.5 human gate. Any new critical code gets independent follow-up. No push or deployment is part of KE00.
+Open at the September 26 audit: project sign-off for retained B04/B04.5 local scope; managed Cognito/DynamoDB/IAM and operational evidence; production migration/retention; trusted invitation provisioning/delivery and response-loss recovery. On September 27, the user deferred project sign-off; KE02 may use the retained B04/B04.5 technical baseline after KE01 without waiting for that sign-off. Any new critical code gets independent follow-up. No push or deployment was part of KE00.
 
 ## File and package inventory
 
@@ -98,7 +100,7 @@ Retained REVIEW tickets remain acceptance records, not an instruction to finish 
 
 | Decision/risk | Required resolution | Owner task |
 | --- | --- | --- |
-| B04 source vs acceptance | Source already integrated; obtain recorded human acceptance of retained local foundation, without claiming live cloud acceptance | Human gate before KE02 |
+| B04 source and review evidence | Source and local review evidence already integrated; retain REVIEW status and do not infer live cloud readiness | Use technical baseline in KE02; project sign-off deferred |
 | Generic type/rule vocabulary | Small closed subset supporting Christmas, purchase and legacy bridge; unknown/unsupported fails closed; size/depth bounds | KE01, KE02 design review |
 | Frame authority/readiness | Who confirms which frame facts; exact revision/roster quorum and stale behavior; no silent organizer policy change | KE01, KE03 |
 | Qualitative constraints | Clarify or explicitly represent unsupported constraints; never claim all hard needs verified from numeric checks alone | KE01, KE07, KE08 |
@@ -115,4 +117,4 @@ Retained REVIEW tickets remain acceptance records, not an instruction to finish 
 
 Current reviewable artifact is the local documentation diff over the exact baseline above, including new files. [KE00](tasks/KE00.md) and [A handoff](handoff-A.md) record fresh checks and changed paths. No production implementation or new independent security verdict is part of this audit.
 
-Stop at KE00 REVIEW. After human acceptance and safe synchronization, claim KE01 alone. Start by deciding rule/value/public-projection semantics and the TeamTable compatibility boundary, then add strict generic schemas and fixtures without changing existing runtime behavior. Do not open KE02 implementation until the retained B04/B04.5 human gate and contract acceptance are recorded. No old SUPERSEDED task may be restarted from a historical handoff.
+Historical instruction at the September 26 audit: KE00 was awaiting review. Current status is KE00 DONE and KE01 READY; follow the current board, synchronize and claim KE01 alone. Decide rule/value/public-projection semantics and the TeamTable compatibility boundary, then add strict generic schemas and fixtures without changing existing runtime behavior. KE02 follows KE01 technical checks and may use retained B04/B04.5 technical evidence; project sign-off is deferred. No old SUPERSEDED task may be restarted from a historical handoff.

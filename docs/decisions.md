@@ -1,10 +1,14 @@
 # Bootstrap decisions and risks
 
+## September 27, 2026 — temporary project sign-off deferral
+
+The user directed that human acceptance/sign-off checkpoints be deferred for now. Internal task completion follows technical ticket criteria, focused evidence and named independent reviews without a separate user sign-off. Existing REVIEW/DONE states remain factual; do not relabel them as newly accepted. In particular, B04/B04.5 remain REVIEW but their project sign-off no longer blocks KE02. This policy does not waive participant consent/approval, explicit cloud/resource/spending authorization, paid-call authorization or publication authorization. See the current [workflow](agent-workflow.md) and [queue](task-board.md).
+
 ## September 26, 2026 — Known Enough product pivot
 
 User-directed KE00 makes Known Enough the AI-first group-decision product; Christmas is the primary demo, Shared Purchase Exploration proves generality and TeamTable remains regression history. [Product](known-enough-product.md), [architecture](known-enough-architecture.md) and [migration mapping](known-enough-pivot.md) supersede older domain restrictions and queue instructions. Existing contract/source behavior is unchanged. Technical package names remain `@deal-table/...`.
 
-B04 correction `f6b93bc` and review record `1c4ea45` are already ancestors of synchronized main `65359eb`; no local-only B04 source remains in this checkout. Human acceptance remains pending for B04/B04.5 local scope. No cloud acceptance or generic AI implementation is implied. KE00 stops REVIEW; KE01 awaits human acceptance, and backend implementation additionally awaits the retained B04 gate. Historical decisions below retain their date and evidence.
+B04 correction `f6b93bc` and review record `1c4ea45` are already ancestors of synchronized main `65359eb`; no local-only B04 source remains in this checkout. At this September 26 snapshot, sign-off was pending for B04/B04.5. The user deferred that project sign-off on September 27; the technical baseline remains available and does not block KE02. No cloud evidence or generic AI implementation is implied by the source integration. KE00 later became DONE and KE01 is READY under the current queue.
 
 ## September 22, 2026 — shared task pool and AI facilitator extension
 
