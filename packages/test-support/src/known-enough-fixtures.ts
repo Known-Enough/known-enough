@@ -1,4 +1,5 @@
 import { KnownEnough } from '@deal-table/contracts';
+import type { SolveDecisionInput } from '@deal-table/domain';
 import { buildTeamTableFixture } from './teamtable-fixture.ts';
 
 const KE = KnownEnough;
@@ -327,10 +328,21 @@ export async function buildHypotheticalContributionFixture() {
   return { definition, candidate, publicFrame, publicFacts, publicCandidate, publicSnapshot, ownerSnapshot };
 }
 
-function covers(available: { date: string; timezone: string; startMinute: number; endMinute: number },
-  required: { date: string; timezone: string; startMinute: number; endMinute: number }): boolean {
-  return available.date === required.date && available.timezone === required.timezone
-    && available.startMinute <= required.startMinute && available.endMinute >= required.endMinute;
+type LegacyInterval = SolveDecisionInput['schedule']['slots'][number]['interval'];
+
+function intervalsCover(available: readonly LegacyInterval[], required: LegacyInterval): boolean {
+  const relevant = available
+    .filter(value => value.date === required.date && value.timezone === required.timezone)
+    .map(value => ({ start: value.startMinute, end: value.endMinute }))
+    .sort((left, right) => left.start - right.start || left.end - right.end);
+  let coveredUntil = required.startMinute;
+  for (const interval of relevant) {
+    if (interval.end <= coveredUntil) continue;
+    if (interval.start > coveredUntil) return false;
+    coveredUntil = interval.end;
+    if (coveredUntil >= required.endMinute) return true;
+  }
+  return false;
 }
 
 function overlaps(left: { date: string; timezone: string; startMinute: number; endMinute: number },
@@ -343,8 +355,7 @@ function utcMillis(value: string): string {
   return value.endsWith('Z') && !value.includes('.') ? value.slice(0, -1) + '.000Z' : value;
 }
 
-export async function adaptTeamTableFixture(withGrant = false) {
-  const legacy = buildTeamTableFixture({ withGrant });
+export async function adaptTeamTableInput(legacy: SolveDecisionInput) {
   const contextToken = 'c'.repeat(64);
   const decisionId = 'teamtable-compatibility';
   const rosterIds = legacy.roster.map(person => person.id);
@@ -381,41 +392,95 @@ export async function adaptTeamTableFixture(withGrant = false) {
   });
 
   const constraints: ReturnType<typeof KE.ConfirmedConstraint.parse>[] = [];
-  const slots = legacy.schedule.slots;
-  for (const owner of legacy.owners) {
-    for (const condition of owner.confirmedInputs.values.conditions) {
-      const ruleId = 'legacy-rule-' + condition.id;
-      let allowedSlots: string[];
-      if (condition.kind === 'HARD_AVAILABILITY') {
-        allowedSlots = slots.filter(slot => condition.availableIntervals
-          .some(available => covers(available, slot.interval))).map(slot => slot.id);
-      } else {
-        allowedSlots = slots.filter(slot => !overlaps(condition.interval, slot.interval)).map(slot => slot.id);
-      }
-      const kind = condition.kind === 'NEGOTIABLE_UNAVAILABLE' && condition.inviteException
-        ? 'NEGOTIABLE' as const : 'HARD' as const;
-      const constraint = KE.ConfirmedConstraint.parse({
-        schemaVersion: KE.KE_SCHEMA_VERSION,
-        constraintId: condition.id,
-        decisionId,
-        ownerParticipantId: owner.ownerMemberId,
-        kind,
-        rule: {
-          ...ruleBase(ruleId, 'TRUSTED_BACKEND'),
-          operator: 'IN',
-          variableId: 'meeting-slot',
-          values: allowedSlots.map(optionId => enumValue(optionId)),
-        },
-        constraintVersion: 1,
-        ownerVersion: owner.confirmedInputs.inputRevision,
-        semanticVersion: 1,
-        contextToken,
-        confirmedAt: utcMillis(owner.confirmedInputs.confirmedAt),
-        status: 'ACTIVE',
-        sourceSummary: 'Synthetic private TeamTable condition retained for compatibility testing.',
+  let ruleSequence = 0;
+  const appendConstraint = (
+    owner: SolveDecisionInput['owners'][number],
+    constraintId: string,
+    kind: 'HARD' | 'NEGOTIABLE',
+    rule: Record<string, unknown>,
+  ) => {
+    constraints.push(KE.ConfirmedConstraint.parse({
+      schemaVersion: KE.KE_SCHEMA_VERSION,
+      constraintId,
+      decisionId,
+      ownerParticipantId: owner.ownerMemberId,
+      kind,
+      rule: { ...rule, ...ruleBase(`legacy-rule-${++ruleSequence}`, 'TRUSTED_BACKEND') },
+      constraintVersion: 1,
+      ownerVersion: owner.confirmedInputs.inputRevision,
+      semanticVersion: 1,
+      contextToken,
+      confirmedAt: utcMillis(owner.confirmedInputs.confirmedAt),
+      status: 'ACTIVE',
+      sourceSummary: 'Synthetic private TeamTable condition retained for compatibility testing.',
+    }));
+  };
+  const addDomainConstraint = (
+    owner: SolveDecisionInput['owners'][number],
+    constraintId: string,
+    kind: 'HARD' | 'NEGOTIABLE',
+    variableId: string,
+    domain: readonly { readonly key: string; readonly value: unknown }[],
+    allowedKeys: ReadonlySet<string>,
+  ) => {
+    const allowed = domain.filter(item => allowedKeys.has(item.key));
+    if (allowed.length) {
+      appendConstraint(owner, constraintId, kind, {
+        operator: 'IN', variableId, values: allowed.map(item => item.value),
       });
-      constraints.push(constraint);
+      return;
     }
+    // An empty IN set is not part of the contract. Exclude every valid value instead.
+    domain.forEach((item, index) => appendConstraint(owner, index ? `${constraintId}-${index}` : constraintId, kind, {
+      operator: 'COMPARE', variableId, comparison: 'NE', value: item.value,
+    }));
+  };
+
+  const meetingDomain = legacy.schedule.slots.map(slot => ({ key: slot.id, value: enumValue(slot.id) }));
+  const dutyDomains = legacy.schedule.duties.map(duty => ({
+    duty,
+    variableId: duty.id === 'lead' ? 'lead-assignee' : 'followup-assignee',
+    domain: duty.qualifiedMemberIds.map(id => ({ key: id, value: participantValue(id) })),
+  }));
+
+  for (const owner of legacy.owners) {
+    const conditions = owner.confirmedInputs.values.conditions;
+    const hardIntervals = conditions
+      .filter((condition): condition is Extract<typeof condition, { kind: 'HARD_AVAILABILITY' }> =>
+        condition.kind === 'HARD_AVAILABILITY')
+      .flatMap(condition => condition.availableIntervals);
+    const availableSlots = new Set(meetingDomain
+      .filter(item => {
+        const slot = legacy.schedule.slots.find(value => value.id === item.key)!;
+        return intervalsCover(hardIntervals, slot.interval);
+      })
+      .map(item => item.key));
+    addDomainConstraint(owner, `legacy-hard-${owner.ownerMemberId}-meeting`, 'HARD', 'meeting-slot', meetingDomain, availableSlots);
+
+    for (const { duty, variableId, domain } of dutyDomains) {
+      const allowedAssignees = new Set(domain
+        .filter(item => item.key !== owner.ownerMemberId || intervalsCover(hardIntervals, duty.interval))
+        .map(item => item.key));
+      addDomainConstraint(owner, `legacy-hard-${owner.ownerMemberId}-${duty.id}`, 'HARD', variableId, domain, allowedAssignees);
+    }
+
+    for (const condition of conditions) {
+      if (condition.kind !== 'NEGOTIABLE_UNAVAILABLE') continue;
+      const kind = condition.inviteException ? 'NEGOTIABLE' as const : 'HARD' as const;
+      const blockedSlots = new Set(legacy.schedule.slots
+        .filter(slot => overlaps(condition.interval, slot.interval))
+        .map(slot => slot.id));
+      if (blockedSlots.size) {
+        addDomainConstraint(owner, condition.id, kind, 'meeting-slot', meetingDomain,
+          new Set(meetingDomain.map(item => item.key).filter(id => !blockedSlots.has(id))));
+      }
+      for (const { duty, variableId, domain } of dutyDomains) {
+        if (!overlaps(condition.interval, duty.interval)) continue;
+        const allowedAssignees = new Set(domain.filter(item => item.key !== owner.ownerMemberId).map(item => item.key));
+        addDomainConstraint(owner, `${condition.id}-${duty.id}`, kind, variableId, domain, allowedAssignees);
+      }
+    }
+
     for (const cost of owner.confirmedInputs.values.dutyCosts) {
       const variableId = cost.dutyId === 'lead' ? 'lead-assignee' : 'followup-assignee';
       constraints.push(KE.ConfirmedConstraint.parse({
@@ -442,18 +507,18 @@ export async function adaptTeamTableFixture(withGrant = false) {
 
   const questions: ReturnType<typeof KE.NegotiationQuestion.parse>[] = [];
   const permissions: ReturnType<typeof KE.NegotiationPermission.parse>[] = [];
-  if (withGrant) {
-    const baseRule = {
-      ...ruleBase('legacy-exception-adjustment', 'TRUSTED_BACKEND' as const),
-      operator: 'IN' as const,
-      variableId: 'meeting-slot',
-      values: [enumValue('meeting-1100')],
-    };
+  if (legacy.exceptionGrants.length) {
     for (const grant of legacy.exceptionGrants) {
-      const ownerParticipantId = 'nina';
+      const baseRule = {
+        ...ruleBase('legacy-exception-adjustment', 'TRUSTED_BACKEND' as const),
+        operator: 'IN' as const,
+        variableId: 'meeting-slot',
+        values: [enumValue(grant.scope.meeting.id)],
+      };
+      const ownerParticipantId = grant.ownerMemberId;
       const constraintId = grant.scope.conditionId;
       const constraint = constraints.find(item => item.constraintId === constraintId && item.ownerParticipantId === ownerParticipantId);
-      if (!constraint || constraint.kind !== 'NEGOTIABLE') throw new Error('Legacy grant must target Nina’s current negotiable condition');
+      if (!constraint || constraint.kind !== 'NEGOTIABLE') throw new Error('Legacy grant must target its owner’s current negotiable condition');
       const questionId = 'question-' + grant.id;
       const requestIdentity = await KE.hashNegotiationRequestIdentity({
         decisionId,
@@ -495,4 +560,8 @@ export async function adaptTeamTableFixture(withGrant = false) {
     }
   }
   return { definition, constraints, questions, negotiationPermissions: permissions, legacyPolicy: legacy.policy };
+}
+
+export async function adaptTeamTableFixture(withGrant = false) {
+  return adaptTeamTableInput(buildTeamTableFixture({ withGrant }));
 }

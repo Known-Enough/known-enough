@@ -6,6 +6,8 @@ Synthetic server/test fixtures for Deal Table. Never import this package or its 
 
 The fixture explicitly records reviewed candidate intervals. Nina's hard availability envelope includes Thursday 11:00, while her separate negotiable condition blocks it until the scoped no-weekend-duty exception is granted. Positive hard availability cannot be expanded by that grant. This models the product's conditional availability without disguising a hard constraint as negotiable.
 
+`adaptTeamTableInput(input)` maps a legacy fixture to generic v2 variables, owner-scoped constraints/preferences and the exact scoped negotiation permission. Its hard-availability conversion covers complete meeting and duty intervals, including contiguous interval unions. The generic-kernel regression evaluates all 12 legacy structural candidates (zero valid at baseline, two with the applicable permission). Existing legacy solver tests retain the historical A/B rankings; the generic kernel only checks admissibility and does not rank preferences. This is a server/test-only migration bridge, not a product or browser API.
+
 Run from the repository root using the pinned Node/npm versions:
 
 ```sh

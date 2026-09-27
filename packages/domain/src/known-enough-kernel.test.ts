@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { KnownEnough as KE } from '@deal-table/contracts';
-import { evaluateKnownEnoughCandidate } from './index.ts';
+import { evaluateKnownEnoughCandidate, enumerateStructuralPlans } from './index.ts';
 import {
-  adaptTeamTableFixture,
+  adaptTeamTableInput,
   buildChristmasFixture,
   buildHypotheticalContributionFixture,
 } from '../../test-support/src/known-enough-fixtures.ts';
 import { buildTeamTableFixture } from '../../test-support/src/teamtable-fixture.ts';
 import { solveDecision } from './solve.ts';
+import type { SolveDecisionInput, StructuralPlan } from './index.ts';
 
 type KernelCase = {
   definition: ReturnType<typeof KE.DecisionDefinition.parse>;
@@ -24,6 +25,8 @@ type KernelCase = {
 
 const NOW = '2026-10-01T12:00:00.000Z';
 const context = (char: string) => char.repeat(64);
+type Mutable<T> = { -readonly [Key in keyof T]: T[Key] extends readonly (infer Item)[] ? Mutable<Item>[] : T[Key] extends object ? Mutable<T[Key]> : T[Key] };
+const mutable = <T>(value: T): Mutable<T> => structuredClone(value) as Mutable<T>;
 const baseCandidateClaim = {
   status: 'VALID' as const,
   checkedRuleIds: [],
@@ -165,16 +168,41 @@ async function christmasCase() {
   } satisfies KernelCase;
 }
 
-async function teamTableCase(withGrant: boolean) {
-  const adapted = await adaptTeamTableFixture(withGrant);
-  const legacy = buildTeamTableFixture({ withGrant });
-  const result = solveDecision(legacy);
-  const plan = result.status === 'SOLVED' ? result.selectedPlan : undefined;
-  if (withGrant && !plan) throw new Error('Expected the fixture solver to find a compatibility plan');
+function teamTablePlanKey(plan: StructuralPlan): string {
+  const lead = plan.facts.assignments.find(item => item.duty.id === 'lead')?.participantId;
+  const followup = plan.facts.assignments.find(item => item.duty.id === 'followup')?.participantId;
+  return `${plan.facts.meeting.id}:${lead}:${followup}`;
+}
+
+async function teamTableCase(
+  withGrant: boolean,
+  planOverride?: StructuralPlan,
+  legacyOverride?: SolveDecisionInput,
+) {
+  const legacy = legacyOverride ?? buildTeamTableFixture({ withGrant });
+  const adapted = await adaptTeamTableInput(legacy);
+  let plan = planOverride;
+  if (!plan) {
+    const result = solveDecision(legacy);
+    plan = result.status === 'SOLVED'
+      ? result.selectedPlan
+      : enumerateStructuralPlans({
+        schedule: legacy.schedule,
+        rosterMemberIds: legacy.roster.map(person => person.id),
+      }).find(candidate => teamTablePlanKey(candidate) === 'meeting-1100:maya:leo');
+  }
+  if (!plan) throw new Error('Expected a structural TeamTable compatibility candidate');
+  const applicableGrants = legacy.exceptionGrants.filter(grant =>
+    grant.scope.meeting.id === plan!.facts.meeting.id
+      && (grant.scope.predicate !== 'OWNER_HAS_NO_WEEKEND_DUTIES'
+        || !plan!.facts.assignments.some(assignment => assignment.participantId === grant.ownerMemberId)));
+  const applicablePermissions = adapted.negotiationPermissions.filter(permission =>
+    applicableGrants.some(grant => grant.ownerMemberId === permission.ownerParticipantId
+      && grant.version === permission.permissionVersion));
   const candidateValues = [
-    { variableId: 'meeting-slot', value: { type: 'ENUM' as const, optionId: plan?.facts.meeting.id ?? 'meeting-1100' } },
-    { variableId: 'lead-assignee', value: { type: 'PARTICIPANT' as const, participantId: plan?.facts.assignments.find(item => item.duty.id === 'lead')!.participantId ?? 'maya' } },
-    { variableId: 'followup-assignee', value: { type: 'PARTICIPANT' as const, participantId: plan?.facts.assignments.find(item => item.duty.id === 'followup')!.participantId ?? 'leo' } },
+    { variableId: 'meeting-slot', value: { type: 'ENUM' as const, optionId: plan.facts.meeting.id } },
+    { variableId: 'lead-assignee', value: { type: 'PARTICIPANT' as const, participantId: plan.facts.assignments.find(item => item.duty.id === 'lead')!.participantId } },
+    { variableId: 'followup-assignee', value: { type: 'PARTICIPANT' as const, participantId: plan.facts.assignments.find(item => item.duty.id === 'followup')!.participantId } },
   ];
   const candidate = KE.CandidateProposal.parse({
     schemaVersion: KE.KE_SCHEMA_VERSION,
@@ -185,7 +213,7 @@ async function teamTableCase(withGrant: boolean) {
     proposalVersion: 1,
     values: candidateValues,
     validation: baseCandidateClaim,
-    permissionDependencies: adapted.negotiationPermissions.map(permission => ({
+    permissionDependencies: applicablePermissions.map(permission => ({
       permissionId: permission.permissionId,
       permissionVersion: permission.permissionVersion,
       kind: 'NEGOTIATION' as const,
@@ -198,8 +226,9 @@ async function teamTableCase(withGrant: boolean) {
     candidate,
     publicProposal: await publicProposalFor(adapted.definition, candidate),
     confirmedConstraints: adapted.constraints,
-    negotiationPermissions: adapted.negotiationPermissions,
-  } satisfies KernelCase;
+    negotiationPermissions: applicablePermissions,
+    plan,
+  } as KernelCase & { readonly plan: StructuralPlan };
 }
 
 function smallNumericCase(left: number, right: number, target: number) {
@@ -276,6 +305,74 @@ describe('Known Enough deterministic candidate kernel', () => {
     const result = await evaluateKnownEnoughCandidate(kernelInput(value));
     expect(result.status).toBe('NEEDS_PERMISSION');
     expect(result.diagnostics.map(item => item.code)).toContain('NEGOTIABLE_PERMISSION_REQUIRED');
+  });
+
+  it('preserves all twelve structural plans and the zero/two generic feasibility counts', async () => {
+    for (const withGrant of [false, true]) {
+      const legacy = buildTeamTableFixture({ withGrant });
+      const plans = enumerateStructuralPlans({
+        schedule: legacy.schedule,
+        rosterMemberIds: legacy.roster.map(person => person.id),
+      });
+      expect(plans).toHaveLength(12);
+      const outcomes = [];
+      for (const plan of plans) {
+        const value = await teamTableCase(withGrant, plan, legacy);
+        expect(JSON.stringify(value.publicProposal)).not.toContain('grant-nina-no-duty');
+        expect(JSON.stringify(value.publicProposal)).not.toContain('nina-thursday-1100');
+        outcomes.push({ plan, result: await evaluateKnownEnoughCandidate(kernelInput(value)) });
+      }
+      const valid = outcomes.filter(outcome => outcome.result.status === 'VALID');
+      expect(valid).toHaveLength(withGrant ? 2 : 0);
+      if (withGrant) {
+        expect(valid.map(outcome => teamTablePlanKey(outcome.plan)).sort()).toEqual([
+          'meeting-1100:leo:maya', 'meeting-1100:maya:leo',
+        ]);
+      }
+    }
+  });
+
+  it('keeps full meeting and duty intervals hard through the generic fixture bridge', async () => {
+    const plans = enumerateStructuralPlans({
+      schedule: buildTeamTableFixture({ withGrant: true }).schedule,
+      rosterMemberIds: ['maya', 'leo', 'nina'],
+    });
+    const chosen = plans.find(plan => teamTablePlanKey(plan) === 'meeting-1100:maya:leo')!;
+    const dutyGap = mutable(buildTeamTableFixture({ withGrant: true }));
+    const mayaHard = dutyGap.owners.find(owner => owner.ownerMemberId === 'maya')!
+      .confirmedInputs.values.conditions.find(condition => condition.kind === 'HARD_AVAILABILITY');
+    if (!mayaHard || mayaHard.kind !== 'HARD_AVAILABILITY') throw new Error('Missing Maya hard availability');
+    mayaHard.availableIntervals.find(interval => interval.date === '2026-10-10')!.endMinute = 719;
+    const dutyValue = await teamTableCase(true, chosen, dutyGap);
+    expect((await evaluateKnownEnoughCandidate(kernelInput(dutyValue))).status).toBe('INVALID');
+
+    const meetingGap = mutable(buildTeamTableFixture({ withGrant: true }));
+    const ninaHard = meetingGap.owners.find(owner => owner.ownerMemberId === 'nina')!
+      .confirmedInputs.values.conditions.find(condition => condition.kind === 'HARD_AVAILABILITY');
+    if (!ninaHard || ninaHard.kind !== 'HARD_AVAILABILITY') throw new Error('Missing Nina hard availability');
+    const thursday = ninaHard.availableIntervals.find(interval => interval.date === '2026-10-08' && interval.startMinute === 660)!;
+    ninaHard.availableIntervals = ninaHard.availableIntervals.filter(interval => interval !== thursday);
+    ninaHard.availableIntervals.push(
+      { ...thursday, endMinute: 675 },
+      { ...thursday, startMinute: 676 },
+    );
+    const meetingValue = await teamTableCase(true, chosen, meetingGap);
+    expect((await evaluateKnownEnoughCandidate(kernelInput(meetingValue))).status).toBe('INVALID');
+  });
+
+  it('requires the exact active TeamTable permission and rejects expiry or revocation', async () => {
+    const value = await teamTableCase(true);
+    expect((await evaluateKnownEnoughCandidate(kernelInput(value))).status).toBe('VALID');
+    const permission = value.negotiationPermissions![0]!;
+    const expired = KE.NegotiationPermission.parse({ ...permission, expiresAt: NOW });
+    expect((await evaluateKnownEnoughCandidate(kernelInput(value, { negotiationPermissions: [expired] }))).status)
+      .toBe('NEEDS_PERMISSION');
+    const revoked = KE.NegotiationPermission.parse({ ...permission, status: 'REVOKED' });
+    expect((await evaluateKnownEnoughCandidate(kernelInput(value, { negotiationPermissions: [revoked] }))).status)
+      .toBe('NEEDS_PERMISSION');
+    const wrongContext = KE.NegotiationPermission.parse({ ...permission, contextToken: context('e') });
+    expect((await evaluateKnownEnoughCandidate(kernelInput(value, { negotiationPermissions: [wrongContext] }))).status)
+      .toBe('NEEDS_PERMISSION');
   });
 
   it('requires an active exact grant for a failed negotiable constraint', async () => {

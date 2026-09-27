@@ -1,3 +1,10 @@
+## 2026-09-27T18:44:49Z — KE04 / DONE
+
+- Completed the KE04 claim from synchronized `main` baseline `5159770`. Actual worker: Codex GPT-6; exact runtime variant/effort unexposed, so the user-directed Luna/high runtime is not claimed. Changed only the generic-kernel TeamTable regression tests, test-support adapter, support README, architecture and task tracking docs.
+- `adaptTeamTableInput` preserves full meeting and duty interval coverage (including contiguous unions), owner-scoped hard/negotiable constraints and exact scoped permission. The generic bridge evaluates all 12 structural plans: 0 valid at baseline, exactly 2 with the scoped permission. Legacy solver ranking tests remain unchanged; generic application tests continue to cover disclosure independence, exact approvals and semantic invalidation. No tests replaced or relabeled.
+- Focused domain/test-support suite: 86/86 passed. Pinned Node 24.21.0/npm 11.19.0 full check passed: references 7/7, planning 15/15, lint/import boundaries 108, typecheck, 280 tests passed and 2 opt-in DynamoDB Local tests skipped, build/bundle scan, hosted-preview scan/browser test 1/1, E2E 41/41. No emulator endpoint, AWS/cloud, paid calls or deployments.
+- KE04 is DONE; KE05 is READY and unclaimed. No separate KE04 review is scheduled; add its exact artifact to KE09's post-MVP bundle. B04/B04.5 and KE00 acceptance statuses are unchanged.
+
 ## 2026-09-27T18:22:56Z — KE04 / IN_PROGRESS
 
 - User A claimed KE04 from clean synchronized `main` baseline `5159770`; `git pull --ff-only origin main` succeeded and HEAD/origin were 0/0. The board and current handoff show KE03 DONE and no competing active task.
