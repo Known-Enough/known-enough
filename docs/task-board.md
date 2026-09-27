@@ -4,7 +4,7 @@ One project-wide priority queue, one active implementation or review at a time. 
 
 ## Current gate and claim
 
-**KE13C REVIEW: hosted preview-only build.** User-authorized after review/acceptance of KE00 and KE13A. Actual worker: Codex GPT-6, variant/effort unexposed. Baseline: clean `main` at `a5d1833` after successful `git pull --ff-only origin main`; no push. Dedicated artifact and checks are complete; independent sequential review is pending. No AWS resources or deployment yet. See [KE13C](tasks/KE13C.md).
+**No active task. KE13C DONE: hosted preview-only build accepted.** User accepted the reported PASS on `a5d1833..a625498` on 2026-09-27. Reviewer is reported by the user as Sol; exact model/effort is unexposed. The review record notes two non-blocking test-coverage gaps. No AWS resources or deployment yet. See [KE13C](tasks/KE13C.md) and [review evidence](reviews/KE13C.md).
 
 **KE00 DONE**: user accepted the documentation-only pivot audit on 2026-09-26. KE01 remains BLOCKED until a fresh claim and its own task work.
 
@@ -14,7 +14,7 @@ One project-wide priority queue, one active implementation or review at a time. 
 
 | Task | Direct model / effort | Prerequisite / gate | Status and outcome |
 | --- | --- | --- | --- |
-| [KE13C](tasks/KE13C.md) | Current Codex GPT-6; exact variant/effort unexposed | User-authorized Stage 0; KE00 and KE13A accepted | REVIEW — build and checks pass; independent critical review pending |
+| [KE13C](tasks/KE13C.md) | Current Codex GPT-6; exact variant/effort unexposed | User-authorized Stage 0; KE00 and KE13A accepted | DONE — build PASS reviewed and accepted by user; no cloud deployment |
 | [KE13A](tasks/KE13A.md) | Current Codex GPT-6; exact variant/effort unexposed | User-authorized early preparation | DONE — prep and read-only SSO STS check complete; user accepted |
 | [KE13B](tasks/KE13B.md) | `gpt-6-sol` / high, selected by the human at claim | Accepted KE00, B04/B04.5 and KE12; reviewed KE13A handoff; explicit bounded implementation/cloud authorization | BLOCKED — authenticated API, DynamoDB persistence and least-privilege IAM implementation; sequential independent review required |
 
@@ -24,7 +24,7 @@ Implementation successors require acceptance of the preceding scope. The indepen
 
 | Task | Direct model / effort | Prerequisite / gate | Status and outcome |
 | --- | --- | --- | --- |
-| [KE00](tasks/KE00.md) | `gpt-6-astra` / high scheduled; actual GPT-6, variant unexposed | User-directed first task | REVIEW — pivot audit and authority reset; human acceptance pending |
+| [KE00](tasks/KE00.md) | `gpt-6-astra` / high scheduled; actual GPT-6, variant unexposed | User-directed first task | DONE — user accepted the pivot audit on 2026-09-26 |
 | [KE01](tasks/KE01.md) | `gpt-6-astra` / high | KE00 human acceptance | BLOCKED — generic contracts and critical review |
 | [KE02](tasks/KE02.md) | `gpt-6-astra` / high design, then `gpt-6-sol` / high implementation | KE01 + B04/B04.5 human acceptance | BLOCKED — small trust kernel |
 | [KE03](tasks/KE03.md) | `gpt-6-sol` / high | KE02 | BLOCKED — application and versioned storage adaptation |

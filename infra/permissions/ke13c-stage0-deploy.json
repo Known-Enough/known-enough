@@ -1,0 +1,145 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CreateNamedPreviewBucketOnlyInUsEast1",
+      "Effect": "Allow",
+      "Action": "s3:CreateBucket",
+      "Resource": "arn:aws:s3:::known-enough-preview-20260927-7f94b6a1",
+      "Condition": {
+        "StringEqualsIfExists": {
+          "s3:LocationConstraint": "us-east-1"
+        }
+      }
+    },
+    {
+      "Sid": "ConfigureNamedPreviewBucket",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetBucketLocation",
+        "s3:GetBucketPolicy",
+        "s3:GetBucketPublicAccessBlock",
+        "s3:GetBucketTagging",
+        "s3:GetBucketVersioning",
+        "s3:GetEncryptionConfiguration",
+        "s3:GetLifecycleConfiguration",
+        "s3:ListBucket",
+        "s3:PutBucketPolicy",
+        "s3:PutBucketTagging",
+        "s3:PutBucketVersioning",
+        "s3:PutLifecycleConfiguration"
+      ],
+      "Resource": "arn:aws:s3:::known-enough-preview-20260927-7f94b6a1"
+    },
+    {
+      "Sid": "ManageOnlyHostedPreviewObjects",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::known-enough-preview-20260927-7f94b6a1/hosted-preview/*",
+        "arn:aws:s3:::known-enough-preview-20260927-7f94b6a1/assets/*"
+      ]
+    },
+    {
+      "Sid": "CreateTaggedPreviewDistribution",
+      "Effect": "Allow",
+      "Action": "cloudfront:CreateDistribution",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/Project": "KnownEnough",
+          "aws:RequestTag/Environment": "staging",
+          "aws:RequestTag/Stage": "preview"
+        },
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "Project",
+            "Environment",
+            "Stage",
+            "ExpiresOn"
+          ]
+        },
+        "Null": {
+          "aws:RequestTag/ExpiresOn": "false"
+        }
+      }
+    },
+    {
+      "Sid": "TagPreviewDistributionsInThisAccount",
+      "Effect": "Allow",
+      "Action": "cloudfront:TagResource",
+      "Resource": "arn:aws:cloudfront::*:distribution/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceAccount": "${aws:PrincipalAccount}",
+          "aws:RequestTag/Project": "KnownEnough",
+          "aws:RequestTag/Environment": "staging",
+          "aws:RequestTag/Stage": "preview"
+        },
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "Project",
+            "Environment",
+            "Stage",
+            "ExpiresOn"
+          ]
+        },
+        "Null": {
+          "aws:RequestTag/ExpiresOn": "false"
+        }
+      }
+    },
+    {
+      "Sid": "CreateOriginAccessControl",
+      "Effect": "Allow",
+      "Action": "cloudfront:CreateOriginAccessControl",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ListCloudFrontResources",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:ListDistributions",
+        "cloudfront:ListOriginAccessControls"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ReadCreatedOriginAccessControlsInThisAccount",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:GetOriginAccessControl",
+        "cloudfront:GetOriginAccessControlConfig"
+      ],
+      "Resource": "arn:aws:cloudfront::*:origin-access-control/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceAccount": "${aws:PrincipalAccount}"
+        }
+      }
+    },
+    {
+      "Sid": "ManageTaggedPreviewDistributionInThisAccount",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:CreateInvalidation",
+        "cloudfront:GetDistribution",
+        "cloudfront:GetDistributionConfig",
+        "cloudfront:GetInvalidation",
+        "cloudfront:ListInvalidations"
+      ],
+      "Resource": "arn:aws:cloudfront::*:distribution/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceAccount": "${aws:PrincipalAccount}",
+          "aws:ResourceTag/Project": "KnownEnough",
+          "aws:ResourceTag/Environment": "staging",
+          "aws:ResourceTag/Stage": "preview"
+        }
+      }
+    }
+  ]
+}
