@@ -1,6 +1,10 @@
-## Current claim — KE07 private participant conversation — 2026-09-27T19:40:10Z
+## Current handoff — KE07 DONE; KE08 next — 2026-09-27
 
-KE07 is IN_PROGRESS, claimed by User A from clean synchronized `main` baseline `0c86a2d53d2d7f58f769afbbb9253afb63625d37` after `git pull --ff-only origin main` succeeded in `/tmp/known-enough-ke07`. This is the sole active task. Actual worker: Codex GPT-6; runtime variant/effort unexposed, so Luna/high is recorded as the user-directed target, not verified runtime selection. Bounded scope: private owner conversation service/tests; narrow owner contract/test additions if required; injected local API adapter/tests if needed; generic home and A05 owner draft UI/mock/tests; focused browser coverage and retention documentation; KE07/board/current handoff/A log. No domain kernel, root manifest/lock, CI, cloud, live model, real identity or shared persistence. Stop and coordinate if a wider contract/root change is needed. See [KE07](tasks/KE07.md). KE00 remains DONE and B04/B04.5 remain REVIEW.
+KE07 is DONE. It adds authenticated owner-scoped extraction behind an injected port, strict context/version validation, sanitized private drafts and existing explicit confirmation semantics. The local UI demonstrates one synthetic example only; arbitrary text asks for clarification, and no private text is sent or persisted. Pinned `npm run check` passed (references 7/7; planning 15/15; boundaries 126; typecheck; 294 tests / 2 opt-in skips; build/scanner; hosted browser 1/1; E2E 43/43). Actual worker Codex GPT-6; runtime variant/effort unexposed. See the [KE07 ticket](tasks/KE07.md), [retention notes](known-enough-architecture.md#owner-conversation-retention-ke07) and A log. KE08 is READY, unclaimed and next. KE00 remains DONE and B04/B04.5 remain REVIEW.
+
+## Prior claim — KE07 private participant conversation — 2026-09-27T19:40:10Z
+
+KE07 was claimed by User A from clean synchronized `main` baseline `0c86a2d53d2d7f58f769afbbb9253afb63625d37` after `git pull --ff-only origin main` succeeded in `/tmp/known-enough-ke07`. Bounded files: owner conversation service/tests; authenticated API handler/test; local home/mock/tests/styles and focused browser coverage; retention documentation; KE07 tracking and A handoff/log. Actual worker Codex GPT-6, runtime variant/effort unexposed; Luna/high was the target only. No domain kernel, root manifest/lock, CI, cloud, live model, real identity or shared persistence planned.
 
 ## Prior handoff — KE06 DONE; KE07 next — 2026-09-27
 

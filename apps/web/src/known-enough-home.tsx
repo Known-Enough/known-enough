@@ -1,6 +1,7 @@
 import { useRef, useState, type FormEvent } from 'react';
 import { KnownEnough } from '@deal-table/contracts';
 import type { KnownEnough as KE } from '@deal-table/contracts';
+import type { LocalOwnerDraft, LocalOwnerInterpreter } from './owner-conversation-mock.ts';
 
 type DecisionView = 'overview' | 'private' | 'proposal';
 type LocalDecision = {
@@ -46,7 +47,7 @@ function parseResponse(value: unknown): ArchitectResponse {
   };
 }
 
-export function KnownEnoughHome() {
+export function KnownEnoughHome({ ownerInterpreter }: { ownerInterpreter?: LocalOwnerInterpreter }) {
   const [objective, setObjective] = useState('');
   const [participantNames, setParticipantNames] = useState('');
   const [optionsText, setOptionsText] = useState('');
@@ -54,11 +55,25 @@ export function KnownEnoughHome() {
   const [view, setView] = useState<DecisionView>('overview');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [ownerText, setOwnerText] = useState('');
+  const [ownerDraft, setOwnerDraft] = useState<LocalOwnerDraft | null>(null);
+  const [ownerConfirmed, setOwnerConfirmed] = useState(false);
+  const [ownerLoading, setOwnerLoading] = useState(false);
+  const [ownerError, setOwnerError] = useState('');
   const inputRevision = useRef(0);
   const requestSequence = useRef(0);
+  const ownerRequestSequence = useRef(0);
   const draftRevision = useRef(0);
   const draftId = useRef('');
   if (!draftId.current) draftId.current = crypto.randomUUID();
+
+  const clearOwnerReview = () => {
+    ownerRequestSequence.current++;
+    setOwnerDraft(null);
+    setOwnerConfirmed(false);
+    setOwnerLoading(false);
+    setOwnerError('');
+  };
 
   const changed = () => {
     inputRevision.current++;
@@ -66,6 +81,27 @@ export function KnownEnoughHome() {
     setDecision(null);
     setLoading(false);
     setError('');
+    clearOwnerReview();
+  };
+
+  const interpretOwnerText = async () => {
+    const sequence = ++ownerRequestSequence.current;
+    setOwnerDraft(null);
+    setOwnerConfirmed(false);
+    setOwnerLoading(true);
+    setOwnerError('');
+    try {
+      const mock = ownerInterpreter ? null : await import('./owner-conversation-mock.ts');
+      const raw = await (ownerInterpreter ? ownerInterpreter(ownerText) : mock!.localOwnerInterpreter(ownerText));
+      const parsed = ownerInterpreter ? await import('./owner-conversation-mock.ts').then(module => module.validateLocalOwnerDraft(raw))
+        : mock!.validateLocalOwnerDraft(raw);
+      if (!parsed) throw new Error('invalid local draft');
+      if (sequence === ownerRequestSequence.current) setOwnerDraft(parsed);
+    } catch {
+      if (sequence === ownerRequestSequence.current) setOwnerError('The local fixture could not safely prepare this draft. Please clarify the wording.');
+    } finally {
+      if (sequence === ownerRequestSequence.current) setOwnerLoading(false);
+    }
   };
 
   const createDraft = async (event: FormEvent<HTMLFormElement>) => {
@@ -156,8 +192,39 @@ export function KnownEnoughHome() {
       </section>}
       {view === 'private' && <section className="ke-card" aria-labelledby="private-heading">
         <h3 id="private-heading">Your private space</h3>
-        <p>Private inputs and permission controls are not connected in this prototype. Do not enter personal or sensitive information here.</p>
-        <p>In the working product, your conditions stay private unless you separately approve a disclosure or approve an outcome that reveals them.</p>
+        <p>This is a local-only conversation prototype for fictional input. It has no verified identity, shared state, or live model. Do not enter personal or sensitive information.</p>
+        <p className="ke-private-identity">Demo profile: {frame?.participants[0]?.displayName ?? 'fictional owner'} · proposed, not verified</p>
+        <label htmlFor="owner-private-statement">Describe one private condition</label>
+        <textarea id="owner-private-statement" value={ownerText} maxLength={2_000} onChange={event => {
+          clearOwnerReview(); setOwnerText(event.target.value);
+        }} placeholder="Use the fictional sample to see hard limits, preferences, and a conditional trade-off." />
+        <div className="ke-private-actions">
+          <button type="button" className="secondary" onClick={() => {
+            void import('./owner-conversation-mock.ts').then(module => {
+              clearOwnerReview(); setOwnerText(module.LOCAL_OWNER_SAMPLE);
+            });
+          }}>Use fictional sample</button>
+          <button type="button" onClick={() => void interpretOwnerText()} disabled={!ownerText.trim() || ownerLoading}>
+            {ownerLoading ? 'Preparing…' : 'Review my private draft'}
+          </button>
+          <button type="button" className="secondary" onClick={() => { clearOwnerReview(); setOwnerText(''); }}>Clear</button>
+        </div>
+        {ownerError && <p role="alert" className="ke-error">{ownerError}</p>}
+        <p className="ke-help">The exact fictional sample is handled by a fixed local fixture; all other wording returns a clarification prompt. Nothing is sent over the network or added to the shared frame.</p>
+        {ownerDraft && <div className="ke-owner-draft" aria-label="Private draft review">
+          <p className="eyebrow">PRIVATE DRAFT · LOCAL SIMULATION</p>
+          {ownerDraft.hardLimits.length > 0 && <><h4>Hard limits</h4><ul>{ownerDraft.hardLimits.map(item => <li key={item}>{item}</li>)}</ul></>}
+          {ownerDraft.preferences.length > 0 && <><h4>Preferences</h4><ul>{ownerDraft.preferences.map(item => <li key={item}>{item}</li>)}</ul></>}
+          {ownerDraft.negotiableConditions.length > 0 && <><h4>Negotiable conditions</h4><ul>{ownerDraft.negotiableConditions.map(item => <li key={item}>{item}</li>)}</ul></>}
+          {ownerDraft.clarificationQuestions.length > 0 && <><h4>Clarify before saving</h4><ul>{ownerDraft.clarificationQuestions.map(item => <li key={item}>{item}</li>)}</ul></>}
+          {ownerDraft.status === 'DRAFT' && <div className="ke-private-actions">
+            <button type="button" onClick={() => setOwnerConfirmed(true)}>Confirm this draft in the local preview</button>
+            <button type="button" className="secondary" onClick={() => { clearOwnerReview(); document.getElementById('owner-private-statement')?.focus(); }}>Edit or clarify</button>
+            <button type="button" className="secondary" onClick={() => { clearOwnerReview(); setOwnerText(''); }}>Reject and clear</button>
+          </div>}
+          {ownerConfirmed && <p role="status">Marked confirmed in this local preview only. It is not authenticated, stored, or shared.</p>}
+        </div>}
+        <p>In the working product, conditions stay owner-private unless you separately approve a disclosure or an outcome that reveals them.</p>
         <p><a href="?view=owner&owner=approval">See the retained fictional private-receipts and permissions demo</a></p>
       </section>}
       {view === 'proposal' && <section className="ke-card" aria-labelledby="proposal-heading">

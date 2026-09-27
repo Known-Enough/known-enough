@@ -738,6 +738,11 @@ export class DealTableApplication {
 
 export { KnownEnoughApplication, KnownEnoughApplicationError } from './known-enough.ts';
 export { DecisionArchitect, DecisionArchitectError } from './decision-architect.ts';
+export { OwnerConversationArchitect, OwnerConversationError } from './owner-conversation.ts';
+export type {
+  OwnerConversationContext, OwnerConversationInterpretation, OwnerConversationMessage,
+  OwnerConversationModel,
+} from './owner-conversation.ts';
 export type {
   DecisionArchitectureDraft, DecisionArchitectErrorCode, DecisionArchitectModel,
   DecisionArchitectModelInput, DecisionArchitectParticipant, DecisionArchitectRequest,

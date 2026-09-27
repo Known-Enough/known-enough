@@ -5,7 +5,8 @@ import {
 } from '@deal-table/contracts';
 import {
   ApplicationError, DealTableApplication, DecisionArchitect, DecisionArchitectError,
-  KnownEnoughApplication, KnownEnoughApplicationError, type DecisionArchitectRequest, type TrustedPrincipal,
+  KnownEnoughApplication, KnownEnoughApplicationError, OwnerConversationArchitect, OwnerConversationError,
+  type DecisionArchitectRequest, type TrustedPrincipal,
 } from '@deal-table/application';
 import { createCognitoIdentityResolver, type CognitoIdentityOptions } from './cognito-identity.ts';
 import type { JwksCache } from 'aws-jwt-verify/jwk';
@@ -46,6 +47,8 @@ export interface KnownEnoughLocalApiOptions {
   readonly application: KnownEnoughApplication;
   /** Optional injected, non-live model port for the public frame-draft route. */
   readonly architect?: DecisionArchitect;
+  /** Optional injected owner-private draft interpreter; never stores raw conversation turns. */
+  readonly ownerConversation?: OwnerConversationArchitect;
   readonly identities?: ReadonlyMap<string, HttpIdentity>;
   readonly maxBodyBytes?: number;
   readonly debug?: boolean;
@@ -55,6 +58,8 @@ export interface KnownEnoughCognitoApiOptions extends CognitoIdentityOptions {
   readonly application: KnownEnoughApplication;
   /** Production callers must explicitly inject a reviewed provider implementation. */
   readonly architect?: DecisionArchitect;
+  /** Production callers must inject a reviewed, owner-scoped provider implementation. */
+  readonly ownerConversation?: OwnerConversationArchitect;
   readonly allowedOrigins: readonly string[];
   readonly maxBodyBytes?: number;
 }
@@ -392,7 +397,7 @@ function knownEnoughRequestError(error: unknown, id: string): DecisionErrorResul
 }
 
 function createKnownEnoughApiHandler(
-  options: Pick<KnownEnoughLocalApiOptions, 'application' | 'architect' | 'maxBodyBytes' | 'debug'>,
+  options: Pick<KnownEnoughLocalApiOptions, 'application' | 'architect' | 'ownerConversation' | 'maxBodyBytes' | 'debug'>,
   authenticate: (request: IncomingMessage) => Promise<HttpIdentity | null>,
   allowedOrigins: readonly string[],
   includeTestIdentity: boolean,
@@ -411,6 +416,7 @@ function createKnownEnoughApiHandler(
       if (!principal) { sendJson(response, 401, decisionErrorBody('UNAUTHENTICATED', id)); return; }
       const url = URL.parse(request.url ?? '/', 'http://local.invalid');
       const architectureDraftRoute = url?.pathname === '/decisions/architecture/draft';
+      const ownerConversationMatch = url?.pathname.match(/^\/decisions\/([^/]+)\/owner-conversation\/draft$/);
       const route = url ? decisionPath(url) : null;
       if (architectureDraftRoute) {
         if (request.method !== 'POST' || !options.architect) {
@@ -447,6 +453,40 @@ function createKnownEnoughApiHandler(
         } catch (error) {
           const result = knownEnoughRequestError(error, responseId);
           debugLog(debug, 'decision-frame-draft-error', { actor: actor(principal), error: result.error.code });
+          sendJson(response, result.error.httpStatus, result);
+        }
+        return;
+      }
+      if (ownerConversationMatch) {
+        if (request.method !== 'POST' || !options.ownerConversation) {
+          sendJson(response, 404, decisionErrorBody('NOT_FOUND', id));
+          return;
+        }
+        let responseId = id;
+        try {
+          const body = await readJson(request, maxBodyBytes);
+          const bodyId = bodyRequestId(body, id);
+          responseId = bodyId;
+          if (body === null || typeof body !== 'object' || Array.isArray(body)
+            || !Id.safeParse(bodyId).success
+            || Object.keys(body).sort().join('|') !== ['messages', 'requestId'].sort().join('|')) {
+            sendJson(response, 422, decisionErrorBody('INVALID_COMMAND', bodyId));
+            return;
+          }
+          const draft = await options.ownerConversation.draft(principal, {
+            decisionId: decodeURIComponent(ownerConversationMatch[1]!),
+            messages: (body as Record<string, unknown>).messages,
+          });
+          debugLog(debug, 'owner-conversation-draft', { actor: actor(principal), status: draft.unsupportedConditions.length ? 'NEEDS_CLARIFICATION' : 'DRAFT' });
+          sendJson(response, 200, { requestId: bodyId, draft });
+        } catch (error) {
+          let result: DecisionErrorResult;
+          if (error instanceof OwnerConversationError) {
+            const code = error.code === 'INVALID_INPUT' ? 'INVALID_COMMAND'
+              : error.code === 'FRAME_NOT_CONFIRMED' ? 'NEEDS_CLARIFICATION' : 'RETRYABLE_SERVER_ERROR';
+            result = decisionErrorBody(code, responseId);
+          } else result = knownEnoughRequestError(error, responseId);
+          debugLog(debug, 'owner-conversation-draft-error', { actor: actor(principal), error: result.error.code });
           sendJson(response, result.error.httpStatus, result);
         }
         return;

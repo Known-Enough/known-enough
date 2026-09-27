@@ -2,18 +2,19 @@ import { createServer, type Server } from 'node:http';
 import { afterEach, describe, expect, it } from 'vitest';
 import { InMemoryRoomRepository } from '@deal-table/adapters';
 import { buildChristmasFixture } from '../../../packages/test-support/src/known-enough-fixtures.ts';
-import { DecisionArchitect, KnownEnoughApplication } from '@deal-table/application';
+import { DecisionArchitect, KnownEnoughApplication, OwnerConversationArchitect, type OwnerConversationModel } from '@deal-table/application';
 import { createLocalKnownEnoughApiHandler } from './http-core.ts';
 
 const decisionId = 'christmas-decision';
 const identities = new Map([
   ['NON_PRODUCTION maya', { kind: 'participant' as const, subject: 'subject-maya' }],
+  ['NON_PRODUCTION leo', { kind: 'participant' as const, subject: 'subject-leo' }],
   ['NON_PRODUCTION display', { kind: 'display' as const, subject: 'display-subject', roomId: decisionId }],
   ['NON_PRODUCTION outsider', { kind: 'participant' as const, subject: 'outsider' }],
 ]);
 let servers: Server[] = [];
 
-async function setup(architect?: DecisionArchitect) {
+async function setup(architect?: DecisionArchitect, ownerModel?: OwnerConversationModel) {
   const fixture = buildChristmasFixture();
   let sequence = 0;
   const application = new KnownEnoughApplication({
@@ -28,7 +29,12 @@ async function setup(architect?: DecisionArchitect) {
       subject: `subject-${person.id}`, participantId: person.id, active: true,
     })),
   });
-  const server = createServer(createLocalKnownEnoughApiHandler({ application, identities, ...(architect ? { architect } : {}) }));
+  const ownerConversation = ownerModel ? new OwnerConversationArchitect({
+    application, model: ownerModel,
+    clock: { now: () => '2026-10-01T12:00:00.000Z' }, ids: { next: () => `api-owner-draft-${++sequence}` },
+  }) : undefined;
+  const server = createServer(createLocalKnownEnoughApiHandler({ application, identities,
+    ...(architect ? { architect } : {}), ...(ownerConversation ? { ownerConversation } : {}) }));
   servers.push(server);
   await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
   const address = server.address();
@@ -37,7 +43,7 @@ async function setup(architect?: DecisionArchitect) {
   const get = (path: string, label = 'NON_PRODUCTION maya') => fetch(base + path, {
     headers: { 'x-deal-table-test-identity': label },
   });
-  return { get, base, application };
+  return { get, base, application, fixture };
 }
 
 afterEach(async () => {
@@ -143,5 +149,59 @@ describe('Known Enough local HTTP adapter', () => {
 
     const unknown = await get(`/decisions/${decisionId}/public`, 'NON_PRODUCTION outsider');
     expect(unknown.status).toBe(404);
+  });
+
+  it('routes private owner conversation through authenticated owner context and stores no raw turns', async () => {
+    let modelContext: unknown;
+    const { get, base, application, fixture } = await setup(undefined, async context => {
+      modelContext = context;
+      return {
+        sourceSummary: 'Do not retain this free-text summary.', proposedConstraints: [],
+        unsupportedConditions: [{ id: 'clarify-limit', sourceSummary: 'do not retain owner text', clarificationQuestion: 'What is the maximum budget?' }],
+      };
+    });
+    for (const participantId of fixture.definition.requiredParticipantIds) {
+      const participant = { kind: 'participant' as const, subject: `subject-${participantId}` };
+      const snapshot = await application.getOwnerSnapshot(participant, decisionId);
+      const confirmed = await application.execute(participant, {
+        schemaVersion: 2, type: 'CONFIRM_FRAME', requestId: `frame-${participantId}`,
+        decisionId, idempotencyKey: `frame-confirm-${participantId}`,
+        expected: {
+          contextToken: snapshot.publicSnapshot.contextToken,
+          semanticVersion: snapshot.publicSnapshot.semanticVersion,
+          controlVersion: snapshot.controlVersion, ownerVersion: snapshot.ownerVersion,
+        },
+        payload: { frameVersion: fixture.definition.frameVersion },
+      });
+      expect(confirmed.ok).toBe(true);
+    }
+    const raw = 'My hard limit is $2,000; please do not reveal my personal reason.';
+    const response = await fetch(`${base}/decisions/${decisionId}/owner-conversation/draft`, {
+      method: 'POST', headers: {
+        'x-deal-table-test-identity': 'NON_PRODUCTION maya', 'content-type': 'application/json',
+      },
+      body: JSON.stringify({ requestId: 'owner-conversation-1', messages: [{ role: 'owner', text: raw }] }),
+    });
+    expect(response.status).toBe(200);
+    const body = await response.json() as { draft: { sourceSummary: string; unsupportedConditions: { sourceSummary: string }[] } };
+    expect(body.draft.sourceSummary).toBe('Review the structured conditions below before confirming them.');
+    expect(JSON.stringify(body)).not.toContain(raw);
+    expect(JSON.stringify(modelContext)).toContain(raw);
+    expect(modelContext).toMatchObject({ ownerParticipantId: 'maya' });
+
+    const maya = await get(`/decisions/${decisionId}/me`);
+    const mayaBody = await maya.json() as { draft: unknown };
+    expect(JSON.stringify(mayaBody.draft)).not.toContain(raw);
+    const publicSnapshot = await get(`/decisions/${decisionId}/public`);
+    expect(JSON.stringify(await publicSnapshot.json())).not.toContain(raw);
+    const leo = await get(`/decisions/${decisionId}/me`, 'NON_PRODUCTION leo');
+    expect((await leo.json()).draft).toBeNull();
+
+    const outsider = await fetch(`${base}/decisions/${decisionId}/owner-conversation/draft`, {
+      method: 'POST', headers: {
+        'x-deal-table-test-identity': 'NON_PRODUCTION outsider', 'content-type': 'application/json',
+      }, body: JSON.stringify({ requestId: 'owner-conversation-2', messages: [{ role: 'owner', text: raw }] }),
+    });
+    expect(outsider.status).toBe(404);
   });
 });

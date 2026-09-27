@@ -95,6 +95,13 @@ blockquote { margin: 12px 0; padding: 12px 15px; border-left: 3px solid #2b8065;
 .ke-tabs { display: flex; flex-wrap: wrap; gap: 9px; }
 .ke-tabs button[aria-pressed="true"] { box-shadow: 0 0 0 2px #e7a846 inset; }
 .ke-next { margin-bottom: 0; padding-top: 12px; border-top: 1px solid #d4dfd7; }
+.ke-card > label[for="owner-private-statement"] { display: block; margin: 18px 0 8px; font-weight: 750; }
+.ke-card #owner-private-statement { display: block; width: min(100%, 720px); min-height: 110px; border: 1px solid #94aaa0; border-radius: 10px; padding: 12px; line-height: 1.5; resize: vertical; }
+.ke-private-identity { color: #4d6158; font-size: .9rem; }
+.ke-private-actions { display: flex; flex-wrap: wrap; gap: 9px; margin: 12px 0; }
+.ke-owner-draft { margin-top: 18px; padding: 18px; border: 1px solid #d4dfd7; border-radius: 12px; background: #f8fbf8; }
+.ke-owner-draft h4 { margin: 14px 0 4px; }
+.ke-owner-draft ul { margin-top: 4px; }
 .ke-footer a { display: inline-block; margin-left: 8px; color: #075440; }
 footer { margin-top: 36px; border-top: 1px solid #d4dfd7; padding-top: 20px; }
 @media (max-width: 650px) { main { padding: 24px 16px; } .masthead, .stale-banner { align-items: flex-start; flex-direction: column; } .header-actions { justify-content: flex-start; } .table, .proposal-card, .consent-boundary, .owner-card, .ke-card { padding: 18px; } .slots, .owner-grid, .receipt-grid { grid-template-columns: 1fr; } .slots li { text-align: left; } small { display: inline; margin-left: 12px; } .duties li, .proposal-card li, .ledger li { align-items: flex-start; flex-direction: column; } .ledger span { text-align: left; } .button-row button { flex: 1 1 100%; } }
