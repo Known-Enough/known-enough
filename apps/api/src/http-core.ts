@@ -4,8 +4,8 @@ import {
   KnownEnough as KE, type CommandResult, type OwnerSnapshot, type PublicRoomSnapshot,
 } from '@deal-table/contracts';
 import {
-  ApplicationError, DealTableApplication, KnownEnoughApplication, KnownEnoughApplicationError,
-  type TrustedPrincipal,
+  ApplicationError, DealTableApplication, DecisionArchitect, DecisionArchitectError,
+  KnownEnoughApplication, KnownEnoughApplicationError, type DecisionArchitectRequest, type TrustedPrincipal,
 } from '@deal-table/application';
 import { createCognitoIdentityResolver, type CognitoIdentityOptions } from './cognito-identity.ts';
 import type { JwksCache } from 'aws-jwt-verify/jwk';
@@ -44,6 +44,8 @@ export interface CognitoApiOptions extends CognitoIdentityOptions {
 
 export interface KnownEnoughLocalApiOptions {
   readonly application: KnownEnoughApplication;
+  /** Optional injected, non-live model port for the public frame-draft route. */
+  readonly architect?: DecisionArchitect;
   readonly identities?: ReadonlyMap<string, HttpIdentity>;
   readonly maxBodyBytes?: number;
   readonly debug?: boolean;
@@ -51,6 +53,8 @@ export interface KnownEnoughLocalApiOptions {
 
 export interface KnownEnoughCognitoApiOptions extends CognitoIdentityOptions {
   readonly application: KnownEnoughApplication;
+  /** Production callers must explicitly inject a reviewed provider implementation. */
+  readonly architect?: DecisionArchitect;
   readonly allowedOrigins: readonly string[];
   readonly maxBodyBytes?: number;
 }
@@ -382,13 +386,13 @@ function decisionErrorBody(code: DecisionErrorCode, id: string): DecisionErrorRe
   return { ok: false, requestId: id, error: { code, httpStatus: KE.DECISION_ERROR_HTTP_STATUS[code] } };
 }
 function knownEnoughRequestError(error: unknown, id: string): DecisionErrorResult {
-  return error instanceof KnownEnoughApplicationError
+  return error instanceof KnownEnoughApplicationError || error instanceof DecisionArchitectError
     ? decisionErrorBody(error.code, id)
     : decisionErrorBody('RETRYABLE_SERVER_ERROR', id);
 }
 
 function createKnownEnoughApiHandler(
-  options: Pick<KnownEnoughLocalApiOptions, 'application' | 'maxBodyBytes' | 'debug'>,
+  options: Pick<KnownEnoughLocalApiOptions, 'application' | 'architect' | 'maxBodyBytes' | 'debug'>,
   authenticate: (request: IncomingMessage) => Promise<HttpIdentity | null>,
   allowedOrigins: readonly string[],
   includeTestIdentity: boolean,
@@ -406,7 +410,47 @@ function createKnownEnoughApiHandler(
       try { principal = await authenticate(request); } catch { /* fail closed */ }
       if (!principal) { sendJson(response, 401, decisionErrorBody('UNAUTHENTICATED', id)); return; }
       const url = URL.parse(request.url ?? '/', 'http://local.invalid');
+      const architectureDraftRoute = url?.pathname === '/decisions/architecture/draft';
       const route = url ? decisionPath(url) : null;
+      if (architectureDraftRoute) {
+        if (request.method !== 'POST' || !options.architect) {
+          sendJson(response, 404, decisionErrorBody('NOT_FOUND', id));
+          return;
+        }
+        if (principal.kind === 'display') {
+          request.resume();
+          sendJson(response, 403, decisionErrorBody('FORBIDDEN', id));
+          return;
+        }
+        let responseId = id;
+        try {
+          const body = await readJson(request, maxBodyBytes);
+          const draftRequestId = bodyRequestId(body, id);
+          responseId = draftRequestId;
+          const expectedKeys = ['allowedOptions', 'draftId', 'objective', 'participants', 'requestId', 'revision'].sort();
+          if (body === null || typeof body !== 'object' || Array.isArray(body)
+            || !Id.safeParse(draftRequestId).success
+            || Object.keys(body).sort().join('|') !== expectedKeys.join('|')
+            || typeof (body as Record<string, unknown>).draftId !== 'string'
+            || typeof (body as Record<string, unknown>).revision !== 'number'
+            || typeof (body as Record<string, unknown>).objective !== 'string'
+            || !Array.isArray((body as Record<string, unknown>).participants)
+            || !Array.isArray((body as Record<string, unknown>).allowedOptions)) {
+            sendJson(response, 422, decisionErrorBody('INVALID_COMMAND', draftRequestId));
+            return;
+          }
+          const draftInput = { ...(body as Record<string, unknown>) };
+          delete draftInput.requestId;
+          const result = await options.architect.draft(principal.subject, draftInput as unknown as DecisionArchitectRequest);
+          debugLog(debug, 'decision-frame-draft', { actor: actor(principal), status: result.status });
+          sendJson(response, 200, { requestId: draftRequestId, draft: result });
+        } catch (error) {
+          const result = knownEnoughRequestError(error, responseId);
+          debugLog(debug, 'decision-frame-draft-error', { actor: actor(principal), error: result.error.code });
+          sendJson(response, result.error.httpStatus, result);
+        }
+        return;
+      }
       if (!route || !['GET', 'POST'].includes(request.method ?? '')
         || (request.method === 'GET' && route.view === 'commands')
         || (request.method === 'POST' && route.view !== 'commands')) {

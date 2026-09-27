@@ -737,4 +737,9 @@ export class DealTableApplication {
 }
 
 export { KnownEnoughApplication, KnownEnoughApplicationError } from './known-enough.ts';
+export { DecisionArchitect, DecisionArchitectError } from './decision-architect.ts';
+export type {
+  DecisionArchitectureDraft, DecisionArchitectErrorCode, DecisionArchitectModel,
+  DecisionArchitectModelInput, DecisionArchitectParticipant, DecisionArchitectRequest,
+} from './decision-architect.ts';
 export type { KnownEnoughApplicationOptions } from './known-enough.ts';

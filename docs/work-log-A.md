@@ -1,3 +1,12 @@
+## 2026-09-27T19:34:53Z — KE06 / DONE
+
+- Completed KE06 from synchronized claim baseline `0c0c4c643f1d0a09f05077a8abb4b68fc5cc6f69` (`2e4bddf` claim checkpoint). Actual worker: Codex GPT-6, variant/effort unexposed; user-requested Luna/high is not claimed as the runtime. Scope stayed within application architect, API local injection/handler, Known Enough home and tests, plus KE06/KE07 tracking.
+- The injected application architect validates bounded model JSON against existing contracts, supplies trusted IDs/context and the user-provided participant roster, enforces caller-approved public options and supported public rules, emits only `PublicDecisionFrame`, maps information needs to safe allowlisted categories, and rejects stale results. API response is not persisted. Existing generic application test verifies a subsequently created frame still awaits explicit participant confirmation.
+- Added an optional authenticated architecture-draft HTTP endpoint and deterministic local mock (no real AI). The UI calls only `127.0.0.1:8787` under the fixed `NON_PRODUCTION organizer` identity, asks for fictional participants/options and public objective only, labels model output as simulated, supports clarification by editing/resubmitting, and clears stale prior output. No live identity, shared state, private input, paid model, AWS/cloud, deployment or external publication.
+- Changed `packages/application/src/{decision-architect.ts,decision-architect.test.ts,index.ts}`, `apps/api/src/{http-core.ts,local.ts,known-enough-http.test.ts}`, `apps/web/src/{known-enough-home.tsx,style.css}`, `tests/e2e/scaffold.spec.ts`, `docs/tasks/KE06.md`, `docs/tasks/KE07.md`, board, A handoff and this log.
+- Pinned Node 24.21.0/npm 11.19.0 `npm run check` passed: references 7/7, planning 15/15, lint/import boundaries 117, typecheck, 285 unit tests passed with 2 opt-in DynamoDB Local skips, production build/bundle scan, hosted-preview build/scan/browser 1/1, E2E 43/43. Actual local API smoke call returned HTTP 200 with a synthetic clarification-required trip frame; server was stopped. No cloud or paid operations.
+- KE06 is DONE; KE07 is READY/unclaimed. No new review gate or project human acceptance was introduced. KE00 and B04/B04.5 statuses remain unchanged.
+
 ## 2026-09-27T19:10:56Z — KE06 / IN_PROGRESS
 
 - User A claimed KE06 after KE05 DONE and a successful `git pull --ff-only origin main`; clean synchronized baseline `0c0c4c643f1d0a09f05077a8abb4b68fc5cc6f69`. Board had no other active task.

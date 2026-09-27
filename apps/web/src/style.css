@@ -77,7 +77,10 @@ blockquote { margin: 12px 0; padding: 12px 15px; border-left: 3px solid #2b8065;
 .ke-hero > p:not(.eyebrow) { max-width: 620px; color: #42594e; }
 .ke-create { display: grid; justify-items: start; gap: 10px; margin-top: 24px; }
 .ke-create label { font-weight: 750; }
-.ke-create textarea { width: min(100%, 640px); min-height: 104px; resize: vertical; border: 1px solid #94aaa0; border-radius: 10px; padding: 12px; background: #fff; line-height: 1.5; }
+.ke-create textarea, .ke-create input { width: min(100%, 640px); border: 1px solid #94aaa0; border-radius: 10px; padding: 12px; background: #fff; line-height: 1.5; }
+.ke-create textarea { min-height: 104px; resize: vertical; }
+.ke-help, .ke-error { max-width: 640px; margin: 0; font-size: .875rem; color: #4d6158; }
+.ke-error { color: #8a2f20; }
 .ke-privacy { max-width: 900px; margin: 28px 0; }
 .ke-card { min-width: 0; border: 1px solid #d4dfd7; border-radius: 16px; padding: 24px; background: #fff; }
 .ke-empty { max-width: 780px; background: #fff; }
@@ -85,6 +88,8 @@ blockquote { margin: 12px 0; padding: 12px 15px; border-left: 3px solid #2b8065;
 .ke-workspace { display: grid; gap: 14px; }
 .ke-participant-list { margin: 8px 0 20px; }
 .ke-participant-list li { border: 1px dashed #b5c7bc; border-radius: 10px; padding: 14px; color: #4d6158; background: #f8fbf8; }
+.ke-information-list { margin: 8px 0 20px; }
+.ke-information-list li { border-top: 1px solid #d4dfd7; padding: 12px 0; }
 .ke-decision-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
 .ke-decision-heading h2 { margin: 7px 0 0; overflow-wrap: anywhere; }
 .ke-tabs { display: flex; flex-wrap: wrap; gap: 9px; }

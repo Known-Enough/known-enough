@@ -1,6 +1,12 @@
-## Current claim — KE06 injected AI decision architect — 2026-09-27T19:10:56Z
+## Current handoff — KE06 DONE; KE07 next — 2026-09-27
 
-KE06 is IN_PROGRESS, claimed by User A from clean synchronized `main` baseline `0c0c4c643f1d0a09f05077a8abb4b68fc5cc6f69` after `git pull --ff-only origin main` succeeded. Actual worker is Codex GPT-6; exact runtime variant/effort are unexposed, so the user-directed Luna/high target is not claimed as verified runtime selection. Bounded files are the Known Enough application and model-port implementation/tests, the Known Enough HTTP adapter/local wiring/tests, Known Enough create/clarify UI and E2E, synthetic test-support fixtures if required, and this task/board/current handoff/A log. No contract schema, managed persistence adapter, package manifests/lock, cloud, paid model/API or publication changes are in scope. No competing project task is active. See the [ticket](tasks/KE06.md).
+KE06 is DONE. It adds a public-only, contract-validated injected architect, safe clarification/participant-information summaries, stale request rejection, an optional authenticated HTTP route, and a deterministic local fixture model. The default UI uses only the loopback development API and reports that the model is simulated; no decision is persisted or confirmed. The local route returned HTTP 200 in a smoke request. Pinned `npm run check` passed (references 7/7; planning 15/15; boundaries 117; typecheck; 285 unit pass / 2 opt-in skips; build/scanners; hosted browser 1/1; E2E 43/43). No paid AI or cloud action. Actual worker: Codex GPT-6, runtime variant/effort unexposed; Luna/high not claimed. See the [KE06 ticket](tasks/KE06.md) and [A log](work-log-A.md).
+
+KE07 is READY and unclaimed; it is next in the queue. No separate per-task reviewer gate is added before the named KE09 checkpoint. The other clone should pull the synchronized completion before claiming work. KE00 and B04/B04.5 statuses are unchanged.
+
+## Prior claim — KE06 injected AI decision architect — 2026-09-27T19:10:56Z
+
+KE06 was claimed by User A from clean synchronized `main` baseline `0c0c4c643f1d0a09f05077a8abb4b68fc5cc6f69` after `git pull --ff-only origin main` succeeded. Actual worker was Codex GPT-6; exact runtime variant/effort were unexposed, so the user-directed Luna/high target was not claimed as verified runtime selection. Bounded files were the Known Enough application/model port and tests, Known Enough HTTP adapter/local wiring/tests, Known Enough create/clarify UI and E2E, synthetic test-support fixtures if required, and the task/board/handoff/log. No schema, managed persistence adapter, manifest/lock, cloud, paid model/API or publication changes were planned.
 
 ## Prior handoff — KE05 completion — 2026-09-27
 

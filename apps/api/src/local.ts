@@ -1,6 +1,7 @@
-import { DealTableApplication, type RoomSeed } from '@deal-table/application';
+import { createServer } from 'node:http';
+import { DecisionArchitect, DealTableApplication, KnownEnoughApplication, type RoomSeed } from '@deal-table/application';
 import { InMemoryRoomRepository } from '@deal-table/adapters';
-import { createNonProductionIdentities, listenLocalApi } from './index.ts';
+import { createLocalApiHandler, createLocalKnownEnoughApiHandler, createNonProductionIdentities } from './index.ts';
 
 const roomId = 'room-synthetic';
 
@@ -40,11 +41,54 @@ function port(): number {
   return value;
 }
 
-const application = new DealTableApplication({
+const roomApplication = new DealTableApplication({
   repository: new InMemoryRoomRepository(),
   clock: { now: () => new Date().toISOString() },
   ids: { next: () => crypto.randomUUID() },
 });
-await application.createRoom(seed);
-await listenLocalApi({ application, identities: createNonProductionIdentities(roomId), port: port(), debug: true });
-console.log(`Deal Table local non-production API listening on http://127.0.0.1:${port()}`);
+await roomApplication.createRoom(seed);
+
+const decisionApplication = new KnownEnoughApplication({
+  repository: new InMemoryRoomRepository(),
+  clock: { now: () => new Date().toISOString() },
+  ids: { next: () => crypto.randomUUID() },
+});
+const architect = new DecisionArchitect({ draft: async input => {
+  const tripObjective = /christmas|trip|holiday|travel/i.test(input.objective);
+  const variables: unknown[] = input.allowedOptions.length ? [{
+    id: 'destination', type: 'ENUM', label: 'Destination', required: true,
+    visibility: 'PUBLIC', ownerParticipantId: null,
+    options: input.allowedOptions.map((label, index) => ({ id: `option-${index + 1}`, label })),
+  }] : [];
+  if (tripObjective) variables.push(
+    { id: 'trip-start', type: 'DATE', label: 'Trip start', required: true, visibility: 'PUBLIC', ownerParticipantId: null },
+  );
+  if (tripObjective) variables.push({
+    id: 'trip-duration', type: 'DURATION', unit: 'SECONDS', label: 'Trip duration', required: true,
+    visibility: 'PUBLIC', ownerParticipantId: null,
+  });
+  const rules = tripObjective ? [{
+    id: 'positive-duration', visibility: 'PUBLIC', operator: 'COMPARE', variableId: 'trip-duration',
+    comparison: 'GT', value: { type: 'DURATION', seconds: 0 },
+  }] : [];
+  return {
+    title: input.objective.slice(0, 160), description: 'A simulated frame draft built from the public objective and options you supplied.',
+    variables, rules,
+    clarificationQuestions: input.allowedOptions.length ? ['What date range should the group consider?'] : ['What options should the group compare?'],
+    participantInformationRequirements: input.participants.map(person => ({
+      participantId: person.id, kind: tripObjective ? 'DATES' : 'PREFERENCES',
+    })),
+  };
+} }, () => crypto.randomUUID());
+
+const identities = createNonProductionIdentities(roomId);
+const roomHandler = createLocalApiHandler({ application: roomApplication, identities, debug: true });
+const decisionHandler = createLocalKnownEnoughApiHandler({
+  application: decisionApplication, identities, architect, debug: true,
+});
+const server = createServer((request, response) => {
+  if (request.url?.startsWith('/decisions/architecture/draft')) decisionHandler(request, response);
+  else roomHandler(request, response);
+});
+server.listen(port(), '127.0.0.1');
+console.log(`Known Enough / TeamTable local non-production API listening on http://127.0.0.1:${port()}`);
