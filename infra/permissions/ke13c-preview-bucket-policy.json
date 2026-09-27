@@ -1,0 +1,23 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowOnlyThisCloudFrontDistributionToReadPreviewObjects",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "cloudfront.amazonaws.com"
+      },
+      "Action": "s3:GetObject",
+      "Resource": [
+        "arn:aws:s3:::known-enough-preview-20260927-7f94b6a1/hosted-preview/*",
+        "arn:aws:s3:::known-enough-preview-20260927-7f94b6a1/assets/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "AWS:SourceArn": "arn:aws:cloudfront::092954139775:distribution/REPLACE_WITH_PROVISIONED_DISTRIBUTION_ID",
+          "AWS:SourceAccount": "092954139775"
+        }
+      }
+    }
+  ]
+}

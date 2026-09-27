@@ -4,7 +4,7 @@ One project-wide priority queue, one active implementation or review at a time. 
 
 ## Current gate and claim
 
-**No active task. KE13C DONE: hosted preview-only build accepted.** User accepted the reported PASS on `a5d1833..a625498` on 2026-09-27. Reviewer is reported by the user as Sol; exact model/effort is unexposed. The review record notes two non-blocking test-coverage gaps. No AWS resources or deployment yet. See [KE13C](tasks/KE13C.md) and [review evidence](reviews/KE13C.md).
+**No task is active. [KE13C Stage 0 IAM policy follow-up](tasks/KE13C-policy-followup.md) is REVIEW**, ready for a focused independent follow-up of the two reported policy corrections. Assignment/deployment remain blocked pending that review and the separate cloud-change gates. The accepted hosted preview build remains DONE and unchanged: user accepted the reported PASS on `a5d1833..a625498` on 2026-09-27. Reviewer is reported by the user as Sol; exact model/effort is unexposed. The build review records two non-blocking test-coverage gaps. No AWS resources or deployment yet. See [KE13C](tasks/KE13C.md), [build review](reviews/KE13C.md), and [policy review](reviews/KE13C-policy.md).
 
 **KE00 DONE**: user accepted the documentation-only pivot audit on 2026-09-26. KE01 remains BLOCKED until a fresh claim and its own task work.
 
@@ -15,6 +15,7 @@ One project-wide priority queue, one active implementation or review at a time. 
 | Task | Direct model / effort | Prerequisite / gate | Status and outcome |
 | --- | --- | --- | --- |
 | [KE13C](tasks/KE13C.md) | Current Codex GPT-6; exact variant/effort unexposed | User-authorized Stage 0; KE00 and KE13A accepted | DONE — build PASS reviewed and accepted by user; no cloud deployment |
+| [KE13C policy follow-up](tasks/KE13C-policy-followup.md) | Current Codex GPT-6; exact variant/effort unexposed | Reported CHANGES_REQUESTED against `f1893e3`; accepted build stays separate | REVIEW — local corrections and author validation complete; no AWS writes |
 | [KE13A](tasks/KE13A.md) | Current Codex GPT-6; exact variant/effort unexposed | User-authorized early preparation | DONE — prep and read-only SSO STS check complete; user accepted |
 | [KE13B](tasks/KE13B.md) | `gpt-6-sol` / high, selected by the human at claim | Accepted KE00, B04/B04.5 and KE12; reviewed KE13A handoff; explicit bounded implementation/cloud authorization | BLOCKED — authenticated API, DynamoDB persistence and least-privilege IAM implementation; sequential independent review required |
 
