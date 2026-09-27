@@ -1,6 +1,17 @@
 # User B handoff — shared task pool
 
-## KE02 start claim — 2026-09-27T09:53:50Z
+## KE02 completion handoff — 2026-09-27T10:30:24Z
+
+KE02 is DONE on technical criteria, based on synchronized design checkpoint `e6d71d9b17cc584d5c19c28dc477387fdbd959cc`; the implementation and completion records in this checkout are ready to publish on `main`. Direct worker is Codex GPT-6; exact runtime variant/effort are not exposed, so `gpt-6-luna` / high remains the user-directed target rather than verified telemetry. See [KE02 ticket](tasks/KE02.md), [architecture/kernel design](known-enough-architecture.md#ke02-deterministic-validation-design--2026-09-27) and [`known-enough-kernel.ts`](../packages/domain/src/known-enough-kernel.ts).
+
+- Implemented deterministic single-candidate validation with strict envelope and aggregate constraint/permission bounds, exact arithmetic, private owner-reference checks, current-frame/readiness gates, proposal hash recomputation, and scoped permission expiry/revocation checks. Candidate validation claims are discarded and recomputed; public output contains only status.
+- Focused KE02 tests passed 15/15. Final pinned `npm run check` passed on Node 24.21.0/npm 11.19.0: 7 reference checksums; 15 planning checks; lint/boundaries (99 references); typecheck; 262 tests passed / 1 skipped; production and hosted-preview builds; hosted preview 1/1; end-to-end 41/41.
+- No separate reviewer session, project-level acceptance, contract/fixture/schema change, application/storage migration, cloud write or external action is claimed. Keep the integrated KE01/KE02 source, tests and architecture artifact for KE09.
+
+KE03 is READY, next eligible and remains unclaimed; this was a status-only prerequisite release, and no next task implementation starts as part of this handoff. The other clone must pull this verified `origin/main` commit before its next task.
+
+
+## KE02 claim record — 2026-09-27T09:53:50Z
 
 KE02 is the sole active project task. Clean `main` synchronized with `origin/main` at `b91cb2e79e9011c819f52b542edacccb3944c417`; `git pull --ff-only origin main` succeeded, ahead/behind 0/0. Board/ticket and A/B current handoffs show no competing active claim. Direct worker is Codex GPT-6; exact variant/effort telemetry is unavailable, so assigned `gpt-6-luna` / high is the target, not a verified runtime selection. Bounded files are `packages/domain/src/index.ts`, new `known-enough-kernel.ts` and its test, `docs/known-enough-architecture.md`, KE02 ticket, board, this handoff and B log. The kernel test will consume existing synthetic v2 fixtures; no fixture/schema edits are claimed. Design phase is complete and transferred to implementation without a reviewer; the normative bounds/permission semantics and KE03 storage reservations are in the architecture doc and KE02 ticket.
 

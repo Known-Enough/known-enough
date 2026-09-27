@@ -14,3 +14,15 @@ export type {
   SolveDecisionResult,
   StructuralPlan,
 } from './types.ts';
+export {
+  evaluateKnownEnoughCandidate,
+  MAX_ACTIVE_CONFIRMED_CONSTRAINTS,
+  MAX_KERNEL_INPUT_BYTES,
+  MAX_KERNEL_OPERATIONS,
+} from './known-enough-kernel.ts';
+export type {
+  KnownEnoughKernelDiagnostic,
+  KnownEnoughKernelDiagnosticCode,
+  KnownEnoughKernelResult,
+  KnownEnoughKernelStatus,
+} from './known-enough-kernel.ts';
