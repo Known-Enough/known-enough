@@ -1,6 +1,16 @@
 # User A handoff — shared task pool
 
-## Current handoff — KE13C build DONE; policy follow-up REVIEW pending — 2026-09-27
+## Current handoff — KE13A-P REVIEW; assignment blocked — 2026-09-27
+
+The user explicitly authorized creating the staging provisioning permission via CLI and requested sequential Sol/high IAM work. Actual worker identifies as Codex GPT-6; exact variant/effort is unexposed. Clean isolated main at `01592c4` successfully pulled before this single claim. [KE13A-P](tasks/KE13A-provisioner-policy.md) owns the bounded candidate policy/docs and read-only inspection phase; original KE13A/KE13C acceptance is retained. See [candidate design and exact phases](../infra/stage0-provisioner-permission.md).
+
+Fresh bootstrap-profile STS identifies root in account `092954139775`; all AWS calls were read-only. Identity Center is ACTIVE with only the existing ReadOnlyAccess permission set/assignment. S3 has no buckets; CloudFront has no distributions/OAC; account-level S3 Block Public Access has no configuration. No scoped permission set, assignment, application resource, budget or deployment write occurred. No tokens, login codes or credentials were read/saved.
+
+The candidate is deliberately expired. It scopes S3 creation/retention/tagging/read configuration to the named bucket, omits bucket-policy/default-protection/ACL/object authority, and proposes CloudFront create-only access plus exact-ARN tagging after creation. CloudFront create/OAC actions require `Resource: "*"`; IAM cannot enforce one resource, the chosen origin/configuration or the $25 ceiling. This limitation blocks assignment pending explicit resolution and independent critical review. The separate OAC bucket-policy installation remains a trusted exact-document CLI action outside the reusable role. The prior release-policy PASS does not cover the new candidate.
+
+Candidate preparation is paused at REVIEW; no active claim remains. Fresh evidence: Access Analyzer has no findings; 136 local JSON/scope/condition probes passed; Python verified seven reference hashes; 93 Markdown files / 782 local links and anchors passed; whitespace and protected-file checks passed. Pinned Node was unavailable in inspected documented locations, so no npm/full/application result is claimed. Policy hash and eight-file review manifest are in the ticket. No commit or push. Next is a separate independent critical review and explicit resolution of the creation/cost limitation before any IAM assignment.
+
+## Prior handoff — KE13C build DONE; policy follow-up REVIEW pending — 2026-09-27
 
 The user accepted KE00 and KE13A, then explicitly authorized proceeding with a Stage 0 preview deployment and said account credits are available. The accepted hosted build remains separate from the IAM policy gate. This bounded follow-up corrects two CHANGES_REQUESTED findings against policy commit `f1893e3`. Actual worker: Codex GPT-6, exact variant/effort unexposed. Synchronized baseline: clean `main` at `f1893e3` after successful `git pull --ff-only origin main`. No push.
 

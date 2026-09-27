@@ -7,6 +7,10 @@
 - Scope: this ticket, [KE13](KE13.md), [board](../task-board.md), [runbook](../../infra/staging-runbook.md), [infra README](../../infra/README.md), A handoff and A work log. Agent work was documentation/read-only checks; no application code, CDK/bootstrap, application resources, deployment or paid calls. The user separately configured IAM Identity Center and assigned a read-only permission set.
 - Authorization: the user explicitly prioritized KE13A ahead of generic product implementation. This is preparation only and does not accept KE00 or B04/B04.5, waive KE12, or satisfy KE13 operational acceptance.
 
+## Provisioning-permission addendum — 2026-09-27
+
+The user later explicitly authorized creating the scoped staging provisioning permission via CLI and requested sequential Sol/high IAM implementation. [KE13A-P](KE13A-provisioner-policy.md) owns the separate bounded candidate policy and read-only inspection phase; original KE13A acceptance remains DONE. The candidate needs independent critical review before any IAM writes and cannot enforce the one-distribution/$25 specification through CloudFront create permissions. See [the exact actions, limitations and later CLI phases](../../infra/stage0-provisioner-permission.md). No permission set, assignment, budget, application resource or deployment has been created by this addendum.
+
 ## Outcome
 
 Prepare a staged AWS plan: first a clearly labeled HTTPS public-fixture mock preview; later an authenticated API and DynamoDB stage after the existing code and gates support it. Record a concrete resource inventory, sequence, low-traffic estimate under the user's $25/month planning ceiling, cleanup plan, IAM needs, profile login steps and evidence limits.
