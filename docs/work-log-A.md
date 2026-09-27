@@ -1,3 +1,9 @@
+## 2026-09-27 — streamline routine task handoffs / documentation checkpoint
+
+- User asked for the next task and fewer human review steps to reach a testable MVP. Actual worker: Codex GPT-6; exact variant/effort unexposed. Bounded scope: simplify routine completion/handoff rules across KE01–KE17, set KE01 READY after accepted KE00, and preserve explicit foundation, architecture/privacy, cloud/IAM and final-release gates. Baseline: `4718dbc` on local `main`; clean working tree and `git pull --ff-only origin main` succeeded before edits. No implementation task claimed.
+- Updated `docs/agent-workflow.md`, `docs/task-board.md`, KE01–KE17 tickets, this handoff, and this log. Routine work reaches DONE on ticket criteria plus focused checks; KE08 is the one MVP product-testing/feedback point; KE09 is the one independent architecture/privacy and human acceptance checkpoint before real model calls. KE13B review, KE13 operational acceptance, B04/B04.5 acceptance, material-boundary follow-ups and KE17 remain. KE00 stays DONE, B04/B04.5 stay REVIEW, and no cloud status/authorization changed. Next task is KE01, unclaimed.
+- Documentation-only checks passed: imported reference hashes 7/7; all 264 local Markdown links/anchors in the 21 changed Markdown files resolved; KE00–KE17 board/ticket statuses agree; KE01 is READY and KE00 is DONE; B04/B04.5 remain REVIEW; `git diff --check` passed. No application suite, cloud actions or push.
+
 ## 2026-09-27 — token-efficient review plan / REVIEW
 
 - User clarified that only specific architectural reviews should be scheduled after the first MVP. Actual worker: Codex GPT-6; exact variant/effort unexposed. Clean-main baseline: `ecd9877`; `git pull --ff-only origin main` succeeded before edits. No task claim or application work.

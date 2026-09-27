@@ -1,3 +1,11 @@
+## Current handoff — KE01 ready; routine review flow streamlined — 2026-09-27
+
+The user asked to reduce routine human/reviewer checkpoints and move quickly toward a testable MVP. The next task is [KE01](tasks/KE01.md), now READY; no task is active. KE00 remains DONE and accepted. KE01 should start only after the worker's clean-main pull/claim procedure. Its ticket still names Astra/high for architecture; report the actual selected model and effort.
+
+Tasks KE01–KE07 now hand off directly when ticket criteria and focused checks pass. At KE08, present the end-to-end local MVP once for product testing/feedback, then pause for the single named KE09 architecture/privacy review before real model calls. No per-task human approval or reviewer task is added. B04/B04.5 remain REVIEW pending human acceptance and still gate KE02; KE13 operational acceptance, KE13B's backend/IAM review, material-boundary follow-ups and KE17 final acceptance remain. No status was changed for KE00, B04/B04.5 or cloud tasks. Stage 0 remains only the deployed synthetic mock, not shared app state.
+
+Actual worker: Codex GPT-6; exact variant/effort unexposed. Bounded claim: documentation-only task-flow update for KE01–KE17, preserving existing explicit gates and historical acceptance/status records. Baseline `4718dbc`, clean local `main`; `git pull --ff-only origin main` succeeded before edits. Changed workflow, board, KE01–KE17 tickets, this handoff and A log. Local checks are recorded in the current A log entry. No application changes, cloud actions, push or external messages.
+
 ## Current handoff — Stage 0 mock preview deployed — 2026-09-27
 
 The user authorized CLI staging setup, later waived the earlier `$25/month` estimate in favor of available credits, and asked to keep cloud work low-cost in tokens. The HTTPS preview is live: [https://d23eowhnwtqts3.cloudfront.net/](https://d23eowhnwtqts3.cloudfront.net/). It is a static synthetic mock with no authentication/API/DynamoDB/shared state. Open that URL as the next immediate step. The [runbook](../infra/staging-runbook.md) has the resource IDs, CLI profile roles, artifact hashes, checks, cleanup date and future release steps.

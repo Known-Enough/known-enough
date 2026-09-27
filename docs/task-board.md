@@ -4,13 +4,13 @@ One project-wide priority queue, one active implementation or review at a time. 
 
 ## Current gate and claim
 
-**Token-efficient execution:** follow [the review policy](agent-workflow.md#review-scope-and-token-efficiency). Routine work gets focused checks and no extra review sessions. Bundle KE01–KE03 review at KE09 after the first end-to-end MVP; keep KE13B's one focused backend/IAM checkpoint and other named safety/human-acceptance gates.
+**Token-efficient execution:** routine tasks advance on their focused checks; no human approval or reviewer session after every ticket. At KE08, show the first end-to-end MVP for one user testing/feedback pass, then run the single KE09 architecture/privacy review. Preserve B04/B04.5 acceptance, KE13B's focused backend/IAM review, KE13 live operations acceptance, KE17 final acceptance, and follow-ups only for material changes to reviewed boundaries.
 
 **No active task. Stage 0 is deployed and online:** [https://d23eowhnwtqts3.cloudfront.net/](https://d23eowhnwtqts3.cloudfront.net/). It is the fixed synthetic hosted mock only; there is no authentication or shared state. See the [runbook](../infra/staging-runbook.md) for resources, hashes, CLI identities, verification and cleanup.
 
 **[KE13C policy follow-up](tasks/KE13C-policy-followup.md) remains REVIEW with independent PASS** on exact `f1893e3..6238700`; P1/P2 are closed for that draft. Its reviewed release policy and exact OAC-only bucket policy were used for the Stage 0 deployment. This does not accept KE13 operational evidence. The hosted-preview build remains DONE and unchanged: user accepted the reported PASS on `a5d1833..a625498` on 2026-09-27. The review records two non-blocking permanent-check gaps. See [KE13C](tasks/KE13C.md), [build review](reviews/KE13C.md), and [policy review](reviews/KE13C-policy.md).
 
-**KE00 DONE**: user accepted the documentation-only pivot audit on 2026-09-26. KE01 remains BLOCKED until a fresh claim and its own task work.
+**KE00 DONE**: user accepted the documentation-only pivot audit on 2026-09-26. **KE01 is the next task and is READY to claim**; no task is currently active.
 
 **Retained foundation gate:** B04/B04.5 remain REVIEW pending human acceptance. Their source and latest independent R11/R12 PASS are already integrated through origin/main `65359eb`; there is no local-only B04 delta in this checkout. KE01 may define contracts after KE00 acceptance; KE02 and later backend implementation additionally require the retained B04/B04.5 human gate. Managed Cognito/DynamoDB/IAM and deployment acceptance remain future evidence, not prerequisites disguised as completed tests.
 
@@ -26,12 +26,12 @@ One project-wide priority queue, one active implementation or review at a time. 
 
 ## Sequential Known Enough queue
 
-Implementation successors require acceptance of the preceding scope. KE09 bundles the KE01–KE08 privacy/architecture review after the first user-facing MVP and before real model calls; keep its writer paused for that one focused review. KE13B adds one focused review of the new authenticated backend/IAM boundary before KE13 operational acceptance. Preparation/mock evidence never substitutes for required live evidence. No later task may be claimed by skipping an unresolved gate.
+Routine implementation successors become eligible when the prior task reaches DONE with its ticket checks recorded; do not wait for a separate human approval each time. KE08 is the user MVP test/feedback checkpoint, followed by the one KE09 privacy/architecture review before real model calls. KE13B retains one focused review of the authenticated backend/IAM boundary before KE13 operational acceptance. Preparation/mock evidence never substitutes for required live evidence. No later task may skip a named gate.
 
 | Task | Direct model / effort | Prerequisite / gate | Status and outcome |
 | --- | --- | --- | --- |
 | [KE00](tasks/KE00.md) | `gpt-6-astra` / high scheduled; actual GPT-6, variant unexposed | User-directed first task | DONE — user accepted the pivot audit on 2026-09-26 |
-| [KE01](tasks/KE01.md) | `gpt-6-astra` / high | KE00 human acceptance | BLOCKED — generic contracts; one review bundled at KE09 after the MVP |
+| [KE01](tasks/KE01.md) | `gpt-6-astra` / high | KE00 accepted | READY — next task: generic contracts; focused checks, no per-task review |
 | [KE02](tasks/KE02.md) | `gpt-6-astra` / high design, then `gpt-6-sol` / high implementation | KE01 + B04/B04.5 human acceptance | BLOCKED — small trust kernel |
 | [KE03](tasks/KE03.md) | `gpt-6-sol` / high | KE02 | BLOCKED — application and versioned storage adaptation |
 | [KE04](tasks/KE04.md) | `gpt-6-sol` / medium | KE03 | BLOCKED — TeamTable regression bridge |
@@ -49,7 +49,7 @@ Implementation successors require acceptance of the preceding scope. KE09 bundle
 | [KE16](tasks/KE16.md) | `gpt-6-luna` / medium | KE15 | BLOCKED — truthful demo/submission materials |
 | [KE17](tasks/KE17.md) | `gpt-6-astra` / high, independent session | KE16 and all current review/live evidence | BLOCKED — final release gate |
 
-Named independent reviews are sequential gates; do not create additional per-task or per-commit reviews. KE09 reviews the accumulated KE01–KE08 artifact once after the MVP; material later model/session/cloud changes get focused KE09 follow-up, and KE13B has its named backend/IAM review. Final human acceptance/publication authorization is separate from PASS. No model name is evidence of execution.
+Named independent reviews are sequential gates; do not create additional per-task or per-commit reviews. KE09 reviews the accumulated KE01–KE08 artifact once after the MVP; material later model/session/cloud changes get focused KE09 follow-up, and KE13B has its named backend/IAM review. KE08 product feedback, KE13 operational acceptance and KE17 final acceptance remain explicit human checkpoints. No model name is evidence of execution.
 
 ## Retained acceptance and historical evidence
 
