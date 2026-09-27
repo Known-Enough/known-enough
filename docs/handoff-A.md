@@ -1,8 +1,12 @@
-## Current handoff — KE05 DONE; KE06 next — 2026-09-27
+## Current claim — KE06 injected AI decision architect — 2026-09-27T19:10:56Z
+
+KE06 is IN_PROGRESS, claimed by User A from clean synchronized `main` baseline `0c0c4c643f1d0a09f05077a8abb4b68fc5cc6f69` after `git pull --ff-only origin main` succeeded. Actual worker is Codex GPT-6; exact runtime variant/effort are unexposed, so the user-directed Luna/high target is not claimed as verified runtime selection. Bounded files are the Known Enough application and model-port implementation/tests, the Known Enough HTTP adapter/local wiring/tests, Known Enough create/clarify UI and E2E, synthetic test-support fixtures if required, and this task/board/current handoff/A log. No contract schema, managed persistence adapter, package manifests/lock, cloud, paid model/API or publication changes are in scope. No competing project task is active. See the [ticket](tasks/KE06.md).
+
+## Prior handoff — KE05 completion — 2026-09-27
 
 KE05 is DONE on its technical criteria. The default page now offers a generic Known Enough local-only create, overview, private-space and proposal shell, typed against the accepted public decision-status contract. Drafts are not persisted; no sign-in, participants, private-input controls, model, server or shared state is wired. TeamTable's public and private regression demos remain reachable through explicit legacy routes, including the local-only synthetic owner permission/receipt flow. The final pinned full check passed (references 7/7; planning 15/15; boundaries 111; typecheck; 280 unit passed / 2 opt-in skipped; build and scanners; hosted test 1/1; E2E 43/43). Actual worker: Codex GPT-6; exact runtime variant/effort unexposed, so Luna/high is not claimed as verified runtime selection. See the [KE05 ticket](tasks/KE05.md) and [A log](work-log-A.md).
 
-KE06 is READY and unclaimed. It is the next task and the only implementation task that may be claimed. The ticket specifies `gpt-6-luna` / high; the actual runtime must be recorded and resolved before claiming that setting. The other clone should pull the synchronized completion before any next-task claim. KE00 and B04/B04.5 statuses are unchanged. No cloud actions, deployment, paid calls or external messages occurred.
+At this handoff KE06 was READY and unclaimed; its claim is recorded above. The other clone should pull the synchronized claim before starting more project work. KE00 and B04/B04.5 statuses are unchanged. No cloud actions, deployment, paid calls or external messages occurred.
 
 ## Prior claim — KE05 Known Enough product shell — 2026-09-27T18:49:31Z
 
