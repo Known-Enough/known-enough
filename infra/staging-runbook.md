@@ -117,11 +117,34 @@ No AWS deployment step below has been run. The user authorized Stage 0 only: one
 5. **Create the separate incremental-release permission set through the Identity Center CLI.** After the distribution exists, render the release policy to a temporary file using its exact ARN; keep the reviewed template unchanged:
 
    ```sh
-   STAGE0_DISTRIBUTION_ARN="$(aws cloudfront get-distribution --id "$STAGE0_DISTRIBUTION_ID" --query 'Distribution.ARN' --output text --profile "$STAGE0_PROVISIONER_PROFILE" --region us-east-1 --no-cli-pager)"
-   jq --arg arn "$STAGE0_DISTRIBUTION_ARN" '(.Statement[] | select(.Sid == "ReadAndInvalidateOnlyProvisionedPreviewDistribution") | .Resource) = $arn' infra/permissions/ke13c-stage0-deploy.json > /tmp/ke13c-stage0-release-policy.json
+   STAGE0_READONLY_PROFILE=known-enough-staging-ro
+   : "${STAGE0_DISTRIBUTION_ID:?set the ID returned when the distribution was created}"
+   : "${STAGE0_BUCKET_NAME:?set the exact provisioned S3 bucket name}"
+   : "${STAGE0_EXPECTED_OAC_ID:?set the OAC ID returned when the OAC was created}"
+
+   STAGE0_CALLER_ARN="$(aws sts get-caller-identity --query Arn --output text --profile "$STAGE0_READONLY_PROFILE" --region us-east-1 --no-cli-pager)" || exit 1
+   case "$STAGE0_CALLER_ARN" in
+     arn:aws:sts::092954139775:assumed-role/AWSReservedSSO_ReadOnlyAccess_*/*) ;;
+     *) printf '%s\n' 'Stop: this is not the expected account ReadOnlyAccess role.' >&2; exit 1 ;;
+   esac
+
+   STAGE0_DISTRIBUTION="$(aws cloudfront get-distribution --id "$STAGE0_DISTRIBUTION_ID" --query Distribution --output json --profile "$STAGE0_READONLY_PROFILE" --region us-east-1 --no-cli-pager)" || exit 1
+   STAGE0_ACTUAL_ID="$(jq -er '.Id | select(type == "string" and length > 0)' <<<"$STAGE0_DISTRIBUTION")" || exit 1
+   STAGE0_DISTRIBUTION_ARN="$(jq -er '.ARN | select(type == "string" and length > 0)' <<<"$STAGE0_DISTRIBUTION")" || exit 1
+   STAGE0_ORIGIN_COUNT="$(jq -er '.DistributionConfig.Origins.Quantity' <<<"$STAGE0_DISTRIBUTION")" || exit 1
+   STAGE0_ORIGIN_DOMAIN="$(jq -er '.DistributionConfig.Origins.Items[0].DomainName | select(type == "string" and length > 0)' <<<"$STAGE0_DISTRIBUTION")" || exit 1
+   STAGE0_ACTUAL_OAC_ID="$(jq -er '.DistributionConfig.Origins.Items[0].OriginAccessControlId | select(type == "string" and length > 0)' <<<"$STAGE0_DISTRIBUTION")" || exit 1
+
+   test "$STAGE0_ACTUAL_ID" = "$STAGE0_DISTRIBUTION_ID" || { printf '%s\n' 'Stop: distribution ID mismatch.' >&2; exit 1; }
+   test "$STAGE0_DISTRIBUTION_ARN" = "arn:aws:cloudfront::092954139775:distribution/$STAGE0_DISTRIBUTION_ID" || { printf '%s\n' 'Stop: distribution ARN is empty, malformed, or belongs to another account/ID.' >&2; exit 1; }
+   test "$STAGE0_ORIGIN_COUNT" = 1 || { printf '%s\n' 'Stop: expected exactly one distribution origin.' >&2; exit 1; }
+   test "$STAGE0_ORIGIN_DOMAIN" = "$STAGE0_BUCKET_NAME.s3.us-east-1.amazonaws.com" || { printf '%s\n' 'Stop: origin is not the expected regional S3 bucket.' >&2; exit 1; }
+   test "$STAGE0_ACTUAL_OAC_ID" = "$STAGE0_EXPECTED_OAC_ID" || { printf '%s\n' 'Stop: origin access control does not match the created OAC.' >&2; exit 1; }
+
+   jq --arg arn "$STAGE0_DISTRIBUTION_ARN" 'if ([.Statement[] | select(.Sid == "ReadAndInvalidateOnlyProvisionedPreviewDistribution")] | length) != 1 then error("expected exactly one release distribution statement") else (.Statement[] | select(.Sid == "ReadAndInvalidateOnlyProvisionedPreviewDistribution") | .Resource) = $arn end' infra/permissions/ke13c-stage0-deploy.json > /tmp/ke13c-stage0-release-policy.json
    ```
 
-   An authorized Identity Center administrator can use `aws sso-admin list-instances`, `create-permission-set` (name `KnownEnoughStage0Release`, duration `PT1H`), `put-inline-policy-to-permission-set`, `create-account-assignment` for user `martelaxe` and the staging account, and `describe-account-assignment-creation-status`. Resolve `InstanceArn`, `IdentityStoreId` and the user's ID with the corresponding `aws sso-admin list-instances` and `aws identitystore list-users` read commands; pass `--profile "$STAGE0_IDENTITY_CENTER_ADMIN_PROFILE" --region us-east-1 --no-cli-pager` on each command. Attach the rendered `/tmp/ke13c-stage0-release-policy.json` with `--inline-policy file:///tmp/ke13c-stage0-release-policy.json`. Keep `ReadOnlyAccess`; do not include `s3:PutBucketPolicy`, resource creation/configuration, tagging, deletion, or wildcard distribution resources. The draft received independent PASS; assignment still needs its human acceptance, verified exact ARN rendering and revalidation. Reject a failed/empty lookup and validate the account, distribution ID, origin and OAC before the illustrative rendering command above; the command alone is not a validation guard.
+   An authorized Identity Center administrator can use `aws sso-admin list-instances`, `create-permission-set` (name `KnownEnoughStage0Release`, duration `PT1H`), `put-inline-policy-to-permission-set`, `create-account-assignment` for user `martelaxe` and the staging account, and `describe-account-assignment-creation-status`. Resolve `InstanceArn`, `IdentityStoreId` and the user's ID with the corresponding `aws sso-admin list-instances` and `aws identitystore list-users` read commands; pass `--profile "$STAGE0_IDENTITY_CENTER_ADMIN_PROFILE" --region us-east-1 --no-cli-pager` on each command. Attach the rendered `/tmp/ke13c-stage0-release-policy.json` with `--inline-policy file:///tmp/ke13c-stage0-release-policy.json`. Keep `ReadOnlyAccess`; do not include `s3:PutBucketPolicy`, resource creation/configuration, tagging, deletion, or wildcard distribution resources. The draft received independent PASS; assignment still needs its human acceptance and reviewed exact-ARN rendering. The distribution inspection above uses the verified read-only profile because the provisioner has no `cloudfront:GetDistribution` permission.
 6. **Authenticate the release profile.** Configure `known-enough-staging-deploy` with `aws configure sso --profile known-enough-staging-deploy`, selecting the same access portal, SSO region `us-east-1`, staging account, `KnownEnoughStage0Release`, and deployment region `us-east-1`. Then run `aws sso login --profile known-enough-staging-deploy --use-device-code` and verify with `aws sts get-caller-identity --profile known-enough-staging-deploy --no-cli-pager`. Stop unless STS shows the intended account and generated `AWSReservedSSO_KnownEnoughStage0Release_…` role.
 7. **Release the accepted build through AWS CLI only.** With `apps/web/dist-hosted-preview/` built from the accepted commit, run these from the repository root:
 

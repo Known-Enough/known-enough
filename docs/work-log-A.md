@@ -569,3 +569,15 @@ Initiating user / A log; sequential reviewer, actual Codex GPT-6, exact variant/
 CHANGES_REQUESTED on `01592c4..4f76570`; [review record](reviews/KE13A-provisioner-policy.md) contains R1/P2 and residual gates. The release ARN lookup uses a role lacking GetDistribution; correct its profile. Fresh explicit bootstrap-profile/us-east-1 STS and Access Analyzer calls exited 0, findings empty. AWS v1.4 action references checked; static boundary assertions and 11 synthetic tag cases passed (not IAM simulation). Exact source/design hashes match author evidence. Only review/tracking documents changed; no AWS mutations, application suite, assignment, provisioning or push. Actual Codex GPT-6 variant/effort unexposed. Claim finished/released for owner correction and independent follow-up; CloudFront cost/configuration decision remains separate.
 
 Final tracking checks: seven reference hashes matched; 139 local link targets in five review/tracking files resolved; git diff --check passed; git diff --exit-code against 4f76570 confirmed infrastructure/application/tests/scripts/planning/manifests/reference sources unchanged. Docs-only local commit prepared without push.
+
+## 2026-09-27T01:33:24Z — KE13A-P R1 correction / IN_PROGRESS
+
+- Root / current Codex GPT-6, exact variant/effort unexposed; baseline clean local `main` at `b92024b`. One active focused correction, bounded to the runbook and KE13A-P/board/A tracking files.
+- Correct reviewer R1/P2 by moving the `GetDistribution` lookup to the verified `known-enough-staging-ro` read-only profile; preserve fail-closed account, distribution ID, origin and OAC checks. Do not broaden the provisioner policy.
+- No AWS writes, permission-set creation/assignment, application resources, deployment, spending, paid calls or push. Return to REVIEW for focused independent follow-up after checks.
+
+## 2026-09-27T01:36:18Z — KE13A-P R1 correction / REVIEW
+
+- Corrected the release-distribution inspection to use `known-enough-staging-ro`, added a runtime STS account/ReadOnlyAccess-role assertion, and added fail-closed distribution ID/ARN, single S3 origin and OAC ID checks before policy rendering. No provisioner permission was broadened.
+- Checks: shell snippet passes `bash -n`; all 7 immutable reference hashes match; 85 docs/infra Markdown files have 765 local link paths checked with none missing; all three IAM policy files are unchanged; `git diff --check` passes. No app tests; executable application files were untouched.
+- Claim finished. Ticket returned to REVIEW for focused independent follow-up. No AWS writes, permission-set creation/assignment, resource creation, deployment, spending, paid calls or push. Separate CloudFront create/count/cost limitation remains unresolved.

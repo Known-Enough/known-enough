@@ -1,5 +1,9 @@
 # User A handoff — shared task pool
 
+## Current handoff — KE13A-P R1 correction complete; follow-up review pending — 2026-09-27T01:36:18Z
+
+Independent [review R1/P2](reviews/KE13A-provisioner-policy.md) found the runbook used the provisioner profile to inspect a CloudFront distribution, though that role has no `cloudfront:GetDistribution`. The correction now uses verified `known-enough-staging-ro` and retains fail-closed checks for account/read-only role, ARN/ID, single expected S3 origin and observed OAC. Root / current Codex GPT-6; exact variant/effort unexposed; baseline `b92024b`. Bash syntax, seven reference hashes, local Markdown link paths and unchanged policy documents passed. No AWS writes. Candidate remains expired/unassigned; focused follow-up review and the separate CloudFront creation/cost decision remain pending.
+
 ## Current handoff — KE13A-P independent CHANGES_REQUESTED — 2026-09-27T01:32:13Z
 
 Independent review of `01592c4..4f76570` found [R1/P2](reviews/KE13A-provisioner-policy.md): the runbook reads the release distribution ARN through a provisioner profile with no `cloudfront:GetDistribution`. Use the verified read-only profile and preserve ARN/origin/OAC validation; do not broaden the role. Fresh Access Analyzer returned no findings; the 16-action candidate and its expired deadline remain unchanged. Separate clean main clone `/tmp/known-enough-ke13ap-independent-review` successfully pulled GitHub origin/main before recording. Actual Codex GPT-6, exact variant/effort unexposed. No AWS writes or push. Review claim finished/released; implementation correction and focused follow-up precede IAM creation. The documented CloudFront count/configuration/spend decision remains unresolved, and all assignment/deployment gates remain.
