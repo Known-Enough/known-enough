@@ -15,6 +15,8 @@ Record:
 ## Known Enough checkpoints
 
 - [KE13C hosted-preview review](KE13C.md): PASS reported for `a5d1833..a625498`; user accepted KE13C on 2026-09-27. Reviewer reported as Sol/Codex GPT-6 by the user; exact variant/effort unexposed. Two permanent-check coverage gaps remain non-blocking for the exact reviewed artifact.
-- [KE13C Stage 0 IAM policy review](KE13C-policy.md): user-supplied CHANGES_REQUESTED findings against `f1893e3`; reviewer identity/model/effort unexposed. Corrected draft requires a focused independent follow-up before assignment. This policy gate is separate from the accepted hosted-preview build.
+- [KE13C Stage 0 IAM policy review](KE13C-policy.md): user-supplied CHANGES_REQUESTED findings against `f1893e3`; reviewer identity/model/effort unexposed. See the completed follow-up below; the original verdict is preserved as history. This policy gate is separate from the accepted hosted-preview build.
+
+- [KE13C policy independent follow-up](KE13C-policy-followup.md): PASS on exact `f1893e3..6238700`; P1/P2 closed, no newly overbroad release grant found. Independent Codex GPT-6 session, exact variant/effort unexposed. Human acceptance, rendered ARN revalidation and live/cloud gates remain separate.
 
 Midpoint review does not approve later unreviewed changes. Mock tests never establish backend authorization or real cloud races. Logs alone are not review evidence. Do not include participant secrets, private payloads or credentials.

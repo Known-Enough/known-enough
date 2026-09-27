@@ -1,6 +1,6 @@
 # KE13C Stage 0 IAM policy follow-up
 
-- Status: REVIEW — the two reported findings have local corrections and author validation; policy assignment and AWS deployment remain blocked pending a fresh focused review and the already separate cloud-change gates.
+- Status: REVIEW — independent focused review PASS on `f1893e3..6238700`; P1/P2 closed for the exact draft. Human acceptance, rendered exact-ARN revalidation and the separate cloud-change gates remain outstanding. See [the follow-up verdict](../reviews/KE13C-policy-followup.md).
 - Claim: Codex; actual model reported by the runtime as GPT-6, exact variant/effort unexposed.
 - Baseline: clean, synchronized `main` at `f1893e3` after `git pull --ff-only origin main` on 2026-09-27.
 - Bounded files: `infra/permissions/ke13c-stage0-deploy.json`, new `infra/permissions/ke13c-preview-bucket-policy.json`, this ticket, `docs/task-board.md`, `docs/reviews/README.md`, new `docs/reviews/KE13C-policy.md`, `docs/tasks/KE13C.md`, `docs/handoff-A.md`, `infra/staging-runbook.md`, and `docs/work-log-A.md`.
@@ -38,3 +38,9 @@ The artifact is ready for the requested focused independent follow-up of these c
 The user supplied a CHANGES_REQUESTED report against `f1893e3`: unrestricted `s3:PutBucketPolicy` could expand bucket permissions, and request-tag-only `cloudfront:TagResource` allowed an unrelated distribution to be retagged before invalidation. The report reproduced `invalidation denied → retag allowed → invalidation allowed` for a synthetic unrelated distribution. It did not evaluate live account guardrails or run AWS simulation. The reported reviewer identity/model/effort is not recorded here because it was not stated with the verdict.
 
 After the correction, pause for an independent focused review of the exact local policy/runbook diff. Do not mark the policy accepted, assign it, or treat KE13C's accepted static build as cloud acceptance. KE13 live operational acceptance remains separate; KE00 and B04/B04.5 statuses remain unchanged.
+
+## Independent sequential review claim — 2026-09-27
+
+Review claim completed with PASS in separate clone `/tmp/known-enough-ke13c-policy-review`; implementation paused. Reviewer: independent Codex GPT-6 session, exact variant/effort unexposed (`gpt-6-astra` / high requested, not claimed as runtime telemetry). Clean `main` and `git pull --ff-only origin main` succeeded before tracking edits; HEAD is `62387004883606d36f221af1c8ab3cf5934eeed5`, four commits ahead of GitHub `origin/main` at `65359ebd19c8ae81007a4b502cce955d5d8ff292`. Review range is `f1893e3cc25c513df7223c77a8853ab59fc86c79..62387004883606d36f221af1c8ab3cf5934eeed5`. This review occupied the only active project task slot, transferred through the coordinating session; its claim is now finished. Bounded writes: new review record, review index, this ticket, task board and A log. No implementation, cloud writes, deployment, commit or push.
+
+The independent [follow-up record](../reviews/KE13C-policy-followup.md) closes P1/P2 with no newly overbroad release grant found. No live guardrail/simulation or cloud action was performed. Author evidence above remains historical; the review records its fresh checks separately. No subsequent provisioning implementation was started.
