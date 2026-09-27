@@ -2,7 +2,7 @@
 
 # Model selection and historical execution evidence
 
-Current policy, September 23, 2026: humans select the direct model/effort printed in each [task ticket](task-board.md). See [workflow](agent-workflow.md). Use `gpt-6-luna` for narrow UI/docs work, `gpt-6-sol` for routine implementation and difficult backend work, and `gpt-6-astra` for architecture and explicit critical checkpoints. B01/B02 source and prior execution evidence are integrated; current results are in [main integration](main-integration.md). Model selection does not change task state or establish verified results.
+Current policy, September 27, 2026: at the user's direction, use `gpt-6-luna` / high for all KE01–KE08 direct work to reach the first MVP. Keep task order, requirements and gates intact. Reserve Astra for the post-MVP KE09 architecture/privacy checkpoint, KE17 final release gate, or post-MVP changes explicitly judged to need it. Other post-MVP task model assignments remain unchanged unless the user revises them. See the [workflow](agent-workflow.md) and [task board](task-board.md). Historical B01/B02 execution evidence remains unchanged; current integration state is in [main integration](main-integration.md). Model selection does not change task state or establish verified results.
 
 Current claims/progress belong in the tickets and [A](work-log-A.md)/[B](work-log-B.md) logs. Both users follow the same highest-priority eligible task; only one task is active across the project, and A/B prefixes do not assign ownership. Preserve existing claims and use an explicit transfer before a handoff. Main in separate clones replaces mandatory task branches. This scheduling update does not move branches or share files automatically.
 

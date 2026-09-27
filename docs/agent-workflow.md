@@ -4,6 +4,8 @@ Effective September 22, 2026, with the user's September 23 sequential-priority u
 
 ## Start and model selection
 
+**User-directed MVP model policy (2026-09-27):** use `gpt-6-luna` / high for all direct work in KE01–KE08, including contract, kernel and backend-adjacent tasks. This is a temporary MVP execution choice, not a claim that these tasks are narrow. Reserve Astra for the named KE09 architecture/privacy checkpoint after KE08, KE17, or post-MVP architectural changes explicitly judged to need it. Keep all task order, scope, acceptance criteria and named gates unchanged. Post-MVP assignments outside KE01–KE08 remain as written unless the user changes them.
+
 1. Open your own clone. Read AGENTS.md, this policy once per session, your current handoff/log, the shared board and selected ticket. Read only relevant plan/contract sections and changed requirements; do not repeatedly load the whole history.
 2. **Before any actual development of a task**, verify the clone is on `main` and has no local changes or active merge/rebase. On that clean `main`, execute `git pull --ff-only origin main` and confirm it succeeds before editing code, tests, configuration, or task artifacts. If local work or an active merge/rebase prevents a clean pull, preserve it and complete the required handoff/integration/synchronization first; do not begin task development until the pull succeeds. Then recheck the commit and project-wide active claim.
 3. Take the highest-priority actionable task on the board, with the same order for either user and regardless of A/B prefix. Select the ticket's named model/effort as the direct worker. The human selects the session model; Markdown does not change it. If unavailable or different, report the actual model and resolve selection before claiming the assigned model was used.
@@ -12,7 +14,7 @@ Effective September 22, 2026, with the user's September 23 sequential-priority u
 
 | Work | Starting choice |
 | --- | --- |
-| Narrow components, styling, mechanical edits and docs | `gpt-6-luna`, low/medium |
+| Narrow components, styling, mechanical edits and docs (default outside KE01–KE08) | `gpt-6-luna`, low/medium |
 | Routine implementation, forms, adapters and tests | `gpt-6-sol`, medium |
 | Difficult solver/backend work and debugging | `gpt-6-sol`, high |
 | Architecture, critical consent/auth decisions and checkpoint reviews | `gpt-6-astra`, high |

@@ -6,6 +6,8 @@ One project-wide priority queue, one active implementation or review at a time. 
 
 **Token-efficient execution:** routine tasks advance on their focused checks; no human approval or reviewer session after every ticket. At KE08, show the first end-to-end MVP for one user testing/feedback pass, then run the single KE09 architecture/privacy review. Preserve B04/B04.5 acceptance, KE13B's focused backend/IAM review, KE13 live operations acceptance, KE17 final acceptance, and follow-ups only for material changes to reviewed boundaries.
 
+**MVP model choice (2026-09-27):** use `gpt-6-luna` / high for all direct work on KE01–KE08. This changes only the model/effort assignment; task order, scope and acceptance gates stay the same. Astra remains assigned to the KE09 post-MVP architecture/privacy checkpoint, KE17 and any post-MVP architectural change the user explicitly decides needs it. Other post-MVP assignments are unchanged.
+
 **No active task. Stage 0 is deployed and online:** [https://d23eowhnwtqts3.cloudfront.net/](https://d23eowhnwtqts3.cloudfront.net/). It is the fixed synthetic hosted mock only; there is no authentication or shared state. See the [runbook](../infra/staging-runbook.md) for resources, hashes, CLI identities, verification and cleanup. Completed tasks, reviewed checkpoints and documentation-only updates are pushed to `origin/main`; the other clone must pull before starting the next task.
 
 **[KE13C policy follow-up](tasks/KE13C-policy-followup.md) remains REVIEW with independent PASS** on exact `f1893e3..6238700`; P1/P2 are closed for that draft. Its reviewed release policy and exact OAC-only bucket policy were used for the Stage 0 deployment. This does not accept KE13 operational evidence. The hosted-preview build remains DONE and unchanged: user accepted the reported PASS on `a5d1833..a625498` on 2026-09-27. The review records two non-blocking permanent-check gaps. See [KE13C](tasks/KE13C.md), [build review](reviews/KE13C.md), and [policy review](reviews/KE13C-policy.md).
@@ -31,14 +33,14 @@ Routine implementation successors become eligible when the prior task reaches DO
 | Task | Direct model / effort | Prerequisite / gate | Status and outcome |
 | --- | --- | --- | --- |
 | [KE00](tasks/KE00.md) | `gpt-6-astra` / high scheduled; actual GPT-6, variant unexposed | User-directed first task | DONE — user accepted the pivot audit on 2026-09-26 |
-| [KE01](tasks/KE01.md) | `gpt-6-astra` / high | KE00 accepted; user-designated to B | READY — B's next task: generic contracts; focused checks, no per-task review |
-| [KE02](tasks/KE02.md) | `gpt-6-astra` / high design, then `gpt-6-sol` / high implementation | KE01 + B04/B04.5 human acceptance | BLOCKED — small trust kernel |
-| [KE03](tasks/KE03.md) | `gpt-6-sol` / high | KE02 | BLOCKED — application and versioned storage adaptation |
-| [KE04](tasks/KE04.md) | `gpt-6-sol` / medium | KE03 | BLOCKED — TeamTable regression bridge |
-| [KE05](tasks/KE05.md) | `gpt-6-luna` / medium | KE04 | BLOCKED — first Luna task; product shell waits for KE04 |
-| [KE06](tasks/KE06.md) | `gpt-6-sol` / high | KE05 | BLOCKED — injected AI decision architect |
-| [KE07](tasks/KE07.md) | `gpt-6-sol` / high | KE06 | BLOCKED — private participant conversation/confirmation |
-| [KE08](tasks/KE08.md) | `gpt-6-sol` / high | KE07 | BLOCKED — candidate generation/private negotiation |
+| [KE01](tasks/KE01.md) | `gpt-6-luna` / high | KE00 accepted; user-designated to B | READY — B's next task: generic contracts; focused checks, no per-task review |
+| [KE02](tasks/KE02.md) | `gpt-6-luna` / high for design and implementation | KE01 + B04/B04.5 human acceptance | BLOCKED — small trust kernel |
+| [KE03](tasks/KE03.md) | `gpt-6-luna` / high | KE02 | BLOCKED — application and versioned storage adaptation |
+| [KE04](tasks/KE04.md) | `gpt-6-luna` / high | KE03 | BLOCKED — TeamTable regression bridge |
+| [KE05](tasks/KE05.md) | `gpt-6-luna` / high | KE04 | BLOCKED — product shell waits for KE04 |
+| [KE06](tasks/KE06.md) | `gpt-6-luna` / high | KE05 | BLOCKED — injected AI decision architect |
+| [KE07](tasks/KE07.md) | `gpt-6-luna` / high | KE06 | BLOCKED — private participant conversation/confirmation |
+| [KE08](tasks/KE08.md) | `gpt-6-luna` / high | KE07 | BLOCKED — candidate generation/private negotiation |
 | [KE09](tasks/KE09.md) | `gpt-6-astra` / high, independent session | KE08 paused for review | BLOCKED — privacy/consent gate; later sequential follow-ups |
 | [KE10](tasks/KE10.md) | `gpt-6-sol` / high | Accepted KE09 + authorized real model calls for live acceptance | BLOCKED — Bedrock and async jobs |
 | [KE11](tasks/KE11.md) | `gpt-6-sol` / high | KE10 + current critical follow-up | BLOCKED — authenticated multi-participant sessions |
