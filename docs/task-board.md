@@ -4,9 +4,18 @@ One project-wide priority queue, one active implementation or review at a time. 
 
 ## Current gate and claim
 
-**KE00 REVIEW: documentation-only pivot audit complete**, performed by the initiating user / A log, actual Codex GPT-6 (exact variant/effort unexposed), clean synchronized main `65359ebd19c8ae81007a4b502cce955d5d8ff292`. The claim is finished; no implementation/review task remains active. The user directed KE00 only; its local documentation artifact is ready for human acceptance. KE01 is BLOCKED until that acceptance and a fresh claim.
+**KE13A REVIEW: AWS staging preparation complete**, explicitly prioritized by the user ahead of generic product implementation. Claim finished by initiating user / A log; actual Codex GPT-6, variant/effort unexposed. AWS CLI v2 is installed; `known-enough-staging-ro` is authenticated and STS verified the `ReadOnlyAccess` role in `us-east-1`. The user configured the Identity Center user and read-only assignment. The earlier root CLI session was logged out. No Known Enough application resources or deployment are underway. Baseline: clean `main` after a successful `git pull --ff-only origin main`, local KE00 checkpoint `a5d1833` (one commit ahead of `origin/main` `65359eb`). See [KE13A](tasks/KE13A.md) and the [staging runbook](../infra/staging-runbook.md).
+
+**KE00 remains REVIEW**: its documentation-only pivot audit is ready for human acceptance. This user-authorized preparation does not accept KE00, and KE01 remains BLOCKED until KE00 acceptance and a fresh claim. No generic product implementation is active.
 
 **Retained foundation gate:** B04/B04.5 remain REVIEW pending human acceptance. Their source and latest independent R11/R12 PASS are already integrated through origin/main `65359eb`; there is no local-only B04 delta in this checkout. KE01 may define contracts after KE00 acceptance; KE02 and later backend implementation additionally require the retained B04/B04.5 human gate. Managed Cognito/DynamoDB/IAM and deployment acceptance remain future evidence, not prerequisites disguised as completed tests.
+
+**AWS staging sequence:** [KE13A](tasks/KE13A.md) prepares the runbook; [KE13B](tasks/KE13B.md) is the future sequential `gpt-6-sol` / high implementation handoff, still gated by the accepted product/backend prerequisites and explicit scope authorization; [KE13](tasks/KE13.md) remains the separate live deployment and operational acceptance gate. KE13A is REVIEW and its claim is released; no task is active. KE00 and B04/B04.5 statuses are unchanged.
+
+| Task | Direct model / effort | Prerequisite / gate | Status and outcome |
+| --- | --- | --- | --- |
+| [KE13A](tasks/KE13A.md) | Current Codex GPT-6; exact variant/effort unexposed | User-authorized early preparation | REVIEW — prep and read-only SSO STS check complete; human review remains |
+| [KE13B](tasks/KE13B.md) | `gpt-6-sol` / high, selected by the human at claim | Accepted KE00, B04/B04.5 and KE12; reviewed KE13A handoff; explicit bounded implementation/cloud authorization | BLOCKED — authenticated API, DynamoDB persistence and least-privilege IAM implementation; sequential independent review required |
 
 ## Sequential Known Enough queue
 
@@ -27,7 +36,7 @@ Implementation successors require acceptance of the preceding scope. The indepen
 | [KE10](tasks/KE10.md) | `gpt-6-sol` / high | Accepted KE09 + authorized real model calls for live acceptance | BLOCKED — Bedrock and async jobs |
 | [KE11](tasks/KE11.md) | `gpt-6-sol` / high | KE10 + current critical follow-up | BLOCKED — authenticated multi-participant sessions |
 | [KE12](tasks/KE12.md) | `gpt-6-sol` / high | KE11 | BLOCKED — stateful simulated Alexa+ shared assistant |
-| [KE13](tasks/KE13.md) | `gpt-6-sol` / high | KE12 + explicit cloud/deployment authorization | BLOCKED — deployed AWS/operations evidence |
+| [KE13](tasks/KE13.md) | `gpt-6-sol` / high | KE13B accepted + KE12 and all earlier gates + explicit live deployment authorization | BLOCKED — separate deployed AWS/operations evidence |
 | [KE14](tasks/KE14.md) | `gpt-6-sol` / high | KE13 operational acceptance | BLOCKED — Christmas and hypothetical purchase qualification |
 | [KE15](tasks/KE15.md) | `gpt-6-luna` / medium | KE14 + current independent privacy gate + authorized volunteer access | BLOCKED — actual synthetic-data trials/UX corrections |
 | [KE16](tasks/KE16.md) | `gpt-6-luna` / medium | KE15 | BLOCKED — truthful demo/submission materials |

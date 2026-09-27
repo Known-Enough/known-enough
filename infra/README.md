@@ -1,5 +1,9 @@
 # B04 DynamoDB adapter and invitation implementation — local checks pass; independent review pending
 
+## Current Known Enough staging sequence
+
+The B04 material below records the local adapter/authentication baseline only; it does not describe a deployed AWS environment. [KE13A staging preparation](staging-runbook.md) records the staged HTTPS mock preview, later authenticated API/DynamoDB plan, profile setup instructions and cost/cleanup controls. [KE13B](../docs/tasks/KE13B.md) is the future sequential `gpt-6-sol` / high backend/authentication/persistence/IAM implementation handoff. [KE13](../docs/tasks/KE13.md) remains separate live deployment and operational acceptance. No AWS resources, profile, login, identity or cloud behavior are claimed here.
+
 Historical B04.5 verdicts remain scoped to their named commits. The current invitation issuance/redemption slice is locally implemented and awaits independent B04.5 review. This document records design and local verification only; no AWS resources have been created and no cloud behavior is claimed as verified.
 
 ## Identity boundary

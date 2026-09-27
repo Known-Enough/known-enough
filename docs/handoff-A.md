@@ -1,6 +1,16 @@
 # User A handoff — shared task pool
 
-## Current handoff — KE00 REVIEW — 2026-09-26T20:36:07Z
+## Current handoff — KE13A REVIEW — 2026-09-26T22:53:27Z
+
+User-authorized early AWS staging preparation is ready for human review. Actual worker: Codex GPT-6, exact variant/effort unexposed. Baseline: local `main` at `a5d1833ff6bf818e963acac6f0a6b6ad923eafa4`, following successful `git pull --ff-only origin main`; origin remains `65359eb`, with the permitted KE00 checkpoint one local commit ahead. No push.
+
+Added [KE13A](tasks/KE13A.md), a staged [AWS runbook](../infra/staging-runbook.md), blocked `gpt-6-sol` / high [KE13B](tasks/KE13B.md), a split between implementation and KE13 live operational acceptance, and board/log/handoff updates. The runbook distinguishes hosted public-fixture mock preview from authenticated shared DynamoDB state; records `us-east-1` deployment and Identity Center regions, `$25/month` estimate/controls, resource/permission list, cleanup and login steps.
+
+Installed AWS CLI v2.37.4 via the official WSL/Linux installer; installer verified its signature. Initial PATH/Windows install-location checks found no pre-existing CLI. The user configured `known-enough-staging` via `aws login`, verified root, and logged out that cached root session. The user then configured the Identity Center user `martelaxe` and `ReadOnlyAccess` assignment. Device-code SSO login succeeded in `known-enough-staging-ro`; explicit-profile STS verified the `AWSReservedSSO_ReadOnlyAccess` assumed role in the intended account. `us-east-1` is both the separately confirmed Identity Center primary region and deployment region. The user made the Identity Center changes; the agent made no AWS IAM/resource changes. No Known Enough app resources, CDK bootstrap, deployment, paid call or model call occurred.
+
+Final docs-only checks passed: references 7/7, planning 15/15, 86 Markdown files/724 local links and anchors/0 errors, task/status gates and `git diff --check`. No application suite ran because no executable files changed. The read-only SSO identity is verified; the next concrete deployment preparation is implement/review of the hosted mock preview guard, then separate approval of specific Stage 0 S3/CloudFront changes. `ReadOnlyAccess` cannot deploy. KE13A is REVIEW; KE13B and live KE13 are BLOCKED. KE00 and B04/B04.5 remain REVIEW for human acceptance.
+
+## Prior handoff — KE00 REVIEW — 2026-09-26T20:36:07Z
 
 Known Enough's documentation restructuring is ready for human review. Baseline: clean synchronized `main` and `origin/main` at `65359ebd19c8ae81007a4b502cce955d5d8ff292`, after successful `git pull --ff-only origin main`. Actual worker: Codex GPT-6, exact variant/effort unexposed. Claim finished; no parallel task or independent-security-review claim.
 
