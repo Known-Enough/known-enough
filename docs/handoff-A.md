@@ -1,3 +1,7 @@
+## Current handoff — KE13A-P correction complete; follow-up review required — 2026-09-27T01:45:19Z
+
+The focused correction on clean `main` baseline `f77d74b` is complete. The Bash-labeled runbook rejects empty, malformed, null/None, wildcard and common placeholder requested/returned distribution and OAC IDs before constructing/rendering the distribution ARN. The verified `known-enough-staging-ro` profile and account/role/requested-ID/ARN/origin/OAC checks remain intact. Bash syntax passed; stubbed end-to-end probes passed (1 valid render and 30 negative cases stopped before output); isolated ID probes passed (3 valid accepted, 14 invalid rejected); reference hashes are 7/7; candidate policy and permission-design hashes are unchanged; 158 changed-doc local link targets and `git diff --check` passed. Current Codex GPT-6 session; exact variant/effort unexposed (user requested Luna, runtime did not expose Luna). No AWS calls/writes, permission creation/attachment/assignment, resources, spending or push. Claim released for independent follow-up. Candidate remains expired/unassigned: wildcard CloudFront creation still cannot enforce the $25 ceiling. Do not assign or create the AWS permission.
+
 # User A handoff — shared task pool
 
 ## Current handoff — KE13A-P focused CHANGES_REQUESTED — 2026-09-27T01:38:35Z

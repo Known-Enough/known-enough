@@ -116,11 +116,23 @@ No AWS deployment step below has been run. The user authorized Stage 0 only: one
 
 5. **Create the separate incremental-release permission set through the Identity Center CLI.** After the distribution exists, render the release policy to a temporary file using its exact ARN; keep the reviewed template unchanged:
 
-   ```sh
+   ```bash
+   # Requires Bash (uses [[ =~ ]] and here-strings).
    STAGE0_READONLY_PROFILE=known-enough-staging-ro
    : "${STAGE0_DISTRIBUTION_ID:?set the ID returned when the distribution was created}"
    : "${STAGE0_BUCKET_NAME:?set the exact provisioned S3 bucket name}"
    : "${STAGE0_EXPECTED_OAC_ID:?set the OAC ID returned when the OAC was created}"
+
+   # Bash-only: allow only nonempty alphanumeric service IDs, then reject
+   # common sentinels case-insensitively before any ARN is constructed.
+   valid_cloudfront_id() {
+     local value="$1" lowered
+     [[ "$value" =~ ^[A-Za-z0-9]+$ ]] || return 1
+     lowered="${value,,}"
+     [[ ! "$lowered" =~ ^(null|none|undefined|replace_|placeholder|exact_|your_) ]]
+   }
+   valid_cloudfront_id "$STAGE0_DISTRIBUTION_ID" || { printf '%s\n' 'Stop: distribution ID is empty, malformed, or a placeholder.' >&2; exit 1; }
+   valid_cloudfront_id "$STAGE0_EXPECTED_OAC_ID" || { printf '%s\n' 'Stop: expected OAC ID is empty, malformed, or a placeholder.' >&2; exit 1; }
 
    STAGE0_CALLER_ARN="$(aws sts get-caller-identity --query Arn --output text --profile "$STAGE0_READONLY_PROFILE" --region us-east-1 --no-cli-pager)" || exit 1
    case "$STAGE0_CALLER_ARN" in
@@ -131,9 +143,12 @@ No AWS deployment step below has been run. The user authorized Stage 0 only: one
    STAGE0_DISTRIBUTION="$(aws cloudfront get-distribution --id "$STAGE0_DISTRIBUTION_ID" --query Distribution --output json --profile "$STAGE0_READONLY_PROFILE" --region us-east-1 --no-cli-pager)" || exit 1
    STAGE0_ACTUAL_ID="$(jq -er '.Id | select(type == "string" and length > 0)' <<<"$STAGE0_DISTRIBUTION")" || exit 1
    STAGE0_DISTRIBUTION_ARN="$(jq -er '.ARN | select(type == "string" and length > 0)' <<<"$STAGE0_DISTRIBUTION")" || exit 1
+   valid_cloudfront_id "$STAGE0_ACTUAL_ID" || { printf '%s\n' 'Stop: returned distribution ID is malformed or a placeholder.' >&2; exit 1; }
+   valid_cloudfront_id "$(jq -er '.ARN | select(type == "string") | split("/") | last' <<<"$STAGE0_DISTRIBUTION")" || { printf '%s\n' 'Stop: ARN distribution ID is malformed or a placeholder.' >&2; exit 1; }
    STAGE0_ORIGIN_COUNT="$(jq -er '.DistributionConfig.Origins.Quantity' <<<"$STAGE0_DISTRIBUTION")" || exit 1
    STAGE0_ORIGIN_DOMAIN="$(jq -er '.DistributionConfig.Origins.Items[0].DomainName | select(type == "string" and length > 0)' <<<"$STAGE0_DISTRIBUTION")" || exit 1
    STAGE0_ACTUAL_OAC_ID="$(jq -er '.DistributionConfig.Origins.Items[0].OriginAccessControlId | select(type == "string" and length > 0)' <<<"$STAGE0_DISTRIBUTION")" || exit 1
+   valid_cloudfront_id "$STAGE0_ACTUAL_OAC_ID" || { printf '%s\n' 'Stop: returned OAC ID is malformed or a placeholder.' >&2; exit 1; }
 
    test "$STAGE0_ACTUAL_ID" = "$STAGE0_DISTRIBUTION_ID" || { printf '%s\n' 'Stop: distribution ID mismatch.' >&2; exit 1; }
    test "$STAGE0_DISTRIBUTION_ARN" = "arn:aws:cloudfront::092954139775:distribution/$STAGE0_DISTRIBUTION_ID" || { printf '%s\n' 'Stop: distribution ARN is empty, malformed, or belongs to another account/ID.' >&2; exit 1; }
