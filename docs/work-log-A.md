@@ -1,3 +1,9 @@
+## 2026-09-27T18:49:31Z — KE05 / IN_PROGRESS
+
+- User A claimed KE05 from clean synchronized `main` baseline `3369345`; `git pull --ff-only origin main` succeeded and HEAD/origin were 0/0. KE04 is DONE and no competing task is active.
+- Actual worker: Codex GPT-6; exact runtime variant/effort unexposed, so the user-directed `gpt-6-luna` / high target is not claimed as verified runtime selection. Bounded scope: `apps/web/**`, relevant browser tests and a web README if needed, plus KE05/board/current handoff/log. No API/backend/contracts/root config/lock/CI/cloud changes planned.
+- Next: replace the default Deal Table presentation with Known Enough decision creation/lobby/status/proposal surfaces using current contracts, preserving legacy regression routes, privacy boundaries, separate permissions and responsive/accessibility behavior. Do not represent injected output as live AI.
+
 ## 2026-09-27T18:44:49Z — KE04 / DONE
 
 - Completed the KE04 claim from synchronized `main` baseline `5159770`. Actual worker: Codex GPT-6; exact runtime variant/effort unexposed, so the user-directed Luna/high runtime is not claimed. Changed only the generic-kernel TeamTable regression tests, test-support adapter, support README, architecture and task tracking docs.

@@ -1,4 +1,10 @@
-## Current handoff — KE04 complete; KE05 next — 2026-09-27T18:44:49Z
+## Current claim — KE05 Known Enough product shell — 2026-09-27T18:49:31Z
+
+KE05 is IN_PROGRESS, claimed by User A from clean synchronized `main` baseline `3369345` after `git pull --ff-only origin main` succeeded. Actual worker is Codex GPT-6; exact runtime variant/effort are unexposed, so the user-directed `gpt-6-luna` / high target is not claimed as verified runtime selection. Bounded scope is `apps/web/**`, relevant UI/browser tests, and current ticket/board/handoff/log tracking. No backend, API, contract, AWS/cloud, paid call or deployment changes are in scope. See the [ticket](tasks/KE05.md).
+
+KE03 and KE04 are DONE on their recorded technical criteria. No task may run in parallel with KE05. The other clone should pull the synchronized claim before starting further project work.
+
+## Prior handoff — KE04 complete; KE05 next — 2026-09-27T18:44:49Z
 
 KE04 is DONE on its recorded technical criteria. User A claimed it from clean synchronized `main` baseline `5159770`; actual worker was Codex GPT-6, exact runtime variant/effort unexposed, so the requested Luna/high runtime is not claimed. The generic fixture bridge now evaluates all 12 candidates, preserves zero baseline/two scoped-grant feasibility, full meeting/duty interval semantics and exact permission behavior. Existing legacy ranking tests and generic app approval/disclosure/context tests remain. Focused domain/test-support tests passed 86/86; pinned full check passed with 280 tests, two opt-in DynamoDB Local skips, hosted browser 1/1 and E2E 41/41. No AWS/cloud actions, paid calls or deployments.
 
