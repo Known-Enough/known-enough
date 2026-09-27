@@ -1,6 +1,10 @@
-## Current claim — KE08 candidate generation and private negotiation — 2026-09-27T20:04:27Z
+## Current handoff — KE08 local MVP / REVIEW — 2026-09-27T20:50Z
 
-KE08 is IN_PROGRESS, claimed by User A after KE07 DONE, from clean synchronized `main` baseline `1135d79` after `git pull --ff-only origin main` succeeded in `/tmp/known-enough-ke07`. Sole active task. Actual worker Codex GPT-6; variant/effort unexposed, so Luna/high is not claimed as verified runtime selection. Bounded scope: application negotiation context/orchestration, optional authenticated API adapter, local injected fixture, generic home proposal/owner negotiation surfaces, focused tests/E2E and task tracking. Existing public contracts, kernel implementation, persistence, root config, cloud and live models are out of scope unless a blocker requires coordination. See [KE08](tasks/KE08.md). KE00 remains DONE; B04/B04.5 remain REVIEW.
+KE08's local injected-model candidate/negotiation flow is implemented and shown for the user feedback pass. The final pinned `npm run check` passed: refs 7/7, plans 15/15, lint/boundaries 132, typecheck, 303 tests with 2 opt-in skips, production bundle scan, hosted preview scan/browser 1/1, and E2E 44/44. Actual worker Codex GPT-6, exact variant/effort unexposed; the requested Luna/high target is not claimed as the observed runtime. Clean synchronized `main` baseline was `1135d79` after a successful `git pull --ff-only origin main`; work was performed in `/tmp/known-enough-ke07`.
+
+The local Christmas demo uses five fixed `NON_PRODUCTION` labels and ephemeral in-memory shared scenario state. No sign-in, real model, paid call, cloud change or persistence was introduced. Hosted Stage 0 remains the static synthetic mock without shared state. Try locally in two terminals from the repository root: `PORT=8788 node scripts/run-local-api.mjs` and `npm run dev --workspace @deal-table/web -- --port 5173 --strictPort`; open `http://127.0.0.1:5173/`. Select Nina only to view her synthetic owner-only question; this is not authentication.
+
+Implementation is paused at KE08 REVIEW for the ticket's single KE09 independent privacy/architecture gate. No next implementation task is active. After the user feedback pass, KE09 requires the separately named Astra/high reviewer; do not begin live model work before its PASS and separate authorization. KE00 remains DONE; B04/B04.5 remain REVIEW.
 
 ## Prior handoff — KE07 DONE; KE08 next — 2026-09-27
 

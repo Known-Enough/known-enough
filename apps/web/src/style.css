@@ -100,6 +100,10 @@ blockquote { margin: 12px 0; padding: 12px 15px; border-left: 3px solid #2b8065;
 .ke-private-identity { color: #4d6158; font-size: .9rem; }
 .ke-private-actions { display: flex; flex-wrap: wrap; gap: 9px; margin: 12px 0; }
 .ke-owner-draft { margin-top: 18px; padding: 18px; border: 1px solid #d4dfd7; border-radius: 12px; background: #f8fbf8; }
+.ke-demo-summary, .ke-demo-proposal { margin-top: 16px; padding: 16px; border: 1px solid #c9d7ce; border-radius: 12px; background: #f8fbf8; }
+.ke-demo-proposal h3 { margin-bottom: 8px; }
+.ke-demo-proposal ul { margin: 8px 0; }
+.ke-demo-proposal li { border-top: 1px solid #d4dfd7; padding: 10px 0; }
 .ke-owner-draft h4 { margin: 14px 0 4px; }
 .ke-owner-draft ul { margin-top: 4px; }
 .ke-footer a { display: inline-block; margin-left: 8px; color: #075440; }

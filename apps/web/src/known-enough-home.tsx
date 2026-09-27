@@ -13,9 +13,36 @@ type LocalDecision = {
   participantInformationRequirements: { participantId: string; prompt: string }[];
 };
 type ArchitectResponse = { requestId: string; draft: LocalDecision };
+type ChristmasDemoData = { publicSnapshot: KE.PublicDecisionSnapshot; ownerSnapshot: KE.OwnerDecisionSnapshot };
+
+const CHRISTMAS_DEMO_ID = 'christmas-decision';
+const LOCAL_API = 'http://127.0.0.1:8788';
+
+function demoIdentity(participantId: string): string { return `NON_PRODUCTION ${participantId}`; }
+
+function describeDemoValue(value: KE.DecisionValue, variable: (KE.PublicDecisionSnapshot['frame']['variables'][number] | KE.DecisionVariable) | undefined): string {
+  if (value.type === 'ENUM' && variable?.type === 'ENUM') return variable.options.find(item => item.id === value.optionId)?.label ?? 'an option';
+  if (value.type === 'ENUM_SET' && variable?.type === 'ENUM_SET') return value.optionIds.map(id => variable.options.find(item => item.id === id)?.label ?? id).join(', ');
+  if (value.type === 'MONEY') return new Intl.NumberFormat('en-US', { style: 'currency', currency: value.currencyCode }).format(value.amountMinor / (10 ** value.minorUnit));
+  if (value.type === 'DATE') return value.date;
+  if (value.type === 'DURATION') return `${Math.round(value.seconds / 86_400)} days`;
+  if (value.type === 'NUMBER') return `${value.coefficient / (10 ** value.scale)} ${value.unitCode}`;
+  if (value.type === 'PERCENTAGE') return `${value.basisPoints / 100}%`;
+  if (value.type === 'BOOLEAN') return value.value ? 'yes' : 'no';
+  return 'the proposed value';
+}
+
+function describeDemoRule(rule: KE.ValidationRule, variables: Array<KE.PublicDecisionSnapshot['frame']['variables'][number] | KE.DecisionVariable>): string {
+  const variableId = 'variableId' in rule ? rule.variableId : '';
+  const variable = variables.find(item => item.id === variableId);
+  const label = variable?.label ?? 'this condition';
+  if (rule.operator === 'COMPARE') return `${label} ${rule.comparison} ${describeDemoValue(rule.value, variable)}`;
+  if (rule.operator === 'IN') return `${label} is one of ${rule.values.map(value => describeDemoValue(value, variable)).join(', ')}`;
+  return label;
+}
 
 const privacyPromise = 'Your private inputs are processed by Known Enough to help the group reach a decision. Other participants do not receive those inputs unless you explicitly approve a disclosure or the final agreed outcome inherently reveals something.';
-const ARCHITECT_URL = 'http://127.0.0.1:8787/decisions/architecture/draft';
+const ARCHITECT_URL = 'http://127.0.0.1:8788/decisions/architecture/draft';
 const LOCAL_IDENTITY = 'NON_PRODUCTION organizer';
 
 function parseResponse(value: unknown): ArchitectResponse {
@@ -60,9 +87,15 @@ export function KnownEnoughHome({ ownerInterpreter }: { ownerInterpreter?: Local
   const [ownerConfirmed, setOwnerConfirmed] = useState(false);
   const [ownerLoading, setOwnerLoading] = useState(false);
   const [ownerError, setOwnerError] = useState('');
+  const [demoParticipant, setDemoParticipant] = useState('maya');
+  const [demoData, setDemoData] = useState<ChristmasDemoData | null>(null);
+  const [demoLoading, setDemoLoading] = useState(false);
+  const [demoError, setDemoError] = useState('');
+  const [demoOutcome, setDemoOutcome] = useState('');
   const inputRevision = useRef(0);
   const requestSequence = useRef(0);
   const ownerRequestSequence = useRef(0);
+  const demoRequestSequence = useRef(0);
   const draftRevision = useRef(0);
   const draftId = useRef('');
   if (!draftId.current) draftId.current = crypto.randomUUID();
@@ -101,6 +134,82 @@ export function KnownEnoughHome({ ownerInterpreter }: { ownerInterpreter?: Local
       if (sequence === ownerRequestSequence.current) setOwnerError('The local fixture could not safely prepare this draft. Please clarify the wording.');
     } finally {
       if (sequence === ownerRequestSequence.current) setOwnerLoading(false);
+    }
+  };
+
+  const loadChristmasDemo = async (participantId = demoParticipant) => {
+    const sequence = ++demoRequestSequence.current;
+    setDemoLoading(true); setDemoError('');
+    const identity = demoIdentity(participantId);
+    const headers = { 'X-Deal-Table-Test-Identity': identity };
+    try {
+      const [publicResponse, ownerResponse] = await Promise.all([
+        fetch(`${LOCAL_API}/decisions/${CHRISTMAS_DEMO_ID}/public`, { headers }),
+        fetch(`${LOCAL_API}/decisions/${CHRISTMAS_DEMO_ID}/me`, { headers }),
+      ]);
+      if (!publicResponse.ok || !ownerResponse.ok) throw new Error('local API unavailable');
+      const [rawPublic, rawOwner] = await Promise.all([publicResponse.json(), ownerResponse.json()]);
+      const loaded = {
+        publicSnapshot: KnownEnough.PublicDecisionSnapshot.parse(rawPublic),
+        ownerSnapshot: KnownEnough.OwnerDecisionSnapshot.parse(rawOwner),
+      };
+      if (sequence === demoRequestSequence.current) setDemoData(loaded);
+    } catch {
+      if (sequence === demoRequestSequence.current) setDemoError('Start the loopback API to load the fictional Christmas scenario.');
+    } finally {
+      if (sequence === demoRequestSequence.current) setDemoLoading(false);
+    }
+  };
+
+  const generateChristmasCandidate = async () => {
+    const sequence = ++demoRequestSequence.current;
+    setDemoLoading(true); setDemoError(''); setDemoOutcome('');
+    try {
+      const response = await fetch(`${LOCAL_API}/decisions/${CHRISTMAS_DEMO_ID}/reasoning`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Deal-Table-Test-Identity': demoIdentity(demoParticipant), 'X-Request-Id': crypto.randomUUID() },
+        body: JSON.stringify({ requestId: crypto.randomUUID() }),
+      });
+      const raw = await response.json();
+      if (!response.ok) throw new Error('reasoning unavailable');
+      if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('invalid response');
+      const result = raw as Record<string, unknown>;
+      if (typeof result.outcome !== 'string') throw new Error('invalid response');
+      setDemoOutcome(result.outcome);
+      await loadChristmasDemo(demoParticipant);
+    } catch {
+      if (sequence === demoRequestSequence.current) setDemoError('The local reasoning action could not complete. Refresh the demo and try again.');
+    } finally {
+      if (sequence === demoRequestSequence.current) setDemoLoading(false);
+    }
+  };
+
+  const answerChristmasQuestion = async (question: KE.NegotiationQuestion, answer: 'ALLOW' | 'DECLINE') => {
+    if (!demoData) return;
+    const owner = demoData.ownerSnapshot;
+    const command = {
+      schemaVersion: KnownEnough.KE_SCHEMA_VERSION, type: 'ANSWER_NEGOTIATION',
+      requestId: crypto.randomUUID(), decisionId: CHRISTMAS_DEMO_ID, idempotencyKey: crypto.randomUUID(),
+      expected: { contextToken: owner.publicSnapshot.contextToken, semanticVersion: owner.publicSnapshot.semanticVersion,
+        controlVersion: owner.controlVersion, ownerVersion: owner.ownerVersion },
+      payload: { questionId: question.questionId, constraintVersion: question.constraintVersion,
+        requestIdentity: question.requestIdentity, answer },
+    };
+    const sequence = ++demoRequestSequence.current;
+    setDemoLoading(true); setDemoError('');
+    try {
+      const response = await fetch(`${LOCAL_API}/decisions/${CHRISTMAS_DEMO_ID}/commands`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Deal-Table-Test-Identity': demoIdentity(demoParticipant) },
+        body: JSON.stringify(command),
+      });
+      const raw = await response.json() as { ok?: boolean };
+      if (!response.ok || raw.ok !== true) throw new Error('command rejected');
+      await loadChristmasDemo(demoParticipant);
+      if (answer === 'ALLOW') await generateChristmasCandidate();
+    } catch {
+      if (sequence === demoRequestSequence.current) setDemoError('That response could not be applied. Refresh the owner profile and review the current question.');
+    } finally {
+      if (sequence === demoRequestSequence.current) setDemoLoading(false);
     }
   };
 
@@ -170,7 +279,61 @@ export function KnownEnoughHome({ ownerInterpreter }: { ownerInterpreter?: Local
       </form>
     </section>
 
-    <p className="notice ke-privacy"><strong>Known Enough product privacy promise for the connected service:</strong> “{privacyPromise}” This local prototype has no sign-in. It sends only the public objective, proposed participant labels and candidate options to the loopback development API; the injected model is deterministic, and drafts are neither saved nor shared.</p>
+    <p className="notice ke-privacy"><strong>Known Enough product privacy promise for the connected service:</strong> “{privacyPromise}” This local prototype has no sign-in. The frame draft sends only the public objective, proposed participant labels and candidate options to the loopback API. The Christmas scenario uses synthetic conditions and temporary in-memory state shared among these fixed local profiles; it disappears when the API stops.</p>
+
+    <section className="ke-card ke-christmas-demo" aria-labelledby="christmas-demo-heading">
+      <p className="eyebrow">END-TO-END LOCAL SCENARIO</p>
+      <h2 id="christmas-demo-heading">Try the fictional Christmas decision</h2>
+      <p>Five synthetic family profiles, confirmed conditions, a kernel-checked proposal and an optional private negotiation. This local API runs the application and deterministic kernel with temporary in-memory shared state across its fixed profiles; the hosted HTTPS preview remains a static mock with no shared state.</p>
+      <label htmlFor="christmas-demo-profile">Fictional local profile</label>
+      <select id="christmas-demo-profile" value={demoParticipant} onChange={event => {
+        setDemoParticipant(event.target.value); setDemoData(null); setDemoOutcome('');
+      }}>
+        {['maya', 'leo', 'nina', 'ana', 'raul'].map(person => <option key={person} value={person}>{person[0]!.toUpperCase() + person.slice(1)} · local demo only</option>)}
+      </select>
+      <div className="ke-private-actions">
+        <button type="button" onClick={() => void loadChristmasDemo()} disabled={demoLoading}>{demoData ? 'Refresh local scenario' : 'Load local scenario'}</button>
+        <button type="button" className="secondary" onClick={() => void generateChristmasCandidate()} disabled={!demoData || demoLoading || !['READY', 'NO_AGREEMENT', 'SUPERSEDED'].includes(demoData.publicSnapshot.status)}>
+          {demoLoading ? 'Working…' : 'Generate candidate'}
+        </button>
+      </div>
+      {demoError && <p role="alert" className="ke-error">{demoError}</p>}
+      {demoOutcome && <p role="status">Local reasoning outcome: {demoOutcome}.</p>}
+      {demoData && <>
+        <div className="ke-demo-summary">
+          <strong>{demoData.publicSnapshot.frame.title}</strong>
+          <span> · {demoData.publicSnapshot.status.replaceAll('_', ' ')}</span>
+          <p>{demoData.publicSnapshot.frame.objective}</p>
+          <p className="ke-help">Selected profile is a fixed NON_PRODUCTION identity. It is not authentication, and all scenario values are synthetic.</p>
+        </div>
+        {demoData.publicSnapshot.currentProposal && <section className="ke-demo-proposal" aria-label="Validated public proposal">
+          <h3>Validated proposal · public facts only</h3>
+          <ul>{demoData.publicSnapshot.currentProposal.facts.values.map(assignment => {
+            const variable = demoData.publicSnapshot.frame.variables.find(item => item.id === assignment.variableId);
+            return variable ? <li key={assignment.variableId}><strong>{variable.label}:</strong> {describeDemoValue(assignment.value, variable)}</li> : null;
+          })}</ul>
+          <p>The proposal was accepted by the existing deterministic kernel. No private reason or condition is included in these shared facts.</p>
+        </section>}
+        {demoData.ownerSnapshot.pendingQuestions.filter(question => question.status === 'PENDING').map(question => {
+          const constraint = demoData.ownerSnapshot.confirmedConstraints.find(item => item.constraintId === question.constraintId
+            && item.constraintVersion === question.constraintVersion && item.status === 'ACTIVE' && item.kind === 'NEGOTIABLE');
+          const variables = [...demoData.publicSnapshot.frame.variables, ...demoData.ownerSnapshot.privateVariables];
+          return <section className="ke-owner-draft" key={question.questionId} aria-label="Private negotiation question">
+            <p className="eyebrow">PRIVATE QUESTION · {demoData.ownerSnapshot.ownerParticipantId}</p>
+            <h3>Optional one-time adjustment</h3>
+            <p>For “{demoData.publicSnapshot.frame.objective},” your condition is {constraint?.kind === 'NEGOTIABLE' ? describeDemoRule(constraint.rule, variables) : 'this negotiable condition'}.</p>
+            <p>The requested adjustment is {describeDemoRule(question.adjustment, variables)}. This local profile selector is not authentication; the scenario is synthetic.</p>
+            <p>Expires {new Date(question.expiresAt).toLocaleString()}.</p>
+            <div className="ke-private-actions">
+              <button type="button" onClick={() => void answerChristmasQuestion(question, 'ALLOW')} disabled={demoLoading}>Allow this exact adjustment</button>
+              <button type="button" className="secondary" onClick={() => void answerChristmasQuestion(question, 'DECLINE')} disabled={demoLoading}>Decline</button>
+            </div>
+          </section>;
+        })}
+        {demoData.publicSnapshot.status === 'PRIVATE_NEGOTIATION' && demoData.ownerSnapshot.pendingQuestions.length === 0
+          && <p>A participant’s private question is pending. Select its fictional local profile to view and answer it.</p>}
+      </>}
+    </section>
 
     {decision && frame ? <section className="ke-workspace" aria-labelledby="decision-heading">
       <div className="ke-card ke-decision-heading">
@@ -232,11 +395,11 @@ export function KnownEnoughHome({ ownerInterpreter }: { ownerInterpreter?: Local
         <p>No proposal yet. A proposal can be shown only after the required participants confirm the shared frame and provide their own inputs.</p>
         <p>The frame structure was checked against supported contract types. That does not confirm participants, private conditions or an outcome.</p>
       </section>}
-    </section> : <section className="ke-card ke-empty" aria-labelledby="your-decisions-heading">
+    </section> : !demoData ? <section className="ke-card ke-empty" aria-labelledby="your-decisions-heading">
       <p className="eyebrow">YOUR DECISIONS</p><h2 id="your-decisions-heading">Nothing here yet</h2>
       <p>Your first frame draft will appear here. It stays in this local session and is not shared.</p>
-    </section>}
+    </section> : null}
 
-    <footer className="ke-footer">Injected deterministic test model · not live AI · no authenticated identity or shared state. <a href="?legacy=teamtable">Open the retained TeamTable regression demo</a>.</footer>
+    <footer className="ke-footer">Injected deterministic test model · not live AI · no authenticated identity or cloud-shared state. Christmas scenario data stays in local memory. <a href="?legacy=teamtable">Open the retained TeamTable regression demo</a>.</footer>
   </main>;
 }

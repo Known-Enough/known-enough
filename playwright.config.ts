@@ -6,5 +6,8 @@ export default defineConfig({
   // Optional installed-browser fallback for hosts unsupported by bundled Chromium.
   use: { baseURL: 'http://127.0.0.1:5173', browserName: 'chromium', channel: process.env.PLAYWRIGHT_CHANNEL },
   // B03 permits only Vite's loopback origin for its explicit local test labels.
-  webServer: { command: 'npm run dev --workspace @deal-table/web -- --port 5173 --strictPort', url: 'http://127.0.0.1:5173', reuseExistingServer: false },
+  webServer: [
+    { command: 'node scripts/run-local-api.mjs', port: 8788, env: { PORT: '8788' }, reuseExistingServer: false },
+    { command: 'npm run dev --workspace @deal-table/web -- --port 5173 --strictPort', url: 'http://127.0.0.1:5173', reuseExistingServer: false },
+  ],
 });

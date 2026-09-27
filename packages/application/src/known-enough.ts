@@ -17,6 +17,21 @@ export interface KnownEnoughApplicationOptions {
   ids: IdSource;
 }
 
+export interface DecisionNegotiationContext {
+  job: DecisionJob;
+  proposalVersion: number;
+  definition: KETypes.DecisionDefinition;
+  publicSnapshot: KETypes.PublicDecisionSnapshot;
+  confirmedConstraints: Omit<KE.ConfirmedConstraint, 'sourceSummary'>[];
+  activeNegotiationPermissions: KE.NegotiationPermission[];
+  pendingCandidate: KE.CandidateProposal | null;
+}
+export interface NegotiationFailureTarget {
+  ownerParticipantId: string;
+  constraintId: string;
+  constraintVersion: number;
+}
+
 export class KnownEnoughApplicationError extends Error {
   constructor(readonly code: DecisionErrorCode) {
     super(code);
@@ -465,6 +480,154 @@ export class KnownEnoughApplication {
       decision.status = 'REASONING';
       decision.controlVersion += 1;
       return structuredClone(decision.job);
+    });
+  }
+
+  /** Allowlisted trusted-worker context; free-text source summaries and raw conversations are excluded. */
+  async getReasoningContext(principal: TrustedPrincipal | null, decisionId: string, jobId: string): Promise<DecisionNegotiationContext> {
+    return this.options.repository.transactionDecision(decisionId, decision => {
+      if (!decision) fail('NOT_FOUND');
+      this.service(decision, principal);
+      const job = decision.job;
+      if (!job || job.id !== jobId || job.contextToken !== decision.definition.contextToken
+        || job.semanticVersion !== decision.definition.semanticVersion || decision.status !== 'REASONING') fail('STALE_CONTEXT');
+      const confirmedConstraints = decision.owners.flatMap(owner => owner.confirmedConstraints
+        .filter(item => item.status === 'ACTIVE')
+        .map(item => {
+          const projected = Object.fromEntries(Object.entries(item).filter(([key]) => key !== 'sourceSummary'));
+          return structuredClone(projected) as Omit<KE.ConfirmedConstraint, 'sourceSummary'>;
+        }));
+      return {
+        job: structuredClone(job),
+        proposalVersion: decision.proposalVersion + 1,
+        definition: structuredClone(decision.definition),
+        publicSnapshot: publicSnapshot(decision, null),
+        confirmedConstraints,
+        activeNegotiationPermissions: structuredClone(decision.owners.flatMap(owner => owner.negotiationPermissions
+          .filter(item => item.status === 'ACTIVE' && Date.parse(item.expiresAt) > Date.parse(this.now())))),
+        pendingCandidate: decision.pendingCandidate ? structuredClone(decision.pendingCandidate) : null,
+      };
+    });
+  }
+
+  /** Release only the exact active reasoning job after bounded provider/output failure. */
+  async cancelReasoning(principal: TrustedPrincipal | null, decisionId: string, jobId: string): Promise<'CANCELLED' | 'STALE'> {
+    return this.options.repository.transactionDecision(decisionId, decision => {
+      if (!decision) fail('NOT_FOUND');
+      this.service(decision, principal);
+      if (!decision.job || decision.job.id !== jobId || decision.job.epoch !== decision.solveEpoch
+        || decision.status !== 'REASONING') return 'STALE';
+      decision.job = null;
+      decision.solveEpoch += 1;
+      decision.status = readinessStatus(decision);
+      decision.controlVersion += 1;
+      return 'CANCELLED';
+    });
+  }
+
+  /** Recompute the exact negotiable constraints currently blocking a pending candidate. */
+  async getPendingNegotiationFailures(principal: TrustedPrincipal | null, decisionId: string): Promise<NegotiationFailureTarget[]> {
+    return this.options.repository.transactionDecision(decisionId, async decision => {
+      if (!decision) fail('NOT_FOUND');
+      this.service(decision, principal);
+      const candidate = decision.pendingCandidate;
+      if (!candidate || decision.status !== 'PRIVATE_NEGOTIATION') return [];
+      const publicFacts = KE.PublicProposalFacts.parse({
+        schemaVersion: KE.KE_SCHEMA_VERSION, decisionId: decision.decisionId,
+        contextToken: decision.definition.contextToken, semanticVersion: decision.definition.semanticVersion,
+        proposalVersion: candidate.proposalVersion, requiredParticipantIds: decision.definition.requiredParticipantIds,
+        values: candidate.values.filter(item => decision.definition.variables.some(variable =>
+          variable.id === item.variableId && variable.visibility === 'PUBLIC')),
+      });
+      const proposal = KE.PublicCandidateProposal.parse({
+        proposalId: candidate.proposalId, facts: publicFacts,
+        publicHash: await KE.hashDecisionProposal(publicFacts), createdAt: candidate.createdAt,
+      });
+      const result = await evaluateKnownEnoughCandidate({
+        definition: decision.definition, candidate, publicProposal: proposal,
+        confirmedConstraints: decision.owners.flatMap(owner => owner.confirmedConstraints.filter(item => item.status === 'ACTIVE')),
+        frameConfirmations: decision.frameConfirmations,
+        readyParticipantIds: decision.owners.filter(owner => owner.readiness === 'READY').map(owner => owner.participantId),
+        unresolvedConditionIds: decision.owners.flatMap(owner => owner.draft?.unsupportedConditions.map(item => item.id) ?? []),
+        negotiationPermissions: decision.owners.flatMap(owner => owner.negotiationPermissions),
+        disclosurePermissions: decision.owners.flatMap(owner => owner.disclosurePermissions), now: this.now(),
+      });
+      return result.diagnostics.flatMap(item => {
+        if (item.code !== 'NEGOTIABLE_PERMISSION_REQUIRED' || !item.ownerParticipantId || !item.constraintId) return [];
+        const constraint = decision.owners.find(owner => owner.participantId === item.ownerParticipantId)
+          ?.confirmedConstraints.find(value => value.constraintId === item.constraintId
+            && value.status === 'ACTIVE' && value.kind === 'NEGOTIABLE');
+        return constraint ? [{ ownerParticipantId: item.ownerParticipantId,
+          constraintId: item.constraintId, constraintVersion: constraint.constraintVersion }] : [];
+      });
+    });
+  }
+
+  /** Confirm an injected relaxation is exact and would admit the pending candidate before asking its owner. */
+  async validatePendingNegotiationAdjustment(principal: TrustedPrincipal | null, input: {
+    decisionId: string; ownerParticipantId: string; constraintId: string; constraintVersion: number;
+    adjustment: unknown; expiresAt: string;
+  }): Promise<boolean> {
+    return this.options.repository.transactionDecision(input.decisionId, async decision => {
+      if (!decision) fail('NOT_FOUND');
+      this.service(decision, principal);
+      const candidate = decision.pendingCandidate;
+      const owner = decision.owners.find(item => item.participantId === input.ownerParticipantId);
+      const constraint = owner?.confirmedConstraints.find(item => item.constraintId === input.constraintId
+        && item.constraintVersion === input.constraintVersion && item.status === 'ACTIVE' && item.kind === 'NEGOTIABLE');
+      if (!candidate || decision.status !== 'PRIVATE_NEGOTIATION' || !owner || !constraint) return false;
+      const adjustment = KE.ValidationRule.safeParse(input.adjustment);
+      if (!adjustment.success || adjustment.data.visibility !== 'TRUSTED_BACKEND'
+        || !ownerRulesValid(decision.definition, owner.participantId, [adjustment.data])
+        || !Number.isFinite(Date.parse(input.expiresAt)) || Date.parse(input.expiresAt) <= Date.parse(this.now())) return false;
+      const publicFacts = KE.PublicProposalFacts.parse({
+        schemaVersion: KE.KE_SCHEMA_VERSION, decisionId: decision.decisionId,
+        contextToken: decision.definition.contextToken, semanticVersion: decision.definition.semanticVersion,
+        proposalVersion: candidate.proposalVersion, requiredParticipantIds: decision.definition.requiredParticipantIds,
+        values: candidate.values.filter(item => decision.definition.variables.some(variable =>
+          variable.id === item.variableId && variable.visibility === 'PUBLIC')),
+      });
+      const publicProposal = KE.PublicCandidateProposal.parse({
+        proposalId: candidate.proposalId, facts: publicFacts,
+        publicHash: await KE.hashDecisionProposal(publicFacts), createdAt: candidate.createdAt,
+      });
+      const evaluationInput = {
+        definition: decision.definition, candidate, publicProposal,
+        confirmedConstraints: decision.owners.flatMap(item => item.confirmedConstraints.filter(value => value.status === 'ACTIVE')),
+        frameConfirmations: decision.frameConfirmations,
+        readyParticipantIds: decision.owners.filter(item => item.readiness === 'READY').map(item => item.participantId),
+        unresolvedConditionIds: decision.owners.flatMap(item => item.draft?.unsupportedConditions.map(value => value.id) ?? []),
+        negotiationPermissions: decision.owners.flatMap(item => item.negotiationPermissions),
+        disclosurePermissions: decision.owners.flatMap(item => item.disclosurePermissions), now: this.now(),
+      };
+      const initial = await evaluateKnownEnoughCandidate(evaluationInput);
+      if (!initial.diagnostics.some(item => item.code === 'NEGOTIABLE_PERMISSION_REQUIRED'
+        && item.ownerParticipantId === owner.participantId && item.constraintId === constraint.constraintId)) return false;
+      const requestIdentity = await sha256(KE.serializeNegotiationRequestIdentity({
+        decisionId: decision.decisionId, contextToken: decision.definition.contextToken,
+        semanticVersion: decision.definition.semanticVersion, targetParticipantId: owner.participantId,
+        constraintId: constraint.constraintId, constraintVersion: constraint.constraintVersion, adjustment: adjustment.data,
+      }));
+      const permissionId = this.id();
+      const permission = KE.NegotiationPermission.parse({
+        permissionId, permissionVersion: 1, decisionId: decision.decisionId,
+        contextToken: decision.definition.contextToken, semanticVersion: decision.definition.semanticVersion,
+        ownerParticipantId: owner.participantId, questionId: this.id(), requestIdentity,
+        constraintId: constraint.constraintId, constraintVersion: constraint.constraintVersion,
+        adjustment: adjustment.data, status: 'ACTIVE', expiresAt: input.expiresAt,
+      });
+      const candidateWithPermission = KE.CandidateProposal.safeParse({
+        ...candidate,
+        permissionDependencies: [...candidate.permissionDependencies, {
+          permissionId, permissionVersion: 1, kind: 'NEGOTIATION', expiresAt: input.expiresAt,
+        }],
+      });
+      if (!candidateWithPermission.success) return false;
+      const preview = await evaluateKnownEnoughCandidate({
+        ...evaluationInput, candidate: candidateWithPermission.data,
+        negotiationPermissions: [...evaluationInput.negotiationPermissions, permission],
+      });
+      return !preview.diagnostics.some(item => item.permissionId === permissionId);
     });
   }
 

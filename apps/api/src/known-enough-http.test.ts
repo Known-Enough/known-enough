@@ -2,7 +2,10 @@ import { createServer, type Server } from 'node:http';
 import { afterEach, describe, expect, it } from 'vitest';
 import { InMemoryRoomRepository } from '@deal-table/adapters';
 import { buildChristmasFixture } from '../../../packages/test-support/src/known-enough-fixtures.ts';
-import { DecisionArchitect, KnownEnoughApplication, OwnerConversationArchitect, type OwnerConversationModel } from '@deal-table/application';
+import {
+  DecisionArchitect, DecisionNegotiator, KnownEnoughApplication, OwnerConversationArchitect,
+  type DecisionNegotiationModel, type OwnerConversationModel, type TrustedPrincipal,
+} from '@deal-table/application';
 import { createLocalKnownEnoughApiHandler } from './http-core.ts';
 
 const decisionId = 'christmas-decision';
@@ -14,7 +17,7 @@ const identities = new Map([
 ]);
 let servers: Server[] = [];
 
-async function setup(architect?: DecisionArchitect, ownerModel?: OwnerConversationModel) {
+async function setup(architect?: DecisionArchitect, ownerModel?: OwnerConversationModel, negotiationModel?: DecisionNegotiationModel) {
   const fixture = buildChristmasFixture();
   let sequence = 0;
   const application = new KnownEnoughApplication({
@@ -33,8 +36,12 @@ async function setup(architect?: DecisionArchitect, ownerModel?: OwnerConversati
     application, model: ownerModel,
     clock: { now: () => '2026-10-01T12:00:00.000Z' }, ids: { next: () => `api-owner-draft-${++sequence}` },
   }) : undefined;
+  const negotiator = negotiationModel ? new DecisionNegotiator({
+    application, model: negotiationModel,
+    clock: { now: () => '2026-10-01T12:00:00.000Z' }, ids: { next: () => `api-negotiation-${++sequence}` },
+  }) : undefined;
   const server = createServer(createLocalKnownEnoughApiHandler({ application, identities,
-    ...(architect ? { architect } : {}), ...(ownerConversation ? { ownerConversation } : {}) }));
+    ...(architect ? { architect } : {}), ...(ownerConversation ? { ownerConversation } : {}), ...(negotiator ? { negotiator } : {}) }));
   servers.push(server);
   await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
   const address = server.address();
@@ -44,6 +51,44 @@ async function setup(architect?: DecisionArchitect, ownerModel?: OwnerConversati
     headers: { 'x-deal-table-test-identity': label },
   });
   return { get, base, application, fixture };
+}
+
+async function prepareReadyDecision(application: KnownEnoughApplication) {
+  const fixture = buildChristmasFixture();
+  const system: TrustedPrincipal = { kind: 'service', subject: 'test-provisioner', roomIds: [decisionId] };
+  for (const person of fixture.definition.requiredParticipantIds) {
+    const actor = { kind: 'participant' as const, subject: `subject-${person}` };
+    const owner = await application.getOwnerSnapshot(actor, decisionId);
+    const confirmation = await application.execute(actor, {
+      schemaVersion: 2, type: 'CONFIRM_FRAME', requestId: `frame-${person}`, decisionId,
+      idempotencyKey: `frame-${person}`,
+      expected: { contextToken: owner.publicSnapshot.contextToken, semanticVersion: owner.publicSnapshot.semanticVersion,
+        controlVersion: owner.controlVersion, ownerVersion: owner.ownerVersion },
+      payload: { frameVersion: fixture.definition.frameVersion },
+    });
+    expect(confirmation.ok).toBe(true);
+  }
+  for (const person of fixture.definition.requiredParticipantIds) {
+    const actor = { kind: 'participant' as const, subject: `subject-${person}` };
+    const owner = await application.getOwnerSnapshot(actor, decisionId);
+    const draft = {
+      schemaVersion: 2 as const, draftId: `empty-${person}`, draftVersion: 1,
+      decisionId, ownerParticipantId: person, ownerVersion: owner.ownerVersion,
+      semanticVersion: owner.publicSnapshot.semanticVersion, contextToken: owner.publicSnapshot.contextToken,
+      sourceSummary: 'No private conditions in this synthetic API test.', proposedConstraints: [], unsupportedConditions: [],
+      createdAt: '2026-10-01T12:00:00.000Z',
+    };
+    await application.storeConstraintDraft(system, draft);
+    const current = await application.getOwnerSnapshot(actor, decisionId);
+    const result = await application.execute(actor, {
+      schemaVersion: 2, type: 'CONFIRM_CONSTRAINTS', requestId: `inputs-${person}`, decisionId,
+      idempotencyKey: `inputs-${person}`,
+      expected: { contextToken: current.publicSnapshot.contextToken, semanticVersion: current.publicSnapshot.semanticVersion,
+        controlVersion: current.controlVersion, ownerVersion: current.ownerVersion },
+      payload: { draftId: `empty-${person}`, draftVersion: 1, constraintIds: [] },
+    });
+    expect(result.ok).toBe(true);
+  }
 }
 
 afterEach(async () => {
@@ -203,5 +248,46 @@ describe('Known Enough local HTTP adapter', () => {
       }, body: JSON.stringify({ requestId: 'owner-conversation-2', messages: [{ role: 'owner', text: raw }] }),
     });
     expect(outsider.status).toBe(404);
+  });
+
+  it('exposes a bounded reasoning action and returns only the validated public proposal', async () => {
+    let receivedContext: unknown;
+    const model: DecisionNegotiationModel = async input => {
+      receivedContext = input.context;
+      return {
+        values: [
+          { variableId: 'destination', value: { type: 'ENUM', optionId: 'cancun' } },
+          { variableId: 'trip-start', value: { type: 'DATE', date: '2026-12-24' } },
+          { variableId: 'trip-end', value: { type: 'DATE', date: '2026-12-29' } },
+          { variableId: 'trip-duration', value: { type: 'DURATION', seconds: 432_000 } },
+          { variableId: 'accommodation', value: { type: 'ENUM', optionId: 'quiet-hotel' } },
+          { variableId: 'estimated-total', value: { type: 'MONEY', amountMinor: 150_000, currencyCode: 'USD', minorUnit: 2 } },
+        ],
+        permissionDependencies: [], questionIntents: [],
+        explanationDraft: { variableIds: ['destination', 'trip-start', 'trip-end', 'trip-duration', 'accommodation', 'estimated-total'],
+          ruleIds: ['positive-duration', 'bounded-synthetic-estimate'] },
+      };
+    };
+    const { get, base, application } = await setup(undefined, undefined, model);
+    await prepareReadyDecision(application);
+    const response = await fetch(`${base}/decisions/${decisionId}/reasoning`, {
+      method: 'POST', headers: { 'x-deal-table-test-identity': 'NON_PRODUCTION maya', 'content-type': 'application/json' },
+      body: JSON.stringify({ requestId: 'run-christmas-model' }),
+    });
+    expect(response.status).toBe(200);
+    const body = await response.json() as {
+      outcome: string; publicSnapshot: { status: string; currentProposal: { facts: { values: unknown[] } } | null };
+      ownQuestions: unknown[]; explanation: { kind: string; values: { label: string; value: string }[] } | null;
+    };
+    expect(body.outcome).toBe('APPLIED');
+    expect(body.publicSnapshot.status).toBe('PROPOSED');
+    expect(body.publicSnapshot.currentProposal?.facts.values).toHaveLength(6);
+    expect(body.ownQuestions).toEqual([]);
+    expect(body.explanation?.kind).toBe('VALIDATED_PUBLIC_VALUES');
+    expect(body.explanation?.values.some(value => value.label === 'Destination' && value.value === 'Cancún')).toBe(true);
+    expect(JSON.stringify(body)).not.toMatch(/private|sourceSummary|constraintId|ownerParticipantId/i);
+    expect(JSON.stringify(receivedContext)).not.toContain('sourceSummary');
+    const snapshot = await get(`/decisions/${decisionId}/public`);
+    expect(await snapshot.json()).toMatchObject({ status: 'PROPOSED' });
   });
 });

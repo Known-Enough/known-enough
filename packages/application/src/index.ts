@@ -743,8 +743,13 @@ export type {
   OwnerConversationContext, OwnerConversationInterpretation, OwnerConversationMessage,
   OwnerConversationModel,
 } from './owner-conversation.ts';
+export { DecisionNegotiator, DecisionNegotiatorError } from './decision-negotiator.ts';
+export type {
+  DecisionNegotiationModel, DecisionNegotiationModelInput, DecisionNegotiationResult,
+  NegotiationQuestionIntent, PublicCandidateExplanation,
+} from './decision-negotiator.ts';
 export type {
   DecisionArchitectureDraft, DecisionArchitectErrorCode, DecisionArchitectModel,
   DecisionArchitectModelInput, DecisionArchitectParticipant, DecisionArchitectRequest,
 } from './decision-architect.ts';
-export type { KnownEnoughApplicationOptions } from './known-enough.ts';
+export type { DecisionNegotiationContext, NegotiationFailureTarget, KnownEnoughApplicationOptions } from './known-enough.ts';

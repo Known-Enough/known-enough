@@ -6,6 +6,7 @@ import {
 import {
   ApplicationError, DealTableApplication, DecisionArchitect, DecisionArchitectError,
   KnownEnoughApplication, KnownEnoughApplicationError, OwnerConversationArchitect, OwnerConversationError,
+  DecisionNegotiator, DecisionNegotiatorError,
   type DecisionArchitectRequest, type TrustedPrincipal,
 } from '@deal-table/application';
 import { createCognitoIdentityResolver, type CognitoIdentityOptions } from './cognito-identity.ts';
@@ -49,6 +50,8 @@ export interface KnownEnoughLocalApiOptions {
   readonly architect?: DecisionArchitect;
   /** Optional injected owner-private draft interpreter; never stores raw conversation turns. */
   readonly ownerConversation?: OwnerConversationArchitect;
+  /** Optional injected, bounded candidate-generation worker. */
+  readonly negotiator?: DecisionNegotiator;
   readonly identities?: ReadonlyMap<string, HttpIdentity>;
   readonly maxBodyBytes?: number;
   readonly debug?: boolean;
@@ -60,6 +63,8 @@ export interface KnownEnoughCognitoApiOptions extends CognitoIdentityOptions {
   readonly architect?: DecisionArchitect;
   /** Production callers must inject a reviewed, owner-scoped provider implementation. */
   readonly ownerConversation?: OwnerConversationArchitect;
+  /** Production callers must inject a reviewed, bounded provider implementation. */
+  readonly negotiator?: DecisionNegotiator;
   readonly allowedOrigins: readonly string[];
   readonly maxBodyBytes?: number;
 }
@@ -397,7 +402,7 @@ function knownEnoughRequestError(error: unknown, id: string): DecisionErrorResul
 }
 
 function createKnownEnoughApiHandler(
-  options: Pick<KnownEnoughLocalApiOptions, 'application' | 'architect' | 'ownerConversation' | 'maxBodyBytes' | 'debug'>,
+  options: Pick<KnownEnoughLocalApiOptions, 'application' | 'architect' | 'ownerConversation' | 'negotiator' | 'maxBodyBytes' | 'debug'>,
   authenticate: (request: IncomingMessage) => Promise<HttpIdentity | null>,
   allowedOrigins: readonly string[],
   includeTestIdentity: boolean,
@@ -417,6 +422,7 @@ function createKnownEnoughApiHandler(
       const url = URL.parse(request.url ?? '/', 'http://local.invalid');
       const architectureDraftRoute = url?.pathname === '/decisions/architecture/draft';
       const ownerConversationMatch = url?.pathname.match(/^\/decisions\/([^/]+)\/owner-conversation\/draft$/);
+      const reasoningMatch = url?.pathname.match(/^\/decisions\/([^/]+)\/reasoning$/);
       const route = url ? decisionPath(url) : null;
       if (architectureDraftRoute) {
         if (request.method !== 'POST' || !options.architect) {
@@ -453,6 +459,40 @@ function createKnownEnoughApiHandler(
         } catch (error) {
           const result = knownEnoughRequestError(error, responseId);
           debugLog(debug, 'decision-frame-draft-error', { actor: actor(principal), error: result.error.code });
+          sendJson(response, result.error.httpStatus, result);
+        }
+        return;
+      }
+      if (reasoningMatch) {
+        if (request.method !== 'POST' || !options.negotiator) {
+          sendJson(response, 404, decisionErrorBody('NOT_FOUND', id));
+          return;
+        }
+        if (principal.kind === 'display') {
+          request.resume();
+          sendJson(response, 403, decisionErrorBody('FORBIDDEN', id));
+          return;
+        }
+        let responseId = id;
+        try {
+          const body = await readJson(request, maxBodyBytes);
+          const bodyId = bodyRequestId(body, id);
+          responseId = bodyId;
+          const decisionId = decodeURIComponent(reasoningMatch[1]!);
+          if (body === null || typeof body !== 'object' || Array.isArray(body)
+            || !Id.safeParse(bodyId).success || !Id.safeParse(decisionId).success
+            || Object.keys(body).sort().join('|') !== 'requestId') {
+            sendJson(response, 422, decisionErrorBody('INVALID_COMMAND', bodyId));
+            return;
+          }
+          const result = await options.negotiator.generate(principal, decisionId);
+          debugLog(debug, 'decision-reasoning', { actor: actor(principal), status: result.outcome, attempts: result.attempts });
+          sendJson(response, 200, { requestId: bodyId, ...result });
+        } catch (error) {
+          const result = error instanceof DecisionNegotiatorError
+            ? decisionErrorBody(error.code === 'INVALID_MODEL_OUTPUT' ? 'INVALID_COMMAND' : 'RETRYABLE_SERVER_ERROR', responseId)
+            : knownEnoughRequestError(error, responseId);
+          debugLog(debug, 'decision-reasoning-error', { actor: actor(principal), error: result.error.code });
           sendJson(response, result.error.httpStatus, result);
         }
         return;

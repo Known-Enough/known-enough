@@ -23,7 +23,7 @@ for (const width of [390, 1280]) {
 
 test('draft, private-space, and proposal surfaces stay local and describe what is not connected', async ({ page }) => {
   let body: Record<string, unknown> | null = null;
-  await page.route('http://127.0.0.1:8787/decisions/architecture/draft', async route => {
+  await page.route('http://127.0.0.1:8788/decisions/architecture/draft', async route => {
     body = route.request().postDataJSON() as Record<string, unknown>;
     const participants = body.participants as { id: string; displayName: string }[];
     await route.fulfill({ contentType: 'application/json', body: JSON.stringify({
@@ -85,4 +85,33 @@ test('retained TeamTable route remains an explicit legacy preview', async ({ pag
   await page.goto('/?legacy=teamtable');
   await expect(page.getByRole('heading', { name: 'Deal Table', exact: true })).toBeVisible();
   await expect(page.getByText('Shared table · local demo')).toBeVisible();
+});
+
+test('fictional Christmas negotiation stays private and publishes only a kernel-checked candidate', async ({ page }, testInfo) => {
+  await page.goto('/');
+  const demo = page.getByRole('region', { name: 'Try the fictional Christmas decision' });
+  await expect(demo).toContainText('the hosted HTTPS preview remains a static mock with no shared state');
+  await demo.getByRole('button', { name: 'Load local scenario' }).click();
+  await expect(demo.getByText('Family Christmas trip', { exact: true })).toBeVisible();
+  await demo.getByRole('button', { name: 'Generate candidate' }).click();
+  await expect(demo.getByText('Local reasoning outcome: NEEDS_PERMISSION.')).toBeVisible();
+  await expect(demo.locator('.ke-demo-summary')).toContainText('PRIVATE NEGOTIATION');
+  await expect(demo.getByText('A participant’s private question is pending. Select its fictional local profile to view and answer it.')).toBeVisible();
+  await expect(demo.getByText(/Maya private|Nina private|nina-destination-flexibility|maya-budget-limit/)).toHaveCount(0);
+
+  await demo.getByLabel('Fictional local profile').selectOption('nina');
+  await demo.getByRole('button', { name: 'Load local scenario' }).click();
+  const question = demo.getByRole('region', { name: 'Private negotiation question' });
+  await expect(question.getByRole('heading', { name: 'Optional one-time adjustment' })).toBeVisible();
+  await expect(question).toContainText('Cancún, Oaxaca');
+  await expect(question).toContainText('Mazatlán');
+  await question.getByRole('button', { name: 'Allow this exact adjustment' }).click();
+  await expect(demo.getByText('Local reasoning outcome: APPLIED.')).toBeVisible();
+  await expect(demo.locator('.ke-demo-summary')).toContainText('PROPOSED');
+  await expect(demo.getByRole('heading', { name: 'Validated proposal · public facts only' })).toBeVisible();
+  await expect(demo.getByText('Destination: Mazatlán')).toBeVisible();
+  await expect(demo.getByText('No private reason or condition is included in these shared facts.')).toBeVisible();
+  await expect(demo.getByText(/maya-budget-limit|nina-destination-flexibility|personal loan|older relative/)).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Nothing here yet' })).toHaveCount(0);
+  await page.screenshot({ path: testInfo.outputPath('christmas-mvp.png'), fullPage: true });
 });
