@@ -4,6 +4,8 @@ The user authorized CLI staging setup, later waived the earlier `$25/month` esti
 
 No task is active. KE13A/KE13C remain accepted; final KE13 operational acceptance is separate, and KE00/B04/B04.5 statuses were not changed. KE13B remains gated by KE12 and B04/B04.5 acceptance. The temporary setup permission set was removed; `known-enough-staging-deploy` remains for exact-prefix static releases. No API or persistence resource was created.
 
+Review plan now avoids extra reviewer sessions: KE01–KE03 evidence is bundled into KE09 after the first end-to-end MVP and before real model calls; KE13B keeps one focused backend/IAM checkpoint. Explicit privacy/security, KE09 follow-up, KE17 and human-acceptance gates remain. Routine tasks use focused checks without repeated general reviews.
+
 Documentation baseline: local `main` at merge checkpoint `fb3d0b0`, preserving prior local `c20fe3c` and integrating `origin/main` `a13447c`. A fast-forward-only sync was attempted first and correctly stopped on divergence; the history-preserving local merge is recorded, with no push. Actual worker: Codex GPT-6; exact variant/effort unexposed. Documentation-only edits are complete and checked: seven reference hashes, 176 local links across eight changed docs, task/status consistency and `git diff --check` passed. No application suite was run and no cloud changes were made for this documentation update.
 
 ## Prior handoff — KE13A-P correction complete; follow-up review required — 2026-09-27T01:45:19Z

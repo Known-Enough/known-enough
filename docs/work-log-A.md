@@ -1,3 +1,9 @@
+## 2026-09-27 — token-efficient review plan / REVIEW
+
+- User clarified that only specific architectural reviews should be scheduled after the first MVP. Actual worker: Codex GPT-6; exact variant/effort unexposed. Clean-main baseline: `ecd9877`; `git pull --ff-only origin main` succeeded before edits. No task claim or application work.
+- Updated the shared workflow, task board, KE01–KE03/KE09/KE13B review timing, and common review footer across KE01–KE17. KE01–KE03 evidence is now reviewed together once at KE09 after the first end-to-end MVP; KE13B retains one focused auth/privacy/persistence/IAM checkpoint. Routine tasks use focused checks, not extra reviewer sessions. Existing B04/B04.5, privacy/security, KE09 follow-up, KE17 and human acceptance gates remain; no task was accepted or unblocked by this edit.
+- No tests or application suite run. `node scripts/check-references.mjs` matched 7/7 immutable hashes; a local-link/gate check resolved 266 links across 22 changed docs and confirmed KE00 remains DONE, B04/B04.5 remain REVIEW, and KE13 remains BLOCKED; `git diff --check` passed. No push.
+
 ## 2026-09-27 — Stage 0 deployment documentation / REVIEW
 
 - Bounded claim: update current KE13 staging/task/handoff records with the already completed AWS CLI deployment; preserve review gates and do not change KE00, B04/B04.5, or KE13 operational acceptance. Actual worker: Codex GPT-6; exact variant/effort unexposed. Baseline: local `main` synchronized at `fb3d0b0`, preserving local `c20fe3c` and merging remote documentation commit `a13447c` after `git pull --ff-only origin main` reported divergence. No push.
