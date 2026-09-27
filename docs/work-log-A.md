@@ -1,3 +1,9 @@
+## 2026-09-27T20:04:27Z — KE08 / IN_PROGRESS
+
+- User A claimed KE08 after KE07 DONE. Clean synchronized `main` baseline `1135d79`; `git pull --ff-only origin main` succeeded in `/tmp/known-enough-ke07`. This is the sole active task. Actual worker Codex GPT-6, runtime variant/effort unexposed; Luna/high is the requested target and not claimed as verified runtime.
+- Bounded files: `packages/application/src/{known-enough.ts,index.ts,decision-negotiator.ts,decision-negotiator.test.ts}`; focused `packages/domain/src/known-enough-kernel.test.ts`; `apps/api/src/{http-core.ts,local.ts,known-enough-http.test.ts}`; `apps/web/src/{known-enough-home.tsx,style.css,decision-negotiator-mock.ts,decision-negotiator-mock.test.ts}`; `tests/e2e/scaffold.spec.ts` plus focused synthetic Christmas browser evaluation if needed; test-support fixture only if necessary; KE08, board, current handoff and A log. No schema/contracts, kernel implementation (unless a proven gap), adapters, root/lock, CI, cloud, live/paid model, deployment or publication.
+- Current baseline already has lifecycle operations to start/complete a reasoning job, kernel-check candidate proposals, create owner-scoped negotiation questions, require exact owner permission and gate publication/disclosure. Reuse these boundaries; no AI output gets consent authority.
+
 ## 2026-09-27 — KE07 / DONE
 
 - Completed KE07 from clean synchronized `main` baseline `0c86a2d53d2d7f58f769afbbb9253afb63625d37` in `/tmp/known-enough-ke07`; `git pull --ff-only origin main` succeeded before work. Actual worker Codex GPT-6, runtime variant/effort unexposed; Luna/high is not claimed as verified runtime selection.
