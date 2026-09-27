@@ -36,7 +36,7 @@ Routine implementation successors become eligible when the prior task reaches DO
 | --- | --- | --- | --- |
 | [KE00](tasks/KE00.md) | `gpt-6-astra` / high scheduled; actual GPT-6, variant unexposed | User-directed first task | DONE — user accepted the pivot audit on 2026-09-26 |
 | [KE01](tasks/KE01.md) | `gpt-6-luna` / high target; runtime variant/effort unexposed | KE00 DONE | DONE — v2 generic contracts, privacy allowlists, fixtures and compatibility notes; full check passed |
-| [KE02](tasks/KE02.md) | `gpt-6-luna` / high target; runtime variant/effort unexposed | KE01 + retained B04/B04.5 technical baseline | IN_PROGRESS — sequential bounded design then deterministic kernel implementation |
+| [KE02](tasks/KE02.md) | `gpt-6-luna` / high target; runtime variant/effort unexposed | KE01 + retained B04/B04.5 technical baseline | IN_PROGRESS — bounded design recorded and transferred to kernel implementation |
 | [KE03](tasks/KE03.md) | `gpt-6-luna` / high | KE02 | BLOCKED — application and versioned storage adaptation |
 | [KE04](tasks/KE04.md) | `gpt-6-luna` / high | KE03 | BLOCKED — TeamTable regression bridge |
 | [KE05](tasks/KE05.md) | `gpt-6-luna` / high | KE04 | BLOCKED — product shell waits for KE04 |

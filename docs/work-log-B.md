@@ -1,5 +1,13 @@
 # Developer B work log
 
+## 2026-09-27T09:55:33Z — KE02 design phase / implementation handoff
+
+- Design recorded in `docs/known-enough-architecture.md` and KE02 ticket; status remains IN_PROGRESS. A design commit is published before implementation. No separate review phase.
+- Kernel is pure single-candidate validation with recomputed typed rule outcomes; exact current frame/owner/proposal/permission binding; independent public fact hash; hard vs negotiable semantics; private ID/code diagnostics plus safe status projection.
+- Aggregate 64 active confirmed constraints +128 definition rules =192 evaluations; worst IN over 64 ENUM_SET values of 64 members =786,432 inner comparisons, plus at most 3,840 referenced operands. Runtime counter caps at one million operations; envelope 360 KiB.
+- KE03 handoff keeps v4's three-owner limitation explicit and requires a versioned five-owner bridge. Retains measured state ceilings 352/360 KiB, GUARD/REPLAY 8 KiB, permission history 192/room &32/owner, pending response counts and B04.5 max-record+768 byte reservation formulas. Full state attribute measurement plus reservations remains mandatory; KE02 does not migrate data.
+- Next: implement in the claimed domain module, export and test against existing Christmas, purchase and TeamTable fixtures. No storage/adapter/application/AWS changes.
+
 ## 2026-09-27T09:53:50Z — KE02 / IN_PROGRESS
 
 - User directed KE02 after KE01. Board and current A/B handoffs show no other active claim. Clean `main` baseline `b91cb2e79e9011c819f52b542edacccb3944c417`; `git pull --ff-only origin main` succeeded and local/remote are 0/0.
