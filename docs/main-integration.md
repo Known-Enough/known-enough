@@ -1,10 +1,14 @@
 # Shared main — integrated baseline
 
+## Current synchronization policy — 2026-09-27
+
+The user has granted standing authorization to push completed task work, verified documentation-only changes, and checked reviewable checkpoints to `origin/main` after focused checks, without a separate push approval. This supersedes dated historical statements below that new publication was not authorized. A checkpoint may be pushed for its named reviewer; preserve REVIEW/BLOCKED status and keep successors gated until all required review/acceptance passes. Pushing a review/status document does not accept a task. After each push, verify local `main` equals `origin/main`; the other clone must pull before taking the next task. AWS deployments, paid resources, spending and external publication remain separately authorized actions.
+
 ## Current inspection — September 26, 2026 (KE00)
 
 Clean main successfully ran `git pull --ff-only origin main` and matched `origin/main` at `65359ebd19c8ae81007a4b502cce955d5d8ff292` (zero ahead/behind). Merge `2dd036a`, correction `a058cc5`, invitation implementation `13707c2`, R11/R12 fix `f6b93bc` and independent PASS record `1c4ea45` are all included. No local-only B04 source delta exists in this checkout. B04/B04.5 remain REVIEW for human acceptance of retained local scope; managed-service/deployment acceptance remains outstanding.
 
-This is a read-only history/source audit, not a new Git integration or application-check run. Dated local/unpushed/paused statements below are preserved as history. The [Known Enough queue](task-board.md) and [pivot audit](known-enough-pivot.md) govern next work. KE00 changes only local documentation and stops for human review; no new publication is authorized or performed.
+This was a read-only history/source audit, not a new Git integration or application-check run. Dated local/unpushed/paused statements below are preserved as history. At that dated checkpoint, KE00 was awaiting user review; the user accepted it on 2026-09-26 and the current [Known Enough queue](task-board.md) governs next work. The former no-publication statement was specific to that checkpoint and is superseded by the current synchronization policy above. The [pivot audit](known-enough-pivot.md) governs product scope.
 
 Main is the single active development branch, in separate clones. Earlier user-authorized consolidations are historical and do not authorize new publication. Old task branches are preserved only as historical pointers; do not start new work on them.
 

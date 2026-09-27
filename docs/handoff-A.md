@@ -1,3 +1,11 @@
+## Current handoff — main synchronization — 2026-09-27
+
+The user has now authorized a standing workflow: completed task work, verified docs-only changes, and checked reviewable checkpoints should be committed and pushed to `origin/main` after their checks, without another push approval. Do not mark REVIEW/BLOCKED work accepted because it is pushed; keep downstream gates. AWS deployments, paid resources, spending and external messages still require their own authorization. The other clone must pull before its next task.
+
+At the start of this update, local `/tmp/known-enough-stage0-guard/main` was clean at `c1b92f5`, 14 commits ahead of `origin/main` `a13447c`; the user's `/home/martelaxe/known-enough` clone was clean at `a13447c`. The ahead range includes the accepted Stage 0 hosted mock, staging docs/policies and the expired/unassigned KE13A-P review candidate. KE13A-P remains REVIEW; the candidate remains unassigned and must not be deployed. No acceptance statuses are changed by syncing.
+
+Actual worker: Codex GPT-6; exact variant/effort unexposed. Bounded claim: revise the shared sync/push instructions and publish only under the new standing authorization after docs checks. Current changed files and final remote verification are recorded in the A log. No AWS mutation or deployment.
+
 ## Current handoff — KE01 ready; routine review flow streamlined — 2026-09-27
 
 The user asked to reduce routine human/reviewer checkpoints and move quickly toward a testable MVP. [KE01](tasks/KE01.md) is READY and designated to User B for this ticket only; B should run the clean-main pull/claim procedure before implementation. No task is active yet. KE00 remains DONE and accepted. KE01 still names Astra/high for architecture; record the actual selected model and effort.

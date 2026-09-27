@@ -1,3 +1,9 @@
+## 2026-09-27 — standing main synchronization policy
+
+- User directed that completed task changes and documentation updates be kept synchronized on local and remote `main` so both users share the same project state. Actual worker: Codex GPT-6; exact variant/effort unexposed. Bounded scope: update repository instructions and synchronization guidance, preserve all acceptance/review statuses, then synchronize the current clean `main` after checks. Baseline `c1b92f5`; `git pull --ff-only origin main` succeeded, `origin/main` is `a13447c`, local `main` is 14 commits ahead. No task acceptance or AWS authorization changed.
+- Standing authorization recorded: push completed tasks, verified documentation-only updates, and checked reviewable checkpoints to `origin main` after their checks; no per-push confirmation. A pushed review artifact remains REVIEW/BLOCKED and cannot unlock successors. Other clone must pull before its next task. Deployments, spending and external messages remain separately authorized. Current 14-commit range includes accepted Stage 0 mock and its docs plus the explicitly expired/unassigned KE13A-P candidate; its ticket stays REVIEW and the candidate must not be assigned or deployed.
+- Changed `AGENTS.md`, `docs/agent-workflow.md`, `docs/main-integration.md`, `docs/task-board.md`, this handoff and this log. Documentation checks and remote synchronization result will be recorded after completion. No AWS resource/deployment change.
+
 ## 2026-09-27 — KE01 designated to User B / task queue clarification
 
 - User directed that User B perform KE01 and asked for an easy Luna task in parallel. Actual worker: Codex GPT-6; exact variant/effort unexposed. Bounded scope: record the one-ticket KE01 designation, clarify the first Luna ticket and explain the retained B04/B04.5 gate. Baseline `6f3dc28`, clean local `main`; `git pull --ff-only origin main` succeeded before edits. No implementation task claimed by this worker.
