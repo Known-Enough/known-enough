@@ -1,3 +1,7 @@
+## 2026-09-28 — KE11 local/test-auth claim
+
+User authorized KE11 and approved proceeding in the current Codex GPT-6 session despite the ticket's Sol/high target; exact runtime variant/effort is unexposed. Clean synchronized `main` baseline `9c577cf861d65f08f944971e330ab2d0857fd54e`; `git pull --ff-only origin main` succeeded. Scope: local signed test sessions, identity-bound invitation/retry behavior, browser session flow, five-participant isolation tests and KE11 docs. No AWS/Cognito changes, live Bedrock, external invite delivery or deployment. `TD-KE10-01` remains deferred; KE10 is not accepted or release-ready.
+
 ## 2026-09-28 — KE10 technical-debt deferral and KE11 queue
 
 At the user's direction, kept the stop/commit finding in the existing technical-debt queue as READY; no new task status was introduced. KE10 remains REVIEW because the named focused independent follow-up has not passed. KE11 is READY for local/test-auth work only. Further live Bedrock use and release-grade claims remain gated on closing TD-KE10-01. This is a documentation-only status update; no code, cloud resources or acceptance records changed.
