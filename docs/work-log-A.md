@@ -171,6 +171,10 @@ At that point, the user's direction was recorded as keeping the stop/commit find
 
 # Developer A work log
 
+## 2026-09-28 — cloud-first MVP queue update
+
+User-directed documentation update on clean synchronized `main` baseline `6d807f09b04f47dac50321c9afd4098100e20b62`. Actual worker: Codex GPT-6; exact variant/effort unexposed. Reordered work to KE11 (User B app-side Cognito integration) → KE13B (User B authenticated API/DynamoDB/IAM, then one focused review) → KE13 (User A CLI provisioning/deployment/smoke) → KE12 deferred. Expanded KE11/KE13B handoffs with code-only boundaries for B and the A-owned cloud verification. No cloud resources, task acceptance, or application code changed. Checks passed: imported hashes 7/7, planning 15/15, local Markdown links in 7 updated files and `git diff --check`.
+
 ## 2026-09-28 — user direction on KE10 deferral
 
 The user clarified that the KE10 stop/commit issue should not pause MVP progress. Updated the current board, KE10/KE11 summaries, technical-debt queue/ticket and handoff: TD-KE10-01 stays READY for post-MVP follow-up and is not a gate for MVP work or separately authorized bounded MVP Bedrock testing. KE10 remains REVIEW; release-grade claims still require the named follow-up. Managed Cognito work still needs separate AWS resource-change authorization. No application code, AWS resources or acceptance status changed.

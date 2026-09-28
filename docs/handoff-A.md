@@ -1,4 +1,8 @@
-## Current handoff — KE11 local/test-auth slice — REVIEW — 2026-09-28
+## Current handoff — cloud-first MVP path — 2026-09-28
+
+The user reprioritized the queue so User B prepares the real cloud app path and User A uses AWS credentials for provisioning/deployment checks. Next: User B claims and completes KE11 (Cognito browser login, access-token API client, focused tests, CLI resource handoff), then KE13B (authenticated API, DynamoDB persistence, least-privilege IAM, tests/runbook and one focused auth/privacy/persistence/IAM review). These are sequential, not parallel. User A then performs KE13 via AWS CLI: create/configure the resources listed in B's runbook, deploy the regular app/backend, and verify API denial/persistence; B signs in with B's own test login to verify the browser flow. KE12 is deferred until after KE13. User B receives no AWS credentials; no local AWS stack is required. No Cognito/API/DynamoDB resources exist yet; Stage 0 remains a static mock. The existing `ReadOnlyAccess` and static-release profiles are not sufficient to create backend resources. Cloud changes still require a concrete scope and authorization before execution.
+
+## Prior handoff — KE11 local/test-auth slice — REVIEW — 2026-09-28
 
 The local test path now issues 15-minute signed loopback sessions for fictional Maya, Leo, Nina, Ana, Raul and a read-only display. Maya can issue a 24-hour hashed invitation link; only its bound local test subject can redeem it. Lost issuance responses require an explicit replacement that invalidates the old token; redemption retries for the same subject are safe. The web flow no longer switches participant identity with a profile selector. See [local auth/invitation runbook](ke11-local-test-auth.md).
 
