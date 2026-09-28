@@ -1,5 +1,6 @@
 import type { ModelInvocation, ModelCommitGuard } from './model-runtime.ts';
 import { KnownEnough as KE } from '@deal-table/contracts';
+import { KnownEnoughApplicationError } from './known-enough.ts';
 import type { KnownEnoughApplication, DecisionNegotiationContext } from './known-enough.ts';
 import type { Clock, TrustedPrincipal, IdSource } from './types.ts';
 
@@ -164,6 +165,7 @@ export class DecisionNegotiator {
     questionTtlMs?: number;
     /** Trusted, synchronous public-data-only catalog; no owner conditions or model output as its source. */
     publicCandidates?: (frame: KE.PublicDecisionFrame) => readonly KE.CandidateProposal['values'][];
+    isEnabled?: () => boolean;
   }) {
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.questionTtlMs = options.questionTtlMs ?? DEFAULT_QUESTION_TTL_MS;
@@ -208,13 +210,14 @@ export class DecisionNegotiator {
     const commitGuard: ModelCommitGuard = {
       principal, controlVersion: context.controlVersion,
       expiresAt: Date.parse(this.options.clock.now()) + 30_000,
+      ...(this.options.isEnabled ? { isEnabled: this.options.isEnabled } : {}),
     };
     const invocation: ModelInvocation = {
       expiresAt: commitGuard.expiresAt,
       assertCurrent: async () => {
         const owner = await this.options.application.getOwnerSnapshot(principal, decisionId);
         const current = await this.options.application.getReasoningContext(service, decisionId, job.id);
-        if (Date.parse(this.options.clock.now()) >= commitGuard.expiresAt
+        if (this.options.isEnabled?.() === false || Date.parse(this.options.clock.now()) >= commitGuard.expiresAt
           || owner.controlVersion !== commitGuard.controlVersion || current.job.epoch !== job.epoch
           || current.controlVersion !== commitGuard.controlVersion)
           throw new DecisionNegotiatorError('MODEL_FAILED');
@@ -257,13 +260,18 @@ export class DecisionNegotiator {
     }
 
     try {
-      const outcome = await this.options.application.completeReasoning(service, decisionId, job.id, parsed.candidate, commitGuard);
+      let outcome = await this.options.application.completeReasoning(service, decisionId, job.id, parsed.candidate, commitGuard);
       if (outcome === 'STALE') await this.options.application.cancelReasoning(service, decisionId, job.id);
       if (outcome === 'NEEDS_PERMISSION') {
+        let questionsIssued = 0;
+        let questionControlVersion = context.controlVersion + 1;
+        const runtimeActive = () => this.options.isEnabled?.() !== false
+          && Date.parse(this.options.clock.now()) < commitGuard.expiresAt;
         const targets = await this.options.application.getPendingNegotiationFailures(service, decisionId);
         const targetKeys = new Set(targets.map(target => `${target.ownerParticipantId}:${target.constraintId}:${target.constraintVersion}`));
         const now = Date.parse(this.options.clock.now());
         for (const intent of parsed.questionIntents) {
+          if (!runtimeActive()) break;
           const key = `${intent.ownerParticipantId}:${intent.constraintId}:${intent.constraintVersion}`;
           if (!targetKeys.has(key)) continue;
           const expiresAt = new Date(now + this.questionTtlMs).toISOString();
@@ -274,13 +282,30 @@ export class DecisionNegotiator {
             adjustment: intent.adjustment, expiresAt,
           });
           if (!applies) continue;
-          await this.options.application.askNegotiation(service, {
-            decisionId, contextToken: job.contextToken, semanticVersion: job.semanticVersion,
-            participantId: intent.ownerParticipantId, pendingProposalId: parsed.candidate.proposalId,
-            constraintId: intent.constraintId, constraintVersion: intent.constraintVersion,
-            adjustment: intent.adjustment,
-            expiresAt,
+          if (!runtimeActive()) break;
+          let asked: KE.NegotiationQuestion | null;
+          try {
+            asked = await this.options.application.askNegotiation(service, {
+              decisionId, contextToken: job.contextToken, semanticVersion: job.semanticVersion,
+              participantId: intent.ownerParticipantId, pendingProposalId: parsed.candidate.proposalId,
+              constraintId: intent.constraintId, constraintVersion: intent.constraintVersion,
+              adjustment: intent.adjustment, expiresAt,
+              runtimeGuard: { expiresAt: commitGuard.expiresAt, expectedControlVersion: questionControlVersion,
+                ...(this.options.isEnabled ? { isEnabled: this.options.isEnabled } : {}) },
+            });
+          } catch (error) {
+            if (!runtimeActive() || (error instanceof KnownEnoughApplicationError && error.code === 'STALE_CONTEXT')) break;
+            throw error;
+          }
+          if (asked) { questionsIssued++; questionControlVersion++; }
+        }
+        if (questionsIssued === 0 && (!runtimeActive()
+          || (await this.options.application.getOwnerSnapshot(principal, decisionId)).controlVersion !== questionControlVersion)) {
+          await this.options.application.abandonPendingReasoning(service, {
+            decisionId, proposalId: parsed.candidate.proposalId, proposalVersion: parsed.candidate.proposalVersion,
+            contextToken: job.contextToken, semanticVersion: job.semanticVersion,
           });
+          outcome = 'STALE';
         }
       }
 

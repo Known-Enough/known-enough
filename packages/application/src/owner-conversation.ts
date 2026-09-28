@@ -85,6 +85,7 @@ export class OwnerConversationArchitect {
     model: OwnerConversationModel;
     clock: Clock;
     ids: IdSource;
+    isEnabled?: () => boolean;
   }) {}
 
   async draft(principal: TrustedPrincipal | null, input: { decisionId: string; messages: unknown }): Promise<KE.AIConstraintDraft> {
@@ -98,12 +99,13 @@ export class OwnerConversationArchitect {
     const commitGuard: ModelCommitGuard = {
       principal, controlVersion: owner.controlVersion,
       expiresAt: Date.parse(this.options.clock.now()) + 30_000,
+      ...(this.options.isEnabled ? { isEnabled: this.options.isEnabled } : {}),
     };
     const invocation: ModelInvocation = {
       expiresAt: commitGuard.expiresAt,
       assertCurrent: async () => {
         const current = await this.options.application.getOwnerSnapshot(principal, input.decisionId);
-        if (Date.parse(this.options.clock.now()) >= commitGuard.expiresAt
+        if (this.options.isEnabled?.() === false || Date.parse(this.options.clock.now()) >= commitGuard.expiresAt
           || current.controlVersion !== owner.controlVersion || current.ownerVersion !== owner.ownerVersion
           || current.draftVersion !== owner.draftVersion || current.ownerParticipantId !== owner.ownerParticipantId
           || current.publicSnapshot.contextToken !== owner.publicSnapshot.contextToken

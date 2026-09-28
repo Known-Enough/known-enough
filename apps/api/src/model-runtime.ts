@@ -22,10 +22,10 @@ export function createKnownEnoughModelRuntime(options: {
   const models = createBedrockModels({ transport, jobs, enabled: () => enabled,
     ...(options.usage ? { usage: options.usage } : {}) });
   return {
-    architect: new DecisionArchitect(models.architect, () => options.ids.next(), () => Date.parse(options.clock.now())),
-    ownerConversation: new OwnerConversationArchitect({ application: options.application, model: models.owner, clock: options.clock, ids: options.ids }),
+    architect: new DecisionArchitect(models.architect, () => options.ids.next(), () => Date.parse(options.clock.now()), () => enabled),
+    ownerConversation: new OwnerConversationArchitect({ application: options.application, model: models.owner, clock: options.clock, ids: options.ids, isEnabled: () => enabled }),
     negotiator: new DecisionNegotiator({ application: options.application, model: models.negotiation, clock: options.clock,
-      ids: options.ids, publicCandidates: options.publicCandidates }),
+      ids: options.ids, publicCandidates: options.publicCandidates, isEnabled: () => enabled }),
     stop: () => { enabled = false; jobs.stop(); },
     jobs,
   };

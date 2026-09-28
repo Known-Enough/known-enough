@@ -250,6 +250,19 @@ describe('Known Enough local HTTP adapter', () => {
     expect(outsider.status).toBe(404);
   });
 
+  it('reports malformed model output as a retryable server failure', async () => {
+    const { base, application } = await setup(undefined, undefined, async () => ({ unexpected: 'PRIVATE_CANARY' }));
+    await prepareReadyDecision(application);
+    const response = await fetch(`${base}/decisions/${decisionId}/reasoning`, {
+      method: 'POST', headers: { 'x-deal-table-test-identity': 'NON_PRODUCTION maya', 'content-type': 'application/json' },
+      body: JSON.stringify({ requestId: 'malformed-provider-result' }),
+    });
+    expect(response.status).toBe(503);
+    const body = await response.json();
+    expect(body).toMatchObject({ ok: false, requestId: 'malformed-provider-result',
+      error: { code: 'RETRYABLE_SERVER_ERROR', httpStatus: 503 } });
+    expect(JSON.stringify(body)).not.toContain('PRIVATE_CANARY');
+  });
   it('exposes a bounded reasoning action and returns only the validated public proposal', async () => {
     let receivedContext: unknown;
     const model: DecisionNegotiationModel = async input => {

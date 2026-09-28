@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 import { buildChristmasPublicCandidates } from '../../../packages/test-support/src/known-enough-fixtures.ts';
 import { createEvaluationDecision, evaluationPrincipal } from '../../../tests/evaluations/ke10.ts';
-import { syntheticResponse } from '../../../tests/evaluations/ke10-injected.ts';
+import { response, syntheticResponse } from '../../../tests/evaluations/ke10-injected.ts';
 import { createKnownEnoughModelRuntime } from './model-runtime.ts';
 
 function compose(h: Awaited<ReturnType<typeof createEvaluationDecision>>, send: (command: ConverseCommand) => ReturnType<typeof syntheticResponse> | Promise<ReturnType<typeof syntheticResponse>>) {
@@ -105,6 +105,76 @@ describe('KE10 application/runtime composition', () => {
     expect(result.publicSnapshot.currentProposal).toBeNull();
     expect((await h.repository.transactionDecision(h.decisionId, record => record))?.job).toBeNull();
     runtime.stop();
+  });
+  it('stop before the owner transaction prevents a completed model response from storing a draft', async () => {
+    const h = await createEvaluationDecision();
+    const original = h.application.storeConstraintDraft.bind(h.application);
+    vi.spyOn(h.application, 'storeConstraintDraft').mockImplementation(async (principal, input, guard) => {
+      runtime.stop();
+      return original(principal, input, guard);
+    });
+    const runtime = compose(h, syntheticResponse);
+    await expect(runtime.ownerConversation.draft(evaluationPrincipal('maya'), { decisionId: h.decisionId, messages }))
+      .rejects.toMatchObject({ code: 'STALE_CONTEXT' });
+    const stored = await h.repository.transactionDecision(h.decisionId, record => record);
+    expect(stored?.owners.find(owner => owner.participantId === 'maya')?.draft).toBeNull();
+  });
+  it('stop before the proposal transaction prevents publication after a completed model response', async () => {
+    const h = await createEvaluationDecision();
+    const original = h.application.completeReasoning.bind(h.application);
+    vi.spyOn(h.application, 'completeReasoning').mockImplementation(async (principal, decisionId, jobId, candidate, guard) => {
+      runtime.stop();
+      return original(principal, decisionId, jobId, candidate, guard);
+    });
+    const runtime = compose(h, syntheticResponse);
+    const result = await runtime.negotiator.generate(evaluationPrincipal('maya'), h.decisionId);
+    expect(result.outcome).toBe('STALE');
+    expect(result.publicSnapshot.currentProposal).toBeNull();
+    const stored = await h.repository.transactionDecision(h.decisionId, record => record);
+    expect(stored?.job).toBeNull();
+    expect(stored?.publicProposal).toBeNull();
+  });
+  it('stop during frame construction rejects the completed model draft', async () => {
+    const h = await createEvaluationDecision();
+    let stopped = false;
+    const ids = { next: () => {
+      if (!stopped) { stopped = true; runtime.stop(); }
+      return 'late-public-draft';
+    } };
+    const runtime = createKnownEnoughModelRuntime({ ...h, ids, provider: { mode: 'INJECTED', transport: { send: async command => syntheticResponse(command) } },
+      publicCandidates: buildChristmasPublicCandidates });
+    await expect(runtime.architect.draft('subject-maya', { draftId: 'late-draft', revision: 1,
+      objective: 'Choose together.', participants: [{ id: 'maya', displayName: 'Maya' }], allowedOptions: ['Cancún', 'Oaxaca'] }))
+      .rejects.toMatchObject({ code: 'STALE_CONTEXT' });
+  });
+  it.each(['stop', 'control'] as const)('%s after a permission-needed result issues no question and releases the exact pending candidate', async change => {
+    const h = await createEvaluationDecision();
+    const original = h.application.completeReasoning.bind(h.application);
+    vi.spyOn(h.application, 'completeReasoning').mockImplementation(async (...args) => {
+      const outcome = await original(...args);
+      if (outcome === 'NEEDS_PERMISSION') {
+        if (change === 'stop') runtime.stop();
+        else await h.repository.transactionDecision(h.decisionId, record => { record!.controlVersion++; });
+      }
+      return outcome;
+    });
+    const runtime = compose(h, command => {
+      const input = JSON.parse(command.input.messages![0]!.content![0]!.text!) as {
+        publicCandidates: unknown[]; confirmedConstraints: { ownerParticipantId: string; constraintId: string; constraintVersion: number }[];
+      };
+      const nina = input.confirmedConstraints.find(item => item.ownerParticipantId === 'nina' && item.constraintId === 'nina-destination-flexibility')!;
+      return response({ values: input.publicCandidates[3], permissionDependencies: [],
+        questionIntents: [{ ownerParticipantId: 'nina', constraintId: nina.constraintId,
+          constraintVersion: nina.constraintVersion, adjustment: { id: 'allow-mazatlan', visibility: 'TRUSTED_BACKEND',
+            operator: 'IN', variableId: 'destination', values: [{ type: 'ENUM', optionId: 'mazatlan' }] } }],
+        explanationDraft: { variableIds: [], ruleIds: [] } });
+    });
+    const result = await runtime.negotiator.generate(evaluationPrincipal('maya'), h.decisionId);
+    expect(result.outcome).toBe('STALE');
+    const state = await h.repository.transactionDecision(h.decisionId, record => record);
+    expect(state?.status).toBe('READY');
+    expect(state?.pendingCandidate).toBeNull();
+    expect(state?.owners.find(owner => owner.participantId === 'nina')?.pendingQuestions).toEqual([]);
   });
   it('bounds malformed proposal repairs to two isolated calls, leaving consent unchanged', async () => {
     const h = await createEvaluationDecision();

@@ -399,7 +399,7 @@ export class KnownEnoughApplication {
       const owner = decision.owners.find(item => item.participantId === draft.ownerParticipantId) ?? fail('NOT_FOUND');
       if (guard) {
         if (this.member(decision, guard.principal).participantId !== owner.participantId
-          || !Number.isFinite(guard.expiresAt) || Date.parse(this.now()) >= guard.expiresAt
+          || guard.isEnabled?.() === false || !Number.isFinite(guard.expiresAt) || Date.parse(this.now()) >= guard.expiresAt
           || decision.controlVersion !== guard.controlVersion) fail('STALE_CONTEXT');
       }
       if (!decision.frameConfirmations.some(item => item.participantId === owner.participantId
@@ -431,10 +431,14 @@ export class KnownEnoughApplication {
     constraintVersion: number;
     adjustment: unknown;
     expiresAt: string;
+    runtimeGuard?: { expiresAt: number; expectedControlVersion: number; isEnabled?: () => boolean };
   }): Promise<KETypes.NegotiationQuestion | null> {
     return this.options.repository.transactionDecision(input.decisionId, async decision => {
       if (!decision) fail('NOT_FOUND');
       this.service(decision, principal);
+      if (input.runtimeGuard && (input.runtimeGuard.isEnabled?.() === false
+        || Date.parse(this.now()) >= input.runtimeGuard.expiresAt
+        || decision.controlVersion !== input.runtimeGuard.expectedControlVersion)) fail('STALE_CONTEXT');
       if (decision.status === 'CLOSED') fail('FORBIDDEN');
       if (input.contextToken !== decision.definition.contextToken || input.semanticVersion !== decision.definition.semanticVersion)
         fail('STALE_CONTEXT');
@@ -480,6 +484,9 @@ export class KnownEnoughApplication {
         constraintId: constraint.constraintId, constraintVersion: constraint.constraintVersion,
         adjustment, requestIdentity, expiresAt: input.expiresAt, status: 'PENDING',
       });
+      if (input.runtimeGuard && (input.runtimeGuard.isEnabled?.() === false
+        || Date.parse(this.now()) >= input.runtimeGuard.expiresAt
+        || decision.controlVersion !== input.runtimeGuard.expectedControlVersion)) fail('STALE_CONTEXT');
       owner.pendingQuestions.push(question);
       if (decision.job) {
         decision.job = null;
@@ -488,6 +495,29 @@ export class KnownEnoughApplication {
       decision.status = 'PRIVATE_NEGOTIATION';
       decision.controlVersion += 1;
       return structuredClone(question);
+    });
+  }
+
+  /** Release only the exact incomplete, question-free candidate after runtime or authority invalidation. */
+  async abandonPendingReasoning(principal: TrustedPrincipal | null, input: {
+    decisionId: string; proposalId: string; proposalVersion: number;
+    contextToken: string; semanticVersion: number;
+  }): Promise<'ABANDONED' | 'STALE'> {
+    return this.options.repository.transactionDecision(input.decisionId, decision => {
+      if (!decision) fail('NOT_FOUND');
+      this.service(decision, principal);
+      const pending = decision.pendingCandidate;
+      if (!pending || decision.status !== 'PRIVATE_NEGOTIATION' || decision.job
+        || decision.definition.contextToken !== input.contextToken
+        || decision.definition.semanticVersion !== input.semanticVersion
+        || pending.proposalId !== input.proposalId || pending.proposalVersion !== input.proposalVersion
+        || pending.contextToken !== input.contextToken || pending.semanticVersion !== input.semanticVersion
+        || decision.owners.some(owner => owner.pendingQuestions.some(question => question.status === 'PENDING')))
+        return 'STALE';
+      decision.pendingCandidate = null;
+      decision.status = readinessStatus(decision);
+      decision.controlVersion += 1;
+      return 'ABANDONED';
     });
   }
 
@@ -718,7 +748,7 @@ export class KnownEnoughApplication {
         || decision.status !== 'REASONING') return 'STALE';
       if (guard) {
         this.member(decision, guard.principal);
-        if (!Number.isFinite(guard.expiresAt) || Date.parse(this.now()) >= guard.expiresAt
+        if (guard.isEnabled?.() === false || !Number.isFinite(guard.expiresAt) || Date.parse(this.now()) >= guard.expiresAt
           || decision.controlVersion !== guard.controlVersion) return 'STALE';
       }
       const candidate = parsed.data;
@@ -756,7 +786,7 @@ export class KnownEnoughApplication {
           .filter(permission => permission.status === 'ACTIVE')),
         now: this.now(),
       });
-      if (guard && (Date.parse(this.now()) >= guard.expiresAt
+      if (guard && (guard.isEnabled?.() === false || Date.parse(this.now()) >= guard.expiresAt
         || candidate.permissionDependencies.some(item => Date.parse(item.expiresAt) <= Date.parse(this.now())))) return 'STALE';
       decision.job = null;
       decision.controlVersion += 1;

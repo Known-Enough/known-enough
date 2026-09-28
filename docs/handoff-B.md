@@ -1,5 +1,19 @@
 # User B handoff — shared task pool
 
+## KE10 correction checkpoint — 2026-09-28
+
+User B / Codex GPT-6 (variant/effort unexposed) finished the bounded correction on synchronized base `7f78349acb160a318bf11b6561ea3c62900be377`. Four reproduced defects were closed: (1) stop after provider completion allowed an architect draft, owner draft or proposal to pass later application guards; (2) malformed model output returned an HTTP 422 client error instead of a redacted retryable 503; (3) stop after `NEEDS_PERMISSION` could still issue an owner question and leave a question-free candidate pending; (4) an authority control change between candidate completion and question creation could issue a stale question. Runtime enablement and control/expiry guards now run inside the exact output/question transactions; a stopped or changed, question-free pending candidate is released only if its proposal identity is still current. Previously committed questions remain subject to their existing context/consent rules.
+
+Focused API/application checks passed **41/41**; pinned `npm run check` passed **355 tests / 2 DynamoDB Local skips, hosted browser 1/1, end-to-end browser 44/44**, 7 reference hashes, 15 planning checks, lint/boundaries 158, types and both builds. The initial full run stopped at four test-only `prefer-const` lint findings; those were fixed before the passing full run. Source SHA-256 of `git diff --binary 7f78349 <correction-checkpoint> -- apps packages`: **`dd8a5fe756156db33edb3b91eaa9fc140c4b02c5a966773db370b9e5e249c101`**. Evidence log hashes: focused `190d2df82136813505f2ff13610a9394a38716f0c0d066e1dbeaae299a1dfbe2`; full `04da6b45eec3a0e8e9fb0960ec01a20363ca7cb4f051b32cee42d8baf4c3c50d`.
+
+The correction claim is released for the named sequential independent KE09 follow-up. **KE10 remains BLOCKED** on that review and separately authorized live Bedrock evaluations. KE11 remains BLOCKED. No paid/provider/cloud call, deployment or external message occurred; the checked repository checkpoint is synchronized under standing push authorization. The other clone must pull `origin main` with `--ff-only` before the next task.
+
+
+## KE10 correction claim — 2026-09-28
+
+User B / Codex GPT-6 (exact runtime variant/effort unexposed) resumes the sole project task on clean synchronized `main` at `7f78349acb160a318bf11b6561ea3c62900be377`; `git pull --ff-only origin main` succeeded, ahead/behind 0/0. The user directed KE10 issue resolution and repo sync. Bounded write scope: KE10 application invocation/commit guards, Bedrock model adapter, API error mapping, their focused regressions, KE10 runtime/ticket/board and B log/handoff. No contracts, browser, root/lock, infrastructure or live cloud changes. Reproduce late kill-switch commits and provider-output HTTP misclassification, correct both, run focused and required full checks, then commit/push a checked BLOCKED checkpoint. Independently reviewed and paid-call gates remain separate.
+
+
 ## KE10 implementation checkpoint — 2026-09-28
 
 Local implementation is complete and checked; **KE10 remains BLOCKED** on authorized live Bedrock evaluation evidence and its named independent KE09 runtime follow-up. User B / Codex GPT-6, exact runtime variant/effort unexposed. The implementation claim is released for sequential review; no next implementation task is active. KE11 remains BLOCKED. The user's earlier KE09 scheduling exception permitted offline work and is not independent certification or paid-call authorization.

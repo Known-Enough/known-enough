@@ -12,6 +12,7 @@ export interface ModelCommitGuard {
   principal: TrustedPrincipal | null;
   controlVersion: number;
   expiresAt: number;
+  isEnabled?: () => boolean;
 }
 export interface ModelJobRunner {
   run(kind: ModelJobKind, invocation: ModelInvocation, task: (signal: AbortSignal) => Promise<unknown>): Promise<unknown>;

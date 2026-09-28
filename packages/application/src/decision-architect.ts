@@ -83,7 +83,8 @@ export class DecisionArchitect {
   private readonly active = new Map<string, number>();
   private sequence = 0;
 
-  constructor(private readonly model: DecisionArchitectModel, private readonly id: () => string, private readonly now: () => number = Date.now) {}
+  constructor(private readonly model: DecisionArchitectModel, private readonly id: () => string, private readonly now: () => number = Date.now,
+    private readonly isEnabled: () => boolean = () => true) {}
 
   async draft(actorSubject: string, request: DecisionArchitectRequest): Promise<DecisionArchitectureDraft> {
     if (!Id.safeParse(actorSubject).success || !Id.safeParse(request?.draftId).success
@@ -110,7 +111,7 @@ export class DecisionArchitect {
     const invocation: ModelInvocation = {
       expiresAt: this.now() + 30_000,
       assertCurrent: async () => {
-        if (this.active.get(key) !== generation || this.now() >= invocation.expiresAt) fail('STALE_CONTEXT');
+        if (!this.isEnabled() || this.active.get(key) !== generation || this.now() >= invocation.expiresAt) fail('STALE_CONTEXT');
       },
     };
     try {

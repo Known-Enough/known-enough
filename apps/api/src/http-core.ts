@@ -490,7 +490,7 @@ function createKnownEnoughApiHandler(
           sendJson(response, 200, { requestId: bodyId, ...result });
         } catch (error) {
           const result = error instanceof DecisionNegotiatorError
-            ? decisionErrorBody(error.code === 'INVALID_MODEL_OUTPUT' ? 'INVALID_COMMAND' : 'RETRYABLE_SERVER_ERROR', responseId)
+            ? decisionErrorBody('RETRYABLE_SERVER_ERROR', responseId)
             : knownEnoughRequestError(error, responseId);
           debugLog(debug, 'decision-reasoning-error', { actor: actor(principal), error: result.error.code });
           sendJson(response, result.error.httpStatus, result);
