@@ -1,5 +1,11 @@
 # User B handoff — shared task pool
 
+## Current KE09 review claim — 2026-09-28T01:00:50Z
+
+User B / Codex GPT-6, exact runtime variant/effort unexposed; Astra/high is the ticket target, not verified telemetry. User directed KE09 at 2026-09-28T01:00:50Z. Clean `main` baseline `cbc498202a06b553bca1a28c9e22c1862e21ac18`; `git pull --ff-only origin main` succeeded, ahead/behind 0/0. KE08 writer is paused; no other task active. Read scope: integrated KE01–KE08 contracts/domain/application/adapters/API/browser source, tests and relevant evidence. Write scope: `docs/reviews/KE09.md`, `docs/tasks/KE09.md`, `docs/task-board.md`, `docs/handoff-B.md`, `docs/work-log-B.md`; disposable adversarial probes under `/tmp`. No implementation fixes in this review; route them to User A. Independence limitation: this conversation implemented KE01–KE02, so its inspection of that portion is self-review and cannot satisfy the independent PASS gate.
+
+The current user request initiates the review; it does not record product acceptance. KE08 remains REVIEW and paused. KE10 remains blocked until independent PASS and separately authorized real model calls.
+
 ## KE02 completion handoff — 2026-09-27T10:30:24Z
 
 KE02 is DONE on technical criteria, based on synchronized design checkpoint `e6d71d9b17cc584d5c19c28dc477387fdbd959cc`; the implementation and completion records in this checkout are ready to publish on `main`. Direct worker is Codex GPT-6; exact runtime variant/effort are not exposed, so `gpt-6-luna` / high remains the user-directed target rather than verified telemetry. See [KE02 ticket](tasks/KE02.md), [architecture/kernel design](known-enough-architecture.md#ke02-deterministic-validation-design--2026-09-27) and [`known-enough-kernel.ts`](../packages/domain/src/known-enough-kernel.ts).

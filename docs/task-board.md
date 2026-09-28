@@ -4,7 +4,7 @@ One project-wide priority queue, one active implementation or review at a time. 
 
 ## Current gate and claim
 
-**Token-efficient execution:** routine tasks advance on their focused checks; no separate project-level human sign-off blocks task progress. KE08's local MVP is ready for one product feedback pass; then run the single KE09 architecture/privacy review. No implementation task is active while this checkpoint is paused. Preserve B04/B04.5 technical evidence, KE13B's focused backend/IAM review, KE13 live operations verification, KE17 final technical review, and follow-ups only for material changes to reviewed boundaries.
+**Token-efficient execution:** routine tasks advance on their focused checks; no separate project-level human sign-off blocks task progress. KE08's local MVP is ready for one product feedback pass; then run the single KE09 architecture/privacy review. KE09 is the sole active review task, claimed by User B on `cbc4982`; no implementation task is active. This conversation authored KE01–KE02, so that portion still requires independent certification. Preserve B04/B04.5 technical evidence, KE13B's focused backend/IAM review, KE13 live operations verification, KE17 final technical review, and follow-ups only for material changes to reviewed boundaries.
 
 **MVP model choice (2026-09-27):** use `gpt-6-luna` / high for all direct work on KE01–KE08. This changes only the model/effort assignment; task order, scope and technical review gates stay the same. Astra remains assigned to the KE09 post-MVP architecture/privacy checkpoint, KE17 and any post-MVP architectural change the user explicitly decides needs it. Other post-MVP assignments are unchanged.
 
@@ -43,7 +43,7 @@ Routine implementation successors become eligible when the prior task reaches DO
 | [KE06](tasks/KE06.md) | `gpt-6-luna` / high target; runtime variant/effort unexposed | KE05 DONE | DONE — injected, contract-validated public frame draft and clarification flow; pinned full check passed |
 | [KE07](tasks/KE07.md) | `gpt-6-luna` / high target; runtime variant/effort unexposed | KE06 DONE | DONE — owner-scoped private draft extraction/confirmation flow; full check passed |
 | [KE08](tasks/KE08.md) | `gpt-6-luna` / high target; runtime variant/effort unexposed | KE07 DONE | REVIEW — local MVP shown for one user product feedback pass; pinned full check passed |
-| [KE09](tasks/KE09.md) | `gpt-6-astra` / high, independent session | KE08 MVP feedback pass and pause | BLOCKED — next named privacy/architecture checkpoint before live model work |
+| [KE09](tasks/KE09.md) | `gpt-6-astra` / high, independent session | KE08 MVP feedback pass and pause | IN_PROGRESS — User B review evidence on `cbc4982`; prior KE01–KE02 authorship precludes independent PASS here |
 | [KE10](tasks/KE10.md) | `gpt-6-sol` / high | KE09 independent PASS + separately authorized real model calls | BLOCKED — Bedrock and async jobs |
 | [KE11](tasks/KE11.md) | `gpt-6-sol` / high | KE10 + current critical follow-up | BLOCKED — authenticated multi-participant sessions |
 | [KE12](tasks/KE12.md) | `gpt-6-sol` / high | KE11 | BLOCKED — stateful simulated Alexa+ shared assistant |
