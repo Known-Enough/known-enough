@@ -1,5 +1,14 @@
 # User B handoff — shared task pool
 
+## User-directed correction review — 2026-09-28
+
+**PASS (self-review), scoped to R1–R6 on `e256a43a92224f2761977759c87dac466049585b`.** User B / Codex GPT-6; runtime variant/effort unexposed. I inspected the corrected source boundaries and their regressions: public catalog normalization and same-owner enum questions; exact historical identities and disclosure audiences; canonical refusals; semantic authority reset; bounded receipts and exact-job cleanup. No additional actionable finding was identified in this correction scope. This is not an independent certification: this conversation authored these fixes and KE01–KE02.
+
+The user directed “review it, pass it, push the changes, and then build KE10” after being informed of the independent-session blocker. This records a narrow scheduling exception allowing offline KE10 implementation following this self-review. It does not waive independent follow-up on new runtime boundaries before release, or authorize paid calls/cloud changes. KE09 is closed under that exception; the original independent gate is not represented as satisfied.
+
+Source diff SHA-256 against `0cced25` remains `0fcb933042af7279dd7342c8cf3c9b6070d6ce74a32a77422398931420e1fcbe`. Fresh pinned focused run: **58/58 passed**, five files (negotiator, lifecycle, owner conversation, contracts, API). The prior full-check evidence above applies to the identical executable artifact: 322 tests, two emulator skips, hosted 1/1, browser 44/44. It was not rerun for this documentation-only verdict. No live model/cloud acceptance is claimed.
+
+
 ## KE09 corrected artifact handoff — 2026-09-28T04:29:03Z
 
 R1–R6 corrections are complete under the user's explicit implementation and test authorization. [Review addendum](reviews/KE09.md#correction-handoff--2026-09-28-independent-follow-up-pending) maps each fix to permanent regressions and identifies the source diff over published claim `0cced25e790e5baa496b5018830755708ebc693e` (SHA-256 `0fcb933042af7279dd7342c8cf3c9b6070d6ce74a32a77422398931420e1fcbe` for `apps packages`). User B / Codex GPT-6, exact runtime variant/effort unexposed. No independent PASS is claimed.
