@@ -1,3 +1,10 @@
+## 2026-09-28T16:33:22Z — KE10 runtime follow-up / CHANGES_REQUESTED
+
+- Completed the independent review on `da76fae782e1d059554e7224ff6b1443b3ea3c84..8d70fd912db3902d08ff04d3778e14a113bcaffa`; runtime source diff SHA-256 `6e411f0e3375886d608ba776fb9804f74b7b8a3020e1cafac28c4b1188e61e3f`. Actual reviewer Codex GPT-6, exact variant/effort unexposed; separate session/checkout from implementation author. No subagents.
+- One P1: `runtime.stop()` does not fence a DynamoDB proposal transaction already submitted after application callback checks. A temporary repository barrier probe reproduced a public `APPLIED` proposal after stop returned. Required: make the stop/commit boundary explicit and enforce the chosen semantics with a delayed-transaction regression. Review record has exact paths/evidence.
+- Focused tests passed 38/38. The temporary adversarial probe reproduced the finding and was removed. Pinned Node 24.21.0/npm 11.19.0 `npm run check` passed: 7 reference hashes; 15 planning; lint/boundaries 158; typecheck; 355 tests/2 DynamoDB Local skips; production/hosted builds; hosted browser 1/1; E2E 44/44. Log SHA-256 `349dfc8cea57a9f5d484fe102bcf681e8b58b239cf858865eae10d3cc102db56`.
+- Review claim released; no active implementation claim. KE10 remains BLOCKED on correction, focused follow-up and separately authorized real-model evidence. No live provider/cloud calls or writes, deployment, spending or external messages.
+
 ## 2026-09-27T20:04:27Z — KE08 / IN_PROGRESS
 
 - User A claimed KE08 after KE07 DONE. Clean synchronized `main` baseline `1135d79`; `git pull --ff-only origin main` succeeded in `/tmp/known-enough-ke07`. This is the sole active task. Actual worker Codex GPT-6, runtime variant/effort unexposed; Luna/high is the requested target and not claimed as verified runtime.

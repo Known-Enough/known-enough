@@ -1,4 +1,10 @@
-## Current handoff — KE08 local MVP / REVIEW — 2026-09-27T20:50Z
+## Current handoff — KE10 runtime follow-up / CHANGES_REQUESTED — 2026-09-28T16:33Z
+
+User A / separate Codex GPT-6 session (variant/effort unexposed) reviewed exact runtime diff `da76fae782e1d059554e7224ff6b1443b3ea3c84..8d70fd912db3902d08ff04d3778e14a113bcaffa`, SHA-256 `6e411f0e3375886d608ba776fb9804f74b7b8a3020e1cafac28c4b1188e61e3f`. The sole review claim is released; no implementation task is active. **CHANGES_REQUESTED, P1:** a model-result proposal can commit after `runtime.stop()` returns if stop occurs while an asynchronous DynamoDB write is in flight. A temporary transaction-barrier probe reproduced `APPLIED` with a public proposal after stop. The required correction and focused regression are in the [review record](reviews/KE10-runtime-followup.md). No source files were edited.
+
+Reviewer checks: focused pinned runtime/API regressions **38/38**; temporary stop/commit probe reproduced the finding; pinned `npm run check` passed with 7 references, 15 planning checks, 158 boundaries, typecheck, 355 tests / 2 DynamoDB Local skips, hosted browser 1/1 and E2E 44/44. Log SHA-256 `349dfc8cea57a9f5d484fe102bcf681e8b58b239cf858865eae10d3cc102db56`. No paid calls, live provider, AWS actions, deployment or external messages. KE10 remains BLOCKED on correction/follow-up and separately authorized live evaluation.
+
+## Prior handoff — KE08 local MVP / REVIEW — 2026-09-27T20:50Z
 
 KE08's local injected-model candidate/negotiation flow is implemented and shown for the user feedback pass. The final pinned `npm run check` passed: refs 7/7, plans 15/15, lint/boundaries 132, typecheck, 303 tests with 2 opt-in skips, production bundle scan, hosted preview scan/browser 1/1, and E2E 44/44. Actual worker Codex GPT-6, exact variant/effort unexposed; the requested Luna/high target is not claimed as the observed runtime. Clean synchronized `main` baseline was `1135d79` after a successful `git pull --ff-only origin main`; work was performed in `/tmp/known-enough-ke07`.
 
