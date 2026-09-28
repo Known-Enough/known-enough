@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { InMemoryRoomRepository } from '@deal-table/adapters';
+import { encodeDecisionStateItem, decodeDecisionStateItem } from '../../adapters/src/dynamodb-codec.ts';
 import { KnownEnough as KE } from '@deal-table/contracts';
 import { buildChristmasFixture } from '../../test-support/src/known-enough-fixtures.ts';
 import { KnownEnoughApplication, type TrustedPrincipal } from './index.ts';
@@ -8,8 +9,12 @@ const decisionId = 'christmas-decision';
 const participant = (subject: string): TrustedPrincipal => ({ kind: 'participant', subject });
 const service: TrustedPrincipal = { kind: 'service', subject: 'worker', roomIds: [decisionId] };
 
-async function setup() {
+async function setup(optionalMember = false) {
   const fixture = buildChristmasFixture();
+  if (optionalMember) {
+    fixture.definition.requiredParticipantIds = fixture.definition.requiredParticipantIds.filter(id => id !== 'raul');
+    fixture.definition.participants.find(person => person.id === 'raul')!.requiredForApproval = false;
+  }
   let sequence = 0;
   let now = '2026-10-01T12:00:00.000Z';
   const repository = new InMemoryRoomRepository();
@@ -48,7 +53,7 @@ async function setup() {
       payload,
     };
   }
-  return { app, fixture, byMember, command, setNow: (value: string) => { now = value; } };
+  return { app, fixture, byMember, command, repository, setNow: (value: string) => { now = value; } };
 }
 
 async function makeReady(h: Awaited<ReturnType<typeof setup>>, negotiable = false) {
@@ -307,11 +312,15 @@ describe('Known Enough application lifecycle', () => {
 
   it('invalidates an approved proposal when an exact negotiation dependency is revoked', async () => {
     const h = await setup();
+    const originalCondition = h.fixture.drafts.find(item => item.ownerParticipantId === 'nina')!.proposedConstraints[0]!;
+    if (originalCondition.kind === 'NEGOTIABLE' && originalCondition.rule.operator === 'IN')
+      originalCondition.rule.values = [{ type: 'ENUM', optionId: 'cancun' }];
     await makeReady(h, true);
     const nina = await h.app.getOwnerSnapshot(h.byMember('nina'), decisionId);
     const constraint = nina.confirmedConstraints.find(item => item.constraintId === 'nina-destination-flexibility')!;
     const question = await h.app.askNegotiation(service, {
-      decisionId, participantId: 'nina', constraintId: constraint.constraintId,
+      decisionId, participantId: 'nina', contextToken: nina.publicSnapshot.contextToken,
+      semanticVersion: nina.publicSnapshot.semanticVersion, constraintId: constraint.constraintId,
       constraintVersion: constraint.constraintVersion,
       adjustment: {
         id: 'allow-mazatlan-and-oaxaca', visibility: 'TRUSTED_BACKEND', operator: 'IN', variableId: 'destination',
@@ -363,7 +372,8 @@ describe('Known Enough application lifecycle', () => {
       await christmasCandidate(h, [], 'mazatlan', 2))).toBe('NEEDS_PERMISSION');
 
     const renewedQuestion = await h.app.askNegotiation(service, {
-      decisionId, participantId: 'nina', constraintId: constraint.constraintId,
+      decisionId, participantId: 'nina', contextToken: nina.publicSnapshot.contextToken,
+      semanticVersion: nina.publicSnapshot.semanticVersion, constraintId: constraint.constraintId,
       constraintVersion: constraint.constraintVersion,
       adjustment: {
         id: 'allow-mazatlan', visibility: 'TRUSTED_BACKEND', operator: 'COMPARE', variableId: 'destination',
@@ -386,5 +396,106 @@ describe('Known Enough application lifecycle', () => {
       }], 'mazatlan', 2))).toBe('APPLIED');
     h.setNow('2026-10-02T12:00:00.000Z');
     expect((await h.app.getPublicSnapshot(h.byMember('maya'), decisionId)).status).toBe('SUPERSEDED');
+  });
+});
+
+async function publishCorrectionNote(h: Awaited<ReturnType<typeof setup>>, audienceParticipantIds = ['leo']) {
+  const proposal = (await h.app.getPublicSnapshot(h.byMember('maya'), decisionId)).currentProposal!;
+  const text = 'Synthetic exact authorized note.';
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  const textHash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+  await h.app.requestDisclosure(service, { kind: 'EXACT_TEXT', permissionId: 'correction-note', permissionVersion: 1,
+    decisionId, contextToken: proposal.facts.contextToken, semanticVersion: proposal.facts.semanticVersion,
+    ownerParticipantId: 'maya', proposalId: proposal.proposalId, proposalVersion: proposal.facts.proposalVersion,
+    audienceParticipantIds, status: 'PENDING', expiresAt: '2026-10-03T12:00:00.000Z', text, textHash });
+  const allow = await h.command('maya', 'DECIDE_DISCLOSURE', { permissionId: 'correction-note', permissionVersion: 1, decision: 'ALLOW' });
+  expect((await h.app.execute(h.byMember('maya'), allow)).ok).toBe(true);
+  await h.app.publishDisclosure(service, decisionId, 'maya', 'correction-note', 1);
+}
+
+describe('KE09 disclosure lifecycle corrections', () => {
+  it.each(['close', 'frame revision', 'constraint revision'] as const)('R3 keeps authorized reads valid after %s', async transition => {
+    const h = await setup();
+    await makeReady(h);
+    const job = await h.app.startReasoning(service, decisionId);
+    expect(await h.app.completeReasoning(service, decisionId, job.id, await christmasCandidate(h))).toBe('APPLIED');
+    await publishCorrectionNote(h);
+    expect((await h.app.getPublicSnapshot(h.byMember('leo'), decisionId)).publishedDisclosures).toHaveLength(1);
+    expect((await h.app.getPublicSnapshot(h.byMember('nina'), decisionId)).publishedDisclosures).toEqual([]);
+    const owner = await h.app.getOwnerSnapshot(h.byMember('maya'), decisionId);
+    if (transition === 'close') await h.app.closeDecision(h.byMember('maya'), decisionId, owner.controlVersion);
+    if (transition === 'frame revision') await h.app.reviseDecision(service, { decisionId,
+      expectedControlVersion: owner.controlVersion,
+      definition: { ...h.fixture.definition, frameVersion: 2, semanticVersion: 2 },
+      memberships: h.fixture.definition.participants.map(person => ({ subject: `subject-${person.id}`, participantId: person.id, active: true })),
+    });
+    if (transition === 'constraint revision') {
+      await h.app.storeConstraintDraft(service, { schemaVersion: KE.KE_SCHEMA_VERSION, draftId: 'changed-maya', draftVersion: 1,
+        decisionId, ownerParticipantId: 'maya', ownerVersion: owner.ownerVersion, contextToken: owner.publicSnapshot.contextToken,
+        semanticVersion: owner.publicSnapshot.semanticVersion, sourceSummary: 'Confirm changed conditions.',
+        proposedConstraints: [], unsupportedConditions: [], createdAt: '2026-10-01T12:00:00.000Z' });
+      expect((await h.app.execute(h.byMember('maya'), await h.command('maya', 'CONFIRM_CONSTRAINTS', {
+        draftId: 'changed-maya', draftVersion: 1, constraintIds: [],
+      }, 'changed-maya-confirm'))).ok).toBe(true);
+    }
+    for (const person of h.fixture.definition.requiredParticipantIds) {
+      const snapshot = await h.app.getOwnerSnapshot(h.byMember(person), decisionId);
+      expect(snapshot.publicSnapshot.publishedDisclosures).toEqual([]);
+    }
+    const stored = await h.repository.transactionDecision(decisionId, record => record);
+    expect(stored?.publishedDisclosures).toHaveLength(1);
+    expect(stored?.publishedDisclosures[0]?.audienceParticipantIds).toEqual(['leo']);
+    expect(decodeDecisionStateItem(encodeDecisionStateItem(stored!), decisionId).publishedDisclosures).toEqual(stored!.publishedDisclosures);
+  });
+
+  it.each(['revoke', 'expire'] as const)('R3 excludes historical disclosures after %s and same-ID proposal replacement', async action => {
+    const h = await setup();
+    await makeReady(h, true);
+    const nina = await h.app.getOwnerSnapshot(h.byMember('nina'), decisionId);
+    const constraint = nina.confirmedConstraints[0]!;
+    const question = await h.app.askNegotiation(service, { decisionId, participantId: 'nina',
+      contextToken: nina.publicSnapshot.contextToken, semanticVersion: nina.publicSnapshot.semanticVersion,
+      constraintId: constraint.constraintId, constraintVersion: constraint.constraintVersion,
+      adjustment: { id: 'public-move', visibility: 'TRUSTED_BACKEND', operator: 'COMPARE', variableId: 'destination', comparison: 'EQ',
+        value: { type: 'ENUM', optionId: 'mazatlan' } }, expiresAt: '2026-10-02T12:00:00.000Z' });
+    expect((await h.app.execute(h.byMember('nina'), await h.command('nina', 'ANSWER_NEGOTIATION', {
+      questionId: question!.questionId, constraintVersion: question!.constraintVersion,
+      requestIdentity: question!.requestIdentity, answer: 'ALLOW',
+    }))).ok).toBe(true);
+    const permission = (await h.app.getOwnerSnapshot(h.byMember('nina'), decisionId)).negotiationPermissions[0]!;
+    const job = await h.app.startReasoning(service, decisionId);
+    expect(await h.app.completeReasoning(service, decisionId, job.id, await christmasCandidate(h, [{
+      permissionId: permission.permissionId, permissionVersion: permission.permissionVersion,
+      kind: 'NEGOTIATION', expiresAt: permission.expiresAt,
+    }], 'mazatlan'))).toBe('APPLIED');
+    await publishCorrectionNote(h);
+    if (action === 'expire') h.setNow('2026-10-02T12:00:00.000Z');
+    else expect((await h.app.execute(h.byMember('nina'), await h.command('nina', 'REVOKE_NEGOTIATION', {
+      permissionId: permission.permissionId, permissionVersion: permission.permissionVersion,
+    }))).ok).toBe(true);
+    const expired = await h.app.getPublicSnapshot(h.byMember('leo'), decisionId);
+    expect(expired.status).toBe('SUPERSEDED');
+    expect(expired.publishedDisclosures).toEqual([]);
+    const replacementJob = await h.app.startReasoning(service, decisionId);
+    expect(await h.app.completeReasoning(service, decisionId, replacementJob.id, await christmasCandidate(h, [], 'cancun', 2))).toBe('APPLIED');
+    const replaced = await h.app.getPublicSnapshot(h.byMember('leo'), decisionId);
+    expect(replaced.currentProposal?.proposalId).toBe('christmas-proposal');
+    expect(replaced.currentProposal?.facts.proposalVersion).toBe(2);
+    expect(replaced.publishedDisclosures).toEqual([]);
+  });
+
+  it('R3 excludes required-only audiences from an unscoped view with an optional participant', async () => {
+    const h = await setup(true);
+    await makeReady(h);
+    const job = await h.app.startReasoning(service, decisionId);
+    expect(await h.app.completeReasoning(service, decisionId, job.id, await christmasCandidate(h))).toBe('APPLIED');
+    await publishCorrectionNote(h, h.fixture.definition.requiredParticipantIds);
+    expect((await h.app.getPublicSnapshot(h.byMember('leo'), decisionId)).publishedDisclosures).toHaveLength(1);
+    expect((await h.app.getPublicSnapshot(h.byMember('raul'), decisionId)).publishedDisclosures).toEqual([]);
+    expect((await h.app.getPublicSnapshot(service, decisionId)).publishedDisclosures).toEqual([]);
+    await h.repository.transactionDecision(decisionId, record => { delete record!.publishedDisclosures[0]!.proposalVersion; });
+    const legacy = await h.repository.transactionDecision(decisionId, record => record!);
+    expect(decodeDecisionStateItem(encodeDecisionStateItem(legacy), decisionId).publishedDisclosures[0]?.proposalVersion).toBeUndefined();
+    expect((await h.app.getPublicSnapshot(h.byMember('leo'), decisionId)).publishedDisclosures).toEqual([]);
   });
 });

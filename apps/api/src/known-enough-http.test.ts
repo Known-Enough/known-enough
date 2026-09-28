@@ -1,7 +1,7 @@
 import { createServer, type Server } from 'node:http';
 import { afterEach, describe, expect, it } from 'vitest';
 import { InMemoryRoomRepository } from '@deal-table/adapters';
-import { buildChristmasFixture } from '../../../packages/test-support/src/known-enough-fixtures.ts';
+import { buildChristmasFixture, buildChristmasPublicCandidates } from '../../../packages/test-support/src/known-enough-fixtures.ts';
 import {
   DecisionArchitect, DecisionNegotiator, KnownEnoughApplication, OwnerConversationArchitect,
   type DecisionNegotiationModel, type OwnerConversationModel, type TrustedPrincipal,
@@ -37,7 +37,7 @@ async function setup(architect?: DecisionArchitect, ownerModel?: OwnerConversati
     clock: { now: () => '2026-10-01T12:00:00.000Z' }, ids: { next: () => `api-owner-draft-${++sequence}` },
   }) : undefined;
   const negotiator = negotiationModel ? new DecisionNegotiator({
-    application, model: negotiationModel,
+    application, model: negotiationModel, publicCandidates: buildChristmasPublicCandidates,
     clock: { now: () => '2026-10-01T12:00:00.000Z' }, ids: { next: () => `api-negotiation-${++sequence}` },
   }) : undefined;
   const server = createServer(createLocalKnownEnoughApiHandler({ application, identities,

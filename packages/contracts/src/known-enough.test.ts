@@ -180,7 +180,7 @@ describe('Known Enough v2 generic contracts', () => {
     optionalMember.currentProposal!.facts.requiredParticipantIds = ['maya', 'leo'];
     optionalMember.publishedDisclosures = [{
       kind: 'EXACT_TEXT', decisionId: 'purchase-decision', contextToken: 'b'.repeat(64),
-      semanticVersion: 1, proposalId: 'purchase-proposal-1', text: 'Approved illustrative note.',
+      semanticVersion: 1, proposalId: 'purchase-proposal-1', proposalVersion: 1, text: 'Approved illustrative note.',
       audienceParticipantIds: ['maya', 'leo'], publishedAt: '2026-10-01T12:00:00.000Z',
     }];
     expect(KE.PublicDecisionSnapshot.safeParse(optionalMember).success).toBe(false);

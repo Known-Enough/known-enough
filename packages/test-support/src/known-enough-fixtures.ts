@@ -22,6 +22,18 @@ const enumValue = (optionId: string) => ({ type: 'ENUM' as const, optionId });
 const participantValue = (participantId: string) => ({ type: 'PARTICIPANT' as const, participantId });
 const ruleBase = (id: string, visibility: 'PUBLIC' | 'TRUSTED_BACKEND') => ({ id, visibility });
 
+/** Public synthetic offers, declared independently of private conditions or model output. */
+export function buildChristmasPublicCandidates(): KnownEnough.CandidateProposal['values'][] {
+  return ['cancun', 'mazatlan', 'oaxaca'].flatMap(optionId => [150_000, 160_000, 170_000].map(amountMinor => [
+    { variableId: 'destination', value: { type: 'ENUM' as const, optionId } },
+    { variableId: 'trip-start', value: { type: 'DATE' as const, date: '2026-12-24' } },
+    { variableId: 'trip-end', value: { type: 'DATE' as const, date: '2026-12-29' } },
+    { variableId: 'trip-duration', value: { type: 'DURATION' as const, seconds: 432_000 } },
+    { variableId: 'accommodation', value: { type: 'ENUM' as const, optionId: 'quiet-hotel' } },
+    { variableId: 'estimated-total', value: { type: 'MONEY' as const, amountMinor, currencyCode: 'USD', minorUnit: 2 } },
+  ]));
+}
+
 export function buildChristmasFixture() {
   const definition = KE.DecisionDefinition.parse({
     schemaVersion: KE.KE_SCHEMA_VERSION,

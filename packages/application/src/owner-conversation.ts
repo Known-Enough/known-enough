@@ -106,9 +106,11 @@ export class OwnerConversationArchitect {
     const interpretation = parseInterpretation(await this.options.model(context));
     const createdAt = this.options.clock.now();
     if (!Number.isFinite(Date.parse(createdAt))) throw new Error('Invalid application clock');
+    const draftId = this.options.ids.next();
+    const identifierPrefix = draftId.slice(0, 60);
     const draft = KE.AIConstraintDraft.parse({
       schemaVersion: KE.KE_SCHEMA_VERSION,
-      draftId: this.options.ids.next(),
+      draftId,
       draftVersion: (owner.draftVersion ?? 0) + 1,
       decisionId: input.decisionId,
       ownerParticipantId: owner.ownerParticipantId,
@@ -117,9 +119,11 @@ export class OwnerConversationArchitect {
       contextToken: owner.publicSnapshot.contextToken,
       // Store only a fixed review cue; do not retain the conversation or model's free-text summary.
       sourceSummary: SAFE_SOURCE_SUMMARY,
-      proposedConstraints: interpretation.proposedConstraints,
-      unsupportedConditions: interpretation.unsupportedConditions.map(item => ({
-        id: item.id,
+      proposedConstraints: interpretation.proposedConstraints.map((item, index) => item.kind === 'PREFERENCE'
+        ? { ...item, constraintId: `${identifierPrefix}-condition-${index}` }
+        : { ...item, constraintId: `${identifierPrefix}-condition-${index}`, rule: { ...item.rule, id: `${identifierPrefix}-rule-${index}` } }),
+      unsupportedConditions: interpretation.unsupportedConditions.map((_item, index) => ({
+        id: `${identifierPrefix}-clarification-${index}`,
         sourceSummary: 'An owner statement needs clarification.',
         clarificationQuestion: SAFE_CLARIFICATION_QUESTION,
       })),

@@ -7,6 +7,7 @@ export const MAX_DECISION_RULES = 128;
 export const MAX_RULE_REFERENCES = 20;
 export const MAX_OPTIONS_PER_VARIABLE = 64;
 export const MAX_PRIVATE_CONSTRAINTS = 64;
+export const MAX_EVALUATED_RULES = MAX_DECISION_RULES + MAX_PRIVATE_CONSTRAINTS;
 export const MAX_DECISION_WIRE_BYTES = 65_536;
 export const MAX_COMMAND_WIRE_BYTES = 32_768;
 export const MAX_DURATION_SECONDS = 315_360_000;
@@ -521,9 +522,9 @@ export type AIConstraintDraft = z.infer<typeof AIConstraintDraft>;
 
 export const CandidateEvaluation = z.strictObject({
   status: z.enum(['VALID', 'INVALID', 'NEEDS_CLARIFICATION']),
-  checkedRuleIds: z.array(Id).max(MAX_DECISION_RULES).refine(unique),
-  failedRuleIds: z.array(Id).max(MAX_DECISION_RULES).refine(unique),
-  unknownRuleIds: z.array(Id).max(MAX_DECISION_RULES).refine(unique),
+  checkedRuleIds: z.array(Id).max(MAX_EVALUATED_RULES).refine(unique),
+  failedRuleIds: z.array(Id).max(MAX_EVALUATED_RULES).refine(unique),
+  unknownRuleIds: z.array(Id).max(MAX_EVALUATED_RULES).refine(unique),
   unsupportedConditionIds: z.array(Id).max(16).refine(unique),
 }).superRefine((result, ctx) => {
   if (result.status === 'VALID' && (result.failedRuleIds.length || result.unknownRuleIds.length || result.unsupportedConditionIds.length))
@@ -697,7 +698,7 @@ export type FinalApproval = z.infer<typeof FinalApproval>;
 const PublishedDisclosure = z.discriminatedUnion('kind', [
   z.strictObject({
     kind: z.literal('EXACT_TEXT'),
-    decisionId: Id, contextToken: ContextToken, semanticVersion: Version, proposalId: Id,
+    decisionId: Id, contextToken: ContextToken, semanticVersion: Version, proposalId: Id, proposalVersion: Version.optional(),
     text: z.string().min(1).max(2_000),
     audienceParticipantIds: IdList,
     publishedAt: UtcInstant,
@@ -705,7 +706,7 @@ const PublishedDisclosure = z.discriminatedUnion('kind', [
   z.strictObject({
     kind: z.literal('VARIABLE_VALUES'),
     decisionId: Id, contextToken: ContextToken, semanticVersion: Version,
-    proposalId: Id,
+    proposalId: Id, proposalVersion: Version.optional(),
     variableIds: VariableIdList,
     values: ValueAssignments,
     audienceParticipantIds: IdList,
@@ -790,7 +791,8 @@ export const PublicDecisionSnapshot = z.strictObject({
       || disclosure.contextToken !== snapshot.contextToken
       || disclosure.semanticVersion !== snapshot.semanticVersion
       || !snapshot.currentProposal
-      || disclosure.proposalId !== snapshot.currentProposal.proposalId)
+      || disclosure.proposalId !== snapshot.currentProposal.proposalId
+      || disclosure.proposalVersion !== snapshot.currentProposal.facts.proposalVersion)
       issue('Disclosure must bind to the current exact proposal and context', ['publishedDisclosures', index]);
     if (disclosure.audienceParticipantIds.some(id => !participants.includes(id)))
       issue('Disclosure audience must belong to the current roster', ['publishedDisclosures', index, 'audienceParticipantIds']);
@@ -898,8 +900,11 @@ export const OwnerDecisionSnapshot = z.strictObject({
       }
     });
   }
-  const constraintIds = snapshot.confirmedConstraints.map(constraint => constraint.constraintId);
-  if (!unique(constraintIds)) issue('Owner constraint IDs must be unique', ['confirmedConstraints']);
+  const constraintIdentities = snapshot.confirmedConstraints.map(constraint =>
+    `${constraint.contextToken}:${constraint.constraintId}:${constraint.constraintVersion}`);
+  if (!unique(constraintIdentities)) issue('Owner constraint versions must be unique within their context', ['confirmedConstraints']);
+  const activeIds = snapshot.confirmedConstraints.filter(constraint => constraint.status === 'ACTIVE').map(constraint => constraint.constraintId);
+  if (!unique(activeIds)) issue('Active owner constraint IDs must be unique', ['confirmedConstraints']);
   snapshot.confirmedConstraints.forEach((constraint, index) => {
     if (constraint.ownerParticipantId !== owner || constraint.decisionId !== decisionId)
       issue('Owner snapshot may include only this owner’s constraints for this decision', ['confirmedConstraints', index]);
@@ -932,7 +937,9 @@ export const OwnerDecisionSnapshot = z.strictObject({
         || question.semanticVersion !== snapshot.publicSnapshot.semanticVersion))
       issue('Pending questions must bind to the current semantic context', ['pendingQuestions', index]);
     const constraint = snapshot.confirmedConstraints.find(item => item.constraintId === question.constraintId
-      && item.ownerParticipantId === owner && item.kind === 'NEGOTIABLE');
+      && item.ownerParticipantId === owner && item.kind === 'NEGOTIABLE'
+      && item.constraintVersion === question.constraintVersion && item.contextToken === question.contextToken
+      && item.semanticVersion === question.semanticVersion);
     if (!constraint) {
       issue('Negotiation questions must reference this owner’s negotiable constraint', ['pendingQuestions', index, 'constraintId']);
     } else if (constraint.constraintVersion !== question.constraintVersion) {
@@ -951,7 +958,9 @@ export const OwnerDecisionSnapshot = z.strictObject({
       || refusal.semanticVersion !== snapshot.publicSnapshot.semanticVersion)
       issue('Refusal identity must bind to the current semantic context', ['refusedRequests', index]);
     const refusedConstraint = snapshot.confirmedConstraints.find(constraint => constraint.constraintId === refusal.constraintId
-      && constraint.ownerParticipantId === owner && constraint.kind === 'NEGOTIABLE');
+      && constraint.ownerParticipantId === owner && constraint.kind === 'NEGOTIABLE'
+      && constraint.constraintVersion === refusal.constraintVersion && constraint.contextToken === refusal.contextToken
+      && constraint.semanticVersion === refusal.semanticVersion);
     if (!refusedConstraint) {
       issue('Refusal identity must reference this owner’s negotiable constraint', ['refusedRequests', index, 'constraintId']);
     } else if (refusedConstraint.constraintVersion !== refusal.constraintVersion) {
@@ -1132,7 +1141,9 @@ const AtomicRequestIdentity = z.strictObject({
 
 export function serializeNegotiationRequestIdentity(input: unknown): string {
   const identity = AtomicRequestIdentity.parse(input);
-  const adjustment: Record<string, unknown> = { ...identity.adjustment };
+  const adjustment: Record<string, unknown> = identity.adjustment.operator === 'COMPARE' && identity.adjustment.comparison === 'EQ'
+    ? { operator: 'IN', variableId: identity.adjustment.variableId, values: [normalizeSetValues(identity.adjustment.value)] }
+    : { ...identity.adjustment };
   delete adjustment.id;
   delete adjustment.visibility;
   if (identity.adjustment.operator === 'IN') {

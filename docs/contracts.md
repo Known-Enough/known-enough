@@ -99,3 +99,10 @@ Runtime schema validity and matching hashes do not prove actor identity, owner a
 ## Migration and KE09 bundle
 
 No persisted migration is part of KE01. Existing STATE v4 and v1 consumers remain unchanged; KE02/KE03 must select and test a deliberate stored-schema bridge before generic records are written. The first KE09 bundle after the MVP will include this exact contract artifact and tests, plus the KE01–KE03 kernel/storage diff and unresolved decisions: storage version and migration/rollback strategy; transaction/read consistency, maximum aggregate size and pending-receipt reservations for five or more participants; verified identity and consent-revocation atomicity; text-hash normalization/equality enforcement; owner/private-data retention, deletion and backup behavior; and evaluation/preference scoring policy. KE09 must inspect code and tests and resolve the privacy/model boundary before real model calls.
+
+
+### KE09 correction compatibility — 2026-09-28
+
+Independent follow-up is pending. Generic CandidateEvaluation ID arrays now allow the aggregate 192 evaluated rules; the application deduplicates receipt names without dropping rule evaluation or scoped private diagnostics. Owner snapshot history permits repeated constraint IDs across distinct context/version tuples while requiring unique active IDs and exact question/refusal version references. Negotiation identity treats equality as singleton membership; generated questions accept only public enum-choice adjustments on the target owner's condition.
+
+PublishedDisclosure carries `proposalVersion` on all new records. The field is optional only in the stored historical shape to keep old STATE v5 receipts decodable without an implicit migration; PublicDecisionSnapshot refinement requires it to equal the current proposal version. The application excludes legacy unversioned receipts and historical contexts/proposals from current projections. No v1 contract or public proposal hash fields changed. See the [KE09 correction policy](known-enough-architecture.md#ke09-correction-policy--2026-09-28-independent-review-pending) for publication and revision authority.

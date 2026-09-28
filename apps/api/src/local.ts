@@ -191,6 +191,14 @@ const architect = new DecisionArchitect({ draft: async input => {
 } }, () => crypto.randomUUID());
 const negotiator = new DecisionNegotiator({
   application: decisionApplication,
+  publicCandidates: () => [[
+        { variableId: 'destination', value: { type: 'ENUM', optionId: 'mazatlan' } },
+        { variableId: 'trip-start', value: { type: 'DATE', date: '2026-12-24' } },
+        { variableId: 'trip-end', value: { type: 'DATE', date: '2026-12-29' } },
+        { variableId: 'trip-duration', value: { type: 'DURATION', seconds: 432_000 } },
+        { variableId: 'accommodation', value: { type: 'ENUM', optionId: 'quiet-hotel' } },
+        { variableId: 'estimated-total', value: { type: 'MONEY', amountMinor: 160_000, currencyCode: 'USD', minorUnit: 2 } },
+      ]],
   clock: { now: () => new Date().toISOString() },
   ids: { next: () => crypto.randomUUID() },
   model: async (request: DecisionNegotiationModelInput) => {
@@ -200,14 +208,7 @@ const negotiator = new DecisionNegotiator({
     const grantedForDestination = permissions.some(item => item.ownerParticipantId === 'nina'
       && item.constraintId === 'nina-destination-flexibility');
     return {
-      values: [
-        { variableId: 'destination', value: { type: 'ENUM', optionId: 'mazatlan' } },
-        { variableId: 'trip-start', value: { type: 'DATE', date: '2026-12-24' } },
-        { variableId: 'trip-end', value: { type: 'DATE', date: '2026-12-29' } },
-        { variableId: 'trip-duration', value: { type: 'DURATION', seconds: 432_000 } },
-        { variableId: 'accommodation', value: { type: 'ENUM', optionId: 'quiet-hotel' } },
-        { variableId: 'estimated-total', value: { type: 'MONEY', amountMinor: 160_000, currencyCode: 'USD', minorUnit: 2 } },
-      ],
+      values: request.publicCandidates[0],
       permissionDependencies: permissions.map(item => ({ permissionId: item.permissionId,
         permissionVersion: item.permissionVersion, kind: 'NEGOTIATION', expiresAt: item.expiresAt })),
       questionIntents: ninaConstraint && !grantedForDestination ? [{

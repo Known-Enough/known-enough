@@ -142,3 +142,20 @@ describe('OwnerConversationArchitect', () => {
     expect(model).not.toHaveBeenCalled();
   });
 });
+
+it('KE09 replaces model identifiers that encode private text before persistence', async () => {
+  const h = await setup();
+  const canary = 'RAW_PRIVATE_CANARY';
+  const architect = new OwnerConversationArchitect({
+    application: h.application, clock: { now: () => '2026-10-01T12:00:00.000Z' }, ids: { next: () => 'server-draft-id' },
+    model: async () => ({ sourceSummary: canary, proposedConstraints: [{ constraintId: canary, kind: 'HARD',
+      rule: { id: canary, visibility: 'TRUSTED_BACKEND', operator: 'COMPARE', variableId: 'estimated-total', comparison: 'LTE',
+        value: { type: 'MONEY', amountMinor: 160_000, currencyCode: 'USD', minorUnit: 2 } } }],
+      unsupportedConditions: [{ id: canary, sourceSummary: canary, clarificationQuestion: canary }],
+    }),
+  });
+  const draft = await architect.draft(principal('maya'), { decisionId, messages: [{ role: 'owner', text: canary }] });
+  expect(JSON.stringify(draft)).not.toContain(canary);
+  expect(JSON.stringify(await h.application.getOwnerSnapshot(principal('maya'), decisionId))).not.toContain(canary);
+  expect(draft.proposedConstraints[0]?.constraintId).toBe('server-draft-id-condition-0');
+});

@@ -14,6 +14,7 @@ export interface NegotiationQuestionIntent {
 }
 export interface DecisionNegotiationModelInput {
   context: DecisionNegotiationContext;
+  publicCandidates: KE.CandidateProposal['values'][];
   attempt: number;
   retryReason: 'INVALID_OUTPUT' | 'MODEL_ERROR' | null;
   signal: AbortSignal;
@@ -80,6 +81,9 @@ function parseModelOutput(value: unknown, context: DecisionNegotiationContext, i
 
   const assignmentIds = new Set(value.values.flatMap(item => record(item) && typeof item.variableId === 'string' ? [item.variableId] : []));
   const publicVariables = new Set(context.definition.variables.filter(item => item.visibility === 'PUBLIC').map(item => item.id));
+  // Only catalog-backed public assignments may cross this model adapter. A future
+  // owner-private output path needs its own reviewed provenance/consent policy.
+  if (value.values.some(item => !record(item) || typeof item.variableId !== 'string' || !publicVariables.has(item.variableId))) return null;
   const publicRules = new Set(context.definition.rules.filter(item => item.visibility === 'PUBLIC').map(item => item.id));
   const explanationVariables = value.explanationDraft.variableIds as string[];
   const explanationRules = value.explanationDraft.ruleIds as string[];
@@ -104,6 +108,14 @@ function parseModelOutput(value: unknown, context: DecisionNegotiationContext, i
     permissionDependencies, createdAt: new Date(now).toISOString(),
   });
   return candidate.success ? { candidate: candidate.data, questionIntents } : null;
+}
+
+function publicValueIdentity(context: DecisionNegotiationContext, values: KE.CandidateProposal['values']): string {
+  return KE.serializeDecisionProposal({
+    schemaVersion: KE.KE_SCHEMA_VERSION, decisionId: context.definition.decisionId,
+    contextToken: context.job.contextToken, semanticVersion: context.job.semanticVersion,
+    proposalVersion: context.proposalVersion, requiredParticipantIds: context.definition.requiredParticipantIds, values,
+  });
 }
 
 function formatPublicValue(variable: KE.PublicDecisionSnapshot['frame']['variables'][number], value: KE.DecisionValue): string {
@@ -148,6 +160,8 @@ export class DecisionNegotiator {
     ids: IdSource;
     timeoutMs?: number;
     questionTtlMs?: number;
+    /** Trusted, synchronous public-data-only catalog; no owner conditions or model output as its source. */
+    publicCandidates?: (frame: KE.PublicDecisionFrame) => readonly KE.CandidateProposal['values'][];
   }) {
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.questionTtlMs = options.questionTtlMs ?? DEFAULT_QUESTION_TTL_MS;
@@ -156,12 +170,12 @@ export class DecisionNegotiator {
       throw new Error('Invalid negotiation bounds');
   }
 
-  private async invoke(context: DecisionNegotiationContext, attempt: number, retryReason: DecisionNegotiationModelInput['retryReason']): Promise<unknown> {
+  private async invoke(context: DecisionNegotiationContext, publicCandidates: KE.CandidateProposal['values'][], attempt: number, retryReason: DecisionNegotiationModelInput['retryReason']): Promise<unknown> {
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
       return await Promise.race([
-        this.options.model({ context, attempt, retryReason, signal: controller.signal }),
+        this.options.model({ context, publicCandidates: structuredClone(publicCandidates), attempt, retryReason, signal: controller.signal }),
         new Promise<never>((_, reject) => {
           timer = setTimeout(() => { controller.abort(); reject(new DecisionNegotiatorError('MODEL_FAILED')); }, this.timeoutMs);
         }),
@@ -175,8 +189,19 @@ export class DecisionNegotiator {
     const service: TrustedPrincipal = { kind: 'service', subject: 'decision-negotiator', roomIds: [decisionId] };
     const job = await this.options.application.startReasoning(service, decisionId);
     let context: DecisionNegotiationContext;
-    try { context = await this.options.application.getReasoningContext(service, decisionId, job.id); }
-    catch (error) { await this.options.application.cancelReasoning(service, decisionId, job.id); throw error; }
+    let publicCandidates: KE.CandidateProposal['values'][];
+    let allowedPublicValues: Map<string, KE.CandidateProposal['values']>;
+    try {
+      context = await this.options.application.getReasoningContext(service, decisionId, job.id);
+      const catalog = this.options.publicCandidates?.(structuredClone(context.publicSnapshot.frame)) ?? [];
+      if (catalog.length === 0 || catalog.length > 64 || new TextEncoder().encode(JSON.stringify(catalog)).byteLength > 256 * 1024)
+        throw new DecisionNegotiatorError('INVALID_MODEL_OUTPUT');
+      publicCandidates = catalog.map(values => KE.PublicProposalFacts.shape.values.parse(values));
+      const publicIds = new Set(context.publicSnapshot.frame.variables.filter(item => item.visibility === 'PUBLIC').map(item => item.id));
+      if (publicCandidates.some(values => values.some(item => !publicIds.has(item.variableId))))
+        throw new DecisionNegotiatorError('INVALID_MODEL_OUTPUT');
+      allowedPublicValues = new Map(publicCandidates.map(values => [publicValueIdentity(context, values), values]));
+    } catch (error) { await this.options.application.cancelReasoning(service, decisionId, job.id); throw error; }
 
     let parsed: ReturnType<typeof parseModelOutput> = null;
     let attempts = 0;
@@ -186,7 +211,7 @@ export class DecisionNegotiator {
       attempts = attempt;
       let output: unknown;
       try {
-        output = await this.invoke(context, attempt, retryReason);
+        output = await this.invoke(context, publicCandidates, attempt, retryReason);
       } catch {
         modelFailed = true;
         retryReason = 'MODEL_ERROR';
@@ -196,9 +221,16 @@ export class DecisionNegotiator {
         const now = this.options.clock.now();
         if (!Number.isFinite(Date.parse(now))) throw new Error('Invalid clock');
         parsed = parseModelOutput(output, context, this.options.ids, now);
-        if (parsed) break;
+        const selected = parsed ? allowedPublicValues.get(publicValueIdentity(context, parsed.candidate.values)) : undefined;
+        if (parsed && selected) {
+          // Publish the trusted catalog representation, never a model-controlled ordering/encoding.
+          parsed.candidate.values = structuredClone(selected);
+          break;
+        }
+        parsed = null;
         retryReason = 'INVALID_OUTPUT';
       } catch {
+        parsed = null;
         retryReason = 'MODEL_ERROR';
       }
     }
@@ -207,40 +239,47 @@ export class DecisionNegotiator {
       throw new DecisionNegotiatorError(modelFailed ? 'MODEL_FAILED' : 'INVALID_MODEL_OUTPUT');
     }
 
-    const outcome = await this.options.application.completeReasoning(service, decisionId, job.id, parsed.candidate);
-    if (outcome === 'NEEDS_PERMISSION') {
-      const targets = await this.options.application.getPendingNegotiationFailures(service, decisionId);
-      const targetKeys = new Set(targets.map(target => `${target.ownerParticipantId}:${target.constraintId}:${target.constraintVersion}`));
-      const now = Date.parse(this.options.clock.now());
-      for (const intent of parsed.questionIntents) {
-        const key = `${intent.ownerParticipantId}:${intent.constraintId}:${intent.constraintVersion}`;
-        if (!targetKeys.has(key)) continue;
-        const expiresAt = new Date(now + this.questionTtlMs).toISOString();
-        const applies = await this.options.application.validatePendingNegotiationAdjustment(service, {
-          decisionId, ownerParticipantId: intent.ownerParticipantId,
-          constraintId: intent.constraintId, constraintVersion: intent.constraintVersion,
-          adjustment: intent.adjustment, expiresAt,
-        });
-        if (!applies) continue;
-        await this.options.application.askNegotiation(service, {
-          decisionId, participantId: intent.ownerParticipantId,
-          constraintId: intent.constraintId, constraintVersion: intent.constraintVersion,
-          adjustment: intent.adjustment,
-          expiresAt,
-        });
+    try {
+      const outcome = await this.options.application.completeReasoning(service, decisionId, job.id, parsed.candidate);
+      if (outcome === 'NEEDS_PERMISSION') {
+        const targets = await this.options.application.getPendingNegotiationFailures(service, decisionId);
+        const targetKeys = new Set(targets.map(target => `${target.ownerParticipantId}:${target.constraintId}:${target.constraintVersion}`));
+        const now = Date.parse(this.options.clock.now());
+        for (const intent of parsed.questionIntents) {
+          const key = `${intent.ownerParticipantId}:${intent.constraintId}:${intent.constraintVersion}`;
+          if (!targetKeys.has(key)) continue;
+          const expiresAt = new Date(now + this.questionTtlMs).toISOString();
+          const applies = await this.options.application.validatePendingNegotiationAdjustment(service, {
+            decisionId, contextToken: job.contextToken, semanticVersion: job.semanticVersion,
+            ownerParticipantId: intent.ownerParticipantId,
+            constraintId: intent.constraintId, constraintVersion: intent.constraintVersion,
+            adjustment: intent.adjustment, expiresAt,
+          });
+          if (!applies) continue;
+          await this.options.application.askNegotiation(service, {
+            decisionId, contextToken: job.contextToken, semanticVersion: job.semanticVersion,
+            participantId: intent.ownerParticipantId, pendingProposalId: parsed.candidate.proposalId,
+            constraintId: intent.constraintId, constraintVersion: intent.constraintVersion,
+            adjustment: intent.adjustment,
+            expiresAt,
+          });
+        }
       }
-    }
 
-    const [publicSnapshot, ownerSnapshot] = await Promise.all([
-      this.options.application.getPublicSnapshot(principal, decisionId),
-      this.options.application.getOwnerSnapshot(principal, decisionId),
-    ]);
-    return {
-      outcome,
-      publicSnapshot,
-      ownQuestions: ownerSnapshot.pendingQuestions.filter(question => question.status === 'PENDING'),
-      explanation: publicExplanation(publicSnapshot),
-      attempts,
-    };
+      const [publicSnapshot, ownerSnapshot] = await Promise.all([
+        this.options.application.getPublicSnapshot(principal, decisionId),
+        this.options.application.getOwnerSnapshot(principal, decisionId),
+      ]);
+      return {
+        outcome,
+        publicSnapshot,
+        ownQuestions: ownerSnapshot.pendingQuestions.filter(question => question.status === 'PENDING'),
+        explanation: publicExplanation(publicSnapshot),
+        attempts,
+      };
+    } catch (error) {
+      await this.options.application.cancelReasoning(service, decisionId, job.id);
+      throw error;
+    }
   }
 }

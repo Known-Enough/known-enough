@@ -1,5 +1,21 @@
 # User B handoff — shared task pool
 
+## KE09 corrected artifact handoff — 2026-09-28T04:29:03Z
+
+R1–R6 corrections are complete under the user's explicit implementation and test authorization. [Review addendum](reviews/KE09.md#correction-handoff--2026-09-28-independent-follow-up-pending) maps each fix to permanent regressions and identifies the source diff over published claim `0cced25e790e5baa496b5018830755708ebc693e` (SHA-256 `0fcb933042af7279dd7342c8cf3c9b6070d6ce74a32a77422398931420e1fcbe` for `apps packages`). User B / Codex GPT-6, exact runtime variant/effort unexposed. No independent PASS is claimed.
+
+- Safe same-owner public enum questions and server identifiers; public candidate catalog enforcement and canonical output; generated private values rejected.
+- Versioned constraint/disclosure history, exact current audience projection, semantic re-confirmation with retired grants/approvals, canonical refusal protection including old hashes, and 192-rule receipts with exact-job recovery.
+- Fresh focused checks: 58/58. Full pinned check: 7 imported hashes, 15 planning checks, lint/boundaries (132), typecheck, 322 tests passed / 2 emulator skips, both builds, hosted browser 1/1 and end-to-end 44/44. No live provider/cloud/emulator acceptance.
+
+Implementation claim released. KE08/KE09 remain REVIEW and KE10 BLOCKED. Next: another session pulls `origin main` with `--ff-only`, claims the existing independent KE09 follow-up and reviews this changed artifact. This conversation authored the corrections and KE01–KE02 and cannot certify their independent PASS. The correction commit and tracking are synchronized under the user's commit/push authorization as a checked reviewable checkpoint.
+
+## KE09 corrections working checkpoint — 2026-09-28T04:15:53Z
+
+R1–R6 source corrections are saved locally over published claim `0cced25`: safe same-owner public enum concessions, public-only catalog provenance, generated owner identifiers, context-bound questions, semantic re-confirmation, historical constraint/disclosure projection, canonical refusal identity and bounded validation receipts/exact-job cleanup. Changed executable files: `packages/contracts/src/known-enough.ts`, `packages/application/src/known-enough.ts`, `packages/application/src/decision-negotiator.ts`, `packages/application/src/owner-conversation.ts`, `apps/api/src/local.ts`; architecture/contracts documentation records the policy.
+
+Lint/boundaries (132), TypeScript, production build/browser boundary and diff whitespace passed. No tests were added or run: explicit user authorization was requested because this session's developer instruction requires it. Still required: update test composition for public catalogs and question contexts, add R1–R6 regression coverage, run focused/full checks, record the exact corrected artifact and commit/push the implementation. No independent PASS is claimed. The active correction claim remains IN_PROGRESS; local changes are preserved and must not be overwritten. Only the documentation claim has been pushed so far.
+
 ## KE09 corrections claim — 2026-09-28T04:05:25Z
 
 The user explicitly directed this conversation to fix R1–R6 and commit/push. This supersedes the prior routing to User A for these corrections. User B / Codex GPT-6 (exact variant/effort unexposed) claims the sole active implementation on clean synchronized `main` at `a3bb78567f08a5df99e262419ea3c3d6b3dd9bde`; `git pull --ff-only origin main` succeeded. Scope: Known Enough contracts/kernel/application and their focused regression files, API local composition and its tests, synthetic test-support publication fixtures as needed, architecture/contracts docs, KE09 review addendum/ticket/board and B log/handoff. No dependency/root/lock/CI/cloud changes. Prior review evidence remains immutable; independent follow-up remains required. Test authorization is requested under this session's developer instruction; implementation proceeds while that answer is pending.
