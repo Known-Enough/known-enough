@@ -1,5 +1,11 @@
 # User B handoff — shared task pool
 
+## Current KE10 state — 2026-09-28
+
+The Nova Lite response-format correction is implemented and passes the pinned full check, but KE10 remains REVIEW. Nova Lite now uses a forced data-only Converse tool call; application validation and consent boundaries remain. The authorized synthetic live evaluation still fails at `proposal-kernel` with `INVALID_MODEL_OUTPUT` after two proposal attempts. The safe harness identifies stage/code but not the invalid field, so the next concrete step is a local-only safe subreason diagnostic before authorizing another live attempt. No provider text was saved, and no AWS resources were changed or deployed.
+
+The CloudFront Stage 0 URL `https://d23eowhnwtqts3.cloudfront.net/` remains the static mock. It cannot call Bedrock or share state; it was not modified. A working hosted app needs the authenticated KE13B backend, still gated by KE12 and explicit cloud scope authorization. The KE10 runtime follow-up remains deferred to later per user direction. See [KE10 checkpoint](tasks/KE10.md#nova-lite-structured-output-correction-checkpoint--2026-09-28). No task is marked accepted or DONE by this checkpoint.
+
 ## KE10 correction checkpoint — 2026-09-28
 
 User B / Codex GPT-6 (variant/effort unexposed) finished the bounded correction on synchronized base `7f78349acb160a318bf11b6561ea3c62900be377`. Four reproduced defects were closed: (1) stop after provider completion allowed an architect draft, owner draft or proposal to pass later application guards; (2) malformed model output returned an HTTP 422 client error instead of a redacted retryable 503; (3) stop after `NEEDS_PERMISSION` could still issue an owner question and leave a question-free candidate pending; (4) an authority control change between candidate completion and question creation could issue a stale question. Runtime enablement and control/expiry guards now run inside the exact output/question transactions; a stopped or changed, question-free pending candidate is released only if its proposal identity is still current. Previously committed questions remain subject to their existing context/consent rules.

@@ -226,7 +226,7 @@ describe('KE10 application/runtime composition', () => {
         questionIntents: [{ ownerParticipantId: 'nina', constraintId: nina.constraintId,
           constraintVersion: nina.constraintVersion, adjustment: { id: 'allow-mazatlan', visibility: 'TRUSTED_BACKEND',
             operator: 'IN', variableId: 'destination', values: [{ type: 'ENUM', optionId: 'mazatlan' }] } }],
-        explanationDraft: { variableIds: [], ruleIds: [] } });
+        explanationDraft: { variableIds: [], ruleIds: [] } }, 'ke_negotiation_output');
     });
     const result = await runtime.negotiator.generate(evaluationPrincipal('maya'), h.decisionId);
     expect(result.outcome).toBe('STALE');
@@ -237,8 +237,7 @@ describe('KE10 application/runtime composition', () => {
   });
   it('bounds malformed proposal repairs to two isolated calls, leaving consent unchanged', async () => {
     const h = await createEvaluationDecision();
-    const send = vi.fn(async (command: ConverseCommand) => ({ ...syntheticResponse(command),
-      output: { message: { role: 'assistant' as const, content: [{ text: '{"publishPrivateReason":"CANARY"}' }] } } }));
+    const send = vi.fn(async () => response({ publishPrivateReason: 'CANARY' }, 'ke_negotiation_output'));
     const runtime = compose(h, send);
     await expect(runtime.negotiator.generate(evaluationPrincipal('maya'), h.decisionId)).rejects.toMatchObject({ code: 'INVALID_MODEL_OUTPUT' });
     expect(send).toHaveBeenCalledTimes(2);

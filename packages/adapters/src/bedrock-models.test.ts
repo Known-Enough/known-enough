@@ -1,11 +1,10 @@
-import { response } from '../../../tests/evaluations/ke10-injected.ts';
-import { syntheticResponse } from '../../../tests/evaluations/ke10-injected.ts';
+import { response, syntheticResponse } from '../../../tests/evaluations/ke10-injected.ts';
 import { describe, expect, it, vi } from 'vitest';
 import type { ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
-import type { ModelInvocation } from '@deal-table/application';
+import type { DecisionNegotiationModelInput, ModelInvocation } from '@deal-table/application';
 import { BoundedModelJobs } from './model-jobs.ts';
 import { createAuthorizedBedrockTransport, createBedrockModels } from './bedrock-models.ts';
-import { runKe10Evaluations, evaluationCanary } from '../../../tests/evaluations/ke10.ts';
+import { Ke10EvaluationFailure, runKe10Evaluations, evaluationCanary } from '../../../tests/evaluations/ke10.ts';
 
 const guard = (): ModelInvocation => ({ expiresAt: Date.now() + 30_000, assertCurrent: async () => {} });
 const architectInput = { objective: 'choose', participants: [{ id: 'maya', displayName: 'Maya' }], allowedOptions: ['A'] };
@@ -18,9 +17,13 @@ describe('Bedrock role adapters', () => {
     expect(requests).toHaveLength(3);
     expect(result.usage).toHaveLength(3);
     for (const request of requests) {
-      expect(Object.keys(request.input).sort()).toEqual(['inferenceConfig', 'messages', 'modelId', 'system']);
+      expect(Object.keys(request.input).sort()).toEqual(['inferenceConfig', 'messages', 'modelId', 'system', 'toolConfig']);
       expect(request.input.messages).toHaveLength(1);
       expect(request.input.inferenceConfig).toEqual({ maxTokens: 2_048, temperature: 0 });
+      const tool = request.input.toolConfig?.tools?.[0]?.toolSpec;
+      expect(tool?.name).toMatch(/^ke_(architect|negotiation|owner)_output$/);
+      expect(request.input.toolConfig?.toolChoice).toEqual({ tool: { name: tool?.name } });
+      expect(tool?.inputSchema).toMatchObject({ json: { type: 'object', properties: expect.any(Object), required: expect.any(Array) } });
     }
     expect(JSON.stringify(requests[0]!.input)).not.toContain(evaluationCanary);
     expect(JSON.stringify(requests[2]!.input)).toContain(evaluationCanary);
@@ -33,8 +36,7 @@ describe('Bedrock role adapters', () => {
       if (mode === 'provider') throw Error('PRIVATE_PROVIDER_ERROR');
       if (mode === 'json') return { ...response({}), output: { message: { role: 'assistant' as const, content: [{ text: 'PRIVATE_INVALID_JSON' }] } } };
       if (mode === 'truncated') return { ...response({}), stopReason: 'max_tokens' as const };
-      if (mode === 'tool') return { ...response({}), output: { message: { role: 'assistant' as const,
-        content: [{ toolUse: { toolUseId: 'private', name: 'publish', input: {} } }] } } };
+      if (mode === 'tool') return response({}, 'unrelated_tool');
       if (mode === 'array') return response([]);
       return response({ text: 'PRIVATE'.repeat(10_000) });
     });
@@ -56,5 +58,26 @@ describe('Bedrock role adapters', () => {
     await expect(models.architect.draft({ ...architectInput, objective: 'x'.repeat(70_000) }, guard()))
       .rejects.toMatchObject({ code: 'INVALID_INPUT' });
     expect(send).not.toHaveBeenCalled();
+  });
+  it('reports only a safe evaluation stage and failure code', async () => {
+    const send = async (command: ConverseCommand) => response({}, command.input.toolConfig?.tools?.[0]?.toolSpec?.name);
+    await expect(runKe10Evaluations({ send })).rejects.toMatchObject({
+      name: 'Ke10EvaluationFailure', stage: 'construction', failureCode: 'RETRYABLE_SERVER_ERROR',
+      message: 'KE10_EVALUATION_FAILED',
+    } satisfies Partial<Ke10EvaluationFailure>);
+  });
+  it('converts flat Nova output into a trusted-backend enum question rule', async () => {
+    const models = createBedrockModels({ transport: { send: async () => response({ values: [], permissionDependencies: [], questionIntents: [{
+      ownerParticipantId: 'owner-1', constraintId: 'constraint-1', constraintVersion: 1,
+      adjustmentVariableId: 'destination', adjustmentOptionIds: ['mazatlan'],
+    }] }, 'ke_negotiation_output') }, jobs: new BoundedModelJobs(), enabled: () => true });
+    const input = {
+      context: { publicSnapshot: { frame: {} }, definition: { decisionId: 'decision-1', variables: [], rules: [] },
+        confirmedConstraints: [], activeNegotiationPermissions: [] },
+      publicCandidates: [], attempt: 1, retryReason: null, signal: new AbortController().signal, invocation: guard(),
+    } as unknown as DecisionNegotiationModelInput;
+    const result = await models.negotiation(input) as { questionIntents: { adjustment: unknown }[] };
+    expect(result.questionIntents[0]?.adjustment).toEqual({ id: 'ke-adjustment-1', visibility: 'TRUSTED_BACKEND',
+      operator: 'IN', variableId: 'destination', values: [{ type: 'ENUM', optionId: 'mazatlan' }] });
   });
 });

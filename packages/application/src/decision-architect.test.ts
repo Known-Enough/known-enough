@@ -66,6 +66,26 @@ describe('injected decision architect', () => {
     expect(JSON.stringify(result.frame)).not.toContain('ownerParticipantId');
   });
 
+  it('fills server-owned public metadata and a missing enum option ID before strict validation', async () => {
+    const base = christmasDraft();
+    const destinationInput = base.variables.find(variable => variable.id === 'destination');
+    if (!destinationInput || destinationInput.type !== 'ENUM' || !Array.isArray(destinationInput.options))
+      throw new Error('Missing synthetic destination variable');
+    const modelOutput = { ...base, variables: [
+      { ...destinationInput, ownerParticipantId: 'untrusted-owner', options: [
+        ...destinationInput.options.slice(0, 2), { label: 'Mazatlán' },
+      ] },
+      { ...base.variables[1], ownerParticipantId: 'untrusted-owner' },
+      base.variables[2],
+    ] };
+    const result = await create({ draft: async () => modelOutput }).draft('organizer', request());
+    const destination = result.frame.variables.find(variable => variable.id === 'destination');
+    expect(destination?.type).toBe('ENUM');
+    if (destination?.type === 'ENUM') expect(destination.options[2]?.id).toBe('ke-option-1-3');
+    expect(result.frame.variables.every(variable => !Object.hasOwn(variable, 'ownerParticipantId'))).toBe(true);
+    expect(JSON.stringify(result.frame)).not.toContain('untrusted-owner');
+  });
+
   it('rejects malformed or extra model fields and never trusts model-supplied participants', async () => {
     const malformed = create({ draft: async () => '{not json' });
     await expect(malformed.draft('organizer', request())).rejects.toMatchObject({ code: 'RETRYABLE_SERVER_ERROR' });

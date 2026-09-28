@@ -74,26 +74,16 @@ function parseModelOutput(value: unknown, context: DecisionNegotiationContext, i
   candidate: KE.CandidateProposal;
   questionIntents: NegotiationQuestionIntent[];
 } | null {
-  if (!record(value) || !exactKeys(value, ['values', 'permissionDependencies', 'questionIntents', 'explanationDraft'])
+  const expectedKeys = ['values', 'permissionDependencies', 'questionIntents'];
+  if (!record(value) || (!exactKeys(value, expectedKeys) && !exactKeys(value, [...expectedKeys, 'explanationDraft']))
     || !Array.isArray(value.values) || !Array.isArray(value.permissionDependencies)) return null;
   const questionIntents = parseQuestionIntents(value.questionIntents, context);
-  if (!questionIntents || !record(value.explanationDraft)
-    || !exactKeys(value.explanationDraft, ['variableIds', 'ruleIds'])
-    || !Array.isArray(value.explanationDraft.variableIds) || !value.explanationDraft.variableIds.every(id => typeof id === 'string')
-    || !Array.isArray(value.explanationDraft.ruleIds) || !value.explanationDraft.ruleIds.every(id => typeof id === 'string')) return null;
+  if (!questionIntents) return null;
 
-  const assignmentIds = new Set(value.values.flatMap(item => record(item) && typeof item.variableId === 'string' ? [item.variableId] : []));
   const publicVariables = new Set(context.definition.variables.filter(item => item.visibility === 'PUBLIC').map(item => item.id));
   // Only catalog-backed public assignments may cross this model adapter. A future
   // owner-private output path needs its own reviewed provenance/consent policy.
   if (value.values.some(item => !record(item) || typeof item.variableId !== 'string' || !publicVariables.has(item.variableId))) return null;
-  const publicRules = new Set(context.definition.rules.filter(item => item.visibility === 'PUBLIC').map(item => item.id));
-  const explanationVariables = value.explanationDraft.variableIds as string[];
-  const explanationRules = value.explanationDraft.ruleIds as string[];
-  if (new Set(explanationVariables).size !== explanationVariables.length
-    || explanationVariables.some(id => !publicVariables.has(id) || !assignmentIds.has(id))
-    || new Set(explanationRules).size !== explanationRules.length
-    || explanationRules.some(id => !publicRules.has(id))) return null;
 
   const permissionDependencies = value.permissionDependencies;
   for (const raw of permissionDependencies) {

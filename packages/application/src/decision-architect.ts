@@ -70,6 +70,59 @@ function boundedStrings(value: unknown, maximum: number, length: number): value 
   return Array.isArray(value) && value.length <= maximum
     && value.every(item => typeof item === 'string' && item.trim().length > 0 && item.length <= length);
 }
+function normalizePublicModelFields(variables: unknown[], rules: unknown[]): { variables: unknown[]; rules: unknown[] } {
+  const remaps = new Map<string, Map<string, string>>();
+  const normalizedVariables = variables.map((value, variableIndex) => {
+    if (!record(value) || value.visibility !== 'PUBLIC') return value;
+    const variable: Record<string, unknown> = { ...value, ownerParticipantId: null };
+    if ((value.type === 'ENUM' || value.type === 'ENUM_SET') && Array.isArray(value.options)
+      && typeof value.id === 'string') {
+      const usedIds = new Set(value.options.flatMap(option => record(option) && Id.safeParse(option.id).success
+        ? [option.id as string] : []));
+      const remap = new Map<string, string>();
+      const ambiguous = new Set<string>();
+      variable.options = value.options.map((option, optionIndex) => {
+        if (!record(option) || Id.safeParse(option.id).success) return option;
+        let generatedId = `ke-option-${variableIndex + 1}-${optionIndex + 1}`;
+        while (usedIds.has(generatedId)) generatedId += 'x';
+        usedIds.add(generatedId);
+        if (typeof option.id === 'string' && option.id.length > 0) {
+          if (remap.has(option.id)) ambiguous.add(option.id);
+          else remap.set(option.id, generatedId);
+        }
+        return { ...option, id: generatedId };
+      });
+      for (const id of ambiguous) remap.delete(id);
+      if (remap.size) remaps.set(value.id, remap);
+    }
+    return variable;
+  });
+
+  const rewriteValue = (value: unknown, variableId: unknown): unknown => {
+    if (!record(value) || typeof variableId !== 'string') return value;
+    const remap = remaps.get(variableId);
+    if (!remap) return value;
+    if (value.type === 'ENUM' && typeof value.optionId === 'string' && remap.has(value.optionId))
+      return { ...value, optionId: remap.get(value.optionId) };
+    if (value.type === 'ENUM_SET' && Array.isArray(value.optionIds))
+      return { ...value, optionIds: value.optionIds.map(id => typeof id === 'string' ? remap.get(id) ?? id : id) };
+    return value;
+  };
+  const normalizedRules = rules.map(value => {
+    if (!record(value)) return value;
+    const rule: Record<string, unknown> = { ...value };
+    for (const field of ['value', 'minimum', 'maximum']) {
+      if (Object.hasOwn(value, field)) rule[field] = rewriteValue(value[field], value.variableId);
+    }
+    if (Array.isArray(value.values)) rule.values = value.values.map(item => rewriteValue(item, value.variableId));
+    for (const field of ['antecedent', 'consequent']) {
+      const condition = value[field];
+      if (record(condition)) rule[field] = { ...condition, value: rewriteValue(condition.value, condition.variableId) };
+    }
+    return rule;
+  });
+  return { variables: normalizedVariables, rules: normalizedRules };
+}
 async function token(id: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(id));
   return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
@@ -153,6 +206,7 @@ export class DecisionArchitect {
         requirements.push({ participantId: item.participantId, prompt: REQUIREMENT_PROMPTS[item.kind]! });
       }
 
+      const normalized = normalizePublicModelFields(output.variables, output.rules);
       const definition = KE.DecisionDefinition.safeParse({
         schemaVersion: KE.KE_SCHEMA_VERSION,
         decisionId: Id.parse(this.id()),
@@ -164,8 +218,8 @@ export class DecisionArchitect {
         description: output.description,
         participants: participants.map(person => ({ ...person, requiredForApproval: true })),
         requiredParticipantIds: participantIds,
-        variables: output.variables,
-        rules: output.rules,
+        variables: normalized.variables,
+        rules: normalized.rules,
       });
       if (!definition.success
         || definition.data.variables.some(variable => variable.visibility !== 'PUBLIC')
