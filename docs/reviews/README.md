@@ -14,6 +14,7 @@ Record:
 
 ## Known Enough checkpoints
 
+- [KE10 runtime follow-up](KE10-runtime-followup.md): IN PROGRESS on `da76fae..8d70fd9`; independent review of the new model/job boundary. Live provider evidence remains separately authorized.
 - [KE13C hosted-preview review](KE13C.md): PASS reported for `a5d1833..a625498`; user accepted KE13C on 2026-09-27. Reviewer reported as Sol/Codex GPT-6 by the user; exact variant/effort unexposed. Two permanent-check coverage gaps remain non-blocking for the exact reviewed artifact.
 - [KE13C Stage 0 IAM policy review](KE13C-policy.md): user-supplied CHANGES_REQUESTED findings against `f1893e3`; reviewer identity/model/effort unexposed. See the completed follow-up below; the original verdict is preserved as history. This policy gate is separate from the accepted hosted-preview build.
 
