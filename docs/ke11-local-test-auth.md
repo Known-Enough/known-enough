@@ -4,7 +4,7 @@ This is a local QA path for the fictional Christmas scenario. It does not sign i
 
 ## Run it
 
-Use the pinned Node 24.21.0 and npm 11.19.0 versions. In one terminal, start the loopback API with `node scripts/run-local-api.mjs`. In another, run `npm run dev` and open `http://127.0.0.1:5173`. The API listens only on `127.0.0.1:8788`. The HTTPS hosted preview at CloudFront remains a static mock and has no invitations or shared application state.
+Use the pinned Node 24.21.0 and npm 11.19.0 versions. In one terminal, start the loopback API on the web app's expected port with `PORT=8788 node scripts/run-local-api.mjs`. Confirm its startup message says `http://127.0.0.1:8788`. In another terminal, run `npm run dev` and open `http://127.0.0.1:5173`. The API listens only on loopback. The HTTPS hosted preview at CloudFront remains a static mock and has no invitations or shared application state.
 
 Choose one of the fictional accounts: Maya (organizer), Leo, Nina, Ana, Raul, or Shared display. No password, email, AWS account, or participant identity is involved. Maya can create a local invitation link for one pending participant. Open that link in another browser tab/context on the same computer, choose the matching fictional account, and accept the invitation. The API checks that the signed test session subject matches the invited participant. The display account can view the public snapshot and cannot write commands.
 
