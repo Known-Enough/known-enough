@@ -1,5 +1,16 @@
 # User B handoff — shared task pool
 
+## KE09 review handoff — 2026-09-28T01:14:03Z
+
+**REVIEW / CHANGES_REQUESTED.** [Review artifact](reviews/KE09.md) covers implementation `cbc498202a06b553bca1a28c9e22c1862e21ac18` and retains a portable six-probe reproducer. User B / Codex GPT-6; exact variant/effort unexposed, Astra/high target only. Review claim released; executable source is unchanged. No new task is active.
+
+- R1: model output copies another owner's private budget rule into a question. R4: singleton membership bypasses an equality refusal. R5: material private-condition change preserves old context/grants.
+- R2: same-ID constraint revision breaks owner reads. R3: closing after disclosure breaks audience reads. R6: rule-ID collision crashes completion and strands reasoning.
+- Fresh pinned full check passed: 7 imported hashes, 15 planning checks, lint/boundaries (132), typecheck, 303 tests / 2 emulator skips, builds, hosted browser 1/1 and end-to-end 44/44. Six synthetic adversarial probes all reproduced the failures; passing existing regressions do not close them.
+- This conversation authored KE01–KE02, so contract/kernel inspection is self-review. KE09 cannot PASS here; a separate independent session must review those boundaries and the corrections. No live provider, cloud, managed identity or DynamoDB Local execution is claimed.
+
+Next: User A pulls `origin main` with `--ff-only`, records a bounded correction claim for R1–R6, implements and checks the fixes, then pauses for independent KE09 follow-up on the exact changed artifact. The workflow requires fixes to stay with the implementation claimant; this review does not apply them. KE08 and KE09 remain REVIEW; KE10 stays BLOCKED pending independent PASS and separately authorized real model calls. Repository review/tracking synchronization uses standing authorization.
+
 ## Current KE09 review claim — 2026-09-28T01:00:50Z
 
 User B / Codex GPT-6, exact runtime variant/effort unexposed; Astra/high is the ticket target, not verified telemetry. User directed KE09 at 2026-09-28T01:00:50Z. Clean `main` baseline `cbc498202a06b553bca1a28c9e22c1862e21ac18`; `git pull --ff-only origin main` succeeded, ahead/behind 0/0. KE08 writer is paused; no other task active. Read scope: integrated KE01–KE08 contracts/domain/application/adapters/API/browser source, tests and relevant evidence. Write scope: `docs/reviews/KE09.md`, `docs/tasks/KE09.md`, `docs/task-board.md`, `docs/handoff-B.md`, `docs/work-log-B.md`; disposable adversarial probes under `/tmp`. No implementation fixes in this review; route them to User A. Independence limitation: this conversation implemented KE01–KE02, so its inspection of that portion is self-review and cannot satisfy the independent PASS gate.
