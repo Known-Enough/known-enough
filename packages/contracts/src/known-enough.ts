@@ -398,6 +398,17 @@ export const DecisionDefinition = z.strictObject({
   if (!unique(ruleIds)) issue('Rule IDs must be unique', ['rules']);
   definition.rules.forEach((rule, index) => validateRuleAgainstVariables(rule, variables, ['rules', index], issue));
 });
+
+/** Trusted invitation actions bind a pending participant to their verified session. */
+export const DecisionInvitationIssueRequest = z.strictObject({
+  requestId: Id,
+  participantId: Id,
+  replaceActive: z.boolean().optional(),
+});
+export const DecisionInvitationRedeemRequest = z.strictObject({
+  requestId: Id,
+  token: Id,
+});
 export type DecisionDefinition = z.infer<typeof DecisionDefinition>;
 
 export const PublicDecisionFrame = z.strictObject({

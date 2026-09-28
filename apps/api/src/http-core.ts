@@ -11,6 +11,7 @@ import {
 } from '@deal-table/application';
 import { createCognitoIdentityResolver, type CognitoIdentityOptions } from './cognito-identity.ts';
 import type { JwksCache } from 'aws-jwt-verify/jwk';
+import type { LocalTestSessionManager } from './local-test-auth.ts';
 
 const IDENTITY_HEADER = 'x-deal-table-test-identity';
 const REQUEST_ID_HEADER = 'x-request-id';
@@ -53,6 +54,8 @@ export interface KnownEnoughLocalApiOptions {
   /** Optional injected, bounded candidate-generation worker. */
   readonly negotiator?: DecisionNegotiator;
   readonly identities?: ReadonlyMap<string, HttpIdentity>;
+  /** Optional signed synthetic sessions for the loopback-only local test server. */
+  readonly testSessions?: LocalTestSessionManager;
   readonly maxBodyBytes?: number;
   readonly debug?: boolean;
 }
@@ -214,11 +217,11 @@ function roomPath(url: URL): { roomId: string; view: 'public' | 'me' | 'commands
   }
 }
 
-function decisionPath(url: URL): { decisionId: string; view: 'public' | 'me' | 'commands' } | null {
-  const match = /^\/decisions\/([^/]+)\/(public|me|commands)$/.exec(url.pathname);
+function decisionPath(url: URL): { decisionId: string; view: 'public' | 'me' | 'commands' | 'invitations' | 'invitations/redeem' } | null {
+  const match = /^\/decisions\/([^/]+)\/(public|me|commands|invitations\/redeem|invitations)$/.exec(url.pathname);
   if (!match?.[1] || !match[2]) return null;
   try {
-    return { decisionId: decodeURIComponent(match[1]), view: match[2] as 'public' | 'me' | 'commands' };
+    return { decisionId: decodeURIComponent(match[1]), view: match[2] as 'public' | 'me' | 'commands' | 'invitations' | 'invitations/redeem' };
   } catch {
     return null;
   }
@@ -402,7 +405,7 @@ function knownEnoughRequestError(error: unknown, id: string): DecisionErrorResul
 }
 
 function createKnownEnoughApiHandler(
-  options: Pick<KnownEnoughLocalApiOptions, 'application' | 'architect' | 'ownerConversation' | 'negotiator' | 'maxBodyBytes' | 'debug'>,
+  options: Pick<KnownEnoughLocalApiOptions, 'application' | 'architect' | 'ownerConversation' | 'negotiator' | 'testSessions' | 'maxBodyBytes' | 'debug'>,
   authenticate: (request: IncomingMessage) => Promise<HttpIdentity | null>,
   allowedOrigins: readonly string[],
   includeTestIdentity: boolean,
@@ -416,10 +419,34 @@ function createKnownEnoughApiHandler(
       setCors(response, request, allowedOrigins, includeTestIdentity);
       if (request.method === 'OPTIONS') { response.statusCode = 204; response.end(); return; }
       const id = requestId(request);
+      const url = URL.parse(request.url ?? '/', 'http://local.invalid');
+      if (includeTestIdentity && url?.pathname === '/__test/session') {
+        if (request.method !== 'POST' || !options.testSessions) {
+          sendJson(response, 404, decisionErrorBody('NOT_FOUND', id));
+          return;
+        }
+        try {
+          const body = await readJson(request, maxBodyBytes);
+          if (body === null || typeof body !== 'object' || Array.isArray(body)
+            || Object.keys(body).join('|') !== 'accountId' || typeof (body as Record<string, unknown>).accountId !== 'string') {
+            sendJson(response, 422, decisionErrorBody('INVALID_COMMAND', id));
+            return;
+          }
+          const session = options.testSessions.issue((body as { accountId: string }).accountId);
+          if (!session) {
+            sendJson(response, 404, decisionErrorBody('NOT_FOUND', id));
+            return;
+          }
+          sendJson(response, 201, session);
+          return;
+        } catch {
+          sendJson(response, 400, decisionErrorBody('INVALID_COMMAND', id));
+          return;
+        }
+      }
       let principal: HttpIdentity | null = null;
       try { principal = await authenticate(request); } catch { /* fail closed */ }
       if (!principal) { sendJson(response, 401, decisionErrorBody('UNAUTHENTICATED', id)); return; }
-      const url = URL.parse(request.url ?? '/', 'http://local.invalid');
       const architectureDraftRoute = url?.pathname === '/decisions/architecture/draft';
       const ownerConversationMatch = url?.pathname.match(/^\/decisions\/([^/]+)\/owner-conversation\/draft$/);
       const reasoningMatch = url?.pathname.match(/^\/decisions\/([^/]+)\/reasoning$/);
@@ -532,13 +559,29 @@ function createKnownEnoughApiHandler(
         return;
       }
       if (!route || !['GET', 'POST'].includes(request.method ?? '')
-        || (request.method === 'GET' && route.view === 'commands')
-        || (request.method === 'POST' && route.view !== 'commands')) {
+        || (request.method === 'GET' && !['public', 'me'].includes(route.view))
+        || (request.method === 'POST' && !['commands', 'invitations', 'invitations/redeem'].includes(route.view))) {
         sendJson(response, 404, decisionErrorBody('NOT_FOUND', id));
         return;
       }
       let responseId = id;
       try {
+        if (request.method === 'POST' && route.view === 'invitations') {
+          const body = await readJson(request, maxBodyBytes);
+          responseId = bodyRequestId(body, id);
+          const issued = await options.application.issueDecisionInvitation(principal, route.decisionId, body);
+          debugLog(debug, 'decision-invitation-issued', { actor: actor(principal), status: 'ISSUED' });
+          sendJson(response, 201, { requestId: responseId, ...issued });
+          return;
+        }
+        if (request.method === 'POST' && route.view === 'invitations/redeem') {
+          const body = await readJson(request, maxBodyBytes);
+          responseId = bodyRequestId(body, id);
+          const redeemed = await options.application.redeemDecisionInvitation(principal, route.decisionId, body);
+          debugLog(debug, 'decision-invitation-redeemed', { actor: actor(principal), status: 'ACCEPTED' });
+          sendJson(response, 200, { requestId: responseId, ...redeemed });
+          return;
+        }
         if (request.method === 'GET' && route.view === 'public') {
           const snapshot = await options.application.getPublicSnapshot(principal, route.decisionId);
           debugLog(debug, 'decision-public-snapshot', { actor: actor(principal), status: snapshot.status });
@@ -597,7 +640,8 @@ export function createLocalKnownEnoughApiHandler(
       ? { kind: 'participant', subject }
       : { kind: 'display', subject, roomId: Id.parse(principal.roomId) });
   }
-  return createKnownEnoughApiHandler(options, async request => identity(request, clean),
+  return createKnownEnoughApiHandler(options, async request => identity(request, clean)
+    ?? await options.testSessions?.resolve(request.headers.authorization) ?? null,
     ['http://127.0.0.1:5173', 'http://localhost:5173'], true);
 }
 

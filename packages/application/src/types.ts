@@ -112,6 +112,12 @@ export interface ApplicationOptions {
 
 /** Subject-to-participant mapping comes from trusted provisioning, never a command body. */
 export interface DecisionMembership { subject: string; participantId: string; active: boolean }
+export interface DecisionInvitationRecord {
+  participantId: string;
+  tokenHash: string;
+  expiresAt: string;
+  redeemedAt: string | null;
+}
 export interface KnownEnoughOwnerRecord {
   participantId: string;
   ownerVersion: number;
@@ -152,6 +158,7 @@ export interface KnownEnoughRecord {
   decisionId: string;
   creatorSubject: string;
   memberships: DecisionMembership[];
+  invitations: DecisionInvitationRecord[];
   definition: KE.DecisionDefinition;
   status: KE.PublicDecisionSnapshot['status'];
   publicRevision: number;

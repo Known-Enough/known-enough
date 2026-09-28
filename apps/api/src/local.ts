@@ -6,6 +6,7 @@ import {
 import { KnownEnough as KE } from '@deal-table/contracts';
 import { InMemoryRoomRepository } from '@deal-table/adapters';
 import { createLocalApiHandler, createLocalKnownEnoughApiHandler, createNonProductionIdentities } from './index.ts';
+import { createLocalTestSessionManager } from './local-test-auth.ts';
 
 const roomId = 'room-synthetic';
 
@@ -52,8 +53,9 @@ const roomApplication = new DealTableApplication({
 });
 await roomApplication.createRoom(seed);
 
+const decisionRepository = new InMemoryRoomRepository();
 const decisionApplication = new KnownEnoughApplication({
-  repository: new InMemoryRoomRepository(),
+  repository: decisionRepository,
   clock: { now: () => new Date().toISOString() },
   ids: { next: () => crypto.randomUUID() },
 });
@@ -161,6 +163,10 @@ for (const participantId of christmasFixture.definition.requiredParticipantIds) 
       constraintIds: draft.proposedConstraints.map(item => item.constraintId) },
   });
 }
+await decisionRepository.transactionDecision(christmasDecisionId, decision => {
+  if (!decision) throw new Error('Local Christmas decision fixture is missing');
+  for (const membership of decision.memberships) membership.active = membership.participantId === 'maya';
+});
 
 const architect = new DecisionArchitect({ draft: async input => {
   const tripObjective = /christmas|trip|holiday|travel/i.test(input.objective);
@@ -234,12 +240,20 @@ const decisionIdentities = new Map([
   ['NON_PRODUCTION ana', { kind: 'participant' as const, subject: 'ana' }],
   ['NON_PRODUCTION raul', { kind: 'participant' as const, subject: 'raul' }],
 ]);
+const testSessions = createLocalTestSessionManager([
+  { id: 'maya', displayName: 'Maya · organizer', participantId: 'maya', identity: { kind: 'participant', subject: 'maya' } },
+  { id: 'leo', displayName: 'Leo', participantId: 'leo', identity: { kind: 'participant', subject: 'leo' } },
+  { id: 'nina', displayName: 'Nina', participantId: 'nina', identity: { kind: 'participant', subject: 'nina' } },
+  { id: 'ana', displayName: 'Ana', participantId: 'ana', identity: { kind: 'participant', subject: 'ana' } },
+  { id: 'raul', displayName: 'Raul', participantId: 'raul', identity: { kind: 'participant', subject: 'raul' } },
+  { id: 'display', displayName: 'Shared display', identity: { kind: 'display', subject: 'local-display', roomId: christmasDecisionId } },
+]);
 const roomHandler = createLocalApiHandler({ application: roomApplication, identities, debug: true });
 const decisionHandler = createLocalKnownEnoughApiHandler({
-  application: decisionApplication, identities: decisionIdentities, architect, negotiator, debug: true,
+  application: decisionApplication, identities: decisionIdentities, testSessions, architect, negotiator, debug: true,
 });
 const server = createServer((request, response) => {
-  if (request.url?.startsWith('/decisions/')) decisionHandler(request, response);
+  if (request.url?.startsWith('/decisions/') || request.url?.startsWith('/__test/session')) decisionHandler(request, response);
   else roomHandler(request, response);
 });
 server.listen(port(), '127.0.0.1');

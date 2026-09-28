@@ -16,6 +16,7 @@ export interface KnownEnoughApplicationOptions {
   repository: KnownEnoughRepository;
   clock: Clock;
   ids: IdSource;
+  invitationTtlMs?: number;
 }
 
 type StructuredConstraint = Omit<Extract<KE.ConfirmedConstraint, { kind: 'HARD' | 'NEGOTIABLE' }>, 'sourceSummary'>
@@ -268,7 +269,12 @@ function errorResult(requestId: string, code: DecisionErrorCode): KETypes.Decisi
 
 /** Generic decision lifecycle. Private state is projected through owner-scoped allowlists only. */
 export class KnownEnoughApplication {
-  constructor(private readonly options: KnownEnoughApplicationOptions) {}
+  private readonly invitationTtlMs: number;
+  constructor(private readonly options: KnownEnoughApplicationOptions) {
+    this.invitationTtlMs = options.invitationTtlMs ?? 24 * 60 * 60_000;
+    if (!Number.isSafeInteger(this.invitationTtlMs) || this.invitationTtlMs < 1 || this.invitationTtlMs > 7 * 24 * 60 * 60_000)
+      throw new Error('invitationTtlMs must be between 1 ms and 7 days');
+  }
 
   private id(): string { return Id.parse(this.options.ids.next()); }
   private now(): string {
@@ -300,6 +306,7 @@ export class KnownEnoughApplication {
       decisionId: definition.decisionId,
       creatorSubject: Id.parse(input.creatorSubject),
       memberships,
+      invitations: [],
       definition,
       status: 'COLLECTING_FRAME_CONFIRMATION',
       publicRevision: 1,
@@ -323,6 +330,54 @@ export class KnownEnoughApplication {
       if (error instanceof RepositoryCapacityError) fail('INVALID_COMMAND');
       throw error;
     }
+  }
+
+  async issueDecisionInvitation(
+    principal: TrustedPrincipal | null, decisionId: string, rawRequest: unknown,
+  ): Promise<{ token: string; expiresAt: string }> {
+    return this.options.repository.transactionDecision(decisionId, async decision => {
+      if (!decision) fail('NOT_FOUND');
+      if (!principal?.subject) fail('UNAUTHENTICATED');
+      if (principal.kind !== 'participant' || principal.subject !== decision.creatorSubject
+        || !decision.memberships.some(item => item.subject === principal.subject && item.active)) fail('NOT_FOUND');
+      const parsed = KE.DecisionInvitationIssueRequest.safeParse(rawRequest);
+      if (!parsed.success) fail('INVALID_COMMAND');
+      const membership = decision.memberships.find(item => item.participantId === parsed.data.participantId);
+      if (!membership || membership.active || membership.subject === decision.creatorSubject
+        || !decision.definition.participants.some(item => item.id === membership.participantId)) fail('NOT_FOUND');
+      const now = this.now();
+      const prior = decision.invitations.find(item => item.participantId === membership.participantId);
+      const priorActive = prior && prior.redeemedAt === null && Date.parse(prior.expiresAt) > Date.parse(now);
+      if (priorActive && !parsed.data.replaceActive) fail('IDEMPOTENCY_CONFLICT');
+      const token = this.id();
+      const expiresAt = new Date(Date.parse(now) + this.invitationTtlMs).toISOString();
+      decision.invitations = decision.invitations.filter(item => item.participantId !== membership.participantId);
+      decision.invitations.push({ participantId: membership.participantId, tokenHash: await sha256(token), expiresAt, redeemedAt: null });
+      return { token, expiresAt };
+    });
+  }
+
+  async redeemDecisionInvitation(
+    principal: TrustedPrincipal | null, decisionId: string, rawRequest: unknown,
+  ): Promise<{ accepted: true }> {
+    const parsed = KE.DecisionInvitationRedeemRequest.safeParse(rawRequest);
+    if (!parsed.success) fail('INVALID_COMMAND');
+    const tokenHash = await sha256(parsed.data.token);
+    return this.options.repository.transactionDecision(decisionId, decision => {
+      if (!decision) fail('NOT_FOUND');
+      if (!principal?.subject) fail('UNAUTHENTICATED');
+      if (principal.kind !== 'participant') fail('NOT_FOUND');
+      const membership = decision.memberships.find(item => item.subject === principal.subject);
+      if (!membership) fail('NOT_FOUND');
+      const invitation = decision.invitations.find(item => item.participantId === membership.participantId
+        && item.tokenHash === tokenHash);
+      if (!invitation) fail('NOT_FOUND');
+      if (invitation.redeemedAt !== null) return membership.active ? { accepted: true } : fail('NOT_FOUND');
+      if (Date.parse(invitation.expiresAt) <= Date.parse(this.now())) fail('NOT_FOUND');
+      membership.active = true;
+      invitation.redeemedAt = this.now();
+      return { accepted: true };
+    });
   }
 
   private member(decision: KnownEnoughRecord, principal: TrustedPrincipal | null): DecisionMembership {

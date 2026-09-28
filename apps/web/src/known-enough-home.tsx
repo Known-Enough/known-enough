@@ -2,6 +2,7 @@ import { useRef, useState, type FormEvent } from 'react';
 import { KnownEnough } from '@deal-table/contracts';
 import type { KnownEnough as KE } from '@deal-table/contracts';
 import type { LocalOwnerDraft, LocalOwnerInterpreter } from './owner-conversation-mock.ts';
+import { localTestFetch, type LocalTestSession } from './local-test-session';
 
 type DecisionView = 'overview' | 'private' | 'proposal';
 type LocalDecision = {
@@ -17,8 +18,6 @@ type ChristmasDemoData = { publicSnapshot: KE.PublicDecisionSnapshot; ownerSnaps
 
 const CHRISTMAS_DEMO_ID = 'christmas-decision';
 const LOCAL_API = 'http://127.0.0.1:8788';
-
-function demoIdentity(participantId: string): string { return `NON_PRODUCTION ${participantId}`; }
 
 function describeDemoValue(value: KE.DecisionValue, variable: (KE.PublicDecisionSnapshot['frame']['variables'][number] | KE.DecisionVariable) | undefined): string {
   if (value.type === 'ENUM' && variable?.type === 'ENUM') return variable.options.find(item => item.id === value.optionId)?.label ?? 'an option';
@@ -43,7 +42,6 @@ function describeDemoRule(rule: KE.ValidationRule, variables: Array<KE.PublicDec
 
 const privacyPromise = 'Your private inputs are processed by Known Enough to help the group reach a decision. Other participants do not receive those inputs unless you explicitly approve a disclosure or the final agreed outcome inherently reveals something.';
 const ARCHITECT_URL = 'http://127.0.0.1:8788/decisions/architecture/draft';
-const LOCAL_IDENTITY = 'NON_PRODUCTION organizer';
 
 function parseResponse(value: unknown): ArchitectResponse {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) throw new Error('invalid response');
@@ -74,7 +72,16 @@ function parseResponse(value: unknown): ArchitectResponse {
   };
 }
 
-export function KnownEnoughHome({ ownerInterpreter }: { ownerInterpreter?: LocalOwnerInterpreter }) {
+export function KnownEnoughHome({
+  ownerInterpreter, session, onSignOut, onSessionExpired, pendingInviteToken, onInviteHandled,
+}: {
+  ownerInterpreter?: LocalOwnerInterpreter;
+  session: LocalTestSession;
+  onSignOut: () => void;
+  onSessionExpired: () => void;
+  pendingInviteToken: string | null;
+  onInviteHandled: () => void;
+}) {
   const [objective, setObjective] = useState('');
   const [participantNames, setParticipantNames] = useState('');
   const [optionsText, setOptionsText] = useState('');
@@ -87,11 +94,15 @@ export function KnownEnoughHome({ ownerInterpreter }: { ownerInterpreter?: Local
   const [ownerConfirmed, setOwnerConfirmed] = useState(false);
   const [ownerLoading, setOwnerLoading] = useState(false);
   const [ownerError, setOwnerError] = useState('');
-  const [demoParticipant, setDemoParticipant] = useState('maya');
   const [demoData, setDemoData] = useState<ChristmasDemoData | null>(null);
   const [demoLoading, setDemoLoading] = useState(false);
   const [demoError, setDemoError] = useState('');
   const [demoOutcome, setDemoOutcome] = useState('');
+  const [inviteParticipant, setInviteParticipant] = useState('leo');
+  const [replaceActiveInvitation, setReplaceActiveInvitation] = useState(false);
+  const [invitationLink, setInvitationLink] = useState('');
+  const [invitationError, setInvitationError] = useState('');
+  const [invitationNotice, setInvitationNotice] = useState('');
   const inputRevision = useRef(0);
   const requestSequence = useRef(0);
   const ownerRequestSequence = useRef(0);
@@ -137,16 +148,18 @@ export function KnownEnoughHome({ ownerInterpreter }: { ownerInterpreter?: Local
     }
   };
 
-  const loadChristmasDemo = async (participantId = demoParticipant) => {
+  const loadChristmasDemo = async () => {
     const sequence = ++demoRequestSequence.current;
     setDemoLoading(true); setDemoError('');
-    const identity = demoIdentity(participantId);
-    const headers = { 'X-Deal-Table-Test-Identity': identity };
     try {
       const [publicResponse, ownerResponse] = await Promise.all([
-        fetch(`${LOCAL_API}/decisions/${CHRISTMAS_DEMO_ID}/public`, { headers }),
-        fetch(`${LOCAL_API}/decisions/${CHRISTMAS_DEMO_ID}/me`, { headers }),
+        localTestFetch(session, onSessionExpired, `${LOCAL_API}/decisions/${CHRISTMAS_DEMO_ID}/public`),
+        localTestFetch(session, onSessionExpired, `${LOCAL_API}/decisions/${CHRISTMAS_DEMO_ID}/me`),
       ]);
+      if (publicResponse.status === 404 || ownerResponse.status === 404) {
+        setDemoError('This test user has not joined the scenario yet. Sign in as Maya and issue an invitation for this test user.');
+        return;
+      }
       if (!publicResponse.ok || !ownerResponse.ok) throw new Error('local API unavailable');
       const [rawPublic, rawOwner] = await Promise.all([publicResponse.json(), ownerResponse.json()]);
       const loaded = {
@@ -165,9 +178,9 @@ export function KnownEnoughHome({ ownerInterpreter }: { ownerInterpreter?: Local
     const sequence = ++demoRequestSequence.current;
     setDemoLoading(true); setDemoError(''); setDemoOutcome('');
     try {
-      const response = await fetch(`${LOCAL_API}/decisions/${CHRISTMAS_DEMO_ID}/reasoning`, {
+      const response = await localTestFetch(session, onSessionExpired, `${LOCAL_API}/decisions/${CHRISTMAS_DEMO_ID}/reasoning`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Deal-Table-Test-Identity': demoIdentity(demoParticipant), 'X-Request-Id': crypto.randomUUID() },
+        headers: { 'Content-Type': 'application/json', 'X-Request-Id': crypto.randomUUID() },
         body: JSON.stringify({ requestId: crypto.randomUUID() }),
       });
       const raw = await response.json();
@@ -176,7 +189,7 @@ export function KnownEnoughHome({ ownerInterpreter }: { ownerInterpreter?: Local
       const result = raw as Record<string, unknown>;
       if (typeof result.outcome !== 'string') throw new Error('invalid response');
       setDemoOutcome(result.outcome);
-      await loadChristmasDemo(demoParticipant);
+      await loadChristmasDemo();
     } catch {
       if (sequence === demoRequestSequence.current) setDemoError('The local reasoning action could not complete. Refresh the demo and try again.');
     } finally {
@@ -198,18 +211,68 @@ export function KnownEnoughHome({ ownerInterpreter }: { ownerInterpreter?: Local
     const sequence = ++demoRequestSequence.current;
     setDemoLoading(true); setDemoError('');
     try {
-      const response = await fetch(`${LOCAL_API}/decisions/${CHRISTMAS_DEMO_ID}/commands`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Deal-Table-Test-Identity': demoIdentity(demoParticipant) },
+      const response = await localTestFetch(session, onSessionExpired, `${LOCAL_API}/decisions/${CHRISTMAS_DEMO_ID}/commands`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(command),
       });
       const raw = await response.json() as { ok?: boolean };
       if (!response.ok || raw.ok !== true) throw new Error('command rejected');
-      await loadChristmasDemo(demoParticipant);
+      await loadChristmasDemo();
       if (answer === 'ALLOW') await generateChristmasCandidate();
     } catch {
       if (sequence === demoRequestSequence.current) setDemoError('That response could not be applied. Refresh the owner profile and review the current question.');
     } finally {
       if (sequence === demoRequestSequence.current) setDemoLoading(false);
+    }
+  };
+
+  const issueInvitation = async () => {
+    setInvitationError(''); setInvitationNotice(''); setInvitationLink('');
+    try {
+      const response = await localTestFetch(session, onSessionExpired, `${LOCAL_API}/decisions/${CHRISTMAS_DEMO_ID}/invitations`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId: crypto.randomUUID(), participantId: inviteParticipant,
+          ...(replaceActiveInvitation ? { replaceActive: true } : {}) }),
+      });
+      if (response.status === 409) {
+        setInvitationError('A live invitation may already exist. If its link was lost, select “Replace current link” to invalidate it and issue a new one.');
+        return;
+      }
+      if (!response.ok) throw new Error('invitation unavailable');
+      const raw: unknown = await response.json();
+      if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('invalid invitation response');
+      const result = raw as Record<string, unknown>;
+      if (typeof result.token !== 'string' || !/^[A-Za-z0-9_-]{1,80}$/.test(result.token)
+        || typeof result.expiresAt !== 'string' || !Number.isFinite(Date.parse(result.expiresAt))) throw new Error('invalid invitation response');
+      setInvitationLink(`${window.location.origin}${window.location.pathname}${window.location.search}#invite=${encodeURIComponent(result.token)}`);
+      setInvitationNotice(replaceActiveInvitation
+        ? 'New invitation link created. The previous link is now invalid.'
+        : 'Invitation link created. It can be redeemed once by the matching local test user.');
+      setReplaceActiveInvitation(false);
+    } catch {
+      setInvitationError('The invitation could not be issued. If the response was lost, retry; if the API reports an active link, replace it only when the old link cannot be recovered.');
+    }
+  };
+
+  const redeemPendingInvitation = async () => {
+    if (!pendingInviteToken) return;
+    setDemoLoading(true); setDemoError(''); setInvitationNotice('');
+    try {
+      const response = await localTestFetch(session, onSessionExpired, `${LOCAL_API}/decisions/${CHRISTMAS_DEMO_ID}/invitations/redeem`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId: crypto.randomUUID(), token: pendingInviteToken }),
+      });
+      if (!response.ok) {
+        setDemoError('This invitation is invalid, expired, or belongs to another test user. Sign out and choose the invited user, or ask Maya for a new link.');
+        return;
+      }
+      onInviteHandled();
+      setInvitationNotice('Invitation accepted. This local test user can now access the shared scenario.');
+      await loadChristmasDemo();
+    } catch {
+      setDemoError('The invitation could not be checked. Keep this tab open and retry, or ask Maya for a replacement link if it expired.');
+    } finally {
+      setDemoLoading(false);
     }
   };
 
@@ -227,11 +290,10 @@ export function KnownEnoughHome({ ownerInterpreter }: { ownerInterpreter?: Local
     setError('');
     try {
       const requestId = crypto.randomUUID();
-      const response = await fetch(ARCHITECT_URL, {
+      const response = await localTestFetch(session, onSessionExpired, ARCHITECT_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Deal-Table-Test-Identity': LOCAL_IDENTITY,
           'X-Request-Id': requestId,
         },
         body: JSON.stringify({
@@ -259,7 +321,8 @@ export function KnownEnoughHome({ ownerInterpreter }: { ownerInterpreter?: Local
   return <main className="ke-home">
     <header className="masthead ke-masthead">
       <div><p className="eyebrow">KNOWN ENOUGH</p><h1>Decide together</h1></div>
-      <span className="badge">Local injected-model preview · no sign-in</span>
+      <div className="header-actions"><span className="badge">Local test session · {session.displayName}</span>
+        <button type="button" className="secondary" onClick={onSignOut}>Sign out</button></div>
     </header>
 
     <section className="ke-hero" aria-labelledby="create-heading">
@@ -279,18 +342,35 @@ export function KnownEnoughHome({ ownerInterpreter }: { ownerInterpreter?: Local
       </form>
     </section>
 
-    <p className="notice ke-privacy"><strong>Known Enough product privacy promise for the connected service:</strong> “{privacyPromise}” This local prototype has no sign-in. The frame draft sends only the public objective, proposed participant labels and candidate options to the loopback API. The Christmas scenario uses synthetic conditions and temporary in-memory state shared among these fixed local profiles; it disappears when the API stops.</p>
+    <p className="notice ke-privacy"><strong>Known Enough product privacy promise for the connected service:</strong> “{privacyPromise}” This test login is a local-only signed session issued by the loopback API; it is not Cognito, a real account, or production authentication. The frame draft sends only the public objective, proposed participant labels and candidate options to the loopback API. The Christmas scenario uses fictional participants, synthetic conditions, and temporary in-memory state; it disappears when the API stops. Invitations are local links only and are never emailed.</p>
 
     <section className="ke-card ke-christmas-demo" aria-labelledby="christmas-demo-heading">
       <p className="eyebrow">END-TO-END LOCAL SCENARIO</p>
       <h2 id="christmas-demo-heading">Try the fictional Christmas decision</h2>
-      <p>Five synthetic family profiles, confirmed conditions, a kernel-checked proposal and an optional private negotiation. This local API runs the application and deterministic kernel with temporary in-memory shared state across its fixed profiles; the hosted HTTPS preview remains a static mock with no shared state.</p>
-      <label htmlFor="christmas-demo-profile">Fictional local profile</label>
-      <select id="christmas-demo-profile" value={demoParticipant} onChange={event => {
-        setDemoParticipant(event.target.value); setDemoData(null); setDemoOutcome('');
-      }}>
-        {['maya', 'leo', 'nina', 'ana', 'raul'].map(person => <option key={person} value={person}>{person[0]!.toUpperCase() + person.slice(1)} · local demo only</option>)}
-      </select>
+      <p>Five fictional participants, confirmed conditions, a kernel-checked proposal and an optional private negotiation. Each participant signs in as a separate local test user and must accept Maya’s invitation before the API grants scenario access. The loopback API uses temporary in-memory shared state that disappears when it stops; the hosted HTTPS preview remains a static mock with no shared state.</p>
+      {pendingInviteToken && <div className="local-note" aria-label="Pending invitation">
+        <p>An invitation link is open for this browser tab. Sign in with the test user it was issued for.</p>
+        <button type="button" onClick={() => void redeemPendingInvitation()} disabled={demoLoading}>
+          {demoLoading ? 'Checking invitation…' : 'Accept local invitation'}
+        </button>
+      </div>}
+      {session.accountId === 'maya' && <section className="ke-invitation" aria-labelledby="issue-invitation-heading">
+        <h3 id="issue-invitation-heading">Invite a fictional participant</h3>
+        <p className="ke-help">The Maya test account can issue these local links. This picker does not verify who is using that account. Replacing a live link immediately invalidates the old link.</p>
+        <label htmlFor="local-invite-participant">Participant</label>
+        <select id="local-invite-participant" value={inviteParticipant} onChange={event => setInviteParticipant(event.target.value)}>
+          {['leo', 'nina', 'ana', 'raul'].map(person => <option key={person} value={person}>{person[0]!.toUpperCase() + person.slice(1)}</option>)}
+        </select>
+        <label className="ke-checkbox"><input type="checkbox" checked={replaceActiveInvitation}
+          onChange={event => setReplaceActiveInvitation(event.target.checked)} /> Replace current link if its response was lost or the old link must be invalidated</label>
+        <button type="button" onClick={() => void issueInvitation()} disabled={demoLoading}>Create invitation link</button>
+        {invitationError && <p role="alert" className="ke-error">{invitationError}</p>}
+        {invitationNotice && <p role="status" className="local-note">{invitationNotice}</p>}
+        {invitationLink && <label htmlFor="local-invitation-link">Copy this one-time link and send it yourself</label>}
+        {invitationLink && <input id="local-invitation-link" className="ke-invitation-link" readOnly value={invitationLink} onFocus={event => event.currentTarget.select()} />}
+        {invitationLink && <p className="ke-help">The link works only in this local test setup while its API process is running. It is not an email invitation or a link to the hosted preview.</p>}
+        {invitationLink && <button type="button" className="secondary" onClick={() => setInvitationLink('')}>Hide invitation link</button>}
+      </section>}
       <div className="ke-private-actions">
         <button type="button" onClick={() => void loadChristmasDemo()} disabled={demoLoading}>{demoData ? 'Refresh local scenario' : 'Load local scenario'}</button>
         <button type="button" className="secondary" onClick={() => void generateChristmasCandidate()} disabled={!demoData || demoLoading || !['READY', 'NO_AGREEMENT', 'SUPERSEDED'].includes(demoData.publicSnapshot.status)}>
@@ -304,7 +384,7 @@ export function KnownEnoughHome({ ownerInterpreter }: { ownerInterpreter?: Local
           <strong>{demoData.publicSnapshot.frame.title}</strong>
           <span> · {demoData.publicSnapshot.status.replaceAll('_', ' ')}</span>
           <p>{demoData.publicSnapshot.frame.objective}</p>
-          <p className="ke-help">Selected profile is a fixed NON_PRODUCTION identity. It is not authentication, and all scenario values are synthetic.</p>
+          <p className="ke-help">The scenario is synthetic. This local session verifies the server-issued test identity but does not prove managed authentication.</p>
         </div>
         {demoData.publicSnapshot.currentProposal && <section className="ke-demo-proposal" aria-label="Validated public proposal">
           <h3>Validated proposal · public facts only</h3>
@@ -322,7 +402,7 @@ export function KnownEnoughHome({ ownerInterpreter }: { ownerInterpreter?: Local
             <p className="eyebrow">PRIVATE QUESTION · {demoData.ownerSnapshot.ownerParticipantId}</p>
             <h3>Optional one-time adjustment</h3>
             <p>For “{demoData.publicSnapshot.frame.objective},” your condition is {constraint?.kind === 'NEGOTIABLE' ? describeDemoRule(constraint.rule, variables) : 'this negotiable condition'}.</p>
-            <p>The requested adjustment is {describeDemoRule(question.adjustment, variables)}. This local profile selector is not authentication; the scenario is synthetic.</p>
+            <p>The requested adjustment is {describeDemoRule(question.adjustment, variables)}. This private question is visible only in this participant’s local signed test session.</p>
             <p>Expires {new Date(question.expiresAt).toLocaleString()}.</p>
             <div className="ke-private-actions">
               <button type="button" onClick={() => void answerChristmasQuestion(question, 'ALLOW')} disabled={demoLoading}>Allow this exact adjustment</button>
@@ -331,7 +411,7 @@ export function KnownEnoughHome({ ownerInterpreter }: { ownerInterpreter?: Local
           </section>;
         })}
         {demoData.publicSnapshot.status === 'PRIVATE_NEGOTIATION' && demoData.ownerSnapshot.pendingQuestions.length === 0
-          && <p>A participant’s private question is pending. Select its fictional local profile to view and answer it.</p>}
+          && <p>A participant’s private question is pending. That participant must sign in separately to view and answer it.</p>}
       </>}
     </section>
 
@@ -355,8 +435,8 @@ export function KnownEnoughHome({ ownerInterpreter }: { ownerInterpreter?: Local
       </section>}
       {view === 'private' && <section className="ke-card" aria-labelledby="private-heading">
         <h3 id="private-heading">Your private space</h3>
-        <p>This is a local-only conversation prototype for fictional input. It has no verified identity, shared state, or live model. Do not enter personal or sensitive information.</p>
-        <p className="ke-private-identity">Demo profile: {frame?.participants[0]?.displayName ?? 'fictional owner'} · proposed, not verified</p>
+        <p>This is a local-only conversation prototype for fictional input. It has no live model or saved shared state. Do not enter personal or sensitive information.</p>
+        <p className="ke-private-identity">Local test user: {session.displayName} · not a real account</p>
         <label htmlFor="owner-private-statement">Describe one private condition</label>
         <textarea id="owner-private-statement" value={ownerText} maxLength={2_000} onChange={event => {
           clearOwnerReview(); setOwnerText(event.target.value);
@@ -400,6 +480,6 @@ export function KnownEnoughHome({ ownerInterpreter }: { ownerInterpreter?: Local
       <p>Your first frame draft will appear here. It stays in this local session and is not shared.</p>
     </section> : null}
 
-    <footer className="ke-footer">Injected deterministic test model · not live AI · no authenticated identity or cloud-shared state. Christmas scenario data stays in local memory. <a href="?legacy=teamtable">Open the retained TeamTable regression demo</a>.</footer>
+    <footer className="ke-footer">Injected deterministic test model · not live AI · local test identity only · no cloud-shared state. Christmas scenario data stays in local memory. <a href="?legacy=teamtable">Open the retained TeamTable regression demo</a>.</footer>
   </main>;
 }

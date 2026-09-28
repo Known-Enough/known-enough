@@ -129,7 +129,7 @@ export type DynamoKnownEnoughRecord = Omit<KnownEnoughRecord, 'replays'>;
 type DynamoItem = Record<string, AttributeValue>;
 
 export const STATE_SCHEMA_VERSION = 4;
-export const KNOWN_ENOUGH_STATE_SCHEMA_VERSION = 5;
+export const KNOWN_ENOUGH_STATE_SCHEMA_VERSION = 6;
 export const GUARD_SCHEMA_VERSION = 1;
 export const REPLAY_SCHEMA_VERSION = 1;
 
@@ -174,11 +174,15 @@ const decisionAgreementSchema = z.strictObject({
   agreedAt: Timestamp,
 });
 const decisionMembershipSchema = z.strictObject({ subject: Id, participantId: Id, active: z.boolean() });
+const decisionInvitationSchema = z.strictObject({
+  participantId: Id, tokenHash: Hash, expiresAt: Timestamp, redeemedAt: Timestamp.nullable(),
+});
 const decisionJobSchema = z.strictObject({ id: Id, contextToken: Hash, semanticVersion: Version, epoch: Version });
 const decisionRecordSchema = z.strictObject({
   decisionId: Id,
   creatorSubject: Id,
   memberships: z.array(decisionMembershipSchema).max(KE.MAX_DECISION_PARTICIPANTS),
+  invitations: z.array(decisionInvitationSchema).max(KE.MAX_DECISION_PARTICIPANTS).default([]),
   definition: KE.DecisionDefinition,
   status: KE.PublicDecisionStatus,
   publicRevision: Version,
@@ -199,6 +203,8 @@ const decisionRecordSchema = z.strictObject({
   const participants = decision.definition.participants.map(item => item.id);
   const membershipIds = decision.memberships.map(item => item.participantId);
   const subjects = decision.memberships.map(item => item.subject);
+  const invitationIds = decision.invitations.map(item => item.participantId);
+  const invitationHashes = decision.invitations.map(item => item.tokenHash);
   const owners = decision.owners.map(item => item.participantId);
   const issue = (path: (string | number)[], message: string) => ctx.addIssue({ code: 'custom', path, message });
   if (decision.decisionId !== decision.definition.decisionId) issue(['definition', 'decisionId'], 'State and definition IDs must match');
@@ -207,6 +213,13 @@ const decisionRecordSchema = z.strictObject({
     || new Set(membershipIds).size !== membershipIds.length
     || new Set(subjects).size !== subjects.length)
     issue(['memberships'], 'Memberships must uniquely bind every current participant');
+  if (new Set(invitationIds).size !== invitationIds.length || new Set(invitationHashes).size !== invitationHashes.length
+    || decision.invitations.some(invitation => {
+      const membership = decision.memberships.find(item => item.participantId === invitation.participantId);
+      return !membership || !participants.includes(invitation.participantId)
+        || (invitation.redeemedAt === null && membership.active)
+        || (invitation.redeemedAt !== null && !membership.active);
+    })) issue(['invitations'], 'Invitations must uniquely bind a pending or redeemed member');
   if ([...participants].sort().join('|') !== [...owners].sort().join('|') || new Set(owners).size !== owners.length)
     issue(['owners'], 'Owner records must match the current participant roster');
   const confirmationIds = decision.frameConfirmations.map(item => item.participantId);
@@ -244,7 +257,7 @@ const decisionRecordSchema = z.strictObject({
     issue(['job'], 'Candidate jobs must bind to the current semantic context and epoch');
 });
 const decisionStateEnvelopeSchema = z.strictObject({
-  schemaVersion: z.literal(KNOWN_ENOUGH_STATE_SCHEMA_VERSION),
+  schemaVersion: z.union([z.literal(5), z.literal(KNOWN_ENOUGH_STATE_SCHEMA_VERSION)]),
   decisionId: Id,
   record: decisionRecordSchema,
 });
@@ -429,9 +442,10 @@ export function decodeStateItem(value: unknown, expectedRoomId: string): DynamoR
 export function decodeDecisionStateItem(value: unknown, expectedDecisionId: string): DynamoKnownEnoughRecord {
   const item = roomItemSchema.safeParse(value);
   if (!item.success || item.data.PK.S !== roomKey(expectedDecisionId) || item.data.SK.S !== 'STATE'
-    || item.data.schemaVersion.N !== String(KNOWN_ENOUGH_STATE_SCHEMA_VERSION)) throw new CorruptDynamoRecordError();
+    || !['5', String(KNOWN_ENOUGH_STATE_SCHEMA_VERSION)].includes(item.data.schemaVersion.N)) throw new CorruptDynamoRecordError();
   const envelope = decisionStateEnvelopeSchema.safeParse(parseJson(item.data.payload.S));
-  if (!envelope.success || envelope.data.decisionId !== expectedDecisionId
+  if (!envelope.success || String(envelope.data.schemaVersion) !== item.data.schemaVersion.N
+    || envelope.data.decisionId !== expectedDecisionId
     || envelope.data.record.decisionId !== expectedDecisionId) throw new CorruptDynamoRecordError();
   return envelope.data.record;
 }

@@ -114,6 +114,36 @@ async function christmasCandidate(
 }
 
 describe('Known Enough application lifecycle', () => {
+  it('issues organizer-bound invitations, safely rotates a lost token, and acknowledges same-member redemption retries', async () => {
+    const h = await setup();
+    await h.repository.transactionDecision(decisionId, decision => {
+      decision!.memberships.find(item => item.participantId === 'leo')!.active = false;
+    });
+    await expect(h.app.issueDecisionInvitation(h.byMember('leo'), decisionId,
+      { requestId: 'invite-not-organizer', participantId: 'leo' }))
+      .rejects.toMatchObject({ code: 'NOT_FOUND' });
+
+    const first = await h.app.issueDecisionInvitation(h.byMember('maya'), decisionId,
+      { requestId: 'invite-leo', participantId: 'leo' });
+    await expect(h.app.issueDecisionInvitation(h.byMember('maya'), decisionId,
+      { requestId: 'invite-leo-retry', participantId: 'leo' })).rejects.toMatchObject({ code: 'IDEMPOTENCY_CONFLICT' });
+    const replacement = await h.app.issueDecisionInvitation(h.byMember('maya'), decisionId,
+      { requestId: 'invite-leo-replace', participantId: 'leo', replaceActive: true });
+    expect(replacement.token).not.toBe(first.token);
+    await expect(h.app.redeemDecisionInvitation(h.byMember('leo'), decisionId,
+      { requestId: 'redeem-old', token: first.token })).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await expect(h.app.redeemDecisionInvitation(h.byMember('nina'), decisionId,
+      { requestId: 'redeem-wrong-member', token: replacement.token })).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await expect(h.app.redeemDecisionInvitation(h.byMember('leo'), decisionId,
+      { requestId: 'redeem-expired', token: replacement.token })).resolves.toEqual({ accepted: true });
+    await expect(h.app.redeemDecisionInvitation(h.byMember('leo'), decisionId,
+      { requestId: 'redeem-retry', token: replacement.token })).resolves.toEqual({ accepted: true });
+    await expect(h.app.issueDecisionInvitation(h.byMember('maya'), decisionId,
+      { requestId: 'invite-active-member', participantId: 'leo', replaceActive: true }))
+      .rejects.toMatchObject({ code: 'NOT_FOUND' });
+    expect((await h.app.getOwnerSnapshot(h.byMember('leo'), decisionId)).ownerParticipantId).toBe('leo');
+  });
+
   it('stores a five-person decision and returns strict public and owner-scoped projections', async () => {
     const h = await setup();
     const publicView = await h.app.getPublicSnapshot({ kind: 'display', subject: 'display', roomId: decisionId }, decisionId);

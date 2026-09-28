@@ -43,16 +43,23 @@ async function records() {
 }
 
 describe('DynamoDB state codecs', () => {
-  it('keeps legacy STATE v4 and generic STATE v5 as explicit, separate formats', async () => {
+  it('keeps legacy STATE v4 and migrates generic STATE v5 to the invitation-aware v6 shape', async () => {
     const { legacy, generic } = await records();
     expect(STATE_SCHEMA_VERSION).toBe(4);
-    expect(KNOWN_ENOUGH_STATE_SCHEMA_VERSION).toBe(5);
+    expect(KNOWN_ENOUGH_STATE_SCHEMA_VERSION).toBe(6);
     const legacyItem = encodeStateItem(legacy);
     const genericItem = encodeDecisionStateItem(generic);
     expect(legacyItem.schemaVersion?.N).toBe('4');
-    expect(genericItem.schemaVersion?.N).toBe('5');
+    expect(genericItem.schemaVersion?.N).toBe('6');
     expect(decodeStateItem(legacyItem, legacy.roomId)).toEqual(encodedStateRecord(legacy));
     expect(decodeDecisionStateItem(genericItem, generic.decisionId)).toEqual(encodedDecisionStateRecord(generic));
+    const priorGeneric = structuredClone(genericItem);
+    priorGeneric.schemaVersion = { N: '5' };
+    const priorPayload = JSON.parse(priorGeneric.payload!.S!);
+    priorPayload.schemaVersion = 5;
+    delete priorPayload.record.invitations;
+    priorGeneric.payload = { S: JSON.stringify(priorPayload) };
+    expect(decodeDecisionStateItem(priorGeneric, generic.decisionId)).toEqual(encodedDecisionStateRecord(generic));
     expect(() => decodeStateItem(genericItem, generic.decisionId)).toThrow(CorruptDynamoRecordError);
     expect(() => decodeDecisionStateItem(legacyItem, legacy.roomId)).toThrow(CorruptDynamoRecordError);
     expect(decisionStateItemSizeBytes(generic)).toBeGreaterThan(0);

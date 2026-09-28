@@ -7,6 +7,7 @@ import {
   type DecisionNegotiationModel, type OwnerConversationModel, type TrustedPrincipal,
 } from '@deal-table/application';
 import { createLocalKnownEnoughApiHandler } from './http-core.ts';
+import { createLocalTestSessionManager, type LocalTestSessionManager } from './local-test-auth.ts';
 
 const decisionId = 'christmas-decision';
 const identities = new Map([
@@ -17,7 +18,10 @@ const identities = new Map([
 ]);
 let servers: Server[] = [];
 
-async function setup(architect?: DecisionArchitect, ownerModel?: OwnerConversationModel, negotiationModel?: DecisionNegotiationModel) {
+async function setup(
+  architect?: DecisionArchitect, ownerModel?: OwnerConversationModel, negotiationModel?: DecisionNegotiationModel,
+  options: { activeParticipantIds?: readonly string[]; testSessions?: LocalTestSessionManager } = {},
+) {
   const fixture = buildChristmasFixture();
   let sequence = 0;
   const application = new KnownEnoughApplication({
@@ -29,7 +33,8 @@ async function setup(architect?: DecisionArchitect, ownerModel?: OwnerConversati
     definition: fixture.definition,
     creatorSubject: 'subject-maya',
     memberships: fixture.definition.participants.map(person => ({
-      subject: `subject-${person.id}`, participantId: person.id, active: true,
+      subject: `subject-${person.id}`, participantId: person.id,
+      active: options.activeParticipantIds ? options.activeParticipantIds.includes(person.id) : true,
     })),
   });
   const ownerConversation = ownerModel ? new OwnerConversationArchitect({
@@ -41,6 +46,7 @@ async function setup(architect?: DecisionArchitect, ownerModel?: OwnerConversati
     clock: { now: () => '2026-10-01T12:00:00.000Z' }, ids: { next: () => `api-negotiation-${++sequence}` },
   }) : undefined;
   const server = createServer(createLocalKnownEnoughApiHandler({ application, identities,
+    ...(options.testSessions ? { testSessions: options.testSessions } : {}),
     ...(architect ? { architect } : {}), ...(ownerConversation ? { ownerConversation } : {}), ...(negotiator ? { negotiator } : {}) }));
   servers.push(server);
   await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -302,5 +308,81 @@ describe('Known Enough local HTTP adapter', () => {
     expect(JSON.stringify(receivedContext)).not.toContain('sourceSummary');
     const snapshot = await get(`/decisions/${decisionId}/public`);
     expect(await snapshot.json()).toMatchObject({ status: 'PROPOSED' });
+  });
+});
+
+describe('Known Enough local signed-session and invitation HTTP flow', () => {
+  it('authenticates five fixed test users, scopes display access, and makes invite redemption retry-safe', async () => {
+    const testSessions = createLocalTestSessionManager([
+      ...['maya', 'leo', 'nina', 'ana', 'raul'].map(id => ({
+        id, displayName: id, participantId: id,
+        identity: { kind: 'participant' as const, subject: `subject-${id}` },
+      })),
+      { id: 'display', displayName: 'Shared display', identity: { kind: 'display' as const, subject: 'display-subject', roomId: decisionId } },
+    ], { key: Buffer.alloc(32, 9) });
+    const { base } = await setup(undefined, undefined, undefined, { activeParticipantIds: ['maya'], testSessions });
+    const signIn = async (accountId: string) => {
+      const response = await fetch(`${base}/__test/session`, {
+        method: 'POST', headers: { 'content-type': 'application/json', origin: 'http://127.0.0.1:5173' },
+        body: JSON.stringify({ accountId }),
+      });
+      expect(response.status).toBe(201);
+      expect(response.headers.get('access-control-allow-origin')).toBe('http://127.0.0.1:5173');
+      return await response.json() as { token: string; expiresAt: string; participantId: string | null; kind: string };
+    };
+    const maya = await signIn('maya');
+    const leo = await signIn('leo');
+    const nina = await signIn('nina');
+    const display = await signIn('display');
+    expect(maya.participantId).toBe('maya');
+    expect(leo.participantId).toBe('leo');
+    expect(display).toMatchObject({ kind: 'display', participantId: null });
+    const bearer = (token: string) => ({ authorization: `Bearer ${token}`, 'content-type': 'application/json' });
+
+    const beforeInvite = await fetch(`${base}/decisions/${decisionId}/public`, { headers: bearer(leo.token) });
+    expect(beforeInvite.status).toBe(404);
+    const deniedIssue = await fetch(`${base}/decisions/${decisionId}/invitations`, {
+      method: 'POST', headers: bearer(leo.token), body: JSON.stringify({ requestId: 'leo-invite', participantId: 'nina' }),
+    });
+    expect(deniedIssue.status).toBe(404);
+    const issued = await fetch(`${base}/decisions/${decisionId}/invitations`, {
+      method: 'POST', headers: bearer(maya.token), body: JSON.stringify({ requestId: 'maya-invite-leo', participantId: 'leo' }),
+    });
+    expect(issued.status).toBe(201);
+    const invitation = await issued.json() as { token: string; expiresAt: string };
+    expect(invitation.token).toBeTruthy();
+    expect(invitation.expiresAt).toBeTruthy();
+    const lostResponseRetry = await fetch(`${base}/decisions/${decisionId}/invitations`, {
+      method: 'POST', headers: bearer(maya.token), body: JSON.stringify({ requestId: 'maya-invite-leo-retry', participantId: 'leo' }),
+    });
+    expect(lostResponseRetry.status).toBe(409);
+    const replacement = await fetch(`${base}/decisions/${decisionId}/invitations`, {
+      method: 'POST', headers: bearer(maya.token), body: JSON.stringify({ requestId: 'maya-reissue-leo', participantId: 'leo', replaceActive: true }),
+    });
+    expect(replacement.status).toBe(201);
+    const newInvitation = await replacement.json() as { token: string; expiresAt: string };
+    expect(newInvitation.token).not.toBe(invitation.token);
+    const oldToken = await fetch(`${base}/decisions/${decisionId}/invitations/redeem`, {
+      method: 'POST', headers: bearer(leo.token), body: JSON.stringify({ requestId: 'redeem-old-link', token: invitation.token }),
+    });
+    expect(oldToken.status).toBe(404);
+    const wrongIdentity = await fetch(`${base}/decisions/${decisionId}/invitations/redeem`, {
+      method: 'POST', headers: bearer(nina.token), body: JSON.stringify({ requestId: 'redeem-wrong-person', token: newInvitation.token }),
+    });
+    expect(wrongIdentity.status).toBe(404);
+    const redeemed = await fetch(`${base}/decisions/${decisionId}/invitations/redeem`, {
+      method: 'POST', headers: bearer(leo.token), body: JSON.stringify({ requestId: 'redeem-leo', token: newInvitation.token }),
+    });
+    expect(redeemed.status).toBe(200);
+    const retry = await fetch(`${base}/decisions/${decisionId}/invitations/redeem`, {
+      method: 'POST', headers: bearer(leo.token), body: JSON.stringify({ requestId: 'redeem-leo-retry', token: newInvitation.token }),
+    });
+    expect(retry.status).toBe(200);
+    const leoPrivate = await fetch(`${base}/decisions/${decisionId}/me`, { headers: bearer(leo.token) });
+    expect(leoPrivate.status).toBe(200);
+    const displayPrivate = await fetch(`${base}/decisions/${decisionId}/me`, { headers: bearer(display.token) });
+    expect(displayPrivate.status).toBe(404);
+    const displayPublic = await fetch(`${base}/decisions/${decisionId}/public`, { headers: bearer(display.token) });
+    expect(displayPublic.status).toBe(200);
   });
 });

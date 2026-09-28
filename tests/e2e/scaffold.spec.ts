@@ -1,4 +1,25 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+
+async function signIn(page: Page, accountId = 'maya') {
+  await page.getByLabel('Test user', { exact: true }).selectOption(accountId);
+  await page.getByRole('button', { name: 'Start local test session' }).click();
+  if (accountId === 'display') await expect(page.getByRole('heading', { name: 'Shared display' })).toBeVisible();
+  else await expect(page.getByText(`Local test session · ${accountId === 'maya' ? 'Maya · organizer' : accountId[0]!.toUpperCase() + accountId.slice(1)}`)).toBeVisible();
+}
+
+async function participantForSession(page: Page): Promise<{ status: number; participantId: string }> {
+  return page.evaluate(async () => {
+    const raw = sessionStorage.getItem('known-enough-local-test-session');
+    if (!raw) throw new Error('missing local test session');
+    const session = JSON.parse(raw) as { token: string };
+    const response = await fetch('http://127.0.0.1:8788/decisions/christmas-decision/me', {
+      headers: { authorization: `Bearer ${session.token}` },
+    });
+    const body = await response.json() as { ownerParticipantId?: string };
+    return { status: response.status, participantId: body.ownerParticipantId ?? '' };
+  });
+}
+
 for (const width of [390, 1280]) {
   test(`Known Enough home renders at ${width}px without private data or external requests`, async ({ page }, testInfo) => {
     await page.setViewportSize({ width, height: 900 });
@@ -8,8 +29,11 @@ for (const width of [390, 1280]) {
     if (typeof configuredBaseUrl !== 'string') throw new Error('Playwright baseURL must be configured for the mock privacy check');
     const configuredOrigin = new URL(configuredBaseUrl).origin;
     page.on('pageerror', e => errors.push(e.message));
-    page.on('request', r => { if (new URL(r.url()).origin !== configuredOrigin) external.push(r.url()); });
+    page.on('request', r => {
+      if (![configuredOrigin, 'http://127.0.0.1:8788'].includes(new URL(r.url()).origin)) external.push(r.url());
+    });
     await page.goto('/');
+    await signIn(page);
     await expect(page.getByRole('heading', { name: 'Decide together', exact: true })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'What are you trying to decide?' })).toBeVisible();
     await expect(page.getByLabel('Describe the shared objective')).toBeVisible();
@@ -46,6 +70,7 @@ test('draft, private-space, and proposal surfaces stay local and describe what i
     }) });
   });
   await page.goto('/');
+  await signIn(page);
   await page.getByLabel('Describe the shared objective').fill('Choose a family Christmas trip.');
   await page.getByLabel('Proposed participants (comma-separated fictional names)').fill('Maya, Leo');
   await page.getByLabel('Options already under consideration (optional, comma-separated)').fill('Cancún, Oaxaca');
@@ -87,31 +112,105 @@ test('retained TeamTable route remains an explicit legacy preview', async ({ pag
   await expect(page.getByText('Shared table · local demo')).toBeVisible();
 });
 
-test('fictional Christmas negotiation stays private and publishes only a kernel-checked candidate', async ({ page }, testInfo) => {
+test('five participants join through invitations, see only their owner snapshots, and keep display read-only', async ({ page, browser }, testInfo) => {
+  const contexts = [] as Awaited<ReturnType<typeof browser.newContext>>[];
+  try {
   await page.goto('/');
+  await signIn(page, 'maya');
   const demo = page.getByRole('region', { name: 'Try the fictional Christmas decision' });
   await expect(demo).toContainText('the hosted HTTPS preview remains a static mock with no shared state');
+
+  const participantPages = new Map<string, Page>();
+  for (const participant of ['leo', 'nina', 'ana', 'raul']) {
+    await page.getByLabel('Participant', { exact: true }).selectOption(participant);
+    await demo.getByRole('button', { name: 'Create invitation link' }).click();
+    const invitation = await page.getByLabel('Copy this one-time link and send it yourself').inputValue();
+    expect(invitation).toContain('#invite=');
+
+    if (participant === 'leo') {
+      const wrongContext = await browser.newContext(); contexts.push(wrongContext);
+      const wrongPage = await wrongContext.newPage();
+      await wrongPage.goto(invitation);
+      await signIn(wrongPage, 'raul');
+      await wrongPage.getByRole('button', { name: 'Accept local invitation' }).click();
+      await expect(wrongPage.getByRole('alert')).toContainText('belongs to another test user');
+      await expect(wrongPage.getByRole('heading', { name: 'Family Christmas trip', exact: true })).toHaveCount(0);
+    }
+
+    const context = await browser.newContext(); contexts.push(context);
+    const participantPage = await context.newPage();
+    await participantPage.goto(invitation);
+    await expect(participantPage.getByText('An invitation link is waiting in this browser tab.')).toBeVisible();
+    await signIn(participantPage, participant);
+    await participantPage.getByRole('button', { name: 'Accept local invitation' }).click();
+    await expect(participantPage.getByRole('region', { name: 'Try the fictional Christmas decision' }).locator('.ke-demo-summary'))
+      .toContainText('Family Christmas trip');
+    expect(await participantForSession(participantPage)).toEqual({ status: 200, participantId: participant });
+    participantPages.set(participant, participantPage);
+    await demo.getByRole('button', { name: 'Hide invitation link' }).click();
+  }
+
+  const unauthorized = await participantForSession(participantPages.get('leo')!);
+  expect(unauthorized.participantId).toBe('leo');
+  const leoSession = await participantPages.get('leo')!.evaluate(() => {
+    const raw = sessionStorage.getItem('known-enough-local-test-session');
+    if (!raw) throw new Error('missing local test session');
+    const session = JSON.parse(raw) as { token: string; accountId: string };
+    session.accountId = 'nina';
+    sessionStorage.setItem('known-enough-local-test-session', JSON.stringify(session));
+    return session.token;
+  });
+  expect(await participantPages.get('leo')!.evaluate(async token => {
+    const response = await fetch('http://127.0.0.1:8788/decisions/christmas-decision/me', { headers: { authorization: `Bearer ${token}` } });
+    const body = await response.json() as { ownerParticipantId?: string };
+    return { status: response.status, participantId: body.ownerParticipantId };
+  }, leoSession)).toEqual({ status: 200, participantId: 'leo' });
+  expect(await participantPages.get('leo')!.evaluate(async token => {
+    const response = await fetch('http://127.0.0.1:8788/decisions/christmas-decision/me?participantId=maya&ownerParticipantId=maya', {
+      headers: { authorization: `Bearer ${token}` },
+    });
+    const body = await response.json() as { ownerParticipantId?: string };
+    return { status: response.status, participantId: body.ownerParticipantId };
+  }, leoSession)).toEqual({ status: 200, participantId: 'leo' });
+
   await demo.getByRole('button', { name: 'Load local scenario' }).click();
-  await expect(demo.getByText('Family Christmas trip', { exact: true })).toBeVisible();
+  await expect(demo.locator('.ke-demo-summary')).toContainText('Family Christmas trip');
   await demo.getByRole('button', { name: 'Generate candidate' }).click();
   await expect(demo.getByText('Local reasoning outcome: NEEDS_PERMISSION.')).toBeVisible();
-  await expect(demo.locator('.ke-demo-summary')).toContainText('PRIVATE NEGOTIATION');
-  await expect(demo.getByText('A participant’s private question is pending. Select its fictional local profile to view and answer it.')).toBeVisible();
-  await expect(demo.getByText(/Maya private|Nina private|nina-destination-flexibility|maya-budget-limit/)).toHaveCount(0);
-
-  await demo.getByLabel('Fictional local profile').selectOption('nina');
-  await demo.getByRole('button', { name: 'Load local scenario' }).click();
-  const question = demo.getByRole('region', { name: 'Private negotiation question' });
+  const ninaPage = participantPages.get('nina')!;
+  const ninaDemo = ninaPage.getByRole('region', { name: 'Try the fictional Christmas decision' });
+  await expect(ninaDemo.locator('.ke-demo-summary')).toContainText('Family Christmas trip');
+  await ninaDemo.getByRole('button', { name: 'Refresh local scenario' }).click();
+  const question = ninaDemo.getByRole('region', { name: 'Private negotiation question' });
   await expect(question.getByRole('heading', { name: 'Optional one-time adjustment' })).toBeVisible();
   await expect(question).toContainText('Cancún, Oaxaca');
   await expect(question).toContainText('Mazatlán');
   await question.getByRole('button', { name: 'Allow this exact adjustment' }).click();
-  await expect(demo.getByText('Local reasoning outcome: APPLIED.')).toBeVisible();
-  await expect(demo.locator('.ke-demo-summary')).toContainText('PROPOSED');
-  await expect(demo.getByRole('heading', { name: 'Validated proposal · public facts only' })).toBeVisible();
-  await expect(demo.getByText('Destination: Mazatlán')).toBeVisible();
-  await expect(demo.getByText('No private reason or condition is included in these shared facts.')).toBeVisible();
-  await expect(demo.getByText(/maya-budget-limit|nina-destination-flexibility|personal loan|older relative/)).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'Nothing here yet' })).toHaveCount(0);
+  await expect(ninaDemo.getByText('Local reasoning outcome: APPLIED.')).toBeVisible();
+  await expect(ninaDemo.locator('.ke-demo-summary')).toContainText('PROPOSED');
+  await expect(ninaDemo.getByRole('heading', { name: 'Validated proposal · public facts only' })).toBeVisible();
+  await expect(ninaDemo.getByText('Destination: Mazatlán')).toBeVisible();
+  await expect(ninaDemo.getByText(/maya-budget-limit|nina-destination-flexibility|personal loan|older relative/)).toHaveCount(0);
+
+  const displayContext = await browser.newContext(); contexts.push(displayContext);
+  const displayPage = await displayContext.newPage();
+  await displayPage.goto(new URL('/', page.url()).toString());
+  await signIn(displayPage, 'display');
+  await expect(displayPage.getByRole('heading', { name: 'Shared display' })).toBeVisible();
+  await expect(displayPage.getByRole('button', { name: /allow|decline|approve|confirm/i })).toHaveCount(0);
+  const displayResult = await displayPage.evaluate(async () => {
+    const raw = sessionStorage.getItem('known-enough-local-test-session');
+    if (!raw) throw new Error('missing local display session');
+    const token = (JSON.parse(raw) as { token: string }).token;
+    const response = await fetch('http://127.0.0.1:8788/decisions/christmas-decision/commands', {
+      method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ requestId: 'display-write', type: 'CONFIRM_FRAME' }),
+    });
+    return response.status;
+  });
+  expect(displayResult).toBe(403);
   await page.screenshot({ path: testInfo.outputPath('christmas-mvp.png'), fullPage: true });
+  } finally {
+    await Promise.all(contexts.map(context => context.close()));
+  }
 });

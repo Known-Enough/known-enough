@@ -1,4 +1,12 @@
-## Current handoff — KE11 local/test-auth claim — 2026-09-28
+## Current handoff — KE11 local/test-auth slice — REVIEW — 2026-09-28
+
+The local test path now issues 15-minute signed loopback sessions for fictional Maya, Leo, Nina, Ana, Raul and a read-only display. Maya can issue a 24-hour hashed invitation link; only its bound local test subject can redeem it. Lost issuance responses require an explicit replacement that invalidates the old token; redemption retries for the same subject are safe. The web flow no longer switches participant identity with a profile selector. See [local auth/invitation runbook](ke11-local-test-auth.md).
+
+Pinned Node 24.21.0/npm 11.19.0 `npm run check` passed: references 7/7; planning 15/15; lint and 167 import boundaries; typecheck; 368 unit tests passed / 2 optional skips; production build and bundle scan; hosted preview boundary and browser test 1/1; E2E 44/44. The focused `tests/e2e/scaffold.spec.ts` run passed 5/5, including separate contexts for the five participants, wrong-account denial, owner-snapshot binding, and display write denial. No Cognito configuration, AWS calls/resource changes, deployment, external invitations, Bedrock calls, or publication occurred.
+
+**KE11 remains REVIEW and KE12 remains BLOCKED.** The local account picker intentionally lets a tester select any fictional account, so signed-session tests prove server-side binding and app owner scoping only; they do not authenticate a real person or prevent a local tester from choosing Maya. Managed Cognito configuration and browser evidence still need explicit AWS resource-change authorization. `TD-KE10-01` continues to gate further live Bedrock evaluation/release-grade use. No human acceptance or unrelated task status changed.
+
+## Prior handoff — KE11 local/test-auth claim — 2026-09-28
 
 KE11 is claimed for local/test-auth implementation from clean synchronized `main` at `9c577cf`; `git pull --ff-only origin main` succeeded. Actual session: Codex GPT-6, exact variant/effort unexposed; the user approved proceeding despite the ticket's Sol/high target. Scope is local signed test sessions, identity-bound invitation and retry behavior, browser session flow, and five-participant isolation tests. No AWS/Cognito changes, live calls, external invite delivery or deployment. KE10 remains REVIEW; `TD-KE10-01` is READY and still gates further live Bedrock use and release-grade claims. See the [KE11 ticket](tasks/KE11.md) and [board](task-board.md).
 
