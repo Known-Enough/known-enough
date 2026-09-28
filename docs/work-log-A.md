@@ -12,7 +12,7 @@ User authorized KE11 and approved proceeding in the current Codex GPT-6 session 
 
 ## 2026-09-28 — KE10 technical-debt deferral and KE11 queue
 
-At the user's direction, kept the stop/commit finding in the existing technical-debt queue as READY; no new task status was introduced. KE10 remains REVIEW because the named focused independent follow-up has not passed. KE11 is READY for local/test-auth work only. Further live Bedrock use and release-grade claims remain gated on closing TD-KE10-01. This is a documentation-only status update; no code, cloud resources or acceptance records changed.
+At that point, the user's direction was recorded as keeping the stop/commit finding in the technical-debt queue as READY; KE10 remained REVIEW because the named focused independent follow-up had not passed, and KE11 was READY for local/test-auth work. The then-current note said further live Bedrock use was gated on closing TD-KE10-01; that schedule was superseded by the user's 2026-09-28 clarification recorded at the top of this log. This was a documentation-only status update; no code, cloud resources or acceptance records changed.
 
 ## 2026-09-28T16:33:22Z — KE10 runtime follow-up / CHANGES_REQUESTED
 
@@ -170,6 +170,10 @@ At the user's direction, kept the stop/commit finding in the existing technical-
 - Claim only; no implementation changes or checks yet. No AWS/Cognito/IAM calls, cloud resources, deployment, commit publication or push.
 
 # Developer A work log
+
+## 2026-09-28 — user direction on KE10 deferral
+
+The user clarified that the KE10 stop/commit issue should not pause MVP progress. Updated the current board, KE10/KE11 summaries, technical-debt queue/ticket and handoff: TD-KE10-01 stays READY for post-MVP follow-up and is not a gate for MVP work or separately authorized bounded MVP Bedrock testing. KE10 remains REVIEW; release-grade claims still require the named follow-up. Managed Cognito work still needs separate AWS resource-change authorization. No application code, AWS resources or acceptance status changed.
 
 A writes this log; B writes [its own log](work-log-B.md), regardless of task prefix in the shared pool. Ticket status/claim is authoritative. Entries are progress summaries, not private reasoning or a live inter-clone lock. Use the [workflow](agent-workflow.md).
 

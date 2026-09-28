@@ -8,5 +8,5 @@ This folder tracks intentionally deferred defects that still matter for a stated
 
 | ID | Status | Item | Required before |
 | --- | --- | --- | --- |
-| [TD-KE10-01](TD-KE10-01-stop-commit-race.md) | READY | Stop/commit correction and local regression checked; focused independent follow-up deferred | Any further live Bedrock evaluation or release-grade use of the KE10 runtime |
+| [TD-KE10-01](TD-KE10-01-stop-commit-race.md) | READY | Stop/commit correction and local regression checked; focused follow-up deferred until after MVP | Before a release-grade KE10 runtime claim; does not block MVP work or separately authorized bounded MVP Bedrock tests |
 | [TD-KE10-02](TD-KE10-02-bedrock-permission-set-name.md) | READY | Move Nova Lite access off the `ReadOnlyAccess` permission set to a clearly named test permission set | Before granting direct Bedrock test access to another user |
