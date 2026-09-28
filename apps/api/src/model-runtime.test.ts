@@ -222,11 +222,10 @@ describe('KE10 application/runtime composition', () => {
         publicCandidates: unknown[]; confirmedConstraints: { ownerParticipantId: string; constraintId: string; constraintVersion: number }[];
       };
       const nina = input.confirmedConstraints.find(item => item.ownerParticipantId === 'nina' && item.constraintId === 'nina-destination-flexibility')!;
-      return response({ values: input.publicCandidates[3], permissionDependencies: [],
+      return response({ candidateIndex: 3, permissionDependencies: [],
         questionIntents: [{ ownerParticipantId: 'nina', constraintId: nina.constraintId,
-          constraintVersion: nina.constraintVersion, adjustment: { id: 'allow-mazatlan', visibility: 'TRUSTED_BACKEND',
-            operator: 'IN', variableId: 'destination', values: [{ type: 'ENUM', optionId: 'mazatlan' }] } }],
-        explanationDraft: { variableIds: [], ruleIds: [] } }, 'ke_negotiation_output');
+          constraintVersion: nina.constraintVersion, adjustmentVariableId: 'destination', adjustmentOptionIds: ['mazatlan'] }] },
+      'ke_negotiation_output');
     });
     const result = await runtime.negotiator.generate(evaluationPrincipal('maya'), h.decisionId);
     expect(result.outcome).toBe('STALE');

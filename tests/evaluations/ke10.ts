@@ -12,8 +12,10 @@ export const evaluationPrincipal = (id: string): TrustedPrincipal => ({ kind: 'p
 export type Ke10EvaluationStage = 'setup' | 'construction' | 'proposal-kernel' | 'extraction-without-consent' | 'privacy';
 const safeFailureCodes = new Set(['INVALID_INPUT', 'INVALID_OUTPUT', 'PROVIDER_FAILED', 'DISABLED', 'EXPIRED',
   'CAPACITY', 'STALE', 'MODEL_FAILED', 'INVALID_MODEL_OUTPUT', 'RETRYABLE_SERVER_ERROR', 'INVALID_INTERPRETATION']);
+const safeDiagnosticReasons = new Set(['OUTPUT_ENVELOPE', 'QUESTION_INTENTS', 'PUBLIC_VALUES',
+  'PERMISSION_DEPENDENCIES', 'CANDIDATE_SCHEMA', 'CATALOG_MISMATCH', 'VALIDATION_EXCEPTION']);
 export class Ke10EvaluationFailure extends Error {
-  constructor(readonly stage: Ke10EvaluationStage, readonly failureCode: string) {
+  constructor(readonly stage: Ke10EvaluationStage, readonly failureCode: string, readonly diagnosticReason?: string) {
     super('KE10_EVALUATION_FAILED');
     this.name = 'Ke10EvaluationFailure';
   }
@@ -23,6 +25,11 @@ function failureCode(error: unknown): string {
   if (error !== null && typeof error === 'object' && 'code' in error
     && typeof error.code === 'string' && safeFailureCodes.has(error.code)) return error.code;
   return 'UNEXPECTED_FAILURE';
+}
+function diagnosticReason(error: unknown): string | undefined {
+  if (error !== null && typeof error === 'object' && 'diagnosticReason' in error
+    && typeof error.diagnosticReason === 'string' && safeDiagnosticReasons.has(error.diagnosticReason)) return error.diagnosticReason;
+  return undefined;
 }
 export async function createEvaluationDecision(
   clock = { now: () => new Date().toISOString() },
@@ -107,6 +114,6 @@ export async function runKe10Evaluations(transport: ConverseTransport) {
     passed.push('privacy');
     return { configuration: BEDROCK_CONFIGURATION, passed, usage };
   } catch (error) {
-    throw new Ke10EvaluationFailure(stage, failureCode(error));
+    throw new Ke10EvaluationFailure(stage, failureCode(error), diagnosticReason(error));
   } finally { await runtime.stop(); }
 }

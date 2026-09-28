@@ -32,8 +32,9 @@ const prompts: Record<ModelJobKind, string> = {
     + 'Do not invent another owner\'s information. Proposed constraints schema: '
     + schema(KE.AIConstraintDraft.shape.proposedConstraints) + ' Unsupported conditions schema: '
     + schema(KE.AIConstraintDraft.shape.unsupportedConditions),
-  NEGOTIATION: policy + 'Select exactly one publicCandidates entry as values, retaining its representation. '
-    + 'Return values, permissionDependencies, questionIntents. permissionDependencies is an array of '
+  NEGOTIATION: policy + 'Select exactly one entry from publicCandidates and return its zero-based array index as candidateIndex. '
+    + 'Do not repeat, edit or summarize its values; the server copies the exact catalog entry. '
+    + 'Also return permissionDependencies and questionIntents. permissionDependencies is an array of '
     + '{permissionId,permissionVersion,kind:"NEGOTIATION",expiresAt} drawn only from activePermissions when required. '
     + 'questionIntents is an array of {ownerParticipantId,constraintId,constraintVersion,adjustmentVariableId,adjustmentOptionIds}. '
     + 'Only propose a concession to that same owner\'s explicitly NEGOTIABLE public ENUM choice, using declared public options. '
@@ -98,7 +99,7 @@ const outputTools = {
     sourceSummary: stringSchema, proposedConstraints: objectArray(draftConditionSchema), unsupportedConditions: objectArray(unsupportedConditionSchema),
   }, required: ['sourceSummary', 'proposedConstraints', 'unsupportedConditions'] } },
   NEGOTIATION: { name: 'ke_negotiation_output', schema: { type: 'object', properties: {
-    values: objectArray(objectSchema({ variableId: stringSchema, value: valueSchema }, ['variableId', 'value'])),
+    candidateIndex: integerSchema,
     permissionDependencies: objectArray(objectSchema({ permissionId: stringSchema, permissionVersion: integerSchema,
       kind: { type: 'string', enum: ['NEGOTIATION'] }, expiresAt: stringSchema }, ['permissionId', 'permissionVersion', 'kind', 'expiresAt'])),
     questionIntents: objectArray(objectSchema({ ownerParticipantId: stringSchema, constraintId: stringSchema,
@@ -107,12 +108,21 @@ const outputTools = {
   }, required: ['values', 'permissionDependencies', 'questionIntents'] } },
 } satisfies Record<ModelJobKind, { name: string; schema: Record<string, unknown> }>;
 
-function normalizeToolOutput(kind: ModelJobKind, value: unknown): unknown {
+function normalizeToolOutput(kind: ModelJobKind, value: unknown, payload: unknown): unknown {
   if (kind !== 'NEGOTIATION' || !value || typeof value !== 'object' || Array.isArray(value)) return value;
   const output = value as Record<string, unknown>;
   if (!Array.isArray(output.questionIntents)) return value;
+  const candidates = payload && typeof payload === 'object' && !Array.isArray(payload)
+    && Array.isArray((payload as Record<string, unknown>).publicCandidates)
+    ? (payload as Record<string, unknown>).publicCandidates as unknown[] : [];
+  const candidateIndex = output.candidateIndex;
+  const values = Number.isSafeInteger(candidateIndex) && (candidateIndex as number) >= 0
+    ? candidates[candidateIndex as number] ?? [] : [];
+  const withoutCandidateIndex = { ...output };
+  delete withoutCandidateIndex.candidateIndex;
   return {
-    ...output,
+    ...withoutCandidateIndex,
+    values,
     questionIntents: output.questionIntents.map((item, index) => {
       if (!item || typeof item !== 'object' || Array.isArray(item)
         || Object.keys(item).sort().join('|') !== 'adjustmentOptionIds|adjustmentVariableId|constraintId|constraintVersion|ownerParticipantId')
@@ -194,7 +204,7 @@ export function createBedrockModels(options: {
       if (!result || typeof result !== 'object' || Array.isArray(result)
         || typeof output !== 'string' || Buffer.byteLength(output) > BEDROCK_CONFIGURATION.maxOutputBytes)
         throw new ModelRuntimeError('INVALID_OUTPUT');
-      return normalizeToolOutput(kind, result);
+      return normalizeToolOutput(kind, result, payload);
     });
   }
   return {

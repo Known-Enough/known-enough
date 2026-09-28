@@ -1,8 +1,12 @@
 # User B handoff — shared task pool
 
+## Current KE10 checkpoint — proposal-output correction
+
+KE10's implementation claim is complete and released on this checkpoint. The diagnostic run identified `CATALOG_MISMATCH`; negotiation now returns a catalog index and the trusted adapter copies the exact server-side candidate. Focused tests passed 47/47 and the pinned full check passed 360 tests / 2 skips, hosted browser 1/1 and E2E 44/44. The post-fix live evaluation passed construction, proposal-kernel, extraction-without-consent and privacy using 29,184 input / 397 output tokens across three requests. KE10 remains REVIEW while the named focused runtime follow-up is deferred; do not call it release-ready or accepted. The static CloudFront mock remains separate and was not changed.
+
 ## Current KE10 state — 2026-09-28
 
-The Nova Lite response-format correction is implemented and passes the pinned full check, but KE10 remains REVIEW. Nova Lite now uses a forced data-only Converse tool call; application validation and consent boundaries remain. The authorized synthetic live evaluation still fails at `proposal-kernel` with `INVALID_MODEL_OUTPUT` after two proposal attempts. The safe harness identifies stage/code but not the invalid field, so the next concrete step is a local-only safe subreason diagnostic before authorizing another live attempt. No provider text was saved, and no AWS resources were changed or deployed.
+Nova Lite uses a forced data-only Converse tool call, and negotiation selects an exact server candidate by catalog index. The post-correction synthetic live evaluation passed construction, proposal-kernel, extraction-without-consent and privacy. The first live attempt's model text was not retained; a safe diagnostic identified only `CATALOG_MISMATCH`. No AWS resources were changed or deployed. KE10 remains REVIEW pending the deferred focused runtime follow-up.
 
 The CloudFront Stage 0 URL `https://d23eowhnwtqts3.cloudfront.net/` remains the static mock. It cannot call Bedrock or share state; it was not modified. A working hosted app needs the authenticated KE13B backend, still gated by KE12 and explicit cloud scope authorization. The KE10 runtime follow-up remains deferred to later per user direction. See [KE10 checkpoint](tasks/KE10.md#nova-lite-structured-output-correction-checkpoint--2026-09-28). No task is marked accepted or DONE by this checkpoint.
 

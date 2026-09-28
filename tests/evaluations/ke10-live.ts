@@ -15,7 +15,9 @@ if (process.env.KE10_PAID_SMOKE_APPROVED !== 'yes'
     process.stdout.write(JSON.stringify({ mode: 'LIVE', ...result }) + '\n');
   } catch (error) {
     const diagnostic = error instanceof Ke10EvaluationFailure
-      ? { stage: error.stage, failureCode: error.failureCode } : { stage: 'setup', failureCode: 'UNEXPECTED_FAILURE' };
+      ? { stage: error.stage, failureCode: error.failureCode,
+        ...(error.diagnosticReason ? { diagnosticReason: error.diagnosticReason } : {}) }
+      : { stage: 'setup', failureCode: 'UNEXPECTED_FAILURE' };
     process.stderr.write(JSON.stringify({ mode: 'LIVE', configuration: BEDROCK_CONFIGURATION,
       outcome: 'EVALUATION_FAILED', ...diagnostic }) + '\n');
     process.exitCode = 1;

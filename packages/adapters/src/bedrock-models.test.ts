@@ -66,17 +66,35 @@ describe('Bedrock role adapters', () => {
       message: 'KE10_EVALUATION_FAILED',
     } satisfies Partial<Ke10EvaluationFailure>);
   });
+  it('reports an allowlisted negotiation rejection reason without model content', async () => {
+    let negotiationCalls = 0;
+    const send = async (command: ConverseCommand) => {
+      const name = command.input.toolConfig?.tools?.[0]?.toolSpec?.name;
+      if (name === 'ke_negotiation_output') {
+        negotiationCalls += 1;
+        return response({ values: [], permissionDependencies: [], questionIntents: [{ privateText: 'must not escape' }] }, name);
+      }
+      return syntheticResponse(command);
+    };
+    await expect(runKe10Evaluations({ send })).rejects.toMatchObject({
+      name: 'Ke10EvaluationFailure', stage: 'proposal-kernel', failureCode: 'INVALID_MODEL_OUTPUT',
+      diagnosticReason: 'QUESTION_INTENTS', message: 'KE10_EVALUATION_FAILED',
+    } satisfies Partial<Ke10EvaluationFailure>);
+    expect(negotiationCalls).toBe(2);
+  });
   it('converts flat Nova output into a trusted-backend enum question rule', async () => {
-    const models = createBedrockModels({ transport: { send: async () => response({ values: [], permissionDependencies: [], questionIntents: [{
+    const catalogEntry = [{ variableId: 'destination', value: { type: 'ENUM', optionId: 'mazatlan' } }];
+    const models = createBedrockModels({ transport: { send: async () => response({ candidateIndex: 0, permissionDependencies: [], questionIntents: [{
       ownerParticipantId: 'owner-1', constraintId: 'constraint-1', constraintVersion: 1,
       adjustmentVariableId: 'destination', adjustmentOptionIds: ['mazatlan'],
     }] }, 'ke_negotiation_output') }, jobs: new BoundedModelJobs(), enabled: () => true });
     const input = {
       context: { publicSnapshot: { frame: {} }, definition: { decisionId: 'decision-1', variables: [], rules: [] },
         confirmedConstraints: [], activeNegotiationPermissions: [] },
-      publicCandidates: [], attempt: 1, retryReason: null, signal: new AbortController().signal, invocation: guard(),
+      publicCandidates: [catalogEntry], attempt: 1, retryReason: null, signal: new AbortController().signal, invocation: guard(),
     } as unknown as DecisionNegotiationModelInput;
-    const result = await models.negotiation(input) as { questionIntents: { adjustment: unknown }[] };
+    const result = await models.negotiation(input) as { values: unknown; questionIntents: { adjustment: unknown }[] };
+    expect(result.values).toEqual(catalogEntry);
     expect(result.questionIntents[0]?.adjustment).toEqual({ id: 'ke-adjustment-1', visibility: 'TRUSTED_BACKEND',
       operator: 'IN', variableId: 'destination', values: [{ type: 'ENUM', optionId: 'mazatlan' }] });
   });

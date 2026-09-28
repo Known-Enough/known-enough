@@ -159,7 +159,9 @@ describe('DecisionNegotiator', () => {
   it('rejects an invented option through the application kernel', async () => {
     const h = await setup();
     const negotiator = createNegotiator(h.application, async input => generated(input, 'invented-destination'));
-    await expect(negotiator.generate(participant('maya'), decisionId)).rejects.toMatchObject({ code: 'INVALID_MODEL_OUTPUT' });
+    await expect(negotiator.generate(participant('maya'), decisionId)).rejects.toMatchObject({
+      code: 'INVALID_MODEL_OUTPUT', diagnosticReason: 'CATALOG_MISMATCH',
+    });
     expect((await h.application.getPublicSnapshot(participant('maya'), decisionId)).currentProposal).toBeNull();
   });
 

@@ -36,11 +36,13 @@ export interface DecisionNegotiationResult {
 }
 
 export class DecisionNegotiatorError extends Error {
-  constructor(readonly code: 'MODEL_FAILED' | 'INVALID_MODEL_OUTPUT') {
+  constructor(readonly code: 'MODEL_FAILED' | 'INVALID_MODEL_OUTPUT', readonly diagnosticReason?: NegotiationOutputFailureReason) {
     super(code);
     this.name = 'DecisionNegotiatorError';
   }
 }
+export type NegotiationOutputFailureReason = 'OUTPUT_ENVELOPE' | 'QUESTION_INTENTS' | 'PUBLIC_VALUES'
+  | 'PERMISSION_DEPENDENCIES' | 'CANDIDATE_SCHEMA' | 'CATALOG_MISMATCH' | 'VALIDATION_EXCEPTION';
 
 function record(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -70,27 +72,32 @@ function parseQuestionIntents(value: unknown, context: DecisionNegotiationContex
   return result;
 }
 
-function parseModelOutput(value: unknown, context: DecisionNegotiationContext, ids: IdSource, now: string): {
+type ParsedNegotiationOutput = {
   candidate: KE.CandidateProposal;
   questionIntents: NegotiationQuestionIntent[];
-} | null {
+};
+type ParseModelOutputResult = { ok: true; value: ParsedNegotiationOutput }
+  | { ok: false; reason: NegotiationOutputFailureReason };
+function parseModelOutput(value: unknown, context: DecisionNegotiationContext, ids: IdSource, now: string): ParseModelOutputResult {
   const expectedKeys = ['values', 'permissionDependencies', 'questionIntents'];
   if (!record(value) || (!exactKeys(value, expectedKeys) && !exactKeys(value, [...expectedKeys, 'explanationDraft']))
-    || !Array.isArray(value.values) || !Array.isArray(value.permissionDependencies)) return null;
+    || !Array.isArray(value.values) || !Array.isArray(value.permissionDependencies)) return { ok: false, reason: 'OUTPUT_ENVELOPE' };
   const questionIntents = parseQuestionIntents(value.questionIntents, context);
-  if (!questionIntents) return null;
+  if (!questionIntents) return { ok: false, reason: 'QUESTION_INTENTS' };
 
   const publicVariables = new Set(context.definition.variables.filter(item => item.visibility === 'PUBLIC').map(item => item.id));
   // Only catalog-backed public assignments may cross this model adapter. A future
   // owner-private output path needs its own reviewed provenance/consent policy.
-  if (value.values.some(item => !record(item) || typeof item.variableId !== 'string' || !publicVariables.has(item.variableId))) return null;
+  if (value.values.some(item => !record(item) || typeof item.variableId !== 'string' || !publicVariables.has(item.variableId)))
+    return { ok: false, reason: 'PUBLIC_VALUES' };
 
   const permissionDependencies = value.permissionDependencies;
   for (const raw of permissionDependencies) {
-    if (!record(raw) || !exactKeys(raw, ['permissionId', 'permissionVersion', 'kind', 'expiresAt'])) return null;
+    if (!record(raw) || !exactKeys(raw, ['permissionId', 'permissionVersion', 'kind', 'expiresAt']))
+      return { ok: false, reason: 'PERMISSION_DEPENDENCIES' };
     if (!context.activeNegotiationPermissions.some(permission => permission.permissionId === raw.permissionId
       && permission.permissionVersion === raw.permissionVersion && raw.kind === 'NEGOTIATION'
-      && permission.expiresAt === raw.expiresAt)) return null;
+      && permission.expiresAt === raw.expiresAt)) return { ok: false, reason: 'PERMISSION_DEPENDENCIES' };
   }
   const candidate = KE.CandidateProposal.safeParse({
     schemaVersion: KE.KE_SCHEMA_VERSION,
@@ -100,7 +107,9 @@ function parseModelOutput(value: unknown, context: DecisionNegotiationContext, i
     validation: { status: 'VALID', checkedRuleIds: [], failedRuleIds: [], unknownRuleIds: [], unsupportedConditionIds: [] },
     permissionDependencies, createdAt: new Date(now).toISOString(),
   });
-  return candidate.success ? { candidate: candidate.data, questionIntents } : null;
+  return candidate.success
+    ? { ok: true, value: { candidate: candidate.data, questionIntents } }
+    : { ok: false, reason: 'CANDIDATE_SCHEMA' };
 }
 
 function publicValueIdentity(context: DecisionNegotiationContext, values: KE.CandidateProposal['values']): string {
@@ -213,10 +222,11 @@ export class DecisionNegotiator {
           throw new DecisionNegotiatorError('MODEL_FAILED');
       },
     };
-    let parsed: ReturnType<typeof parseModelOutput> = null;
+    let parsed: ParsedNegotiationOutput | null = null;
     let attempts = 0;
     let retryReason: DecisionNegotiationModelInput['retryReason'] = null;
     let modelFailed = false;
+    let diagnosticReason: NegotiationOutputFailureReason = 'OUTPUT_ENVELOPE';
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
       attempts = attempt;
       let output: unknown;
@@ -230,23 +240,32 @@ export class DecisionNegotiator {
       try {
         const now = this.options.clock.now();
         if (!Number.isFinite(Date.parse(now))) throw new Error('Invalid clock');
-        parsed = parseModelOutput(output, context, this.options.ids, now);
-        const selected = parsed ? allowedPublicValues.get(publicValueIdentity(context, parsed.candidate.values)) : undefined;
-        if (parsed && selected) {
+        const parsedOutput = parseModelOutput(output, context, this.options.ids, now);
+        if (!parsedOutput.ok) {
+          parsed = null;
+          diagnosticReason = parsedOutput.reason;
+          retryReason = 'INVALID_OUTPUT';
+          continue;
+        }
+        parsed = parsedOutput.value;
+        const selected = allowedPublicValues.get(publicValueIdentity(context, parsed.candidate.values));
+        if (selected) {
           // Publish the trusted catalog representation, never a model-controlled ordering/encoding.
           parsed.candidate.values = structuredClone(selected);
           break;
         }
         parsed = null;
+        diagnosticReason = 'CATALOG_MISMATCH';
         retryReason = 'INVALID_OUTPUT';
       } catch {
         parsed = null;
+        diagnosticReason = 'VALIDATION_EXCEPTION';
         retryReason = 'MODEL_ERROR';
       }
     }
     if (!parsed) {
       await this.options.application.cancelReasoning(service, decisionId, job.id);
-      throw new DecisionNegotiatorError(modelFailed ? 'MODEL_FAILED' : 'INVALID_MODEL_OUTPUT');
+      throw new DecisionNegotiatorError(modelFailed ? 'MODEL_FAILED' : 'INVALID_MODEL_OUTPUT', diagnosticReason);
     }
 
     try {
