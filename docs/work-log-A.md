@@ -735,3 +735,9 @@ Final review-document checks: all 7 immutable reference hashes match; 143 local 
 - Clean clone `/tmp/known-enough-ke10-review`, synchronized `main` at `8d70fd912db3902d08ff04d3778e14a113bcaffa`; `git pull --ff-only origin main` succeeded (0/0).
 - Review base/head: `da76fae782e1d059554e7224ff6b1443b3ea3c84..8d70fd912db3902d08ff04d3778e14a113bcaffa`. Read-only code scope is the integrated KE10 runtime, its tests and evaluation paths; write scope is the review record, KE10 ticket/board, and A handoff/log.
 - Required checks: focused adversarial checks and pinned `npm run check`. No provider calls, cloud changes, deployment, spending or external messages.
+
+## 2026-09-28 — KE10 stop/commit finding deferred as technical debt
+
+- User directed that the P1 race be recorded for later and local work moved forward. Added `docs/technical-debt/TD-KE10-01-stop-commit-race.md` and its folder README. The item is READY for scheduling but must close before live Bedrock evaluation or release-grade use.
+- Updated KE10, KE11, the shared board, current handoff and the KE10 review disposition. KE10 remains blocked for live/release use; KE11 local/test-auth work is READY. The exact review verdict remains CHANGES_REQUESTED; no task is marked DONE or accepted.
+- Actual model: Codex GPT-6, exact variant/effort unexposed. Documentation-only checks passed: imported reference hashes 7/7, planning checks 15/15, 188 local Markdown links, and `git diff --check`. No application suite or cloud/provider actions.

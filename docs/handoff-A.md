@@ -1,4 +1,8 @@
-## Current handoff — KE10 runtime follow-up / CHANGES_REQUESTED — 2026-09-28T16:33Z
+## Current handoff — KE10 debt deferred; KE11 local work READY — 2026-09-28
+
+The user directed recording the KE10 stop/commit race as [READY technical debt](technical-debt/TD-KE10-01-stop-commit-race.md), so local MVP work can proceed. The original independent review remains CHANGES_REQUESTED; no task was marked DONE or accepted. KE10 remains blocked for live Bedrock evaluation/release-grade use until the debt is corrected and the named focused follow-up passes. KE11 is READY for local/test-auth session work; its actual-auth evidence and any cloud changes keep their existing requirements. No task is active. See the [board](task-board.md).
+
+## Prior handoff — KE10 runtime follow-up / CHANGES_REQUESTED — 2026-09-28T16:33Z
 
 User A / separate Codex GPT-6 session (variant/effort unexposed) reviewed exact runtime diff `da76fae782e1d059554e7224ff6b1443b3ea3c84..8d70fd912db3902d08ff04d3778e14a113bcaffa`, SHA-256 `6e411f0e3375886d608ba776fb9804f74b7b8a3020e1cafac28c4b1188e61e3f`. The sole review claim is released; no implementation task is active. **CHANGES_REQUESTED, P1:** a model-result proposal can commit after `runtime.stop()` returns if stop occurs while an asynchronous DynamoDB write is in flight. A temporary transaction-barrier probe reproduced `APPLIED` with a public proposal after stop. The required correction and focused regression are in the [review record](reviews/KE10-runtime-followup.md). No source files were edited.
 

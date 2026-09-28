@@ -39,3 +39,7 @@ No other blocking cross-owner disclosure path was found in the reviewed context 
 - No live Bedrock call, AWS identity check, cloud mutation, deployment, spending or external message was performed. The two DynamoDB Local skips mean the checked suite does not exercise a real async storage transaction.
 
 KE10 remains BLOCKED. The review claim is released for a bounded correction; no implementation task is active until a writer claims it. Review only the changed stop/commit boundary in a sequential follow-up. Separately authorized live Bedrock evidence remains outstanding. No task acceptance or user sign-off is inferred.
+
+## Owner disposition — 2026-09-28
+
+The user directed that the stop/commit finding be deferred into [technical debt TD-KE10-01](../technical-debt/TD-KE10-01-stop-commit-race.md) to allow local MVP work to continue. The finding and this review's CHANGES_REQUESTED verdict remain unchanged. Local/test-auth development may continue; close the debt and obtain the named focused follow-up before live Bedrock evaluation or release-grade use. This disposition is not a review PASS or task acceptance.
