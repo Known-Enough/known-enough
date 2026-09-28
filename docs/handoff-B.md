@@ -2,7 +2,7 @@
 
 ## Current KE10 checkpoint — proposal-output correction
 
-KE10's implementation claim is complete and released on this checkpoint. The diagnostic run identified `CATALOG_MISMATCH`; negotiation now returns a catalog index and the trusted adapter copies the exact server-side candidate. Focused tests passed 47/47 and the pinned full check passed 360 tests / 2 skips, hosted browser 1/1 and E2E 44/44. The post-fix live evaluation passed construction, proposal-kernel, extraction-without-consent and privacy using 29,184 input / 397 output tokens across three requests. KE10 remains REVIEW while the named focused runtime follow-up is deferred; do not call it release-ready or accepted. The static CloudFront mock remains separate and was not changed.
+KE10's implementation claim is complete and released on this checkpoint. The diagnostic run identified `CATALOG_MISMATCH`; negotiation now returns a catalog index and the trusted adapter copies the exact server-side candidate. Focused tests passed 47/47 and the pinned full check passed 360 tests / 2 skips, hosted browser 1/1 and E2E 44/44. The post-fix live evaluation passed construction, proposal-kernel, extraction-without-consent and privacy using 29,184 input / 397 output tokens across three requests. KE10 remains REVIEW while the named focused runtime follow-up is deferred as READY debt; KE11 may proceed with local/test-auth work only. Do not call KE10 release-ready or accepted. The static CloudFront mock remains separate and was not changed.
 
 ## Current KE10 state — 2026-09-28
 

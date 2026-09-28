@@ -44,8 +44,8 @@ Routine implementation successors become eligible when the prior task reaches DO
 | [KE07](tasks/KE07.md) | `gpt-6-luna` / high target; runtime variant/effort unexposed | KE06 DONE | DONE — owner-scoped private draft extraction/confirmation flow; full check passed |
 | [KE08](tasks/KE08.md) | `gpt-6-luna` / high target; runtime variant/effort unexposed | KE07 DONE | REVIEW — local MVP shown for one user product feedback pass; pinned full check passed |
 | [KE09](tasks/KE09.md) | `gpt-6-astra` / high, independent session | KE08 MVP feedback pass and pause | DONE — R1–R6 self-review PASS; user-directed exception, no independent certification |
-| [KE10](tasks/KE10.md) | `gpt-6-sol` / high target; actual Codex GPT-6 variant/effort unexposed | User-directed synthetic live-evaluation exception; focused follow-up before release-grade use | REVIEW — corrected live evaluation passes; focused follow-up deferred, not release-ready |
-| [KE11](tasks/KE11.md) | `gpt-6-sol` / high | KE10 focused follow-up; local/test-auth work follows; live acceptance remains gated | BLOCKED — named KE10 follow-up pending |
+| [KE10](tasks/KE10.md) | `gpt-6-sol` / high target; actual Codex GPT-6 variant/effort unexposed | Synthetic live evaluation passed under one-off user authorization; TD-KE10-01 before further live/release use | REVIEW — implementation/evaluation complete; focused follow-up deferred to technical debt; no active claim |
+| [KE11](tasks/KE11.md) | `gpt-6-sol` / high | KE10 local implementation/checks complete; user-directed TD-KE10-01 deferral permits local/test-auth work | READY — local/test-auth scope only; further live Bedrock/release use remains gated |
 | [KE12](tasks/KE12.md) | `gpt-6-sol` / high | KE11 | BLOCKED — stateful simulated Alexa+ shared assistant |
 | [KE13](tasks/KE13.md) | `gpt-6-sol` / high | KE13B implementation + independent PASS, KE12 and all earlier technical gates + explicit live deployment authorization | BLOCKED — separate deployed AWS/operations evidence |
 | [KE14](tasks/KE14.md) | `gpt-6-sol` / high | KE13 operational evidence recorded | BLOCKED — Christmas and hypothetical purchase qualification |

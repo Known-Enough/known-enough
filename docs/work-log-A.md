@@ -1,3 +1,7 @@
+## 2026-09-28 — KE10 technical-debt deferral and KE11 queue
+
+At the user's direction, kept the stop/commit finding in the existing technical-debt queue as READY; no new task status was introduced. KE10 remains REVIEW because the named focused independent follow-up has not passed. KE11 is READY for local/test-auth work only. Further live Bedrock use and release-grade claims remain gated on closing TD-KE10-01. This is a documentation-only status update; no code, cloud resources or acceptance records changed.
+
 ## 2026-09-28T16:33:22Z — KE10 runtime follow-up / CHANGES_REQUESTED
 
 - Completed the independent review on `da76fae782e1d059554e7224ff6b1443b3ea3c84..8d70fd912db3902d08ff04d3778e14a113bcaffa`; runtime source diff SHA-256 `6e411f0e3375886d608ba776fb9804f74b7b8a3020e1cafac28c4b1188e61e3f`. Actual reviewer Codex GPT-6, exact variant/effort unexposed; separate session/checkout from implementation author. No subagents.
