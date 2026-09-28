@@ -1,5 +1,9 @@
 # Developer B work log
 
+## KE09 corrections claim — 2026-09-28T04:05:25Z
+
+The user explicitly directed this conversation to fix R1–R6 and commit/push. This supersedes the prior routing to User A for these corrections. User B / Codex GPT-6 (exact variant/effort unexposed) claims the sole active implementation on clean synchronized `main` at `a3bb78567f08a5df99e262419ea3c3d6b3dd9bde`; `git pull --ff-only origin main` succeeded. Scope: Known Enough contracts/kernel/application and their focused regression files, API local composition and its tests, synthetic test-support publication fixtures as needed, architecture/contracts docs, KE09 review addendum/ticket/board and B log/handoff. No dependency/root/lock/CI/cloud changes. Prior review evidence remains immutable; independent follow-up remains required. Test authorization is requested under this session's developer instruction; implementation proceeds while that answer is pending.
+
 ## 2026-09-28T01:14:03Z — KE09 CHANGES_REQUESTED; review handoff
 
 User B / Codex GPT-6, exact variant/effort unexposed; Astra/high remains the assigned target. Reviewed integrated source head `cbc498202a06b553bca1a28c9e22c1862e21ac18` at docs-only claim commit `3064d153fbefb002c139e228f8bbca3c67153648`. Changed only `docs/reviews/KE09.md`, KE09 ticket, board, B handoff and this log. No implementation changes. [Review](reviews/KE09.md) records base/head/tree/diff hashes, six reproduced failures, source anchors, portable synthetic probes and command evidence.
