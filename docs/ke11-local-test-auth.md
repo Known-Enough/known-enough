@@ -8,6 +8,8 @@ Use the pinned Node 24.21.0 and npm 11.19.0 versions. In one terminal, start the
 
 Choose one of the fictional accounts: Maya (organizer), Leo, Nina, Ana, Raul, or Shared display. No password, email, AWS account, or participant identity is involved. Maya can create a local invitation link for one pending participant. Open that link in another browser tab/context on the same computer, choose the matching fictional account, and accept the invitation. The API checks that the signed test session subject matches the invited participant. The display account can view the public snapshot and cannot write commands.
 
+For simultaneous participant testing, use separate browser profiles/private windows or Playwright browser contexts. A normal new tab can inherit the current tab's session. If the invitation opens under the wrong test account, sign out, select the invited account, then accept it.
+
 The link is a local development URL. Sending it to another computer will not make that computer connect to this loopback API. No email or external message is sent.
 
 ## Expiry, retry and recovery
