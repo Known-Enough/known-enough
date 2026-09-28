@@ -43,7 +43,9 @@ The [Nova Lite model card](https://docs.aws.amazon.com/bedrock/latest/userguide/
 
 These are documentation checks, not account access, quota, latency, quality or billing evidence. Before paid use, verify that the account can invoke this exact model/region and recheck lifecycle/availability. Do not substitute another region/model or enable cross-region inference silently.
 
-[Invocation logging](https://docs.aws.amazon.com/bedrock/latest/userguide/model-invocation-logging.html) can collect request/response content in AWS logging destinations; private workloads require verified disabled payload logging. Review the applicable [retention policy](https://docs.aws.amazon.com/bedrock/latest/userguide/data-retention.html), model terms and account configuration before enabling the transport. Do not infer zero retention from the absence of app persistence, or assume project/Mantle controls apply to this Converse endpoint. No AWS settings, credentials, accounts or retention modes were inspected or changed during this task.
+[Invocation logging](https://docs.aws.amazon.com/bedrock/latest/userguide/model-invocation-logging.html) can collect request/response content in AWS logging destinations; private workloads require verified disabled payload logging. Review the applicable [retention policy](https://docs.aws.amazon.com/bedrock/latest/userguide/data-retention.html), model terms and account configuration before enabling the transport. Do not infer zero retention from the absence of app persistence, or assume project/Mantle controls apply to this Converse endpoint. The subsequent read-only AWS account/configuration results are recorded in the [KE10 ticket](tasks/KE10.md); no settings or permissions were changed.
+
+The current `known-enough-staging-ro` profile is assigned `ReadOnlyAccess` and is only for checks. To run the KE10 Converse evaluation, a separate assigned role needs `bedrock:InvokeModel` scoped to `arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-lite-v1:0`. Keep using synthetic fixtures. Do not grant or invoke until the focused stop/commit follow-up passes and the user separately authorizes the paid call.
 
 ## Reusable evaluations
 
