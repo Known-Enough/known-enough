@@ -9,3 +9,4 @@ This folder tracks intentionally deferred defects that still matter for a stated
 | ID | Status | Item | Required before |
 | --- | --- | --- | --- |
 | [TD-KE10-01](TD-KE10-01-stop-commit-race.md) | REVIEW | Stop/commit fix checked; focused independent follow-up pending | Any live Bedrock evaluation or release-grade use of the KE10 runtime |
+| [TD-KE10-02](TD-KE10-02-bedrock-permission-set-name.md) | READY | Move Nova Lite access off the `ReadOnlyAccess` permission set to a clearly named test permission set | Before granting direct Bedrock test access to another user |
