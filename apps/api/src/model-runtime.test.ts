@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
+import { InMemoryRoomRepository } from '@deal-table/adapters';
+import type { KnownEnoughRecord } from '@deal-table/application';
 import { buildChristmasPublicCandidates } from '../../../packages/test-support/src/known-enough-fixtures.ts';
 import { createEvaluationDecision, evaluationPrincipal } from '../../../tests/evaluations/ke10.ts';
 import { response, syntheticResponse } from '../../../tests/evaluations/ke10-injected.ts';
@@ -10,6 +12,38 @@ function compose(h: Awaited<ReturnType<typeof createEvaluationDecision>>, send: 
     publicCandidates: buildChristmasPublicCandidates });
 }
 const messages = [{ role: 'owner', text: 'My maximum is USD 1600.' }];
+
+class DelayedProposalRepository extends InMemoryRoomRepository {
+  private pauseNextProposal = false;
+  private enterTransaction!: () => void;
+  private releaseTransaction!: () => void;
+  private readonly proposalEntered = new Promise<void>(resolve => { this.enterTransaction = resolve; });
+  private readonly transactionRelease = new Promise<void>(resolve => { this.releaseTransaction = resolve; });
+  committedProposal = false;
+
+  pauseProposalCommit(): void { this.pauseNextProposal = true; }
+  waitForProposalCommit(): Promise<void> { return this.proposalEntered; }
+  releaseProposalCommit(): void { this.releaseTransaction(); }
+
+  override async transactionDecision<T>(
+    decisionId: string,
+    transition: (decision: KnownEnoughRecord | null) => Promise<T> | T,
+  ): Promise<T> {
+    let paused = false;
+    const result = await super.transactionDecision(decisionId, async decision => {
+      const outcome = await transition(decision);
+      if (this.pauseNextProposal && decision?.status === 'PROPOSED' && decision.publicProposal) {
+        this.pauseNextProposal = false;
+        paused = true;
+        this.enterTransaction();
+        await this.transactionRelease;
+      }
+      return outcome;
+    });
+    if (paused) this.committedProposal = true;
+    return result;
+  }
+}
 
 describe('KE10 application/runtime composition', () => {
   it('keeps local live mode disabled without separate paid-call and privacy authorization', async () => {
@@ -36,7 +70,7 @@ describe('KE10 application/runtime composition', () => {
     firstResolve(syntheticResponse(firstCommand));
     expect(await first).toBe('STALE');
     expect((await h.application.getOwnerSnapshot(evaluationPrincipal('maya'), h.decisionId)).draft?.draftId).toBe(second.draftId);
-    runtime.stop();
+    await runtime.stop();
   });
   it.each(['expiry', 'control', 'membership'] as const)('checks %s inside the owner output transaction', async change => {
     let instant = Date.now();
@@ -54,7 +88,7 @@ describe('KE10 application/runtime composition', () => {
     await expect(runtime.ownerConversation.draft(evaluationPrincipal('maya'), { decisionId: h.decisionId, messages })).rejects.toBeDefined();
     const stored = await h.repository.transactionDecision(h.decisionId, record => record);
     expect(stored?.owners.find(owner => owner.participantId === 'maya')?.draft).toBeNull();
-    runtime.stop();
+    await runtime.stop();
   });
   it('rejects changed permission authority before a second provider attempt and releases only its job', async () => {
     const h = await createEvaluationDecision();
@@ -70,7 +104,7 @@ describe('KE10 application/runtime composition', () => {
     expect(state?.job).toBeNull();
     expect(state?.publicProposal).toBeNull();
     expect(state?.status).toBe('READY');
-    runtime.stop();
+    await runtime.stop();
   });
   it('does not let an obsolete completion cancel a newer job epoch', async () => {
     const h = await createEvaluationDecision();
@@ -88,7 +122,7 @@ describe('KE10 application/runtime composition', () => {
     expect(state?.status).toBe('REASONING');
     expect(state?.publicProposal).toBeNull();
     expect(send).toHaveBeenCalledTimes(1);
-    runtime.stop();
+    await runtime.stop();
   });
   it.each(['expiry', 'control'] as const)('checks %s transactionally before applying a proposal', async change => {
     let instant = Date.now();
@@ -104,13 +138,13 @@ describe('KE10 application/runtime composition', () => {
     expect(result.outcome).toBe('STALE');
     expect(result.publicSnapshot.currentProposal).toBeNull();
     expect((await h.repository.transactionDecision(h.decisionId, record => record))?.job).toBeNull();
-    runtime.stop();
+    await runtime.stop();
   });
   it('stop before the owner transaction prevents a completed model response from storing a draft', async () => {
     const h = await createEvaluationDecision();
     const original = h.application.storeConstraintDraft.bind(h.application);
     vi.spyOn(h.application, 'storeConstraintDraft').mockImplementation(async (principal, input, guard) => {
-      runtime.stop();
+      void runtime.stop();
       return original(principal, input, guard);
     });
     const runtime = compose(h, syntheticResponse);
@@ -123,7 +157,7 @@ describe('KE10 application/runtime composition', () => {
     const h = await createEvaluationDecision();
     const original = h.application.completeReasoning.bind(h.application);
     vi.spyOn(h.application, 'completeReasoning').mockImplementation(async (principal, decisionId, jobId, candidate, guard) => {
-      runtime.stop();
+      void runtime.stop();
       return original(principal, decisionId, jobId, candidate, guard);
     });
     const runtime = compose(h, syntheticResponse);
@@ -134,11 +168,36 @@ describe('KE10 application/runtime composition', () => {
     expect(stored?.job).toBeNull();
     expect(stored?.publicProposal).toBeNull();
   });
+  it('waits for an in-flight proposal transaction before awaited stop resolves', async () => {
+    const repository = new DelayedProposalRepository();
+    const h = await createEvaluationDecision(undefined, repository);
+    repository.pauseProposalCommit();
+    const runtime = compose(h, syntheticResponse);
+    const generating = runtime.negotiator.generate(evaluationPrincipal('maya'), h.decisionId);
+    try {
+      await repository.waitForProposalCommit();
+      let stopResolved = false;
+      const stopping = runtime.stop().then(() => { stopResolved = true; });
+      await Promise.resolve();
+      expect(stopResolved).toBe(false);
+      expect(repository.committedProposal).toBe(false);
+      repository.releaseProposalCommit();
+      await stopping;
+      expect(repository.committedProposal).toBe(true);
+      expect(stopResolved).toBe(true);
+      expect((await generating).outcome).toBe('APPLIED');
+      const stored = await repository.transactionDecision(h.decisionId, decision => decision);
+      expect(stored?.publicProposal).not.toBeNull();
+    } finally {
+      repository.releaseProposalCommit();
+      await runtime.stop();
+    }
+  });
   it('stop during frame construction rejects the completed model draft', async () => {
     const h = await createEvaluationDecision();
     let stopped = false;
     const ids = { next: () => {
-      if (!stopped) { stopped = true; runtime.stop(); }
+      if (!stopped) { stopped = true; void runtime.stop(); }
       return 'late-public-draft';
     } };
     const runtime = createKnownEnoughModelRuntime({ ...h, ids, provider: { mode: 'INJECTED', transport: { send: async command => syntheticResponse(command) } },
@@ -153,7 +212,7 @@ describe('KE10 application/runtime composition', () => {
     vi.spyOn(h.application, 'completeReasoning').mockImplementation(async (...args) => {
       const outcome = await original(...args);
       if (outcome === 'NEEDS_PERMISSION') {
-        if (change === 'stop') runtime.stop();
+        if (change === 'stop') void runtime.stop();
         else await h.repository.transactionDecision(h.decisionId, record => { record!.controlVersion++; });
       }
       return outcome;
@@ -187,6 +246,6 @@ describe('KE10 application/runtime composition', () => {
     expect(owner.ownApproval).toBeNull();
     expect(owner.publicSnapshot.currentProposal).toBeNull();
     expect(JSON.stringify(owner)).not.toContain('CANARY');
-    runtime.stop();
+    await runtime.stop();
   });
 });

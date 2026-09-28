@@ -9,10 +9,12 @@ import { buildChristmasFixture, buildChristmasPublicCandidates } from '../../pac
 
 export const evaluationCanary = 'SYNTHETIC_OWNER_CANARY_KE10';
 export const evaluationPrincipal = (id: string): TrustedPrincipal => ({ kind: 'participant', subject: `subject-${id}` });
-export async function createEvaluationDecision(clock = { now: () => new Date().toISOString() }) {
+export async function createEvaluationDecision(
+  clock = { now: () => new Date().toISOString() },
+  repository = new InMemoryRoomRepository(),
+) {
   let sequence = 0;
   const fixture = buildChristmasFixture();
-  const repository = new InMemoryRoomRepository();
   const ids = { next: () => `evaluation-${++sequence}` };
   const application = new KnownEnoughApplication({ repository, clock, ids });
   const decisionId = fixture.definition.decisionId;
@@ -82,5 +84,5 @@ export async function runKe10Evaluations(transport: ConverseTransport) {
     assert.ok(!JSON.stringify(result.publicSnapshot).includes('maya-budget-limit'));
     passed.push('privacy');
     return { configuration: BEDROCK_CONFIGURATION, passed, usage };
-  } finally { runtime.stop(); }
+  } finally { await runtime.stop(); }
 }

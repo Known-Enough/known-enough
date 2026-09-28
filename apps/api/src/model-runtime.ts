@@ -15,18 +15,46 @@ export function createKnownEnoughModelRuntime(options: {
   metric?: (value: ModelJobMetric) => void; usage?: (value: ModelUsage) => void;
 }) {
   let enabled = true;
+  let stopping: Promise<void> | undefined;
+  const outputWrites = new Set<Promise<unknown>>();
+  const trackOutputWrite = <T>(write: () => Promise<T>): Promise<T> => {
+    const pending = Promise.resolve().then(write);
+    outputWrites.add(pending);
+    void pending.then(() => outputWrites.delete(pending), () => outputWrites.delete(pending));
+    return pending;
+  };
+  const modelApplication = new Proxy(options.application, {
+    get(target, property, receiver) {
+      if (property === 'completeReasoning')
+        return (...args: Parameters<typeof target.completeReasoning>) => trackOutputWrite(() => target.completeReasoning(...args));
+      if (property === 'storeConstraintDraft')
+        return (...args: Parameters<typeof target.storeConstraintDraft>) => trackOutputWrite(() => target.storeConstraintDraft(...args));
+      if (property === 'askNegotiation')
+        return (...args: Parameters<typeof target.askNegotiation>) => trackOutputWrite(() => target.askNegotiation(...args));
+      const value: unknown = Reflect.get(target, property, receiver);
+      return typeof value === 'function' ? value.bind(target) : value;
+    },
+  });
   const jobs = new BoundedModelJobs({ now: () => Date.parse(options.clock.now()),
     ...(options.metric ? { metric: options.metric } : {}) });
   const transport = options.provider.mode === 'INJECTED'
     ? options.provider.transport : createAuthorizedBedrockTransport(options.provider);
   const models = createBedrockModels({ transport, jobs, enabled: () => enabled,
     ...(options.usage ? { usage: options.usage } : {}) });
+  const stop = (): Promise<void> => {
+    enabled = false;
+    jobs.stop();
+    stopping ??= (async () => {
+      while (outputWrites.size > 0) await Promise.allSettled([...outputWrites]);
+    })();
+    return stopping;
+  };
   return {
     architect: new DecisionArchitect(models.architect, () => options.ids.next(), () => Date.parse(options.clock.now()), () => enabled),
-    ownerConversation: new OwnerConversationArchitect({ application: options.application, model: models.owner, clock: options.clock, ids: options.ids, isEnabled: () => enabled }),
-    negotiator: new DecisionNegotiator({ application: options.application, model: models.negotiation, clock: options.clock,
+    ownerConversation: new OwnerConversationArchitect({ application: modelApplication, model: models.owner, clock: options.clock, ids: options.ids, isEnabled: () => enabled }),
+    negotiator: new DecisionNegotiator({ application: modelApplication, model: models.negotiation, clock: options.clock,
       ids: options.ids, publicCandidates: options.publicCandidates, isEnabled: () => enabled }),
-    stop: () => { enabled = false; jobs.stop(); },
+    stop,
     jobs,
   };
 }

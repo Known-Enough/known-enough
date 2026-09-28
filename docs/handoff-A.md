@@ -1,6 +1,6 @@
-## Current handoff — KE10 debt deferred; KE11 local work READY — 2026-09-28
+## Current handoff — KE10 correction review pending — 2026-09-28
 
-The user directed recording the KE10 stop/commit race as [READY technical debt](technical-debt/TD-KE10-01-stop-commit-race.md), so local MVP work can proceed. The original independent review remains CHANGES_REQUESTED; no task was marked DONE or accepted. KE10 remains blocked for live Bedrock evaluation/release-grade use until the debt is corrected and the named focused follow-up passes. KE11 is READY for local/test-auth session work; its actual-auth evidence and any cloud changes keep their existing requirements. No task is active. See the [board](task-board.md).
+The user reprioritized [TD-KE10-01](technical-debt/TD-KE10-01-stop-commit-race.md) for closure before Bedrock tests. The stop/commit correction and delayed-storage regression passed focused and pinned full checks; KE10 is REVIEW on synchronized `main` pending its named focused independent follow-up. The actual session was Codex GPT-6, exact variant/effort unexposed; the ticket's Sol/high assignment is not claimed. No Bedrock calls or AWS changes occurred in this checkpoint. The `known-enough-staging-ro` SSO refresh is underway; after login, run STS identity plus read-only Nova Lite, invocation-logging and retention checks in `us-east-1`. Do not make a paid Bedrock call until the follow-up passes, the account/configuration checks are recorded, and the user separately authorizes it. KE11 remains blocked pending the focused follow-up; see the [board](task-board.md).
 
 ## Prior handoff — KE10 runtime follow-up / CHANGES_REQUESTED — 2026-09-28T16:33Z
 

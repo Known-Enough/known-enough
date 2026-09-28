@@ -8,4 +8,4 @@ This folder tracks intentionally deferred defects that still matter for a stated
 
 | ID | Status | Item | Required before |
 | --- | --- | --- | --- |
-| [TD-KE10-01](TD-KE10-01-stop-commit-race.md) | READY — deferred | A model proposal transaction may commit after runtime stop returns | Any live Bedrock evaluation or release-grade use of the KE10 runtime |
+| [TD-KE10-01](TD-KE10-01-stop-commit-race.md) | REVIEW | Stop/commit fix checked; focused independent follow-up pending | Any live Bedrock evaluation or release-grade use of the KE10 runtime |
