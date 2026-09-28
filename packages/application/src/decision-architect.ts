@@ -1,3 +1,4 @@
+import type { ModelInvocation } from './model-runtime.ts';
 import { Id, KnownEnough as KE } from '@deal-table/contracts';
 import type { KnownEnough as KETypes } from '@deal-table/contracts';
 
@@ -22,7 +23,7 @@ export interface DecisionArchitectModelInput {
 
 /** A model port is injected by the caller. Raw output is always treated as untrusted. */
 export interface DecisionArchitectModel {
-  draft(input: DecisionArchitectModelInput): Promise<unknown>;
+  draft(input: DecisionArchitectModelInput, invocation?: ModelInvocation): Promise<unknown>;
 }
 
 export type DecisionArchitectureDraft = {
@@ -82,7 +83,7 @@ export class DecisionArchitect {
   private readonly active = new Map<string, number>();
   private sequence = 0;
 
-  constructor(private readonly model: DecisionArchitectModel, private readonly id: () => string) {}
+  constructor(private readonly model: DecisionArchitectModel, private readonly id: () => string, private readonly now: () => number = Date.now) {}
 
   async draft(actorSubject: string, request: DecisionArchitectRequest): Promise<DecisionArchitectureDraft> {
     if (!Id.safeParse(actorSubject).success || !Id.safeParse(request?.draftId).success
@@ -106,6 +107,12 @@ export class DecisionArchitect {
     const generation = ++this.sequence;
     this.active.set(key, generation);
 
+    const invocation: ModelInvocation = {
+      expiresAt: this.now() + 30_000,
+      assertCurrent: async () => {
+        if (this.active.get(key) !== generation || this.now() >= invocation.expiresAt) fail('STALE_CONTEXT');
+      },
+    };
     try {
       let output: unknown;
       try {
@@ -113,7 +120,7 @@ export class DecisionArchitect {
           objective: request.objective.trim(),
           participants: participants as DecisionArchitectParticipant[],
           allowedOptions,
-        });
+        }, invocation);
       } catch {
         fail('RETRYABLE_SERVER_ERROR');
       }
@@ -179,6 +186,7 @@ export class DecisionArchitect {
         }),
       });
 
+      await invocation.assertCurrent();
       return {
         draftId: request.draftId,
         revision: request.revision,

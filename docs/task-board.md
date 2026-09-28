@@ -4,7 +4,7 @@ One project-wide priority queue, one active implementation or review at a time. 
 
 ## Current gate and claim
 
-**Current user-directed sequence (2026-09-28):** KE09 R1–R6 correction self-review is PASS on `e256a43`, with fresh focused 58/58 and the unchanged artifact's recorded full check. KE09 is DONE under the user's explicit scheduling exception allowing offline KE10 next; this is not an independent PASS. No task is currently active. KE10 is READY for offline implementation; live Bedrock evidence and independent follow-up on its new boundaries remain required before completion/release. Preserve B04/B04.5, KE13B, KE13 and KE17 gates. See [review verdict and limits](reviews/KE09.md#user-directed-correction-review--2026-09-28).
+**Current user-directed sequence (2026-09-28):** KE09 R1–R6 correction self-review is PASS on `e256a43`, published in `da76fae`; KE09 is DONE under the user's scheduling exception, not independent certification. KE10's [local runtime implementation](ke10-runtime.md) is now complete and checked (349 tests, hosted 1/1, browser 44/44). Its implementation claim is released; no task is active. **KE10 remains BLOCKED** on authorized real-model evidence and its named independent KE09 follow-up for the new model/job boundary. KE11 stays blocked. Preserve B04/B04.5, KE13B, KE13 and KE17 gates. See [KE09 verdict](reviews/KE09.md#user-directed-correction-review--2026-09-28) and [KE10 evidence](tasks/KE10.md#checked-implementation-evidence--2026-09-28).
 
 **MVP model choice (2026-09-27):** use `gpt-6-luna` / high for all direct work on KE01–KE08. This changes only the model/effort assignment; task order, scope and technical review gates stay the same. Astra remains assigned to the KE09 post-MVP architecture/privacy checkpoint, KE17 and any post-MVP architectural change the user explicitly decides needs it. Other post-MVP assignments are unchanged.
 
@@ -44,7 +44,7 @@ Routine implementation successors become eligible when the prior task reaches DO
 | [KE07](tasks/KE07.md) | `gpt-6-luna` / high target; runtime variant/effort unexposed | KE06 DONE | DONE — owner-scoped private draft extraction/confirmation flow; full check passed |
 | [KE08](tasks/KE08.md) | `gpt-6-luna` / high target; runtime variant/effort unexposed | KE07 DONE | REVIEW — local MVP shown for one user product feedback pass; pinned full check passed |
 | [KE09](tasks/KE09.md) | `gpt-6-astra` / high, independent session | KE08 MVP feedback pass and pause | DONE — R1–R6 self-review PASS; user-directed exception, no independent certification |
-| [KE10](tasks/KE10.md) | `gpt-6-sol` / high | KE09 scheduling exception; live calls separately authorized; release review retained | READY — offline Bedrock and async runtime implementation |
+| [KE10](tasks/KE10.md) | `gpt-6-sol` / high | KE09 scheduling exception; live calls separately authorized; release review retained | BLOCKED — local runtime/checks complete; live evidence and independent runtime review pending |
 | [KE11](tasks/KE11.md) | `gpt-6-sol` / high | KE10 + current critical follow-up | BLOCKED — authenticated multi-participant sessions |
 | [KE12](tasks/KE12.md) | `gpt-6-sol` / high | KE11 | BLOCKED — stateful simulated Alexa+ shared assistant |
 | [KE13](tasks/KE13.md) | `gpt-6-sol` / high | KE13B implementation + independent PASS, KE12 and all earlier technical gates + explicit live deployment authorization | BLOCKED — separate deployed AWS/operations evidence |

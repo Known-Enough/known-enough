@@ -1,3 +1,4 @@
+import type { ModelInvocation, ModelCommitGuard } from './model-runtime.ts';
 import { KnownEnough as KE } from '@deal-table/contracts';
 import type { KnownEnoughApplication } from './known-enough.ts';
 import type { Clock, IdSource, TrustedPrincipal } from './types.ts';
@@ -23,7 +24,7 @@ export interface OwnerConversationInterpretation {
   proposedConstraints: KE.AIConstraintDraft['proposedConstraints'];
   unsupportedConditions: KE.AIConstraintDraft['unsupportedConditions'];
 }
-export type OwnerConversationModel = (context: OwnerConversationContext) => Promise<unknown>;
+export type OwnerConversationModel = (context: OwnerConversationContext, invocation?: ModelInvocation) => Promise<unknown>;
 
 export class OwnerConversationError extends Error {
   constructor(readonly code: 'INVALID_INPUT' | 'FRAME_NOT_CONFIRMED' | 'INVALID_INTERPRETATION') {
@@ -94,6 +95,22 @@ export class OwnerConversationArchitect {
     if (!required.every(participantId => confirmed.has(participantId)) || !confirmed.has(owner.ownerParticipantId))
       throw new OwnerConversationError('FRAME_NOT_CONFIRMED');
 
+    const commitGuard: ModelCommitGuard = {
+      principal, controlVersion: owner.controlVersion,
+      expiresAt: Date.parse(this.options.clock.now()) + 30_000,
+    };
+    const invocation: ModelInvocation = {
+      expiresAt: commitGuard.expiresAt,
+      assertCurrent: async () => {
+        const current = await this.options.application.getOwnerSnapshot(principal, input.decisionId);
+        if (Date.parse(this.options.clock.now()) >= commitGuard.expiresAt
+          || current.controlVersion !== owner.controlVersion || current.ownerVersion !== owner.ownerVersion
+          || current.draftVersion !== owner.draftVersion || current.ownerParticipantId !== owner.ownerParticipantId
+          || current.publicSnapshot.contextToken !== owner.publicSnapshot.contextToken
+          || current.publicSnapshot.semanticVersion !== owner.publicSnapshot.semanticVersion)
+          throw new OwnerConversationError('INVALID_INTERPRETATION');
+      },
+    };
     const context: OwnerConversationContext = {
       decisionId: input.decisionId,
       ownerParticipantId: owner.ownerParticipantId,
@@ -103,7 +120,7 @@ export class OwnerConversationArchitect {
       ownerPreviousDraft: owner.draft ? structuredClone(owner.draft) : null,
       messages,
     };
-    const interpretation = parseInterpretation(await this.options.model(context));
+    const interpretation = parseInterpretation(await this.options.model(context, invocation));
     const createdAt = this.options.clock.now();
     if (!Number.isFinite(Date.parse(createdAt))) throw new Error('Invalid application clock');
     const draftId = this.options.ids.next();
@@ -131,7 +148,7 @@ export class OwnerConversationArchitect {
     });
     await this.options.application.storeConstraintDraft({
       kind: 'service', subject: 'owner-conversation-interpreter', roomIds: [input.decisionId],
-    }, draft);
+    }, draft, commitGuard);
     return draft;
   }
 }

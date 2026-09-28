@@ -753,3 +753,5 @@ export type {
   DecisionArchitectModelInput, DecisionArchitectParticipant, DecisionArchitectRequest,
 } from './decision-architect.ts';
 export type { DecisionNegotiationContext, NegotiationFailureTarget, KnownEnoughApplicationOptions } from './known-enough.ts';
+
+export type { ModelInvocation, ModelCommitGuard, ModelJobKind, ModelJobRunner } from './model-runtime.ts';

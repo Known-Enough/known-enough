@@ -13,3 +13,5 @@ export type {
 } from './http-core.ts';
 export { createCognitoIdentityResolver, createCognitoIdentityResolverFromEnv } from './cognito-identity.ts';
 export type { CognitoIdentityOptions } from './cognito-identity.ts';
+
+export { createKnownEnoughModelRuntime } from './model-runtime.ts';

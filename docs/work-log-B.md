@@ -1,5 +1,19 @@
 # Developer B work log
 
+## KE10 implementation checkpoint — 2026-09-28
+
+Local implementation is complete and checked; **KE10 remains BLOCKED** on authorized live Bedrock evaluation evidence and its named independent KE09 runtime follow-up. User B / Codex GPT-6, exact runtime variant/effort unexposed. The implementation claim is released for sequential review; no next implementation task is active. KE11 remains BLOCKED. The user's earlier KE09 scheduling exception permitted offline work and is not independent certification or paid-call authorization.
+
+Implemented isolated Bedrock Converse role adapters, a bounded process-local ID-only job queue/worker, explicit opt-in API composition, stale/expiry/membership/control/job-epoch guards inside output transactions, redacted metrics, cancellation/kill switch and reusable synthetic/live evaluation entrypoints. Existing local injected behavior and deterministic public explanations remain available. No shared cloud queue, live identity/deployment or durable worker lease is claimed. See [runtime design and operations](ke10-runtime.md) and [KE10 evidence](tasks/KE10.md#checked-implementation-evidence--2026-09-28).
+
+Focused runtime tests passed **27/27**. Pinned full check passed **349 tests / 2 DynamoDB Local skips, hosted browser 1/1, end-to-end 44/44**, reference hashes 7/7, planning 15/15, lint/boundaries 157, types and both builds. The live entrypoint correctly exited 2 with `KE10_LIVE_NOT_AUTHORIZED`; no provider/account/cloud call was made. Source/dependency diff against `da76fae782e1d059554e7224ff6b1443b3ea3c84`, over `apps packages tests package-lock.json`, has SHA-256 **`afc30a28c298b3aec1d23edc3510d0f4bbf643dfa9d2756cd304ea9a6e0d3967`**. This checked checkpoint is synchronized under standing authorization; the other clone must pull `origin main` with `--ff-only` before claiming the independent follow-up.
+
+
+## KE10 offline implementation claim — 2026-09-28
+
+User B / Codex GPT-6 (exact variant/effort unexposed) claims the sole active task on clean synchronized `main` at `da76fae782e1d059554e7224ff6b1443b3ea3c84`; ff-only pull succeeded. User-directed KE09 scheduling exception applies. Bounded scope: `packages/application/src/{model-runtime,decision-architect,owner-conversation,decision-negotiator,known-enough,index}.ts` and focused tests; new Bedrock/job adapters and exports under `packages/adapters/src`; `apps/workers/src`, worker README/manifest; API runtime composition/export; adapter manifest and root lockfile for pinned Bedrock SDK; reusable synthetic evaluations; runtime operations/architecture docs, KE10 ticket/board and B log/handoff. No contracts, browser, CI, infrastructure or deployed configuration changes. Live calls remain disabled and unauthorized. Local implementation will be checked; KE10 cannot reach DONE without live evaluation evidence and its named independent follow-up.
+
+
 ## User-directed correction review — 2026-09-28
 
 **PASS (self-review), scoped to R1–R6 on `e256a43a92224f2761977759c87dac466049585b`.** User B / Codex GPT-6; runtime variant/effort unexposed. I inspected the corrected source boundaries and their regressions: public catalog normalization and same-owner enum questions; exact historical identities and disclosure audiences; canonical refusals; semantic authority reset; bounded receipts and exact-job cleanup. No additional actionable finding was identified in this correction scope. This is not an independent certification: this conversation authored these fixes and KE01–KE02.

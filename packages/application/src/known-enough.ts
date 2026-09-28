@@ -1,3 +1,4 @@
+import type { ModelCommitGuard } from './model-runtime.ts';
 import { Id, KnownEnough as KE } from '@deal-table/contracts';
 import type { KnownEnough as KETypes } from '@deal-table/contracts';
 import { evaluateKnownEnoughCandidate, MAX_ACTIVE_CONFIRMED_CONSTRAINTS } from '@deal-table/domain';
@@ -21,6 +22,7 @@ type StructuredConstraint = Omit<Extract<KE.ConfirmedConstraint, { kind: 'HARD' 
   | Omit<Extract<KE.ConfirmedConstraint, { kind: 'PREFERENCE' }>, 'sourceSummary'>;
 
 export interface DecisionNegotiationContext {
+  controlVersion: number;
   job: DecisionJob;
   proposalVersion: number;
   definition: KETypes.DecisionDefinition;
@@ -387,7 +389,7 @@ export class KnownEnoughApplication {
   }
 
   /** Model output is private and context-bound; raw private conversations are never stored here. */
-  async storeConstraintDraft(principal: TrustedPrincipal | null, input: unknown): Promise<void> {
+  async storeConstraintDraft(principal: TrustedPrincipal | null, input: unknown, guard?: ModelCommitGuard): Promise<void> {
     const parsed = KE.AIConstraintDraft.safeParse(input);
     if (!parsed.success) fail('INVALID_COMMAND');
     const draft = parsed.data;
@@ -395,6 +397,11 @@ export class KnownEnoughApplication {
       if (!decision) fail('NOT_FOUND');
       this.service(decision, principal);
       const owner = decision.owners.find(item => item.participantId === draft.ownerParticipantId) ?? fail('NOT_FOUND');
+      if (guard) {
+        if (this.member(decision, guard.principal).participantId !== owner.participantId
+          || !Number.isFinite(guard.expiresAt) || Date.parse(this.now()) >= guard.expiresAt
+          || decision.controlVersion !== guard.controlVersion) fail('STALE_CONTEXT');
+      }
       if (!decision.frameConfirmations.some(item => item.participantId === owner.participantId
         && item.contextToken === decision.definition.contextToken)
         || draft.contextToken !== decision.definition.contextToken
@@ -554,6 +561,7 @@ export class KnownEnoughApplication {
             : { ...base, kind: item.kind, rule: structuredClone(item.rule) };
         }));
       return {
+        controlVersion: decision.controlVersion,
         job: structuredClone(job),
         proposalVersion: decision.proposalVersion + 1,
         definition: structuredClone(decision.definition),
@@ -697,6 +705,7 @@ export class KnownEnoughApplication {
     decisionId: string,
     jobId: string,
     candidateInput: unknown,
+    guard?: ModelCommitGuard,
   ): Promise<'APPLIED' | 'STALE' | 'NEEDS_CLARIFICATION' | 'NEEDS_PERMISSION' | 'INVALID'> {
     const parsed = KE.CandidateProposal.safeParse(candidateInput);
     if (!parsed.success) fail('INVALID_COMMAND');
@@ -707,6 +716,11 @@ export class KnownEnoughApplication {
       if (!job || job.id !== jobId || job.contextToken !== decision.definition.contextToken
         || job.semanticVersion !== decision.definition.semanticVersion || job.epoch !== decision.solveEpoch
         || decision.status !== 'REASONING') return 'STALE';
+      if (guard) {
+        this.member(decision, guard.principal);
+        if (!Number.isFinite(guard.expiresAt) || Date.parse(this.now()) >= guard.expiresAt
+          || decision.controlVersion !== guard.controlVersion) return 'STALE';
+      }
       const candidate = parsed.data;
       if (candidate.decisionId !== decision.decisionId || candidate.contextToken !== job.contextToken
         || candidate.semanticVersion !== job.semanticVersion || candidate.proposalVersion !== decision.proposalVersion + 1)
@@ -742,6 +756,8 @@ export class KnownEnoughApplication {
           .filter(permission => permission.status === 'ACTIVE')),
         now: this.now(),
       });
+      if (guard && (Date.parse(this.now()) >= guard.expiresAt
+        || candidate.permissionDependencies.some(item => Date.parse(item.expiresAt) <= Date.parse(this.now())))) return 'STALE';
       decision.job = null;
       decision.controlVersion += 1;
       if (evaluation.status !== 'VALID') {

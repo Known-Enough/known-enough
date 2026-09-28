@@ -63,3 +63,8 @@ export class InMemoryRoomRepository implements RoomRepository, KnownEnoughReposi
     });
   }
 }
+
+export { BoundedModelJobs, ModelRuntimeError } from './model-jobs.ts';
+export type { ModelJobEnvelope, ModelJobMetric } from './model-jobs.ts';
+export { BEDROCK_CONFIGURATION, createAuthorizedBedrockTransport, createBedrockModels } from './bedrock-models.ts';
+export type { ConverseTransport, ModelUsage } from './bedrock-models.ts';

@@ -1,3 +1,4 @@
+import type { ModelInvocation, ModelCommitGuard } from './model-runtime.ts';
 import { KnownEnough as KE } from '@deal-table/contracts';
 import type { KnownEnoughApplication, DecisionNegotiationContext } from './known-enough.ts';
 import type { Clock, TrustedPrincipal, IdSource } from './types.ts';
@@ -18,6 +19,7 @@ export interface DecisionNegotiationModelInput {
   attempt: number;
   retryReason: 'INVALID_OUTPUT' | 'MODEL_ERROR' | null;
   signal: AbortSignal;
+  invocation?: ModelInvocation;
 }
 export type DecisionNegotiationModel = (input: DecisionNegotiationModelInput) => Promise<unknown>;
 export interface PublicCandidateExplanation {
@@ -170,12 +172,12 @@ export class DecisionNegotiator {
       throw new Error('Invalid negotiation bounds');
   }
 
-  private async invoke(context: DecisionNegotiationContext, publicCandidates: KE.CandidateProposal['values'][], attempt: number, retryReason: DecisionNegotiationModelInput['retryReason']): Promise<unknown> {
+  private async invoke(context: DecisionNegotiationContext, publicCandidates: KE.CandidateProposal['values'][], attempt: number, retryReason: DecisionNegotiationModelInput['retryReason'], invocation: ModelInvocation): Promise<unknown> {
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
       return await Promise.race([
-        this.options.model({ context, publicCandidates: structuredClone(publicCandidates), attempt, retryReason, signal: controller.signal }),
+        this.options.model({ context, publicCandidates: structuredClone(publicCandidates), attempt, retryReason, signal: controller.signal, invocation }),
         new Promise<never>((_, reject) => {
           timer = setTimeout(() => { controller.abort(); reject(new DecisionNegotiatorError('MODEL_FAILED')); }, this.timeoutMs);
         }),
@@ -203,6 +205,21 @@ export class DecisionNegotiator {
       allowedPublicValues = new Map(publicCandidates.map(values => [publicValueIdentity(context, values), values]));
     } catch (error) { await this.options.application.cancelReasoning(service, decisionId, job.id); throw error; }
 
+    const commitGuard: ModelCommitGuard = {
+      principal, controlVersion: context.controlVersion,
+      expiresAt: Date.parse(this.options.clock.now()) + 30_000,
+    };
+    const invocation: ModelInvocation = {
+      expiresAt: commitGuard.expiresAt,
+      assertCurrent: async () => {
+        const owner = await this.options.application.getOwnerSnapshot(principal, decisionId);
+        const current = await this.options.application.getReasoningContext(service, decisionId, job.id);
+        if (Date.parse(this.options.clock.now()) >= commitGuard.expiresAt
+          || owner.controlVersion !== commitGuard.controlVersion || current.job.epoch !== job.epoch
+          || current.controlVersion !== commitGuard.controlVersion)
+          throw new DecisionNegotiatorError('MODEL_FAILED');
+      },
+    };
     let parsed: ReturnType<typeof parseModelOutput> = null;
     let attempts = 0;
     let retryReason: DecisionNegotiationModelInput['retryReason'] = null;
@@ -211,7 +228,7 @@ export class DecisionNegotiator {
       attempts = attempt;
       let output: unknown;
       try {
-        output = await this.invoke(context, publicCandidates, attempt, retryReason);
+        output = await this.invoke(context, publicCandidates, attempt, retryReason, invocation);
       } catch {
         modelFailed = true;
         retryReason = 'MODEL_ERROR';
@@ -240,7 +257,8 @@ export class DecisionNegotiator {
     }
 
     try {
-      const outcome = await this.options.application.completeReasoning(service, decisionId, job.id, parsed.candidate);
+      const outcome = await this.options.application.completeReasoning(service, decisionId, job.id, parsed.candidate, commitGuard);
+      if (outcome === 'STALE') await this.options.application.cancelReasoning(service, decisionId, job.id);
       if (outcome === 'NEEDS_PERMISSION') {
         const targets = await this.options.application.getPendingNegotiationFailures(service, decisionId);
         const targetKeys = new Set(targets.map(target => `${target.ownerParticipantId}:${target.constraintId}:${target.constraintVersion}`));
