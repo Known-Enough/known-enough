@@ -26,7 +26,7 @@ One project-wide priority queue, one active implementation or review at a time. 
 | [KE13C policy follow-up](tasks/KE13C-policy-followup.md) | Current Codex GPT-6; exact variant/effort unexposed | Reported CHANGES_REQUESTED against `f1893e3`; accepted build stays separate | REVIEW — independent focused PASS; policy used for Stage 0; final KE13 operations remain pending |
 | [KE13A-P](tasks/KE13A-provisioner-policy.md) | Requested sequential Sol/high for IAM; focused docs fix by current Codex GPT-6, exact variant/effort unexposed | Explicit CLI setup authorization; candidate review remains separate | REVIEW — candidate not used; temporary setup permission set removed; no assignment planned |
 | [KE13A](tasks/KE13A.md) | Current Codex GPT-6; exact variant/effort unexposed | User-authorized early preparation | DONE — prep and read-only SSO STS check complete; user accepted |
-| [KE13B](tasks/KE13B.md) | User B; `gpt-6-sol` / high target, actual variant unexposed | KE11 DONE; B04 technical baseline; reviewed KE13A handoff | REVIEW — checked authenticated API/DynamoDB/IAM code and CLI handoff; one independent focused verdict pending |
+| [KE13B](tasks/KE13B.md) | User B; `gpt-6-sol` / high target, actual variant unexposed | KE11 DONE; B04 technical baseline; reviewed KE13A handoff | REVIEW — backend/browser predeployment corrections and CLI handoff checked; one independent focused verdict pending |
 
 ## Sequential Known Enough queue
 
