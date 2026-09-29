@@ -8,6 +8,8 @@ Amplify app `known-enough-staging-amplify` (`d143q5ravxp5av`) and development br
 
 The GitHub repo is public and was created on 2026-09-19. AWS trusts its immutable GitHub OIDC subject `repo:Known-Enough@331386621/known-enough@1377587215:ref:refs/heads/main`. The workflow gets 15-minute credentials for role `arn:aws:iam::092954139775:role/KnownEnoughAmplifyMainDeploy`. It can create/start deployments for only this app's `main` branch and read job status. It cannot change the app, branch, IAM, Cognito, API, Lambda, DynamoDB, or other Amplify sites. No AWS access key or GitHub personal access token is stored in GitHub or the repository. The app, branch, role and OIDC provider are tagged `CleanupAfter=2026-10-29`; tags do not delete resources automatically.
 
+The deploy role scopes `amplify:CreateDeployment` to `arn:aws:amplify:us-east-1:092954139775:apps/d143q5ravxp5av/branches/main/deployments/*`; Amplify authorizes that API against the deployment child resource. `amplify:StartDeployment` is scoped to this branch and its deployment child resources, while `amplify:GetJob` is scoped to this branch's job resources. The repository's IAM JSON is the source to sync with the role. Changes to that file also trigger the deployment workflow.
+
 ## Build and deployment
 
 The workflow is [deploy-amplify-staging.yml](../.github/workflows/deploy-amplify-staging.yml). It uses pinned Node from `.nvmrc`, runs `npm ci` and `npm run build`, then packages only `apps/web/dist/`. The six `VITE_*` values are public Cognito/API configuration compiled into browser code, not passwords or credentials. Do not put tokens or private data in these variables.

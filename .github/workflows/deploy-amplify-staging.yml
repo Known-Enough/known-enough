@@ -11,6 +11,7 @@ on:
       - '.nvmrc'
       - 'scripts/check-bundle.mjs'
       - '.github/workflows/deploy-amplify-staging.yml'
+      - 'infra/permissions/ke13-amplify-github-deploy.json'
   workflow_dispatch:
 
 concurrency:

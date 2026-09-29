@@ -2,13 +2,19 @@
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "DeployOnlyMainAmplifyBranch",
+      "Sid": "CreateDeploymentForMainBranch",
       "Effect": "Allow",
-      "Action": [
-        "amplify:CreateDeployment",
-        "amplify:StartDeployment"
-      ],
-      "Resource": "arn:aws:amplify:us-east-1:092954139775:apps/d143q5ravxp5av/branches/main"
+      "Action": "amplify:CreateDeployment",
+      "Resource": "arn:aws:amplify:us-east-1:092954139775:apps/d143q5ravxp5av/branches/main/deployments/*"
+    },
+    {
+      "Sid": "StartDeploymentForMainBranch",
+      "Effect": "Allow",
+      "Action": "amplify:StartDeployment",
+      "Resource": [
+        "arn:aws:amplify:us-east-1:092954139775:apps/d143q5ravxp5av/branches/main",
+        "arn:aws:amplify:us-east-1:092954139775:apps/d143q5ravxp5av/branches/main/deployments/*"
+      ]
     },
     {
       "Sid": "ReadOwnDeploymentJobStatus",
