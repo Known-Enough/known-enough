@@ -150,7 +150,7 @@ The Stage 0 values are listed above. The Stage 1 resource IDs are recorded below
 | Cognito | User pool `us-east-1_V9OMjd0zx`; domain prefix `known-enough-092954139775`; participant client `3accf7paalvon2m8ue8okfi853`; display client `481ru24906sv26f30i569gq8g0`; public signup disabled; access tokens 15 minutes; callbacks/logout match the Vercel URL. |
 | API | HTTP API `u94iyvt6p9`; base URL `https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com`; protected `ANY /decisions/{proxy+}` JWT route plus public `OPTIONS` preflight; 5 requests/second and burst 10. |
 | Compute/storage | Lambda `known-enough-stage-api`, Node.js 24, 512 MB, 29-second timeout; runtime role `KnownEnoughStageApiRole`; DynamoDB `KnownEnoughStage`, on-demand billing, two seeded STATE/GUARD records; log group `/aws/lambda/known-enough-stage-api`, seven-day retention. Runtime policy SHA-256 `db9a80f35ce4235fad44d84af7411c0a5020240e38ce20d3798d5d8193d75b12`; Lambda ZIP SHA-256 `8e01ad21d9233b834b76e1aee77d32e37f6898f5827c49182c64d54fe1b26211`. |
-| Smoke and remaining proof | Site returned 200 and browser showed the sign-in screen with no page errors; participant sign-in reached Cognito. Unauthenticated, test-header-only and invalid-token API requests returned 401; allowed-origin CORS returned 204 and an unrelated origin received no allow-origin header. Cognito OIDC issuer and API JWT audiences match. Test account passwords remain unset; authenticated participant/display and shared-state browser checks are still pending. |
+| Smoke and remaining proof | Site returned 200 and browser showed the sign-in screen with no page errors; participant sign-in reached Cognito. User reports successful participant sign-in; a read-only user-pool check confirms `participant-b-staging` is enabled/CONFIRMED. Unauthenticated, test-header-only and invalid-token API requests returned 401; allowed-origin CORS returned 204 and an unrelated origin received no allow-origin header. Cognito OIDC issuer and API JWT audiences match. `display-staging` and four other synthetic participants remain `FORCE_CHANGE_PASSWORD`; authenticated shared-state and display checks remain pending. |
 
 No Vercel upgrade, custom domain, Stage 0 modification, SQS, Bedrock or budget alert was created. The AWS credit balance and current bill were not checked. The account-root bootstrap identity is not a reusable least-privilege Stage 1 operator; record this before future incremental AWS changes.
 
@@ -171,7 +171,7 @@ Steps 1–6 record the completed Stage 0 deployment. Steps 7–10 record current
 7. **KE13B implementation/review (complete).** Authenticated composition, durable adapter wiring and the exact runtime policy passed the named focused independent review; see [KE13B evidence](../docs/reviews/KE13B.md).
 8. **Stage 1 deployment (complete through CLI).** The user authorized Vercel + Cognito/API Gateway/Lambda/DynamoDB/runtime IAM/CloudWatch in `us-east-1`. The bootstrap profile authenticated as account root because no Stage 1 permission set existed. Exact IDs and artifact hashes are recorded above and in [KE13](../docs/tasks/KE13.md). This did not modify the accepted Stage 0 mock.
 9. **Basic live smoke (passed).** HTTPS frontend returns 200 and the participant UI reaches Cognito. Unauthenticated requests are denied; exact-origin CORS and JWT authorizer configuration pass. These checks do not prove authenticated shared-state use.
-10. **Finish KE13 acceptance.** Set passwords locally for the synthetic participant/display accounts; verify participant and display login, shared read/write persistence, other-member denial, replay/conflict behavior, expiry and redacted logs. Record results without passwords/tokens. KE13 stays IN_PROGRESS until this is complete. Keep Bedrock/SQS disabled and obtain the named KE09 cloud-boundary follow-up before external testers.
+10. **Finish KE13 acceptance.** Participant sign-in is user-reported successful. Verify authenticated `/public` and `/me`, a write/reload, other-member denial, replay/conflict behavior, expiry and redacted logs. The connected page has no decision-editing UI, so persistence testing needs an authenticated API call. Set a local password for `display-staging` and verify public read plus write denial. Record results without passwords/tokens. KE13 stays IN_PROGRESS until this is complete. Keep Bedrock/SQS disabled and obtain the named KE09 cloud-boundary follow-up before external testers.
 
 ## Historical cost estimate (original $25/month planning assumption)
 
@@ -230,19 +230,19 @@ Use synthetic test records only. Set a dated cleanup reminder at creation. Clean
 - Stage 0 cleanup is scheduled by the `CleanupAfter=2026-10-04` tag; do not delete resources without explicit cleanup authorization. Follow the procedure below and empty all bucket versions before bucket removal.
 - The historical KE13A-P candidate policy was not used for deployment; its temporary permission set was created for setup and deleted afterward. Do not assign that expired candidate. The exact release profile and trusted bucket-policy installation path used for Stage 0 are documented above.
 - The accepted Stage 0 preview remains public synthetic mock data. No account-level hard spend cap or budget alert was created. AWS credits and current billing were not verified.
-- KE00, KE13A and KE13B remain DONE for their recorded scopes; B04/B04.5 remain REVIEW with project sign-off deferred. KE12 is deferred. KE13 needs a locally set test password and authenticated browser/shared-state evidence; a scoped Stage 1 operator identity should precede later incremental AWS changes.
+- KE00, KE13A and KE13B remain DONE for their recorded scopes; B04/B04.5 remain REVIEW with project sign-off deferred. KE12 is deferred. Participant login is user-reported successful and Cognito marks `participant-b-staging` CONFIRMED. KE13 still needs authenticated shared-state and display-only evidence; a scoped Stage 1 operator identity should precede later incremental AWS changes.
 
 ## KE11 Cognito identity — deployed values and login handoff — 2026-09-29
 
 KE13 created the Cognito pool, clients, domain, synthetic users and display group in the table above. **Do not rerun the resource-creation commands below.** They are retained as the original setup recipe. User B does not receive AWS credentials; User A sets a password for the dedicated test username locally and shares it with B only through a private channel. Never put the password in chat, a repository file or a log.
 
-The participant account `participant-b-staging` is bound to Maya's synthetic membership. Set its permanent test password from the operator's WSL terminal using a hidden prompt:
+The participant account `participant-b-staging` is bound to Maya's synthetic membership. Its password is set and Cognito reports `CONFIRMED`; do not reset it. To prepare the separate read-only display login, set `display-staging`'s permanent test password from the operator's WSL terminal using a hidden prompt:
 
 ```sh
-read -rsp 'New participant test password: ' KE13_TEST_PASSWORD
+read -rsp 'New display test password: ' KE13_TEST_PASSWORD
 printf '\n'
 aws cognito-idp admin-set-user-password --profile known-enough-staging-bootstrap --region us-east-1 \
-  --user-pool-id us-east-1_V9OMjd0zx --username participant-b-staging \
+  --user-pool-id us-east-1_V9OMjd0zx --username display-staging \
   --password "$KE13_TEST_PASSWORD" --permanent --no-cli-pager
 unset KE13_TEST_PASSWORD
 ```

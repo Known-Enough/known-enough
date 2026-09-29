@@ -1,3 +1,9 @@
+## 2026-09-29 — KE13 participant sign-in checkpoint
+
+- Sole active task remains KE13. Actual worker: Codex GPT-6; exact variant/effort unexposed. Clean synchronized `main` baseline `cbb09dce92873cf6efef6b903fd1f1ebf3bd8c8f`; `git pull --ff-only origin main` succeeded before this documentation update. Bounded scope: KE13 ticket, task board, A handoff/log and staging runbook; no application source or AWS mutations.
+- User reports the `participant-b-staging` account successfully signs in. Read-only checks with explicit profile `known-enough-staging-bootstrap` verified caller account `092954139775` as `arn:aws:iam::092954139775:root` and Cognito statuses: `participant-b-staging` is enabled/CONFIRMED; `ana-staging`, `leo-staging`, `nina-staging`, `raul-staging` and `display-staging` are enabled/FORCE_CHANGE_PASSWORD. No passwords or tokens were read or recorded.
+- The authenticated public/owner API, persistent write, membership denial and replay/conflict checks remain unverified. The connected app currently offers sign-in, snapshot load and invitation UI, but no decision-editing UI; a persistent write check requires an authenticated API call. KE13 stays IN_PROGRESS. No cloud changes, resource creation, deployment, paid call or status acceptance occurred.
+
 ## 2026-09-29 — KE13 cloud deployment / IN_PROGRESS
 
 - User A authorized the cloud-first KE13 scope. Actual worker: Codex GPT-6; exact variant/effort unexposed. Clean synchronized `main` baseline `7aa36ebc57bdad603b088ad7a47975cd779d8f46`; `git pull --ff-only origin main` succeeded. Sole active task is KE13. Bounded files: Vercel build config, staging/Vercel runbooks, KE13 ticket, board, A handoff/log; no app source or Stage 0 resource changes.
