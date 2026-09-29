@@ -1,5 +1,7 @@
 # KE14 scenario qualification — needs changes
 
+Historical qualification at `44602df`. The later [fix checkpoint](ke14-fixes.md) implements the recorded gaps and passes local checks; KE14 is now REVIEW for the required independent boundary follow-up. Live acceptance remains pending. The observations below are retained unchanged for their original artifact.
+
 Qualification date: 2026-09-29. User A / Codex GPT-6, exact variant and effort unexposed; ticket target Sol/high. Source baseline `2f20192da333713bd2eaaff3a9fd01ec44f4955c`, clean ff-only pull before claim. This report and the two new test files form the qualification artifact; application, contracts, adapters, infrastructure and browser code were unchanged.
 
 **Verdict: CHANGES_REQUIRED.** Offline checks demonstrate substantial Christmas and Purchase behavior, but neither scenario satisfies the ticket's complete deployed-artifact criterion. KE14 is PAUSED with this reviewable artifact; KE15 remains BLOCKED. Passing tests that assert a safe rejection do not make the rejected workflow qualified.

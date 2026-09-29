@@ -12,6 +12,7 @@ import {
 import { createCognitoIdentityResolver, type CognitoIdentityOptions } from './cognito-identity.ts';
 import type { JwksCache } from 'aws-jwt-verify/jwk';
 import type { LocalTestSessionManager } from './local-test-auth.ts';
+import type { ScenarioService } from './scenario-service.ts';
 
 const IDENTITY_HEADER = 'x-deal-table-test-identity';
 const REQUEST_ID_HEADER = 'x-request-id';
@@ -46,6 +47,7 @@ export interface CognitoApiOptions extends CognitoIdentityOptions {
 }
 
 export interface KnownEnoughLocalApiOptions {
+  readonly scenarios?: ScenarioService;
   readonly application: KnownEnoughApplication;
   /** Optional injected, non-live model port for the public frame-draft route. */
   readonly architect?: DecisionArchitect;
@@ -61,6 +63,7 @@ export interface KnownEnoughLocalApiOptions {
 }
 
 export interface KnownEnoughCognitoApiOptions extends CognitoIdentityOptions {
+  readonly scenarios?: ScenarioService;
   readonly application: KnownEnoughApplication;
   /** Production callers must explicitly inject a reviewed provider implementation. */
   readonly architect?: DecisionArchitect;
@@ -405,7 +408,7 @@ function knownEnoughRequestError(error: unknown, id: string): DecisionErrorResul
 }
 
 function createKnownEnoughApiHandler(
-  options: Pick<KnownEnoughLocalApiOptions, 'application' | 'architect' | 'ownerConversation' | 'negotiator' | 'testSessions' | 'maxBodyBytes' | 'debug'>,
+  options: Pick<KnownEnoughLocalApiOptions, 'application' | 'architect' | 'ownerConversation' | 'negotiator' | 'scenarios' | 'testSessions' | 'maxBodyBytes' | 'debug'>,
   authenticate: (request: IncomingMessage) => Promise<HttpIdentity | null>,
   allowedOrigins: readonly string[],
   includeTestIdentity: boolean,
@@ -447,6 +450,21 @@ function createKnownEnoughApiHandler(
       let principal: HttpIdentity | null = null;
       try { principal = await authenticate(request); } catch { /* fail closed */ }
       if (!principal) { sendJson(response, 401, decisionErrorBody('UNAUTHENTICATED', id)); return; }
+      if (url?.pathname === '/decisions') {
+        if (request.method !== 'POST' || !options.scenarios) { sendJson(response, 404, decisionErrorBody('NOT_FOUND', id)); return; }
+        if (principal.kind !== 'participant') { request.resume(); sendJson(response, 403, decisionErrorBody('FORBIDDEN', id)); return; }
+        let responseId = id;
+        try {
+          const body = await readJson(request, maxBodyBytes);
+          responseId = bodyRequestId(body, id);
+          const snapshot = await options.scenarios.create(principal, body);
+          sendJson(response, 200, { requestId: responseId, snapshot });
+        } catch (error) {
+          const result = knownEnoughRequestError(error, responseId);
+          sendJson(response, result.error.httpStatus, result);
+        }
+        return;
+      }
       const architectureDraftRoute = url?.pathname === '/decisions/architecture/draft';
       const ownerConversationMatch = url?.pathname.match(/^\/decisions\/([^/]+)\/owner-conversation\/draft$/);
       const reasoningMatch = url?.pathname.match(/^\/decisions\/([^/]+)\/reasoning$/);
@@ -528,6 +546,9 @@ function createKnownEnoughApiHandler(
         if (request.method !== 'POST' || !options.ownerConversation) {
           sendJson(response, 404, decisionErrorBody('NOT_FOUND', id));
           return;
+        }
+        if (principal.kind === 'display') {
+          request.resume(); sendJson(response, 403, decisionErrorBody('FORBIDDEN', id)); return;
         }
         let responseId = id;
         try {

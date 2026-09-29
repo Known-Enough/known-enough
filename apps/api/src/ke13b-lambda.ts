@@ -2,6 +2,9 @@ import { createServer, type RequestListener } from 'node:http';
 import { createAwsDynamoDBRoomRepository } from '@deal-table/adapters';
 import { KnownEnoughApplication } from '@deal-table/application';
 import { createCognitoKnownEnoughApiHandler } from './http-core.ts';
+import { createKnownEnoughModelRuntime } from './model-runtime.ts';
+import { ScenarioService, readScenarioMembers, scenarioCandidates, type ScenarioMember } from './scenario-service.ts';
+import type { ConverseTransport } from '@deal-table/adapters';
 
 /** API Gateway HTTP API payload-format 2.0. Only fields needed by the reviewed HTTP handler are accepted. */
 export interface HttpApiEvent {
@@ -26,6 +29,8 @@ export interface Ke13bConfig {
   participantClientId: string;
   displayClientId: string;
   allowedOrigin: string;
+  models?: { members: ScenarioMember[]; provider: { mode: 'BEDROCK'; paidCallsApproved: boolean;
+    invocationLoggingDisabled: boolean; retentionReviewed: boolean } | { mode: 'INJECTED'; transport: ConverseTransport } };
 }
 const MAX_GATEWAY_BODY_BYTES = 64 * 1024;
 const RESPONSE_HEADERS = [
@@ -52,7 +57,17 @@ export function readKe13bConfig(env: NodeJS.ProcessEnv = process.env): Ke13bConf
     || participantClientId === displayClientId || !parsedOrigin || parsedOrigin.protocol !== 'https:'
     || parsedOrigin.origin !== allowedOrigin || parsedOrigin.username || parsedOrigin.password)
     throw new Error('KE13B deployment configuration is incomplete or invalid');
-  return { tableName, region, userPoolId, participantClientId, displayClientId, allowedOrigin };
+  const config: Ke13bConfig = { tableName, region, userPoolId, participantClientId, displayClientId, allowedOrigin };
+  // Disabled unless ALL explicit deployment acknowledgments and registered subjects are present.
+  // These flags are a configuration guard, not human authorization or a privacy review.
+  if (env.KE14_MODEL_MODE !== undefined && env.KE14_MODEL_MODE !== 'DISABLED') {
+    if (env.KE14_MODEL_MODE !== 'BEDROCK' || env.KE14_PAID_CALLS_APPROVED !== 'true'
+      || env.KE14_INVOCATION_LOGGING_DISABLED !== 'true' || env.KE14_RETENTION_REVIEWED !== 'true')
+      throw new Error('KE14 model configuration is not approved');
+    config.models = { members: readScenarioMembers(JSON.parse(env.KE14_MEMBER_BINDINGS ?? 'null')),
+      provider: { mode: 'BEDROCK', paidCallsApproved: true, invocationLoggingDisabled: true, retentionReviewed: true } };
+  }
+  return config;
 }
 function eventHeaders(value: unknown): Record<string, string> {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return {};
@@ -117,9 +132,18 @@ export function createKe13bLambdaHandler(config: Ke13bConfig): (event: HttpApiEv
   const repository = createAwsDynamoDBRoomRepository(config.tableName, config.region);
   const application = new KnownEnoughApplication({ repository,
     clock: { now: () => new Date().toISOString() }, ids: { next: () => crypto.randomUUID() } });
+  const runtime = config.models ? createKnownEnoughModelRuntime({ application,
+    clock: { now: () => new Date().toISOString() }, ids: { next: () => crypto.randomUUID() },
+    provider: config.models.provider, publicCandidates: frame => scenarioCandidates(frame)
+      .map(values => values.filter(item => frame.variables.some(variable => variable.id === item.variableId))),
+    trustedCandidates: scenarioCandidates }) : undefined;
+  const scenarios = runtime && config.models ? new ScenarioService({ application: runtime.application, architect: runtime.architect,
+    members: config.models.members, clock: { now: () => new Date().toISOString() }, isEnabled: runtime.isEnabled }) : undefined;
   const listener = createCognitoKnownEnoughApiHandler({ application, userPoolId: config.userPoolId,
     participantClientId: config.participantClientId, displayClientId: config.displayClientId,
-    allowedOrigins: [config.allowedOrigin] });
+    allowedOrigins: [config.allowedOrigin], ...(runtime ? {
+      ownerConversation: runtime.ownerConversation, negotiator: runtime.negotiator } : {}),
+    ...(scenarios ? { scenarios } : {}) });
   return event => invokeHttpApi(listener, event);
 }
 let liveHandler: ((event: HttpApiEvent) => Promise<HttpApiResult>) | null = null;

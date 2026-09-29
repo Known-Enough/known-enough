@@ -289,9 +289,12 @@ export class KnownEnoughApplication {
     definition: unknown;
     creatorSubject: string;
     memberships: readonly DecisionMembership[];
+    creationBodyHash?: string;
+    creationGuard?: { expiresAt: number; isEnabled: () => boolean };
   }): Promise<void> {
     const parsed = KE.DecisionDefinition.safeParse(input.definition);
-    if (!parsed.success || !Id.safeParse(input.creatorSubject).success) fail('INVALID_COMMAND');
+    if (!parsed.success || !Id.safeParse(input.creatorSubject).success
+      || (input.creationBodyHash !== undefined && !/^[a-f0-9]{64}$/.test(input.creationBodyHash))) fail('INVALID_COMMAND');
     const definition = KE.DecisionDefinition.parse({ ...parsed.data, contextToken: await this.contextToken() });
     const participants = definition.participants.map(item => item.id).sort();
     const memberIds = input.memberships.map(item => item.participantId).sort();
@@ -303,6 +306,7 @@ export class KnownEnoughApplication {
         || typeof item.active !== 'boolean')) fail('INVALID_COMMAND');
     const memberships = structuredClone(input.memberships) as DecisionMembership[];
     const record: KnownEnoughRecord = {
+      ...(input.creationBodyHash ? { creationBodyHash: input.creationBodyHash } : {}),
       decisionId: definition.decisionId,
       creatorSubject: Id.parse(input.creatorSubject),
       memberships,
@@ -325,11 +329,26 @@ export class KnownEnoughApplication {
       job: null,
       replays: [],
     };
+    if (input.creationGuard && (!input.creationGuard.isEnabled()
+      || !Number.isFinite(input.creationGuard.expiresAt) || Date.parse(this.now()) >= input.creationGuard.expiresAt)) fail('STALE_CONTEXT');
     try { await this.options.repository.createDecision(record); }
     catch (error) {
       if (error instanceof RepositoryCapacityError) fail('INVALID_COMMAND');
+      if (input.creationBodyHash && await this.getCreatedDecision(
+        { kind: 'participant', subject: input.creatorSubject }, definition.decisionId, input.creationBodyHash)) return;
       throw error;
     }
+  }
+
+  /** Authorize before replay lookup. Returns current state, never resurrects old consent. */
+  async getCreatedDecision(principal: TrustedPrincipal | null, decisionId: string, bodyHash: string): Promise<KE.PublicDecisionSnapshot | null> {
+    return this.options.repository.transactionDecision(decisionId, decision => {
+      if (!decision) return null;
+      this.member(decision, principal);
+      if (principal?.kind !== 'participant' || principal.subject !== decision.creatorSubject) fail('NOT_FOUND');
+      if (decision.creationBodyHash !== bodyHash) fail('IDEMPOTENCY_CONFLICT');
+      return publicSnapshot(decision, this.member(decision, principal).participantId);
+    });
   }
 
   async issueDecisionInvitation(

@@ -155,6 +155,8 @@ export interface DecisionJob {
 }
 /** Versioned generic state stored alongside legacy STATE v4 records. */
 export interface KnownEnoughRecord {
+  /** Trusted provisioning receipt; never projected to owner/public payloads. */
+  creationBodyHash?: string | undefined;
   decisionId: string;
   creatorSubject: string;
   memberships: DecisionMembership[];

@@ -22,6 +22,14 @@ const session: CognitoSession = { accessToken: jwt, expiresAt: Date.now() + 60_0
 afterEach(() => vi.restoreAllMocks());
 
 describe('KE11 Cognito browser client', () => {
+  it('permits the exact authenticated creation endpoint while rejecting foreign and unrelated paths', async () => {
+    const fetcher = vi.fn(async () => new Response('{}', { status: 200 }));
+    await cognitoApiFetch(config, session, '/decisions', () => {}, { method: 'POST' }, fetcher);
+    expect(fetcher).toHaveBeenCalledOnce();
+    for (const path of ['/decisions-other', '//evil.test/decisions', '/decisions/../admin', '/admin'])
+      await expect(cognitoApiFetch(config, session, path, () => {}, {}, fetcher)).rejects.toThrow('Invalid API path');
+    expect(fetcher).toHaveBeenCalledOnce();
+  });
   it('requires all non-secret settings and rejects insecure endpoints', () => {
     expect(parseCognitoConfig({})).toBeNull();
     expect(() => parseCognitoConfig({ VITE_COGNITO_REGION: 'us-east-1', VITE_COGNITO_USER_POOL_ID: 'us-east-1_fixture',

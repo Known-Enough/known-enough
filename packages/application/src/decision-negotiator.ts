@@ -164,6 +164,8 @@ export class DecisionNegotiator {
     questionTtlMs?: number;
     /** Trusted, synchronous public-data-only catalog; no owner conditions or model output as its source. */
     publicCandidates?: (frame: KE.PublicDecisionFrame) => readonly KE.CandidateProposal['values'][];
+    /** Trusted server offers independent of owner conditions/model output. Only their public projection reaches the model. */
+    trustedCandidates?: (frame: KE.PublicDecisionFrame) => readonly KE.CandidateProposal['values'][];
     isEnabled?: () => boolean;
   }) {
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
@@ -196,14 +198,21 @@ export class DecisionNegotiator {
     let allowedPublicValues: Map<string, KE.CandidateProposal['values']>;
     try {
       context = await this.options.application.getReasoningContext(service, decisionId, job.id);
-      const catalog = this.options.publicCandidates?.(structuredClone(context.publicSnapshot.frame)) ?? [];
+      const catalog = this.options.trustedCandidates?.(structuredClone(context.publicSnapshot.frame))
+        ?? this.options.publicCandidates?.(structuredClone(context.publicSnapshot.frame)) ?? [];
       if (catalog.length === 0 || catalog.length > 64 || new TextEncoder().encode(JSON.stringify(catalog)).byteLength > 256 * 1024)
         throw new DecisionNegotiatorError('INVALID_MODEL_OUTPUT');
-      publicCandidates = catalog.map(values => KE.PublicProposalFacts.shape.values.parse(values));
       const publicIds = new Set(context.publicSnapshot.frame.variables.filter(item => item.visibility === 'PUBLIC').map(item => item.id));
-      if (publicCandidates.some(values => values.some(item => !publicIds.has(item.variableId))))
+      const trustedValues = catalog.map(values => KE.CandidateProposal.shape.values.parse(values));
+      if (!this.options.trustedCandidates && trustedValues.some(values => values.some(item => !publicIds.has(item.variableId))))
         throw new DecisionNegotiatorError('INVALID_MODEL_OUTPUT');
-      allowedPublicValues = new Map(publicCandidates.map(values => [publicValueIdentity(context, values), values]));
+      const variableIds = new Set(context.definition.variables.map(item => item.id));
+      if (trustedValues.some(values => values.some(item => !variableIds.has(item.variableId))))
+        throw new DecisionNegotiatorError('INVALID_MODEL_OUTPUT');
+      publicCandidates = trustedValues.map(values => KE.PublicProposalFacts.shape.values.parse(values.filter(item => publicIds.has(item.variableId))));
+      allowedPublicValues = new Map(publicCandidates.map((values, index) => [publicValueIdentity(context, values), trustedValues[index]!]));
+      // Two complete offers with identical public facts cannot be distinguished by this public-only model selector.
+      if (allowedPublicValues.size !== catalog.length) throw new DecisionNegotiatorError('INVALID_MODEL_OUTPUT');
     } catch (error) { await this.options.application.cancelReasoning(service, decisionId, job.id); throw error; }
 
     const commitGuard: ModelCommitGuard = {

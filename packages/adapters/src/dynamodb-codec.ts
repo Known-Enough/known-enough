@@ -179,6 +179,7 @@ const decisionInvitationSchema = z.strictObject({
 });
 const decisionJobSchema = z.strictObject({ id: Id, contextToken: Hash, semanticVersion: Version, epoch: Version });
 const decisionRecordSchema = z.strictObject({
+  creationBodyHash: z.string().regex(/^[a-f0-9]{64}$/).optional(),
   decisionId: Id,
   creatorSubject: Id,
   memberships: z.array(decisionMembershipSchema).max(KE.MAX_DECISION_PARTICIPANTS),

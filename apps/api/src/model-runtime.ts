@@ -12,6 +12,7 @@ export function createKnownEnoughModelRuntime(options: {
   provider: { mode: 'INJECTED'; transport: ConverseTransport }
     | { mode: 'BEDROCK'; paidCallsApproved: boolean; invocationLoggingDisabled: boolean; retentionReviewed: boolean };
   publicCandidates: (frame: KE.PublicDecisionFrame) => readonly KE.CandidateProposal['values'][];
+  trustedCandidates?: (frame: KE.PublicDecisionFrame) => readonly KE.CandidateProposal['values'][];
   metric?: (value: ModelJobMetric) => void; usage?: (value: ModelUsage) => void;
 }) {
   let enabled = true;
@@ -25,6 +26,8 @@ export function createKnownEnoughModelRuntime(options: {
   };
   const modelApplication = new Proxy(options.application, {
     get(target, property, receiver) {
+      if (property === 'createDecision')
+        return (...args: Parameters<typeof target.createDecision>) => trackOutputWrite(() => target.createDecision(...args));
       if (property === 'completeReasoning')
         return (...args: Parameters<typeof target.completeReasoning>) => trackOutputWrite(() => target.completeReasoning(...args));
       if (property === 'storeConstraintDraft')
@@ -50,10 +53,13 @@ export function createKnownEnoughModelRuntime(options: {
     return stopping;
   };
   return {
+    application: modelApplication,
+    isEnabled: () => enabled,
     architect: new DecisionArchitect(models.architect, () => options.ids.next(), () => Date.parse(options.clock.now()), () => enabled),
     ownerConversation: new OwnerConversationArchitect({ application: modelApplication, model: models.owner, clock: options.clock, ids: options.ids, isEnabled: () => enabled }),
     negotiator: new DecisionNegotiator({ application: modelApplication, model: models.negotiation, clock: options.clock,
-      ids: options.ids, publicCandidates: options.publicCandidates, isEnabled: () => enabled }),
+      ids: options.ids, publicCandidates: options.publicCandidates,
+      ...(options.trustedCandidates ? { trustedCandidates: options.trustedCandidates } : {}), isEnabled: () => enabled }),
     stop,
     jobs,
   };
