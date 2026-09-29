@@ -1,3 +1,9 @@
+## KE13 live staging completed — next KE14 READY — 2026-09-29
+
+KE13 is DONE; [scoped deployed-boundary review and operational evidence](reviews/KE13-deployed-boundaries.md) is PASS. Amplify participant login/own reads and user-operated write/replay/conflict/reload passed. Independent real Cognito display/unprovisioned browser/API checks, consistent DynamoDB reads and fresh-Lambda persistence passed. Live IAM/config/log/cost readback matched the reviewed artifact. No application source changed; no Stage 0, Bedrock or SQS scope was added. Temporary QA users are disabled and local secrets removed; existing accounts are untouched.
+
+Claim released. Next: [KE14](tasks/KE14.md), READY/unclaimed, `gpt-6-sol` / high, synthetic Christmas/Shared Purchase qualification. Pull `origin main` with `--ff-only` before claiming. Keep KE10 debt, volunteer authorization and KE17 gates intact. Operator-root/no-budget/alarm/automatic-cleanup and browser CORS-error limits are recorded in the review; no release or human acceptance is implied. Prior handoffs below retain dated history.
+
 ## KE12 independent privacy review completed — PASS — 2026-09-29
 
 The user-requested review is [PASS](reviews/KE12-privacy-followup.md) on exact `a7f07d5..e197734`, unchanged through `fb81b8e`. KE12 is DONE on its technical criteria; no code changes were made. Fresh focused 40/40, connected 1/1, independent privacy/expiry probes and full pinned check (395 passed / 2 optional skips, hosted 1/1, E2E 45/45) passed. The full check used a clean archive because pre-existing generated Vercel output caused working-clone lint errors; that output was preserved. Independent reviewer: User A / Codex GPT-6, exact variant/effort unexposed.

@@ -142,6 +142,8 @@ The Stage 0 values are listed above. The Stage 1 resource IDs are recorded below
 
 ## Current Stage 1 deployment — 2026-09-29
 
+**KE13 operational completion:** real Amplify participant/display login and scope/denial checks, signed own-frame write/replay/conflict/reload, independent DynamoDB readback/fresh-Lambda persistence, IAM/config/log/cost readback and scoped deployed-boundary privacy follow-up passed. KE13 is DONE; [exact evidence and limits](../docs/reviews/KE13-deployed-boundaries.md). Two dedicated QA accounts were tested with messages suppressed, globally signed out and disabled; their local credentials/tokens were removed. Existing accounts/subject bindings were not altered. Estimated September account usage USD 0.1770917136 was covered by USD -0.1770918356 credits (approximately zero net after rounding); remaining credits and a hard spend cap are not established. Earlier pending-smoke entries are dated historical checkpoints.
+
 | Component | Deployed value |
 | --- | --- |
 | AWS identity | Profile `known-enough-staging-bootstrap`; STS principal `arn:aws:iam::092954139775:root` in account `092954139775`. |
