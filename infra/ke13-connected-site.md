@@ -1,4 +1,6 @@
-# KE13 connected site: operator-only CLI handoff
+# KE13 connected site: superseded AWS hosting option
+
+> **Superseded on 2026-09-29 by user direction.** The authenticated app frontend will be deployed to Vercel project `known-enough-staging`, not to a new AWS S3/CloudFront site. Do not run the unexecuted S3/OAC/CloudFront commands below for KE13. The existing Stage 0 CloudFront mock stays online and unchanged. Use [the Vercel CLI handoff](ke13-vercel-site.md).
 
 This is the **regular authenticated app** site for KE13. It is separate from the deployed Stage 0 mock bucket and distribution. The commands below are unexecuted. User A runs them only after KE13B's independent focused review passes and the user authorizes the exact Stage 1 resource, permission and cost scope. Keep generated JSON and CLI outputs outside the repository. Use only synthetic staging accounts. These steps follow the [AWS CloudFront CLI OAC walkthrough](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/get-started-cli-tutorial.html) and [S3 OAC policy guidance](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html).
 
