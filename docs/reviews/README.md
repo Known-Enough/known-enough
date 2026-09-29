@@ -23,3 +23,5 @@ Record:
 Midpoint review does not approve later unreviewed changes. Mock tests never establish backend authorization or real cloud races. Logs alone are not review evidence. Do not include participant secrets, private payloads or credentials.
 
 - [KE13B focused auth/privacy/persistence/IAM review](KE13B.md) — PASS on `9b6861c..b090b03`; scoped to the fresh-table staging artifact, with live cloud verification still assigned to KE13.
+
+- [KE12 scoped KE09 privacy follow-up](KE12-privacy-followup.md) — independent PASS on `a7f07d5..e197734`, unchanged through `fb81b8e`; fresh focused/full checks and adversarial probes reproduced the simulated assistant boundary. KE13 live operations and other runtime/release gates remain separate.
