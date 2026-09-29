@@ -136,7 +136,7 @@ The Stage 0 values are listed above. Future API names are examples only and must
 | API | Amazon Cognito User Pool | Only after KE13B: participant and display app clients, public sign-up disabled, short access-token lifetime, administrator-managed display group; synthetic test accounts only. Avoid SMS MFA. Runtime JWT verification uses public JWKS and needs no Cognito API permission. |
 | API | API Gateway HTTP API | HTTPS JSON API routes to Lambda, throttling enabled, JWT authentication/authorizer configured from verified Cognito issuer/client IDs. |
 | API | AWS Lambda function(s) | Request composition; bounded memory/timeout and reserved concurrency; no VPC/NAT for the initial serverless path. Runtime role cannot provision infrastructure. |
-| API | One DynamoDB Standard on-demand table | `DealTableRooms` with the existing adapter’s `ROOM#...` partition and STATE/GUARD/REPLAY sort keys. Single region; set supported on-demand throughput maxima after measured adapter sizing. No TTL for authorization/expiry. Do not enable global tables. |
+| API | One DynamoDB Standard on-demand table | `KnownEnoughStage` with the existing adapter’s `ROOM#...` partition and STATE/GUARD/REPLAY sort keys. Single region; set supported on-demand throughput maxima after measured adapter sizing. No TTL for authorization/expiry. Do not enable global tables. |
 | API | CloudWatch Logs groups, alarms and metrics | Redacted operational categories only; 7-day retention for staging; alert on error/throttle/cost signals. Never log JWTs, private input/conditions, prompts, grant IDs or refusal details. |
 | Deferred | SQS standard queue + DLQ | Add only with a real reviewed async worker. Queue envelopes carry opaque job/authorized record references, not raw conversation text. Bound retention/redrive and cap worker concurrency. |
 | Excluded | Bedrock, NAT Gateway, EC2, RDS, load balancer, paid domain registration, exportable/Private CA, SMS, global table, provisioned database capacity | Not needed for the first mock preview and would add variable or standing cost. Reconsider only under later explicit scope/approval. |
@@ -295,3 +295,140 @@ A passes these non-secret values to B for the regular app build: `VITE_COGNITO_R
 KE13 verification after KE13B deployment: A confirms a signed-out API request is `401`, B signs in with B's own account and confirms a `/decisions/christmas-decision/me` request succeeds only after trusted-subject membership provisioning, another owner's private snapshot remains inaccessible, and sign-out or 15-minute expiry requires a new browser session. A signs in with a separate display account and confirms only the public route succeeds; command, owner and invitation writes fail. Record the browser origin, Cognito pool/client IDs, API base URL, HTTP statuses and deployment artifact hash without access tokens, passwords, private inputs or real participant data. These checks belong to KE13, not KE11 code-level acceptance.
 
 Cleanup after the approved staging exercise, after confirming no live dependency: `aws cognito-idp admin-delete-user --profile "$KE11_PROFILE" --region "$KE11_REGION" --user-pool-id "$KE11_POOL_ID" --username REPLACE_B_USERNAME` (and each other synthetic account), then `aws cognito-idp delete-user-pool-domain --profile "$KE11_PROFILE" --region "$KE11_REGION" --user-pool-id "$KE11_POOL_ID" --domain "$KE11_DOMAIN_PREFIX"`, `aws cognito-idp delete-user-pool-client --profile "$KE11_PROFILE" --region "$KE11_REGION" --user-pool-id "$KE11_POOL_ID" --client-id "$KE11_PARTICIPANT_CLIENT_ID"` (repeat for display), and finally `aws cognito-idp delete-user-pool --profile "$KE11_PROFILE" --region "$KE11_REGION" --user-pool-id "$KE11_POOL_ID"`. KE13B supplies the separate API/Lambda/DynamoDB cleanup commands.
+
+## KE13B authenticated backend handoff for KE13 (not executed)
+
+**Review and authority gate.** These are commands for User A after KE13B's one focused independent auth/privacy/persistence/IAM review passes and the exact Stage 1 resource/cost/permission scope is separately approved. User B wrote and locally checked code only; no command in this section has been run against AWS. A must use a new HTTPS origin for the connected regular app; do not overwrite the accepted Stage 0 static mock bucket/distribution. A first provisions that separate private S3 + OAC-only CloudFront site under KE13 authorization, records its exact `https://...cloudfront.net` origin, then uses the KE11 Cognito section above with that origin. A updates the placeholder values below from **actual** CLI outputs and checks account/region after every provisioning step. No real user data, JWTs, passwords, private inputs or invitation tokens enter repository files or logs. The synthetic room has no Bedrock path or SQS/DLQ; reasoning endpoints are disabled in this slice.
+
+The API artifact is `apps/api/src/ke13b-lambda.ts`, bundled for AWS Lambda `nodejs24.x` with pinned Rolldown in the current npm lockfile. The Lambda handler uses the default AWS credential chain only for `DynamoDBRoomRepository`; the separate Cognito JWT verifier downloads public JWKS and the application independently checks current membership. API Gateway's JWT authorizer is an additional gate. HTTP API v2 payloads are forwarded through a loopback-only Node HTTP adapter with an allowlist of request/response headers. Only `Authorization`, `Origin`, `Content-Type` and `X-Request-Id` can enter that adapter; `X-Deal-Table-Test-Identity` cannot. No in-memory room state is used in the deployed composition. The strict DynamoDB codec stores generic STATE v6 with guarded GUARD and exact REPLAY items, rejects unknown/older schemas and never auto-migrates v3/v4/v5 data. Trusted room bootstrap runs as an operator-only local command; it is **not** an API route.
+
+Required A setup profile permissions, limited to the reviewed staging resource names/ARNs wherever the API permits: `sts:GetCallerIdentity`; `dynamodb:CreateTable`, `DescribeTable`, `DeleteTable` and the adapter's transaction item actions for the one table; `logs:CreateLogGroup`, `PutRetentionPolicy`, `DescribeLogGroups`, `DeleteLogGroup`; `iam:CreateRole`, `PutRolePolicy`, `GetRole`, `GetRolePolicy`, `DeleteRolePolicy`, `DeleteRole`, and `iam:PassRole` restricted to the one Lambda role; `lambda:CreateFunction`, `GetFunctionConfiguration`, `AddPermission`, `RemovePermission`, `DeleteFunction`, `UpdateFunctionCode`, `UpdateFunctionConfiguration`; and `apigateway:POST/GET/PATCH/DELETE` for the one HTTP API and its stage/integration/routes/authorizer. The separate site and Cognito setup profiles need their own reviewed scope. The **runtime** role gets only the generated DynamoDB transaction item policy and exact log-stream writes. It gets no IAM, Cognito admin, S3, Bedrock, table administration, `DeleteItem`, `Query`, `Scan`, or direct nontransactional item access. Verify the generated JSON and its SHA-256 before `put-role-policy`; a prefix condition does not replace app membership checks. The design follows [AWS DynamoDB transaction IAM](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis-iam.html), [HTTP API JWT validation](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-jwt-authorizer.html), [Lambda Node 24 runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html), and [HTTP API v2 integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-integrations-lambda.html).
+
+Build on a clean, reviewed KE13B commit with pinned `npm ci`, Node 24.21.0/npm 11.19.0, and the full check already recorded. These commands run **locally** and make no AWS call:
+
+```bash
+export KE13B_ARTIFACT_DIR=/tmp/known-enough-ke13b-stage
+mkdir -p "$KE13B_ARTIFACT_DIR"
+./node_modules/.bin/rolldown apps/api/src/ke13b-lambda.ts --platform node --format esm --no-codeSplitting --file "$KE13B_ARTIFACT_DIR/ke13b-lambda.mjs"
+./node_modules/.bin/rolldown apps/api/src/ke13b-provision-run.ts --platform node --format esm --no-codeSplitting --file "$KE13B_ARTIFACT_DIR/ke13b-provision.mjs"
+./node_modules/.bin/rolldown apps/api/src/ke13b-policy-run.ts --platform node --format esm --no-codeSplitting --file "$KE13B_ARTIFACT_DIR/ke13b-policy.mjs"
+python3 -m zipfile -c "$KE13B_ARTIFACT_DIR/ke13b-lambda.zip" "$KE13B_ARTIFACT_DIR/ke13b-lambda.mjs"
+python3 -m zipfile -l "$KE13B_ARTIFACT_DIR/ke13b-lambda.zip"
+sha256sum "$KE13B_ARTIFACT_DIR/ke13b-lambda.zip" "$KE13B_ARTIFACT_DIR/ke13b-lambda.mjs"
+```
+
+The ZIP listing must contain `ke13b-lambda.mjs` at its root and no source maps, fixtures or `node_modules`. A records the ZIP SHA-256 before upload. The following variables have no usable defaults; A fills `REPLACE_*` **after** the approved profile and account check. `KE11_*` variables are the exact non-secret values produced in the KE11 identity section. `KE13B_APP_ORIGIN` is the new connected site's exact HTTPS origin, without trailing slash. Do not reuse the Stage 0 domain or bucket.
+
+```bash
+export KE13B_PROFILE=REPLACE_APPROVED_STAGE1_PROFILE
+export KE13B_REGION=us-east-1
+export KE13B_ACCOUNT=REPLACE_VERIFIED_ACCOUNT_ID
+export KE13B_APP_ORIGIN=https://REPLACE_NEW_CONNECTED_SITE_DOMAIN
+export KE13B_TABLE_NAME=KnownEnoughStage
+export KE13B_FUNCTION_NAME=known-enough-stage-api
+export KE13B_ROLE_NAME=KnownEnoughStageApiRole
+export KE13B_LOG_GROUP=/aws/lambda/known-enough-stage-api
+aws sts get-caller-identity --profile "$KE13B_PROFILE" --query '{Account:Account,Arn:Arn}'
+# Stop unless Account exactly equals KE13B_ACCOUNT and this profile has the approved setup policy.
+aws dynamodb create-table --profile "$KE13B_PROFILE" --region "$KE13B_REGION" \
+  --table-name "$KE13B_TABLE_NAME" --billing-mode PAY_PER_REQUEST \
+  --attribute-definitions AttributeName=PK,AttributeType=S AttributeName=SK,AttributeType=S \
+  --key-schema AttributeName=PK,KeyType=HASH AttributeName=SK,KeyType=RANGE \
+  --tags Key=Project,Value=KnownEnough Key=Environment,Value=staging
+aws dynamodb wait table-exists --profile "$KE13B_PROFILE" --region "$KE13B_REGION" --table-name "$KE13B_TABLE_NAME"
+aws dynamodb describe-table --profile "$KE13B_PROFILE" --region "$KE13B_REGION" \
+  --table-name "$KE13B_TABLE_NAME" --query 'Table.{Arn:TableArn,Status:TableStatus,Billing:BillingModeSummary.BillingMode,Keys:KeySchema}'
+aws logs create-log-group --profile "$KE13B_PROFILE" --region "$KE13B_REGION" --log-group-name "$KE13B_LOG_GROUP"
+aws logs put-retention-policy --profile "$KE13B_PROFILE" --region "$KE13B_REGION" \
+  --log-group-name "$KE13B_LOG_GROUP" --retention-in-days 7
+export KE13B_TABLE_ARN="arn:aws:dynamodb:${KE13B_REGION}:${KE13B_ACCOUNT}:table/${KE13B_TABLE_NAME}"
+export KE13B_LOG_GROUP_ARN="arn:aws:logs:${KE13B_REGION}:${KE13B_ACCOUNT}:log-group:${KE13B_LOG_GROUP}"
+node "$KE13B_ARTIFACT_DIR/ke13b-policy.mjs" > "$KE13B_ARTIFACT_DIR/runtime-policy.json"
+sha256sum "$KE13B_ARTIFACT_DIR/runtime-policy.json"
+```
+
+A reviews `runtime-policy.json` against the exact table/log ARNs and the independent KE13B verdict. The role trust permits only `lambda.amazonaws.com`. Create the trust file locally with no secrets:
+
+```bash
+cat > "$KE13B_ARTIFACT_DIR/lambda-trust.json" <<'JSON'
+{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"lambda.amazonaws.com"},"Action":"sts:AssumeRole"}]}
+JSON
+aws iam create-role --profile "$KE13B_PROFILE" --role-name "$KE13B_ROLE_NAME" \
+  --assume-role-policy-document "file://$KE13B_ARTIFACT_DIR/lambda-trust.json"
+aws iam put-role-policy --profile "$KE13B_PROFILE" --role-name "$KE13B_ROLE_NAME" \
+  --policy-name KnownEnoughStageApiRuntime --policy-document "file://$KE13B_ARTIFACT_DIR/runtime-policy.json"
+aws iam get-role-policy --profile "$KE13B_PROFILE" --role-name "$KE13B_ROLE_NAME" \
+  --policy-name KnownEnoughStageApiRuntime --query PolicyDocument
+export KE13B_ROLE_ARN="arn:aws:iam::${KE13B_ACCOUNT}:role/${KE13B_ROLE_NAME}"
+aws lambda create-function --profile "$KE13B_PROFILE" --region "$KE13B_REGION" \
+  --function-name "$KE13B_FUNCTION_NAME" --runtime nodejs24.x \
+  --handler ke13b-lambda.handler --role "$KE13B_ROLE_ARN" \
+  --zip-file "fileb://$KE13B_ARTIFACT_DIR/ke13b-lambda.zip" \
+  --timeout 29 --memory-size 512 --architectures x86_64 \
+  --environment "Variables={KE13B_TABLE_NAME=$KE13B_TABLE_NAME,COGNITO_USER_POOL_ID=$KE11_POOL_ID,COGNITO_PARTICIPANT_CLIENT_ID=$KE11_PARTICIPANT_CLIENT_ID,COGNITO_DISPLAY_CLIENT_ID=$KE11_DISPLAY_CLIENT_ID,KE13B_ALLOWED_ORIGIN=$KE13B_APP_ORIGIN}" \
+  --tags Project=KnownEnough,Environment=staging
+aws lambda get-function-configuration --profile "$KE13B_PROFILE" --region "$KE13B_REGION" \
+  --function-name "$KE13B_FUNCTION_NAME" \
+  --query '{State:State,Runtime:Runtime,Handler:Handler,Role:Role,Environment:Environment.Variables}'
+```
+
+If IAM propagation causes `create-function` to fail, wait and retry that exact command; do not attach a broad managed role. The API Gateway JWT authorizer checks the same pool and two public app-client IDs; the Lambda verifier then checks the signed access token again and maps its `sub`. API Gateway validates `client_id` when Cognito access tokens have no `aud`; Lambda rejects ID tokens, wrong clients and unscoped display groups regardless of gateway claims. A creates only an authenticated decision route and an unauthenticated preflight route:
+
+```bash
+export KE13B_FUNCTION_ARN="arn:aws:lambda:${KE13B_REGION}:${KE13B_ACCOUNT}:function:${KE13B_FUNCTION_NAME}"
+aws apigatewayv2 create-api --profile "$KE13B_PROFILE" --region "$KE13B_REGION" \
+  --name known-enough-stage-http --protocol-type HTTP --query '{ApiId:ApiId,Endpoint:ApiEndpoint}'
+export KE13B_API_ID=REPLACE_API_ID_FROM_PREVIOUS_OUTPUT
+aws apigatewayv2 create-integration --profile "$KE13B_PROFILE" --region "$KE13B_REGION" \
+  --api-id "$KE13B_API_ID" --integration-type AWS_PROXY \
+  --integration-uri "$KE13B_FUNCTION_ARN" --payload-format-version 2.0 \
+  --query IntegrationId --output text
+export KE13B_INTEGRATION_ID=REPLACE_INTEGRATION_ID_FROM_PREVIOUS_OUTPUT
+aws apigatewayv2 create-authorizer --profile "$KE13B_PROFILE" --region "$KE13B_REGION" \
+  --api-id "$KE13B_API_ID" --name known-enough-cognito-access --authorizer-type JWT \
+  --identity-source '$request.header.Authorization' \
+  --jwt-configuration "Audience=$KE11_PARTICIPANT_CLIENT_ID $KE11_DISPLAY_CLIENT_ID,Issuer=https://cognito-idp.$KE13B_REGION.amazonaws.com/$KE11_POOL_ID" \
+  --query AuthorizerId --output text
+export KE13B_AUTHORIZER_ID=REPLACE_AUTHORIZER_ID_FROM_PREVIOUS_OUTPUT
+aws apigatewayv2 create-route --profile "$KE13B_PROFILE" --region "$KE13B_REGION" \
+  --api-id "$KE13B_API_ID" --route-key 'ANY /decisions/{proxy+}' \
+  --authorization-type JWT --authorizer-id "$KE13B_AUTHORIZER_ID" \
+  --target "integrations/$KE13B_INTEGRATION_ID"
+aws apigatewayv2 create-route --profile "$KE13B_PROFILE" --region "$KE13B_REGION" \
+  --api-id "$KE13B_API_ID" --route-key 'OPTIONS /decisions/{proxy+}' \
+  --authorization-type NONE --target "integrations/$KE13B_INTEGRATION_ID"
+aws apigatewayv2 create-stage --profile "$KE13B_PROFILE" --region "$KE13B_REGION" \
+  --api-id "$KE13B_API_ID" --stage-name '$default' --auto-deploy \
+  --default-route-settings ThrottlingBurstLimit=10,ThrottlingRateLimit=5
+aws lambda add-permission --profile "$KE13B_PROFILE" --region "$KE13B_REGION" \
+  --function-name "$KE13B_FUNCTION_NAME" --statement-id allow-known-enough-stage-http \
+  --action lambda:InvokeFunction --principal apigateway.amazonaws.com \
+  --source-arn "arn:aws:execute-api:${KE13B_REGION}:${KE13B_ACCOUNT}:${KE13B_API_ID}/*/*"
+aws apigatewayv2 get-routes --profile "$KE13B_PROFILE" --region "$KE13B_REGION" \
+  --api-id "$KE13B_API_ID" --query 'Items[].{Route:RouteKey,Auth:AuthorizationType,Authorizer:AuthorizerId}'
+export KE13B_API_BASE_URL="https://${KE13B_API_ID}.execute-api.${KE13B_REGION}.amazonaws.com"
+```
+
+The `create-authorizer` audience shorthand must resolve to **two** entries; A checks `get-authorizer --api-id "$KE13B_API_ID" --authorizer-id "$KE13B_AUTHORIZER_ID"` before smoke. If the CLI does not parse two audiences as intended, create a local JSON `JwtConfiguration` with `{"Audience":["REPLACE_PARTICIPANT_ID","REPLACE_DISPLAY_ID"],"Issuer":"REPLACE_ISSUER"}` and pass `--jwt-configuration file://...` after filling exact values. Do not deploy with a single client audience. A separately confirms `get-stage` reports throttling and `$default` auto-deploy. Signed-out `curl -i "$KE13B_API_BASE_URL/decisions/christmas-decision/public"` must be `401`; the test identity header without bearer must also be `401`. Browser preflight from the exact connected origin must return only that origin in `Access-Control-Allow-Origin`; another origin must receive no usable CORS response. The Lambda itself independently returns 401 even if invoked around API Gateway without a valid bearer.
+
+To create the single synthetic staging decision, A uses `admin-get-user` for each of the five **synthetic** Cognito accounts and copies only their verified `sub` attributes into a temporary local JSON object with exact keys `maya`, `leo`, `nina`, `ana`, `raul`; B's own test account is bound to `maya`. Do not infer a subject from username/email, and do not place the JSON in the repo. A runs `aws cognito-idp admin-get-user --profile "$KE13B_PROFILE" --region "$KE13B_REGION" --user-pool-id "$KE11_POOL_ID" --username REPLACE_SYNTHETIC_USERNAME --query 'UserAttributes[?Name==`sub`].Value|[0]' --output text` separately for each account and confirms five unique nonempty subjects. The provisioning command below validates all five bindings, makes Maya active and the other four pending, creates one public-only Christmas frame and no private conditions, and writes STATE/GUARD transactionally. Duplicate invocation fails closed; do not delete rows to retry with different subject mappings. The display user has no participant membership and belongs only to Cognito group `deal-table-display-christmas-decision` from the KE11 handoff.
+
+```bash
+export AWS_REGION="$KE13B_REGION"
+export AWS_PROFILE="$KE13B_PROFILE"
+export KE13B_BOOTSTRAP_FILE=/tmp/known-enough-ke13b-stage/subjects.json
+# A writes /tmp/known-enough-ke13b-stage/subjects.json with exact keys and verified sub values; chmod 600.
+chmod 600 "$KE13B_BOOTSTRAP_FILE"
+export KE13B_TABLE_NAME
+export COGNITO_USER_POOL_ID="$KE11_POOL_ID"
+export COGNITO_PARTICIPANT_CLIENT_ID="$KE11_PARTICIPANT_CLIENT_ID"
+export COGNITO_DISPLAY_CLIENT_ID="$KE11_DISPLAY_CLIENT_ID"
+export KE13B_ALLOWED_ORIGIN="$KE13B_APP_ORIGIN"
+node "$KE13B_ARTIFACT_DIR/ke13b-provision.mjs"
+aws dynamodb describe-table --profile "$KE13B_PROFILE" --region "$KE13B_REGION" \
+  --table-name "$KE13B_TABLE_NAME" --query 'Table.{Status:TableStatus,Arn:TableArn}'
+```
+
+For the connected site build, A sets the six non-secret `VITE_*` values from the KE11 section, with `VITE_API_BASE_URL=$KE13B_API_BASE_URL`, runs `npm run build --workspace @deal-table/web`, checks its bundle scan and SHA-256, and uploads only `apps/web/dist/` to the **separate** KE13 HTTPS site. Do not upload `dist-hosted-preview`, overwrite the Stage 0 bucket, or enable the local test picker. The connected site must serve `index.html` at the registered callback/logout URL and use a CloudFront invalidation for that path/assets after upload. B signs in with B's own account and verifies `/me` after A has bound B's Cognito `sub`; A uses separate synthetic accounts for cross-owner and display probes. Record signed-out/invalid-token 401, pending-owner 404, wrong-subject invitation 404, organizer-only issue, same-subject redemption retry, own-snapshot reads, display public-only reads, command write denial, replay/conflict behavior, cold-start persistence, throttling and redacted logs. Browser preparation and local signed JWT tests are not this live evidence. The API has no model/reasoning routes enabled and no automatic schema migration.
+
+After KE13 evidence is complete and the user authorizes cleanup, A removes the API route/stage/authorizer/integration/API with `aws apigatewayv2 delete-api --api-id "$KE13B_API_ID" --profile "$KE13B_PROFILE" --region "$KE13B_REGION"`; deletes Lambda with `aws lambda delete-function --function-name "$KE13B_FUNCTION_NAME" --profile "$KE13B_PROFILE" --region "$KE13B_REGION"`; deletes the inline role policy with `aws iam delete-role-policy --role-name "$KE13B_ROLE_NAME" --policy-name KnownEnoughStageApiRuntime --profile "$KE13B_PROFILE"`, then `aws iam delete-role --role-name "$KE13B_ROLE_NAME" --profile "$KE13B_PROFILE"`; removes the table with `aws dynamodb delete-table --table-name "$KE13B_TABLE_NAME" --profile "$KE13B_PROFILE" --region "$KE13B_REGION"`; and removes the log group with `aws logs delete-log-group --log-group-name "$KE13B_LOG_GROUP" --profile "$KE13B_PROFILE" --region "$KE13B_REGION"`. A removes the separate connected site and Cognito resources with their own approved cleanup steps. Export needed synthetic evidence before deletion without copying private values into repository artifacts. No KE13 cleanup is performed by User B.

@@ -1,0 +1,130 @@
+import { createServer, type RequestListener } from 'node:http';
+import { createAwsDynamoDBRoomRepository } from '@deal-table/adapters';
+import { KnownEnoughApplication } from '@deal-table/application';
+import { createCognitoKnownEnoughApiHandler } from './http-core.ts';
+
+/** API Gateway HTTP API payload-format 2.0. Only fields needed by the reviewed HTTP handler are accepted. */
+export interface HttpApiEvent {
+  version?: unknown;
+  rawPath?: unknown;
+  rawQueryString?: unknown;
+  headers?: unknown;
+  body?: unknown;
+  isBase64Encoded?: unknown;
+  requestContext?: { http?: { method?: unknown } };
+}
+export interface HttpApiResult {
+  statusCode: number;
+  headers: Record<string, string>;
+  body: string;
+  isBase64Encoded: false;
+}
+export interface Ke13bConfig {
+  tableName: string;
+  region: string;
+  userPoolId: string;
+  participantClientId: string;
+  displayClientId: string;
+  allowedOrigin: string;
+}
+const MAX_GATEWAY_BODY_BYTES = 64 * 1024;
+const RESPONSE_HEADERS = [
+  'content-type', 'cache-control', 'access-control-allow-origin', 'access-control-allow-methods',
+  'access-control-allow-headers', 'vary',
+] as const;
+function failure(statusCode: number): HttpApiResult {
+  return { statusCode, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
+    body: JSON.stringify({ ok: false, requestId: 'invalid-request',
+      error: { code: statusCode === 422 ? 'INVALID_COMMAND'
+        : statusCode === 404 ? 'NOT_FOUND' : 'RETRYABLE_SERVER_ERROR', httpStatus: statusCode } }),
+    isBase64Encoded: false };
+}
+export function readKe13bConfig(env: NodeJS.ProcessEnv = process.env): Ke13bConfig {
+  const tableName = env.KE13B_TABLE_NAME?.trim() ?? '';
+  const region = env.AWS_REGION?.trim() ?? '';
+  const userPoolId = env.COGNITO_USER_POOL_ID?.trim() ?? '';
+  const participantClientId = env.COGNITO_PARTICIPANT_CLIENT_ID?.trim() ?? '';
+  const displayClientId = env.COGNITO_DISPLAY_CLIENT_ID?.trim() ?? '';
+  const allowedOrigin = env.KE13B_ALLOWED_ORIGIN?.trim() ?? '';
+  const parsedOrigin = URL.parse(allowedOrigin);
+  if (!/^[A-Za-z0-9_.-]{3,255}$/.test(tableName) || !/^[a-z]{2}-[a-z]+-\d$/.test(region)
+    || !userPoolId.startsWith(`${region}_`) || !participantClientId || !displayClientId
+    || participantClientId === displayClientId || !parsedOrigin || parsedOrigin.protocol !== 'https:'
+    || parsedOrigin.origin !== allowedOrigin || parsedOrigin.username || parsedOrigin.password)
+    throw new Error('KE13B deployment configuration is incomplete or invalid');
+  return { tableName, region, userPoolId, participantClientId, displayClientId, allowedOrigin };
+}
+function eventHeaders(value: unknown): Record<string, string> {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return {};
+  const raw = value as Record<string, unknown>;
+  const allowed = ['authorization', 'origin', 'content-type', 'x-request-id'];
+  const headers: Record<string, string> = {};
+  for (const [key, item] of Object.entries(raw)) {
+    const name = key.toLowerCase();
+    if (allowed.includes(name) && typeof item === 'string' && !/[\r\n]/.test(item) && item.length <= 8192)
+      headers[name] = item;
+  }
+  return headers;
+}
+function eventBody(event: HttpApiEvent): string | null {
+  if (event.body === undefined || event.body === null) return null;
+  if (typeof event.body !== 'string' || (event.isBase64Encoded !== undefined && typeof event.isBase64Encoded !== 'boolean'))
+    throw new Error('invalid gateway body');
+  if (event.body.length > MAX_GATEWAY_BODY_BYTES * 4) throw new RangeError('body too large');
+  if (event.isBase64Encoded && (!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(event.body)))
+    throw new Error('invalid gateway body');
+  const body = event.isBase64Encoded ? Buffer.from(event.body, 'base64') : Buffer.from(event.body, 'utf8');
+  if (body.byteLength > MAX_GATEWAY_BODY_BYTES) throw new RangeError('body too large');
+  return body.toString('utf8');
+}
+/** Transport adapter keeps the existing Cognito verification and application request path intact. */
+export async function invokeHttpApi(listener: RequestListener, event: HttpApiEvent): Promise<HttpApiResult> {
+  if (event.version !== '2.0' || typeof event.rawPath !== 'string' || !event.rawPath.startsWith('/')
+    || event.rawPath.length > 2048 || typeof event.requestContext?.http?.method !== 'string') return failure(503);
+  if (!['GET', 'POST', 'OPTIONS'].includes(event.requestContext.http.method)) return failure(404);
+  let body: string | null;
+  try { body = eventBody(event); } catch { return failure(422); }
+  const headers = eventHeaders(event.headers);
+  const server = createServer(listener);
+  try {
+    await new Promise<void>((resolve, reject) => {
+      server.once('error', reject);
+      server.listen(0, '127.0.0.1', () => { server.off('error', reject); resolve(); });
+    });
+    const address = server.address();
+    if (!address || typeof address === 'string') return failure(503);
+    const response = await fetch(`http://127.0.0.1:${address.port}${event.rawPath}`, {
+      method: event.requestContext.http.method,
+      headers,
+      ...(body && event.requestContext.http.method === 'POST' ? { body } : {}),
+      redirect: 'error', signal: AbortSignal.timeout(25_000),
+    });
+    const resultHeaders: Record<string, string> = {};
+    for (const header of RESPONSE_HEADERS) {
+      const value = response.headers.get(header);
+      if (value !== null) resultHeaders[header] = value;
+    }
+    return { statusCode: response.status, headers: resultHeaders, body: await response.text(), isBase64Encoded: false };
+  } catch { return failure(503); }
+  finally {
+    if (server.listening) {
+      server.closeAllConnections();
+      await new Promise<void>(resolve => server.close(() => resolve()));
+    }
+  }
+}
+export function createKe13bLambdaHandler(config: Ke13bConfig): (event: HttpApiEvent) => Promise<HttpApiResult> {
+  const repository = createAwsDynamoDBRoomRepository(config.tableName, config.region);
+  const application = new KnownEnoughApplication({ repository,
+    clock: { now: () => new Date().toISOString() }, ids: { next: () => crypto.randomUUID() } });
+  const listener = createCognitoKnownEnoughApiHandler({ application, userPoolId: config.userPoolId,
+    participantClientId: config.participantClientId, displayClientId: config.displayClientId,
+    allowedOrigins: [config.allowedOrigin] });
+  return event => invokeHttpApi(listener, event);
+}
+let liveHandler: ((event: HttpApiEvent) => Promise<HttpApiResult>) | null = null;
+/** AWS Lambda handler. Configuration is immutable for a warm execution environment. */
+export async function handler(event: HttpApiEvent): Promise<HttpApiResult> {
+  try { liveHandler ??= createKe13bLambdaHandler(readKe13bConfig()); return await liveHandler(event); }
+  catch { return failure(503); }
+}

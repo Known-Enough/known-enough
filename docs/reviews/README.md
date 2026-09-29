@@ -1,6 +1,6 @@
 # Checkpoint evidence
 
-Create one compact record per checkpoint: B02.5, A03.5, B04.5, G01, G02, G03 or KE13C. No checkpoint has passed merely because its ticket exists. Use the independent model/effort selected in the ticket; record the actual reviewer model and effort without inference.
+Create one compact record per checkpoint: B02.5, A03.5, B04.5, G01, G02, G03, KE13C or KE13B. No checkpoint has passed merely because its ticket exists. Use the independent model/effort selected in the ticket; record the actual reviewer model and effort without inference.
 
 Record:
 
@@ -21,3 +21,5 @@ Record:
 - [KE13C policy independent follow-up](KE13C-policy-followup.md): PASS on exact `f1893e3..6238700`; P1/P2 closed, no newly overbroad release grant found. Independent Codex GPT-6 session, exact variant/effort unexposed. Human acceptance, rendered ARN revalidation and live/cloud gates remain separate.
 
 Midpoint review does not approve later unreviewed changes. Mock tests never establish backend authorization or real cloud races. Logs alone are not review evidence. Do not include participant secrets, private payloads or credentials.
+
+- [KE13B focused auth/privacy/persistence/IAM review](KE13B.md) — PENDING independent verdict on checked cloud-backend code checkpoint.

@@ -2,7 +2,7 @@ import { Id } from '@deal-table/contracts';
 import type {
   KnownEnoughRecord, KnownEnoughRepository, RoomRecord, RoomRepository,
 } from '@deal-table/application';
-export { DynamoDBRoomRepository, RepositoryStorageError } from './dynamodb.ts';
+export { DynamoDBRoomRepository, RepositoryStorageError, createAwsDynamoDBRoomRepository } from './dynamodb.ts';
 export type { DynamoDBRoomRepositoryOptions } from './dynamodb.ts';
 
 /** Local process only: no cross-process or DynamoDB transaction guarantee. */

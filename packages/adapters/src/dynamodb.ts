@@ -717,3 +717,10 @@ export class DynamoDBRoomRepository implements RoomRepository, KnownEnoughReposi
     }
   }
 }
+
+/** Default-credential-chain factory for the deployed API and trusted provisioning CLI. */
+export function createAwsDynamoDBRoomRepository(tableName: string, region: string): DynamoDBRoomRepository {
+  if (!/^[A-Za-z0-9_.-]{3,255}$/.test(tableName) || !/^[a-z]{2}-[a-z]+-\d$/.test(region))
+    throw new Error('A valid exact DynamoDB table and region are required');
+  return new DynamoDBRoomRepository({ client: new DynamoDBClient({ region }), tableName });
+}
