@@ -4,6 +4,7 @@ import {
   beginCognitoSignIn, clearCognitoSession, clearPendingCognitoInvitation, cognitoApiFetch, cognitoLogoutUrl,
   finishCognitoSignIn, readCognitoSession, readPendingCognitoInvitation, type CognitoBrowserConfig, type CognitoSession,
 } from './cognito-session';
+import { SimulatedSharedAssistant } from './simulated-shared-assistant';
 
 const DECISION_ID = 'christmas-decision';
 let callbackCompletion: Promise<CognitoSession | null> | null = null;
@@ -52,6 +53,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
       const publicResponse = await cognitoApiFetch(config, session, `/decisions/${DECISION_ID}/public`, expire);
       if (!publicResponse.ok) throw new Error('unavailable');
       const publicValue = KnownEnough.PublicDecisionSnapshot.parse(await publicResponse.json());
+      if (publicValue.frame.decisionId !== DECISION_ID) throw new Error('wrong decision');
       let ownerValue: KnownEnough.OwnerDecisionSnapshot | null = null;
       if (session.kind === 'participant') {
         const ownerResponse = await cognitoApiFetch(config, session, `/decisions/${DECISION_ID}/me`, expire);
@@ -118,6 +120,21 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
             Your current proposal approval: {ownerSnapshot.ownApproval ? 'recorded' : 'not recorded'}.</p>
           <p className="ke-help">This profile comes from your own authenticated owner route. Sign in again if your membership changes.</p></div>}
       </section>
+      <SimulatedSharedAssistant key={`${session.kind}:${session.accessToken}`} snapshot={publicSnapshot}
+        fetchPublic={async () => {
+          const response = await cognitoApiFetch(config, session, `/decisions/${DECISION_ID}/public`, expire);
+          if (!response.ok) throw new Error('public view unavailable');
+          const value = await response.json();
+          const parsed = KnownEnough.PublicDecisionSnapshot.parse(value);
+          if (parsed.frame.decisionId !== DECISION_ID) throw new Error('wrong decision');
+          return parsed;
+        }}
+        onFreshSnapshot={fresh => {
+          setPublicSnapshot(fresh);
+          setOwnerSnapshot(current => current && (current.publicSnapshot.contextToken !== fresh.contextToken
+            || current.publicSnapshot.semanticVersion !== fresh.semanticVersion
+            || current.publicSnapshot.publicRevision !== fresh.publicRevision) ? null : current);
+        }} />
       {session.kind === 'participant' && <section className="ke-card ke-invitation"><h2>Invitations</h2>
         {inviteToken && <><p>An invitation is waiting in this tab. Accept it with the account it was issued for.</p>
           <button type="button" onClick={() => void redeem()} disabled={busy}>Accept invitation</button>
