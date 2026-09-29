@@ -1,6 +1,6 @@
 # KE13B — Authenticated AWS backend and persistence implementation
 
-- Status: BLOCKED — next after KE11 in the user-directed cloud-first MVP sequence; KE12 is deferred until after KE13.
+- Status: READY — KE11 code/CLI criteria are DONE; this is next in the user-directed cloud-first MVP sequence. KE12 is deferred until after KE13. No active claim.
 - Claim: unclaimed; no active implementation task. User B is the directed worker after KE11 is DONE and must record a fresh claim before starting.
 - Direct worker/model: User B; target `gpt-6-sol` / high. Record actual model/effort and baseline at claim.
 - Prerequisites: KE11 DONE; KE00 direction recorded; B04/B04.5 technical baseline and review evidence available; KE13A handoff reviewed; all earlier named technical gates except deferred KE12 satisfied. KE12 is no longer a prerequisite for the cloud MVP and is deferred until after KE13. Project sign-off is deferred. A ticket does not authorize CDK bootstrap, account changes, resource creation, deployment, paid calls or spending.

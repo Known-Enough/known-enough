@@ -1,3 +1,7 @@
+# KE11 connected browser code/CLI handoff — DONE — 2026-09-29
+
+User B / current Codex GPT-6 session (exact variant/effort unexposed; Sol/high was the ticket target) completed KE11 from synchronized `main` baseline `a2d2709`. The regular web app now has Cognito authorization-code/PKCE participant/display sign-in, callback/state handling, tab-local access-token API requests, sign-out/expiry handling, authenticated public/owner reads and invitation issue/redemption. The local test picker remains development only. The CLI identity handoff and non-secret config placeholders are in the staging runbook and `apps/web/.env.example`. Focused auth tests passed 6/6; final pinned `npm run check` passed 374 unit tests / 2 optional skips, hosted browser 1/1 and E2E 44/44, plus references, planning, lint/boundaries, types and builds. No AWS resource or managed-login smoke occurred. KE11 claim is released; KE13B is next and needs its focused review before KE13 cloud actions. KE10 release debt remains separate. The other clone must `git pull --ff-only origin main` before claiming work.
+
 # User B handoff — shared task pool
 
 ## Current KE10 checkpoint — proposal-output correction

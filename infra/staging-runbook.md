@@ -219,3 +219,79 @@ Use synthetic test records only. Set a dated cleanup reminder at creation. Clean
 - The historical KE13A-P candidate policy was not used for deployment; its temporary permission set was created for setup and deleted afterward. Do not assign that expired candidate. The exact release profile and trusted bucket-policy installation path used for Stage 0 are documented above.
 - The accepted preview remains public synthetic mock data. No account-level hard spend cap or budget alert was created. Before a future API stage, recheck current cost, permissions, and sequential task gates.
 - KE00 and KE13A remain DONE for their recorded scope; B04/B04.5 remain REVIEW with project sign-off deferred. KE13B, KE12 and final live KE13 require technical evidence; explicit authorization is still required before cloud changes.
+
+## KE11 browser identity handoff for KE13 (not executed)
+
+KE11 prepares the browser only. User A runs the following AWS CLI v2 commands **after** KE13B's focused PASS, an approved concrete Stage 1 resource scope, and a fresh cost/permission review. User B does not receive an AWS profile and does not run these commands. A fills every `REPLACE_*` value from actual CLI output. This section creates no resources by itself. The currently deployed Stage 0 preview is unchanged.
+
+Required A profile actions for this identity slice: `sts:GetCallerIdentity`; `cognito-idp:CreateUserPool`, `DescribeUserPool`, `DeleteUserPool`, `CreateUserPoolClient`, `DescribeUserPoolClient`, `DeleteUserPoolClient`, `CreateUserPoolDomain`, `DescribeUserPoolDomain`, `DeleteUserPoolDomain`, `AdminCreateUser`, `AdminGetUser`, `AdminDeleteUser`, `AdminSetUserPassword`, `CreateGroup`, `DeleteGroup`, `AdminAddUserToGroup`, and `ListUsers`. Scope mutating post-creation actions to the dedicated staging pool ARN once its ID exists. KE13B will specify separate API, Lambda, DynamoDB and runtime-role permissions. The existing read-only/static-release profiles cannot provision this slice. See the [AWS user-pool CLI](https://docs.aws.amazon.com/cli/latest/reference/cognito-idp/create-user-pool.html), [client CLI](https://docs.aws.amazon.com/cli/latest/reference/cognito-idp/create-user-pool-client.html), and [domain CLI](https://docs.aws.amazon.com/cli/latest/reference/cognito-idp/create-user-pool-domain.html).
+
+Before running commands, A fills `REPLACE_PROFILE` with the specifically approved CLI profile, `REPLACE_ACCOUNT_ID` with the `sts` result, `REPLACE_APP_ORIGIN` with the final HTTPS regular-app origin (the Stage 0 static preview is not the regular app), and `REPLACE_UNIQUE_PREFIX` with an available Cognito prefix. The callback and logout URL must be the **same exact** app root path, including its trailing slash. If the regular app uses a non-root path, use that exact path in both client commands and `index.html` deployment. Do not use localhost callback URLs in the staging clients.
+
+```bash
+export KE11_PROFILE=REPLACE_PROFILE
+export KE11_REGION=us-east-1
+export KE11_APP_ORIGIN=https://REPLACE_APP_ORIGIN
+export KE11_DOMAIN_PREFIX=REPLACE_UNIQUE_PREFIX
+aws sts get-caller-identity --profile "$KE11_PROFILE" --query '{Account:Account,Arn:Arn}'
+# Confirm Account is REPLACE_ACCOUNT_ID and the role has the approved Stage 1 scope.
+aws cognito-idp create-user-pool --profile "$KE11_PROFILE" --region "$KE11_REGION" \
+  --pool-name known-enough-staging --admin-create-user-config AllowAdminCreateUserOnly=true \
+  --query 'UserPool.Id' --output text
+export KE11_POOL_ID=REPLACE_POOL_ID_FROM_PREVIOUS_OUTPUT
+aws cognito-idp describe-user-pool --profile "$KE11_PROFILE" --region "$KE11_REGION" \
+  --user-pool-id "$KE11_POOL_ID" --query 'UserPool.AdminCreateUserConfig.AllowAdminCreateUserOnly'
+aws cognito-idp create-user-pool-domain --profile "$KE11_PROFILE" --region "$KE11_REGION" \
+  --user-pool-id "$KE11_POOL_ID" --domain "$KE11_DOMAIN_PREFIX" --managed-login-version 1
+aws cognito-idp describe-user-pool-domain --profile "$KE11_PROFILE" --region "$KE11_REGION" \
+  --domain "$KE11_DOMAIN_PREFIX" --query 'DomainDescription.Status'
+aws cognito-idp create-user-pool-client --profile "$KE11_PROFILE" --region "$KE11_REGION" \
+  --user-pool-id "$KE11_POOL_ID" --client-name known-enough-participant-browser \
+  --no-generate-secret --allowed-o-auth-flows-user-pool-client \
+  --allowed-o-auth-flows code --allowed-o-auth-scopes openid \
+  --supported-identity-providers COGNITO --callback-urls "$KE11_APP_ORIGIN/" \
+  --logout-urls "$KE11_APP_ORIGIN/" --access-token-validity 15 \
+  --token-validity-units AccessToken=minutes --prevent-user-existence-errors ENABLED \
+  --query 'UserPoolClient.ClientId' --output text
+export KE11_PARTICIPANT_CLIENT_ID=REPLACE_PARTICIPANT_CLIENT_ID_FROM_PREVIOUS_OUTPUT
+aws cognito-idp create-user-pool-client --profile "$KE11_PROFILE" --region "$KE11_REGION" \
+  --user-pool-id "$KE11_POOL_ID" --client-name known-enough-display-browser \
+  --no-generate-secret --allowed-o-auth-flows-user-pool-client \
+  --allowed-o-auth-flows code --allowed-o-auth-scopes openid \
+  --supported-identity-providers COGNITO --callback-urls "$KE11_APP_ORIGIN/" \
+  --logout-urls "$KE11_APP_ORIGIN/" --access-token-validity 15 \
+  --token-validity-units AccessToken=minutes --prevent-user-existence-errors ENABLED \
+  --query 'UserPoolClient.ClientId' --output text
+export KE11_DISPLAY_CLIENT_ID=REPLACE_DISPLAY_CLIENT_ID_FROM_PREVIOUS_OUTPUT
+aws cognito-idp describe-user-pool-client --profile "$KE11_PROFILE" --region "$KE11_REGION" \
+  --user-pool-id "$KE11_POOL_ID" --client-id "$KE11_PARTICIPANT_CLIENT_ID" \
+  --query 'UserPoolClient.{Secret:ClientSecret,Callbacks:CallbackURLs,Flows:AllowedOAuthFlows,AccessValidity:AccessTokenValidity}'
+aws cognito-idp describe-user-pool-client --profile "$KE11_PROFILE" --region "$KE11_REGION" \
+  --user-pool-id "$KE11_POOL_ID" --client-id "$KE11_DISPLAY_CLIENT_ID" \
+  --query 'UserPoolClient.{Secret:ClientSecret,Callbacks:CallbackURLs,Flows:AllowedOAuthFlows,AccessValidity:AccessTokenValidity}'
+```
+
+Both client descriptions must show no secret, the exact callback URL, `code` flow and 15-minute access validity. Check closed self-registration via `AllowAdminCreateUserOnly=true`. To verify the authorization server without signing in, run `curl -fsSI "https://${KE11_DOMAIN_PREFIX}.auth.${KE11_REGION}.amazoncognito.com/.well-known/openid-configuration"`; fetch its document with `curl -fsS` if `HEAD` is unsupported. The browser obtains a short-lived access token with PKCE, stores it only in tab `sessionStorage`, discards the OAuth state/verifier after one callback, and uses a separate display client. It does not store or use a refresh token. Cognito hosted logout clears the hosted browser session; API bearer tokens can remain valid until their short expiry, so access revocation must also be enforced by the backend membership check. The backend verifies JWT issuer, audience/client ID, token use and display group; a browser label cannot grant membership.
+
+For User B's one dedicated staging login, A fills `REPLACE_B_USERNAME` with a synthetic staging-only username and creates it with **no automatic email/SMS**. A generates a temporary password outside the repository and communicates it to B through an explicitly approved secret channel; do not paste it into a commit, issue, log, or this runbook. The exact CLI operation is below; A supplies the password through an ephemeral secure local input or CLI input file, then deletes that file. The `--temporary-password` placeholder is intentionally not a value to run verbatim. User B changes the temporary password at first sign-in. A must not sign in as B; B performs the browser check with B's own account. Provision the display account separately and add only that account to the room-specific group; never put a participant in the display group.
+
+```bash
+aws cognito-idp admin-create-user --profile "$KE11_PROFILE" --region "$KE11_REGION" \
+  --user-pool-id "$KE11_POOL_ID" --username REPLACE_B_USERNAME \
+  --message-action SUPPRESS --temporary-password REPLACE_B_TEMPORARY_PASSWORD
+aws cognito-idp admin-get-user --profile "$KE11_PROFILE" --region "$KE11_REGION" \
+  --user-pool-id "$KE11_POOL_ID" --username REPLACE_B_USERNAME \
+  --query '{Username:Username,Status:UserStatus}'
+aws cognito-idp create-group --profile "$KE11_PROFILE" --region "$KE11_REGION" \
+  --user-pool-id "$KE11_POOL_ID" --group-name deal-table-display-christmas-decision
+# After separately creating REPLACE_DISPLAY_USERNAME with admin-create-user:
+aws cognito-idp admin-add-user-to-group --profile "$KE11_PROFILE" --region "$KE11_REGION" \
+  --user-pool-id "$KE11_POOL_ID" --username REPLACE_DISPLAY_USERNAME \
+  --group-name deal-table-display-christmas-decision
+```
+
+A passes these non-secret values to B for the regular app build: `VITE_COGNITO_REGION=us-east-1`, `VITE_COGNITO_USER_POOL_ID=$KE11_POOL_ID`, `VITE_COGNITO_DOMAIN=https://${KE11_DOMAIN_PREFIX}.auth.${KE11_REGION}.amazoncognito.com`, `VITE_COGNITO_PARTICIPANT_CLIENT_ID=$KE11_PARTICIPANT_CLIENT_ID`, `VITE_COGNITO_DISPLAY_CLIENT_ID=$KE11_DISPLAY_CLIENT_ID`, and `VITE_API_BASE_URL=REPLACE_DEPLOYED_HTTPS_API_BASE_URL`. The API separately needs `COGNITO_USER_POOL_ID`, `COGNITO_PARTICIPANT_CLIENT_ID`, and `COGNITO_DISPLAY_CLIENT_ID`. B's browser build must use `npm run build --workspace @deal-table/web`; the `build:hosted-preview` artifact is the disconnected Stage 0 mock. Never commit a populated `.env` or credentials. [Browser placeholders](../apps/web/.env.example) list the exact names.
+
+KE13 verification after KE13B deployment: A confirms a signed-out API request is `401`, B signs in with B's own account and confirms a `/decisions/christmas-decision/me` request succeeds only after trusted-subject membership provisioning, another owner's private snapshot remains inaccessible, and sign-out or 15-minute expiry requires a new browser session. A signs in with a separate display account and confirms only the public route succeeds; command, owner and invitation writes fail. Record the browser origin, Cognito pool/client IDs, API base URL, HTTP statuses and deployment artifact hash without access tokens, passwords, private inputs or real participant data. These checks belong to KE13, not KE11 code-level acceptance.
+
+Cleanup after the approved staging exercise, after confirming no live dependency: `aws cognito-idp admin-delete-user --profile "$KE11_PROFILE" --region "$KE11_REGION" --user-pool-id "$KE11_POOL_ID" --username REPLACE_B_USERNAME` (and each other synthetic account), then `aws cognito-idp delete-user-pool-domain --profile "$KE11_PROFILE" --region "$KE11_REGION" --user-pool-id "$KE11_POOL_ID" --domain "$KE11_DOMAIN_PREFIX"`, `aws cognito-idp delete-user-pool-client --profile "$KE11_PROFILE" --region "$KE11_REGION" --user-pool-id "$KE11_POOL_ID" --client-id "$KE11_PARTICIPANT_CLIENT_ID"` (repeat for display), and finally `aws cognito-idp delete-user-pool --profile "$KE11_PROFILE" --region "$KE11_REGION" --user-pool-id "$KE11_POOL_ID"`. KE13B supplies the separate API/Lambda/DynamoDB cleanup commands.

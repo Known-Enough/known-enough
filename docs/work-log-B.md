@@ -1,3 +1,11 @@
+# 2026-09-29 — KE11 code-level DONE handoff
+
+Implemented Cognito authorization-code/PKCE browser session and configured participant/display API client, same-tab invitation retention across OAuth redirects, public/owner snapshot consistency, non-secret env placeholders and exact CLI identity handoff. Focused auth tests 6/6. Final pinned `npm run check`: references 7/7, planning 15/15, lint/boundaries 172, typecheck, 374 unit tests / 2 optional skips, production/hosted builds and scans, hosted browser 1/1, E2E 44/44. Initial full E2E keyboard test failed from asynchronous local entry loading; changed local entry to synchronous startup and final full check passed. No AWS resource, login smoke, deployment, external message or paid call. Claim released; KE13B ticket/status made READY as successor tracking only. KE13B next after sync; KE13 retains live Cognito/browser/API evidence.
+
+# 2026-09-28 — KE11 app-side Cognito claim
+
+User B / current Codex GPT-6 session (exact variant/effort unexposed; ticket target `gpt-6-sol` / high). Clean `main` at `a2d2709` after successful `git pull --ff-only origin main`, ahead/behind 0/0; board and A handoff show no active claim. User directed KE11. Scope: `apps/web/src/**`, `apps/web/.env.example`, focused browser tests, KE11 ticket/board/B log/handoff and `infra/staging-runbook.md`. Implement Cognito authorization-code/PKCE browser login, callback/sign-out, access-token API client, focused tests and CLI handoff. No backend composition, AWS resource change, credentials, deployment, external invitation or paid calls.
+
 # Developer B work log
 
 ## 2026-09-28 — KE10 proposal-output diagnosis claim
