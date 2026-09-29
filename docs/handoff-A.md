@@ -1,3 +1,11 @@
+## KE14 qualification checkpoint — needs changes — 2026-09-29
+
+User A completed the bounded qualification artifact from synchronized `2f20192`, actual Codex GPT-6 (exact variant/effort unexposed). [Report](ke14-qualification.md) and [ticket](tasks/KE14.md) record CHANGES_REQUIRED; KE14 PAUSED, claim released, KE15 BLOCKED. No active task. Next is a fresh bounded claim for KE14's listed missing-flow implementation, existing focused KE09 follow-up and then deployed requalification; do not advance to volunteers.
+
+Ten local scenario tests cover Christmas scripted-model agreement/negotiation/refusal/clarification, exact approval, revisions and Purchase private caps/projection/stale completion. Purchase kernel/application success uses trusted fixtures; public-only model candidate/private numeric flexibility safely fail. Current Lambda has no model ports, HTTP has no draft-to-decision persistence operation, and connected UI has no complete participant scenario flows. No cloud/IAM/provider/application change occurred.
+
+Focused 50/50 and full pinned clean-archive check passed: 405 tests / 2 optional DynamoDB Local skips, hosted 1/1, E2E 45/45, references 7, planning 15, lint/boundaries 189, types/builds. Tests match archive SHA-256 recorded in report. Existing ignored generated `.vercel/output` assets preserved. Authorized origin/main checkpoint sync follows; other clone pulls ff-only before resuming. Historical handoffs remain below.
+
 ## KE13 live staging completed — next KE14 READY — 2026-09-29
 
 KE13 is DONE; [scoped deployed-boundary review and operational evidence](reviews/KE13-deployed-boundaries.md) is PASS. Amplify participant login/own reads and user-operated write/replay/conflict/reload passed. Independent real Cognito display/unprovisioned browser/API checks, consistent DynamoDB reads and fresh-Lambda persistence passed. Live IAM/config/log/cost readback matched the reviewed artifact. No application source changed; no Stage 0, Bedrock or SQS scope was added. Temporary QA users are disabled and local secrets removed; existing accounts are untouched.
