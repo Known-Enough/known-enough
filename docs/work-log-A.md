@@ -1,3 +1,9 @@
+## 2026-09-29 — KE13 Vercel Git connection / production-branch trigger check
+
+- Sole active task remains KE13. Actual worker: Codex GPT-6; exact variant/effort unexposed. Clean synchronized `main` baseline `302364231cf3a969c1c40e5e70cd586a6c384e8f`; `git pull --ff-only origin main` succeeded before edits. Bounded scope: KE13 deployment/runbook/task-board/A handoff/log documentation and the requested Vercel Git integration; no AWS changes.
+- After User A authorized the GitHub App, `vercel git connect --scope martelaxes-projects --yes` reported the repository already connected. Read-only Vercel project API confirmed GitHub repo `Known-Enough/known-enough` and production branch `main`. A new docs checkpoint will be pushed to exercise the Git trigger; deployment result pending at this log entry.
+- Automatic frontend deployments are now configured at the project level. AWS backend remains manual. No plan upgrade, AWS mutation, paid resource or secret was added.
+
 ## 2026-09-29 — KE13 Vercel auto-deployment setup blocked on GitHub authorization
 
 - Sole active task remains KE13. Actual worker: Codex GPT-6; exact variant/effort unexposed. Clean synchronized `main` baseline `8800b91020a8b9242778814bd0b2720272b730c3`; `git pull --ff-only origin main` succeeded before edits. Bounded scope: KE13 deployment/runbook/task-board/A handoff/log documentation; attempted only the requested Vercel Git repository connection. No AWS changes.
