@@ -1,6 +1,6 @@
-## Current handoff — KE13B independent review in progress — 2026-09-29
+## Current handoff — KE13B review PASS; KE13 awaits cloud scope — 2026-09-29
 
-The user directed the required KE13B auth/privacy/persistence/IAM review. An independent Codex GPT-6 session that did not author the implementation/correction claimed the review from synchronized `main` `b090b03`; exact runtime variant/effort and human A/B identity are unexposed. The review also covers the browser production-bundle correction and connected-site/runbook handoff. The implementation claim is released. **No verdict is recorded yet: KE13B remains REVIEW and KE13 remains BLOCKED.** No source changes, AWS calls or deployment occurred. The other clone must pull after this review claim is published.
+The independent focused KE13B review passed on the exact artifact `9b6861c..b090b03`. It covered Cognito/API authorization, privacy projections, DynamoDB STATE/GUARD/REPLAY, IAM, the production browser boundary and CLI handoffs. Fresh reviewer evidence: focused tests 55/55, configured regular browser build/scanner pass and standalone Lambda mock-header smoke returned 401. A non-blocking P2 runbook/schema mismatch says v5 state is rejected although the codec accepts and migrates generic v5; the PASS is scoped to KE13's documented creation of a fresh empty table. Do not reuse an existing table until the wording/migration policy is reconciled. No AWS calls or deployment occurred. KE13B is DONE on technical criteria; KE13 remains BLOCKED until User A explicitly authorizes the exact resource, permission and cost scope. After this documentation handoff is pushed, the other clone must pull before its next task.
 
 ## Current handoff — cloud-first MVP path — 2026-09-28
 
