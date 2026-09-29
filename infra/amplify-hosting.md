@@ -22,9 +22,9 @@ The deployment uses AWS's manual deployment flow without connecting an Amplify G
 
 After the first Amplify job succeeds:
 
-1. Verify the URL serves `index.html` and referenced assets over HTTPS. Confirm the deployed JS bundle does not contain local demo identities or local API URLs.
-2. Add `https://main.d143q5ravxp5av.amplifyapp.com/` as the callback and logout URL on both existing Cognito app clients, retaining authorization-code OAuth, `openid`, and the 15-minute access-token lifetime.
-3. Change the Lambda's exact allowed CORS origin from Vercel to `https://main.d143q5ravxp5av.amplifyapp.com` while preserving its other environment variables. This makes Amplify the active app origin. The old Vercel build remains available but cannot call the authenticated API after the switch; restore its prior callback/logout and CORS origin only if rolling back.
+1. **Done 2026-09-29:** workflow run `36620734722` deployed commit `d0a482b`; Amplify job 2 succeeded and the HTTPS URL returned 200. The build ran the production bundle scan.
+2. **Done 2026-09-29:** added `https://main.d143q5ravxp5av.amplifyapp.com/` to callback and logout URLs on both existing Cognito clients. Vercel URLs remain allowed; authorization-code OAuth, `openid`, and token lifetimes were preserved.
+3. **Pending:** change the Lambda's exact allowed CORS origin from Vercel to `https://main.d143q5ravxp5av.amplifyapp.com` while preserving its other environment variables. This makes Amplify the active app origin. The old Vercel build remains available but cannot call the authenticated API after the switch; restore its prior callback/logout and CORS origin only if rolling back.
 4. Verify Amplify-origin CORS preflight succeeds and a different origin receives no `Access-Control-Allow-Origin`; an unauthenticated API request remains 401.
 5. User A verifies participant and display Cognito sign-in using synthetic users. Continue KE13's authenticated shared-state, membership-denial, replay/conflict and display-write-denial checks. Do not mark KE13 complete based only on an HTTPS page load or successful login.
 
