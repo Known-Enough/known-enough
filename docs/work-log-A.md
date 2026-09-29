@@ -1,3 +1,9 @@
+## 2026-09-29 — KE13 automatic Vercel deployment verified
+
+- Sole active task remains KE13. Actual worker: Codex GPT-6; exact variant/effort unexposed. Clean synchronized `main` baseline `22e9323b561c8fb1416889f6b3fc61c82c2ccb17`; `git pull --ff-only origin main` succeeded before this documentation update. Bounded scope: KE13 deployment/runbook/task-board/A handoff/log only; no application source or AWS changes.
+- Vercel project API confirms GitHub `Known-Enough/known-enough`, production branch `main`. A push to `22e9323b561c8fb1416889f6b3fc61c82c2ccb17` created Git-sourced production deployment `dpl_HJcD9Uvpx42k3anHu6ogzcd2oMsj`, status `READY`; stable Vercel alias returned HTTP 200. This proves automatic deployment for the account owner's authored commit.
+- Vercel API reports team plan `hobby`. The tested author was team owner `martelaxe`; deployment by User B's separate commit author remains unverified and Vercel's Hobby restriction may block it. No Vercel plan upgrade or token-based GitHub Action was created. AWS backend remains manual. KE13 remains IN_PROGRESS.
+
 ## 2026-09-29 — KE13 Vercel Git connection / production-branch trigger check
 
 - Sole active task remains KE13. Actual worker: Codex GPT-6; exact variant/effort unexposed. Clean synchronized `main` baseline `302364231cf3a969c1c40e5e70cd586a6c384e8f`; `git pull --ff-only origin main` succeeded before edits. Bounded scope: KE13 deployment/runbook/task-board/A handoff/log documentation and the requested Vercel Git integration; no AWS changes.
