@@ -8,6 +8,10 @@ The authenticated app runs on Vercel project `known-enough-staging` in personal 
 
 The repository-root [Vercel configuration](../vercel.json) runs pinned `npm ci`, `npm run build`, and publishes `apps/web/dist`. The configured production build omits the local test picker when the six public settings below are present. These settings contain no browser secrets or AWS credentials.
 
+## Git auto-deployment status
+
+The Vercel project is not connected to the GitHub repository yet. On 2026-09-29, `vercel git connect https://github.com/Known-Enough/known-enough.git --scope martelaxes-projects --yes` failed with a repository-access error; the repository is public. No auto-deployment workflow or GitHub Actions deployment secrets were added. A GitHub organization owner/admin must authorize Vercel's GitHub App for `Known-Enough/known-enough`, then connect this repo to `known-enough-staging` and select `main` as the production branch. The supported CLI is [vercel git connect](https://vercel.com/docs/cli/git); once linked, Vercel automatically deploys Git pushes according to its [Git deployment settings](https://vercel.com/docs/git). Until then, use the pinned local `vercel build --prod` and `vercel deploy --prebuilt --prod` steps below. The AWS backend still deploys separately through its CLI runbook.
+
 After AWS provisioning, use the actual values returned by Cognito and API Gateway:
 
 ```sh

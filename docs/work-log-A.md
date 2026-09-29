@@ -1,3 +1,9 @@
+## 2026-09-29 — KE13 Vercel auto-deployment setup blocked on GitHub authorization
+
+- Sole active task remains KE13. Actual worker: Codex GPT-6; exact variant/effort unexposed. Clean synchronized `main` baseline `8800b91020a8b9242778814bd0b2720272b730c3`; `git pull --ff-only origin main` succeeded before edits. Bounded scope: KE13 deployment/runbook/task-board/A handoff/log documentation; attempted only the requested Vercel Git repository connection. No AWS changes.
+- The official `vercel git connect` command failed to link public repo `Known-Enough/known-enough` to Vercel project `known-enough-staging`, reporting that repository access must be checked. Vercel CLI is authenticated as `martelaxe`; GitHub CLI is unavailable. No Git link, webhook, deployment workflow or secret was created. Vercel currently deploys manually via prebuilt CLI; AWS backend remains a separate manual CLI deployment.
+- A GitHub organization owner/admin must authorize Vercel's GitHub App for the repository, then connect it to the Vercel project with `main` as production. Official CLI/Git auto-deployment instructions are linked in `infra/ke13-vercel-site.md`. Documentation records this blocker; KE13 stays IN_PROGRESS. No deployment, AWS mutation or secret/token was exposed.
+
 ## 2026-09-29 — KE13 participant sign-in checkpoint
 
 - Sole active task remains KE13. Actual worker: Codex GPT-6; exact variant/effort unexposed. Clean synchronized `main` baseline `cbb09dce92873cf6efef6b903fd1f1ebf3bd8c8f`; `git pull --ff-only origin main` succeeded before this documentation update. Bounded scope: KE13 ticket, task board, A handoff/log and staging runbook; no application source or AWS mutations.
