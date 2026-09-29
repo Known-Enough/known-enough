@@ -1,0 +1,20 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DeployOnlyMainAmplifyBranch",
+      "Effect": "Allow",
+      "Action": [
+        "amplify:CreateDeployment",
+        "amplify:StartDeployment"
+      ],
+      "Resource": "arn:aws:amplify:us-east-1:092954139775:apps/d143q5ravxp5av/branches/main"
+    },
+    {
+      "Sid": "ReadOwnDeploymentJobStatus",
+      "Effect": "Allow",
+      "Action": "amplify:GetJob",
+      "Resource": "arn:aws:amplify:us-east-1:092954139775:apps/d143q5ravxp5av/branches/main/jobs/*"
+    }
+  ]
+}
