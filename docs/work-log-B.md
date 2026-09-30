@@ -1,3 +1,12 @@
+## 2026-09-30T00:41:40Z — KE14 / REVIEW — CHANGES_REQUESTED
+
+- Independent focused review of `44602df..9f0e11f`; all 17 executable manifest hashes match. R1: connected frame confirmation omits material AI-created options/rules/approval roster. R2: complex closed private rules appear as an opaque fallback but remain confirmable; preference review omits its variable. Exact findings and limits: [KE14 follow-up](reviews/KE14-KE09-followup.md). No implementation change; review claim released.
+- Fresh focused six-suite Vitest 61/61, typecheck and connected browser 2/2 passed. Author's full 414/1/47 check inspected for matching source, not rerun. No cloud/paid action. KE14 REVIEW and KE15 BLOCKED; bounded correction and a separate focused follow-up are next.
+
+## 2026-09-30T00:35:39Z — KE14 / IN_PROGRESS independent follow-up
+
+- User B / Codex GPT-6 (exact variant/effort unexposed; Sol/high ticket target) claims the named focused KE09 review of User A's KE14 implementation. Clean `main` at `9f0e11fe53ed16a635e4f123410cc06df7981cf6`; `git pull --ff-only origin main` succeeded, ahead/behind 0/0. Review exact `44602df..9f0e11f` over the documented 17 executable files, requirements, focused tests and unresolved issues. Write review/ticket/board/B handoff/log only; implementation fixes remain with owner A. No AWS deployment, paid call, participant action or external message.
+
 ## 2026-09-29 — KE12 / REVIEW checkpoint
 
 - User B / Codex GPT-6 session, exact variant/effort unexposed (Sol/high ticket target), implemented the connected simulated Alexa+ assistant over the authenticated public route only. Scope stayed in web code/tests, a focused browser check, demo/privacy documentation, KE12 ticket and B records; User A retained KE13/board. No AWS credentials, cloud writes, native Alexa host or paid model calls.
