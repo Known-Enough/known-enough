@@ -1,3 +1,15 @@
+## 2026-09-30T21:40:40Z — KE14 / public-schema review PASS
+
+- Independent review of User A's exact patch SHA-256 `6160910f39881f39e3fd44e08765d36cd5811ecfdd71a2e4c1c9ba389fd0f66b`; source base `e2d4d17` in an isolated clone. All twelve final file hashes matched the author's manifest; patch applied cleanly. No actionable finding in the bounded structured-public-schema, authorization/replay, application-validation or diagnostic boundary.
+- Pinned Node 24.21.0/npm 11.19.0 `npm ci` passed. The six named focused test files passed **67/67** and `npm run typecheck` passed. The author's full 440 / 2 optional skips, hosted 1/1, E2E 47/47 report was inspected, not rerun.
+- Verdict PASS; review claim released. No source integration, AWS action, paid request or participant action. KE14 remains REVIEW for integration/staging/full live qualification; KE15 remains BLOCKED. Evidence: [review record](reviews/KE14-public-schema-followup.md).
+
+## 2026-09-30T20:54:16Z — KE14 / independent public-schema review claim
+
+- Current board assigned the next sequential gate to an independent User B review of User A's frozen public-schema/diagnostic correction. Reviewer role: User B; human A/B identity is not exposed in this session. Actual model is Codex GPT-6, exact runtime variant/effort unexposed; `gpt-6-sol` / high remains the ticket target, not runtime telemetry.
+- Clean `main` at `61d346c1962a71b1eb5c8b25cafda703e0d148f1`; `git pull --ff-only origin main` passed, ahead/behind 0/0. No other active task was recorded on the board. Read scope: exact patch SHA-256 `6160910f39881f39e3fd44e08765d36cd5811ecfdd71a2e4c1c9ba389fd0f66b`, its twelve declared source/test files and recorded checks. Write scope: new focused review record, KE14 ticket, task board and B handoff/log. No source edits, cloud actions, paid calls or participant actions.
+- Review and focused verification were pending at claim; the later PASS entry records release. KE14 remains REVIEW and KE15 BLOCKED.
+
 ## 2026-09-30T03:24:43Z — KE14 / REVIEW — independent live-model correction follow-up PASS
 
 - User B / Codex GPT-6; exact runtime variant/effort unexposed (Sol/high ticket target only). Implementation owner A's exact patch SHA-256: `730b18b636b18272e02de019d53f5616432e72e2973aed98d29a0e853fa2df89`. Reviewed from a separate clean `main` clone at `b199e87959f4518e173be5cd6e44bebfa16fb41f`; ff-only pull succeeded, ahead/behind 0/0 before applying the patch. Scope was the two adapter files, model negotiation/prompt boundaries and regression only. Pinned Node 24.21.0/npm 11.19.0; `npm ci` passed; focused adapter suite 12/12; negative control against the old schema failed the new regression as expected; diff whitespace check passed. Author's full 418 / 2 optional skips, hosted 1/1 and E2E 47/47 inspected, not rerun. Non-blocking limit: the architect input has no structured variable/option IDs or type fields, so prompt text alone cannot guarantee exact identity for absent IDs; actual prompt quality remains untested against live output. No AWS writes, paid calls, deployment, participant action or source integration. Review claim released. KE14 remains REVIEW; KE15 BLOCKED. Exact findings/evidence: [review record](reviews/KE14-live-model-followup.md); [handoff](handoff-B.md#ke14-live-model-review-checkpoint--pass--2026-09-30-utc).
@@ -361,9 +373,3 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Claim finished. B04.5 is REVIEW/PASS for this correction; B04 remains PAUSED with the code gate cleared pending owner sequential resumption. Remaining B04, final critical review, human and G02/live gates persist. No implementation edits, cloud work or publication. A local documentation-only review commit is authorized.
 
 Final documentation validation: **145 local Markdown targets**, current B04.5 REVIEW/PASS and B04 PAUSED status consistency, and `git diff --check` passed. Imported reference hashes remained 7/7. The only pre-existing untracked entry is the supplied `node_modules` symlink; it is excluded from the review commit.
-
-## 2026-09-30T20:54:16Z — KE14 / independent public-schema review claim
-
-- Current board assigns the next sequential gate to an independent User B review of User A's frozen public-schema/diagnostic correction. Reviewer role: User B; human A/B identity is not exposed in this session. Actual model is Codex GPT-6, exact runtime variant/effort unexposed; `gpt-6-sol` / high remains the ticket target, not runtime telemetry.
-- Clean `main` at `61d346c1962a71b1eb5c8b25cafda703e0d148f1`; `git pull --ff-only origin main` passed, ahead/behind 0/0. No other active task is recorded on the board. Read scope: exact patch SHA-256 `6160910f39881f39e3fd44e08765d36cd5811ecfdd71a2e4c1c9ba389fd0f66b`, its twelve declared source/test files and recorded checks. Write scope: new focused review record, KE14 ticket, task board and B handoff/log. No source edits, cloud actions, paid calls or participant actions.
-- Review and focused verification are pending. Preserve KE14 REVIEW and KE15 BLOCKED until findings and required gates are recorded.
