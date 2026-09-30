@@ -1,6 +1,6 @@
 # Checkpoint evidence
 
-Create one compact record per checkpoint: B02.5, A03.5, B04.5, G01, G02, G03, KE13C or KE13B. No checkpoint has passed merely because its ticket exists. Use the independent model/effort selected in the ticket; record the actual reviewer model and effort without inference.
+Create one compact record per checkpoint: B02.5, A03.5, B04.5, G01, G02, G03, KE13C, KE13B, and named KE14 follow-ups. No checkpoint has passed merely because its ticket exists. Use the independent model/effort selected in the ticket; record the actual reviewer model and effort without inference.
 
 Record:
 
@@ -27,3 +27,5 @@ Midpoint review does not approve later unreviewed changes. Mock tests never esta
 - [KE12 scoped KE09 privacy follow-up](KE12-privacy-followup.md) — independent PASS on `a7f07d5..e197734`, unchanged through `fb81b8e`; fresh focused/full checks and adversarial probes reproduced the simulated assistant boundary. KE13 live operations and other runtime/release gates remain separate.
 
 - [KE13 scoped KE09 deployed-boundary follow-up](KE13-deployed-boundaries.md) — independent source/config PASS with real synthetic staging operational evidence: signed participant write/replay/conflict/reload, display/member isolation and fresh-Lambda persistence. KE13 DONE; KE14 READY; other runtime/volunteer/release gates unchanged.
+
+- [KE14 live model correction follow-up](KE14-live-model-followup.md) — PASS on the exact two-file review patch; source integration, deployed model output and full Christmas/Purchase qualification remain pending.
