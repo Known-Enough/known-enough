@@ -1,3 +1,9 @@
+## KE14 live draft smoke passed; model correction needs independent review — 2026-09-29
+
+Both real participant-owned AI creation/public/own reads and page-reload durable replays passed on existing reviewed staging; safe public fields and zero automatic consent. Independent DynamoDB readback confirms v6 creation receipts, directory bindings, only creator active, no confirmations/private conditions/proposal. Earlier default clarification and Purchase identity failures preserved. Conservative counter reached eight HTTP attempts; no further smoke request. [Live evidence](ke14-ai-activation.md).
+
+[Correction/handoff](ke14-live-model-correction.md): two adapter executable files only, undeclared required negotiation field corrected and explicit public/private draft guidance. Meaningful baseline-failing regression; focused 20/20, final pinned full 418 / 2 optional skips, hosted 1/1, E2E 47/47 passed. Reproducible review-only patch published under docs, application source/main and staging remain unchanged. A retains exact frozen two-file working changes, not committed/integrated/deployed. Implementation claim released for the named independent KE09 follow-up; an independent reviewer pulls main ff-only and inspects/applies the exact patch in an isolated archive. No author self-certification. Full live multi-participant consent/negotiation/approval qualification remains pending; KE14 REVIEW, KE15 BLOCKED, no active task.
+
 ## KE14 Nova Lite enabled — positive AI smoke/qualification pending — 2026-09-29
 
 User's explicit paid synthetic staging approval applied. [Activation evidence](ke14-ai-activation.md): unchanged reviewed ZIP, Lambda Active/Successful, exact Nova-only runtime permission and custom/effective role simulations 6/6 + 5/5; scoped release operator installed only model guards and verified subject directory. Invocation logging remains disabled, retention inherit reviewed, no zero-retention claim. All other runtime/config retained.
