@@ -1,3 +1,25 @@
+## 2026-09-30 — KE14 reviewed code deployment SUCCEEDED
+
+- User completed SSO sign-in; STS exact account/Stage1Release role verified. Scoped release performed revision-guarded Lambda update: Active/Successful, ZIP SHA-256 017aae3553a16edbd7b3c019956b388f3e6c16bd08a238e1f705a785c220c6ca; original ZIP privately backed up/hash verified, environment/runtime/role/config unchanged. Exact creation JWT/preflight routes added, existing authorizer/audiences/integration/stage read back. Source remained unchanged.
+- Six HTTP/CORS/unauthenticated checks and direct Lambda mock rejection passed; real Cognito QA display/unbound browser smoke passed, 900-second access tokens, zero page errors, safe display fields, creation unavailable with models disabled. Two pre-existing agent-owned QA accounts used temporarily; both globally signed out and disabled, passwords/tokens removed. Log scan 82 platform events, 0 private/secret markers. No real participant credential/membership or data mutation; no paid model call. [Exact artifacts and limits](ke14-deployment.md).
+- User’s separate model/paid-call choice is pending; model mode/guards/directory and runtime invocation permission remain unchanged/disabled. KE14 REVIEW for activation/live qualification, KE15 BLOCKED; deployment claim released. Documentation-only source/status sync follows verified links/hashes/consistency checks.
+
+## 2026-09-30 — KE14 deployment checkpoint PAUSED for AWS SSO sign-in
+
+- Reviewed bundle ready: ZIP 017aae3553a16edbd7b3c019956b388f3e6c16bd08a238e1f705a785c220c6ca; mock identity request 401. Hosted Amplify job 4 SUCCEED; all four deployed files match the reviewed production build. Creation POST/preflight currently 404 because exact routes are absent; prepared same-authorizer JWT POST and unauthenticated preflight only.
+- Scoped `KnownEnoughStage1Release` account-owner Identity Center assignment succeeded; local profile configured, exact inline-policy readback and 42 IAM action/resource assertions passed. User’s device SSO sign-in is pending; no incremental Lambda/API update attempted with root. Temporary failed-path IAM role/policy deletion confirmed. No source edit, new key, model call or participant credential/membership change.
+- [Exact checkpoint/resume plan](ke14-deployment.md). Task PAUSED, User A claim retained pending authentication; KE15 BLOCKED. Separate model/paid-call question remains pending. This dated pause was superseded by the successful scoped release above after user sign-in.
+
+## 2026-09-30 — KE14 scoped operator setup / narrow escalation
+
+- Two substantive release-credential attempts failed before any Lambda/API update: root cannot AssumeRole; its existing temporary session cannot GetFederationToken. Created temporary IAM role/policy for the first approach, then deleted both. No key was created. Existing Stage 0 SSO session is expired and its role lacks Stage 1 permissions. Following runbook’s prohibition on root incremental releases, prepare exact Lambda/API `KnownEnoughStage1Release` access for the existing account owner and request AWS SSO sign-in; no request for credentials. This is the named additional setup scope, not new application code.
+- Frontend Amplify job 4 SUCCEED; four hosted files match the reviewed production build exactly. Bundled unauthenticated/mock identity request returns 401. Bedrock invocation logging has no configuration; account data retention is inherit. Models remain disabled and no paid call was made.
+
+## 2026-09-30 — KE14 authorized staging deployment claim
+
+- User explicitly authorized deployment after independent R1/R2 PASS. User A / Codex GPT-6 (exact variant/effort unexposed), clean main `93d5eda2395ff5ae7ea7bdc92d28d05441b9b167`, ff-only pull and ahead/behind 0/0; no other active claim. Scope: unchanged reviewed code deployment/build artifact, existing Lambda/Amplify readback and safe smoke, deployment documentation/runbook/ticket/board/A log/handoff. Models/paid calls retain separate guard requirements; no participant consent is implied.
+- Read-only AWS identity/config confirms staging account 092954139775/us-east-1, original Lambda ZIP and runtime role, Active/Successful, models absent. Root bootstrap profile is available; assess the scoped release path before mutation. Full source check on identical code already passed 417/1/47; do not repeat without code changes.
+
 ## 2026-09-30 — KE14 independent R1/R2 follow-up PASS
 
 - Reviewed B’s exact `b0699fe..95db9b5` correction and three matching source hashes. R1/R2 closed with no new actionable finding on that correction. Independent of B’s edits; earlier A-authored implementation outside certification. Actual reviewer Codex GPT-6, exact variant/effort unexposed. Source stayed unchanged; claim released.

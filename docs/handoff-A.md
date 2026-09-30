@@ -1,3 +1,11 @@
+## KE14 reviewed code deployed — model activation/qualification pending — 2026-09-30
+
+User-authorized deployment from clean main `93d5eda` succeeded after AWS SSO sign-in under scoped `KnownEnoughStage1Release`; source unchanged. [Evidence](ke14-deployment.md): reviewed ZIP `017aae3553a16edbd7b3c019956b388f3e6c16bd08a238e1f705a785c220c6ca`, Lambda Active/Successful, previous environment/role/runtime unchanged; exact `/decisions` POST JWT/preflight routes added using the existing authorizer/integration. Hosted Amplify job 4 source bytes match reviewed production build. Root bootstrap used only for setup/read-only checks; failed-path temporary role/policy removed. Scoped policy/readback and 42 IAM checks passed.
+
+Six HTTP checks and direct Lambda mock denial passed, plus actual Cognito QA display public-only/unbound denial browser smoke. QA users globally signed out/disabled and temporary passwords/tokens removed; 82 platform events, no private/secret markers. No real participant account, credential, group, membership or data write was changed.
+
+Deployment claim released; no active task. KE14 REVIEW, KE15 BLOCKED. Separate paid-call/model-activation decision remains pending; Lambda flags/directory/runtime Bedrock permission were not installed and no model call occurred. After authorization, prepare the exact reviewed model permission/configuration and bounded smoke; actual two-scenario qualification still needs participants’ own actions. Preserve prior review and live evidence, recheck synchronized main before continuing.
+
 ## KE14 independent R1/R2 correction follow-up — PASS — 2026-09-30
 
 User A / Codex GPT-6 (exact variant/effort unexposed) independently reviewed B’s three-file correction `b0699fe..95db9b58da4dbff3f600ab338430a59eb2fa9882`. [Verdict](reviews/KE14-KE09-followup.md#ke14-r1r2-followup): R1/R2 closed, no new actionable finding in this narrow correction. Frame terms are visible before confirmation, revision requires fresh review, and complex private rules/preferences are intelligible without exposure to display viewers. This session authored underlying KE14 implementation and does not independently certify that earlier scope.
