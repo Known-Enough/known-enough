@@ -1,3 +1,9 @@
+## 2026-09-30T23:40:46Z — KE14 / local exact-patch source commit
+
+- Committed only the exact twelve independently reviewed files, with every final manifest hash rechecked, as local `main` commit `5e87543` on parent `350349a`. No source alteration from the reviewed patch; no other source/config/lock/CI changes. The commit remains one source commit ahead of `origin/main` and is not pushed.
+- Evidence and limitations are in the prior checkpoint: focused 67/67, typecheck, 440/2 unit suite under a diagnostic timeout override, build and hosted 1/1 pass; the unmodified full check failed due default timeouts reproduced on base; E2E failures also reproduced on base. No task completion or live qualification is claimed.
+- A push of this commit triggers the repo's AWS Amplify staging workflow because it includes `packages/**`. Separate explicit staging authorization is required before pushing. No AWS, paid model or participant action occurred.
+
 ## 2026-09-30T23:37:36Z — KE14 / exact patch applied; check environment checkpoint
 
 - Applied only review patch `docs/review-artifacts/KE14-public-schema-correction.patch`, SHA-256 `6160910f39881f39e3fd44e08765d36cd5811ecfdd71a2e4c1c9ba389fd0f66b`, to the clean integration clone at baseline `d3a11c8` after pushing the docs-only claim commit `aa7add7`. `git apply --unidiff-zero --check` passed; all 12 final source hashes matched `docs/ke14-public-schema-correction.md`; `git diff --check` passed. Only those 12 executable files are modified. Pinned Node 24.21.0/npm 11.19.0 `npm ci` passed (0 vulnerabilities; npm noted the lockfile's existing fsevents install-script approval warning).
