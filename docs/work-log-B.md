@@ -1,3 +1,7 @@
+## 2026-09-30T22:42:01Z — KE14 / IN_PROGRESS exact public-schema integration claim
+
+- User B / actual Codex GPT-6 (exact runtime variant/effort unexposed; `gpt-6-sol` / high remains the ticket target). The independent review PASS is recorded for exact patch SHA-256 `6160910f39881f39e3fd44e08765d36cd5811ecfdd71a2e4c1c9ba389fd0f66b`. Separate clone `/private/tmp/ke14-schema-integration-d3a11c8` is clean on `main` at `d3a11c82541c0f2914b5593715788afce70805b8`; ff-only pull passed, ahead/behind 0/0. Claim is limited to applying the exact 12-file patch, checking its file hashes, running the focused suite, typecheck and pinned full check, and updating the patch/ticket/board/B handoff/log evidence. No broader code/config/CI edits, cloud operations, paid model calls or participant actions. Push of `packages/**` triggers Amplify staging, so source publication waits for its separate authorization. No code changed yet at claim.
+
 ## 2026-09-30T21:40:40Z — KE14 / public-schema review PASS
 
 - Independent review of User A's exact patch SHA-256 `6160910f39881f39e3fd44e08765d36cd5811ecfdd71a2e4c1c9ba389fd0f66b`; source base `e2d4d17` in an isolated clone. All twelve final file hashes matched the author's manifest; patch applied cleanly. No actionable finding in the bounded structured-public-schema, authorization/replay, application-validation or diagnostic boundary.

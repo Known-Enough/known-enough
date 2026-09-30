@@ -1,3 +1,7 @@
+# KE14 exact public-schema integration — active claim — 2026-09-30
+
+User B / actual Codex GPT-6 (exact runtime variant/effort unexposed; Sol/high is the ticket target) claims only integration of the exact independently reviewed 12-file patch, SHA-256 `6160910f39881f39e3fd44e08765d36cd5811ecfdd71a2e4c1c9ba389fd0f66b`, and its required checks. Clean separate clone is synchronized `main` at `d3a11c82541c0f2914b5593715788afce70805b8`, ff-only pull passed, ahead/behind 0/0. Review PASS is recorded at [the review evidence](reviews/KE14-public-schema-followup.md). No other implementation or cloud/paid/participant scope is claimed. Because source pushes invoke the Amplify staging workflow, do not publish the code checkpoint until staging deployment is separately authorized.
+
 # KE14 public-schema/diagnostic independent review — PASS — 2026-09-30
 
 Independent review of the exact twelve-file patch returned PASS; all final file hashes matched the author's manifest. The patch was applied in an isolated clone at `e2d4d17`. Pinned Node 24.21.0/npm 11.19.0 focused checks passed: 67/67 across six test files and typecheck. The author's full-check report was inspected, not rerun. [Review record](reviews/KE14-public-schema-followup.md) contains scope, checks and limits. The claim is released. The patch remains unintegrated/undeployed; KE14 stays REVIEW for full staging/live qualification and KE15 stays BLOCKED. No AWS write, paid call or participant action occurred in review.
