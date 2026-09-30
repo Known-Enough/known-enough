@@ -1,8 +1,8 @@
 # KE14 live model correction — reviewable artifact — 2026-09-29
 
-**Exact correction integrated at the [2026-09-30 release checkpoint](ke14-model-correction-deployment.md); code-only staging deployment in progress.** Independent PASS on the original exact patch remains recorded. Earlier preparation/test/review facts below are historical; no additional executable change. User A claims only the authorized integration/release; KE14 IN_PROGRESS, KE15 BLOCKED.
+**Exact correction integrated at `46441d7` and deployed at the [2026-09-30 release checkpoint](ke14-model-correction-deployment.md).** Independent PASS on the exact patch remains recorded. Earlier preparation/test/review facts below are historical; no additional executable change. Safe release checks passed; participant-owned post-correction default-objective smoke failed (Christmas 503 RETRYABLE_SERVER_ERROR, Purchase 422 INVALID_COMMAND); qualification needs changes. Integration/release claim released; KE14 REVIEW, KE15 BLOCKED.
 
-## Observed live results on the existing deployed artifact
+## Historical live results on the earlier deployed artifact
 
 [Activation evidence](ke14-ai-activation.md) records exact reviewed staging code/config/IAM. In the human's own Cognito participant session:
 
@@ -11,7 +11,7 @@
 - v3 explicit Purchase schema: both create/public/own reads 200. Christmas used the original durable receipt; Purchase has four public variables/three approvers. After page reload, the exact same envelopes replayed both decision IDs with all reads 200, same persisted context, private fields absent and zero automatic confirmations/approvals.
 - Independent DynamoDB transaction reads verify both v6 creation receipts, exact registered memberships, only the creator active, zero private confirmed constraints, zero frame confirmations and no proposal. Purchase has seven total definition variables: four public and three owner-private contribution variables. This is persistence/provisioning proof, not full participant qualification.
 
-Eight conservative create/replay HTTP attempts were recorded; code paths permit five architect invocations and three pre-provider durable replays. No additional operator model calls, human token access, consent/approval or credential reset. Billing was not independently measured. New local model prompts have **not** been tested against the live provider or deployed.
+Eight conservative create/replay HTTP attempts were recorded; code paths permit five architect invocations and three pre-provider durable replays. No additional operator model calls, human token access, consent/approval or credential reset. Billing was not independently measured. At that earlier checkpoint, the new local prompts had not been deployed or tested against the live provider. The exact correction is now deployed; post-correction default-objective requests returned 503/422; no successful changed-prompt draft is established.
 
 ## Exact correction and remaining limits
 
