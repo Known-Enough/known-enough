@@ -1,0 +1,541 @@
+diff --git a/apps/api/src/ke13b-lambda.test.ts b/apps/api/src/ke13b-lambda.test.ts
+index 682ee897d59398c704599e9374dd4b9c72f14311..a863033374e57ae824be5d9ca18eaded2852de83 100644
+--- a/apps/api/src/ke13b-lambda.test.ts
++++ b/apps/api/src/ke13b-lambda.test.ts
+@@ -4 +4 @@ import { SimpleJwksCache, type Jwk } from 'aws-jwt-verify/jwk';
+-import { describe, expect, it } from 'vitest';
++import { describe, expect, it, vi } from 'vitest';
+@@ -6 +6 @@ import { InMemoryRoomRepository } from '@deal-table/adapters';
+-import { KnownEnoughApplication } from '@deal-table/application';
++import { KnownEnoughApplication, type ModelFailureDiagnostic } from '@deal-table/application';
+@@ -8 +8 @@ import { createCognitoKnownEnoughApiHandlerWithJwksCache } from './http-core.ts'
+-import { invokeHttpApi, readKe13bConfig, type HttpApiEvent } from './ke13b-lambda.ts';
++import { invokeHttpApi, logModelFailure, readKe13bConfig, type HttpApiEvent } from './ke13b-lambda.ts';
+@@ -46,0 +47,11 @@ describe('KE13B signed HTTP API composition', () => {
++  it('logs only declared model failure stages; private extras/errors/identities never reach the sink', () => {
++    const write = vi.fn();
++    logModelFailure({ kind: 'ARCHITECT', stage: 'ARCHITECT_DEFINITION' }, write);
++    expect(write.mock.calls).toEqual([[JSON.stringify({ event: 'ke14-model-failure', kind: 'ARCHITECT', stage: 'ARCHITECT_DEFINITION' })]]);
++    for (const invalid of [null, [], { kind: 'ARCHITECT', stage: 'PRIVATE_OUTPUT' },
++      { kind: 'PRIVATE_SUBJECT', stage: 'PROVIDER' },
++      { kind: 'ARCHITECT', stage: 'PROVIDER', error: 'Bearer PRIVATE_TOKEN', subject: 'PRIVATE_SUBJECT' }])
++      logModelFailure(invalid as ModelFailureDiagnostic, write);
++    expect(write).toHaveBeenCalledTimes(1);
++    expect(() => logModelFailure({ kind: 'ARCHITECT', stage: 'PROVIDER' }, () => { throw Error('PRIVATE_SINK'); })).not.toThrow();
++  });
+diff --git a/apps/api/src/ke13b-lambda.ts b/apps/api/src/ke13b-lambda.ts
+index 064de9d546010081b8783f1e55686a905b67c776..4a33626a182c75b0f3bf12c81fe398f038a552eb 100644
+--- a/apps/api/src/ke13b-lambda.ts
++++ b/apps/api/src/ke13b-lambda.ts
+@@ -3 +3 @@ import { createAwsDynamoDBRoomRepository } from '@deal-table/adapters';
+-import { KnownEnoughApplication } from '@deal-table/application';
++import { KnownEnoughApplication, MODEL_FAILURE_STAGES, type ModelFailureDiagnostic } from '@deal-table/application';
+@@ -35,0 +36,9 @@ const MAX_GATEWAY_BODY_BYTES = 64 * 1024;
++/** Reconstruct a strict allowlist even if a caller bypasses TypeScript. Never serialize the original object. */
++export function logModelFailure(value: ModelFailureDiagnostic, write: (line: string) => void = console.info): void {
++  if (!value || typeof value !== 'object' || Array.isArray(value)
++    || Object.keys(value).sort().join('|') !== 'kind|stage'
++    || !['ARCHITECT', 'OWNER', 'NEGOTIATION'].includes(value.kind)
++    || !MODEL_FAILURE_STAGES.some(stage => stage === value.stage)) return;
++  try { write(JSON.stringify({ event: 'ke14-model-failure', kind: value.kind, stage: value.stage })); }
++  catch { /* Logging cannot change the request outcome. */ }
++}
+@@ -139 +148 @@ export function createKe13bLambdaHandler(config: Ke13bConfig): (event: HttpApiEv
+-    trustedCandidates: scenarioCandidates }) : undefined;
++    trustedCandidates: scenarioCandidates, diagnostic: logModelFailure }) : undefined;
+@@ -141 +150,2 @@ export function createKe13bLambdaHandler(config: Ke13bConfig): (event: HttpApiEv
+-    members: config.models.members, clock: { now: () => new Date().toISOString() }, isEnabled: runtime.isEnabled }) : undefined;
++    members: config.models.members, clock: { now: () => new Date().toISOString() }, isEnabled: runtime.isEnabled,
++    diagnostic: logModelFailure }) : undefined;
+diff --git a/apps/api/src/model-runtime.ts b/apps/api/src/model-runtime.ts
+index 2ad0a4e141a0a16be466f6cb99c81acd6eae7add..cf4af06d631b70faa28f8f9879b7f5e8a9eb5b80 100644
+--- a/apps/api/src/model-runtime.ts
++++ b/apps/api/src/model-runtime.ts
+@@ -2 +2 @@ import { DecisionArchitect, OwnerConversationArchitect, DecisionNegotiator } fro
+-import type { KnownEnoughApplication, Clock, IdSource } from '@deal-table/application';
++import type { KnownEnoughApplication, Clock, IdSource, ModelFailureDiagnostic } from '@deal-table/application';
+@@ -16,0 +17 @@ export function createKnownEnoughModelRuntime(options: {
++  diagnostic?: (value: ModelFailureDiagnostic) => void;
+@@ -46 +47 @@ export function createKnownEnoughModelRuntime(options: {
+-    ...(options.usage ? { usage: options.usage } : {}) });
++    ...(options.usage ? { usage: options.usage } : {}), ...(options.diagnostic ? { diagnostic: options.diagnostic } : {}) });
+@@ -58 +59,2 @@ export function createKnownEnoughModelRuntime(options: {
+-    architect: new DecisionArchitect(models.architect, () => options.ids.next(), () => Date.parse(options.clock.now()), () => enabled),
++    architect: new DecisionArchitect(models.architect, () => options.ids.next(), () => Date.parse(options.clock.now()), () => enabled,
++      options.diagnostic),
+diff --git a/apps/api/src/scenario-service.test.ts b/apps/api/src/scenario-service.test.ts
+index 238f757581489d09f8fdacf12844f0e213767a57..501572560c9e2f839208009d85824ea6a1ef9230 100644
+--- a/apps/api/src/scenario-service.test.ts
++++ b/apps/api/src/scenario-service.test.ts
+@@ -2 +2,4 @@ import { describe, expect, it, vi } from 'vitest';
+-import { DecisionNegotiator, KnownEnoughApplication } from '@deal-table/application';
++import { DecisionNegotiator, KnownEnoughApplication, type ModelFailureDiagnostic } from '@deal-table/application';
++import type { KnownEnough as KE } from '@deal-table/contracts';
++import { response } from '../../../tests/evaluations/ke10-injected.ts';
++import { createKnownEnoughModelRuntime } from './model-runtime.ts';
+@@ -38,0 +42,55 @@ describe('KE14 authenticated provisioning and trusted catalog composition', () =
++  it.each(['CHRISTMAS', 'SHARED_PURCHASE'] as const)('creates %s from a brief objective with complete structured public scope and no automatic consent', async scenario => {
++    const h = await fixedScenarioHarness();
++    const requests: { publicVariables: KE.PublicDecisionVariable[] }[] = [];
++    const runtime = createKnownEnoughModelRuntime({ application: h.application, clock: h.clock, ids: h.ids,
++      publicCandidates: () => [], provider: { mode: 'INJECTED', transport: { send: async command => {
++        const input = JSON.parse(command.input.messages![0]!.content![0]!.text!);
++        requests.push(input);
++        return response({ title: 'Synthetic draft', description: 'Explore together.',
++          variableIds: input.publicVariables.map((variable: KE.PublicDecisionVariable) => variable.id),
++          rules: [], clarificationQuestions: [], participantInformationRequirements: [{ participantId: 'maya', kind: 'BUDGET' }] });
++      } } } });
++    const service = new ScenarioService({ application: runtime.application, architect: runtime.architect, members: h.members,
++      clock: h.clock, isEnabled: runtime.isEnabled });
++    try {
++      const snapshot = await service.create(participant('maya'), createBody(scenario));
++      expect(snapshot.frame.variables).toEqual(requests[0]!.publicVariables);
++      expect(snapshot.frame.requiredParticipantIds).toHaveLength(scenario === 'CHRISTMAS' ? 5 : 3);
++      expect(snapshot.frameConfirmations).toEqual([]);
++      expect(snapshot.approvedParticipantIds).toEqual([]);
++      expect(snapshot.currentProposal).toBeNull();
++      expect(JSON.stringify(requests)).not.toMatch(/subject-maya|ownerParticipantId|maya-contribution|privateVariables|confirmedConstraints/);
++      expect(await service.create(participant('maya'), createBody(scenario))).toEqual(snapshot);
++      expect(requests).toHaveLength(1);
++    } finally { await runtime.stop(); await h.runtime.stop(); }
++  });
++  it.each(['provider', 'envelope', 'fields', 'definition', 'selector', 'persistence'] as const)(
++    'distinguishes %s failure with static diagnostics and no private payload or repeated model call', async failure => {
++      const h = await fixedScenarioHarness();
++      const events: ModelFailureDiagnostic[] = [];
++      const send = vi.fn(async command => {
++        if (failure === 'provider') throw Error('PRIVATE_PROVIDER_CANARY');
++        const input = JSON.parse(command.input.messages![0]!.content![0]!.text!);
++        const value = { title: failure === 'fields' ? null : 'Synthetic draft', description: 'PRIVATE_MODEL_CANARY',
++          variableIds: failure === 'selector' ? ['guessed'] : input.publicVariables.map((variable: KE.PublicDecisionVariable) => variable.id),
++          rules: failure === 'definition' ? [{ id: 'bad-reference', visibility: 'PUBLIC', operator: 'COMPARE',
++            variableId: 'PRIVATE_UNKNOWN_VARIABLE', comparison: 'GT', value: { type: 'DURATION', seconds: 0 } }] : [],
++          clarificationQuestions: [], participantInformationRequirements: [] };
++        return failure === 'envelope' ? { ...response(value), stopReason: 'max_tokens' as const } : response(value);
++      });
++      const diagnostic = (event: ModelFailureDiagnostic) => { events.push(event); throw Error('PRIVATE_OBSERVER_CANARY'); };
++      const runtime = createKnownEnoughModelRuntime({ application: h.application, clock: h.clock, ids: h.ids,
++        diagnostic, publicCandidates: () => [], provider: { mode: 'INJECTED', transport: { send } } });
++      const service = new ScenarioService({ application: runtime.application, architect: runtime.architect, members: h.members,
++        clock: h.clock, isEnabled: runtime.isEnabled, diagnostic });
++      if (failure === 'persistence') vi.spyOn(h.application, 'createDecision').mockRejectedValueOnce(Error('PRIVATE_STORAGE_CANARY'));
++      const stages = { provider: 'PROVIDER', envelope: 'TOOL_ENVELOPE', fields: 'ARCHITECT_FIELDS',
++        definition: 'ARCHITECT_DEFINITION', selector: 'TOOL_OUTPUT', persistence: 'SCENARIO_PERSISTENCE' };
++      try {
++        await expect(service.create(participant('maya'), createBody())).rejects.toBeDefined();
++        expect(send).toHaveBeenCalledTimes(1);
++        expect(events).toContainEqual({ kind: 'ARCHITECT', stage: stages[failure] });
++        expect(events.every(event => Object.keys(event).sort().join('|') === 'kind|stage')).toBe(true);
++        expect(JSON.stringify(events)).not.toMatch(/PRIVATE|subject-|Bearer/);
++      } finally { await runtime.stop(); await h.runtime.stop(); }
++    });
+diff --git a/apps/api/src/scenario-service.ts b/apps/api/src/scenario-service.ts
+index 08f30e65dd80b7e81f41153bae4f306c402f946f..b20940aa293b355675f17c33be47c15f77428ff6 100644
+--- a/apps/api/src/scenario-service.ts
++++ b/apps/api/src/scenario-service.ts
+@@ -4 +4 @@ import { KnownEnoughApplicationError, type KnownEnoughApplication, type Decision
+-  type TrustedPrincipal, type Clock } from '@deal-table/application';
++  reportModelFailure, type ModelFailureDiagnostic, type TrustedPrincipal, type Clock } from '@deal-table/application';
+@@ -12,0 +13,20 @@ const option = (optionId: string): KE.DecisionValue => ({ type: 'ENUM', optionId
++/** Explicit public scope of these two bounded synthetic qualification scenarios. No owner limits/values. */
++function scenarioPublicVariables(kind: ScenarioKind, members: readonly ScenarioMember[]): KE.PublicDecisionVariable[] {
++  const base = { required: true, visibility: 'PUBLIC' as const };
++  return kind === 'CHRISTMAS' ? [
++    { ...base, id: 'destination', type: 'ENUM', label: 'Destination', options: [
++      { id: 'cancun', label: 'Cancún' }, { id: 'oaxaca', label: 'Oaxaca' }, { id: 'mazatlan', label: 'Mazatlán' }] },
++    { ...base, id: 'trip-start', type: 'DATE', label: 'Trip start' },
++    { ...base, id: 'trip-end', type: 'DATE', label: 'Trip end' },
++    { ...base, id: 'trip-duration', type: 'DURATION', label: 'Trip duration', unit: 'SECONDS' },
++    { ...base, id: 'accommodation', type: 'ENUM', label: 'Accommodation', options: [
++      { id: 'shared-villa', label: 'Shared villa' }, { id: 'quiet-hotel', label: 'Quiet hotel' }] },
++    { ...base, id: 'estimated-total', type: 'MONEY', label: 'Estimated total', currencyCode: 'USD', minorUnit: 2 },
++  ] : [
++    { ...base, id: 'funding-structure', type: 'ENUM', label: 'Contribution structure', options: [
++      { id: 'equal', label: 'Equal contributions' }, { id: 'weighted', label: 'Weighted contributions' }] },
++    ...['maya', 'leo', 'nina'].map(person => ({ ...base, id: `${person}-ownership`, type: 'PERCENTAGE' as const,
++      label: `${members.find(member => member.participantId === person)!.displayName} proposed ownership` })),
++  ];
++}
++
+@@ -90 +110 @@ export class ScenarioService {
+-    clock: Clock; isEnabled: () => boolean }) {
++    clock: Clock; isEnabled: () => boolean; diagnostic?: (value: ModelFailureDiagnostic) => void }) {
+@@ -109 +129,4 @@ export class ScenarioService {
+-    const replay = await this.options.application.getCreatedDecision(principal, decisionId, bodyHash);
++    let replay: KE.PublicDecisionSnapshot | null;
++    try { replay = await this.options.application.getCreatedDecision(principal, decisionId, bodyHash); } catch (error) {
++      reportModelFailure(this.options.diagnostic, 'ARCHITECT', 'SCENARIO_READBACK'); throw error;
++    }
+@@ -116,0 +140 @@ export class ScenarioService {
++      publicVariables: scenarioPublicVariables(kind, roster),
+@@ -118,3 +142,9 @@ export class ScenarioService {
+-    if (draft.status !== 'DEFINING') throw new KnownEnoughApplicationError('NEEDS_CLARIFICATION');
+-    const definition = provisionDefinition({ ...draft.frame, decisionId, objective: body.objective.trim() }, kind);
+-    await this.options.application.createDecision({ definition, creatorSubject: principal.subject, creationBodyHash: bodyHash,
++    if (draft.status !== 'DEFINING') {
++      reportModelFailure(this.options.diagnostic, 'ARCHITECT', 'SCENARIO_CLARIFICATION');
++      throw new KnownEnoughApplicationError('NEEDS_CLARIFICATION');
++    }
++    let definition: KE.DecisionDefinition;
++    try { definition = provisionDefinition({ ...draft.frame, decisionId, objective: body.objective.trim() }, kind); } catch (error) {
++      reportModelFailure(this.options.diagnostic, 'ARCHITECT', 'SCENARIO_DEFINITION'); throw error;
++    }
++    try { await this.options.application.createDecision({ definition, creatorSubject: principal.subject, creationBodyHash: bodyHash,
+@@ -123 +153,4 @@ export class ScenarioService {
+-    return this.options.application.getPublicSnapshot(principal, decisionId);
++    } catch (error) { reportModelFailure(this.options.diagnostic, 'ARCHITECT', 'SCENARIO_PERSISTENCE'); throw error; }
++    try { return await this.options.application.getPublicSnapshot(principal, decisionId); } catch (error) {
++      reportModelFailure(this.options.diagnostic, 'ARCHITECT', 'SCENARIO_READBACK'); throw error;
++    }
+diff --git a/packages/adapters/src/bedrock-models.test.ts b/packages/adapters/src/bedrock-models.test.ts
+index 12222a953bde150524042c90883a7f00a363515b..7035f0d4dabb3dc28a5d842ded69a3a4a1a25685 100644
+--- a/packages/adapters/src/bedrock-models.test.ts
++++ b/packages/adapters/src/bedrock-models.test.ts
+@@ -4,0 +5 @@ import type { DecisionNegotiationModelInput, ModelInvocation } from '@deal-table
++import type { KnownEnough as KE } from '@deal-table/contracts';
+@@ -10,0 +12,4 @@ const architectInput = { objective: 'choose', participants: [{ id: 'maya', displ
++const publicVariables: KE.PublicDecisionVariable[] = [
++  { id: 'choice', type: 'ENUM', label: 'Choice', required: true, visibility: 'PUBLIC', options: [{ id: 'option-a', label: 'A' }] },
++  { id: 'cost', type: 'MONEY', label: 'Cost', required: true, visibility: 'PUBLIC', currencyCode: 'USD', minorUnit: 2 },
++];
+@@ -12,0 +18,59 @@ describe('Bedrock role adapters', () => {
++  it('sends structured public scope and copies exact definitions only after all declared IDs are selected', async () => {
++    let received: ConverseCommand | undefined;
++    const models = createBedrockModels({ transport: { send: async command => {
++      received = command;
++      return response({ title: 'Draft', description: 'Public scope only', variableIds: ['cost', 'choice'], rules: [],
++        clarificationQuestions: [], participantInformationRequirements: [] });
++    } }, jobs: new BoundedModelJobs(), enabled: () => true });
++    const result = await models.architect.draft({ ...architectInput, publicVariables }, guard());
++    const payload = JSON.parse(received!.input.messages![0]!.content![0]!.text!);
++    expect(payload.publicVariables).toEqual(publicVariables);
++    const tool = received!.input.toolConfig!.tools![0]!.toolSpec!.inputSchema!.json as {
++      properties: Record<string, unknown>; required: string[];
++    };
++    expect(tool.properties.variables).toBeUndefined();
++    expect(tool.properties.variableIds).toEqual({ type: 'array', minItems: 2, maxItems: 2,
++      items: { type: 'string', enum: ['choice', 'cost'] } });
++    expect(tool.required).toContain('variableIds');
++    expect(tool.required.every(field => Object.hasOwn(tool.properties, field))).toBe(true);
++    expect(result).toEqual({ title: 'Draft', description: 'Public scope only',
++      variables: publicVariables.map(variable => ({ ...variable, ownerParticipantId: null })),
++      rules: [], clarificationQuestions: [], participantInformationRequirements: [] });
++  });
++  it.each([{ variableIds: ['choice'] }, { variableIds: ['choice', 'choice'] },
++    { variableIds: ['choice', 'guessed-cost'] }, { variableIds: ['choice', 'cost', 'extra'] }])(
++    'rejects an incomplete, repeated or undeclared selector $variableIds without repair or retry', async ({ variableIds }) => {
++      const diagnostic = vi.fn();
++      const send = vi.fn(async () => response({ title: 'Draft', variableIds, description: 'SECRET_OUTPUT', rules: [],
++        clarificationQuestions: [], participantInformationRequirements: [] }));
++      const models = createBedrockModels({ transport: { send }, jobs: new BoundedModelJobs(), enabled: () => true, diagnostic });
++      await expect(models.architect.draft({ ...architectInput, publicVariables }, guard())).rejects.toMatchObject({ code: 'INVALID_OUTPUT' });
++      expect(send).toHaveBeenCalledTimes(1);
++      expect(diagnostic.mock.calls).toEqual([[{ kind: 'ARCHITECT', stage: 'TOOL_OUTPUT' }]]);
++      expect(JSON.stringify(diagnostic.mock.calls)).not.toContain('SECRET');
++    });
++  it('rejects private/extra schema fields and duplicates before transmitting, even through a direct role call', async () => {
++    const send = vi.fn(async () => response({}));
++    const models = createBedrockModels({ transport: { send }, jobs: new BoundedModelJobs(), enabled: () => true });
++    for (const invalid of [[], [publicVariables[0]!, publicVariables[0]!],
++      [{ ...publicVariables[1]!, privateBudget: 'PRIVATE_SCHEMA_CANARY' }],
++      [{ ...publicVariables[1]!, visibility: 'OWNER_PRIVATE', ownerParticipantId: 'maya' }]]) {
++      await expect(Promise.resolve().then(() => models.architect.draft({ ...architectInput,
++        publicVariables: invalid as KE.PublicDecisionVariable[] }, guard()))).rejects.toMatchObject({ code: 'INVALID_INPUT' });
++    }
++    expect(send).not.toHaveBeenCalled();
++  });
++  it.each(['provider', 'envelope'] as const)('reports a static %s stage without private error/output text; broken diagnostics do not retry', async failure => {
++    const events: unknown[] = [];
++    const send = vi.fn(async () => {
++      if (failure === 'provider') throw Error('Bearer PRIVATE_ERROR');
++      return { ...response({ privateBudget: 'PRIVATE_OUTPUT' }), stopReason: 'max_tokens' as const };
++    });
++    const models = createBedrockModels({ transport: { send }, jobs: new BoundedModelJobs(), enabled: () => true,
++      diagnostic: event => { events.push(event); throw Error('PRIVATE_OBSERVER_ERROR'); } });
++    await expect(models.architect.draft(architectInput, guard())).rejects.toMatchObject({
++      code: failure === 'provider' ? 'PROVIDER_FAILED' : 'INVALID_OUTPUT',
++    });
++    expect(events).toEqual([{ kind: 'ARCHITECT', stage: failure === 'provider' ? 'PROVIDER' : 'TOOL_ENVELOPE' }]);
++    expect(send).toHaveBeenCalledTimes(1);
++  });
+diff --git a/packages/adapters/src/bedrock-models.ts b/packages/adapters/src/bedrock-models.ts
+index 1be0b0eb0a72f6195cc997882b3c9fc7b2130052..2d06872e768a06ad2d8311639a9f377980d9a6d2 100644
+--- a/packages/adapters/src/bedrock-models.ts
++++ b/packages/adapters/src/bedrock-models.ts
+@@ -5 +5,2 @@ import type { DecisionArchitectModel, OwnerConversationModel, DecisionNegotiatio
+-  ModelInvocation, ModelJobKind, ModelJobRunner } from '@deal-table/application';
++  ModelInvocation, ModelJobKind, ModelJobRunner, ModelFailureDiagnostic } from '@deal-table/application';
++import { reportModelFailure } from '@deal-table/application';
+@@ -24,0 +26,2 @@ const prompts: Record<ModelJobKind, string> = {
++    + 'When publicVariables is supplied, select every supplied variable ID exactly once in variableIds instead of returning variables. '
++    + 'The server copies those exact public definitions; do not add variables, reinterpret units/options or select values. '
+@@ -28 +31 @@ const prompts: Record<ModelJobKind, string> = {
+-    + 'Return title, description, variables, rules, clarificationQuestions (string array), participantInformationRequirements '
++    + 'Return title, description, rules, clarificationQuestions (string array), participantInformationRequirements '
+@@ -30 +33,2 @@ const prompts: Record<ModelJobKind, string> = {
+-    + 'Every variable must include id, type, label, required, visibility="PUBLIC", and ownerParticipantId=null. '
++    + 'Also return variableIds when publicVariables is supplied; otherwise return variables. '
++    + 'For an open-scope draft, every variable must include id, type, label, required, visibility="PUBLIC", and ownerParticipantId=null. '
+@@ -115,0 +120,12 @@ function normalizeToolOutput(kind: ModelJobKind, value: unknown, payload: unknow
++  if (kind === 'ARCHITECT' && payload && typeof payload === 'object' && 'publicVariables' in payload) {
++    const variables = (payload as { publicVariables: KE.PublicDecisionVariable[] }).publicVariables;
++    const output = value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : null;
++    const selected = output?.variableIds;
++    if (!output || Object.hasOwn(output, 'variables') || !Array.isArray(selected)
++      || selected.length !== variables.length || selected.some(id => typeof id !== 'string')
++      || new Set(selected).size !== selected.length
++      || variables.some(variable => !selected.includes(variable.id))) throw new ModelRuntimeError('INVALID_OUTPUT');
++    const normalized = { ...output, variables: variables.map(variable => ({ ...structuredClone(variable), ownerParticipantId: null })) };
++    delete (normalized as Record<string, unknown>).variableIds;
++    return normalized;
++  }
+@@ -165,0 +182 @@ export function createBedrockModels(options: {
++  diagnostic?: (value: ModelFailureDiagnostic) => void;
+@@ -171,0 +189,10 @@ export function createBedrockModels(options: {
++    let tool: { name: string; schema: Record<string, unknown> } = outputTools[kind];
++    if (kind === 'ARCHITECT' && payload && typeof payload === 'object' && 'publicVariables' in payload) {
++      const variables = (payload as { publicVariables: KE.PublicDecisionVariable[] }).publicVariables;
++      const { variables: omitted, ...properties } = outputTools.ARCHITECT.schema.properties;
++      void omitted;
++      tool = { name: tool.name, schema: objectSchema({ ...properties,
++        variableIds: { type: 'array', minItems: variables.length, maxItems: variables.length,
++          items: { type: 'string', enum: variables.map(variable => variable.id) } },
++      }, outputTools.ARCHITECT.schema.required.map(field => field === 'variables' ? 'variableIds' : field)) };
++    }
+@@ -173 +200 @@ export function createBedrockModels(options: {
+-      + Buffer.byteLength(JSON.stringify(outputTools[kind].schema)) > BEDROCK_CONFIGURATION.maxInputBytes)
++      + Buffer.byteLength(JSON.stringify(tool.schema)) > BEDROCK_CONFIGURATION.maxInputBytes)
+@@ -182,3 +209,3 @@ export function createBedrockModels(options: {
+-        tools: [{ toolSpec: { name: outputTools[kind].name, description: 'Return the requested structured data only.',
+-          inputSchema: { json: outputTools[kind].schema as never } } }],
+-        toolChoice: { tool: { name: outputTools[kind].name } },
++        tools: [{ toolSpec: { name: tool.name, description: 'Return the requested structured data only.',
++          inputSchema: { json: tool.schema as never } } }],
++        toolChoice: { tool: { name: tool.name } },
+@@ -191 +218,4 @@ export function createBedrockModels(options: {
+-      catch { throw new ModelRuntimeError('PROVIDER_FAILED'); }
++      catch {
++        reportModelFailure(options.diagnostic, kind, 'PROVIDER');
++        throw new ModelRuntimeError('PROVIDER_FAILED');
++      }
+@@ -197 +227,4 @@ export function createBedrockModels(options: {
+-        throw new ModelRuntimeError('INVALID_OUTPUT');
++        {
++          reportModelFailure(options.diagnostic, kind, 'TOOL_ENVELOPE');
++          throw new ModelRuntimeError('INVALID_OUTPUT');
++        }
+@@ -207 +240,3 @@ export function createBedrockModels(options: {
+-      try { output = JSON.stringify(result); } catch { throw new ModelRuntimeError('INVALID_OUTPUT'); }
++      try { output = JSON.stringify(result); } catch {
++        reportModelFailure(options.diagnostic, kind, 'TOOL_OUTPUT'); throw new ModelRuntimeError('INVALID_OUTPUT');
++      }
+@@ -210,2 +245,7 @@ export function createBedrockModels(options: {
+-        throw new ModelRuntimeError('INVALID_OUTPUT');
+-      return normalizeToolOutput(kind, result, payload);
++        {
++          reportModelFailure(options.diagnostic, kind, 'TOOL_OUTPUT');
++          throw new ModelRuntimeError('INVALID_OUTPUT');
++        }
++      try { return normalizeToolOutput(kind, result, payload); } catch {
++        reportModelFailure(options.diagnostic, kind, 'TOOL_OUTPUT'); throw new ModelRuntimeError('INVALID_OUTPUT');
++      }
+@@ -215,4 +255,19 @@ export function createBedrockModels(options: {
+-    architect: { draft: (input, invocation) => invoke('ARCHITECT', {
+-      objective: input.objective, participants: input.participants.map(person => ({ id: person.id, displayName: person.displayName })),
+-      allowedOptions: input.allowedOptions,
+-    }, invocation) },
++    architect: { draft: async (input, invocation) => {
++      let publicVariables: KE.PublicDecisionVariable[] | undefined;
++      if (input.publicVariables !== undefined) {
++        if (!Array.isArray(input.publicVariables) || input.publicVariables.length < 1
++          || input.publicVariables.length > KE.MAX_DECISION_VARIABLES) throw new ModelRuntimeError('INVALID_INPUT');
++        publicVariables = input.publicVariables.map(variable => {
++          const parsed = KE.PublicDecisionVariable.safeParse(variable);
++          if (!parsed.success || parsed.data.visibility !== 'PUBLIC') throw new ModelRuntimeError('INVALID_INPUT');
++          return parsed.data;
++        });
++        if (new Set(publicVariables.map(variable => variable.id)).size !== publicVariables.length)
++          throw new ModelRuntimeError('INVALID_INPUT');
++      }
++      return invoke('ARCHITECT', {
++        objective: input.objective, participants: input.participants.map(person => ({ id: person.id, displayName: person.displayName })),
++        allowedOptions: input.allowedOptions,
++        ...(publicVariables ? { publicVariables } : {}),
++      }, invocation);
++    } },
+diff --git a/packages/application/src/decision-architect.test.ts b/packages/application/src/decision-architect.test.ts
+index 45b75f8d07d8e38b504459b0bcc1ccb8514cafdb..1d6decf2622ab9aa390913382241fb8bb206fcc3 100644
+--- a/packages/application/src/decision-architect.test.ts
++++ b/packages/application/src/decision-architect.test.ts
+@@ -1 +1,2 @@
+-import { describe, expect, it } from 'vitest';
++import { describe, expect, it, vi } from 'vitest';
++import type { KnownEnough as KE } from '@deal-table/contracts';
+@@ -43,0 +45,30 @@ describe('injected decision architect', () => {
++  it('rejects private or extra structured scope before invoking any model', async () => {
++    const draft = vi.fn(async () => christmasDraft());
++    const architect = create({ draft });
++    for (const invalid of [[], [{ id: 'private-cost', type: 'MONEY', label: 'PRIVATE_SCOPE', required: true,
++      visibility: 'OWNER_PRIVATE', ownerParticipantId: 'person-1', currencyCode: 'USD', minorUnit: 2 }],
++    [{ id: 'public-cost', type: 'MONEY', label: 'Cost', required: true,
++      visibility: 'PUBLIC', currencyCode: 'USD', minorUnit: 2, privateLimit: 'PRIVATE_SCOPE' }]]) {
++      await expect(architect.draft('organizer', { ...request(), publicVariables: invalid as KE.PublicDecisionVariable[] }))
++        .rejects.toMatchObject({ code: 'INVALID_COMMAND' });
++    }
++    expect(draft).not.toHaveBeenCalled();
++  });
++  it.each(['id', 'type', 'option', 'missing'] as const)('rejects %s drift against complete supplied public scope without leaking the model output', async change => {
++    const base = christmasDraft();
++    const publicVariables = base.variables.map(variable => {
++      const { ownerParticipantId, ...publicVariable } = variable;
++      void ownerParticipantId;
++      return publicVariable;
++    }) as KE.PublicDecisionVariable[];
++    const output = structuredClone(base);
++    if (change === 'id') output.variables[1]!.id = 'guessed-start';
++    if (change === 'type') output.variables[1]!.type = 'BOOLEAN';
++    if (change === 'option') output.variables[0]!.options![0]!.id = 'guessed-option';
++    if (change === 'missing') output.variables.splice(1, 1);
++    const diagnostic = vi.fn();
++    const architect = new DecisionArchitect({ draft: async () => output }, () => 'schema-draft', Date.now, () => true, diagnostic);
++    await expect(architect.draft('organizer', { ...request(), publicVariables })).rejects.toMatchObject({ code: 'RETRYABLE_SERVER_ERROR' });
++    expect(diagnostic).toHaveBeenCalledWith({ kind: 'ARCHITECT', stage: 'ARCHITECT_PUBLIC_SCHEMA' });
++    expect(JSON.stringify(diagnostic.mock.calls)).not.toContain('guessed');
++  });
+diff --git a/packages/application/src/decision-architect.ts b/packages/application/src/decision-architect.ts
+index 505770d18676fcac64808d7903498f7ff1b83b27..7fbc4e882d98e8604a5e717292f456e0cf62458f 100644
+--- a/packages/application/src/decision-architect.ts
++++ b/packages/application/src/decision-architect.ts
+@@ -1 +1 @@
+-import type { ModelInvocation } from './model-runtime.ts';
++import { reportModelFailure, type ModelInvocation, type ModelFailureDiagnostic } from './model-runtime.ts';
+@@ -15,0 +16,2 @@ export interface DecisionArchitectRequest {
++  /** Server-owned public definitions, never private values or participant authority. */
++  publicVariables?: readonly KETypes.PublicDecisionVariable[];
+@@ -21,0 +24 @@ export interface DecisionArchitectModelInput {
++  publicVariables?: readonly KETypes.PublicDecisionVariable[];
+@@ -140 +143,7 @@ export class DecisionArchitect {
+-    private readonly isEnabled: () => boolean = () => true) {}
++    private readonly isEnabled: () => boolean = () => true,
++    private readonly diagnostic?: (value: ModelFailureDiagnostic) => void) {}
++
++  private rejectModel(stage: ModelFailureDiagnostic['stage']): never {
++    reportModelFailure(this.diagnostic, 'ARCHITECT', stage);
++    return fail('RETRYABLE_SERVER_ERROR');
++  }
+@@ -158,0 +168,15 @@ export class DecisionArchitect {
++    let publicVariables: KETypes.PublicDecisionVariable[] | undefined;
++    if (request.publicVariables !== undefined) {
++      if (!Array.isArray(request.publicVariables) || request.publicVariables.length < 1
++        || request.publicVariables.length > KE.MAX_DECISION_VARIABLES) fail('INVALID_COMMAND');
++      publicVariables = request.publicVariables.map(variable => {
++        const parsed = KE.PublicDecisionVariable.safeParse(variable);
++        if (!parsed.success || parsed.data.visibility !== 'PUBLIC') fail('INVALID_COMMAND');
++        return parsed.data;
++      });
++      const allowed = new Set(allowedOptions.map(option => option.toLowerCase()));
++      if (new Set(publicVariables.map(variable => variable.id)).size !== publicVariables.length
++        || publicVariables.some(variable => (variable.type === 'ENUM' || variable.type === 'ENUM_SET')
++          && variable.options.some(option => !allowed.has(option.label.toLowerCase())))) fail('INVALID_COMMAND');
++    }
++
+@@ -176,0 +201 @@ export class DecisionArchitect {
++          ...(publicVariables ? { publicVariables: structuredClone(publicVariables) } : {}),
+@@ -179 +204 @@ export class DecisionArchitect {
+-        fail('RETRYABLE_SERVER_ERROR');
++        this.rejectModel('ARCHITECT_CALL');
+@@ -183,2 +208,6 @@ export class DecisionArchitect {
+-        if (new TextEncoder().encode(output).byteLength > 256 * 1024) fail('RETRYABLE_SERVER_ERROR');
+-        try { output = JSON.parse(output) as unknown; } catch { fail('RETRYABLE_SERVER_ERROR'); }
++        if (new TextEncoder().encode(output).byteLength > 256 * 1024) {
++          this.rejectModel('ARCHITECT_FIELDS');
++        }
++        try { output = JSON.parse(output) as unknown; } catch {
++          this.rejectModel('ARCHITECT_FIELDS');
++        }
+@@ -187,4 +216,9 @@ export class DecisionArchitect {
+-      try { serialized = JSON.stringify(output); } catch { fail('RETRYABLE_SERVER_ERROR'); }
+-      if (serialized === undefined || new TextEncoder().encode(serialized).byteLength > 256 * 1024)
+-        fail('RETRYABLE_SERVER_ERROR');
+-      try { output = JSON.parse(serialized) as unknown; } catch { fail('RETRYABLE_SERVER_ERROR'); }
++      try { serialized = JSON.stringify(output); } catch {
++        this.rejectModel('ARCHITECT_FIELDS');
++      }
++      if (serialized === undefined || new TextEncoder().encode(serialized).byteLength > 256 * 1024) {
++        this.rejectModel('ARCHITECT_FIELDS');
++      }
++      try { output = JSON.parse(serialized) as unknown; } catch {
++        this.rejectModel('ARCHITECT_FIELDS');
++      }
+@@ -197 +231,3 @@ export class DecisionArchitect {
+-        || output.participantInformationRequirements.length > MAX_REQUIREMENTS) fail('RETRYABLE_SERVER_ERROR');
++        || output.participantInformationRequirements.length > MAX_REQUIREMENTS) {
++        this.rejectModel('ARCHITECT_FIELDS');
++      }
+@@ -205 +241 @@ export class DecisionArchitect {
+-          fail('RETRYABLE_SERVER_ERROR');
++          this.rejectModel('ARCHITECT_REQUIREMENTS');
+@@ -226 +262,18 @@ export class DecisionArchitect {
+-        || definition.data.rules.some(rule => rule.visibility !== 'PUBLIC')) fail('RETRYABLE_SERVER_ERROR');
++        || definition.data.rules.some(rule => rule.visibility !== 'PUBLIC')) {
++        this.rejectModel('ARCHITECT_DEFINITION');
++      }
++
++      if (publicVariables) {
++        // Compare complete validated public definitions by ID; never silently repair model-selected identities/types.
++        const received = new Map(definition.data.variables.map(variable => {
++          const { ownerParticipantId, ...publicVariable } = variable;
++          void ownerParticipantId;
++          return [variable.id, publicVariable] as const;
++        }));
++        if (received.size !== publicVariables.length || publicVariables.some(variable => {
++          const parsed = KE.PublicDecisionVariable.safeParse(received.get(variable.id));
++          return !parsed.success || JSON.stringify(parsed.data) !== JSON.stringify(variable);
++        })) {
++          this.rejectModel('ARCHITECT_PUBLIC_SCHEMA');
++        }
++      }
+@@ -231 +284,3 @@ export class DecisionArchitect {
+-          if (variable.options.some(option => !allowed.has(option.label.toLowerCase()))) fail('RETRYABLE_SERVER_ERROR');
++          if (variable.options.some(option => !allowed.has(option.label.toLowerCase()))) {
++            this.rejectModel('ARCHITECT_OPTIONS');
++          }
+diff --git a/packages/application/src/index.ts b/packages/application/src/index.ts
+index d7aaa0b594cbe4f91522368678a219fe882128ed..7f11f144221d2bc21bd6824c41efa42a69dd68f6 100644
+--- a/packages/application/src/index.ts
++++ b/packages/application/src/index.ts
+@@ -757 +757,2 @@ export type { DecisionNegotiationContext, NegotiationFailureTarget, KnownEnoughA
+-export type { ModelInvocation, ModelCommitGuard, ModelJobKind, ModelJobRunner } from './model-runtime.ts';
++export { MODEL_FAILURE_STAGES, reportModelFailure } from './model-runtime.ts';
++export type { ModelInvocation, ModelCommitGuard, ModelJobKind, ModelJobRunner, ModelFailureDiagnostic } from './model-runtime.ts';
+diff --git a/packages/application/src/model-runtime.ts b/packages/application/src/model-runtime.ts
+index 307faab7dbc82a1fccfd5e2a092434f78993d994..c0f41c4091eb89d49d393b74cf034a78fbae3206 100644
+--- a/packages/application/src/model-runtime.ts
++++ b/packages/application/src/model-runtime.ts
+@@ -3,0 +4,16 @@ export type ModelJobKind = 'ARCHITECT' | 'OWNER' | 'NEGOTIATION';
++/** Static server stages only. No request IDs, subjects, payloads, paths or error text. */
++export const MODEL_FAILURE_STAGES = [
++  'PROVIDER', 'TOOL_ENVELOPE', 'TOOL_OUTPUT', 'ARCHITECT_CALL', 'ARCHITECT_FIELDS',
++  'ARCHITECT_REQUIREMENTS', 'ARCHITECT_DEFINITION', 'ARCHITECT_OPTIONS', 'ARCHITECT_PUBLIC_SCHEMA',
++  'SCENARIO_DEFINITION', 'SCENARIO_CLARIFICATION', 'SCENARIO_PERSISTENCE', 'SCENARIO_READBACK',
++] as const;
++export interface ModelFailureDiagnostic {
++  kind: ModelJobKind;
++  stage: typeof MODEL_FAILURE_STAGES[number];
++}
++export function reportModelFailure(
++  diagnostic: ((value: ModelFailureDiagnostic) => void) | undefined,
++  kind: ModelJobKind, stage: ModelFailureDiagnostic['stage'],
++): void {
++  try { diagnostic?.({ kind, stage }); } catch { /* Diagnostics have no authority or retry effects. */ }
++}
+diff --git a/tests/evaluations/ke14-fixed.ts b/tests/evaluations/ke14-fixed.ts
+index 93ee31551cf419111809df376e941a6778ff23a5..4eeb9e737f9a48a4e952249dcf294270dd2c2b77 100644
+--- a/tests/evaluations/ke14-fixed.ts
++++ b/tests/evaluations/ke14-fixed.ts
+@@ -57,0 +58,5 @@ export async function fixedScenarioHarness() {
++    if (prompt.includes('Construct only') && Array.isArray(input.publicVariables)) {
++      const { variables, ...fields } = output as Record<string, unknown>;
++      void variables;
++      output = { ...fields, variableIds: input.publicVariables.map(variable => (variable as KE.PublicDecisionVariable).id) };
++    }
