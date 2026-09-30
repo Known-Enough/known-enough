@@ -1,3 +1,7 @@
+# KE14 public-schema/diagnostic independent review claim — IN_PROGRESS — 2026-09-30
+
+The named sequential review is claimed from clean synchronized `main` `61d346c1962a71b1eb5c8b25cafda703e0d148f1`; `git pull --ff-only origin main` passed and ahead/behind is 0/0. The exact twelve-file patch is frozen in [`KE14-public-schema-correction.patch`](review-artifacts/KE14-public-schema-correction.patch), SHA-256 `6160910f39881f39e3fd44e08765d36cd5811ecfdd71a2e4c1c9ba389fd0f66b`. Review scope is that patch, its code/tests and recorded evidence. Only the review record and task tracking docs may change. Actual reviewer model is Codex GPT-6 with exact variant/effort unexposed; Sol/high is the target, not runtime proof. No executable edits, AWS actions or paid calls. KE14 remains REVIEW and KE15 BLOCKED pending the verdict and separate live qualification.
+
 # KE14 live-model review checkpoint — PASS — 2026-09-30 UTC
 
 The independent review of User A's exact two-file model correction returned PASS. [Review record](reviews/KE14-live-model-followup.md) includes the patch SHA-256, clean-clone baseline, focused evidence and limits. The adapter suite passed 12/12 on pinned Node 24.21.0/npm 11.19.0; the new regression failed against the original undeclared `values` requirement, as expected. No source was integrated/deployed and no AWS or paid model action occurred. KE14 remains REVIEW for complete Christmas/Purchase qualification; KE15 remains BLOCKED. Review claim released.
