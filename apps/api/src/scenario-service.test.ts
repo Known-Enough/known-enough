@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
-import { DecisionNegotiator, KnownEnoughApplication } from '@deal-table/application';
+import { DecisionNegotiator, KnownEnoughApplication, type ModelFailureDiagnostic } from '@deal-table/application';
+import type { KnownEnough as KE } from '@deal-table/contracts';
+import { response } from '../../../tests/evaluations/ke10-injected.ts';
+import { createKnownEnoughModelRuntime } from './model-runtime.ts';
 import { InMemoryRoomRepository } from '@deal-table/adapters';
 import { encodeDecisionStateItem, decodeDecisionStateItem } from '../../../packages/adapters/src/dynamodb-codec.ts';
 import { fixedScenarioHarness } from '../../../tests/evaluations/ke14-fixed.ts';
@@ -36,6 +39,61 @@ async function ready(h: Awaited<ReturnType<typeof fixedScenarioHarness>>, scenar
 }
 
 describe('KE14 authenticated provisioning and trusted catalog composition', () => {
+  it.each(['CHRISTMAS', 'SHARED_PURCHASE'] as const)('creates %s from a brief objective with complete structured public scope and no automatic consent', async scenario => {
+    const h = await fixedScenarioHarness();
+    const requests: { publicVariables: KE.PublicDecisionVariable[] }[] = [];
+    const runtime = createKnownEnoughModelRuntime({ application: h.application, clock: h.clock, ids: h.ids,
+      publicCandidates: () => [], provider: { mode: 'INJECTED', transport: { send: async command => {
+        const input = JSON.parse(command.input.messages![0]!.content![0]!.text!);
+        requests.push(input);
+        return response({ title: 'Synthetic draft', description: 'Explore together.',
+          variableIds: input.publicVariables.map((variable: KE.PublicDecisionVariable) => variable.id),
+          rules: [], clarificationQuestions: [], participantInformationRequirements: [{ participantId: 'maya', kind: 'BUDGET' }] });
+      } } } });
+    const service = new ScenarioService({ application: runtime.application, architect: runtime.architect, members: h.members,
+      clock: h.clock, isEnabled: runtime.isEnabled });
+    try {
+      const snapshot = await service.create(participant('maya'), createBody(scenario));
+      expect(snapshot.frame.variables).toEqual(requests[0]!.publicVariables);
+      expect(snapshot.frame.requiredParticipantIds).toHaveLength(scenario === 'CHRISTMAS' ? 5 : 3);
+      expect(snapshot.frameConfirmations).toEqual([]);
+      expect(snapshot.approvedParticipantIds).toEqual([]);
+      expect(snapshot.currentProposal).toBeNull();
+      expect(JSON.stringify(requests)).not.toMatch(/subject-maya|ownerParticipantId|maya-contribution|privateVariables|confirmedConstraints/);
+      expect(await service.create(participant('maya'), createBody(scenario))).toEqual(snapshot);
+      expect(requests).toHaveLength(1);
+    } finally { await runtime.stop(); await h.runtime.stop(); }
+  });
+  it.each(['provider', 'envelope', 'fields', 'definition', 'selector', 'persistence'] as const)(
+    'distinguishes %s failure with static diagnostics and no private payload or repeated model call', async failure => {
+      const h = await fixedScenarioHarness();
+      const events: ModelFailureDiagnostic[] = [];
+      const send = vi.fn(async command => {
+        if (failure === 'provider') throw Error('PRIVATE_PROVIDER_CANARY');
+        const input = JSON.parse(command.input.messages![0]!.content![0]!.text!);
+        const value = { title: failure === 'fields' ? null : 'Synthetic draft', description: 'PRIVATE_MODEL_CANARY',
+          variableIds: failure === 'selector' ? ['guessed'] : input.publicVariables.map((variable: KE.PublicDecisionVariable) => variable.id),
+          rules: failure === 'definition' ? [{ id: 'bad-reference', visibility: 'PUBLIC', operator: 'COMPARE',
+            variableId: 'PRIVATE_UNKNOWN_VARIABLE', comparison: 'GT', value: { type: 'DURATION', seconds: 0 } }] : [],
+          clarificationQuestions: [], participantInformationRequirements: [] };
+        return failure === 'envelope' ? { ...response(value), stopReason: 'max_tokens' as const } : response(value);
+      });
+      const diagnostic = (event: ModelFailureDiagnostic) => { events.push(event); throw Error('PRIVATE_OBSERVER_CANARY'); };
+      const runtime = createKnownEnoughModelRuntime({ application: h.application, clock: h.clock, ids: h.ids,
+        diagnostic, publicCandidates: () => [], provider: { mode: 'INJECTED', transport: { send } } });
+      const service = new ScenarioService({ application: runtime.application, architect: runtime.architect, members: h.members,
+        clock: h.clock, isEnabled: runtime.isEnabled, diagnostic });
+      if (failure === 'persistence') vi.spyOn(h.application, 'createDecision').mockRejectedValueOnce(Error('PRIVATE_STORAGE_CANARY'));
+      const stages = { provider: 'PROVIDER', envelope: 'TOOL_ENVELOPE', fields: 'ARCHITECT_FIELDS',
+        definition: 'ARCHITECT_DEFINITION', selector: 'TOOL_OUTPUT', persistence: 'SCENARIO_PERSISTENCE' };
+      try {
+        await expect(service.create(participant('maya'), createBody())).rejects.toBeDefined();
+        expect(send).toHaveBeenCalledTimes(1);
+        expect(events).toContainEqual({ kind: 'ARCHITECT', stage: stages[failure] });
+        expect(events.every(event => Object.keys(event).sort().join('|') === 'kind|stage')).toBe(true);
+        expect(JSON.stringify(events)).not.toMatch(/PRIVATE|subject-|Bearer/);
+      } finally { await runtime.stop(); await h.runtime.stop(); }
+    });
   it('awaited stop drains an admitted frame creation write before resolving', async () => {
     const h = await fixedScenarioHarness();
     let release!: () => void;

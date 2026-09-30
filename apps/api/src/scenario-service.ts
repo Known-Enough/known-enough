@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { Id, KnownEnough as KE } from '@deal-table/contracts';
 import { KnownEnoughApplicationError, type KnownEnoughApplication, type DecisionArchitect,
-  type TrustedPrincipal, type Clock } from '@deal-table/application';
+  reportModelFailure, type ModelFailureDiagnostic, type TrustedPrincipal, type Clock } from '@deal-table/application';
 
 export type ScenarioKind = 'CHRISTMAS' | 'SHARED_PURCHASE';
 export interface ScenarioMember { participantId: string; displayName: string; subject: string }
@@ -9,6 +9,26 @@ const ids = ['maya', 'leo', 'nina', 'ana', 'raul'];
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
 const money = (amountMinor: number) => ({ type: 'MONEY' as const, amountMinor, currencyCode: 'USD', minorUnit: 2 });
 const option = (optionId: string): KE.DecisionValue => ({ type: 'ENUM', optionId });
+
+/** Explicit public scope of these two bounded synthetic qualification scenarios. No owner limits/values. */
+function scenarioPublicVariables(kind: ScenarioKind, members: readonly ScenarioMember[]): KE.PublicDecisionVariable[] {
+  const base = { required: true, visibility: 'PUBLIC' as const };
+  return kind === 'CHRISTMAS' ? [
+    { ...base, id: 'destination', type: 'ENUM', label: 'Destination', options: [
+      { id: 'cancun', label: 'Cancún' }, { id: 'oaxaca', label: 'Oaxaca' }, { id: 'mazatlan', label: 'Mazatlán' }] },
+    { ...base, id: 'trip-start', type: 'DATE', label: 'Trip start' },
+    { ...base, id: 'trip-end', type: 'DATE', label: 'Trip end' },
+    { ...base, id: 'trip-duration', type: 'DURATION', label: 'Trip duration', unit: 'SECONDS' },
+    { ...base, id: 'accommodation', type: 'ENUM', label: 'Accommodation', options: [
+      { id: 'shared-villa', label: 'Shared villa' }, { id: 'quiet-hotel', label: 'Quiet hotel' }] },
+    { ...base, id: 'estimated-total', type: 'MONEY', label: 'Estimated total', currencyCode: 'USD', minorUnit: 2 },
+  ] : [
+    { ...base, id: 'funding-structure', type: 'ENUM', label: 'Contribution structure', options: [
+      { id: 'equal', label: 'Equal contributions' }, { id: 'weighted', label: 'Weighted contributions' }] },
+    ...['maya', 'leo', 'nina'].map(person => ({ ...base, id: `${person}-ownership`, type: 'PERCENTAGE' as const,
+      label: `${members.find(member => member.participantId === person)!.displayName} proposed ownership` })),
+  ];
+}
 
 /** Explicit deployment-owned directory. Client bodies can neither supply subjects nor activate invitees. */
 export function readScenarioMembers(value: unknown): ScenarioMember[] {
@@ -87,7 +107,7 @@ function provisionDefinition(frame: KE.PublicDecisionFrame, kind: ScenarioKind):
 export class ScenarioService {
   private readonly members: ScenarioMember[];
   constructor(private readonly options: { application: KnownEnoughApplication; architect: DecisionArchitect; members: readonly ScenarioMember[];
-    clock: Clock; isEnabled: () => boolean }) {
+    clock: Clock; isEnabled: () => boolean; diagnostic?: (value: ModelFailureDiagnostic) => void }) {
     this.members = readScenarioMembers(options.members);
   }
   async create(principal: TrustedPrincipal | null, raw: unknown): Promise<KE.PublicDecisionSnapshot> {
@@ -106,7 +126,10 @@ export class ScenarioService {
     if (!roster.some(member => member.subject === principal.subject)) throw new KnownEnoughApplicationError('FORBIDDEN');
     const decisionId = `decision-${hash(JSON.stringify([principal.subject, body.idempotencyKey]))}`;
     const bodyHash = hash(JSON.stringify([kind, body.objective.trim()]));
-    const replay = await this.options.application.getCreatedDecision(principal, decisionId, bodyHash);
+    let replay: KE.PublicDecisionSnapshot | null;
+    try { replay = await this.options.application.getCreatedDecision(principal, decisionId, bodyHash); } catch (error) {
+      reportModelFailure(this.options.diagnostic, 'ARCHITECT', 'SCENARIO_READBACK'); throw error;
+    }
     if (replay) return replay;
     const expiresAt = Date.parse(this.options.clock.now()) + 30_000;
     const objective = kind === 'CHRISTMAS'
@@ -114,12 +137,22 @@ export class ScenarioService {
       : `${body.objective.trim()}\nHypothetical USD 50,000 exploration only, no advice or purchase. Exactly funding-structure ENUM (equal/Equal contributions, weighted/Weighted contributions), maya-ownership, leo-ownership, nina-ownership PERCENTAGE. No other public variables. Each owner will privately confirm their contribution limits. No legal, tax or mortgage conclusion.`;
     const draft = await this.options.architect.draft(principal.subject, { draftId: body.idempotencyKey as string,
       revision: 1, objective, participants: roster.map(member => ({ id: member.participantId, displayName: member.displayName })),
+      publicVariables: scenarioPublicVariables(kind, roster),
       allowedOptions: kind === 'CHRISTMAS' ? ['Cancún', 'Oaxaca', 'Mazatlán', 'Shared villa', 'Quiet hotel'] : ['Equal contributions', 'Weighted contributions'] });
-    if (draft.status !== 'DEFINING') throw new KnownEnoughApplicationError('NEEDS_CLARIFICATION');
-    const definition = provisionDefinition({ ...draft.frame, decisionId, objective: body.objective.trim() }, kind);
-    await this.options.application.createDecision({ definition, creatorSubject: principal.subject, creationBodyHash: bodyHash,
+    if (draft.status !== 'DEFINING') {
+      reportModelFailure(this.options.diagnostic, 'ARCHITECT', 'SCENARIO_CLARIFICATION');
+      throw new KnownEnoughApplicationError('NEEDS_CLARIFICATION');
+    }
+    let definition: KE.DecisionDefinition;
+    try { definition = provisionDefinition({ ...draft.frame, decisionId, objective: body.objective.trim() }, kind); } catch (error) {
+      reportModelFailure(this.options.diagnostic, 'ARCHITECT', 'SCENARIO_DEFINITION'); throw error;
+    }
+    try { await this.options.application.createDecision({ definition, creatorSubject: principal.subject, creationBodyHash: bodyHash,
       creationGuard: { expiresAt, isEnabled: this.options.isEnabled },
       memberships: roster.map(member => ({ subject: member.subject, participantId: member.participantId, active: member.subject === principal.subject })) });
-    return this.options.application.getPublicSnapshot(principal, decisionId);
+    } catch (error) { reportModelFailure(this.options.diagnostic, 'ARCHITECT', 'SCENARIO_PERSISTENCE'); throw error; }
+    try { return await this.options.application.getPublicSnapshot(principal, decisionId); } catch (error) {
+      reportModelFailure(this.options.diagnostic, 'ARCHITECT', 'SCENARIO_READBACK'); throw error;
+    }
   }
 }

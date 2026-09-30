@@ -2,7 +2,8 @@ import { BedrockRuntimeClient, ConverseCommand } from '@aws-sdk/client-bedrock-r
 import type { ConverseCommandInput, ConverseCommandOutput } from '@aws-sdk/client-bedrock-runtime';
 import { KnownEnough as KE } from '@deal-table/contracts';
 import type { DecisionArchitectModel, OwnerConversationModel, DecisionNegotiationModel,
-  ModelInvocation, ModelJobKind, ModelJobRunner } from '@deal-table/application';
+  ModelInvocation, ModelJobKind, ModelJobRunner, ModelFailureDiagnostic } from '@deal-table/application';
+import { reportModelFailure } from '@deal-table/application';
 import { z } from 'zod';
 import { ModelRuntimeError } from './model-jobs.ts';
 
@@ -22,12 +23,15 @@ const schema = (value: z.ZodType): string => JSON.stringify(z.toJSONSchema(value
 const prompts: Record<ModelJobKind, string> = {
   ARCHITECT: policy + 'Construct only a public decision draft. Use only supplied participants and option labels. '
     + 'Preserve explicitly supplied variable IDs, option IDs and variable types exactly. '
+    + 'When publicVariables is supplied, select every supplied variable ID exactly once in variableIds instead of returning variables. '
+    + 'The server copies those exact public definitions; do not add variables, reinterpret units/options or select values. '
     + 'A draft may leave decision variable values unselected. Ask clarification questions only for unresolved public frame scope. '
     + 'Private budgets, dates, preferences and accessibility needs to collect later belong in participantInformationRequirements; '
     + 'their absence alone does not prevent drafting the public frame. Never invent their values. '
-    + 'Return title, description, variables, rules, clarificationQuestions (string array), participantInformationRequirements '
+    + 'Return title, description, rules, clarificationQuestions (string array), participantInformationRequirements '
     + '(array of {participantId,kind}, kind one of DATES, PREFERENCES, ACCESSIBILITY, BUDGET). '
-    + 'Every variable must include id, type, label, required, visibility="PUBLIC", and ownerParticipantId=null. '
+    + 'Also return variableIds when publicVariables is supplied; otherwise return variables. '
+    + 'For an open-scope draft, every variable must include id, type, label, required, visibility="PUBLIC", and ownerParticipantId=null. '
     + 'Each ENUM and ENUM_SET variable must include options as objects with both a unique id and a label. '
     + 'All rules must have visibility PUBLIC. Variable schema: '
     + schema(KE.DecisionVariable) + ' Rule schema: ' + schema(KE.ValidationRule),
@@ -113,6 +117,18 @@ const outputTools = {
 } satisfies Record<ModelJobKind, { name: string; schema: Record<string, unknown> }>;
 
 function normalizeToolOutput(kind: ModelJobKind, value: unknown, payload: unknown): unknown {
+  if (kind === 'ARCHITECT' && payload && typeof payload === 'object' && 'publicVariables' in payload) {
+    const variables = (payload as { publicVariables: KE.PublicDecisionVariable[] }).publicVariables;
+    const output = value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : null;
+    const selected = output?.variableIds;
+    if (!output || Object.hasOwn(output, 'variables') || !Array.isArray(selected)
+      || selected.length !== variables.length || selected.some(id => typeof id !== 'string')
+      || new Set(selected).size !== selected.length
+      || variables.some(variable => !selected.includes(variable.id))) throw new ModelRuntimeError('INVALID_OUTPUT');
+    const normalized = { ...output, variables: variables.map(variable => ({ ...structuredClone(variable), ownerParticipantId: null })) };
+    delete (normalized as Record<string, unknown>).variableIds;
+    return normalized;
+  }
   if (kind !== 'NEGOTIATION' || !value || typeof value !== 'object' || Array.isArray(value)) return value;
   const output = value as Record<string, unknown>;
   if (!Array.isArray(output.questionIntents)) return value;
@@ -163,14 +179,25 @@ export function createAuthorizedBedrockTransport(approval: {
 export function createBedrockModels(options: {
   transport: ConverseTransport; jobs: ModelJobRunner; enabled: () => boolean;
   usage?: (value: ModelUsage) => void;
+  diagnostic?: (value: ModelFailureDiagnostic) => void;
 }): { architect: DecisionArchitectModel; owner: OwnerConversationModel; negotiation: DecisionNegotiationModel } {
   async function invoke(kind: ModelJobKind, payload: unknown, invocation?: ModelInvocation): Promise<unknown> {
     if (!options.enabled()) throw new ModelRuntimeError('DISABLED');
     if (!invocation) throw new ModelRuntimeError('INVALID_INPUT');
     let text: string;
     try { text = JSON.stringify(payload); } catch { throw new ModelRuntimeError('INVALID_INPUT'); }
+    let tool: { name: string; schema: Record<string, unknown> } = outputTools[kind];
+    if (kind === 'ARCHITECT' && payload && typeof payload === 'object' && 'publicVariables' in payload) {
+      const variables = (payload as { publicVariables: KE.PublicDecisionVariable[] }).publicVariables;
+      const { variables: omitted, ...properties } = outputTools.ARCHITECT.schema.properties;
+      void omitted;
+      tool = { name: tool.name, schema: objectSchema({ ...properties,
+        variableIds: { type: 'array', minItems: variables.length, maxItems: variables.length,
+          items: { type: 'string', enum: variables.map(variable => variable.id) } },
+      }, outputTools.ARCHITECT.schema.required.map(field => field === 'variables' ? 'variableIds' : field)) };
+    }
     if (typeof text !== 'string' || Buffer.byteLength(text) + Buffer.byteLength(prompts[kind])
-      + Buffer.byteLength(JSON.stringify(outputTools[kind].schema)) > BEDROCK_CONFIGURATION.maxInputBytes)
+      + Buffer.byteLength(JSON.stringify(tool.schema)) > BEDROCK_CONFIGURATION.maxInputBytes)
       throw new ModelRuntimeError('INVALID_INPUT');
     // A fresh request per job. The sole forced tool is a data envelope; it has no execution path.
     const request: ConverseCommandInput = {
@@ -179,22 +206,28 @@ export function createBedrockModels(options: {
       messages: [{ role: 'user', content: [{ text }] }],
       inferenceConfig: { maxTokens: BEDROCK_CONFIGURATION.maxTokens, temperature: BEDROCK_CONFIGURATION.temperature },
       toolConfig: {
-        tools: [{ toolSpec: { name: outputTools[kind].name, description: 'Return the requested structured data only.',
-          inputSchema: { json: outputTools[kind].schema as never } } }],
-        toolChoice: { tool: { name: outputTools[kind].name } },
+        tools: [{ toolSpec: { name: tool.name, description: 'Return the requested structured data only.',
+          inputSchema: { json: tool.schema as never } } }],
+        toolChoice: { tool: { name: tool.name } },
       },
     };
     return options.jobs.run(kind, invocation, async signal => {
       if (!options.enabled() || signal.aborted) throw new ModelRuntimeError('DISABLED');
       let response: ConverseCommandOutput;
       try { response = await options.transport.send(new ConverseCommand(request), { abortSignal: signal }); }
-      catch { throw new ModelRuntimeError('PROVIDER_FAILED'); }
+      catch {
+        reportModelFailure(options.diagnostic, kind, 'PROVIDER');
+        throw new ModelRuntimeError('PROVIDER_FAILED');
+      }
       if (!options.enabled() || signal.aborted) throw new ModelRuntimeError('EXPIRED');
       const blocks = response.output?.message?.content;
       if (response.stopReason !== 'tool_use' || response.output?.message?.role !== 'assistant'
         || !Array.isArray(blocks) || blocks.length !== 1 || !blocks[0]
         || Object.keys(blocks[0]).join('|') !== 'toolUse' || blocks[0].toolUse?.name !== outputTools[kind].name)
-        throw new ModelRuntimeError('INVALID_OUTPUT');
+        {
+          reportModelFailure(options.diagnostic, kind, 'TOOL_ENVELOPE');
+          throw new ModelRuntimeError('INVALID_OUTPUT');
+        }
       const inputTokens = response.usage?.inputTokens;
       const outputTokens = response.usage?.outputTokens;
       if (typeof inputTokens === 'number' && typeof outputTokens === 'number'
@@ -204,18 +237,40 @@ export function createBedrockModels(options: {
       }
       const result = blocks[0].toolUse.input;
       let output: string;
-      try { output = JSON.stringify(result); } catch { throw new ModelRuntimeError('INVALID_OUTPUT'); }
+      try { output = JSON.stringify(result); } catch {
+        reportModelFailure(options.diagnostic, kind, 'TOOL_OUTPUT'); throw new ModelRuntimeError('INVALID_OUTPUT');
+      }
       if (!result || typeof result !== 'object' || Array.isArray(result)
         || typeof output !== 'string' || Buffer.byteLength(output) > BEDROCK_CONFIGURATION.maxOutputBytes)
-        throw new ModelRuntimeError('INVALID_OUTPUT');
-      return normalizeToolOutput(kind, result, payload);
+        {
+          reportModelFailure(options.diagnostic, kind, 'TOOL_OUTPUT');
+          throw new ModelRuntimeError('INVALID_OUTPUT');
+        }
+      try { return normalizeToolOutput(kind, result, payload); } catch {
+        reportModelFailure(options.diagnostic, kind, 'TOOL_OUTPUT'); throw new ModelRuntimeError('INVALID_OUTPUT');
+      }
     });
   }
   return {
-    architect: { draft: (input, invocation) => invoke('ARCHITECT', {
-      objective: input.objective, participants: input.participants.map(person => ({ id: person.id, displayName: person.displayName })),
-      allowedOptions: input.allowedOptions,
-    }, invocation) },
+    architect: { draft: async (input, invocation) => {
+      let publicVariables: KE.PublicDecisionVariable[] | undefined;
+      if (input.publicVariables !== undefined) {
+        if (!Array.isArray(input.publicVariables) || input.publicVariables.length < 1
+          || input.publicVariables.length > KE.MAX_DECISION_VARIABLES) throw new ModelRuntimeError('INVALID_INPUT');
+        publicVariables = input.publicVariables.map(variable => {
+          const parsed = KE.PublicDecisionVariable.safeParse(variable);
+          if (!parsed.success || parsed.data.visibility !== 'PUBLIC') throw new ModelRuntimeError('INVALID_INPUT');
+          return parsed.data;
+        });
+        if (new Set(publicVariables.map(variable => variable.id)).size !== publicVariables.length)
+          throw new ModelRuntimeError('INVALID_INPUT');
+      }
+      return invoke('ARCHITECT', {
+        objective: input.objective, participants: input.participants.map(person => ({ id: person.id, displayName: person.displayName })),
+        allowedOptions: input.allowedOptions,
+        ...(publicVariables ? { publicVariables } : {}),
+      }, invocation);
+    } },
     owner: (input, invocation) => invoke('OWNER', {
       publicFrame: input.publicFrame, ownerParticipantId: input.ownerParticipantId,
       privateVariables: input.ownerPrivateVariables,

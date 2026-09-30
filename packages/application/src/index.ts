@@ -754,4 +754,5 @@ export type {
 } from './decision-architect.ts';
 export type { DecisionNegotiationContext, NegotiationFailureTarget, KnownEnoughApplicationOptions } from './known-enough.ts';
 
-export type { ModelInvocation, ModelCommitGuard, ModelJobKind, ModelJobRunner } from './model-runtime.ts';
+export { MODEL_FAILURE_STAGES, reportModelFailure } from './model-runtime.ts';
+export type { ModelInvocation, ModelCommitGuard, ModelJobKind, ModelJobRunner, ModelFailureDiagnostic } from './model-runtime.ts';

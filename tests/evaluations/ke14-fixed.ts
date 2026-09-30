@@ -55,6 +55,11 @@ export async function fixedScenarioHarness() {
             operator: 'IN', variableId: buying ? 'funding-structure' : 'destination', values: [{ type: 'ENUM', optionId: buying ? 'weighted' : 'mazatlan' }] } }],
       };
     }
+    if (prompt.includes('Construct only') && Array.isArray(input.publicVariables)) {
+      const { variables, ...fields } = output as Record<string, unknown>;
+      void variables;
+      output = { ...fields, variableIds: input.publicVariables.map(variable => (variable as KE.PublicDecisionVariable).id) };
+    }
     return { $metadata: {}, usage: undefined, metrics: undefined, stopReason: 'tool_use', output: { message: {
       role: 'assistant', content: [{ toolUse: { toolUseId: 'ke14-fixed', name: command.input.toolConfig!.tools![0]!.toolSpec!.name!, input: output as never } }] } } };
   } };

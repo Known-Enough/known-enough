@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import type { KnownEnough as KE } from '@deal-table/contracts';
 import { DecisionArchitect, DecisionArchitectError, type DecisionArchitectModel } from './decision-architect.ts';
 
 const request = (revision = 1) => ({
@@ -41,6 +42,36 @@ function create(model: DecisionArchitectModel) {
 }
 
 describe('injected decision architect', () => {
+  it('rejects private or extra structured scope before invoking any model', async () => {
+    const draft = vi.fn(async () => christmasDraft());
+    const architect = create({ draft });
+    for (const invalid of [[], [{ id: 'private-cost', type: 'MONEY', label: 'PRIVATE_SCOPE', required: true,
+      visibility: 'OWNER_PRIVATE', ownerParticipantId: 'person-1', currencyCode: 'USD', minorUnit: 2 }],
+    [{ id: 'public-cost', type: 'MONEY', label: 'Cost', required: true,
+      visibility: 'PUBLIC', currencyCode: 'USD', minorUnit: 2, privateLimit: 'PRIVATE_SCOPE' }]]) {
+      await expect(architect.draft('organizer', { ...request(), publicVariables: invalid as KE.PublicDecisionVariable[] }))
+        .rejects.toMatchObject({ code: 'INVALID_COMMAND' });
+    }
+    expect(draft).not.toHaveBeenCalled();
+  });
+  it.each(['id', 'type', 'option', 'missing'] as const)('rejects %s drift against complete supplied public scope without leaking the model output', async change => {
+    const base = christmasDraft();
+    const publicVariables = base.variables.map(variable => {
+      const { ownerParticipantId, ...publicVariable } = variable;
+      void ownerParticipantId;
+      return publicVariable;
+    }) as KE.PublicDecisionVariable[];
+    const output = structuredClone(base);
+    if (change === 'id') output.variables[1]!.id = 'guessed-start';
+    if (change === 'type') output.variables[1]!.type = 'BOOLEAN';
+    if (change === 'option') output.variables[0]!.options![0]!.id = 'guessed-option';
+    if (change === 'missing') output.variables.splice(1, 1);
+    const diagnostic = vi.fn();
+    const architect = new DecisionArchitect({ draft: async () => output }, () => 'schema-draft', Date.now, () => true, diagnostic);
+    await expect(architect.draft('organizer', { ...request(), publicVariables })).rejects.toMatchObject({ code: 'RETRYABLE_SERVER_ERROR' });
+    expect(diagnostic).toHaveBeenCalledWith({ kind: 'ARCHITECT', stage: 'ARCHITECT_PUBLIC_SCHEMA' });
+    expect(JSON.stringify(diagnostic.mock.calls)).not.toContain('guessed');
+  });
   it('drafts a contract-valid public frame and asks for clarification without confirming it', async () => {
     let received: unknown;
     const architect = create({ draft: async input => { received = input; return christmasDraft(); } });

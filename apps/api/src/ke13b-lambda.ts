@@ -1,6 +1,6 @@
 import { createServer, type RequestListener } from 'node:http';
 import { createAwsDynamoDBRoomRepository } from '@deal-table/adapters';
-import { KnownEnoughApplication } from '@deal-table/application';
+import { KnownEnoughApplication, MODEL_FAILURE_STAGES, type ModelFailureDiagnostic } from '@deal-table/application';
 import { createCognitoKnownEnoughApiHandler } from './http-core.ts';
 import { createKnownEnoughModelRuntime } from './model-runtime.ts';
 import { ScenarioService, readScenarioMembers, scenarioCandidates, type ScenarioMember } from './scenario-service.ts';
@@ -33,6 +33,15 @@ export interface Ke13bConfig {
     invocationLoggingDisabled: boolean; retentionReviewed: boolean } | { mode: 'INJECTED'; transport: ConverseTransport } };
 }
 const MAX_GATEWAY_BODY_BYTES = 64 * 1024;
+/** Reconstruct a strict allowlist even if a caller bypasses TypeScript. Never serialize the original object. */
+export function logModelFailure(value: ModelFailureDiagnostic, write: (line: string) => void = console.info): void {
+  if (!value || typeof value !== 'object' || Array.isArray(value)
+    || Object.keys(value).sort().join('|') !== 'kind|stage'
+    || !['ARCHITECT', 'OWNER', 'NEGOTIATION'].includes(value.kind)
+    || !MODEL_FAILURE_STAGES.some(stage => stage === value.stage)) return;
+  try { write(JSON.stringify({ event: 'ke14-model-failure', kind: value.kind, stage: value.stage })); }
+  catch { /* Logging cannot change the request outcome. */ }
+}
 const RESPONSE_HEADERS = [
   'content-type', 'cache-control', 'access-control-allow-origin', 'access-control-allow-methods',
   'access-control-allow-headers', 'vary',
@@ -136,9 +145,10 @@ export function createKe13bLambdaHandler(config: Ke13bConfig): (event: HttpApiEv
     clock: { now: () => new Date().toISOString() }, ids: { next: () => crypto.randomUUID() },
     provider: config.models.provider, publicCandidates: frame => scenarioCandidates(frame)
       .map(values => values.filter(item => frame.variables.some(variable => variable.id === item.variableId))),
-    trustedCandidates: scenarioCandidates }) : undefined;
+    trustedCandidates: scenarioCandidates, diagnostic: logModelFailure }) : undefined;
   const scenarios = runtime && config.models ? new ScenarioService({ application: runtime.application, architect: runtime.architect,
-    members: config.models.members, clock: { now: () => new Date().toISOString() }, isEnabled: runtime.isEnabled }) : undefined;
+    members: config.models.members, clock: { now: () => new Date().toISOString() }, isEnabled: runtime.isEnabled,
+    diagnostic: logModelFailure }) : undefined;
   const listener = createCognitoKnownEnoughApiHandler({ application, userPoolId: config.userPoolId,
     participantClientId: config.participantClientId, displayClientId: config.displayClientId,
     allowedOrigins: [config.allowedOrigin], ...(runtime ? {

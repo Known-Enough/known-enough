@@ -1,5 +1,5 @@
 import { DecisionArchitect, OwnerConversationArchitect, DecisionNegotiator } from '@deal-table/application';
-import type { KnownEnoughApplication, Clock, IdSource } from '@deal-table/application';
+import type { KnownEnoughApplication, Clock, IdSource, ModelFailureDiagnostic } from '@deal-table/application';
 import { BoundedModelJobs, createAuthorizedBedrockTransport, createBedrockModels } from '@deal-table/adapters';
 import type { ConverseTransport, ModelJobMetric, ModelUsage } from '@deal-table/adapters';
 import type { KnownEnough as KE } from '@deal-table/contracts';
@@ -14,6 +14,7 @@ export function createKnownEnoughModelRuntime(options: {
   publicCandidates: (frame: KE.PublicDecisionFrame) => readonly KE.CandidateProposal['values'][];
   trustedCandidates?: (frame: KE.PublicDecisionFrame) => readonly KE.CandidateProposal['values'][];
   metric?: (value: ModelJobMetric) => void; usage?: (value: ModelUsage) => void;
+  diagnostic?: (value: ModelFailureDiagnostic) => void;
 }) {
   let enabled = true;
   let stopping: Promise<void> | undefined;
@@ -43,7 +44,7 @@ export function createKnownEnoughModelRuntime(options: {
   const transport = options.provider.mode === 'INJECTED'
     ? options.provider.transport : createAuthorizedBedrockTransport(options.provider);
   const models = createBedrockModels({ transport, jobs, enabled: () => enabled,
-    ...(options.usage ? { usage: options.usage } : {}) });
+    ...(options.usage ? { usage: options.usage } : {}), ...(options.diagnostic ? { diagnostic: options.diagnostic } : {}) });
   const stop = (): Promise<void> => {
     enabled = false;
     jobs.stop();
@@ -55,7 +56,8 @@ export function createKnownEnoughModelRuntime(options: {
   return {
     application: modelApplication,
     isEnabled: () => enabled,
-    architect: new DecisionArchitect(models.architect, () => options.ids.next(), () => Date.parse(options.clock.now()), () => enabled),
+    architect: new DecisionArchitect(models.architect, () => options.ids.next(), () => Date.parse(options.clock.now()), () => enabled,
+      options.diagnostic),
     ownerConversation: new OwnerConversationArchitect({ application: modelApplication, model: models.owner, clock: options.clock, ids: options.ids, isEnabled: () => enabled }),
     negotiator: new DecisionNegotiator({ application: modelApplication, model: models.negotiation, clock: options.clock,
       ids: options.ids, publicCandidates: options.publicCandidates,

@@ -1,4 +1,4 @@
-import type { ModelInvocation } from './model-runtime.ts';
+import { reportModelFailure, type ModelInvocation, type ModelFailureDiagnostic } from './model-runtime.ts';
 import { Id, KnownEnough as KE } from '@deal-table/contracts';
 import type { KnownEnough as KETypes } from '@deal-table/contracts';
 
@@ -13,12 +13,15 @@ export interface DecisionArchitectRequest {
   objective: string;
   participants: readonly DecisionArchitectParticipant[];
   allowedOptions: readonly string[];
+  /** Server-owned public definitions, never private values or participant authority. */
+  publicVariables?: readonly KETypes.PublicDecisionVariable[];
 }
 
 export interface DecisionArchitectModelInput {
   objective: string;
   participants: readonly DecisionArchitectParticipant[];
   allowedOptions: readonly string[];
+  publicVariables?: readonly KETypes.PublicDecisionVariable[];
 }
 
 /** A model port is injected by the caller. Raw output is always treated as untrusted. */
@@ -137,7 +140,13 @@ export class DecisionArchitect {
   private sequence = 0;
 
   constructor(private readonly model: DecisionArchitectModel, private readonly id: () => string, private readonly now: () => number = Date.now,
-    private readonly isEnabled: () => boolean = () => true) {}
+    private readonly isEnabled: () => boolean = () => true,
+    private readonly diagnostic?: (value: ModelFailureDiagnostic) => void) {}
+
+  private rejectModel(stage: ModelFailureDiagnostic['stage']): never {
+    reportModelFailure(this.diagnostic, 'ARCHITECT', stage);
+    return fail('RETRYABLE_SERVER_ERROR');
+  }
 
   async draft(actorSubject: string, request: DecisionArchitectRequest): Promise<DecisionArchitectureDraft> {
     if (!Id.safeParse(actorSubject).success || !Id.safeParse(request?.draftId).success
@@ -155,6 +164,21 @@ export class DecisionArchitect {
     const allowedOptions = request.allowedOptions.map(option => typeof option === 'string' ? option.trim() : '');
     if (allowedOptions.some(option => option.length === 0 || option.length > 120)
       || new Set(allowedOptions.map(option => option.toLowerCase())).size !== allowedOptions.length) fail('INVALID_COMMAND');
+
+    let publicVariables: KETypes.PublicDecisionVariable[] | undefined;
+    if (request.publicVariables !== undefined) {
+      if (!Array.isArray(request.publicVariables) || request.publicVariables.length < 1
+        || request.publicVariables.length > KE.MAX_DECISION_VARIABLES) fail('INVALID_COMMAND');
+      publicVariables = request.publicVariables.map(variable => {
+        const parsed = KE.PublicDecisionVariable.safeParse(variable);
+        if (!parsed.success || parsed.data.visibility !== 'PUBLIC') fail('INVALID_COMMAND');
+        return parsed.data;
+      });
+      const allowed = new Set(allowedOptions.map(option => option.toLowerCase()));
+      if (new Set(publicVariables.map(variable => variable.id)).size !== publicVariables.length
+        || publicVariables.some(variable => (variable.type === 'ENUM' || variable.type === 'ENUM_SET')
+          && variable.options.some(option => !allowed.has(option.label.toLowerCase())))) fail('INVALID_COMMAND');
+    }
 
     const key = `${actorSubject}:${request.draftId}`;
     if (!this.active.has(key) && this.active.size >= MAX_ACTIVE_DRAFTS) fail('RETRYABLE_SERVER_ERROR');
@@ -174,27 +198,39 @@ export class DecisionArchitect {
           objective: request.objective.trim(),
           participants: participants as DecisionArchitectParticipant[],
           allowedOptions,
+          ...(publicVariables ? { publicVariables: structuredClone(publicVariables) } : {}),
         }, invocation);
       } catch {
-        fail('RETRYABLE_SERVER_ERROR');
+        this.rejectModel('ARCHITECT_CALL');
       }
       if (this.active.get(key) !== generation) fail('STALE_CONTEXT');
       if (typeof output === 'string') {
-        if (new TextEncoder().encode(output).byteLength > 256 * 1024) fail('RETRYABLE_SERVER_ERROR');
-        try { output = JSON.parse(output) as unknown; } catch { fail('RETRYABLE_SERVER_ERROR'); }
+        if (new TextEncoder().encode(output).byteLength > 256 * 1024) {
+          this.rejectModel('ARCHITECT_FIELDS');
+        }
+        try { output = JSON.parse(output) as unknown; } catch {
+          this.rejectModel('ARCHITECT_FIELDS');
+        }
       }
       let serialized: string | undefined;
-      try { serialized = JSON.stringify(output); } catch { fail('RETRYABLE_SERVER_ERROR'); }
-      if (serialized === undefined || new TextEncoder().encode(serialized).byteLength > 256 * 1024)
-        fail('RETRYABLE_SERVER_ERROR');
-      try { output = JSON.parse(serialized) as unknown; } catch { fail('RETRYABLE_SERVER_ERROR'); }
+      try { serialized = JSON.stringify(output); } catch {
+        this.rejectModel('ARCHITECT_FIELDS');
+      }
+      if (serialized === undefined || new TextEncoder().encode(serialized).byteLength > 256 * 1024) {
+        this.rejectModel('ARCHITECT_FIELDS');
+      }
+      try { output = JSON.parse(serialized) as unknown; } catch {
+        this.rejectModel('ARCHITECT_FIELDS');
+      }
       if (!record(output) || !sameKeys(output, MODEL_FIELDS)
         || typeof output.title !== 'string' || output.title.trim().length === 0 || output.title.length > 160
         || typeof output.description !== 'string' || output.description.length > 4_000
         || !Array.isArray(output.variables) || !Array.isArray(output.rules)
         || !boundedStrings(output.clarificationQuestions, MAX_QUESTIONS, 500)
         || !Array.isArray(output.participantInformationRequirements)
-        || output.participantInformationRequirements.length > MAX_REQUIREMENTS) fail('RETRYABLE_SERVER_ERROR');
+        || output.participantInformationRequirements.length > MAX_REQUIREMENTS) {
+        this.rejectModel('ARCHITECT_FIELDS');
+      }
 
       const knownParticipants = new Set(participantIds);
       const requirements: { participantId: string; prompt: string }[] = [];
@@ -202,7 +238,7 @@ export class DecisionArchitect {
         if (!record(item) || !sameKeys(item, ['kind', 'participantId'])
           || typeof item.participantId !== 'string' || !knownParticipants.has(item.participantId)
           || typeof item.kind !== 'string' || !Object.hasOwn(REQUIREMENT_PROMPTS, item.kind))
-          fail('RETRYABLE_SERVER_ERROR');
+          this.rejectModel('ARCHITECT_REQUIREMENTS');
         requirements.push({ participantId: item.participantId, prompt: REQUIREMENT_PROMPTS[item.kind]! });
       }
 
@@ -223,12 +259,31 @@ export class DecisionArchitect {
       });
       if (!definition.success
         || definition.data.variables.some(variable => variable.visibility !== 'PUBLIC')
-        || definition.data.rules.some(rule => rule.visibility !== 'PUBLIC')) fail('RETRYABLE_SERVER_ERROR');
+        || definition.data.rules.some(rule => rule.visibility !== 'PUBLIC')) {
+        this.rejectModel('ARCHITECT_DEFINITION');
+      }
+
+      if (publicVariables) {
+        // Compare complete validated public definitions by ID; never silently repair model-selected identities/types.
+        const received = new Map(definition.data.variables.map(variable => {
+          const { ownerParticipantId, ...publicVariable } = variable;
+          void ownerParticipantId;
+          return [variable.id, publicVariable] as const;
+        }));
+        if (received.size !== publicVariables.length || publicVariables.some(variable => {
+          const parsed = KE.PublicDecisionVariable.safeParse(received.get(variable.id));
+          return !parsed.success || JSON.stringify(parsed.data) !== JSON.stringify(variable);
+        })) {
+          this.rejectModel('ARCHITECT_PUBLIC_SCHEMA');
+        }
+      }
 
       const allowed = new Set(allowedOptions.map(option => option.toLowerCase()));
       for (const variable of definition.data.variables) {
         if (variable.type === 'ENUM' || variable.type === 'ENUM_SET') {
-          if (variable.options.some(option => !allowed.has(option.label.toLowerCase()))) fail('RETRYABLE_SERVER_ERROR');
+          if (variable.options.some(option => !allowed.has(option.label.toLowerCase()))) {
+            this.rejectModel('ARCHITECT_OPTIONS');
+          }
         }
       }
 

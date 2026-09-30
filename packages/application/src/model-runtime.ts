@@ -1,6 +1,22 @@
 import type { TrustedPrincipal } from './types.ts';
 
 export type ModelJobKind = 'ARCHITECT' | 'OWNER' | 'NEGOTIATION';
+/** Static server stages only. No request IDs, subjects, payloads, paths or error text. */
+export const MODEL_FAILURE_STAGES = [
+  'PROVIDER', 'TOOL_ENVELOPE', 'TOOL_OUTPUT', 'ARCHITECT_CALL', 'ARCHITECT_FIELDS',
+  'ARCHITECT_REQUIREMENTS', 'ARCHITECT_DEFINITION', 'ARCHITECT_OPTIONS', 'ARCHITECT_PUBLIC_SCHEMA',
+  'SCENARIO_DEFINITION', 'SCENARIO_CLARIFICATION', 'SCENARIO_PERSISTENCE', 'SCENARIO_READBACK',
+] as const;
+export interface ModelFailureDiagnostic {
+  kind: ModelJobKind;
+  stage: typeof MODEL_FAILURE_STAGES[number];
+}
+export function reportModelFailure(
+  diagnostic: ((value: ModelFailureDiagnostic) => void) | undefined,
+  kind: ModelJobKind, stage: ModelFailureDiagnostic['stage'],
+): void {
+  try { diagnostic?.({ kind, stage }); } catch { /* Diagnostics have no authority or retry effects. */ }
+}
 /** Server-created capability; never serialized into a queue message or model prompt. */
 export interface ModelInvocation {
   expiresAt: number;

@@ -1,11 +1,11 @@
 import { generateKeyPairSync, sign as signBytes } from 'node:crypto';
 import { CognitoJwtVerifier } from 'aws-jwt-verify';
 import { SimpleJwksCache, type Jwk } from 'aws-jwt-verify/jwk';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { InMemoryRoomRepository } from '@deal-table/adapters';
-import { KnownEnoughApplication } from '@deal-table/application';
+import { KnownEnoughApplication, type ModelFailureDiagnostic } from '@deal-table/application';
 import { createCognitoKnownEnoughApiHandlerWithJwksCache } from './http-core.ts';
-import { invokeHttpApi, readKe13bConfig, type HttpApiEvent } from './ke13b-lambda.ts';
+import { invokeHttpApi, logModelFailure, readKe13bConfig, type HttpApiEvent } from './ke13b-lambda.ts';
 import { provisionStageDecision } from './ke13b-provision.ts';
 
 const pool = 'us-east-1_testPool';
@@ -44,6 +44,17 @@ async function setup() {
 }
 
 describe('KE13B signed HTTP API composition', () => {
+  it('logs only declared model failure stages; private extras/errors/identities never reach the sink', () => {
+    const write = vi.fn();
+    logModelFailure({ kind: 'ARCHITECT', stage: 'ARCHITECT_DEFINITION' }, write);
+    expect(write.mock.calls).toEqual([[JSON.stringify({ event: 'ke14-model-failure', kind: 'ARCHITECT', stage: 'ARCHITECT_DEFINITION' })]]);
+    for (const invalid of [null, [], { kind: 'ARCHITECT', stage: 'PRIVATE_OUTPUT' },
+      { kind: 'PRIVATE_SUBJECT', stage: 'PROVIDER' },
+      { kind: 'ARCHITECT', stage: 'PROVIDER', error: 'Bearer PRIVATE_TOKEN', subject: 'PRIVATE_SUBJECT' }])
+      logModelFailure(invalid as ModelFailureDiagnostic, write);
+    expect(write).toHaveBeenCalledTimes(1);
+    expect(() => logModelFailure({ kind: 'ARCHITECT', stage: 'PROVIDER' }, () => { throw Error('PRIVATE_SINK'); })).not.toThrow();
+  });
   it('rejects missing, mock-header, wrong-client and wrong-token-use identities', async () => {
     const invoke = await setup();
     for (const request of [
