@@ -1,6 +1,6 @@
 # KE14 live model correction — reviewable artifact — 2026-09-29
 
-**Prepared and tested, not integrated or deployed; independent follow-up pending.** Actual worker User A / Codex GPT-6, exact variant/effort unexposed. Bounded baseline `b682a6b` (executable source identical to reviewed `95db9b5`); two executable files only. [Reproducible review patch](review-artifacts/KE14-live-model-correction.patch), SHA-256 `ee30798fa57b739f7b552f153009c2a7be66d4feccecea8114e3d2781015a617`. The patch is documentation/review evidence on main; application source on main remains unchanged. A retains the two frozen local working changes, implementation claim released for the named next independent review. No independent PASS or KE14 DONE is claimed.
+**Prepared and tested, not integrated or deployed; independent follow-up pending.** Actual worker User A / Codex GPT-6, exact variant/effort unexposed. Bounded baseline `b682a6b` (executable source identical to reviewed `95db9b5`); two executable files only. [Reproducible review patch](review-artifacts/KE14-live-model-correction.patch), SHA-256 `730b18b636b18272e02de019d53f5616432e72e2973aed98d29a0e853fa2df89`. The patch is documentation/review evidence on main; application source on main remains unchanged. A retains the two frozen local working changes, implementation claim released for the named next independent review. No independent PASS or KE14 DONE is claimed.
 
 ## Observed live results on the existing deployed artifact
 
