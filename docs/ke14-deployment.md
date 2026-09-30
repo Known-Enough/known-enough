@@ -1,5 +1,7 @@
 # KE14 staging deployment checkpoint — 2026-09-30
 
+**Historical code-only checkpoint; model-disabled statements below were superseded by the separately authorized [AI activation](ke14-ai-activation.md) on September 29 client date (September 30 UTC).**
+
 **Reviewed code deployment SUCCEEDED; models remain disabled.** The user explicitly authorized deployment after the [R1/R2 follow-up PASS](reviews/KE14-KE09-followup.md#ke14-r1r2-followup), then completed AWS SSO sign-in. User A / Codex GPT-6, exact variant/effort unexposed, started from clean synchronized `main` at `93d5eda2395ff5ae7ea7bdc92d28d05441b9b167`; ff-only pull succeeded, ahead/behind 0/0. No executable source changed. The reviewed Lambda bundle and exact API creation routes are deployed; the existing frontend matches the reviewed build. Deployment claim released. KE14 remains REVIEW for model approval/activation and actual live two-scenario qualification; KE15 stays BLOCKED.
 
 ## Verified artifact and staging state
