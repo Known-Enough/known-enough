@@ -58,6 +58,11 @@ test('three connected owners create, confirm private inputs, negotiate and appro
     for (const page of [leo!, nina!]) await page.getByRole('button', { name: 'Load shared decision' }).click();
     for (const page of pages) {
       await page.getByRole('button', { name: 'Load shared decision' }).click();
+      await expect(page.getByRole('list', { name: 'Shared frame options and types' })).toContainText('Equal contributions, Weighted contributions');
+      await expect(page.getByRole('list', { name: 'Public decision rules' })).toContainText('Sum of Maya proposed ownership + Leo proposed ownership + Nina proposed ownership = 100%');
+      await expect(page.getByRole('list', { name: 'Frame participants and approvals' })).toContainText('required approver');
+      await expect(page.getByRole('button', { name: 'Confirm shared frame' })).toBeDisabled();
+      await page.getByLabel('I reviewed this frame version, its options and public rules.').check();
       await page.getByRole('button', { name: 'Confirm shared frame' }).click();
       await expect(page.getByRole('button', { name: 'Confirm shared frame' })).toHaveCount(0);
       await expect(page.getByRole('heading', { name: 'Your private conditions', exact: true })).toBeVisible();
@@ -128,6 +133,7 @@ test('an unknown connected command result retries the identical envelope and rec
     const page = await context.newPage();
     await page.goto(`${url}?decision=${id}`);
     await page.getByRole('button', { name: 'Load shared decision' }).click();
+    await page.getByLabel('I reviewed this frame version, its options and public rules.').check();
     await page.getByRole('button', { name: 'Confirm shared frame' }).click();
     await page.getByRole('button', { name: 'Retry the same action', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Confirm shared frame' })).toHaveCount(0);

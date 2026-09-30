@@ -1,3 +1,12 @@
+## 2026-09-30T00:50:42Z — KE14 / REVIEW — bounded correction checked
+
+- Completed R1/R2 UI correction from clean baseline `b0699fe`: full shared frame and approval roster/options/rules before version-bound confirmation, complete closed private-rule rendering and named preferences. New focused unit/SSR regression tests a valid complex draft; connected browser tests the review gate and retry. Exact file hashes and limits: [correction checkpoint](ke14-confirmation-correction.md). No backend/cloud/provider action.
+- Focused unit 3/3 and connected browser 2/2, lint and typecheck passed. Final pinned full `npm run check` exited 0: 417 unit/integration / 2 optional skips, hosted 1/1, E2E 47/47, 7 hashes, 15 planning, lint/boundaries 199, types/builds. Correction claim released. The original independent CHANGES_REQUESTED verdict stays open until a different reviewer checks this changed diff. KE14 REVIEW; KE15 BLOCKED; live deployment/qualification needs separate authorization.
+
+## 2026-09-30 — KE14 / IN_PROGRESS bounded R1/R2 correction
+
+- After the independent CHANGES_REQUESTED verdict and released User A/reviewer claims, the current user request to review and finish KE14 directs User B to correct R1/R2. Clean `main` at `b0699fe57127e8e0c7959e02cbd963b3dc872d51`; `git pull --ff-only origin main` passed, ahead/behind 0/0. Actual Codex GPT-6 variant/effort unexposed; Sol/high ticket target. Bounded code: connected decision frame/rule review surface and focused web/browser tests; ticket/board/B records. No backend/contracts/infra/root/lock/CI, cloud deployment, paid call or external message. Corrected code needs a separate focused independent follow-up before live enablement.
+
 ## 2026-09-30T00:41:40Z — KE14 / REVIEW — CHANGES_REQUESTED
 
 - Independent focused review of `44602df..9f0e11f`; all 17 executable manifest hashes match. R1: connected frame confirmation omits material AI-created options/rules/approval roster. R2: complex closed private rules appear as an opaque fallback but remain confirmable; preference review omits its variable. Exact findings and limits: [KE14 follow-up](reviews/KE14-KE09-followup.md). No implementation change; review claim released.

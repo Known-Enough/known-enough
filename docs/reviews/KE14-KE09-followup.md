@@ -16,3 +16,7 @@ Both findings concern informed participant confirmation, not a known server auth
 - Author's pinned full clean-archive check on the identical 17 executable hashes: 414 tests passed / 2 optional skips, hosted browser 1/1, E2E 47/47, references 7/7, planning 15/15, lint/boundaries 199, types/builds. Inspected as dated evidence, not rerun by this reviewer.
 
 KE14 remains REVIEW and KE15 BLOCKED. After the bounded UI correction and focused/full checks, obtain a separate focused follow-up on the changed review surface. Separately authorized cloud/model deployment and live two-scenario qualification remain required for KE14 DONE.
+
+## Subsequent correction handoff — 2026-09-30
+
+User B implemented R1/R2 after this independent verdict. The [checked correction](../ke14-confirmation-correction.md) names the exact changed files and tests. This original verdict remains CHANGES_REQUESTED until a different reviewer inspects the correction; the correction author does not self-close either finding.
