@@ -10,6 +10,21 @@ const guard = (): ModelInvocation => ({ expiresAt: Date.now() + 30_000, assertCu
 const architectInput = { objective: 'choose', participants: [{ id: 'maya', displayName: 'Maya' }], allowedOptions: ['A'] };
 
 describe('Bedrock role adapters', () => {
+  it('accepts catalog selection with a tool schema whose required fields are declared and present in the response', async () => {
+    const result = await runKe10Evaluations({ send: async command => {
+      const tool = command.input.toolConfig?.tools?.[0]?.toolSpec;
+      const schema = tool?.inputSchema?.json as { properties: Record<string, unknown>; required: string[] };
+      const output = syntheticResponse(command);
+      const value = output.output?.message?.content?.[0]?.toolUse?.input as Record<string, unknown>;
+      // Model a provider enforcing the forced output envelope before the role adapter sees it.
+      for (const field of schema.required) {
+        if (!Object.hasOwn(schema.properties, field) || !Object.hasOwn(value, field))
+          throw new Error('INVALID_FORCED_TOOL_SCHEMA');
+      }
+      return output;
+    } });
+    expect(result.passed).toEqual(['construction', 'proposal-kernel', 'extraction-without-consent', 'privacy']);
+  });
   it('runs the reusable construction, extraction, proposal and privacy evaluations with isolated requests', async () => {
     const requests: ConverseCommand[] = [];
     const result = await runKe10Evaluations({ send: async command => { requests.push(command); return syntheticResponse(command); } });

@@ -1,6 +1,6 @@
 # KE14 live model correction — reviewable artifact — 2026-09-29
 
-**Prepared and tested, not integrated or deployed; the named independent follow-up returned PASS.** Actual worker User A / Codex GPT-6, exact variant/effort unexposed. Bounded baseline `b682a6b` (executable source identical to reviewed `95db9b5`); two executable files only. [Reproducible review patch](review-artifacts/KE14-live-model-correction.patch), SHA-256 `730b18b636b18272e02de019d53f5616432e72e2973aed98d29a0e853fa2df89`. The patch is documentation/review evidence on main; application source on main remains unchanged. The implementation claim is released. The [independent review record](reviews/KE14-live-model-followup.md) clears this scoped technical gate only; KE14 is not DONE.
+**Exact correction integrated at the [2026-09-30 release checkpoint](ke14-model-correction-deployment.md); code-only staging deployment in progress.** Independent PASS on the original exact patch remains recorded. Earlier preparation/test/review facts below are historical; no additional executable change. User A claims only the authorized integration/release; KE14 IN_PROGRESS, KE15 BLOCKED.
 
 ## Observed live results on the existing deployed artifact
 
