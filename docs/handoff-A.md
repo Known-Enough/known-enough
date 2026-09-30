@@ -1,3 +1,7 @@
+## KE14 authorized model activation underway — 2026-09-29
+
+User A / Codex GPT-6 (exact variant/effort unexposed) claims authorized KE14 model activation from clean synchronized main `fb9d4663329ed8d4d7edb52e4c4a850338602216`, ff-only pull and ahead/behind 0/0. User explicitly approved Nova Lite synthetic staging use and at most eight paid smoke requests. Scope: exact Nova Lite runtime IAM permission, revision-guarded Lambda environment activation, privacy/configuration readback, agent-owned QA denial/display smoke, participant-owned positive smoke, `docs/ke14-ai-activation.md`, deployment/ticket/board and A log/handoff. No executable change, account-wide retention change, participant consent or final approval inferred. KE14 IN_PROGRESS, KE15 BLOCKED; single A claim active. Prior deployment/review evidence below is historical.
+
 ## KE14 reviewed code deployed — model activation/qualification pending — 2026-09-30
 
 User-authorized deployment from clean main `93d5eda` succeeded after AWS SSO sign-in under scoped `KnownEnoughStage1Release`; source unchanged. [Evidence](ke14-deployment.md): reviewed ZIP `017aae3553a16edbd7b3c019956b388f3e6c16bd08a238e1f705a785c220c6ca`, Lambda Active/Successful, previous environment/role/runtime unchanged; exact `/decisions` POST JWT/preflight routes added using the existing authorizer/integration. Hosted Amplify job 4 source bytes match reviewed production build. Root bootstrap used only for setup/read-only checks; failed-path temporary role/policy removed. Scoped policy/readback and 42 IAM checks passed.

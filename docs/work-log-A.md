@@ -1,3 +1,8 @@
+## 2026-09-29 — KE14 authorized model activation claim
+
+- User A / Codex GPT-6 (exact variant/effort unexposed) claims authorized KE14 model activation from clean synchronized main `fb9d4663329ed8d4d7edb52e4c4a850338602216`, ff-only pull and ahead/behind 0/0. User explicitly approved Nova Lite synthetic staging use and at most eight paid smoke requests. Scope: exact Nova Lite runtime IAM permission, revision-guarded Lambda environment activation, privacy/configuration readback, agent-owned QA denial/display smoke, participant-owned positive smoke, `docs/ke14-ai-activation.md`, deployment/ticket/board and A log/handoff. No executable change, account-wide retention change, participant consent or final approval inferred.
+- Read-only AWS preflight: Nova Lite ACTIVE, invocation logging unconfigured/disabled, account retention inherit. Actual settings reviewed; no zero-retention guarantee inferred. Existing scoped SSO release identity verified; source remains reviewed and unchanged.
+
 ## 2026-09-30 — KE14 reviewed code deployment SUCCEEDED
 
 - User completed SSO sign-in; STS exact account/Stage1Release role verified. Scoped release performed revision-guarded Lambda update: Active/Successful, ZIP SHA-256 017aae3553a16edbd7b3c019956b388f3e6c16bd08a238e1f705a785c220c6ca; original ZIP privately backed up/hash verified, environment/runtime/role/config unchanged. Exact creation JWT/preflight routes added, existing authorizer/audiences/integration/stage read back. Source remained unchanged.
