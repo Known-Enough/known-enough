@@ -430,3 +430,7 @@ User requested a documentation proposal for agents to test existing cloud builds
 ## Live automated test proposal completed — 2026-10-01
 
 [Proposal](live-automated-plan-tests.md) recommends existing staging public checks followed by GitHub OIDC observation, isolated synthetic-account QA and bounded paid-model lanes. Includes target/artifact identity, agent roles, real PKCE, shared aggregate isolation, cleanup/evidence and LAT01–LAT06 implementation steps. Added NP05 reference; its BLOCKED/unclaimed status and NP00 claim are unchanged. Verified local Markdown targets, status/dependency consistency, imported reference hashes 7/7 and git diff whitespace. Documentation only: no application suite required, no agents launched, workflow dispatched, AWS/login/paid/send operation or recurring automation created. Either collaborator can dispatch approved workload tests after the proposed setup/authorization replaces the current A-only policy.
+
+## LIVE01 claim — 2026-10-01
+
+B / Battosai1806; GPT-6 variant/effort unexposed. Clean ff-only main a25a77e, 0/0. Exact new setup/config/fixture/budget/package files in LIVE01 ticket. Prepare isolated QA and primary rollout/readback/rollback package, automatic synthetic identities/mailbox/run leases; no A credentials, NP00/shared inspector edits or cloud operations. A maintains shared board during overlap. Source sync skips deployment CI.

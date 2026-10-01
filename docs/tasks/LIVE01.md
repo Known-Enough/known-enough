@@ -1,6 +1,6 @@
 # LIVE01 — Build the online setup package
 
-- Status: READY — preparation only, unclaimed.
+- Status: IN_PROGRESS — local setup-package preparation.
 - Intended worker: B / Battosai1806, separate clone; record actual worker/model/effort and baseline at claim. Suggested direct target: gpt-6-sol / high, selected by the human.
 - Prerequisite: Clean ff-only main and claim/scope check under the [delivery scheduling exception](../live-test-delivery.md#scheduling-and-ownership).
 - Outcome: One complete repeatable package A can install, rather than separate exploratory administrator instructions.
@@ -19,3 +19,7 @@ New `infra/live-qa/`, `scripts/live-qa/`, `docs/live-qa-setup.md`, setup regress
 6. Test renderer/resource/permission boundaries and cleanup safety locally. Run focused checks and pinned npm run check for executable changes; reference/link/consistency checks for docs. Record real preparation evidence and limitations.
 
 DONE means the complete package is prepared and locally verified, with exact implementation files and setup scope documented. Installation and real account/service proof belong to LIVE04. No AWS writes, paid resources, email, paid AI, deployment or participant actions are authorized by this ticket. Repository sync uses [skip ci]. Continue to [LIVE02](LIVE02.md).
+
+## Claim — 2026-10-01
+
+B / verified Battosai1806, Windows/WSL separate clone; actual GPT-6 variant/effort unexposed. Clean ff-only main a25a77e, ahead/behind 0/0. Exact bounded files: new infra/live-qa/{config.example.json,authorization.example.json}; scripts/live-qa/{config.mjs,template.mjs,aws.mjs,install.mjs,package.mjs,setup.sh,broker.mjs,fixture-core.mjs,budget.mjs,entry.ts,package.json,package-lock.json}; new tests/integration/live-qa-setup.test.ts and docs/live-qa-setup.md; this ticket and own B log/handoff. No root/lock/app/NP00/shared-inspector/shared-deployment changes. Private generated packages/configuration stay outside Git. LIVE04 retains actual installation/service proof and concrete spending/recipient/domain authorization. Repository checkpoint/source sync uses [skip ci].
