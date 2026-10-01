@@ -3,6 +3,8 @@ import { GroupDecisions } from './group-decisions';
 import { Groups } from '@deal-table/contracts';
 export function GroupHome({ api, openDecision }: { api: (path: string, init?: RequestInit) => Promise<Response>;
   openDecision: (id: string) => void }) {
+  const [available, setAvailable] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [account, setAccount] = useState<ReturnType<typeof Groups.AccountSnapshot.parse> | null>(null);
   const [groups, setGroups] = useState<Groups.GroupSnapshot[]>([]);
   const groupRequest = useRef<{ name: string; idempotencyKey: string } | null>(null);
@@ -23,11 +25,12 @@ export function GroupHome({ api, openDecision }: { api: (path: string, init?: Re
     sessionStorage.removeItem('ke-group-invite'); return '';
   });
   async function load() {
+    setChecking(true);
     const response = await api('/account');
-    if (!response.ok) throw new Error('Account information is unavailable.');
+    if (!response.ok) { setChecking(false); setAvailable(false); throw new Error('Account information is unavailable.'); }
     const result = await response.json() as { account: unknown };
     const next = result.account ? Groups.AccountSnapshot.parse(result.account) : null;
-    setAccount(next); if (next?.status !== 'APPROVED') setGroups([]);
+    setAvailable(true); setChecking(false); setAccount(next); if (next?.status !== 'APPROVED') setGroups([]);
     if (next?.status === 'APPROVED') {
       const response = await api('/groups');
       if (!response.ok) { setGroups([]); throw new Error('Groups are unavailable. Refresh or sign in again.'); }
@@ -35,7 +38,7 @@ export function GroupHome({ api, openDecision }: { api: (path: string, init?: Re
       setGroups(result.groups.map(group => Groups.GroupSnapshot.parse(group)));
     }
   }
-  useEffect(() => { let active = true; void load().catch(() => { if (active) setNotice('Group onboarding is not available on this server yet.'); });
+  useEffect(() => { let active = true; void load().catch(() => { if (active) { setChecking(false); setNotice('Groups are unavailable. Try refreshing; this preview may not include group onboarding.'); } });
     return () => { active = false; }; }, []); // The component is keyed to the authenticated session.
   async function action(path: string, body: unknown, after?: (result: Record<string, unknown>) => void) {
     setBusy(true); setNotice('');
@@ -50,16 +53,16 @@ export function GroupHome({ api, openDecision }: { api: (path: string, init?: Re
     } catch { setNotice('The result is unknown. Refresh before retrying; replace a lost invitation link explicitly.'); }
     finally { setBusy(false); }
   }
-  return <section className="ke-card"><h2>Your account and groups</h2>
+  return <section className="ke-card" aria-busy={busy}><h2>Your account and groups</h2>
     <p>Register through the sign-in page and verify your email. Then request access here. Global access approval and accepting a group invitation are separate.</p>
     <button className="secondary" disabled={busy} onClick={() => { void load().catch(() => setNotice('Refresh failed. Sign in again if needed.')); }}>Refresh account and groups</button>
-    {!account && <><label htmlFor="group-display-name">Your display name</label><input id="group-display-name" value={name} maxLength={80} onChange={event => setName(event.target.value)} />
+    {available && !checking && !account && <><label htmlFor="group-display-name">Your display name</label><input id="group-display-name" value={name} maxLength={80} onChange={event => setName(event.target.value)} />
       <button disabled={busy || !name.trim()} onClick={() => void action('/account/register', { displayName: name })}>Request access</button></>}
     {account?.status === 'PENDING' && <p>Access request pending. The operator must approve it before you create or join groups.</p>}
     {account?.status === 'REJECTED' && <p>Your access request was declined. Contact the operator outside this app.</p>}
     {account?.status === 'DISABLED' && <p>Your access is disabled. Group and decision actions are unavailable.</p>}
     {account?.status === 'APPROVED' && <>
-      <p>Access approved for {account.displayName}.</p>
+      <p>Access approved for {account.displayName}. Create a group or accept an invitation, then describe what your group should decide.</p>
       <label htmlFor="new-group-name">New group name</label><input id="new-group-name" value={groupName} maxLength={80} disabled={!!groupRequest.current} onChange={event => setGroupName(event.target.value)} />
       <button disabled={busy || !groupName.trim()} onClick={() => { groupRequest.current ??= { name: groupName, idempotencyKey: crypto.randomUUID() }; void action('/groups', groupRequest.current, () => { groupRequest.current = null; setGroupName(''); }); }}>Create group</button>
       {token && <><p>A group invitation is waiting. Accept it only if you want to join; it does not confirm a decision or approve a proposal.</p>
@@ -77,8 +80,8 @@ export function GroupHome({ api, openDecision }: { api: (path: string, init?: Re
           })}>Create invitation link</button></>}
       </article>)}
     </>}
-    {link && <><p>Copy this recipient-bound link privately. It expires after 24 hours. No email has been sent.</p><label htmlFor="group-copy-link">Invitation link</label>
+    {link && <><p>Copy this recipient-bound link privately. It expires after 24 hours. No email has been sent. Share the link yourself only with the intended recipient.</p><label htmlFor="group-copy-link">Invitation link</label>
       <input id="group-copy-link" readOnly value={link} onFocus={event => event.currentTarget.select()} /><button className="secondary" onClick={() => setLink('')}>Hide invitation link</button></>}
-    {notice && <p role="status">{notice}</p>}
+    {(checking || busy || notice) && <p role="status">{checking ? 'Checking your account…' : busy ? 'Saving or checking the group…' : notice}</p>}
   </section>;
 }

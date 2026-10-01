@@ -1,9 +1,12 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { ruleText, variableText } from './connected-decision';
+class UserFlowError extends Error {}
 export function GroupDecisions({ group, api, reload, openDecision }: { group: Groups.GroupSnapshot;
   api: (path: string, init?: RequestInit) => Promise<Response>; reload: () => Promise<void>; openDecision: (id: string) => void }) {
   const [objective, setObjective] = useState(''); const [draft, setDraft] = useState<Groups.GroupDraft | null>(null);
+  const draftHeading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => { draftHeading.current?.focus(); }, [draft?.id, draft?.revision]);
   const [dirty, setDirty] = useState(false);
   const [reviewed, setReviewed] = useState(false); const [busy, setBusy] = useState(false); const [notice, setNotice] = useState('');
   const pending = useRef<{ objective: string; idempotencyKey: string } | null>(null);
@@ -12,20 +15,20 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
   async function request(path: string, body?: unknown) {
     const response = await api(`/groups/${group.id}/${path}`, body === undefined ? undefined : {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
-    if (!response.ok) throw new Error(response.status === 409 ? 'The group or draft changed. Refresh and review the current terms.'
+    if (!response.ok) throw new UserFlowError(response.status === 409 ? 'The group or draft changed. Refresh and review the current terms.'
       : response.status === 422 ? 'This draft needs supported public choices or clarification before it can continue.'
       : 'This action is unavailable. Check your account and organizer access.');
     return response.json() as Promise<Record<string, unknown>>;
   }
   async function action(work: () => Promise<void>) {
     setBusy(true); setNotice('');
-    try { await work(); } catch (error) { setNotice(error instanceof Error ? error.message : 'The result is unknown. Refresh before retrying.'); }
+    try { await work(); } catch (error) { setNotice(error instanceof UserFlowError ? error.message : 'The result is unknown. Refresh before retrying.'); }
     finally { setBusy(false); }
   }
   function changeFrame(frame: KE.PublicDecisionFrame) {
     if (draft) setDraft({ ...draft, frame }); setReviewed(false); setDirty(true);
   }
-  return <section><h4>Decisions for {group.name}</h4>
+  return <section aria-busy={busy}><h4>Decisions for {group.name}</h4>
     {group.decisions.map(decision => <div key={decision.id}>{decision.current
       ? <button disabled={busy} onClick={() => openDecision(decision.id)}>Open decision</button>
       : <><p>Membership changed. This decision is paused so old confirmations cannot apply to a new group.</p>
@@ -45,11 +48,12 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
         const result = await request('drafts', pending.current); setDraft(Groups.GroupDraft.parse(result.draft)); setDirty(false); setRoster(null);
         pending.current = null; setReviewed(false); await reload();
       })}>{pending.current ? 'Retry the same draft request' : 'Draft a new decision'}</button>
+      {pending.current && !busy && <button className="secondary" onClick={() => { pending.current = null; setNotice('Refresh saved drafts before starting a different request.'); }}>Release this draft request for editing</button>}
       {group.drafts.map(item => <p key={item.id}>{item.current ? <button disabled={busy} onClick={() => void action(async () => {
         const result = await request(`drafts/${item.id}`); setDraft(Groups.GroupDraft.parse(result.draft)); setDirty(false); setRoster(null); setReviewed(false);
       })}>{item.created ? 'Open or retry decision' : 'Review draft'}: {item.title}</button> : 'An earlier draft needs a new request because group membership changed.'}</p>)}
     </>}
-    {draft && <div className="local-note"><h4>Review the public draft</h4>
+    {draft && <div className="local-note"><h4 tabIndex={-1} ref={draftHeading}>Review the public draft</h4>
       <label htmlFor={`draft-title-${group.id}`}>Decision title</label><input id={`draft-title-${group.id}`} value={draft.frame.title} maxLength={160} disabled={busy || !!draft.createdDecisionId} onChange={event => changeFrame({ ...draft.frame, title: event.target.value })} />
       <p>{draft.frame.objective}</p><p>{draft.frame.description}</p>
       <h5>Everyone required to approve</h5><ul>{draft.frame.participants.map(member => <li key={member.id}>{member.displayName}</li>)}</ul>
@@ -86,6 +90,6 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
         const snapshot = KE.PublicDecisionSnapshot.parse(result.snapshot); setRoster(null); setReviewed(false); await reload(); openDecision(snapshot.frame.decisionId);
       })}>Start a new review with this roster</button>
     </div>}
-    {notice && <p role="status">{notice}</p>}
+    {(busy || notice) && <p role="status">{busy ? 'Preparing or saving your decision…' : notice}</p>}
   </section>;
 }

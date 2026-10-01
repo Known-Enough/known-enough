@@ -410,3 +410,7 @@ B / verified Battosai1806, GPT-6 variant/effort unexposed. General group drafts/
 ## NP03 claim — 2026-10-01
 
 B / Battosai1806; GPT-6 variant/effort unexposed. Clean ff-only main b9be678. UI/inventory scope in NP03; preserve exact consent facts and simulation labels. No backend/cloud/model authority changes.
+
+## NP03 completed — 2026-10-01
+
+B / Battosai1806, GPT-6 variant/effort unexposed. Local clarity fixes and existing owner disclosure/revocation controls verified; [inventory](np03-screen-inventory.md) separates rendered evidence from NP05 checks. Focused browser 4/4; full check 457 / 2 optional skips, hosted 1/1, E2E 51/51. NP00 source/claim preserved. NP04 next; external operations remain NP05. Source sync skips CI.

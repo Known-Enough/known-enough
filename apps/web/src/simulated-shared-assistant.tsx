@@ -56,7 +56,7 @@ export function SimulatedSharedAssistant({ snapshot, fetchPublic, onFreshSnapsho
   return <section className="ke-card ke-assistant" aria-labelledby="ke-assistant-heading">
     <p className="eyebrow">SIMULATED ALEXA+ · SHARED ASSISTANT</p>
     <h2 id="ke-assistant-heading">Ask about this decision</h2>
-    <p className="ke-help">This simulation uses the current authenticated public view. It has no native Alexa connection, model call, private profile access, or permission controls.</p>
+    <p className="ke-help">This is simulated Alexa+, using the current shared view. It does not connect to native Alexa or call live AI. It cannot read private needs, grant permissions or approve for anyone.</p>
     {answers.length > 0 && <ol className="ke-assistant-answers" aria-label="Assistant answers">{answers.map((answer, index) => <li key={index}>{answer}</li>)}</ol>}
     {notice && <p role="status" className="local-note">{notice}</p>}
     <form onSubmit={event => void ask(event)}>

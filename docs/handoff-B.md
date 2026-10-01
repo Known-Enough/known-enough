@@ -218,3 +218,7 @@ B / verified Battosai1806; actual GPT-6 exact variant/effort unexposed. NP01 loc
 ## NP02 completed — 2026-10-01
 
 B / verified Battosai1806, GPT-6 variant/effort unexposed. General group drafts/creation/typed candidate domains and safe membership revision implemented; no NP00 owned files touched. Final full check 456 / 2 optional skips, hosted 1/1, E2E 48/48. Browser exposed/fixed editor unmount and unsaved/recovery cases are covered. NP03 next; deployment/managed/signup/email/paid-model evidence stays NP05. Source sync skips CI.
+
+## NP03 completed — 2026-10-01
+
+B / Battosai1806, GPT-6 variant/effort unexposed. Local clarity fixes and existing owner disclosure/revocation controls verified; [inventory](np03-screen-inventory.md) separates rendered evidence from NP05 checks. Focused browser 4/4; full check 457 / 2 optional skips, hosted 1/1, E2E 51/51. NP00 source/claim preserved. NP04 next; external operations remain NP05. Source sync skips CI.

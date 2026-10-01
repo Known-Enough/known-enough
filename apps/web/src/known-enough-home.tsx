@@ -342,12 +342,12 @@ export function KnownEnoughHome({
       </form>
     </section>
 
-    <p className="notice ke-privacy"><strong>Known Enough product privacy promise for the connected service:</strong> “{privacyPromise}” This test login is a local-only signed session issued by the loopback API; it is not Cognito, a real account, or production authentication. The frame draft sends only the public objective, proposed participant labels and candidate options to the loopback API. The Christmas scenario uses fictional participants, synthetic conditions, and temporary in-memory state; it disappears when the API stops. Invitations are local links only and are never emailed.</p>
+    <p className="notice ke-privacy"><strong>Known Enough product privacy promise for the connected service:</strong> “{privacyPromise}” This local demo uses fictional test accounts; it does not sign you in to a real connected account. Only the public objective, fictional names and proposed options are used to draft the shared terms. The Christmas scenario uses fictional participants, synthetic conditions, and temporary in-memory state; it disappears when the API stops. Invitations are local links only and are never emailed.</p>
 
     <section className="ke-card ke-christmas-demo" aria-labelledby="christmas-demo-heading">
       <p className="eyebrow">END-TO-END LOCAL SCENARIO</p>
       <h2 id="christmas-demo-heading">Try the fictional Christmas decision</h2>
-      <p>Five fictional participants, confirmed conditions, a kernel-checked proposal and an optional private negotiation. Each participant signs in as a separate local test user and must accept Maya’s invitation before the API grants scenario access. The loopback API uses temporary in-memory shared state that disappears when it stops; the hosted HTTPS preview remains a static mock with no shared state.</p>
+      <p>Five fictional participants, confirmed conditions, a proposal checked against the confirmed rules and an optional private negotiation. Each participant signs in as a separate local test user and must accept Maya’s invitation before the API grants scenario access. This local test uses temporary shared state that disappears when the test service stops; the hosted HTTPS preview remains a static mock with no shared state.</p>
       {pendingInviteToken && <div className="local-note" aria-label="Pending invitation">
         <p>An invitation link is open for this browser tab. Sign in with the test user it was issued for.</p>
         <button type="button" onClick={() => void redeemPendingInvitation()} disabled={demoLoading}>
@@ -392,7 +392,7 @@ export function KnownEnoughHome({
             const variable = demoData.publicSnapshot.frame.variables.find(item => item.id === assignment.variableId);
             return variable ? <li key={assignment.variableId}><strong>{variable.label}:</strong> {describeDemoValue(assignment.value, variable)}</li> : null;
           })}</ul>
-          <p>The proposal was accepted by the existing deterministic kernel. No private reason or condition is included in these shared facts.</p>
+          <p>The proposal satisfies the supported confirmed rules. No private reason or condition is included in these shared facts.</p>
         </section>}
         {demoData.ownerSnapshot.pendingQuestions.filter(question => question.status === 'PENDING').map(question => {
           const constraint = demoData.ownerSnapshot.confirmedConstraints.find(item => item.constraintId === question.constraintId

@@ -112,7 +112,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh }: {
   return <>
     <section className="ke-card"><h2>Shared frame</h2><p>{snapshot.frame.objective}</p>
       <p>{snapshot.frame.description}</p>
-      <p>Frame version {snapshot.frame.frameVersion}. Review the people, choices and rules below before confirming this version.</p>
+      <p>Review these current shared terms, the people, choices and rules before confirming them.</p>
       <h3>Participants and approvals</h3>
       <ul aria-label="Frame participants and approvals">{snapshot.frame.participants.map(person => <li key={person.id}>{person.displayName}: {person.requiredForApproval ? 'required approver' : 'optional participant'}</li>)}</ul>
       <h3>Shared topics and options</h3>
@@ -150,13 +150,35 @@ export function ConnectedDecision({ snapshot, owner, api, refresh }: {
         {(['ALLOW', 'DECLINE'] as const).map(answer => <button key={answer} disabled={blocked} onClick={() => void command('ANSWER_NEGOTIATION', {
           questionId: question.questionId, constraintVersion: question.constraintVersion, requestIdentity: question.requestIdentity, answer })}>{answer === 'ALLOW' ? 'Allow this adjustment' : 'Decline this adjustment'}</button>)}
       </div>)}
+      {owner.negotiationPermissions.filter(permission => permission.status === 'ACTIVE').map(permission => <div key={permission.permissionId}><h3>Your allowed adjustment</h3>
+        <p>{ruleText(permission.adjustment, variables)}</p><p>Expires {permission.expiresAt}. You can revoke permission for future use.</p>
+        <button disabled={blocked} onClick={() => void command('REVOKE_NEGOTIATION', { permissionId: permission.permissionId, permissionVersion: permission.permissionVersion })}>Revoke this adjustment</button>
+      </div>)}
       <button disabled={blocked || !['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status)} onClick={() => void generate()}>Explore proposals</button>
     </section>}
-    {proposal && <section className="ke-card"><h2>Current hypothetical proposal</h2>
+    {owner && owner.disclosurePermissions.length > 0 && <section className="ke-card"><h2>Your disclosure choices</h2>
+      <p>Sharing a detail is separate from allowing an adjustment or approving a proposal. Declining to share does not by itself reject the proposal.</p>
+      {owner.disclosurePermissions.map(permission => <div key={permission.permissionId}>
+        <h3>{permission.status === 'PENDING' ? 'Review this exact disclosure' : 'Disclosure record'}</h3>
+        {permission.kind === 'EXACT_TEXT' ? <blockquote>{permission.text}</blockquote> : <ul>{permission.variableIds.map(id => {
+          const variable = variables.find(item => item.id === id); const assignment = owner.privateProposalValues?.values.find(item => item.variableId === id);
+          return <li key={id}>{variable?.label ?? 'Your value'}: {assignment ? valueText(assignment.value, variable) : 'Refresh to review the current proposal value.'}</li>;
+        })}</ul>}
+        <p>Audience: {permission.audienceParticipantIds.map(id => snapshot.frame.participants.find(person => person.id === id)?.displayName ?? 'Earlier group member').join(', ')}.</p>
+        <p>Expires {permission.expiresAt}. {permission.status === 'PENDING' ? 'Not yet allowed or published.' : permission.status === 'ACTIVE' ? 'Permission recorded; publication is a separate action.' : permission.status.toLowerCase()}.</p>
+        {permission.status === 'PENDING' && <>
+          <button disabled={blocked || (permission.kind === 'VARIABLE_VALUES' && (!owner.privateProposalValues || permission.variableIds.some(id => !owner.privateProposalValues!.values.some(value => value.variableId === id))))} onClick={() => void command('DECIDE_DISCLOSURE', { permissionId: permission.permissionId, permissionVersion: permission.permissionVersion, decision: 'ALLOW' })}>Allow this disclosure</button>
+          <button disabled={blocked} onClick={() => void command('DECIDE_DISCLOSURE', { permissionId: permission.permissionId, permissionVersion: permission.permissionVersion, decision: 'DECLINE' })}>Decline this disclosure</button>
+        </>}
+        {permission.status === 'ACTIVE' && <button disabled={blocked} onClick={() => void command('REVOKE_DISCLOSURE', { permissionId: permission.permissionId, permissionVersion: permission.permissionVersion })}>Revoke future disclosure</button>}
+        <p>Revoking stops future publication. People cannot unread information already shared.</p>
+      </div>)}
+    </section>}
+    {proposal && <section className="ke-card"><h2>{decisionId.startsWith('groupdecision-') ? 'Current proposal' : 'Current hypothetical proposal'}</h2>
       <ul>{proposal.facts.values.map(item => <li key={item.variableId}>{variables.find(variable => variable.id === item.variableId)?.label}: {valueText(item.value, variables.find(variable => variable.id === item.variableId))}</li>)}</ul>
       {owner?.privateProposalValues && <div><h3>Your private part of this proposal</h3>
         <ul>{owner.privateProposalValues.values.map(item => <li key={item.variableId}>{variables.find(variable => variable.id === item.variableId)?.label}: {valueText(item.value, variables.find(variable => variable.id === item.variableId))}</li>)}</ul></div>}
-      <p>Valid under currently confirmed supported conditions. All offers are synthetic. This does not execute a booking or purchase, or establish legal ownership.</p>
+      <p>Valid under currently confirmed supported conditions. {decisionId.startsWith('groupdecision-') ? 'Review the actual choices and your own needs before approving; this is not a promise of the best possible outcome.' : 'All offers are synthetic.'} This does not execute a booking or purchase, or establish legal ownership.</p>
       <p>{snapshot.approvedParticipantIds.length} of {snapshot.frame.requiredParticipantIds.length} approvals. {snapshot.status === 'AGREED' ? 'Everyone approved this exact outcome.' : 'Agreement is still pending.'}</p>
       {owner && <><label><input type="checkbox" disabled={blocked} checked={reviewed} onChange={event => setReviewed(event.target.checked)} />I reviewed the shared outcome and my private part of this exact proposal.</label>
         <button disabled={blocked || !reviewed || !!owner.ownApproval} onClick={() => void command('APPROVE_PROPOSAL', { proposalId: proposal.proposalId,
