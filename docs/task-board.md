@@ -1,5 +1,22 @@
 # Known Enough — shared task queue
 
+## Current delivery priority — user direction, 2026-10-01
+
+The user requested named tasks B can prepare, one final A installation, and unattended real tests triggered by GitHub deployments. [Live test delivery](live-test-delivery.md) governs this sequence and supersedes older next-task routing below for B. NP00 remains A/Luna's active claim; no claim is released. This documentation-only planning update claims no implementation or online PASS.
+
+| Order | Task | Worker | Status |
+| --- | --- | --- | --- |
+| 1 | [LIVE01 — Build the online setup package](tasks/LIVE01.md) | B preparation | READY / unclaimed |
+| 2 | [LIVE02 — Test the real user journey](tasks/LIVE02.md) | B preparation | BLOCKED on LIVE01 |
+| 3 | [LIVE03 — Run checks after every deployment](tasks/LIVE03.md) | B preparation | BLOCKED on LIVE02 |
+| 4 | [LIVE04 — Install once and prove B can run everything](tasks/LIVE04.md) | A installation, then B qualification | BLOCKED on preparation and concrete setup/budgets |
+
+B prepares LIVE01–03 sequentially in a separate clone under the explicit bounded scheduling exception, without A's AWS credentials or overlap with NP00 files. Record exact claims and coordinate shared file amendments. A maintains shared board routing during the overlap. NP01–NP04 local DONE and NP05's historical acceptance remain intact; unfinished NP05 online work maps to LIVE01–04. Required real tests cannot be marked PASS from local evidence. No cloud writes, spending, email, paid AI or deployment are performed/authorized by this planning update.
+
+Latest established shared-check evidence: the administrator created the GitHub staging-inspection role; run [36926796651](https://github.com/Known-Enough/known-enough/actions/runs/36926796651) authenticated with that role and passed 10/10 public website checks. AWS inventory and the complete report still failed in its second attempt. Luna's existing NP00 repair remains separate. Older absent-role/no-run paragraphs below describe their earlier checkpoint.
+
+## Retained NP queue and checkpoint history
+
 Current batch: **NP — Next Phase**, authorized 2026-09-30. [Batch direction and closure mapping](next-phase.md), [workflow](agent-workflow.md#np-batch-policy), and each NP ticket govern current work. Original NP00–NP04 batch plus the user-requested [NP05 live-check task](tasks/NP05.md), six tickets total. All previous tickets are DONE by user-directed administrative closure; their original evidence/statuses remain in their historical bodies and the [pre-NP inventory](archive/pre-np-task-statuses.json). This is not new technical verification or release acceptance.
 
 **Current B outcome (2026-10-01): NP01–NP04 local DONE**, with full 464 / 2 optional skips, hosted 1/1 and E2E 53/53. The user scheduling override below governs B's completed work; older NP00-only routing paragraphs are preserved as the prior checkpoint. NP00 remains A's active claim. NP05 requires a separately authorized A/configured-host operations claim; [qualification and limits](np04-qualification.md).

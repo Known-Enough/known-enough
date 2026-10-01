@@ -1,5 +1,9 @@
 # Live automated plan tests
 
+## Current execution route — 2026-10-01
+
+The user has scheduled [LIVE01–04](live-test-delivery.md) to implement this proposal: B prepares setup, real scenarios and post-deployment automation; A installs the approved package once; B proves complete live runs. The detailed assertions and access/privacy constraints below remain requirements. The original prepared-role/no-run statements are historical: shared run [36926796651](https://github.com/Known-Enough/known-enough/actions/runs/36926796651) now has verified GitHub AWS login and public 10/10 PASS, but AWS inventory/report FAIL. Full NP03/NP04 live automation is still unimplemented.
+
 Proposal requested on 2026-10-01. The broader authenticated synthetic/isolated-QA plan remains PROPOSED. The narrow public smoke and read-only AWS inventory workflow is prepared under A's current NP00 claim; its AWS inspector role is not installed and no GitHub live run has completed. See [shared staging checks](shared-staging-checks.md). B / verified Battosai1806; actual GPT-6 variant/effort unexposed. Repository baseline when proposed: `28845f8`. This document remains the future execution path for broader [NP05](tasks/NP05.md), preserving NP00's active claim and historical evidence.
 
 ## Recommendation

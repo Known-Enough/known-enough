@@ -1,3 +1,9 @@
+## Current A handoff — LIVE delivery, 2026-10-01
+
+A/Luna retains NP00 and its shared-report/model-disable work. The user authorizes B's non-overlapping LIVE01–03 preparation; see [delivery plan](live-test-delivery.md). A's later [LIVE04 step](tasks/LIVE04.md) is one exact verified setup package in CloudShell with automatic readback, after concrete resource/cost authorization and a coordinated operations handoff. B then qualifies the real journeys through its own GitHub account. No personal credential transfer or repeated human project-sign-off/manual testing gate. Existing shared run authenticated and public 10/10 passed; inventory/report still failed. No new cloud or paid action in this update. Older preparation/routing below is historical.
+
+---
+
 ## Current routing for User A — NP batch, 2026-10-01
 
 **Verified identity correction:** A is Ricardo / GitHub `martelaxe`. The Mac worker's Git credential authenticated as martelaxe; the current WSL task also uses A's account and log. B is Octavio Alatorre / `Battosai1806`. See [people and workers](people-and-workers.md); a Mac/chat title is not evidence of B's live activity. Historical role/author names remain preserved and do not retroactively establish reviewer independence.

@@ -1,3 +1,9 @@
+## Current next work for B — LIVE delivery, 2026-10-01
+
+After a clean ff-only pull and claim check, claim LIVE01 and prepare LIVE01–03 sequentially in your separate clone. Use the [new delivery plan](live-test-delivery.md) and [LIVE01 ticket](tasks/LIVE01.md). This is an explicit B scheduling exception alongside A/Luna's preserved NP00 claim. Prepare all setup/test/automation code without A credentials; do not perform cloud writes or overlap NP00 files. Record exact file scope and your own log/handoff. A applies one verified package in LIVE04, then B proves its own GitHub dispatch and automatic post-deployment complete PASS. No live completion is claimed now. Older routing below is retained history.
+
+---
+
 ## Current routing for User B — NP batch, 2026-09-30
 
 **Verified identity correction:** B is Octavio Alatorre / GitHub `Battosai1806`; A is Ricardo / `martelaxe`. The Mac worker currently authenticates as A. See [people and workers](people-and-workers.md). “MAC DIRECT” is a local chat title and cannot establish B's activity. The assistant's own misplaced NP planning entry is archived and attributed to A; B's prior log history is preserved. B's current activity remains unconfirmed until a named synchronized update or identified B session is available.

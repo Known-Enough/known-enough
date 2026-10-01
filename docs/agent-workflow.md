@@ -1,5 +1,11 @@
 # Task execution and collaboration
 
+## Latest live-delivery scheduling override — user direction, 2026-10-01
+
+[Live test delivery](live-test-delivery.md) introduces LIVE01–04 to deliver independently runnable online NP03/NP04 scenarios and automatic checks after authorized GitHub deployments. B may prepare LIVE01 → LIVE02 → LIVE03 sequentially in a separate clean clone while A/Luna retains NP00. This extends the prior explicit B preparation exception; no NP00 claim is released and no subagents are permitted. B records exact ticket/file scope and its own log/handoff; A maintains shared board routing during overlap. B must not touch NP00's shared-inspection/model-disable/runtime cleanup files. Coordinate exact amendments before shared source/root/config/lock/deploy workflow changes. LIVE04 is a sequential operations handoff with concrete installation/cost authorization.
+
+LIVE01–03 complete on verified preparation criteria; real service acceptance is LIVE04. Approved routine test runs use GitHub workload access and synthetic actors, with no recurring human review gate, personal AWS login, manual fixture admission or mailbox-code copying. Cloud installation/publication and recurring paid AI/email need a concrete approved envelope first; this planning direction does not authorize unspecified resources/spending. Preserve participant authority for real people. Follow the delivery plan and current board before older next-task paragraphs below.
+
 <a id="np-batch-policy"></a>
 ## Current NP batch policy — user direction, 2026-09-30
 
