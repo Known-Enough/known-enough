@@ -3,6 +3,8 @@
 <a id="np-batch-policy"></a>
 ## Current NP batch policy — user direction, 2026-09-30
 
+**Identity correction:** [People and workers](people-and-workers.md) maps A to Ricardo / GitHub `martelaxe` and B to Octavio Alatorre / GitHub `Battosai1806`. The Mac is a separate worker using A's account at the verified checkpoint. A local chat such as “MAC DIRECT” cannot establish B's activity. New claims distinguish account, worker/checkout, session and task role and use the account owner's log. All machines/sessions share the single-active-task queue; extra workers do not permit parallel implementation.
+
 [NP direction](next-phase.md) and the [shared board](task-board.md) now govern selection: NP00 → NP01 → NP02 → NP03 → NP04. Both A and B receive the same highest-priority eligible task. Initial next task is NP00, READY/unclaimed. Before implementation or task-artifact edits, use a clean separate `main` clone, successfully pull `git pull --ff-only origin main`, inspect synchronized claims, and record the exact claimant/baseline/files. One active task across both users; no subagents. If the current task needs A-only cloud operations, preserve a bounded handoff within that task and explicitly transfer it; do not skip to a later task or share credentials.
 
 The user administratively closed all pre-NP tickets and their scheduling claims. Each is DONE for that scheduling decision with its original status/body retained as history; this does not establish missing technical acceptance. Inherited technical debt, old KE14 integration/check/live qualification and IAM cleanup are consolidated in NP00. Preserve existing work and source `5e87543`; remote synchronization was observed at `bafa1d4` during planning. Never overwrite another clone's saved changes.

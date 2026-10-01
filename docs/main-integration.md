@@ -1,5 +1,7 @@
 # Shared main — integrated baseline
 
+Current attribution follows [people and workers](people-and-workers.md): Ricardo/martelaxe is A; Octavio/Battosai1806 is B; the Mac is a separate worker currently using A's account. Historical author/role names below do not establish current identity or live activity. Follow the [NP queue](task-board.md) across all workers.
+
 ## Current synchronization policy — 2026-09-27
 
 The user has granted standing authorization to push completed task work, verified documentation-only changes, and checked reviewable checkpoints to `origin/main` after focused checks, without a separate push approval. This supersedes dated historical statements below that new publication was not authorized. A checkpoint may be pushed for its named reviewer; preserve REVIEW/BLOCKED status and keep successors gated until required technical reviews pass. The user temporarily deferred project-level human acceptance/sign-off checkpoints on 2026-09-27; existing states remain factual. Pushing a review/status document does not accept a task. After each push, verify local `main` equals `origin/main`; the other clone must pull before taking the next task. AWS deployments, paid resources, spending and external publication remain separately authorized actions.

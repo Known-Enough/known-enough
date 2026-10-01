@@ -1,5 +1,7 @@
 ## Current routing for User A — NP batch, 2026-09-30
 
+**Verified identity correction:** A is Ricardo / GitHub `martelaxe`. This Mac's Git credential authenticated as martelaxe; current Mac work is an A-account worker and uses A's log. B is Octavio Alatorre / `Battosai1806`. See [people and workers](people-and-workers.md); a Mac/chat title is not evidence of B's live activity. Historical role/author names remain preserved and do not retroactively establish reviewer independence.
+
 User-directed shared scheduling notice: [NP00](tasks/NP00.md) is the next task for both A and B, READY and unclaimed. Follow the [current board](task-board.md), [NP direction](next-phase.md) and [workflow override](agent-workflow.md#np-batch-policy) before any historical next step below. Pull clean `main` ff-only, recheck the claim, and claim only the first eligible NP task. One active task; no subagents or independent/human reviewer sessions now. A-only authorized AWS operations use a sequential handoff within that task; B receives no AWS credentials.
 
 All previous task claims are administratively closed by the user. Old statuses/check failures/remaining scope are preserved as history, with unfinished technical work transferred to NP00 and human/release preparation deferred. Source `5e87543` is in synchronized history at planning baseline `bafa1d4`; old unpushed/undeployed assertions below describe their date and are not current synchronization evidence. No new deployment or passing full check is claimed. Preserve any unshared changes before takeover.

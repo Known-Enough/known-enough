@@ -28,7 +28,7 @@ Model targets: `gpt-6-sol` / high for NP00, NP01, NP02 and NP04; `gpt-6-luna` / 
 
 When either user asks what to do next, read the current [workflow](agent-workflow.md#np-batch-policy) and [board](task-board.md) before following a personal handoff's historical next step. On a clean separate clone, successfully run `git pull --ff-only origin main`, recheck the shared claim, and take the first eligible NP task. Initial answer: **NP00**. If it is claimed, report its claimant and next action; do not start NP01 or a parallel task. If an A-only authorized operation is needed, B preserves a bounded handoff within the same task, and A explicitly takes over. Neither user gets a permanent subsystem assignment.
 
-The shared commit communicates these priorities to the other clone when it pulls; it is not a live notification or a claim that the other user has read them. Both handoffs carry a routing notice. Only the current session's B-side log is updated; A's personal log is preserved.
+The shared commit communicates these priorities to the other clone when it pulls; it is not a live notification or a claim that the other user has read them. Both handoffs carry a routing notice. The [identity correction](people-and-workers.md) establishes A as Ricardo/martelaxe, B as Octavio/Battosai1806 and the Mac as a separate worker currently using A's account. The original Mac planning note was mistakenly filed in B's log; its exact text is archived and the corrected attribution recorded in A's log. All workers share the same single-active-task queue.
 
 ## Unfinished work mapping
 

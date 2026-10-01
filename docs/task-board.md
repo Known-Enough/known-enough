@@ -4,6 +4,8 @@ Current batch: **NP — Next Phase**, authorized 2026-09-30. [Batch direction an
 
 ## Current priority and claim
 
+**Who is who:** A = Ricardo / GitHub `martelaxe`; B = Octavio Alatorre / GitHub `Battosai1806`. The Mac is an execution worker currently using A's account. See [verified mapping and status rules](people-and-workers.md). Account names, machines and chat titles are separate; no B activity is inferred from a Mac chat's status. One active task total includes the Mac worker.
+
 **Next task for either User A or User B: [NP00 — technical closeout](tasks/NP00.md).** Status READY; unclaimed. No NP implementation or reviewer task is active. This update is documentation planning only.
 
 The old KE14 integration claim is closed by the user's explicit direction; its unfinished technical obligations transfer to NP00. Source commit `5e87543` is present in synchronized `main`/`origin/main` at planning baseline `bafa1d4`. The exact patch and recorded check failures are preserved. Staging deployment, a clean full integration check and complete live-scenario qualification still require NP00 evidence. Preserve any unshared work in the other clone before taking over; do not discard or redo it blindly.
