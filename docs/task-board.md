@@ -1,5 +1,10 @@
 # Known Enough — shared task queue
 
+
+### Shared report repair checkpoint — 2026-10-01
+
+GitHub diagnostic run [36930827040](https://github.com/Known-Enough/known-enough/actions/runs/36930827040) establishes the actual denial: Amplify ListJobs requires the observed `main/jobs/*` resource, with error reason no identity-based allow. The original branch-only simulation did not evaluate that resource. Correction `94d48f9` adds only the observed jobs resource to the existing read-only statement. Access Analyzer returned no findings; simulation allows main job listing and denies other-branch listing/StartJob. Safe-error and failed-inventory regression tests pass 4/4; pinned full check passes 468 / 2 optional skips, hosted 1/1 and E2E 53/53. The current installed baseline was reverified unchanged. Administrator CloudShell apply was supplied to the user because local administrator profiles remain unavailable; installed correction and full report PASS are still pending. No paid call, deployment, signup or email. NP00 stays IN_PROGRESS; B LIVE01 preparation remains independent. [Repair instructions](../docs/shared-staging-checks.md#amplify-listjobs-resource-repair--administrator-applies-once).
+
 ## Current delivery priority — user direction, 2026-10-01
 
 The user requested named tasks B can prepare, one final A installation, and unattended real tests triggered by GitHub deployments. [Live test delivery](live-test-delivery.md) governs this sequence and supersedes older next-task routing below for B. NP00 remains A/Luna's active claim; no claim is released. This documentation-only planning update claims no implementation or online PASS.
