@@ -26,15 +26,22 @@ WSL's bootstrap/root-login profiles remain unavailable; its read-only session ca
 ```bash
 set -euo pipefail
 test "$(aws sts get-caller-identity --query Account --output text --no-cli-pager)" = "092954139775"
-# In a clean clone containing the verified correction commit:
+INSPECTOR_FIX_FILE=$(mktemp)
+curl -fsSL \
+  "https://raw.githubusercontent.com/Known-Enough/known-enough/94d48f9d487767b34e14cdef8e078bf04bb2e2a5/infra/permissions/shared-staging-github-inspect.json" \
+  -o "$INSPECTOR_FIX_FILE"
+printf '%s  %s\n' \
+  "f5b12007c5df14306cd9e3534466d529858c6160b3cf8e17e0bf52b4f0f4079f" \
+  "$INSPECTOR_FIX_FILE" | sha256sum -c -
 aws iam put-role-policy \
   --role-name KnownEnoughGithubStagingInspector \
   --policy-name InspectExistingStagingMetadata \
-  --policy-document file://infra/permissions/shared-staging-github-inspect.json \
+  --policy-document "file://$INSPECTOR_FIX_FILE" \
   --no-cli-pager
+echo "READ-ONLY FIX APPLIED"
 ```
 
-The worker supplies a commit-pinned download and SHA-256 check for the same policy when the CloudShell clone is older. This updates only the one existing inspection policy; it does not create a new role or touch the deployment role. Compare fresh full policy/trust readback before and after, preserving unrelated settings. IAM has no RevisionId for PutRolePolicy, so do not run concurrent edits. Rollback is the previous exact policy from commit `92f72951ef1b8545e08048f04b770dd2705aaff2`, which restores the read-only branch-only grant and the known failed ListJobs state. After installation, the worker checks exact policy equality and reruns the full shared workflow through GitHub. Administrator simulation alone does not count as live repair PASS.
+The block above downloads the exact verified correction commit and checks its SHA-256, so an older CloudShell clone is not a dependency. This updates only the one existing inspection policy; it does not create a new role or touch the deployment role. Compare fresh full policy/trust readback before and after, preserving unrelated settings. IAM has no RevisionId for PutRolePolicy, so do not run concurrent edits. Rollback is the previous exact policy from commit `92f72951ef1b8545e08048f04b770dd2705aaff2`, which restores the read-only branch-only grant and the known failed ListJobs state. After installation, the worker checks exact policy equality and reruns the full shared workflow through GitHub. Administrator simulation alone does not count as live repair PASS.
 
 ## One-time AWS administrator setup
 
