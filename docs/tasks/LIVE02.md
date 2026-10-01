@@ -1,6 +1,6 @@
 # LIVE02 — Test the real user journey
 
-- Status: BLOCKED — LIVE01 preparation required; unclaimed.
+- Status: IN_PROGRESS — LIVE01 preparation complete; live harness preparation claimed.
 - Intended worker: B / Battosai1806, separate clone; record actual model/effort/baseline. Suggested direct target: gpt-6-sol / high.
 - Outcome: Runnable live versions of NP03/NP04 with automatic fictional actors and factual results.
 - Policy: [Live delivery](../live-test-delivery.md); preparation can complete before installation, real evidence cannot.
@@ -20,3 +20,7 @@ New `tests/live/qa/`, `playwright.live-qa.config.ts`, runner helpers under `scri
 7. Locally verify harness/configuration and meaningful safety checks, plus pinned npm run check for changes. Explicitly label harness tests that simulate services as preparation evidence. Provide one runner command that needs no personal AWS profile and fails clearly if setup is absent.
 
 DONE means live test code and coverage mapping are implemented and locally verified. No claim of real service PASS until LIVE04. No deployment, account creation, paid AI, email or AWS write occurs during preparation. Sync uses [skip ci]. Continue to [LIVE03](LIVE03.md).
+
+## Claim — 2026-10-01
+
+B / Battosai1806, Windows/WSL separate clone; GPT-6 variant/effort unexposed. Clean synchronized main 6484bce, 0/0. Exact scope: new tests/live/qa/{helpers.ts,journey.spec.ts}, playwright.live-qa.config.ts, scripts/live-qa/{runner.mjs,runner-core.mjs,sanitized-reporter.mjs}; new tests/integration/live-qa-runner.test.ts; docs/live-qa-coverage.md; this ticket, own B log/handoff. Amend own LIVE01 broker.mjs only to add exact run-owned disclosure publication/expiry service actions needed for qualification, preserving real application permission enforcement; fixture-core/config/setup test only for focused regression if needed. No NP00/shared inspector/root/deployment/application edits. Source pushes skip CI; no actual AWS/signup/email/model operation in preparation. App/target failures exposed by the harness remain explicit LIVE04 blockers rather than fake passing results. A owns shared board updates during overlap.
