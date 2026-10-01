@@ -1,6 +1,11 @@
 ## Current A handoff — LIVE delivery, 2026-10-01
 
 
+### Shared report repair verified PASS — 2026-10-01T22:07:19Z
+
+The user applied the exact read-only correction; installed policy/trust match, with one inline policy and no managed attachments. [Run 36932474464](https://github.com/Known-Enough/known-enough/actions/runs/36932474464) completed SUCCESS on `ccbc56387b01fa9b74a893e251a1b6c39f5e66b6`: public 10/10 and AWS metadata/report PASS, seven passing inspection checks, zero failed checks. Six product/model/deployment holds remain explicitly blocked. The shared-report repair is complete; NP00 remains IN_PROGRESS and B continues its separately claimed LIVE01 preparation. GitHub workload access needs no personal AWS session for these checks; actual B dispatch and full product online qualification remain LIVE04. No deployment, paid AI, signup/email or participant action occurred. Earlier repair-pending paragraphs below retain dated history.
+
+
 ### Shared report repair checkpoint — 2026-10-01
 
 GitHub diagnostic run [36930827040](https://github.com/Known-Enough/known-enough/actions/runs/36930827040) establishes the actual denial: Amplify ListJobs requires the observed `main/jobs/*` resource, with error reason no identity-based allow. The original branch-only simulation did not evaluate that resource. Correction `94d48f9` adds only the observed jobs resource to the existing read-only statement. Access Analyzer returned no findings; simulation allows main job listing and denies other-branch listing/StartJob. Safe-error and failed-inventory regression tests pass 4/4; pinned full check passes 468 / 2 optional skips, hosted 1/1 and E2E 53/53. The current installed baseline was reverified unchanged. Administrator CloudShell apply was supplied to the user because local administrator profiles remain unavailable; installed correction and full report PASS are still pending. No paid call, deployment, signup or email. NP00 stays IN_PROGRESS; B LIVE01 preparation remains independent. [Repair instructions](../docs/shared-staging-checks.md#amplify-listjobs-resource-repair--administrator-applies-once).

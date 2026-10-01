@@ -242,15 +242,47 @@
       "otherBranchJobList": "implicitDeny",
       "startJob": "implicitDeny"
     },
-    "installedCorrection": "pending administrator apply",
+    "installedCorrection": "verified exact corrected policy after user administrator CloudShell apply",
     "awsWritesByRepairWorker": false,
-    "sharedReportPassed": false,
+    "sharedReportPassed": true,
     "localVerification": {
       "focusedPassed": 4,
       "unitIntegrationPassed": 468,
       "optionalSkips": 2,
       "hostedPassed": 1,
       "e2ePassed": 53
-    }
+    },
+    "userAdministratorApplied": true,
+    "installedTrustMatches": true,
+    "attachedManagedPolicyCount": 0,
+    "inlinePolicyNames": [
+      "InspectExistingStagingMetadata"
+    ],
+    "liveVerification": {
+      "runId": 36932474464,
+      "runUrl": "https://github.com/Known-Enough/known-enough/actions/runs/36932474464",
+      "sourceCommit": "ccbc56387b01fa9b74a893e251a1b6c39f5e66b6",
+      "awsCollectionStatus": "passed",
+      "combinedReportStatus": "passed",
+      "githubRunConclusion": "success",
+      "publicPassed": 10,
+      "publicFailed": 0,
+      "awsChecksPassed": 7,
+      "awsChecksFailed": 0,
+      "productChecksBlocked": 6,
+      "observedAt": "2026-10-01T22:01:53.792Z",
+      "reportObservedAt": "2026-10-01T22:07:14.473Z",
+      "triggeredBy": "martelaxe",
+      "actualBDispatchProven": false
+    },
+    "completion": "verified live inspection repair; NP00 and full product LIVE obligations remain open",
+    "remainingProductChecks": [
+      "NP00 model guard and runtime inline grant are off",
+      "NP05 group table",
+      "NP01 non-model group routes",
+      "Verified-email self-signup feature",
+      "Paid-model qualification",
+      "NP05 deployment writes"
+    ]
   }
 }
