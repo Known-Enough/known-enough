@@ -13,6 +13,10 @@
 - Lambda `known-enough-stage-api` remains Active/Successful (`nodejs24.x`, `ke13b-lambda.handler`, `KnownEnoughStageApiRole`) with `BEDROCK`/`true`. A new private mode-0600 full-environment request changes only those two flags and carries the latest `RevisionId`. Both exact one-statement Nova policy hashes still match (`0b8612…` runtime, `be165d…` ReadOnlyAccess); private response bodies, revision ID, user ID and attributes were not printed or saved in Git.
 - The temporary `KnownEnoughNP00Off` permission set and GitHub inspector role are still absent. No cloud write, IAM simulation, model call, email, signup, deployment or workflow dispatch occurred. The exact apply remains authorized but cannot run until its scoped one-time setup completes.
 
+## 2026-10-01T20:50:32Z — post-sync access-presence readback
+
+- After pushing `d40b74e`, the read-only staging profile again confirmed account `092954139775`, no `KnownEnoughGithubStagingInspector` role, and no `KnownEnoughNP00Off` permission set. No external setup had appeared; no role was assumed and no workflow was dispatched. Local `main` and `origin/main` matched at `d40b74e8d93aec4181f95d500ce5fb5b6297541e`.
+
 ## 2026-10-01T19:08:16Z — NP00 model-disable command and identity preflight
 
 - Same active NP00 claim. Per the user's request, prepared a separate [NP00-only model shutdown plan](../infra/np00-model-disable.md) before any write; the existing [model-test permission-set plan](../infra/np00-permission-set-cleanup.md) is explicitly gated for later and is not part of this change. NP05 table/API rollout, Cognito signup/email, and paid-model testing remain separate.

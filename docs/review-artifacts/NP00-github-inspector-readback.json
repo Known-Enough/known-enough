@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "observedAt": "2026-10-01T20:47:16Z",
+  "observedAt": "2026-10-01T20:50:32Z",
   "repository": {
     "fullName": "Known-Enough/known-enough",
     "repositoryId": 1377587215,
@@ -160,7 +160,8 @@
     "np00TemporaryPermissionSetPresent": false,
     "bootstrapProfileAuthenticated": false,
     "awsWritesPerformed": false,
-    "githubWorkflowDispatched": false
+    "githubWorkflowDispatched": false,
+    "latestPresenceReadbackAt": "2026-10-01T20:50:32Z"
   },
   "limitations": [
     "The local bootstrap profile could not authenticate, so account-administrator AWS setup remains pending.",
