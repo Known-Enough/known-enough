@@ -19,13 +19,13 @@ export function npTransport(): ConverseTransport {
       const messages = input.messages as { text: string }[];
       const text = messages.map(item => item.text).join(' ');
       const frame = input.publicFrame as KE.PublicDecisionFrame;
-      const variable = frame.variables[0]!;
+      const variable = text.includes('time afternoon') ? frame.variables[1]! : frame.variables[0]!;
       const negotiated = text.includes('flexible');
       const options = variable.type === 'ENUM' ? variable.options : [];
-      const choice = text.includes('second') ? options[1]!.id : options[0]!.id;
+      const choice = text.includes('second') || text.includes('time afternoon') ? options[1]!.id : options[0]!.id;
       output = { sourceSummary: 'NP_PRIVATE_RAW_CANARY', proposedConstraints: text.includes('unsupported') ? [] : [
-        { constraintId: 'owner-choice', kind: negotiated ? 'NEGOTIABLE' : 'HARD', rule: { id: 'owner-choice-rule',
-          visibility: 'TRUSTED_BACKEND', operator: 'IN', variableId: variable.id, values: [{ type: 'ENUM', optionId: choice }] } }],
+        ...(text.includes('preferred') ? [{ constraintId: 'owner-choice', kind: 'PREFERENCE', preference: { variableId: variable.id, value: { type: 'ENUM', optionId: choice }, cost: 1 } }] : [{ constraintId: 'owner-choice', kind: negotiated ? 'NEGOTIABLE' : 'HARD', rule: { id: 'owner-choice-rule',
+          visibility: 'TRUSTED_BACKEND', operator: 'IN', variableId: variable.id, values: [{ type: 'ENUM', optionId: choice }] } }])],
         unsupportedConditions: text.includes('unsupported') ? [{ id: 'uncertain', sourceSummary: 'NP_PRIVATE_RAW_CANARY', clarificationQuestion: 'Please clarify.' }] : [] };
     } else {
       const frame = input.frame as KE.PublicDecisionFrame;
@@ -35,7 +35,7 @@ export function npTransport(): ConverseTransport {
       const constraints = input.confirmedConstraints as KE.ConfirmedConstraint[];
       const negotiable = constraints.find(item => item.kind === 'NEGOTIABLE');
       const permissions = input.activePermissions as KE.NegotiationPermission[];
-      output = { candidateIndex: candidates.findIndex(values => values.some(item => item.variableId === variable.id && item.value.type === 'ENUM' && item.value.optionId === option)),
+      output = { candidateIndex: candidates.findIndex(values => values.some(item => item.variableId === variable.id && item.value.type === 'ENUM' && item.value.optionId === option) && constraints.every(item => { if (item.kind !== 'HARD' || item.rule.operator !== 'IN') return true; const rule = item.rule; return values.some(value => value.variableId === rule.variableId && rule.values.some(allowed => JSON.stringify(allowed) === JSON.stringify(value.value))); })),
         permissionDependencies: permissions.map(item => ({ permissionId: item.permissionId, permissionVersion: item.permissionVersion, kind: 'NEGOTIATION', expiresAt: item.expiresAt })),
         questionIntents: !negotiable || permissions.length ? [] : [{ ownerParticipantId: negotiable.ownerParticipantId,
           constraintId: negotiable.constraintId, constraintVersion: negotiable.constraintVersion,

@@ -226,3 +226,7 @@ B / Battosai1806, GPT-6 variant/effort unexposed. Local clarity fixes and existi
 ## NP04 claim — 2026-10-01
 
 B / Battosai1806; actual GPT-6 variant/effort unexposed, clean ff-only main f78ea12. Exact bounded qualification files in NP04. No NP00 or external operations.
+
+## NP04 completed — 2026-10-01
+
+B / verified Battosai1806; GPT-6 variant/effort unexposed. [Qualification report](np04-qualification.md): four new browser owners create Garden from blank entry, confirm distinct private needs, allow exact concession and independently reach AGREED; negative authority/privacy/replay/reconstruction/session checks pass. Fixed invitation hash changes on an already open page. Clean npm ci zero vulnerabilities; focused API 7/7, browser 2/2; full check 464 / 2 optional skips, hosted 1/1, E2E 53/53, references 7/7, planning 15/15. NP01–NP04 local DONE; NP00 source/A claim preserved. NP05 is the new separately authorized managed/live-check task. No deployment, AWS, paid call, email, volunteer or independent review result claimed. Source sync skips CI; next clone must pull main ff-only.

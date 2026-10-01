@@ -24,6 +24,17 @@ export function GroupHome({ api, openDecision }: { api: (path: string, init?: Re
     } catch { /* Invalid or expired tab-local link is discarded. */ }
     sessionStorage.removeItem('ke-group-invite'); return '';
   });
+  useEffect(() => {
+    const capture = () => {
+      const value = new URLSearchParams(window.location.hash.slice(1)).get('groupInvite');
+      if (!value || !/^[A-Za-z0-9_-]{32,80}$/.test(value)) return;
+      sessionStorage.setItem('ke-group-invite', JSON.stringify({ token: value, at: Date.now() }));
+      setToken(value);
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    };
+    window.addEventListener('hashchange', capture);
+    return () => window.removeEventListener('hashchange', capture);
+  }, []);
   async function load() {
     setChecking(true);
     const response = await api('/account');
