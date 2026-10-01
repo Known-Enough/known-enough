@@ -210,3 +210,7 @@ Configured `gpt-6-astra` / high review of `b91ff76..98877e1`: **CHANGES_REQUESTE
 ## B04.5 fresh R10 follow-up — 2026-09-23T22:38:42Z
 
 **PASS on `f88b4a0..b78aab9`**. Independent configured gpt-6-astra / high reviewed the classifier, both callers, exact new/old tests and owner full-check evidence. R10 closed; R7–R9 remain closed. Fresh adapter suite **21/21** and **35 classifier assertions** passed, with references 7/7 and planning 15/15. [Review evidence](reviews/B04.5.md) records exact hashes and limits. Reviewer claim finished; B04 stays PAUSED with this code gate cleared pending owner resumption. Remaining implementation, final review, human acceptance and G02/live gates still apply. No implementation edits, live cloud acceptance or publication.
+
+## NP01 completed — 2026-09-30
+
+B / verified Battosai1806; actual GPT-6 exact variant/effort unexposed. NP01 local implementation done; pinned full check passed 449 / 2 optional skips, hosted 1/1 and E2E 48/48; focused 9/9. No NP00 owned source or evidence touched. NP02 next under the user's scheduling exception. Real Cognito/AWS/email/deployment/model checks remain NP05, not invented completion. Source push skips CI publication.

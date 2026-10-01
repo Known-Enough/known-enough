@@ -5,6 +5,7 @@ import {
   finishCognitoSignIn, readCognitoSession, readPendingCognitoInvitation, type CognitoBrowserConfig, type CognitoSession,
 } from './cognito-session';
 import { SimulatedSharedAssistant } from './simulated-shared-assistant';
+import { GroupHome } from './group-home';
 import { ConnectedDecision } from './connected-decision';
 
 const DECISION_ID = 'christmas-decision';
@@ -44,6 +45,8 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     }).catch(() => { if (active) setStatus('Sign-in could not be completed. Start again.'); });
     return () => { active = false; };
   }, [config]);
+  const groupInvite = new URLSearchParams(window.location.hash.slice(1)).get('groupInvite');
+  if (groupInvite && /^[A-Za-z0-9_-]{32,80}$/.test(groupInvite)) sessionStorage.setItem('ke-group-invite', JSON.stringify({ token: groupInvite, at: Date.now() }));
   const signIn = async (kind: CognitoSession['kind']) => {
     setStatus('');
     try { window.location.assign(await beginCognitoSignIn(config, kind)); }
@@ -141,6 +144,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
       <p>Use your own staging account. The shared display has a separate read-only account.</p>
       <div className="ke-private-actions"><button type="button" onClick={() => void signIn('participant')}>Participant sign-in</button>
         <button type="button" className="secondary" onClick={() => void signIn('display')}>Shared display sign-in</button></div></section> : <>
+      {session.kind === 'participant' && <GroupHome key={session.accessToken} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} openDecision={id => { setRoomInput(id); void load(id); }} />}
       <section className="ke-card"><p className="eyebrow">{session.kind === 'display' ? 'SHARED DISPLAY' : 'PARTICIPANT SESSION'}</p>
         <h2>Shared decision</h2><label htmlFor="connected-decision-id">Decision ID from your invitation</label>
         <input id="connected-decision-id" value={roomInput} maxLength={80} disabled={busy} onChange={event => { setRoomInput(event.target.value); setOwnerSnapshot(null); setPublicSnapshot(null); loadEpoch.current++; }} />

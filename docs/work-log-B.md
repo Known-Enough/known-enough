@@ -394,3 +394,7 @@ Final documentation validation: **145 local Markdown targets**, current B04.5 RE
 ## 2026-09-30 — NP01 claim under user exception
 
 Verified transport GitHub Battosai1806; main c00b508 clean ff-only pull passed. Actual GPT-6, variant/effort unexposed. User directs NP01–NP04 implementation except NP00; preserved A/Mac scope, added NP05 for external checks. Exact NP01 files recorded in ticket. Node 24.21.0/npm 11.19.0 available in temporary WSL tool directory. No AWS, paid calls or external messages. Repository implementation sync will skip deployment CI.
+
+## NP01 completed — 2026-09-30
+
+B / verified Battosai1806; actual GPT-6 exact variant/effort unexposed. NP01 local implementation done; pinned full check passed 449 / 2 optional skips, hosted 1/1 and E2E 48/48; focused 9/9. No NP00 owned source or evidence touched. NP02 next under the user's scheduling exception. Real Cognito/AWS/email/deployment/model checks remain NP05, not invented completion. Source push skips CI publication.

@@ -1,10 +1,11 @@
 import { createServer, type RequestListener } from 'node:http';
-import { createAwsDynamoDBRoomRepository } from '@deal-table/adapters';
+import { createDynamoGroupRepository, createAwsDynamoDBRoomRepository } from '@deal-table/adapters';
 import { KnownEnoughApplication, MODEL_FAILURE_STAGES, type ModelFailureDiagnostic } from '@deal-table/application';
 import { createCognitoKnownEnoughApiHandler } from './http-core.ts';
 import { createKnownEnoughModelRuntime } from './model-runtime.ts';
 import { ScenarioService, readScenarioMembers, scenarioCandidates, type ScenarioMember } from './scenario-service.ts';
 import type { ConverseTransport } from '@deal-table/adapters';
+import { GroupService } from './group-service.ts';
 
 /** API Gateway HTTP API payload-format 2.0. Only fields needed by the reviewed HTTP handler are accepted. */
 export interface HttpApiEvent {
@@ -29,6 +30,7 @@ export interface Ke13bConfig {
   participantClientId: string;
   displayClientId: string;
   allowedOrigin: string;
+  groups?: { tableName: string; emailKey: string; cognitoDomain: string };
   models?: { members: ScenarioMember[]; provider: { mode: 'BEDROCK'; paidCallsApproved: boolean;
     invocationLoggingDisabled: boolean; retentionReviewed: boolean } | { mode: 'INJECTED'; transport: ConverseTransport } };
 }
@@ -75,6 +77,14 @@ export function readKe13bConfig(env: NodeJS.ProcessEnv = process.env): Ke13bConf
       throw new Error('KE14 model configuration is not approved');
     config.models = { members: readScenarioMembers(JSON.parse(env.KE14_MEMBER_BINDINGS ?? 'null')),
       provider: { mode: 'BEDROCK', paidCallsApproved: true, invocationLoggingDisabled: true, retentionReviewed: true } };
+  }
+  if (env.NP_GROUPS_ENABLED === 'true') {
+    const domain = URL.parse(env.NP_COGNITO_DOMAIN ?? '');
+    if (!env.NP_GROUP_TABLE_NAME || !/^[A-Za-z0-9_.-]{3,255}$/.test(env.NP_GROUP_TABLE_NAME)
+      || !env.NP_GROUP_EMAIL_KEY || env.NP_GROUP_EMAIL_KEY.length < 32 || !domain
+      || domain.protocol !== 'https:' || !domain.hostname.endsWith(`.auth.${region}.amazoncognito.com`)
+      || domain.origin !== env.NP_COGNITO_DOMAIN) throw new Error('NP group configuration incomplete');
+    config.groups = { tableName: env.NP_GROUP_TABLE_NAME, emailKey: env.NP_GROUP_EMAIL_KEY, cognitoDomain: domain.origin };
   }
   return config;
 }
@@ -149,7 +159,18 @@ export function createKe13bLambdaHandler(config: Ke13bConfig): (event: HttpApiEv
   const scenarios = runtime && config.models ? new ScenarioService({ application: runtime.application, architect: runtime.architect,
     members: config.models.members, clock: { now: () => new Date().toISOString() }, isEnabled: runtime.isEnabled,
     diagnostic: logModelFailure }) : undefined;
-  const listener = createCognitoKnownEnoughApiHandler({ application, userPoolId: config.userPoolId,
+  const groups = config.groups ? new GroupService(createDynamoGroupRepository(config.groups.tableName, config.region), {
+    emailKey: config.groups.emailKey, now: () => Date.now() }) : undefined;
+  const listener = createCognitoKnownEnoughApiHandler({ application,
+    ...(groups ? { groups, registrationProfile: async (authorization: string | string[] | undefined) => {
+      if (typeof authorization !== 'string') throw new Error('Unauthenticated');
+      const response = await fetch(`${config.groups!.cognitoDomain}/oauth2/userInfo`, {
+        headers: { authorization }, redirect: 'error', signal: AbortSignal.timeout(5000) });
+      if (!response.ok) throw new Error('Profile unavailable');
+      const profile = await response.json() as Record<string, unknown>;
+      if (typeof profile.sub !== 'string' || typeof profile.email !== 'string') throw new Error('Invalid profile');
+      return { subject: profile.sub, email: profile.email, verified: profile.email_verified === true || profile.email_verified === 'true' };
+    } } : {}), userPoolId: config.userPoolId,
     participantClientId: config.participantClientId, displayClientId: config.displayClientId,
     allowedOrigins: [config.allowedOrigin], ...(runtime ? {
       ownerConversation: runtime.ownerConversation, negotiator: runtime.negotiator } : {}),

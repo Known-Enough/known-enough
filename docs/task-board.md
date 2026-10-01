@@ -17,8 +17,8 @@ When B asks “what's next?”, pull clean `main` with `git pull --ff-only origi
 | Priority | Task | Direct worker target | Prerequisite | Status |
 | --- | --- | --- | --- | --- |
 | 0 | [NP00 — Technical closeout](tasks/NP00.md) | `gpt-6-sol` / high | User-directed old-batch closure | IN_PROGRESS — A / martelaxe / Mac |
-| 1 | [NP01 — Registration, approval CLI, groups and invitations](tasks/NP01.md) | `gpt-6-sol` / high | NP00 DONE | BLOCKED |
-| 2 | [NP02 — Create a group's own decision](tasks/NP02.md) | `gpt-6-sol` / high | NP01 DONE | BLOCKED |
+| 1 | [NP01 — Registration, approval CLI, groups and invitations](tasks/NP01.md) | `gpt-6-sol` / high | User exception; local automated criteria | DONE — live evidence NP05 |
+| 2 | [NP02 — Create a group's own decision](tasks/NP02.md) | `gpt-6-sol` / high | NP01 local DONE | READY |
 | 3 | [NP03 — All-screen clarity and copy](tasks/NP03.md) | `gpt-6-luna` / medium | NP02 DONE | BLOCKED |
 | 4 | [NP04 — Fresh-group/non-prefabricated qualification](tasks/NP04.md) | `gpt-6-sol` / high | NP03 DONE | BLOCKED |
 
@@ -35,3 +35,5 @@ The [original pre-NP board](archive/task-board-before-np-2026-09-30.md.txt), old
 ## User scheduling override — 2026-09-30, Windows B worker
 
 The user explicitly directed this chat to work on everything except NP00 and to list AWS or other live checks as a new task. NP00's A/Mac claim and bounded files remain untouched. B may implement NP01–NP04 sequentially alongside that preserved NP00 claim, with no subagents and no overlap with NP00's named runtime/admission/test or tracking files. This is a specific scheduling exception. NP01 no longer waits for NP00 DONE. Automated focused and pinned full checks remain mandatory; required new managed-service/deployment/email/paid-model evidence routes to NP05 rather than blocking local implementation. No live acceptance is invented. B updates NP01–NP05 tickets, its own log/handoff and this override; A-owned existing claim/evidence is preserved. All implementation commits use `[skip ci]` to prevent deployment on authorized repository sync; NP05 owns separately authorized publication.
+
+**B checkpoint:** NP01 local implementation DONE, 449 / 2 optional skips, hosted 1/1, E2E 48/48. NP02 READY. NP05 BLOCKED on local implementation and separately authorized live operations. NP00 claim unchanged.

@@ -13,6 +13,7 @@ import { createCognitoIdentityResolver, type CognitoIdentityOptions } from './co
 import type { JwksCache } from 'aws-jwt-verify/jwk';
 import type { LocalTestSessionManager } from './local-test-auth.ts';
 import type { ScenarioService } from './scenario-service.ts';
+import type { GroupService } from './group-service.ts';
 
 const IDENTITY_HEADER = 'x-deal-table-test-identity';
 const REQUEST_ID_HEADER = 'x-request-id';
@@ -47,6 +48,8 @@ export interface CognitoApiOptions extends CognitoIdentityOptions {
 }
 
 export interface KnownEnoughLocalApiOptions {
+  readonly groups?: GroupService;
+  readonly registrationProfile?: (authorization: string | string[] | undefined) => Promise<{ subject: string; email: string; verified: boolean }>;
   readonly scenarios?: ScenarioService;
   readonly application: KnownEnoughApplication;
   /** Optional injected, non-live model port for the public frame-draft route. */
@@ -63,6 +66,8 @@ export interface KnownEnoughLocalApiOptions {
 }
 
 export interface KnownEnoughCognitoApiOptions extends CognitoIdentityOptions {
+  readonly groups?: GroupService;
+  readonly registrationProfile?: (authorization: string | string[] | undefined) => Promise<{ subject: string; email: string; verified: boolean }>;
   readonly scenarios?: ScenarioService;
   readonly application: KnownEnoughApplication;
   /** Production callers must explicitly inject a reviewed provider implementation. */
@@ -408,7 +413,7 @@ function knownEnoughRequestError(error: unknown, id: string): DecisionErrorResul
 }
 
 function createKnownEnoughApiHandler(
-  options: Pick<KnownEnoughLocalApiOptions, 'application' | 'architect' | 'ownerConversation' | 'negotiator' | 'scenarios' | 'testSessions' | 'maxBodyBytes' | 'debug'>,
+  options: Pick<KnownEnoughLocalApiOptions, 'application' | 'architect' | 'ownerConversation' | 'negotiator' | 'scenarios' | 'testSessions' | 'groups' | 'registrationProfile' | 'maxBodyBytes' | 'debug'>,
   authenticate: (request: IncomingMessage) => Promise<HttpIdentity | null>,
   allowedOrigins: readonly string[],
   includeTestIdentity: boolean,
@@ -450,6 +455,43 @@ function createKnownEnoughApiHandler(
       let principal: HttpIdentity | null = null;
       try { principal = await authenticate(request); } catch { /* fail closed */ }
       if (!principal) { sendJson(response, 401, decisionErrorBody('UNAUTHENTICATED', id)); return; }
+      if (options.groups) {
+        try {
+          const path = url?.pathname ?? '';
+          if (path === '/account' && request.method === 'GET') {
+            sendJson(response, 200, { account: await options.groups.status(principal) }); return;
+          }
+          if (path === '/account/register' && request.method === 'POST') {
+            const profile = await options.registrationProfile?.(request.headers.authorization);
+            if (!profile || profile.subject !== principal.subject) throw new KnownEnoughApplicationError('FORBIDDEN');
+            const account = await options.groups.register(principal, profile, await readJson(request, maxBodyBytes));
+            sendJson(response, 200, { account }); return;
+          }
+          await options.groups.requireApproved(principal);
+          if (path === '/groups' && request.method === 'GET') {
+            sendJson(response, 200, { groups: await options.groups.list(principal) }); return;
+          }
+          if (path === '/groups' && request.method === 'POST') {
+            sendJson(response, 200, { group: await options.groups.create(principal, await readJson(request, maxBodyBytes)) }); return;
+          }
+          if (path === '/groups/accept' && request.method === 'POST') {
+            sendJson(response, 200, { group: await options.groups.accept(principal, await readJson(request, maxBodyBytes)) }); return;
+          }
+          const groupRoute = /^\/groups\/([A-Za-z0-9_-]{1,80})\/(invitations|remove)$/.exec(path);
+          if (groupRoute && request.method === 'POST') {
+            const body = await readJson(request, maxBodyBytes);
+            const result = groupRoute[2] === 'invitations'
+              ? await options.groups.invite(principal, groupRoute[1]!, body)
+              : { group: await options.groups.remove(principal, groupRoute[1]!, body) };
+            sendJson(response, 200, result); return;
+          }
+          const decision = /^\/decisions\/([A-Za-z0-9_-]{1,80})\//.exec(path);
+          if (decision) await options.groups.authorizeDecision(principal, decision[1]!);
+        } catch (error) {
+          const result = knownEnoughRequestError(error, id);
+          sendJson(response, result.error.httpStatus, result); return;
+        }
+      }
       if (url?.pathname === '/decisions') {
         if (request.method !== 'POST' || !options.scenarios) { sendJson(response, 404, decisionErrorBody('NOT_FOUND', id)); return; }
         if (principal.kind !== 'participant') { request.resume(); sendJson(response, 403, decisionErrorBody('FORBIDDEN', id)); return; }

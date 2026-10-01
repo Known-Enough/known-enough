@@ -201,3 +201,5 @@ export type FinalApproval = z.infer<typeof FinalApproval>;
 
 // New Known Enough schemas are namespaced so the pre-pivot v1 wire schemas and hash API remain unchanged.
 export * as KnownEnough from './known-enough.ts';
+
+export * as Groups from './groups.ts';

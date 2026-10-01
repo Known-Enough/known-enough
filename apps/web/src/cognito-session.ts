@@ -60,7 +60,7 @@ export async function beginCognitoSignIn(config: CognitoBrowserConfig, kind: Cog
   storage.setItem(PENDING_KEY, JSON.stringify(pending));
   const url = URL.parse('/oauth2/authorize', config.domain)!;
   url.search = new URLSearchParams({ response_type: 'code', client_id: clientId(config, kind),
-    redirect_uri: callbackUrl(location), scope: 'openid', state: pending.state,
+    redirect_uri: callbackUrl(location), scope: kind === 'participant' ? 'openid email' : 'openid', state: pending.state,
     code_challenge_method: 'S256', code_challenge: await challenge(pending.verifier) }).toString();
   return url.href;
 }
@@ -144,7 +144,7 @@ export function cognitoLogoutUrl(config: CognitoBrowserConfig, session: CognitoS
 export async function cognitoApiFetch(config: CognitoBrowserConfig, session: CognitoSession, path: string,
   onUnauthorized: () => void, init?: RequestInit, fetcher: typeof fetch = fetch): Promise<Response> {
   if (!path.startsWith('/') || path.startsWith('//') || path.includes('..')
-    || (path !== '/decisions' && !path.startsWith('/decisions/'))) throw new Error('Invalid API path');
+    || (path !== '/decisions' && !path.startsWith('/decisions/') && path !== '/account' && path !== '/account/register' && path !== '/groups' && !path.startsWith('/groups/'))) throw new Error('Invalid API path');
   if (session.expiresAt <= Date.now() + 5000) { onUnauthorized(); throw new Error('Session expired'); }
   const headers = new Headers(init?.headers);
   headers.set('authorization', `Bearer ${session.accessToken}`);
