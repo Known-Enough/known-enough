@@ -1,0 +1,52 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "SetOnlyStageModelGuardsOff",
+      "Effect": "Allow",
+      "Action": "lambda:UpdateFunctionConfiguration",
+      "Resource": "arn:aws:lambda:us-east-1:092954139775:function:known-enough-stage-api"
+    },
+    {
+      "Sid": "RemoveStageRuntimeNovaInlinePolicy",
+      "Effect": "Allow",
+      "Action": "iam:DeleteRolePolicy",
+      "Resource": "arn:aws:iam::092954139775:role/KnownEnoughStageApiRole"
+    },
+    {
+      "Sid": "RemoveReadOnlyInlinePolicy",
+      "Effect": "Allow",
+      "Action": "sso:DeleteInlinePolicyFromPermissionSet",
+      "Resource": [
+        "arn:aws:sso:::instance/ssoins-722328a7765eb0e8",
+        "arn:aws:sso:::permissionSet/ssoins-722328a7765eb0e8/ps-7223102750014ed2"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "sso:PrimaryRegion": "us-east-1"
+        }
+      }
+    },
+    {
+      "Sid": "ProvisionReadOnlyToStageAccount",
+      "Effect": "Allow",
+      "Action": "sso:ProvisionPermissionSet",
+      "Resource": [
+        "arn:aws:sso:::account/092954139775",
+        "arn:aws:sso:::instance/ssoins-722328a7765eb0e8",
+        "arn:aws:sso:::permissionSet/ssoins-722328a7765eb0e8/ps-7223102750014ed2"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "sso:PrimaryRegion": "us-east-1"
+        }
+      }
+    },
+    {
+      "Sid": "DecryptIdentityCenterCustomerKey",
+      "Effect": "Allow",
+      "Action": "kms:Decrypt",
+      "Resource": "arn:aws:kms:us-east-1:092954139775:key/mrk-f940f13807f145fd84387208b80a4b90"
+    }
+  ]
+}
