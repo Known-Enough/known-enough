@@ -28,5 +28,5 @@ export function targetNames(config) { return { prefix: config.stack, artifacts: 
 export function publicTarget(outputs) {
   const allowed = ['Account','Region','ApiUrl','FrontendUrl','PoolId','ParticipantClientId','DisplayClientId','CognitoDomain','ApiFunction','BrokerFunction','DecisionTable','GroupTable','ControlTable','MailboxBucket','LoginSecret','TestRoleArn','ReleaseRoleArn','SourceCommit','AmplifyAppId'];
   if (allowed.some(key => typeof outputs[key] !== 'string' || !outputs[key])) throw new Error('INCOMPLETE_INSTALLED_TARGET');
-  return Object.fromEntries(allowed.map(key => [key, outputs[key]]));
+  return {...Object.fromEntries(allowed.map(key => [key, outputs[key]])),...(typeof outputs.PrimaryReleaseRoleArn==='string'?{PrimaryReleaseRoleArn:outputs.PrimaryReleaseRoleArn}:{})};
 }

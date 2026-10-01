@@ -1,0 +1,296 @@
+name: Live QA release and qualification
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Deploy Known Enough staging to AWS Amplify']
+    types: [completed]
+    branches: [main]
+
+concurrency:
+  group: known-enough-isolated-qa-release-and-test
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  provenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      source: ${{ steps.guard.outputs.source }}
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Verify repository main event and upstream workflow identity
+        id: guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/live-qa/provenance.mjs
+      - name: Require installed and authorized QA
+        env:
+          LIVE_QA_ENABLED: ${{ vars.LIVE_QA_ENABLED }}
+        run: test "$LIVE_QA_ENABLED" = true
+
+  release:
+    needs: provenance
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ needs.provenance.outputs.source }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install exact dependencies and check source before credentials
+        env:
+          PLAYWRIGHT_CHANNEL: chromium
+        run: |
+          npm ci
+          npm ci --prefix scripts/live-qa --ignore-scripts
+          npx playwright install --with-deps chromium
+          npm run check
+      - name: Build independent expected artifacts and target differences
+        env:
+          LIVE_TARGET_JSON: ${{ vars.LIVE_QA_INSTALLED_TARGET }}
+        run: |
+          umask 077
+          mkdir -p /tmp/qa-release
+          node --input-type=module -e "import {writeFileSync} from 'node:fs'; import {validateTarget} from './scripts/live-qa/runner-core.mjs'; writeFileSync('/tmp/qa-release/target.json',JSON.stringify(validateTarget(JSON.parse(process.env.LIVE_TARGET_JSON??'null'))),{mode:0o600});"
+          node scripts/live-qa/release.mjs prepare /tmp/qa-release/target.json /tmp/qa-release
+      - name: Assume only QA release workload role
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubQaRelease
+          aws-region: us-east-1
+          role-session-name: qa-release-${{ github.run_id }}
+          role-duration-seconds: 900
+          mask-aws-account-id: true
+      - name: Publish QA artifacts and verify code/readiness receipt
+        run: node scripts/live-qa/release.mjs publish /tmp/qa-release
+      - name: Save only release evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: live-qa-release-receipt
+          path: |
+            /tmp/qa-release/receipt.json
+            /tmp/qa-release/target.json
+            /tmp/qa-release/release-failure.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  primary-release:
+    needs: [provenance, release]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ needs.provenance.outputs.source }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: live-qa-release-receipt
+          path: /tmp/qa-release
+      - run: npm ci
+      - name: Assume primary backend code-only role
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPrimaryRelease
+          aws-region: us-east-1
+          role-session-name: primary-code-${{ github.run_id }}
+          role-duration-seconds: 900
+          mask-aws-account-id: true
+      - name: Publish matching primary backend with NP00/config/revision guard
+        run: node scripts/live-qa/release.mjs primary /tmp/qa-release
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: live-qa-primary-release-result
+          path: /tmp/qa-release/primary-release.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  public:
+    needs: [provenance, release, primary-release]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ needs.provenance.outputs.source }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: live-qa-release-receipt
+          path: /tmp/qa-report
+      - name: Compare public bytes and rendered screens to independent builds
+        run: node scripts/live-qa/public.mjs /tmp/qa-report/receipt.json /tmp/qa-report/public.json
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: live-qa-public-result
+          path: /tmp/qa-report/public.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  metadata:
+    needs: [provenance, release, primary-release]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ needs.provenance.outputs.source }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: live-qa-release-receipt
+          path: /tmp/qa-report
+      - name: Assume stable read-only staging inspection role
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubStagingInspector
+          aws-region: us-east-1
+          role-session-name: qa-inspect-${{ github.run_id }}
+          role-duration-seconds: 900
+          mask-aws-account-id: true
+      - name: Collect with the unchanged shared inspector
+        env:
+          STAGING_INSPECTION_OUTPUT: /tmp/qa-report/inspection.json
+        run: node scripts/inspect-shared-staging.mjs
+      - name: Compare primary configuration and code to this expected release
+        run: node scripts/live-qa/metadata.mjs /tmp/qa-report/receipt.json /tmp/qa-report/inspection.json /tmp/qa-report/metadata.json
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: live-qa-metadata-result
+          path: /tmp/qa-report/metadata.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  journey:
+    needs: [provenance, release, primary-release]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ needs.provenance.outputs.source }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - run: |
+          npm ci
+          npm ci --prefix scripts/live-qa --ignore-scripts
+          npx playwright install --with-deps chromium
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: live-qa-release-receipt
+          path: /tmp/qa-report
+      - name: Assume only synthetic test role
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubQaTest
+          aws-region: us-east-1
+          role-session-name: qa-test-${{ github.run_id }}
+          role-duration-seconds: 3600
+          mask-aws-account-id: true
+      - name: Run real journeys and exact always-run cleanup
+        env:
+          RUN_ID: gh-${{ github.run_id }}-${{ github.run_attempt }}
+        run: node scripts/live-qa/runner.mjs /tmp/qa-report/target.json /tmp/qa-report/receipt.json "$RUN_ID" /tmp/qa-report/qa-report.json
+      - name: Retry exact cleanup after cancellation or runner failure
+        if: always()
+        env:
+          RUN_ID: gh-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          node --input-type=module -e "import {readFileSync} from 'node:fs'; import {validateTarget} from './scripts/live-qa/runner-core.mjs'; import {invokeBroker} from './scripts/live-qa/runner.mjs'; const r=invokeBroker(validateTarget(JSON.parse(readFileSync('/tmp/qa-report/target.json','utf8'))),process.env.RUN_ID,'cleanup'); if(r.cleanup!=='CLEAN')process.exitCode=1;"
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: live-qa-journey-result
+          path: /tmp/qa-report/qa-report.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  report:
+    if: always()
+    needs: [provenance, release, primary-release, public, metadata, journey]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Initialize report directory even when no lane could run
+        run: mkdir -p /tmp/qa-report
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: live-qa-*
+          merge-multiple: true
+          path: /tmp/qa-report
+      - name: Read current main for superseded-release classification
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: echo "LATEST_MAIN_SHA=$(gh api repos/Known-Enough/known-enough/git/ref/heads/main --jq .object.sha)" >> "$GITHUB_ENV"
+      - name: Always publish sanitized classification; require every lane
+        if: always()
+        env:
+          PIPELINE_JOBS: ${{ toJSON(needs) }}
+          TESTED_SOURCE: ${{ needs.provenance.outputs.source }}
+          INITIATING_ACCOUNT: ${{ github.triggering_actor }}
+        run: node scripts/live-qa/report.mjs /tmp/qa-report
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: live-qa-complete-report
+          path: |
+            /tmp/qa-report/complete-report.json
+            /tmp/qa-report/complete-report.md
+          if-no-files-found: error
+          retention-days: 7

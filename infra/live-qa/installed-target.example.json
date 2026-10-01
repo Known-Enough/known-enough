@@ -1,0 +1,4 @@
+{
+  "status": "NOT_INSTALLED",
+  "instructions": "LIVE04 publishes the allowlisted installed-target.json from the exact approved CloudShell setup; never invent pool/client/API identifiers or observed hashes."
+}
