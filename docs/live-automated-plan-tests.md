@@ -1,6 +1,6 @@
 # Live automated plan tests
 
-Proposal requested on 2026-10-01. Status: PROPOSED; no test infrastructure installed and no live run performed. B / verified Battosai1806; actual GPT-6 variant/effort unexposed. Repository baseline: `28845f8`. This is a proposed execution path for [NP05](tasks/NP05.md), preserving NP00's active claim and historical evidence.
+Proposal requested on 2026-10-01. Status: PROPOSED; LAT01's repository-only target manifest and on-demand public smoke harness are prepared under the existing NP00 claim. No automated workflow, AWS access setup or live test run is installed/performed. B / verified Battosai1806; actual GPT-6 variant/effort unexposed. Repository baseline when proposed: `28845f8`. This is an execution path for [NP05](tasks/NP05.md), preserving NP00's active claim and historical evidence.
 
 ## Recommendation
 
@@ -121,17 +121,62 @@ Budget defaults: paid model/email lanes disabled. Initial L3 smoke is planned ar
 
 | Step | Deliverable and criterion | Access/setup dependency |
 | --- | --- | --- |
-| LAT01 | Inventory/target schema, public-build harness and exact release manifests; checks run from CI and can be launched by either collaborator | Repository-only implementation; actual test dispatch/public traffic scope approved |
+| LAT01 | Target inventory/schema, pinned release manifest and on-demand public smoke harness, launchable by either collaborator | Repository-only implementation prepared under NP00; executing public requests needs approved scope |
 | LAT02 | Exact observe-role/trust policy, protected workflow and sanitized collector; prove permitted reads and denied writes/wrong-repo trust | One-time authorized IAM/environment setup, then OIDC; no personal login per run |
 | LAT03 | Isolated QA target, agent-owned identities, secret handling, lease/admission/cleanup mechanism and authority denial checks | Explicit setup/spending/identity-policy amendment; no unscoped aggregate writes |
 | LAT04 | Real Cognito browser/API qualification, frame/persistence/replay/privacy tests; no model calls hidden in this lane | LAT02–LAT03; fixed synthetic identities and bounded writes |
 | LAT05 | Paid fresh-group live-model scenarios, explicit simulated permissions/exact approvals and controlled fault cases | LAT04 plus exact paid budget/retention/fault authorization |
 | LAT06 | Post-release/daily routing, clean summaries and failure triage; all active target receipts correlated to deployed artifacts | Earlier lanes stable; explicit recurring-run cadence and scope authorization |
 
-These are proposed substeps, not newly claimed tasks or fabricated results. Implement LAT01 first, while preparing LAT02's policy diff for approval. Integrate approved steps into NP05 under one sequential implementation claim. Coordinate any NP00-owned artifact/check before execution; preserve its claim and do not duplicate its closeout verdict.
+These remain proposed substeps, not new claims or fabricated results. LAT01's repository-only preparation is recorded as a bounded scope amendment to the existing NP00 claim; that claim's owner and status are unchanged. The exact target records and public harness are linked below. LAT02–LAT06, live dispatch, cloud setup and paid/email runs remain unclaimed. Integrate any later approved steps into NP05 under one sequential implementation claim. Preserve NP00's claim and do not duplicate its closeout verdict.
+
+## LAT01 target manifest and public smoke harness — prepared 2026-10-01
+
+The [target manifest](../tests/live/targets.json) pins the two recorded public builds. Stage 0 is the static CloudFront preview at source commit `a6254989f04e194412c5682cee6073b502777645`, with three recorded frontend hashes. Connected Amplify staging is pinned to frontend source commit `bafa1d4e21cb6e29008dce76b6b52f8b146d6a5e`, five frontend file hashes and API base `https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com`. Its recorded backend artifact SHA-256 is `8e01ad21d9233b834b76e1aee77d32e37f6898f5827c49182c64d54fe1b26211`; the deployed receipt does not bind that ZIP hash to a source commit, so the manifest leaves that field null. The backend hash was last verified on 2026-09-29 and needs a fresh credentialed Lambda readback before later journeys.
+
+The [dedicated Playwright config](../playwright.live.config.ts) and [public smoke suite](../tests/live/public-smoke.spec.ts) cover HTTPS page/assets and content hashes, browser/console/network errors, a 390px viewport, keyboard focus or the static page's no-control behavior, and one unauthenticated decision API read expected to return 401. The exact command is `npx playwright test --config=playwright.live.config.ts`. It sends only GET requests when explicitly run; it does not authenticate, write fixtures, collect response bodies, create screenshots/traces, deploy, invoke a model or send email. This harness has not been run against its public targets, and its expected hashes remain dated evidence until the run confirms them.
+
+## Full journey mapped to existing NP04 assertions
+
+The local tests are the assertion source for later live lanes. Their existing mocked transport, simulated operator, signed fixture sessions and injected model are not live evidence. LAT04/05 must replace those boundaries with real hosted Cognito/API access and, only in the separately budgeted model lane, the deployed provider.
+
+| Journey step | Existing assertions to carry forward | Later live assertion and required actor |
+| --- | --- | --- |
+| Registration | `tests/e2e/np-onboarding.spec.ts`; `apps/api/src/group-service.test.ts` admission tests | A synthetic person completes Cognito signup and verified email in a controlled QA mailbox; the verified profile enters PENDING. Before admission, group/decision access is denied. Email delivery is its own opt-in lane. |
+| Approval | `apps/api/src/group-service.test.ts` guarded approve/reject/disable cases; `tests/e2e/np-onboarding.spec.ts` currently calls a simulated operator | The trusted operator process approves the exact synthetic subject/version through the scoped CLI. Rejection and disable deny new calls and old access tokens. Browser participants never receive operator authority. |
+| Invitations | `tests/e2e/np-onboarding.spec.ts`; `apps/api/src/group-service.test.ts` recipient binding, exact replay, replacement and expiry | An approved organizer issues links to the intended verified recipients. Correct accounts accept; wrong account, replaced, expired and replayed links fail. Acceptance changes membership only, not frame confirmation or consent. |
+| Decision creation | `apps/api/src/group-decisions.test.ts` arbitrary roster, draft edit/replay and private-field rejection; `tests/e2e/np-onboarding.spec.ts` reviewed draft | The approved group creates a fresh decision from a public objective, reviews the exact draft and roster, and creates it. No fixed scenario, pre-seeded private needs or fabricated membership is used. |
+| Private needs | `tests/e2e/np-qualification.spec.ts` independent frame confirmation and owner condition confirmation; `tests/integration/np-qualification.test.ts` private/public allowlist checks | Each owner confirms the same current frame, provides and reviews only their own fictional conditions, and explicitly confirms the selected interpretation. Other owners and public snapshots/logs contain no private canary. Live language interpretation uses the paid lane. |
+| Negotiation | `tests/e2e/np-qualification.spec.ts` exact permission path; `tests/integration/np-qualification.test.ts` refusal, clarification and revoked-grant cases | The owner alone answers a precise adjustment request. Allow, decline, unsupported need, stale context and revoked permission retain their existing outcomes; a refusal is not asked again and cannot leak its owner. Model-dependent runs use the live-model budget. |
+| Exact unanimous approval | `tests/e2e/np-qualification.spec.ts`; `apps/api/src/group-decisions.test.ts` generated frame/approval path | Every required owner inspects the same proposal ID, version and public hash, reviews their private part, and independently approves that exact proposal. Status becomes AGREED only after the last required approval; a changed/revoked proposal invalidates prepared approvals. New sessions reload the same agreement. |
+| Cross-cutting recovery/privacy | `tests/integration/np-qualification.test.ts` stale roster, old approvals, audience separation, private canary rejection, fresh application/replay; `tests/e2e/np-qualification.spec.ts` retry/reconnect | Isolated QA proves denial, idempotent retry, persistence across fresh sessions, revision/revocation recovery and sanitized evidence. Restart/cold invocation uses an authorized isolated QA Lambda; no shared NP00 function mutation. |
+
+Use one fresh run ID and one isolated group per writable run; serialize runs against the QA target through a lease. Keep success and negative branches separately counted so a refusal or clarification is not mistaken for an agreement. Reuse assertion semantics, not the fixture transport, fake approval call or scripted provider.
+
+## Safe live-test setup and access sequence
+
+1. LAT01 public checks use the pinned targets and unauthenticated HTTPS GETs only. The target manifest must be refreshed from current evidence before any later authenticated journey.
+2. An observe-only GitHub OIDC role may read exact deployment metadata. A trusted collector emits only approved fields such as job status and artifact hashes; it never uploads raw Lambda configuration, signed URLs, logs, identity claims or payloads to the test worker.
+3. Writable journeys wait for a persistent, separately approved QA deployment with isolated decision/group tables and synthetic Cognito identities. The existing group state is a shared aggregate item, so a username prefix or run ID cannot isolate writes to the existing Stage 1 table. Do not reset the NP00 function/table or use real people.
+4. Use short-lived credentials from reviewed exact-repository/ref/workflow OIDC trust and protected environments. Keep deployment, observation, fixture setup, test identity reads and any runtime model permission in distinct roles. The existing Amplify deploy role cannot inspect or test the backend.
+5. Use four or more fictional QA owner accounts plus named unapproved, disabled, outsider and display-only cases. Tokens/passwords stay in the trusted job process; never use mock browser storage or local route interception. Real signup email remains a separate controlled-mailbox run.
+6. Give every writable run a lease and cleanup manifest that names only run-owned artifacts. Always-run cleanup removes only those artifacts through the reviewed QA mechanism. A cleanup failure blocks the next write run; it never triggers a broad table reset. No recurring dispatch begins until cleanup and identity denial are stable.
+
+No OIDC role, protected environment, isolated QA stack, synthetic account set or cleanup broker is installed by this preparation. The current public harness is manual and credential-free.
+
+## Separate model and email authorization budgets
+
+Model evaluation and real email delivery remain separate opt-in lanes. Neither inherits permission from a successful public smoke or from the existing offline NP04 tests.
+
+| Lane | Prepared initial scope | Budget fields required before authorization | Current state |
+| --- | --- | --- | --- |
+| Live model | One fresh synthetic group/objective; four owners; at most eight logical operations for drafting, four private interpretations and reasoning | Exact model/region; logical-call cap; provider-attempt/retry cap enforced server-side; input/output token ceilings; USD ceiling; timeout and retention; exact run count | Disabled. Eight logical calls are only the proposal's test-shape ceiling; provider, token and dollar caps are unset. |
+| Real email | One controlled QA mailbox and only the signup/verification or invitation message being tested | Exact sender/domain and recipient allowlist; maximum message count; USD ceiling; test window; retention/deletion and retry limit | Disabled. Message and dollar budgets are unset; no messages sent. |
+
+Before either lane runs, record the approving user, exact target and source/artifact manifest, one-run budget, expiration, and permitted scenarios in NP05. Model retry ceilings must include SDK/provider retries and be enforced in the application admission path; workflow counters and billing alarms are not hard caps. An email test never sends to a participant or other real person. A deployment or IAM change still requires its own explicit authorization.
 
 ## Decision needed before installation
 
 Approve the concrete bootstrap package when it is prepared: exact roles/trust/resource ARNs; QA shared-versus-isolated design; synthetic identities/secret store; workflow dispatch rights; protected environment policy; cleanup/rollback; per-run and recurring budget; paid/email lane permissions. This is setup authorization, not a requirement for A to log in before every test. After setup, either collaborator's agent can dispatch the approved workload and obtain reproducible results using GitHub access alone.
 
-Writing/committing this proposal performs none of those operations. Current NP05 remains unclaimed/blocked on authorized setup/live operations, NP00 remains unchanged, and local NP01–NP04 DONE is not relabeled as cloud acceptance.
+Writing/committing this proposal performs none of those operations. Current NP05 remains unclaimed/blocked on authorized setup/live operations; NP00 remains IN_PROGRESS with its LAT01 scope amendment. Local NP01–NP04 DONE is not relabeled as cloud acceptance.

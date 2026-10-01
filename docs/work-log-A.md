@@ -1,3 +1,8 @@
+## 2026-10-01 — NP00 scope extension for NP04 retry assertion
+
+- Two full-check runs in the clean worktree observed the same existing `tests/e2e/np-qualification.spec.ts` race: the retry button's async request had not yet been recorded when the immediate count assertion ran. A focused run passed 1/1, confirming the failure is timing-sensitive.
+- Added that one exact test file to the active NP00 scope for a bounded wait on request two before comparing identical command bodies. No application behavior or approval semantics change; claimant/status remain unchanged. Full check will rerun after the correction.
+
 ## 2026-10-01 — NP00 scope amendment for LAT01
 
 - The user directed me to add the first concrete LAT01 deliverable to the existing NP00 claim. Claimant A / Mac worker and NP00 IN_PROGRESS status remain unchanged. From clean main, `git pull --ff-only origin main` succeeded at `1abb05aed09ca6f35a1d88d2b0e5ecea36959c72`, equal to `origin/main`; no local changes or merge/rebase were present.
