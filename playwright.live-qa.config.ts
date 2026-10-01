@@ -1,0 +1,2 @@
+import { defineConfig } from '@playwright/test';
+export default defineConfig({testDir:'./tests/live/qa',fullyParallel:false,workers:1,retries:0,timeout:300000,globalTimeout:1800000,reporter:[['./scripts/live-qa/sanitized-reporter.mjs']],outputDir:process.env.QA_PRIVATE_OUTPUT??'/tmp/known-enough-live-qa-browser',use:{browserName:'chromium',headless:true,trace:'off',screenshot:'off',video:'off',viewport:{width:1280,height:900}},expect:{timeout:45000}});

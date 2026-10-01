@@ -1,6 +1,6 @@
 # LIVE02 — Test the real user journey
 
-- Status: IN_PROGRESS — LIVE01 preparation complete; live harness preparation claimed.
+- Status: DONE — real journey harness prepared and locally verified; actual service qualification remains LIVE04.
 - Intended worker: B / Battosai1806, separate clone; record actual model/effort/baseline. Suggested direct target: gpt-6-sol / high.
 - Outcome: Runnable live versions of NP03/NP04 with automatic fictional actors and factual results.
 - Policy: [Live delivery](../live-test-delivery.md); preparation can complete before installation, real evidence cannot.
@@ -24,3 +24,9 @@ DONE means live test code and coverage mapping are implemented and locally verif
 ## Claim — 2026-10-01
 
 B / Battosai1806, Windows/WSL separate clone; GPT-6 variant/effort unexposed. Clean synchronized main 6484bce, 0/0. Exact scope: new tests/live/qa/{helpers.ts,journey.spec.ts}, playwright.live-qa.config.ts, scripts/live-qa/{runner.mjs,runner-core.mjs,sanitized-reporter.mjs}; new tests/integration/live-qa-runner.test.ts; docs/live-qa-coverage.md; this ticket, own B log/handoff. Amend own LIVE01 broker.mjs only to add exact run-owned disclosure publication/expiry service actions needed for qualification, preserving real application permission enforcement; fixture-core/config/setup test only for focused regression if needed. No NP00/shared inspector/root/deployment/application edits. Source pushes skip CI; no actual AWS/signup/email/model operation in preparation. App/target failures exposed by the harness remain explicit LIVE04 blockers rather than fake passing results. A owns shared board updates during overlap.
+
+## Completion — 2026-10-01
+
+B / Battosai1806, GPT-6 variant/effort unexposed. Seven serial required live tests cover actual hosted PKCE/signup/mailbox, admission/invitations, fresh model/public draft, four independent owner confirmations, negotiation/exact agreement, denial/privacy/retry/concurrency/real token expiry, refusal/revocation/roster/disclosure and rendered clarification/accessibility. Runner validates workload/target/expected release, uses private synthetic logins, always requests exact cleanup and emits only sanitized allowlisted statuses/counts. Missing/skipped/duplicate tests or model/signup/privacy/cleanup block complete qualification. [Coverage and explicit gaps](../live-qa-coverage.md) map NP03/NP04 and record the bound-display admission issue needing a coordinated application fix in LIVE04. No app/NP00/root/shared workflow file changed.
+
+Focused setup/runner tests 18/18; full pinned npm run check exit 0: 486 passed / 2 optional DynamoDB Local skips, hosted 1/1, E2E 53/53; references 7/7, planning 15/15 and lint/typecheck/builds pass. Final typecheck/scoped lint and Playwright collection 7/7 pass; collection is not live execution. Local links/whitespace pass. No AWS/profile/login/account creation, hosted browser run, email/model call or deployment performed. LIVE04 owns actual managed-service/model/selector/cleanup proof and must fix any relevant source/service failure before acceptance. Next B preparation LIVE03.
