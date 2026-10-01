@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { safeAwsFailureDetail } from './shared-staging-error.mjs';
 
 const ACCOUNT = '092954139775';
 const REGION = 'us-east-1';
@@ -62,7 +63,7 @@ function awsJson(args, label, { missingIsExpected = false } = {}) {
     if (missingIsExpected && /ResourceNotFoundException|ResourceNotFound|requested resource not found/i.test(diagnostic)) {
       return { missing: true };
     }
-    throw new Error(`${label} was denied or unavailable`);
+    throw new Error(`${label} was denied or unavailable${safeAwsFailureDetail(result.stderr)}`);
   }
 
   try {

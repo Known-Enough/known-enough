@@ -161,9 +161,12 @@ for (const check of inventory?.checks ?? []) {
 if (!inventory?.checks?.length) lines.push('| AWS inspection | BLOCKED | No AWS inspection artifact was collected. |');
 
 lines.push('', '## Missing features and blocked work', '');
+if (inspectionReadStatus !== 'passed') {
+  lines.push('- AWS feature readiness could not be checked because metadata collection failed. Missing observations are not proof that features are ready.');
+}
 if (blockedChecks.length) {
   for (const check of blockedChecks) lines.push(`- **${markdownCell(check.name)}:** ${markdownCell(check.detail)}`);
-} else {
+} else if (inspectionReadStatus === 'passed') {
   lines.push('- No AWS feature checks are blocked in this observation.');
 }
 if (failedChecks.length) {
