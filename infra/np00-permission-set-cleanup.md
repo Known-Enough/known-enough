@@ -6,6 +6,8 @@ The intended permission-set repair moves the existing single-model permission ou
 
 **Current user direction, 2026-10-01:** keep paid model calls disabled until their separate budget is authorized. The read-only Lambda config currently reports `KE14_MODEL_MODE=BEDROCK` and `KE14_PAID_CALLS_APPROVED=true`; its runtime role and the `ReadOnlyAccess` role each still have a Nova Lite `bedrock:InvokeModel` grant. No model call was made in the WSL session. This runbook is preparation only: after the user reviews/authorizes AWS writes, first disable the Lambda model guard and remove the runtime-role and `ReadOnlyAccess` grants. Do not create/assign `KnownEnoughBedrockTest` or restore any invocation grant until the separate model budget is approved. This newest direction gates the create/assignment/simulation commands below; they are future steps, not currently authorized operations.
 
+The exact NP00-only fail-closed commands, refreshed runtime/permission-set policy hashes, verified A identity/account footprint, and minimal write permissions are now in [the model-disable plan](np00-model-disable.md). Use that plan for the model-off change. The permission-set creation, assignment and simulated model-test profile below remain future paid-model-test preparation and are not part of the current shutdown. Do not run those sections for NP00 model disable.
+
 ## 1. Read-only preflight
 
 Run in one Bash session. Replace the three `REPLACE_` values only from current readback and A's verified Identity Center identity, not a Git author name. The instance/account below are historical targets and must be confirmed. Use a private operations directory for before/after policy and assignment evidence; publish only sanitized role/policy outcomes.
