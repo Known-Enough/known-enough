@@ -1,3 +1,9 @@
+## 2026-10-01 — NP00 scope amendment for LAT01
+
+- The user directed me to add the first concrete LAT01 deliverable to the existing NP00 claim. Claimant A / Mac worker and NP00 IN_PROGRESS status remain unchanged. From clean main, `git pull --ff-only origin main` succeeded at `1abb05aed09ca6f35a1d88d2b0e5ecea36959c72`, equal to `origin/main`; no local changes or merge/rebase were present.
+- Added exact scope for `playwright.live.config.ts`, `tests/live/targets.json`, and `tests/live/public-smoke.spec.ts`, plus the named NP00/NP05 coordination and A-side tracking files in [NP00](tasks/NP00.md). Existing Playwright is reused; no package manifest, lockfile, CI, cloud access, deployment, paid call, email or participant action is included. Actual Codex GPT-6; exact variant/effort unexposed (ticket target Sol/high).
+- Target pinning uses the latest dated deployed evidence, not an invented current readback. Public test dispatch/read execution remains separate from this repository implementation.
+
 ## 2026-10-01T03:31:43Z — NP00 / supported-host technical checkpoint; A-side AWS handoff pending
 
 - Starting claim `df277dc` was pushed and clean local main equaled origin/main before implementation. Exact inherited code unchanged; source `5e87543` is integrated, all twelve correction manifest hashes and immutable patch hash match. No application/test/root/lock/CI edit or broadening of configuration was needed. Evidence-only scope amendment adds the saved full-check output and artifact/readback manifest under `docs/review-artifacts/NP00-*`, plus the current debt routing index; historical queue is preserved.
