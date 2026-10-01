@@ -406,3 +406,7 @@ B / Battosai1806, GPT-6 variant/effort unexposed. Clean ff-only main 7cb9c64; ex
 ## NP02 completed — 2026-10-01
 
 B / verified Battosai1806, GPT-6 variant/effort unexposed. General group drafts/creation/typed candidate domains and safe membership revision implemented; no NP00 owned files touched. Final full check 456 / 2 optional skips, hosted 1/1, E2E 48/48. Browser exposed/fixed editor unmount and unsaved/recovery cases are covered. NP03 next; deployment/managed/signup/email/paid-model evidence stays NP05. Source sync skips CI.
+
+## NP03 claim — 2026-10-01
+
+B / Battosai1806; GPT-6 variant/effort unexposed. Clean ff-only main b9be678. UI/inventory scope in NP03; preserve exact consent facts and simulation labels. No backend/cloud/model authority changes.
