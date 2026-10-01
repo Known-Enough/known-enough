@@ -1,3 +1,9 @@
+## 2026-10-01T03:11:45Z — NP00 / IN_PROGRESS claim published before implementation
+
+- User A Ricardo / GitHub `martelaxe` (ID `44531296`), Mac worker `/Users/martelaxe/Blockchain_development/known-enough`; actual Codex GPT-6, exact variant/effort unexposed, ticket target Sol/high. User requested the first new-batch task and a starting claim push visible to B. Clean `main` ff-only pull passed at `5d06c6f9bf87271db480998f142d748f7f1689f8`, equal to `origin/main`, ahead/behind 0/0; NP00 was READY/unclaimed and no NP task active.
+- Claim exactly the bounded runtime/admission/qualification files and tracking/runbook paths listed in [NP00](tasks/NP00.md). No source edit yet. Root config/lock/CI require a reproduced-failure scope amendment. Preserve inherited source/manifest/review bytes; one task, no agents/reviews/human trials. [Technical obligation table](np00-technical-closeout.md) records remaining work.
+- Documentation-only claim sync is pushed before implementation, under standing authorization. B sees the claim after pulling, not through an automatic notification/read receipt. Current routing tells B NP00 is held by A/Mac and no NP01/parallel task is eligible. No AWS/deployment/paid/email/participant authorization is inferred.
+
 ## 2026-10-01T03:00:52Z — Developer identity correction / Mac worker attribution
 
 - User A Ricardo/martelaxe requested verification and correction. Current Mac worker in `/Users/martelaxe/Blockchain_development/known-enough`; actual Codex GPT-6, exact variant/effort unexposed. Documentation-only scope: canonical people/worker mapping, AGENTS/workflow/board/NP direction/current handoffs/main integration, this A log and the assistant's own misplaced NP planning entry/archive. Clean `main` baseline `5611aca0dbba01c6d205762b6d8d9248c122f09b` matched `origin/main`; `git pull --ff-only origin main` passed before edits. No NP implementation claim; NP00 remains READY/unclaimed.

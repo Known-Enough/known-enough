@@ -6,17 +6,17 @@ Current batch: **NP — Next Phase**, authorized 2026-09-30. [Batch direction an
 
 **Who is who:** A = Ricardo / GitHub `martelaxe`; B = Octavio Alatorre / GitHub `Battosai1806`. The Mac is an execution worker currently using A's account. See [verified mapping and status rules](people-and-workers.md). Account names, machines and chat titles are separate; no B activity is inferred from a Mac chat's status. One active task total includes the Mac worker.
 
-**Next task for either User A or User B: [NP00 — technical closeout](tasks/NP00.md).** Status READY; unclaimed. No NP implementation or reviewer task is active. This update is documentation planning only.
+**Active task for the shared queue: [NP00 — technical closeout](tasks/NP00.md).** IN_PROGRESS, claimed by A (Ricardo/martelaxe), Mac worker, at 2026-10-01T03:11:45Z; clean synchronized baseline `5d06c6f9bf87271db480998f142d748f7f1689f8`. Claim is published before implementation. B must not start NP00 or NP01 in parallel; inspect the [current checkpoint](np00-technical-closeout.md) after pulling.
 
 The old KE14 integration claim is closed by the user's explicit direction; its unfinished technical obligations transfer to NP00. Source commit `5e87543` is present in synchronized `main`/`origin/main` at planning baseline `bafa1d4`. The exact patch and recorded check failures are preserved. Staging deployment, a clean full integration check and complete live-scenario qualification still require NP00 evidence. Preserve any unshared work in the other clone before taking over; do not discard or redo it blindly.
 
-When B asks “what's next?”, pull clean `main` with `git pull --ff-only origin main`, read this board and NP00, and claim NP00 if still unclaimed. A gets the same answer. If a task is claimed, report that claim and continue/handoff within that task; do not start the next task in parallel. A alone handles authorized AWS operations with A's own credentials. B can implement/check code and prepare the CLI handoff without AWS access.
+When B asks “what's next?”, pull clean `main` with `git pull --ff-only origin main`, read this board and NP00, and report that A's Mac worker holds NP00. A gets the same queue answer. A takeover requires an explicit recorded transfer; do not open a second task. If a task is claimed, report that claim and continue/handoff within that task; do not start the next task in parallel. A alone handles authorized AWS operations with A's own credentials. B can implement/check code and prepare the CLI handoff without AWS access.
 
 ## Sequential NP queue
 
 | Priority | Task | Direct worker target | Prerequisite | Status |
 | --- | --- | --- | --- | --- |
-| 0 | [NP00 — Technical closeout](tasks/NP00.md) | `gpt-6-sol` / high | User-directed old-batch closure | READY — no technical work claimed yet |
+| 0 | [NP00 — Technical closeout](tasks/NP00.md) | `gpt-6-sol` / high | User-directed old-batch closure | IN_PROGRESS — A / martelaxe / Mac |
 | 1 | [NP01 — Registration, approval CLI, groups and invitations](tasks/NP01.md) | `gpt-6-sol` / high | NP00 DONE | BLOCKED |
 | 2 | [NP02 — Create a group's own decision](tasks/NP02.md) | `gpt-6-sol` / high | NP01 DONE | BLOCKED |
 | 3 | [NP03 — All-screen clarity and copy](tasks/NP03.md) | `gpt-6-luna` / medium | NP02 DONE | BLOCKED |

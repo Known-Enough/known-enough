@@ -2,11 +2,11 @@
 
 **Verified identity correction:** B is Octavio Alatorre / GitHub `Battosai1806`; A is Ricardo / `martelaxe`. The Mac worker currently authenticates as A. See [people and workers](people-and-workers.md). “MAC DIRECT” is a local chat title and cannot establish B's activity. The assistant's own misplaced NP planning entry is archived and attributed to A; B's prior log history is preserved. B's current activity remains unconfirmed until a named synchronized update or identified B session is available.
 
-User-directed shared scheduling notice: [NP00](tasks/NP00.md) is the next task for both A and B, READY and unclaimed. Follow the [current board](task-board.md), [NP direction](next-phase.md) and [workflow override](agent-workflow.md#np-batch-policy) before any historical next step below. Pull clean `main` ff-only, recheck the claim, and claim only the first eligible NP task. One active task; no subagents or independent/human reviewer sessions now. A-only authorized AWS operations use a sequential handoff within that task; B receives no AWS credentials.
+User-directed shared scheduling notice: [NP00](tasks/NP00.md) is IN_PROGRESS, claimed by A (Ricardo/martelaxe), Mac worker, at 2026-10-01T03:11:45Z. See the [current technical checkpoint](np00-technical-closeout.md). B should report this active claim after pulling; no NP01 or parallel task may start. Follow the [current board](task-board.md), [NP direction](next-phase.md) and [workflow override](agent-workflow.md#np-batch-policy) before any historical next step below. Pull clean `main` ff-only, recheck the claim, and claim only the first eligible NP task. One active task; no subagents or independent/human reviewer sessions now. A-only authorized AWS operations use a sequential handoff within that task; B receives no AWS credentials.
 
 All previous task claims are administratively closed by the user. Old statuses/check failures/remaining scope are preserved as history, with unfinished technical work transferred to NP00 and human/release preparation deferred. Source `5e87543` is in synchronized history at planning baseline `bafa1d4`; old unpushed/undeployed assertions below describe their date and are not current synchronization evidence. No new deployment or passing full check is claimed. Preserve any unshared changes before takeover.
 
-This is a shared routing notice, not a claim that the other user has read it. No new implementation has started. The prior handoff body below is retained unchanged.
+This shared claim is synchronized before implementation; it is not a claim that the other user has read it. The prior handoff body below is retained unchanged.
 
 ---
 
