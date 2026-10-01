@@ -1,8 +1,10 @@
 # NP00 — A-only Bedrock permission-set cleanup
 
-Prepared CLI handoff, not executed. The current Mac has neither AWS CLI nor a standard AWS profile. [NP00](../docs/tasks/NP00.md) retains the required live result; [TD-KE10-02](../docs/technical-debt/TD-KE10-02-bedrock-permission-set-name.md) remains open.
+Prepared CLI handoff, not executed. The original Mac lacked AWS CLI/profile; the receiving WSL worker now has both `known-enough-staging-ro` and `known-enough-stage1-release`, each read-only STS-verified for account `092954139775`. [Current read-only preflight](../docs/review-artifacts/NP00-wsl-deployment-preflight.json) records the actual permissions. [NP00](../docs/tasks/NP00.md) retains the required live result; [TD-KE10-02](../docs/technical-debt/TD-KE10-02-bedrock-permission-set-name.md) remains open.
 
-The proposed change moves the existing single-model permission out of `ReadOnlyAccess` into `KnownEnoughBedrockTest`, assigned only to the existing A account owner. Keep the old read-only assignment. Add no B assignment, access key, model invocation, application-role policy, email or application configuration change. A performs this on A's configured host after explicit IAM authorization. Use an authorized Identity Center administration profile; do not substitute root or grant broader permissions on failure.
+The intended permission-set repair moves the existing single-model permission out of `ReadOnlyAccess` into `KnownEnoughBedrockTest`, assigned only to the verified A account owner. Keep the old read-only assignment. Add no B assignment, access key, email, or unrelated application change. Use an authorized Identity Center administration profile; do not substitute root or grant broader permissions on failure.
+
+**Current user direction, 2026-10-01:** keep paid model calls disabled until their separate budget is authorized. The read-only Lambda config currently reports `KE14_MODEL_MODE=BEDROCK` and `KE14_PAID_CALLS_APPROVED=true`; its runtime role and the `ReadOnlyAccess` role each still have a Nova Lite `bedrock:InvokeModel` grant. No model call was made in the WSL session. This runbook is preparation only: after the user reviews/authorizes AWS writes, first disable the Lambda model guard and remove the runtime-role and `ReadOnlyAccess` grants. Do not create/assign `KnownEnoughBedrockTest` or restore any invocation grant until the separate model budget is approved. This newest direction gates the create/assignment/simulation commands below; they are future steps, not currently authorized operations.
 
 ## 1. Read-only preflight
 
@@ -15,7 +17,7 @@ NP00_IAM_PROFILE=REPLACE_AUTHORIZED_IAM_PROFILE
 NP00_REGION=us-east-1
 NP00_ACCOUNT=092954139775
 NP00_INSTANCE=arn:aws:sso:::instance/ssoins-722328a7765eb0e8
-NP00_OLD_SET=REPLACE_VERIFIED_READONLY_PERMISSION_SET_ARN
+NP00_OLD_SET=arn:aws:sso:::permissionSet/ssoins-722328a7765eb0e8/ps-7223102750014ed2
 NP00_A_USER_ID=REPLACE_VERIFIED_EXISTING_A_IDENTITY_CENTER_USER_ID
 NP00_OPS_DIR=$(mktemp -d "${TMPDIR:-/tmp}/known-enough-np00-iam.XXXXXX")
 case "$NP00_IAM_PROFILE:$NP00_OLD_SET:$NP00_A_USER_ID" in *REPLACE_*) exit 1;; esac
@@ -51,7 +53,7 @@ print('Exact existing single-user, read-only plus Nova Lite scope confirmed.')
 PY
 ```
 
-Confirm the listed instance, identity-store ID and A user through `identitystore describe-user` on that same host. Inspect existing permission boundaries and the verified old STS role. Stop if assignments/policies differ from this narrow preflight, if `KnownEnoughBedrockTest` already exists, or if the selected administration identity is outside the separately authorized scope. Preserve existing resources and amend the plan rather than overwriting them.
+Current WSL read-only SSO Admin readback confirmed the instance/account, primary region, `ReadOnlyAccess` permission-set ARN above, one `USER` assignment, and no existing `KnownEnoughBedrockTest`. The assigned principal's Identity Store identity is not yet joined to A's verified user; before any mutation, run `identitystore describe-user` for the opaque assignment ID and compare it privately with A's active Identity Center identity. Inspect existing permission boundaries and the verified old STS role. Stop if assignments/policies differ from this narrow preflight, if `KnownEnoughBedrockTest` already exists, or if the selected administration identity is outside the separately authorized scope. Preserve existing resources and amend the plan rather than overwriting them.
 
 ## 2. Create the separate set and assign only A
 

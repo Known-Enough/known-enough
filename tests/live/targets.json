@@ -85,10 +85,10 @@
       "backend": {
         "status": "last-verified",
         "apiBaseUrl": "https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com",
-        "expectedArtifactSha256": "8e01ad21d9233b834b76e1aee77d32e37f6898f5827c49182c64d54fe1b26211",
+        "expectedArtifactSha256": "d5194b8da79250fbad2422ba948d4122654947941c20822ec58de768ef2f9b4f",
         "sourceCommit": null,
-        "lastVerifiedAt": "2026-09-29T22:30:33Z",
-        "evidence": "docs/reviews/KE13-deployed-boundaries.md; requires credentialed Lambda readback for fresh confirmation"
+        "lastVerifiedAt": "2026-10-01T18:18:06Z",
+        "evidence": "docs/review-artifacts/NP00-wsl-deployment-preflight.json; WSL read-only AWS CodeSha256 readback and downloaded ZIP hash match, but deployed source commit remains unknown"
       },
       "unauthenticatedApiProbe": {
         "method": "GET",

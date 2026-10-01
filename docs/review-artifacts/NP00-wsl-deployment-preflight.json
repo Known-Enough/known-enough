@@ -1,0 +1,208 @@
+{
+  "observedOn": "2026-10-01",
+  "awsAccount": "092954139775",
+  "region": "us-east-1",
+  "checkout": {
+    "codeSourceCommit": "3feef260f6fb865f249ae81149a03f8774ca2d39",
+    "documentationBaseline": "e04649e3993456b461b660e54ec856a865986224",
+    "node": "24.21.0",
+    "npm": "11.19.0",
+    "rolldown": "1.2.9"
+  },
+  "lambda": {
+    "name": "known-enough-stage-api",
+    "runtime": "nodejs24.x",
+    "handler": "ke13b-lambda.handler",
+    "role": "arn:aws:iam::092954139775:role/KnownEnoughStageApiRole",
+    "state": "Active",
+    "lastUpdateStatus": "Successful",
+    "lastModified": "2026-09-30T16:25:25.000+0000",
+    "observedAt": "2026-10-01T18:18:06Z",
+    "deployedSourceCommit": null,
+    "deployedCodeSha256Base64": "1RlLjaeSUPutJCK6lI1BImVJR5QcIIIuxY3naO8vm08=",
+    "deployedZipSha256": "d5194b8da79250fbad2422ba948d4122654947941c20822ec58de768ef2f9b4f",
+    "deployedZipBytes": 339145,
+    "deployedModuleBytes": 1698353,
+    "environmentKeyNames": [
+      "COGNITO_DISPLAY_CLIENT_ID",
+      "COGNITO_PARTICIPANT_CLIENT_ID",
+      "COGNITO_USER_POOL_ID",
+      "KE13B_ALLOWED_ORIGIN",
+      "KE13B_TABLE_NAME",
+      "KE14_INVOCATION_LOGGING_DISABLED",
+      "KE14_MEMBER_BINDINGS",
+      "KE14_MODEL_MODE",
+      "KE14_PAID_CALLS_APPROVED",
+      "KE14_RETENTION_REVIEWED"
+    ],
+    "modelMode": "BEDROCK",
+    "paidCallsApprovedFlag": true,
+    "invocationLoggingDisabledFlag": true,
+    "retentionReviewedFlag": true,
+    "groupsEnabled": false,
+    "groupTableConfigured": false,
+    "groupDomainConfigured": false,
+    "groupEmailKeyConfigured": false
+  },
+  "lambdaResourcePolicy": {
+    "apiGatewayServicePrincipal": true,
+    "sourceArn": "arn:aws:execute-api:us-east-1:092954139775:u94iyvt6p9/*/*",
+    "additionalInvokePermissionNeededForRoutes": false
+  },
+  "api": {
+    "name": "known-enough-stage-http",
+    "id": "u94iyvt6p9",
+    "endpoint": "https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com",
+    "corsConfiguration": null,
+    "routes": [
+      "ANY /decisions/{proxy+}",
+      "POST /decisions",
+      "OPTIONS /decisions/{proxy+}",
+      "OPTIONS /decisions"
+    ],
+    "integrationId": "odmtgut",
+    "integrationType": "AWS_PROXY",
+    "integrationUri": "arn:aws:lambda:us-east-1:092954139775:function:known-enough-stage-api",
+    "payloadFormatVersion": "2.0",
+    "authorizerId": "vnsmtt",
+    "authorizerType": "JWT",
+    "authorizerIssuer": "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_V9OMjd0zx",
+    "authorizerAudiences": [
+      "3accf7paalvon2m8ue8okfi853",
+      "481ru24906sv26f30i569gq8g0"
+    ],
+    "defaultStage": "$default",
+    "autoDeploy": true,
+    "throttleRatePerSecond": 5,
+    "throttleBurst": 10
+  },
+  "dynamodb": {
+    "tables": [
+      "KnownEnoughStage"
+    ],
+    "existingRoomTable": {
+      "status": "ACTIVE",
+      "billingMode": "PAY_PER_REQUEST",
+      "partitionKey": "PK:S",
+      "sortKey": "SK:S",
+      "globalSecondaryIndexes": 0,
+      "runtimeKeyCondition": "ROOM#*"
+    },
+    "groupsTableExists": false,
+    "proposedGroupsTable": {
+      "name": "KnownEnoughGroupsStage",
+      "billingMode": "PAY_PER_REQUEST",
+      "partitionKey": "PK:S",
+      "sortKey": "SK:S",
+      "globalSecondaryIndexes": 0,
+      "singleAggregateKey": {
+        "PK": "NP#GROUPS",
+        "SK": "STATE"
+      },
+      "deletionProtection": true
+    }
+  },
+  "cognito": {
+    "userPoolId": "us-east-1_V9OMjd0zx",
+    "userPoolName": "known-enough-staging",
+    "domain": "known-enough-092954139775",
+    "domainStatus": "ACTIVE",
+    "managedLoginVersion": 1,
+    "allowAdminCreateUserOnly": true,
+    "autoVerifiedAttributes": null,
+    "emailSendingAccount": "COGNITO_DEFAULT",
+    "participantClient": {
+      "id": "3accf7paalvon2m8ue8okfi853",
+      "name": "known-enough-participant-browser",
+      "secret": false,
+      "oauthFlow": "code",
+      "scopes": [
+        "openid"
+      ],
+      "accessTokenValidityMinutes": 15,
+      "callbackAndLogoutOrigins": [
+        "https://known-enough-staging.vercel.app/",
+        "https://main.d143q5ravxp5av.amplifyapp.com/"
+      ]
+    },
+    "displayClient": {
+      "id": "481ru24906sv26f30i569gq8g0",
+      "name": "known-enough-display-browser",
+      "secret": false,
+      "oauthFlow": "code",
+      "scopes": [
+        "openid"
+      ],
+      "accessTokenValidityMinutes": 15,
+      "callbackAndLogoutOrigins": [
+        "https://known-enough-staging.vercel.app/",
+        "https://main.d143q5ravxp5av.amplifyapp.com/"
+      ]
+    }
+  },
+  "permissions": {
+    "lambdaRuntimeRole": {
+      "roomPolicy": "GetItem/PutItem/UpdateItem on KnownEnoughStage only, restricted to TransactGetItems/TransactWriteItems and ROOM#* leading keys; exact Lambda log-stream writes",
+      "bedrockPolicy": "bedrock:InvokeModel on amazon.nova-lite-v1:0 in us-east-1"
+    },
+    "readOnlyProfile": {
+      "managedPolicy": "ReadOnlyAccess",
+      "inlineBedrockPermission": "bedrock:InvokeModel on amazon.nova-lite-v1:0 in us-east-1",
+      "assignmentCount": 1,
+      "assignmentPrincipalType": "USER",
+      "identityStorePrincipalIdentityVerified": false
+    },
+    "stage1ReleaseProfile": {
+      "lambdaActions": [
+        "lambda:GetFunction",
+        "lambda:GetFunctionConfiguration",
+        "lambda:UpdateFunctionCode",
+        "lambda:UpdateFunctionConfiguration",
+        "lambda:InvokeFunction"
+      ],
+      "lambdaResource": "arn:aws:lambda:us-east-1:092954139775:function:known-enough-stage-api",
+      "apiGatewayActions": [
+        "apigateway:GET",
+        "apigateway:POST",
+        "apigateway:DELETE"
+      ],
+      "apiGatewayResourceScope": "routes/authorizers/stages under API u94iyvt6p9",
+      "missingForGroupProvisioning": [
+        "DynamoDB table creation",
+        "dynamodb:GetItem and dynamodb:PutItem on the new groups table",
+        "iam:PutRolePolicy on KnownEnoughStageApiRole",
+        "Cognito user-pool/client updates"
+      ]
+    },
+    "bedrockTestPermissionSetExists": false
+  },
+  "candidatePackage": {
+    "path": "/tmp/known-enough-np00-wsl-3feef26/ke13b-lambda.zip",
+    "sourceCommit": "3feef260f6fb865f249ae81149a03f8774ca2d39",
+    "zipBytes": 346757,
+    "zipSha256": "95a928930a08d34f52e1073d9ac4a729a3452a0dafcfdf3ba414da8606db5ff9",
+    "codeSha256Base64": "lakokwoI009S4Qc9msSnKaNFKg2vz987pBTahgbbX/k=",
+    "moduleEntry": "ke13b-lambda.mjs",
+    "moduleBytes": 1712913,
+    "moduleSha256": "e1438b920e539492289a2ce409bb46e85e2a08176202d6ac6830ac9de4905d05",
+    "includesSourceMapsFixturesOrNodeModules": false
+  },
+  "rollback": {
+    "zipPath": "/tmp/known-enough-np00-wsl-3feef26/rollback-current-lambda.zip",
+    "zipSha256": "d5194b8da79250fbad2422ba948d4122654947941c20822ec58de768ef2f9b4f",
+    "zipBytes": 339145,
+    "matchesLambdaCodeSha256": true,
+    "privateSnapshotDirectory": "/tmp/known-enough-np00-wsl-3feef26",
+    "privateSnapshotMode": "0700",
+    "rollbackEnvPath": "/tmp/known-enough-np00-wsl-3feef26/rollback-disabled-model-env.json",
+    "rollbackEnvironmentKeepsModelOff": true,
+    "rawEnvironmentContainsOpaqueTestBindings": true
+  },
+  "execution": {
+    "awsWrites": 0,
+    "publicApiCalls": 0,
+    "participantActions": 0,
+    "emailMessages": 0,
+    "bedrockModelCalls": 0
+  }
+}
