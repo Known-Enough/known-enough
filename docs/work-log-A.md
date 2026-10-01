@@ -1,3 +1,10 @@
+## 2026-10-01T17:56:15Z — NP00 Mac-to-WSL worker transfer
+
+- At the user's explicit direction, A transferred the same active NP00 claim from the Mac worker to WSL `/home/martelaxe/known-enough`; no second task or claimant was opened. WSL started on clean `main`, `git pull --ff-only origin main` succeeded (`Already up to date`), and `main` matched `origin/main` at `3feef260f6fb865f249ae81149a03f8774ca2d39` (ahead/behind 0/0).
+- Preserved the synchronized NP00 checkpoint, LAT01 harness/manifest and retry-test change without rewriting them. The receiver's ignored `.vercel/`, `apps/web/dist*`, `node_modules/` and `test-results/` remain untouched. The prior `/tmp/known-enough-np00-df277dc` package is not present in this WSL filesystem; the separate Mac filesystem is not mounted, so its tree/artifact remain untouched and their unsynchronized state is not asserted. Any WSL rebuild will use a separate output path and the recorded source commit.
+- Both `known-enough-staging-ro` and `known-enough-stage1-release` successfully passed read-only STS identity checks for account `092954139775` in `us-east-1`. No AWS write, deployment, paid request, email or participant action occurred. The existing NP00 technical checks and unresolved obligations remain as recorded; next prepare the exact WSL artifact, read actual staging state and present the planned changes before cloud writes.
+- Actual model: Codex GPT-6; exact variant/effort unexposed (NP00 ticket target remains `gpt-6-sol` / high).
+
 ## 2026-10-01 — NP00 scope extension for NP04 retry assertion
 
 - Two full-check runs in the clean worktree observed the same existing `tests/e2e/np-qualification.spec.ts` race: the retry button's async request had not yet been recorded when the immediate count assertion ran. A focused run passed 1/1, confirming the failure is timing-sensitive.

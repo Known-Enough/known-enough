@@ -2,7 +2,11 @@
 
 ## Active claim
 
-A / Ricardo / GitHub `martelaxe` (ID `44531296`), Mac worker `/Users/martelaxe/Blockchain_development/known-enough`, claimed 2026-10-01T03:11:45Z. Actual model Codex GPT-6; exact variant/effort unexposed, ticket target Sol/high. Clean `main` ff-only pull passed at `5d06c6f9bf87271db480998f142d748f7f1689f8`, equal to `origin/main`. Claim synchronization precedes implementation; see [ticket and exact scope](tasks/NP00.md). One active project task; no subagents/reviewer/human trial.
+A / Ricardo / GitHub `martelaxe` (ID `44531296`), WSL worker `/home/martelaxe/known-enough`, transferred from the Mac at 2026-10-01T17:56:15Z. Actual model Codex GPT-6; exact variant/effort unexposed, ticket target Sol/high. Clean `main` ff-only pull passed at `3feef260f6fb865f249ae81149a03f8774ca2d39`, equal to `origin/main` (ahead/behind `0/0`). The original claim and Mac evidence remain preserved; see [ticket and transfer record](tasks/NP00.md). One active project task; no subagents/reviewer/human trial.
+
+## WSL AWS identity preflight — 2026-10-01
+
+Read-only `aws sts get-caller-identity` verified both `known-enough-staging-ro` and `known-enough-stage1-release` resolve to account `092954139775` in `us-east-1`; the release profile is the named `AWSReservedSSO_KnownEnoughStage1Release` role. This verifies profile identity only. No cloud write or model/email call has occurred.
 
 ## LAT01 preparation checkpoint — 2026-10-01
 
