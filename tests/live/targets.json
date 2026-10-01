@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "purpose": "LAT01 public, unauthenticated smoke only",
+  "targets": [
+    {
+      "id": "stage0-static-preview",
+      "kind": "static-public-preview",
+      "frontendUrl": "https://d23eowhnwtqts3.cloudfront.net/",
+      "frontend": {
+        "sourceCommit": "a6254989f04e194412c5682cee6073b502777645",
+        "lastVerifiedAt": "2026-09-27",
+        "evidence": "infra/staging-runbook.md and docs/reviews/KE13C.md",
+        "files": [
+          {
+            "path": "/",
+            "sha256": "574954696e5098f34cfedb1fda0e2942f7df781a4e07e58bc6adb366a51c32fe",
+            "mediaType": "text/html"
+          },
+          {
+            "path": "/assets/index-CohlOwP-.js",
+            "sha256": "eccc59393bcda465c1dfa3e20f38fe28f7013ef21be998323cb095db061de379",
+            "mediaType": "javascript"
+          },
+          {
+            "path": "/assets/index-Bh2GWqRh.css",
+            "sha256": "786e7c506ddb978f62cac8cc40ea0e67e28e74489701c9d8dc76ace55c2fee23",
+            "mediaType": "text/css"
+          }
+        ]
+      },
+      "backend": {
+        "status": "not-applicable",
+        "apiBaseUrl": null,
+        "expectedArtifactSha256": null
+      },
+      "page": {
+        "heading": "Deal Table",
+        "keyboard": {
+          "mode": "no-controls",
+          "expectedFocusableCount": 0
+        }
+      }
+    },
+    {
+      "id": "amplify-connected-staging",
+      "kind": "connected-staging",
+      "frontendUrl": "https://main.d143q5ravxp5av.amplifyapp.com/",
+      "frontend": {
+        "sourceCommit": "bafa1d4e21cb6e29008dce76b6b52f8b146d6a5e",
+        "lastVerifiedAt": "2026-10-01T03:31:43Z",
+        "evidence": "docs/np00-technical-closeout.md and docs/review-artifacts/NP00-local-artifact-manifest.json",
+        "files": [
+          {
+            "path": "/",
+            "sha256": "867259c6c93dc3a2bb3abd6774d81d383c0631b9015d4151572ba24e2161a43d",
+            "bytes": 545,
+            "mediaType": "text/html"
+          },
+          {
+            "path": "/assets/connected-app-CxhluTmY.js",
+            "sha256": "be5c65705b996b53271925a469266fffc1bdb290cc61cc5b242bfa5495ad3176",
+            "bytes": 159713,
+            "mediaType": "javascript"
+          },
+          {
+            "path": "/assets/index-B96ri3Se.js",
+            "sha256": "29db0b86589df4fdbb2a2b3921a69e74114e914dc9296c721bf19a11f79fab18",
+            "bytes": 213566,
+            "mediaType": "javascript"
+          },
+          {
+            "path": "/assets/index-CrFboyLM.css",
+            "sha256": "d5fc935c58c26d1d2ccd98b707bfb07ee4083f78720a476c3079232592c6c627",
+            "bytes": 9506,
+            "mediaType": "text/css"
+          },
+          {
+            "path": "/assets/jsx-runtime-D6BUY6Oc.js",
+            "sha256": "919f9139c48fa2d94a4794afd4647cb65d5f67339b1932ff02f9978b1d3ffdf8",
+            "bytes": 13524,
+            "mediaType": "javascript"
+          }
+        ]
+      },
+      "backend": {
+        "status": "last-verified",
+        "apiBaseUrl": "https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com",
+        "expectedArtifactSha256": "8e01ad21d9233b834b76e1aee77d32e37f6898f5827c49182c64d54fe1b26211",
+        "sourceCommit": null,
+        "lastVerifiedAt": "2026-09-29T22:30:33Z",
+        "evidence": "docs/reviews/KE13-deployed-boundaries.md; requires credentialed Lambda readback for fresh confirmation"
+      },
+      "unauthenticatedApiProbe": {
+        "method": "GET",
+        "path": "/decisions/christmas-decision/public",
+        "expectedStatus": 401
+      },
+      "page": {
+        "heading": "Decide together",
+        "keyboard": {
+          "mode": "first-button-focus",
+          "role": "button",
+          "name": "Sign in or register"
+        }
+      }
+    }
+  ]
+}

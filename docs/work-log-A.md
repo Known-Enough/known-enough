@@ -3,6 +3,12 @@
 - Two full-check runs in the clean worktree observed the same existing `tests/e2e/np-qualification.spec.ts` race: the retry button's async request had not yet been recorded when the immediate count assertion ran. A focused run passed 1/1, confirming the failure is timing-sensitive.
 - Added that one exact test file to the active NP00 scope for a bounded wait on request two before comparing identical command bodies. No application behavior or approval semantics change; claimant/status remain unchanged. Full check will rerun after the correction.
 
+## 2026-10-01 — LAT01 repository checkpoint
+
+- Prepared the target manifest and on-demand public Playwright harness under the existing NP00 claim. Target evidence consistency passed for two source commits, eight frontend hashes and the last recorded backend ZIP hash. The manifest-only test passed 1/1; ESLint and TypeScript passed.
+- Final exact-diff check ran in clean worktree /tmp/known-enough-lat01-final-dd525 with Node 24.21.0/npm 11.19.0 after clean `npm ci` (193 packages audited, zero vulnerabilities). `PLAYWRIGHT_CHANNEL=chromium npm run check` passed references 7/7, planning 15/15, lint/boundaries 233, typecheck, 464 unit/integration with 2 optional emulator skips, production/hosted builds and scans, hosted 1/1 and E2E 53/53. Existing retry assertion received the bounded `expect.poll` wait under the recorded scope extension.
+- Changed-clone lint initially scanned pre-existing ignored .vercel/output; those artifacts were preserved. Final application check used a clean worktree. The live target suite was not run; no public target traffic, AWS/OIDC setup, login, synthetic account action, deployment, model call or email occurred. Actual worker Codex GPT-6, variant/effort unexposed; NP00 target remains Sol/high.
+
 ## 2026-10-01 — NP00 scope amendment for LAT01
 
 - The user directed me to add the first concrete LAT01 deliverable to the existing NP00 claim. Claimant A / Mac worker and NP00 IN_PROGRESS status remain unchanged. From clean main, `git pull --ff-only origin main` succeeded at `1abb05aed09ca6f35a1d88d2b0e5ecea36959c72`, equal to `origin/main`; no local changes or merge/rebase were present.

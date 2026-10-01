@@ -95,7 +95,9 @@ test('a lost committed response retries the exact command once; expired browser 
     });
     const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: 'Open decision', exact: true }).click();
     await page.getByLabel('I reviewed this frame version, its options and public rules.').check(); await page.getByRole('button', { name: 'Confirm shared frame' }).click();
-    await page.getByRole('button', { name: 'Retry the same action' }).click(); expect(bodies).toHaveLength(2); expect(bodies[0]).toBe(bodies[1]);
+    await page.getByRole('button', { name: 'Retry the same action' }).click();
+    await expect.poll(() => bodies.length).toBe(2);
+    expect(bodies[0]).toBe(bodies[1]);
     expect((await h.publicView()).frameConfirmations).toHaveLength(1);
     await page.evaluate(() => { const key = 'known-enough-cognito-session'; const session = JSON.parse(sessionStorage.getItem(key)!); session.expiresAt = Date.now() - 1; sessionStorage.setItem(key, JSON.stringify(session)); });
     await page.reload(); await expect(page.getByRole('button', { name: 'Sign in or register', exact: true })).toBeVisible();

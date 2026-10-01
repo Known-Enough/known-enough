@@ -4,6 +4,14 @@
 
 A / Ricardo / GitHub `martelaxe` (ID `44531296`), Mac worker `/Users/martelaxe/Blockchain_development/known-enough`, claimed 2026-10-01T03:11:45Z. Actual model Codex GPT-6; exact variant/effort unexposed, ticket target Sol/high. Clean `main` ff-only pull passed at `5d06c6f9bf87271db480998f142d748f7f1689f8`, equal to `origin/main`. Claim synchronization precedes implementation; see [ticket and exact scope](tasks/NP00.md). One active project task; no subagents/reviewer/human trial.
 
+## LAT01 preparation checkpoint — 2026-10-01
+
+The user-approved scope amendment keeps the same NP00 claim and owner. [Target manifest](../tests/live/targets.json) records Stage 0 at commit `a6254989f04e194412c5682cee6073b502777645` and Amplify frontend at `bafa1d4e21cb6e29008dce76b6b52f8b146d6a5e`, with exact expected frontend hashes, connected API URL, and last-observed Lambda ZIP SHA-256 `8e01ad21d9233b834b76e1aee77d32e37f6898f5827c49182c64d54fe1b26211`. The backend source commit remains unspecified in the deployed receipt; its hash is dated 2026-09-29 and requires fresh credentialed readback. The [on-demand public harness](../tests/live/public-smoke.spec.ts) checks page/assets, browser errors and off-origin requests, 390px overflow, keyboard behavior, and unauthenticated API denial. Run with `npx playwright test --config=playwright.live.config.ts`; this contacts public targets and has not been run.
+
+The proposal also maps the full registration/admission/invitation/decision/private-needs/negotiation/exact-approval path to existing offline assertions. Safe setup calls for a separate isolated QA target and short-lived exact-subject OIDC roles. Real-model and email budgets are separate and unset pending explicit authorization. No role, workflow, QA resource or fixture has been installed.
+
+Verification used pinned Node 24.21.0/npm 11.19.0 in a clean worktree: target evidence consistency passed for eight frontend hashes, one backend hash and two source commits; manifest-only Playwright check passed 1/1; final `PLAYWRIGHT_CHANNEL=chromium npm run check` passed (464 unit/integration, 2 optional skips, hosted 1/1, E2E 53/53). One existing asynchronous retry assertion was synchronized after repeated full-suite races. No test ran against a public URL; no cloud, paid, email, participant or deployment operation occurred. NP00 remains IN_PROGRESS; NP05 remains BLOCKED/unclaimed.
+
 ## Supported-host technical checkpoint — 2026-10-01T03:31:43Z
 
 Full local check finished 2026-10-01T03:17:37Z. Starting claim published as `df277dcb6d282240c47c8732ec7deed9b2c7b779`; all results below use its unchanged executable source. No application, test, root configuration, lockfile or CI edit was needed. The current Mac runs macOS 14.8.9 x86_64, Node 24.21.0/npm 11.19.0, with fresh dependencies and bundled Chromium installed. The older macOS 12 failures remain dated evidence; their exact host-level cause is not newly established here.
