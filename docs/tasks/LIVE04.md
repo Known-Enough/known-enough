@@ -1,6 +1,6 @@
 # LIVE04 — Install once and prove B can run everything
 
-- Status: BLOCKED — LIVE01–03 preparation, coordinated operations claim and concrete setup/budget authorization required; unclaimed.
+- Status: BLOCKED — concrete domain/setup/budget authorization and coordinated A operations installation required; LIVE01–03 preparation complete. B preinstallation source repair is scoped below.
 - Intended workers: A / martelaxe installs through A's authorized AWS session; B / Battosai1806 launches qualification using B's own GitHub account. Sequential recorded handoff; no credential sharing.
 - Outcome: Complete real online tests run without repeated help from A, including after deployments.
 - Policy: [Live delivery](../live-test-delivery.md); [NP05 inherited obligations](NP05.md) remain mapped here, never silently waived.
@@ -20,3 +20,9 @@ The human's remaining role is the concrete initial setup/cost authorization and 
 ## Obligation mapping
 
 NP05 items 1/2: coordinated deployment/role/configuration and exact artifacts. Items 3/4: real account/operator/membership/denial/persistence. Item 5: optional invitation sender remains optional and is labeled; signup verification has separate required controlled-mailbox evidence. Item 6: bounded real fresh-objective AI and privacy/authority qualification. Item 7: actual hosted NP03 states. Item 8: factual evidence/limits. NP00's existing model-disable and historical scenario obligations remain with its current claimant unless explicitly transferred; these tasks do not close NP00.
+
+## B preinstallation repair scope — 2026-10-01
+
+B / Battosai1806; actual GPT-6 variant/effort unexposed, clean synchronized main ec05a98b6e5166811126a74308e055313b266b90. LIVE01/02/03 preparation completed and pushed separately. Exact local repair scope: apps/api/src/group-service.ts; new tests/integration/live-qa-display.test.ts; docs/live-qa-coverage.md and docs/live-qa-automation.md to preserve/follow up the discovered gap; this ticket, LIVE03 clean-build evidence, own B log/handoff. Read-only inspection confirms NP00's exact active claim does not include group-service.ts or this new test; no HTTP/runtime/model/NP00/root/CI/contract/dependency file is amended. The repository-published bounded claim coordinates the shared source through the workflow's required clone pull; no live message/read receipt is inferred. Publish this scope before the source edit.
+
+The existing authenticated display principal has exactly one admin-managed bound room. Group admission incorrectly rejects it as a nonparticipant before public projection. Repair only admits that exact public scope while preserving current roster freeze and any recorded disabled/rejected admission. Existing application/HTTP boundaries still reject owner access, commands and model routes. Add focused real local HTTP coverage, then full pinned check and artifact build. This is a reversible local technical fix under LIVE04's failure-repair obligation, not A's AWS operations claim or cloud installation authorization. LIVE04 remains BLOCKED and cannot reach DONE until actual installation, B manual and automatic complete PASS.
