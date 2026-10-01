@@ -1,0 +1,262 @@
+{
+  "baseline": "bafa1d4e21cb6e29008dce76b6b52f8b146d6a5e",
+  "closure_date": "2026-09-30",
+  "closure": "User-directed administrative DONE; original technical status/evidence retained, unfinished work mapped to NP00 or deferred release work.",
+  "body_marker": "<!-- pre-NP-original-body -->\n\n",
+  "board": {
+    "path": "docs/archive/task-board-before-np-2026-09-30.md.txt",
+    "sha256": "11fbdda39cffab8e3496bce7922f822377dc50ed33e6d20fae7a99565d4a4028"
+  },
+  "tasks": [
+    {
+      "path": "docs/tasks/A01.md",
+      "prior_status": "DONE; included in main at the user\u2019s explicit integration direction. Combined checks passed; see [main integration](../main-integration.md).",
+      "original_body_sha256": "f2858c860b4e38a3664252cb1fba1a05877656613580ecb5fb8d41f64ef4e482"
+    },
+    {
+      "path": "docs/tasks/A02.5.md",
+      "prior_status": "REVIEW.",
+      "original_body_sha256": "50168eec8f0d9170b95424477df58eb9b776d94877b7ddac6bb7ab9bb78ccde3"
+    },
+    {
+      "path": "docs/tasks/A02.md",
+      "prior_status": "REVIEW.",
+      "original_body_sha256": "f544f1eda720a6085b36a480793804d3719c5f9e77702b4b436fed1d5e360cfe"
+    },
+    {
+      "path": "docs/tasks/A03.5.md",
+      "prior_status": "REVIEW; checkpoint verdict PASS for mock preparation rechecked on published `bc02dc6`; human acceptance pending.",
+      "original_body_sha256": "e7d96b05ec751e17b1c7b2e9fd92759ad83ce5930be70e7c6c0c5be0d9515462"
+    },
+    {
+      "path": "docs/tasks/A03.md",
+      "prior_status": "REVIEW.",
+      "original_body_sha256": "af32e7e4c6314aafe8aa37c7654fa79c9398b78a2207fa604005bccf1370d3f7"
+    },
+    {
+      "path": "docs/tasks/A04.5.md",
+      "prior_status": "SUPERSEDED.",
+      "original_body_sha256": "f661a355f650ba0ba524e0e39afeac789b8d58a9e32bff5aee00ed0b3ced1682"
+    },
+    {
+      "path": "docs/tasks/A04.md",
+      "prior_status": "SUPERSEDED.",
+      "original_body_sha256": "bc5470457b2f9019092cfd62ab1de0506bf2c480b72b8787bed9abb9df34673e"
+    },
+    {
+      "path": "docs/tasks/A05.5.md",
+      "prior_status": "SUPERSEDED.",
+      "original_body_sha256": "ca4b54648fe51479117a7ad2291648306bf14d067f666cb7bfed43cd993fb9d8"
+    },
+    {
+      "path": "docs/tasks/A05.md",
+      "prior_status": "REVIEW; implementation and checks complete; independent privacy follow-up PASS; human acceptance pending.",
+      "original_body_sha256": "6eb75af22c763a91ca7007651f73fbbe202a316d3851d90d67826227fe78ba31"
+    },
+    {
+      "path": "docs/tasks/A06.5.md",
+      "prior_status": "SUPERSEDED.",
+      "original_body_sha256": "f7bc8c5556bc7c04a8263f3baeefb71d6ac019d2270982b12e6fb30a71b3e888"
+    },
+    {
+      "path": "docs/tasks/A06.md",
+      "prior_status": "SUPERSEDED.",
+      "original_body_sha256": "101e0caaf889a9899b465f4a4020c6b75af330864236e212c0a11d21f8ea0064"
+    },
+    {
+      "path": "docs/tasks/B01.md",
+      "prior_status": "DONE; included in main at the user\u2019s explicit integration direction. Combined checks passed; see [main integration](../main-integration.md).",
+      "original_body_sha256": "a3037f65567269876b634f7e432873d55942c6745faf16ee94c1e8c1a364f90b"
+    },
+    {
+      "path": "docs/tasks/B02.5.md",
+      "prior_status": "DONE; supplied independent final review reconciled with fresh integration checks. [Verdict: PASS](../reviews/B02.5.md).",
+      "original_body_sha256": "a3faab1fe40d712f501e3a73e1c5b4ba9d890b841269438d688c17f83ba54186"
+    },
+    {
+      "path": "docs/tasks/B02.md",
+      "prior_status": "DONE; 47b97eb integrated at the user\u2019s direction; combined checks passed. See [main integration](../main-integration.md).",
+      "original_body_sha256": "119a36debeb0eb211a577579e4d65c19bb7808bc38b625c7f4a917be782c2b63"
+    },
+    {
+      "path": "docs/tasks/B03.md",
+      "prior_status": "REVIEW; implemented in `27a110c`, now integrated into main at the user\u2019s direction. Live acceptance remains at A02.5/G01.",
+      "original_body_sha256": "7aecb66323428c9b2ceff5754c95195b553f9593559214aa7d84318c229bcea3"
+    },
+    {
+      "path": "docs/tasks/B04.5.md",
+      "prior_status": "REVIEW \u2014 fresh independent R11/R12 correction follow-up PASS on exact source diff `04bd1db..f6b93bc77ecf7b0680a1abcab4bc99d7fa836515`, inspected at `afecdf4`. R11/R12 are closed; no new bounded findings. Review claim finished. B04 remains REVIEW with project-level sign-off deferred; this does not block KE02. Live/cloud evidence remains outstanding; earlier verdicts retain their artifact scope. See [independent evidence](../reviews/B04.5.md).",
+      "original_body_sha256": "c90022446c0915ae573f438d8c94f4a8e8b2e869afc18bbf1baf37b975cc2b47"
+    },
+    {
+      "path": "docs/tasks/B04.md",
+      "prior_status": "REVIEW \u2014 local B04 technical evidence has been assessed after independent B04.5 PASS on exact source range `04bd1db..f6b93bc`; R11/R12 are closed. Identity, room/owner scope, invitation replay/expiry, auth-before-cache, and local DynamoDB transaction evidence are recorded below and in [independent review](../reviews/B04.5.md). The author-reported full check passed with a documented serial-browser fallback; the independent reviewer reran focused suites and DynamoDB Local but not the full/browser suite. Project-level sign-off is deferred; the REVIEW status is preserved and does not block KE02. No managed AWS/live Cognito/IAM, deployment, or push is claimed.",
+      "original_body_sha256": "d46f0213c25c8bb0de78b1e94fb3e7f4f7549805b3f4a8a8907cfe4ccc6f1af5"
+    },
+    {
+      "path": "docs/tasks/B05.md",
+      "prior_status": "SUPERSEDED.",
+      "original_body_sha256": "e6d17052eb97c465798bce71c454949276e52303aca24fe283272e970e384703"
+    },
+    {
+      "path": "docs/tasks/B06.md",
+      "prior_status": "SUPERSEDED.",
+      "original_body_sha256": "d959fc7e14027722990767d03dce8228bb37f71ce5a416c65bdad5e9d88be36d"
+    },
+    {
+      "path": "docs/tasks/F00.md",
+      "prior_status": "DONE; foundation ca9fb636974030bfd8a620cec2b3d8581b3c8114 was integrated at the user\u2019s direction, as recorded in B01\u2019s shared history.",
+      "original_body_sha256": "50771ca9e34e39bb633ccf25d9e84d9bf60d8cbd8b4d2910f40ec1189a19fe19"
+    },
+    {
+      "path": "docs/tasks/F01.md",
+      "prior_status": "DONE; foundation ca9fb636974030bfd8a620cec2b3d8581b3c8114 was integrated at the user\u2019s direction, as recorded in B01\u2019s shared history.",
+      "original_body_sha256": "5c9f80691ebb229fab286dbe0c43421d2dff4fb5a149c5d34599b676a18b6f9b"
+    },
+    {
+      "path": "docs/tasks/F02.md",
+      "prior_status": "DONE; foundation ca9fb636974030bfd8a620cec2b3d8581b3c8114 was integrated at the user\u2019s direction, as recorded in B01\u2019s shared history.",
+      "original_body_sha256": "df75316119c404752831805c6086feae3ef1b34b152c14cb518740f96e51562f"
+    },
+    {
+      "path": "docs/tasks/G01.md",
+      "prior_status": "DONE; local integration checkpoint human accepted 2026-09-23.",
+      "original_body_sha256": "71aa1ef0067bc36bf92acb6f04a4f4697797e697494416fc06308ae6d1a08422"
+    },
+    {
+      "path": "docs/tasks/G02.md",
+      "prior_status": "SUPERSEDED.",
+      "original_body_sha256": "5f33383ef02ebd43fe3f3098237e6c8d6f0bbe8d308d2faf3ccd213bbebb6c52"
+    },
+    {
+      "path": "docs/tasks/G03.md",
+      "prior_status": "SUPERSEDED.",
+      "original_body_sha256": "712c54c8e8028f20db1f67e5e72b6677f28ac337ddafcbc5440d93c31f173c54"
+    },
+    {
+      "path": "docs/tasks/KE00.md",
+      "prior_status": "DONE \u2014 documentation pivot accepted by the user on 2026-09-26T23:19:42Z.",
+      "original_body_sha256": "5c7e5223cc22bda3fa9a0c2edd1fb2172ff39e86fa58a8f533e54c753106ce3f"
+    },
+    {
+      "path": "docs/tasks/KE01.md",
+      "prior_status": "DONE.",
+      "original_body_sha256": "62eb57f02c0fb004bc74306230f818c13012093a092cdf27214addee8e3f5dd3"
+    },
+    {
+      "path": "docs/tasks/KE02.md",
+      "prior_status": "DONE \u2014 technical ticket criteria and required checks passed; project-level sign-off remains deferred.",
+      "original_body_sha256": "5708e290e14223d82a14becfb3420cf2c17168862c028d639891c06fa1f4ea4a"
+    },
+    {
+      "path": "docs/tasks/KE03.md",
+      "prior_status": "DONE \u2014 2026-09-27; technical criteria and pinned full check passed. No managed AWS resources or cloud evidence claimed.",
+      "original_body_sha256": "6f3d8d573def578d386007a9e93df766752dd3bdb5602795d5ee203a7ecb0009"
+    },
+    {
+      "path": "docs/tasks/KE04.md",
+      "prior_status": "DONE \u2014 2026-09-27; compatibility criteria and pinned full check passed.",
+      "original_body_sha256": "a30aba02212618650c97dbb7ba3683c58aa1985fed03232f70448c014851d035"
+    },
+    {
+      "path": "docs/tasks/KE05.md",
+      "prior_status": "DONE \u2014 technical acceptance met on 2026-09-27; handed off to KE06.",
+      "original_body_sha256": "8692d710fa1c33ff2c655652290e3dcfa1ed1c26a5fc98d2e54d2440881fbea7"
+    },
+    {
+      "path": "docs/tasks/KE06.md",
+      "prior_status": "DONE \u2014 technical acceptance met on 2026-09-27; handed off to KE07.",
+      "original_body_sha256": "bbbe025fbcffb37ac23bad541e18b30a9a35694125ef8dddaa81ccfe2ed85837"
+    },
+    {
+      "path": "docs/tasks/KE07.md",
+      "prior_status": "DONE \u2014 technical criteria and required checks passed on 2026-09-27.",
+      "original_body_sha256": "f33929d1f14ff3eff04577bc3ce25d5ca061dcfbbcd361e7fe7b8a957f2ffb2a"
+    },
+    {
+      "path": "docs/tasks/KE08.md",
+      "prior_status": "REVIEW \u2014 local MVP and technical checks complete; shown for the single product feedback pass; next is KE09's named independent architecture/privacy review.",
+      "original_body_sha256": "88e1cad2f97b99fe3a67623a77ab77bb3e8868803a3c389e484671da0972153e"
+    },
+    {
+      "path": "docs/tasks/KE09.md",
+      "prior_status": "DONE under the user-directed scheduling exception below; R1\u2013R6 self-review PASS, not independent certification.",
+      "original_body_sha256": "123d8a56b78fcafe9e0e84831201dd17bab31227b649baa002ada893dd564d92"
+    },
+    {
+      "path": "docs/tasks/KE10.md",
+      "prior_status": "REVIEW \u2014 proposal-output mismatch corrected; pinned checks and the post-correction live evaluation pass. Per the user's 2026-09-28 direction, the named focused runtime follow-up is deferred to [TD-KE10-01](../technical-debt/TD-KE10-01-stop-commit-race.md) until after MVP; it does not block MVP progress or separately authorized bounded MVP Bedrock tests. Keep KE10 REVIEW and do not make a release-grade runtime claim until the follow-up passes.",
+      "original_body_sha256": "4814cb50674e63e1cfeb66d31670b862edaa6a7ec2e97228e6575d0700259ff0"
+    },
+    {
+      "path": "docs/tasks/KE11.md",
+      "prior_status": "DONE \u2014 code-level app-side Cognito login, authenticated API client, focused tests and CLI handoff are complete under the user-directed cloud-first MVP path. Managed cloud smoke belongs to [KE13](KE13.md), after [KE13B](KE13B.md). No AWS resources were created by User B.",
+      "original_body_sha256": "28fe07115857aa981c26a6b4ce0e6c2fdff64318348f8949a6bcfd35f48820b6"
+    },
+    {
+      "path": "docs/tasks/KE12.md",
+      "prior_status": "DONE \u2014 implementation criteria and required checks passed; the independent scoped KE09 privacy follow-up is PASS on `a7f07d5..e197734`, unchanged through `fb81b8e`. No native Alexa or live AWS acceptance is claimed.",
+      "original_body_sha256": "acb02816111c1bedb66c6eded43720b90fa381ba60426b1142063978a54c3947"
+    },
+    {
+      "path": "docs/tasks/KE13.md",
+      "prior_status": "DONE \u2014 authorized Amplify/Stage 1 live participant/display, durable write/reload/cold-start, membership-denial, replay/conflict, IAM/log/cost checks passed; scoped independent KE09 deployed-boundary follow-up PASS. Native Alexa, model enablement, volunteer access and release gates remain separate.",
+      "original_body_sha256": "f870ee9a70274e9dea922323129acf2df6dff13fc30560587a5e424a5da6b7e4"
+    },
+    {
+      "path": "docs/tasks/KE13A-provisioner-policy.md",
+      "prior_status": "REVIEW \u2014 the focused correction is complete; independent follow-up review is required. The reviewed `known-enough-staging-ro` inspection and identity/origin/OAC checks remain intact. Strict alphanumeric ID allowlisting and case-insensitive sentinel rejection now precede ARN rendering. Assignment remains blocked by the documented CloudFront creation/specification/cost limitation.",
+      "original_body_sha256": "4573589cac56feccda4a0d0ee70aa1fd66a941db23f5b9347ddffbc773a41e94"
+    },
+    {
+      "path": "docs/tasks/KE13A.md",
+      "prior_status": "DONE \u2014 preparation accepted by the user on 2026-09-26T23:19:42Z.",
+      "original_body_sha256": "7b0047d2911c4f6b73d4737511c478fa744ace5c318c84041e7b16e39aaa433d"
+    },
+    {
+      "path": "docs/tasks/KE13B.md",
+      "prior_status": "DONE \u2014 authenticated API, durable repository composition, deployment artifacts, focused checks and the one named independent auth/privacy/persistence/IAM review are complete. This records the technical gate only; KE13 live cloud verification remains separate.",
+      "original_body_sha256": "246dfda89bee5e9ce01a4d397426475d56e1985ac90f45ee2b2e9ed3b2513216"
+    },
+    {
+      "path": "docs/tasks/KE13C-policy-followup.md",
+      "prior_status": "REVIEW \u2014 independent focused review PASS on `f1893e3..6238700`; P1/P2 closed for the exact draft. Human acceptance, rendered exact-ARN revalidation and the separate cloud-change gates remain outstanding. See [the follow-up verdict](../reviews/KE13C-policy-followup.md).",
+      "original_body_sha256": "177ce5dce89567ba3acf6b869753ffeadc33d0f30489b3f5124a8f12d79ffdc0"
+    },
+    {
+      "path": "docs/tasks/KE13C.md",
+      "prior_status": "DONE \u2014 hosted-preview build reviewed and accepted by the user; Stage 0 deployed and verified over HTTPS on 2026-09-27. KE13 operational acceptance remains separate.",
+      "original_body_sha256": "df969dc6d65cd851798608cc922e3e77a8f960ff42d4d15f9792c25d29e13d87"
+    },
+    {
+      "path": "docs/tasks/KE14.md",
+      "prior_status": "REVIEW \u2014 independent public-schema/diagnostic review PASS on the exact patch; integration, staging and complete live qualification remain pending, KE15 BLOCKED.",
+      "original_body_sha256": "495b4aed07f3428c132152a292ffd79f30e4a0e99e09900001b2572ce7c16974"
+    },
+    {
+      "path": "docs/tasks/KE15.md",
+      "prior_status": "BLOCKED.",
+      "original_body_sha256": "73c0efe50b5790ccb7aa3083747fb1dfbc045c7a1b7644c8f5920b7d05efc184"
+    },
+    {
+      "path": "docs/tasks/KE16.md",
+      "prior_status": "BLOCKED.",
+      "original_body_sha256": "6435eab41617451a44d0fd69dc081baa7935d2e17a84232b5e10a85599cdcc8d"
+    },
+    {
+      "path": "docs/tasks/KE17.md",
+      "prior_status": "BLOCKED.",
+      "original_body_sha256": "f96c1d50961ee312efe874fdc8a639a689e37b0fc94de007c3c03f07ebde721b"
+    },
+    {
+      "path": "docs/tasks/T01.md",
+      "prior_status": "SUPERSEDED.",
+      "original_body_sha256": "dbe139bf3bb2d7dfb7f6102338030d94360c627461126c08b8596f9610aedee0"
+    },
+    {
+      "path": "docs/tasks/T02.md",
+      "prior_status": "SUPERSEDED.",
+      "original_body_sha256": "c68743b646bee8739286d0e6b66defe1e796711362f78c2d8b9da083e9b46073"
+    }
+  ]
+}

@@ -1,3 +1,13 @@
+## Current routing for User A — NP batch, 2026-09-30
+
+User-directed shared scheduling notice: [NP00](tasks/NP00.md) is the next task for both A and B, READY and unclaimed. Follow the [current board](task-board.md), [NP direction](next-phase.md) and [workflow override](agent-workflow.md#np-batch-policy) before any historical next step below. Pull clean `main` ff-only, recheck the claim, and claim only the first eligible NP task. One active task; no subagents or independent/human reviewer sessions now. A-only authorized AWS operations use a sequential handoff within that task; B receives no AWS credentials.
+
+All previous task claims are administratively closed by the user. Old statuses/check failures/remaining scope are preserved as history, with unfinished technical work transferred to NP00 and human/release preparation deferred. Source `5e87543` is in synchronized history at planning baseline `bafa1d4`; old unpushed/undeployed assertions below describe their date and are not current synchronization evidence. No new deployment or passing full check is claimed. Preserve any unshared changes before takeover.
+
+This is a shared routing notice, not a claim that the other user has read it. No new implementation has started. The prior handoff body below is retained unchanged.
+
+---
+
 ## KE14 public-schema/diagnostic correction ready for independent review — 2026-09-30
 
 User A / actual Codex GPT-6 (variant/effort unexposed) prepared the bounded twelve-file public-schema/diagnostic correction from clean synchronized `b93432b`, claim `e2d4d17`. Complete strictly PUBLIC definitions now travel as structured server input; model selects exact declared IDs, server copies metadata, and application rejects schema drift. Failure diagnostics contain only declared kind/stage enums and a fixed event label. Focused 67/67, two baseline-failing negative controls, connected browser 2/2, final fresh pinned full check **440 / 2 optional DynamoDB Local skips, hosted 1/1, E2E 47/47**, refs 7/7, planning 15/15, boundaries 201, lint/types/builds passed. [Exact patch/evidence](ke14-public-schema-correction.md), SHA-256 `6160910f39881f39e3fd44e08765d36cd5811ecfdd71a2e4c1c9ba389fd0f66b`. Source is frozen local work, unintegrated/undeployed, for the named User B independent model/privacy follow-up; only review artifact/documentation is synchronized. Implementation claim released at REVIEW, no active task; KE15 BLOCKED. No AWS mutation, paid call, human credentials or participant consent/approval.

@@ -1,3 +1,5 @@
+> **Current routing, 2026-09-30:** technical closeout belongs to [NP00](../tasks/NP00.md). The prior reviewer prerequisite below is deferred under the [NP policy](../next-phase.md); no reviewer PASS or new technical closure is claimed. Keep the original debt/finding evidence below. A-only IAM actions retain separate authorization.
+
 # TD-KE10-02 — Bedrock permission-set name and isolation
 
 - Status: **READY — permission currently works, but is attached to the misleadingly named `ReadOnlyAccess` permission set.**

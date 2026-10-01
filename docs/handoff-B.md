@@ -1,3 +1,13 @@
+## Current routing for User B — NP batch, 2026-09-30
+
+User-directed shared scheduling notice: [NP00](tasks/NP00.md) is the next task for both A and B, READY and unclaimed. Follow the [current board](task-board.md), [NP direction](next-phase.md) and [workflow override](agent-workflow.md#np-batch-policy) before any historical next step below. Pull clean `main` ff-only, recheck the claim, and claim only the first eligible NP task. One active task; no subagents or independent/human reviewer sessions now. A-only authorized AWS operations use a sequential handoff within that task; B receives no AWS credentials.
+
+All previous task claims are administratively closed by the user. Old statuses/check failures/remaining scope are preserved as history, with unfinished technical work transferred to NP00 and human/release preparation deferred. Source `5e87543` is in synchronized history at planning baseline `bafa1d4`; old unpushed/undeployed assertions below describe their date and are not current synchronization evidence. No new deployment or passing full check is claimed. Preserve any unshared changes before takeover.
+
+This is a shared routing notice, not a claim that the other user has read it. No new implementation has started. The prior handoff body below is retained unchanged.
+
+---
+
 ## KE14 exact public-schema integration — local checkpoint — 2026-09-30
 
 The exact independent-PASS patch is committed locally as `5e87543` from the synchronized docs baseline `350349a`; all twelve final hashes match. Focused tests 67/67 and typecheck pass. Full-check limitations on this macOS 12 host are detailed in [the ticket](tasks/KE14.md) and [B log](work-log-B.md): baseline-reproduced default test timeouts, a diagnostic unit-suite pass with 30-second timeouts, build and hosted-preview passes, and browser failures on the bundled-Chromium run. Source is not pushed or deployed. A `packages/**` push triggers Amplify staging, which awaits separate authorization. Claim remains active; KE14 REVIEW and KE15 BLOCKED.

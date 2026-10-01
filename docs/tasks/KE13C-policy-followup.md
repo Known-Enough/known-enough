@@ -1,3 +1,14 @@
+# KE13C Stage 0 IAM policy follow-up — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](NP00.md). Future product work follows [NP00–NP04](../next-phase.md) and the [shared board](../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
 # KE13C Stage 0 IAM policy follow-up
 
 - Status: REVIEW — independent focused review PASS on `f1893e3..6238700`; P1/P2 closed for the exact draft. Human acceptance, rendered exact-ARN revalidation and the separate cloud-change gates remain outstanding. See [the follow-up verdict](../reviews/KE13C-policy-followup.md).

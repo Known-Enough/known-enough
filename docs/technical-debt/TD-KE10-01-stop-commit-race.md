@@ -1,3 +1,5 @@
+> **Current routing, 2026-09-30:** technical closeout belongs to [NP00](../tasks/NP00.md). The prior reviewer prerequisite below is deferred under the [NP policy](../next-phase.md); no reviewer PASS or new technical closure is claimed. Keep the original debt/finding evidence below. A-only IAM actions retain separate authorization.
+
 # TD-KE10-01 — KE10 stop/commit race
 
 - Status: **READY — correction and local regression checked; focused independent follow-up deferred until after MVP.** The existing debt queue uses READY for an item that can be scheduled when its closure trigger is reached; it does not mean review passed.

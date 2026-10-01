@@ -1,3 +1,14 @@
+# KE13C — hosted public-only mock preview — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](NP00.md). Future product work follows [NP00–NP04](../next-phase.md) and the [shared board](../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
 # KE13C — hosted public-only mock preview
 
 - Status: DONE — hosted-preview build reviewed and accepted by the user; Stage 0 deployed and verified over HTTPS on 2026-09-27. KE13 operational acceptance remains separate.

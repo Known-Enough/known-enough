@@ -1,5 +1,26 @@
 # Task execution and collaboration
 
+<a id="np-batch-policy"></a>
+## Current NP batch policy — user direction, 2026-09-30
+
+[NP direction](next-phase.md) and the [shared board](task-board.md) now govern selection: NP00 → NP01 → NP02 → NP03 → NP04. Both A and B receive the same highest-priority eligible task. Initial next task is NP00, READY/unclaimed. Before implementation or task-artifact edits, use a clean separate `main` clone, successfully pull `git pull --ff-only origin main`, inspect synchronized claims, and record the exact claimant/baseline/files. One active task across both users; no subagents. If the current task needs A-only cloud operations, preserve a bounded handoff within that task and explicitly transfer it; do not skip to a later task or share credentials.
+
+The user administratively closed all pre-NP tickets and their scheduling claims. Each is DONE for that scheduling decision with its original status/body retained as history; this does not establish missing technical acceptance. Inherited technical debt, old KE14 integration/check/live qualification and IAM cleanup are consolidated in NP00. Preserve existing work and source `5e87543`; remote synchronization was observed at `bafa1d4` during planning. Never overwrite another clone's saved changes.
+
+No independent reviews, human sign-off or volunteer trials are required or scheduled now. NP tasks complete on their stated technical criteria and actual focused/full checks. Former B04/KE09/KE10/KE17 reviewer prerequisites are deferred under this newer instruction; their old verdicts remain historical and are not relabeled PASS. Human feedback, demo/submission preparation and release review are deferred outside the batch. A future user instruction can reinstate them. Technical self-inspection remains part of implementation.
+
+Current model targets are Sol/high for NP00, NP01, NP02 and NP04, and Luna/medium for NP03, using the exact IDs in each ticket. The human selects the session; report actual exposed model/effort. No Astra manager or automatic model switch is implied.
+
+Participant identity, membership checks, independent concession/disclosure/final approval and stale-authority protection remain mandatory. No administrative closure or deferred reviewer gate waives participant consent. A alone uses A's AWS credentials. AWS/IAM changes, deployments, paid calls, live emails, publication and external messages still require separate explicit authorization. Prepare exact reviewable artifacts first. Source pushes that trigger Amplify count as deployment-triggering actions and need the applicable authorization; documentation-only pushes are covered by standing repository sync authorization.
+
+For documentation-only changes verify links, statuses/dependencies and immutable reference hashes; do not rerun the application suite. For implementation use pinned Node/npm, focused checks and `npm run check`. Keep own log/handoff plus ticket/board evidence factual. Synchronize verified task/checkpoint/docs commits explicitly to `origin main`: verify branch, fetch/inspect remote head before push, never force-push, verify local/remote equality afterward. The other clone pulls ff-only before its next work.
+
+A/B handoff history and old ticket next-step paragraphs cannot override this NP queue. When B asks “what's next?”, consult this section and the board first; if NP00 is still unclaimed, the answer is NP00. Shared updates reach the other clone through the required pull, not a live message/read receipt.
+
+## Retained historical workflow
+
+The dated policies below preserve their original evidence and continue to apply only where they do not conflict with the newer NP policy. Their old task statuses, sequencing and mandatory reviewer/volunteer prerequisites do not schedule current work.
+
 Effective September 22, 2026, with the user's September 23 sequential-priority update. One shared priority queue supersedes the September 20 A/B ownership and coverage rules. Either user gets the same top-priority eligible task; normally only one task is active project-wide. The one-time KE12/KE13 parallel exception is recorded below. This replaces the earlier parallel schedule, Astra-led-every-task policy and mandatory task branches. This is the current authority for execution, ownership transfers and scheduling; the September 26 Known Enough [product](known-enough-product.md), [architecture](known-enough-architecture.md) and [pivot record](known-enough-pivot.md) now govern new product work. Imported TeamTable plans retain historical semantics and evidence; executable contracts/source describe the implementation baseline. [Task board](task-board.md) lists the priority order; each ticket owns its requirements and status.
 
 ## Start and model selection

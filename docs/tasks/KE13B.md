@@ -1,3 +1,14 @@
+# KE13B — Authenticated AWS backend and persistence implementation — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](NP00.md). Future product work follows [NP00–NP04](../next-phase.md) and the [shared board](../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
 # KE13B — Authenticated AWS backend and persistence implementation
 
 - Status: DONE — authenticated API, durable repository composition, deployment artifacts, focused checks and the one named independent auth/privacy/persistence/IAM review are complete. This records the technical gate only; KE13 live cloud verification remains separate.
