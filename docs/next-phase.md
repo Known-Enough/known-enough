@@ -46,3 +46,7 @@ The shared commit communicates these priorities to the other clone when it pulls
 | KE17 and other unfinished independent/human reviews | Deferred until the user reinstates them; not a release PASS |
 
 Native Alexa, booking, payments, unrestricted rule execution, marketing mail and broad infrastructure redesign are outside this batch. Submission/publication remains a separately authorized future action.
+
+## User scheduling override — 2026-09-30, Windows B worker
+
+The user explicitly directed this chat to work on everything except NP00 and to list AWS or other live checks as a new task. NP00's A/Mac claim and bounded files remain untouched. B may implement NP01–NP04 sequentially alongside that preserved NP00 claim, with no subagents and no overlap with NP00's named runtime/admission/test or tracking files. This is a specific scheduling exception. NP01 no longer waits for NP00 DONE. Automated focused and pinned full checks remain mandatory; required new managed-service/deployment/email/paid-model evidence routes to NP05 rather than blocking local implementation. No live acceptance is invented. B updates NP01–NP05 tickets, its own log/handoff and this override; A-owned existing claim/evidence is preserved. All implementation commits use `[skip ci]` to prevent deployment on authorized repository sync; NP05 owns separately authorized publication.

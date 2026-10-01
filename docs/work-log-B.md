@@ -390,3 +390,7 @@ Entry format: UTC time | task/state | developer/model/effort | baseline/commit/d
 - Claim finished. B04.5 is REVIEW/PASS for this correction; B04 remains PAUSED with the code gate cleared pending owner sequential resumption. Remaining B04, final critical review, human and G02/live gates persist. No implementation edits, cloud work or publication. A local documentation-only review commit is authorized.
 
 Final documentation validation: **145 local Markdown targets**, current B04.5 REVIEW/PASS and B04 PAUSED status consistency, and `git diff --check` passed. Imported reference hashes remained 7/7. The only pre-existing untracked entry is the supplied `node_modules` symlink; it is excluded from the review commit.
+
+## 2026-09-30 — NP01 claim under user exception
+
+Verified transport GitHub Battosai1806; main c00b508 clean ff-only pull passed. Actual GPT-6, variant/effort unexposed. User directs NP01–NP04 implementation except NP00; preserved A/Mac scope, added NP05 for external checks. Exact NP01 files recorded in ticket. Node 24.21.0/npm 11.19.0 available in temporary WSL tool directory. No AWS, paid calls or external messages. Repository implementation sync will skip deployment CI.
