@@ -1,6 +1,6 @@
 # LIVE03 — Run checks after every deployment
 
-- Status: BLOCKED — LIVE02 preparation required; unclaimed.
+- Status: IN_PROGRESS — LIVE02 preparation complete; automation claimed.
 - Intended worker: B / Battosai1806, separate clone; record actual model/effort/baseline. Suggested direct target: gpt-6-sol / high.
 - Outcome: One GitHub result automatically follows each authorized deployment; A/B can also launch it themselves.
 - Policy: [Live delivery](../live-test-delivery.md).
@@ -20,3 +20,7 @@ New `.github/workflows/live-qa-*.yml`, new release-receipt/report/runner files u
 7. Test workflow provenance/trigger/failure handling and report classification; run focused and pinned npm run check for executable changes. Provide A/B launch/read instructions and exact installation inputs. Keep workflows inactive or guarded until LIVE04 installation; sync preparation using [skip ci].
 
 DONE means automation is prepared and locally verified. Actual post-deployment trigger and B-account access are proven in LIVE04, not inferred from YAML. No deployment/cloud/paid/email operation is authorized here. Continue to [LIVE04](LIVE04.md).
+
+## Claim — 2026-10-01
+
+B / Battosai1806, separate Windows/WSL clone, GPT-6 variant/effort unexposed. Clean synchronized main 8d4d6bb, 0/0. Exact new scope: .github/workflows/live-qa-release-and-check.yml; scripts/live-qa/{provenance.mjs,release.mjs,public.mjs,metadata.mjs,report.mjs}; infra/live-qa/installed-target.example.json; tests/integration/live-qa-automation.test.ts; docs/live-qa-automation.md; this ticket and own B log/handoff. Own LIVE01 template.mjs amendment: release role gets only GetItem on QA LEASE to refuse target mutations during a run; it still has no fixture operator/account/data write or environment/IAM/Cognito grant. Reuse A's stable inspector JSON/interface and public harness read-only; no NP00/shared inspector/deployment workflow/root/lock edits. Automatic/manual workflow stays guarded until LIVE04 has installed exact resources/envelope and set its repository enable/config variables. No workflow dispatch, cloud publish/write or paid/email operation occurs in this preparation. All required missing/failed/blocked lanes fail the final result.
