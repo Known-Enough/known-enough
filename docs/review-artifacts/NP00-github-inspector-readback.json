@@ -225,5 +225,32 @@
     "readOnlyNovaGrantCanonicalSha256": "be165dbd713fd1b5c0dc9e06a6e9511588a8863dcbd025c35fe7719494d57acd",
     "revisionIdAndFullEnvironmentRequest": "saved privately with mode 0600; only the two model flags changed",
     "temporaryWritePermissionSetPresent": false
+  },
+  "sharedReportRepair": {
+    "baselineHistoryPreserved": true,
+    "diagnosticSourceCommit": "92f72951ef1b8545e08048f04b770dd2705aaff2",
+    "diagnosticRunUrl": "https://github.com/Known-Enough/known-enough/actions/runs/36930827040",
+    "githubInspectorRolePresent": true,
+    "githubOidcIdentity": "passed",
+    "awsErrorCode": "AccessDeniedException",
+    "awsErrorResource": "arn:aws:amplify:us-east-1:092954139775:apps/d143q5ravxp5av/branches/main/jobs/*",
+    "awsErrorReason": "no identity-based allow",
+    "correction": "add the exact observed main/jobs/* resource to existing amplify:ListJobs statement; preserve all other policy/trust",
+    "accessAnalyzerFindings": [],
+    "customPolicySimulation": {
+      "mainJobList": "allowed",
+      "otherBranchJobList": "implicitDeny",
+      "startJob": "implicitDeny"
+    },
+    "installedCorrection": "pending administrator apply",
+    "awsWritesByRepairWorker": false,
+    "sharedReportPassed": false,
+    "localVerification": {
+      "focusedPassed": 4,
+      "unitIntegrationPassed": 468,
+      "optionalSkips": 2,
+      "hostedPassed": 1,
+      "e2ePassed": 53
+    }
   }
 }

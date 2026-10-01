@@ -1,6 +1,8 @@
 # Shared staging checks
 
-**Status: prepared; AWS role not installed and no GitHub run completed yet.** The bootstrap profile `known-enough-staging-bootstrap` did not authenticate in WSL. On 2026-10-01 the staging read-only and Stage1 release profiles again verified account `092954139775`; neither session can install this role. No AWS write was attempted. The policy and workflow are ready for the one-time account administrator setup below.
+**Current status: role installed; Amplify resource correction prepared, not yet applied.** Diagnostic run [36930827040](https://github.com/Known-Enough/known-enough/actions/runs/36930827040) authenticated through GitHub, then returned `AccessDeniedException` on the exact `main/jobs/*` resource because no identity-based policy allowed it. The checked-in policy now permits `amplify:ListJobs` on both the documented branch ARN and the observed job-list resource; it grants no new action, other branch or write access. The earlier setup checkpoint follows as history.
+
+**Historical preparation checkpoint:** The bootstrap profile `known-enough-staging-bootstrap` did not authenticate in WSL. On 2026-10-01 the staging read-only and Stage1 release profiles again verified account `092954139775`; neither session can install this role. No AWS write was attempted. The policy and workflow are ready for the one-time account administrator setup below.
 
 The manual [Shared staging checks workflow](../.github/workflows/shared-staging-check.yml) runs the existing LAT01 public Playwright suite and reads staging metadata in a separate AWS job. Its third-party actions are pinned to verified commit SHAs. The report is written to the GitHub Actions run summary and attached as a 30-day artifact named `shared-staging-report`. The workflow only runs the check jobs on `main`.
 
@@ -14,6 +16,25 @@ The manual [Shared staging checks workflow](../.github/workflows/shared-staging-
 The AWS job assumes `KnownEnoughGithubStagingInspector` through GitHub OIDC for 900 seconds. It has no static credential or GitHub secret. Its policy can read only the named Lambda configuration, one API, two named table descriptions, one Cognito pool/client set, inline policies on the Lambda execution role and Amplify main-branch job summaries. It has no Lambda invoke/update/code, API write, DynamoDB item, Cognito user, email, Bedrock, deployment or IAM write permission. The inspector and report scripts keep raw service responses out of logs and artifacts; output uses a fixed field allowlist.
 
 AWS cannot field-scope `lambda:GetFunctionConfiguration`; the service response includes the function's environment configuration. The CLI applies a fixed field query and the script only emits the two model guard values, the artifact hash and runtime metadata. Treat edits to the inspector script/workflow on `main` as changes to the AWS read surface. The two Cognito clients are checked as public clients with no client secret; the workflow prints only a boolean secret-presence value.
+
+## Amplify ListJobs resource repair — administrator applies once
+
+The original policy allowed `amplify:ListJobs` only on `arn:aws:amplify:us-east-1:092954139775:apps/d143q5ravxp5av/branches/main`. AWS's [authorization table](https://docs.aws.amazon.com/service-authorization/latest/reference/list_amplify.html) lists the branch resource, and that simulation passed. The actual API error in [the diagnostic run](https://github.com/Known-Enough/known-enough/actions/runs/36930827040) names `arn:aws:amplify:us-east-1:092954139775:apps/d143q5ravxp5av/branches/main/jobs/*` and explicitly says no identity-based allow. The correction adds only that resource to the same ListJobs statement; all other actions/resources/trust stay unchanged. Simulation of the corrected policy allows a main job resource while denying other-branch listing and StartJob. Access Analyzer returned zero findings.
+
+WSL's bootstrap/root-login profiles remain unavailable; its read-only session cannot apply this IAM change. An administrator uses CloudShell in account `092954139775` and the exact checked-in corrected policy:
+
+```bash
+set -euo pipefail
+test "$(aws sts get-caller-identity --query Account --output text --no-cli-pager)" = "092954139775"
+# In a clean clone containing the verified correction commit:
+aws iam put-role-policy \
+  --role-name KnownEnoughGithubStagingInspector \
+  --policy-name InspectExistingStagingMetadata \
+  --policy-document file://infra/permissions/shared-staging-github-inspect.json \
+  --no-cli-pager
+```
+
+The worker supplies a commit-pinned download and SHA-256 check for the same policy when the CloudShell clone is older. This updates only the one existing inspection policy; it does not create a new role or touch the deployment role. Compare fresh full policy/trust readback before and after, preserving unrelated settings. IAM has no RevisionId for PutRolePolicy, so do not run concurrent edits. Rollback is the previous exact policy from commit `92f72951ef1b8545e08048f04b770dd2705aaff2`, which restores the read-only branch-only grant and the known failed ListJobs state. After installation, the worker checks exact policy equality and reruns the full shared workflow through GitHub. Administrator simulation alone does not count as live repair PASS.
 
 ## One-time AWS administrator setup
 

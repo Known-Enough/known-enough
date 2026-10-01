@@ -44,7 +44,10 @@
       "Sid": "InspectAmplifyMainJobSummaries",
       "Effect": "Allow",
       "Action": "amplify:ListJobs",
-      "Resource": "arn:aws:amplify:us-east-1:092954139775:apps/d143q5ravxp5av/branches/main"
+      "Resource": [
+        "arn:aws:amplify:us-east-1:092954139775:apps/d143q5ravxp5av/branches/main",
+        "arn:aws:amplify:us-east-1:092954139775:apps/d143q5ravxp5av/branches/main/jobs/*"
+      ]
     }
   ]
 }
