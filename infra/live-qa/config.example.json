@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "account": "092954139775",
+  "region": "us-east-1",
+  "stack": "known-enough-live-qa",
+  "repository": "Known-Enough/known-enough",
+  "oidcSubject": "repo:Known-Enough@331386621/known-enough@1377587215:ref:refs/heads/main",
+  "mailDomain": "REPLACE_OWNED_QA_SUBDOMAIN",
+  "hostedZoneId": "REPLACE_ROUTE53_ZONE",
+  "sourceCommit": "REPLACE_40_CHARACTER_VERIFIED_COMMIT",
+  "primaryRollout": false,
+  "primaryExpectedRevision": null,
+  "authorization": {
+    "approved": false,
+    "expiresAt": "2026-10-01T00:00:00.000Z",
+    "maxRunsPerDay": 0,
+    "maxAttemptsPerRun": 0,
+    "maxTokensPerRun": 0,
+    "maxCostMicrosPerRun": 0,
+    "attemptCostMicros": 0,
+    "maxSignupMessagesPerRun": 0,
+    "maxSignupMessagesPerDay": 0,
+    "retentionReviewed": false,
+    "invocationLoggingDisabled": false
+  }
+}
