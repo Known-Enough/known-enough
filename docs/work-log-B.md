@@ -398,3 +398,7 @@ Verified transport GitHub Battosai1806; main c00b508 clean ff-only pull passed. 
 ## NP01 completed — 2026-09-30
 
 B / verified Battosai1806; actual GPT-6 exact variant/effort unexposed. NP01 local implementation done; pinned full check passed 449 / 2 optional skips, hosted 1/1 and E2E 48/48; focused 9/9. No NP00 owned source or evidence touched. NP02 next under the user's scheduling exception. Real Cognito/AWS/email/deployment/model checks remain NP05, not invented completion. Source push skips CI publication.
+
+## NP02 claim — 2026-09-30
+
+B / Battosai1806, GPT-6 variant/effort unexposed. Clean ff-only main 7cb9c64; exact scope in NP02. Implement persistent group-scoped public drafts, generated bounded options/candidates, independent existing owner lifecycle and safe roster revision. NP00 remains untouched; cloud/model evidence stays NP05.
