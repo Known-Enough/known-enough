@@ -35,7 +35,7 @@ test('new users request access, operator admits, organizer invites a new recipie
     await expect(host.getByText('Access request pending.', { exact: false })).toBeVisible();
     await api.approve('iris'); await host.getByRole('button', { name: 'Refresh account and groups' }).click();
     await host.getByLabel('New group name').fill('Garden club'); await host.getByRole('button', { name: 'Create group', exact: true }).click();
-    await expect(host.getByRole('heading', { name: 'Garden club' })).toBeVisible();
+    await expect(host.getByRole('heading', { name: 'Garden club', exact: true })).toBeVisible();
     await host.getByLabel('Recipient email').fill('omar@example.invalid'); await host.getByRole('button', { name: 'Create invitation link' }).click();
     const link = await host.getByLabel('Invitation link', { exact: true }).inputValue();
     const guest = await pageFor('omar'); await guest.goto(link.replace('http://127.0.0.1:5181', 'http://127.0.0.1:5181'));
@@ -43,11 +43,25 @@ test('new users request access, operator admits, organizer invites a new recipie
     await expect(guest.getByText('Access request pending.', { exact: false })).toBeVisible();
     await api.approve('omar'); await guest.getByRole('button', { name: 'Refresh account and groups' }).click();
     await guest.getByRole('button', { name: 'Accept group invitation', exact: true }).click();
-    await expect(guest.getByRole('heading', { name: 'Garden club' })).toBeVisible();
+    await expect(guest.getByRole('heading', { name: 'Garden club', exact: true })).toBeVisible();
     await expect(guest.getByRole('button', { name: 'Create invitation link' })).toHaveCount(0);
-    await guest.reload(); await expect(guest.getByRole('heading', { name: 'Garden club' })).toBeVisible();
+    await guest.reload(); await expect(guest.getByRole('heading', { name: 'Garden club', exact: true })).toBeVisible();
     await host.getByRole('button', { name: 'Refresh account and groups' }).click();
     await expect(host.getByRole('button', { name: 'Remove Omar' })).toBeVisible();
+    await host.getByLabel('What should this group decide?').fill('Choose a gallery meetup venue and time.');
+    await host.getByRole('button', { name: 'Draft a new decision', exact: true }).click();
+    await expect(host.getByRole('heading', { name: 'Review the public draft' })).toBeVisible();
+    await host.getByLabel('Decision title', { exact: true }).fill('Garden club gallery meetup');
+    await host.getByRole('checkbox', { name: 'I reviewed this public draft and the required approvers' }).check();
+    await expect(host.getByRole('button', { name: 'Create decision for group review' })).toBeDisabled();
+    await host.getByRole('button', { name: 'Save draft edits' }).click();
+    await expect(host.getByRole('checkbox', { name: 'I reviewed this public draft and the required approvers' })).not.toBeChecked();
+    await host.getByRole('checkbox', { name: 'I reviewed this public draft and the required approvers' }).check();
+    await host.getByRole('button', { name: 'Create decision for group review' }).click();
+    await expect(host.getByRole('heading', { name: 'Shared frame', exact: true })).toBeVisible();
+    await expect(host.getByRole('heading', { name: 'Garden club gallery meetup', exact: true })).toBeVisible();
+    await guest.reload(); await guest.getByRole('button', { name: 'Open decision', exact: true }).click();
+    await expect(guest.getByRole('heading', { name: 'Shared frame', exact: true })).toBeVisible();
     await api.disable('omar'); await guest.getByRole('button', { name: 'Refresh account and groups' }).click();
     await expect(guest.getByText('Your access is disabled.', { exact: false })).toBeVisible();
   } finally { await Promise.all(contexts.map(context => context.close())); await api.close(); }

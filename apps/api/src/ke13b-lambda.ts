@@ -1,10 +1,11 @@
 import { createServer, type RequestListener } from 'node:http';
-import { createDynamoGroupRepository, createAwsDynamoDBRoomRepository } from '@deal-table/adapters';
+import { genericCandidates, createDynamoGroupRepository, createAwsDynamoDBRoomRepository } from '@deal-table/adapters';
 import { KnownEnoughApplication, MODEL_FAILURE_STAGES, type ModelFailureDiagnostic } from '@deal-table/application';
 import { createCognitoKnownEnoughApiHandler } from './http-core.ts';
 import { createKnownEnoughModelRuntime } from './model-runtime.ts';
 import { ScenarioService, readScenarioMembers, scenarioCandidates, type ScenarioMember } from './scenario-service.ts';
 import type { ConverseTransport } from '@deal-table/adapters';
+import { GroupDecisionService } from './group-decisions.ts';
 import { GroupService } from './group-service.ts';
 
 /** API Gateway HTTP API payload-format 2.0. Only fields needed by the reviewed HTTP handler are accepted. */
@@ -75,7 +76,7 @@ export function readKe13bConfig(env: NodeJS.ProcessEnv = process.env): Ke13bConf
     if (env.KE14_MODEL_MODE !== 'BEDROCK' || env.KE14_PAID_CALLS_APPROVED !== 'true'
       || env.KE14_INVOCATION_LOGGING_DISABLED !== 'true' || env.KE14_RETENTION_REVIEWED !== 'true')
       throw new Error('KE14 model configuration is not approved');
-    config.models = { members: readScenarioMembers(JSON.parse(env.KE14_MEMBER_BINDINGS ?? 'null')),
+    config.models = { members: env.NP_GROUPS_ENABLED === 'true' && !env.KE14_MEMBER_BINDINGS ? [] : readScenarioMembers(JSON.parse(env.KE14_MEMBER_BINDINGS ?? 'null')),
       provider: { mode: 'BEDROCK', paidCallsApproved: true, invocationLoggingDisabled: true, retentionReviewed: true } };
   }
   if (env.NP_GROUPS_ENABLED === 'true') {
@@ -153,15 +154,18 @@ export function createKe13bLambdaHandler(config: Ke13bConfig): (event: HttpApiEv
     clock: { now: () => new Date().toISOString() }, ids: { next: () => crypto.randomUUID() } });
   const runtime = config.models ? createKnownEnoughModelRuntime({ application,
     clock: { now: () => new Date().toISOString() }, ids: { next: () => crypto.randomUUID() },
-    provider: config.models.provider, publicCandidates: frame => scenarioCandidates(frame)
+    provider: config.models.provider, publicCandidates: frame => (frame.decisionId.startsWith('groupdecision-') ? genericCandidates(frame) : scenarioCandidates(frame))
       .map(values => values.filter(item => frame.variables.some(variable => variable.id === item.variableId))),
-    trustedCandidates: scenarioCandidates, diagnostic: logModelFailure }) : undefined;
-  const scenarios = runtime && config.models ? new ScenarioService({ application: runtime.application, architect: runtime.architect,
+    trustedCandidates: frame => frame.decisionId.startsWith('groupdecision-') ? genericCandidates(frame) : scenarioCandidates(frame), diagnostic: logModelFailure }) : undefined;
+  const scenarios = runtime && config.models?.members.length ? new ScenarioService({ application: runtime.application, architect: runtime.architect,
     members: config.models.members, clock: { now: () => new Date().toISOString() }, isEnabled: runtime.isEnabled,
     diagnostic: logModelFailure }) : undefined;
   const groups = config.groups ? new GroupService(createDynamoGroupRepository(config.groups.tableName, config.region), {
     emailKey: config.groups.emailKey, now: () => Date.now() }) : undefined;
+  const groupDecisions = groups && runtime ? new GroupDecisionService({ groups, application: runtime.application,
+    architect: runtime.architect, now: () => Date.now(), isEnabled: runtime.isEnabled }) : undefined;
   const listener = createCognitoKnownEnoughApiHandler({ application,
+    ...(groupDecisions ? { groupDecisions } : {}),
     ...(groups ? { groups, registrationProfile: async (authorization: string | string[] | undefined) => {
       if (typeof authorization !== 'string') throw new Error('Unauthenticated');
       const response = await fetch(`${config.groups!.cognitoDomain}/oauth2/userInfo`, {

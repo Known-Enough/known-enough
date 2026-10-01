@@ -214,3 +214,7 @@ Configured `gpt-6-astra` / high review of `b91ff76..98877e1`: **CHANGES_REQUESTE
 ## NP01 completed — 2026-09-30
 
 B / verified Battosai1806; actual GPT-6 exact variant/effort unexposed. NP01 local implementation done; pinned full check passed 449 / 2 optional skips, hosted 1/1 and E2E 48/48; focused 9/9. No NP00 owned source or evidence touched. NP02 next under the user's scheduling exception. Real Cognito/AWS/email/deployment/model checks remain NP05, not invented completion. Source push skips CI publication.
+
+## NP02 completed — 2026-10-01
+
+B / verified Battosai1806, GPT-6 variant/effort unexposed. General group drafts/creation/typed candidate domains and safe membership revision implemented; no NP00 owned files touched. Final full check 456 / 2 optional skips, hosted 1/1, E2E 48/48. Browser exposed/fixed editor unmount and unsaved/recovery cases are covered. NP03 next; deployment/managed/signup/email/paid-model evidence stays NP05. Source sync skips CI.

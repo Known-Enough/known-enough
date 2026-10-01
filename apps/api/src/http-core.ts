@@ -13,6 +13,7 @@ import { createCognitoIdentityResolver, type CognitoIdentityOptions } from './co
 import type { JwksCache } from 'aws-jwt-verify/jwk';
 import type { LocalTestSessionManager } from './local-test-auth.ts';
 import type { ScenarioService } from './scenario-service.ts';
+import type { GroupDecisionService } from './group-decisions.ts';
 import type { GroupService } from './group-service.ts';
 
 const IDENTITY_HEADER = 'x-deal-table-test-identity';
@@ -49,6 +50,7 @@ export interface CognitoApiOptions extends CognitoIdentityOptions {
 
 export interface KnownEnoughLocalApiOptions {
   readonly groups?: GroupService;
+  readonly groupDecisions?: GroupDecisionService;
   readonly registrationProfile?: (authorization: string | string[] | undefined) => Promise<{ subject: string; email: string; verified: boolean }>;
   readonly scenarios?: ScenarioService;
   readonly application: KnownEnoughApplication;
@@ -67,6 +69,7 @@ export interface KnownEnoughLocalApiOptions {
 
 export interface KnownEnoughCognitoApiOptions extends CognitoIdentityOptions {
   readonly groups?: GroupService;
+  readonly groupDecisions?: GroupDecisionService;
   readonly registrationProfile?: (authorization: string | string[] | undefined) => Promise<{ subject: string; email: string; verified: boolean }>;
   readonly scenarios?: ScenarioService;
   readonly application: KnownEnoughApplication;
@@ -413,7 +416,7 @@ function knownEnoughRequestError(error: unknown, id: string): DecisionErrorResul
 }
 
 function createKnownEnoughApiHandler(
-  options: Pick<KnownEnoughLocalApiOptions, 'application' | 'architect' | 'ownerConversation' | 'negotiator' | 'scenarios' | 'testSessions' | 'groups' | 'registrationProfile' | 'maxBodyBytes' | 'debug'>,
+  options: Pick<KnownEnoughLocalApiOptions, 'application' | 'architect' | 'ownerConversation' | 'negotiator' | 'scenarios' | 'testSessions' | 'groups' | 'groupDecisions' | 'registrationProfile' | 'maxBodyBytes' | 'debug'>,
   authenticate: (request: IncomingMessage) => Promise<HttpIdentity | null>,
   allowedOrigins: readonly string[],
   includeTestIdentity: boolean,
@@ -476,6 +479,29 @@ function createKnownEnoughApiHandler(
           }
           if (path === '/groups/accept' && request.method === 'POST') {
             sendJson(response, 200, { group: await options.groups.accept(principal, await readJson(request, maxBodyBytes)) }); return;
+          }
+          const draftRoute = /^\/groups\/([A-Za-z0-9_-]{1,80})\/drafts(?:\/([A-Za-z0-9_-]{1,80})(\/create)?)?$/.exec(path);
+          if (draftRoute && options.groupDecisions) {
+            const groupId = draftRoute[1]!; const draftId = draftRoute[2];
+            if (request.method === 'GET' && draftId && !draftRoute[3]) {
+              sendJson(response, 200, { draft: await options.groupDecisions.read(principal, groupId, draftId) }); return;
+            }
+            if (request.method === 'POST') {
+              const body = await readJson(request, maxBodyBytes);
+              const result = !draftId ? { draft: await options.groupDecisions.draft(principal, groupId, body) }
+                : draftRoute[3] ? { snapshot: await options.groupDecisions.create(principal, groupId, draftId, body) }
+                : { draft: await options.groupDecisions.edit(principal, groupId, draftId, body) };
+              sendJson(response, 200, result); return;
+            }
+          }
+          const rosterRoute = /^\/groups\/([A-Za-z0-9_-]{1,80})\/decisions\/([A-Za-z0-9_-]{1,80})\/(review|revise)$/.exec(path);
+          if (rosterRoute && options.groupDecisions) {
+            if (request.method === 'GET' && rosterRoute[3] === 'review') {
+              sendJson(response, 200, await options.groupDecisions.reviewRoster(principal, rosterRoute[1]!, rosterRoute[2]!)); return;
+            }
+            if (request.method === 'POST' && rosterRoute[3] === 'revise') {
+              sendJson(response, 200, { snapshot: await options.groupDecisions.reviseRoster(principal, rosterRoute[1]!, rosterRoute[2]!, await readJson(request, maxBodyBytes)) }); return;
+            }
           }
           const groupRoute = /^\/groups\/([A-Za-z0-9_-]{1,80})\/(invitations|remove)$/.exec(path);
           if (groupRoute && request.method === 'POST') {

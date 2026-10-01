@@ -8,13 +8,20 @@ import { MemoryGroupRepository } from '@deal-table/adapters';
 import { createCognitoKnownEnoughApiHandlerWithJwksCache } from '../../apps/api/src/http-core.ts';
 import { GroupService } from '../../apps/api/src/group-service.ts';
 import { operateAccount } from '../../apps/api/src/group-operator.ts';
+import { createKnownEnoughModelRuntime } from '../../apps/api/src/model-runtime.ts';
+import { GroupDecisionService } from '../../apps/api/src/group-decisions.ts';
+import { genericCandidates, type ConverseTransport } from '@deal-table/adapters';
+import { npTransport } from './np-model.ts';
 /** Offline signed tokens, local HTTP and synthetic userInfo port; no real signup or cloud operations. */
-export async function npApi() {
+export async function npApi(transport: ConverseTransport = npTransport()) {
   const repository = new MemoryGroupRepository();
   const groups = new GroupService(repository, { emailKey: 'synthetic-np-test-key-123456789012345', now: () => Date.now() });
   let sequence = 0;
   const application = new KnownEnoughApplication({ repository: new InMemoryRoomRepository(),
     clock: { now: () => new Date().toISOString() }, ids: { next: () => `np-${++sequence}` } });
+  const runtime = createKnownEnoughModelRuntime({ application, clock: { now: () => new Date().toISOString() },
+    ids: { next: () => `np-runtime-${++sequence}` }, provider: { mode: 'INJECTED', transport }, publicCandidates: genericCandidates });
+  const groupDecisions = new GroupDecisionService({ groups, application: runtime.application, architect: runtime.architect, now: () => Date.now(), isEnabled: runtime.isEnabled });
   const pair = generateKeyPairSync('rsa', { modulusLength: 2048 }); const pool = 'us-east-1_npFixture';
   const parsed = CognitoJwtVerifier.parseUserPoolId(pool); const cache = new SimpleJwksCache();
   cache.addJwks(parsed.jwksUri, { keys: [{ ...pair.publicKey.export({ format: 'jwk' }), kid: 'np', use: 'sig', alg: 'RS256' } as unknown as Jwk] });
@@ -23,7 +30,7 @@ export async function npApi() {
     const payload = Buffer.from(JSON.stringify({ sub: subject, iss: parsed.issuer, token_use: 'access', client_id: 'participant-client', exp: Math.floor(Date.now() / 1000) + 900 })).toString('base64url');
     return `${header}.${payload}.${sign('RSA-SHA256', Buffer.from(`${header}.${payload}`), pair.privateKey).toString('base64url')}`;
   };
-  const server = createServer(createCognitoKnownEnoughApiHandlerWithJwksCache({ application, groups,
+  const server = createServer(createCognitoKnownEnoughApiHandlerWithJwksCache({ application, groups, groupDecisions, ownerConversation: runtime.ownerConversation, negotiator: runtime.negotiator,
     registrationProfile: async authorization => {
       const value = JSON.parse(Buffer.from((authorization as string).split('.')[1]!, 'base64url').toString());
       return { subject: value.sub, email: `${value.sub}@example.invalid`, verified: value.sub !== 'unverified' };
@@ -33,8 +40,8 @@ export async function npApi() {
   const base = `http://127.0.0.1:${address.port}`;
   const call = (who: string, path: string, body?: unknown) => fetch(base + path, { method: body === undefined ? 'GET' : 'POST',
     headers: { authorization: `Bearer ${bearer(who)}`, 'content-type': 'application/json' }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
-  return { base, bearer, call, groups, repository, application,
+  return { base, bearer, call, groups, repository, application, groupDecisions, runtime,
     approve: (who: string, version = 1) => operateAccount(repository, 'approve', who, version),
     disable: (who: string, version = 2) => operateAccount(repository, 'disable', who, version),
-    close: async () => { server.closeAllConnections(); await new Promise<void>(resolve => server.close(() => resolve())); } };
+    close: async () => { await runtime.stop(); server.closeAllConnections(); await new Promise<void>(resolve => server.close(() => resolve())); } };
 }

@@ -172,3 +172,10 @@ describe('injected decision architect', () => {
     await expect(first).rejects.toMatchObject({ code: 'STALE_CONTEXT' });
   });
 });
+
+it('general public-draft mode can propose new labels; ordinary restricted drafts still reject them', async () => {
+  const model = { draft: async () => ({ ...christmasDraft(), clarificationQuestions: [] }) };
+  const architect = create(model);
+  await expect(architect.draft('organizer', { ...request(), allowedOptions: [] })).rejects.toMatchObject({ code: 'RETRYABLE_SERVER_ERROR' });
+  expect((await architect.draft('organizer', { ...request(), allowedOptions: [], generateOptions: true })).frame.variables[0]!.id).toBe('destination');
+});

@@ -37,11 +37,17 @@ export class GroupService {
     const group = state.groups.find(item => item.id === id && item.members.includes(who));
     return group ?? fail('NOT_FOUND');
   }
+  currentGroup(state: Groups.GroupState, principal: TrustedPrincipal | null, groupId: string, organizerOnly = false): Groups.Group {
+    const who = subject(principal); const group = this.group(state, who, groupId);
+    if (organizerOnly && group.organizer !== who) return fail('FORBIDDEN');
+    return group;
+  }
   private snapshot(state: Groups.GroupState, group: Groups.Group, who: string): Groups.GroupSnapshot {
     return Groups.GroupSnapshot.parse({ id: group.id, name: group.name, version: group.version,
       isOrganizer: group.organizer === who,
       members: group.members.map(value => ({ id: memberId(value),
         displayName: state.accounts.find(item => item.subject === value)!.displayName, isOrganizer: value === group.organizer })),
+      drafts: group.drafts.map(item => ({ id: item.id, title: item.frame.title, created: !!item.createdDecisionId, needsClarification: item.clarificationQuestions.length > 0, current: item.groupVersion === group.version })),
       pendingInvitations: group.invitations.filter(item => !item.acceptedBy && item.expiresAt > this.options.now()).length,
       decisions: group.decisions.map(item => ({ id: item.id, current: item.version === group.version })) });
   }
@@ -84,7 +90,7 @@ export class GroupService {
       let group = state.groups.find(item => item.id === id);
       if (group && group.name !== name) return fail('STALE_CONTEXT');
       if (!group) { if (state.groups.length >= 32) return fail('INVALID_COMMAND');
-        group = { id, name, organizer: who, version: 1, members: [who], invitations: [], decisions: [] }; state.groups.push(group); }
+        group = { id, name, organizer: who, version: 1, members: [who], invitations: [], decisions: [], drafts: [] }; state.groups.push(group); }
       return this.snapshot(state, group, who);
     });
   }

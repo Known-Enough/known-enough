@@ -22,3 +22,9 @@ Subject: Invitation to join {{group name}} in Known Enough
 {{organizer display name}} invited you to {{group name}}. Sign in or register with the email this invitation was issued for, verify your email, and request access if needed. Accepting joins the group; it does not confirm a decision, share your private needs or approve an agreement. This link expires in 24 hours: {{recipient-bound link}}. If you were not expecting it, ignore it. No automatic reminders or marketing mail.
 
 NP05 must implement a sender adapter with validated destination/origin, escape rendered HTML and authorize the exact recipient before sending. An app link preview does not establish delivery.
+
+## NP02 additions
+
+Authorize exact GET/POST `/groups/{groupId}/drafts`, `/groups/{groupId}/drafts/{draftId}`, POST `/groups/{groupId}/drafts/{draftId}/create`, GET `/groups/{groupId}/decisions/{decisionId}/review` and POST `/groups/{groupId}/decisions/{decisionId}/revise`, plus CORS/JWT integration. With groups enabled, the general model path may omit `KE14_MEMBER_BINDINGS`; legacy templates are available only with their directory explicitly configured. Existing paid-runtime/retention/logging guards remain required. Paid scope/budget must be authorized anew; this feature does not extend old allowances.
+
+Public drafts and their exact revisions live in the bounded group aggregate. Group membership revision deliberately freezes linked decisions, including public reads, until explicit roster review clears old authority. Removed users are denied before application access. Generated offers derive from public typed domains; no real price/availability lookup or universal optimization is claimed. Unsupported domains require clarification. Qualify general signup/group/roster/cold-retry and model prompt quality in NP05.

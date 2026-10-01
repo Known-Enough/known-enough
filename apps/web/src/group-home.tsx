@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { GroupDecisions } from './group-decisions';
 import { Groups } from '@deal-table/contracts';
 export function GroupHome({ api, openDecision }: { api: (path: string, init?: RequestInit) => Promise<Response>;
   openDecision: (id: string) => void }) {
@@ -26,10 +27,10 @@ export function GroupHome({ api, openDecision }: { api: (path: string, init?: Re
     if (!response.ok) throw new Error('Account information is unavailable.');
     const result = await response.json() as { account: unknown };
     const next = result.account ? Groups.AccountSnapshot.parse(result.account) : null;
-    setAccount(next); setGroups([]);
+    setAccount(next); if (next?.status !== 'APPROVED') setGroups([]);
     if (next?.status === 'APPROVED') {
       const response = await api('/groups');
-      if (!response.ok) throw new Error('Groups are unavailable. Refresh or sign in again.');
+      if (!response.ok) { setGroups([]); throw new Error('Groups are unavailable. Refresh or sign in again.'); }
       const result = await response.json() as { groups: unknown[] };
       setGroups(result.groups.map(group => Groups.GroupSnapshot.parse(group)));
     }
@@ -67,9 +68,7 @@ export function GroupHome({ api, openDecision }: { api: (path: string, init?: Re
       {groups.map(group => <article key={group.id}><h3>{group.name}</h3><ul>{group.members.map(member => <li key={member.id}>{member.displayName}{member.isOrganizer ? ' (organizer)' : ''}
         {group.isOrganizer && !member.isOrganizer && <button className="secondary" disabled={busy} onClick={() => void action(`/groups/${group.id}/remove`, { memberId: member.id, version: group.version })}>Remove {member.displayName}</button>}</li>)}</ul>
         <p>{group.pendingInvitations} pending invitation links. Joining or removing a member requires linked decisions to be reviewed with a new roster.</p>
-        {group.decisions.map(decision => <p key={decision.id}>{decision.current
-          ? <button disabled={busy} onClick={() => openDecision(decision.id)}>Open decision</button>
-          : 'Decision paused: group membership changed. Review its roster before continuing.'}</p>)}
+        <GroupDecisions group={group} api={api} reload={load} openDecision={openDecision} />
         {group.isOrganizer && <><label htmlFor={`group-email-${group.id}`}>Recipient email</label><input id={`group-email-${group.id}`} type="email" value={email} maxLength={254} onChange={event => setEmail(event.target.value)} />
           <label><input type="checkbox" checked={replace} onChange={event => setReplace(event.target.checked)} /> Replace a lost link (the previous link stops working)</label>
           <button disabled={busy || !email.trim()} onClick={() => void action(`/groups/${group.id}/invitations`, { email, replace }, result => {

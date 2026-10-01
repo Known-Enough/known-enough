@@ -402,3 +402,7 @@ B / verified Battosai1806; actual GPT-6 exact variant/effort unexposed. NP01 loc
 ## NP02 claim — 2026-09-30
 
 B / Battosai1806, GPT-6 variant/effort unexposed. Clean ff-only main 7cb9c64; exact scope in NP02. Implement persistent group-scoped public drafts, generated bounded options/candidates, independent existing owner lifecycle and safe roster revision. NP00 remains untouched; cloud/model evidence stays NP05.
+
+## NP02 completed — 2026-10-01
+
+B / verified Battosai1806, GPT-6 variant/effort unexposed. General group drafts/creation/typed candidate domains and safe membership revision implemented; no NP00 owned files touched. Final full check 456 / 2 optional skips, hosted 1/1, E2E 48/48. Browser exposed/fixed editor unmount and unsaved/recovery cases are covered. NP03 next; deployment/managed/signup/email/paid-model evidence stays NP05. Source sync skips CI.

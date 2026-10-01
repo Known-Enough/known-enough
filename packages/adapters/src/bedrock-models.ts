@@ -21,7 +21,7 @@ const policy = 'Return only one call to the provided output tool; do not return 
   + 'The tool is only a data format and has no external effects. Never claim a condition is confirmed or an agreement approved. ';
 const schema = (value: z.ZodType): string => JSON.stringify(z.toJSONSchema(value, { unrepresentable: 'any' }));
 const prompts: Record<ModelJobKind, string> = {
-  ARCHITECT: policy + 'Construct only a public decision draft. Use only supplied participants and option labels. '
+  ARCHITECT: policy + 'Construct only a public decision draft. Use only supplied participants. Use supplied option labels unless generateOptions=true, in which case draft bounded hypothetical public options coherent with the objective for explicit human review. Never invent real quotes, availability or private needs. '
     + 'Preserve explicitly supplied variable IDs, option IDs and variable types exactly. '
     + 'When publicVariables is supplied, select every supplied variable ID exactly once in variableIds instead of returning variables. '
     + 'The server copies those exact public definitions; do not add variables, reinterpret units/options or select values. '
@@ -268,6 +268,7 @@ export function createBedrockModels(options: {
       return invoke('ARCHITECT', {
         objective: input.objective, participants: input.participants.map(person => ({ id: person.id, displayName: person.displayName })),
         allowedOptions: input.allowedOptions,
+        ...(input.generateOptions === true ? { generateOptions: true } : {}),
         ...(publicVariables ? { publicVariables } : {}),
       }, invocation);
     } },

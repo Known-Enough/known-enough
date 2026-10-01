@@ -15,6 +15,8 @@ export interface DecisionArchitectRequest {
   allowedOptions: readonly string[];
   /** Server-owned public definitions, never private values or participant authority. */
   publicVariables?: readonly KETypes.PublicDecisionVariable[];
+  /** Explicit general-draft mode: propose new bounded public option labels for participant review. */
+  generateOptions?: boolean;
 }
 
 export interface DecisionArchitectModelInput {
@@ -22,6 +24,8 @@ export interface DecisionArchitectModelInput {
   participants: readonly DecisionArchitectParticipant[];
   allowedOptions: readonly string[];
   publicVariables?: readonly KETypes.PublicDecisionVariable[];
+  /** Explicit general-draft mode: propose new bounded public option labels for participant review. */
+  generateOptions?: boolean;
 }
 
 /** A model port is injected by the caller. Raw output is always treated as untrusted. */
@@ -198,6 +202,7 @@ export class DecisionArchitect {
           objective: request.objective.trim(),
           participants: participants as DecisionArchitectParticipant[],
           allowedOptions,
+          ...(request.generateOptions === true ? { generateOptions: true } : {}),
           ...(publicVariables ? { publicVariables: structuredClone(publicVariables) } : {}),
         }, invocation);
       } catch {
@@ -281,7 +286,7 @@ export class DecisionArchitect {
       const allowed = new Set(allowedOptions.map(option => option.toLowerCase()));
       for (const variable of definition.data.variables) {
         if (variable.type === 'ENUM' || variable.type === 'ENUM_SET') {
-          if (variable.options.some(option => !allowed.has(option.label.toLowerCase()))) {
+          if (request.generateOptions !== true && variable.options.some(option => !allowed.has(option.label.toLowerCase()))) {
             this.rejectModel('ARCHITECT_OPTIONS');
           }
         }

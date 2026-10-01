@@ -15,7 +15,7 @@ function valueText(value: KE.DecisionValue, variable?: Variable): string {
   if (value.type === 'BOOLEAN') return value.value ? 'Yes' : 'No';
   return value.participantId;
 }
-function variableText(variable: KE.PublicDecisionFrame['variables'][number], frame: KE.PublicDecisionFrame): string {
+export function variableText(variable: KE.PublicDecisionFrame['variables'][number], frame: KE.PublicDecisionFrame): string {
   const requirement = variable.required ? 'required' : 'optional';
   switch (variable.type) {
     case 'ENUM': case 'ENUM_SET': return `${variable.label} (${variable.type === 'ENUM' ? 'one option' : 'set of options'}, ${requirement}): ${variable.options.map(item => item.label).join(', ')}`;

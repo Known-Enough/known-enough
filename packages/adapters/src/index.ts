@@ -70,3 +70,5 @@ export { BEDROCK_CONFIGURATION, createAuthorizedBedrockTransport, createBedrockM
 export type { ConverseTransport, ModelUsage } from './bedrock-models.ts';
 
 export { createDynamoGroupRepository, createGroupRepositoryTransport, MemoryGroupRepository, type GroupRepository } from './group-repository.ts';
+
+export { genericCandidates } from './generic-candidates.ts';
