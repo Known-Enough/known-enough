@@ -20,7 +20,7 @@ When B asks “what's next?”, pull clean `main` with `git pull --ff-only origi
 | 1 | [NP01 — Registration, approval CLI, groups and invitations](tasks/NP01.md) | `gpt-6-sol` / high | User exception; local automated criteria | DONE — live evidence NP05 |
 | 2 | [NP02 — Create a group's own decision](tasks/NP02.md) | `gpt-6-sol` / high | NP01 local DONE | DONE — live evidence NP05 |
 | 3 | [NP03 — All-screen clarity and copy](tasks/NP03.md) | `gpt-6-luna` / medium | NP02 local DONE | DONE — remaining live states NP05 |
-| 4 | [NP04 — Fresh-group/non-prefabricated qualification](tasks/NP04.md) | `gpt-6-sol` / high | NP03 local DONE | READY |
+| 4 | [NP04 — Fresh-group/non-prefabricated qualification](tasks/NP04.md) | `gpt-6-sol` / high | NP03 local DONE | IN_PROGRESS — B / Battosai1806 / Windows |
 
 No independent reviewer sessions, human sign-off or volunteer trials are scheduled now. Technical self-inspection, focused checks and pinned `npm run check` remain required for implementation. No subagents or parallel project tasks. Participant confirmations/permissions/approvals remain mandatory product behavior. Cloud writes/deployments, paid calls, live email and publication retain separate authorization; documentation sync to `origin main` remains standing-authorized.
 
@@ -41,3 +41,5 @@ The user explicitly directed this chat to work on everything except NP00 and to 
 **B checkpoint (2026-10-01):** NP02 local DONE; full 456 / 2 optional skips, hosted 1/1, E2E 48/48. NP03 READY under user exception. NP00 claim unchanged; NP05 retains live checks.
 
 **B checkpoint (2026-10-01):** NP03 local DONE, full 457 / 2 optional skips, hosted 1/1, E2E 51/51. NP04 READY; actual screen evidence/limits in NP03 inventory. NP00 claim unchanged.
+
+**B current claim:** NP04 offline qualification at f78ea12; exact files in ticket. NP00 A/Mac claim remains unchanged.
