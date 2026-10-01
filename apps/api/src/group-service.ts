@@ -74,6 +74,7 @@ export class GroupService {
     });
   }
   async requireApproved(principal: TrustedPrincipal | null): Promise<void> {
+    if (principal?.kind === 'display') return this.authorizeDecision(principal, principal.roomId);
     const who = subject(principal); await this.repository.transaction(state => { this.account(state, who); });
   }
   async list(principal: TrustedPrincipal | null) {
@@ -146,6 +147,17 @@ export class GroupService {
   }
   /** Every bound decision read/command checks current admission AND exact group version. */
   async authorizeDecision(principal: TrustedPrincipal | null, decisionId: string) {
+    if (principal?.kind === 'display') {
+      if (principal.roomId !== decisionId) return fail('FORBIDDEN');
+      await this.repository.transaction(state => {
+        const account = state.accounts.find(item => item.subject === principal.subject);
+        if (account && account.status !== 'APPROVED') return fail('FORBIDDEN');
+        const group = state.groups.find(item => item.decisions.some(decision => decision.id === decisionId));
+        if (group && group.decisions.find(item => item.id === decisionId)!.version !== group.version) return fail('STALE_CONTEXT');
+      });
+      // Admission checks the verified room scope; the application still denies owner/write authority.
+      return;
+    }
     const who = subject(principal);
     await this.repository.transaction(state => {
       this.account(state, who);
