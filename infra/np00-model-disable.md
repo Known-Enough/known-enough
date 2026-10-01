@@ -2,6 +2,8 @@
 
 This is the NP00-only fail-closed change set. It removes the currently observed Nova Lite invocation grants and sets the Lambda model flags off. It does not create a model-test permission set, invoke a model, deploy code, or include NP05 group rollout, Cognito signup/email, or paid-model qualification. No AWS write has been run for this plan.
 
+**Authorization/status, 2026-10-01:** the user explicitly authorized applying these exact writes after repeating the listed identity and hash checks, through the separate one-hour `KnownEnoughNP00Off` scope. The only authorized Lambda changes are `KE14_MODEL_MODE=DISABLED` and `KE14_PAID_CALLS_APPROVED=false` using the freshly read full environment map and `RevisionId`; the only policy removals are the two hash-matched Nova Lite grants. The authorized CloudShell setup is documented below, but the bootstrap profile remains unavailable and the temporary permission set is absent. No model-off write has been applied.
+
 ## Fresh read-only baseline and identity check
 
 On 2026-10-01, both `known-enough-staging-ro` and `known-enough-stage1-release` returned account `092954139775`. Fresh readback found the Lambda `known-enough-stage-api` Active/Successful on `nodejs24.x`, handler `ke13b-lambda.handler`, execution role `KnownEnoughStageApiRole`, model mode `BEDROCK`, and paid-call flag `true`. Its unrelated environment values are preserved in a private mode-`0600` snapshot; the prepared environment request changes only those two flags to `DISABLED` and `false`.
@@ -110,7 +112,7 @@ Private fresh snapshots and the prepared full-environment request are in `/tmp/k
 
 ## Exact change set
 
-Apply only after explicit AWS-write authorization and with the narrowly scoped write permissions below. Use this order:
+Apply only after the fresh read-only checks below and with the short-lived `KnownEnoughNP00Off` permission set described in [temporary permissions](permissions/np00-model-disable-temporary.json). This set is assigned only to A for the staging account, has a one-hour session duration, and grants only the Lambda guard update, the two exact policy removals/provisioning, and decryption on the one Identity Center key. Use this order:
 
 1. Update only the Lambda environment flags using the complete, freshly read environment map and Lambda `RevisionId`; wait for `LastUpdateStatus=Successful`. AWS's CLI supports a revision guard that refuses the update if the function changed after readback ([AWS CLI reference](https://docs.aws.amazon.com/cli/latest/reference/lambda/update-function-configuration.html)).
 2. Remove `KnownEnoughStageNovaLite` from `KnownEnoughStageApiRole` after a fresh exact-policy/hash check. This removes the runtime's observed Nova Lite grant after the application flags have been turned off.
@@ -120,7 +122,7 @@ Do not restore either model grant or turn the Lambda flags back on until a separ
 
 ### Lambda environment update
 
-`known-enough-stage1-release` already has `lambda:GetFunctionConfiguration` and `lambda:UpdateFunctionConfiguration` on the exact function ARN. Its current inline policy also includes `lambda:UpdateFunctionCode` and `lambda:InvokeFunction`; this change set uses neither. Never call `InvokeFunction` or `UpdateFunctionCode` in this work.
+Use `known-enough-staging-ro` for the read-only preparation and the temporary `KnownEnoughNP00Off` profile for the write. Do not use `known-enough-stage1-release`: although it is scoped to this function, its current permission set also allows `lambda:UpdateFunctionCode` and `lambda:InvokeFunction`. Never call either action.
 
 Before any authorized write, run this read-only preparation and rebuild the private request by copying every current environment value and changing only these two keys. Keep the same Bash session for later command blocks so `NP00_STATE_DIR` remains set. This writes secrets only to a fresh mode-`0600` file inside a mode-`0700` private directory, and prints no environment values:
 
@@ -160,13 +162,14 @@ The prepared request from the 2026-10-01 readback is at `/tmp/known-enough-np00-
 set -euo pipefail
 umask 077
 : "${NP00_STATE_DIR:?Run the read-only Lambda preparation block first in this Bash session}"
+: "${NP00_WRITE_PROFILE:?Set this to the A-only known-enough-np00-off profile}"
 test -f "$NP00_STATE_DIR/lambda-model-off-environment-private.json"
 test -f "$NP00_STATE_DIR/lambda-revision-private.txt"
-test "$(aws sts get-caller-identity --profile known-enough-stage1-release --query Account --output text --no-cli-pager)" = 092954139775
-NP00_STAGE1_STS_ARN=$(aws sts get-caller-identity --profile known-enough-stage1-release --query Arn --output text --no-cli-pager)
-case "$NP00_STAGE1_STS_ARN" in arn:aws:sts::092954139775:assumed-role/AWSReservedSSO_KnownEnoughStage1Release_*/*) ;; *) printf '%s\n' 'STAGE1_IDENTITY_CHECK=FAIL'; exit 1 ;; esac
+test "$(aws sts get-caller-identity --profile "$NP00_WRITE_PROFILE" --query Account --output text --no-cli-pager)" = 092954139775
+NP00_WRITE_STS_ARN=$(aws sts get-caller-identity --profile "$NP00_WRITE_PROFILE" --query Arn --output text --no-cli-pager)
+case "$NP00_WRITE_STS_ARN" in arn:aws:sts::092954139775:assumed-role/AWSReservedSSO_KnownEnoughNP00Off_*/*) ;; *) printf '%s\n' 'NP00_WRITE_IDENTITY_CHECK=FAIL'; exit 1 ;; esac
 aws lambda update-function-configuration \
-  --profile known-enough-stage1-release --region us-east-1 \
+  --profile "$NP00_WRITE_PROFILE" --region us-east-1 \
   --function-name known-enough-stage-api \
   --environment "file://$NP00_STATE_DIR/lambda-model-off-environment-private.json" \
   --revision-id "$(cat "$NP00_STATE_DIR/lambda-revision-private.txt")" \
@@ -257,15 +260,15 @@ If this check fails, do not execute either policy removal; refresh the snapshot,
 ```bash
 set -euo pipefail
 umask 077
-: "${NP00_IAM_ADMIN_PROFILE:?Set only to an A-authorized, short-lived profile with the listed exact scope}"
+: "${NP00_WRITE_PROFILE:?Set to the short-lived known-enough-np00-off profile}"
 aws iam delete-role-policy \
-  --profile "$NP00_IAM_ADMIN_PROFILE" \
+  --profile "$NP00_WRITE_PROFILE" \
   --role-name KnownEnoughStageApiRole \
   --policy-name KnownEnoughStageNovaLite \
   --no-cli-pager
 ```
 
-`NP00_IAM_ADMIN_PROFILE` must be an A-authorized, short-lived IAM administration session; neither current profile has this permission. `DeleteRolePolicy` is scoped by IAM to the role ARN, not to the inline policy name. It therefore permits deleting any inline policy on this one role while granted. Use a just-in-time grant, verify the exact document immediately before the command, serialize IAM administration during the change, and remove the temporary grant afterward. Do not grant `iam:PutRolePolicy`, `iam:AttachRolePolicy`, `iam:PassRole`, or role trust/delete permissions.
+`NP00_WRITE_PROFILE` must resolve to A's short-lived `KnownEnoughNP00Off` SSO session. `DeleteRolePolicy` is scoped by IAM to the role ARN, not to the inline policy name. It therefore permits deleting any inline policy on this one role while assigned. Verify the exact document immediately before the command, serialize IAM policy administration during the change, and remove the temporary permission-set assignment afterward. Do not grant `iam:PutRolePolicy`, `iam:AttachRolePolicy`, `iam:PassRole`, or role trust/delete permissions.
 
 Post-write role verification is IAM-only and does not invoke Bedrock:
 
@@ -321,15 +324,15 @@ If either guard fails, do not delete the policy.
 ```bash
 set -euo pipefail
 umask 077
-: "${NP00_IAM_ADMIN_PROFILE:?Set only to an A-authorized, short-lived profile with the listed exact scope}"
+: "${NP00_WRITE_PROFILE:?Set to the short-lived known-enough-np00-off profile}"
 aws sso-admin delete-inline-policy-from-permission-set \
-  --profile "$NP00_IAM_ADMIN_PROFILE" --region us-east-1 \
+  --profile "$NP00_WRITE_PROFILE" --region us-east-1 \
   --instance-arn arn:aws:sso:::instance/ssoins-722328a7765eb0e8 \
   --permission-set-arn arn:aws:sso:::permissionSet/ssoins-722328a7765eb0e8/ps-7223102750014ed2 \
   --no-cli-pager
 
 NP00_PROVISION_REQUEST=$(aws sso-admin provision-permission-set \
-  --profile "$NP00_IAM_ADMIN_PROFILE" --region us-east-1 \
+  --profile "$NP00_WRITE_PROFILE" --region us-east-1 \
   --instance-arn arn:aws:sso:::instance/ssoins-722328a7765eb0e8 \
   --permission-set-arn arn:aws:sso:::permissionSet/ssoins-722328a7765eb0e8/ps-7223102750014ed2 \
   --target-type AWS_ACCOUNT --target-id 092954139775 \
@@ -387,22 +390,28 @@ The optional IAM-only check is `aws iam simulate-principal-policy` for `bedrock:
 
 ## Minimal permissions needed
 
-`known-enough-stage1-release` can update the Lambda configuration, but its current permission set also allows Lambda code update and invocation on that function; the prepared command uses neither. It lacks role-policy deletion and IAM Identity Center write actions. `known-enough-staging-ro` is read-only. The additional IAM/Identity Center writes need a separate, short-lived A-only administrative scope containing only those actions and resources; do not broaden the paid-test permission set or use any of these permissions for testing.
+`known-enough-stage1-release` can update the Lambda configuration but also allows code update and invocation on that function, so it is not used for this change. `known-enough-staging-ro` remains the read profile. The exact temporary A-only write permissions are in [the installable policy](permissions/np00-model-disable-temporary.json); no deployment, invocation, model, or participant permission is included.
 
 | Purpose | Required IAM actions for apply | Resource scope |
 | --- | --- | --- |
-| Lambda safety flags | `lambda:UpdateFunctionConfiguration` (already available on Stage1) | `arn:aws:lambda:us-east-1:092954139775:function:known-enough-stage-api` |
+| Lambda safety flags | `lambda:UpdateFunctionConfiguration` | `arn:aws:lambda:us-east-1:092954139775:function:known-enough-stage-api` |
 | Remove runtime Nova grant | `iam:DeleteRolePolicy` | `arn:aws:iam::092954139775:role/KnownEnoughStageApiRole` |
 | Remove A's ReadOnlyAccess inline grant | `sso:DeleteInlinePolicyFromPermissionSet` | The exact Identity Center instance ARN and exact ReadOnlyAccess permission-set ARN above |
 | Apply permission-set change to staging | `sso:ProvisionPermissionSet` | The exact Identity Center instance, ReadOnlyAccess permission set, and `arn:aws:sso:::account/092954139775` |
 | Use Identity Center's customer-managed encryption key for its APIs | `kms:Decrypt` | `arn:aws:kms:us-east-1:092954139775:key/mrk-f940f13807f145fd84387208b80a4b90` |
 
-The temporary admin scope for the IAM and Identity Center writes can use this exact allow policy for the observed target resources; it deliberately has no create, assignment, attachment, code-update, invoke, or model permissions:
+The temporary permission set uses this exact allow policy; it deliberately has no permission-set creation/assignment, policy attachment, Lambda code-update, Lambda invocation, or model permissions:
 
 ```json
 {
   "Version": "2012-10-17",
   "Statement": [
+    {
+      "Sid": "SetOnlyStageModelGuardsOff",
+      "Effect": "Allow",
+      "Action": "lambda:UpdateFunctionConfiguration",
+      "Resource": "arn:aws:lambda:us-east-1:092954139775:function:known-enough-stage-api"
+    },
     {
       "Sid": "RemoveStageRuntimeNovaInlinePolicy",
       "Effect": "Allow",
@@ -441,6 +450,85 @@ The temporary admin scope for the IAM and Identity Center writes can use this ex
 ```
 
 `iam:DeleteRolePolicy` can be scoped to the role ARN but not to the inline `PolicyName`; while this grant exists it can delete any inline policy on this one role. Require the immediately preceding canonical-hash guard, serialize IAM policy administration, and remove the short-lived grant after the change. AWS lists the `Instance` and `PermissionSet` resource types for policy deletion and those plus `Account` for provisioning, with `sso:PrimaryRegion` available on the Identity Center resources ([IAM authorization reference](https://docs.aws.amazon.com/service-authorization/latest/reference/list_awsidentityandaccessmanagementiam.html), [Identity Center authorization reference](https://docs.aws.amazon.com/service-authorization/latest/reference/list_awsiamidentitycenter.html)). The current instance uses an enabled customer-managed key, and AWS requires IAM principals calling Identity Center APIs to have key access; its resource policy currently delegates IAM authorization to the account root ([customer-managed key guidance](https://docs.aws.amazon.com/singlesignon/latest/userguide/identity-center-customer-managed-keys.html)). The grant above therefore includes only `kms:Decrypt` on that exact key ARN. Do not change the KMS key policy or add KMS administration actions as part of this scope.
+
+## One-time setup for the temporary NP00 write profile
+
+The WSL `known-enough-staging-bootstrap` profile is currently unavailable. If no account administrator is already available through AWS CloudShell, an administrator must run this setup once. It creates a dedicated one-hour Identity Center permission set, attaches [the exact five-action policy](permissions/np00-model-disable-temporary.json), and assigns it only to A's verified `martelaxe` user in account `092954139775`. It does not modify the existing Stage1 or ReadOnlyAccess permission sets.
+
+From AWS CloudShell signed in to the staging account with IAM Identity Center administration rights:
+
+```bash
+set -euo pipefail
+AWS_REGION=us-east-1
+NP00_ACCOUNT=092954139775
+NP00_INSTANCE=arn:aws:sso:::instance/ssoins-722328a7765eb0e8
+NP00_STORE=d-906661f00d
+test "$(aws sts get-caller-identity --query Account --output text --no-cli-pager)" = "$NP00_ACCOUNT"
+git clone https://github.com/Known-Enough/known-enough.git known-enough-np00-access
+cd known-enough-np00-access
+test "$(git branch --show-current)" = main
+aws sso-admin describe-instance --instance-arn "$NP00_INSTANCE" --region "$AWS_REGION" --query 'InstanceArn' --output text --no-cli-pager
+aws accessanalyzer validate-policy \
+  --policy-document file://infra/permissions/np00-model-disable-temporary.json \
+  --policy-type IDENTITY_POLICY --region "$AWS_REGION" \
+  --query 'findings[].{Type:findingType,Code:issueCode}' --output json --no-cli-pager
+NP00_USERS=$(aws identitystore list-users --identity-store-id "$NP00_STORE" --filters AttributePath=UserName,AttributeValue=martelaxe --region "$AWS_REGION" --query 'Users[].{UserId:UserId,UserName:UserName}' --output json --no-cli-pager)
+NP00_USER_ID=$(python3 -c 'import json,sys; d=json.load(sys.stdin); assert len(d)==1 and d[0]["UserName"]=="martelaxe"; print(d[0]["UserId"])' <<< "$NP00_USERS")
+NP00_SET=$(aws sso-admin create-permission-set --instance-arn "$NP00_INSTANCE" --name KnownEnoughNP00Off --description 'Temporary A-only fail-closed staging model shutdown' --session-duration PT1H --region "$AWS_REGION" --query PermissionSet.PermissionSetArn --output text --no-cli-pager)
+aws sso-admin put-inline-policy-to-permission-set --instance-arn "$NP00_INSTANCE" --permission-set-arn "$NP00_SET" --inline-policy file://infra/permissions/np00-model-disable-temporary.json --region "$AWS_REGION" --no-cli-pager
+NP00_ASSIGNMENT=$(aws sso-admin create-account-assignment --instance-arn "$NP00_INSTANCE" --target-id "$NP00_ACCOUNT" --target-type AWS_ACCOUNT --permission-set-arn "$NP00_SET" --principal-type USER --principal-id "$NP00_USER_ID" --region "$AWS_REGION" --query AccountAssignmentCreationStatus.RequestId --output text --no-cli-pager)
+for attempt in $(seq 1 60); do
+  NP00_ASSIGNMENT_STATUS=$(aws sso-admin describe-account-assignment-creation-status --instance-arn "$NP00_INSTANCE" --account-assignment-creation-request-id "$NP00_ASSIGNMENT" --region "$AWS_REGION" --query AccountAssignmentCreationStatus.Status --output text --no-cli-pager)
+  case "$NP00_ASSIGNMENT_STATUS" in
+    SUCCEEDED) printf '%s\n' 'NP00_TEMPORARY_ASSIGNMENT=SUCCEEDED'; break ;;
+    FAILED) printf '%s\n' 'NP00_TEMPORARY_ASSIGNMENT=FAILED; preserve request ID and stop'; exit 1 ;;
+    IN_PROGRESS) sleep 5 ;;
+    *) printf '%s\n' 'NP00_TEMPORARY_ASSIGNMENT=unexpected; stop'; exit 1 ;;
+  esac
+done
+test "${NP00_ASSIGNMENT_STATUS:-}" = SUCCEEDED
+```
+
+Before using it, the administrator must read back the permission set and confirm it has no managed policies, no customer-managed policy references, no boundary, the exact inline JSON/hash in `infra/permissions/np00-model-disable-temporary.json`, and only one `USER` assignment to A in the staging account. A then configures `known-enough-np00-off` as an SSO profile, signs in as A, verifies the `AWSReservedSSO_KnownEnoughNP00Off_*` role and account, and follows the guarded apply blocks above. The setup account-administrator rights are used only to create/assign this temporary scope; never give them to GitHub Actions.
+
+```bash
+aws configure set sso_session known-enough-sso --profile known-enough-np00-off
+aws configure set sso_account_id 092954139775 --profile known-enough-np00-off
+aws configure set sso_role_name KnownEnoughNP00Off --profile known-enough-np00-off
+aws configure set region us-east-1 --profile known-enough-np00-off
+aws sso login --profile known-enough-np00-off
+test "$(aws sts get-caller-identity --profile known-enough-np00-off --query Account --output text --no-cli-pager)" = 092954139775
+NP00_TEMP_ARN=$(aws sts get-caller-identity --profile known-enough-np00-off --query Arn --output text --no-cli-pager)
+case "$NP00_TEMP_ARN" in arn:aws:sts::092954139775:assumed-role/AWSReservedSSO_KnownEnoughNP00Off_*/*) printf '%s\n' 'NP00_TEMPORARY_IDENTITY=PASS';; *) printf '%s\n' 'NP00_TEMPORARY_IDENTITY=FAIL'; exit 1;; esac
+```
+
+After NP00 model-off readback succeeds, an administrator must remove the temporary assignment, wait for deletion to succeed, then delete `KnownEnoughNP00Off`:
+
+```bash
+NP00_DELETE_REQUEST=$(aws sso-admin delete-account-assignment \
+  --instance-arn arn:aws:sso:::instance/ssoins-722328a7765eb0e8 \
+  --target-id 092954139775 --target-type AWS_ACCOUNT \
+  --permission-set-arn "$NP00_SET" --principal-type USER --principal-id "$NP00_USER_ID" \
+  --region us-east-1 --query AccountAssignmentDeletionStatus.RequestId --output text --no-cli-pager)
+for attempt in $(seq 1 60); do
+  NP00_DELETE_STATUS=$(aws sso-admin describe-account-assignment-deletion-status \
+    --instance-arn arn:aws:sso:::instance/ssoins-722328a7765eb0e8 \
+    --account-assignment-deletion-request-id "$NP00_DELETE_REQUEST" \
+    --region us-east-1 --query AccountAssignmentDeletionStatus.Status --output text --no-cli-pager)
+  case "$NP00_DELETE_STATUS" in
+    SUCCEEDED) printf '%s\n' 'NP00_TEMPORARY_ASSIGNMENT_REMOVAL=SUCCEEDED'; break ;;
+    FAILED) printf '%s\n' 'NP00_TEMPORARY_ASSIGNMENT_REMOVAL=FAILED; preserve request ID and stop'; exit 1 ;;
+    IN_PROGRESS) sleep 5 ;;
+    *) printf '%s\n' 'NP00_TEMPORARY_ASSIGNMENT_REMOVAL=unexpected; stop'; exit 1 ;;
+  esac
+done
+test "${NP00_DELETE_STATUS:-}" = SUCCEEDED
+aws sso-admin delete-permission-set \
+  --instance-arn arn:aws:sso:::instance/ssoins-722328a7765eb0e8 \
+  --permission-set-arn "$NP00_SET" --region us-east-1 --no-cli-pager
+```
+
+Preserve the resulting status/request IDs in the NP00 record. Keep the Lambda's model flags off and both Nova grants removed; do not restore them during cleanup.
 
 Read-back actions may be supplied through the existing read-only profile; if they are included in the short-lived session, scope them to the same targets: `lambda:GetFunctionConfiguration` on the function; `iam:GetRole`, `iam:ListRolePolicies`, and `iam:GetRolePolicy` on the execution role; the `sso:DescribePermissionSet`, `GetInlinePolicyForPermissionSet`, `GetPermissionsBoundaryForPermissionSet`, `ListManagedPoliciesInPermissionSet`, and `ListCustomerManagedPolicyReferencesInPermissionSet` actions on the exact instance and permission set; `sso:ListAccountAssignments` on that account, instance, and permission set; `sso:ListAccountsForProvisionedPermissionSet` on the instance and permission set; and `sso:DescribePermissionSetProvisioningStatus` on the instance. `identitystore:DescribeUser` is needed only for identity verification and has already succeeded through the read-only profile. `kms:GetKeyPolicy` for the exact key can be used to repeat the private delegation check. Require `sso:PrimaryRegion=us-east-1` where supported.
 

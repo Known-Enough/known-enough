@@ -1,0 +1,50 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "InspectStagingLambda",
+      "Effect": "Allow",
+      "Action": "lambda:GetFunctionConfiguration",
+      "Resource": "arn:aws:lambda:us-east-1:092954139775:function:known-enough-stage-api"
+    },
+    {
+      "Sid": "InspectStagingApiRoutes",
+      "Effect": "Allow",
+      "Action": "apigateway:GET",
+      "Resource": "arn:aws:apigateway:us-east-1::/apis/u94iyvt6p9/*"
+    },
+    {
+      "Sid": "InspectNamedStagingTables",
+      "Effect": "Allow",
+      "Action": "dynamodb:DescribeTable",
+      "Resource": [
+        "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughStage",
+        "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughGroupsStage"
+      ]
+    },
+    {
+      "Sid": "InspectStagingCognitoPoolAndClients",
+      "Effect": "Allow",
+      "Action": [
+        "cognito-idp:DescribeUserPool",
+        "cognito-idp:DescribeUserPoolClient"
+      ],
+      "Resource": "arn:aws:cognito-idp:us-east-1:092954139775:userpool/us-east-1_V9OMjd0zx"
+    },
+    {
+      "Sid": "InspectStagingRuntimeInlinePolicies",
+      "Effect": "Allow",
+      "Action": [
+        "iam:ListRolePolicies",
+        "iam:GetRolePolicy"
+      ],
+      "Resource": "arn:aws:iam::092954139775:role/KnownEnoughStageApiRole"
+    },
+    {
+      "Sid": "InspectAmplifyMainJobSummaries",
+      "Effect": "Allow",
+      "Action": "amplify:ListJobs",
+      "Resource": "arn:aws:amplify:us-east-1:092954139775:apps/d143q5ravxp5av/branches/main"
+    }
+  ]
+}

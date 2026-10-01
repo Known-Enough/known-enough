@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-01T20:47:16Z",
+  "repository": {
+    "fullName": "Known-Enough/known-enough",
+    "repositoryId": 1377587215,
+    "ownerId": 331386621,
+    "defaultBranch": "main",
+    "visibility": "public",
+    "githubUsers": {
+      "martelaxe": "admin",
+      "Battosai1806": "admin"
+    }
+  },
+  "awsReadOnlyIdentity": {
+    "account": "092954139775",
+    "profiles": [
+      "known-enough-staging-ro",
+      "known-enough-stage1-release"
+    ],
+    "sameVerifiedAIdentity": true,
+    "region": "us-east-1",
+    "lastLocalAccountChecks": {
+      "profiles": {
+        "known-enough-staging-ro": "092954139775",
+        "known-enough-stage1-release": "092954139775"
+      },
+      "result": "PASS"
+    }
+  },
+  "np00Preconditions": {
+    "readOnlyPermissionSet": "ReadOnlyAccess",
+    "readOnlyAssignments": 1,
+    "readOnlyProvisionedAccountCount": 1,
+    "assignedIdentityMatchedA": true,
+    "managedPolicy": "arn:aws:iam::aws:policy/ReadOnlyAccess",
+    "runtimeNovaInlinePolicyCanonicalSha256": "0b8612598320fc2b0121b8daa232d6814efb52f2fed30c1791ad6da4ceb58f57",
+    "readOnlyNovaInlinePolicyCanonicalSha256": "be165dbd713fd1b5c0dc9e06a6e9511588a8863dcbd025c35fe7719494d57acd",
+    "identityCenterKeyType": "CUSTOMER_MANAGED_KEY",
+    "identityCenterKeyStatus": "ENABLED",
+    "identityCenterKeyArn": "arn:aws:kms:us-east-1:092954139775:key/mrk-f940f13807f145fd84387208b80a4b90",
+    "keyPolicyRootDelegationPresent": true
+  },
+  "githubOidcProvider": {
+    "present": true,
+    "url": "token.actions.githubusercontent.com",
+    "audiences": [
+      "sts.amazonaws.com"
+    ]
+  },
+  "amplify": {
+    "appId": "d143q5ravxp5av",
+    "branch": "main",
+    "latestSuccessfulJob": {
+      "jobId": "6",
+      "status": "SUCCEED",
+      "commitId": null,
+      "endedAt": "2026-09-30T19:28:36.613000-06:00"
+    }
+  },
+  "lambda": {
+    "functionName": "known-enough-stage-api",
+    "state": "Active",
+    "lastUpdateStatus": "Successful",
+    "runtime": "nodejs24.x",
+    "handler": "ke13b-lambda.handler",
+    "executionRole": "KnownEnoughStageApiRole",
+    "codeSha256Hex": "d5194b8da79250fbad2422ba948d4122654947941c20822ec58de768ef2f9b4f",
+    "manifestCodeSha256Hex": "d5194b8da79250fbad2422ba948d4122654947941c20822ec58de768ef2f9b4f",
+    "manifestSourceCommit": null,
+    "modelMode": "BEDROCK",
+    "paidCallsApproved": "true",
+    "runtimeNovaInlinePolicy": "present",
+    "runtimeNovaInlinePolicyCanonicalSha256": "0b8612598320fc2b0121b8daa232d6814efb52f2fed30c1791ad6da4ceb58f57"
+  },
+  "api": {
+    "id": "u94iyvt6p9",
+    "routes": [
+      {
+        "routeKey": "ANY /decisions/{proxy+}",
+        "authorizationType": "JWT",
+        "authorizerId": "vnsmtt"
+      },
+      {
+        "routeKey": "POST /decisions",
+        "authorizationType": "JWT",
+        "authorizerId": "vnsmtt"
+      },
+      {
+        "routeKey": "OPTIONS /decisions/{proxy+}",
+        "authorizationType": "NONE",
+        "authorizerId": null
+      },
+      {
+        "routeKey": "OPTIONS /decisions",
+        "authorizationType": "NONE",
+        "authorizerId": null
+      }
+    ],
+    "requiredNp01RoutesMissing": true
+  },
+  "dynamodb": {
+    "tableNames": [
+      "KnownEnoughStage"
+    ],
+    "requiredGroupTable": "KnownEnoughGroupsStage",
+    "groupTablePresent": false
+  },
+  "cognito": {
+    "userPoolId": "us-east-1_V9OMjd0zx",
+    "domain": "known-enough-092954139775",
+    "allowAdminCreateUserOnly": true,
+    "autoVerifiedAttributes": [],
+    "emailSendingAccount": "COGNITO_DEFAULT",
+    "participantClient": {
+      "id": "3accf7paalvon2m8ue8okfi853",
+      "oauthFlows": [
+        "code"
+      ],
+      "oauthScopes": [
+        "openid"
+      ],
+      "hasClientSecret": false,
+      "accessTokenValidityMinutes": 15
+    },
+    "displayClient": {
+      "id": "481ru24906sv26f30i569gq8g0",
+      "oauthFlows": [
+        "code"
+      ],
+      "oauthScopes": [
+        "openid"
+      ],
+      "hasClientSecret": false,
+      "accessTokenValidityMinutes": 15
+    }
+  },
+  "publicLiveRun": {
+    "date": "2026-10-01",
+    "location": "WSL local worker; no AWS profile used",
+    "status": "passed",
+    "passed": 10,
+    "failed": 0,
+    "blocked": 0,
+    "targets": [
+      "https://d23eowhnwtqts3.cloudfront.net/",
+      "https://main.d143q5ravxp5av.amplifyapp.com/"
+    ],
+    "notes": [
+      "The initial run was 9/10 because the manifest expected a newer local-source button label.",
+      "The manifest was corrected to the observed deployed bafa1d4 label Participant sign-in; target hashes and source commits were unchanged.",
+      "The passing rerun verified both public asset sets, browser behavior and unauthenticated API 401.",
+      "This result is not a GitHub OIDC workflow run."
+    ]
+  },
+  "accessSetup": {
+    "githubInspectorRole": "KnownEnoughGithubStagingInspector",
+    "githubInspectorRolePresent": false,
+    "np00TemporaryPermissionSet": "KnownEnoughNP00Off",
+    "np00TemporaryPermissionSetPresent": false,
+    "bootstrapProfileAuthenticated": false,
+    "awsWritesPerformed": false,
+    "githubWorkflowDispatched": false
+  },
+  "limitations": [
+    "The local bootstrap profile could not authenticate, so account-administrator AWS setup remains pending.",
+    "The AWS inspector role and GitHub workflow dispatch remain pending.",
+    "The Lambda source commit remains unknown even though its ZIP hash matches the manifest."
+  ],
+  "permissionValidation": {
+    "method": "AWS IAM Access Analyzer validate-policy",
+    "sharedInspectorIdentityPolicyFindings": [],
+    "np00TemporaryIdentityPolicyFindings": [],
+    "githubOidcTrustFindings": [
+      {
+        "type": "SUGGESTION",
+        "code": "CONFIRM_AUDIENCE_CLAIM_TYPE"
+      }
+    ],
+    "githubOidcTrustAudienceCondition": "sts.amazonaws.com",
+    "iamPolicySimulation": "not run; current profiles do not provide the required simulator access; exact allow/deny cases are in docs/shared-staging-checks.md"
+  },
+  "workflowValidation": {
+    "yamlStructure": "passed",
+    "trigger": "workflow_dispatch only; check jobs restricted to main",
+    "idTokenWrite": "aws-inspection job only",
+    "actionCommitShaPins": "passed",
+    "inspectorPolicyScope": "exact service actions/resources; no deploy/write/invoke/data/email/model grants"
+  },
+  "localVerification": {
+    "pinnedNode": "24.21.0",
+    "pinnedNpm": "11.19.0",
+    "cleanWorktreeFullCheck": {
+      "status": "passed",
+      "unitIntegrationPassed": 464,
+      "optionalSkips": 2,
+      "hostedPassed": 1,
+      "e2ePassed": 53,
+      "boundaryReferences": 233,
+      "npmCiPackagesAdded": 184,
+      "npmCiAuditPackages": 193,
+      "npmCiVulnerabilities": 0
+    },
+    "publicLiveSuite": {
+      "status": "passed",
+      "passed": 10,
+      "failed": 0,
+      "blocked": 0,
+      "location": "WSL local; no AWS profile"
+    }
+  },
+  "np00FreshPrewriteChecks": {
+    "result": "PASS; no writes applied",
+    "stagingReadOnlyAccount": "092954139775",
+    "stage1ReleaseAccount": "092954139775",
+    "readOnlyAssignmentCount": 1,
+    "readOnlyProvisionedAccountCount": 1,
+    "assignedIdentityMatchedA": true,
+    "identityCenterCmkAndRootDelegation": "PASS",
+    "lambdaActiveSuccessful": "PASS",
+    "lambdaModelMode": "BEDROCK",
+    "lambdaPaidCallsApproved": "true",
+    "runtimeNovaGrantCanonicalSha256": "0b8612598320fc2b0121b8daa232d6814efb52f2fed30c1791ad6da4ceb58f57",
+    "readOnlyNovaGrantCanonicalSha256": "be165dbd713fd1b5c0dc9e06a6e9511588a8863dcbd025c35fe7719494d57acd",
+    "revisionIdAndFullEnvironmentRequest": "saved privately with mode 0600; only the two model flags changed",
+    "temporaryWritePermissionSetPresent": false
+  }
+}

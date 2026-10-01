@@ -100,7 +100,7 @@
         "keyboard": {
           "mode": "first-button-focus",
           "role": "button",
-          "name": "Sign in or register"
+          "name": "Participant sign-in"
         }
       }
     }

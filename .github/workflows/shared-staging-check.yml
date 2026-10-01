@@ -1,0 +1,170 @@
+name: Shared staging checks
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: shared-staging-checks-main
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  public-smoke:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      test-result: ${{ steps.outcome.outputs.result }}
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the selected main revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Install Chromium for public browser checks
+        run: npx playwright install --with-deps chromium
+
+      - name: Run public website smoke checks
+        id: live
+        continue-on-error: true
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: ${{ runner.temp }}/public-playwright.json
+        run: npx playwright test --config=playwright.live.config.ts tests/live/public-smoke.spec.ts --reporter=json
+
+      - name: Record test step result
+        id: outcome
+        if: always()
+        env:
+          STEP_RESULT: ${{ steps.live.outcome }}
+        run: echo "result=${STEP_RESULT:-skipped}" >> "$GITHUB_OUTPUT"
+
+      - name: Save public test results for the shared report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: shared-public-test-results
+          path: ${{ runner.temp }}/public-playwright.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+  aws-inspection:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      inspection-result: ${{ steps.outcome.outputs.result }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out the selected main revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Assume the read-only staging inspector role
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubStagingInspector
+          aws-region: us-east-1
+          role-session-name: staging-inspect-${{ github.run_id }}
+          role-duration-seconds: 900
+          mask-aws-account-id: true
+
+      - name: Read and sanitize staging deployment metadata
+        id: inspect
+        continue-on-error: true
+        env:
+          STAGING_INSPECTION_OUTPUT: ${{ runner.temp }}/staging-inspection.json
+        run: node scripts/inspect-shared-staging.mjs
+
+      - name: Record inspection step result
+        id: outcome
+        if: always()
+        env:
+          STEP_RESULT: ${{ steps.inspect.outcome }}
+        run: echo "result=${STEP_RESULT:-skipped}" >> "$GITHUB_OUTPUT"
+
+      - name: Save sanitized AWS metadata for the shared report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: shared-aws-inspection
+          path: ${{ runner.temp }}/staging-inspection.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+  shared-report:
+    if: always()
+    needs:
+      - public-smoke
+      - aws-inspection
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the selected main revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Download the public test results
+        if: always()
+        continue-on-error: true
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: shared-public-test-results
+          path: ${{ runner.temp }}/shared-staging-inputs
+
+      - name: Download sanitized AWS metadata
+        if: always()
+        continue-on-error: true
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: shared-aws-inspection
+          path: ${{ runner.temp }}/shared-staging-inputs
+
+      - name: Write the shared GitHub run report
+        id: report
+        if: always()
+        env:
+          AWS_INSPECTOR_OUTCOME: ${{ needs.aws-inspection.outputs.inspection-result }}
+          PUBLIC_TEST_OUTCOME: ${{ needs.public-smoke.outputs.test-result }}
+          RUN_ON_MAIN: ${{ github.ref == 'refs/heads/main' }}
+          STAGING_INSPECTION_JSON: ${{ runner.temp }}/shared-staging-inputs/staging-inspection.json
+          PLAYWRIGHT_RESULT_JSON: ${{ runner.temp }}/shared-staging-inputs/public-playwright.json
+          SHARED_STAGING_REPORT_PATH: ${{ runner.temp }}/shared-staging-report.md
+        run: node scripts/render-shared-staging-report.mjs
+
+      - name: Save the shared report artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: shared-staging-report
+          path: ${{ runner.temp }}/shared-staging-report.md
+          if-no-files-found: ignore
+          retention-days: 30
