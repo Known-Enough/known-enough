@@ -1,3 +1,5 @@
+> **NP00 checkpoint, 2026-10-01T03:31:43Z:** OPEN for actual A-only IAM cleanup/readback. [Exact prepared CLI handoff](../../infra/np00-permission-set-cleanup.md) includes guarded original-policy comparison, only A's existing assignment, named role/profile verification and six-case old/new simulations. Four Bash sections parse; none was executed because this Mac has no AWS CLI/profile and the configured A host is pending. Historical old role state below is not a fresh readback; no new set/role/policy state is invented. [NP00 evidence](../np00-technical-closeout.md).
+
 > **Current routing, 2026-09-30:** technical closeout belongs to [NP00](../tasks/NP00.md). The prior reviewer prerequisite below is deferred under the [NP policy](../next-phase.md); no reviewer PASS or new technical closure is claimed. Keep the original debt/finding evidence below. A-only IAM actions retain separate authorization.
 
 # TD-KE10-02 — Bedrock permission-set name and isolation

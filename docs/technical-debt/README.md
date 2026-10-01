@@ -4,9 +4,9 @@ All existing technical obligations route through [NP00](../tasks/NP00.md), the f
 
 | Item | Current work | Status |
 | --- | --- | --- |
-| [TD-KE10-01](TD-KE10-01-stop-commit-race.md) | Verify/fix stop-and-drain behavior with meaningful delayed-storage regressions; record technical closure in NP00 | Open technical closeout; former independent follow-up deferred |
-| [TD-KE10-02](TD-KE10-02-bedrock-permission-set-name.md) | A's separately authorized least-privilege permission-set cleanup/readback | Open; NP00 |
-| KE14 source/staging/check gaps | Reconcile source/deployment, fix inherited verification failures and qualify existing live synthetic scenarios | Open; NP00 |
+| [TD-KE10-01](TD-KE10-01-stop-commit-race.md) | Stop/admission/newer-job inspection and delayed-storage regressions pass on unchanged supported-host source; [NP00 evidence](../np00-technical-closeout.md) | Deterministic technical scope resolved; no live-race claim; former independent follow-up deferred |
+| [TD-KE10-02](TD-KE10-02-bedrock-permission-set-name.md) | [Guarded A-only CLI plan](../../infra/np00-permission-set-cleanup.md) prepared; actual cleanup/readback awaits A's configured AWS host and separate authorization | Open; NP00 |
+| KE14 source/staging/check gaps | Source hashes and supported-host full check pass; frontend bytes verified. Lambda/IAM/complete managed synthetic qualification still pending | Open for remaining live scope; NP00 |
 
 The task batch is administratively closed; these technical obligations are not erased or called verified. Update items only with actual NP00 evidence. Human trials, reviewer sessions and submission materials are outside technical-debt cleanup.
 

@@ -1,0 +1,83 @@
+{
+  "source_commit": "df277dcb6d282240c47c8732ec7deed9b2c7b779",
+  "node": "24.21.0",
+  "npm": "11.19.0",
+  "rolldown": "1.2.9",
+  "module_bytes": 1679797,
+  "module_sha256": "aea8cfd5cb149a9e0cb13c1d5e618ef8e7d2fa3fb00720ab62c25497c40a1ee1",
+  "zip_bytes": 339968,
+  "zip_sha256": "6e9360a63176ce071546f6f9a64a50f8ce5f3646f226ad741cbdcea72d9bf171",
+  "zip_entries": [
+    "ke13b-lambda.mjs"
+  ],
+  "authentication_probe": {
+    "mode": "local exact bundle with injected provider and synthetic bindings",
+    "no_bearer_mock_claims_status": 401,
+    "provider_calls": 0
+  },
+  "full_check_archive_sha256": "3da55ccb2edefacc280a69183c39641829c090928154d9b1468d4e2cec4f2e14",
+  "full_check_command": "PLAYWRIGHT_CHANNEL=chromium npm run check",
+  "full_check_exit_code": 0,
+  "full_check_results": {
+    "unit_integration_passed": 440,
+    "optional_dynamodb_local_skipped": 2,
+    "hosted_preview_passed": 1,
+    "e2e_passed": 47
+  },
+  "frontend_readback": [
+    {
+      "path": "/",
+      "sha256": "867259c6c93dc3a2bb3abd6774d81d383c0631b9015d4151572ba24e2161a43d",
+      "bytes": 545,
+      "matches_configured_local_build": true
+    },
+    {
+      "path": "/assets/connected-app-CxhluTmY.js",
+      "sha256": "be5c65705b996b53271925a469266fffc1bdb290cc61cc5b242bfa5495ad3176",
+      "bytes": 159713,
+      "matches_configured_local_build": true
+    },
+    {
+      "path": "/assets/index-B96ri3Se.js",
+      "sha256": "29db0b86589df4fdbb2a2b3921a69e74114e914dc9296c721bf19a11f79fab18",
+      "bytes": 213566,
+      "matches_configured_local_build": true
+    },
+    {
+      "path": "/assets/index-CrFboyLM.css",
+      "sha256": "d5fc935c58c26d1d2ccd98b707bfb07ee4083f78720a476c3079232592c6c627",
+      "bytes": 9506,
+      "matches_configured_local_build": true
+    },
+    {
+      "path": "/assets/jsx-runtime-D6BUY6Oc.js",
+      "sha256": "919f9139c48fa2d94a4794afd4647cb65d5f67339b1932ff02f9978b1d3ffdf8",
+      "bytes": 13524,
+      "matches_configured_local_build": true
+    }
+  ],
+  "public_http_readback": [
+    {
+      "check": "signed-out-public",
+      "status": 401,
+      "cors": []
+    },
+    {
+      "check": "mock-header-public",
+      "status": 401,
+      "cors": []
+    },
+    {
+      "check": "allowed-origin-preflight",
+      "status": 204,
+      "cors": [
+        "https://main.d143q5ravxp5av.amplifyapp.com"
+      ]
+    },
+    {
+      "check": "other-origin-preflight",
+      "status": 204,
+      "cors": []
+    }
+  ]
+}

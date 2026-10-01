@@ -1,3 +1,5 @@
+> **NP00 technical resolution, 2026-10-01T03:31:43Z:** deterministic technical scope is RESOLVED on unchanged executable source `df277dc`: inspected shared output-write tracking, focused runtime/jobs/HTTP 26/26 and clean pinned full check 440 / 2 optional DynamoDB Local skips, hosted 1/1, E2E 47/47. Delayed proposal commit and admitted creation regressions prove awaited stop remains pending until storage settles; admission denial and obsolete-job preservation checks pass. [Current evidence](../np00-technical-closeout.md) records the limits. No live DynamoDB-race proof or new independent PASS is claimed. The original finding/verdict and dated status below remain unchanged history; the NP policy defers independent follow-up.
+
 > **Current routing, 2026-09-30:** technical closeout belongs to [NP00](../tasks/NP00.md). The prior reviewer prerequisite below is deferred under the [NP policy](../next-phase.md); no reviewer PASS or new technical closure is claimed. Keep the original debt/finding evidence below. A-only IAM actions retain separate authorization.
 
 # TD-KE10-01 — KE10 stop/commit race
