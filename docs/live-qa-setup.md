@@ -2,6 +2,8 @@
 
 Prepared source only. No resource, identity, message, model request or deployment has been created by this work. [LIVE04](tasks/LIVE04.md) owns concrete initial authorization, A's installation and B's actual qualification. NP00 keeps its existing claim; primary rollout refuses an enabled model or changed Lambda revision.
 
+Start with the [LIVE04 domain and configuration guide](live04-setup-guide.md) if you do not know the mail domain or hosted-zone ID yet. Its offline helper saves a draft with missing values; those choices do not block local code preparation.
+
 ## Installation inputs and authorization
 
 A uses account `092954139775`, region `us-east-1`, an already owned Route53 zone and a **dedicated** mail subdomain. The installer refuses another active SES rule set, an unrelated zone, an existing unowned MX record/table/stack/artifact bucket, a changed primary revision or an active/incomplete QA lease. If this account already receives unrelated SES mail, do not replace its rule set: resolve that installation dependency as a separate scoped change before applying.

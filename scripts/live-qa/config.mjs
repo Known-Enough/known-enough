@@ -2,12 +2,17 @@ import { createHash } from 'node:crypto';
 export const ACCOUNT = '092954139775';
 export const REGION = 'us-east-1';
 export const ACTORS = ['iris', 'omar', 'tess', 'vin', 'pending', 'rejected', 'disabled', 'outsider', 'display', 'signup'];
+export function isMailDomain(value) {
+  return typeof value === 'string' && value.length <= 253 && value === value.toLowerCase()
+    && value.split('.').length >= 2 && /^[a-z]{2,}$/.test(value.split('.').at(-1))
+    && value.split('.').every(label => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label));
+}
 export function validateConfig(value) {
   if (!value || value.schemaVersion !== 1 || value.account !== ACCOUNT || value.region !== REGION
     || value.stack !== 'known-enough-live-qa' || value.repository !== 'Known-Enough/known-enough'
     || value.oidcSubject !== 'repo:Known-Enough@331386621/known-enough@1377587215:ref:refs/heads/main'
     || !/^[0-9a-f]{40}$/.test(value.sourceCommit) || typeof value.primaryRollout !== 'boolean'
-    || !/^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}$/.test(value.mailDomain) || value.mailDomain.includes('..')
+    || !isMailDomain(value.mailDomain)
     || !/^Z[A-Z0-9]{5,32}$/.test(value.hostedZoneId)) throw new Error('INVALID_SETUP_CONFIGURATION');
   if (value.primaryRollout && !/^[0-9a-f-]{36}$/.test(value.primaryExpectedRevision ?? '')) throw new Error('PRIMARY_REVISION_REQUIRED');
   validateAuthorization(value.authorization);
