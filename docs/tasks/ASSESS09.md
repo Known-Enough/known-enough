@@ -1,6 +1,6 @@
 # ASSESS09 — Unblock Cognito setup and safely resume
 
-- Status: READY — priority B follow-up for Lambda upload; previous Cognito repair remains locally DONE with evidence below.
+- Status: IN_PROGRESS — A takes over the Lambda upload follow-up by explicit user direction; prior B Cognito repair remains locally DONE.
 - Worker: B / Octavio / Battosai1806, Codex GPT-6 (exact runtime variant/effort not exposed). Clean main ff-only baseline 3d2d68af2c1c2b7980ad56328a032e368e2f30c9e92, 2026-10-02; no subagents. Claimed only the narrow scope below, including a dedicated same-pin Cognito repair helper and focused tests.
 - Authority: user explicitly requests this priority repair on 2026-10-02, with narrow scope and minimal token use. A retains AWS execution/NP00. No credential sharing, new spending or unsolicited cloud writes.
 
@@ -38,3 +38,7 @@ Official shapes/default-preservation rules: [UpdateUserPool](https://docs.aws.am
 User requests transfer to B, minimal token use. Actual da3b1bd helper output: original 30fa91a package hashes verified; PRIMARY_SIGNUP_RECONCILED with cloudWrites=false; continuation fails AWS_OPERATION_FAILED:lambda:update-function-code. Cognito reconciliation succeeded; do not redo it. AWS denial/validation cause is not established. The original journal may now have pending=update-code; do not clear it, overwrite backups or blindly retry.
 
 B: narrowly inspect primary Lambda upload and aws.mjs CLI blob handling (base64 JSON vs binary/file inputs), revision guard, size and exact existing permission; obtain one small sanitized A read-only diagnostic if needed to establish the real AWS error and whether upload occurred. Preserve original deployment source/artifacts/expiry/counters and all successful prior fixes. Reconcile only a proven exact pending operation; no broader access or new deployment pin. Add meaningful focused regressions and required pinned full check only for changed code. Publish one safe same-source recovery command. A pauses CloudShell retries. No AWS credentials needed by B; no new cloud write/spend authorization.
+
+## A takeover — 2026-10-02
+
+User explicitly transfers ASSESS09 to this A/martelaxe WSL chat. Baseline dc8a7d2, clean ff-only main; actual GPT-6 variant/effort unexposed, no subagents. Former B Lambda follow-up was READY/unclaimed; no concurrent writer is authorized. Narrow scope: aws.mjs Lambda binary transport; primary.mjs exact pending update-code reconciliation; existing same-source helper and focused regression/handoff files plus own A records/board/workflow. Preserve original 30fa91a source/ZIPs/config/journal/backup, finite limits/expiry and successful Cognito repair. Local read-only AWS SSO is expired; user CloudShell supplies only bounded sanitized readback when needed.

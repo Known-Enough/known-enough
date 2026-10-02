@@ -1,5 +1,7 @@
 # Task execution and collaboration
 
+**Current takeover (2026-10-02):** User assigned ASSESS09 Lambda-upload repair to A/martelaxe WSL, IN_PROGRESS. Prior B follow-up was READY/unclaimed; B must not implement this scope concurrently. Prior Cognito repair stays locally complete; A preserves original deployment/recovery state and prepares a guarded same-source continuation.
+
 **Latest priority (2026-10-02):** ASSESS09 is READY for B's narrow Lambda-upload follow-up. Actual Cognito checkpoint reconciled, then lambda:update-function-code failed. A pauses retries; preserve possible pending=update-code and original artifacts/backup. Prior Cognito local completion stays historical. See [exact handoff](tasks/ASSESS09.md#priority-follow-up-handed-to-b--2026-10-02).
 
 ## Immediate priority — user direction, 2026-10-02

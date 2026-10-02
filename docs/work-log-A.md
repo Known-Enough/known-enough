@@ -1252,3 +1252,5 @@ User requests a narrow B task rather than more cloud retries. Created ASSESS09 R
 ASSESS09 documentation checks passed: links/priority/status consistency, references 7/7, planning 15/15, whitespace. No executable change/application rerun.
 
 2026-10-02: user explicitly requests minimal-token handoff to B. Synced ASSESS09 priority Lambda follow-up: original package verified, signup reconciled, actual lambda:update-function-code failed. Cause unknown; preserve possible pending update-code, no retry/reset. B checks exact CLI blob/revision/permission/error evidence and provides safe same-pin recovery. Documentation only; no cloud action or B activity claim.
+
+ASSESS09 explicit A takeover, 2026-10-02: clean dc8a7d2, bounded AWS transport/pending-code/helper tests/handoff scope in ticket. No subagents or AWS write. Local actual 554956-byte ZIP produces 740008-byte CLI argument; /bin/true spawn reproduces E2BIG (status null) before any AWS request. The wrapper hid process-launch failure as AWS_OPERATION_FAILED. Prepare private binary-file transport and exact pending-code reconciliation; retain backup/guards. Local SSO expired, no assumed remote readback.
