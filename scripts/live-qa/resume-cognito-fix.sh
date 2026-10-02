@@ -119,13 +119,14 @@ try {
   if (installer.split(primaryImport).length !== 2) throw new Error('REPAIR_MODULE_SHAPE_CHANGED');
   overlay('install-assess09.mjs', installer.replace(primaryImport, "from './primary-assess09.mjs'"));
   const { aws, assertIdentity } = await import(pathToFileURL(`${scripts}/aws-assess09.mjs`));
-  const { reconcilePendingSignup, reconcilePendingCode } = await import(pathToFileURL(`${scripts}/primary-assess09.mjs`));
+  const { reconcilePendingSignup, reconcilePendingCode, reconcileRecordedRevision } = await import(pathToFileURL(`${scripts}/primary-assess09.mjs`));
   const { install } = await import(pathToFileURL(`${scripts}/install-assess09.mjs`));
   const prepared = await install('dry-run', raw, `/tmp/known-enough-live-qa-${pin}/assess09-prepared`, aws);
   if (Object.entries(expected).some(([name, hash]) => prepared.artifacts[name]?.sha256 !== hash))
     throw new Error('PRIMARY_PACKAGE_BYTES_CHANGED');
   assertIdentity(aws('sts', 'get-caller-identity'), raw);
   console.log(JSON.stringify(await reconcilePendingCode(raw, manifest, directory, aws)));
+  console.log(JSON.stringify(await reconcileRecordedRevision(raw, manifest, directory, aws)));
   console.log(JSON.stringify(await reconcilePendingSignup(raw, manifest, directory, aws)));
   writeFileSync(directory + '/assess09-repair.json', JSON.stringify({ repairCommit: repairPin, sourceCommit: pin,
     primaryModuleSha256: sha(primary), awsModuleSha256: sha(readFileSync(repair + '/aws.mjs')), artifacts: expected }) + '\n', { mode: 0o600 });
@@ -135,7 +136,8 @@ try {
   console.log('LIVE_QA_INSTALLED_TARGET=' + JSON.stringify(publicTarget(JSON.parse(readFileSync(directory + '/installed-target.json', 'utf8')))));
 } catch (error) {
   const code = /^(?:[A-Z0-9_]+|AWS_OPERATION_FAILED:[a-z0-9-]+:[a-z0-9-]+)$/.test(error.message) ? error.message : 'SETUP_OPERATION_FAILED';
-  console.error(JSON.stringify({ status: 'BLOCKED', code }));
+  console.error(JSON.stringify({ status: 'BLOCKED', code,
+    ...(code === 'PRIMARY_RECORDED_CONFIG_MISMATCH' ? { fields: error.fields } : {}) }));
   process.exitCode = 1;
 }
 JS

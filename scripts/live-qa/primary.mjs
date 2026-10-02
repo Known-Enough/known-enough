@@ -294,6 +294,10 @@ export async function primaryApply(config, manifest, directory, aws) {
         };
         journal.save(state);
     }
+    if (state.codeDone) {
+        await reconcileRecordedRevision(config, manifest, directory, aws);
+        state = journal.read();
+    }
     const live = await ready(aws, state.afterRevision, 'PRIMARY_UPDATE');
     assertLambda(state, live, state.codeDone ? codeHash(targetCode) : state.config.CodeSha256, state.configDone ? { Variables: state.next } : state.config.Environment, state.configDone ? 'api.handler' : state.config.Handler);
     assertCognito(state, aws);
@@ -375,6 +379,8 @@ export async function primaryApply(config, manifest, directory, aws) {
             state.codeDone = true;
         });
     }
+    await reconcileRecordedRevision(config, manifest, directory, aws);
+    state = journal.read();
     const codeReady = await ready(aws, state.afterRevision, 'PRIMARY_UPDATE');
     assertLambda(state, codeReady, codeHash(targetCode), state.configDone ? { Variables: state.next } : state.config.Environment, state.configDone ? 'api.handler' : state.config.Handler);
     if (!state.configDone)
@@ -383,6 +389,8 @@ export async function primaryApply(config, manifest, directory, aws) {
             state.afterRevision = result.RevisionId;
             state.configDone = true;
         });
+    await reconcileRecordedRevision(config, manifest, directory, aws);
+    state = journal.read();
     await ready(aws, state.afterRevision, 'PRIMARY_CONFIG');
     verifyApply(state, aws);
     state.complete = true;
@@ -584,4 +592,79 @@ export async function reconcilePendingCode(config, manifest, directory, aws) {
     state.pending = null;
     journal.save(state);
     return { status: 'PRIMARY_CODE_UPLOAD_NOT_APPLIED_RECONCILED', cloudWrites: false };
+}
+
+/** Adopt a fresh guard only for an acknowledged update with complete state proof. */
+export async function reconcileRecordedRevision(config, manifest, directory, aws) {
+    const journal = journalAt(directory);
+    const state = journal.read();
+    const candidate = readFileSync(directory + '/api.zip');
+    if (state.schemaVersion !== 2 || state.account !== config.account || state.rollback ||
+        state.targetCode !== manifest.artifacts.api.sha256 || digest(candidate) !== state.targetCode)
+        throw new Error('PRIMARY_JOURNAL_TARGET_CHANGED');
+    const notRequired = { status: 'PRIMARY_RECORDED_REVISION_NOT_REQUIRED', cloudWrites: false };
+    if (!state.codeDone) return notRequired;
+    assertNoPending(state);
+    if (!state.poolDone || !state.clientDone || !state.rollbackCode)
+        throw new Error('PRIMARY_MUTATION_RECONCILIATION_REQUIRED');
+    let current;
+    for (let attempt = 0; attempt < 60; attempt++) {
+        current = lambda(aws);
+        if (current.LastUpdateStatus === 'Failed') throw new Error('PRIMARY_UPDATE_FAILED');
+        if (current.LastUpdateStatus === 'Successful' && current.State === 'Active') break;
+        if (attempt === 59) throw new Error('PRIMARY_UPDATE_TIMEOUT');
+        await delay();
+    }
+    if (current.RevisionId === state.afterRevision) return notRequired;
+    primaryPlan(config, state.config);
+    if (digest(readFileSync(directory + '/primary-rollback.zip')) !== state.rollbackCode ||
+        codeHash(state.rollbackCode) !== state.config.CodeSha256)
+        throw new Error('ROLLBACK_BYTES_CHANGED');
+    const expected = { ...state.config, CodeSha256: codeHash(state.targetCode), CodeSize: candidate.length,
+        Environment: state.configDone ? { Variables: state.next } : state.config.Environment,
+        Handler: state.configDone ? 'api.handler' : state.config.Handler };
+    // Only update identifiers/timestamps/state messages are observational. Unknown
+    // fields, runtime versions and every other configuration field remain exact.
+    const observations = new Set(['RevisionId', 'LastModified', 'LastUpdateStatus',
+        'LastUpdateStatusReason', 'LastUpdateStatusReasonCode', 'State', 'StateReason', 'StateReasonCode']);
+    if (state.configDone) observations.add('ConfigSha256'); // Derived from the explicitly changed settings.
+    const stable = value => Object.fromEntries(Object.entries(value).filter(([key]) => !observations.has(key)));
+    if (!current.RevisionId || !same(stable(current), stable(expected))) {
+        const error = new Error('PRIMARY_RECORDED_CONFIG_MISMATCH');
+        const known = new Set(['Role', 'Runtime', 'RuntimeVersionConfig', 'MemorySize', 'Timeout', 'Description',
+            'VpcConfig', 'Layers', 'LoggingConfig', 'Environment', 'Handler', 'Architectures', 'ConfigSha256',
+            'CodeSize', 'CodeSha256', 'PackageType', 'FunctionArn', 'FunctionName', 'KMSKeyArn',
+            'EphemeralStorage', 'TracingConfig', 'DeadLetterConfig', 'Version', 'SigningJobArn',
+            'SigningProfileVersionArn', 'SnapStart', 'FileSystemConfigs']);
+        const a = stable(current), b = stable(expected);
+        error.fields = [...new Set([...Object.keys(a), ...Object.keys(b)])]
+            .filter(key => !same({ [key]: a[key] }, { [key]: b[key] }))
+            .map(key => known.has(key) ? key : 'OTHER_CONFIGURATION');
+        throw error;
+    }
+    assertCognito(state, aws);
+    const table = aws('dynamodb', 'describe-table', { TableName: groupTable }).Table;
+    assertPrimaryTable(table, config.account,
+        aws('dynamodb', 'list-tags-of-resource', { ResourceArn: table.TableArn }).Tags);
+    verifyRoutes(state, aws);
+    if (!same(readPolicy(aws, state.config.Role.split('/').at(-1)), state.policy))
+        throw new Error('PRIMARY_POLICY_CONFLICT');
+    await delay();
+    // A second complete read proves stability throughout the authority checks.
+    const confirmed = lambda(aws);
+    if (!same(confirmed, current)) throw new Error('PRIMARY_REVISION_OR_CONFIG_DRIFT');
+    const bytes = readFileSync(directory + '/primary-private-journal.json');
+    if (!same(JSON.parse(bytes), state)) throw new Error('PRIMARY_JOURNAL_TARGET_CHANGED');
+    const backup = directory + '/primary-before-recorded-revision-' + digest(bytes) + '.json';
+    if (existsSync(backup)) {
+        if (lstatSync(backup).isSymbolicLink() || !readFileSync(backup).equals(bytes))
+            throw new Error('PRIMARY_REPAIR_BACKUP_CONFLICT');
+    } else {
+        const descriptor = openSync(backup, 'wx', 0o600);
+        try { writeFileSync(descriptor, bytes); fsyncSync(descriptor); }
+        finally { closeSync(descriptor); }
+    }
+    state.afterRevision = confirmed.RevisionId;
+    journal.save(state);
+    return { status: 'PRIMARY_RECORDED_REVISION_RECONCILED', cloudWrites: false };
 }

@@ -1,10 +1,10 @@
-import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, rmSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, expect, test, vi } from 'vitest';
 import cliInputs from '../evaluations/aws-cli-input-keys.json';
 // @ts-expect-error Operational JavaScript exercised by Vitest.
-import { primaryApply, primaryRollback, assertPrimaryTable, primaryPlan, sameCognito, reconcilePendingSignup, reconcilePendingCode } from '../../scripts/live-qa/primary.mjs';
+import { primaryApply, primaryRollback, assertPrimaryTable, primaryPlan, sameCognito, reconcilePendingSignup, reconcilePendingCode, reconcileRecordedRevision } from '../../scripts/live-qa/primary.mjs';
 // @ts-expect-error Operational JavaScript exercised by Vitest.
 import { digest } from '../../scripts/live-qa/config.mjs';
 vi.mock('../../scripts/live-qa/aws.mjs', async importOriginal => ({
@@ -37,12 +37,13 @@ function harness() {
   const manifest = { artifacts: { api: { sha256: digest(replacement) } } };
   const state = {
     lambda: { RevisionId: 'original-revision', State: 'Active', LastUpdateStatus: 'Successful', CodeSha256: Buffer.from(digest(original), 'hex').toString('base64'),
+      CodeSize: original.length, Runtime: 'nodejs24.x', MemorySize: 256,
       Environment: { Variables: { KE14_MODEL_MODE: 'DISABLED', KE14_PAID_CALLS_APPROVED: 'false', KEEP: 'yes' } }, Handler: 'original.handler', Role: `arn:aws:iam::${account}:role/Runtime` },
     pool: { AdminCreateUserConfig: { AllowAdminCreateUserOnly: true }, AutoVerifiedAttributes: [], Policies: { preserved: true } },
     client: { AllowedOAuthScopes: ['profile'], CallbackURLs: ['https://example.invalid/'] },
     routes: [{ RouteId: 'anchor', RouteKey: 'ANY /decisions/{proxy+}', AuthorizationType: 'JWT', AuthorizerId: 'exact', Target: 'integrations/exact' }],
     policy: null as unknown, revision: 0, reorderReads: false, poolPropagation: 0, clientPropagation: 0,
-    poolOld: null as unknown, clientOld: null as unknown, poolDrift: false, clientDrift: false, fail: '', failAfter: '', stuck: '', stuckAfter: '', tableMissing: false, calls: [] as string[]
+    poolOld: null as unknown, clientOld: null as unknown, poolDrift: false, clientDrift: false, fail: '', failAfter: '', stuck: '', stuckAfter: '', staleResponse: '', tableMissing: false, calls: [] as string[]
   };
   const aws = (_service: string, operation: string, input: Record<string, unknown> = {}) => {
     state.calls.push(operation);
@@ -74,9 +75,13 @@ function harness() {
       case 'update-function-configuration':
         expect(input.RevisionId).toBe(state.lambda.RevisionId);
         state.lambda.RevisionId = 'revision-' + ++state.revision;
-        if (operation === 'update-function-code') state.lambda.CodeSha256 = Buffer.from(digest(Buffer.from(input.ZipFile as string, 'base64')), 'hex').toString('base64');
+        if (operation === 'update-function-code') {
+          const bytes = Buffer.from(input.ZipFile as string, 'base64');
+          state.lambda.CodeSha256 = Buffer.from(digest(bytes), 'hex').toString('base64');
+          state.lambda.CodeSize = bytes.length;
+        }
         else { state.lambda.Environment = structuredClone(input.Environment) as typeof state.lambda.Environment; state.lambda.Handler = input.Handler as string; }
-        result = state.lambda; break;
+        result = state.staleResponse === operation ? { ...state.lambda, RevisionId: 'response-revision-' + state.revision } : state.lambda; break;
       default: throw new Error('UNEXPECTED_OPERATION:' + operation);
     }
     if (state.stuckAfter === operation) state.stuck = 'InProgress';
@@ -294,4 +299,76 @@ test.each(['applied', 'revision', 'role', 'environment', 'cognito', 'policy', 'r
   expect(readFileSync(h.directory + '/primary-private-journal.json')).toEqual(before);
   expect(h.state.calls.slice(start).every(call => /^(get|describe|list)-/.test(call))).toBe(true);
   expect(() => readFileSync(h.directory + '/primary-before-lambda-upload-repair.json')).toThrow();
+});
+
+async function acknowledgedUpdate(phase = 'code') {
+  instantPolling();
+  const h = harness();
+  h.state.stuckAfter = phase === 'code' ? 'update-function-code' : 'update-function-configuration';
+  await expect(h.apply()).rejects.toThrow('PRIMARY_UPDATE_TIMEOUT');
+  expect(h.journal()).toMatchObject({ codeDone: true, configDone: phase === 'config', pending: null });
+  h.state.stuck = ''; h.state.stuckAfter = '';
+  h.state.lambda.RevisionId = 'fresh-confirmed-revision';
+  return h;
+}
+
+test.each(['code', 'config'])('recorded %s update proves full state, preserves checkpoint and resumes without repetition', async phase => {
+  const h = await acknowledgedUpdate(phase);
+  const bytes = readFileSync(h.directory + '/primary-private-journal.json');
+  const rollback = readFileSync(h.directory + '/primary-rollback.zip');
+  const start = h.state.calls.length;
+  await expect(reconcileRecordedRevision(h.config, h.manifest, h.directory, h.aws)).resolves.toEqual({ status: 'PRIMARY_RECORDED_REVISION_RECONCILED', cloudWrites: false });
+  expect(h.state.calls.slice(start).every(call => /^(get|describe|list)-/.test(call))).toBe(true);
+  expect(h.journal().afterRevision).toBe('fresh-confirmed-revision');
+  const backup = readdirSync(h.directory).find(name => name.startsWith('primary-before-recorded-revision-'))!;
+  expect(readFileSync(h.directory + '/' + backup)).toEqual(bytes);
+  expect(readFileSync(h.directory + '/primary-rollback.zip')).toEqual(rollback);
+  await expect(h.apply()).resolves.toMatchObject({ status: 'PASS' });
+  expect(h.state.calls.filter(call => call === 'update-function-code')).toHaveLength(1);
+  expect(h.state.calls.filter(call => call === 'update-function-configuration')).toHaveLength(1);
+  expect(h.state.calls.filter(call => call === 'update-user-pool')).toHaveLength(1);
+  expect(h.journal().config).toEqual(JSON.parse(bytes.toString()).config);
+});
+
+test.each(['update-function-code', 'update-function-configuration'])('stable intended readback supplies fresh guard after acknowledged %s', async operation => {
+  instantPolling(); const h = harness(); h.state.staleResponse = operation;
+  await expect(h.apply()).resolves.toMatchObject({ status: 'PASS' });
+  expect(h.journal().afterRevision).toBe(h.state.lambda.RevisionId);
+  expect(h.state.calls.filter(call => call === 'update-function-code')).toHaveLength(1);
+  expect(h.state.calls.filter(call => call === 'update-function-configuration')).toHaveLength(1);
+});
+
+test.each(['package', 'environment', 'handler', 'role', 'memory', 'runtime', 'code-size', 'unknown', 'cognito', 'route', 'policy', 'backup', 'pending', 'race'])('recorded revision rejects %s, retaining original checkpoint', async drift => {
+  const h = await acknowledgedUpdate();
+  if (drift === 'package') h.state.lambda.CodeSha256 = 'foreign-code';
+  if (drift === 'environment') h.state.lambda.Environment.Variables.KEEP = 'foreign';
+  if (drift === 'handler') h.state.lambda.Handler = 'foreign.handler';
+  if (drift === 'role') h.state.lambda.Role += 'foreign';
+  if (drift === 'memory') h.state.lambda.MemorySize = 512;
+  if (drift === 'runtime') h.state.lambda.Runtime = 'nodejs22.x';
+  if (drift === 'code-size') h.state.lambda.CodeSize++;
+  if (drift === 'unknown') Object.assign(h.state.lambda, { PRIVATE_UNKNOWN_FIELD: 'PRIVATE_VALUE' });
+  if (drift === 'cognito') h.state.client.CallbackURLs = ['https://foreign.invalid/'];
+  if (drift === 'route') h.state.routes[1]!.Target = 'integrations/foreign';
+  if (drift === 'policy') h.state.policy = { Statement: [] };
+  if (drift === 'backup') writeFileSync(h.directory + '/primary-rollback.zip', 'foreign');
+  if (drift === 'pending') writeFileSync(h.directory + '/primary-private-journal.json', JSON.stringify({ ...h.journal(), pending: 'update-config' }));
+  const bytes = readFileSync(h.directory + '/primary-private-journal.json');
+  const start = h.state.calls.length;
+  let reads = 0;
+  const aws = (service: string, operation: string, input?: Record<string, unknown>) => {
+    if (drift === 'race' && operation === 'get-function-configuration' && ++reads === 2)
+      h.state.lambda.RevisionId = 'concurrent-revision';
+    return h.aws(service, operation, input);
+  };
+  let error: unknown;
+  try { await reconcileRecordedRevision(h.config, h.manifest, h.directory, aws); } catch (caught) { error = caught; }
+  expect(error).toBeInstanceOf(Error);
+  if (drift === 'unknown') {
+    expect(error).toMatchObject({ fields: ['OTHER_CONFIGURATION'] });
+    expect(JSON.stringify(error)).not.toContain('PRIVATE_');
+  }
+  expect(readFileSync(h.directory + '/primary-private-journal.json')).toEqual(bytes);
+  expect(h.state.calls.slice(start).every(call => /^(get|describe|list)-/.test(call))).toBe(true);
+  expect(readdirSync(h.directory).some(name => name.startsWith('primary-before-recorded-revision-'))).toBe(false);
 });

@@ -1,6 +1,6 @@
 # ASSESS09 — Unblock Cognito setup and safely resume
 
-- Status: IN_PROGRESS/A — recorded Lambda revision follow-up; prior binary-upload and Cognito repairs remain locally verified.
+- Status: DONE locally/A — recorded-update revision, binary-upload and Cognito repairs verified; actual CloudShell readback and live qualification remain ASSESS07.
 - Worker: B / Octavio / Battosai1806, Codex GPT-6 (exact runtime variant/effort not exposed). Clean main ff-only baseline 3d2d68af2c1c2b7980ad56328a032e368e2f30c9e92, 2026-10-02; no subagents. Claimed only the narrow scope below, including a dedicated same-pin Cognito repair helper and focused tests.
 - Authority: user explicitly requests this priority repair on 2026-10-02, with narrow scope and minimal token use. A retains AWS execution/NP00. No credential sharing, new spending or unsolicited cloud writes.
 
@@ -56,3 +56,13 @@ Published A upload repair **f5e4e5b7a0771320bc027531b6ccfd391522263a**: download
 ## Recorded upload revision follow-up — A, 2026-10-02
 
 Clean main 1239654; user CloudShell reports codeDone=true, configDone=false, no pending intent. Actual uploaded package/environment/handler match, Lambda Active/Successful, only RevisionId differs from recorded update response. This proves upload progress, not its cause or full configuration equivalence. A retains the sole narrow ASSESS09 scope: exact complete recorded Lambda update proof, stable fresh revision guard, same-source helper/tests/handoff; no new deployment package/approval/credential scope. Original rollback/journal/expiry/counters preserved; no blind revision replacement.
+
+### Recorded revision repair evidence
+
+Actual upload acknowledgment plus read-only target/environment/handler match narrows the failure to the saved revision guard; the cause of the different revision is not established. New reconcileRecordedRevision accepts only codeDone=true, no pending/rollback, verified original target and rollback, prior pool/client completion and original model-off approval. It waits for Active/Successful, compares the entire original Lambda response against the explicitly intended code size/hash and recorded environment/handler phase, and preserves all unknown fields/runtime versions/settings exactly. Only revision/timestamps/status messages are observational; after a recorded configuration update its derived ConfigSha256 is checked through the exact complete settings. Read-only Cognito/table/routes/policy proof plus a second identical full Lambda read rejects concurrent change. An immutable content-addressed journal backup precedes atomic adoption of only afterRevision; original snapshots/ZIPs/counters/expiry stay unchanged. No AWS write in reconciliation.
+
+The same helper reconciles this acknowledged update before resume, and primary apply performs the same proof after acknowledged code/config writes if their returned revision differs from stable readback. Thus successful upload/Cognito/config steps are not repeated. Lost-response/pending mutations remain blocked. Focused tests 82/82 include both phases, stale returned revision on both updates, full settings/unknown-field drift, permissions/resources, rollback and concurrent revision rejection. Original 30fa91a operational overlay imports and exact original API/broker hashes pass. Final full check/publication evidence follows. Actual managed readback and qualification still require ASSESS07.
+
+AWS documents revision preconditions and complete response fields in [UpdateFunctionCode](https://docs.aws.amazon.com/lambda/latest/api/API_UpdateFunctionCode.html) and [GetFunctionConfiguration](https://docs.aws.amazon.com/lambda/latest/api/API_GetFunctionConfiguration.html). These describe the guard and response; they do not establish why this run's revision differs.
+
+Final recorded-revision repair pinned npm run check exit 0: 673 application tests/two optional skips, hosted 1/1, E2E 56/56, references 7/7, planning 15/15, lint/types/boundaries/build. Log /tmp/known-enough-lambda-repair.kQw9AO/recorded-revision-check.log. Focused 82/82; exact original-source overlay/artifact smoke, checked executable/test bytes, Bash syntax, changed documentation links and whitespace pass. No AWS write or service test by this worker. Actual readback and complete manual/automatic live qualification remain pending.
