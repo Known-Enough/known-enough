@@ -1,6 +1,6 @@
 # Task execution and collaboration
 
-**Current handoff (2026-10-02):** ASSESS09 is locally DONE/A for the Lambda upload repair, preserving B's completed Cognito fix. A runs the [same-source repair command](assess09-cognito-resume.md) in existing CloudShell HOME. Original source, backup and finite limits remain intact; actual installation readback and B/manual plus matching automatic qualification remain ASSESS07, BLOCKED until those proofs. No parallel implementation or new task claim.
+**Current follow-up (2026-10-02):** ASSESS09 is IN_PROGRESS/A for exact recorded-update revision reconciliation. User confirms upload recorded and intended code/environment/handler active/successful, but saved revision differs; prior transport/Cognito repairs remain verified. No parallel writer. A runs the [same-source repair command](assess09-cognito-resume.md) in existing CloudShell HOME. Original source, backup and finite limits remain intact; actual installation readback and B/manual plus matching automatic qualification remain ASSESS07, BLOCKED until those proofs. No parallel implementation or new task claim.
 
 **Previous priority (2026-10-02, superseded by A takeover above):** ASSESS09 was READY for B's narrow Lambda-upload follow-up. Actual Cognito checkpoint reconciled, then lambda:update-function-code failed. A pauses retries; preserve possible pending=update-code and original artifacts/backup. Prior Cognito local completion stays historical. See [exact handoff](tasks/ASSESS09.md#priority-follow-up-handed-to-b--2026-10-02).
 

@@ -1,6 +1,6 @@
 # ASSESS09 — Unblock Cognito setup and safely resume
 
-- Status: DONE locally — A Lambda-upload repair and B Cognito repair verified; actual CloudShell readback and live qualification remain ASSESS07.
+- Status: IN_PROGRESS/A — recorded Lambda revision follow-up; prior binary-upload and Cognito repairs remain locally verified.
 - Worker: B / Octavio / Battosai1806, Codex GPT-6 (exact runtime variant/effort not exposed). Clean main ff-only baseline 3d2d68af2c1c2b7980ad56328a032e368e2f30c9e92, 2026-10-02; no subagents. Claimed only the narrow scope below, including a dedicated same-pin Cognito repair helper and focused tests.
 - Authority: user explicitly requests this priority repair on 2026-10-02, with narrow scope and minimal token use. A retains AWS execution/NP00. No credential sharing, new spending or unsolicited cloud writes.
 
@@ -52,3 +52,7 @@ The same-source helper accepts pending=update-code only for guarded reconciliati
 Focused primary/CLI/helper regressions passed 64/64: real Linux launch with large file arguments, byte equality/private permissions/cleanup, resume once and ten applied/drift rejection cases. Final pinned full check exit 0: 655 application tests/two optional skips, hosted 1/1, browser 56/56, references 7/7, planning 15/15, lint/types/boundaries/build. Log /tmp/known-enough-lambda-repair.kQw9AO/final-check.log. Evidence and immutable command are recorded in the [repair handoff](../assess09-cognito-resume.md). An original 30fa91a checkout verifies operational overlay imports and the exact original API/broker artifact hashes. No AWS write, model call, email or live qualification by this worker. A executes the final same-source helper in existing CloudShell HOME; SETUP_READBACK_PASS and actual B/manual plus matching automatic complete PASS remain required by ASSESS07.
 
 Published A upload repair **f5e4e5b7a0771320bc027531b6ccfd391522263a**: downloaded helper/primary/adapter bytes match exact Git blobs, Bash parse PASS; [same-source command](../assess09-cognito-resume.md) is ready. Local main/origin synchronized after implementation; actual managed output remains pending.
+
+## Recorded upload revision follow-up — A, 2026-10-02
+
+Clean main 1239654; user CloudShell reports codeDone=true, configDone=false, no pending intent. Actual uploaded package/environment/handler match, Lambda Active/Successful, only RevisionId differs from recorded update response. This proves upload progress, not its cause or full configuration equivalence. A retains the sole narrow ASSESS09 scope: exact complete recorded Lambda update proof, stable fresh revision guard, same-source helper/tests/handoff; no new deployment package/approval/credential scope. Original rollback/journal/expiry/counters preserved; no blind revision replacement.
