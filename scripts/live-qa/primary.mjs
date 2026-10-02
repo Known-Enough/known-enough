@@ -541,3 +541,47 @@ export async function reconcilePendingSignup(config, manifest, directory, aws) {
     journal.save(state);
     return { status: 'PRIMARY_SIGNUP_RECONCILED', cloudWrites: false };
 }
+
+
+/** Retry only a proven unapplied code upload; matching/foreign mutations require review. */
+export async function reconcilePendingCode(config, manifest, directory, aws) {
+    const journal = journalAt(directory);
+    const state = journal.read();
+    if (state.schemaVersion !== 2 || state.account !== config.account || state.rollback ||
+        state.targetCode !== manifest.artifacts.api.sha256 ||
+        digest(readFileSync(directory + '/api.zip')) !== state.targetCode)
+        throw new Error('PRIMARY_JOURNAL_TARGET_CHANGED');
+    if (!state.pending || state.pending === 'enable-signup')
+        return { status: 'PRIMARY_CODE_RECONCILIATION_NOT_REQUIRED', cloudWrites: false };
+    if (state.pending !== 'update-code' || !state.poolDone || !state.clientDone ||
+        state.codeDone || state.configDone || state.complete || !state.rollbackCode)
+        throw new Error('PRIMARY_MUTATION_RECONCILIATION_REQUIRED');
+    primaryPlan(config, state.config);
+    if (digest(readFileSync(directory + '/primary-rollback.zip')) !== state.rollbackCode ||
+        codeHash(state.rollbackCode) !== state.config.CodeSha256)
+        throw new Error('ROLLBACK_BYTES_CHANGED');
+    const current = await ready(aws, state.afterRevision, 'PRIMARY_UPDATE');
+    assertLambda(state, current, state.config.CodeSha256, state.config.Environment, state.config.Handler);
+    if (current.Role !== state.config.Role)
+        throw new Error('PRIMARY_REVISION_OR_CONFIG_DRIFT');
+    assertCognito(state, aws);
+    const table = aws('dynamodb', 'describe-table', { TableName: groupTable }).Table;
+    assertPrimaryTable(table, config.account,
+        aws('dynamodb', 'list-tags-of-resource', { ResourceArn: table.TableArn }).Tags);
+    verifyRoutes(state, aws);
+    if (!same(readPolicy(aws, state.config.Role.split('/').at(-1)), state.policy))
+        throw new Error('PRIMARY_POLICY_CONFLICT');
+    const backup = directory + '/primary-before-lambda-upload-repair.json';
+    if (existsSync(backup)) {
+        if (lstatSync(backup).isSymbolicLink() || !same(JSON.parse(readFileSync(backup, 'utf8')), state))
+            throw new Error('PRIMARY_REPAIR_BACKUP_CONFLICT');
+    } else {
+        const descriptor = openSync(backup, 'wx', 0o600);
+        try { writeFileSync(descriptor, readFileSync(directory + '/primary-private-journal.json')); fsyncSync(descriptor); }
+        finally { closeSync(descriptor); }
+    }
+    // Exact original hash + revision/config/authority prove this upload was not applied.
+    state.pending = null;
+    journal.save(state);
+    return { status: 'PRIMARY_CODE_UPLOAD_NOT_APPLIED_RECONCILED', cloudWrites: false };
+}

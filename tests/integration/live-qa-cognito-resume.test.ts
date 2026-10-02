@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { expect, test } from 'vitest';
 
-test.each(['pending-signup', 'ready', 'other-pending', 'expired', 'wrong-pin', 'missing-backup', 'symlink'])('Cognito repair preflight preserves original state: %s', mode => {
+test.each(['pending-signup', 'pending-code', 'ready', 'other-pending', 'expired', 'wrong-pin', 'missing-backup', 'symlink'])('Cognito repair preflight preserves original state: %s', mode => {
   const folder = mkdtempSync(tmpdir() + '/cognito-resume-preflight-');
   const block = readFileSync('scripts/live-qa/resume-cognito-fix.sh', 'utf8').split("<<'PY'\n")[1];
   if (!block) throw new Error('Missing preflight block');
@@ -26,7 +26,7 @@ original = {'sourceCommit':pin, 'mailboxProvider':'mailtm', 'primaryRollout':Tru
 config.write_text(json.dumps(original)); config_bytes = config.read_bytes()
 journal = root / 'known-enough-live-qa-state' / ('a'*40 if mode == 'wrong-pin' else pin) / 'package/primary-private-journal.json'
 journal.parent.mkdir(parents=True)
-state = {'schemaVersion':2, 'account':'092954139775', 'pending':'enable-signup' if mode == 'pending-signup' else 'update-code' if mode == 'other-pending' else None}
+state = {'schemaVersion':2, 'account':'092954139775', 'pending':'enable-signup' if mode == 'pending-signup' else 'update-code' if mode == 'pending-code' else 'update-config' if mode == 'other-pending' else None}
 journal.write_text(json.dumps(state)); journal_bytes = journal.read_bytes()
 for file in ['api.zip','broker.zip','package.json','primary-rollback.zip']:
     (journal.parent / file).write_text('preserved-'+file)
@@ -41,7 +41,7 @@ except SystemExit as error:
     expected = {'expired':'ORIGINAL_AUTHORIZATION_EXPIRED', 'other-pending':'PRIMARY_MUTATION_RECONCILIATION_REQUIRED', 'wrong-pin':'EXISTING_PRIMARY_RECOVERY_PIN_REQUIRED', 'missing-backup':'EXISTING_PRIMARY_BACKUP_REQUIRED', 'symlink':'PRIVATE_STATE_SYMLINK_REJECTED'}
     assert str(error) == expected[mode], str(error)
 else:
-    assert mode in ('ready','pending-signup')
+    assert mode in ('ready','pending-signup','pending-code')
 assert config.read_bytes() == config_bytes and journal.read_bytes() == journal_bytes
 assert {str(p):p.read_bytes() for p in root.rglob('*') if p.is_file()} == saved
 `, folder, helper, mode], { encoding: 'utf8' });

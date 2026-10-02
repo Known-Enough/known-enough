@@ -1,8 +1,8 @@
 # Known Enough — shared task queue
 
-**Current takeover (2026-10-02):** User assigned ASSESS09 Lambda-upload repair to A/martelaxe WSL, IN_PROGRESS. Prior B follow-up was READY/unclaimed; B must not implement this scope concurrently. Prior Cognito repair stays locally complete; A preserves original deployment/recovery state and prepares a guarded same-source continuation.
+**Current handoff (2026-10-02):** ASSESS09 is locally DONE/A for the Lambda upload repair, preserving B's completed Cognito fix. A runs the [same-source repair command](assess09-cognito-resume.md) in existing CloudShell HOME. Original source, backup and finite limits remain intact; actual installation readback and B/manual plus matching automatic qualification remain ASSESS07, BLOCKED until those proofs. No parallel implementation or new task claim.
 
-**Latest priority (2026-10-02):** ASSESS09 is READY for B's narrow Lambda-upload follow-up. Actual Cognito checkpoint reconciled, then lambda:update-function-code failed. A pauses retries; preserve possible pending=update-code and original artifacts/backup. Prior Cognito local completion stays historical. See [exact handoff](tasks/ASSESS09.md#priority-follow-up-handed-to-b--2026-10-02).
+**Previous priority (2026-10-02, superseded by A takeover above):** ASSESS09 was READY for B's narrow Lambda-upload follow-up. Actual Cognito checkpoint reconciled, then lambda:update-function-code failed. A pauses retries; preserve possible pending=update-code and original artifacts/backup. Prior Cognito local completion stays historical. See [exact handoff](tasks/ASSESS09.md#priority-follow-up-handed-to-b--2026-10-02).
 
 ## Immediate priority — user direction, 2026-10-02
 

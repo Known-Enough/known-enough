@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Reconcile only the saved enable-signup step, retaining original source/artifacts/grant.
+# Reconcile proven signup/unapplied-upload steps, retaining original source/artifacts/grant.
 set -euo pipefail
 umask 077
 repair_commit="${1:?Exact verified ASSESS09 repair commit required}"
@@ -33,7 +33,7 @@ if journals != [expected]:
 if any(p.is_symlink() for p in [root, expected, expected.parent, expected.parent.parent]):
     sys.exit('PRIVATE_STATE_SYMLINK_REJECTED')
 state = json.loads(expected.read_text())
-if state.get('schemaVersion') != 2 or state.get('account') != '092954139775' or state.get('pending') not in (None, 'enable-signup') or state.get('rollback'):
+if state.get('schemaVersion') != 2 or state.get('account') != '092954139775' or state.get('pending') not in (None, 'enable-signup', 'update-code') or state.get('rollback'):
     sys.exit('PRIMARY_MUTATION_RECONCILIATION_REQUIRED')
 # Never mutate or move any existing approved settings, journal or rollback bytes.
 if not (expected.parent / 'primary-rollback.zip').is_file() or not (expected.parent / 'package.json').is_file():
@@ -119,12 +119,13 @@ try {
   if (installer.split(primaryImport).length !== 2) throw new Error('REPAIR_MODULE_SHAPE_CHANGED');
   overlay('install-assess09.mjs', installer.replace(primaryImport, "from './primary-assess09.mjs'"));
   const { aws, assertIdentity } = await import(pathToFileURL(`${scripts}/aws-assess09.mjs`));
-  const { reconcilePendingSignup } = await import(pathToFileURL(`${scripts}/primary-assess09.mjs`));
+  const { reconcilePendingSignup, reconcilePendingCode } = await import(pathToFileURL(`${scripts}/primary-assess09.mjs`));
   const { install } = await import(pathToFileURL(`${scripts}/install-assess09.mjs`));
   const prepared = await install('dry-run', raw, `/tmp/known-enough-live-qa-${pin}/assess09-prepared`, aws);
   if (Object.entries(expected).some(([name, hash]) => prepared.artifacts[name]?.sha256 !== hash))
     throw new Error('PRIMARY_PACKAGE_BYTES_CHANGED');
   assertIdentity(aws('sts', 'get-caller-identity'), raw);
+  console.log(JSON.stringify(await reconcilePendingCode(raw, manifest, directory, aws)));
   console.log(JSON.stringify(await reconcilePendingSignup(raw, manifest, directory, aws)));
   writeFileSync(directory + '/assess09-repair.json', JSON.stringify({ repairCommit: repairPin, sourceCommit: pin,
     primaryModuleSha256: sha(primary), awsModuleSha256: sha(readFileSync(repair + '/aws.mjs')), artifacts: expected }) + '\n', { mode: 0o600 });

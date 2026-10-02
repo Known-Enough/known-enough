@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { afterEach, expect, test, vi } from 'vitest';
 import cliInputs from '../evaluations/aws-cli-input-keys.json';
 // @ts-expect-error Operational JavaScript exercised by Vitest.
-import { primaryApply, primaryRollback, assertPrimaryTable, primaryPlan, sameCognito, reconcilePendingSignup } from '../../scripts/live-qa/primary.mjs';
+import { primaryApply, primaryRollback, assertPrimaryTable, primaryPlan, sameCognito, reconcilePendingSignup, reconcilePendingCode } from '../../scripts/live-qa/primary.mjs';
 // @ts-expect-error Operational JavaScript exercised by Vitest.
 import { digest } from '../../scripts/live-qa/config.mjs';
 vi.mock('../../scripts/live-qa/aws.mjs', async importOriginal => ({
@@ -254,4 +254,44 @@ test('initially absent auto-verification field is appended to intent but ordered
   expect(h.journal().pool).not.toHaveProperty('AutoVerifiedAttributes');
   await expect(h.rollback()).resolves.toMatchObject({ status: 'PASS' });
   expect(h.state.pool.AutoVerifiedAttributes).toEqual([]);
+});
+
+
+test('unapplied code upload reconciles by readback only, preserves backup and resumes once', async () => {
+  const h = harness(); h.state.fail = 'update-function-code';
+  await expect(h.apply()).rejects.toThrow('INJECTED_FAILURE');
+  const before = readFileSync(h.directory + '/primary-private-journal.json');
+  const rollback = readFileSync(h.directory + '/primary-rollback.zip');
+  const start = h.state.calls.length;
+  await expect(reconcilePendingCode(h.config, h.manifest, h.directory, h.aws)).resolves.toEqual({ status: 'PRIMARY_CODE_UPLOAD_NOT_APPLIED_RECONCILED', cloudWrites: false });
+  expect(h.state.calls.slice(start).every(call => /^(get|describe|list)-/.test(call))).toBe(true);
+  expect(readFileSync(h.directory + '/primary-before-lambda-upload-repair.json')).toEqual(before);
+  expect(readFileSync(h.directory + '/primary-rollback.zip')).toEqual(rollback);
+  expect(h.journal()).toMatchObject({ pending: null, codeDone: false });
+  h.state.fail = '';
+  await expect(h.apply()).resolves.toMatchObject({ status: 'PASS' });
+  expect(h.state.calls.filter(call => call === 'update-user-pool')).toHaveLength(1);
+  expect(h.state.calls.filter(call => call === 'update-user-pool-client')).toHaveLength(1);
+  expect(h.journal().config.CodeSha256).toBe(JSON.parse(before.toString()).config.CodeSha256);
+});
+
+test.each(['applied', 'revision', 'role', 'environment', 'cognito', 'policy', 'route', 'backup', 'package', 'other-pending'])('pending upload rejects %s and preserves checkpoint', async drift => {
+  const h = harness(); h.state.fail = 'update-function-code';
+  await expect(h.apply()).rejects.toThrow('INJECTED_FAILURE'); h.state.fail = '';
+  if (drift === 'applied') h.state.lambda.CodeSha256 = Buffer.from(digest(replacement), 'hex').toString('base64');
+  if (drift === 'revision') h.state.lambda.RevisionId = 'foreign-revision';
+  if (drift === 'role') h.state.lambda.Role += 'foreign';
+  if (drift === 'environment') h.state.lambda.Environment.Variables.KEEP = 'foreign';
+  if (drift === 'cognito') h.state.client.CallbackURLs = ['https://foreign.invalid/'];
+  if (drift === 'policy') h.state.policy = { Statement: [] };
+  if (drift === 'route') h.state.routes[1]!.Target = 'integrations/foreign';
+  if (drift === 'backup') writeFileSync(h.directory + '/primary-rollback.zip', 'foreign');
+  if (drift === 'package') writeFileSync(h.directory + '/api.zip', 'foreign');
+  if (drift === 'other-pending') writeFileSync(h.directory + '/primary-private-journal.json', JSON.stringify({ ...h.journal(), pending: 'update-config' }));
+  const before = readFileSync(h.directory + '/primary-private-journal.json');
+  const start = h.state.calls.length;
+  await expect(reconcilePendingCode(h.config, h.manifest, h.directory, h.aws)).rejects.toThrow();
+  expect(readFileSync(h.directory + '/primary-private-journal.json')).toEqual(before);
+  expect(h.state.calls.slice(start).every(call => /^(get|describe|list)-/.test(call))).toBe(true);
+  expect(() => readFileSync(h.directory + '/primary-before-lambda-upload-repair.json')).toThrow();
 });

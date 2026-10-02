@@ -1,5 +1,9 @@
-## Current A handoff — LIVE delivery, 2026-10-01
+## Current A handoff — LIVE delivery, 2026-10-02
 
+
+### ASSESS09 Lambda-upload repair — current priority
+
+Locally verified private binary-file upload and exact unapplied-update-code reconciliation. Run the [same-source repair command](assess09-cognito-resume.md) in existing CloudShell HOME; deployment source/ZIPs/backup and original limits/expiry remain unchanged. Local Linux reproduction proves the old JSON ZIP argument exceeds the per-argument limit before AWS is contacted. Actual managed readback and B/manual plus matching automatic seven-journey qualification remain ASSESS07. No AWS write by this worker. Earlier handoffs below are historical.
 
 ### Shared report repair verified PASS — 2026-10-01T22:07:19Z
 
