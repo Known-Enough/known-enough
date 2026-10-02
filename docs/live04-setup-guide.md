@@ -2,6 +2,12 @@
 
 Local code preparation can continue with these inputs unknown. The offline helper below saves an incomplete draft; the installer still requires concrete values and recorded initial cloud/cost authorization. No cloud resources, DNS records, messages or deployments were created for this guide. [LIVE04](tasks/LIVE04.md) owns actual installation and online proof; [setup package](live-qa-setup.md) describes resources, costs and rollback.
 
+## Current free option: no domain purchase
+
+The user selected Mail.tm automatic disposable test mailboxes. Start with [the free-mode setup instructions](live-qa-setup.md#user-selected-free-verification-mailbox--2026-10-02). Use `--mailbox-provider mailtm` with a pinned package commit; domain and hosted-zone fields become null. Leave spending/installation approval disabled until the concrete AWS setup and recurring test limits are recorded. A domain search or purchase is no longer the next step. The domain/Route53 steps below remain the optional `owned-ses` alternative and historical preparation; they do not block free-mode installation.
+
+The free mode still tests actual signup and email confirmation; provider unavailability is a visible failure. No full online PASS exists until real Cognito delivery, B's manual run and the deployment-triggered run succeed. One-time AWS installation remains required; personal credentials are not supplied to B.
+
 ## 1. What domain do we need?
 
 Choose one **dedicated email subdomain of a domain you own or have permission to administer**, for example `qa-mail.yourdomain.com`. This is for synthetic signup verification emails only. Tests generate addresses under it, SES receives the messages into a private bucket, and the runner retrieves verification codes automatically. You do not need individual inboxes, Gmail/Outlook accounts or a website at that subdomain.
@@ -91,8 +97,8 @@ The configuration deliberately keeps `approved=false`, all limits zero and `prim
 
 | Value | How to obtain it | What can stay pending now |
 | --- | --- | --- |
-| `mailDomain` | Chosen controlled, unused email subdomain | Placeholder |
-| `hostedZoneId` | Route53 public parent zone, or publicly delegated child zone | Placeholder |
+| `mailDomain` | Owned SES: controlled unused email subdomain; Mail.tm: not needed | `null` in Mail.tm mode |
+| `hostedZoneId` | Owned SES: public zone; Mail.tm: not needed | `null` in Mail.tm mode |
 | `sourceCommit` | Latest verified implementation package recorded in LIVE04 | Placeholder until package is selected |
 | `primaryRollout` | Enable only for coordinated primary feature installation | `false` while preparing; QA-only installation does not close LIVE04 |
 | `primaryExpectedRevision` | Fresh read-only Lambda revision immediately before primary installation | `null` while `primaryRollout=false` |
@@ -117,7 +123,7 @@ The setup page supplies the proposed finite test envelope, the resource list, mo
 Once the concrete inputs and initial cloud/publication/model/email envelope are approved:
 
 1. A uses the [commit-pinned CloudShell entry command](live-qa-setup.md#where-to-click-and-the-one-entry-command) with the reviewed private configuration. Start with `dry-run` (offline build), then `validate` (read-only account/zone/conflict checks). Only the separately authorized `apply` creates/publishes the reviewed resources and enables the envelope.
-2. Let the installer create the approved SES/MX/DKIM/mailbox/QA/roles and primary feature setup; check `SETUP_READBACK_PASS`. This is setup readback, not journey acceptance. Preserve private rollback files.
+2. Let the installer create the approved QA/roles and primary feature setup (SES/DNS/mailbox resources only in owned SES mode); check `SETUP_READBACK_PASS`. This is setup readback, not journey acceptance. Preserve private rollback files.
 3. Configure the actual GitHub target/enable variables using [the automation guide](live-qa-automation.md). Do not put credentials, raw mail, passwords or private environment snapshots into GitHub variables or Git.
 4. B launches the manual GitHub check using B's own account; all required lanes must pass and clean up. A's AWS session is no longer needed for ordinary installed runs.
 5. Perform the separately authorized deployment and prove its automatic matching full check. LIVE04 completes only with both actual passing run links, tested SHA, privacy/model/mail/cleanup evidence and remaining obligations resolved.

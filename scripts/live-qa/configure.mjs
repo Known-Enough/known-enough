@@ -1,11 +1,11 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { validateConfig, isMailDomain } from './config.mjs';
+import { validateConfig, isMailDomain, mailboxProvider } from './config.mjs';
 
 const example = () => JSON.parse(readFileSync(new URL('../../infra/live-qa/config.example.json', import.meta.url), 'utf8'));
 const placeholders = example();
-const inputNames = ['mailDomain', 'hostedZoneId', 'sourceCommit'];
+const inputNames = ['mailDomain', 'hostedZoneId', 'sourceCommit', 'mailboxProvider'];
 
 /** Offline only: omitted inputs stay placeholders; this never enables paid/cloud operations. */
 export function draftConfiguration(inputs = {}) {
@@ -18,6 +18,10 @@ export function draftConfiguration(inputs = {}) {
     draft[name] = name === 'mailDomain' ? value.toLowerCase().replace(/\.$/, '')
       : name === 'hostedZoneId' ? value.replace(/^\/hostedzone\//, '') : value;
   }
+  if (mailboxProvider(draft) === 'mailtm') {
+    if (inputs.mailDomain !== undefined || inputs.hostedZoneId !== undefined) throw new Error('MAILTM_DNS_INPUT_NOT_ALLOWED');
+    draft.mailDomain = null; draft.hostedZoneId = null;
+  }
   const status = configurationStatus(draft);
   if (status.status === 'INVALID_CONFIGURATION') throw new Error('INVALID_CONFIGURATION_INPUT');
   return draft;
@@ -26,8 +30,9 @@ export function draftConfiguration(inputs = {}) {
 /** Reports field names only; no configuration values, credentials or environment are printed. */
 export function configurationStatus(draft) {
   if (!draft || typeof draft !== 'object' || Array.isArray(draft)) return { status: 'INVALID_CONFIGURATION', fields: ['configuration'], cloudWrites: false };
-  const missing = inputNames.filter(key => draft[key] === placeholders[key] || draft[key] === null || draft[key] === undefined || draft[key] === '');
-  const invalid = inputNames.filter(key => !missing.includes(key) && (key === 'mailDomain' ? !isMailDomain(draft[key])
+  const required = mailboxProvider(draft) === 'mailtm' ? ['sourceCommit'] : ['mailDomain', 'hostedZoneId', 'sourceCommit'];
+  const missing = required.filter(key => draft[key] === placeholders[key] || draft[key] === null || draft[key] === undefined || draft[key] === '');
+  const invalid = required.filter(key => !missing.includes(key) && (key === 'mailDomain' ? !isMailDomain(draft[key])
     : key === 'hostedZoneId' ? !/^Z[A-Z0-9]{5,32}$/.test(draft[key]) : !/^[a-f0-9]{40}$/.test(draft[key])));
   if (invalid.length) return { status: 'INVALID_CONFIGURATION', fields: invalid, cloudWrites: false };
   // Validate all fixed security/envelope fields even when site inputs are not chosen yet.
@@ -54,7 +59,7 @@ export function configure(args) {
     if (flags.length) throw new Error('CONFIGURATION_USAGE_REQUIRED');
     return configurationStatus(JSON.parse(readFileSync(path, 'utf8')));
   }
-  const mapping = { '--mail-domain': 'mailDomain', '--hosted-zone-id': 'hostedZoneId', '--source-commit': 'sourceCommit' };
+  const mapping = { '--mail-domain': 'mailDomain', '--hosted-zone-id': 'hostedZoneId', '--source-commit': 'sourceCommit', '--mailbox-provider': 'mailboxProvider' };
   const inputs = {};
   for (let i = 0; i < flags.length; i += 2) {
     const key = mapping[flags[i]];

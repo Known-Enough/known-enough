@@ -7,13 +7,15 @@ export function isMailDomain(value) {
     && value.split('.').length >= 2 && /^[a-z]{2,}$/.test(value.split('.').at(-1))
     && value.split('.').every(label => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label));
 }
+export const mailboxProvider = value => value.mailboxProvider ?? 'owned-ses';
 export function validateConfig(value) {
   if (!value || value.schemaVersion !== 1 || value.account !== ACCOUNT || value.region !== REGION
     || value.stack !== 'known-enough-live-qa' || value.repository !== 'Known-Enough/known-enough'
     || value.oidcSubject !== 'repo:Known-Enough@331386621/known-enough@1377587215:ref:refs/heads/main'
     || !/^[0-9a-f]{40}$/.test(value.sourceCommit) || typeof value.primaryRollout !== 'boolean'
-    || !isMailDomain(value.mailDomain)
-    || !/^Z[A-Z0-9]{5,32}$/.test(value.hostedZoneId)) throw new Error('INVALID_SETUP_CONFIGURATION');
+    || !['owned-ses', 'mailtm'].includes(mailboxProvider(value))
+    || (mailboxProvider(value) === 'owned-ses' && (!isMailDomain(value.mailDomain) || !/^Z[A-Z0-9]{5,32}$/.test(value.hostedZoneId)))
+    || (mailboxProvider(value) === 'mailtm' && (value.mailDomain !== null || value.hostedZoneId !== null))) throw new Error('INVALID_SETUP_CONFIGURATION');
   if (value.primaryRollout && !/^[0-9a-f-]{36}$/.test(value.primaryExpectedRevision ?? '')) throw new Error('PRIMARY_REVISION_REQUIRED');
   validateAuthorization(value.authorization);
   return structuredClone(value);
@@ -33,5 +35,5 @@ export function targetNames(config) { return { prefix: config.stack, artifacts: 
 export function publicTarget(outputs) {
   const allowed = ['Account','Region','ApiUrl','FrontendUrl','PoolId','ParticipantClientId','DisplayClientId','CognitoDomain','ApiFunction','BrokerFunction','DecisionTable','GroupTable','ControlTable','MailboxBucket','LoginSecret','TestRoleArn','ReleaseRoleArn','SourceCommit','AmplifyAppId'];
   if (allowed.some(key => typeof outputs[key] !== 'string' || !outputs[key])) throw new Error('INCOMPLETE_INSTALLED_TARGET');
-  return {...Object.fromEntries(allowed.map(key => [key, outputs[key]])),...(typeof outputs.PrimaryReleaseRoleArn==='string'?{PrimaryReleaseRoleArn:outputs.PrimaryReleaseRoleArn}:{})};
+  return {...Object.fromEntries(allowed.map(key => [key, outputs[key]])),MailboxProvider:outputs.MailboxProvider??'owned-ses',...(typeof outputs.PrimaryReleaseRoleArn==='string'?{PrimaryReleaseRoleArn:outputs.PrimaryReleaseRoleArn}:{})};
 }
