@@ -1,15 +1,16 @@
-import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { rolldown } from 'rolldown';
 import { digest } from './config.mjs';
+import { privateDirectory } from './private-directory.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 function run(cmd,args,cwd=root){const r=spawnSync(cmd,args,{cwd,encoding:'utf8'});if(r.status!==0)throw new Error('PACKAGE_COMMAND_FAILED');return r.stdout.trim();}
 export async function buildPackage(directory, sourceCommit){
   if(!/^[0-9a-f]{40}$/.test(sourceCommit))throw new Error('INVALID_SOURCE_COMMIT');
   if(process.versions.node!=='24.21.0'||run('npm',['--version'])!=='11.19.0')throw new Error('PINNED_RUNTIME_REQUIRED');
-  const out=resolve(directory); if(out===root||!out.startsWith('/tmp/'))throw new Error('PRIVATE_TEMP_OUTPUT_REQUIRED');mkdirSync(out,{recursive:true,mode:0o700});
+  const out=privateDirectory(directory,root);
   const sourceFiles=[];for(const area of ['apps/api/src','packages','scripts/live-qa']){const scan=path=>{for(const e of readdirSync(path,{withFileTypes:true})){if(['node_modules','dist'].includes(e.name))continue;const p=resolve(path,e.name);if(e.isDirectory())scan(p);else if(/\.(?:ts|mjs|json)$/.test(p))sourceFiles.push({path:p.slice(root.length+1),sha256:digest(readFileSync(p))});}};scan(resolve(root,area));}
   const manifest={schemaVersion:1,sourceCommit,sourceFiles:sourceFiles.sort((a,b)=>a.path.localeCompare(b.path)),artifacts:{}};
   for(const [name,input] of [['api','entry.ts'],['broker','broker.mjs']]){

@@ -54,6 +54,7 @@ export function assertRecoveryStack(config, stack, observedResources, template, 
   assertResources(config, observedResources, false);
 }
 function checkTables(config, aws) {
+  const observed = [];
   for (const name of Object.values(tableNames(config))) {
     const table = aws('dynamodb', 'describe-table', { TableName: name }).Table;
     const expectedArn = `arn:aws:dynamodb:${config.region}:${config.account}:table/${name}`;
@@ -63,12 +64,35 @@ function checkTables(config, aws) {
         !== canonical([{ AttributeName: 'PK', AttributeType: 'S' }, { AttributeName: 'SK', AttributeType: 'S' }])
       || table.BillingModeSummary?.BillingMode !== 'PAY_PER_REQUEST'
       || table.GlobalSecondaryIndexes?.length || table.LocalSecondaryIndexes?.length) throw new Error('RECOVERY_TABLE_MISMATCH');
+    observed.push(table);
     const tags = aws('dynamodb', 'list-tags-of-resource', { ResourceArn: expectedArn }).Tags;
     if (!tags.some(tag => tag.Key === 'KnownEnoughQa' && tag.Value === 'true')) throw new Error('RECOVERY_TABLE_NOT_OWNED');
   }
   const lease = aws('dynamodb', 'get-item', { TableName: tableNames(config).Control,
     Key: { PK: { S: 'LEASE' }, SK: { S: 'STATE' } }, ConsistentRead: true });
   if (lease.Item && JSON.parse(lease.Item.payload.S).status !== 'CLEAN') throw new Error('RECOVERY_ACTIVE_LEASE_BLOCKED');
+  return observed;
+}
+function deletedOrigin(config, expected, aws) {
+  const history = aws('cloudformation', 'list-stacks', { StackStatusFilter: ['DELETE_COMPLETE'] }).StackSummaries;
+  const candidates = [];
+  for (const summary of history.filter(item => item.StackName === config.stack)) {
+    const stack = describe(aws, summary.StackId);
+    if (!owned(stack) || stack.StackStatus !== 'DELETE_COMPLETE') continue;
+    const template = body(aws('cloudformation', 'get-template', { StackName: stack.StackId, TemplateStage: 'Original' }).TemplateBody);
+    if (template.Outputs?.SourceCommit?.Value !== priorSource || template.Outputs?.MailboxProvider?.Value !== 'mailtm'
+      || logicalNames.some(name => canonical(template.Resources[name]) !== canonical(expected.Resources[name]))) continue;
+    assertResources(config, resources(aws, stack), true);
+    const tables = checkTables(config, aws);
+    const created = Date.parse(summary.CreationTime), deleted = Date.parse(summary.DeletionTime);
+    if (!Number.isFinite(created) || !Number.isFinite(deleted) || tables.some(table => {
+      const time = typeof table.CreationDateTime === 'number' ? table.CreationDateTime * 1000 : Date.parse(table.CreationDateTime);
+      return !Number.isFinite(time) || time < created || time > deleted;
+    })) continue;
+    candidates.push(stack);
+  }
+  if (candidates.length !== 1) throw new Error('EXACT_DELETED_STACK_ORIGIN_REQUIRED');
+  return candidates[0];
 }
 async function waitStack(aws, name, expected, pause) {
   for (let i = 0; i < 180; i++) {
@@ -98,7 +122,8 @@ export async function recoverFailedStack(config, expected, directory, aws, pause
     return { status: 'RETAINED_TABLES_IMPORTED', tablesPreserved: 3, next: 'apply' };
   }
   if (!journal) {
-    if (!owned(stack) || stack.StackStatus !== 'ROLLBACK_COMPLETE') throw new Error('EXACT_FAILED_STACK_REQUIRED');
+    if (!stack) stack = deletedOrigin(config, expected, aws);
+    if (!owned(stack) || !['ROLLBACK_COMPLETE', 'DELETE_COMPLETE'].includes(stack.StackStatus)) throw new Error('EXACT_FAILED_STACK_REQUIRED');
     const template = body(aws('cloudformation', 'get-template', { StackName: stack.StackId, TemplateStage: 'Original' }).TemplateBody);
     if (template.Outputs?.SourceCommit?.Value !== priorSource || template.Outputs?.MailboxProvider?.Value !== 'mailtm'
       || logicalNames.some(name => canonical(template.Resources[name]) !== canonical(expected.Resources[name]))) throw new Error('FAILED_STACK_TEMPLATE_MISMATCH');
@@ -107,6 +132,7 @@ export async function recoverFailedStack(config, expected, directory, aws, pause
     journal = { sourceCommit: config.sourceCommit, stackName: config.stack, stackId: stack.StackId,
       tables: tableNames(config), phase: 'VERIFIED', changeSetId: null };
     save();
+    if (stack.StackStatus === 'DELETE_COMPLETE') stack = null;
   }
   if (stack && stack.StackId === journal.stackId) {
     if (stack.StackStatus === 'ROLLBACK_COMPLETE') {

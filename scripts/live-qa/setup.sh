@@ -2,10 +2,11 @@
 set -euo pipefail
 umask 077
 commit="${1:?40-character approved package commit required}"
-mode="${2:?dry-run/validate/recover/apply/readback/rollback required}"
+mode="${2:?dry-run/validate/recover/resume/apply/readback/rollback required}"
 config="${3:?absolute path to approved configuration required}"
 [[ "$commit" =~ ^[a-f0-9]{40}$ && "$config" == /* && -s "$config" ]] || exit 2
-case "$mode" in dry-run|validate|recover|apply|readback|rollback) ;; *) exit 2 ;; esac
+case "$mode" in dry-run|validate|recover|resume|apply|readback|rollback) ;; *) exit 2 ;; esac
+printf '%s\n' 'Preparing pinned tools; saved AWS progress stays in your home folder.'
 workspace="/tmp/known-enough-live-qa-$commit"
 mkdir -p "$workspace"
 if [[ ! -d "$workspace/source/.git" ]]; then
@@ -25,7 +26,10 @@ if [[ ! -x "$runtime/bin/node" ]]; then
   tar -xJf "$workspace/node.tar.xz" --strip-components=1 -C "$runtime"
 fi
 export PATH="$runtime/bin:$PATH"
+export npm_config_cache="$workspace/npm-cache"
 [[ "$(node --version)" == v24.21.0 && "$(npm --version)" == 11.19.0 ]] || exit 2
 npm ci --ignore-scripts --silent
 npm ci --prefix scripts/live-qa --ignore-scripts --silent
-node scripts/live-qa/install.mjs "$mode" "$config" "$workspace/package"
+state="$HOME/known-enough-live-qa-state/$commit/package"
+printf '%s\n' 'Tools ready. Checking and resuming AWS setup.'
+node scripts/live-qa/install.mjs "$mode" "$config" "$state"

@@ -93,3 +93,8 @@ NP00 model-off changes and temporary-access removal are verified. Its remaining 
 ### Low-quota installation repair prepared — 2026-10-02 UTC
 
 A retains the sequential LIVE04 operations scope. Shared Lambda capacity removes the pending quota-request dependency; guarded retained-table import recovery is technically verified (517 application tests / two optional skips, hosted 1/1, E2E 53/53; real read-only guards and AWS template syntax pass). Actual CloudShell recovery/installation and B/manual plus automatic live qualification remain pending. Preserve the original authorization expiry 2026-10-09T03:16:41.171626Z. No concurrent NP00 writer or second task is claimed.
+
+
+### CloudShell session-safe resume prepared — 2026-10-02 UTC
+
+A continues the same LIVE04 operations handoff. The installer now persists private recovery/rollback state in HOME, reconstructs this lost journal from exact AWS history and discovers saved settings automatically. Full checks pass (523 application tests / two optional skips, hosted 1/1, E2E 53/53); actual import/apply and B/automatic live proof are pending. Existing budgets and expiry stay unchanged. No second implementation task or NP00 writer is active.
