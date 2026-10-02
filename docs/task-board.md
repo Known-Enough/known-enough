@@ -16,10 +16,10 @@ The user requested named tasks B can prepare, one final A installation, and unat
 
 | Order | Task | Worker | Status |
 | --- | --- | --- | --- |
-| 1 | [LIVE01 — Build the online setup package](tasks/LIVE01.md) | B preparation | IN_PROGRESS — Battosai1806; synchronized claim ccbc563 |
-| 2 | [LIVE02 — Test the real user journey](tasks/LIVE02.md) | B preparation | BLOCKED on LIVE01 |
-| 3 | [LIVE03 — Run checks after every deployment](tasks/LIVE03.md) | B preparation | BLOCKED on LIVE02 |
-| 4 | [LIVE04 — Install once and prove B can run everything](tasks/LIVE04.md) | A installation, then B qualification | BLOCKED on preparation and concrete setup/budgets |
+| 1 | [LIVE01 — Build the online setup package](tasks/LIVE01.md) | B preparation | DONE — verified local setup preparation; online proof LIVE04 |
+| 2 | [LIVE02 — Test the real user journey](tasks/LIVE02.md) | B preparation | DONE — verified local real-journey harness; online proof LIVE04 |
+| 3 | [LIVE03 — Run checks after every deployment](tasks/LIVE03.md) | B preparation | DONE — verified local automation; online proof LIVE04 |
+| 4 | [LIVE04 — Install once and prove B can run everything](tasks/LIVE04.md) | A installation, then B qualification | BLOCKED for installation; A prepares user-selected free mailbox alternative |
 
 B prepares LIVE01–03 sequentially in a separate clone under the explicit bounded scheduling exception, without A's AWS credentials or overlap with NP00 files. Record exact claims and coordinate shared file amendments. A maintains shared board routing during the overlap. NP01–NP04 local DONE and NP05's historical acceptance remain intact; unfinished NP05 online work maps to LIVE01–04. Required real tests cannot be marked PASS from local evidence. No cloud writes, spending, email, paid AI or deployment are performed/authorized by this planning update.
 

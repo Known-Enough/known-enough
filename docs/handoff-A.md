@@ -382,3 +382,7 @@ The owner assessed B04's local acceptance evidence; B04 and B04.5 are REVIEW pen
 ## Current review claim — KE10 model/job runtime follow-up — 2026-09-28
 
 User A / separate Codex GPT-6 session claims the sole active sequential review, with exact runtime variant/effort unexposed. Clean synchronized clone `/tmp/known-enough-ke10-review`, `main` at `8d70fd912db3902d08ff04d3778e14a113bcaffa`; `git pull --ff-only origin main` succeeded, ahead/behind 0/0. Reviewing KE10 runtime from `da76fae782e1d059554e7224ff6b1443b3ea3c84` through `8d70fd912db3902d08ff04d3778e14a113bcaffa`, including the Bedrock/job implementation and four correction regressions. Write scope is the review record, KE10 ticket/board, and A handoff/log only; source/tests remain read-only. Focused adversarial checks and pinned `npm run check` are required. No live Bedrock calls, cloud actions, deployment, spending or external messages.
+
+## LIVE04 free mailbox claim — 2026-10-02
+
+A / martelaxe / WSL, actual GPT-6 variant/effort unexposed, synchronized bf06a33. User chose Mail.tm to avoid buying a domain. Sequential bounded local scope is recorded in LIVE04 after B's local scope release; preserve NP00 cloud claim. Prepare true automatic signup-email reading and exact synthetic mailbox cleanup; never bypass confirmation or report a partial suite as complete. No AWS writes, paid calls or deployments authorized by this preparation claim.
