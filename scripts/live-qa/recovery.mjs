@@ -73,7 +73,7 @@ function checkTables(config, aws) {
 async function waitStack(aws, name, expected, pause) {
   for (let i = 0; i < 180; i++) {
     const stack = describe(aws, name);
-    if (expected === 'DELETED' && !stack) return null;
+    if (expected === 'DELETED' && (!stack || stack.StackStatus === 'DELETE_COMPLETE')) return null;
     if (stack?.StackStatus === expected) return stack;
     if (expected === 'DELETED' && stack?.StackStatus === 'ROLLBACK_COMPLETE') { await pause(5000); continue; }
     if (stack?.StackStatus?.includes('FAILED') || stack?.StackStatus?.includes('ROLLBACK')) throw new Error('RECOVERY_STACK_OPERATION_FAILED');

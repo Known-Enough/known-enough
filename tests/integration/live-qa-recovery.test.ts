@@ -16,7 +16,7 @@ const newId = oldId.replace('/old', '/new');
 const folders: string[] = [];
 afterEach(() => { for (const folder of folders.splice(0)) rmSync(folder, { recursive: true, force: true }); });
 function directory() { const folder = mkdtempSync(tmpdir() + '/known-enough-recovery-test-'); folders.push(folder); return folder; }
-function fixture(options: { foreign?: boolean; unowned?: boolean; active?: boolean; badImport?: boolean; failBeforeImport?: boolean } = {}) {
+function fixture(options: { foreign?: boolean; unowned?: boolean; active?: boolean; badImport?: boolean; failBeforeImport?: boolean; deletedArnVisible?: boolean } = {}) {
   const calls: { service: string; operation: string; input: Record<string, unknown> }[] = [];
   let stackId: string | null = oldId;
   let status = 'ROLLBACK_COMPLETE';
@@ -29,6 +29,7 @@ function fixture(options: { foreign?: boolean; unowned?: boolean; active?: boole
   const aws = (service: string, operation: string, input: Record<string, unknown>) => {
     calls.push({ service, operation, input });
     if (operation === 'describe-stacks') {
+      if (!stackId && input.StackName === oldId && options.deletedArnVisible) return { Stacks: [{ StackId: oldId, StackStatus: 'DELETE_COMPLETE' }] };
       if (!stackId || (input.StackName === oldId && stackId !== oldId)) throw Object.assign(new Error('missing'), { missing: true });
       return { Stacks: [{ StackId: stackId, StackStatus: status,
         Tags: [{ Key: 'KnownEnoughQa', Value: options.unowned ? 'false' : 'true' }],
@@ -78,6 +79,10 @@ describe('LIVE04 low-quota recovery', () => {
     const f = fixture(options);
     await expect(recoverFailedStack(config, expected, directory(), f.aws, async () => {})).rejects.toThrow();
     expect(f.calls.some(call => /delete|create|execute|update/.test(call.operation))).toBe(false);
+  });
+  test('continues when AWS still describes a deleted stack by its ARN', async () => {
+    const f = fixture({ deletedArnVisible: true });
+    await expect(recoverFailedStack(config, expected, directory(), f.aws, async () => { throw new Error('SHOULD_NOT_WAIT'); })).resolves.toMatchObject({ tablesPreserved: 3 });
   });
   test('resumes after metadata removal without deleting anything twice', async () => {
     const f = fixture({ failBeforeImport: true }); const folder = directory();
