@@ -19,6 +19,10 @@ DONE requires identified existing B automation, correct installed-target/workloa
 
 ## A follow-up configuration — 2026-10-02
 
-A could find no local copy of B's automation. To watch progress without changing B's session, A created a separate read-only heartbeat in this existing chat: known-enough-aws-and-five-minute-monitor-check, ACTIVE, requested every five minutes. This temporary follow-up observes available GitHub reports/ASSESS10 evidence; it does not replace or prove B's monitor, claim implementation, trigger cloud work or notify unchanged state. Avoid duplicate long-term coverage after B's monitor is verified. First scheduled execution/cadence is pending, not claimed as PASS.
+A could find no local copy of B's automation. To watch progress without changing B's session, A created a separate read-only heartbeat in this existing chat: known-enough-aws-and-five-minute-monitor-check, originally ACTIVE every five minutes; now DELETED by user direction. The former temporary follow-up observed available GitHub reports/ASSESS10 evidence; it does not replace or prove B's monitor, claim implementation, trigger cloud work or notify unchanged state. Avoid duplicate long-term coverage after B's monitor is verified. First scheduled execution/cadence is pending, not claimed as PASS.
 
 [Official scheduled-task guidance](https://learn.chatgpt.com/docs/automations?surface=app) explains local host/app availability and checking actual recent runs. The task uses actual automation-tool readback for its configured schedule rather than assuming the monitor has run.
+
+## A observer cancelled — user direction, 2026-10-02
+
+User cancels the recurring monitor on A's side. Native tool confirms deletion of known-enough-aws-and-five-minute-monitor-check. Exactly one read-only follow-up is scheduled in this chat, check-b-test-once-in-five-minutes, about five minutes later, with a single occurrence and self-deletion after reporting pass/fail/not-yet-verifiable. This leaves B's existing automation and ASSESS10 verification scope unchanged. A must not restart recurring monitoring after that check. No repeated project/cloud/test action is authorized by this timer.
