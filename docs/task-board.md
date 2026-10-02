@@ -100,3 +100,5 @@ A retains the sequential LIVE04 operations scope. Shared Lambda capacity removes
 A continues the same LIVE04 operations handoff. The installer now persists private recovery/rollback state in HOME, reconstructs this lost journal from exact AWS history and discovers saved settings automatically. Full checks pass (523 application tests / two optional skips, hosted 1/1, E2E 53/53); actual import/apply and B/automatic live proof are pending. Existing budgets and expiry stay unchanged. No second implementation task or NP00 writer is active.
 
 LIVE04 latest block: CloudTrail confirms CreateChangeSet rejected output additions during retained-table import. A repairs this within the existing sequential claim; saved data and original authorization remain intact. Actual installation and real qualification are still pending, not DONE.
+
+LIVE04 follow-up: AWS rejected stack Tags during import after the Outputs fix. Same A claim removes both from the import step, retains exact skeleton/table checks and adds labels/results by normal update. Actual installation remains pending.

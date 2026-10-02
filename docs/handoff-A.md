@@ -446,3 +446,9 @@ Session-safe verified package `46160692e77d114a09283ddb271dda8b984add3e` passed 
 CloudTrail established the current block: AWS CreateChangeSet rejects outputs during import. Recovery now omits all outputs and recognizes the exact source-bound import description with ownership/template/resource guards; outputs are added only by normal update. Existing approved configuration and retained tables stay intact. Resume accepts the previously executed 4616069 pin. Focused recovery 14/14 and AWS template validation pass; actual CloudShell recovery/install and B/automatic live qualification remain pending.
 
 Full repair check passed exit 0 with 523 application tests / two optional skips, hosted 1/1, E2E 53/53 and all references/planning/lint/types/build/boundaries checks. Private log /tmp/known-enough-lowquota-check-i3d5ys4_/verification-output-free-import.log. Use the newly published repair pin; original expiry/limits remain unchanged.
+
+### Current import restriction — 2026-10-02 UTC
+
+The fb42d67 retry failed before import because CreateChangeSet rejects Tags too. Corrected request contains neither Tags nor template Outputs; normal subsequent update adds them. Untagged skeleton acceptance is guarded by exact source description, template, three-resource inventory, IMPORT_COMPLETE and retained-table ownership/schema checks. No new stack currently exists. Saved approval/expiry preserved; CloudShell execution and live qualification pending.
+
+Full pinned clean-clone repair check passed exit 0: references 7/7, planning 15/15, lint/types/boundaries/build, 523 application tests with two optional skips, hosted 1/1, E2E 53/53. Focused recovery 14/14, Bash syntax, changed documentation links and whitespace passed. Log: /tmp/known-enough-lowquota-check-i3d5ys4_/verification-tag-free-import.log. Actual import/setup and live qualification remain pending.

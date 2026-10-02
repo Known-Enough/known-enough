@@ -42,7 +42,7 @@ function assertResources(config, items, retained) {
       || (retained && item.ResourceStatus !== 'DELETE_SKIPPED'))) throw new Error('RECOVERY_RESOURCE_SCOPE_MISMATCH');
 }
 export function assertRecoveryStack(config, stack, observedResources, template, expected) {
-  if (!owned(stack) || !isRecoveryStack(stack) || stack.StackStatus !== 'IMPORT_COMPLETE'
+  if (!isRecoveryStack(stack) || stack.StackStatus !== 'IMPORT_COMPLETE'
     || stack.Description !== marker + ' source=' + config.sourceCommit
     || canonical(template) !== canonical(recoveryTemplate(config, expected))) throw new Error('RECOVERY_IMPORT_STATE_MISMATCH');
   assertResources(config, observedResources, false);
@@ -147,7 +147,6 @@ export async function recoverFailedStack(config, expected, directory, aws, pause
       ChangeSetType: 'IMPORT', TemplateBody: JSON.stringify(imported),
       ResourcesToImport: logicalNames.map(name => ({ ResourceType: 'AWS::DynamoDB::Table',
         LogicalResourceId: name, ResourceIdentifier: { TableName: journal.tables[name] } })),
-      Tags: [{ Key: 'KnownEnoughQa', Value: 'true' }],
     });
     journal.changeSetId = change.Id; journal.importStackId = change.StackId; journal.phase = 'IMPORT_PREPARED'; save();
   }

@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 
 commit = sys.argv[1]
 previous = {
+    'fb42d675756bd6c67ff77f7a1a980ae965705a76',
     '46160692e77d114a09283ddb271dda8b984add3e',
     'e0cd5ddd3ede595eea88aef3481c23bf01363a8a',
     '18d5ea433cfc55dec71d19b3e2878974dfc6a531',

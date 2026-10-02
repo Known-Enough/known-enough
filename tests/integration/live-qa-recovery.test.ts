@@ -38,7 +38,7 @@ function fixture(options: { foreign?: boolean; unowned?: boolean; active?: boole
       if (!stackId && input.StackName === oldId && options.deletedArnVisible) return { Stacks: [{ StackId: oldId, StackStatus: 'DELETE_COMPLETE' }] };
       if (!stackId || (input.StackName === oldId && stackId !== oldId)) throw Object.assign(new Error('missing'), { missing: true });
       return { Stacks: [{ StackId: stackId, StackStatus: status,
-        Tags: [{ Key: 'KnownEnoughQa', Value: options.unowned ? 'false' : 'true' }],
+        Tags: imported ? [] : [{ Key: 'KnownEnoughQa', Value: options.unowned ? 'false' : 'true' }],
         Description: imported ? (imported as { Description: string }).Description : 'Original stack',
         Outputs: [],
       }] };
@@ -58,6 +58,7 @@ function fixture(options: { foreign?: boolean; unowned?: boolean; active?: boole
       const incoming = JSON.parse(String(input.TemplateBody));
       // AWS rejects output additions during resource import, even into a new stack.
       expect(incoming).not.toHaveProperty('Outputs');
+      expect(input).not.toHaveProperty('Tags');
       imported = incoming; stackId = newId; status = 'REVIEW_IN_PROGRESS';
       return { Id: 'change-id', StackId: newId };
     }
