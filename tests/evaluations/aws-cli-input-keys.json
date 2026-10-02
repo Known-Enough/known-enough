@@ -1,0 +1,722 @@
+{
+  "sourceCommit": "9f5baa9742a6e65121479e786d6fba24b7ff940e",
+  "source": "https://github.com/boto/botocore/tree/9f5baa9742a6e65121479e786d6fba24b7ff940e/botocore/data",
+  "operations": {
+    "cloudformation:describe-stacks": {
+      "members": [
+        "StackName",
+        "NextToken"
+      ],
+      "required": []
+    },
+    "cloudformation:update-stack": {
+      "members": [
+        "StackName",
+        "TemplateBody",
+        "TemplateURL",
+        "UsePreviousTemplate",
+        "StackPolicyDuringUpdateBody",
+        "StackPolicyDuringUpdateURL",
+        "Parameters",
+        "Capabilities",
+        "ResourceTypes",
+        "RoleARN",
+        "RollbackConfiguration",
+        "StackPolicyBody",
+        "StackPolicyURL",
+        "NotificationARNs",
+        "Tags",
+        "DisableRollback",
+        "ClientRequestToken",
+        "RetainExceptOnCreate",
+        "DeploymentConfig",
+        "DisableValidation"
+      ],
+      "required": [
+        "StackName"
+      ]
+    },
+    "cloudformation:create-stack": {
+      "members": [
+        "StackName",
+        "TemplateBody",
+        "TemplateURL",
+        "Parameters",
+        "DisableRollback",
+        "RollbackConfiguration",
+        "TimeoutInMinutes",
+        "NotificationARNs",
+        "Capabilities",
+        "ResourceTypes",
+        "RoleARN",
+        "OnFailure",
+        "StackPolicyBody",
+        "StackPolicyURL",
+        "Tags",
+        "ClientRequestToken",
+        "EnableTerminationProtection",
+        "RetainExceptOnCreate",
+        "DeploymentConfig",
+        "DisableValidation"
+      ],
+      "required": [
+        "StackName"
+      ]
+    },
+    "amplify:create-deployment": {
+      "members": [
+        "appId",
+        "branchName",
+        "fileMap"
+      ],
+      "required": [
+        "appId",
+        "branchName"
+      ]
+    },
+    "amplify:start-deployment": {
+      "members": [
+        "appId",
+        "branchName",
+        "jobId",
+        "sourceUrl",
+        "sourceUrlType"
+      ],
+      "required": [
+        "appId",
+        "branchName"
+      ]
+    },
+    "amplify:get-job": {
+      "members": [
+        "appId",
+        "branchName",
+        "jobId"
+      ],
+      "required": [
+        "appId",
+        "branchName",
+        "jobId"
+      ]
+    },
+    "sts:get-caller-identity": {
+      "members": [],
+      "required": []
+    },
+    "cloudformation:get-template": {
+      "members": [
+        "StackName",
+        "ChangeSetName",
+        "TemplateStage"
+      ],
+      "required": []
+    },
+    "cloudformation:list-stack-resources": {
+      "members": [
+        "StackName",
+        "NextToken"
+      ],
+      "required": [
+        "StackName"
+      ]
+    },
+    "ses:describe-active-receipt-rule-set": {
+      "members": [],
+      "required": []
+    },
+    "route53:get-hosted-zone": {
+      "members": [
+        "Id"
+      ],
+      "required": [
+        "Id"
+      ]
+    },
+    "route53:list-resource-record-sets": {
+      "members": [
+        "HostedZoneId",
+        "StartRecordName",
+        "StartRecordType",
+        "StartRecordIdentifier",
+        "MaxItems"
+      ],
+      "required": [
+        "HostedZoneId"
+      ]
+    },
+    "dynamodb:get-item": {
+      "members": [
+        "TableName",
+        "Key",
+        "AttributesToGet",
+        "ConsistentRead",
+        "ReturnConsumedCapacity",
+        "ProjectionExpression",
+        "ExpressionAttributeNames"
+      ],
+      "required": [
+        "TableName",
+        "Key"
+      ]
+    },
+    "dynamodb:put-item": {
+      "members": [
+        "TableName",
+        "Item",
+        "Expected",
+        "ReturnValues",
+        "ReturnConsumedCapacity",
+        "ReturnItemCollectionMetrics",
+        "ConditionalOperator",
+        "ConditionExpression",
+        "ExpressionAttributeNames",
+        "ExpressionAttributeValues",
+        "ReturnValuesOnConditionCheckFailure"
+      ],
+      "required": [
+        "TableName",
+        "Item"
+      ]
+    },
+    "iam:delete-role-policy": {
+      "members": [
+        "RoleName",
+        "PolicyName"
+      ],
+      "required": [
+        "RoleName",
+        "PolicyName"
+      ]
+    },
+    "bedrock:get-model-invocation-logging-configuration": {
+      "members": [],
+      "required": []
+    },
+    "dynamodb:describe-table": {
+      "members": [
+        "TableName"
+      ],
+      "required": [
+        "TableName"
+      ]
+    },
+    "s3api:head-bucket": {
+      "members": [
+        "Bucket",
+        "ExpectedBucketOwner"
+      ],
+      "required": [
+        "Bucket"
+      ]
+    },
+    "s3api:get-bucket-tagging": {
+      "members": [
+        "Bucket",
+        "ExpectedBucketOwner"
+      ],
+      "required": [
+        "Bucket"
+      ]
+    },
+    "s3api:create-bucket": {
+      "members": [
+        "ACL",
+        "Bucket",
+        "CreateBucketConfiguration",
+        "GrantFullControl",
+        "GrantRead",
+        "GrantReadACP",
+        "GrantWrite",
+        "GrantWriteACP",
+        "ObjectLockEnabledForBucket",
+        "ObjectOwnership",
+        "BucketNamespace"
+      ],
+      "required": [
+        "Bucket"
+      ]
+    },
+    "s3api:put-bucket-tagging": {
+      "members": [
+        "Bucket",
+        "ContentMD5",
+        "ChecksumAlgorithm",
+        "Tagging",
+        "ExpectedBucketOwner"
+      ],
+      "required": [
+        "Bucket",
+        "Tagging"
+      ]
+    },
+    "s3api:put-public-access-block": {
+      "members": [
+        "Bucket",
+        "ContentMD5",
+        "ChecksumAlgorithm",
+        "PublicAccessBlockConfiguration",
+        "ExpectedBucketOwner"
+      ],
+      "required": [
+        "Bucket",
+        "PublicAccessBlockConfiguration"
+      ]
+    },
+    "s3api:put-bucket-encryption": {
+      "members": [
+        "Bucket",
+        "ContentMD5",
+        "ChecksumAlgorithm",
+        "ServerSideEncryptionConfiguration",
+        "ExpectedBucketOwner"
+      ],
+      "required": [
+        "Bucket",
+        "ServerSideEncryptionConfiguration"
+      ]
+    },
+    "s3api:put-object": {
+      "members": [
+        "ACL",
+        "Body",
+        "Bucket",
+        "CacheControl",
+        "ContentDisposition",
+        "ContentEncoding",
+        "ContentLanguage",
+        "ContentLength",
+        "ContentMD5",
+        "ContentType",
+        "ChecksumAlgorithm",
+        "ChecksumCRC32",
+        "ChecksumCRC32C",
+        "ChecksumCRC64NVME",
+        "ChecksumSHA1",
+        "ChecksumSHA256",
+        "ChecksumSHA512",
+        "ChecksumMD5",
+        "ChecksumXXHASH64",
+        "ChecksumXXHASH3",
+        "ChecksumXXHASH128",
+        "Expires",
+        "IfMatch",
+        "IfNoneMatch",
+        "GrantFullControl",
+        "GrantRead",
+        "GrantReadACP",
+        "GrantWriteACP",
+        "Key",
+        "WriteOffsetBytes",
+        "Metadata",
+        "ServerSideEncryption",
+        "StorageClass",
+        "WebsiteRedirectLocation",
+        "SSECustomerAlgorithm",
+        "SSECustomerKey",
+        "SSECustomerKeyMD5",
+        "SSEKMSKeyId",
+        "SSEKMSEncryptionContext",
+        "BucketKeyEnabled",
+        "RequestPayer",
+        "Tagging",
+        "ObjectLockMode",
+        "ObjectLockRetainUntilDate",
+        "ObjectLockLegalHoldStatus",
+        "ObjectLockEventHold",
+        "ObjectLockEventHoldDurationDays",
+        "ObjectLockEventHoldDurationYears",
+        "ExpectedBucketOwner"
+      ],
+      "required": [
+        "Bucket",
+        "Key"
+      ]
+    },
+    "ses:set-active-receipt-rule-set": {
+      "members": [
+        "RuleSetName"
+      ],
+      "required": []
+    },
+    "sesv2:get-email-identity": {
+      "members": [
+        "EmailIdentity"
+      ],
+      "required": [
+        "EmailIdentity"
+      ]
+    },
+    "dynamodb:transact-write-items": {
+      "members": [
+        "TransactItems",
+        "ReturnConsumedCapacity",
+        "ReturnItemCollectionMetrics",
+        "ClientRequestToken"
+      ],
+      "required": [
+        "TransactItems"
+      ]
+    },
+    "lambda:get-function-configuration": {
+      "members": [
+        "FunctionName",
+        "Qualifier"
+      ],
+      "required": [
+        "FunctionName"
+      ]
+    },
+    "cognito-idp:describe-user-pool": {
+      "members": [
+        "UserPoolId"
+      ],
+      "required": [
+        "UserPoolId"
+      ]
+    },
+    "cognito-idp:describe-user-pool-client": {
+      "members": [
+        "UserPoolId",
+        "ClientId"
+      ],
+      "required": [
+        "UserPoolId",
+        "ClientId"
+      ]
+    },
+    "apigatewayv2:get-routes": {
+      "members": [
+        "ApiId",
+        "MaxResults",
+        "NextToken"
+      ],
+      "required": [
+        "ApiId"
+      ]
+    },
+    "apigatewayv2:get-authorizers": {
+      "members": [
+        "ApiId",
+        "MaxResults",
+        "NextToken"
+      ],
+      "required": [
+        "ApiId"
+      ]
+    },
+    "apigatewayv2:get-integrations": {
+      "members": [
+        "ApiId",
+        "MaxResults",
+        "NextToken"
+      ],
+      "required": [
+        "ApiId"
+      ]
+    },
+    "iam:get-role-policy": {
+      "members": [
+        "RoleName",
+        "PolicyName"
+      ],
+      "required": [
+        "RoleName",
+        "PolicyName"
+      ]
+    },
+    "dynamodb:create-table": {
+      "members": [
+        "AttributeDefinitions",
+        "TableName",
+        "KeySchema",
+        "LocalSecondaryIndexes",
+        "GlobalSecondaryIndexes",
+        "BillingMode",
+        "ProvisionedThroughput",
+        "StreamSpecification",
+        "SSESpecification",
+        "Tags",
+        "TableClass",
+        "DeletionProtectionEnabled",
+        "WarmThroughput",
+        "ResourcePolicy",
+        "OnDemandThroughput",
+        "GlobalTableSourceArn",
+        "GlobalTableSettingsReplicationMode",
+        "VectorIndexes"
+      ],
+      "required": [
+        "TableName"
+      ]
+    },
+    "dynamodb:list-tags-of-resource": {
+      "members": [
+        "ResourceArn",
+        "NextToken"
+      ],
+      "required": [
+        "ResourceArn"
+      ]
+    },
+    "lambda:get-function": {
+      "members": [
+        "FunctionName",
+        "Qualifier"
+      ],
+      "required": [
+        "FunctionName"
+      ]
+    },
+    "iam:put-role-policy": {
+      "members": [
+        "RoleName",
+        "PolicyName",
+        "PolicyDocument"
+      ],
+      "required": [
+        "RoleName",
+        "PolicyName",
+        "PolicyDocument"
+      ]
+    },
+    "apigatewayv2:create-route": {
+      "members": [
+        "ApiId",
+        "ApiKeyRequired",
+        "AuthorizationScopes",
+        "AuthorizationType",
+        "AuthorizerId",
+        "ModelSelectionExpression",
+        "OperationName",
+        "RequestModels",
+        "RequestParameters",
+        "RouteKey",
+        "RouteResponseSelectionExpression",
+        "Target"
+      ],
+      "required": [
+        "ApiId",
+        "RouteKey"
+      ]
+    },
+    "cognito-idp:update-user-pool": {
+      "members": [
+        "UserPoolId",
+        "Policies",
+        "DeletionProtection",
+        "LambdaConfig",
+        "AutoVerifiedAttributes",
+        "SmsVerificationMessage",
+        "EmailVerificationMessage",
+        "EmailVerificationSubject",
+        "VerificationMessageTemplate",
+        "SmsAuthenticationMessage",
+        "UserAttributeUpdateSettings",
+        "MfaConfiguration",
+        "DeviceConfiguration",
+        "EmailConfiguration",
+        "SmsConfiguration",
+        "UserPoolTags",
+        "AdminCreateUserConfig",
+        "UserPoolAddOns",
+        "AccountRecoverySetting",
+        "PoolName",
+        "UserPoolTier",
+        "KeyConfiguration",
+        "IssuerConfiguration"
+      ],
+      "required": [
+        "UserPoolId"
+      ]
+    },
+    "cognito-idp:update-user-pool-client": {
+      "members": [
+        "UserPoolId",
+        "ClientId",
+        "ClientName",
+        "RefreshTokenValidity",
+        "AccessTokenValidity",
+        "IdTokenValidity",
+        "TokenValidityUnits",
+        "ReadAttributes",
+        "WriteAttributes",
+        "ExplicitAuthFlows",
+        "SupportedIdentityProviders",
+        "CallbackURLs",
+        "LogoutURLs",
+        "DefaultRedirectURI",
+        "AllowedOAuthFlows",
+        "AllowedOAuthScopes",
+        "AllowedOAuthFlowsUserPoolClient",
+        "AnalyticsConfiguration",
+        "PreventUserExistenceErrors",
+        "EnableTokenRevocation",
+        "EnablePropagateAdditionalUserContextData",
+        "AuthSessionValidity",
+        "RefreshTokenRotation"
+      ],
+      "required": [
+        "UserPoolId",
+        "ClientId"
+      ]
+    },
+    "lambda:update-function-code": {
+      "members": [
+        "FunctionName",
+        "ZipFile",
+        "S3Bucket",
+        "S3Key",
+        "S3ObjectVersion",
+        "S3ObjectStorageMode",
+        "ImageUri",
+        "Architectures",
+        "Publish",
+        "PublishTo",
+        "DryRun",
+        "RevisionId",
+        "SourceKMSKeyArn"
+      ],
+      "required": [
+        "FunctionName"
+      ]
+    },
+    "lambda:update-function-configuration": {
+      "members": [
+        "FunctionName",
+        "Role",
+        "Handler",
+        "Description",
+        "Timeout",
+        "MemorySize",
+        "VpcConfig",
+        "Environment",
+        "Runtime",
+        "DeadLetterConfig",
+        "KMSKeyArn",
+        "TracingConfig",
+        "RevisionId",
+        "Layers",
+        "FileSystemConfigs",
+        "ImageConfig",
+        "EphemeralStorage",
+        "SnapStart",
+        "LoggingConfig",
+        "CapacityProviderConfig",
+        "DurableConfig"
+      ],
+      "required": [
+        "FunctionName"
+      ]
+    },
+    "apigatewayv2:delete-route": {
+      "members": [
+        "ApiId",
+        "RouteId"
+      ],
+      "required": [
+        "ApiId",
+        "RouteId"
+      ]
+    },
+    "cloudformation:list-stacks": {
+      "members": [
+        "NextToken",
+        "StackStatusFilter"
+      ],
+      "required": []
+    },
+    "cloudformation:delete-stack": {
+      "members": [
+        "StackName",
+        "RetainResources",
+        "RoleARN",
+        "ClientRequestToken",
+        "DeletionMode",
+        "DeploymentConfig"
+      ],
+      "required": [
+        "StackName"
+      ]
+    },
+    "cloudformation:create-change-set": {
+      "members": [
+        "StackName",
+        "TemplateBody",
+        "TemplateURL",
+        "UsePreviousTemplate",
+        "Parameters",
+        "Capabilities",
+        "ResourceTypes",
+        "RoleARN",
+        "RollbackConfiguration",
+        "NotificationARNs",
+        "Tags",
+        "ChangeSetName",
+        "ClientToken",
+        "Description",
+        "ChangeSetType",
+        "ResourcesToImport",
+        "IncludeNestedStacks",
+        "OnStackFailure",
+        "ImportExistingResources",
+        "DeploymentMode",
+        "DeploymentConfig",
+        "DisableValidation"
+      ],
+      "required": [
+        "StackName",
+        "ChangeSetName"
+      ]
+    },
+    "cloudformation:describe-change-set": {
+      "members": [
+        "ChangeSetName",
+        "StackName",
+        "NextToken",
+        "IncludePropertyValues"
+      ],
+      "required": [
+        "ChangeSetName"
+      ]
+    },
+    "cloudformation:execute-change-set": {
+      "members": [
+        "ChangeSetName",
+        "StackName",
+        "ClientRequestToken",
+        "DisableRollback",
+        "RetainExceptOnCreate"
+      ],
+      "required": [
+        "ChangeSetName"
+      ]
+    },
+    "logs:filter-log-events": {
+      "members": [
+        "logGroupName",
+        "logGroupIdentifier",
+        "logStreamNames",
+        "logStreamNamePrefix",
+        "startTime",
+        "endTime",
+        "filterPattern",
+        "nextToken",
+        "limit",
+        "startFromHead",
+        "interleaved",
+        "unmask"
+      ],
+      "required": []
+    },
+    "secretsmanager:get-secret-value": {
+      "members": [
+        "SecretId",
+        "VersionId",
+        "VersionStage"
+      ],
+      "required": [
+        "SecretId"
+      ]
+    }
+  }
+}

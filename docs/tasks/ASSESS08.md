@@ -30,3 +30,15 @@ Synchronize to origin main with [skip ci] under the standing repository authoriz
 ## Claim — 2026-10-02
 
 B / Battosai1806, actual GPT-6 variant/effort unexposed, clean synchronized e14634d. Exact scope: final setup/resume/recovery/private-directory/install/package/release/aws and existing tests; one new focused resume/CLI-input regression if needed; source-schema inspection uses public official AWS CLI/botocore models only, no credentials/service call. Corrected primary/budget/workflow interfaces read for integration. Inspect forward-resume private state/pin preservation, original expiry/limits, installed 348afae stack and publication/readback. Produce docs/live-qa-final-handoff.md with one exact pinned CloudShell block/settings/static diagnostic; ticket/board/workflow/assessment/own log/handoff. No NP00, cloud writer/spend, external message or dependency/lock change. Retain all original journals/rollback material; ambiguous state requires reconciliation, not blind retry.
+
+## Concrete resume correction
+
+New source pins now refuse to bypass any older HOME primary recovery journal; same-pin resume preserves original journal/rollback files and primary guards. Saved configuration updates use fsync plus atomic replace, preserving the original on write failure. Recognize A's published Amplify fix pin 67657e2 along with prior allowed pins. No historical primary journal is deleted/copied/adopted. Existing 348afae infrastructure remains a forward update, not a fresh table/resource creation.
+
+CLI input verification uses 84 literal requests across 51 operations against official botocore source 9f5baa9742a6e65121479e786d6fba24b7ff940e. The compact permanent input-key fixture is generated from that immutable model, not from mocks; required fields/casing are checked locally. No AWS CLI, credential or AWS operation is used for schema verification.
+
+## Verified source checkpoint — 2026-10-02
+
+Final source includes A import-tag/publication fixes and ASSESS01–06. New resume guard/atomic config persistence and four installer regressions pass. Compact official input fixture: tests/evaluations/aws-cli-input-keys.json, model source 9f5baa9742a6e65121479e786d6fba24b7ff940e; 84 literal CLI inputs/51 operations checked, permanent test covers required fields and case-sensitive names. Focused 32/32; final pinned npm run check exit 0: 608 application tests, two optional DynamoDB Local skips, hosted 1/1, E2E 56/56, all other stages pass. Bash setup/resume parse.
+
+Session environment changed to a read-only runtime mid-task; repository/history retained, exact official-checksummed Node 24.21.0/npm 11.19.0 restored in temporary tools and required repository commands explicitly escalated. User grants all permissions while away; existing A/cloud/NP00 boundaries remain. No AWS credentials/service call or deployment. This verified source checkpoint is committed before building a clean pinned package; ASSESS08 remains IN_PROGRESS until offline package verification and exact final handoff are published.
