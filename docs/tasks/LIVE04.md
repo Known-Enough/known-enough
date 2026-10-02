@@ -1,5 +1,7 @@
 # LIVE04 — Install once and prove B can run everything
 
+> Current user clarification, 2026-10-02: routine qualification must run automatically after eligible successful deployments. Manual Run workflow is optional; no B click/dispatch acceptance gate remains.
+
 - Status: IN_PROGRESS — actual A SETUP_READBACK_PASS on original 30fa91a; GitHub variables and B/manual plus automatic complete qualification remain. Original finite envelope is unchanged.
 - Intended workers: A / martelaxe installs through A's authorized AWS session; B / Battosai1806 launches qualification using B's own GitHub account. Sequential recorded handoff; no credential sharing.
 - Outcome: Complete real online tests run without repeated help from A, including after deployments.
@@ -174,3 +176,7 @@ Final directory repair checks passed: focused helper 4/4; pinned clean-clone ful
 ## AWS setup succeeded — 2026-10-02
 
 A CloudShell supplied SETUP_READBACK_PASS after a164eaa same-source repair, with exact original package hashes and allowlisted target. See [sanitized receipt](../review-artifacts/ASSESS09-install-readback.json) and [GitHub settings/qualification handoff](../live-qa-final-handoff.md#exact-github-settings-and-proof). Historical installation-pending entries below/above retain their dated evidence. Current remaining work is GitHub configuration and actual managed manual/automatic qualification, not another installer retry. This does not establish paid-model/email/seven-journey/cleanup PASS or extend the original expiry/limits.
+
+## Automatic qualification — user clarification, 2026-10-02
+
+User requires automatic tests, without B clicking Run workflow. Manual dispatch is optional diagnostics and is no completion prerequisite. After A's two installed-target/enabled repository settings are saved, eligible application/API/harness pushes to main run Deploy Known Enough staging to AWS Amplify; successful matching deployments automatically start Live QA release and qualification via the existing workflow_run trigger. Preserve provenance/current-main guards, all seven journeys, exact artifact receipts, CLEAN cleanup, finite cost/expiry/counters and real-person consent. A or B reads the report from their own GitHub account without personal AWS credentials. B's normal authorized code push can supply actor evidence; no contrived deployment or message is sent here. Required proof is an actual complete matching automatic PASS, still pending. This supersedes earlier mandatory B/manual-dispatch wording; history remains dated.

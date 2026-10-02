@@ -1,5 +1,7 @@
 # Live test delivery — finish online testing
 
+> Current user clarification, 2026-10-02: routine qualification must run automatically after eligible successful deployments. Manual Run workflow is optional; no B click/dispatch acceptance gate remains.
+
 User direction, 2026-10-01: prepare the missing online setup and real NP03/NP04 tests so B can run them independently, and automatically run approved checks after GitHub deployments. This plan replaces the single broad NP05 handoff with four deliverable tasks. It does not mark online work complete or authorize unspecified cloud writes, resource costs, paid AI or email. No implementation starts in this planning update.
 
 ## What the user receives
@@ -46,3 +48,7 @@ Model and email lanes need explicit setup authorization with fixed recipients/mo
 An actual B account launches a complete passing report through GitHub without A's session. A subsequent authorized GitHub deployment triggers the appropriate real tests automatically against the matching release, including cleanup. The report proves managed login, group/invitation state, new decision/private inputs/negotiation/exact agreement, denial/privacy/recovery and required real hosted screens. AI/signup-email evidence is real and budgeted. No human is required to approve fictional accounts, retrieve verification codes, read screens or judge routine results. Automated assertions determine the outcome. Human product feedback and release/submission remain outside this work.
 
 Reuse [the detailed live assertion/access plan](live-automated-plan-tests.md), [NP03 screen inventory](np03-screen-inventory.md), [NP04 qualification](np04-qualification.md), [NP05 deployment preparation](../infra/np05-deployment.md) and [shared staging checks](shared-staging-checks.md). Do not rebuild the app or replace meaningful local regression tests.
+
+## Automatic qualification — user clarification, 2026-10-02
+
+User requires automatic tests, without B clicking Run workflow. Manual dispatch is optional diagnostics and is no completion prerequisite. After A's two installed-target/enabled repository settings are saved, eligible application/API/harness pushes to main run Deploy Known Enough staging to AWS Amplify; successful matching deployments automatically start Live QA release and qualification via the existing workflow_run trigger. Preserve provenance/current-main guards, all seven journeys, exact artifact receipts, CLEAN cleanup, finite cost/expiry/counters and real-person consent. A or B reads the report from their own GitHub account without personal AWS credentials. B's normal authorized code push can supply actor evidence; no contrived deployment or message is sent here. Required proof is an actual complete matching automatic PASS, still pending. This supersedes earlier mandatory B/manual-dispatch wording; history remains dated.
