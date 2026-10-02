@@ -15,7 +15,7 @@ node scripts/live-qa/configure.mjs init /tmp/known-enough-free-qa-config.json \
   --mailbox-provider mailtm --source-commit REPLACE_40_CHARACTER_VERIFIED_COMMIT
 ```
 
-Replace the commit placeholder before running. The draft keeps all authorization disabled/zero and primary rollout off; syntax readiness does not authorize AWS resources or models. Complete and review that same private file for the later installation.
+Current verified free-mode package: `e0cd5ddd3ede595eea88aef3481c23bf01363a8a`. Replace the commit placeholder with that exact hash before running. The draft keeps all authorization disabled/zero and primary rollout off; syntax readiness does not authorize AWS resources or models. Complete and review that same private file for the later installation.
 
 The broker creates one randomly named disposable mailbox per lease at [Mail.tm](https://mail.tm/), reads the actual Cognito default-sender confirmation email and deletes that exact mailbox during cleanup. It discovers an active public provider domain at run time instead of pinning a domain that may rotate. Mailbox creation intent/password is persisted privately before creation; retries authenticate the saved intent. Mailbox credentials remain in the synthetic-login secret; release roles cannot read that secret. No personal mailbox, real participant account, manual code copy or admin confirmation substitutes for delivery. Other fixture accounts are still precreated with suppressed messaging; they do not receive mail.
 
