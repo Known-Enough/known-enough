@@ -1,6 +1,6 @@
 # ASSESS09 — Unblock Cognito setup and safely resume
 
-- Status: DONE — local repair/tests/published immutable resume handoff; actual A cloud execution and qualification remain ASSESS07.
+- Status: READY — priority B follow-up for Lambda upload; previous Cognito repair remains locally DONE with evidence below.
 - Worker: B / Octavio / Battosai1806, Codex GPT-6 (exact runtime variant/effort not exposed). Clean main ff-only baseline 3d2d68af2c1c2b7980ad56328a032e368e2f30c9e92, 2026-10-02; no subagents. Claimed only the narrow scope below, including a dedicated same-pin Cognito repair helper and focused tests.
 - Authority: user explicitly requests this priority repair on 2026-10-02, with narrow scope and minimal token use. A retains AWS execution/NP00. No credential sharing, new spending or unsolicited cloud writes.
 
@@ -32,3 +32,9 @@ Same-pin reconciliation accepts only pending=enable-signup, before client/code/c
 Focused checks: 56/56 across primary, Cognito helper, prior IAM helper, AWS errors and official CLI input checks; typecheck/lint and Bash syntax pass. An isolated original-source checkout with installed pinned dependencies verified actual operational overlay imports, exact original API/broker hashes, artifact/journal/rollback preservation and fail-closed mocked STS denial. No real AWS/service call. Final pinned Node 24.21.0/npm 11.19.0 full npm run check exit 0: 639 application tests/two optional skips, hosted 1/1, E2E 56/56, references 7/7, planning 15/15, lint/types/boundaries/build. Log /tmp/assess09-check.log. Published repair da3b1bd1cbc6c7eac155dcd03a52e60bdf1c52ef; downloaded helper/primary/adapter bytes equal immutable Git blobs and Bash syntax passes. [One verified resume command](../assess09-cognito-resume.md) completes the local criteria. Actual managed reconciliation/readback remains ASSESS07.
 
 Official shapes/default-preservation rules: [UpdateUserPool](https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_UpdateUserPool.html), [UserPoolType](https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_UserPoolType.html), [UserPoolClientType](https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_UserPoolClientType.html). No generic scalar-default equivalence is inferred.
+
+## Priority follow-up handed to B — 2026-10-02
+
+User requests transfer to B, minimal token use. Actual da3b1bd helper output: original 30fa91a package hashes verified; PRIMARY_SIGNUP_RECONCILED with cloudWrites=false; continuation fails AWS_OPERATION_FAILED:lambda:update-function-code. Cognito reconciliation succeeded; do not redo it. AWS denial/validation cause is not established. The original journal may now have pending=update-code; do not clear it, overwrite backups or blindly retry.
+
+B: narrowly inspect primary Lambda upload and aws.mjs CLI blob handling (base64 JSON vs binary/file inputs), revision guard, size and exact existing permission; obtain one small sanitized A read-only diagnostic if needed to establish the real AWS error and whether upload occurred. Preserve original deployment source/artifacts/expiry/counters and all successful prior fixes. Reconcile only a proven exact pending operation; no broader access or new deployment pin. Add meaningful focused regressions and required pinned full check only for changed code. Publish one safe same-source recovery command. A pauses CloudShell retries. No AWS credentials needed by B; no new cloud write/spend authorization.

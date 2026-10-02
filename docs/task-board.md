@@ -1,5 +1,7 @@
 # Known Enough — shared task queue
 
+**Latest priority (2026-10-02):** ASSESS09 is READY for B's narrow Lambda-upload follow-up. Actual Cognito checkpoint reconciled, then lambda:update-function-code failed. A pauses retries; preserve possible pending=update-code and original artifacts/backup. Prior Cognito local completion stays historical. See [exact handoff](tasks/ASSESS09.md#priority-follow-up-handed-to-b--2026-10-02).
+
 ## Immediate priority — user direction, 2026-10-02
 
 [ASSESS09 — Unblock Cognito setup and safely resume](tasks/ASSESS09.md) is locally DONE/B: canonical Cognito comparisons, exact pending-signup reconciliation and [one verified original-pin resume command](assess09-cognito-resume.md). A resumes its existing installation using that handoff; actual readback and qualification remain ASSESS07. Preserve the original private state/backup/approval; no blind retry or new-pin bypass. B used no AWS credentials or cloud writes. ASSESS08 local completion is historical; ASSESS07 remains blocked. No parallel implementation or new cloud authorization.
