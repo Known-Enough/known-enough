@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, existsSync, renameSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, renameSync, openSync, fsyncSync, closeSync, lstatSync } from 'node:fs';
 import { randomBytes } from 'node:crypto';
 import { digest } from './config.mjs';
 import { preservationInput, awsSkeleton } from './aws.mjs';
@@ -19,7 +19,66 @@ const routes = [
 ];
 const delay = () => new Promise(resolve => globalThis.setTimeout(resolve, 1000));
 const codeHash = hex => Buffer.from(hex, 'hex').toString('base64');
-const same = (a, b) => digest(a) === digest(b);
+// JSON object order is not configuration. Only named Cognito collection paths
+// below are unordered; unknown arrays retain their order and all values remain exact.
+const cognitoSets = new Set([
+    'AutoVerifiedAttributes', 'AliasAttributes', 'UsernameAttributes', 'SchemaAttributes',
+    'Policies.SignInPolicy.AllowedFirstAuthFactors',
+    'UserAttributeUpdateSettings.AttributesRequireVerificationBeforeUpdate',
+    'AccountRecoverySetting.RecoveryMechanisms', 'AllowedOAuthScopes', 'AllowedOAuthFlows',
+    'ExplicitAuthFlows', 'SupportedIdentityProviders', 'CallbackURLs', 'LogoutURLs',
+    'ReadAttributes', 'WriteAttributes'
+]);
+function canonical(value, path = '', sets = false) {
+    if (Array.isArray(value)) {
+        const items = value.map(item => canonical(item, path + '[]', sets));
+        return sets && cognitoSets.has(path)
+            ? items.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b))) : items;
+    }
+    if (value && typeof value === 'object')
+        return Object.fromEntries(Object.keys(value).filter(key =>
+            // Absent/empty optional attribute or scope lists both select no entries.
+            !(sets && path === '' && ['AutoVerifiedAttributes', 'AllowedOAuthScopes'].includes(key)
+                && Array.isArray(value[key]) && value[key].length === 0)).sort().map(key => [key,
+            canonical(value[key], path ? path + '.' + key : key, sets)]));
+    return value;
+}
+const same = (a, b) => digest(canonical(a)) === digest(canonical(b));
+export const sameCognito = (a, b) => digest(canonical(a, '', true)) === digest(canonical(b, '', true));
+// These are observed modification time and population, not pool/client settings.
+// Only empty optional attribute/scope lists normalize to absence; scalar defaults stay exact.
+function stableCognito(snapshot) {
+    return Object.fromEntries(Object.entries(snapshot).filter(([key]) =>
+        key !== 'LastModifiedDate' && key !== 'EstimatedNumberOfUsers'));
+}
+const sameSnapshot = (a, b) => sameCognito(stableCognito(a), stableCognito(b));
+function signupInput(snapshot) {
+    const input = poolInput(snapshot);
+    input.AdminCreateUserConfig = { ...snapshot.AdminCreateUserConfig, AllowAdminCreateUserOnly: false };
+    input.AutoVerifiedAttributes = [...new Set([...(snapshot.AutoVerifiedAttributes ?? []), 'email'])];
+    return input;
+}
+function scopesInput(snapshot) {
+    const input = clientInput(snapshot);
+    input.AllowedOAuthScopes = [...new Set([...(snapshot.AllowedOAuthScopes ?? []), 'openid', 'email'])];
+    return input;
+}
+function expectedSnapshot(before, input) {
+    const expected = { ...before, ...input };
+    if (!Object.hasOwn(before, 'UserPoolId')) delete expected.UserPoolId;
+    // ClientId already exists in real DescribeUserPoolClient; do not invent it for mocks.
+    if (!Object.hasOwn(before, 'ClientId')) delete expected.ClientId;
+    return expected;
+}
+async function cognitoReadback(read, inputFor, input, before, errorCode) {
+    for (let attempt = 0; attempt < 10; attempt++) {
+        const result = read();
+        if (sameCognito(inputFor(result), input) && sameSnapshot(result, expectedSnapshot(before, input)))
+            return result;
+        if (attempt < 9) await delay();
+    }
+    throw new Error(errorCode);
+}
 const lambda = aws => aws('lambda', 'get-function-configuration', { FunctionName: functionName });
 const readPool = aws => aws('cognito-idp', 'describe-user-pool', { UserPoolId: pool }).UserPool;
 const readClient = aws => aws('cognito-idp', 'describe-user-pool-client', { UserPoolId: pool, ClientId: client }).UserPoolClient;
@@ -31,7 +90,13 @@ function journalAt(directory) {
         read: () => JSON.parse(readFileSync(path, 'utf8')),
         save: state => {
             // A failed/truncated write must never replace the previous checkpoint.
-            writeFileSync(path + '.next', JSON.stringify(state), { mode: 0o600 });
+            if ([path, path + '.next'].some(file => existsSync(file) && lstatSync(file).isSymbolicLink()))
+                throw new Error('PRIVATE_STATE_SYMLINK_REJECTED');
+            const descriptor = openSync(path + '.next', 'w', 0o600);
+            try {
+                writeFileSync(descriptor, JSON.stringify(state));
+                fsyncSync(descriptor);
+            } finally { closeSync(descriptor); }
             renameSync(path + '.next', path);
         }
     };
@@ -104,12 +169,12 @@ function assertNoPending(state) {
 }
 // Intent is persisted BEFORE every write. If response/checkpoint is lost, stop rather
 // than adopt possibly foreign changes. An operator reconciles the exact pending action.
-function mutate(journal, state, kind, operation, record = () => {
+async function mutate(journal, state, kind, operation, record = () => {
 }) {
     state.pending = kind;
     journal.save(state);
-    const result = operation();
-    record(result);
+    const result = await operation();
+    await record(result);
     state.pending = null;
     journal.save(state);
     return result;
@@ -148,7 +213,7 @@ async function ensureTable(config, aws, journal, state) {
     catch (error) {
         if (!error.missing)
             throw error;
-        mutate(journal, state, 'create-group-table', () => aws('dynamodb', 'create-table', {
+        await mutate(journal, state, 'create-group-table', () => aws('dynamodb', 'create-table', {
             TableName: groupTable, BillingMode: 'PAY_PER_REQUEST',
             AttributeDefinitions: [{ AttributeName: 'PK', AttributeType: 'S' }, { AttributeName: 'SK', AttributeType: 'S' }],
             KeySchema: [{ AttributeName: 'PK', KeyType: 'HASH' }, { AttributeName: 'SK', KeyType: 'RANGE' }],
@@ -168,7 +233,7 @@ async function ensureTable(config, aws, journal, state) {
     assertPrimaryTable(table, config.account, tags);
 }
 function assertCognito(state, aws) {
-    if (!same(readPool(aws), state.poolAfter) || !same(readClient(aws), state.clientAfter))
+    if (!sameSnapshot(readPool(aws), state.poolAfter) || !sameSnapshot(readClient(aws), state.clientAfter))
         throw new Error('PRIMARY_COGNITO_DRIFT');
 }
 function verifyRoutes(state, aws) {
@@ -258,7 +323,7 @@ export async function primaryApply(config, manifest, directory, aws) {
     if (existingPolicy && !same(existingPolicy, state.policy))
         throw new Error('PRIMARY_POLICY_CONFLICT');
     if (!existingPolicy)
-        mutate(journal, state, 'create-policy', () => aws('iam', 'put-role-policy', { RoleName: role, PolicyName: policyName, PolicyDocument: JSON.stringify(state.policy) }), () => {
+        await mutate(journal, state, 'create-policy', () => aws('iam', 'put-role-policy', { RoleName: role, PolicyName: policyName, PolicyDocument: JSON.stringify(state.policy) }), () => {
             state.createdPolicy = true;
         });
     for (const route of routes) {
@@ -269,20 +334,18 @@ export async function primaryApply(config, manifest, directory, aws) {
                 throw new Error('PRIMARY_ROUTE_CONFLICT');
             continue;
         }
-        mutate(journal, state, 'create-route:' + route, () => aws('apigatewayv2', 'create-route', { ApiId: api, ...expected }), created => {
+        await mutate(journal, state, 'create-route:' + route, () => aws('apigatewayv2', 'create-route', { ApiId: api, ...expected }), created => {
             state.createdRoutes.push({ id: created.RouteId, ...expected });
         });
     }
     if (!state.poolDone) {
         assertCognito(state, aws);
-        const input = poolInput(state.pool);
-        input.AdminCreateUserConfig = { ...state.pool.AdminCreateUserConfig, AllowAdminCreateUserOnly: false };
-        input.AutoVerifiedAttributes = [...new Set([...(state.pool.AutoVerifiedAttributes ?? []), 'email'])];
-        mutate(journal, state, 'enable-signup', () => {
+        const input = signupInput(state.pool);
+        await mutate(journal, state, 'enable-signup', () => {
             aws('cognito-idp', 'update-user-pool', input);
-            return readPool(aws);
+            return cognitoReadback(() => readPool(aws), poolInput, input, state.poolAfter, 'PRIMARY_POOL_READBACK_FAILED');
         }, result => {
-            if (!same(poolInput(result), input))
+            if (!sameCognito(poolInput(result), input))
                 throw new Error('PRIMARY_POOL_READBACK_FAILED');
             state.poolAfter = result;
             state.poolDone = true;
@@ -290,13 +353,12 @@ export async function primaryApply(config, manifest, directory, aws) {
     }
     if (!state.clientDone) {
         assertCognito(state, aws);
-        const input = clientInput(state.client);
-        input.AllowedOAuthScopes = [...new Set([...(state.client.AllowedOAuthScopes ?? []), 'openid', 'email'])];
-        mutate(journal, state, 'enable-client-scopes', () => {
+        const input = scopesInput(state.client);
+        await mutate(journal, state, 'enable-client-scopes', () => {
             aws('cognito-idp', 'update-user-pool-client', input);
-            return readClient(aws);
+            return cognitoReadback(() => readClient(aws), clientInput, input, state.clientAfter, 'PRIMARY_CLIENT_READBACK_FAILED');
         }, result => {
-            if (!same(clientInput(result), input))
+            if (!sameCognito(clientInput(result), input))
                 throw new Error('PRIMARY_CLIENT_READBACK_FAILED');
             state.clientAfter = result;
             state.clientDone = true;
@@ -305,7 +367,7 @@ export async function primaryApply(config, manifest, directory, aws) {
     if (!state.codeDone) {
         const current = await ready(aws, state.afterRevision, 'PRIMARY_UPDATE');
         assertLambda(state, current, state.config.CodeSha256, state.config.Environment, state.config.Handler);
-        mutate(journal, state, 'update-code', () => aws('lambda', 'update-function-code', {
+        await mutate(journal, state, 'update-code', () => aws('lambda', 'update-function-code', {
             FunctionName: functionName, RevisionId: state.afterRevision,
             ZipFile: readFileSync(directory + '/api.zip').toString('base64')
         }), result => {
@@ -316,7 +378,7 @@ export async function primaryApply(config, manifest, directory, aws) {
     const codeReady = await ready(aws, state.afterRevision, 'PRIMARY_UPDATE');
     assertLambda(state, codeReady, codeHash(targetCode), state.configDone ? { Variables: state.next } : state.config.Environment, state.configDone ? 'api.handler' : state.config.Handler);
     if (!state.configDone)
-        mutate(journal, state, 'update-config', () => aws('lambda', 'update-function-configuration', { FunctionName: functionName,
+        await mutate(journal, state, 'update-config', () => aws('lambda', 'update-function-configuration', { FunctionName: functionName,
             RevisionId: state.afterRevision, Environment: { Variables: state.next }, Handler: 'api.handler' }), result => {
             state.afterRevision = result.RevisionId;
             state.configDone = true;
@@ -344,7 +406,7 @@ export async function primaryRollback(directory, aws) {
     let current = await ready(aws, state.afterRevision, 'PRIMARY_ROLLBACK');
     assertLambda(state, current, rollback.codeDone ? state.config.CodeSha256 : state.codeDone ? codeHash(state.targetCode) : state.config.CodeSha256, rollback.configDone ? state.config.Environment : state.configDone ? { Variables: state.next } : state.config.Environment, rollback.configDone ? state.config.Handler : state.configDone ? 'api.handler' : state.config.Handler);
     if (!rollback.codeDone)
-        mutate(journal, state, 'rollback-code', () => aws('lambda', 'update-function-code', { FunctionName: functionName, RevisionId: state.afterRevision,
+        await mutate(journal, state, 'rollback-code', () => aws('lambda', 'update-function-code', { FunctionName: functionName, RevisionId: state.afterRevision,
             ZipFile: code.toString('base64') }), result => {
             state.afterRevision = result.RevisionId;
             rollback.codeDone = true;
@@ -353,7 +415,7 @@ export async function primaryRollback(directory, aws) {
     if (current.CodeSha256 !== state.config.CodeSha256)
         throw new Error('PRIMARY_ROLLBACK_CODE_MISMATCH');
     if (!rollback.configDone)
-        mutate(journal, state, 'rollback-config', () => aws('lambda', 'update-function-configuration', { FunctionName: functionName,
+        await mutate(journal, state, 'rollback-config', () => aws('lambda', 'update-function-configuration', { FunctionName: functionName,
             RevisionId: state.afterRevision, Environment: state.config.Environment, Handler: state.config.Handler }), result => {
             state.afterRevision = result.RevisionId;
             rollback.configDone = true;
@@ -366,7 +428,7 @@ export async function primaryRollback(directory, aws) {
         const found = readRoutes(aws).find(route => route.RouteId === created.id);
         if (!found || !same(routeShape(found), routeShape(created)))
             throw new Error('PRIMARY_ROLLBACK_ROUTE_DRIFT');
-        mutate(journal, state, 'rollback-route:' + created.id, () => aws('apigatewayv2', 'delete-route', { ApiId: api, RouteId: created.id }), () => {
+        await mutate(journal, state, 'rollback-route:' + created.id, () => aws('apigatewayv2', 'delete-route', { ApiId: api, RouteId: created.id }), () => {
             rollback.routes.push(created.id);
         });
     }
@@ -374,18 +436,18 @@ export async function primaryRollback(directory, aws) {
         const role = state.config.Role.split('/').at(-1);
         if (!same(readPolicy(aws, role), state.policy))
             throw new Error('PRIMARY_POLICY_CONFLICT');
-        mutate(journal, state, 'rollback-policy', () => aws('iam', 'delete-role-policy', { RoleName: role, PolicyName: policyName }), () => {
+        await mutate(journal, state, 'rollback-policy', () => aws('iam', 'delete-role-policy', { RoleName: role, PolicyName: policyName }), () => {
             rollback.policyDone = true;
         });
     }
     if (!rollback.poolDone) {
         assertCognito(state, aws);
         const input = poolInput(state.pool);
-        mutate(journal, state, 'rollback-pool', () => {
+        await mutate(journal, state, 'rollback-pool', () => {
             aws('cognito-idp', 'update-user-pool', input);
-            return readPool(aws);
+            return cognitoReadback(() => readPool(aws), poolInput, input, state.pool, 'PRIMARY_ROLLBACK_POOL_MISMATCH');
         }, result => {
-            if (!same(poolInput(result), input))
+            if (!sameCognito(poolInput(result), input))
                 throw new Error('PRIMARY_ROLLBACK_POOL_MISMATCH');
             state.poolAfter = result;
             rollback.poolDone = true;
@@ -394,11 +456,11 @@ export async function primaryRollback(directory, aws) {
     if (!rollback.clientDone) {
         assertCognito(state, aws);
         const input = clientInput(state.client);
-        mutate(journal, state, 'rollback-client', () => {
+        await mutate(journal, state, 'rollback-client', () => {
             aws('cognito-idp', 'update-user-pool-client', input);
-            return readClient(aws);
+            return cognitoReadback(() => readClient(aws), clientInput, input, state.client, 'PRIMARY_ROLLBACK_CLIENT_MISMATCH');
         }, result => {
-            if (!same(clientInput(result), input))
+            if (!sameCognito(clientInput(result), input))
                 throw new Error('PRIMARY_ROLLBACK_CLIENT_MISMATCH');
             state.clientAfter = result;
             rollback.clientDone = true;
@@ -406,12 +468,76 @@ export async function primaryRollback(directory, aws) {
     }
     current = await ready(aws, state.afterRevision, 'PRIMARY_ROLLBACK_CONFIG');
     assertLambda(state, current, state.config.CodeSha256, state.config.Environment, state.config.Handler);
-    if (!same(poolInput(readPool(aws)), poolInput(state.pool)) ||
-        !same(clientInput(readClient(aws)), clientInput(state.client)) ||
+    if (!sameCognito(poolInput(readPool(aws)), poolInput(state.pool)) ||
+        !sameCognito(clientInput(readClient(aws)), clientInput(state.client)) ||
         readRoutes(aws).some(route => state.createdRoutes.some(created => created.id === route.RouteId)) ||
         (state.createdPolicy && readPolicy(aws, state.config.Role.split('/').at(-1)) !== null))
         throw new Error('PRIMARY_ROLLBACK_READBACK_FAILED');
     rollback.complete = true;
     journal.save(state);
     return { status: 'PASS', groupTable: 'RETAINED' };
+}
+
+/** Read-only cloud evidence; writes only the exact local checkpoint after proof. */
+export async function reconcilePendingSignup(config, manifest, directory, aws) {
+    const journal = journalAt(directory);
+    const state = journal.read();
+    if (state.schemaVersion !== 2 || state.account !== config.account || state.rollback ||
+        state.targetCode !== manifest.artifacts.api.sha256 ||
+        digest(readFileSync(directory + '/api.zip')) !== state.targetCode)
+        throw new Error('PRIMARY_JOURNAL_TARGET_CHANGED');
+    if (!state.pending) {
+        assertCognito(state, aws);
+        return { status: 'PRIMARY_RECONCILIATION_NOT_REQUIRED' };
+    }
+    if (state.pending !== 'enable-signup' || state.poolDone || state.clientDone ||
+        state.codeDone || state.configDone || state.complete || !state.rollbackCode ||
+        !sameSnapshot(state.poolAfter, state.pool) || !sameSnapshot(state.clientAfter, state.client))
+        throw new Error('PRIMARY_MUTATION_RECONCILIATION_REQUIRED');
+    primaryPlan(config, state.config);
+    if (digest(readFileSync(directory + '/primary-rollback.zip')) !== state.rollbackCode ||
+        codeHash(state.rollbackCode) !== state.config.CodeSha256)
+        throw new Error('ROLLBACK_BYTES_CHANGED');
+    const current = await ready(aws, state.afterRevision, 'PRIMARY_UPDATE');
+    assertLambda(state, current, state.config.CodeSha256, state.config.Environment, state.config.Handler);
+    if (!sameSnapshot(readClient(aws), state.client))
+        throw new Error('PRIMARY_COGNITO_DRIFT');
+    const table = aws('dynamodb', 'describe-table', { TableName: groupTable }).Table;
+    assertPrimaryTable(table, config.account,
+        aws('dynamodb', 'list-tags-of-resource', { ResourceArn: table.TableArn }).Tags);
+    verifyRoutes(state, aws);
+    if (!same(readPolicy(aws, state.config.Role.split('/').at(-1)), state.policy))
+        throw new Error('PRIMARY_POLICY_CONFLICT');
+    const input = signupInput(state.pool);
+    let result;
+    try {
+        result = await cognitoReadback(() => readPool(aws), poolInput, input, state.pool,
+            'PRIMARY_POOL_RECONCILIATION_MISMATCH');
+    } catch (error) {
+        if (error.message !== 'PRIMARY_POOL_RECONCILIATION_MISMATCH') throw error;
+        // Top-level known field names only: never values, nested tag names or raw responses.
+        const observed = stableCognito(readPool(aws));
+        const expected = stableCognito(expectedSnapshot(state.pool, input));
+        const fields = [...new Set([...Object.keys(expected), ...Object.keys(observed)])]
+            .filter(key => !sameCognito({ [key]: observed[key] }, { [key]: expected[key] }))
+            .map(key => Object.hasOwn(awsSkeleton('cognito-idp', 'update-user-pool'), key)
+                ? key : 'OTHER_CONFIGURATION').filter((key, index, keys) => keys.indexOf(key) === index);
+        console.error(JSON.stringify({ status: 'BLOCKED', code: error.message, fields }));
+        throw error;
+    }
+    // Retain immutable pre-repair journal bytes as well as the untouched rollback ZIP.
+    const backup = directory + '/primary-before-assess09.json';
+    if (existsSync(backup)) {
+        if (lstatSync(backup).isSymbolicLink() || !same(JSON.parse(readFileSync(backup, 'utf8')), state))
+            throw new Error('PRIMARY_REPAIR_BACKUP_CONFLICT');
+    } else {
+        const descriptor = openSync(backup, 'wx', 0o600);
+        try { writeFileSync(descriptor, readFileSync(directory + '/primary-private-journal.json')); fsyncSync(descriptor); }
+        finally { closeSync(descriptor); }
+    }
+    state.poolAfter = result;
+    state.poolDone = true;
+    state.pending = null;
+    journal.save(state);
+    return { status: 'PRIMARY_SIGNUP_RECONCILED', cloudWrites: false };
 }

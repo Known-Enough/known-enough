@@ -1,3 +1,9 @@
+## 2026-10-02 — ASSESS09 verified source checkpoint
+
+Canonical Cognito comparisons fix the absent AutoVerifiedAttributes insertion-order failure and nested/client collection reordering; unknown defaults/loss remain blocked. Full snapshot preservation, bounded read-only propagation, apply/rollback parity and exact pending-signup reconciliation retain original backup and progress. Dedicated same-source helper uses corrected IAM adapter, original runtime/cwd, private immutable backup copies and operational overlays. No source-pin advancement, authorization renewal/counter reset or real AWS call.
+
+Focused 56/56, pinned full npm run check exit 0: 639 application tests/two optional skips, hosted 1/1, E2E 56/56, references/planning/lint/types/boundaries/build. Bash parse/whitespace and self-inspection pass. Actual original-source offline overlay build reproduces published API/broker hashes and preserves checkpoint/artifacts at a mocked STS denial; initial verification symlink dependencies altered source markers, corrected by installing the original pinned lockfiles in the isolated clone. No artifact hash guard was relaxed. Full log /tmp/assess09-check.log, isolated verification /tmp/known-enough-assess09-verification. Ticket remains IN_PROGRESS for immutable command publication/verification; A alone performs managed reconciliation and ASSESS07.
+
 ## 2026-10-02 — ASSESS09 local repair claim
 
 Clean ff-only main baseline 3d2d68af2c1c2b7980ad56328a032e368e2f30c9e92. B / Battosai1806, Codex GPT-6 (exact variant/effort not exposed), no subagents. Scope: primary Cognito comparisons/pending reconciliation, dedicated original-pin recovery helper, focused tests and handoff/ticket/board records. A keeps cloud execution and NP00; no credential access or cloud writes.
