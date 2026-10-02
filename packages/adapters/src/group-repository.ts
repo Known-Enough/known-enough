@@ -5,10 +5,13 @@ export interface GroupRepository {
   transaction<T>(update: (state: Groups.GroupState) => T | Promise<T>): Promise<T>;
   fence(inspect: (state: Groups.GroupState) => void): Promise<DecisionAdmissionFence>;
 }
+export class GroupCapacityError extends Error {
+  constructor() { super('GROUP_CAPACITY_EXCEEDED'); this.name = 'GroupCapacityError'; }
+}
 type Versioned = { version: number; state: Groups.GroupState };
 function checked(state: Groups.GroupState): Groups.GroupState {
   const parsed = Groups.GroupState.parse(state);
-  if (Buffer.byteLength(JSON.stringify(parsed)) > 300_000) throw new Error('Group capacity reached');
+  if (Buffer.byteLength(JSON.stringify(parsed)) > 300_000) throw new GroupCapacityError();
   return parsed;
 }
 /** Strong reads and conditional writes; coordinated decision writes share the group condition/Put. */

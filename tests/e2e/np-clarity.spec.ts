@@ -125,3 +125,36 @@ test('unanswered public questions survive saving and explicit answers create a r
     await expect(page.getByRole('heading', { name: 'Shared frame', exact: true })).toBeVisible();
   } finally { await context.close(); await api.close(); }
 });
+
+test('failed account refresh clears prior approved groups and recipient links', async ({browser}) => {
+  const api=await npApi();const context=await browser.newContext();
+  try {
+    await connect(context,api,'iris');await api.call('iris','/account/register',{displayName:'Iris'});await api.approve('iris');
+    await api.groups.create({kind:'participant',subject:'iris'},{name:'Fictional club',idempotencyKey:'club'});
+    const page=await context.newPage();await page.goto(url);await expect(page.getByText('Access approved for Iris.',{exact:false})).toBeVisible();
+    await page.getByLabel('Recipient email', {exact:true}).fill('fictional-recipient@example.invalid');
+    await page.getByRole('button',{name:'Create invitation link',exact:true}).click();await expect(page.getByLabel('Invitation link',{exact:true})).toBeVisible();
+    await page.route('https://api.example.test/account',route=>route.fulfill({status:500,body:'PRIVATE_FAILURE',headers:{'access-control-allow-origin':'*'}}));
+    await page.getByRole('button',{name:'Refresh account and groups'}).click();await expect(page.getByText('Refresh failed. Sign in again if needed.')).toBeVisible();
+    await expect(page.getByRole('button',{name:'Create group',exact:true})).toHaveCount(0);await expect(page.getByRole('heading',{name:'Fictional club',exact:true})).toHaveCount(0);
+    await expect(page.getByLabel('Invitation link',{exact:true})).toHaveCount(0);expect(await page.locator('body').innerText()).not.toMatch(/PRIVATE_FAILURE|fictional-recipient/);
+  }finally{await context.close();await api.close();}
+});
+test('a late approved refresh cannot overwrite a newer disabled account', async ({browser})=>{
+  const api=await npApi();const context=await browser.newContext();
+  try{
+    await connect(context,api,'iris');await api.call('iris','/account/register',{displayName:'Iris'});await api.approve('iris');
+    const page=await context.newPage();await page.goto(url);await expect(page.getByText('Access approved for Iris.',{exact:false})).toBeVisible();
+    let release!:()=>void;let entered!:()=>void;const started=new Promise<void>(resolve=>{entered=resolve;});const wait=new Promise<void>(resolve=>{release=resolve;});let requests=0;
+    await page.route('https://api.example.test/account',async route=>{
+      const response=await api.call('iris','/account');const body=await response.text();
+      if(++requests===1){entered();await wait;}
+      await route.fulfill({status:response.status,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body}).catch(()=>{});
+    });
+    await page.getByRole('button',{name:'Refresh account and groups'}).click();await started;
+    await expect(page.getByRole('button',{name:'Create group',exact:true})).toBeDisabled();await api.disable('iris');
+    await page.getByRole('button',{name:'Refresh account and groups'}).click();await expect(page.getByText('Your access is disabled.',{exact:false})).toBeVisible();
+    release();await page.waitForLoadState('networkidle');await expect(page.getByText('Your access is disabled.',{exact:false})).toBeVisible();
+    await expect(page.getByRole('button',{name:'Create group',exact:true})).toHaveCount(0);
+  }finally{await context.close();await api.close();}
+});

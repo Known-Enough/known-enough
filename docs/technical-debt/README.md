@@ -1,3 +1,5 @@
+> **Current routing, 2026-10-02:** Local assessment corrections belong to B's sequential ASSESS01–06/08 scope, managed acceptance to ASSESS07/LIVE04, and NP00 to A. [OPS01](../tasks/OPS01.md), [OPS02](../tasks/OPS02.md) and [OPS03](../tasks/OPS03.md) record wider-use capacity/archive, retention/erasure and distributed-job work. A's latest [NP00 checkpoint](../np00-technical-closeout.md) records model-off and temporary permission cleanup; older "cleanup awaits host" text below is historical, not fresh inspection. Preserve named evidence; no NP00 status is changed here.
+
 # Technical debt — current routing
 
 All existing technical obligations route through [NP00](../tasks/NP00.md), the first task in the [NP queue](../task-board.md). Do not claim a TD/KE task in parallel. The old independent review prerequisite is deferred by the [current user direction](../next-phase.md); actual technical checks remain required, and old review verdicts are preserved.

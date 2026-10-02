@@ -1,3 +1,5 @@
+> **Current implementation, 2026-10-02:** Known Enough v2, group onboarding, drafting/clarification, private confirmation/negotiation, exact approval and live-QA preparation are implemented locally. ASSESS01–06 correct local defects; actual corrected installation and complete managed qualification remain ASSESS07/LIVE04. Capacity, retention/erasure and process-local jobs remain bounded pilot limits; see [current operational limits](operational-limits.md) and [assessment](full-assessment.md). Earlier direction below is retained as dated history.
+
 # Known Enough — architecture direction
 
 Status: KE00/KE01 direction, updated 2026-09-27. KE01 implements the v2 generic runtime schemas, strict projection DTOs and canonical identities; KE02/KE03 implement evaluation and application/storage behavior. [Contract v2](contracts.md#ke01-generic-contract-v2) is the executable boundary. The [pivot audit](known-enough-pivot.md) distinguishes existing source from targets. Preserve the current repository and adapt its boundaries.

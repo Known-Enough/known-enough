@@ -35,38 +35,57 @@ export function GroupHome({ api, openDecision }: { api: (path: string, init?: Re
     window.addEventListener('hashchange', capture);
     return () => window.removeEventListener('hashchange', capture);
   }, []);
-  async function load() {
-    setChecking(true);
-    const response = await api('/account');
-    if (!response.ok) { setChecking(false); setAvailable(false); throw new Error('Account information is unavailable.'); }
-    const result = await response.json() as { account: unknown };
-    const next = result.account ? Groups.AccountSnapshot.parse(result.account) : null;
-    setAvailable(true); setChecking(false); setAccount(next); if (next?.status !== 'APPROVED') setGroups([]);
-    if (next?.status === 'APPROVED') {
-      const response = await api('/groups');
-      if (!response.ok) { setGroups([]); throw new Error('Groups are unavailable. Refresh or sign in again.'); }
-      const result = await response.json() as { groups: unknown[] };
-      setGroups(result.groups.map(group => Groups.GroupSnapshot.parse(group)));
-    }
+  const loadEpoch = useRef(0); const loadAbort = useRef<AbortController | null>(null);
+  const mounted = useRef(true);
+  async function load(preserveLink = false) {
+    const epoch = ++loadEpoch.current; loadAbort.current?.abort();
+    const controller = new AbortController(); loadAbort.current = controller;
+    const current = () => mounted.current && epoch === loadEpoch.current;
+    setChecking(true); if (!preserveLink) setLink('');
+    try {
+      const response = await api('/account', {signal: controller.signal});
+      if (!response.ok) throw new Error('Account unavailable');
+      const result = await response.json() as { account: unknown };
+      const next = result.account ? Groups.AccountSnapshot.parse(result.account) : null;
+      let nextGroups: Groups.GroupSnapshot[] = [];
+      if (next?.status === 'APPROVED') {
+        const response = await api('/groups', {signal: controller.signal});
+        if (!response.ok) throw new Error('Groups unavailable');
+        const result = await response.json() as { groups: unknown[] };
+        nextGroups = result.groups.map(group => Groups.GroupSnapshot.parse(group));
+      }
+      if (!current()) return;
+      setAvailable(true); setAccount(next); setGroups(nextGroups); setNotice('');
+      if (next?.status !== 'APPROVED') {setLink(''); setEmail(''); setReplace(false);}
+    } catch {
+      if (!current()) return;
+      setAvailable(false); setAccount(null); setGroups([]); setLink(''); setEmail(''); setReplace(false);
+      throw new Error('Groups are unavailable. Refresh or sign in again.');
+    } finally {if (current()) setChecking(false);}
   }
-  useEffect(() => { let active = true; void load().catch(() => { if (active) { setChecking(false); setNotice('Groups are unavailable. Try refreshing; this preview may not include group onboarding.'); } });
-    return () => { active = false; }; }, []); // The component is keyed to the authenticated session.
+  useEffect(() => {
+    mounted.current = true;
+    void load().catch(() => {if (mounted.current) setNotice('Groups are unavailable. Try refreshing or signing in again.');});
+    return () => {mounted.current = false; ++loadEpoch.current; loadAbort.current?.abort();};
+  }, []); // The component is keyed to the authenticated session.
   async function action(path: string, body: unknown, after?: (result: Record<string, unknown>) => void) {
     setBusy(true); setNotice('');
     try {
       const response = await api(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
       if (!response.ok) {
-        setNotice(response.status === 409 ? 'The group or link changed. Refresh and review before trying again.'
+        setNotice(response.status === 507 ? 'This pilot has reached its capacity. Ask the operator about capacity; retrying will not free space.'
+          : response.status === 409 ? 'The group or link changed. Refresh and review before trying again.'
           : response.status === 403 ? 'Account approval or organizer access is required.'
           : 'This action could not be completed. Check access, the recipient and link expiry.'); return;
       }
-      const result = await response.json() as Record<string, unknown>; after?.(result); await load();
+      const result = await response.json() as Record<string, unknown>; after?.(result); await load(true);
     } catch { setNotice('The result is unknown. Refresh before retrying; replace a lost invitation link explicitly.'); }
     finally { setBusy(false); }
   }
   return <section className="ke-card" aria-busy={busy}><h2>Your account and groups</h2>
     <p>Register through the sign-in page and verify your email. Then request access here. Global access approval and accepting a group invitation are separate.</p>
     <button className="secondary" disabled={busy} onClick={() => { void load().catch(() => setNotice('Refresh failed. Sign in again if needed.')); }}>Refresh account and groups</button>
+    <fieldset disabled={busy || checking} style={{border: 0, padding: 0, minWidth: 0}} aria-label="Account and group actions">
     {available && !checking && !account && <><label htmlFor="group-display-name">Your display name</label><input id="group-display-name" value={name} maxLength={80} onChange={event => setName(event.target.value)} />
       <button disabled={busy || !name.trim()} onClick={() => void action('/account/register', { displayName: name })}>Request access</button></>}
     {account?.status === 'PENDING' && <p>Access request pending. The operator must approve it before you create or join groups.</p>}
@@ -93,6 +112,7 @@ export function GroupHome({ api, openDecision }: { api: (path: string, init?: Re
     </>}
     {link && <><p>Copy this recipient-bound link privately. It expires after 24 hours. No email has been sent. Share the link yourself only with the intended recipient.</p><label htmlFor="group-copy-link">Invitation link</label>
       <input id="group-copy-link" readOnly value={link} onFocus={event => event.currentTarget.select()} /><button className="secondary" onClick={() => setLink('')}>Hide invitation link</button></>}
+    </fieldset>
     {(checking || busy || notice) && <p role="status">{checking ? 'Checking your account…' : busy ? 'Saving or checking the group…' : notice}</p>}
   </section>;
 }

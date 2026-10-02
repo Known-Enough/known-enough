@@ -1,7 +1,7 @@
 import { createHash, createHmac, randomBytes } from 'node:crypto';
 import { Groups, Id } from '@deal-table/contracts';
 import { KnownEnoughApplicationError, type TrustedPrincipal } from '@deal-table/application';
-import { bindAdmissionFence, type GroupRepository } from '@deal-table/adapters';
+import { bindAdmissionFence, GroupCapacityError, type GroupRepository } from '@deal-table/adapters';
 const digest = (text: string) => createHash('sha256').update(text).digest('hex');
 export const memberId = (subject: string) => `member-${digest(subject).slice(0, 32)}`;
 const fail = (code: 'FORBIDDEN' | 'INVALID_COMMAND' | 'NOT_FOUND' | 'STALE_CONTEXT'): never => { throw new KnownEnoughApplicationError(code); };
@@ -60,7 +60,8 @@ export class GroupService {
       let account = state.accounts.find(item => item.subject === who);
       if (account && account.emailHash !== emailHash) return fail('FORBIDDEN');
       if (!account) {
-        if (state.accounts.length >= 256 || state.accounts.some(item => item.emailHash === emailHash)) return fail('FORBIDDEN');
+        if (state.accounts.length >= 256) throw new GroupCapacityError();
+        if (state.accounts.some(item => item.emailHash === emailHash)) return fail('FORBIDDEN');
         account = { subject: who, emailHash, displayName, status: 'PENDING', version: 1 }; state.accounts.push(account);
       }
       return Groups.AccountSnapshot.parse({ status: account.status, displayName: account.displayName, version: account.version });
@@ -90,7 +91,7 @@ export class GroupService {
       this.account(state, who);
       let group = state.groups.find(item => item.id === id);
       if (group && group.name !== name) return fail('STALE_CONTEXT');
-      if (!group) { if (state.groups.length >= 32) return fail('INVALID_COMMAND');
+      if (!group) { if (state.groups.length >= 32) throw new GroupCapacityError();
         group = { id, name, organizer: who, version: 1, members: [who], invitations: [], decisions: [], drafts: [] }; state.groups.push(group); }
       return this.snapshot(state, group, who);
     });
@@ -107,7 +108,7 @@ export class GroupService {
       const prior = group.invitations.find(item => item.recipientHash === recipientHash && !item.acceptedBy && item.expiresAt > this.options.now());
       if (prior && !body.replace) return fail('STALE_CONTEXT');
       group.invitations = group.invitations.filter(item => item.recipientHash !== recipientHash && item.expiresAt > this.options.now());
-      if (group.invitations.length >= 64) return fail('INVALID_COMMAND');
+      if (group.invitations.length >= 64) throw new GroupCapacityError();
       const expiresAt = this.options.now() + 24 * 60 * 60_000;
       group.invitations.push({ recipientHash, tokenHash: digest(token), expiresAt, acceptedBy: null });
       return { token, expiresAt, delivery: 'COPY_LINK' as const };
@@ -127,7 +128,7 @@ export class GroupService {
         if (invitation.acceptedBy !== who || !group.members.includes(who)) return fail('NOT_FOUND');
         return this.snapshot(state, group, who);
       }
-      if (group.members.length >= 16) return fail('INVALID_COMMAND');
+      if (group.members.length >= 16) throw new GroupCapacityError();
       if (!group.members.includes(who)) { group.members.push(who); group.version++; }
       invitation.acceptedBy = who;
       return this.snapshot(state, group, who);
@@ -182,7 +183,7 @@ export class GroupService {
       if (group.version !== version) return fail('STALE_CONTEXT');
       const prior = group.decisions.find(item => item.id === decisionId);
       if (prior) { if (prior.version !== version) return fail('STALE_CONTEXT'); return; }
-      if (group.decisions.length >= 64) return fail('INVALID_COMMAND');
+      if (group.decisions.length >= 64) throw new GroupCapacityError();
       group.decisions.push({ id: Id.parse(decisionId), version });
     });
   }

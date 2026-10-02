@@ -1,69 +1,213 @@
 import { validateConfig, targetNames, mailboxProvider } from './config.mjs';
 const ref = name => ({ Ref: name });
-const att = (name,key) => ({ 'Fn::GetAtt': [name,key] });
+const att = (name, key) => ({ 'Fn::GetAtt': [name, key] });
 const sub = text => ({ 'Fn::Sub': text });
-const statement = (Action, Resource) => ({ Effect:'Allow', Action, Resource });
-const policy = statements => ({ Version:'2012-10-17', Statement: statements });
-const table = name => ({ Type:'AWS::DynamoDB::Table', DeletionPolicy:'Retain', UpdateReplacePolicy:'Retain', Properties:{ TableName:name, BillingMode:'PAY_PER_REQUEST', AttributeDefinitions:[{AttributeName:'PK',AttributeType:'S'},{AttributeName:'SK',AttributeType:'S'}], KeySchema:[{AttributeName:'PK',KeyType:'HASH'},{AttributeName:'SK',KeyType:'RANGE'}], SSESpecification:{SSEEnabled:true}, Tags:[{Key:'KnownEnoughQa',Value:'true'}] } });
-const trust = service => policy([{ Effect:'Allow', Principal:{Service:service}, Action:'sts:AssumeRole' }]);
-const role = (name, statements) => ({ Type:'AWS::IAM::Role', Properties:{ RoleName:name, AssumeRolePolicyDocument:trust('lambda.amazonaws.com'), Policies:[{PolicyName:'ExactQaResources',PolicyDocument:policy(statements)}] } });
-const output = value => ({ Value:value });
+const statement = (Action, Resource) => ({ Effect: 'Allow', Action, Resource });
+const policy = statements => ({ Version: '2012-10-17', Statement: statements });
+const table = name => ({
+    Type: 'AWS::DynamoDB::Table', DeletionPolicy: 'Retain', UpdateReplacePolicy: 'Retain', Properties: {
+        TableName: name, BillingMode: 'PAY_PER_REQUEST', AttributeDefinitions: [{ AttributeName: 'PK', AttributeType: 'S' }, { AttributeName: 'SK', AttributeType: 'S' }], KeySchema: [{ AttributeName: 'PK', KeyType: 'HASH' }, { AttributeName: 'SK', KeyType: 'RANGE' }], SSESpecification: { SSEEnabled: true }, Tags: [{ Key: 'KnownEnoughQa', Value: 'true' }]
+    }
+});
+const trust = service => policy([{ Effect: 'Allow', Principal: { Service: service }, Action: 'sts:AssumeRole' }]);
+const role = (name, statements) => ({
+    Type: 'AWS::IAM::Role', Properties: {
+        RoleName: name, AssumeRolePolicyDocument: trust('lambda.amazonaws.com'), Policies: [{ PolicyName: 'ExactQaResources', PolicyDocument: policy(statements) }]
+    }
+});
+const output = value => ({ Value: value });
 export function renderTemplates(raw, artifacts) {
-  const c = validateConfig(raw); const n = targetNames(c); const freeMail = mailboxProvider(c) === 'mailtm';
-  for (const name of ['apiKey','brokerKey']) if (!/^[0-9a-f]{64}\/[a-z-]+\.zip$/.test(artifacts[name] ?? '')) throw new Error('INVALID_ARTIFACT_KEY');
-  const front = sub('https://main.${QaApp.DefaultDomain}/');
-  const control = att('Control','Arn'); const group = att('Groups','Arn'); const decision = att('Decisions','Arn');
-  const logs = statement(['logs:CreateLogStream','logs:PutLogEvents'], sub(`arn:aws:logs:${c.region}:${c.account}:log-group:/aws/lambda/known-enough-qa-*:log-stream:*`));
-  const code = key => ({S3Bucket:n.artifacts,S3Key:key});
-  const environment = {
-    AWS_ACCOUNT_EXPECTED:c.account, QA_CONTROL_TABLE:ref('Control'), QA_GROUP_TABLE:ref('Groups'), QA_DECISION_TABLE:ref('Decisions'),
-    NP_GROUP_EMAIL_KEY:ref('EmailKey'), QA_MAIL_PROVIDER:mailboxProvider(c), QA_MAIL_DOMAIN:freeMail?'qa.invalid':c.mailDomain, QA_MAIL_BUCKET:freeMail?'NOT_USED_MAILTM':ref('MailboxBucket'), QA_SECRET:ref('LoginSecret'), QA_POOL_ID:ref('Pool'), QA_SOURCE_COMMIT:c.sourceCommit,
-  };
-  // Shared account capacity also works in new accounts with a concurrency quota of 10.
-  // The broker/model transactions enforce the approved budgets independently of Lambda capacity.
-  const fn = (name, handler, r, key, variables, timeout=29) => ({ Type:'AWS::Lambda::Function', Properties:{ FunctionName:name, Runtime:'nodejs24.x', Handler:handler, Role:att(r,'Arn'), Code:code(key), MemorySize:512, Timeout:timeout, Environment:{Variables:variables}, Tags:[{Key:'KnownEnoughQa',Value:'true'}] } });
-  const template = { AWSTemplateFormatVersion:'2010-09-09', Description:'Known Enough isolated QA; no primary state or personal credentials', Parameters:{MailboxBucket:{Type:'String'},EmailSourceArn:{Type:'String'},EmailKey:{Type:'String',NoEcho:true,MinLength:32}}, Resources:{}, Outputs:{} };
-  const r = template.Resources;
-  r.Decisions=table(n.decisions); r.Groups=table(n.groups); r.Control=table(n.control);
-  r.LoginSecret={Type:'AWS::SecretsManager::Secret',Properties:{Name:'known-enough/qa/run-login',GenerateSecretString:{PasswordLength:48},Tags:[{Key:'KnownEnoughQa',Value:'true'}]}};
-  r.QaApp={Type:'AWS::Amplify::App',Properties:{Name:n.appName,Platform:'WEB',CustomRules:[{Source:'/<*>',Target:'/index.html',Status:'404-200'}]}};
-  r.QaBranch={Type:'AWS::Amplify::Branch',Properties:{AppId:att('QaApp','AppId'),BranchName:'main',Stage:'DEVELOPMENT',EnableAutoBuild:false}};
-  r.TriggerRole=role('KnownEnoughQaTrigger', [logs,statement(['dynamodb:GetItem','dynamodb:PutItem','dynamodb:ConditionCheckItem'],control)]);
-  const triggerEnv={QA_CONTROL_TABLE:ref('Control'),QA_MAIL_PROVIDER:mailboxProvider(c),QA_MAIL_DOMAIN:freeMail?'qa.invalid':c.mailDomain};
-  r.PreSignup=fn('known-enough-qa-pre-signup','broker.preSignup','TriggerRole',artifacts.brokerKey,triggerEnv,10);
-  r.CustomMessage=fn('known-enough-qa-custom-message','broker.customMessage','TriggerRole',artifacts.brokerKey,triggerEnv,10);
-  r.Pool={Type:'AWS::Cognito::UserPool',DeletionPolicy:'Retain',Properties:{UserPoolName:'known-enough-live-qa',UsernameConfiguration:{CaseSensitive:true},AutoVerifiedAttributes:['email'],AdminCreateUserConfig:{AllowAdminCreateUserOnly:false},Policies:{PasswordPolicy:{MinimumLength:16,RequireUppercase:true,RequireLowercase:true,RequireNumbers:true,RequireSymbols:true}},MfaConfiguration:'OFF',AccountRecoverySetting:{RecoveryMechanisms:[{Name:'verified_email',Priority:1}]},EmailConfiguration:{EmailSendingAccount:'DEVELOPER',SourceArn:ref('EmailSourceArn'),From:`no-reply@${c.mailDomain}`},VerificationMessageTemplate:{DefaultEmailOption:'CONFIRM_WITH_CODE'},LambdaConfig:{PreSignUp:att('PreSignup','Arn'),CustomMessage:att('CustomMessage','Arn')},UserPoolTags:{KnownEnoughQa:'true'}}};
-  for (const name of ['PreSignup','CustomMessage']) r[`${name}Permission`]={Type:'AWS::Lambda::Permission',Properties:{FunctionName:ref(name),Action:'lambda:InvokeFunction',Principal:'cognito-idp.amazonaws.com',SourceAccount:c.account,SourceArn:att('Pool','Arn')}};
-  for (const name of ['Participant','Display']) r[name]={Type:'AWS::Cognito::UserPoolClient',Properties:{ClientName:`qa-${name.toLowerCase()}`,UserPoolId:ref('Pool'),GenerateSecret:false,AllowedOAuthFlowsUserPoolClient:true,AllowedOAuthFlows:['code'],AllowedOAuthScopes:name==='Participant'?['openid','email']:['openid'],SupportedIdentityProviders:['COGNITO'],CallbackURLs:[front],LogoutURLs:[front],AccessTokenValidity:15,IdTokenValidity:15,TokenValidityUnits:{AccessToken:'minutes',IdToken:'minutes'},PreventUserExistenceErrors:'ENABLED'}};
-  r.PoolDomain={Type:'AWS::Cognito::UserPoolDomain',Properties:{Domain:n.domain,UserPoolId:ref('Pool')}};
-  r.ApiRole=role('KnownEnoughQaApi', [logs,statement(['dynamodb:GetItem','dynamodb:PutItem','dynamodb:UpdateItem','dynamodb:ConditionCheckItem'],decision),statement(['dynamodb:GetItem','dynamodb:PutItem','dynamodb:ConditionCheckItem'],group),statement('dynamodb:GetItem',control),{...statement('dynamodb:UpdateItem',control),Condition:{'ForAllValues:StringEquals':{'dynamodb:LeadingKeys':['LEASE','TOTAL']}}},{...statement('dynamodb:ConditionCheckItem',control),Condition:{'ForAllValues:StringEquals':{'dynamodb:LeadingKeys':['AUTH']}}},statement('bedrock:InvokeModel',`arn:aws:bedrock:${c.region}::foundation-model/amazon.nova-lite-v1:0`)]);
-  r.ApiFunction=fn(n.functionName,'api.qaHandler','ApiRole',artifacts.apiKey,{...environment, KE13B_TABLE_NAME:ref('Decisions'),COGNITO_USER_POOL_ID:ref('Pool'),COGNITO_PARTICIPANT_CLIENT_ID:ref('Participant'),COGNITO_DISPLAY_CLIENT_ID:ref('Display'),KE13B_ALLOWED_ORIGIN:sub('https://main.${QaApp.DefaultDomain}'),NP_GROUPS_ENABLED:'true',NP_GROUP_TABLE_NAME:ref('Groups'),NP_GROUP_EMAIL_KEY:ref('EmailKey'),NP_COGNITO_DOMAIN:`https://${n.domain}.auth.${c.region}.amazoncognito.com`,KE14_MODEL_MODE:c.authorization.approved?'BEDROCK':'DISABLED',KE14_PAID_CALLS_APPROVED:String(c.authorization.approved),KE14_INVOCATION_LOGGING_DISABLED:String(c.authorization.invocationLoggingDisabled),KE14_RETENTION_REVIEWED:String(c.authorization.retentionReviewed)});
-  r.BrokerRole=role('KnownEnoughQaFixtures',[logs,statement(['dynamodb:GetItem','dynamodb:PutItem','dynamodb:UpdateItem','dynamodb:ConditionCheckItem'],control),statement(['dynamodb:GetItem','dynamodb:PutItem','dynamodb:ConditionCheckItem'],group),statement(['dynamodb:Query','dynamodb:GetItem','dynamodb:PutItem','dynamodb:UpdateItem','dynamodb:DeleteItem','dynamodb:ConditionCheckItem'],decision),statement(['cognito-idp:AdminCreateUser','cognito-idp:AdminSetUserPassword','cognito-idp:AdminGetUser','cognito-idp:AdminDeleteUser','cognito-idp:AdminDisableUser','cognito-idp:AdminUserGlobalSignOut','cognito-idp:CreateGroup','cognito-idp:DeleteGroup','cognito-idp:AdminAddUserToGroup'],att('Pool','Arn')),statement(['secretsmanager:GetSecretValue','secretsmanager:PutSecretValue'],ref('LoginSecret')),...(!freeMail?[statement(['s3:ListBucket'],sub('arn:aws:s3:::${MailboxBucket}')),statement(['s3:GetObject','s3:DeleteObject'],sub('arn:aws:s3:::${MailboxBucket}/verification/*'))]:[])]);
-  r.Broker=fn(n.brokerName,'broker.handler','BrokerRole',artifacts.brokerKey,environment,180);
-  r.Api={Type:'AWS::ApiGatewayV2::Api',Properties:{Name:'known-enough-live-qa',ProtocolType:'HTTP',CorsConfiguration:{AllowOrigins:[sub('https://main.${QaApp.DefaultDomain}')],AllowMethods:['GET','POST','OPTIONS'],AllowHeaders:['authorization','content-type'],MaxAge:300}}};
-  r.Authorizer={Type:'AWS::ApiGatewayV2::Authorizer',Properties:{ApiId:ref('Api'),Name:'qa-cognito',AuthorizerType:'JWT',IdentitySource:['$request.header.Authorization'],JwtConfiguration:{Audience:[ref('Participant'),ref('Display')],Issuer:sub(`https://cognito-idp.${c.region}.amazonaws.com/`+'${Pool}')}}};
-  r.Integration={Type:'AWS::ApiGatewayV2::Integration',Properties:{ApiId:ref('Api'),IntegrationType:'AWS_PROXY',IntegrationUri:att('ApiFunction','Arn'),PayloadFormatVersion:'2.0',TimeoutInMillis:29000}};
-  r.Route={Type:'AWS::ApiGatewayV2::Route',Properties:{ApiId:ref('Api'),RouteKey:'$default',AuthorizationType:'JWT',AuthorizerId:ref('Authorizer'),Target:sub('integrations/${Integration}')}};
-  r.Options={Type:'AWS::ApiGatewayV2::Route',Properties:{ApiId:ref('Api'),RouteKey:'OPTIONS /{proxy+}',AuthorizationType:'NONE',Target:sub('integrations/${Integration}')}};
-  r.Stage={Type:'AWS::ApiGatewayV2::Stage',Properties:{ApiId:ref('Api'),StageName:'$default',AutoDeploy:true,DefaultRouteSettings:{ThrottlingBurstLimit:10,ThrottlingRateLimit:5}}};
-  r.ApiPermission={Type:'AWS::Lambda::Permission',Properties:{Action:'lambda:InvokeFunction',FunctionName:ref('ApiFunction'),Principal:'apigateway.amazonaws.com',SourceAccount:c.account,SourceArn:sub(`arn:aws:execute-api:${c.region}:${c.account}:`+'${Api}/*')}};
-  for (const [name, suffix] of [['ApiLogs','api'],['BrokerLogs','fixtures'],['SignupLogs','pre-signup'],['MessageLogs','custom-message']]) r[name]={Type:'AWS::Logs::LogGroup',Properties:{LogGroupName:`/aws/lambda/known-enough-qa-${suffix}`,RetentionInDays:7}};
-  const oidcTrust=policy([{Effect:'Allow',Principal:{Federated:`arn:aws:iam::${c.account}:oidc-provider/token.actions.githubusercontent.com`},Action:'sts:AssumeRoleWithWebIdentity',Condition:{StringEquals:{'token.actions.githubusercontent.com:aud':'sts.amazonaws.com','token.actions.githubusercontent.com:sub':c.oidcSubject}}}]);
-  r.TestRole={Type:'AWS::IAM::Role',Properties:{RoleName:'KnownEnoughGithubQaTest',MaxSessionDuration:3600,AssumeRolePolicyDocument:oidcTrust,Policies:[{PolicyName:'InvokeFixtureBrokerAndOwnLogins',PolicyDocument:policy([statement('lambda:InvokeFunction',att('Broker','Arn')),statement('secretsmanager:GetSecretValue',ref('LoginSecret')),statement(['lambda:GetFunctionConfiguration'],att('ApiFunction','Arn')),statement(['logs:FilterLogEvents'],sub(`arn:aws:logs:${c.region}:${c.account}:log-group:/aws/lambda/${n.functionName}:*`))])}]}};
-  r.ReleaseRole={Type:'AWS::IAM::Role',Properties:{RoleName:'KnownEnoughGithubQaRelease',MaxSessionDuration:3600,AssumeRolePolicyDocument:oidcTrust,Policies:[{PolicyName:'ExactQaRelease',PolicyDocument:policy([statement(['lambda:UpdateFunctionCode','lambda:GetFunctionConfiguration'],[att('ApiFunction','Arn'),att('Broker','Arn'),att('PreSignup','Arn'),att('CustomMessage','Arn')]),statement(['amplify:CreateDeployment','amplify:StartDeployment','amplify:GetJob'],[sub(`arn:aws:amplify:${c.region}:${c.account}:apps/`+'${QaApp.AppId}/branches/main'),sub(`arn:aws:amplify:${c.region}:${c.account}:apps/`+'${QaApp.AppId}/branches/main/jobs/*')]),statement(['s3:PutObject','s3:GetObject'],`arn:aws:s3:::${n.artifacts}/*`),{...statement('dynamodb:GetItem',control),Condition:{'ForAllValues:StringEquals':{'dynamodb:LeadingKeys':['AUTH','LEASE']}}}])}]}};
-  if(c.primaryRollout)r.PrimaryReleaseRole={Type:'AWS::IAM::Role',Properties:{RoleName:'KnownEnoughGithubPrimaryRelease',MaxSessionDuration:3600,AssumeRolePolicyDocument:oidcTrust,Policies:[{PolicyName:'ExactPrimaryCodeOnly',PolicyDocument:policy([statement(['lambda:UpdateFunctionCode','lambda:GetFunctionConfiguration'],`arn:aws:lambda:${c.region}:${c.account}:function:known-enough-stage-api`),statement('s3:GetObject',`arn:aws:s3:::${n.artifacts}/*`),{...statement('dynamodb:GetItem',control),Condition:{'ForAllValues:StringEquals':{'dynamodb:LeadingKeys':['AUTH','LEASE']}}}])}]}};
-  template.Outputs=Object.fromEntries(Object.entries({Account:c.account,Region:c.region,ApiUrl:att('Api','ApiEndpoint'),FrontendUrl:front,PoolId:ref('Pool'),ParticipantClientId:ref('Participant'),DisplayClientId:ref('Display'),CognitoDomain:`https://${n.domain}.auth.${c.region}.amazoncognito.com`,ApiFunction:ref('ApiFunction'),BrokerFunction:ref('Broker'),DecisionTable:ref('Decisions'),GroupTable:ref('Groups'),ControlTable:ref('Control'),MailboxBucket:freeMail?'NOT_USED_MAILTM':ref('MailboxBucket'),MailboxProvider:mailboxProvider(c),LoginSecret:ref('LoginSecret'),TestRoleArn:att('TestRole','Arn'),ReleaseRoleArn:att('ReleaseRole','Arn'),SourceCommit:c.sourceCommit,AmplifyAppId:att('QaApp','AppId'),PrimaryReleaseRoleArn:c.primaryRollout?att('PrimaryReleaseRole','Arn'):'NOT_INSTALLED'}).map(([key,value])=>[key,output(value)]));
-  if (freeMail) {
-    delete template.Parameters.MailboxBucket; delete template.Parameters.EmailSourceArn;
-    r.Pool.Properties.EmailConfiguration = {EmailSendingAccount:'COGNITO_DEFAULT'};
-    return {core:template,mail:null};
-  }
-  const bucket=`known-enough-qa-mail-${c.account}`;
-  const mail={AWSTemplateFormatVersion:'2010-09-09',Resources:{Identity:{Type:'AWS::SES::EmailIdentity',Properties:{EmailIdentity:c.mailDomain}},Mailbox:{Type:'AWS::S3::Bucket',Properties:{BucketName:bucket,PublicAccessBlockConfiguration:{BlockPublicAcls:true,IgnorePublicAcls:true,BlockPublicPolicy:true,RestrictPublicBuckets:true},BucketEncryption:{ServerSideEncryptionConfiguration:[{ServerSideEncryptionByDefault:{SSEAlgorithm:'AES256'}}]},LifecycleConfiguration:{Rules:[{Id:'VerificationExpiry',Status:'Enabled',ExpirationInDays:1}]}}}},Outputs:{MailboxBucket:output(ref('Mailbox')),EmailSourceArn:output(`arn:aws:ses:${c.region}:${c.account}:identity/${c.mailDomain}`)}};
-  mail.Resources.Policy={Type:'AWS::S3::BucketPolicy',Properties:{Bucket:ref('Mailbox'),PolicyDocument:policy([{Effect:'Allow',Principal:{Service:'ses.amazonaws.com'},Action:'s3:PutObject',Resource:`arn:aws:s3:::${bucket}/verification/*`,Condition:{StringEquals:{'AWS:SourceAccount':c.account},ArnEquals:{'AWS:SourceArn':`arn:aws:ses:${c.region}:${c.account}:receipt-rule-set/known-enough-qa:receipt-rule/qa-verification`}}}])}};
-  mail.Resources.Rules={Type:'AWS::SES::ReceiptRuleSet',Properties:{RuleSetName:'known-enough-qa'}};
-  mail.Resources.Rule={Type:'AWS::SES::ReceiptRule',DependsOn:'Policy',Properties:{RuleSetName:ref('Rules'),Rule:{Name:'qa-verification',Enabled:true,ScanEnabled:true,Recipients:[c.mailDomain],Actions:[{S3Action:{BucketName:ref('Mailbox'),ObjectKeyPrefix:'verification/'}}]}}};
-  mail.Resources.Mx={Type:'AWS::Route53::RecordSet',Properties:{HostedZoneId:c.hostedZoneId,Name:c.mailDomain,Type:'MX',TTL:'300',ResourceRecords:[`10 inbound-smtp.${c.region}.amazonaws.com`]}};
-  for (let i=1;i<=3;i++) mail.Resources[`Dkim${i}`]={Type:'AWS::Route53::RecordSet',Properties:{HostedZoneId:c.hostedZoneId,Name:att('Identity',`DkimDNSTokenName${i}`),Type:'CNAME',TTL:'300',ResourceRecords:[att('Identity',`DkimDNSTokenValue${i}`)]}};
-  return {core:template,mail};
+    const c = validateConfig(raw);
+    const n = targetNames(c);
+    const freeMail = mailboxProvider(c) === 'mailtm';
+    for (const name of ['apiKey', 'brokerKey'])
+        if (!/^[0-9a-f]{64}\/[a-z-]+\.zip$/.test(artifacts[name] ?? ''))
+            throw new Error('INVALID_ARTIFACT_KEY');
+    const front = sub('https://main.${QaApp.DefaultDomain}/');
+    const control = att('Control', 'Arn');
+    const group = att('Groups', 'Arn');
+    const decision = att('Decisions', 'Arn');
+    const logs = statement(['logs:CreateLogStream', 'logs:PutLogEvents'], sub(`arn:aws:logs:${c.region}:${c.account}:log-group:/aws/lambda/known-enough-qa-*:log-stream:*`));
+    const code = key => ({ S3Bucket: n.artifacts, S3Key: key });
+    const environment = {
+        AWS_ACCOUNT_EXPECTED: c.account, QA_CONTROL_TABLE: ref('Control'), QA_GROUP_TABLE: ref('Groups'), QA_DECISION_TABLE: ref('Decisions'),
+        NP_GROUP_EMAIL_KEY: ref('EmailKey'), QA_MAIL_PROVIDER: mailboxProvider(c), QA_MAIL_DOMAIN: freeMail ? 'qa.invalid' : c.mailDomain, QA_MAIL_BUCKET: freeMail ? 'NOT_USED_MAILTM' : ref('MailboxBucket'), QA_SECRET: ref('LoginSecret'), QA_POOL_ID: ref('Pool'), QA_SOURCE_COMMIT: c.sourceCommit,
+    };
+    // Shared account capacity also works in new accounts with a concurrency quota of 10.
+    // The broker/model transactions enforce the approved budgets independently of Lambda capacity.
+    const fn = (name, handler, r, key, variables, timeout = 29) => ({
+        Type: 'AWS::Lambda::Function', Properties: {
+            FunctionName: name, Runtime: 'nodejs24.x', Handler: handler, Role: att(r, 'Arn'), Code: code(key), MemorySize: 512, Timeout: timeout, Environment: { Variables: variables }, Tags: [{ Key: 'KnownEnoughQa', Value: 'true' }]
+        }
+    });
+    const template = {
+        AWSTemplateFormatVersion: '2010-09-09', Description: 'Known Enough isolated QA; no primary state or personal credentials', Parameters: { MailboxBucket: { Type: 'String' }, EmailSourceArn: { Type: 'String' }, EmailKey: { Type: 'String', NoEcho: true, MinLength: 32 } }, Resources: {}, Outputs: {}
+    };
+    const r = template.Resources;
+    r.Decisions = table(n.decisions);
+    r.Groups = table(n.groups);
+    r.Control = table(n.control);
+    r.LoginSecret = {
+        Type: 'AWS::SecretsManager::Secret', Properties: { Name: 'known-enough/qa/run-login', GenerateSecretString: { PasswordLength: 48 }, Tags: [{ Key: 'KnownEnoughQa', Value: 'true' }] }
+    };
+    r.QaApp = {
+        Type: 'AWS::Amplify::App', Properties: { Name: n.appName, Platform: 'WEB', CustomRules: [{ Source: '/<*>', Target: '/index.html', Status: '404-200' }] }
+    };
+    r.QaBranch = { Type: 'AWS::Amplify::Branch', Properties: { AppId: att('QaApp', 'AppId'), BranchName: 'main', Stage: 'DEVELOPMENT', EnableAutoBuild: false } };
+    r.TriggerRole = role('KnownEnoughQaTrigger', [logs, statement(['dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:ConditionCheckItem'], control)]);
+    const triggerEnv = { QA_CONTROL_TABLE: ref('Control'), QA_MAIL_PROVIDER: mailboxProvider(c), QA_MAIL_DOMAIN: freeMail ? 'qa.invalid' : c.mailDomain };
+    r.PreSignup = fn('known-enough-qa-pre-signup', 'broker.preSignup', 'TriggerRole', artifacts.brokerKey, triggerEnv, 10);
+    r.CustomMessage = fn('known-enough-qa-custom-message', 'broker.customMessage', 'TriggerRole', artifacts.brokerKey, triggerEnv, 10);
+    r.Pool = {
+        Type: 'AWS::Cognito::UserPool', DeletionPolicy: 'Retain', Properties: {
+            UserPoolName: 'known-enough-live-qa', UsernameConfiguration: { CaseSensitive: true }, AutoVerifiedAttributes: ['email'], AdminCreateUserConfig: { AllowAdminCreateUserOnly: false }, Policies: { PasswordPolicy: { MinimumLength: 16, RequireUppercase: true, RequireLowercase: true, RequireNumbers: true, RequireSymbols: true } }, MfaConfiguration: 'OFF', AccountRecoverySetting: { RecoveryMechanisms: [{ Name: 'verified_email', Priority: 1 }] }, EmailConfiguration: { EmailSendingAccount: 'DEVELOPER', SourceArn: ref('EmailSourceArn'), From: `no-reply@${c.mailDomain}` }, VerificationMessageTemplate: { DefaultEmailOption: 'CONFIRM_WITH_CODE' }, LambdaConfig: { PreSignUp: att('PreSignup', 'Arn'), CustomMessage: att('CustomMessage', 'Arn') }, UserPoolTags: { KnownEnoughQa: 'true' }
+        }
+    };
+    for (const name of ['PreSignup', 'CustomMessage'])
+        r[`${name}Permission`] = {
+            Type: 'AWS::Lambda::Permission', Properties: {
+                FunctionName: ref(name), Action: 'lambda:InvokeFunction', Principal: 'cognito-idp.amazonaws.com', SourceAccount: c.account, SourceArn: att('Pool', 'Arn')
+            }
+        };
+    for (const name of ['Participant', 'Display'])
+        r[name] = {
+            Type: 'AWS::Cognito::UserPoolClient', Properties: {
+                ClientName: `qa-${name.toLowerCase()}`, UserPoolId: ref('Pool'), GenerateSecret: false, AllowedOAuthFlowsUserPoolClient: true, AllowedOAuthFlows: ['code'], AllowedOAuthScopes: name === 'Participant' ? ['openid', 'email'] : ['openid'], SupportedIdentityProviders: ['COGNITO'], CallbackURLs: [front], LogoutURLs: [front], AccessTokenValidity: 15, IdTokenValidity: 15, TokenValidityUnits: { AccessToken: 'minutes', IdToken: 'minutes' }, PreventUserExistenceErrors: 'ENABLED'
+            }
+        };
+    r.PoolDomain = { Type: 'AWS::Cognito::UserPoolDomain', Properties: { Domain: n.domain, UserPoolId: ref('Pool') } };
+    r.ApiRole = role('KnownEnoughQaApi', [
+        logs, statement(['dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:UpdateItem', 'dynamodb:ConditionCheckItem'], decision), statement(['dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:ConditionCheckItem'], group), statement('dynamodb:GetItem', control), { ...statement('dynamodb:UpdateItem', control), Condition: { 'ForAllValues:StringEquals': { 'dynamodb:LeadingKeys': ['LEASE', 'TOTAL'] } } }, { ...statement('dynamodb:ConditionCheckItem', control), Condition: { 'ForAllValues:StringEquals': { 'dynamodb:LeadingKeys': ['AUTH'] } } }, statement('bedrock:InvokeModel', `arn:aws:bedrock:${c.region}::foundation-model/amazon.nova-lite-v1:0`)
+    ]);
+    r.ApiFunction = fn(n.functionName, 'api.qaHandler', 'ApiRole', artifacts.apiKey, {
+        ...environment, KE13B_TABLE_NAME: ref('Decisions'), COGNITO_USER_POOL_ID: ref('Pool'), COGNITO_PARTICIPANT_CLIENT_ID: ref('Participant'), COGNITO_DISPLAY_CLIENT_ID: ref('Display'), KE13B_ALLOWED_ORIGIN: sub('https://main.${QaApp.DefaultDomain}'), NP_GROUPS_ENABLED: 'true', NP_GROUP_TABLE_NAME: ref('Groups'), NP_GROUP_EMAIL_KEY: ref('EmailKey'), NP_COGNITO_DOMAIN: `https://${n.domain}.auth.${c.region}.amazoncognito.com`, KE14_MODEL_MODE: c.authorization.approved ? 'BEDROCK' : 'DISABLED', KE14_PAID_CALLS_APPROVED: String(c.authorization.approved), KE14_INVOCATION_LOGGING_DISABLED: String(c.authorization.invocationLoggingDisabled), KE14_RETENTION_REVIEWED: String(c.authorization.retentionReviewed)
+    });
+    r.BrokerRole = role('KnownEnoughQaFixtures', [
+        logs, statement(['dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:UpdateItem', 'dynamodb:ConditionCheckItem'], control), statement(['dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:ConditionCheckItem'], group), statement(['dynamodb:Query', 'dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:UpdateItem', 'dynamodb:DeleteItem', 'dynamodb:ConditionCheckItem'], decision), statement([
+            'cognito-idp:AdminCreateUser', 'cognito-idp:AdminSetUserPassword', 'cognito-idp:AdminGetUser', 'cognito-idp:AdminDeleteUser', 'cognito-idp:AdminDisableUser', 'cognito-idp:AdminUserGlobalSignOut', 'cognito-idp:CreateGroup', 'cognito-idp:DeleteGroup', 'cognito-idp:AdminAddUserToGroup'
+        ], att('Pool', 'Arn')), statement(['secretsmanager:GetSecretValue', 'secretsmanager:PutSecretValue'], ref('LoginSecret')), ...(!freeMail ? [
+            statement(['s3:ListBucket'], sub('arn:aws:s3:::${MailboxBucket}')), statement(['s3:GetObject', 's3:DeleteObject'], sub('arn:aws:s3:::${MailboxBucket}/verification/*'))
+        ] : [])
+    ]);
+    r.Broker = fn(n.brokerName, 'broker.handler', 'BrokerRole', artifacts.brokerKey, environment, 180);
+    r.Api = {
+        Type: 'AWS::ApiGatewayV2::Api', Properties: {
+            Name: 'known-enough-live-qa', ProtocolType: 'HTTP', CorsConfiguration: {
+                AllowOrigins: [sub('https://main.${QaApp.DefaultDomain}')], AllowMethods: ['GET', 'POST', 'OPTIONS'], AllowHeaders: ['authorization', 'content-type'], MaxAge: 300
+            }
+        }
+    };
+    r.Authorizer = {
+        Type: 'AWS::ApiGatewayV2::Authorizer', Properties: {
+            ApiId: ref('Api'), Name: 'qa-cognito', AuthorizerType: 'JWT', IdentitySource: ['$request.header.Authorization'], JwtConfiguration: { Audience: [ref('Participant'), ref('Display')], Issuer: sub(`https://cognito-idp.${c.region}.amazonaws.com/` + '${Pool}') }
+        }
+    };
+    r.Integration = {
+        Type: 'AWS::ApiGatewayV2::Integration', Properties: { ApiId: ref('Api'), IntegrationType: 'AWS_PROXY', IntegrationUri: att('ApiFunction', 'Arn'), PayloadFormatVersion: '2.0', TimeoutInMillis: 29000 }
+    };
+    r.Route = {
+        Type: 'AWS::ApiGatewayV2::Route', Properties: { ApiId: ref('Api'), RouteKey: '$default', AuthorizationType: 'JWT', AuthorizerId: ref('Authorizer'), Target: sub('integrations/${Integration}') }
+    };
+    r.Options = {
+        Type: 'AWS::ApiGatewayV2::Route', Properties: { ApiId: ref('Api'), RouteKey: 'OPTIONS /{proxy+}', AuthorizationType: 'NONE', Target: sub('integrations/${Integration}') }
+    };
+    r.Stage = {
+        Type: 'AWS::ApiGatewayV2::Stage', Properties: { ApiId: ref('Api'), StageName: '$default', AutoDeploy: true, DefaultRouteSettings: { ThrottlingBurstLimit: 10, ThrottlingRateLimit: 5 } }
+    };
+    r.ApiPermission = {
+        Type: 'AWS::Lambda::Permission', Properties: {
+            Action: 'lambda:InvokeFunction', FunctionName: ref('ApiFunction'), Principal: 'apigateway.amazonaws.com', SourceAccount: c.account, SourceArn: sub(`arn:aws:execute-api:${c.region}:${c.account}:` + '${Api}/*')
+        }
+    };
+    for (const [name, suffix] of [['ApiLogs', 'api'], ['BrokerLogs', 'fixtures'], ['SignupLogs', 'pre-signup'], ['MessageLogs', 'custom-message']])
+        r[name] = { Type: 'AWS::Logs::LogGroup', Properties: { LogGroupName: `/aws/lambda/known-enough-qa-${suffix}`, RetentionInDays: 7 } };
+    const oidcTrust = policy([
+        {
+            Effect: 'Allow', Principal: { Federated: `arn:aws:iam::${c.account}:oidc-provider/token.actions.githubusercontent.com` }, Action: 'sts:AssumeRoleWithWebIdentity', Condition: { StringEquals: { 'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com', 'token.actions.githubusercontent.com:sub': c.oidcSubject } }
+        }
+    ]);
+    r.TestRole = {
+        Type: 'AWS::IAM::Role', Properties: {
+            RoleName: 'KnownEnoughGithubQaTest', MaxSessionDuration: 3600, AssumeRolePolicyDocument: oidcTrust, Policies: [
+                {
+                    PolicyName: 'InvokeFixtureBrokerAndOwnLogins', PolicyDocument: policy([
+                        statement('lambda:InvokeFunction', att('Broker', 'Arn')), statement('secretsmanager:GetSecretValue', ref('LoginSecret')), statement(['lambda:GetFunctionConfiguration'], att('ApiFunction', 'Arn')), statement(['logs:FilterLogEvents'], sub(`arn:aws:logs:${c.region}:${c.account}:log-group:/aws/lambda/${n.functionName}:*`))
+                    ])
+                }
+            ]
+        }
+    };
+    r.ReleaseRole = {
+        Type: 'AWS::IAM::Role', Properties: {
+            RoleName: 'KnownEnoughGithubQaRelease', MaxSessionDuration: 3600, AssumeRolePolicyDocument: oidcTrust, Policies: [
+                {
+                    PolicyName: 'ExactQaRelease', PolicyDocument: policy([
+                        statement(['lambda:UpdateFunctionCode', 'lambda:GetFunctionConfiguration'], [att('ApiFunction', 'Arn'), att('Broker', 'Arn'), att('PreSignup', 'Arn'), att('CustomMessage', 'Arn')]), statement(['amplify:CreateDeployment', 'amplify:StartDeployment', 'amplify:GetJob'], [
+                            sub(`arn:aws:amplify:${c.region}:${c.account}:apps/` + '${QaApp.AppId}/branches/main'), sub(`arn:aws:amplify:${c.region}:${c.account}:apps/` + '${QaApp.AppId}/branches/main/jobs/*')
+                        ]), statement(['s3:PutObject', 's3:GetObject'], `arn:aws:s3:::${n.artifacts}/*`), { ...statement('dynamodb:GetItem', control), Condition: { 'ForAllValues:StringEquals': { 'dynamodb:LeadingKeys': ['AUTH', 'LEASE'] } } }
+                    ])
+                }
+            ]
+        }
+    };
+    if (c.primaryRollout)
+        r.PrimaryReleaseRole = {
+            Type: 'AWS::IAM::Role', Properties: {
+                RoleName: 'KnownEnoughGithubPrimaryRelease', MaxSessionDuration: 3600, AssumeRolePolicyDocument: oidcTrust, Policies: [
+                    {
+                        PolicyName: 'ExactPrimaryCodeOnly', PolicyDocument: policy([
+                            statement(['lambda:UpdateFunctionCode', 'lambda:GetFunctionConfiguration'], `arn:aws:lambda:${c.region}:${c.account}:function:known-enough-stage-api`), statement('s3:GetObject', `arn:aws:s3:::${n.artifacts}/*`), { ...statement('dynamodb:GetItem', control), Condition: { 'ForAllValues:StringEquals': { 'dynamodb:LeadingKeys': ['AUTH', 'LEASE'] } } }
+                        ])
+                    }
+                ]
+            }
+        };
+    template.Outputs = Object.fromEntries(Object.entries({
+        Account: c.account, Region: c.region, ApiUrl: att('Api', 'ApiEndpoint'), FrontendUrl: front, PoolId: ref('Pool'), ParticipantClientId: ref('Participant'), DisplayClientId: ref('Display'), CognitoDomain: `https://${n.domain}.auth.${c.region}.amazoncognito.com`, ApiFunction: ref('ApiFunction'), BrokerFunction: ref('Broker'), DecisionTable: ref('Decisions'), GroupTable: ref('Groups'), ControlTable: ref('Control'), MailboxBucket: freeMail ? 'NOT_USED_MAILTM' : ref('MailboxBucket'), MailboxProvider: mailboxProvider(c), LoginSecret: ref('LoginSecret'), TestRoleArn: att('TestRole', 'Arn'), ReleaseRoleArn: att('ReleaseRole', 'Arn'), SourceCommit: c.sourceCommit, AmplifyAppId: att('QaApp', 'AppId'), PrimaryReleaseRoleArn: c.primaryRollout ? att('PrimaryReleaseRole', 'Arn') : 'NOT_INSTALLED'
+    }).map(([key, value]) => [key, output(value)]));
+    if (freeMail) {
+        delete template.Parameters.MailboxBucket;
+        delete template.Parameters.EmailSourceArn;
+        r.Pool.Properties.EmailConfiguration = { EmailSendingAccount: 'COGNITO_DEFAULT' };
+        return { core: template, mail: null };
+    }
+    const bucket = `known-enough-qa-mail-${c.account}`;
+    const mail = {
+        AWSTemplateFormatVersion: '2010-09-09', Resources: {
+            Identity: { Type: 'AWS::SES::EmailIdentity', Properties: { EmailIdentity: c.mailDomain } }, Mailbox: {
+                Type: 'AWS::S3::Bucket', Properties: {
+                    BucketName: bucket, PublicAccessBlockConfiguration: { BlockPublicAcls: true, IgnorePublicAcls: true, BlockPublicPolicy: true, RestrictPublicBuckets: true }, BucketEncryption: { ServerSideEncryptionConfiguration: [{ ServerSideEncryptionByDefault: { SSEAlgorithm: 'AES256' } }] }, LifecycleConfiguration: { Rules: [{ Id: 'VerificationExpiry', Status: 'Enabled', ExpirationInDays: 1 }] }
+                }
+            }
+        }, Outputs: { MailboxBucket: output(ref('Mailbox')), EmailSourceArn: output(`arn:aws:ses:${c.region}:${c.account}:identity/${c.mailDomain}`) }
+    };
+    mail.Resources.Policy = {
+        Type: 'AWS::S3::BucketPolicy', Properties: {
+            Bucket: ref('Mailbox'), PolicyDocument: policy([
+                {
+                    Effect: 'Allow', Principal: { Service: 'ses.amazonaws.com' }, Action: 's3:PutObject', Resource: `arn:aws:s3:::${bucket}/verification/*`, Condition: {
+                        StringEquals: { 'AWS:SourceAccount': c.account }, ArnEquals: { 'AWS:SourceArn': `arn:aws:ses:${c.region}:${c.account}:receipt-rule-set/known-enough-qa:receipt-rule/qa-verification` }
+                    }
+                }
+            ])
+        }
+    };
+    mail.Resources.Rules = { Type: 'AWS::SES::ReceiptRuleSet', Properties: { RuleSetName: 'known-enough-qa' } };
+    mail.Resources.Rule = {
+        Type: 'AWS::SES::ReceiptRule', DependsOn: 'Policy', Properties: {
+            RuleSetName: ref('Rules'), Rule: {
+                Name: 'qa-verification', Enabled: true, ScanEnabled: true, Recipients: [c.mailDomain], Actions: [{ S3Action: { BucketName: ref('Mailbox'), ObjectKeyPrefix: 'verification/' } }]
+            }
+        }
+    };
+    mail.Resources.Mx = {
+        Type: 'AWS::Route53::RecordSet', Properties: { HostedZoneId: c.hostedZoneId, Name: c.mailDomain, Type: 'MX', TTL: '300', ResourceRecords: [`10 inbound-smtp.${c.region}.amazonaws.com`] }
+    };
+    for (let i = 1; i <= 3; i++)
+        mail.Resources[`Dkim${i}`] = {
+            Type: 'AWS::Route53::RecordSet', Properties: {
+                HostedZoneId: c.hostedZoneId, Name: att('Identity', `DkimDNSTokenName${i}`), Type: 'CNAME', TTL: '300', ResourceRecords: [att('Identity', `DkimDNSTokenValue${i}`)]
+            }
+        };
+    return { core: template, mail };
 }

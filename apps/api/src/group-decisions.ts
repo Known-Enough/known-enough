@@ -2,7 +2,7 @@ import { withAdmissionFence } from '@deal-table/adapters';
 import { createHash } from 'node:crypto';
 import { Groups, Id, KnownEnough as KE } from '@deal-table/contracts';
 import { KnownEnoughApplicationError, type KnownEnoughApplication, type TrustedPrincipal, type DecisionArchitect } from '@deal-table/application';
-import { genericCandidates, genericCandidateCatalog } from '@deal-table/adapters';
+import { genericCandidates, genericCandidateCatalog, GroupCapacityError } from '@deal-table/adapters';
 import { GroupService } from './group-service.ts';
 const hash = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const fail = (code: 'INVALID_COMMAND' | 'STALE_CONTEXT' | 'NOT_FOUND' | 'NEEDS_CLARIFICATION'): never => { throw new KnownEnoughApplicationError(code); };
@@ -26,7 +26,7 @@ export class GroupDecisionService {
       const existing = group.drafts.find(item => item.id === id);
       if (existing && existing.bodyHash !== bodyHash) return fail('STALE_CONTEXT');
       if (group.version !== roster.version) return fail('STALE_CONTEXT');
-      if (!existing && group.drafts.length >= 64) return fail('INVALID_COMMAND');
+      if (!existing && group.drafts.length >= 64) throw new GroupCapacityError();
       return existing ? structuredClone(existing) : null;
     });
     if (prior) return prior;
@@ -44,7 +44,7 @@ export class GroupDecisionService {
       if (group.version !== roster.version || !this.options.isEnabled()) return fail('STALE_CONTEXT');
       const existing = group.drafts.find(item => item.id === id);
       if (existing) { if (existing.bodyHash !== bodyHash) return fail('STALE_CONTEXT'); return structuredClone(existing); }
-      if (group.drafts.length >= 64) return fail('INVALID_COMMAND');
+      if (group.drafts.length >= 64) throw new GroupCapacityError();
       group.drafts.push(draft); return structuredClone(draft);
     });
   }

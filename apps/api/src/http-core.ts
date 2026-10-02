@@ -1,4 +1,4 @@
-import { withAdmissionContext } from '@deal-table/adapters';
+import { withAdmissionContext, GroupCapacityError } from '@deal-table/adapters';
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import {
   CommandEnvelope, ERROR_HTTP_STATUS, Id, RoomInvitationIssueRequest, RoomInvitationRedeemRequest,
@@ -411,6 +411,7 @@ function decisionErrorBody(code: DecisionErrorCode, id: string): DecisionErrorRe
   return { ok: false, requestId: id, error: { code, httpStatus: KE.DECISION_ERROR_HTTP_STATUS[code] } };
 }
 function knownEnoughRequestError(error: unknown, id: string): DecisionErrorResult {
+  if (error instanceof GroupCapacityError) return decisionErrorBody('CAPACITY_EXCEEDED', id);
   return error instanceof KnownEnoughApplicationError || error instanceof DecisionArchitectError
     ? decisionErrorBody(error.code, id)
     : decisionErrorBody('RETRYABLE_SERVER_ERROR', id);

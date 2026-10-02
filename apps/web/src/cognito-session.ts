@@ -148,7 +148,9 @@ export async function cognitoApiFetch(config: CognitoBrowserConfig, session: Cog
   if (session.expiresAt <= Date.now() + 5000) { onUnauthorized(); throw new Error('Session expired'); }
   const headers = new Headers(init?.headers);
   headers.set('authorization', `Bearer ${session.accessToken}`);
-  const response = await fetcher(`${config.apiBaseUrl}${path}`, { ...init, headers, credentials: 'omit', redirect: 'error' });
+  const deadline = AbortSignal.timeout(45000);
+  const signal = init?.signal ? AbortSignal.any([init.signal, deadline]) : deadline;
+  const response = await fetcher(`${config.apiBaseUrl}${path}`, { ...init, signal, headers, credentials: 'omit', redirect: 'error' });
   if (response.status === 401) onUnauthorized();
   return response;
 }

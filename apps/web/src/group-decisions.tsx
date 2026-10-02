@@ -17,7 +17,8 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
   async function request(path: string, body?: unknown) {
     const response = await api(`/groups/${group.id}/${path}`, body === undefined ? undefined : {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
-    if (!response.ok) throw new UserFlowError(response.status === 409 ? 'The group or draft changed. Refresh and review the current terms.'
+    if (!response.ok) throw new UserFlowError(response.status === 507 ? 'This pilot has reached its capacity. Ask the operator about capacity; retrying will not free space.'
+      : response.status === 409 ? 'The group or draft changed. Refresh and review the current terms.'
       : response.status === 422 ? 'This draft needs supported public choices or clarification before it can continue.'
       : 'This action is unavailable. Check your account and organizer access.');
     return response.json() as Promise<Record<string, unknown>>;

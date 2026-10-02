@@ -47,10 +47,10 @@ jobs:
       VITE_API_BASE_URL: https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com
     steps:
       - name: Check out main
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Set up pinned Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -64,7 +64,7 @@ jobs:
           zip -qr "$GITHUB_WORKSPACE/amplify-build.zip" .
 
       - name: Get short-lived AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6.3.0
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
           role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughAmplifyMainDeploy
           aws-region: us-east-1

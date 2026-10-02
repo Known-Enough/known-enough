@@ -1,3 +1,9 @@
+## Current B handoff — ASSESS06, 2026-10-02
+
+ASSESS01–06 local criteria complete. Final check: 604 application tests plus two optional skips, hosted 1/1, E2E 56/56. Refresh race/failure handling, capacity/507 responses, current banners/action pins and readable scripts verified; 22 scripts retain equivalent ASTs. [Operational limits](operational-limits.md) and OPS01/02/03 retain wider-use capacity/erasure/distributed-job obligations, not invented implementation. Next ASSESS08 one pinned installer handoff; all actual cloud/email/manual/automatic proof remains [ASSESS07](tasks/ASSESS07.md). A retains NP00/cloud/private expiry and counters. Prior handoffs are dated history.
+
+---
+
 ## Current B handoff — ASSESS05, 2026-10-02
 
 ASSESS01/04/02/03/05 locally DONE. Qualification now blocks global/process failures, covers API/harness triggers, uses broker deadlines covering Lambda, checks exact primary routing and renews synthetic sessions at serial boundaries. Full check: 598 application tests plus two optional skips, hosted 1/1, E2E 54/54. FA13 email delivery and all real B/manual/automatic proof remain [ASSESS07](tasks/ASSESS07.md). Next ASSESS06 then ASSESS08 final pinned installer handoff. A retains NP00/cloud/saved expiry/limits; pull corrected source before further installation. Prior handoffs are dated history.

@@ -1096,10 +1096,11 @@ export const DECISION_ERROR_HTTP_STATUS = {
   IDEMPOTENCY_CONFLICT: 409,
   INVALID_COMMAND: 422,
   NEEDS_CLARIFICATION: 422,
+  CAPACITY_EXCEEDED: 507,
   RETRYABLE_SERVER_ERROR: 503,
 } as const;
-export const DecisionErrorCode = z.enum(['UNAUTHENTICATED', 'FORBIDDEN', 'NOT_FOUND', 'STALE_CONTEXT', 'STALE_OWNER', 'STALE_DRAFT', 'STALE_PROPOSAL', 'IDEMPOTENCY_CONFLICT', 'INVALID_COMMAND', 'NEEDS_CLARIFICATION', 'RETRYABLE_SERVER_ERROR']);
-const DecisionErrorStatus = z.union([z.literal(401), z.literal(403), z.literal(404), z.literal(409), z.literal(422), z.literal(503)]);
+export const DecisionErrorCode = z.enum(['UNAUTHENTICATED', 'FORBIDDEN', 'NOT_FOUND', 'STALE_CONTEXT', 'STALE_OWNER', 'STALE_DRAFT', 'STALE_PROPOSAL', 'IDEMPOTENCY_CONFLICT', 'INVALID_COMMAND', 'NEEDS_CLARIFICATION', 'CAPACITY_EXCEEDED', 'RETRYABLE_SERVER_ERROR']);
+const DecisionErrorStatus = z.union([z.literal(401), z.literal(403), z.literal(404), z.literal(409), z.literal(422), z.literal(503), z.literal(507)]);
 export const DecisionCommandResult = z.discriminatedUnion('ok', [
   z.strictObject({
     ok: z.literal(true), requestId: Id, status: z.enum(['APPLIED', 'QUEUED']),

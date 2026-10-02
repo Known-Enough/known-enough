@@ -122,4 +122,18 @@ describe('KE11 Cognito browser client', () => {
     expect(logout.searchParams.get('client_id')).toBe('participant-client');
     expect(logout.searchParams.get('logout_uri')).toBe('https://app.example.test/');
   });
+  it.each(['deadline', 'caller'])('bounded API fetch respects %s cancellation without clearing a valid session', async kind => {
+    const deadline = new AbortController(); const caller = new AbortController();
+    const timeout = vi.spyOn(AbortSignal, 'timeout').mockReturnValue(deadline.signal);
+    const unauthorized = vi.fn();
+    const fetcher = vi.fn((_input: RequestInfo | URL, init?: RequestInit) => new Promise<Response>((_resolve, reject) => {
+      const signal = init!.signal!; signal.addEventListener('abort', () => reject(new Error('Request aborted')), {once:true});
+    }));
+    try {
+      const request = cognitoApiFetch(config, session, '/account', unauthorized, {signal:caller.signal}, fetcher);
+      expect(timeout).toHaveBeenCalledWith(45000); (kind === 'deadline' ? deadline : caller).abort();
+      await expect(request).rejects.toThrow('Request aborted'); expect(unauthorized).not.toHaveBeenCalled();
+    } finally {timeout.mockRestore();}
+  });
+
 });

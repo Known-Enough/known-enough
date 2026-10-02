@@ -1,7 +1,40 @@
 import { publicTarget, requireRunId } from './config.mjs';
-export const REQUIRED_TESTS=['QA01 signup and managed login','QA02 admission and invitations','QA03 fresh decision and owner confirmations','QA04 private negotiation and exact agreement','QA05 denial privacy and recovery','QA06 refusal revocation revision and disclosure','QA07 rendered clarification and accessibility'];
-export function validateTarget(raw){const t=publicTarget(raw);if(t.Account!=='092954139775'||t.Region!=='us-east-1'||t.PoolId==='us-east-1_V9OMjd0zx'||!/^us-east-1_[A-Za-z0-9]+$/.test(t.PoolId)||!/^https:\/\/[a-z0-9]+\.execute-api\.us-east-1\.amazonaws\.com$/.test(t.ApiUrl)||t.ApiUrl.includes('u94iyvt6p9')||!/^https:\/\/main\.[a-z0-9]+\.amplifyapp\.com\/$/.test(t.FrontendUrl)||t.CognitoDomain!=='https://known-enough-qa-092954139775.auth.us-east-1.amazoncognito.com'||t.ApiFunction!=='known-enough-qa-api'||t.BrokerFunction!=='known-enough-qa-fixtures'||t.GroupTable!=='KnownEnoughQaGroups'||t.DecisionTable!=='KnownEnoughQaDecisions'||t.ControlTable!=='KnownEnoughQaControl'||!t.LoginSecret.startsWith('arn:aws:secretsmanager:us-east-1:092954139775:secret:known-enough/qa/run-login-'))throw new Error('QA_TARGET_NOT_INSTALLED_OR_UNSAFE');return t;}
-export function validateReceipt(t,r,current){if(!r||r.schemaVersion!==1||r.sourceCommit!==current||!/^[a-f0-9]{40}$/.test(current)||r.targetApi!==t.ApiUrl||r.targetFrontend!==t.FrontendUrl||!/^\d+$/.test(String(r.jobId))||!/^\d+$/.test(String(r.workflowRunId))||!r.artifacts||['api','broker','web'].some(k=>!/^[a-f0-9]{64}$/.test(r.artifacts[k]?.sha256??'')))throw new Error('TRUSTED_RELEASE_RECEIPT_REQUIRED');return r;}
-export function validateWorkload(identity,profile){if(profile||identity.Account!=='092954139775'||!identity.Arn?.startsWith('arn:aws:sts::092954139775:assumed-role/KnownEnoughGithubQaTest/'))throw new Error('QA_GITHUB_WORKLOAD_IDENTITY_REQUIRED');}
-export function safeResults(tests){tests=Array.isArray(tests)?tests.filter(t=>t&&typeof t==='object'):[];return REQUIRED_TESTS.map(title=>{const found=tests.filter(t=>t.title===title);return {title,status:found.length===1&&found[0].status==='passed'?'PASS':found.some(t=>['failed','timedOut','interrupted'].includes(t.status))?'FAIL':'BLOCKED'};});}
-export function qualificationReport(input){requireRunId(input.runId);const results=safeResults(input.tests??[]);const lanes={execution:input.processExitCode===0&&input.processSignal===null&&input.reportStatus==='passed'&&input.globalErrors===0&&input.failedTests===0?'PASS':'BLOCKED',preflight:input.preflight==='PASS'?'PASS':'BLOCKED',fixtures:input.fixtures==='PASS'?'PASS':'BLOCKED',journeys:results.every(t=>t.status==='PASS')?'PASS':results.some(t=>t.status==='FAIL')?'FAIL':'BLOCKED',model:input.attempts>0?'PASS':'BLOCKED',privacy:input.privacy==='PASS'?'PASS':'BLOCKED',signup:input.signupMessages>0&&results[0].status==='PASS'?'PASS':'BLOCKED',cleanup:input.cleanup==='CLEAN'?'PASS':'BLOCKED'};return {schemaVersion:1,runId:input.runId,sourceCommit:/^[a-f0-9]{40}$/.test(input.sourceCommit??'')?input.sourceCommit:null,status:Object.values(lanes).every(s=>s==='PASS')?'PASS':'BLOCKED_OR_FAILED',lanes,tests:results,counts:{passed:results.filter(t=>t.status==='PASS').length,failed:results.filter(t=>t.status==='FAIL').length,blocked:results.filter(t=>t.status==='BLOCKED').length,modelAttempts:Number.isSafeInteger(input.attempts)?input.attempts:0,signupMessages:Number.isSafeInteger(input.signupMessages)?input.signupMessages:0}};}
+export const REQUIRED_TESTS = [
+    'QA01 signup and managed login', 'QA02 admission and invitations', 'QA03 fresh decision and owner confirmations', 'QA04 private negotiation and exact agreement', 'QA05 denial privacy and recovery', 'QA06 refusal revocation revision and disclosure', 'QA07 rendered clarification and accessibility'
+];
+export function validateTarget(raw) {
+    const t = publicTarget(raw);
+    if (t.Account !== '092954139775' || t.Region !== 'us-east-1' || t.PoolId === 'us-east-1_V9OMjd0zx' || !/^us-east-1_[A-Za-z0-9]+$/.test(t.PoolId) || !/^https:\/\/[a-z0-9]+\.execute-api\.us-east-1\.amazonaws\.com$/.test(t.ApiUrl) || t.ApiUrl.includes('u94iyvt6p9') || !/^https:\/\/main\.[a-z0-9]+\.amplifyapp\.com\/$/.test(t.FrontendUrl) || t.CognitoDomain !== 'https://known-enough-qa-092954139775.auth.us-east-1.amazoncognito.com' || t.ApiFunction !== 'known-enough-qa-api' || t.BrokerFunction !== 'known-enough-qa-fixtures' || t.GroupTable !== 'KnownEnoughQaGroups' || t.DecisionTable !== 'KnownEnoughQaDecisions' || t.ControlTable !== 'KnownEnoughQaControl' || !t.LoginSecret.startsWith('arn:aws:secretsmanager:us-east-1:092954139775:secret:known-enough/qa/run-login-'))
+        throw new Error('QA_TARGET_NOT_INSTALLED_OR_UNSAFE');
+    return t;
+}
+export function validateReceipt(t, r, current) {
+    if (!r || r.schemaVersion !== 1 || r.sourceCommit !== current || !/^[a-f0-9]{40}$/.test(current) || r.targetApi !== t.ApiUrl || r.targetFrontend !== t.FrontendUrl || !/^\d+$/.test(String(r.jobId)) || !/^\d+$/.test(String(r.workflowRunId)) || !r.artifacts || ['api', 'broker', 'web'].some(k => !/^[a-f0-9]{64}$/.test(r.artifacts[k]?.sha256 ?? '')))
+        throw new Error('TRUSTED_RELEASE_RECEIPT_REQUIRED');
+    return r;
+}
+export function validateWorkload(identity, profile) {
+    if (profile || identity.Account !== '092954139775' || !identity.Arn?.startsWith('arn:aws:sts::092954139775:assumed-role/KnownEnoughGithubQaTest/'))
+        throw new Error('QA_GITHUB_WORKLOAD_IDENTITY_REQUIRED');
+}
+export function safeResults(tests) {
+    tests = Array.isArray(tests) ? tests.filter(t => t && typeof t === 'object') : [];
+    return REQUIRED_TESTS.map(title => {
+        const found = tests.filter(t => t.title === title);
+        return {
+            title, status: found.length === 1 && found[0].status === 'passed' ? 'PASS' : found.some(t => ['failed', 'timedOut', 'interrupted'].includes(t.status)) ? 'FAIL' : 'BLOCKED'
+        };
+    });
+}
+export function qualificationReport(input) {
+    requireRunId(input.runId);
+    const results = safeResults(input.tests ?? []);
+    const lanes = {
+        execution: input.processExitCode === 0 && input.processSignal === null && input.reportStatus === 'passed' && input.globalErrors === 0 && input.failedTests === 0 ? 'PASS' : 'BLOCKED', preflight: input.preflight === 'PASS' ? 'PASS' : 'BLOCKED', fixtures: input.fixtures === 'PASS' ? 'PASS' : 'BLOCKED', journeys: results.every(t => t.status === 'PASS') ? 'PASS' : results.some(t => t.status === 'FAIL') ? 'FAIL' : 'BLOCKED', model: input.attempts > 0 ? 'PASS' : 'BLOCKED', privacy: input.privacy === 'PASS' ? 'PASS' : 'BLOCKED', signup: input.signupMessages > 0 && results[0].status === 'PASS' ? 'PASS' : 'BLOCKED', cleanup: input.cleanup === 'CLEAN' ? 'PASS' : 'BLOCKED'
+    };
+    return {
+        schemaVersion: 1, runId: input.runId, sourceCommit: /^[a-f0-9]{40}$/.test(input.sourceCommit ?? '') ? input.sourceCommit : null, status: Object.values(lanes).every(s => s === 'PASS') ? 'PASS' : 'BLOCKED_OR_FAILED', lanes, tests: results, counts: {
+            passed: results.filter(t => t.status === 'PASS').length, failed: results.filter(t => t.status === 'FAIL').length, blocked: results.filter(t => t.status === 'BLOCKED').length, modelAttempts: Number.isSafeInteger(input.attempts) ? input.attempts : 0, signupMessages: Number.isSafeInteger(input.signupMessages) ? input.signupMessages : 0
+        }
+    };
+}

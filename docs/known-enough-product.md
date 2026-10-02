@@ -1,3 +1,5 @@
+> **Current implementation, 2026-10-02:** Known Enough v2, group onboarding, drafting/clarification, private confirmation/negotiation, exact approval and live-QA preparation are implemented locally. ASSESS01–06 correct local defects; actual corrected installation and complete managed qualification remain ASSESS07/LIVE04. Capacity, retention/erasure and process-local jobs remain bounded pilot limits; see [current operational limits](operational-limits.md) and [assessment](full-assessment.md). Earlier direction below is retained as dated history.
+
 # Known Enough — product definition
 
 Status: KE00 direction, 2026-09-26; implementation remains the historical TeamTable application until the migration tasks land. This document governs new product work. See the [architecture](known-enough-architecture.md), [migration record](known-enough-pivot.md) and [queue](task-board.md) for implementation and acceptance boundaries.

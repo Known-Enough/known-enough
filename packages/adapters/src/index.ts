@@ -77,7 +77,7 @@ export type { ModelJobEnvelope, ModelJobMetric } from './model-jobs.ts';
 export { BEDROCK_CONFIGURATION, createAuthorizedBedrockTransport, createBedrockModels } from './bedrock-models.ts';
 export type { ConverseTransport, ModelUsage } from './bedrock-models.ts';
 
-export { createDynamoGroupRepository, createGroupRepositoryTransport, MemoryGroupRepository, type GroupRepository } from './group-repository.ts';
+export { createDynamoGroupRepository, createGroupRepositoryTransport, MemoryGroupRepository, GroupCapacityError, type GroupRepository } from './group-repository.ts';
 
 export { genericCandidates, genericCandidateCatalog } from './generic-candidates.ts';
 

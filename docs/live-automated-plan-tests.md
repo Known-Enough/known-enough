@@ -1,3 +1,5 @@
+> **Current delivery, 2026-10-02:** LIVE01–03 preparation and offline verification are DONE; LIVE04 installed QA infrastructure but publication/primary rollout/complete live qualification are pending. ASSESS01–06 correct local installer/budget/admission/clarification/automation issues; ASSESS08 provides the final pinned handoff. Full authenticated automation is implemented in source, with actual delivery, B/manual and matching automatic PASS still required in [ASSESS07](tasks/ASSESS07.md). The proposed/unimplemented/no-role/no-run statements below describe earlier dates. See [board](task-board.md) and [limits](operational-limits.md).
+
 # Live automated plan tests
 
 ## Current execution route — 2026-10-01
