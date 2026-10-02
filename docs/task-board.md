@@ -1,5 +1,9 @@
 # Known Enough — shared task queue
 
+## Immediate priority — user direction, 2026-10-02
+
+[ASSESS09 — Unblock Cognito setup and safely resume](tasks/ASSESS09.md) is READY/unclaimed and is B's next task before further A installation or ASSESS07. Actual 30fa91a apply failed PRIMARY_POOL_READBACK_FAILED; Cognito may already be updated with a pending journal step. Preserve A's original private state/backup/approval; no blind retry or new-pin bypass. A pauses installation, B prepares one narrow verified recovery handoff without AWS credentials. ASSESS08 local completion is historical; ASSESS07 remains blocked. No parallel implementation or new cloud authorization.
+
 ## Assessment correction routing — user direction, 2026-10-01
 
 User assigned all local assessment corrections to B, explicitly including primary/budget/workflow files, while A retains cloud operations. B executes ASSESS01 → ASSESS04 → ASSESS02 → ASSESS03 → ASSESS05 → ASSESS06 → ASSESS08 sequentially; no subagents or NP00 takeover. A's saved installation state and cloud claim remain intact; pull corrected source before further installation. This amends the former local LIVE04 file ownership only; it permits no second cloud writer or new spending. [ASSESS01](tasks/ASSESS01.md) is locally DONE; ASSESS04 is locally DONE; ASSESS02 is locally DONE; ASSESS03 is locally DONE; ASSESS05 is locally DONE (FA13 service proof pending); ASSESS06 is locally DONE (wider-use obligations OPS01/02/03); ASSESS08 is locally DONE; [final pinned handoff](live-qa-final-handoff.md) is ready for A. [ASSESS07](tasks/ASSESS07.md) records actual managed checks, BLOCKED pending corrected installation/handoff. Source sync uses [skip ci]. User direction on 2026-10-02 adds [ASSESS08](tasks/ASSESS08.md), now locally DONE/B: a focused installer check and one pinned A handoff before further full installation and ASSESS07. B needs no personal AWS credentials; A keeps cloud execution. Existing active claims are preserved.

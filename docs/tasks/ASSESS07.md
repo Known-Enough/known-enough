@@ -15,3 +15,5 @@
 7. Document effective capacity, retention/erasure and durable-job scope before wider use; prepare any additional resource/permission proposal before separate authorization.
 
 Local tests cannot complete this ticket. A preserves all private saved configuration/journals, original expiry 2026-10-09T03:16:41.171626Z and existing cloud claims. This checklist grants no new cloud spending, deployment or resource deletion authorization. See [LIVE04](LIVE04.md) and [assessment](../full-assessment.md).
+
+Current dependency (2026-10-02): ASSESS09 is the priority B repair for actual PRIMARY_POOL_READBACK_FAILED and safe interrupted Cognito reconciliation. A installation/readback follows its verified handoff; this managed ticket remains BLOCKED.
