@@ -6,7 +6,7 @@
 
 ## Immediate priority — user direction, 2026-10-02
 
-[ASSESS09 — Unblock Cognito setup and safely resume](tasks/ASSESS09.md) is locally DONE/B: canonical Cognito comparisons, exact pending-signup reconciliation and [one verified original-pin resume command](assess09-cognito-resume.md). A resumes its existing installation using that handoff; actual readback and qualification remain ASSESS07. Preserve the original private state/backup/approval; no blind retry or new-pin bypass. B used no AWS credentials or cloud writes. ASSESS08 local completion is historical; ASSESS07 remains blocked. No parallel implementation or new cloud authorization.
+[ASSESS09 — Unblock Cognito setup and safely resume](tasks/ASSESS09.md) is locally DONE: B's canonical Cognito/pending-signup repair and A's binary-file Lambda/unapplied-upload repair, with [one verified original-pin resume command](assess09-cognito-resume.md). A resumes its existing installation using that handoff; actual readback and qualification remain ASSESS07. Preserve the original private state/backup/approval; no blind retry or new-pin bypass. B used no AWS credentials or cloud writes. ASSESS08 local completion is historical; ASSESS07 remains blocked. No parallel implementation or new cloud authorization.
 
 ## Assessment correction routing — user direction, 2026-10-01
 
