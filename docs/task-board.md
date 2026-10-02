@@ -23,7 +23,7 @@ The user requested named tasks B can prepare, one final A installation, and unat
 | 1 | [LIVE01 — Build the online setup package](tasks/LIVE01.md) | B preparation | DONE — verified local setup preparation; online proof LIVE04 |
 | 2 | [LIVE02 — Test the real user journey](tasks/LIVE02.md) | B preparation | DONE — verified local real-journey harness; online proof LIVE04 |
 | 3 | [LIVE03 — Run checks after every deployment](tasks/LIVE03.md) | B preparation | DONE — verified local automation; online proof LIVE04 |
-| 4 | [LIVE04 — Install once and prove B can run everything](tasks/LIVE04.md) | A installation, then B qualification | BLOCKED on NP00 model-off/access and installation; setup authorized, four runs/day for seven days |
+| 4 | [LIVE04 — Install once and prove B can run everything](tasks/LIVE04.md) | A installation, then B qualification | IN_PROGRESS — A sequential installation handoff; NP00 model-off/access cleanup verified; four runs/day for seven days |
 
 B prepares LIVE01–03 sequentially in a separate clone under the explicit bounded scheduling exception, without A's AWS credentials or overlap with NP00 files. Record exact claims and coordinate shared file amendments. A maintains shared board routing during the overlap. NP01–NP04 local DONE and NP05's historical acceptance remain intact; unfinished NP05 online work maps to LIVE01–04. Required real tests cannot be marked PASS from local evidence. No cloud writes, spending, email, paid AI or deployment are performed/authorized by this planning update.
 
@@ -83,3 +83,8 @@ The user explicitly directed this chat to work on everything except NP00 and to 
 **B current claim:** NP04 offline qualification at f78ea12; exact files in ticket. NP00 A/Mac claim remains unchanged.
 
 **Final B checkpoint (2026-10-01):** NP01–NP04 local DONE, all B claims finished. NP04 final full check 464 / 2 optional skips, hosted 1/1, E2E 53/53; source sync skips CI. NP05 contains deployment/AWS/signup/operator/email/live-model and remaining actual screen checks. NP00 A/Mac claim untouched; the other clone must pull main ff-only before its next task.
+
+
+### Sequential A installation handoff — 2026-10-02 UTC
+
+NP00 model-off changes and temporary-access removal are verified. Its remaining obligations/claim are preserved without concurrent execution during A's LIVE04 operations handoff. A prepares the unchanged pinned free-mailbox installer with a fresh primary revision and the approved seven-day envelope; actual installation, B manual PASS and automatic post-deployment PASS remain pending. See [LIVE04](tasks/LIVE04.md) and [A handoff](handoff-A.md).
