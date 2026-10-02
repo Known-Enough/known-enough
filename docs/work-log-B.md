@@ -508,3 +508,7 @@ FA05 locally resolved. Persistent TOTAL counts run/model-token/model-micro/messa
 ## ASSESS02 claim — 2026-10-02T06:25Z
 
 Clean ff-only main 0b625fd; ASSESS01/04 synchronized. B takes only local admission/roster atomicity scope recorded in ASSESS02, including server async scope, repository group-version condition/atomic roster Put and exact ConditionCheck group permission. Actual GPT-6 variant/effort unexposed. Preserve NP00/A cloud scope and saved state. No subagents/cloud operation. In-flight reads linearize at a validated repository operation; delayed commits must reject revoked authority. Focused and full checks required.
+
+## ASSESS02 completed — 2026-10-02T06:45Z
+
+FA03/FA09 locally resolved. Server request admission fences bind model/decision commits to current group aggregate version; same-memory lock or exact cross-table DynamoDB condition. Creation/review fenced, roster binding and revised decision commit together, queued tasks retain request context, mixed persistence modes fail closed. Whole-aggregate changes conservatively invalidate in-flight requests. 11 new regressions; full pinned check exit 0 (570 application tests plus two optional skips, hosted 1/1, E2E 53/53, all reference/planning/lint/types/boundaries/build checks); final additional guards/tests 11/11 and lint/types. Exact existing primary/QA group role gains ConditionCheckItem only; actual installation/readback remains ASSESS07/08. Actual GPT-6 variant/effort unexposed, no NP00/cloud source takeover or service action. Next ASSESS03 clarification/domains.

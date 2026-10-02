@@ -1,3 +1,4 @@
+import { AsyncResource } from 'node:async_hooks';
 import { randomUUID } from 'node:crypto';
 import type { ModelInvocation, ModelJobKind, ModelJobRunner } from '@deal-table/application';
 
@@ -58,7 +59,7 @@ export class BoundedModelJobs implements ModelJobRunner {
     return new Promise((resolve, reject) => {
       const abort = () => this.finish(jobId, new ModelRuntimeError('EXPIRED'));
       const entry: Entry = {
-        kind, invocation, task, resolve, reject, running: false, started: this.now(),
+        kind, invocation: { ...invocation, assertCurrent: AsyncResource.bind(invocation.assertCurrent) }, task: AsyncResource.bind(task), resolve, reject, running: false, started: this.now(),
         controller: new AbortController(), timer: setTimeout(abort, duration),
         dispose: () => invocation.signal?.removeEventListener('abort', abort),
       };

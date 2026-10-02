@@ -1,3 +1,4 @@
+import { currentAdmissionFence } from './admission-context.ts';
 import {
   DynamoDBClient, TransactGetItemsCommand, TransactWriteItemsCommand,
   type AttributeValue, type TransactGetItemsCommandInput, type TransactWriteItemsCommandInput,
@@ -312,6 +313,9 @@ export class DynamoDBRoomRepository implements RoomRepository, KnownEnoughReposi
   }
 
   async createDecision(decision: KnownEnoughRecord): Promise<void> {
+    const fence = currentAdmissionFence(decision.decisionId);
+    if (fence && !fence.write) throw new RepositoryStorageError();
+    await fence?.assertCurrent();
     try {
       if (decision.replays.length !== 0) throw new CorruptDynamoRecordError();
       const record = encodedDecisionStateRecord(decision);
@@ -330,6 +334,7 @@ export class DynamoDBRoomRepository implements RoomRepository, KnownEnoughReposi
       validateDecisionStateGuard(record, guard);
       const request: TransactWriteItemsCommandInput = {
         TransactItems: [
+          ...(fence?.write ? [fence.write] : []),
           { Put: {
             TableName: this.options.tableName,
             Item: encodeDecisionStateItem(decision),
@@ -346,6 +351,7 @@ export class DynamoDBRoomRepository implements RoomRepository, KnownEnoughReposi
       };
       await this.options.client.send(new TransactWriteItemsCommand(request));
     } catch (error) {
+      await fence?.assertCurrent();
       if (error instanceof RepositoryCapacityError) throw error;
       if (error instanceof CorruptDynamoRecordError) throw new InvalidRoomCreationError();
       const disposition = transactionDisposition(error);
@@ -361,10 +367,13 @@ export class DynamoDBRoomRepository implements RoomRepository, KnownEnoughReposi
     transactionOptions?: DecisionTransactionOptions,
   ): Promise<T> {
     if (!Id.safeParse(decisionId).success) return structuredClone(await transition(null));
+    const fence = currentAdmissionFence(decisionId);
+    if (fence && !fence.write) throw new RepositoryStorageError();
     const candidate = transactionOptions?.replay;
     const candidateHash = candidate ? await candidate.keyHash : undefined;
     const replayKeyHash = candidateHash && REPLAY_KEY_HASH.test(candidateHash) ? candidateHash : undefined;
     for (let attempt = 1; attempt <= this.maxAttempts; attempt += 1) {
+      await fence?.assertCurrent();
       const loaded = await this.loadDecision(decisionId, replayKeyHash);
       if (!loaded.decision || !loaded.guard) return structuredClone(await transition(null));
       const beforeDecision = loaded.decision;
@@ -385,7 +394,7 @@ export class DynamoDBRoomRepository implements RoomRepository, KnownEnoughReposi
         if (nextDecision.replays.length > 1) throw new CorruptDynamoRecordError();
 
         const newReplay = resultingReplay && !beforeReplay ? resultingReplay : undefined;
-        if (!stateChanged && !newReplay) return structuredClone(result);
+        if (!stateChanged && !newReplay) { await fence?.assertCurrent(); return structuredClone(result); }
         const historyBefore = decisionPermissionHistoryCount(beforeRecord);
         const historyAfter = decisionPermissionHistoryCount(nextRecord);
         if (historyAfter < historyBefore || historyAfter - historyBefore > 1) throw new CorruptDynamoRecordError();
@@ -444,6 +453,7 @@ export class DynamoDBRoomRepository implements RoomRepository, KnownEnoughReposi
         if (estimateItemBytes(guardItem) > 8 * 1024) throw new RepositoryStorageError();
         const write: TransactWriteItemsCommandInput = {
           TransactItems: [
+            ...(fence?.write ? [fence.write] : []),
             { Put: {
               TableName: this.options.tableName,
               Item: encodeDecisionStateItem(nextDecision),

@@ -39,7 +39,7 @@ function journalAt(directory) {
 }
 function policy(account, table = groupTable) {
   return { Version: '2012-10-17', Statement: [{ Effect: 'Allow',
-    Action: ['dynamodb:GetItem', 'dynamodb:PutItem'],
+    Action: ['dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:ConditionCheckItem'],
     Condition: { 'ForAllValues:StringEquals': { 'dynamodb:LeadingKeys': ['NP#GROUPS'] } },
     Resource: `arn:aws:dynamodb:us-east-1:${account}:table/${table}` }] };
 }

@@ -1,3 +1,4 @@
+import { withAdmissionContext } from '@deal-table/adapters';
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import {
   CommandEnvelope, ERROR_HTTP_STATUS, Id, RoomInvitationIssueRequest, RoomInvitationRedeemRequest,
@@ -426,7 +427,7 @@ function createKnownEnoughApiHandler(
     throw new Error('maxBodyBytes must be an integer between 1 and 1048576');
   const debug = includeTestIdentity ? options.debug ?? false : false;
   return (request, response) => {
-    void (async () => {
+    void withAdmissionContext(async () => {
       setCors(response, request, allowedOrigins, includeTestIdentity);
       if (request.method === 'OPTIONS') { response.statusCode = 204; response.end(); return; }
       const id = requestId(request);
@@ -710,7 +711,7 @@ function createKnownEnoughApiHandler(
         debugLog(debug, 'decision-request-error', { actor: actor(principal), error: result.error.code });
         sendJson(response, result.error.httpStatus, result);
       }
-    })();
+    });
   };
 }
 

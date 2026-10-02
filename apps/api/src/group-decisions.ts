@@ -1,3 +1,4 @@
+import { withAdmissionFence } from '@deal-table/adapters';
 import { createHash } from 'node:crypto';
 import { Groups, Id, KnownEnough as KE } from '@deal-table/contracts';
 import { KnownEnoughApplicationError, type KnownEnoughApplication, type TrustedPrincipal, type DecisionArchitect } from '@deal-table/application';
@@ -90,22 +91,31 @@ export class GroupDecisionService {
       return { draft: structuredClone(draft), members, decisionId };
     });
     const bodyHash = hash([groupId, reserved.draft.id, reserved.draft.revision, reserved.draft.groupVersion, reserved.draft.frame]);
-    const replay = await this.options.application.getCreatedDecision(principal, reserved.decisionId, bodyHash);
+    const creationFence = await this.options.groups.repository.fence(state => {
+      const group = this.options.groups.currentGroup(state, principal, groupId, true);
+      if (group.version !== reserved.draft.groupVersion || group.members.length !== reserved.members.length
+        || reserved.members.some(member => !group.members.includes(member.subject)
+          || state.accounts.find(account => account.subject === member.subject)?.status !== 'APPROVED')) return fail('STALE_CONTEXT');
+    });
+    const replay = await withAdmissionFence(reserved.decisionId, creationFence,
+      () => this.options.application.getCreatedDecision(principal, reserved.decisionId, bodyHash));
     if (replay) { await this.options.groups.authorizeDecision(principal, reserved.decisionId); return replay; }
     const definition = KE.DecisionDefinition.parse({ ...reserved.draft.frame, decisionId: reserved.decisionId,
       variables: reserved.draft.frame.variables.map(variable => ({ ...variable, ownerParticipantId: null })) });
-    await this.options.application.createDecision({ definition, creatorSubject: principal!.subject, creationBodyHash: bodyHash,
-      memberships: reserved.members, creationGuard: { expiresAt, isEnabled: this.options.isEnabled } });
+    await withAdmissionFence(reserved.decisionId, creationFence, () => this.options.application.createDecision({ definition, creatorSubject: principal!.subject, creationBodyHash: bodyHash,
+      memberships: reserved.members, creationGuard: { expiresAt, isEnabled: this.options.isEnabled } }));
     await this.options.groups.authorizeDecision(principal, reserved.decisionId);
     return this.options.application.getPublicSnapshot(principal, reserved.decisionId);
   }
   async reviewRoster(principal: TrustedPrincipal | null, groupId: string, decisionId: string) {
     const roster = await this.options.groups.roster(principal, groupId);
-    await this.options.groups.repository.transaction(state => {
+    const reviewFence = await this.options.groups.repository.fence(state => {
       const group = this.options.groups.currentGroup(state, principal, groupId, true);
+      if (group.version !== roster.version) return fail('STALE_CONTEXT');
       if (!group.decisions.some(item => item.id === decisionId)) return fail('NOT_FOUND');
     });
-    const owner = await this.options.application.getOwnerSnapshot(principal, decisionId);
+    const owner = await withAdmissionFence(decisionId, reviewFence,
+      () => this.options.application.getOwnerSnapshot(principal, decisionId));
     return { frame: owner.publicSnapshot.frame, controlVersion: owner.controlVersion, groupVersion: roster.version,
       participants: roster.members.map(member => ({ id: member.participantId, displayName: member.displayName })) };
   }
@@ -117,13 +127,17 @@ export class GroupDecisionService {
     const definition = KE.DecisionDefinition.parse({ ...preview.frame, frameVersion: preview.frame.frameVersion + 1,
       semanticVersion: preview.frame.semanticVersion + 1, participants: preview.participants.map(person => ({ ...person, requiredForApproval: true })),
       requiredParticipantIds: preview.participants.map(person => person.id), variables: preview.frame.variables.map(variable => ({ ...variable, ownerParticipantId: null })) });
-    await this.options.application.reviseDecision(principal, { decisionId, expectedControlVersion: preview.controlVersion, definition,
-      memberships: roster.members.map(member => ({ subject: member.subject, participantId: member.participantId, active: true })) });
-    await this.options.groups.repository.transaction(state => {
+    const revisionFence = await this.options.groups.repository.fence(state => {
       const group = this.options.groups.currentGroup(state, principal, groupId, true);
       if (group.version !== preview.groupVersion || roster.version !== preview.groupVersion) return fail('STALE_CONTEXT');
+      if (roster.members.some(member => !group.members.includes(member.subject)
+        || state.accounts.find(account => account.subject === member.subject)?.status !== 'APPROVED')) return fail('STALE_CONTEXT');
       const binding = group.decisions.find(item => item.id === decisionId) ?? fail('NOT_FOUND'); binding.version = group.version;
     });
+    await withAdmissionFence(decisionId, revisionFence, () => this.options.application.reviseDecision(principal, {
+      decisionId, expectedControlVersion: preview.controlVersion, definition,
+      memberships: roster.members.map(member => ({ subject: member.subject, participantId: member.participantId, active: true }))
+    }));
     await this.options.groups.authorizeDecision(principal, decisionId);
     return this.options.application.getPublicSnapshot(principal, decisionId);
   }

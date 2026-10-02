@@ -1,7 +1,7 @@
 import { createHash, createHmac, randomBytes } from 'node:crypto';
 import { Groups, Id } from '@deal-table/contracts';
 import { KnownEnoughApplicationError, type TrustedPrincipal } from '@deal-table/application';
-import type { GroupRepository } from '@deal-table/adapters';
+import { bindAdmissionFence, type GroupRepository } from '@deal-table/adapters';
 const digest = (text: string) => createHash('sha256').update(text).digest('hex');
 export const memberId = (subject: string) => `member-${digest(subject).slice(0, 32)}`;
 const fail = (code: 'FORBIDDEN' | 'INVALID_COMMAND' | 'NOT_FOUND' | 'STALE_CONTEXT'): never => { throw new KnownEnoughApplicationError(code); };
@@ -147,25 +147,23 @@ export class GroupService {
   }
   /** Every bound decision read/command checks current admission AND exact group version. */
   async authorizeDecision(principal: TrustedPrincipal | null, decisionId: string) {
-    if (principal?.kind === 'display') {
-      if (principal.roomId !== decisionId) return fail('FORBIDDEN');
-      await this.repository.transaction(state => {
+    const fence = await this.repository.fence(state => {
+      if (principal?.kind === 'display') {
+        if (principal.roomId !== decisionId) return fail('FORBIDDEN');
         const account = state.accounts.find(item => item.subject === principal.subject);
         if (account && account.status !== 'APPROVED') return fail('FORBIDDEN');
         const group = state.groups.find(item => item.decisions.some(decision => decision.id === decisionId));
         if (group && group.decisions.find(item => item.id === decisionId)!.version !== group.version) return fail('STALE_CONTEXT');
-      });
-      // Admission checks the verified room scope; the application still denies owner/write authority.
-      return;
-    }
-    const who = subject(principal);
-    await this.repository.transaction(state => {
+        return;
+      }
+      const who = subject(principal);
       this.account(state, who);
       const group = state.groups.find(item => item.decisions.some(decision => decision.id === decisionId));
-      if (!group) return; // legacy decision membership is still enforced by its own application boundary
+      if (!group) return; // legacy membership is still checked by the decision boundary
       this.group(state, who, group.id);
       if (group.decisions.find(item => item.id === decisionId)!.version !== group.version) return fail('STALE_CONTEXT');
     });
+    bindAdmissionFence(decisionId, fence);
   }
   async roster(principal: TrustedPrincipal | null, groupId: string) {
     const who = subject(principal);

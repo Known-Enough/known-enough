@@ -1,3 +1,4 @@
+import { currentAdmissionFence } from './admission-context.ts';
 import { Id } from '@deal-table/contracts';
 import type {
   KnownEnoughRecord, KnownEnoughRepository, RoomRecord, RoomRepository,
@@ -32,11 +33,14 @@ export class InMemoryRoomRepository implements RoomRepository, KnownEnoughReposi
   }
 
   async createDecision(decision: KnownEnoughRecord): Promise<void> {
-    await this.isolated(decision.decisionId, async () => {
+    const operation = () => this.isolated(decision.decisionId, async () => {
       if (this.rooms.has(decision.decisionId) || this.decisions.has(decision.decisionId))
         throw new Error('Decision already exists');
       this.decisions.set(decision.decisionId, structuredClone(decision));
     });
+    const fence = currentAdmissionFence(decision.decisionId);
+    if (fence?.write) throw new Error('INCOMPATIBLE_ADMISSION_REPOSITORIES');
+    await (fence ? fence.serialize(operation) : operation());
   }
 
   async transaction<T>(roomId: string, transition: (room: RoomRecord | null) => Promise<T> | T): Promise<T> {
@@ -54,13 +58,17 @@ export class InMemoryRoomRepository implements RoomRepository, KnownEnoughReposi
     transition: (decision: KnownEnoughRecord | null) => Promise<T> | T,
   ): Promise<T> {
     if (!Id.safeParse(decisionId).success) return structuredClone(await transition(null));
-    return this.isolated(decisionId, async () => {
+    const operation = () => this.isolated(decisionId, async () => {
       const stored = this.decisions.get(decisionId);
       const working = stored ? structuredClone(stored) : null;
       const result = await transition(working);
+      const safeResult = structuredClone(result);
       if (working) this.decisions.set(decisionId, structuredClone(working));
-      return structuredClone(result);
+      return safeResult;
     });
+    const fence = currentAdmissionFence(decisionId);
+    if (fence?.write) throw new Error('INCOMPATIBLE_ADMISSION_REPOSITORIES');
+    return fence ? fence.serialize(operation) : operation();
   }
 }
 
@@ -72,3 +80,5 @@ export type { ConverseTransport, ModelUsage } from './bedrock-models.ts';
 export { createDynamoGroupRepository, createGroupRepositoryTransport, MemoryGroupRepository, type GroupRepository } from './group-repository.ts';
 
 export { genericCandidates } from './generic-candidates.ts';
+
+export { withAdmissionContext, bindAdmissionFence, withAdmissionFence } from './admission-context.ts';
