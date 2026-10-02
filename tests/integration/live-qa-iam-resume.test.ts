@@ -44,7 +44,7 @@ assert json.loads(journal.read_text()) == state
 });
 
 
-test('recovery child commands inherit pinned npm rather than CloudShell npm', () => {
+test('recovery child commands use pinned npm and the original build directory', () => {
   const folder = mkdtempSync(tmpdir() + '/iam-runtime-path-');
   try {
     const shell = readFileSync('scripts/live-qa/resume-iam-policy-fix.sh', 'utf8');
@@ -52,12 +52,12 @@ test('recovery child commands inherit pinned npm rather than CloudShell npm', ()
     if (!section) throw new Error('Missing runtime launch');
     const launch = section.split("<<'JS'")[0];
     if (!launch) throw new Error('Missing Node launch');
-    for (const name of ['runtime/bin', 'base/bin']) mkdirSync(folder + '/' + name, { recursive: true });
+    for (const name of ['runtime/bin', 'base/bin', 'source']) mkdirSync(folder + '/' + name, { recursive: true });
     writeFileSync(folder + '/base/bin/npm', '#!/bin/sh\necho 10.0.0\n', { mode: 0o700 });
     writeFileSync(folder + '/runtime/bin/npm', '#!/bin/sh\necho 11.19.0\n', { mode: 0o700 });
-    writeFileSync(folder + '/runtime/bin/node', '#!/bin/sh\ntest "$(npm --version)" = "11.19.0"\n', { mode: 0o700 });
-    const result = spawnSync('/bin/bash', ['-c', launch.replaceAll('/tmp/known-enough-live-qa-$source_commit/node/bin', folder + '/runtime/bin')], {
-      encoding: 'utf8', env: { PATH: folder + '/base/bin:/usr/bin:/bin', config: 'unused', adapter: 'unused', source_commit: 'original' },
+    writeFileSync(folder + '/runtime/bin/node', '#!/bin/sh\ntest "$(npm --version)" = "11.19.0" && test "$PWD" = "$EXPECTED_SOURCE"\n', { mode: 0o700 });
+    const result = spawnSync('/bin/bash', ['-c', launch.replaceAll('/tmp/known-enough-live-qa-$source_commit/node/bin', folder + '/runtime/bin').replaceAll('/tmp/known-enough-live-qa-$source_commit/source', folder + '/source')], {
+      encoding: 'utf8', env: { PATH: folder + '/base/bin:/usr/bin:/bin', config: 'unused', adapter: 'unused', source_commit: 'original', EXPECTED_SOURCE: folder + '/source' },
     });
     expect(result.stderr).toBe('');
     expect(result.status).toBe(0);

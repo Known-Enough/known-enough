@@ -45,6 +45,7 @@ curl --fail --silent --show-error "https://raw.githubusercontent.com/Known-Enoug
 # Rebuild disposable tools if CloudShell restarted; keep the original source and state.
 bash "$setup" "$source_commit" dry-run "$config"
 export PATH="/tmp/known-enough-live-qa-$source_commit/node/bin:$PATH"
+cd "/tmp/known-enough-live-qa-$source_commit/source"
 "/tmp/known-enough-live-qa-$source_commit/node/bin/node" --input-type=module - "$config" "$adapter" "$source_commit" <<'JS'
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
