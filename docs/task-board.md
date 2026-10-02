@@ -112,3 +112,5 @@ LIVE04 live checkpoint: QA infrastructure UPDATE_COMPLETE at 348afae; primary ro
 ## Wider-use obligations recorded by ASSESS06
 
 [OPS01](tasks/OPS01.md) partition/archive, [OPS02](tasks/OPS02.md) retention/export/erasure and [OPS03](tasks/OPS03.md) distributed jobs are BLOCKED/unclaimed pending the managed ASSESS07 baseline before wider-use implementation. These features remain unimplemented. ASSESS08 is locally complete; finish ASSESS07 next; preserve A NP00. See [current operational limits](operational-limits.md).
+
+LIVE04 / ASSESS07 current blocker: user confirms missing KnownEnoughStageGroups (NoSuchEntity), incorrectly classified by the AWS CLI adapter. A prepares a bounded same-30fa91a recovery with corrected adapter, preserving the existing primary journal/rollback and grant. ASSESS08 local completion remains historical; actual corrected installation/live proof is still pending.

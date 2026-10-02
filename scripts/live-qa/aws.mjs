@@ -11,7 +11,7 @@ export function aws(service, operation, input = {}) {
     if (result.status !== 0) {
         const error = new Error(`AWS_OPERATION_FAILED:${service}:${operation}`);
         error.noUpdates = /No updates are to be performed/.test(result.stderr ?? '');
-        error.missing = /NoSuchBucket|Not Found|ResourceNotFoundException|does not exist|SecretNotFound|NotFoundException/.test(result.stderr ?? '');
+        error.missing = /NoSuchBucket|NoSuchEntity|Not Found|ResourceNotFoundException|does not exist|SecretNotFound|NotFoundException/.test(result.stderr ?? '');
         throw error;
     }
     try {

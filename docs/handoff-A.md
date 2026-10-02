@@ -462,3 +462,9 @@ Focused setup/recovery passed 28/28. Pinned clean-clone npm run check passed exi
 ### Focused final setup handoff queued — 2026-10-02
 
 User requests a B task to reduce repeated setup attempts/token use. ASSESS08 is READY/unclaimed after B's existing corrective queue and before A installation/ASSESS07. It verifies remaining installer CLI contracts, installed-stack forward resume and final corrected source, then supplies one pinned CloudShell block and exact GitHub settings. No B credential sharing/cloud write or new spending; A state/claims remain preserved. This is documentation routing, not completed setup.
+
+### Current 30fa91a IAM recovery — 2026-10-02
+
+User confirms NoSuchEntity on KnownEnoughStageGroups. Fix AWS adapter's missing-resource classifier; resume the original 30fa91a installation with the corrected adapter, not a new deployment pin. New resume-iam-policy-fix.sh preserves original HOME journal/rollback material, refuses pending/rollback or expired state, rebuilds original disposable tools and invokes original clean installer with corrected AWS command handling. Policy creation remains inside existing journal/guards. Final command follows the verified repair commit; deployment source remains 30fa91a. Actual readback and managed tests pending.
+
+Final repair checks passed: focused classification/primary/preflight 28/28; pinned clean-clone npm run check exit 0, 615 application tests / two optional skips, hosted 1/1, E2E 56/56, references 7/7, planning 15/15, lint/types/boundaries/build. Shell parse, documentation links and whitespace passed. Private verification directory is recorded in /tmp/known-enough-iam-fix-location (final-check.log). Actual same-pin helper execution and AWS readback remain pending.
