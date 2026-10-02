@@ -79,6 +79,6 @@ export type { ConverseTransport, ModelUsage } from './bedrock-models.ts';
 
 export { createDynamoGroupRepository, createGroupRepositoryTransport, MemoryGroupRepository, type GroupRepository } from './group-repository.ts';
 
-export { genericCandidates } from './generic-candidates.ts';
+export { genericCandidates, genericCandidateCatalog } from './generic-candidates.ts';
 
 export { withAdmissionContext, bindAdmissionFence, withAdmissionFence } from './admission-context.ts';

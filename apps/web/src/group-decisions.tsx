@@ -7,6 +7,8 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
   const [objective, setObjective] = useState(''); const [draft, setDraft] = useState<Groups.GroupDraft | null>(null);
   const draftHeading = useRef<HTMLHeadingElement>(null);
   useEffect(() => { draftHeading.current?.focus(); }, [draft?.id, draft?.revision]);
+  const [answers, setAnswers] = useState<Record<number, string>>({});
+  useEffect(() => setAnswers({}), [draft?.id]);
   const [dirty, setDirty] = useState(false);
   const [reviewed, setReviewed] = useState(false); const [busy, setBusy] = useState(false); const [notice, setNotice] = useState('');
   const pending = useRef<{ objective: string; idempotencyKey: string } | null>(null);
@@ -25,6 +27,14 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
     try { await work(); } catch (error) { setNotice(error instanceof UserFlowError ? error.message : 'The result is unknown. Refresh before retrying.'); }
     finally { setBusy(false); }
   }
+  async function draftObjective(value: string) {
+    pending.current ??= { objective: value, idempotencyKey: crypto.randomUUID() };
+    const result = await request('drafts', pending.current);
+    setDraft(Groups.GroupDraft.parse(result.draft)); setDirty(false); setRoster(null);
+    pending.current = null; setReviewed(false); await reload();
+  }
+  const answeredObjective = draft ? [draft.frame.objective, 'Public clarification answers:',
+    ...draft.clarificationQuestions.map((question, index) => question + ' Answer: ' + (answers[index] ?? '').trim())].join('\n') : '';
   function changeFrame(frame: KE.PublicDecisionFrame) {
     if (draft) setDraft({ ...draft, frame }); setReviewed(false); setDirty(true);
   }
@@ -44,9 +54,7 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
         onChange={event => { setObjective(event.target.value); setReviewed(false); }} />
       <p>This objective is shared. Describe the public choices; add your private limits later in your own conversation.</p>
       <button disabled={busy || !objective.trim()} onClick={() => void action(async () => {
-        pending.current ??= { objective, idempotencyKey: crypto.randomUUID() };
-        const result = await request('drafts', pending.current); setDraft(Groups.GroupDraft.parse(result.draft)); setDirty(false); setRoster(null);
-        pending.current = null; setReviewed(false); await reload();
+        await draftObjective(objective);
       })}>{pending.current ? 'Retry the same draft request' : 'Draft a new decision'}</button>
       {pending.current && !busy && <button className="secondary" onClick={() => { pending.current = null; setNotice('Refresh saved drafts before starting a different request.'); }}>Release this draft request for editing</button>}
       {group.drafts.map(item => <p key={item.id}>{item.current ? <button disabled={busy} onClick={() => void action(async () => {
@@ -65,7 +73,20 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
       </div>)}
       <h5>Shared rules</h5><ul>{draft.frame.rules.map(rule => <li key={rule.id}>{ruleText(rule, draft.frame.variables)}</li>)}</ul>
       {!draft.frame.rules.length && <p>No extra shared rules. Your private confirmed needs still apply.</p>}
-      {draft.clarificationQuestions.map((question, index) => <p key={index} role="status">{question}</p>)}
+      {draft.clarificationQuestions.map((question, index) => <div key={index}>
+        <p role="status">{question}</p>
+        {!draft.createdDecisionId && <><label htmlFor={'public-answer-' + group.id + '-' + index}>Public answer {index + 1}</label>
+          <textarea id={'public-answer-' + group.id + '-' + index} value={answers[index] ?? ''} maxLength={200}
+            disabled={busy || !!pending.current} onChange={event => setAnswers({ ...answers, [index]: event.target.value })} /></>}
+      </div>)}
+      {!!draft.clarificationQuestions.length && !draft.createdDecisionId && <>
+        <p>These answers will be shared with the group. Keep private limits for your own conversation. Saving draft edits does not answer these questions.</p>
+        {answeredObjective.length > 2000 && <p role="status">Shorten these public answers or describe a simpler decision above.</p>}
+        <button disabled={busy || dirty || answeredObjective.length > 2000
+          || draft.clarificationQuestions.some((_question, index) => !answers[index]?.trim())
+          || (!!pending.current && pending.current.objective !== answeredObjective)}
+          onClick={() => void action(() => draftObjective(answeredObjective))}>Use public answers to draft again</button>
+      </>}
       <p>For different public terms, describe them above and request a new draft. Unsupported or unbounded choices need clarification.</p>
       {!draft.createdDecisionId && <button disabled={busy} onClick={() => void action(async () => {
         const result = await request(`drafts/${draft.id}`, { revision: draft.revision, title: draft.frame.title, objective: draft.frame.objective, variables: draft.frame.variables, rules: draft.frame.rules });

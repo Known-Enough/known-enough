@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { test, expect, type BrowserContext } from '@playwright/test';
 import { npApi } from '../evaluations/np-api.ts';
+import { clarificationTransport } from '../evaluations/assessment-model.ts';
 import { freshGroup } from '../evaluations/np-lifecycle.ts';
 let server: ChildProcess;
 const url = 'http://127.0.0.1:5183/';
@@ -98,5 +99,29 @@ test('public draft takes keyboard focus; malformed responses show a safe retry m
     await page.getByRole('button', { name: 'Draft a new decision', exact: true }).click();
     await expect(page.getByText('The result is unknown. Refresh before retrying.', { exact: false })).toBeVisible();
     expect(await page.locator('body').innerText()).not.toContain('PRIVATE_PROVIDER_PAYLOAD');
+  } finally { await context.close(); await api.close(); }
+});
+
+test('unanswered public questions survive saving and explicit answers create a reviewed new draft', async ({ browser }) => {
+  const api = await npApi(clarificationTransport()); const context = await browser.newContext();
+  try {
+    await connect(context, api, 'iris'); await api.call('iris', '/account/register', { displayName: 'Iris' }); await api.approve('iris');
+    await api.groups.create({ kind: 'participant', subject: 'iris' }, { name: 'Small club', idempotencyKey: 'small' });
+    const page = await context.newPage(); await page.goto(url);
+    await page.getByLabel('What should this group decide?').fill('Choose a gallery meetup.');
+    await page.getByRole('button', { name: 'Draft a new decision', exact: true }).click();
+    const question = page.getByText('Should this meetup be indoors or outdoors?', { exact: true });
+    await expect(question).toBeVisible();
+    const create = page.getByRole('button', { name: 'Create decision for group review', exact: true });
+    await expect(create).toBeDisabled();
+    await page.getByRole('button', { name: 'Save draft edits', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Review the public draft' })).toBeFocused();
+    await expect(question).toBeVisible(); await expect(create).toBeDisabled();
+    await page.getByLabel('Public answer 1', { exact: true }).fill('Indoors only.');
+    await page.getByRole('button', { name: 'Use public answers to draft again', exact: true }).click();
+    await expect(question).toHaveCount(0); await expect(create).toBeDisabled();
+    await page.getByRole('checkbox', { name: 'I reviewed this public draft and the required approvers' }).check();
+    await expect(create).toBeEnabled(); await create.click();
+    await expect(page.getByRole('heading', { name: 'Shared frame', exact: true })).toBeVisible();
   } finally { await context.close(); await api.close(); }
 });

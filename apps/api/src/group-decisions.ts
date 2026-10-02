@@ -2,7 +2,7 @@ import { withAdmissionFence } from '@deal-table/adapters';
 import { createHash } from 'node:crypto';
 import { Groups, Id, KnownEnough as KE } from '@deal-table/contracts';
 import { KnownEnoughApplicationError, type KnownEnoughApplication, type TrustedPrincipal, type DecisionArchitect } from '@deal-table/application';
-import { genericCandidates } from '@deal-table/adapters';
+import { genericCandidates, genericCandidateCatalog } from '@deal-table/adapters';
 import { GroupService } from './group-service.ts';
 const hash = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const fail = (code: 'INVALID_COMMAND' | 'STALE_CONTEXT' | 'NOT_FOUND' | 'NEEDS_CLARIFICATION'): never => { throw new KnownEnoughApplicationError(code); };
@@ -34,7 +34,8 @@ export class GroupDecisionService {
       participants: roster.members.map(member => ({ id: member.participantId, displayName: member.displayName })),
       allowedOptions: [], generateOptions: true });
     const questions = [...output.clarificationQuestions];
-    if (!genericCandidates(output.frame).length) questions.push('Please clarify a bounded set of public choices or public value limits; this draft cannot generate supported candidates yet.');
+    const catalog = genericCandidateCatalog(output.frame);
+    if (catalog.clarificationQuestion) questions.push(catalog.clarificationQuestion);
     const draft = Groups.GroupDraft.parse({ id, bodyHash, revision: 1, groupVersion: roster.version,
       frame: output.frame, clarificationQuestions: questions.slice(0, 12), createdDecisionId: null });
     if (!this.options.isEnabled()) return fail('STALE_CONTEXT');
@@ -64,7 +65,10 @@ export class GroupDecisionService {
       const result = KE.PublicDecisionFrame.safeParse({ ...draft.frame, title: body.title, objective: body.objective, variables: body.variables, rules: body.rules });
       if (!result.success || result.data.variables.some(item => item.visibility !== 'PUBLIC') || result.data.rules.some(item => item.visibility !== 'PUBLIC')) return fail('INVALID_COMMAND');
       draft.frame = result.data; draft.revision++;
-      draft.clarificationQuestions = genericCandidates(draft.frame).length ? [] : ['Clarify supported public choices or value limits before creating this decision.'];
+      // Saving edits is not an answer to a model's unresolved public question.
+      const catalog = genericCandidateCatalog(draft.frame);
+      if (catalog.clarificationQuestion && !draft.clarificationQuestions.includes(catalog.clarificationQuestion))
+        draft.clarificationQuestions = [...draft.clarificationQuestions, catalog.clarificationQuestion].slice(0, 12);
       return structuredClone(draft);
     });
   }

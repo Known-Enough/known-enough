@@ -1,3 +1,9 @@
+## Current B assessment handoff — 2026-10-02
+
+ASSESS01/04/02/03 are locally DONE and synchronized sequentially. ASSESS03 verification: 583 application tests plus two optional skips, hosted 1/1, E2E 54/54 and all pinned check stages. Preserved unanswered questions and explicit public redrafting; bounded complete typed catalog including subsets, interiors and optional omission. Next ASSESS05, then ASSESS06 and final ASSESS08 pinned installer handoff. A retains NP00/cloud ownership and saved configuration/expiry. No live PASS or deployment is claimed. See [assessment](full-assessment.md) and [managed checklist](tasks/ASSESS07.md). Older routing below is dated history.
+
+---
+
 ## Current next work for B — LIVE delivery, 2026-10-01
 
 After a clean ff-only pull and claim check, claim LIVE01 and prepare LIVE01–03 sequentially in your separate clone. Use the [new delivery plan](live-test-delivery.md) and [LIVE01 ticket](tasks/LIVE01.md). This is an explicit B scheduling exception alongside A/Luna's preserved NP00 claim. Prepare all setup/test/automation code without A credentials; do not perform cloud writes or overlap NP00 files. Record exact file scope and your own log/handoff. A applies one verified package in LIVE04, then B proves its own GitHub dispatch and automatic post-deployment complete PASS. No live completion is claimed now. Older routing below is retained history.
