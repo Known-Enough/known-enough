@@ -2,7 +2,7 @@
 
 ## Immediate priority — user direction, 2026-10-02
 
-[ASSESS09 — Unblock Cognito setup and safely resume](tasks/ASSESS09.md) is READY/unclaimed and is B's next task before further A installation or ASSESS07. Actual 30fa91a apply failed PRIMARY_POOL_READBACK_FAILED; Cognito may already be updated with a pending journal step. Preserve A's original private state/backup/approval; no blind retry or new-pin bypass. A pauses installation, B prepares one narrow verified recovery handoff without AWS credentials. ASSESS08 local completion is historical; ASSESS07 remains blocked. No parallel implementation or new cloud authorization.
+[ASSESS09 — Unblock Cognito setup and safely resume](tasks/ASSESS09.md) is IN_PROGRESS/B local repair and is the current task before further A installation or ASSESS07. Actual 30fa91a apply failed PRIMARY_POOL_READBACK_FAILED; Cognito may already be updated with a pending journal step. Preserve A's original private state/backup/approval; no blind retry or new-pin bypass. A pauses installation, B prepares one narrow verified recovery handoff without AWS credentials. ASSESS08 local completion is historical; ASSESS07 remains blocked. No parallel implementation or new cloud authorization.
 
 ## Assessment correction routing — user direction, 2026-10-01
 

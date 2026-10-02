@@ -1,3 +1,7 @@
+## 2026-10-02 — ASSESS09 local repair claim
+
+Clean ff-only main baseline 3d2d68af2c1c2b7980ad56328a032e368e2f30c9e92. B / Battosai1806, Codex GPT-6 (exact variant/effort not exposed), no subagents. Scope: primary Cognito comparisons/pending reconciliation, dedicated original-pin recovery helper, focused tests and handoff/ticket/board records. A keeps cloud execution and NP00; no credential access or cloud writes.
+
 ## 2026-09-30T23:40:46Z — KE14 / local exact-patch source commit
 
 - Committed only the exact twelve independently reviewed files, with every final manifest hash rechecked, as local `main` commit `5e87543` on parent `350349a`. No source alteration from the reviewed patch; no other source/config/lock/CI changes. The commit remains one source commit ahead of `origin/main` and is not pushed.

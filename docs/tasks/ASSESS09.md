@@ -1,7 +1,7 @@
 # ASSESS09 — Unblock Cognito setup and safely resume
 
-- Status: READY — highest-priority B task, before further A installation and ASSESS07.
-- Intended worker: B / Octavio / Battosai1806; unclaimed. Record clean ff-only baseline and actual model/effort before work; no subagents.
+- Status: IN_PROGRESS — B local repair; A cloud execution remains paused.
+- Worker: B / Octavio / Battosai1806, Codex GPT-6 (exact runtime variant/effort not exposed). Clean main ff-only baseline 3d2d68af2c1c2b7980ad56328a032e368e2f30c9e92, 2026-10-02; no subagents. Claimed only the narrow scope below, including a dedicated same-pin Cognito repair helper and focused tests.
 - Authority: user explicitly requests this priority repair on 2026-10-02, with narrow scope and minimal token use. A retains AWS execution/NP00. No credential sharing, new spending or unsolicited cloud writes.
 
 ## Exact failure and preserved state
