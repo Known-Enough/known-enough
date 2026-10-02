@@ -300,3 +300,7 @@ Read [full assessment](full-assessment.md) before relying on LIVE04 install/comp
 ## Assessment corrective batch claim — 2026-10-01
 
 User assigned all local assessment corrections to B, including overlapping primary/budget/workflow scope; A retains cloud installation/NP00. Clean ff-only main 91044cdf10de1af80e3b11effd31e7897609091f. Actual Codex GPT-6, variant/effort unexposed. Sequential ASSESS01 first: primary.mjs, new primary regressions, ticket/assessment/own records. ASSESS04/02/03/05/06 are READY; ASSESS07 lists managed checks separately. No subagents/cloud operation/spending or external message. Claim is published before executable edits.
+
+## ASSESS01 complete — 2026-10-02T06:05Z
+
+FA01/FA02/FA12 locally resolved: immutable original recovery snapshots/ZIP, atomic intent checkpoints, normal resumable phases, fail-closed ambiguous/legacy mutations, exact owned-resource/table checks and verified rollback. 21 new regressions; full integrated check 545 passed plus two optional DynamoDB Local skips, hosted 1/1, E2E 53/53; final guard focus 35/35 and lint. Actual Codex GPT-6 variant/effort unexposed. A incoming Amplify publication repair 67657e2 preserved. No cloud action or service acceptance. Legacy/pending mutation reconciliation and real install/rollback readback are ASSESS07. Source sync [skip ci]; next ASSESS04 whole-envelope counters. A must pull corrected source before primary rollout and preserve original private approval/expiry/state.

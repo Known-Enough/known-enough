@@ -6,6 +6,10 @@ Completed 2026-10-02 UTC (2026-10-01, Mexico City). B / Battosai1806; actual Cod
 
 Reviewed executable baseline: `fb42d675756bd6c67ff77f7a1a980ae965705a76`, clean ff-only pull. Claim: `bd3cd80`. Locations refer to that baseline. [Board](task-board.md), [workflow](agent-workflow.md), [LIVE04](tasks/LIVE04.md) and [NP00](tasks/NP00.md) govern current claims/statuses. No fixes or task status changes are delivered.
 
+## Corrective execution register — 2026-10-01
+
+User assigned local corrections to B, including primary/budget/workflow scope; A retains cloud operations and NP00. Original findings/evidence below are retained. [ASSESS01](tasks/ASSESS01.md) implements immutable recovery, fail-closed ambiguous mutations and verified rollback; local verification passed (FA01/FA02/FA12 locally resolved; actual service proof ASSESS07). [ASSESS04](tasks/ASSESS04.md), [ASSESS02](tasks/ASSESS02.md), [ASSESS03](tasks/ASSESS03.md), [ASSESS05](tasks/ASSESS05.md) and [ASSESS06](tasks/ASSESS06.md) follow sequentially. Actual managed proof belongs to new [ASSESS07](tasks/ASSESS07.md), not inferred from these fixes.
+
 ## Scope and evidence
 
 Inspected current contracts/kernel, decision/owner/permission/approval lifecycle, group admission/invitations/roster, HTTP/Cognito/Lambda, browser sessions/screens, DynamoDB/replay, Bedrock/jobs, installer/recovery/rollback, fixtures/mailbox/budgets, deployment/qualification workflows and relevant tests/task obligations. Historical TeamTable remains regression evidence. Review concentrated on authority/privacy/concurrency/recovery/completion; this is not a line-by-line independent audit of every historical fixture/import.

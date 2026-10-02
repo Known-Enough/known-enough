@@ -2,7 +2,7 @@
 
 ## Assessment correction routing — user direction, 2026-10-01
 
-User assigned all local assessment corrections to B, explicitly including primary/budget/workflow files, while A retains cloud operations. B executes ASSESS01 → ASSESS04 → ASSESS02 → ASSESS03 → ASSESS05 → ASSESS06 sequentially; no subagents or NP00 takeover. A's saved installation state and cloud claim remain intact; pull corrected source before further installation. This amends the former local LIVE04 file ownership only; it permits no second cloud writer or new spending. [ASSESS01](tasks/ASSESS01.md) is IN_PROGRESS; remaining correction tickets READY. [ASSESS07](tasks/ASSESS07.md) records actual managed checks, BLOCKED pending corrected installation/handoff. Source sync uses [skip ci].
+User assigned all local assessment corrections to B, explicitly including primary/budget/workflow files, while A retains cloud operations. B executes ASSESS01 → ASSESS04 → ASSESS02 → ASSESS03 → ASSESS05 → ASSESS06 sequentially; no subagents or NP00 takeover. A's saved installation state and cloud claim remain intact; pull corrected source before further installation. This amends the former local LIVE04 file ownership only; it permits no second cloud writer or new spending. [ASSESS01](tasks/ASSESS01.md) is locally DONE; ASSESS04 is next, remaining correction tickets READY. [ASSESS07](tasks/ASSESS07.md) records actual managed checks, BLOCKED pending corrected installation/handoff. Source sync uses [skip ci].
 
 ## Latest live-delivery scheduling override — user direction, 2026-10-01
 
