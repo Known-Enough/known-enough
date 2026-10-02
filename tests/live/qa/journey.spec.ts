@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@playwright/test';
 import { KnownEnough as KE, Groups } from '@deal-table/contracts';
-import { data, fixture, login, register, request, checked, owner, publicView, envelope, command, open, close, type Session } from './helpers.ts';
+import { data, fixture, login, register, request, checked, owner, publicView, envelope, command, open, close, renewSessions, type Session } from './helpers.ts';
 const sessions:Session[]=[];const people:Session[]=[];let groupId='',decisionId='';let offered:KE.PublicDecisionSnapshot['currentProposal']=null;
 const canary='QA_PRIVATE_CANARY_'+(process.env.QA_RUN_ID??'uninstalled');
 const host=()=>people[0]!;
@@ -12,6 +12,9 @@ async function explore(id:string){await checked(host(),`/decisions/${id}/reasoni
 async function allowProposal(id:string){await explore(id);const question=(await owner(host(),id)).pendingQuestions.find(q=>q.status==='PENDING');if(!question)throw new Error('LIVE_NEGOTIATION_QUESTION_REQUIRED');await command(host(),id,'ANSWER_NEGOTIATION',{questionId:question.questionId,constraintVersion:question.constraintVersion,requestIdentity:question.requestIdentity,answer:'ALLOW'});await explore(id);const proposal=(await publicView(host(),id)).currentProposal;if(!proposal)throw new Error('LIVE_PROPOSAL_REQUIRED');return proposal;}
 test.describe.configure({mode:'serial'});
 test.afterAll(async()=>close(sessions));
+test.beforeEach(async ({browser}) => {
+  if (people.length) await renewSessions(sessions, people, prior => login(browser, prior.user.actor, {mobile: prior.user.actor === 'iris', display: prior.user.actor === 'display'}));
+});
 test('QA01 signup and managed login',async({browser})=>{
   const {target,login:logins}=data();const user=logins.users.find(u=>u.actor==='signup')!;const context=await browser.newContext();const page=await context.newPage();sessions.push({context,page,user});await page.goto(target.FrontendUrl);await page.keyboard.press('Tab');await expect(page.getByRole('button',{name:'Sign in or register',exact:true})).toBeFocused();await page.getByRole('button',{name:'Sign in or register',exact:true}).click();await page.getByRole('link',{name:/sign up/i}).click();await page.locator('input[name="username"]:visible').fill(user.username);await page.locator('input[name="email"]:visible').fill(user.email);await page.locator('input[name="password"]:visible').fill(user.password);const confirm=page.locator('input[name="confirm_password"]:visible');if(await confirm.count())await confirm.fill(user.password);await page.locator('input[type="submit"]:visible,button[type="submit"]:visible').first().click();let code='';await expect.poll(()=>{const result=fixture('mail');if(result.status==='PASS')code=result.code;return !!code;},{timeout:120000,intervals:[3000]}).toBe(true);await page.locator('input[name="confirmation_code"]:visible,input[name="code"]:visible').first().fill(code);await page.locator('input[type="submit"]:visible,button[type="submit"]:visible').first().click();await context.close();sessions.pop();const signup=await login(browser,'signup');sessions.push(signup);await register(signup);expect((await checked(signup,'/account')).account).toMatchObject({status:'APPROVED'});
   for(const actor of ['iris','omar','tess','vin','pending','rejected','disabled','outsider']){const s=await login(browser,actor,{mobile:actor==='iris'});sessions.push(s);if(['iris','omar','tess','vin'].includes(actor))people.push(s);}
@@ -47,8 +50,7 @@ test('QA05 denial privacy and recovery',async({browser})=>{
   // Actual expired access token: wait out the pool's 15-minute validity, then reauthenticate normally.
   const token=await fresh.page.evaluate(()=>JSON.parse(sessionStorage.getItem('known-enough-cognito-session')!).accessToken as string);const claims=JSON.parse(Buffer.from(token.split('.')[1]!,'base64url').toString('utf8')) as {exp:number};const waitMs=Math.max(0,claims.exp*1000-Date.now()+2000);await new Promise(resolve=>setTimeout(resolve,waitMs));expect((await request(fresh,`/decisions/${decisionId}/me`)).ok()).toBe(false);await fresh.page.reload();await expect(fresh.page.getByRole('button',{name:'Sign in or register',exact:true})).toBeVisible();
 });
-test('QA06 refusal revocation revision and disclosure',async({browser})=>{
-  for(let i=0;i<people.length;i++){const renewed=await login(browser,people[i]!.user.actor,{mobile:i===0});sessions.push(renewed);people[i]=renewed;}
+test('QA06 refusal revocation revision and disclosure',async()=>{
   // Refresh all expired participants via real login before this test, never by replacing token storage.
   // This test is followed by the independent accessibility screen lane, so missing actions remain blocked.
   const refused=await freshDecision('refusal');await ready(refused);await explore(refused);const question=(await owner(host(),refused)).pendingQuestions.find(q=>q.status==='PENDING')!;await command(host(),refused,'ANSWER_NEGOTIATION',{questionId:question.questionId,constraintVersion:question.constraintVersion,requestIdentity:question.requestIdentity,answer:'DECLINE'});for(let i=0;i<2;i++){const response=await request(host(),`/decisions/${refused}/reasoning`,{requestId:randomUUID()});expect([200,422]).toContain(response.status());}expect((await owner(host(),refused)).pendingQuestions.filter(q=>q.status==='PENDING')).toHaveLength(0);expect((await publicView(host(),refused)).currentProposal).toBeNull();

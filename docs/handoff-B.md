@@ -1,3 +1,9 @@
+## Current B handoff — ASSESS05, 2026-10-02
+
+ASSESS01/04/02/03/05 locally DONE. Qualification now blocks global/process failures, covers API/harness triggers, uses broker deadlines covering Lambda, checks exact primary routing and renews synthetic sessions at serial boundaries. Full check: 598 application tests plus two optional skips, hosted 1/1, E2E 54/54. FA13 email delivery and all real B/manual/automatic proof remain [ASSESS07](tasks/ASSESS07.md). Next ASSESS06 then ASSESS08 final pinned installer handoff. A retains NP00/cloud/saved expiry/limits; pull corrected source before further installation. Prior handoffs are dated history.
+
+---
+
 ## Current B assessment handoff — 2026-10-02
 
 ASSESS01/04/02/03 are locally DONE and synchronized sequentially. ASSESS03 verification: 583 application tests plus two optional skips, hosted 1/1, E2E 54/54 and all pinned check stages. Preserved unanswered questions and explicit public redrafting; bounded complete typed catalog including subsets, interiors and optional omission. Next ASSESS05, then ASSESS06 and final ASSESS08 pinned installer handoff. A retains NP00/cloud ownership and saved configuration/expiry. No live PASS or deployment is claimed. See [assessment](full-assessment.md) and [managed checklist](tasks/ASSESS07.md). Older routing below is dated history.

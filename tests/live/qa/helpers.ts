@@ -22,3 +22,17 @@ export async function command(session:Session,id:string,type:string,payload:unkn
 export async function open(session:Session,id:string){await session.page.reload();const input=session.page.getByLabel('Decision ID from your invitation');await input.fill(id);await session.page.getByRole('button',{name:'Load shared decision'}).click();}
 export async function close(sessions:Session[]){await Promise.all(sessions.map(s=>s.context.close()));}
 export type {BrowserContext};
+
+/** Renew only through real hosted PKCE login at serial test boundaries. */
+export async function renewSessions(sessions: Session[], people: Session[], authenticate: (prior: Session) => Promise<Session>) {
+  const latest = new Map(sessions.map(session => [session.user.actor, session]));
+  for (const prior of latest.values()) {
+    const renewed = await authenticate(prior);
+    const index = people.findIndex(session => session.user.actor === prior.user.actor);
+    if (index >= 0) people[index] = renewed;
+    for (let at = sessions.length - 1; at >= 0; at--) if (sessions[at]!.user.actor === prior.user.actor) {
+      await sessions[at]!.context.close(); sessions.splice(at, 1);
+    }
+    sessions.push(renewed);
+  }
+}

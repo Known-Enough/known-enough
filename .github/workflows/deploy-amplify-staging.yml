@@ -5,6 +5,14 @@ on:
     branches: [main]
     paths:
       - 'apps/web/**'
+      - 'apps/api/**'
+      - 'scripts/live-qa/**'
+      - 'tests/live/qa/**'
+      - 'infra/live-qa/**'
+      - 'playwright.live-qa.config.ts'
+      - 'tsconfig.json'
+      - 'eslint.config.*'
+      - '.github/workflows/live-qa-release-and-check.yml'
       - 'packages/**'
       - 'package.json'
       - 'package-lock.json'
