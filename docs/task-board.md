@@ -88,3 +88,8 @@ The user explicitly directed this chat to work on everything except NP00 and to 
 ### Sequential A installation handoff — 2026-10-02 UTC
 
 NP00 model-off changes and temporary-access removal are verified. Its remaining obligations/claim are preserved without concurrent execution during A's LIVE04 operations handoff. A prepares the unchanged pinned free-mailbox installer with a fresh primary revision and the approved seven-day envelope; actual installation, B manual PASS and automatic post-deployment PASS remain pending. See [LIVE04](tasks/LIVE04.md) and [A handoff](handoff-A.md).
+
+
+### Low-quota installation repair prepared — 2026-10-02 UTC
+
+A retains the sequential LIVE04 operations scope. Shared Lambda capacity removes the pending quota-request dependency; guarded retained-table import recovery is technically verified (517 application tests / two optional skips, hosted 1/1, E2E 53/53; real read-only guards and AWS template syntax pass). Actual CloudShell recovery/installation and B/manual plus automatic live qualification remain pending. Preserve the original authorization expiry 2026-10-09T03:16:41.171626Z. No concurrent NP00 writer or second task is claimed.

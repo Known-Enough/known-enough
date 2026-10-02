@@ -2,10 +2,10 @@
 set -euo pipefail
 umask 077
 commit="${1:?40-character approved package commit required}"
-mode="${2:?dry-run/validate/apply/readback/rollback required}"
+mode="${2:?dry-run/validate/recover/apply/readback/rollback required}"
 config="${3:?absolute path to approved configuration required}"
 [[ "$commit" =~ ^[a-f0-9]{40}$ && "$config" == /* && -s "$config" ]] || exit 2
-case "$mode" in dry-run|validate|apply|readback|rollback) ;; *) exit 2 ;; esac
+case "$mode" in dry-run|validate|recover|apply|readback|rollback) ;; *) exit 2 ;; esac
 workspace="/tmp/known-enough-live-qa-$commit"
 mkdir -p "$workspace"
 if [[ ! -d "$workspace/source/.git" ]]; then

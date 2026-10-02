@@ -19,7 +19,9 @@ export function renderTemplates(raw, artifacts) {
     AWS_ACCOUNT_EXPECTED:c.account, QA_CONTROL_TABLE:ref('Control'), QA_GROUP_TABLE:ref('Groups'), QA_DECISION_TABLE:ref('Decisions'),
     NP_GROUP_EMAIL_KEY:ref('EmailKey'), QA_MAIL_PROVIDER:mailboxProvider(c), QA_MAIL_DOMAIN:freeMail?'qa.invalid':c.mailDomain, QA_MAIL_BUCKET:freeMail?'NOT_USED_MAILTM':ref('MailboxBucket'), QA_SECRET:ref('LoginSecret'), QA_POOL_ID:ref('Pool'), QA_SOURCE_COMMIT:c.sourceCommit,
   };
-  const fn = (name, handler, r, key, variables, timeout=29) => ({ Type:'AWS::Lambda::Function', Properties:{ FunctionName:name, Runtime:'nodejs24.x', Handler:handler, Role:att(r,'Arn'), Code:code(key), MemorySize:512, Timeout:timeout, ReservedConcurrentExecutions:2, Environment:{Variables:variables}, Tags:[{Key:'KnownEnoughQa',Value:'true'}] } });
+  // Shared account capacity also works in new accounts with a concurrency quota of 10.
+  // The broker/model transactions enforce the approved budgets independently of Lambda capacity.
+  const fn = (name, handler, r, key, variables, timeout=29) => ({ Type:'AWS::Lambda::Function', Properties:{ FunctionName:name, Runtime:'nodejs24.x', Handler:handler, Role:att(r,'Arn'), Code:code(key), MemorySize:512, Timeout:timeout, Environment:{Variables:variables}, Tags:[{Key:'KnownEnoughQa',Value:'true'}] } });
   const template = { AWSTemplateFormatVersion:'2010-09-09', Description:'Known Enough isolated QA; no primary state or personal credentials', Parameters:{MailboxBucket:{Type:'String'},EmailSourceArn:{Type:'String'},EmailKey:{Type:'String',NoEcho:true,MinLength:32}}, Resources:{}, Outputs:{} };
   const r = template.Resources;
   r.Decisions=table(n.decisions); r.Groups=table(n.groups); r.Control=table(n.control);

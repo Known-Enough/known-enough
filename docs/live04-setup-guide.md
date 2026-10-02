@@ -129,3 +129,14 @@ Once the concrete inputs and initial cloud/publication/model/email envelope are 
 5. Perform the separately authorized deployment and prove its automatic matching full check. LIVE04 completes only with both actual passing run links, tested SHA, privacy/model/mail/cleanup evidence and remaining obligations resolved.
 
 Until then, code and draft preparation remain usable and configurable; installation is the only part waiting on infrastructure choices.
+
+
+## Recovery for the first low-quota Mail.tm installation
+
+LIVE04's first apply failed because this account's Lambda concurrency limit is 10 and the earlier template requested two reserved executions for each of four functions. The repaired template uses shared account capacity, keeps API throttling and all atomic fixture/model/email reservations, and needs no quota increase. Shared capacity can still throttle competing workloads; a quota request can remain pending without blocking this setup. No function provisioned concurrency is purchased.
+
+For the exact failed e0cd5ddd3ede595eea88aef3481c23bf01363a8a Mail.tm stack, use the latest verified repair package recorded in LIVE04 and the existing private approved configuration. Change only `sourceCommit` to the repair pin; refresh `primaryExpectedRevision` immediately before final apply and verify primary models remain off. Preserve the original exact expiry and all run/model/email limits. Do not recreate the seven-day window on retries.
+
+Run the same pinned setup entry command with `recover` first, then `apply`. Recovery requires the owned stack to be ROLLBACK_COMPLETE with exactly the three retained QA tables and no other remaining resource. It verifies the known failed source/provider/table definitions, actual table schemas/tags and absence of an active cleanup lease, journals privately, removes only the failed stack metadata, and imports the retained tables into a new stack with an explicit recovery marker. It never deletes a table or reads/deletes table contents. The import change set may contain only three Import actions. Drift, unrelated resources or active fixtures block recovery. A successful `RETAINED_TABLES_IMPORTED` is not completed installation or live qualification.
+
+`apply` verifies the exact imported template/resources before adding the remaining QA resources; it creates the private email key for that import skeleton rather than pretending a previous parameter exists. Final normal stack outputs replace the temporary recovery marker. A private recovery journal lets the same pin/config resume after metadata removal or import; preserve that directory. A completed import can be checked again without writes. Full installation/qualification still requires real AWS readback and B/manual plus post-deployment PASS.
