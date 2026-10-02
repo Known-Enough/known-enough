@@ -88,12 +88,12 @@ describe('LIVE04 Mail.tm preparation without AWS writes or real messages',()=>{
   });
   test('default Cognito messages still reserve the exact run email budget and deny other recipients',async()=>{
     vi.stubEnv('QA_MAIL_PROVIDER','mailtm');vi.stubEnv('QA_CONTROL_TABLE','qa-control');
-    const a={...JSON.parse(readFileSync('infra/live-qa/config.example.json','utf8')).authorization,approved:true,expiresAt:new Date(Date.now()+60000).toISOString(),maxSignupMessagesPerRun:2,maxSignupMessagesPerDay:4};
+    const a={...JSON.parse(readFileSync('infra/live-qa/config.example.json','utf8')).authorization,approved:true,expiresAt:new Date(Date.now()+60000).toISOString(),maxRunsPerDay:4,maxAttemptsPerRun:200,maxTokensPerRun:250000,maxCostMicrosPerRun:250000,attemptCostMicros:1,retentionReviewed:true,invocationLoggingDisabled:true,maxSignupMessagesPerRun:2,maxSignupMessagesPerDay:4};
     const l={id:'run-12345',status:'ACTIVE',expiresAt:Date.now()+60000,users:[{actor:'signup',email:mailbox.address}]};
     const send=vi.spyOn(DynamoDBClient.prototype,'send').mockImplementation(async(...args: unknown[])=>{
       const command=args[0] as {input:{Key?:{PK:{S:string}}}};
       if(!command.input.Key)return {};
-      const value=command.input.Key.PK.S==='AUTH'?a:command.input.Key.PK.S==='LEASE'?l:{};
+      const value=command.input.Key.PK.S==='AUTH'?a:command.input.Key.PK.S==='LEASE'?l:command.input.Key.PK.S==='TOTAL'?{runs:1,reservedTokens:0,reservedCostMicros:0,messages:0}:{};
       return {Item:{payload:{S:JSON.stringify(value)},version:{N:'1'}}};
     });
     const event={triggerSource:'CustomMessage_SignUp',userName:'qa-run-12345-signup',request:{userAttributes:{email:mailbox.address}},response:{}};

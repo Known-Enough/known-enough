@@ -500,3 +500,7 @@ ASSESS01 source commit 76a5831 initially failed repository sync because A concur
 ## ASSESS04 claim — 2026-10-02T06:07Z
 
 Clean ff-only main 0e1a9ef, ASSESS01 source and reconciliation synchronized 0/0. B local cumulative-budget scope as ASSESS04 ticket; original expiry and saved limits preserved, no counter reset after activity. No NP00/cloud/source overlap with A recovery/publication changes; additive installer authorization transaction only. Actual GPT-6 variant/effort unexposed. Permanent UTC/retry/concurrency/exhaustion regressions and pinned full check required before completion.
+
+## ASSESS04 completed — 2026-10-02T06:23Z
+
+FA05 locally resolved. Persistent TOTAL counts run/model-token/model-micro/message reservations atomically with AUTH/LEASE/day; never reset on cleanup/reinstall. Existing saved grants get conservative cumulative caps without editing their approval/expiry; explicit caps configurable. Active-run retry charges once, failed provisioning retains charge, CLEAN same-run resurrection blocked, lost/legacy history cannot fabricate zero. New examples stay unapproved. 15 new regressions, focused 55/55; pinned full check exit 0: 561 tests plus two optional DynamoDB Local skips, hosted 1/1, E2E 53/53 and references/planning/lint/types/boundaries/build pass. Actual GPT-6 variant/effort unexposed. No cloud write/deployment/model/mailbox operation, paid call or live acceptance. New code requires final ASSESS08 package/handoff and ASSESS07 managed verification; original private state/expiry preserved. Next ASSESS02 admission/roster.

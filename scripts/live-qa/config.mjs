@@ -22,11 +22,14 @@ export function validateConfig(value) {
 }
 export function validateAuthorization(a) {
   const keys = ['approved', 'expiresAt', 'maxRunsPerDay', 'maxAttemptsPerRun', 'maxTokensPerRun', 'maxCostMicrosPerRun', 'attemptCostMicros', 'maxSignupMessagesPerRun', 'maxSignupMessagesPerDay', 'retentionReviewed', 'invocationLoggingDisabled'];
+  const totals = ['maxRunsTotal', 'maxTokensTotal', 'maxCostMicrosTotal', 'maxSignupMessagesTotal'];
+  const hasTotals = totals.some(key => Object.hasOwn(a ?? {}, key));
+  if (hasTotals) keys.push(...totals);
   if (!a || Object.keys(a).sort().join() !== keys.sort().join() || !Number.isFinite(Date.parse(a.expiresAt))
     || ['approved','retentionReviewed','invocationLoggingDisabled'].some(key => typeof a[key] !== 'boolean')
     || keys.filter(key => key.startsWith('max') || key === 'attemptCostMicros').some(key => !Number.isSafeInteger(a[key]) || a[key] < 0)) throw new Error('INVALID_AUTHORIZATION');
   if (a.approved && (!a.maxRunsPerDay || !a.maxSignupMessagesPerRun || !a.maxSignupMessagesPerDay || !a.maxAttemptsPerRun || !a.maxTokensPerRun
-    || !a.attemptCostMicros || a.maxCostMicrosPerRun < a.attemptCostMicros || !a.retentionReviewed || !a.invocationLoggingDisabled)) throw new Error('INCOMPLETE_APPROVED_ENVELOPE');
+    || (hasTotals && totals.some(key => !a[key])) || !a.attemptCostMicros || a.maxCostMicrosPerRun < a.attemptCostMicros || !a.retentionReviewed || !a.invocationLoggingDisabled)) throw new Error('INCOMPLETE_APPROVED_ENVELOPE');
   return structuredClone(a);
 }
 export const digest = value => createHash('sha256').update(typeof value === 'string' || Buffer.isBuffer(value) ? value : JSON.stringify(value)).digest('hex');

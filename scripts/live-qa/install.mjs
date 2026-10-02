@@ -10,6 +10,7 @@ import { buildPackage } from './package.mjs';
 import { createMailtmClient } from './mailtm.mjs';
 import { primaryApply, primaryRollback } from './primary.mjs';
 import { recoverFailedStack, isRecoveryStack, assertRecoveryStack } from './recovery.mjs';
+import { authorizationTransaction } from './cumulative.mjs';
 import { privateDirectory } from './private-directory.mjs';
 const delay=ms=>new Promise(r=>globalThis.setTimeout(r,ms));
 const root=resolve(fileURLToPath(new URL('../..',import.meta.url)));
@@ -47,7 +48,7 @@ export async function install(mode,raw,directory,aws=command){const c=validateCo
     let verified=false;for(let i=0;i<120;i++){const identity=aws('sesv2','get-email-identity',{EmailIdentity:c.mailDomain});if(identity.VerifiedForSendingStatus){verified=true;break;}await delay(5000);}if(!verified)throw new Error('MAIL_IDENTITY_NOT_VERIFIED_RETRY_APPLY');}
 
     const parameters=[...(!freeMail?[{ParameterKey:'MailboxBucket',ParameterValue:m.MailboxBucket},{ParameterKey:'EmailSourceArn',ParameterValue:m.EmailSourceArn}]:[]),core?.Parameters?.some(p=>p.ParameterKey==='EmailKey')?{ParameterKey:'EmailKey',UsePreviousValue:true}:{ParameterKey:'EmailKey',ParameterValue:randomBytes(32).toString('hex')}];const installed=await deployStack(aws,c.stack,plan.templates.core,parameters);const target=publicTarget(outputs(installed));
-    const key={PK:{S:'AUTH'},SK:{S:'STATE'}};const lease=aws('dynamodb','get-item',{TableName:target.ControlTable,Key:{PK:{S:'LEASE'},SK:{S:'STATE'}},ConsistentRead:true});if(lease.Item&&JSON.parse(lease.Item.payload.S).status!=='CLEAN')throw new Error('ACTIVE_LEASE_AUTHORIZATION_UPDATE_BLOCKED');const prior=aws('dynamodb','get-item',{TableName:target.ControlTable,Key:key,ConsistentRead:true});aws('dynamodb','put-item',{TableName:target.ControlTable,Item:{...key,payload:{S:JSON.stringify(c.authorization)},version:{N:String(Number(prior.Item?.version.N??0)+1)}},ConditionExpression:prior.Item?'#v=:v':'attribute_not_exists(PK)',...(prior.Item?{ExpressionAttributeNames:{'#v':'version'},ExpressionAttributeValues:{':v':prior.Item.version}}:{})});
+    const key={PK:{S:'AUTH'},SK:{S:'STATE'}};const lease=aws('dynamodb','get-item',{TableName:target.ControlTable,Key:{PK:{S:'LEASE'},SK:{S:'STATE'}},ConsistentRead:true});if(lease.Item&&JSON.parse(lease.Item.payload.S).status!=='CLEAN')throw new Error('ACTIVE_LEASE_AUTHORIZATION_UPDATE_BLOCKED');const prior=aws('dynamodb','get-item',{TableName:target.ControlTable,Key:key,ConsistentRead:true});const total=aws('dynamodb','get-item',{TableName:target.ControlTable,Key:{PK:{S:'TOTAL'},SK:{S:'STATE'}},ConsistentRead:true});aws('dynamodb','transact-write-items',authorizationTransaction(target.ControlTable,prior.Item,lease.Item,total.Item,c.authorization));
     const webSha256=await webArtifact(target,dir);const jobId=await publishWeb(aws,target,dir);const primary=await primaryApply(c,manifest,dir,aws);writeFileSync(dir+'/installed-target.json',JSON.stringify({...target,artifacts:manifest.artifacts,webSha256,jobId,primary},null,2)+'\n',{mode:0o600});
   }
   const target=publicTarget(outputs(describe(aws,c.stack)??{}));const observed={api:aws('lambda','get-function-configuration',{FunctionName:target.ApiFunction}),broker:aws('lambda','get-function-configuration',{FunctionName:target.BrokerFunction})};verifyRuntime(target,manifest,observed);

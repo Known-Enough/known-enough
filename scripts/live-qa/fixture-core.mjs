@@ -2,6 +2,7 @@ import { ACTORS, requireRunId, validateAuthorization } from './config.mjs';
 export function beginLease(prior, runId, authorization, now) {
   requireRunId(runId); validateAuthorization(authorization);
   if (!authorization.approved || Date.parse(authorization.expiresAt) <= now) throw new Error('AUTHORIZATION_ABSENT_OR_EXPIRED');
+  if (prior?.status === 'CLEAN' && prior.id === runId) throw new Error('RUN_ID_ALREADY_USED');
   if (prior && prior.status !== 'CLEAN') { if (prior.id === runId && prior.expiresAt > now && prior.status === 'ACTIVE') return prior; throw new Error('LEASE_OR_CLEANUP_BLOCKED'); }
   return { id: runId, status: 'ACTIVE', expiresAt: Math.min(now + 45 * 60000, Date.parse(authorization.expiresAt)), users: [], decisionIds: [], attempts: 0, reservedTokens: 0, reservedCostMicros: 0, mailboxObjects: [] };
 }

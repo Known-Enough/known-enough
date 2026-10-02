@@ -77,7 +77,7 @@ describe('LIVE01 preparation, no AWS requests',()=>{
   });
   test('reserves provider attempts before sending and never sends on CAS failure',async()=>{
     const sends: unknown[]=[];const transactions: unknown[]=[];
-    const db={send:async(command: GetItemCommand)=>{if(command.constructor.name==='GetItemCommand')return {Item:{payload:{S:JSON.stringify(command.input.Key?.PK?.S==='AUTH'?authorization:beginLease(null,'run-12345',authorization,now))},version:{N:'1'}}};transactions.push(command);throw new Error('CAS_LOST');}} as unknown as DynamoDBClient;
+    const db={send:async(command: GetItemCommand)=>{if(command.constructor.name==='GetItemCommand')return {Item:{payload:{S:JSON.stringify(command.input.Key?.PK?.S==='TOTAL'?{runs:1,reservedTokens:0,reservedCostMicros:0,messages:0}:command.input.Key?.PK?.S==='AUTH'?authorization:beginLease(null,'run-12345',authorization,now))},version:{N:'1'}}};transactions.push(command);throw new Error('CAS_LOST');}} as unknown as DynamoDBClient;
     const transport=budgetedTransport({send:async(command)=>{sends.push(command);throw new Error('UNEXPECTED_SEND');}},db,'KnownEnoughQaControl',()=>now);
     await expect(transport.send(new ConverseCommand({modelId:'amazon.nova-lite-v1:0',messages:[{role:'user',content:[{text:'fictional'}]}],inferenceConfig:{maxTokens:100}}),{abortSignal:new AbortController().signal})).rejects.toThrow('CAS_LOST');
     expect(sends).toHaveLength(0);expect(JSON.stringify(transactions)).toContain('ConditionCheck');expect(JSON.stringify(transactions)).toContain('LEASE');
