@@ -1,6 +1,6 @@
 # ASSESS05 — Complete automated qualification
 
-- Status: READY
+- Status: IN_PROGRESS
 - Findings: FA06, FA07, FA08, FA11, FA13, FA14; [assessment](../full-assessment.md).
 - Worker: B / Battosai1806 / Windows-WSL separate clone; actual Codex GPT-6, variant/effort unexposed. No subagents.
 - Baseline: 348afae8270eb739a89ab974c85a89e1526f06d9; clean ff-only main after preserving incoming A import-tag repair.
@@ -13,3 +13,7 @@ live runner/reporter/metadata, workflow triggers, hosted test authentication hel
 Global Playwright/process failure blocks PASS; all relevant source changes trigger qualification; bounded broker deadlines, exact routing checks and renewed synthetic sessions. Real delivery proof remains ASSESS07.
 
 Focused permanent regressions, pinned npm run check, self-inspection, factual handoff and explicit origin main synchronization using [skip ci]. DONE means local implementation criteria passed, not AWS/service acceptance. Required real checks go to [ASSESS07](ASSESS07.md). Record exact amended scope before additional files. No cloud write, deployment, paid call, personal credential use or external message.
+
+## Claim — 2026-10-02
+
+B / Battosai1806, actual GPT-6 variant/effort unexposed, synchronized ac067b9. Exact local scope: runner/core/sanitized reporter and regressions; own metadata collector/comparison and routing fixtures (shared inspector/policy unchanged); upstream deployment path filters and automation regression; hosted journey/helper boundary reauthentication and synthetic timing checks; ticket/assessment/board/workflow/own log/handoff. All source sync [skip ci]. Existing read-only inspector role already permits apigateway GET on this primary API; no new cloud permission or operation. Original session lifetime and explicit real expiry-denial test retained. FA13 live delivery and B/manual plus automatic complete proof remain ASSESS07. No NP00 edits, root/lock change or subagents.
