@@ -1,3 +1,5 @@
+> **Current recovery — 2026-10-02:** The actual original-pin apply stopped at PRIMARY_POOL_READBACK_FAILED. Use [the ASSESS09 same-source repair/resume command](assess09-cognito-resume.md) first. The older generic and IAM-only resume blocks below are historical for this interrupted Cognito checkpoint. Original source, backup and authorization remain in place.
+
 # Final LIVE04 installation handoff — 2026-10-02
 
 Use source **30fa91ad914c1dc1732680784ee368e2f30c9e92**. A retains AWS/NP00 operations; B's local corrections and installer checks are complete. This handoff preserves the existing private configuration, retained tables, original rollback material and authorization expiry **2026-10-09T03:16:41.171626Z**. It does not claim installation/live PASS or renew approval. The older package pins in setup guides describe prior checkpoints.

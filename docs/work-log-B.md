@@ -1,3 +1,7 @@
+## 2026-10-02 — ASSESS09 immutable handoff/local completion
+
+Verified source checkpoint da3b1bd1cbc6c7eac155dcd03a52e60bdf1c52ef pushed and main/origin equality confirmed. Downloaded exact pinned helper, primary module and AWS adapter; all bytes match Git blobs, Bash syntax passes. [One verified resume command](assess09-cognito-resume.md) supersedes prior interrupted-checkpoint commands. Ticket locally DONE on focused/full checks plus preserved-state offline verification; managed A reconciliation/readback and ASSESS07 remain pending. No cloud execution, approval renewal/counter reset, NP00 edit or external message.
+
 ## 2026-10-02 — ASSESS09 verified source checkpoint
 
 Canonical Cognito comparisons fix the absent AutoVerifiedAttributes insertion-order failure and nested/client collection reordering; unknown defaults/loss remain blocked. Full snapshot preservation, bounded read-only propagation, apply/rollback parity and exact pending-signup reconciliation retain original backup and progress. Dedicated same-source helper uses corrected IAM adapter, original runtime/cwd, private immutable backup copies and operational overlays. No source-pin advancement, authorization renewal/counter reset or real AWS call.

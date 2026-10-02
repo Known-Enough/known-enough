@@ -1,3 +1,9 @@
+## Current B handoff — ASSESS09 locally complete, 2026-10-02
+
+Repair source da3b1bd1cbc6c7eac155dcd03a52e60bdf1c52ef is published and its helper/primary/adapter URL bytes equal the immutable Git blobs. Use [one verified same-source resume command](assess09-cognito-resume.md); original deployment pin 30fa91a, backup/progress/config/expiry/limits are retained. Focused 56/56; pinned full check exit 0, 639 application tests/two optional skips, hosted 1/1, E2E 56/56. Original-source offline overlay reproduces both ZIP hashes and preserves state on mocked AWS denial. No actual AWS call or managed success. A retains installation/NP00; actual readback then ASSESS07 are next. Older handoffs below are history, not instructions for clearing the current pending signup.
+
+---
+
 ## Current B handoff — assessment local batch complete, 2026-10-02
 
 ASSESS01–06 and ASSESS08 local criteria are DONE. Use [the final pinned handoff](live-qa-final-handoff.md), source 30fa91ad914c1dc1732680784ee368e2f30c9e92. Full check: 608 application tests plus two optional skips, hosted 1/1, E2E 56/56; focused installer 32/32; deterministic clean offline package twice. No service acceptance is claimed. A retains NP00/cloud and the original private grant/expiry/journals; pull main and use the exact handoff. ASSESS07/LIVE04 requires actual corrected installation, Cognito-to-Mail.tm delivery/cleanup, B workload qualification and matching automatic complete PASS. OPS01/02/03 retain wider-use limits. Prior handoffs are dated history.
