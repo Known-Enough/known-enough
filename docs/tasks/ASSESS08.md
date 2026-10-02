@@ -1,7 +1,7 @@
 # ASSESS08 — Finish the AWS setup handoff
 
-- Status: READY — queued after B's ASSESS01 → ASSESS04 → ASSESS02 → ASSESS03 → ASSESS05 → ASSESS06 corrections, before A's next full installation and ASSESS07 managed verification.
-- Intended worker: B / Octavio / GitHub Battosai1806; unclaimed. Record actual model/effort and clean synchronized baseline when claiming. No subagents.
+- Status: IN_PROGRESS — queued after B's ASSESS01 → ASSESS04 → ASSESS02 → ASSESS03 → ASSESS05 → ASSESS06 corrections, before A's next full installation and ASSESS07 managed verification.
+- Intended worker: B / Octavio / GitHub Battosai1806; claimed by B as recorded below. Record actual model/effort and clean synchronized baseline when claiming. No subagents.
 - Authority: user requested this focused setup-blocker task on 2026-10-02 to reduce repeated CloudShell attempts and token use. A retains AWS operations and NP00; this task grants no personal AWS credential access, cloud writes, deployment, paid calls or email.
 - Purpose: check the remaining installer path as a whole and give A one verified, pinned resume command. Local readiness is separate from actual cloud success in [ASSESS07](ASSESS07.md) and [LIVE04](LIVE04.md).
 
@@ -26,3 +26,7 @@ After prior correction scopes are released, inspect scripts/live-qa/{aws,install
 DONE means the installation handoff is locally verified and published, not that AWS or B's real journeys passed. If executable changes are necessary, run focused meaningful regressions and one pinned full npm run check before handoff. Documentation-only work requires links, reference hashes and consistency checks; do not rerun successful application suites without changed executable code or a relevant unresolved concern. Reuse existing receipts/logs; keep the handoff concise.
 
 Synchronize to origin main with [skip ci] under the standing repository authorization, verify equality and have A pull before installation. ASSESS07 stays pending until actual corrected installation, B's own GitHub run and matching automatic run pass. No independent human sign-off or extra recurring AWS login is introduced. An expired authorization is reported as expired, never silently extended.
+
+## Claim — 2026-10-02
+
+B / Battosai1806, actual GPT-6 variant/effort unexposed, clean synchronized e14634d. Exact scope: final setup/resume/recovery/private-directory/install/package/release/aws and existing tests; one new focused resume/CLI-input regression if needed; source-schema inspection uses public official AWS CLI/botocore models only, no credentials/service call. Corrected primary/budget/workflow interfaces read for integration. Inspect forward-resume private state/pin preservation, original expiry/limits, installed 348afae stack and publication/readback. Produce docs/live-qa-final-handoff.md with one exact pinned CloudShell block/settings/static diagnostic; ticket/board/workflow/assessment/own log/handoff. No NP00, cloud writer/spend, external message or dependency/lock change. Retain all original journals/rollback material; ambiguous state requires reconciliation, not blind retry.
