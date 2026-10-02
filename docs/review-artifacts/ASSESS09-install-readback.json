@@ -1,0 +1,26 @@
+{
+  "evidenceOrigin": "A-provided CloudShell stdout, 2026-10-02; not an independent AWS session",
+  "repairCommit": "a164eaa0f128db05a337bd3b5d8789ceb3e63906",
+  "sourceCommit": "30fa91ad914c1dc1732680784ee368e2f30c9e92",
+  "status": "SETUP_READBACK_PASS",
+  "cloudQualification": "PENDING_LIVE04",
+  "checkpointStatuses": [
+    "PRIMARY_CODE_RECONCILIATION_NOT_REQUIRED",
+    "PRIMARY_RECORDED_REVISION_RECONCILED",
+    "PRIMARY_RECONCILIATION_NOT_REQUIRED"
+  ],
+  "account": "092954139775",
+  "region": "us-east-1",
+  "apiUrl": "https://d9jmc6pa40.execute-api.us-east-1.amazonaws.com",
+  "frontendUrl": "https://main.d2l23pkzmr1tio.amplifyapp.com/",
+  "mailboxProvider": "mailtm",
+  "apiSha256": "6a0cd3eb5b35b1c993917962b9f5f3eb415a6eb75f9b25f98141c1ee36708b4a",
+  "brokerSha256": "b5f93d79414e582107ea16d6fd351c19d22419f47ebe772482f98630d2426a49",
+  "authorizationExpiresAt": "2026-10-09T03:16:41.171626Z",
+  "pending": [
+    "GitHub LIVE_QA_INSTALLED_TARGET variable from exact returned allowlisted JSON",
+    "GitHub LIVE_QA_ENABLED=true",
+    "B-own-account complete manual qualification with matching receipt and CLEAN cleanup",
+    "Matching automatic post-deployment complete qualification"
+  ]
+}
