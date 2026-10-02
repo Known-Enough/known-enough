@@ -39,8 +39,8 @@ function fixture(options: { foreign?: boolean; unowned?: boolean; active?: boole
       if (!stackId || (input.StackName === oldId && stackId !== oldId)) throw Object.assign(new Error('missing'), { missing: true });
       return { Stacks: [{ StackId: stackId, StackStatus: status,
         Tags: [{ Key: 'KnownEnoughQa', Value: options.unowned ? 'false' : 'true' }],
-        Outputs: imported ? Object.entries((imported as { Outputs: Record<string, { Value: unknown }> }).Outputs)
-          .map(([key, value]) => ({ OutputKey: key, OutputValue: typeof value.Value === 'object' ? names[(value.Value as { Ref: string }).Ref] : value.Value })) : [],
+        Description: imported ? (imported as { Description: string }).Description : 'Original stack',
+        Outputs: [],
       }] };
     }
     if (operation === 'get-template') return { TemplateBody: imported ?? oldTemplate };
@@ -55,7 +55,10 @@ function fixture(options: { foreign?: boolean; unowned?: boolean; active?: boole
       if (options.failBeforeImport && !failed) { failed = true; throw new Error('TRANSIENT'); }
       expect(input.ChangeSetType).toBe('IMPORT');
       expect(input.ResourcesToImport).toHaveLength(3);
-      imported = JSON.parse(String(input.TemplateBody)); stackId = newId; status = 'REVIEW_IN_PROGRESS';
+      const incoming = JSON.parse(String(input.TemplateBody));
+      // AWS rejects output additions during resource import, even into a new stack.
+      expect(incoming).not.toHaveProperty('Outputs');
+      imported = incoming; stackId = newId; status = 'REVIEW_IN_PROGRESS';
       return { Id: 'change-id', StackId: newId };
     }
     if (operation === 'describe-change-set') return { Status: 'CREATE_COMPLETE', ExecutionStatus: status === 'IMPORT_COMPLETE' ? 'EXECUTE_COMPLETE' : 'AVAILABLE',

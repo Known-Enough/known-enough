@@ -440,3 +440,9 @@ Focused setup/mail/recovery checks passed 31/31 before the two additional resume
 
 
 Session-safe verified package `46160692e77d114a09283ddb271dda8b984add3e` passed clean committed-clone dry-run using the persistent HOME state directory. API/broker ZIP and module hashes match the previously verified package; cloudWrites false. User entry is the pinned scripts/live-qa/resume.sh, which discovers the existing configuration, reconstructs the missing recovery journal from AWS history when necessary and continues setup. Source/runtime/npm caches remain disposable; saved private state is persistent in HOME. Actual CloudShell installation and complete cloud qualification remain pending.
+
+### LIVE04 current failure repair — 2026-10-02 UTC
+
+CloudTrail established the current block: AWS CreateChangeSet rejects outputs during import. Recovery now omits all outputs and recognizes the exact source-bound import description with ownership/template/resource guards; outputs are added only by normal update. Existing approved configuration and retained tables stay intact. Resume accepts the previously executed 4616069 pin. Focused recovery 14/14 and AWS template validation pass; actual CloudShell recovery/install and B/automatic live qualification remain pending.
+
+Full repair check passed exit 0 with 523 application tests / two optional skips, hosted 1/1, E2E 53/53 and all references/planning/lint/types/build/boundaries checks. Private log /tmp/known-enough-lowquota-check-i3d5ys4_/verification-output-free-import.log. Use the newly published repair pin; original expiry/limits remain unchanged.

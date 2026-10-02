@@ -2,7 +2,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { mailboxProvider, targetNames } from './config.mjs';
 
 const priorSource = 'e0cd5ddd3ede595eea88aef3481c23bf01363a8a';
-const marker = 'RETAINED_QA_TABLES_IMPORTED';
+const marker = 'Known Enough recovery: import retained QA tables without changing data';
 const logicalNames = ['Control', 'Decisions', 'Groups'];
 const delay = ms => new Promise(resolve => globalThis.setTimeout(resolve, ms));
 const canonical = value => JSON.stringify(value, function (_key, item) {
@@ -11,20 +11,14 @@ const canonical = value => JSON.stringify(value, function (_key, item) {
 });
 const body = value => typeof value === 'string' ? JSON.parse(value) : value;
 const owned = stack => stack?.Tags?.some(tag => tag.Key === 'KnownEnoughQa' && tag.Value === 'true');
-const outputs = stack => Object.fromEntries((stack?.Outputs ?? []).map(item => [item.OutputKey, item.OutputValue]));
-export const isRecoveryStack = stack => outputs(stack).RecoveryStage === marker;
+export const isRecoveryStack = stack => stack?.Description?.startsWith(marker + ' source=') === true;
 
 export function recoveryTemplate(config, template) {
   return {
     AWSTemplateFormatVersion: '2010-09-09',
-    Description: 'Known Enough recovery: import retained QA tables without changing data',
+    Description: marker + ' source=' + config.sourceCommit,
     Resources: Object.fromEntries(logicalNames.map(name => [name, structuredClone(template.Resources[name])])),
-    Outputs: {
-      RecoveryStage: { Value: marker }, MailboxProvider: { Value: 'mailtm' },
-      SourceCommit: { Value: config.sourceCommit },
-      ControlTable: { Value: { Ref: 'Control' } },
-      DecisionTable: { Value: { Ref: 'Decisions' } }, GroupTable: { Value: { Ref: 'Groups' } },
-    },
+
   };
 }
 function describe(aws, name) {
@@ -49,7 +43,7 @@ function assertResources(config, items, retained) {
 }
 export function assertRecoveryStack(config, stack, observedResources, template, expected) {
   if (!owned(stack) || !isRecoveryStack(stack) || stack.StackStatus !== 'IMPORT_COMPLETE'
-    || outputs(stack).MailboxProvider !== 'mailtm' || outputs(stack).SourceCommit !== config.sourceCommit
+    || stack.Description !== marker + ' source=' + config.sourceCommit
     || canonical(template) !== canonical(recoveryTemplate(config, expected))) throw new Error('RECOVERY_IMPORT_STATE_MISMATCH');
   assertResources(config, observedResources, false);
 }

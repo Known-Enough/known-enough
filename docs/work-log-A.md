@@ -1202,3 +1202,9 @@ Focused setup/mail/recovery checks passed 31/31 before the two additional resume
 
 
 Session-safe verified package `46160692e77d114a09283ddb271dda8b984add3e` passed clean committed-clone dry-run using the persistent HOME state directory. API/broker ZIP and module hashes match the previously verified package; cloudWrites false. User entry is the pinned scripts/live-qa/resume.sh, which discovers the existing configuration, reconstructs the missing recovery journal from AWS history when necessary and continues setup. Source/runtime/npm caches remain disposable; saved private state is persistent in HOME. Actual CloudShell installation and complete cloud qualification remain pending.
+
+### LIVE04 import-output repair — 2026-10-02 UTC
+
+A/martelaxe WSL continues the existing sequential LIVE04 claim, GPT-6 variant/effort unexposed, no subagents. CloudTrail identifies the user's pinned resume failure as CreateChangeSet ValidationException: outputs cannot be added during import. No new stack exists. Corrected recovery template omits outputs, uses exact source-bound description plus existing ownership/resource/template guards, and normal apply accepts the verified output-free skeleton. Resume accepts the previous source pin; limits/expiry unchanged. Error reporting preserves safe AWS service/action names. Recovery regression 14/14 passed, AWS validate-template accepted the corrected three-table/no-output template. Full-check result follows in ticket/handoff. No AWS write, paid-model call or email performed by this worker.
+
+Full repair check passed exit 0: 523 application tests / two optional skips, hosted 1/1, E2E 53/53, references 7/7, planning 15/15, lint/types/build/boundaries. Changed docs links, Bash syntax and whitespace passed. Private log /tmp/known-enough-lowquota-check-i3d5ys4_/verification-output-free-import.log. CloudShell execution and real qualification remain pending.
