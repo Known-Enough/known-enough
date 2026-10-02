@@ -1,6 +1,6 @@
 # OPS03 — Recoverable distributed model jobs
 
-- Status: BLOCKED — wider-use scope requires managed ASSESS07 baseline and explicit product/architecture scheduling; unclaimed. No implementation runs alongside A cloud/NP00.
+- Status: BLOCKED — wider-use scope requires managed ASSESS07 baseline before wider-use implementation/claims; unclaimed. No implementation runs alongside A cloud/NP00.
 - Origin: FA16 in [assessment](../full-assessment.md), tracked by ASSESS06.
 - Priority: before broader enrollment/real-person/distributed claims respectively, after ASSESS08/07.
 - Worker/model: select at claim under current workflow; architectural changes use the required architecture checkpoint, never an automatic model switch.

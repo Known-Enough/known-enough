@@ -1,3 +1,9 @@
+## Current B handoff — assessment local batch complete, 2026-10-02
+
+ASSESS01–06 and ASSESS08 local criteria are DONE. Use [the final pinned handoff](live-qa-final-handoff.md), source 30fa91ad914c1dc1732680784ee368e2f30c9e92. Full check: 608 application tests plus two optional skips, hosted 1/1, E2E 56/56; focused installer 32/32; deterministic clean offline package twice. No service acceptance is claimed. A retains NP00/cloud and the original private grant/expiry/journals; pull main and use the exact handoff. ASSESS07/LIVE04 requires actual corrected installation, Cognito-to-Mail.tm delivery/cleanup, B workload qualification and matching automatic complete PASS. OPS01/02/03 retain wider-use limits. Prior handoffs are dated history.
+
+---
+
 ## Current B handoff — ASSESS06, 2026-10-02
 
 ASSESS01–06 local criteria complete. Final check: 604 application tests plus two optional skips, hosted 1/1, E2E 56/56. Refresh race/failure handling, capacity/507 responses, current banners/action pins and readable scripts verified; 22 scripts retain equivalent ASTs. [Operational limits](operational-limits.md) and OPS01/02/03 retain wider-use capacity/erasure/distributed-job obligations, not invented implementation. Next ASSESS08 one pinned installer handoff; all actual cloud/email/manual/automatic proof remains [ASSESS07](tasks/ASSESS07.md). A retains NP00/cloud/private expiry and counters. Prior handoffs are dated history.

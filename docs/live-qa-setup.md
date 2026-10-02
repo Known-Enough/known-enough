@@ -1,3 +1,5 @@
+> **Final corrected handoff, 2026-10-02:** Use [the verified pinned resume block](live-qa-final-handoff.md) at 30fa91ad914c1dc1732680784ee368e2f30c9e92. Mail.tm requires no purchased domain/Route53/owned-SES setup. Source includes all local assessment fixes; full authenticated automation is implemented, with actual installation/delivery/manual/automatic PASS still pending. API/harness changes now trigger the trusted upstream build. Older pin/owned-SES/manual-only statements below are dated historical instructions, not the current resume command.
+
 # LIVE01 online setup package
 
 Prepared source only. No resource, identity, message, model request or deployment has been created by this work. [LIVE04](tasks/LIVE04.md) owns concrete initial authorization, A's installation and B's actual qualification. NP00 keeps its existing claim; primary rollout refuses an enabled model or changed Lambda revision.
