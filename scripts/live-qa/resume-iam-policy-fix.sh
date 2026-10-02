@@ -44,6 +44,7 @@ curl --fail --silent --show-error "https://raw.githubusercontent.com/Known-Enoug
 curl --fail --silent --show-error "https://raw.githubusercontent.com/Known-Enough/known-enough/$source_commit/scripts/live-qa/setup.sh" -o "$setup"
 # Rebuild disposable tools if CloudShell restarted; keep the original source and state.
 bash "$setup" "$source_commit" dry-run "$config"
+export PATH="/tmp/known-enough-live-qa-$source_commit/node/bin:$PATH"
 "/tmp/known-enough-live-qa-$source_commit/node/bin/node" --input-type=module - "$config" "$adapter" "$source_commit" <<'JS'
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
