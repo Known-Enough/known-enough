@@ -117,3 +117,8 @@ Focused recovery 9/9, changed-file lint/types and read-only retained-table impor
 
 
 Corrected committed recovery package `5d6d5e169c166c900564623b49704a1eed59db42` passed clean-clone dry-run PREPARED with unchanged API/broker ZIP and module hashes and cloudWrites false. Resume copies the prior 18d5ea4 private VERIFIED/no-change-set journal into this pin's private directory, preserves the original approved expiry/limits and refreshes the primary revision before apply. Actual import and live qualification remain pending.
+
+
+### CloudShell session-safe recovery scope amendment — 2026-10-02 UTC
+
+User reports CloudShell session limits: approved HOME configuration is found but both /tmp recovery journals are missing. Correct the workflow so temporary source/runtime/dependencies can be rebuilt while journals/rollback packages/receipts persist in a private HOME state namespace. Extend this same A LIVE04 claim to scripts/live-qa/package.mjs, new private-directory.mjs, new resume.sh and corresponding recovery tests; existing setup/install/recovery/docs scope remains. No root/lock/workflow/application/budget source change. Resume must locate the existing approved config automatically, preserve original expiry/limits, reconstruct only the exact previously verified deleted Mail.tm stack from AWS history if private journal is absent, and import retained tables without deletion. User executes one pinned resume command; no dependence on remembered shell variables or surviving /tmp files. Fresh read-only checks confirm AWS retains the original deleted stack description/template/resource history. Actual import/apply remain pending; no cloud writes by this worker.
