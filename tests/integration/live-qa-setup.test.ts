@@ -1,7 +1,7 @@
-import { readFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
 import { qaHandler } from '../../scripts/live-qa/entry.ts';
@@ -13,7 +13,7 @@ import { renderTemplates } from '../../scripts/live-qa/template.mjs';
 // @ts-expect-error Setup JavaScript is exercised at runtime by Vitest.
 import { beginLease, cleanupPlan } from '../../scripts/live-qa/fixture-core.mjs';
 // @ts-expect-error Setup JavaScript is exercised at runtime by Vitest.
-import { installationPlan, mailboxGuard, verifyRuntime } from '../../scripts/live-qa/install.mjs';
+import { installationPlan, mailboxGuard, verifyRuntime, publishWeb } from '../../scripts/live-qa/install.mjs';
 // @ts-expect-error Setup JavaScript is exercised at runtime by Vitest.
 import { preservationInput } from '../../scripts/live-qa/aws.mjs';
 // @ts-expect-error Setup JavaScript is exercised at runtime by Vitest.
@@ -102,5 +102,38 @@ describe('LIVE01 preparation, no AWS requests',()=>{
   });
   test('private manifest hashes are reproducible and no generated output is required in Git',()=>{
     const directory=mkdtempSync(resolve(tmpdir(),'live-qa-test-'));try{expect(digest('same-bytes')).toBe(digest(Buffer.from('same-bytes')));expect(readFileSync('scripts/live-qa/setup.sh','utf8')).toContain('git checkout --quiet --detach "$commit"');}finally{rmSync(directory,{recursive:true,force:true});}
+  });
+});
+
+
+describe('QA Amplify publication API contract', () => {
+  test.each(['SUCCEED', 'FAILED'])('uses CLI field names and checks deployment result %s', async status => {
+    const directory = mkdtempSync(resolve(tmpdir(), 'live-qa-publish-'));
+    writeFileSync(directory + '/web.zip', 'website-bytes');
+    const upload = vi.fn(async () => new Response('', { status: 200 }));
+    vi.stubGlobal('fetch', upload);
+    const calls: string[] = [];
+    const aws = (service: string, operation: string, input: Record<string, unknown>) => {
+      expect(service).toBe('amplify');
+      // AWS CLI's published input contract uses lower camel case for Amplify.
+      expect(input).toEqual({ appId: 'qa-app', branchName: 'main', ...(operation === 'create-deployment' ? {} : { jobId: '7' }) });
+      calls.push(operation);
+      if (operation === 'create-deployment') return { jobId: '7', zipUploadUrl: 'https://upload.example.invalid/website' };
+      if (operation === 'start-deployment') return {};
+      if (operation === 'get-job') return { job: { summary: { status } } };
+      throw new Error('Unexpected cloud operation');
+    };
+    try {
+      const result = publishWeb(aws, { AmplifyAppId: 'qa-app' }, directory);
+      if (status === 'SUCCEED') await expect(result).resolves.toBe('7');
+      else await expect(result).rejects.toThrow('WEB_DEPLOYMENT_FAILED');
+      expect(calls).toEqual(['create-deployment', 'start-deployment', 'get-job']);
+      expect(upload).toHaveBeenCalledWith('https://upload.example.invalid/website', {
+        method: 'PUT', body: Buffer.from('website-bytes'), redirect: 'error',
+      });
+    } finally {
+      vi.unstubAllGlobals();
+      rmSync(directory, { recursive: true, force: true });
+    }
   });
 });

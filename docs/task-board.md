@@ -106,3 +106,5 @@ A continues the same LIVE04 operations handoff. The installer now persists priva
 LIVE04 latest block: CloudTrail confirms CreateChangeSet rejected output additions during retained-table import. A repairs this within the existing sequential claim; saved data and original authorization remain intact. Actual installation and real qualification are still pending, not DONE.
 
 LIVE04 follow-up: AWS rejected stack Tags during import after the Outputs fix. Same A claim removes both from the import step, retains exact skeleton/table checks and adds labels/results by normal update. Actual installation remains pending.
+
+LIVE04 live checkpoint: QA infrastructure UPDATE_COMPLETE at 348afae; primary rollout not reached. A fixes Amplify CLI publication field names in install.mjs (separate from B's active ASSESS01 primary.mjs scope). Full checks pass 525 application tests / two optional skips, hosted 1/1, E2E 53/53. Publication/primary apply/live qualification remain pending; full resume must use B's corrected primary source under the assessment routing override. Existing saved settings/finite authorization preserved.
