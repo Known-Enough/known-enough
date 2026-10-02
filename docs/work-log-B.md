@@ -512,3 +512,7 @@ Clean ff-only main 0b625fd; ASSESS01/04 synchronized. B takes only local admissi
 ## ASSESS02 completed — 2026-10-02T06:45Z
 
 FA03/FA09 locally resolved. Server request admission fences bind model/decision commits to current group aggregate version; same-memory lock or exact cross-table DynamoDB condition. Creation/review fenced, roster binding and revised decision commit together, queued tasks retain request context, mixed persistence modes fail closed. Whole-aggregate changes conservatively invalidate in-flight requests. 11 new regressions; full pinned check exit 0 (570 application tests plus two optional skips, hosted 1/1, E2E 53/53, all reference/planning/lint/types/boundaries/build checks); final additional guards/tests 11/11 and lint/types. Exact existing primary/QA group role gains ConditionCheckItem only; actual installation/readback remains ASSESS07/08. Actual GPT-6 variant/effort unexposed, no NP00/cloud source takeover or service action. Next ASSESS03 clarification/domains.
+
+## ASSESS03 claim — 2026-10-02T06:48Z
+
+Clean ff-only c2bfbc2. B claims local unanswered-question preservation, explicit public answer/redraft and complete bounded typed enumeration in the ticket scope. No schema/root/lock/NP00/A cloud changes; original consent and draft history retained. Actual GPT-6 variant/effort unexposed; focus/full checks before source sync.

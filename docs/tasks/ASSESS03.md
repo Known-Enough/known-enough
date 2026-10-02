@@ -1,6 +1,6 @@
 # ASSESS03 — Clarification and supported domains
 
-- Status: READY
+- Status: IN_PROGRESS
 - Findings: FA04, FA10; [assessment](../full-assessment.md).
 - Worker: B / Battosai1806 / Windows-WSL separate clone; actual Codex GPT-6, variant/effort unexposed. No subagents.
 - Baseline: 348afae8270eb739a89ab974c85a89e1526f06d9; clean ff-only main after preserving incoming A import-tag repair.
@@ -13,3 +13,7 @@ group draft service/UI/contracts and generic candidate adapter; focused regressi
 Unchanged edits preserve unanswered questions; explicit supported resolution and bounded complete domains; unsupported shapes cannot falsely claim infeasibility.
 
 Focused permanent regressions, pinned npm run check, self-inspection, factual handoff and explicit origin main synchronization using [skip ci]. DONE means local implementation criteria passed, not AWS/service acceptance. Required real checks go to [ASSESS07](ASSESS07.md). Record exact amended scope before additional files. No cloud write, deployment, paid call, personal credential use or external message.
+
+## Claim — 2026-10-02T06:48Z
+
+B / Battosai1806, actual GPT-6 variant/effort unexposed; clean ff-only main c2bfbc2. Exact amendment: generic-candidates typed complete finite catalog/result explanation and tests; group-decisions clarification preservation and current finite-domain checks; browser public answer/redraft flow reusing existing draft endpoint; signed local draft regressions and one focused browser journey. Original draft questions remain immutable unless a new model-reviewed draft explicitly resolves them. No schema/contract/root/lock/NP00/cloud change. Enumeration is complete only within bounded discrete/explicit public domains and 64 combinations; unsupported expansion remains clarification, not a false no-solution/optimality claim.
