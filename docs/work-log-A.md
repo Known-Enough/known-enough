@@ -1,3 +1,22 @@
+## 2026-10-03T17:16:50.036796Z — ASSESS07 preparation permissions restored
+
+User enables unrestricted local execution and requests retry. Git metadata now writable; preserve and resume the saved A/Mac claim from44697aff. Exact scope stays as recorded. Publish the verified documentation-only claim with [skip ci] before executable work. The earlier Git/index and connector approval failures remain factual history. Cloud transfer, deployment, paid-model/email qualification and any change to usage/limits remain pending final concrete approval. No new task, B credential access or monitor.
+
+## 2026-10-03T17:08:29.473075Z — ASSESS07 preparation synchronization blocked
+
+Local preparation is BLOCKED before executable edits: Git cannot create .git/index.lock (Operation not permitted). The connected GitHub create-tree tool is also blocked with "MCP tool call requires approval, but approval policy is never". No remote commit/ref was created. Claim documents are local and unpublished; preserve them and the saved claim copy under /private/tmp/known-enough-assess07-a-claim. A working authorized commit/push path is required before preparation continues. This is a workspace/tool-permission blocker, not a failed cloud test or an installed allowance change.
+
+Preflight extra-run/automation/runner tests26/26 PASS on pinned Node24.21.0/npm11.19.0. Claim documentation references7/7, planning15/15, local links212 and whitespace passed before publishing attempt. No runtime/helper code edited, full changed-source suite run, AWS record/IAM change, deployment/test dispatch, model/email call, B account access or new monitor. Local main/origin main were equal at44697aff; read-only GitHub confirms the same unchanged remote head.
+
+## 2026-10-03T16:58:43Z — ASSESS07 A/Mac takeover preparation claim
+
+The user asks this A session to proceed with ASSESS07 and selects "Prepare an A takeover of the same two runs for me to approve." A / Ricardo / GitHub martelaxe (connector ID44531296) / Mac worker claims this one sequential preparation task from clean ff-only main 44697aff1b6ea3ceecf4155c52a0bced138343e5. Actual model: Codex GPT-6; exact variant/effort unexposed. B was unclaimed on verified shared main; no B execution is inferred. NP00's saved WSL claim stays preserved without concurrent work; ASSESS10 remains B-only and unclaimed.
+
+Prepare, check and synchronize only: scripts/live-qa/extra-runs.mjs; new scripts/live-qa/transfer-two-extra-runs-to-a.py; tests/integration/live-qa-extra-runs.test.ts and new live-qa-extra-run-transfer.test.ts; infra/live-qa/two-extra-runs.md; this ticket/README, board/workflow, own A log/handoff and sanitized ASSESS07-a-transfer-preparation.json evidence. No root/config/lock/IAM/other application change. The guarded administrator command must transfer only the existing dated allowance's remaining slots to martelaxe, preserve usedRuns and all AUTH/DAY/TOTAL/LEASE records, enforce CLEAN/version/expiry/cumulative gates, save a private original snapshot, verify readback and retry idempotently. Runtime remains bound to exact GitHub actor/triggering actor and repository/workflow/run evidence.
+
+This instruction authorizes repository preparation only. Final concrete approval is required before AWS transfer, deployment, model/email tests or paid calls. Publish preparation/claim with [skip ci]; do not consume B's grant, reset usage, renew expiry, create resources/roles or send messages. If the dated slots expire, do not extend them. Fresh preflight: normal main pull succeeded; GitHub main matched 44697aff1b6ea3ceecf4155c52a0bced138343e5, identity martelaxe and latest run37089230162 unchanged; focused extra-run/automation/runner checks26/26 PASS. Full changed-source checks remain required before the final command.
+
+
 ## 2026-10-01T20:39:29Z — NP00 shared progress and GitHub inspection setup
 
 - Continued A's existing NP00 claim on WSL; no new task or parallel claim. The user authorized the exact one-hour A-only NP00 model-disable scope after its identity/hash checks and authorized installing a separate read-only GitHub OIDC inspector role. Deployment, signup/email and paid-model testing remain separate.

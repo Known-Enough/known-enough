@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "timestamp": "2026-10-03T17:16:50.036796Z",
+  "sourceCommit": "44697aff1b6ea3ceecf4155c52a0bced138343e5",
+  "worker": {
+    "account": "martelaxe",
+    "githubId": 44531296,
+    "host": "Mac",
+    "model": "Codex GPT-6; variant/effort unexposed"
+  },
+  "status": "CLAIM_READY",
+  "phase": "Git permissions restored; resumed claim ready to synchronize",
+  "preflight": {
+    "cleanFfOnlyPull": "PASS",
+    "remoteHeadMatch": "PASS",
+    "focusedTests": {
+      "passed": 26,
+      "failed": 0
+    },
+    "references": 7,
+    "planning": 15,
+    "changedSourceFullCheck": "NOT_RUN"
+  },
+  "blockers": [],
+  "executableFilesChanged": false,
+  "remoteMutation": false,
+  "cloudWrites": false,
+  "deployments": 0,
+  "liveTests": 0,
+  "nextStep": "Publish the resumed claim, then implement/check the A transfer before asking for concrete approval.",
+  "historicalBlocker": {
+    "timestamp": "2026-10-03T17:08:29.473075Z",
+    "blockers": [
+      "GIT_INDEX_WRITE_DENIED",
+      "GITHUB_WRITE_APPROVAL_DISABLED"
+    ]
+  }
+}

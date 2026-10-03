@@ -1,8 +1,26 @@
 # ASSESS07 — Managed verification of corrective changes
 
-- Status: READY — B takeover authorized/unclaimed; A extra allowance readback passed, broker release/full live proof pending.
-- Worker: B / Octavio / Battosai1806 next; A releases ASSESS07 only. Record actual model, identity, source and receipts.
+- Status: IN_PROGRESS — A/Mac takeover preparation resumed after the user enables Git write access; cloud approval pending.
+- Worker: A / Ricardo / martelaxe / Mac for the user-requested takeover preparation; no cloud execution authorized by this preparation.
 - Scope: new read-only/service verification checklist under existing LIVE04, never NP00 takeover.
+
+## Preparation permissions restored — 2026-10-03T17:16:50.036796Z
+
+The user enables unrestricted workspace execution and asks this A session to retry. Git metadata is now writable. Resume the existing saved preparation claim, synchronize it with [skip ci], then implement/check the bounded transfer package. No AWS transfer, deployment, model/email call or paid test is authorized by the permissions change; final concrete approval remains required. Earlier blocker below preserves the actual failure and unpublished checkpoint.
+
+## Preparation sync blocker — 2026-10-03T17:08:29.473075Z
+
+Local preparation is BLOCKED before executable edits: Git cannot create .git/index.lock (Operation not permitted). The connected GitHub create-tree tool is also blocked with "MCP tool call requires approval, but approval policy is never". No remote commit/ref was created. Claim documents are local and unpublished; preserve them and the saved claim copy under /private/tmp/known-enough-assess07-a-claim. A working authorized commit/push path is required before preparation continues. This is a workspace/tool-permission blocker, not a failed cloud test or an installed allowance change.
+
+Fresh preflight remains26/26 PASS. No transfer helper or runtime modification has been implemented; changed-source full checks have not run. The user approved preparation for a later concrete approval, not AWS transfer or paid execution. Installed B allowance and all original limits remain unchanged.
+
+## A takeover preparation — user direction, 2026-10-03
+
+The user asks this A session to proceed with ASSESS07 and selects "Prepare an A takeover of the same two runs for me to approve." A / Ricardo / GitHub martelaxe (connector ID44531296) / Mac worker claims this one sequential preparation task from clean ff-only main 44697aff1b6ea3ceecf4155c52a0bced138343e5. Actual model: Codex GPT-6; exact variant/effort unexposed. B was unclaimed on verified shared main; no B execution is inferred. NP00's saved WSL claim stays preserved without concurrent work; ASSESS10 remains B-only and unclaimed.
+
+Prepare, check and synchronize only: scripts/live-qa/extra-runs.mjs; new scripts/live-qa/transfer-two-extra-runs-to-a.py; tests/integration/live-qa-extra-runs.test.ts and new live-qa-extra-run-transfer.test.ts; infra/live-qa/two-extra-runs.md; this ticket/README, board/workflow, own A log/handoff and sanitized ASSESS07-a-transfer-preparation.json evidence. No root/config/lock/IAM/other application change. The guarded administrator command must transfer only the existing dated allowance's remaining slots to martelaxe, preserve usedRuns and all AUTH/DAY/TOTAL/LEASE records, enforce CLEAN/version/expiry/cumulative gates, save a private original snapshot, verify readback and retry idempotently. Runtime remains bound to exact GitHub actor/triggering actor and repository/workflow/run evidence.
+
+This instruction authorizes repository preparation only. Final concrete approval is required before AWS transfer, deployment, model/email tests or paid calls. Publish preparation/claim with [skip ci]; do not consume B's grant, reset usage, renew expiry, create resources/roles or send messages. If the dated slots expire, do not extend them. Fresh preflight: normal main pull succeeded; GitHub main matched 44697aff1b6ea3ceecf4155c52a0bced138343e5, identity martelaxe and latest run37089230162 unchanged; focused extra-run/automation/runner checks26/26 PASS. Full changed-source checks remain required before the final command.
 
 ## B takeover and two-run approval — user direction, 2026-10-03 UTC
 

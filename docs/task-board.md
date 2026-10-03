@@ -2,6 +2,12 @@
 
 [Task guide](tasks/README.md) explains each remaining task in plain language. [Historical tasks](tasks/historical/README.md) contain earlier work and the [previous board](tasks/historical/task-board-before-organization-2026-10-02.md).
 
+## Current priority — 2026-10-03
+
+**Preparation resumed:** The user enables Git write access on the Mac and asks A to retry. A resumes the same ASSESS07 claim; synchronize preparation with [skip ci]. The guarded transfer and matching deployment/paid tests still need final approval. Earlier local permission failures are retained in the ticket.
+
+A / Ricardo / martelaxe / Mac claims ASSESS07 preparation at the user's request: prepare a guarded transfer of the same two remaining slots for concrete approval. Repository preparation only; AWS transfer/deployment/paid tests wait for final approval. B was unclaimed; NP00's saved WSL claim is preserved without concurrent work. Earlier B routing/readback below is historical and does not authorize A to use the B-only grant. [Current claim and exact scope](tasks/active/live-testing/ASSESS07/ticket.md#a-takeover-preparation--user-direction-2026-10-03).
+
 ## Current checkpoint — 2026-10-02
 
 AWS installation, GitHub settings, publishing permissions and automatic deployment/test triggering are verified. Latest deployment37089181120 automatically started37089230162 on matching source bef9d0d. Publication, public checks and AWS metadata PASS. Real email verification/hosted login (QA01) and admission/invitations (QA02) PASS. Decision creation/owner confirmation (QA03) FAIL, four later journeys BLOCKED; privacy and CLEAN cleanup PASS. One model attempt and one synthetic message reported. [Actual matching report](review-artifacts/ASSESS07-email-login-pass-decision-failure.json). The report does not identify the failing QA03 substep. A corrects a reproduced test timing race (reading the old decision ID before creation completes) and prepares fixed decision-stage/HTTP diagnostics; the fourth run's exact failing substep remains unproved. Full live acceptance remains pending. Four fixture-started runs on UTC2026-10-03 used the installed daily allowance. The user now approves two extra one-time bounded runs for B and transfers this priority to B. A's CloudShell20432bb8 helper now reports TWO_EXTRA_RUNS_APPROVED, remaining2, expires2026-10-04T00:00:00Z/cloudWrites=true. [Actual user readback](review-artifacts/ASSESS07-two-extra-runs-approved.json). B can now claim ASSESS07, pull corrected main and deploy through its GitHub account; that release publishes broker exception support before automatic fixture startup. AUTH/usage/cumulative caps remain unchanged. B claim/consumption/full seven-journey proof remain unverified. Keep all prior usage, cumulative ceilings and original expiry.
@@ -12,7 +18,7 @@ A's recurring observer and completed one-time follow-up are deleted. B's existin
 
 | Order | Task | Current status | What remains |
 | --- | --- | --- | --- |
-| 1 | [ASSESS07 — Real automatic qualification](tasks/active/live-testing/ASSESS07/README.md) | READY — B takeover authorized / unclaimed; two extra runs approved; broker release/live proof pending | Pull tested main, claim ASSESS07, use A's installed two-run approval, release the updated broker; publish and inspect the matching automatic all-seven/CLEAN report. |
+| 1 | [ASSESS07 — Real automatic qualification](tasks/active/live-testing/ASSESS07/README.md) | IN_PROGRESS — A/Mac preparation; final cloud approval pending | Prepare and test an idempotent actor transfer preserving remaining slots, all usage/caps and original expiry; present the exact command before any cloud action. |
 | 2 | [ASSESS10 — B monitor verification](tasks/active/monitoring/ASSESS10/README.md) | READY / unclaimed; B-only verification after the current cycle | Identify B's existing automation, prove two unattended ticks and fresh AWS results, check stale/failure notification behavior. |
 | Delivery umbrella | [LIVE04 — Online test delivery](tasks/active/live-testing/LIVE04/README.md) | IN_PROGRESS; installation/settings checkpoint passed | Finish its remaining managed proof through ASSESS07; no mandatory B manual launch. |
 | Preserved closeout | [NP00 — Technical closeout](tasks/active/closeout/NP00/README.md) | IN_PROGRESS; A / Ricardo / martelaxe / WSL claim retained | Finish original remaining technical obligations; its model-off checkpoint is already verified. No concurrent writer. |
@@ -20,7 +26,7 @@ A's recurring observer and completed one-time follow-up are deleted. B's existin
 
 ASSESS10 is not a claim that B has started. A/B identity, execution worker, chat and task role remain distinct: A is Ricardo / martelaxe; B is Octavio / Battosai1806. A Mac session authenticated as A is not B. See [verified mapping](people-and-workers.md).
 
-Latest user direction transfers ASSESS07 to B and approves two one-time extra synthetic cycles. A releases only ASSESS07 and stops that work; B claims after pulling main. Next is ASSESS10, then OPS01 → OPS02 → OPS03 as their prerequisites allow. NP00 remains A's preserved closeout; no concurrent writer or actual B start is claimed.
+Earlier user direction transferred ASSESS07 to B and approved two one-time extra synthetic cycles. The new A preparation claim above supersedes that scheduling. A now owns this preparation; B must pull and respect the shared claim. Next is ASSESS10, then OPS01 → OPS02 → OPS03 as their prerequisites allow. NP00 remains A's preserved closeout; no concurrent writer or actual B start is claimed.
 
 ## Execution boundaries
 
