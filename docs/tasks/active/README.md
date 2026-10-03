@@ -6,5 +6,6 @@ Only unfinished, currently applicable work belongs here. READY means it can be c
 - [B's existing monitor](monitoring/README.md): verify ASSESS10; no A monitor remains.
 - [Technical closeout](closeout/README.md): NP00's retained obligations and A claim.
 - [Future operations](operations/README.md): OPS01–03 wait for managed qualification.
+- [Interface and basic completion](ui-ux/README.md): UX01–03 follow OPS; review, fix essentials and verify the finished basic app.
 
 [Task guide](../README.md) · [Current board](../../task-board.md)

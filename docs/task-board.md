@@ -22,11 +22,25 @@ A's recurring observer and completed one-time follow-up are deleted. B's existin
 
 | Order | Task | Current status | What remains |
 | --- | --- | --- | --- |
-| 1 | [ASSESS07 — Real automatic qualification](tasks/active/live-testing/ASSESS07/README.md) | IN_PROGRESS — two GitHub-approved B runs recorded; B live proof pending | B claims the task and starts an authorized staging deployment; matching tests follow automatically. Two dated extra starts expire October3,18:00 Mexico City. Receipt consumption/full live proof remain pending; original budget/expiry gates still apply. |
+| 1 | [ASSESS07 — Real automatic qualification](tasks/active/live-testing/ASSESS07/README.md) | IN_PROGRESS — B claimed; two GitHub-approved runs recorded; live proof pending | B continues its bounded claim and starts an authorized staging deployment; matching tests follow automatically. Two dated extra starts expire October3,18:00 Mexico City. Receipt consumption/full live proof remain pending; original budget/expiry gates still apply. |
 | 2 | [ASSESS10 — B monitor verification](tasks/active/monitoring/ASSESS10/README.md) | READY / unclaimed; B-only verification after the current cycle | Identify B's existing automation, prove two unattended ticks and fresh AWS results, check stale/failure notification behavior. |
 | Delivery umbrella | [LIVE04 — Online test delivery](tasks/active/live-testing/LIVE04/README.md) | IN_PROGRESS; installation/settings checkpoint passed | Finish its remaining managed proof through ASSESS07; no mandatory B manual launch. |
 | Preserved closeout | [NP00 — Technical closeout](tasks/active/closeout/NP00/README.md) | IN_PROGRESS; A / Ricardo / martelaxe / WSL claim retained | Finish original remaining technical obligations; its model-off checkpoint is already verified. No concurrent writer. |
 | Later | [OPS01 — Storage and archiving](tasks/active/operations/OPS01/README.md) · [OPS02 — Retention and erasure](tasks/active/operations/OPS02/README.md) · [OPS03 — Recoverable jobs](tasks/active/operations/OPS03/README.md) | BLOCKED / unclaimed | Managed ASSESS07 baseline first, then wider-use work under the shared queue. |
+
+**Claim readback — 2026-10-03T22:34Z:** Incoming main commit `7e6b55d5c1912256b31b278a0593f32e4e26313f` records B's ASSESS07 automation claim at22:33:43Z: GitHub deployment/qualification observation and sanitized evidence only, using at most the existing two dated cycles. A preserved the local documentation work, pulled that commit ff-only and reapplied the saved changes without conflicts. B's claim/log/body remain intact; no B live result or allowance consumption is inferred. A is preparing documentation only, with no concurrent implementation or test dispatch.
+
+## After OPS — finish the basic app, user direction 2026-10-03
+
+The user requests a post-OPS UI/usability sequence, bounded Luna helper reviews and basic completion. Prepared documentation is not a new implementation claim. ASSESS07 remains B's immediate priority; ASSESS10 follows, then OPS01 → OPS02 → OPS03. No existing claim or dated run expiry is changed. [What exists and what is missing](basic-completion-plan.md).
+
+| Order after OPS | Task | Status | Required outcome |
+| --- | --- | --- | --- |
+| 1 | [UX01 — Screen and journey review](tasks/active/ui-ux/UX01/README.md) | BLOCKED / unclaimed; after OPS03 | Verified short list of confusing/broken screens and desktop/phone/keyboard/participant-view issues. Optional bounded Luna helpers inspect read-only within this task. |
+| 2 | [UX02 — Fix basic usability](tasks/active/ui-ux/UX02/README.md) | BLOCKED / unclaimed; after UX01 | Fix completion blockers and essential layout/messages/accessibility; preserve consent/privacy and verify affected behavior. |
+| 3 | [UX03 — Verify finished basics](tasks/active/ui-ux/UX03/README.md) | BLOCKED / unclaimed; after UX02 | Matching real online passes, final screen/demo proof and simple start instructions; final basic readiness also reconciles actual NP00/LIVE04/OPS evidence. |
+
+These tasks stay in the single shared queue, with current routing B. Luna helpers are a bounded review exception only within UX01/UX03; one direct worker claims the parent and performs any edits/integration. Helpers do not independently deploy, run paid suites, write files or claim tasks. New AWS setup/permissions for OPS remain A-authorized operations; B prepares concrete proposals without receiving A's credentials. This roadmap grants no cloud write, paid-model/email run, wider enrollment or deployment. Human trials, voice integration and submission materials remain later work.
 
 ASSESS10 is not a claim that B has started. A/B identity, execution worker, chat and task role remain distinct: A is Ricardo / martelaxe; B is Octavio / Battosai1806. A Mac session authenticated as A is not B. See [verified mapping](people-and-workers.md).
 

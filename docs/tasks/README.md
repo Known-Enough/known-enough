@@ -9,7 +9,7 @@ Installation, GitHub settings and automatic test triggering are verified. Real s
 | Task | Basic idea | Status |
 | --- | --- | --- |
 | [LIVE04](active/live-testing/LIVE04/README.md) | Prove the installed online test environment works from start to finish. Installation and GitHub settings are ready; real test results and cleanup evidence are still needed. | IN_PROGRESS |
-| [ASSESS07](active/live-testing/ASSESS07/README.md) | Collect real online proof that all required user journeys, safety checks and cleanup pass automatically after a matching successful deployment. B takes the current handoff. | IN_PROGRESS / B execution pending |
+| [ASSESS07](active/live-testing/ASSESS07/README.md) | Collect real online proof that all required user journeys, safety checks and cleanup pass automatically after a matching successful deployment. B takes the current handoff. | IN_PROGRESS / B claimed; live proof pending |
 
 ## B's existing monitor
 
@@ -32,6 +32,16 @@ These tasks wait for the managed ASSESS07 baseline.
 | [OPS01](active/operations/OPS01/README.md) | Prepare group storage and safe archiving for wider use, after the real online test baseline is verified. | BLOCKED / unclaimed |
 | [OPS02](active/operations/OPS02/README.md) | Add clear retention, export and authorized deletion of private data before wider use. | BLOCKED / unclaimed |
 | [OPS03](active/operations/OPS03/README.md) | Make AI jobs recover safely across worker restarts and retries, with current permissions and spending limits checked. | BLOCKED / unclaimed |
+
+## After operations: finish the interface and basics
+
+The [basic completion roadmap](../basic-completion-plan.md) explains what exists and what still needs actual proof. These tasks are prepared for the shared queue; B can take them after OPS01–03 complete, one at a time. Within UX01/UX03, bounded Luna helpers may inspect screens read-only; the direct worker owns all changes and verification. This schedules no helper or deployment now.
+
+| Task | Basic idea | Status |
+| --- | --- | --- |
+| [UX01](active/ui-ux/UX01/README.md) | Review the screens and complete participant journey on desktop and phone; record a short verified issue list. | BLOCKED / unclaimed; after OPS03 |
+| [UX02](active/ui-ux/UX02/README.md) | Fix essential navigation, progress/error messages, phone layouts and accessibility issues from the review. | BLOCKED / unclaimed; after UX01 |
+| [UX03](active/ui-ux/UX03/README.md) | Verify the matching deployed basic app, final screens and existing demos; reconcile actual closeout evidence and simple start instructions. | BLOCKED / unclaimed; after UX02; final closeout needs NP00/LIVE04 proof |
 
 ## Where earlier work went
 

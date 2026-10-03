@@ -1,8 +1,16 @@
 # ASSESS07 — Managed verification of corrective changes
 
 - Status: IN_PROGRESS — reusable GitHub-only run approvals are activated; the current two-run B receipt is recorded and verified. No B deployment or live test was dispatched by this approval; actual consumption and full live qualification remain pending.
-- Worker: A completed GitHub-only activation and retains run-approval authority; B / Octavio / `Battosai1806` executes the authorized GitHub-triggered live cycle after its allowance is recorded. No B run has occurred yet.
+- Worker: B / Octavio / `Battosai1806` recorded the bounded GitHub deployment/qualification claim at22:33:43Z, synchronized as `7e6b55d`. A retains run-approval authority and prepares only the user-requested roadmap documentation. No actual B live run is verified yet; preserve the B claim below.
 - Scope: finish ASSESS07's isolated managed verification and any narrowly verified diagnostic repair; preserve NP00's separate saved WSL claim and all existing daily, per-run, cumulative and expiry limits.
+
+### Basic completion roadmap — documentation preparation, 2026-10-03T22:30Z
+
+The user asks what is implemented, what B can take, what remains to finish the basics, and proposes UI/usability tasks after OPS with Luna review helpers. A / Ricardo / `martelaxe` / WSL prepares only this queue/handoff documentation from clean ff-only synchronized `main` at `41cdbdfbce96e751a38a80fe22db2358077f0f7c`. Actual session: Codex GPT-6; exact variant/effort unexposed. B's ASSESS07 live-cycle routing and two dated GitHub-approved starts remain; no B execution is inferred. Latest actual GitHub qualification remains37147658807 failure; approval37158067754 success is not a test result.
+
+Bounded documentation scope: new `docs/basic-completion-plan.md`, new `docs/tasks/active/ui-ux/README.md` and UX01/UX02/UX03 task folders; task guide/active index/shared board/workflow; this ASSESS07 ticket; A work log and A/B shared handoff routing. Add future prerequisites and explicit basic-completion criteria without claiming or executing another implementation. Requested Luna helpers are a future bounded review option within UX01/UX03; no subagent or separate chat is started here. No executable/source/IAM/config/lock change, AWS operation, deployment/test dispatch, email/model call, budget/expiry change or external message. Preserve NP00's saved claim and all historical evidence. Verify docs, then synchronize with `[skip ci]`.
+
+Prepared [basic completion roadmap](../../../../basic-completion-plan.md) and UX01/UX02/UX03 task folders, all BLOCKED/unclaimed after OPS. The shared guide/board and handoffs preserve this immediate B live priority and its exact finite receipt. Docs checks PASS: reference hashes7/7, planning15/15,349 local links across16 Markdown files, task status/dependency/uniqueness/routing consistency and whitespace. No executable change/application rerun, helper, AWS action or live test occurred. This is a docs-only `[skip ci]` checkpoint, not another implementation claim.
 
 ### Two GitHub-approved runs recorded for B — 2026-10-03T22:20Z
 
