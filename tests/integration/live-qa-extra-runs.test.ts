@@ -16,7 +16,7 @@ describe('two additional B runs, never a recurring daily increase',()=>{
   expect(()=>reserveExtra(second,auth,3,6,'gh-123-1',run,now)).toThrow('EXTRA_RUN_ALLOWANCE_BLOCKED');expect(approval.usedRuns).toBe(0);expect(auth.maxRunsPerDay).toBe(4);
  });
  test('wrong day, expired/malformed approval, changed grant and inconsistent usage fail closed',()=>{
-  for(const a of [null,{...approval,additionalRuns:3},{...approval,usedRuns:-1},{...approval,usedRuns:2},{...approval,usedRuns:0.5},{...approval,actor:'martelaxe'},{...approval,expiresAt:auth.expiresAt},{...approval,unknown:'PRIVATE'}])
+  for(const a of [null,{...approval,additionalRuns:3},{...approval,usedRuns:-1},{...approval,usedRuns:2},{...approval,usedRuns:0.5},{...approval,actor:'someone-else'},{...approval,expiresAt:auth.expiresAt},{...approval,unknown:'PRIVATE'}])
    expect(()=>reserveExtra(a,auth,3,4,'gh-123-1',run,now)).toThrow('EXTRA_RUN_ALLOWANCE_BLOCKED');
   for(const time of [Date.parse('2026-10-02T23:59:59Z'),Date.parse(approval.expiresAt)])expect(()=>reserveExtra(approval,auth,3,4,'gh-123-1',run,time)).toThrow();
   expect(()=>reserveExtra(approval,auth,4,4,'gh-123-1',run,now)).toThrow();expect(()=>reserveExtra(approval,auth,3,5,'gh-123-1',run,now)).toThrow();
@@ -24,6 +24,14 @@ describe('two additional B runs, never a recurring daily increase',()=>{
  test('caller-supplied actor cannot replace fixed GitHub repository/workflow/run/attempt evidence',()=>{
   for(const r of [{...run,actor:{login:'martelaxe'}},{...run,triggering_actor:{login:'martelaxe'}},{...run,id:124},{...run,run_attempt:2},{...run,repository:{id:1}},{...run,head_repository:{id:1}},{...run,head_branch:'other'},{...run,path:'other.yml'},{...run,event:'pull_request'},{...run,status:'completed'}])
    expect(()=>reserveExtra(approval,auth,3,4,'gh-123-1',r,now)).toThrow('EXTRA_RUN_ACTOR_UNVERIFIED');
+ });
+ test('the one-time transfer accepts A only when the saved approval and both GitHub actors name A',()=>{
+  const aApproval={...approval,actor:'martelaxe'};
+  const aRun={...run,actor:{login:'martelaxe'},triggering_actor:{login:'martelaxe'}};
+  expect(reserveExtra(aApproval,auth,3,4,'gh-123-1',aRun,now).usedRuns).toBe(1);
+  for(const r of [{...aRun,actor:{login:'Battosai1806'}},{...aRun,triggering_actor:{login:'Battosai1806'}}])
+   expect(()=>reserveExtra(aApproval,auth,3,4,'gh-123-1',r,now)).toThrow('EXTRA_RUN_ACTOR_UNVERIFIED');
+  expect(()=>reserveExtra({...approval,actor:'someone-else'},auth,3,4,'gh-123-1',run,now)).toThrow('EXTRA_RUN_ALLOWANCE_BLOCKED');
  });
  test('GitHub lookup uses the fixed HTTPS repository, bounded deadline, no redirect or private errors',async()=>{
   const fetcher=vi.fn(async(url:string,options:Record<string,unknown>)=>{expect(url).toContain('https://api.github.com/');expect(options.signal).toBeDefined();return {ok:true,json:async()=>run};});expect(await githubRun('gh-123-1',fetcher)).toEqual(run);

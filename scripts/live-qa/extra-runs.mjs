@@ -1,6 +1,6 @@
 // Administrator approval is separate from the unchanged daily and cumulative grant.
 export const EXTRA_DAY = '2026-10-03';
-export const EXTRA_ACTOR = 'Battosai1806';
+export const EXTRA_ACTORS = new Set(['Battosai1806', 'martelaxe']);
 export async function githubRun(runId, fetcher = globalThis.fetch) {
     const match = /^gh-(\d+)-(\d+)$/.exec(runId);
     if (!match) throw new Error('EXTRA_RUN_ACTOR_UNVERIFIED');
@@ -18,7 +18,7 @@ export function reserveExtra(approval, authorization, authorizationVersion, dail
     const day = new Date(now).toISOString().slice(0, 10);
     const keys = ['schemaVersion', 'day', 'actor', 'additionalRuns', 'usedRuns', 'baseRuns', 'authorizationVersion', 'authorizationExpiresAt', 'expiresAt'].sort().join();
     if (!approval || Object.keys(approval).sort().join() !== keys || approval.schemaVersion !== 1
-        || day !== EXTRA_DAY || approval.day !== day || approval.actor !== EXTRA_ACTOR
+        || day !== EXTRA_DAY || approval.day !== day || !EXTRA_ACTORS.has(approval.actor)
         || approval.additionalRuns !== 2 || approval.baseRuns !== 4 || authorization.maxRunsPerDay !== 4
         || approval.authorizationVersion !== authorizationVersion || approval.authorizationExpiresAt !== authorization.expiresAt
         || !authorization.approved || Date.parse(authorization.expiresAt) <= now
@@ -27,7 +27,7 @@ export function reserveExtra(approval, authorization, authorizationVersion, dail
         || dailyRuns !== approval.baseRuns + approval.usedRuns)
         throw new Error('EXTRA_RUN_ALLOWANCE_BLOCKED');
     if (!match || String(run?.id) !== match[1] || String(run?.run_attempt) !== match[2]
-        || run?.actor?.login !== EXTRA_ACTOR || run?.triggering_actor?.login !== EXTRA_ACTOR
+        || run?.actor?.login !== approval.actor || run?.triggering_actor?.login !== approval.actor
         || run?.repository?.id !== 1377587215 || run?.head_repository?.id !== 1377587215
         || run?.head_branch !== 'main' || run?.event !== 'workflow_run' || run?.status !== 'in_progress'
         || run?.path !== '.github/workflows/live-qa-release-and-check.yml'
