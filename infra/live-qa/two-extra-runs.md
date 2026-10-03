@@ -1,35 +1,21 @@
 # ASSESS07 — prepare B's final live test — 2026-10-03 UTC
 
-## Current status: CloudShell retry needed before B can test
+## Current status: exact CLI bug fixed; A must apply the allowance
 
-The user has assigned the remaining ASSESS07 work to B (`Battosai1806`). One final automatic live cycle was authorized, but its one-use slot is **not yet available**. The earlier two extra cycles were consumed. The allowance expires at `2026-10-04T00:00:00Z` (18:00 on October 3 in Mexico City).
+The user assigned B (`Battosai1806`) one final automatic live cycle. Its one-use slot is **not yet installed**. Both previous extra cycles remain spent. The deadline is `2026-10-04T00:00:00Z` (18:00 on October 3 in Mexico City).
 
-The pasted CloudShell attempt stopped at `dynamodb:get-item`, while reading existing records. The first helper hid the AWS error. A second attempt reported `Unknown:KEY=AUTH`, which means its parser did not recognize where the AWS CLI put the error text; it still failed before the guarded write. Neither attempt consumed a run or changed the allowance. CloudShell had also reopened in recovery mode; that was a new shell, so its old `$DIR` variable no longer existed. The later `/approve.py` error only means the temporary folder variable was lost; it is not an AWS state change.
+The helper constructed `--consistent-read true`; AWS CLI rejected the extra `true` locally with exit252 / `Unknown options: true`, before any AWS request. Earlier error-parser changes missed the malformed command. The boolean-option builder is now fixed and regression-tested through the actual subprocess arguments.
 
-The latest helper also checks both AWS CLI output streams and classifies common permission, expired-login, credential, missing-resource and connection failures without printing private AWS details. It assigns the existing one-use exception to B, preserves `usedRuns=2`, every original test/email/cost limit, and the same expiry. A must apply this administrator-only update using A's CloudShell session. B must not use A's AWS credentials. The checked helper is on `main` at `d30e03b6aa4877353d59864ff68257ddc671bece`; its SHA-256 is `3a7dc2648444f0078a04770b159b0830ea8e2ac36245a2f19f242517c8ac93ee`.
+Actual AWS read-only preflight now returns `THIRD_RUN_PREPARED_FOR_B`, `remaining:1`, `cloudWrites:false`, unchanged expiry `2026-10-04T00:00:00Z`. The allowance is not yet installed. Focused12/12 and pinned Node24.21.0/npm11.19.0 full `npm run check` PASS:707 application tests/two optional skips, hosted1/1, E2E58/58, references7/7, planning15/15, lint/types/build/boundaries. Corrected source is `5279d8a4edbb0d01eabd832c5f487cba98d8d9e3`; helper SHA-256 is `576a0b4733ac04ee933543d2f9a631af5283230a42dcb5f33a3d8ccabd16dba9`. No cloud write, deployment, live test, paid AI or email occurred during this repair. The guarded transaction still changes only the one-use exception, preserves `usedRuns=2`, and checks the original authorization, versions, CLEAN state, budget headroom and expiry.
 
-If CloudShell is still in recovery mode, make a private backup of the startup files and restore the standard bash startup file, then restart CloudShell:
-
-```bash
-(
-  set -euo pipefail
-  backup="$HOME/cloudshell-startup-backup-$(date +%Y%m%dT%H%M%S)"
-  mkdir -m 700 "$backup"
-  for file in .bashrc .bash_profile .profile; do
-    if [ -f "$HOME/$file" ]; then cp -p "$HOME/$file" "$backup/$file"; fi
-  done
-  cp /etc/skel/.bashrc "$HOME/.bashrc"
-)
-```
-
-When CloudShell returns to a normal `~ $` prompt, paste the entire block below at once. The surrounding subshell keeps a failed check from closing the CloudShell session. The helper first performs a read-only check; `--apply` runs only if that check succeeds. Replace the commit and hash with the verified values recorded after this fix is synchronized to `main`.
+CloudShell startup repair is already complete. Paste this entire block into A's normal CloudShell prompt. It first checks the real AWS records without writing; `--apply` runs only if that check succeeds. The subshell keeps a failed check from closing CloudShell.
 
 ```bash
 (
   set -euo pipefail
   umask 077
-  COMMIT=d30e03b6aa4877353d59864ff68257ddc671bece
-  SHA256=3a7dc2648444f0078a04770b159b0830ea8e2ac36245a2f19f242517c8ac93ee
+  COMMIT=5279d8a4edbb0d01eabd832c5f487cba98d8d9e3
+  SHA256=576a0b4733ac04ee933543d2f9a631af5283230a42dcb5f33a3d8ccabd16dba9
   DIR=$(mktemp -d "$HOME/known-enough-third-run.XXXXXX")
   curl --fail --silent --show-error \
     "https://raw.githubusercontent.com/Known-Enough/known-enough/$COMMIT/scripts/live-qa/approve-third-extra-run.py" \
@@ -40,7 +26,11 @@ When CloudShell returns to a normal `~ $` prompt, paste the entire block below a
 )
 ```
 
-Expected results are `THIRD_RUN_PREPARED_FOR_B` (`cloudWrites:false`) followed by `THIRD_RUN_APPROVED_FOR_B` (`remaining:1`, unchanged expiry). If the helper prints `BLOCKED`, stop and send back its `code`; the new version checks both output streams and identifies the fixed record read. If it reports `UnclassifiedCliError` again, stop there and send that exact result instead of retrying. Do not edit the table manually or run another deployment. If approval succeeds, B can use GitHub without AWS credentials: B's repository permission was read back as `admin`, and the staging deployment workflow has a manual start that automatically triggers the matching live qualification. B must first pull the new `main`, sign into GitHub as `Battosai1806`, and start only the staging deployment workflow. Do not click the live-test workflow separately. One deployment leads to one qualification; no retries or second cycle are authorized.
+Expected output: `THIRD_RUN_PREPARED_FOR_B`, then `THIRD_RUN_APPROVED_FOR_B` with `remaining:1`. A repeat after a lost successful response returns `THIRD_RUN_ALREADY_APPROVED_FOR_B` without replenishing a spent run. If a check blocks or the deadline passes, stop and report its code; do not edit AWS records or extend the allowance.
+
+A applies the pinned helper in CloudShell using A's administrator session. After successful `THIRD_RUN_APPROVED_FOR_B` readback, B pulls clean `main`, signs into GitHub as `Battosai1806`, and starts one staging deployment; its matching qualification starts automatically. B needs no AWS credentials or separate test-workflow click. Only one cycle is authorized, with no reset of used runs, caps or expiry. No B execution or full live PASS is claimed.
+
+The separate CloudShell recovery session lost the old `$DIR` variable, explaining the historical `/approve.py` file error. It did not change AWS state. The previous `Unknown` / `UnclassifiedCliError` reports masked this CLI usage error; they did not establish an AWS permission denial.
 
 ## Historical A transfer and two completed automatic runs
 

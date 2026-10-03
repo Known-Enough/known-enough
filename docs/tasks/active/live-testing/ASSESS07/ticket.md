@@ -1,6 +1,6 @@
 # ASSESS07 — Managed verification of corrective changes
 
-- Status: IN_PROGRESS — one additional bounded live qualification cycle is authorized, but its slot is not installed yet. A is repairing the administrator-only CloudShell step; the user has assigned B to execute the single deployment and automatic qualification after successful readback.
+- Status: IN_PROGRESS — one additional bounded live qualification cycle is authorized, but its slot is not installed yet. A repaired the administrator-only CloudShell helper and verified its real read-only preflight; the user assigned B to execute the single deployment and automatic qualification after successful administrator readback.
 - Worker: A for the narrow CloudShell helper/readback prerequisite; then B / Octavio / `Battosai1806` for the one GitHub-triggered live cycle. No B run has occurred yet.
 - Scope: finish ASSESS07's isolated managed verification and any narrowly verified diagnostic repair; preserve NP00's separate saved WSL claim and all existing daily, per-run, cumulative and expiry limits.
 
@@ -11,6 +11,8 @@ A / Ricardo / `martelaxe` / WSL continues the administrator helper prerequisite 
 The old malformed command was reproduced against a loopback endpoint with unsigned access: CLI exit252 and `Unknown options: true`, before any AWS request. The corrected helper emits `--consistent-read` alone, or `--no-consistent-read` for false, while preserving string/JSON parameters. Focused regression passed12/12 and verifies the actual subprocess argv through the real record-read entry point. Actual AWS dry-run using A's existing `known-enough-staging-ro` profile returned `THIRD_RUN_PREPARED_FOR_B`, `remaining:1`, `expiresAt:2026-10-04T00:00:00Z`, `cloudWrites:false`. This proves cloud preflight now succeeds, but does not install the allowance or execute B's test.
 
 Pinned Node24.21.0/npm11.19.0 `PLAYWRIGHT_CHANNEL=chromium npm run check` exit0:707 application tests/two optional skips, hosted1/1, E2E58/58, references7/7, planning15/15, lint/types/build/boundaries PASS. Log: `/tmp/known-enough-assess07-cli-check.47qWvq/full-check.log`. Only the boolean-option builder and its regression changed; original transaction/version/CLEAN/cumulative/email/expiry guards are unchanged. Publish with `[skip ci]`; A next applies the new verified CloudShell pin, then B executes the single authorized live cycle. No cloud write or full live PASS is claimed.
+
+Published repair: `5279d8a4edbb0d01eabd832c5f487cba98d8d9e3`, helper SHA-256 `576a0b4733ac04ee933543d2f9a631af5283230a42dcb5f33a3d8ccabd16dba9`. The exact administrator command is in the [runbook](../../../../../infra/live-qa/two-extra-runs.md). Actual cloud preflight is verified; administrator application and B's live cycle remain pending.
 
 ### Current recovery and B handoff — 2026-10-03T20:51Z
 
