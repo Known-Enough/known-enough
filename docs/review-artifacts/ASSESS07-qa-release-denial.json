@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "6a8ed6b91d9e778aaeea2dfbba2bd320af4b5df6",
+  "deploymentRunId": 37082249237,
+  "deploymentConclusion": "success",
+  "automaticQualificationRunId": 37082289231,
+  "event": "workflow_run",
+  "qaReleaseAssumption": "success",
+  "sourceChecks": "success",
+  "releaseFailure": {
+    "status": "FAIL",
+    "rollback": "PASS",
+    "frontend": "INSPECT_OR_FORWARD_REPAIR_REQUIRED",
+    "failure": {
+      "code": "AWS_OPERATION_FAILED:amplify:create-deployment",
+      "awsCode": "AccessDeniedException",
+      "deniedResource": "arn:aws:amplify:us-east-1:092954139775:apps/d2l23pkzmr1tio/branches/main/deployments/*"
+    }
+  },
+  "modelAttempts": 0,
+  "signupMessages": 0,
+  "status": "BLOCKED_ON_EXACT_QA_RELEASE_PERMISSION",
+  "evidenceOrigin": "GitHub downloaded sanitized release-failure.json; workload role assumption and dependency results observed through GitHub API",
+  "diagnosis": "Observed CreateDeployment denial resource is absent from the prepared ExactQaRelease policy. Installed-policy drift must still be rejected by administrator readback before any correction. No speculative wildcard account/app access or policy broadening."
+}
