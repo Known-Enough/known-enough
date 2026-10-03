@@ -1,6 +1,6 @@
 # ASSESS07 — Managed verification of corrective changes
 
-- Status: READY — B takeover authorized/unclaimed; local correction ready, AWS extra allowance and full live proof pending.
+- Status: READY — B takeover authorized/unclaimed; A extra allowance readback passed, broker release/full live proof pending.
 - Worker: B / Octavio / Battosai1806 next; A releases ASSESS07 only. Record actual model, identity, source and receipts.
 - Scope: new read-only/service verification checklist under existing LIVE04, never NP00 takeover.
 
@@ -129,3 +129,6 @@ A helper compatibility amendment — user CloudShell7c3807b reports BLOCKED/CUMU
 
 
 Legacy-cap correction checks PASS: focused22/22; final clean pinned Node24.21.0/npm11.19.0 full npm run check exit0,699 application tests/two optional skips, hosted1/1, E2E58/58, references7/7, planning15/15, lint/types/build/boundaries. Log /tmp/known-enough-extra-legacy-check.l8qi4oef/full-check.log; both changed executable/test files equal tested bytes. Python helper parity matches actual cumulative.mjs for legacy full/stricter per-run envelopes and explicit lower totals. Mocked administrator application succeeds for legacy and stricter grants while preserving original AUTH/DAY/TOTAL/LEASE bytes; partial/bool/zero/enlarged caps still reject, all previous scope/version/idempotence/CLEAN guards remain. Documentation links/hashes/status/whitespace PASS. Verified [skip ci] sync, then same already-authorized A CloudShell retry with the newly pinned helper. No AWS write, cap increase, expiry reset, broker change or test/deployment dispatch by this worker; actual installed caps/approval remain unverified until user readback. ASSESS07 stays READY for B after this narrow prerequisite.
+
+
+Actual A allowance checkpoint — user CloudShell20432bb8 reports TWO_EXTRA_RUNS_APPROVED/remaining2/expiresAt2026-10-04T00:00:00Z/cloudWrites=true. [Sanitized user readback](../../../../review-artifacts/ASSESS07-two-extra-runs-approved.json). Earlier allowance-pending paragraphs are historical. B now pulls current main, authenticates GitHub as Battosai1806, claims ASSESS07 and uses the authorized upstream deployment; automatic release updates the broker before fixture startup so dated extra slots are recognized. A's administrator prerequisite is resolved; normal test/release roles require no personal AWS credentials. This readback proves the approved record, not broker consumption, actual B activity or seven-journey acceptance. Full live proof remains pending; ASSESS07 stays READY/B unclaimed. After its technical completion B continues ASSESS10 then OPS01/02/03 as gates allow. New IAM/resources/migration/retention/deletion outside the two-cycle scope remain A-only execution with separate applicable authorization; NP00 preserved claim is unchanged.
