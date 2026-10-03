@@ -4,9 +4,7 @@
 
 ## Current priority — 2026-10-03
 
-**A takeover, 2026-10-03:** Because B is unavailable, A continued the existing ASSESS07 task. Both earlier extra runs ([37145997504](https://github.com/Known-Enough/known-enough/actions/runs/37145997504), [37147658807](https://github.com/Known-Enough/known-enough/actions/runs/37147658807)) passed release/public/metadata, preflight, fixture startup, model, privacy and cleanup. QA01/02 passed twice; QA03 failed twice; QA04–07 were blocked. A read-only server diagnostic narrowed QA03 to a generated-draft validation failure, not a timeout. The [sanitized finding](review-artifacts/ASSESS07-qa03-server-diagnostic.json) contains no raw lines. The local prompt correction and pinned checks pass, but staging still has the prior package. The user authorized exactly one additional bounded cycle. A's read-only AWS check found the two-use allowance exhausted (`usedRuns=2`), daily starts=6, messages=5, lease CLEAN. A has prepared a version-guarded one-use extension that preserves prior usage and all original cost/model/email limits, expires at `2026-10-04T00:00:00Z`, and must be applied by A in CloudShell before a single deployment. The focused and pinned full checks pass. No full live PASS or B activity is claimed.
-
-A / Ricardo / martelaxe / Mac retains the ASSESS07 claim and is implementing the newly authorized one-use allowance extension. The [task ticket](tasks/active/live-testing/ASSESS07/ticket.md) records both prior runs and the exact new limit. NP00's saved WSL claim is preserved without concurrent work.
+**Current ASSESS07 handoff, 2026-10-03:** The user assigned B to run the one remaining authorized live cycle. Its slot is not yet installed. A's last CloudShell attempt stopped during a read-only DynamoDB record read; the old helper hid the AWS error code. It stopped before any write. CloudShell then opened a new recovery shell and lost the temporary `$DIR` variable, which explains the later `/approve.py` file-not-found error. The corrected helper is pushed on `main` at `55cac9f3ef43e9c41818bf8c572944f9ca28a5a0`; focused11/11 and the pinned full check passed. It reports a safe error code and fixed record name, and assigns exactly one run to B while preserving both consumed runs, all cost/model/email limits and the `2026-10-04T00:00:00Z` expiry. A must apply it; only A has AWS admin access. After successful readback, B can use their verified GitHub `admin` account to start one staging deployment. The matching live qualification starts automatically; B needs no personal AWS login. The test slot remains unavailable until A reports successful readback. No B run or full live PASS is claimed. See the [task ticket](tasks/active/live-testing/ASSESS07/ticket.md) and [pinned CloudShell steps](../infra/live-qa/two-extra-runs.md). NP00's saved WSL claim is preserved.
 
 ## Historical live-test evidence checkpoint — 2026-10-02; superseded by the A takeover above
 
@@ -18,7 +16,7 @@ A's recurring observer and completed one-time follow-up are deleted. B's existin
 
 | Order | Task | Current status | What remains |
 | --- | --- | --- | --- |
-| 1 | [ASSESS07 — Real automatic qualification](tasks/active/live-testing/ASSESS07/README.md) | IN_PROGRESS — A/Mac | User authorized one extra cycle. Apply the checked one-use guard in CloudShell, then make one deployment that automatically triggers qualification before midnight UTC. |
+| 1 | [ASSESS07 — Real automatic qualification](tasks/active/live-testing/ASSESS07/README.md) | IN_PROGRESS — A admin prerequisite, then B live run | A applies the guarded one-use B allowance in CloudShell; after readback, B starts one staging deployment from GitHub. Qualification follows automatically. The allowance expires at midnight UTC. |
 | 2 | [ASSESS10 — B monitor verification](tasks/active/monitoring/ASSESS10/README.md) | READY / unclaimed; B-only verification after the current cycle | Identify B's existing automation, prove two unattended ticks and fresh AWS results, check stale/failure notification behavior. |
 | Delivery umbrella | [LIVE04 — Online test delivery](tasks/active/live-testing/LIVE04/README.md) | IN_PROGRESS; installation/settings checkpoint passed | Finish its remaining managed proof through ASSESS07; no mandatory B manual launch. |
 | Preserved closeout | [NP00 — Technical closeout](tasks/active/closeout/NP00/README.md) | IN_PROGRESS; A / Ricardo / martelaxe / WSL claim retained | Finish original remaining technical obligations; its model-off checkpoint is already verified. No concurrent writer. |
@@ -26,7 +24,7 @@ A's recurring observer and completed one-time follow-up are deleted. B's existin
 
 ASSESS10 is not a claim that B has started. A/B identity, execution worker, chat and task role remain distinct: A is Ricardo / martelaxe; B is Octavio / Battosai1806. A Mac session authenticated as A is not B. See [verified mapping](people-and-workers.md).
 
-Historical routing: earlier user direction transferred ASSESS07 to B and approved two one-time extra synthetic cycles. The A takeover claim above supersedes that scheduling because B is unavailable. No actual B start is claimed. After ASSESS07, follow the shared queue and existing task prerequisites. NP00 remains A's preserved closeout; no concurrent writer.
+Historical routing: A briefly took over ASSESS07 when B was unavailable, and used the earlier two-run allowance. The user's latest direction assigns the single newly authorized run to B. No actual B start is claimed yet. After ASSESS07, follow the shared queue and existing task prerequisites. NP00 remains A's preserved closeout; no concurrent writer.
 
 ## Execution boundaries
 

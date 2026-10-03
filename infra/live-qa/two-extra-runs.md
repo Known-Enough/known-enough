@@ -1,26 +1,50 @@
-# Transfer the two remaining live test runs to A — 2026-10-03 UTC
+# ASSESS07 — prepare B's final live test — 2026-10-03 UTC
 
-## Newly authorized single additional cycle — guarded helper checked, pending CloudShell apply
+## Current status: CloudShell retry needed before B can test
 
-At 2026-10-03T20:12:45Z the user authorized exactly one more live cycle after the previous two were consumed. A's read-only check found the original grant still approved, a CLEAN lease, six daily starts, five synthetic messages, and the exception at `additionalRuns=2, usedRuns=2`. The current broker correctly blocks a third use. The helper adds one start to this exact dated exception while preserving `usedRuns=2`, original daily/per-run/cumulative caps, and expiry `2026-10-04T00:00:00Z`. Focused10/10 and pinned full checks pass. Source is synced on `main` at `44788157c25b61bba606a41ee05d15ef5d73c81f`; helper SHA-256 is `75b4a81c319ac40d108bfbf1cfbe79da27d0b9a0cdaea17194db90d573c85c47`. A's AWS profile is read-only; A must use the CloudShell administrator session for the exact guarded update below. It reads current state and headroom before changing anything. `set -e` prevents applying if its read-only preparation is blocked.
+The user has assigned the remaining ASSESS07 work to B (`Battosai1806`). One final automatic live cycle was authorized, but its one-use slot is **not yet available**. The earlier two extra cycles were consumed. The allowance expires at `2026-10-04T00:00:00Z` (18:00 on October 3 in Mexico City).
+
+The pasted CloudShell attempt stopped at `dynamodb:get-item`, while reading existing records. The older helper suppressed AWS's error code, so we cannot yet tell whether this is a permission denial, a missing record, or another cause. It failed before its single guarded write, so that attempt did not consume the run or change the allowance. CloudShell then reopened in recovery mode; that is a new shell, so its old `$DIR` variable no longer existed. The later `/approve.py` error only means the temporary folder variable was lost; it is not an AWS state change.
+
+The updated helper now reports a safe AWS error code and the fixed record name, such as `AccessDeniedException:KEY=AUTH`, without printing private AWS details. It also changes the existing one-use exception from A back to B, preserves `usedRuns=2`, every original test/email/cost limit, and the same expiry. A must apply this administrator-only update using A's CloudShell session. B must not use A's AWS credentials. The checked helper is on `main` at `55cac9f3ef43e9c41818bf8c572944f9ca28a5a0`; its SHA-256 is `77e21300c16f507d8ea4633e4e6348c66f30402365b6df954d59c0189e76b08a`.
+
+If CloudShell is still in recovery mode, make a private backup of the startup files and restore the standard bash startup file, then restart CloudShell:
 
 ```bash
-set -euo pipefail
-umask 077
-COMMIT=44788157c25b61bba606a41ee05d15ef5d73c81f
-SHA256=75b4a81c319ac40d108bfbf1cfbe79da27d0b9a0cdaea17194db90d573c85c47
-DIR=$(mktemp -d "$HOME/known-enough-third-run.XXXXXX")
-curl --fail --silent --show-error \
-  "https://raw.githubusercontent.com/Known-Enough/known-enough/$COMMIT/scripts/live-qa/approve-third-extra-run.py" \
-  -o "$DIR/approve.py"
-printf '%s  %s\n' "$SHA256" "$DIR/approve.py" | sha256sum --check --status
-python3 -B "$DIR/approve.py"
-python3 -B "$DIR/approve.py" --apply
+(
+  set -euo pipefail
+  backup="$HOME/cloudshell-startup-backup-$(date +%Y%m%dT%H%M%S)"
+  mkdir -m 700 "$backup"
+  for file in .bashrc .bash_profile .profile; do
+    if [ -f "$HOME/$file" ]; then cp -p "$HOME/$file" "$backup/$file"; fi
+  done
+  cp /etc/skel/.bashrc "$HOME/.bashrc"
+)
 ```
 
-The first result must be `THIRD_RUN_PREPARED` with `cloudWrites:false`; the second must be `THIRD_RUN_APPROVED`, `remaining:1`, and the unchanged expiry. Stop and paste the result if either result differs or is blocked. The helper changes only the existing exception counter, from three approved/two used, preserving the previous two runs. It neither raises the recurring daily limit nor resets any totals. Once the second result is confirmed, one deployment of the synced prompt correction starts the one authorized automatic qualification.
+When CloudShell returns to a normal `~ $` prompt, paste the entire block below at once. The surrounding subshell keeps a failed check from closing the CloudShell session. The helper first performs a read-only check; `--apply` runs only if that check succeeds. Replace the commit and hash with the verified values recorded after this fix is synchronized to `main`.
 
-The existing two-use exception was approved for B, but B is unavailable. The user asked A to continue ASSESS07. The one-time transfer changed only the existing `EXTRA#2026-10-03/STATE` record's approved GitHub actor from `Battosai1806` to `martelaxe`. It preserved the number already used, so it transferred only remaining starts; it did not restore a spent start.
+```bash
+(
+  set -euo pipefail
+  umask 077
+  COMMIT=55cac9f3ef43e9c41818bf8c572944f9ca28a5a0
+  SHA256=77e21300c16f507d8ea4633e4e6348c66f30402365b6df954d59c0189e76b08a
+  DIR=$(mktemp -d "$HOME/known-enough-third-run.XXXXXX")
+  curl --fail --silent --show-error \
+    "https://raw.githubusercontent.com/Known-Enough/known-enough/$COMMIT/scripts/live-qa/approve-third-extra-run.py" \
+    -o "$DIR/approve.py"
+  printf '%s  %s\n' "$SHA256" "$DIR/approve.py" | sha256sum --check --status
+  python3 -B "$DIR/approve.py"
+  python3 -B "$DIR/approve.py" --apply
+)
+```
+
+Expected results are `THIRD_RUN_PREPARED_FOR_B` (`cloudWrites:false`) followed by `THIRD_RUN_APPROVED_FOR_B` (`remaining:1`, unchanged expiry). If the helper prints `BLOCKED`, stop and send back its `code`; the updated message identifies which fixed record read failed. Do not edit the table manually or rerun a different helper. If approval succeeds, B can use GitHub without AWS credentials: B's repository permission was read back as `admin`, and the staging deployment workflow has a manual start that automatically triggers the matching live qualification. B must first pull the new `main`, sign into GitHub as `Battosai1806`, and start only the staging deployment workflow. Do not click the live-test workflow separately. One deployment leads to one qualification; no retries or second cycle are authorized.
+
+## Historical A transfer and two completed automatic runs
+
+The existing two-use exception was originally approved for B. When B was unavailable, the user authorized A to continue and the one-time transfer changed only the existing `EXTRA#2026-10-03/STATE` record's actor from `Battosai1806` to `martelaxe`. It preserved the number already used; it did not restore a spent start.
 
 **Applied 2026-10-03:** User supplied CloudShell readback `TWO_EXTRA_RUNS_TRANSFERRED_TO_A`, initially `remaining: 2`, expiring `2026-10-04T00:00:00Z`. Matching automatic qualifications [37145997504](https://github.com/Known-Enough/known-enough/actions/runs/37145997504) and [37147658807](https://github.com/Known-Enough/known-enough/actions/runs/37147658807) both passed fixture startup, consuming the two slots atomically. Both extra cycles are used; no separate post-run administrator readback was performed. Do not rerun the transfer or dispatch another qualification under this allowance. The helper's default is read-only. Before `--apply`, it checked account `092954139775`, the exact active `KnownEnoughQaControl` table, the original grant and its expiry, all existing limits and remaining budget, a `CLEAN` test record, current daily usage, the existing two-run approval, and its unchanged version. It saved a private original snapshot under `$HOME/known-enough-two-extra-runs-transfer/2026-10-03`, then conditionally updated only the exception record. `AUTH`, `DAY`, `TOTAL`, and `LEASE` are condition-checked and left unchanged. Readback confirmed the change.
 
@@ -51,7 +75,7 @@ User approval covered two additional one-time synthetic ASSESS07 runs for B/Batt
 
 `python3 scripts/live-qa/approve-two-extra-runs.py --apply` checks account092954139775, exact existing KnownEnoughQaControl, original approved grant/expiry/cumulative ceilings (including legacy grants without explicit total fields), CLEAN lease, four current-day starts and sufficient daily email/cumulative headroom. It writes only EXTRA#2026-10-03/STATE, with a two-use counter and expiry2026-10-04T00:00:00Z. AUTH, DAY, TOTAL and LEASE remain unchanged and their versions are checked atomically. A private immutable original snapshot is saved in $HOME/known-enough-two-extra-runs/2026-10-03; rerunning never replenishes a consumed allowance. Without --apply the helper is read-only. A successful result is TWO_EXTRA_RUNS_APPROVED or TWO_EXTRA_RUNS_ALREADY_APPROVED, with remaining count. A BLOCKED result is not applied approval.
 
-At the time of the original B approval, B was to pull the commit containing extra-runs.mjs and the broker change, claim ASSESS07 and start an authorized main deployment. Its automatic qualification would publish the updated broker before fixture startup. This is historical; the current A takeover procedure is above. No separate administrator Lambda upload, IAM change, new resource or personal credential sharing is needed.
+At the time of the original B approval, B was to pull the commit containing extra-runs.mjs and the broker change, claim ASSESS07 and start an authorized main deployment. Its automatic qualification would publish the updated broker before fixture startup. This is historical; the current one-use B handoff is above. No separate administrator Lambda upload, IAM change, new resource or credential sharing is needed.
 
 When normal daily starts are exhausted, the broker fetches fixed-repository GitHub run metadata and requires the exact in-progress main automatic qualification workflow, matching run/attempt and both actor/triggering_actor Battosai1806. The exception consumes one of its two uses in the same conditional transaction as ordinary DAY/TOTAL/LEASE usage. It never changes the four/day grant, cumulative run/model/token/email ceilings or original2026-10-09T03:16:41.171626Z expiry. Other actors, a third extra run, malformed/drifted approval, wrong day, stale versions and unverified GitHub metadata fail closed. All future UTC days use the original four/day limit.
 

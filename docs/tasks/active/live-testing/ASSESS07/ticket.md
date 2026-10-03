@@ -1,8 +1,14 @@
 # ASSESS07 — Managed verification of corrective changes
 
-- Status: IN_PROGRESS — A/Mac has new user authorization for exactly one bounded live qualification cycle, 2026-10-03. The existing two-use exception is exhausted; first implement/check a one-use extension that preserves prior usage, all original spending limits and the `2026-10-04T00:00:00Z` exception expiry. A must apply it in CloudShell before deployment.
-- Worker: A / Ricardo / martelaxe / Mac. The user supplied the CloudShell transfer readback and authorized staging deployment plus bounded automatic live qualification.
+- Status: IN_PROGRESS — one additional bounded live qualification cycle is authorized, but its slot is not installed yet. A is repairing the administrator-only CloudShell step; the user has assigned B to execute the single deployment and automatic qualification after successful readback.
+- Worker: A for the narrow CloudShell helper/readback prerequisite; then B / Octavio / `Battosai1806` for the one GitHub-triggered live cycle. No B run has occurred yet.
 - Scope: finish ASSESS07's isolated managed verification and any narrowly verified diagnostic repair; preserve NP00's separate saved WSL claim and all existing daily, per-run, cumulative and expiry limits.
+
+### Current recovery and B handoff — 2026-10-03T20:51Z
+
+The user's CloudShell run reached `dynamodb:get-item` and returned a generic blocked result. The helper stopped during its read-only preflight, before the guarded transaction; the allowance is therefore unchanged. CloudShell then reopened in recovery mode. Its new shell did not retain `$DIR`, so the subsequent `/approve.py` lookup failed because the temporary path variable was empty. That second message is a shell-session issue, not a second AWS failure or a test attempt.
+
+The helper correction is on `main` at `55cac9f3ef43e9c41818bf8c572944f9ca28a5a0`, with SHA-256 `77e21300c16f507d8ea4633e4e6348c66f30402365b6df954d59c0189e76b08a`. It reports only the AWS error code and fixed control-record name, and retargets the one already-authorized extra start to B. Focused tests passed11/11; pinned full `npm run check` passed706 application tests (two optional skips), hosted preview1/1, E2E58/58, references7/7 and planning15/15, plus lint/types/build/boundaries. This preserves `usedRuns=2`, all daily/per-run/cumulative limits and the `2026-10-04T00:00:00Z` expiry. A must apply the guarded update using A's own AWS session; B does not need AWS credentials. After successful readback, B pulls clean `main` and starts the staging deployment as `Battosai1806`. That deployment automatically starts the one matching qualification. The user has authorized only that single cycle: no retry or second deployment that could trigger another test. The CloudShell repair and exact pinned command are in the [runbook](../../../../../infra/live-qa/two-extra-runs.md).
 
 ### Fresh one-cycle authorization — 2026-10-03T20:12:45Z
 
