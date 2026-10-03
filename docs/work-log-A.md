@@ -1,3 +1,7 @@
+## 2026-10-03T20:29:50Z — ASSESS07 pinned CloudShell handoff published
+
+The helper command and its SHA-256 pin are now in `infra/live-qa/two-extra-runs.md`; docs-only `[skip ci]` commit `f7009177555068bfc60143168496d5ddee2e8c51` is pushed. The helper remains pinned to tested code commit `44788157c25b61bba606a41ee05d15ef5d73c81f`, SHA-256 `75b4a81c319ac40d108bfbf1cfbe79da27d0b9a0cdaea17194db90d573c85c47`. Local `main` and fetched `origin/main` matched and the worktree was clean at this checkpoint. Reference/planning checks, six-document local link scan, Bash syntax and whitespace pass. The only next action is A's one guarded CloudShell run; no AWS write/deployment/model/email occurred. After a verified one-use readback, use the already authorized single deployment/automatic qualification before the exception expires.
+
 ## 2026-10-03T20:28:15Z — ASSESS07 one-use guard checked and synced
 
 The one-use counter helper and broker gate passed focused tests10/10 plus pinned `PLAYWRIGHT_CHANNEL=chromium npm run check` exit0: refs7/7, planning15/15, 705 application tests/two optional skips, hosted preview1/1, E2E58/58, lint/boundaries/typecheck/build. Custom local-link scan checked six updated Markdown files with no missing target; `git diff --check` and Python AST parse passed. Committed and pushed source/docs as `44788157c25b61bba606a41ee05d15ef5d73c81f` with `[skip ci]`; fetched `origin/main` and verified exact commit equality and clean tree. Helper hash is `75b4a81c319ac40d108bfbf1cfbe79da27d0b9a0cdaea17194db90d573c85c47`.
