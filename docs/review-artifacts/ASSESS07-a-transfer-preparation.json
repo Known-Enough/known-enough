@@ -1,33 +1,50 @@
 {
   "schemaVersion": 1,
-  "timestamp": "2026-10-03T17:16:50.036796Z",
-  "sourceCommit": "44697aff1b6ea3ceecf4155c52a0bced138343e5",
+  "timestamp": "2026-10-03T18:40:08Z",
+  "sourceCommit": "e0199859069d7ccd1f80a0ccfadb9a9f5c61c35a",
+  "transferHelperSha256": "1ac6dbe6e854ab0eb5c2970d9a1cea361d4963ab491e7f0a7e86a41e40d38129",
   "worker": {
     "account": "martelaxe",
     "githubId": 44531296,
     "host": "Mac",
     "model": "Codex GPT-6; variant/effort unexposed"
   },
-  "status": "CLAIM_READY",
-  "phase": "Git permissions restored; resumed claim ready to synchronize",
+  "status": "PREPARED_APPROVAL_REQUIRED",
+  "phase": "Guarded transfer is checked and pushed; cloud record remains assigned to B",
   "preflight": {
-    "cleanFfOnlyPull": "PASS",
-    "remoteHeadMatch": "PASS",
+    "cleanFfOnlyPull": "PASS at d0c3cfb9c7a8608998f2013e464cd50c63f73c03",
+    "remoteHeadMatch": "PASS before and after code push",
     "focusedTests": {
-      "passed": 26,
+      "passed": 10,
       "failed": 0
     },
     "references": 7,
     "planning": 15,
-    "changedSourceFullCheck": "NOT_RUN"
+    "lintBoundariesTypecheck": "PASS",
+    "applicationTests": {
+      "passed": 702,
+      "skipped": 2
+    },
+    "hostedPreview": "PASS 1/1",
+    "browserTests": "PASS 58/58",
+    "changedSourceFullCheck": "PASS: PLAYWRIGHT_CHANNEL=chromium npm run check with one browser worker"
   },
-  "blockers": [],
-  "executableFilesChanged": false,
-  "remoteMutation": false,
+  "cloudState": "Not re-read during this preparation. Last user-provided readback showed B's allowance with two remaining and expiry 2026-10-04T00:00:00Z.",
+  "latestLiveReport": {
+    "runId": 37089230162,
+    "sourceCommit": "bef9d0d9e4608c7742cbac1d8aa8fa4c04740735",
+    "conclusion": "failure",
+    "newReportAfterPreparationPush": false
+  },
+  "blockers": [
+    "Exact CloudShell transfer needs the user's approval before it is applied."
+  ],
+  "executableFilesChanged": true,
+  "remoteMutation": "Code commit e0199859069d7ccd1f80a0ccfadb9a9f5c61c35a pushed to origin/main with [skip ci].",
   "cloudWrites": false,
   "deployments": 0,
   "liveTests": 0,
-  "nextStep": "Publish the resumed claim, then implement/check the A transfer before asking for concrete approval.",
+  "nextStep": "Approve the exact pinned CloudShell transfer command in infra/live-qa/two-extra-runs.md; check its reported remaining count before any release or live run.",
   "historicalBlocker": {
     "timestamp": "2026-10-03T17:08:29.473075Z",
     "blockers": [

@@ -4,6 +4,20 @@
 - Worker: A / Ricardo / martelaxe / Mac for the user-requested takeover preparation; no cloud execution authorized by this preparation.
 - Scope: new read-only/service verification checklist under existing LIVE04, never NP00 takeover.
 
+## A takeover because B is unavailable — user direction, 2026-10-03T18:30:54Z
+
+The user asks A to continue ASSESS07 because B is unavailable. Continue the existing A/Mac preparation claim from the synchronized main branch. Prepare and test only the guarded transfer of the same two-use grant already approved for B; do not create a fresh grant, restore any used run, change the original expiry, or widen the daily/cumulative limits. The installed cloud record remains B-bound until the user approves and applies the concrete command. No AWS write, deployment, email or paid test is authorized by this instruction alone.
+
+The transfer helper must recheck the exact account/table, original authorization and expiry, current counters and caps, current CLEAN state, exception record and version; save a private original snapshot; conditionally change only the exception actor to A; and verify readback. Retries must never replenish a spent run. The broker accepts this exception only when both GitHub run actor fields match the explicitly approved actor and the automatic workflow/repository/main/run evidence matches. After verification and separate user approval, use an eligible main release to publish the updated broker and let its matching qualification start automatically. Do not use personal AWS credentials from this Codex session or change B's GitHub settings.
+
+The existing allowance expires at 2026-10-04T00:00:00Z. If no starts remain or it expires, stop; do not extend it. See the current [transfer runbook](../../../../../infra/live-qa/two-extra-runs.md).
+
+## A transfer package prepared and checked — 2026-10-03
+
+The one-time transfer helper and actor gate are synchronized at `e0199859069d7ccd1f80a0ccfadb9a9f5c61c35a`. The helper changes only the existing exception's actor, condition-checks AUTH/LEASE/DAY/TOTAL and the exception version, keeps `usedRuns`, checks current budget/expiry/CLEAN state, and stores a mode-0600 original snapshot in a mode-0700 folder. The broker accepts only the two verified project accounts, and the selected approval's actor must match both GitHub run actor fields.
+
+Verification: focused transfer/broker tests 10/10; full `PLAYWRIGHT_CHANNEL=chromium npm run check` passed: references7/7, planning15/15, lint/boundaries/typecheck, 702 application tests with two optional skips, hosted preview1/1, browser58/58. The default parallel full run had one local test-server connection refusal; the failing test passed alone, then the entire check passed with one browser worker. No AWS write, deployed release, email, model call or live test was made. [Sanitized preparation evidence](../../../../review-artifacts/ASSESS07-a-transfer-preparation.json) and [pinned one-time runbook](../../../../../infra/live-qa/two-extra-runs.md). Await the user's approval before A runs the CloudShell command.
+
 ## Preparation permissions restored — 2026-10-03T17:16:50.036796Z
 
 The user enables unrestricted workspace execution and asks this A session to retry. Git metadata is now writable. Resume the existing saved preparation claim, synchronize it with [skip ci], then implement/check the bounded transfer package. No AWS transfer, deployment, model/email call or paid test is authorized by the permissions change; final concrete approval remains required. Earlier blocker below preserves the actual failure and unpublished checkpoint.

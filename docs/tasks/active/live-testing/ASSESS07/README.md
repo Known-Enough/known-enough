@@ -2,11 +2,11 @@
 
 Collect real online proof that all required user journeys, safety checks and cleanup pass automatically after a matching successful deployment.
 
-**Status:** IN_PROGRESS — A/Mac takeover preparation; Git permissions restored.
+**Status:** IN_PROGRESS — A/Mac takeover preparation; B is unavailable.
 
-**Next step:** Synchronize the resumed claim, then A prepares and tests an exact transfer of the existing remaining two-run allowance, then presents it for approval before cloud writes or deployment. The installed allowance still belongs to B until that transfer is approved and verified. Earlier B execution instructions below are historical. A's CloudShell command succeeded: two extra runs are available until October 3 at 6 p.m., Mexico City time (UTC2026-10-04T00:00:00Z). [Approval readback](../../../../review-artifacts/ASSESS07-two-extra-runs-approved.json). The first release publishes the updated broker that consumes those slots; no AWS login or another CloudShell setup is needed for normal qualification. Original cost/usage/expiry/cleanup limits remain. Real email/login/invitations pass; decision testing and the complete seven-journey PASS still need proof.
+**Next step:** The guarded transfer is implemented, checked and synchronized as `e0199859069d7ccd1f80a0ccfadb9a9f5c61c35a`. The cloud record still names B; no AWS change has been made. The exact pinned CloudShell command is in the [transfer runbook](../../../../../infra/live-qa/two-extra-runs.md) and awaits user approval. The allowance expires October 3 at 6 p.m. Mexico City time (UTC2026-10-04T00:00:00Z). [Original approval readback](../../../../review-artifacts/ASSESS07-two-extra-runs-approved.json). After approval and verified readback, A's eligible main release publishes the updated broker and automatically starts qualification. The prior report passed real email/login/invitations but failed the decision stage; full seven-journey PASS remains unproved.
 
-A has released this claim for B. After completion: ASSESS10, then OPS01 → OPS02 → OPS03 under their existing gates.
+Earlier B execution instructions are retained in the ticket as history; the user has now asked A to proceed because B is unavailable. After ASSESS07, the shared board schedules the next eligible task.
 
 [Latest actual report](../../../../review-artifacts/ASSESS07-email-login-pass-decision-failure.json).
 
