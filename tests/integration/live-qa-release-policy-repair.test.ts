@@ -54,7 +54,9 @@ def fake(service,op,*args):
   return {'PolicyDocument':p}
  if op=='simulate-principal-policy':
   names=args[args.index('--resource-arns')+1:]
-  return {'EvaluationResults':[{'EvalResourceName':name,'EvalDecision':'allowed' if name==m.RESOURCE and m.repaired(state['policy'])[1] else 'implicitDeny'} for name in names]}
+  # Current IAM wire format: aggregate denial can coexist with allowed QA resource.
+  return {'IsTruncated':False,'EvaluationResults':[{'EvalActionName':'amplify:CreateDeployment','EvalResourceName':'*','EvalDecision':'implicitDeny','ResourceSpecificResults':[
+   {'EvalResourceName':name,'EvalResourceDecision':'allowed' if name==m.RESOURCE and m.repaired(state['policy'])[1] else 'implicitDeny'} for name in names]}]}
  if op=='put-role-policy':
   assert args[:4]==('--role-name',m.ROLE,'--policy-name',m.POLICY)
   state['writes']+=1;state['policy']=json.loads(Path(args[-1].removeprefix('file://')).read_text());return {}
@@ -71,6 +73,36 @@ with patch('pathlib.Path.home',return_value=folder):
  backup=folder/'known-enough-qa-release-policy-repair'/'before.json'
  assert m.canonical(json.loads(backup.read_text()))==m.canonical(old);assert backup.stat().st_mode & 0o077==0
  m.main(True);assert state['writes']==1
+ # A genuine outside-QA allow still blocks; incomplete evidence never means allow.
+ response=fake('iam','simulate-principal-policy','--resource-arns',m.RESOURCE,m.RESOURCE.replace('/branches/main/','/branches/other/'),m.RESOURCE.replace('apps/d2l23pkzmr1tio/','apps/otherapp/'))
+ assert response['EvaluationResults'][0]['EvalDecision']=='implicitDeny'
+ assert response['EvaluationResults'][0]['ResourceSpecificResults'][0]['EvalResourceDecision']=='allowed'
+ def assert_blocked(value,code):
+  with patch.object(m,'aws',side_effect=lambda service,op,*args:copy.deepcopy(value) if op=='simulate-principal-policy' else fake(service,op,*args)):
+   try:m.main(True);raise AssertionError('Bad simulation accepted')
+   except RuntimeError as e:assert str(e)==code,(str(e),code);assert state['writes']==1
+ for index in (1,2):
+  bad=copy.deepcopy(response);bad['EvaluationResults'][0]['ResourceSpecificResults'][index]['EvalResourceDecision']='allowed'
+  assert_blocked(bad,'OUTSIDE_QA_SCOPE_ALLOWED')
+ for mutate in [
+  lambda r:r.update(IsTruncated=True),
+  lambda r:r.update(EvaluationResults=[]),
+  lambda r:r['EvaluationResults'].append(copy.deepcopy(r['EvaluationResults'][0])),
+  lambda r:r['EvaluationResults'][0].update(EvalActionName='amplify:StartDeployment'),
+  lambda r:r['EvaluationResults'][0].update(MissingContextValues=['unknown:key']),
+  lambda r:r['EvaluationResults'][0].pop('ResourceSpecificResults'),
+  lambda r:r['EvaluationResults'][0]['ResourceSpecificResults'].pop(),
+  lambda r:r['EvaluationResults'][0]['ResourceSpecificResults'].__setitem__(1,copy.deepcopy(r['EvaluationResults'][0]['ResourceSpecificResults'][0])),
+  lambda r:r['EvaluationResults'][0]['ResourceSpecificResults'][1].update(EvalResourceName='*'),
+  lambda r:r['EvaluationResults'][0]['ResourceSpecificResults'][1].update(EvalResourceDecision='unknown'),
+  lambda r:r['EvaluationResults'][0]['ResourceSpecificResults'][1].pop('EvalResourceDecision'),
+  lambda r:r['EvaluationResults'][0]['ResourceSpecificResults'][1].update(MissingContextValues=['unknown:key'])
+ ]:
+  bad=copy.deepcopy(response);mutate(bad);assert_blocked(bad,'SIMULATION_EVIDENCE_INCOMPLETE')
+ # Explicit denial on either unrelated resource is also acceptable.
+ explicit=copy.deepcopy(response)
+ for item in explicit['EvaluationResults'][0]['ResourceSpecificResults'][1:]:item['EvalResourceDecision']='explicitDeny'
+ with patch.object(m,'aws',return_value=explicit):assert m.simulate()=='allowed'
  for key,bad,good,code in [('account','000000000000',m.ACCOUNT,'WRONG_ACCOUNT'),('boundary',True,False,'ROLE_OR_TRUST_DRIFT'),('managed',[{'PolicyArn':'other'}],[],'MANAGED_POLICY_DRIFT')]:
   state[key]=bad
   try:m.main(True);raise AssertionError('Wrong context accepted')

@@ -90,10 +90,29 @@ def simulate():
     denied = [RESOURCE.replace("/branches/main/", "/branches/other/"), RESOURCE.replace("apps/d2l23pkzmr1tio/", "apps/otherapp/")]
     result = aws("iam", "simulate-principal-policy", "--policy-source-arn", ROLE_ARN,
                  "--action-names", "amplify:CreateDeployment", "--resource-arns", RESOURCE, *denied)
-    decisions = {r["EvalResourceName"]: r["EvalDecision"] for r in result["EvaluationResults"]}
-    if any(decisions.get(r) not in ("implicitDeny", "explicitDeny") for r in denied):
+    # AWS returns one aggregate result per action; its decision/name do not
+    # identify the permission on any individual customer resource.
+    evaluations = result.get("EvaluationResults")
+    if result.get("IsTruncated") or not isinstance(evaluations, list) or len(evaluations) != 1:
+        raise RuntimeError("SIMULATION_EVIDENCE_INCOMPLETE")
+    evaluation = evaluations[0]
+    if not isinstance(evaluation, dict) or evaluation.get("EvalActionName") != "amplify:CreateDeployment" or evaluation.get("MissingContextValues"):
+        raise RuntimeError("SIMULATION_EVIDENCE_INCOMPLETE")
+    resources = evaluation.get("ResourceSpecificResults")
+    if not isinstance(resources, list) or len(resources) != 3:
+        raise RuntimeError("SIMULATION_EVIDENCE_INCOMPLETE")
+    decisions = {}
+    expected = {RESOURCE, *denied}
+    for item in resources:
+        if not isinstance(item, dict):
+            raise RuntimeError("SIMULATION_EVIDENCE_INCOMPLETE")
+        name, decision = item.get("EvalResourceName"), item.get("EvalResourceDecision")
+        if not isinstance(name, str) or name not in expected or name in decisions or decision not in ("allowed", "implicitDeny", "explicitDeny") or item.get("MissingContextValues"):
+            raise RuntimeError("SIMULATION_EVIDENCE_INCOMPLETE")
+        decisions[name] = decision
+    if any(decisions[r] == "allowed" for r in denied):
         raise RuntimeError("OUTSIDE_QA_SCOPE_ALLOWED")
-    return decisions.get(RESOURCE)
+    return decisions[RESOURCE]
 
 
 def save_private(name, value):

@@ -16,6 +16,12 @@ The original policy and proposed result are saved privately under `$HOME/known-e
 
 The direct inline-policy correction does not update the already-installed CloudFormation stack template. Future authorized stack maintenance must use the corrected source template; do not rerun the old installer to repair this permission. No new stack update is bundled with this helper. Saved installation/rollback state, the grant ending 2026-10-09T03:16:41.171626Z and accumulated run/model/email counters remain intact.
 
+## Simulator response correction
+
+The first administrator attempt reported `OUTSIDE_QA_SCOPE_ALLOWED`. The old helper incorrectly looked for resource decisions in the aggregate result. AWS's [EvaluationResult documentation](https://docs.aws.amazon.com/IAM/latest/APIReference/API_EvaluationResult.html) states that results are aggregated per action; each resource's decision is in [ResourceSpecificResults](https://docs.aws.amazon.com/IAM/latest/APIReference/API_ResourceSpecificResult.html). The corrected helper requires a complete, unique decision for each of the three exact requested resources, checks the action and context, and rejects truncated or ambiguous evidence as `SIMULATION_EVIDENCE_INCOMPLETE`. An actual outside-app/branch allowance still reports `OUTSIDE_QA_SCOPE_ALLOWED`. An aggregate deny does not override an individual QA allow.
+
+The user executed the exact `--apply` administrator command; repeating the same bounded repair with the corrected reader retains that authorization. No new action/resource or policy widening is added by this parser fix. If the exact policy is already installed, readback requires no write. The previous failure alone does not establish actual cloud write state or full qualification. Private saved files remain reusable and unchanged.
+
 ## After readback passes
 
 A continues the same approved GitHub deployment → automatic qualification cycle through CLI. Verify an actual matching all-lane report, seven journeys and exact CLEAN cleanup. Neither the policy simulation nor a successful app deployment is full online PASS. B still uses B's own GitHub account for routine results; no personal AWS credentials or repeated administrator action should be needed for those runs. No A recurring monitor is created.
