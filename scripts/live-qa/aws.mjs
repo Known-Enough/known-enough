@@ -2,6 +2,13 @@ import { spawnSync } from 'node:child_process';
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+export const SAFE_AWS_ERROR_CODES = new Set([
+    'AccessDenied', 'AccessDeniedException', 'NoSuchEntity', 'NoSuchBucket',
+    'ResourceNotFoundException', 'ValidationException', 'InvalidParameterValueException',
+    'InvalidParameterException', 'InvalidRequestException', 'PreconditionFailedException',
+    'ResourceConflictException', 'ExpiredToken', 'ExpiredTokenException',
+    'UnrecognizedClientException', 'ServiceException', 'TooManyRequestsException'
+]);
 /** Never print SDK/CLI diagnostics, raw responses or command bodies. */
 export function aws(service, operation, input = {}) {
     const body = service === 's3api' && operation === 'put-object' ? input.Body : null;
@@ -31,6 +38,13 @@ export function aws(service, operation, input = {}) {
             throw new Error('AWS_CLI_PROCESS_LAUNCH_FAILED');
         if (result.status !== 0) {
             const error = new Error(`AWS_OPERATION_FAILED:${service}:${operation}`);
+            const code = /An error occurred \(([^)]+)\)/.exec(result.stderr ?? '')?.[1];
+            if (SAFE_AWS_ERROR_CODES.has(code)) error.awsCode = code;
+            if (service === 'amplify' && ['AccessDenied', 'AccessDeniedException'].includes(code)) {
+                const app = input.appId ?? input.AppId;
+                const resource = /(arn:aws:amplify:us-east-1:092954139775:apps\/[a-z0-9]+\/branches\/main(?:\/(?:deployments|jobs)\/[A-Za-z0-9_*-]+)?)(?=[\s"']|$)/.exec(result.stderr ?? '')?.[1];
+                if (/^[a-z0-9]{1,32}$/.test(app ?? '') && resource?.startsWith(`arn:aws:amplify:us-east-1:092954139775:apps/${app}/branches/main`)) error.deniedResource = resource;
+            }
             error.noUpdates = /No updates are to be performed/.test(result.stderr ?? '');
             error.missing = /NoSuchBucket|NoSuchEntity|Not Found|ResourceNotFoundException|does not exist|SecretNotFound|NotFoundException/.test(result.stderr ?? '');
             throw error;

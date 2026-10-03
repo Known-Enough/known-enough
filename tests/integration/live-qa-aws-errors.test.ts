@@ -65,3 +65,27 @@ test('invalid base64 is rejected before launching AWS', () => {
   expect(() => aws('lambda', 'update-function-code', { ZipFile: 'invalid !!' })).toThrow('INVALID_LAMBDA_UPLOAD_BYTES');
   expect(spawnSync).not.toHaveBeenCalled();
 });
+
+test.each([
+  ['d2l23pkzmr1tio', 'main', '092954139775', true],
+  ['otherapp', 'main', '092954139775', false],
+  ['d2l23pkzmr1tio', 'other-branch', '092954139775', false],
+  ['d2l23pkzmr1tio', 'main', '000000000000', false],
+])('exposes only a matching public Amplify denial resource (%s/%s/%s)', (app, branch, account, included) => {
+  const resource = `arn:aws:amplify:us-east-1:${account}:apps/${app}/branches/${branch}/deployments/*`;
+  vi.mocked(spawnSync).mockReturnValueOnce({ status: 254, stdout: '', stderr: `An error occurred (AccessDeniedException) when calling CreateDeployment: PRIVATE_IDENTITY on resource ${resource} PRIVATE_SECRET` } as ReturnType<typeof spawnSync>);
+  let caught: unknown;
+  try { aws('amplify', 'create-deployment', { appId: 'd2l23pkzmr1tio', branchName: 'main' }); } catch (e) { caught = e; }
+  expect(caught).toMatchObject({ awsCode: 'AccessDeniedException' });
+  if (included) expect(caught).toHaveProperty('deniedResource', resource);
+  else expect(caught).not.toHaveProperty('deniedResource');
+  expect(JSON.stringify(caught)).not.toMatch(/PRIVATE_IDENTITY|PRIVATE_SECRET/);
+});
+
+test('unknown CLI error identifiers and raw diagnostics are never published', () => {
+  vi.mocked(spawnSync).mockReturnValueOnce({ status: 254, stdout: '', stderr: 'An error occurred (PRIVATE_SECRET) when calling PutObject: PRIVATE_DATA' } as ReturnType<typeof spawnSync>);
+  let caught: unknown;
+  try { aws('s3api', 'put-object', {}); } catch (e) { caught = e; }
+  expect(caught).not.toHaveProperty('awsCode');
+  expect(JSON.stringify(caught)).not.toMatch(/PRIVATE_SECRET|PRIVATE_DATA/);
+});

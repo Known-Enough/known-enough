@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "evidenceOrigin": "GitHub Actions API and downloaded sanitized artifacts, inspected by A / martelaxe",
+  "sourceCommit": "f2fbcbd288286cc9a4065891877633cefa4238ec",
+  "deployment": {
+    "runId": 37081152042,
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/37081152042",
+    "conclusion": "success"
+  },
+  "qualification": {
+    "runId": 37081192859,
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/37081192859",
+    "event": "workflow_run",
+    "conclusion": "failure",
+    "initiatingAccount": "martelaxe",
+    "sourceMatched": true,
+    "provenance": "success",
+    "fullSourceCheck": "success",
+    "qaOidcAssumption": "success",
+    "failedStep": "Publish QA artifacts and verify code/readiness receipt",
+    "releaseFailure": {
+      "status": "FAIL",
+      "rollback": "PASS",
+      "frontend": "INSPECT_OR_FORWARD_REPAIR_REQUIRED"
+    },
+    "dependentJobs": "skipped",
+    "modelAttempts": 0,
+    "signupMessages": 0,
+    "completeStatus": "BLOCKED_OR_FAILED"
+  },
+  "next": "Allowlisted diagnostic-only repair before exact cloud cause classification; no IAM speculation, no grant/expiry/counter reset"
+}

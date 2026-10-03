@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { digest } from './config.mjs';
-import { aws, assertIdentity } from './aws.mjs';
+import { aws, assertIdentity, SAFE_AWS_ERROR_CODES } from './aws.mjs';
 import { buildPackage } from './package.mjs';
 import { webArtifact, publishWeb } from './install.mjs';
 import { validateTarget } from './runner-core.mjs';
@@ -11,6 +11,27 @@ export const PRIMARY = {
     Account: '092954139775', Region: 'us-east-1', ApiUrl: 'https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com', FrontendUrl: 'https://main.d143q5ravxp5av.amplifyapp.com/', PoolId: 'us-east-1_V9OMjd0zx', CognitoDomain: 'https://known-enough-092954139775.auth.us-east-1.amazoncognito.com', ParticipantClientId: '3accf7paalvon2m8ue8okfi853', DisplayClientId: '481ru24906sv26f30i569gq8g0', AmplifyAppId: 'd143q5ravxp5av'
 };
 const delay = ms => new Promise(r => globalThis.setTimeout(r, ms));
+/** Publish only known operation codes and public main-branch Amplify identifiers. */
+export function releaseFailure(error) {
+    const seen = new Set();
+    let failure = { code: 'QA_RELEASE_BLOCKED_OR_FAILED' };
+    const guards = new Set(['QA_RELEASE_FAILED', 'PRIMARY_CODE_RELEASE_FAILED',
+        'AWS_CLI_PROCESS_LAUNCH_FAILED', 'INVALID_AWS_RESPONSE', 'BUILT_ARTIFACT_BYTES_CHANGED',
+        'WEB_BYTES_CHANGED', 'QA_NOT_READY_FOR_RELEASE', 'QA_CODE_UPDATE_FAILED',
+        'QA_CODE_READBACK_MISMATCH', 'QA_CODE_UPDATE_TIMEOUT', 'QA_ROLLBACK_DRIFT',
+        'INSTALLED_PUBLICATION_ENVELOPE_EXPIRED', 'QA_TARGET_LEASE_OR_CLEANUP_BLOCKED']);
+    while (error && !seen.has(error) && seen.size < 8) {
+        seen.add(error);
+        const operation = /^AWS_OPERATION_FAILED:(sts:get-caller-identity|dynamodb:get-item|s3api:put-object|lambda:(?:get-function-configuration|update-function-code)|amplify:(?:create-deployment|start-deployment|get-job))$/.test(error.message ?? '');
+        if (operation || guards.has(error.message)) {
+            failure = { code: error.message };
+            if (operation && SAFE_AWS_ERROR_CODES.has(error.awsCode)) failure.awsCode = error.awsCode;
+            if (operation && error.message.startsWith('AWS_OPERATION_FAILED:amplify:') && ['AccessDenied', 'AccessDeniedException'].includes(error.awsCode) && /^arn:aws:amplify:us-east-1:092954139775:apps\/[a-z0-9]+\/branches\/main(?:\/(?:deployments|jobs)\/[A-Za-z0-9_*-]+)?$/.test(error.deniedResource ?? '')) failure.deniedResource = error.deniedResource;
+        }
+        error = error.cause;
+    }
+    return failure;
+}
 export function sourceHead() {
     const r = spawnSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' });
     if (r.status || !/^[a-f0-9]{40}$/.test(r.stdout.trim()))
@@ -136,7 +157,7 @@ export async function publish(directory) {
                 rollback = 'BLOCKED';
             }
         }
-        writeFileSync(directory + '/release-failure.json', JSON.stringify({ status: 'FAIL', rollback, frontend: 'INSPECT_OR_FORWARD_REPAIR_REQUIRED' }));
+        writeFileSync(directory + '/release-failure.json', JSON.stringify({ status: 'FAIL', rollback, frontend: 'INSPECT_OR_FORWARD_REPAIR_REQUIRED', failure: releaseFailure(error) }), { mode: 0o600 });
         throw new Error('QA_RELEASE_FAILED', { cause: error });
     }
 }
@@ -189,8 +210,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
         else
             throw new Error('MODE_REQUIRED');
     }
-    catch {
-        console.error('QA_RELEASE_BLOCKED_OR_FAILED');
+    catch (error) {
+        console.error(JSON.stringify({ status: 'QA_RELEASE_BLOCKED_OR_FAILED', failure: releaseFailure(error) }));
         process.exitCode = 1;
     }
 }
