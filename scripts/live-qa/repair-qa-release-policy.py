@@ -89,7 +89,12 @@ def read_state():
 def simulate():
     denied = [RESOURCE.replace("/branches/main/", "/branches/other/"), RESOURCE.replace("apps/d2l23pkzmr1tio/", "apps/otherapp/")]
     result = aws("iam", "simulate-principal-policy", "--policy-source-arn", ROLE_ARN,
-                 "--action-names", "amplify:CreateDeployment", "--resource-arns", RESOURCE, *denied)
+                 "--action-names", "amplify:CreateDeployment", "--resource-arns", RESOURCE, *denied,
+                 # IAM also requests context from the role's unrelated control-table
+                 # statement. Supply only its existing permitted keys, never a policy.
+                 "--context-entries", json.dumps([{"ContextKeyName": "dynamodb:LeadingKeys",
+                                                   "ContextKeyType": "stringList",
+                                                   "ContextKeyValues": ["AUTH", "LEASE"]}]))
     # AWS returns one aggregate result per action; its decision/name do not
     # identify the permission on any individual customer resource.
     evaluations = result.get("EvaluationResults")

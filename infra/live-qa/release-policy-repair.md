@@ -22,6 +22,10 @@ The first administrator attempt reported `OUTSIDE_QA_SCOPE_ALLOWED`. The old hel
 
 The user executed the exact `--apply` administrator command; repeating the same bounded repair with the corrected reader retains that authorization. No new action/resource or policy widening is added by this parser fix. If the exact policy is already installed, readback requires no write. The previous failure alone does not establish actual cloud write state or full qualification. Private saved files remain reusable and unchanged.
 
+## Verified missing simulation context
+
+A's read-only AWS diagnostic then returned the correct nested shape but reported missing `dynamodb:LeadingKeys` on the aggregate and all three resource results. That condition belongs to the role's existing control-table GetItem statement, limited to `AUTH`/`LEASE`. The helper now supplies exactly those permitted values with `ContextKeyType=stringList` through the simulator's [context entries](https://docs.aws.amazon.com/IAM/latest/APIReference/API_ContextEntry.html). This supplies input to a read-only simulation; it adds no policy grant, database read or write. Any remaining missing context still blocks. The exact IAM correction, backup/idempotency and finite-grant boundaries remain unchanged; only actual AWS readback can establish success.
+
 ## After readback passes
 
 A continues the same approved GitHub deployment → automatic qualification cycle through CLI. Verify an actual matching all-lane report, seven journeys and exact CLEAN cleanup. Neither the policy simulation nor a successful app deployment is full online PASS. B still uses B's own GitHub account for routine results; no personal AWS credentials or repeated administrator action should be needed for those runs. No A recurring monitor is created.

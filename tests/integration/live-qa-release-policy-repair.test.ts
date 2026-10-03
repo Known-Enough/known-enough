@@ -53,10 +53,14 @@ def fake(service,op,*args):
   if state['drift'] and state['reads']==2:p['Statement'][0]['Action'].append('lambda:InvokeFunction')
   return {'PolicyDocument':p}
  if op=='simulate-principal-policy':
-  names=args[args.index('--resource-arns')+1:]
+  end=args.index('--context-entries') if '--context-entries' in args else len(args)
+  names=args[args.index('--resource-arns')+1:end]
+  context=json.loads(args[end+1]) if end<len(args) else []
+  if context:assert context==[{'ContextKeyName':'dynamodb:LeadingKeys','ContextKeyType':'stringList','ContextKeyValues':['AUTH','LEASE']}]
+  missing=[] if context else ['dynamodb:LeadingKeys']
   # Current IAM wire format: aggregate denial can coexist with allowed QA resource.
-  return {'IsTruncated':False,'EvaluationResults':[{'EvalActionName':'amplify:CreateDeployment','EvalResourceName':'*','EvalDecision':'implicitDeny','ResourceSpecificResults':[
-   {'EvalResourceName':name,'EvalResourceDecision':'allowed' if name==m.RESOURCE and m.repaired(state['policy'])[1] else 'implicitDeny'} for name in names]}]}
+  return {'EvaluationResults':[{'EvalActionName':'amplify:CreateDeployment','EvalResourceName':'arn:aws:amplify:\${Region}:\${Account}:\${ResourceType}/\${ResourceName}','EvalDecision':'implicitDeny','MissingContextValues':missing,'ResourceSpecificResults':[
+   {'EvalResourceName':name,'EvalResourceDecision':'allowed' if not missing and name==m.RESOURCE and m.repaired(state['policy'])[1] else 'implicitDeny','MissingContextValues':missing} for name in names]}]}
  if op=='put-role-policy':
   assert args[:4]==('--role-name',m.ROLE,'--policy-name',m.POLICY)
   state['writes']+=1;state['policy']=json.loads(Path(args[-1].removeprefix('file://')).read_text());return {}
@@ -73,8 +77,15 @@ with patch('pathlib.Path.home',return_value=folder):
  backup=folder/'known-enough-qa-release-policy-repair'/'before.json'
  assert m.canonical(json.loads(backup.read_text()))==m.canonical(old);assert backup.stat().st_mode & 0o077==0
  m.main(True);assert state['writes']==1
+ # Reproduce A's actual AWS receipt: unrelated table context appears on every resource.
+ missing_response=fake('iam','simulate-principal-policy','--resource-arns',m.RESOURCE,m.RESOURCE.replace('/branches/main/','/branches/other/'),m.RESOURCE.replace('apps/d2l23pkzmr1tio/','apps/otherapp/'))
+ assert missing_response['EvaluationResults'][0]['MissingContextValues']==['dynamodb:LeadingKeys']
+ assert all(item['EvalResourceDecision']=='implicitDeny' and item['MissingContextValues']==['dynamodb:LeadingKeys'] for item in missing_response['EvaluationResults'][0]['ResourceSpecificResults'])
+ with patch.object(m,'aws',return_value=missing_response):
+  try:m.simulate();raise AssertionError('Missing context accepted')
+  except RuntimeError as e:assert str(e)=='SIMULATION_EVIDENCE_INCOMPLETE'
  # A genuine outside-QA allow still blocks; incomplete evidence never means allow.
- response=fake('iam','simulate-principal-policy','--resource-arns',m.RESOURCE,m.RESOURCE.replace('/branches/main/','/branches/other/'),m.RESOURCE.replace('apps/d2l23pkzmr1tio/','apps/otherapp/'))
+ response=fake('iam','simulate-principal-policy','--resource-arns',m.RESOURCE,m.RESOURCE.replace('/branches/main/','/branches/other/'),m.RESOURCE.replace('apps/d2l23pkzmr1tio/','apps/otherapp/'),'--context-entries',json.dumps([{'ContextKeyName':'dynamodb:LeadingKeys','ContextKeyType':'stringList','ContextKeyValues':['AUTH','LEASE']}]))
  assert response['EvaluationResults'][0]['EvalDecision']=='implicitDeny'
  assert response['EvaluationResults'][0]['ResourceSpecificResults'][0]['EvalResourceDecision']=='allowed'
  def assert_blocked(value,code):
