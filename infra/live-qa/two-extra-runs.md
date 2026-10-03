@@ -4,9 +4,9 @@
 
 The user has assigned the remaining ASSESS07 work to B (`Battosai1806`). One final automatic live cycle was authorized, but its one-use slot is **not yet available**. The earlier two extra cycles were consumed. The allowance expires at `2026-10-04T00:00:00Z` (18:00 on October 3 in Mexico City).
 
-The pasted CloudShell attempt stopped at `dynamodb:get-item`, while reading existing records. The older helper suppressed AWS's error code, so we cannot yet tell whether this is a permission denial, a missing record, or another cause. It failed before its single guarded write, so that attempt did not consume the run or change the allowance. CloudShell then reopened in recovery mode; that is a new shell, so its old `$DIR` variable no longer existed. The later `/approve.py` error only means the temporary folder variable was lost; it is not an AWS state change.
+The pasted CloudShell attempt stopped at `dynamodb:get-item`, while reading existing records. The first helper hid the AWS error. A second attempt reported `Unknown:KEY=AUTH`, which means its parser did not recognize where the AWS CLI put the error text; it still failed before the guarded write. Neither attempt consumed a run or changed the allowance. CloudShell had also reopened in recovery mode; that was a new shell, so its old `$DIR` variable no longer existed. The later `/approve.py` error only means the temporary folder variable was lost; it is not an AWS state change.
 
-The updated helper now reports a safe AWS error code and the fixed record name, such as `AccessDeniedException:KEY=AUTH`, without printing private AWS details. It also changes the existing one-use exception from A back to B, preserves `usedRuns=2`, every original test/email/cost limit, and the same expiry. A must apply this administrator-only update using A's CloudShell session. B must not use A's AWS credentials. The checked helper is on `main` at `55cac9f3ef43e9c41818bf8c572944f9ca28a5a0`; its SHA-256 is `77e21300c16f507d8ea4633e4e6348c66f30402365b6df954d59c0189e76b08a`.
+The latest helper also checks both AWS CLI output streams and classifies common permission, expired-login, credential, missing-resource and connection failures without printing private AWS details. It assigns the existing one-use exception to B, preserves `usedRuns=2`, every original test/email/cost limit, and the same expiry. A must apply this administrator-only update using A's CloudShell session. B must not use A's AWS credentials. The checked helper is on `main` at `d30e03b6aa4877353d59864ff68257ddc671bece`; its SHA-256 is `3a7dc2648444f0078a04770b159b0830ea8e2ac36245a2f19f242517c8ac93ee`.
 
 If CloudShell is still in recovery mode, make a private backup of the startup files and restore the standard bash startup file, then restart CloudShell:
 
@@ -28,8 +28,8 @@ When CloudShell returns to a normal `~ $` prompt, paste the entire block below a
 (
   set -euo pipefail
   umask 077
-  COMMIT=55cac9f3ef43e9c41818bf8c572944f9ca28a5a0
-  SHA256=77e21300c16f507d8ea4633e4e6348c66f30402365b6df954d59c0189e76b08a
+  COMMIT=d30e03b6aa4877353d59864ff68257ddc671bece
+  SHA256=3a7dc2648444f0078a04770b159b0830ea8e2ac36245a2f19f242517c8ac93ee
   DIR=$(mktemp -d "$HOME/known-enough-third-run.XXXXXX")
   curl --fail --silent --show-error \
     "https://raw.githubusercontent.com/Known-Enough/known-enough/$COMMIT/scripts/live-qa/approve-third-extra-run.py" \
@@ -40,7 +40,7 @@ When CloudShell returns to a normal `~ $` prompt, paste the entire block below a
 )
 ```
 
-Expected results are `THIRD_RUN_PREPARED_FOR_B` (`cloudWrites:false`) followed by `THIRD_RUN_APPROVED_FOR_B` (`remaining:1`, unchanged expiry). If the helper prints `BLOCKED`, stop and send back its `code`; the updated message identifies which fixed record read failed. Do not edit the table manually or rerun a different helper. If approval succeeds, B can use GitHub without AWS credentials: B's repository permission was read back as `admin`, and the staging deployment workflow has a manual start that automatically triggers the matching live qualification. B must first pull the new `main`, sign into GitHub as `Battosai1806`, and start only the staging deployment workflow. Do not click the live-test workflow separately. One deployment leads to one qualification; no retries or second cycle are authorized.
+Expected results are `THIRD_RUN_PREPARED_FOR_B` (`cloudWrites:false`) followed by `THIRD_RUN_APPROVED_FOR_B` (`remaining:1`, unchanged expiry). If the helper prints `BLOCKED`, stop and send back its `code`; the new version checks both output streams and identifies the fixed record read. If it reports `UnclassifiedCliError` again, stop there and send that exact result instead of retrying. Do not edit the table manually or run another deployment. If approval succeeds, B can use GitHub without AWS credentials: B's repository permission was read back as `admin`, and the staging deployment workflow has a manual start that automatically triggers the matching live qualification. B must first pull the new `main`, sign into GitHub as `Battosai1806`, and start only the staging deployment workflow. Do not click the live-test workflow separately. One deployment leads to one qualification; no retries or second cycle are authorized.
 
 ## Historical A transfer and two completed automatic runs
 
