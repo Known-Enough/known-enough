@@ -116,3 +116,19 @@ test('mail diagnosis keeps strict sender/owner/recipient/date/code checks and ex
   const tags:string[]=[];const fetcher=vi.fn().mockResolvedValueOnce(response({id:mailbox.id,token:mailbox.token})).mockResolvedValueOnce(response({id:mailbox.id,address:mailbox.address})).mockResolvedValueOnce(response({'hydra:member':[]}));
   expect(await createMailtmClient(fetcher,async()=>{}).code(mailbox,(tag:string)=>tags.push(tag))).toBeNull();expect(tags).toEqual(['MAIL_EMPTY']);
 });
+
+
+test('provider account links identify only the already authenticated inbox; never follow or normalize arbitrary URLs', async () => {
+  for (const accountId of [mailbox.id,'/accounts/'+mailbox.id,'https://api.mail.tm/accounts/'+mailbox.id])
+    expect(mailtmVerificationCode({...message,accountId},mailbox)).toBe('123456');
+  for (const accountId of [undefined,null,'/accounts/foreign','https://attacker.invalid/accounts/'+mailbox.id,
+    'https://api.mail.tm/accounts/'+mailbox.id+'?other=1','/accounts/'+mailbox.id+'#other',
+    '/accounts/foreign/../'+mailbox.id,'https://api.mail.tm@attacker.invalid/accounts/'+mailbox.id]) {
+    expect(mailtmMessageStatus({...message,accountId},mailbox)).toBe('MAIL_OWNER_MISMATCH');
+    expect(mailtmVerificationCode({...message,accountId},mailbox)).toBeNull();
+  }
+  const fetcher=vi.fn().mockResolvedValueOnce(response({id:mailbox.id,token:mailbox.token})).mockResolvedValueOnce(response({id:mailbox.id,address:mailbox.address}))
+    .mockResolvedValueOnce(response({'hydra:member':[{id:'message-123',size:200}]})).mockResolvedValueOnce(response({...message,accountId:'/accounts/'+mailbox.id}));
+  expect(await createMailtmClient(fetcher,async()=>{}).code(mailbox)).toBe('123456');
+  expect(fetcher.mock.calls.map(call=>call[0])).toEqual(['https://api.mail.tm/token','https://api.mail.tm/me','https://api.mail.tm/messages?page=1','https://api.mail.tm/messages/message-123']);
+});

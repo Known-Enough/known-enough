@@ -65,5 +65,5 @@ it('test boundaries replace all old sessions via authentication and keep denied 
   expect(authenticate).toHaveBeenCalledTimes(2);expect(sessions).toHaveLength(2);expect(people[0]).not.toBe(old);expect(people[0]).toBe(sessions.find(s=>s.user.actor==='iris'));
   expect(old.context.close).toHaveBeenCalled();expect(fresh.context.close).toHaveBeenCalled();expect(denied.context.close).toHaveBeenCalled();
   const source=readFileSync('tests/live/qa/journey.spec.ts','utf8');expect(source).toContain('test.beforeEach');expect(source).toContain('await renewSessions');
-  expect(source).toContain('claims.exp*1000-Date.now()+2000');expect(source).toContain('request(fresh,');
+  expect(source).toContain('claims.exp*1000-Date.now()+2000');expect(source).toContain("headers:{authorization:'Bearer '+token}");expect(source).toContain('expect(expiredResponse.status()).toBe(401)');
 });

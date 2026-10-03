@@ -4,7 +4,7 @@ Collect real online proof that all required user journeys, safety checks and cle
 
 **Status:** BLOCKED.
 
-**Next step:** A fixes the actual signup test and adds browser email registration using the installed services, then continues the approved automatic deployment/test cycle. Publishing, website/configuration checks and cleanup passed; complete user journeys are still pending.
+**Next step:** Verify the exact mailbox account-link correction in the next authorized automatic run. Real signup works; email reading was blocked on its ownership metadata. Publishing, website/configuration checks and cleanup passed; complete user journeys remain pending.
 
 **Related work:** [LIVE04](../LIVE04/README.md), [NP05](../../../historical/superseded/NP05/README.md).
 

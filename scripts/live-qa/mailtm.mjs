@@ -116,7 +116,8 @@ export function createMailtmClient(fetcher = globalThis.fetch, pause = ms => new
     };
 }
 export function mailtmMessageStatus(message, mailbox) {
-    if (message.accountId !== mailbox.id || message.isDeleted) return 'MAIL_OWNER_MISMATCH';
+    const ownedIds = [mailbox.id, '/accounts/' + mailbox.id, ORIGIN + '/accounts/' + mailbox.id];
+    if (!ownedIds.includes(message.accountId) || message.isDeleted) return 'MAIL_OWNER_MISMATCH';
     if (message.from?.address !== 'no-reply@verificationemail.com') return 'MAIL_SENDER_MISMATCH';
     if (!message.to?.some(item => item.address === mailbox.address)) return 'MAIL_RECIPIENT_MISMATCH';
     if (!Number.isFinite(Date.parse(message.createdAt)) || Date.parse(message.createdAt) < mailbox.createdAt) return 'MAIL_OLD_MESSAGE';

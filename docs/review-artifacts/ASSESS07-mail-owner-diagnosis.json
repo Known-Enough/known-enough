@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "deploymentRunId": 37087742621,
+  "automaticQualificationRunId": 37087779249,
+  "event": "workflow_run",
+  "sourceCommit": "3859a3ecbb8c1c1ff84c3d9f647785deeb555db7",
+  "publicationPublicMetadata": "PASS",
+  "qaReport": {
+    "schemaVersion": 1,
+    "runId": "gh-37087779249-1",
+    "sourceCommit": "3859a3ecbb8c1c1ff84c3d9f647785deeb555db7",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "BLOCKED",
+      "privacy": "PASS",
+      "signup": "BLOCKED",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "mailStatus": "MAIL_OWNER_MISMATCH",
+        "phase": "QA01_EMAIL_READ",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 0,
+      "failed": 1,
+      "blocked": 6,
+      "modelAttempts": 0,
+      "signupMessages": 1
+    }
+  },
+  "providerApiDescription": {
+    "url": "https://api.mail.tm/docs.jsonld",
+    "accountIdProperty": {
+      "@type": "hydra:SupportedProperty",
+      "hydra:property": {
+        "@id": "#Message/accountId",
+        "@type": "hydra:Link",
+        "rdfs:label": "accountId",
+        "domain": "#Message",
+        "owl:maxCardinality": 1,
+        "range": "#Account"
+      },
+      "hydra:title": "accountId",
+      "hydra:required": false,
+      "hydra:readable": true,
+      "hydra:writeable": false
+    }
+  },
+  "diagnosis": "Actual message was rejected by accountId/isDeleted ownership guard. Provider API describes accountId as a link to #Account. Support only exact owned scalar/relative/canonical HTTPS account link; reject missing/foreign/query/fragment values. No raw message or account identifier included."
+}
