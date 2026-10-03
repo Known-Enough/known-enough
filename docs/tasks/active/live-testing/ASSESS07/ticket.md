@@ -1,8 +1,16 @@
 # ASSESS07 — Managed verification of corrective changes
 
-- Status: IN_PROGRESS — reusable GitHub-only run approvals are activated and their broker code/settings readback is verified. No new allowance or live test was dispatched by activation. Existing B live-cycle authorization remains preserved; actual receipt consumption and full live qualification remain pending.
+- Status: IN_PROGRESS — reusable GitHub-only run approvals are activated; the current two-run B receipt is recorded and verified. No B deployment or live test was dispatched by this approval; actual consumption and full live qualification remain pending.
 - Worker: A completed GitHub-only activation and retains run-approval authority; B / Octavio / `Battosai1806` executes the authorized GitHub-triggered live cycle after its allowance is recorded. No B run has occurred yet.
 - Scope: finish ASSESS07's isolated managed verification and any narrowly verified diagnostic repair; preserve NP00's separate saved WSL claim and all existing daily, per-run, cumulative and expiry limits.
+
+### Two GitHub-approved runs recorded for B — 2026-10-03T22:20Z
+
+The user explicitly authorizes exactly two runs for B while asking for project/test status. A / Ricardo / `martelaxe` / WSL completed only this allowance/handoff prerequisite from clean ff-only synchronized `main` at `34a8872fd3073954032157938f6f233195abb83a`. [Approval run37158067754](https://github.com/Known-Enough/known-enough/actions/runs/37158067754) succeeded with both A actor fields/ID44531296 and exact main/repository/workflow/source provenance. Its sanitized log receipt is `GITHUB_RUN_ALLOWANCE_RECORDED`, count2, actor `Battosai1806`, day2026-10-03, request ID `5e690893-fc82-4bb0-acb0-53615b9e325a`, `cloudWrites:false`; the existing executable receipt validator passes against actual GitHub metadata. [Safe evidence](../../../../review-artifacts/ASSESS07-github-two-b-runs-approved.json).
+
+Expiry is `2026-10-04T00:00:00Z` (October3,18:00 Mexico City). Reuse this UUID only for a lost-response retry of this same request; the successful run needs no redispatch. Original cost/email/cumulative/expiry/CLEAN gates and prior usage remain. This exact two-run receipt supersedes the uninstalled older one-use handoff for current execution; do not also apply a legacy CloudShell allowance for the same approval.
+
+B claims ASSESS07 after a clean ff-only pull, verifies GitHub login `Battosai1806`, and starts the existing staging deployment. Matching qualification follows automatically. Use at most two authorized deployment/test cycles sequentially before this dated deadline, with matching actual result and CLEAN cleanup inspection between cycles. API prompt correction is checked in but still needs publication and real proof. This approval did not deploy, start a live test, invoke a model, send email or write AWS. Receipt consumption, B execution and all-seven live PASS remain unverified. NP00's saved WSL claim stays preserved; no parallel implementation.
 
 ### GitHub-only activation verified — 2026-10-03T22:10:42Z
 

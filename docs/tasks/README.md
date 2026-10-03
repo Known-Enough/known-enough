@@ -4,12 +4,12 @@ Start here to understand what is left. Every task has its own folder: README.md 
 
 ## Online testing
 
-Installation, GitHub settings and the automatic trigger are verified. Publishing, public website/configuration checks and cleanup passed after the IAM repair; real email/login/invitations pass; decision testing and complete live PASS are still pending. B has the next claim and two one-time approved extra runs; installed AWS allowance must be checked before dispatch. B prepares any required change; only A applies it with A's own AWS access. After an authorized eligible app deployment succeeds, GitHub runs the qualification automatically; B does not need A's AWS credentials or a manual Run workflow click.
+Installation, GitHub settings and automatic test triggering are verified. Real signup/email/login and invitations passed; decision creation failed in the latest online run, blocking the four later journeys. The checked correction needs a new deployment and real proof. A has now recorded exactly two extra B runs through GitHub, valid until October3,18:00 Mexico City; original cost/email/cleanup limits still apply. B pulls clean main, claims ASSESS07 and starts an authorized staging deployment using B's own GitHub login. Tests follow automatically, with no personal AWS credentials, CloudShell or separate test click. Actual receipt consumption and full live PASS are still pending. [Approval evidence](../review-artifacts/ASSESS07-github-two-b-runs-approved.json).
 
 | Task | Basic idea | Status |
 | --- | --- | --- |
 | [LIVE04](active/live-testing/LIVE04/README.md) | Prove the installed online test environment works from start to finish. Installation and GitHub settings are ready; real test results and cleanup evidence are still needed. | IN_PROGRESS |
-| [ASSESS07](active/live-testing/ASSESS07/README.md) | Collect real online proof that all required user journeys, safety checks and cleanup pass automatically after a matching successful deployment. B takes the current handoff. | READY / B unclaimed |
+| [ASSESS07](active/live-testing/ASSESS07/README.md) | Collect real online proof that all required user journeys, safety checks and cleanup pass automatically after a matching successful deployment. B takes the current handoff. | IN_PROGRESS / B execution pending |
 
 ## B's existing monitor
 

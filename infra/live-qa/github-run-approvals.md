@@ -6,6 +6,9 @@ After one-time activation, A can say: **“Authorize two extra test runs for B t
 
 **Activated 2026-10-03T22:10:42Z:** [GitHub run37157321175](https://github.com/Known-Enough/known-enough/actions/runs/37157321175) succeeded on source `18ac65b55b49a71007353010015712d95d041ebe`. The matching downloaded receipt confirms `GITHUB_RUN_APPROVALS_ACTIVATED`, broker ZIP `def539555c15e07876f4ba11c598562bbfa5b03b3712303b85e25cbb5f324753`, unchanged handler/environment and preserved prior rollback artifact. Actual GitHub full checks passed718 tests/two optional skips, hosted1/1 and browser58/58. Activation recorded no allowance and started no live test. First actual GitHub receipt consumption remains unverified. A's earlier finite B authorization is preserved; the activation does not create another spending grant.
 
+
+**First dated approval recorded — 2026-10-03T22:20Z:** [Run37158067754](https://github.com/Known-Enough/known-enough/actions/runs/37158067754) succeeded on source `34a8872fd3073954032157938f6f233195abb83a`. Actual provenance and sanitized log match exactly two runs for `Battosai1806`, UTC2026-10-03, request ID `5e690893-fc82-4bb0-acb0-53615b9e325a`, both A actors/ID44531296 and `cloudWrites:false`. Expiry: `2026-10-04T00:00:00Z` (October3,18:00 Mexico City). No deployment/test/paid-model/email or AWS write was performed by approval. Receipt consumption and full live PASS remain unverified; do not redispatch this successful request or install a legacy allowance for it. [Safe evidence](../../docs/review-artifacts/ASSESS07-github-two-b-runs-approved.json).
+
 ## One-time activation — completed; retained for recovery
 
 A explicitly authorized this one-time publication and the agent used A's GitHub login. The completed command is retained below for history; do not dispatch it again merely to add test runs:
