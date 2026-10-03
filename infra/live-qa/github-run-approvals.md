@@ -4,11 +4,11 @@
 
 After one-time activation, A can say: **“Authorize two extra test runs for B today.”** The agent translates that explicit instruction into one GitHub approval workflow under A's own GitHub login. No CloudShell session, bespoke Python script, IAM edit or new source commit is needed for each approval. A approves; B can consume those runs through the normal staging deployment and automatic qualification.
 
-This feature is prepared and checked locally: focused25/25, full project checks718 tests/two optional skips, hosted1/1 and browser58/58 pass. The live broker must still receive the new code. No activation, allowance workflow or additional test was dispatched during preparation. A's earlier one-cycle B authorization stays separate from any future extra counts; this implementation does not create a new spending grant.
+**Activated 2026-10-03T22:10:42Z:** [GitHub run37157321175](https://github.com/Known-Enough/known-enough/actions/runs/37157321175) succeeded on source `18ac65b55b49a71007353010015712d95d041ebe`. The matching downloaded receipt confirms `GITHUB_RUN_APPROVALS_ACTIVATED`, broker ZIP `def539555c15e07876f4ba11c598562bbfa5b03b3712303b85e25cbb5f324753`, unchanged handler/environment and preserved prior rollback artifact. Actual GitHub full checks passed718 tests/two optional skips, hosted1/1 and browser58/58. Activation recorded no allowance and started no live test. First actual GitHub receipt consumption remains unverified. A's earlier finite B authorization is preserved; the activation does not create another spending grant.
 
-## One-time activation
+## One-time activation — completed; retained for recovery
 
-After A explicitly authorizes publishing this feature, the agent uses A's GitHub login:
+A explicitly authorized this one-time publication and the agent used A's GitHub login. The completed command is retained below for history; do not dispatch it again merely to add test runs:
 
 ```bash
 gh workflow run activate-qa-run-approvals.yml \

@@ -1,8 +1,18 @@
 # ASSESS07 — Managed verification of corrective changes
 
-- Status: IN_PROGRESS — reusable GitHub-only run approvals are prepared and verified. A must authorize one-time publication of the updated test broker before this flow is live. Existing B live-cycle authorization remains preserved; no new allowance or test was dispatched.
-- Worker: A for the narrow CloudShell helper/readback prerequisite; then B / Octavio / `Battosai1806` for the one GitHub-triggered live cycle. No B run has occurred yet.
+- Status: IN_PROGRESS — reusable GitHub-only run approvals are activated and their broker code/settings readback is verified. No new allowance or live test was dispatched by activation. Existing B live-cycle authorization remains preserved; actual receipt consumption and full live qualification remain pending.
+- Worker: A completed GitHub-only activation and retains run-approval authority; B / Octavio / `Battosai1806` executes the authorized GitHub-triggered live cycle after its allowance is recorded. No B run has occurred yet.
 - Scope: finish ASSESS07's isolated managed verification and any narrowly verified diagnostic repair; preserve NP00's separate saved WSL claim and all existing daily, per-run, cumulative and expiry limits.
+
+### GitHub-only activation verified — 2026-10-03T22:10:42Z
+
+A's authorized workflow [37157321175](https://github.com/Known-Enough/known-enough/actions/runs/37157321175) completed successfully on source `18ac65b55b49a71007353010015712d95d041ebe`, with both actor fields `martelaxe` / ID44531296 and matching main/repository/workflow provenance. Downloaded `qa-run-approval-activation/activation.json` has exact expected schema/source/status and `testStarted:false`, `cloudWrites:true`. Broker ZIP `def539555c15e07876f4ba11c598562bbfa5b03b3712303b85e25cbb5f324753` matches the locally prepared package and the cloud readback. Previous ZIP `427769db72d94dd105aa7b522194cfd57c800c3a7410a5c11934611f081bfe17` remains under the recorded private rollback key; the activation verified its existence before uploading. The update/readback step confirms handler and full environment preservation. GitHub's own full checks passed718 application tests/two optional skips, hosted1/1, E2E58/58, references7/7 and planning15/15, plus lint/types/build/boundaries. [Sanitized activation evidence](../../../../review-artifacts/ASSESS07-github-approval-activation.json).
+
+The reusable approval flow is active. A's explicit natural-language count/recipient/day authorization can now be recorded by the agent using A's GitHub account, without another CloudShell helper or IAM change. B's test broker verifies and atomically consumes that dated receipt within original caps/expiry/CLEAN gates. This activation recorded no new allowance, started no live test, and made no model/email call. First actual GitHub receipt consumption is not yet verified, and the full seven-journey ASSESS07/LIVE04 proof is still pending. Preserve the existing finite B authorization; do not issue both legacy CloudShell and GitHub allowances for the same approval.
+
+### GitHub-only activation authorized — 2026-10-03T22:05Z
+
+The user explicitly answers “Yes please” to publishing the prepared approval feature. A / Ricardo / `martelaxe` / WSL continues this one ASSESS07 prerequisite from clean ff-only synchronized `main` at `18ac65b55b49a71007353010015712d95d041ebe`. Verified GitHub session is `martelaxe` / ID44531296. Authorization is limited to the prepared `Activate GitHub QA run approvals` workflow: short-lived existing release-role access, original ZIP check, S3 broker artifact upload, revision-guarded code update of `known-enough-qa-fixtures` and unchanged settings/hash readback. No new IAM/resources, website/API deployment, allowance dispatch or test/model/email run. Record the matching GitHub result and safe activation receipt before claiming the feature is active. B's earlier finite live-cycle authorization and NP00's saved WSL claim stay preserved.
 
 ### GitHub-only allowance preparation — user direction, 2026-10-03
 

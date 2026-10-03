@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "checkpoint": "GITHUB_RUN_APPROVALS_ACTIVATED",
+  "evidenceOrigin": "matching GitHub workflow success and downloaded activation artifact",
+  "sourceCommit": "18ac65b55b49a71007353010015712d95d041ebe",
+  "workflow": {
+    "runId": 37157321175,
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/37157321175",
+    "path": ".github/workflows/activate-qa-run-approvals.yml",
+    "event": "workflow_dispatch",
+    "conclusion": "success",
+    "actor": "martelaxe",
+    "actorId": 44531296,
+    "triggeringActor": "martelaxe",
+    "triggeringActorId": 44531296,
+    "repositoryId": 1377587215,
+    "completedAt": "2026-10-03T22:10:42Z"
+  },
+  "activation": {
+    "status": "GITHUB_RUN_APPROVALS_ACTIVATED",
+    "sourceCommit": "18ac65b55b49a71007353010015712d95d041ebe",
+    "brokerSha256": "def539555c15e07876f4ba11c598562bbfa5b03b3712303b85e25cbb5f324753",
+    "previousSha256": "427769db72d94dd105aa7b522194cfd57c800c3a7410a5c11934611f081bfe17",
+    "rollbackKey": "427769db72d94dd105aa7b522194cfd57c800c3a7410a5c11934611f081bfe17/broker.zip",
+    "testStarted": false,
+    "cloudWrites": true
+  },
+  "verification": {
+    "brokerCodeHashReadback": "PASS",
+    "handlerAndEnvironmentPreserved": "PASS",
+    "previousRollbackArtifact": "PRESENT",
+    "applicationTestsPassed": 718,
+    "optionalTestsSkipped": 2,
+    "hostedPreviewPassed": 1,
+    "browserTestsPassed": 58,
+    "referenceHashesPassed": 7,
+    "planningChecksPassed": 15
+  },
+  "boundaries": {
+    "allowanceWorkflowDispatched": false,
+    "liveTestStarted": false,
+    "modelCallPerformed": false,
+    "syntheticEmailPerformed": false,
+    "newIamOrResources": false,
+    "approvalReceiptConsumption": "NOT_YET_VERIFIED",
+    "fullLiveQualification": "PENDING"
+  }
+}

@@ -1,6 +1,6 @@
 # ASSESS07 — prepare B's final live test — 2026-10-03 UTC
 
-**New direction:** reusable [GitHub-only approvals](github-run-approvals.md) are prepared, pending one-time broker activation. This CloudShell procedure preserves the previous guarded one-use handoff. Do not combine both approval paths for the same human authorization.
+**New direction:** reusable [GitHub-only approvals](github-run-approvals.md) are activated and verified by GitHub run37157321175. This CloudShell procedure preserves the previous guarded one-use handoff. Do not combine both approval paths for the same human authorization.
 
 ## Historical CloudShell path: exact CLI bug fixed; allowance not applied
 
