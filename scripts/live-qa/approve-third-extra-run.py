@@ -19,6 +19,25 @@ TOTAL_CEILINGS = {"maxRunsTotal": 28, "maxTokensTotal": 7000000,
                   "maxCostMicrosTotal": 7000000, "maxSignupMessagesTotal": 56}
 
 
+def safe_aws_error_code(result):
+    output = "\n".join(part for part in (result.stderr, result.stdout) if part)
+    match = re.search(r"\bAn error occurred\s+\(([A-Za-z][A-Za-z0-9]+)\)", output, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    for pattern, code in [
+        (r"\b(?:AccessDenied(?:Exception)?|not authorized)\b", "AccessDenied"),
+        (r"\b(?:ExpiredToken(?:Exception)?|security token.*expired)\b", "ExpiredToken"),
+        (r"\bUnable to locate credentials\b", "NoCredentials"),
+        (r"\bResourceNotFound\w*\b", "ResourceNotFound"),
+        (r"\bValidationException\b", "ValidationException"),
+        (r"\bConditionalCheckFailed\w*\b", "ConditionalCheckFailed"),
+        (r"\b(?:Could not connect|connection timed out|ReadTimeoutError)\b", "NetworkOrTimeout"),
+    ]:
+        if re.search(pattern, output, re.IGNORECASE):
+            return code
+    return "UnclassifiedCliError" if output.strip() else "NoCliErrorText"
+
+
 def aws(service, operation, **parameters):
     args = ["aws", service, operation, "--region", "us-east-1", "--output", "json", "--no-cli-pager"]
     for name, value in parameters.items():
@@ -26,9 +45,7 @@ def aws(service, operation, **parameters):
     result = subprocess.run(args, capture_output=True, text=True, timeout=60,
                             env={**os.environ, "AWS_MAX_ATTEMPTS": "1", "AWS_PAGER": ""})
     if result.returncode:
-        match = re.search(r"An error occurred \(([A-Za-z][A-Za-z0-9]+)\) when calling", result.stderr)
-        error_code = match.group(1) if match else "Unknown"
-        raise ValueError("AWS_OPERATION_FAILED:" + service + ":" + operation + ":" + error_code)
+        raise ValueError("AWS_OPERATION_FAILED:" + service + ":" + operation + ":" + safe_aws_error_code(result))
     return json.loads(result.stdout) if result.stdout.strip() else {}
 
 

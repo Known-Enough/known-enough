@@ -149,10 +149,17 @@ import importlib.util,subprocess
 from types import SimpleNamespace
 s=importlib.util.spec_from_file_location('third','scripts/live-qa/approve-third-extra-run.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m)
 original=m.subprocess.run
-m.subprocess.run=lambda *a,**k:SimpleNamespace(returncode=1,stderr='aws: [ERROR]: An error occurred (AccessDeniedException) when calling the GetItem operation: PRIVATE_ARN_AND_DETAILS')
+cases=[
+ (SimpleNamespace(returncode=1,stderr='aws: [ERROR]: An error occurred (AccessDeniedException) when calling the GetItem operation: PRIVATE_ARN_AND_DETAILS',stdout=''),'AccessDeniedException'),
+ (SimpleNamespace(returncode=1,stderr='',stdout='An error occurred (ExpiredTokenException) when calling GetItem: PRIVATE_TOKEN'),'ExpiredTokenException'),
+ (SimpleNamespace(returncode=1,stderr='AccessDeniedException: PRIVATE_ARN_AND_DETAILS',stdout=''),'AccessDenied'),
+ (SimpleNamespace(returncode=1,stderr='Unable to locate credentials: PRIVATE_HOME_PATH',stdout=''),'NoCredentials'),
+ (SimpleNamespace(returncode=1,stderr='unrecognized private AWS output',stdout=''),'UnclassifiedCliError')]
 try:
- try:m.read(lambda *a,**k:m.aws('dynamodb','get-item',table_name=m.TABLE,key=m.key('AUTH')),'AUTH');raise AssertionError('expected safe AWS failure')
- except ValueError as e:assert str(e)=='AWS_OPERATION_FAILED:dynamodb:get-item:AccessDeniedException:KEY=AUTH' and 'PRIVATE' not in str(e)
+ for response,code in cases:
+  m.subprocess.run=lambda *a,**k:response
+  try:m.read(lambda *a,**k:m.aws('dynamodb','get-item',table_name=m.TABLE,key=m.key('AUTH')),'AUTH');raise AssertionError('expected safe AWS failure')
+  except ValueError as e:assert str(e)=='AWS_OPERATION_FAILED:dynamodb:get-item:'+code+':KEY=AUTH' and 'PRIVATE' not in str(e)
 finally:m.subprocess.run=original
 print('safe AWS error classification passed')
 `],{encoding:'utf8'});
