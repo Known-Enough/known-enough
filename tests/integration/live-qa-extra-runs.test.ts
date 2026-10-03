@@ -143,6 +143,28 @@ print(json.dumps({'prepared':True,'oneUseOnly':True,'idempotent':True,'priorReco
 `],{encoding:'utf8'});
   expect(result.status,result.stderr).toBe(0);expect(result.stdout).toContain('"oneUseOnly": true');expect(result.stdout).not.toMatch(/PRIVATE|DO_NOT_PRINT/);
  });
+ test('administrator helper sends AWS boolean switches without extra true or false arguments',()=>{
+  const result=spawnSync('python3',['-B','-c',String.raw`
+import importlib.util,json
+from types import SimpleNamespace
+s=importlib.util.spec_from_file_location('third','scripts/live-qa/approve-third-extra-run.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m)
+calls=[]
+def capture(args,**options):
+ calls.append(args)
+ assert options['capture_output'] and options['text'] and options['timeout']==60
+ assert options['env']['AWS_MAX_ATTEMPTS']=='1'
+ return SimpleNamespace(returncode=0,stdout='{}',stderr='')
+m.subprocess.run=capture
+assert m.read(m.aws,'AUTH') is None
+first=calls[0]
+assert first==['aws','dynamodb','get-item','--region','us-east-1','--output','json','--no-cli-pager','--table-name',m.TABLE,'--key',json.dumps(m.key('AUTH')),'--consistent-read']
+m.aws('dynamodb','get-item',table_name=m.TABLE,key=m.key('AUTH'),consistent_read=False)
+assert calls[1][:-1]==first[:-1] and calls[1][-1]=='--no-consistent-read'
+assert all('true' not in args and 'false' not in args for args in calls)
+print('AWS boolean switches passed')
+`],{encoding:'utf8'});
+  expect(result.status,result.stderr).toBe(0);expect(result.stdout).toContain('AWS boolean switches passed');
+ });
  test('administrator helper exposes only a safe AWS error code and fixed control key',()=>{
   const result=spawnSync('python3',['-B','-c',String.raw`
 import importlib.util,subprocess

@@ -41,6 +41,9 @@ def safe_aws_error_code(result):
 def aws(service, operation, **parameters):
     args = ["aws", service, operation, "--region", "us-east-1", "--output", "json", "--no-cli-pager"]
     for name, value in parameters.items():
+        if isinstance(value, bool):
+            args.append("--" + ("" if value else "no-") + name.replace("_", "-"))
+            continue
         args += ["--" + name.replace("_", "-"), value if isinstance(value, str) else json.dumps(value)]
     result = subprocess.run(args, capture_output=True, text=True, timeout=60,
                             env={**os.environ, "AWS_MAX_ATTEMPTS": "1", "AWS_PAGER": ""})

@@ -4,7 +4,17 @@
 - Worker: A for the narrow CloudShell helper/readback prerequisite; then B / Octavio / `Battosai1806` for the one GitHub-triggered live cycle. No B run has occurred yet.
 - Scope: finish ASSESS07's isolated managed verification and any narrowly verified diagnostic repair; preserve NP00's separate saved WSL claim and all existing daily, per-run, cumulative and expiry limits.
 
+### Exact CLI repair claim — 2026-10-03T21:22Z
+
+A / Ricardo / `martelaxe` / WSL continues the administrator helper prerequisite from clean, ff-only synchronized `main` at `ec54c158e7a459cf8d3a24d47f7e0708fc7fd9d2` (Codex GPT-6; exact variant/effort not exposed). The actual argument builder emits `--consistent-read true`; AWS CLI2 rejects the extra `true` locally with exit252 / `Unknown options: true`, before an AWS request. Earlier output-parser repairs did not fix command construction. Scope is only the helper's boolean-option builder, its integration regression, this ticket/README, the existing allowance runbook, board/workflow and A's log/handoff. Use the established boolean-option construction from the sibling allowance helpers. Verify actual argv plus a real read-only cloud preflight with A's existing read-only profile; run focused/pinned full checks before `[skip ci]` synchronization. No local AWS write, test dispatch, deployment, email/model call or change to limits/expiry. B retains the single live cycle after A's administrator readback.
+
+The old malformed command was reproduced against a loopback endpoint with unsigned access: CLI exit252 and `Unknown options: true`, before any AWS request. The corrected helper emits `--consistent-read` alone, or `--no-consistent-read` for false, while preserving string/JSON parameters. Focused regression passed12/12 and verifies the actual subprocess argv through the real record-read entry point. Actual AWS dry-run using A's existing `known-enough-staging-ro` profile returned `THIRD_RUN_PREPARED_FOR_B`, `remaining:1`, `expiresAt:2026-10-04T00:00:00Z`, `cloudWrites:false`. This proves cloud preflight now succeeds, but does not install the allowance or execute B's test.
+
+Pinned Node24.21.0/npm11.19.0 `PLAYWRIGHT_CHANNEL=chromium npm run check` exit0:707 application tests/two optional skips, hosted1/1, E2E58/58, references7/7, planning15/15, lint/types/build/boundaries PASS. Log: `/tmp/known-enough-assess07-cli-check.47qWvq/full-check.log`. Only the boolean-option builder and its regression changed; original transaction/version/CLEAN/cumulative/email/expiry guards are unchanged. Publish with `[skip ci]`; A next applies the new verified CloudShell pin, then B executes the single authorized live cycle. No cloud write or full live PASS is claimed.
+
 ### Current recovery and B handoff — 2026-10-03T20:51Z
+
+Historical diagnostic checkpoint, superseded by the exact CLI repair above. Its parser changes did not correct the malformed boolean argument.
 
 The user's CloudShell runs reached `dynamodb:get-item` and returned blocked results while reading the `AUTH` record. Both stopped during read-only preflight, before the guarded transaction; the allowance is therefore unchanged. The second helper printed `Unknown` because it could not find the AWS CLI error text. CloudShell had earlier reopened in recovery mode; its new shell did not retain `$DIR`, so the subsequent `/approve.py` lookup failed because the temporary path variable was empty. That message is a shell-session issue, not an AWS write or test attempt.
 
