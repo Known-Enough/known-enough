@@ -10,6 +10,7 @@ import { ACTORS, requireRunId } from './config.mjs';
 import { createMailtmClient } from './mailtm.mjs';
 import { reserveTotal } from './cumulative.mjs';
 import { beginLease, actorUsername, cleanupPlan } from './fixture-core.mjs';
+import { githubRun, reserveExtra } from './extra-runs.mjs';
 const options = { region: 'us-east-1', maxAttempts: 1 };
 const db = new DynamoDBClient(options), users = new CognitoIdentityProviderClient(options), secrets = new SecretsManagerClient(options), s3 = new S3Client(options);
 const mailtm = createMailtmClient();
@@ -87,15 +88,21 @@ async function provision(runId) {
         const next = { runs: (period.value?.runs ?? 0) + 1, messages: period.value?.messages ?? 0 };
         const total = await read('TOTAL');
         const reservedTotal = reserveTotal(total.value, a.value, { runs: 1 });
-        if (next.runs > a.value.maxRunsPerDay)
-            throw new Error('PERIOD_BUDGET_EXHAUSTED');
+        let extraReservation = [];
+        if (next.runs > a.value.maxRunsPerDay) {
+            const extraKey = 'EXTRA#' + day.slice(4);
+            const extra = await read(extraKey);
+            if (!extra.value) throw new Error('PERIOD_BUDGET_EXHAUSTED');
+            const reservedExtra = reserveExtra(extra.value, a.value, a.version, period.value.runs, runId, await githubRun(runId), Date.now());
+            extraReservation = [put(extraKey, extra, reservedExtra)];
+        }
         await db.send(new TransactWriteItemsCommand({
             TransactItems: [
                 {
                     ConditionCheck: {
                         TableName: table(), Key: key('AUTH'), ConditionExpression: '#v=:v', ExpressionAttributeNames: { '#v': 'version' }, ExpressionAttributeValues: { ':v': { N: String(a.version) } }
                     }
-                }, put('LEASE', prior, current), put(day, period, next), put('TOTAL', total, reservedTotal)
+                }, put('LEASE', prior, current), put(day, period, next), put('TOTAL', total, reservedTotal), ...extraReservation
             ]
         }));
     }

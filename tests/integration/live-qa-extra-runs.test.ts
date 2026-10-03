@@ -1,0 +1,79 @@
+import { describe, expect, test, vi } from 'vitest';
+import { spawnSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+// @ts-expect-error Node-only authorization boundary exercised without live services.
+import { reserveExtra, githubRun } from '../../scripts/live-qa/extra-runs.mjs';
+const now=Date.parse('2026-10-03T03:00:00Z');
+const auth={approved:true,maxRunsPerDay:4,expiresAt:'2026-10-09T03:16:41.171626Z'};
+const approval={schemaVersion:1,day:'2026-10-03',actor:'Battosai1806',additionalRuns:2,usedRuns:0,baseRuns:4,authorizationVersion:3,authorizationExpiresAt:auth.expiresAt,expiresAt:'2026-10-04T00:00:00Z'};
+const run={id:123,run_attempt:1,actor:{login:'Battosai1806'},triggering_actor:{login:'Battosai1806'},repository:{id:1377587215},head_repository:{id:1377587215},head_branch:'main',event:'workflow_run',status:'in_progress',path:'.github/workflows/live-qa-release-and-check.yml',head_sha:'a'.repeat(40)};
+describe('two additional B runs, never a recurring daily increase',()=>{
+ test('two starts consume the dated allowance without changing the original grant',()=>{
+  const first=reserveExtra(approval,auth,3,4,'gh-123-1',run,now);expect(first.usedRuns).toBe(1);
+  const second=reserveExtra(first,auth,3,5,'gh-123-1',run,now);expect(second.usedRuns).toBe(2);
+  expect(()=>reserveExtra(second,auth,3,6,'gh-123-1',run,now)).toThrow('EXTRA_RUN_ALLOWANCE_BLOCKED');expect(approval.usedRuns).toBe(0);expect(auth.maxRunsPerDay).toBe(4);
+ });
+ test('wrong day, expired/malformed approval, changed grant and inconsistent usage fail closed',()=>{
+  for(const a of [null,{...approval,additionalRuns:3},{...approval,usedRuns:-1},{...approval,usedRuns:2},{...approval,usedRuns:0.5},{...approval,actor:'martelaxe'},{...approval,expiresAt:auth.expiresAt},{...approval,unknown:'PRIVATE'}])
+   expect(()=>reserveExtra(a,auth,3,4,'gh-123-1',run,now)).toThrow('EXTRA_RUN_ALLOWANCE_BLOCKED');
+  for(const time of [Date.parse('2026-10-02T23:59:59Z'),Date.parse(approval.expiresAt)])expect(()=>reserveExtra(approval,auth,3,4,'gh-123-1',run,time)).toThrow();
+  expect(()=>reserveExtra(approval,auth,4,4,'gh-123-1',run,now)).toThrow();expect(()=>reserveExtra(approval,auth,3,5,'gh-123-1',run,now)).toThrow();
+ });
+ test('caller-supplied actor cannot replace fixed GitHub repository/workflow/run/attempt evidence',()=>{
+  for(const r of [{...run,actor:{login:'martelaxe'}},{...run,triggering_actor:{login:'martelaxe'}},{...run,id:124},{...run,run_attempt:2},{...run,repository:{id:1}},{...run,head_repository:{id:1}},{...run,head_branch:'other'},{...run,path:'other.yml'},{...run,event:'pull_request'},{...run,status:'completed'}])
+   expect(()=>reserveExtra(approval,auth,3,4,'gh-123-1',r,now)).toThrow('EXTRA_RUN_ACTOR_UNVERIFIED');
+ });
+ test('GitHub lookup uses the fixed HTTPS repository, bounded deadline, no redirect or private errors',async()=>{
+  const fetcher=vi.fn(async(url:string,options:Record<string,unknown>)=>{expect(url).toContain('https://api.github.com/');expect(options.signal).toBeDefined();return {ok:true,json:async()=>run};});expect(await githubRun('gh-123-1',fetcher)).toEqual(run);
+  expect(fetcher.mock.calls[0]?.[0]).toBe('https://api.github.com/repos/Known-Enough/known-enough/actions/runs/123');
+  expect(fetcher.mock.calls[0]?.[1]).toMatchObject({redirect:'error'});
+  await expect(githubRun('PRIVATE_TOKEN',fetcher)).rejects.toThrow('EXTRA_RUN_ACTOR_UNVERIFIED');expect(fetcher).toHaveBeenCalledTimes(1);
+  await expect(githubRun('gh-123-1',async()=>{throw new Error('PRIVATE_PROVIDER_PAYLOAD');})).rejects.toThrow('EXTRA_RUN_ACTOR_UNVERIFIED');
+ });
+ test('the exception increment is in the same broker transaction as ordinary usage, lease and cumulative reservation',()=>{
+  const source=readFileSync('scripts/live-qa/broker.mjs','utf8');
+  expect(source).toContain('if (next.runs > a.value.maxRunsPerDay)');expect(source).toContain('reserveTotal(total.value, a.value, { runs: 1 })');
+  expect(source).toContain("put('LEASE', prior, current), put(day, period, next), put('TOTAL', total, reservedTotal), ...extraReservation");
+ });
+ test('administrator helper preserves usage, guards all four versions, retries idempotently and rejects drift',()=>{
+  const result=spawnSync('python3',['-B','-c',String.raw`
+import copy, datetime, importlib.util, json, os, tempfile
+from pathlib import Path
+spec=importlib.util.spec_from_file_location('extra','scripts/live-qa/approve-two-extra-runs.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+now=datetime.datetime(2026,10,3,3,tzinfo=datetime.timezone.utc)
+a={'approved':True,'retentionReviewed':True,'invocationLoggingDisabled':True,'expiresAt':m.EXPIRY,'maxRunsPerDay':4,'maxRunsTotal':28,'maxTokensTotal':7000000,'maxCostMicrosTotal':7000000,'maxSignupMessagesTotal':56,'maxAttemptsPerRun':200,'maxTokensPerRun':250000,'maxCostMicrosPerRun':250000,'maxSignupMessagesPerRun':2,'maxSignupMessagesPerDay':8}
+values={'AUTH':a,'LEASE':{'status':'CLEAN','PRIVATE':'DO_NOT_PRINT'},'DAY#'+m.DAY:{'runs':4,'messages':4},'TOTAL':{'runs':4,'reservedTokens':100,'reservedCostMicros':100,'messages':4}}
+base={k:{**m.key(k),'payload':{'S':json.dumps(v)},'version':{'N':'3'}} for k,v in values.items()}
+with tempfile.TemporaryDirectory() as folder:
+ home=Path(folder);state=copy.deepcopy(base);writes=[]
+ def fake(service,op,**p):
+  if op=='get-caller-identity':return {'Account':m.ACCOUNT}
+  if op=='describe-table':return {'Table':{'TableArn':'arn:aws:dynamodb:us-east-1:'+m.ACCOUNT+':table/'+m.TABLE,'TableStatus':'ACTIVE'}}
+  if op=='get-item':
+   assert p['consistent_read'] is True and p['table_name']==m.TABLE
+   return {'Item':state[p['key']['PK']['S']]} if p['key']['PK']['S'] in state else {}
+  if op=='transact-write-items':
+   tx=json.loads(Path(p['cli_input_json'].removeprefix('file://')).read_text())['TransactItems'];assert len(tx)==5
+   for name,t in zip(['AUTH','LEASE','DAY#'+m.DAY,'TOTAL'],tx[:4]):
+    assert t['ConditionCheck']['Key']==m.key(name) and t['ConditionCheck']['ExpressionAttributeValues'][':v']==state[name]['version']
+   put=tx[-1]['Put'];assert put['ConditionExpression']=='attribute_not_exists(PK)' and put['Item']['PK']['S']==m.EXTRA_KEY
+   writes.append(tx);state[m.EXTRA_KEY]=put['Item'];return {}
+  raise AssertionError('Unexpected operation')
+ assert m.install(fake,now,home)['cloudWrites'] is False and not (home/'known-enough-two-extra-runs').exists()
+ assert m.install(fake,now,home,True,clock=lambda:now)['remaining']==2 and len(writes)==1
+ assert all(state[k]==v for k,v in base.items())
+ assert (home/'known-enough-two-extra-runs'/m.DAY/'original-private.json').stat().st_mode&0o777==0o600
+ state[m.EXTRA_KEY]['payload']['S']=json.dumps({**json.loads(state[m.EXTRA_KEY]['payload']['S']),'usedRuns':1})
+ assert m.install(fake,now,home,True,clock=lambda:now)['remaining']==1 and len(writes)==1
+ for change,reason in [('lease','CLEANUP_REQUIRED_FIRST'),('daily','DAILY_USAGE_CHANGED'),('total','CUMULATIVE_BUDGET_INSUFFICIENT'),('grant','ORIGINAL_APPROVAL_CHANGED'),('extra','EXTRA_ALLOWANCE_DRIFT')]:
+  state=copy.deepcopy(base)
+  name,field,value={'lease':('LEASE','status','ACTIVE'),'daily':('DAY#'+m.DAY,'runs',5),'total':('TOTAL','runs',28),'grant':('AUTH','maxRunsPerDay',6)}.get(change,('','',None))
+  if change=='extra':state[m.EXTRA_KEY]={**m.key(m.EXTRA_KEY),'payload':{'S':'{}'},'version':{'N':'1'}}
+  else:
+   v=json.loads(state[name]['payload']['S']);v[field]=value;state[name]['payload']['S']=json.dumps(v)
+  try:m.install(fake,now,home,True,clock=lambda:now);raise AssertionError('unexpected allowance')
+  except ValueError as e:assert str(e)==reason
+ assert len(writes)==1
+`],{encoding:'utf8'});expect(result.status,result.stderr).toBe(0);expect(result.stdout).not.toMatch(/PRIVATE|DO_NOT_PRINT/);
+ });
+});
