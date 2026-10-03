@@ -4,12 +4,12 @@ Start here to understand what is left. Every task has its own folder: README.md 
 
 ## Online testing
 
-Installation and GitHub settings are ready. The first complete live test result is still pending. After an authorized eligible app deployment succeeds, GitHub runs the qualification automatically; B does not need A's AWS credentials or a manual Run workflow click.
+Installation, GitHub settings and the automatic trigger are verified. The first live test attempt is blocked on one QA publishing permission; the complete live PASS is still pending. After an authorized eligible app deployment succeeds, GitHub runs the qualification automatically; B does not need A's AWS credentials or a manual Run workflow click.
 
 | Task | Basic idea | Status |
 | --- | --- | --- |
 | [LIVE04](active/live-testing/LIVE04/README.md) | Prove the installed online test environment works from start to finish. Installation and GitHub settings are ready; real test results and cleanup evidence are still needed. | IN_PROGRESS |
-| [ASSESS07](active/live-testing/ASSESS07/README.md) | Collect real online proof that all required user journeys, safety checks and cleanup pass automatically after a matching successful deployment. | IN_PROGRESS |
+| [ASSESS07](active/live-testing/ASSESS07/README.md) | Collect real online proof that all required user journeys, safety checks and cleanup pass automatically after a matching successful deployment. | BLOCKED |
 
 ## B's existing monitor
 

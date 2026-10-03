@@ -143,7 +143,7 @@ export function renderTemplates(raw, artifacts) {
                 {
                     PolicyName: 'ExactQaRelease', PolicyDocument: policy([
                         statement(['lambda:UpdateFunctionCode', 'lambda:GetFunctionConfiguration'], [att('ApiFunction', 'Arn'), att('Broker', 'Arn'), att('PreSignup', 'Arn'), att('CustomMessage', 'Arn')]), statement(['amplify:CreateDeployment', 'amplify:StartDeployment', 'amplify:GetJob'], [
-                            sub(`arn:aws:amplify:${c.region}:${c.account}:apps/` + '${QaApp.AppId}/branches/main'), sub(`arn:aws:amplify:${c.region}:${c.account}:apps/` + '${QaApp.AppId}/branches/main/jobs/*')
+                            sub(`arn:aws:amplify:${c.region}:${c.account}:apps/` + '${QaApp.AppId}/branches/main'), sub(`arn:aws:amplify:${c.region}:${c.account}:apps/` + '${QaApp.AppId}/branches/main/jobs/*'), sub(`arn:aws:amplify:${c.region}:${c.account}:apps/` + '${QaApp.AppId}/branches/main/deployments/*')
                         ]), statement(['s3:PutObject', 's3:GetObject'], `arn:aws:s3:::${n.artifacts}/*`), { ...statement('dynamodb:GetItem', control), Condition: { 'ForAllValues:StringEquals': { 'dynamodb:LeadingKeys': ['AUTH', 'LEASE'] } } }
                     ])
                 }
