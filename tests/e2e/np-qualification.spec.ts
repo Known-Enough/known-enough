@@ -47,7 +47,18 @@ test('four new independent browser owners create a garden decision from blank en
     await expect(host.getByRole('heading', { name: 'Review the public draft' })).toBeVisible();
     await expect(host.getByText('Planting, Watering', { exact: false })).toBeVisible();
     await host.getByRole('checkbox', { name: 'I reviewed this public draft and the required approvers' }).check();
+    let releaseCreate!: () => void; let markCreateStarted!: () => void;
+    const createGate = new Promise<void>(resolve => { releaseCreate = resolve; });
+    const createStarted = new Promise<void>(resolve => { markCreateStarted = resolve; });
+    await host.route('https://api.example.test/groups/*/drafts/*/create', async route => {
+      if (route.request().method() === 'POST') { markCreateStarted(); await createGate; }
+      await route.fallback();
+    });
     await host.getByRole('button', { name: 'Create decision for group review' }).click();
+    await createStarted;
+    try { expect(await host.getByLabel('Decision ID from your invitation').inputValue()).toBe('christmas-decision'); }
+    finally { releaseCreate(); }
+    await expect(host.getByLabel('Decision ID from your invitation')).toHaveValue(/^groupdecision-[a-f0-9]{40}$/);
     for (const page of pages.slice(1)) { await page.reload(); await page.getByRole('button', { name: 'Open decision', exact: true }).click(); }
     for (const page of pages) {
       await page.getByRole('button', { name: 'Load shared decision' }).click();

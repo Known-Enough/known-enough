@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "deploymentRunId": 37089181120,
+  "automaticQualificationRunId": 37089230162,
+  "event": "workflow_run",
+  "sourceCommit": "bef9d0d9e4608c7742cbac1d8aa8fa4c04740735",
+  "publicationPublicMetadata": "PASS",
+  "qaReport": {
+    "schemaVersion": 1,
+    "runId": "gh-37089230162-1",
+    "sourceCommit": "bef9d0d9e4608c7742cbac1d8aa8fa4c04740735",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "PASS",
+      "privacy": "PASS",
+      "signup": "PASS",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "mailStatus": "MAIL_CODE_READY",
+        "status": "PASS"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 2,
+      "failed": 1,
+      "blocked": 4,
+      "modelAttempts": 1,
+      "signupMessages": 1
+    }
+  },
+  "completeReport": {
+    "schemaVersion": 1,
+    "status": "BLOCKED_OR_FAILED",
+    "sourceCommit": "bef9d0d9e4608c7742cbac1d8aa8fa4c04740735",
+    "initiatingAccount": "martelaxe",
+    "lanes": {
+      "jobs": "BLOCKED",
+      "primaryPublication": "PASS",
+      "currentSource": "PASS",
+      "release": "PASS",
+      "public": "PASS",
+      "primaryConfiguration": "PASS",
+      "qaJourney": "BLOCKED"
+    },
+    "jobResults": {
+      "provenance": "success",
+      "release": "success",
+      "primary-release": "success",
+      "public": "success",
+      "metadata": "success",
+      "journey": "failure"
+    },
+    "targets": {
+      "primary": "https://main.d143q5ravxp5av.amplifyapp.com/",
+      "qa": "https://main.d2l23pkzmr1tio.amplifyapp.com/",
+      "staticPreview": "https://d23eowhnwtqts3.cloudfront.net/"
+    },
+    "targetDifferences": [
+      "Primary models remain disabled under NP00; real AI journeys run in isolated budgeted QA.",
+      "QA uses separate pools, clients, API and data tables; primary writable AI was not tested."
+    ],
+    "qaCounts": {
+      "passed": 2,
+      "failed": 1,
+      "blocked": 4,
+      "modelAttempts": 1,
+      "signupMessages": 1
+    },
+    "requiredCloudAcceptance": "LIVE04 requires actual B dispatch and separate authorized automatic deployment run"
+  },
+  "dailyFixtureRuns": [
+    {
+      "id": 37085221562,
+      "created_at": "2026-10-03T01:12:50Z",
+      "event": "workflow_run",
+      "head_sha": "3b7fbad5456641b63e6bae08c62ab7d66e202ae1",
+      "conclusion": "failure",
+      "html_url": "https://github.com/Known-Enough/known-enough/actions/runs/37085221562"
+    },
+    {
+      "id": 37086559092,
+      "created_at": "2026-10-03T01:33:39Z",
+      "event": "workflow_run",
+      "head_sha": "9fdda716246033a72a5815263020b90d6a937b40",
+      "conclusion": "failure",
+      "html_url": "https://github.com/Known-Enough/known-enough/actions/runs/37086559092"
+    },
+    {
+      "id": 37087779249,
+      "created_at": "2026-10-03T01:53:05Z",
+      "event": "workflow_run",
+      "head_sha": "3859a3ecbb8c1c1ff84c3d9f647785deeb555db7",
+      "conclusion": "failure",
+      "html_url": "https://github.com/Known-Enough/known-enough/actions/runs/37087779249"
+    },
+    {
+      "id": 37089230162,
+      "created_at": "2026-10-03T02:16:34Z",
+      "event": "workflow_run",
+      "head_sha": "bef9d0d9e4608c7742cbac1d8aa8fa4c04740735",
+      "conclusion": "failure",
+      "html_url": "https://github.com/Known-Enough/known-enough/actions/runs/37089230162"
+    }
+  ],
+  "nextStep": "QA03 exact subphase/cause is not available in this artifact. Prepare fixed phase/HTTP-outcome diagnostics, preserve all acceptance assertions. Four fixture-started runs occurred in this UTC day; no fifth dispatch, counter reset or grant renewal. Next live proof uses an available original-budget daily slot before original expiry.",
+  "localRepair": "Controlled held creation request in browser reproduces the old christmas-decision field before completion. Live harness now waits for a server-generated groupdecision ID before readback. Preserve all assertions and add fixed QA03 phase/draft HTTP-outcome diagnostics; this is not yet live-qualified."
+}

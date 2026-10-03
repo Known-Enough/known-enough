@@ -3,8 +3,11 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { describe, expect, test } from 'vitest';
+import { EventEmitter } from 'node:events';
+import type { Page } from '@playwright/test';
+import { trackOperation } from '../live/qa/helpers.ts';
 // @ts-expect-error JavaScript runner boundary is exercised directly without AWS calls.
-import { validateTarget, validateReceipt, validateWorkload, safeResults, qualificationReport, REQUIRED_TESTS } from '../../scripts/live-qa/runner-core.mjs';
+import { validateTarget, validateReceipt, validateWorkload, safeResults, qualificationReport, REQUIRED_TESTS, operationStatus } from '../../scripts/live-qa/runner-core.mjs';
 const target={Account:'092954139775',Region:'us-east-1',SourceCommit:'a'.repeat(40),ApiUrl:'https://qabuild.execute-api.us-east-1.amazonaws.com',FrontendUrl:'https://main.qabuild.amplifyapp.com/',PoolId:'us-east-1_QaPool',ParticipantClientId:'pc',DisplayClientId:'dc',CognitoDomain:'https://known-enough-qa-092954139775.auth.us-east-1.amazoncognito.com',ApiFunction:'known-enough-qa-api',BrokerFunction:'known-enough-qa-fixtures',DecisionTable:'KnownEnoughQaDecisions',GroupTable:'KnownEnoughQaGroups',ControlTable:'KnownEnoughQaControl',MailboxBucket:'qa-mail',LoginSecret:'arn:aws:secretsmanager:us-east-1:092954139775:secret:known-enough/qa/run-login-secret',TestRoleArn:'arn:aws:iam::092954139775:role/KnownEnoughGithubQaTest',ReleaseRoleArn:'arn:aws:iam::092954139775:role/KnownEnoughGithubQaRelease',AmplifyAppId:'qaapp'};
 const receipt={schemaVersion:1,sourceCommit:target.SourceCommit,targetApi:target.ApiUrl,targetFrontend:target.FrontendUrl,workflowRunId:'12',jobId:'34',artifacts:Object.fromEntries(['api','broker','web'].map(k=>[k,{sha256:'b'.repeat(64)}]))};
 describe('LIVE02 runner preparation, no service simulation counted as live',()=>{
@@ -33,3 +36,32 @@ test('failed signup phase survives the sanitized reporter and report without ass
     expect(safeResults([{title:REQUIRED_TESTS[0],status:'failed',phase:'PRIVATE_EMAIL',mailStatus:'PRIVATE_EMAIL'}])[0]).not.toHaveProperty('phase');
   } finally {if(before===undefined)delete process.env.QA_RESULTS_FILE;else process.env.QA_RESULTS_FILE=before;rmSync(dir,{recursive:true,force:true});}
 });
+
+
+test('decision diagnostics keep only fixed phase/outcome tags and never response contents', async () => {
+  const dir=mkdtempSync(resolve(tmpdir(),'ke-qa-decision-phase-'));const before=process.env.QA_RESULTS_FILE;process.env.QA_RESULTS_FILE=dir+'/tests.json';
+  try {
+    // @ts-expect-error Reporter accepts allowlisted static metadata only.
+    const {default:Reporter}=await import('../../scripts/live-qa/sanitized-reporter.mjs');const reporter=new Reporter();
+    reporter.onStepEnd({title:REQUIRED_TESTS[2]}, {}, {title:'QA03_DRAFT',error:{message:'PRIVATE_MODEL_OUTPUT'}});
+    reporter.onTestEnd({title:REQUIRED_TESTS[2],annotations:[{type:'qa-operation-status',description:'HTTP_UNAVAILABLE'},{type:'qa-operation-status',description:'PRIVATE_TOKEN'}]}, {status:'failed',error:{message:'PRIVATE_MODEL_OUTPUT'}});reporter.onEnd({status:'failed'});
+    const raw=readFileSync(process.env.QA_RESULTS_FILE,'utf8');expect(raw).not.toMatch(/PRIVATE/);
+    const result=qualificationReport({runId:'run-12345',tests:JSON.parse(raw).tests});expect(result.tests[2]).toMatchObject({status:'FAIL',phase:'QA03_DRAFT',operationStatus:'HTTP_UNAVAILABLE'});
+    expect(safeResults([{title:REQUIRED_TESTS[2],status:'failed',operationStatus:'PRIVATE_TOKEN'}])[2]).not.toHaveProperty('operationStatus');
+  } finally {if(before===undefined)delete process.env.QA_RESULTS_FILE;else process.env.QA_RESULTS_FILE=before;rmSync(dir,{recursive:true,force:true});}
+});
+
+test('browser operation observer matches only the exact POST and detaches after success/failure', async () => {
+  const page=new EventEmitter();const statuses:string[]=[];const url='https://qa.invalid/groups/private-group/drafts';
+  const request=(path:string,method='POST')=>({url:()=>path,method:()=>method});
+  const response=(path:string,status:number,method='POST')=>({request:()=>request(path,method),status:()=>status,json:()=>{throw new Error('NEVER_READ_PRIVATE_BODY');}});
+  await trackOperation(page as unknown as Page,url,async()=>{
+    page.emit('response',response(url+'?private=value',503));page.emit('response',response(url,401,'GET'));expect(statuses).toEqual(['HTTP_PENDING']);
+    page.emit('response',response(url,503));
+  },status=>statuses.push(status));
+  expect(statuses).toEqual(['HTTP_PENDING','HTTP_UNAVAILABLE']);expect(page.listenerCount('response')).toBe(0);expect(page.listenerCount('requestfailed')).toBe(0);
+  await expect(trackOperation(page as unknown as Page,url,async()=>{page.emit('requestfailed',request(url));throw new Error('PRIVATE_ERROR');},status=>statuses.push(status))).rejects.toThrow('PRIVATE_ERROR');
+  expect(statuses.slice(-2)).toEqual(['HTTP_PENDING','HTTP_TRANSPORT_FAILED']);expect(page.listenerCount('response')).toBe(0);expect(page.listenerCount('requestfailed')).toBe(0);
+});
+
+test('HTTP diagnostics accept only numeric protocol outcomes',()=>{expect(operationStatus(200)).toBe('HTTP_OK');expect(operationStatus(422)).toBe('HTTP_UNPROCESSABLE');for(const status of ['toString','PRIVATE_TOKEN',undefined,null,NaN,0,600])expect(operationStatus(status)).toBe('HTTP_OTHER_FAILURE');});

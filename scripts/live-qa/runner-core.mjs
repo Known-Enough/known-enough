@@ -17,14 +17,20 @@ export function validateWorkload(identity, profile) {
     if (profile || identity.Account !== '092954139775' || !identity.Arn?.startsWith('arn:aws:sts::092954139775:assumed-role/KnownEnoughGithubQaTest/'))
         throw new Error('QA_GITHUB_WORKLOAD_IDENTITY_REQUIRED');
 }
-export const SAFE_PHASES = ['QA01_ENTRY', 'QA01_SIGNUP', 'QA01_EMAIL', 'QA01_EMAIL_READ', 'QA01_EMAIL_CONFIRM', 'QA01_LOGIN', 'QA01_ACTORS'];
+export const SAFE_PHASES = ['QA01_ENTRY', 'QA01_SIGNUP', 'QA01_EMAIL', 'QA01_EMAIL_READ', 'QA01_EMAIL_CONFIRM', 'QA01_LOGIN', 'QA01_ACTORS', 'QA03_DRAFT', 'QA03_EDIT', 'QA03_CREATE', 'QA03_FRAME', 'QA03_OWNER'];
 export const SAFE_MAIL_STATUSES = ['MAIL_PENDING', 'MAIL_EMPTY', 'MAIL_OWNER_MISMATCH', 'MAIL_SENDER_MISMATCH', 'MAIL_RECIPIENT_MISMATCH', 'MAIL_OLD_MESSAGE', 'MAIL_CODE_READY', 'MAIL_CODE_AMBIGUOUS', 'MAIL_CODE_UNRECOGNIZED', 'MAIL_PROVIDER_UNAVAILABLE', 'MAIL_SCHEMA_UNEXPECTED', 'MAIL_BROKER_UNAVAILABLE'];
+export const SAFE_OPERATION_STATUSES = ['HTTP_PENDING', 'HTTP_OK', 'HTTP_BAD_REQUEST', 'HTTP_UNAUTHENTICATED', 'HTTP_FORBIDDEN', 'HTTP_NOT_FOUND', 'HTTP_CONFLICT', 'HTTP_UNPROCESSABLE', 'HTTP_CAPACITY', 'HTTP_UNAVAILABLE', 'HTTP_GATEWAY_TIMEOUT', 'HTTP_OTHER_FAILURE', 'HTTP_TRANSPORT_FAILED'];
+export function operationStatus(status) {
+    if (!Number.isInteger(status) || status < 100 || status > 599) return 'HTTP_OTHER_FAILURE';
+    if (status >= 200 && status < 300) return 'HTTP_OK';
+    return ({400:'HTTP_BAD_REQUEST',401:'HTTP_UNAUTHENTICATED',403:'HTTP_FORBIDDEN',404:'HTTP_NOT_FOUND',409:'HTTP_CONFLICT',422:'HTTP_UNPROCESSABLE',507:'HTTP_CAPACITY',503:'HTTP_UNAVAILABLE',504:'HTTP_GATEWAY_TIMEOUT'})[status] ?? 'HTTP_OTHER_FAILURE';
+}
 export function safeResults(tests) {
     tests = Array.isArray(tests) ? tests.filter(t => t && typeof t === 'object') : [];
     return REQUIRED_TESTS.map(title => {
         const found = tests.filter(t => t.title === title);
         return {
-            title, ...(found.length === 1 && SAFE_MAIL_STATUSES.includes(found[0].mailStatus) ? { mailStatus: found[0].mailStatus } : {}), ...(found.length === 1 && SAFE_PHASES.includes(found[0].phase) ? { phase: found[0].phase } : {}), status: found.length === 1 && found[0].status === 'passed' ? 'PASS' : found.some(t => ['failed', 'timedOut', 'interrupted'].includes(t.status)) ? 'FAIL' : 'BLOCKED'
+            title, ...(found.length === 1 && SAFE_OPERATION_STATUSES.includes(found[0].operationStatus) ? { operationStatus: found[0].operationStatus } : {}), ...(found.length === 1 && SAFE_MAIL_STATUSES.includes(found[0].mailStatus) ? { mailStatus: found[0].mailStatus } : {}), ...(found.length === 1 && SAFE_PHASES.includes(found[0].phase) ? { phase: found[0].phase } : {}), status: found.length === 1 && found[0].status === 'passed' ? 'PASS' : found.some(t => ['failed', 'timedOut', 'interrupted'].includes(t.status)) ? 'FAIL' : 'BLOCKED'
         };
     });
 }

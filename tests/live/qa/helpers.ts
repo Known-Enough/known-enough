@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
 import { KnownEnough as KE } from '@deal-table/contracts';
 // @ts-expect-error Runtime boundary validation is covered by LIVE02 runner tests.
-import { validateTarget } from '../../../scripts/live-qa/runner-core.mjs';
+import { validateTarget, operationStatus } from '../../../scripts/live-qa/runner-core.mjs';
 // @ts-expect-error CLI broker uses temporary workload credentials; no personal profiles.
 import { invokeBroker } from '../../../scripts/live-qa/runner.mjs';
 export type Actor={actor:string;username:string;email:string;password:string};
@@ -35,4 +35,14 @@ export async function renewSessions(sessions: Session[], people: Session[], auth
     }
     sessions.push(renewed);
   }
+}
+
+/** Observe only this existing POST; never read its body, token, URL into a report or retry it. */
+export async function trackOperation(page: Page, url: string, run: () => Promise<void>, record: (status: string) => void) {
+  record('HTTP_PENDING');
+  const matches = (request: import('@playwright/test').Request) => request.method() === 'POST' && request.url() === url;
+  const response = (value: import('@playwright/test').Response) => { if (matches(value.request())) record(operationStatus(value.status())); };
+  const failed = (value: import('@playwright/test').Request) => { if (matches(value)) record('HTTP_TRANSPORT_FAILED'); };
+  page.on('response', response); page.on('requestfailed', failed);
+  try { await run(); } finally { page.off('response', response); page.off('requestfailed', failed); }
 }
