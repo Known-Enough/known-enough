@@ -1,6 +1,6 @@
 # NP00 — A-only Bedrock permission-set cleanup
 
-Prepared CLI handoff, not executed. The original Mac lacked AWS CLI/profile; the receiving WSL worker now has both `known-enough-staging-ro` and `known-enough-stage1-release`, each read-only STS-verified for account `092954139775`. [Current read-only preflight](../docs/review-artifacts/NP00-wsl-deployment-preflight.json) records the actual permissions. [NP00](../docs/tasks/NP00.md) retains the required live result; [TD-KE10-02](../docs/technical-debt/TD-KE10-02-bedrock-permission-set-name.md) remains open.
+Prepared CLI handoff, not executed. The original Mac lacked AWS CLI/profile; the receiving WSL worker now has both `known-enough-staging-ro` and `known-enough-stage1-release`, each read-only STS-verified for account `092954139775`. [Current read-only preflight](../docs/review-artifacts/NP00-wsl-deployment-preflight.json) records the actual permissions. [NP00](../docs/tasks/active/closeout/NP00/ticket.md) retains the required live result; [TD-KE10-02](../docs/technical-debt/TD-KE10-02-bedrock-permission-set-name.md) remains open.
 
 The intended permission-set repair moves the existing single-model permission out of `ReadOnlyAccess` into `KnownEnoughBedrockTest`, assigned only to the verified A account owner. Keep the old read-only assignment. Add no B assignment, access key, email, or unrelated application change. Use an authorized Identity Center administration profile; do not substitute root or grant broader permissions on failure.
 

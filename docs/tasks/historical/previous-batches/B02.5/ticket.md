@@ -1,0 +1,30 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# B02.5 — midpoint B02 consent/projection/idempotency review — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+> **Known Enough migration, 2026-09-26:** retained historical scope; status remains **DONE**. Follow the [current queue](../../../../task-board.md) and [mapping](../../../../known-enough-pivot.md#complete-old-task-mapping) for future work; historical handoffs below do not restart old tasks.
+
+# B02.5 — midpoint B02 consent/projection/idempotency review
+
+> **Before development:** On a clean clone checked out on `main`, run `git pull --ff-only origin main` before any actual development of this task, including code, tests, configuration, or task artifacts. If local changes or an active rebase/merge prevent a clean pull, preserve and resolve/synchronize that state first; do not begin task development until the pull succeeds.
+
+
+- Direct worker: human selects `gpt-6-astra`, high effort; record actual model in evidence.
+- Pool: Shared; either user may claim eligible unclaimed work. Historical claims below remain evidence; active claims require explicit release.
+- Status: DONE; supplied independent final review reconciled with fresh integration checks. [Verdict: PASS](../../../../reviews/B02.5.md).
+- Claim: Astra integration review completed; no active review writer. Imported independent B02 review is identified in the evidence record.
+- Prerequisite: satisfied by published B02 code and supplied independent final review. The planned midpoint was overtaken by B’s completed implementation; this record covers final integration and does not restart B02.
+- Scope/files: read B02 code, diff, tests, contracts, and logs; write `docs/reviews/B02.5.md`, the reviewer’s work log, and coordinated task/board/handoff records only. No author rewrites by the reviewer.
+- Acceptance: independently review consent, projections, idempotency, versioning, and finalization design/tests against the actual diff, not logs alone. Run available focused consent/projection tests and record actual commands/results. List missing evidence and unresolved findings; B addresses critical findings before dependent integration. Recheck the final B02 delta before B03 integration acceptance.
+- Handoff: B03 and G01 evidence.
+
+Follow [agent workflow](../../../../agent-workflow.md) and [task board](../../../../task-board.md). Use a separate clone on `main`; no mandatory subagents.

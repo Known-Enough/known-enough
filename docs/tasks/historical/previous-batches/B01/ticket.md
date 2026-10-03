@@ -1,0 +1,32 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# B01 — exhaustive solver and both rankings — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+> **Known Enough migration, 2026-09-26:** retained historical scope; status remains **DONE**. Follow the [current queue](../../../../task-board.md) and [mapping](../../../../known-enough-pivot.md#complete-old-task-mapping) for future work; historical handoffs below do not restart old tasks.
+
+# B01 — exhaustive solver and both rankings
+
+> **Before development:** On a clean clone checked out on `main`, run `git pull --ff-only origin main` before any actual development of this task, including code, tests, configuration, or task artifacts. If local changes or an active rebase/merge prevent a clean pull, preserve and resolve/synchronize that state first; do not begin task development until the pull succeeds.
+
+
+- Direct worker: future follow-up uses `gpt-6-sol`, high effort. Shared execution evidence records initial Sol work, Astra completion after a usage limit, and independent Astra review.
+- Pool: Shared; either user may claim eligible unclaimed work. Historical claims below remain evidence; active claims require explicit release.
+- Status: DONE; included in main at the user’s explicit integration direction. Combined checks passed; see [main integration](../../../../main-integration.md).
+- Claim: Historical implementation; no new implementation writer assigned by this scheduling update.
+- Historical provenance: prior task/branch evidence remains intact; future work uses a separate clone on `main` and does not require a branch or Astra lead.
+- Scope/files: `packages/domain/**`, `packages/test-support/**`, plus the implementing developer’s work log and coordinated task/board/handoff records; coordinate contracts with affected task claimants.
+- Acceptance evidence to synchronize: exact fixtures and invalid grants; 12 structural plans; zero baseline; two after a valid scoped exception; inconvenience chooses B and balance-load chooses A; rejection of expired/revoked/wrong-context/roster/policy/duration grants, Nina/double/unqualified assignments; hard-impossible, zero-concession, stable ties, and disclosure independence. Use explicit clock/context/full intervals and no AWS/React/model calls. Preserve actual relevant test and `npm run check` outcomes; do not invent a fresh run.
+- Handoff: B02.
+
+Follow [agent workflow](../../../../agent-workflow.md) and [task board](../../../../task-board.md). Historical acceptance is not revoked.
+
+Integration note: wire contracts unchanged. The coordinated lockfile changes declare existing workspace dependencies; tsconfig enables TypeScript import extensions under noEmit. Internal `availabilityReview` must come from authoritative owner confirmation in B02, never inferred schedule coverage. See [B01 evidence](../../../../verification.md#b01-verification--september-20-2026).

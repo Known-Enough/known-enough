@@ -1,0 +1,48 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# T02 — historical task — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+# T02 — historical task
+
+- Status: SUPERSEDED.
+- Claim: None; unstarted future work replaced by the user-directed Known Enough pivot on 2026-09-26.
+- Replacement: [KE06](../KE06/ticket.md), [KE08](../KE08/ticket.md), [KE10](../KE10/ticket.md), [KE12](../KE12/ticket.md).
+
+> **SUPERSEDED — do not restart.** The original ticket below is preserved verbatim, including its then-current status and prerequisites. Only the status above schedules this ticket. See the [authoritative mapping](../../../../known-enough-pivot.md#complete-old-task-mapping) and [current queue](../../../../task-board.md). This is intentional replacement, not failure or completion.
+
+---
+
+# T02 — implement and verify the AI facilitator experience
+
+> **Before development:** On a clean clone checked out on `main`, run `git pull --ff-only origin main` before any actual development of this task, including code, tests, configuration, or task artifacts. If local changes or an active rebase/merge prevent a clean pull, preserve and resolve/synchronize that state first; do not begin task development until the pull succeeds.
+
+
+- Direct worker: human selects `gpt-6-sol`, high effort; record actual model in evidence.
+- Pool: Shared; either user may claim eligible unclaimed work.
+- Status: BLOCKED.
+- Claim: Unclaimed; synchronize current shared claims before starting.
+- Prerequisites: T01 reviewed design, B05, A05.5 and G02. Actual AWS model calls additionally require authorized access and spending; local synthetic preparation is not live acceptance.
+- Scope/files: `apps/web/**`, `apps/api/**`, `apps/workers/**`, `packages/application/**`, `packages/adapters/**`, relevant `tests/**`, implementation docs and the claimant's log. Name bounded files at claim; coordinate contracts, root files and any overlap with A05/B05/A05.5/B06. No simultaneous writers or implicit deployment authorization.
+- Outcome: implement T01's bounded TeamTable objective clarification, solver-supported private suggestion explanations and public-only conversational answers, reusing existing extraction, identity, job and permission machinery.
+
+## Acceptance
+
+1. Implement the three T01 interaction moments with actual application state and explicit owner/participant confirmation. Reuse A05/B05/A05.5 rather than introduce a second parser or permission system. Unsupported objectives get clarification; AI text cannot mutate consent or claim feasibility by itself.
+2. Enforce separate private/public model inputs and tool scopes on the server, including conversation memory, retries, logs and job results. Public answers use only current authorized public facts/disclosures. Validate all proposed actions through existing permissions and revision checks; discard stale model outputs.
+3. Preserve independent exception, disclosure and final-plan decisions. Verify refusal, no repeated pressure, no hard-condition relaxation, exact audience/text publication checks, duration/policy invalidation and unanimous approval of the same plan. Render safe form/template fallbacks when model output is invalid or the service is unavailable.
+4. Add and run T01's behavioral/privacy evaluations, including injected model instructions, other-owner requests, “who blocked this?” questions, unapproved disclosure, invented agreement status and stale responses. Inspect real requests/responses at the model boundary using synthetic fixtures; document limitations rather than claiming complete inference resistance.
+5. Run focused unit/integration/browser checks and `npm run check` under pinned Node/npm. Separately record an authorized real Bedrock run demonstrating the three moments, selected model/region, outcomes and redacted evidence. Mocks alone leave live acceptance pending; do not spend without explicit authorization.
+6. Obtain independent review of the changed privacy/consent code and tests before release; update affected G02 evidence for this new model boundary. Leave REVIEW pending human acceptance. Supply A06.5 with a reproducible demo and G03 with current review/evaluation evidence.
+
+- Handoff: A06.5 demo integration and G03 final release evidence. B06 remains the operational/deployment owner by task claim, not by user identity.
+
+Follow the [shared-pool workflow](../../../../agent-workflow.md) and [task board](../../../../task-board.md). General-purpose negotiation across new domains and native Alexa integration remain outside this task.

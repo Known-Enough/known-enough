@@ -1,0 +1,32 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# B02 — application commands, in-memory repository, projections, and versioned consent — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+> **Known Enough migration, 2026-09-26:** retained historical scope; status remains **DONE**. Follow the [current queue](../../../../task-board.md) and [mapping](../../../../known-enough-pivot.md#complete-old-task-mapping) for future work; historical handoffs below do not restart old tasks.
+
+# B02 — application commands, in-memory repository, projections, and versioned consent
+
+> **Before development:** On a clean clone checked out on `main`, run `git pull --ff-only origin main` before any actual development of this task, including code, tests, configuration, or task artifacts. If local changes or an active rebase/merge prevent a clean pull, preserve and resolve/synchronize that state first; do not begin task development until the pull succeeds.
+
+
+- Direct worker: original implementation and independent review used `gpt-6-astra`, high effort. Preserve that evidence; do not restart B02.
+- Pool: Shared; either user may claim eligible unclaimed work. Historical claims below remain evidence; active claims require explicit release.
+- Status: DONE; 47b97eb integrated at the user’s direction; combined checks passed. See [main integration](../../../../main-integration.md).
+- Claim: Completed implementation supplied for integration; no active implementation writer assigned here.
+- Prerequisite: B01 integrated on main.
+- Scope/files: `packages/application/**`, `packages/adapters/**` (in-memory only), `tests/integration/**`, plus the implementing developer’s work log and coordinated task/board/handoff records; Breaking contracts require coordinated consumer review.
+- Acceptance: test owner/public projections, stale contexts/proposals, same-key/different-body replay, independent permissions, expiry/decline/withdrawal/closed-room behavior, semantic invalidation, and competing finalization/revocation with an injectable clock. Run relevant unit/integration tests and `npm run check`; record actual outcomes. In-memory evidence does not prove DynamoDB safety.
+- Checkpoint/handoff: B02.5 reviews the next reviewable slice before B03 integration acceptance may rely on B02. The final B02 delta must be rechecked before B03 integration acceptance; then hand off to B03/A02.5.
+
+Follow [agent workflow](../../../../agent-workflow.md) and [task board](../../../../task-board.md). No mandatory branch or subagent; future work uses a separate clone on `main`.
+
+Published source: 47b97eb, based on B01 04c87d7. Imported historical verification reports 144 tests, two browser tests and an independent Astra review. Required owner/confirmation contract fields are integrated with the A01 mock update; public DTOs remain unchanged. No HTTP, verified authentication or durable/cloud implementation is implied.

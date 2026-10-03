@@ -1,0 +1,55 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# KE11 — Authenticated multi-participant experience — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+# KE11 — Authenticated multi-participant experience
+
+- Status: DONE — code-level app-side Cognito login, authenticated API client, focused tests and CLI handoff are complete under the user-directed cloud-first MVP path. Managed cloud smoke belongs to [KE13](../KE13/ticket.md), after [KE13B](../KE13B/ticket.md). No AWS resources were created by User B.
+- Claim: released on checked code/CLI handoff. User B / current Codex GPT-6 session (exact variant/effort unexposed; ticket target `gpt-6-sol` / high), clean synchronized `main` baseline `a2d2709`. Bounded files: `apps/web/src/**`, `apps/web/.env.example`, focused browser tests, this ticket, successor KE13B status-only, board, `docs/handoff-B.md`, `docs/work-log-B.md`, and `infra/staging-runbook.md`. No AWS/Cognito resource changes or backend composition.
+- Prior local-slice claim: Current Codex GPT-6 session (exact variant/effort unexposed), approved by the user despite the Sol/high target; clean synchronized `main` baseline `9c577cf861d65f08f944971e330ab2d0857fd54e`. Its tests and evidence are recorded below. No AWS/Cognito resource changes were made.
+- Prerequisite: KE10 local runtime implementation/checks and named earlier gates are recorded. [TD-KE10-01](../../../../technical-debt/TD-KE10-01-stop-commit-race.md) remains deferred until after MVP and does not block this work.
+- Scope/files: Cognito browser sign-in/callback/sign-out and access-token API client in `apps/web/src/**`; focused browser/unit tests; non-secret placeholders in `.env.example` if needed; this ticket, board, current handoff, `infra/staging-runbook.md` and User B's work log. Use an authorization-code + PKCE browser flow; no browser client secret. Keep the local-only test session isolated and never enable it in the hosted build. Do not implement the serverless API/DynamoDB/IAM composition here; that is KE13B. Do not create AWS resources, use AWS credentials, send invitations, deploy, or make paid calls in KE11. No real participant data, secrets or login tokens in repo files.
+
+## Outcome
+
+Adapt A04/A04.5 into the generic product using B04’s verified identity and invitations. Demonstrate independent participant sessions and a shared display; local mock labels cannot establish live authentication.
+
+The local slice uses short-lived signed loopback sessions, hashed single-use invitation tokens, explicit rotation after a lost issuance response, same-member redemption retry, and a public-only display session. The account picker can select any fictional account, so it demonstrates app identity binding and owner scoping without proving that a person is the named participant. See the [local test auth and invitation note](../../../../ke11-local-test-auth.md).
+
+## Acceptance
+
+1. Handle invitation issue/redemption, trusted subject provisioning, separate owner sessions, display scope and reconnect. Document token/session expiry, stale tabs and loss of access without leaking other-owner existence.
+2. Address the existing returned-once token, lost issuance response/reissue timing and post-redemption retry behavior. Never broaden invitation authority as an incidental UX fix.
+3. Test distinct browser contexts for five participants; verify test-session subjects cannot be changed by client fields, participant sessions receive only their own owner snapshot, another account cannot redeem the invitation, and the display cannot write. These local checks do not prove real-user resistance to organizer impersonation; that requires managed identity configuration and acceptance. Preserve exact unknown-outcome retries and reconfirm stale terms.
+4. Add focused tests for login callback/state handling, token attachment, expiry/sign-out and unauthenticated API failure using test doubles. No local AWS stack or AWS credentials are needed for these checks.
+5. Leave the web build configurable from non-secret Cognito/API settings and document their exact names: `VITE_COGNITO_REGION`, `VITE_COGNITO_USER_POOL_ID`, `VITE_COGNITO_DOMAIN`, `VITE_COGNITO_PARTICIPANT_CLIENT_ID`, `VITE_COGNITO_DISPLAY_CLIENT_ID`, and `VITE_API_BASE_URL`. The API keeps its existing server-side `COGNITO_USER_POOL_ID`, `COGNITO_PARTICIPANT_CLIENT_ID`, and `COGNITO_DISPLAY_CLIENT_ID`. Provide `.env.example` placeholders only, never a populated or committed `.env`; no browser client secret or AWS credentials.
+6. Update the staging runbook with exact CLI resource commands, required profile permissions, callback/logout URLs, environment variable names, B-only test-user setup, verification commands and cleanup. The runbook must label all values A must fill after CLI creation; B does not execute cloud commands.
+7. Specify closed self-registration and one pre-provisioned B-only staging account; do not commit its password or send it through repository artifacts. The backend must still enforce membership from verified identity.
+8. KE11 closes on code-level checks and a complete CLI handoff. Actual Cognito/browser and cloud-state evidence is recorded in KE13 by User A and User B using B's own test login. Pause for a focused KE09 follow-up only if a material auth boundary changes for external testers.
+
+## Connected browser checkpoint — 2026-09-29
+
+The regular app build now has a configured Cognito authorization-code/PKCE participant and display path. It validates the non-secret Cognito/API settings, uses distinct public app clients, keeps a short-lived access token and in-flight invitation in tab `sessionStorage`, consumes one matching callback state, removes callback parameters from the URL, sends the bearer token only to the configured decision API, and clears the browser session after expiry or API `401`. Hosted logout is invoked on sign-out; previously issued access tokens remain server-verifiable until expiry, so backend membership enforcement remains mandatory. The display path reads only the public snapshot; participant reads bind a public snapshot to the owner snapshot revision before showing private readiness/counts. The authenticated browser can issue or redeem a one-time invitation through the existing API, while the API determines organizer authority and token-to-subject binding. Unknown issuance outcomes preserve the explicit replacement step; unknown redemption outcomes retain the same tab token for retry. No cloud service is implied by the local test picker or by this build.
+
+The [Stage 1 CLI handoff](../../../../../infra/staging-runbook.md#ke11-cognito-identity--deployed-values-and-login-handoff--2026-09-29) specifies the pool/domain/public clients, closed self-registration, B-only test account, display group, profile actions, exact callback/logout URLs, non-secret build/server variables, verification and cleanup. [Browser placeholders](../../../../../apps/web/.env.example) carry no populated account values. KE13B must add authenticated API/DynamoDB/IAM composition and its named review before A executes that runbook; KE13 records B's own managed login and A's cloud smoke.
+
+Focused `apps/web/src/cognito-session.test.ts` passed 6/6, including callback/state/replay/expiry/provider error, PKCE client separation, bearer attachment/401 and same-tab invitation retention. The final pinned Node 24.21.0/npm 11.19.0 `npm run check` passed: 7 reference hashes, 15 planning checks, lint and 172 boundaries, typecheck, **374 unit tests passed / 2 optional skips**, production build/bundle scan, hosted preview boundary/browser 1/1 and E2E **44/44**. The first full run exposed one legacy keyboard navigation race from asynchronous local entry loading; synchronous local entry startup fixed it, and the final full run passed. No managed Cognito sign-in, cloud API/DynamoDB smoke, AWS write, external invitation or paid call occurred. KE11 is DONE on code/CLI criteria only; KE13 retains live acceptance.
+
+## Checks and handoff
+
+Pinned Node 24.21.0/npm 11.19.0 `npm run check` passed: references 7/7; planning 15/15; lint/boundaries 167; typecheck; 368 unit tests passed / 2 optional skips; production build/bundle scan; hosted preview boundary/browser 1/1; E2E 44/44. Focused signed-session/API tests passed 32/32 and `tests/e2e/scaffold.spec.ts` passed 5/5. Evidence includes wrong-account invitation denial, immutable token-to-subject binding despite changed client fields, each invited participant's own owner snapshot, and display write denial.
+
+The completed local slice's Cognito/browser smoke did not run because no managed identity configuration exists. Its local evidence is not real authentication. Under the 2026-09-28 cloud-first reprioritization, KE11 now prepares the app-side integration; User A performs the actual cloud smoke in KE13. No cloud resources, Bedrock calls, external invitations or publication occurred in the prior slice.
+
+Before development, use a separate clean clone on `main`, successfully run `git pull --ff-only origin main`, recheck current claims and record the bounded claim. One task at a time. Only reviews explicitly named in this ticket are gates; do not add broad or repeated review sessions. Follow the [token-efficient review policy](../../../../agent-workflow.md#review-scope-and-token-efficiency). No implicit publication, merge, deployment, paid calls/resources or external messages.
+
+Follow the [workflow](../../../../agent-workflow.md), [current queue](../../../../task-board.md), [product](../../../../known-enough-product.md), [architecture](../../../../known-enough-architecture.md) and [migration mapping](../../../../known-enough-pivot.md).

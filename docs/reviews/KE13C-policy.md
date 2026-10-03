@@ -16,4 +16,4 @@ No files or cloud resources were changed by the reviewer. This verdict applies t
 
 ## Follow-up
 
-The author correction is tracked in [KE13C policy follow-up](../tasks/KE13C-policy-followup.md). Its exact artifact must receive an independent focused review before permission-set assignment. Neither this review nor its correction changes KE00, B04/B04.5, KE13C build acceptance, or KE13 operational acceptance.
+The author correction is tracked in [KE13C policy follow-up](../tasks/historical/previous-batches/KE13C-policy-followup/ticket.md). Its exact artifact must receive an independent focused review before permission-set assignment. Neither this review nor its correction changes KE00, B04/B04.5, KE13C build acceptance, or KE13 operational acceptance.

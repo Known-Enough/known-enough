@@ -1,0 +1,40 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# A03.5 — frontend privacy and consent boundary review — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+> **Known Enough migration, 2026-09-26:** retained historical scope; status remains **REVIEW**. Follow the [current queue](../../../../task-board.md) and [mapping](../../../../known-enough-pivot.md#complete-old-task-mapping) for future work; historical handoffs below do not restart old tasks.
+
+# A03.5 — frontend privacy and consent boundary review
+
+> **Before development:** On a clean clone checked out on `main`, run `git pull --ff-only origin main` before any actual development of this task, including code, tests, configuration, or task artifacts. If local changes or an active rebase/merge prevent a clean pull, preserve and resolve/synchronize that state first; do not begin task development until the pull succeeds.
+
+
+- Direct worker: human selects `gpt-6-astra`, high effort; record actual model in evidence.
+- Pool: Shared; either user may claim eligible unclaimed work. Historical claims below remain evidence; active claims require explicit release.
+- Status: REVIEW; checkpoint verdict PASS for mock preparation rechecked on published `bc02dc6`; human acceptance pending.
+- Current follow-up claim: 2026-09-22T01:12:43Z — user-assigned independent A-lane GPT-6 reviewer (variant/effort not independently exposed). Reviewed the existing uncommitted R2/R5 correction against `cfb337104cff4d760986c849ab55606bf8ba0afa`; documentation-only scope, no implementation edits or subagents. Review finished; PASS. Earlier correction review of `1119d9d` remains historical in the review/log.
+- Follow-up claim: 2026-09-21T18:10:18Z — user-assigned independent A-lane reviewer, actual GPT-6 (session does not expose an Astra variant/effort). Reviewing current clean `main` at `c79faeb130ab4be5327212605197d621f572e71d`, including fix `64cdf4fc9ddadb56ad5285e6632332c6586e434c` and B03 integration. Follow-up finished; CHANGES_REQUESTED remains after independent verification. Documentation-only write scope; no implementation claim or subagents.
+- Claim: 2026-09-21T16:56:02Z — user-assigned independent A-lane reviewer, GPT-6 Astra / high. Clean `main` and fetched `origin/main` both at `df1e8761774b76923e9d3b69927025cbdc41c753`; A02/A03 are REVIEW with no active implementation claim. Review-only file scope below; implementation fixes stay with A.
+- Prerequisites: A02 and A03 are reviewable. Review uses mocks and is independent of server-auth evidence.
+- Scope/files: read `apps/web/**`, browser tests, bundles, imports, task/evidence logs; write `docs/reviews/A03.5.md`, the reviewer’s work log, and coordinated task/board/handoff records only. Route fixes to the owning writer.
+- Acceptance: independently review frontend public/private and consent boundaries, logs, imports, bundles, and browser behavior. Run focused client/browser tests and import/bundle checks; record actual commands/results. State missing evidence and unresolved findings explicitly. It is not proof of server authentication. Release A04/A05 preparation and A02.5 only with a recorded PASS for the current reviewed artifact and no unresolved blocking findings.
+- Handoff: A02.5, A04, A05.
+- Current review result: [independent uncommitted correction review](../../../../reviews/A03.5.md): PASS for the exact source diff/hash recorded there. R2/R5 closed for preparation; R1/R3/R4/V1 closures retained. Fresh full check 171/171 unit/integration and 29/29 browser; focused checks 13/13 unit and 27/27 browser; 11 independent probes passed. A02.5/A04/A05 checkpoint blocks released; human/live acceptance pending.
+- Implementation follow-up: A’s local correction against `cfb3371` and its original evidence remain in the work log; independently reviewed as above. Any changed source artifact requires follow-up review.
+
+Follow [agent workflow](../../../../agent-workflow.md) and [task board](../../../../task-board.md). Use a separate clone on `main`; no mandatory subagents.
+
+## Published-artifact completion
+
+User authorized B to finish/publish the pending follow-up on September 22. Main `bc02dc6` already contains A's fixes; no duplicate production implementation was made. Independent Astra/high probes confirmed the previous R2/R5 findings and stale receipt assertion are resolved. Terra/medium corrected browser-origin and lazy-loading synchronization checks; Astra integrated verification and publication. See [current review evidence](../../../../reviews/A03.5.md). This PASS is limited to mock preparation; A02.5 live acceptance and G01 remain separate.
+
+Final current check passed: 171 unit/integration tests, 29 Chromium browser tests, references/arithmetic/lint/typecheck/build/privacy scan. All final test deltas received independent Astra review; no remaining finding for this mock-preparation scope. User authorized publication to main.

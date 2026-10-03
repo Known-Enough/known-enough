@@ -1,0 +1,40 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# KE17 — Independent final release gate — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+# KE17 — Independent final release gate
+
+- Status: BLOCKED.
+- Claim: Unclaimed. No implementation or review has started.
+- Direct worker: human selects `gpt-6-astra` / high; record actual model/effort, never infer it from this file.
+- Prerequisite: [KE16](../KE16/ticket.md) is DONE with materials/checks recorded; all named earlier gates remain satisfied.
+- Scope/files: Read current deployed artifact/source/tests/demo/evidence; write docs/reviews/KE17.md and coordinated tracking only. Also this ticket, the current board/handoff and claimant’s own log. Name exact files and baseline at claim; coordinate contract/root/lock/CI changes.
+
+## Outcome
+
+Independently review the exact release candidate in a separate session with implementation paused. No feature work after this gate except release-blocking fixes, which require affected checks and follow-up review.
+
+## Acceptance
+
+1. Verify clean setup, exact source/deployment hashes, full automated checks, actual model/cloud smoke, judge access, current official track/rules, simulated Alexa+ labeling and truthful AWS/runtime claims.
+2. Inspect actual code and tests for authorization, strict public/private separation, context/memory/queue/log boundaries, independent permissions, stale-context/revoked-grant handling, exact unanimous approval and secret/fixture leakage.
+3. Confirm all current critical deltas have independent review, B04 local technical evidence and managed-service evidence are distinguished, and the demo matches the deployed artifact. Check actual friction and product-feedback materials.
+4. Record PASS/CHANGES_REQUESTED/BLOCKED with exact artifact, findings, commands and limitations. Route fixes to the implementation owner sequentially; rerun affected checks after changes.
+5. Record the independent verdict and mark the technical release review DONE on PASS. A reviewer PASS does not authorize publishing, pushing, submitting, deployment, spending or messages; those actions retain separate explicit authorization requirements.
+
+## Checks and handoff
+
+Fresh pinned npm run check, clean setup and separately authorized real model/cloud/access verification. The independent technical PASS is the final project review gate; execute external release actions only if explicitly authorized. No separate project-level human sign-off is required under the temporary deferral.
+
+Before development, use a separate clean clone on `main`, successfully run `git pull --ff-only origin main`, recheck current claims and record the bounded claim. One task at a time. Only reviews explicitly named in this ticket are gates; do not add broad or repeated review sessions. Follow the [token-efficient review policy](../../../../agent-workflow.md#review-scope-and-token-efficiency). No implicit publication, merge, deployment, paid calls/resources or external messages.
+
+Follow the [workflow](../../../../agent-workflow.md), [current queue](../../../../task-board.md), [product](../../../../known-enough-product.md), [architecture](../../../../known-enough-architecture.md) and [migration mapping](../../../../known-enough-pivot.md).

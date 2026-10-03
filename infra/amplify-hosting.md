@@ -37,7 +37,7 @@ The build runs in GitHub Actions rather than Amplify's build fleet, so Amplify b
 If staging is no longer needed:
 
 1. Remove this workflow and push that change to `main` to stop future deployments.
-2. Restore or remove the Amplify callback/logout URL from both Cognito clients. If returning to Vercel, restore the Vercel URL and Lambda origin recorded in [KE13](../docs/tasks/KE13.md).
+2. Restore or remove the Amplify callback/logout URL from both Cognito clients. If returning to Vercel, restore the Vercel URL and Lambda origin recorded in [KE13](../docs/tasks/historical/previous-batches/KE13/ticket.md).
 3. Delete the Amplify app (which removes its branches and hosted artifacts):
 
    ```sh

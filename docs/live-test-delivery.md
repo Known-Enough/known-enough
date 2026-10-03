@@ -14,10 +14,10 @@ The setup command is a required future deliverable, not an existing working comm
 
 | Order | Task | Intended worker | Current status | Concrete result |
 | --- | --- | --- | --- | --- |
-| 1 | [LIVE01 — Build the online setup package](tasks/LIVE01.md) | B | READY / unclaimed | Repeatable setup, test accounts, secure automatic login, isolated data, cleanup and rollback |
-| 2 | [LIVE02 — Test the real user journey](tasks/LIVE02.md) | B | BLOCKED on LIVE01 preparation | Real website/service tests carrying NP03/NP04 assertions; no local login/API/model substitute in live lanes |
-| 3 | [LIVE03 — Run checks after every deployment](tasks/LIVE03.md) | B | BLOCKED on LIVE02 preparation | Trusted GitHub deployment/test orchestration, release identity checks and one complete report |
-| 4 | [LIVE04 — Install once and prove B can run everything](tasks/LIVE04.md) | A installs; B qualifies | BLOCKED on LIVE01–03 and approved setup/budgets | Installed package, complete passing live report, automatic post-deployment run and actual B dispatch |
+| 1 | [LIVE01 — Build the online setup package](tasks/historical/completed/live-testing/LIVE01/ticket.md) | B | READY / unclaimed | Repeatable setup, test accounts, secure automatic login, isolated data, cleanup and rollback |
+| 2 | [LIVE02 — Test the real user journey](tasks/historical/completed/live-testing/LIVE02/ticket.md) | B | BLOCKED on LIVE01 preparation | Real website/service tests carrying NP03/NP04 assertions; no local login/API/model substitute in live lanes |
+| 3 | [LIVE03 — Run checks after every deployment](tasks/historical/completed/live-testing/LIVE03/ticket.md) | B | BLOCKED on LIVE02 preparation | Trusted GitHub deployment/test orchestration, release identity checks and one complete report |
+| 4 | [LIVE04 — Install once and prove B can run everything](tasks/active/live-testing/LIVE04/ticket.md) | A installs; B qualifies | BLOCKED on LIVE01–03 and approved setup/budgets | Installed package, complete passing live report, automatic post-deployment run and actual B dispatch |
 
 LIVE01–03 finish on their preparation criteria, with online execution explicitly pending LIVE04. LIVE04 requires actual service results. A blocked or omitted required lane cannot be reported as complete online qualification. NP01–NP04 remain local DONE; NP05 retains historical acceptance and maps its unfinished work into this sequence. NP00 retains its claim and model-disable work.
 

@@ -1,0 +1,38 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# G03 — historical task — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+# G03 — historical task
+
+- Status: SUPERSEDED.
+- Claim: None; unstarted future work replaced by the user-directed Known Enough pivot on 2026-09-26.
+- Replacement: [KE17](../KE17/ticket.md).
+
+> **SUPERSEDED — do not restart.** The original ticket below is preserved verbatim, including its then-current status and prerequisites. Only the status above schedules this ticket. See the [authoritative mapping](../../../../known-enough-pivot.md#complete-old-task-mapping) and [current queue](../../../../task-board.md). This is intentional replacement, not failure or completion.
+
+---
+
+# G03 — release evidence, threat-model review, and submission readiness
+
+> **Before development:** On a clean clone checked out on `main`, run `git pull --ff-only origin main` before any actual development of this task, including code, tests, configuration, or task artifacts. If local changes or an active rebase/merge prevent a clean pull, preserve and resolve/synchronize that state first; do not begin task development until the pull succeeds.
+
+
+- Direct worker: human selects `gpt-6-astra`, high effort; record actual model in evidence.
+- Pool: Shared; either user may claim eligible unclaimed work. Historical claims below remain evidence; active claims require explicit release.
+- Status: BLOCKED.
+- Claim: Unclaimed in this scheduling update; synchronize current shared claims before starting.
+- Prerequisites: A05.5, A06.5, B06 operational completion, T02 live evidence/independent review, and final G02 evidence including the changed AI boundaries.
+- Scope/files: `tests/**`, `docs/**`, this ticket, `docs/reviews/G03.md`, and coordinated task/board/handoff records. Route fixes to the named implementation claimant.
+- Acceptance: release test, threat-model review, current rules/access check, recording, and submission readiness using actual evidence. Run relevant checks and `npm run check`, recording actual outcomes. Publishing, submission, deployment, paid resources, and external access retain explicit authorization.
+- Handoff: human review and authorized release actions.
+
+Follow [agent workflow](../../../../agent-workflow.md) and [task board](../../../../task-board.md). Future work uses a separate clone on `main`; no mandatory branch or subagent.

@@ -28,11 +28,11 @@ Existing NP01 group-transport CAS/reconstruction, recipient expiry/replacement a
 
 ## Reproduction and limits
 
-Pinned Node 24.21.0/npm 11.19.0 `npm ci`: exit 0, 193 packages audited, zero vulnerabilities. Chromium/system dependencies installed on this local supported host. Focused NP04 browser 2/2 and API 7/7 passed; typecheck passed. Final full-check results are in [NP04](tasks/NP04.md).
+Pinned Node 24.21.0/npm 11.19.0 `npm ci`: exit 0, 193 packages audited, zero vulnerabilities. Chromium/system dependencies installed on this local supported host. Focused NP04 browser 2/2 and API 7/7 passed; typecheck passed. Final full-check results are in [NP04](tasks/historical/completed/next-phase/NP04/ticket.md).
 
 Run `npx vitest run tests/integration/np-qualification.test.ts` and `PLAYWRIGHT_CHANNEL=chromium npx playwright test tests/e2e/np-qualification.spec.ts`; then pinned `PLAYWRIGHT_CHANNEL=chromium npm run check`. Synthetic accounts and provider require no credentials or paid calls. Source commits use `[skip ci]`; repository sync does not publish staging.
 
-[NP05](tasks/NP05.md) separately owns authorized AWS/Cognito signup, A-only deployed CLI and IAM/config, managed persistence/restart/concurrency/logs, optional email, live-model qualification and remaining actual hosted screen checks. No managed or human result is implied by local DONE. NP00 remains A's preserved active claim. NP01–NP04 local implementation and qualification are complete. Final pinned full check exit 0: 464 passed / 2 optional DynamoDB Local skips, hosted 1/1, E2E 53/53; references 7/7, planning 15/15, lint/typecheck/builds passed.
+[NP05](tasks/historical/superseded/NP05/ticket.md) separately owns authorized AWS/Cognito signup, A-only deployed CLI and IAM/config, managed persistence/restart/concurrency/logs, optional email, live-model qualification and remaining actual hosted screen checks. No managed or human result is implied by local DONE. NP00 remains A's preserved active claim. NP01–NP04 local implementation and qualification are complete. Final pinned full check exit 0: 464 passed / 2 optional DynamoDB Local skips, hosted 1/1, E2E 53/53; references 7/7, planning 15/15, lint/typecheck/builds passed.
 
 Tested artifact SHA-256 (before documentation-only completion tracking):
 

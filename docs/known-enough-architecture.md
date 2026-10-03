@@ -113,7 +113,7 @@ Retain the [STATE/GUARD/REPLAY repository](../packages/adapters/src/dynamodb.ts)
 
 ## Model jobs and operations
 
-First implement injected interfaces for decision construction, owner interpretation, negotiation and public explanation. Deterministic synthetic responses exercise the actual application. They prove local orchestration only. [KE10](tasks/KE10.md) adds Bedrock and async runtime; [KE13](tasks/KE13.md) establishes authorized deployment evidence. The current workers package is a placeholder, not an existing SQS service.
+First implement injected interfaces for decision construction, owner interpretation, negotiation and public explanation. Deterministic synthetic responses exercise the actual application. They prove local orchestration only. [KE10](tasks/historical/previous-batches/KE10/ticket.md) adds Bedrock and async runtime; [KE13](tasks/historical/previous-batches/KE13/ticket.md) establishes authorized deployment evidence. The current workers package is a placeholder, not an existing SQS service.
 
 Queue envelopes carry job IDs and authorized record references, never raw private text. Bind jobs to decision context, owner/draft version where relevant, job epoch and audience. Check before reading/calling and transactionally before applying results. Superseded/expired/duplicate work cannot publish or resurrect a proposal. Limit attempts, repair loops, latency, tokens, concurrency and retained data; include a kill switch, redacted failure categories and expiry. Store provider/model/region/configuration as operational metadata without prompt contents in logs.
 
@@ -121,7 +121,7 @@ Keep raw private conversations only as necessary; KE07/KE10 specify retention, d
 
 ## Review and open decisions
 
-[KE09](tasks/KE09.md) independently reviews local generic code and tests. After Bedrock, session, shared-assistant or cloud changes, sequential follow-up review must cover those exact artifacts before external testers or release. Project-level sign-off is temporarily deferred; participant approvals and explicit external-action authorization remain separate. [KE17](tasks/KE17.md) reviews the actual release artifact; old TeamTable PASSes are never relabeled as new privacy evidence.
+[KE09](tasks/historical/previous-batches/KE09/ticket.md) independently reviews local generic code and tests. After Bedrock, session, shared-assistant or cloud changes, sequential follow-up review must cover those exact artifacts before external testers or release. Project-level sign-off is temporarily deferred; participant approvals and explicit external-action authorization remain separate. [KE17](tasks/historical/previous-batches/KE17/ticket.md) reviews the actual release artifact; old TeamTable PASSes are never relabeled as new privacy evidence.
 
 KE01 settles the shared-frame confirmation contract, bounded rule subset, qualitative clarification, private/public contribution projection, exact value/hash semantics and equivalent-request refusal identity. Ranking policy, pure evaluation and storage migration remain for KE02/KE03 and the later KE09 bundle. Ranking claims must name approved criteria and evaluated candidates; no claim of global optimality follows from heuristic AI search. The B04/B04.5 technical baseline remains available for KE02; project sign-off is deferred and does not block it. Cloud changes still require explicit authorization. Remaining decisions and risk owners are in the [pivot record](known-enough-pivot.md).
 

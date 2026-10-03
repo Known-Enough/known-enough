@@ -1,0 +1,56 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# KE12 — Stateful simulated Alexa+ shared assistant — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+# KE12 — Stateful simulated Alexa+ shared assistant
+
+- Status: DONE — implementation criteria and required checks passed; the independent scoped KE09 privacy follow-up is PASS on `a7f07d5..e197734`, unchanged through `fb81b8e`. No native Alexa or live AWS acceptance is claimed.
+- Claim: User B / Codex GPT-6 session, exact variant and effort unexposed (ticket target `gpt-6-sol` / high); clean `main` at `a7f07d5d1135f91291caa10051820a3e3d9eaee4`, `git pull --ff-only origin main` succeeded, ahead/behind 0/0. Bounded scope: `apps/web/src/connected-app.tsx`, new public assistant code/tests in `apps/web/src`, focused `tests/e2e`, demo documentation, this ticket, B log and handoff. User A retains KE13 and shared board ownership.
+- Direct worker: User B; `gpt-6-sol` / high target. B records the actual model/effort at claim; the ticket target is not proof of the active session model.
+- Prerequisite: KE11 and KE13B are DONE, and KE09's named prior checkpoint is recorded. User A's KE13 authenticated cloud smoke is still in progress; the user explicitly waived waiting for that smoke before starting KE12. The cloud smoke and KE12 completion remain independent and neither accepts the other.
+- Scope/files: apps/web/** shared conversation; public-only API/model adapter boundary; focused privacy/browser/evaluation tests; demo docs; this ticket and B's own log/handoff. A owns the shared board during the parallel window. Do not edit `.github/**`, `infra/**`, AWS auth/API CORS/IAM, contracts, root config, lockfile or deployment files; if KE12 needs one of those, pause and coordinate first.
+
+## Outcome
+
+Build the stateful Alexa+ track experience using only the public projection and authorized published disclosures. Prominently label simulated Alexa+ unless actual native integration is implemented and verified.
+
+## Acceptance
+
+1. Answer current proposal/approval state, such as “A proposal is ready and is awaiting two approvals,” from actual state. Preserve context across public turns and invalidate stale conversation state on revisions.
+2. Explain supported public reasons without claiming exhaustive best ranking. “Who could not afford Europe?” and indirect attribution attempts must not reveal private inputs, conflicts or hidden ratings.
+3. Public model context, memory and tools never receive owner data or invoke consent commands. A label on private model output is not a public projection.
+4. Evaluate direct/indirect disclosure requests, public-objective injection, stale agreement claims, expired/audience-changed disclosures and cross-room queries. Record actual versus simulated host/model behavior and obtain sequential KE09 follow-up.
+
+## Checks and handoff
+
+Run focused public-context and conversational/browser checks plus pinned `npm run check`. Mark DONE when its criteria pass; retain only the named sequential KE09 follow-up. Native Alexa/MCP remains optional future authorized scope. This task may run concurrently only with User A's KE13 AWS Amplify hosting automation under the one-time exception in the [workflow](../../../../agent-workflow.md#one-time-parallel-exception-for-2026-09-29). B does not need AWS credentials and must not change AWS auth, API CORS, IAM, deployment or infra files. Pushes to `main` can auto-deploy this work to the staging Amplify URL while it is in progress.
+
+Before development, use a separate clean clone on `main`, successfully run `git pull --ff-only origin main`, recheck the KE12/KE13 parallel claim and record the bounded claim. Only reviews explicitly named in this ticket are gates; do not add broad or repeated review sessions. Follow the [token-efficient review policy](../../../../agent-workflow.md#review-scope-and-token-efficiency). No AWS writes, paid model calls, or unrelated external actions.
+
+Follow the [workflow](../../../../agent-workflow.md), [current queue](../../../../task-board.md), [product](../../../../known-enough-product.md), [architecture](../../../../known-enough-architecture.md) and [migration mapping](../../../../known-enough-pivot.md).
+
+## Checked implementation checkpoint — 2026-09-29
+
+- The connected app now presents a prominent simulated Alexa+ shared assistant. Every question refreshes the authenticated public API route, validates the strict public snapshot and checks the requested decision ID. The assistant keeps only bounded public topic/revision memory, reports current proposal/approval counts, quotes only current viewer-authorized published information, and refuses private attribution. No model provider, native Alexa, owner route or consent command is in its assistant path.
+- [Demo and privacy evaluation](../../../../ke12-simulated-alexa.md) records actual simulated results versus absent native host/model results, including direct/indirect disclosure probes, public-objective injection, stale agreement, disclosure version/audience/expiry distinctions and cross-room requests.
+- Focused adapter tests: 12/12; connected-browser test: 1/1. Pinned `npm run check` on the implementation passed 395/395 unit/integration tests (2 optional skips), hosted browser 1/1 and E2E 45/45, plus 7 reference hashes, 15 planning checks, lint/boundaries, types and builds. A final full rerun after the bounded public-context key cleanup also passed with the same results.
+- User A retains KE13 and shared board ownership. This KE12 checkpoint has no AWS credentials or writes. The independent KE09 follow-up must inspect the exact pushed diff and these tests after the KE13/KE12 implementation overlap pauses; this author has not self-certified that gate.
+
+## Independent review claim — 2026-09-29T22:07:48Z
+
+User A / independent Codex GPT-6 session, exact runtime variant and effort unexposed (KE09 target Astra/high is not verified telemetry), takes the user-requested KE12 privacy follow-up. This session did not author KE12. Clean synchronized `main` baseline `fb81b8e`; `git pull --ff-only origin main` passed, ahead/behind 0/0. Review exact `a7f07d5..e197734` KE12 artifact and unchanged source at the current head; read supporting contracts/projection/auth and recorded tests. Bounded writes: `docs/reviews/KE12-privacy-followup.md`, this ticket, review index, shared board, demo/evaluation status, A log and A handoff only. No application/test/config/infra edits, AWS writes or paid calls. KE12 implementation is paused/released; this user-directed review occupies the sequential gate, with KE13 operational work held during this review.
+
+## Independent review outcome — 2026-09-29T22:12:21Z
+
+**PASS.** [KE12 privacy follow-up](../../../../reviews/KE12-privacy-followup.md) records the exact artifact, inspected public/auth/disclosure boundaries, fresh focused 40/40 (KE12 12/12), connected browser 1/1, independent 31-assertion adapter/browser and 5-assertion disclosure-expiry probes, and a full pinned clean-artifact check (395 passed / 2 optional skips, hosted 1/1, E2E 45/45). No code changes requested or made. The first full run encountered pre-existing generated Vercel-output lint errors; the same tracked artifact passed in a clean archive without disturbing those files. Reviewer: independent User A / Codex GPT-6, exact variant/effort unexposed; no KE12 authorship.
+
+This completes the named KE12 privacy gate and technical DONE criteria, not broader KE09/KE10 certification, KE13 live operations, native Alexa, real public-model behavior or human acceptance. Review claim released. KE13 retains its separate IN_PROGRESS operational work; B records remain historical evidence.

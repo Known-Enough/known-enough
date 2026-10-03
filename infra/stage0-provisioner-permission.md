@@ -1,6 +1,6 @@
 # Stage 0 provisioning permission candidate
 
-[KE13A-P](../docs/tasks/KE13A-provisioner-policy.md) prepares [this identity-policy template](permissions/ke13a-stage0-provisioner.json) for independent critical review. It is **not assignable**. Every allow expires at the deliberately past sentinel `2000-01-01T00:00:00Z`; the CloudFront tag ARN is a non-resource placeholder. No AWS mutation has occurred. User authorization to create a staging permission does not establish that this candidate meets the staging or spending constraints.
+[KE13A-P](../docs/tasks/historical/previous-batches/KE13A-provisioner-policy/ticket.md) prepares [this identity-policy template](permissions/ke13a-stage0-provisioner.json) for independent critical review. It is **not assignable**. Every allow expires at the deliberately past sentinel `2000-01-01T00:00:00Z`; the CloudFront tag ARN is a non-resource placeholder. No AWS mutation has occurred. User authorization to create a staging permission does not establish that this candidate meets the staging or spending constraints.
 
 ## Proposed identity and exact boundary
 

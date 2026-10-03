@@ -2,7 +2,7 @@
 
 # LIVE03 deployment and unattended qualification
 
-Prepared, disabled until installation. No workflow dispatch, AWS write/publication, real account, model or email operation occurred in this task. [LIVE04](tasks/LIVE04.md) records actual installed scope/envelope, A-to-B handoff, B's authenticated complete PASS and a separate authorized primary deployment followed automatically by a matching complete PASS. Local YAML/regression/full-suite success cannot prove those service results.
+Prepared, disabled until installation. No workflow dispatch, AWS write/publication, real account, model or email operation occurred in this task. [LIVE04](tasks/active/live-testing/LIVE04/ticket.md) records actual installed scope/envelope, A-to-B handoff, B's authenticated complete PASS and a separate authorized primary deployment followed automatically by a matching complete PASS. Local YAML/regression/full-suite success cannot prove those service results.
 
 ## Installation inputs
 

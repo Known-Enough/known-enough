@@ -1,0 +1,89 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# B04.5 — midpoint identity, transaction, and IAM review — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+> **Known Enough migration, 2026-09-26; policy update, 2026-09-27:** retained historical scope; status remains **REVIEW**. Synchronized main `65359eb` includes `f6b93bc` and independent R11/R12 PASS `1c4ea45`. Project-level user sign-off is deferred and does not block KE02; do not mark B04/B04.5 accepted or DONE. Earlier handoffs are dated evidence, not current blockers.
+
+# B04.5 — midpoint identity, transaction, and IAM review
+
+> **Before development:** On a clean clone checked out on `main`, run `git pull --ff-only origin main` before any actual development of this task, including code, tests, configuration, or task artifacts. If local changes or an active rebase/merge prevent a clean pull, preserve and resolve/synchronize that state first; do not begin task development until the pull succeeds.
+
+
+- Direct worker: human selects `gpt-6-astra`, high effort; record actual model in evidence.
+- Pool: Shared; either user may claim eligible unclaimed work. Historical claims below remain evidence; active claims require explicit release.
+- Status: REVIEW — fresh independent R11/R12 correction follow-up PASS on exact source diff `04bd1db..f6b93bc77ecf7b0680a1abcab4bc99d7fa836515`, inspected at `afecdf4`. R11/R12 are closed; no new bounded findings. Review claim finished. B04 remains REVIEW with project-level sign-off deferred; this does not block KE02. Live/cloud evidence remains outstanding; earlier verdicts retain their artifact scope. See [independent evidence](../../../../reviews/B04.5.md).
+- Claim: 2026-09-23T09:34:04Z; independent reviewer B / Codex GPT-6, exact variant/effort not exposed (scheduled Astra/high not claimed). Review `8e6d1c4..2df501d`; implementation owner A was paused during this review. Review finished. B04 submitted bounded R1–R4 corrections; the follow-up below leaves R2a/R2b/R5 open before adapter expansion. Write scope: this ticket, `docs/reviews/B04.5.md`, `docs/work-log-B.md`, and coordinated task board only.
+- Prerequisites: G01 and B04's initial reviewable slice, not B04 completion.
+- Scope/files: read B04 design, code, tests, and evidence; write `docs/reviews/B04.5.md`, the reviewer’s work log, and coordinated task/board/handoff records only. Route fixes to B04's writer.
+- Acceptance: independent critical review of identity, transactions, IAM, design, code, and tests. Run available focused adapter tests and record actual commands/results, distinguishing unrun cloud checks. Report findings and the final delta that requires G02 review; B04 completion requires critical findings addressed and actual checks.
+- Handoff: G02.
+
+- Fresh follow-up READY (2026-09-24): independently inspect exact B04 implementation commit `13707c2794491666989059cf23dcaa8bcd7e2075` against parent `30132974c457c6472290e64b35a495c676901b0e`. B04 is paused. Review invitation authorization, subject binding, one-time redemption, expiry/reissue, strict STATE v4 codec and race tests; verify the reported focused/full/DynamoDB Local evidence and its limits. This review is finished; see the claim and result below. The prior `a058cc5` PASS does not cover this diff.
+
+Follow [agent workflow](../../../../agent-workflow.md) and [task board](../../../../task-board.md). Use a separate clone on `main`; no mandatory subagents.
+
+- Follow-up claim: 2026-09-23T10:10:44Z; independent reviewer B / Codex GPT-6, variant/effort not exposed (Astra/high not claimed). Committed `2df501d..35d57e7`; implementation owner A is paused. Follow-up finished; CHANGES_REQUESTED. Documentation-only review scope as above.
+
+- Second follow-up claim: 2026-09-23T10:43:26Z; independent reviewer B / Codex GPT-6, variant/effort not exposed. Review exact `35d57e7..b91ff76` with status head `f2a8bf6`; implementation owner A is paused. Review finished; CHANGES_REQUESTED for R5b/R6. Preserved existing uncommitted reviewer evidence; no implementation writes.
+
+- Design follow-up claim: 2026-09-23T10:59:19Z; independent reviewer B / Codex GPT-6, variant/effort unexposed. Clean head `ff69e9c`; owner A paused. Review `b91ff76..ff69e9c` design delta; documentation-only scope, no implementation writes.
+
+- Interrupted attempt: the 2026-09-23T10:59:19Z reviewer claim reached its usage limit before substantive review. Its claim/log remain historical evidence; explicit user-authorized handoff releases it to this fresh review.
+- Fresh design follow-up claim: 2026-09-23T20:19:27Z; independent Codex reviewer, configured `gpt-6-astra` / high (launch metadata confirmed by coordinating session; separate runtime variant telemetry and human identity are not exposed). Review committed `b91ff76..98877e1` on `main`; owner A paused. Write scope: `docs/reviews/B04.5.md`, this ticket, `docs/work-log-B.md`, and coordinated task board/B04 ticket/A and B handoff review status only. No implementation edits or publication.
+
+- Fresh design follow-up result: 2026-09-23T20:21:21Z; CHANGES_REQUESTED. Claim finished. R6 accounting/proof/row arithmetic closed; R5b must reserve the disclosure response obligation before issuing its parent exception offer. Owner A takes only that bounded design correction, then returns for independent review before adapter expansion.
+
+- R5b follow-up claim: 2026-09-23T20:33:01Z; same independent Codex reviewer configured `gpt-6-astra` / high (launch metadata confirmed; separate runtime variant telemetry and human identity unexposed). Clean `main` at `5297118`, review range `98877e1..5297118`; owner A paused. Write scope remains review, B log and coordinated B04/B04.5 ticket/board/A and B handoff status only. No design or implementation edits, commit or publication.
+
+- R5b follow-up result: 2026-09-23T20:33:46Z; PASS on `5297118`. Claim finished. Complete response-path budgeting and atomic shared-reservation transfer close R5b; R6 remains closed. B04 midpoint design gate cleared; the owner may record sequential resumption under the B04 ticket. Implementation enforcement, subsequent critical review and G02/live acceptance remain required.
+
+
+- First-code-slice review claim: 2026-09-23T21:34:56Z; independent reviewer configured as gpt-6-astra / high under the user's explicit reviewer selection. Review exact B04 code commit 5297118..747aac2, the current B04 ticket, reviewed infra/README.md, focused/full-check evidence, and unresolved implementation limits. Owner A was paused. Reviewer scope was read-only source/test inspection; no implementation edits or publication.
+- First-code-slice review result: 2026-09-23T21:46:31Z; configured gpt-6-astra / high returned CHANGES_REQUESTED with four P2 findings R7–R10. Focused adapter 11/11; six relevant suites 72/72; typecheck, reference 7/7, planning 15/15, and whitespace passed. Independent probes reproduced all four. The reviewer did not rerun the full suite (210 unit/integration and 41 browser tests); the implementation's prior full check remains dated evidence. No live AWS/Cognito/DynamoDB/IAM evidence, commit, or publication. Detailed evidence is in [B04.5](../../../../reviews/B04.5.md).
+
+- R7–R10 follow-up claim: 2026-09-23T22:10:02Z; independent reviewer configured `gpt-6-astra` / high under the user's explicit selection. Inspect the exact correction range `747aac2..f88b4a0`, review findings and current task/design, full pinned check output, new regressions and local evidence/limitations. Owner A is paused. Review is read-only source/test inspection plus this checkpoint's evidence records; no implementation edits or publication.
+
+- R7–R10 follow-up result: 2026-09-23T22:16:01Z; configured `gpt-6-astra` / high, explicitly authorized by the user after the prior reviewer exhausted its usage limit. Review exact code range `747aac2..f88b4a0`; claim finished, CHANGES_REQUESTED narrowly for R10 mixed-reason precedence. R7–R9 closed. Focused adapter 17/17; six relevant suites 78/78; typecheck, references 7/7, planning 15/15, and whitespace passed. No full suite rerun by the reviewer and no live cloud/auth evidence. Findings and recommended classification order are recorded in [B04.5 review](../../../../reviews/B04.5.md).
+
+- Fresh R10 code follow-up claim: 2026-09-23T22:30:28Z; independent reviewer configured gpt-6-astra / high under the user's explicit fresh-review approval. Inspect exact diff f88b4a0..b78aab9, R10 findings, changed adapter code/tests and pinned check evidence. B04 owner A is paused. Read-only implementation inspection; write scope is review evidence, reviewer B log, this ticket and coordinated board/handoff status only. No implementation edits or publication.
+
+- Fresh R10 code follow-up result: 2026-09-23T22:38:42Z; independent configured gpt-6-astra / high (coordinating-session launch metadata confirmed; separate runtime variant telemetry unexposed). PASS on exact f88b4a0..b78aab99307fda1eda41776cf7bf260c72971a2a, inspected at 7104681 in a separate clone. R10 closed; claim finished. Focused adapter 21/21, 35 classifier assertions, references 7/7 and planning 15/15 passed. Owner full check was inspected, not independently rerun. B04 stays PAUSED pending owner resumption; no implementation edits, cloud acceptance or publication.
+
+
+## Unified artifact review handoff — 2026-09-23
+
+Review the exact local merge commit and inspect both parent deltas, the resulting Cognito/API composition, application replay contract, strict STATE/GUARD/REPLAY codec and transaction logic, all affected tests, and the migrated opt-in DynamoDB Local test. The older local R10 PASS (`f88b4a0..b78aab9`) and published persistence PASS (`a3e7261..cb2dbf9`) cover different artifacts. Confirm that no behavior or test evidence was lost while consolidating the adapter. The implementation owner remains paused until this independent review is recorded. No live-service verdict is possible from the local integration alone.
+
+
+- Completed unified artifact review claim: 2026-09-24T02:08:25Z; independent reviewer configured as `gpt-6-astra` / high under the user's earlier explicit authorization. Exact artifact: local merge commit `2dd036a`; B04 implementation owner remains paused. Review scope: read-only code/test inspection of merged Cognito/API composition, application replay behavior, STATE/GUARD/REPLAY adapter and transaction tests, migrated opt-in DynamoDB Local test, and the prior review constraints. Write scope is limited to this review record and coordinated task/board/handoff evidence. No implementation changes or publication.
+
+
+- Unified artifact review result: **CHANGES_REQUESTED**, recorded in `docs/reviews/B04.5.md`. Fix: export the Cognito resolver and type from `@deal-table/api`; add a package-surface regression; align the DynamoDB SDK manifest/lock with the installed 3.1135.0 package and restore full lock metadata. Independent checks confirmed the rest of the inspected merge boundaries. The review claim is finished; follow-up is required after the bounded B04 correction.
+
+
+- B04 correction handoff: 2026-09-24T02:20:50Z; source/test/manifest/lock changes are complete and paused. Review the package exports through `@deal-table/api`, verify manifest/lock/installed SDK alignment and the restored lock metadata, inspect the changed package test, and confirm no unintended scope. B04 remains paused until this follow-up returns PASS or findings. The emulator test remains skipped without DynamoDB Local.
+
+- Follow-up claim: 2026-09-24T02:26:02Z; reviewer B / `gpt-6-astra`, high effort (fresh independent reviewer, explicitly authorized). Exact code under review: `a058cc56b3b37f50f16ce01b2fbfeba68cf9a4b6` (bounded B04 correction atop unified merge `2dd036a`). Read-only scope: inspect the package exports and package-surface regression, verify adapter manifest/lock/installed SDK consistency and registry integrity metadata, review reported focused/full check evidence and the skipped emulator limitation, and assess the corrected unified artifact for regressions. Write scope is `docs/reviews/B04.5.md`, reviewer B's work log, this ticket, and coordinated task-board/handoff records only. No source edits, implementation, cloud activity, or publication. B04 remains PAUSED pending this verdict.
+
+
+- Follow-up result, 2026-09-24: fresh independent `gpt-6-astra` / high review **PASS** on exact code commit `a058cc56b3b37f50f16ce01b2fbfeba68cf9a4b6`; no bounded findings remain. Reviewer verified public exports, package regression, lock graph/SRI/install alignment, related auth/transaction behavior and reported limitations. Focused run: 82 passed, 1 opt-in DynamoDB Local case skipped; typecheck, references 7/7, planning 15/15 and diff checks passed. Full suite was author-reported, not independently rerun. B04 remains REVIEW pending human acceptance/integration and DynamoDB Local evidence. No push.
+
+- Invitation follow-up claim: 2026-09-24T23:48:04+00:00; independent Codex reviewer `/root/b04_5_independent_review`, configured `gpt-6-astra` / high (coordinating session confirmed explicit spawn model/effort and `fork_turns: none`; separate runtime telemetry is not exposed). Separate clone `/tmp/known-enough-b045-invitation-review`, clean `main` successfully pulled with `git pull --ff-only origin main` to `8d13cff3a9dc5bff6f5654df25b03c517a2ac232`. Exact review range `30132974c457c6472290e64b35a495c676901b0e..13707c2794491666989059cf23dcaa8bcd7e2075`. B04 remains PAUSED. Bounded writes: this ticket, `docs/reviews/B04.5.md`, and coordinated `docs/task-board.md` only; no implementation or personal-log edits, no push.
+
+- Invitation follow-up result: 2026-09-24T23:54:33+00:00; **CHANGES_REQUESTED**, R11/R12 as recorded in [review evidence](../../../../reviews/B04.5.md). Exact range `30132974c457c6472290e64b35a495c676901b0e..13707c2794491666989059cf23dcaa8bcd7e2075`; configured `gpt-6-astra` / high independent reviewer. Fresh focused suites 86/86, DynamoDB Local 1/1, typecheck, references 7/7, planning 15/15 and targeted probes passed/reproduced the findings. Full author check was read as a summary, not independently rerun. Claim released; B04 remains PAUSED until the owner records bounded R11/R12 correction resumption, followed by independent review. No implementation/personal-log edits or push.
+
+
+- Correction follow-up READY (2026-09-25): independently inspect exact source diff `04bd1db..f6b93bc` for R11/R12 closure. Verify scoped 404/403 behavior, pre-body and transaction reauthorization, known-no-commit 409 mapping for invitation issue/redemption, no partial state, new signed-identity/HTTP tests and reported full check. This handoff was claimed and completed below; B04 is paused. Prior CHANGES_REQUESTED applies only to `13707c2`.
+
+- R11/R12 correction follow-up claim: 2026-09-25T00:27:00Z; independent Codex reviewer `/root/b04_5_r11_r12_followup`, configured `gpt-6-astra` / high (coordinating session confirmed explicit spawn model/effort and `fork_turns: none`; separate runtime telemetry is not exposed). Separate clone `/tmp/known-enough-b045-followup-review`: clean `main` successfully pulled from origin to `8d13cff3a9dc5bff6f5654df25b03c517a2ac232`, then fast-forwarded the authorized local artifact to `afecdf4`. Exact source range `04bd1db..f6b93bc77ecf7b0680a1abcab4bc99d7fa836515`. B04 remains PAUSED. Write scope: this ticket, `docs/reviews/B04.5.md`, and `docs/task-board.md` only; no implementation, personal-log edits, or push.
+
+- R11/R12 correction follow-up result (2026-09-25): **PASS**, configured independent `gpt-6-astra` / high on exact `04bd1db..f6b93bc77ecf7b0680a1abcab4bc99d7fa836515`. R11/R12 closed; claim released. Fresh focused suites **87/87**, DynamoDB Local **1/1**, nine adapter-to-HTTP capacity/unknown/throttle scenarios, pending-scope and organizer-revocation probes, typecheck, references **7/7**, planning **15/15** passed. Author full check was reviewed as a committed summary, not independently rerun; raw output was unavailable. B04 remains PAUSED until owner records resumption; B04.5 REVIEW pending human acceptance, no live/cloud acceptance or push. Only the three authorized review/tracking documents changed; no personal-log authorship.

@@ -16,11 +16,11 @@ Participant confirmation, concession permission, disclosure permission and exact
 
 | Priority | Task | Outcome | Initial status |
 | --- | --- | --- | --- |
-| 0 | [NP00](tasks/NP00.md) | Resolve known technical debt, verification limits and remaining existing-scenario integration/operational proof | READY |
-| 1 | [NP01](tasks/NP01.md) | Registration, A's approval CLI, groups and invitations | BLOCKED on NP00 |
-| 2 | [NP02](tasks/NP02.md) | Create a supported decision from a group's own objective | BLOCKED on NP01 |
-| 3 | [NP03](tasks/NP03.md) | Inspect every user-facing screen and make wording clear | BLOCKED on NP02 |
-| 4 | [NP04](tasks/NP04.md) | Automated fresh-user/group qualification through a non-prefabricated agreement | BLOCKED on NP03 |
+| 0 | [NP00](tasks/active/closeout/NP00/ticket.md) | Resolve known technical debt, verification limits and remaining existing-scenario integration/operational proof | READY |
+| 1 | [NP01](tasks/historical/completed/next-phase/NP01/ticket.md) | Registration, A's approval CLI, groups and invitations | BLOCKED on NP00 |
+| 2 | [NP02](tasks/historical/completed/next-phase/NP02/ticket.md) | Create a supported decision from a group's own objective | BLOCKED on NP01 |
+| 3 | [NP03](tasks/historical/completed/next-phase/NP03/ticket.md) | Inspect every user-facing screen and make wording clear | BLOCKED on NP02 |
+| 4 | [NP04](tasks/historical/completed/next-phase/NP04/ticket.md) | Automated fresh-user/group qualification through a non-prefabricated agreement | BLOCKED on NP03 |
 
 Model targets: `gpt-6-sol` / high for NP00, NP01, NP02 and NP04; `gpt-6-luna` / medium for NP03. The human selects the direct worker. Report the actual session model/effort when exposed; a ticket does not change the runtime. No manager or subagents are required, and no agents are spawned under this batch policy.
 

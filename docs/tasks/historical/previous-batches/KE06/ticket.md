@@ -1,0 +1,50 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# KE06 — AI decision architect with injected responses — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+# KE06 — AI decision architect with injected responses
+
+- Status: DONE — technical acceptance met on 2026-09-27; handed off to KE07.
+- Claim: 2026-09-27T19:10:56Z; User A / current Codex GPT-6, exact runtime variant/effort unexposed. The user-directed `gpt-6-luna` / high target is recorded, not claimed as verified runtime selection. Clean synchronized `main` baseline `0c0c4c643f1d0a09f05077a8abb4b68fc5cc6f69`; `git pull --ff-only origin main` succeeded. Bounded files: `packages/application/src/{known-enough.ts,types.ts,index.ts}` and new `decision-architect.ts` plus focused application tests; `apps/api/src/{http-core.ts,local.ts}` and `known-enough-http.test.ts`; `apps/web/src/{known-enough-home.tsx,command-client.ts}` and `tests/e2e/scaffold.spec.ts`; `packages/test-support/src/known-enough-fixtures.ts` only if required for public synthetic cases; this ticket, board, current handoff and A log. No contract schema, domain kernel, managed persistence adapter, root manifest/lockfile, CI, cloud, paid model, external API or publication changes planned. Stop and coordinate if schema/root scope proves necessary.
+- Claim verification: KE05 is DONE and the board shows no other active task. This is the sole active project task.
+- Direct worker: `gpt-6-luna` / high by user direction for the KE01–KE08 MVP; record actual model/effort, never infer it from this file.
+- Prerequisite: [KE05](../KE05/ticket.md) is DONE with its acceptance checks recorded; all named earlier gates remain satisfied.
+- Scope/files: application model ports; apps/web/** create/clarify UI; apps/api/** as required; synthetic fixtures and focused tests. Also this ticket, the current board/handoff and claimant’s own log. Name exact files and baseline at claim; coordinate contract/root/lock/CI changes.
+
+## Outcome
+
+Given a natural-language objective, use an injected AI interface to draft a validated decision frame. Exercise the actual generic application using deterministic fake model responses before introducing Bedrock.
+
+## Acceptance
+
+1. Christmas objective produces clarification questions, typed variables, public options, participant information requirements and supported rules. The shared frame remains a draft until the accepted explicit confirmation mechanism completes.
+2. Treat all model output as untrusted input. Reject malformed JSON, invented participants/options, unsupported operators, inconsistent definitions and stale jobs; ambiguous or unsupported objectives require clarification.
+3. Public-objective prompt injection cannot alter authorization, select arbitrary tools or execute expressions. Separate model suggestions from authoritative commands.
+4. Build reusable synthetic evaluation cases with expected outcomes and record observed results. Keep native Alexa, paid calls and external APIs outside this injected task.
+
+## Checks and handoff
+
+Run focused schema/application/UI evaluations and pinned npm run check. When criteria and checks pass, record evidence and mark DONE; hand off directly to KE07 without per-task human review.
+
+Before development, use a separate clean clone on `main`, successfully run `git pull --ff-only origin main`, recheck current claims and record the bounded claim. One task at a time. Only reviews explicitly named in this ticket are gates; do not add broad or repeated review sessions. Follow the [token-efficient review policy](../../../../agent-workflow.md#review-scope-and-token-efficiency). No implicit publication, merge, deployment, paid calls/resources or external messages.
+
+Follow the [workflow](../../../../agent-workflow.md), [current queue](../../../../task-board.md), [product](../../../../known-enough-product.md), [architecture](../../../../known-enough-architecture.md) and [migration mapping](../../../../known-enough-pivot.md).
+
+## Completion — 2026-09-27
+
+- Added an injected `DecisionArchitect` application service. The caller supplies public objective, proposed participant labels and allowed option labels; untrusted model output must be bounded JSON, use only supported public contract variables/rules, preserve the input participant set/options, and keep information requirements in a small privacy-safe category allowlist. The service constructs a public frame projection and removes owner fields. It does not persist or confirm the frame. Per-actor/draft in-flight generations reject stale results.
+- Added authenticated HTTP `POST /decisions/architecture/draft`, enabled only when an architect port is explicitly injected. The local API injects a deterministic fixture model, not a live AI provider; no real model, network service, paid call or private input is used. The default UI calls only the loopback API using the fixed local non-production identity, asks for fictional participant labels and candidate options, shows clarifications/requirements/shared topics, drops superseded results, and labels all output as simulated. Existing TeamTable local identities/routes remain clearly non-authenticated and local-only.
+- The returned frame is a public allowlist object. The API test passes the frame to `KnownEnoughApplication.createDecision` and verifies its initial state is still `COLLECTING_FRAME_CONFIRMATION` with no confirmations. No production authentication or shared persistence was added; the UI prototype remains ephemeral and local.
+- Changed files: `packages/application/src/{decision-architect.ts,decision-architect.test.ts,index.ts}`, `apps/api/src/{http-core.ts,local.ts,known-enough-http.test.ts}`, `apps/web/src/{known-enough-home.tsx,style.css}`, `tests/e2e/scaffold.spec.ts`, this ticket, `docs/task-board.md`, `docs/handoff-A.md`, and `docs/work-log-A.md`. No schema, domain, adapter, manifest/lock, CI, cloud, deployment or paid-call changes.
+- Actual worker: Codex GPT-6; runtime variant/effort unexposed. The requested `gpt-6-luna` / high setting is not claimed as the runtime used.
+- Pinned Node 24.21.0 / npm 11.19.0 `npm run check` passed: reference hashes 7/7; planning checks 15/15; lint/import boundaries 117; typecheck; 285 unit tests passed with two opt-in DynamoDB Local skips; production build and bundle scan; hosted-preview build/scan and browser test 1/1; full E2E 43/43. A real loopback smoke request returned HTTP 200 with a clarification-required synthetic trip frame and no authentication/shared-state claim. No AWS/cloud or paid operations.
+- KE06 is DONE on its task criteria. KE07 is next and READY; no separate review or human acceptance gate was added. KE00 and B04/B04.5 statuses are unchanged.

@@ -36,4 +36,4 @@ Current focused primary/CLI/helper checks **82/82**; pinned full `npm run check`
 
 Original API ZIP: `6a0cd3eb5b35b1c993917962b9f5f3eb415a6eb75f9b25f98141c1ee36708b4a`; broker ZIP: `b5f93d79414e582107ea16d6fd351c19d22419f47ebe772482f98630d2426a49`.
 
-A's actual reconciliation/readback, real Cognito delivery to Mail.tm/cleanup, B workload manual qualification and matching automatic complete PASS remain [ASSESS07](tasks/ASSESS07.md). NP00 remains A's excluded work. See [ASSESS09 evidence](tasks/ASSESS09.md) and the [remaining installation/qualification instructions](live-qa-final-handoff.md) after successful readback.
+A's actual reconciliation/readback, real Cognito delivery to Mail.tm/cleanup, B workload manual qualification and matching automatic complete PASS remain [ASSESS07](tasks/active/live-testing/ASSESS07/ticket.md). NP00 remains A's excluded work. See [ASSESS09 evidence](tasks/historical/completed/assessments/ASSESS09/ticket.md) and the [remaining installation/qualification instructions](live-qa-final-handoff.md) after successful readback.

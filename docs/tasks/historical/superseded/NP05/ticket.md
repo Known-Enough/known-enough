@@ -1,0 +1,38 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# NP05 — Authorized deployment and managed-service checks
+
+## Current delivery mapping — 2026-10-01
+
+The user requested smaller named tasks with B preparing everything before A installs once. [LIVE01–04](../../../../live-test-delivery.md) now schedule this unfinished online work; [LIVE04](../../../active/live-testing/LIVE04/ticket.md#obligation-mapping) maps every acceptance item below. This ticket remains BLOCKED/unclaimed as historical umbrella tracking; its requirements are not deleted or marked complete. B starts LIVE01 preparation under the explicit exception, while NP00 retains its claim. Actual managed evidence remains pending.
+
+- Status: BLOCKED — separately authorized operations and A/configured-host claim required; local NP01–NP04 checkpoints complete.
+- Claim: Unclaimed; A uses A's own AWS credentials.
+- Created by user direction on 2026-09-30: work on everything except NP00 and list AWS or other checks as a new task.
+
+## Acceptance
+
+1. Preserve NP00's existing claim and evidence; coordinate before touching its Lambda/IAM/scenario obligations. Do not duplicate or claim those are completed.
+2. Prepare exact source/build/Lambda artifacts, new routes/table access and verified-email Cognito signup settings. Separately authorize deployments/cloud writes; implementation commits use `[skip ci]` until publication is approved here.
+3. Verify actual registration/verification, operator approval/rejection/disable and denial of old sessions. Run A's scoped approval CLI and sanitize readback.
+4. Verify managed persistence/restart, invitation recipient binding/replacement/replay/expiry, concurrent membership/decision changes, cross-group and owner isolation with specifically authorized synthetic identities.
+5. Optionally configure an email sender and verify bounded authorized transactional sends; copyable links remain available. No automatic messages or real recipient data in evidence.
+6. Run separately budgeted live-model qualification of a fresh group/objective, explicit synthetic confirmations/permissions/exact approvals, refusal/stale/revoked authority and privacy/log checks. Deterministic NP04 tests are not live evidence.
+7. Inspect actual hosted signup/verification/error screens and remaining rejected-access, expired/replaced invitation, clarification/revision and managed display states from [NP03 inventory](../../../../np03-screen-inventory.md); record rendered evidence.
+8. Record hashes/configuration/commands/results/limits. Volunteer feedback, independent release review and submission remain deferred.
+
+NP01–NP04 complete local implementation/automated criteria; their missing managed evidence remains here. This task itself authorizes no AWS writes, paid calls, deployment, email or real participant actions.
+
+## Local handoff
+
+See [deployment preparation](../../../../../infra/np05-deployment.md), [NP03 screen inventory](../../../../np03-screen-inventory.md) and [NP04 qualification](../../../../np04-qualification.md). All local source pushes skip deployment CI. The next configured-host worker must pull clean main ff-only, inspect NP00's preserved claim, record a non-overlapping NP05 claim and obtain the separately required operations/budget/send authorization. Do not treat offline signed tokens, operator-core calls or codec reconstruction as deployed Cognito/CLI/restart evidence.
+
+## Shared live-check preparation — 2026-10-01
+
+The user authorized a narrow GitHub OIDC role for checks of the existing public staging builds and AWS metadata. The manual workflow and exact read-only trust/policy are prepared in [shared staging checks](../../../../shared-staging-checks.md); their bounded setup is recorded under the still-active NP00 claim. The WSL local public smoke run passes 10/10, but the AWS role is not installed and no GitHub OIDC workflow run exists yet. This read-only role does not claim NP05 rollout or grant any deployment permission. NP00's claimant/status are unchanged. NP05 remains BLOCKED/unclaimed.
+
+The LAT01 manifest pins the recorded Stage 0 and Amplify frontend commits/hashes and the API base. NP00's 2026-10-01 WSL read-only Lambda readback verified deployed ZIP SHA-256 `d5194b8da79250fbad2422ba948d4122654947941c20822ec58de768ef2f9b4f`, now recorded in the manifest; the deployed source commit remains unknown. The candidate source ZIP and exact previous ZIP are prepared in NP00's private WSL artifact directory. The separate WSL public harness run passed 10/10 with bounded unauthenticated HTTPS GETs and browser loads; no GitHub OIDC inventory run exists yet.
+
+The broader proposal maps registration through exact unanimous approval to the existing NP01/NP02/NP04 local assertions, then names their real Cognito/operator/API replacements for later live runs. That larger setup still needs an isolated QA deployment and short-lived exact-subject roles; no write access to NP00's shared aggregate is permitted. No paid model request or email was made. The live Lambda is currently configured `BEDROCK` with paid approval `true` and its Nova permission still attached; NP00 has prepared, but not applied, the fail-closed AWS safety changes because the temporary administrator profile is unavailable. Cognito self-signup is currently admin-only. Keep model calls, self-signup/verification email and transactional email gated behind their distinct budgets and authorization. This is preparation only; LAT02+ and live operations remain unclaimed.
+
+LAT01 local evidence: target manifest consistency passed for eight frontend hashes, the backend artifact hash and both frontend source commits. The manifest-only Playwright check passed 1/1; pinned clean-worktree `npm run check` passed with 464 tests / 2 optional skips, hosted 1/1 and E2E 53/53. A WSL public live run now passed 10/10, confirming both frontend asset sets against their pinned hashes and the API's unauthenticated denial; GitHub OIDC readback still awaits role installation/dispatch. The [WSL preflight](../../../../../infra/np05-deployment.md) identifies the dedicated group table, exact API routes, Cognito requirements, scoped permissions and rollback; it remains part of NP00 preparation and does not claim NP05. NP05 stays BLOCKED/unclaimed.

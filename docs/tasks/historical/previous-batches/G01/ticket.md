@@ -1,0 +1,38 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# G01 — real local negotiation integration checkpoint — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+> **Known Enough migration, 2026-09-26:** retained historical scope; status remains **DONE**. Follow the [current queue](../../../../task-board.md) and [mapping](../../../../known-enough-pivot.md#complete-old-task-mapping) for future work; historical handoffs below do not restart old tasks. Synchronized main `65359eb` includes `f6b93bc` and the independent R11/R12 PASS record `1c4ea45`; B04/B04.5 remain REVIEW for human acceptance. Earlier local/unpushed/paused statements are dated history, not the current source state.
+
+# G01 — real local negotiation integration checkpoint
+
+> **Before development:** On a clean clone checked out on `main`, run `git pull --ff-only origin main` before any actual development of this task, including code, tests, configuration, or task artifacts. If local changes or an active rebase/merge prevent a clean pull, preserve and resolve/synchronize that state first; do not begin task development until the pull succeeds.
+
+
+- Direct worker: human selects `gpt-6-astra`, high effort; record actual model in evidence.
+- Pool: Shared; either user may claim eligible unclaimed work. Historical claims below remain evidence; active claims require explicit release.
+- Status: DONE; local integration checkpoint human accepted 2026-09-23.
+- Claim/result: implementation and integration were already published; user acceptance recorded 2026-09-23 after independent follow-up PASS. No new implementation claim.
+- Prerequisites: A02.5, A03.5, B03, and final B02.5 evidence.
+- Scope/files: `tests/e2e/**`, `tests/integration/**`, this ticket, `docs/reviews/G01.md`, and coordinated task/board/handoff records. Route fixes to the named implementation claimant.
+- Acceptance: real local solver drives UI without an LLM; refusal and disclosure remain independent; three approvals are required; duration edit invalidates exception grants and final approvals. Run relevant unit/integration/browser tests and `npm run check`, recording actual outcomes. This is local integration evidence, not proof of real DynamoDB races or production authentication.
+- Handoff: A04.5, B04, A06.5.
+
+Current queue update, 2026-09-25: B04’s G01 prerequisite is satisfied. Earlier B04.5 follow-up passed on `a058cc5`, then a fresh invitation audit requested P2 R11/R12 on `13707c2`. B04 fixed the findings in local commit `f6b93bc`; exact source diff `04bd1db..f6b93bc` is PAUSED for fresh independent B04.5 follow-up. No live identity/cloud acceptance is implied.
+
+Follow [agent workflow](../../../../agent-workflow.md) and [task board](../../../../task-board.md). Future work uses a separate clone on `main`; no mandatory branch or subagent.
+
+## Authorized integration — September 22, 2026
+
+This September 22 note records the integration state at that time. Its statement that human acceptance was separate and B04 unclaimed was superseded by the September 23 G01 acceptance and B04 claim above.
+
+User authorized commit/push of the reviewed repairs in `d042d8f`; synchronization found published overlapping work through `8371e7b`. Both histories are preserved in the integration. Latest implementation owner: B for this bounded integration; no new task takeover is inferred from the shared-pool policy. A02.5/G01 repair evidence is in [G01](../../../../reviews/G01.md). Incoming diagnostics/readiness fixes and coverage-review regression are preserved; initial answers stay explicit per interval, retries remain exact and snapshots must match control versions. Fresh combined `npm run check` passed 179 unit/integration and 37 browser tests; independent follow-up PASS on the exact 12-file artifact is recorded in G01. Publication is explicitly user-authorized; human checkpoint acceptance remains separate. B04 remains unclaimed pending G01 acceptance. Earlier findings remain historical evidence.

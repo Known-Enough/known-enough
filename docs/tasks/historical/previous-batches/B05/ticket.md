@@ -1,0 +1,40 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# B05 — historical task — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+# B05 — historical task
+
+- Status: SUPERSEDED.
+- Claim: None; unstarted future work replaced by the user-directed Known Enough pivot on 2026-09-26.
+- Replacement: [KE10](../KE10/ticket.md).
+
+> **SUPERSEDED — do not restart.** The original ticket below is preserved verbatim, including its then-current status and prerequisites. Only the status above schedules this ticket. See the [authoritative mapping](../../../../known-enough-pivot.md#complete-old-task-mapping) and [current queue](../../../../task-board.md). This is intentional replacement, not failure or completion.
+
+---
+
+# B05 — Bedrock owner-only draft extraction, SQS jobs, stale-result rejection, and safe routing
+
+> **Before development:** On a clean clone checked out on `main`, run `git pull --ff-only origin main` before any actual development of this task, including code, tests, configuration, or task artifacts. If local changes or an active rebase/merge prevent a clean pull, preserve and resolve/synchronize that state first; do not begin task development until the pull succeeds.
+
+
+- Direct worker: human selects `gpt-6-sol`, high effort; record actual model in evidence.
+- Pool: Shared; either user may claim eligible unclaimed work. Historical claims below remain evidence; active claims require explicit release.
+- Status: BLOCKED.
+- Claim: Unclaimed in this scheduling update; synchronize current shared claims before starting.
+- Prerequisites: reviewed B04 and B04.5.
+- Scope/files: `apps/workers/**`, `packages/adapters/**`, `packages/application/**`, `tests/integration/**`, plus the implementing developer’s work log and coordinated task/board/handoff records; coordinate contracts/root changes.
+- Acceptance: target Bedrock owner-only draft extraction and SQS jobs, with stale-result rejection and safe shared routing. Every extracted draft needs explicit owner review and confirmation; the model cannot grant exceptions, disclosure permission or final approval. Run relevant unit/integration tests and `npm run check`; record actual outcomes. Preserve independent consent and redact private conditions, grant IDs, and refusal detail in public payloads/logs.
+- Handoff: A05.5 and B06.
+
+Coordinate with [T01](../T01/ticket.md)/[T02](../T02/ticket.md): this ticket retains owner-only extraction/jobs and safe routing; T02 owns the additional facilitator behavior and evaluations. Do not duplicate these components.
+
+Follow [agent workflow](../../../../agent-workflow.md) and [task board](../../../../task-board.md). Future work uses a separate clone on `main`; no mandatory branch or subagent.

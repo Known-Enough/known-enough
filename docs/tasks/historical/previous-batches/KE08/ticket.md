@@ -1,0 +1,52 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# KE08 — AI candidate generation and private negotiation — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+# KE08 — AI candidate generation and private negotiation
+
+- Status: REVIEW — local MVP and technical checks complete; shown for the single product feedback pass; next is KE09's named independent architecture/privacy review.
+- Claim: User A; actual worker Codex GPT-6, runtime variant/effort unexposed. User-directed `gpt-6-luna` / high is the target, not verified runtime selection. Clean synchronized `main` baseline `1135d79` after successful `git pull --ff-only origin main` in `/tmp/known-enough-ke07`.
+- Direct worker: `gpt-6-luna` / high by user direction for the KE01–KE08 MVP; record actual model/effort, never infer it from this file.
+- Prerequisite: [KE07](../KE07/ticket.md) is DONE with its acceptance checks recorded; all named earlier gates remain satisfied.
+- Bounded scope/files: `packages/application/src/{known-enough.ts,index.ts,decision-negotiator.ts,decision-negotiator.test.ts}`; `packages/domain/src/known-enough-kernel.test.ts` only for focused integration coverage (kernel implementation unchanged unless its current contract proves insufficient); `apps/api/src/{http-core.ts,local.ts,known-enough-http.test.ts}`; `apps/web/src/{known-enough-home.tsx,style.css,decision-negotiator-mock.ts,decision-negotiator-mock.test.ts}`; `tests/e2e/scaffold.spec.ts`, `playwright.config.ts` and `scripts/{run-local-api.mjs,typescript-loader.mjs}` only to run/test the loopback API for the synthetic Christmas browser flow; this ticket, board, A handoff and A log. The API's loopback-only Christmas fixture stays self-contained in `apps/api/src/local.ts`; browser source imports no fixtures. No contract/schema, persistence adapter, root manifest/lock, CI, AWS, live model or paid-service changes. Stop and coordinate if scope must expand.
+
+## Outcome
+
+Trusted negotiation AI consumes confirmed structured conditions, preferences, active permissions and current public state to propose candidates and useful private questions. Every candidate passes KE02 before publication; AI cannot grant a concession.
+
+## Acceptance
+
+1. Exclude unnecessary raw explanations from negotiation context. Return candidate values, invoked rule references, intended-owner questions and explanation drafts through strict schemas.
+2. Validate arithmetic, references, confirmed HARD limits, current context and permissions; discard or repair invalid output under explicit attempt/time bounds. No domain-specific optimizer or arbitrary generated code.
+3. Ask only about explicitly negotiable conditions; bind the exact adjustment/condition/expiry, support refusal, prevent equivalent repeated requests and require affirmative owner permission before using the concession. Reconstruct owner-question wording from public facts and the recipient’s own validated condition/adjustment; no other owner’s private reasoning may enter it.
+4. Never publish free-form prose from private negotiation context as a public explanation. Reconstruct approved public inputs/templates, recheck disclosure text/audience at publication and verify claims against actual evaluated candidates.
+5. Evaluate valid/invalid candidates, arithmetic errors, invented options/owners, stale jobs, revoked permissions, hidden disclosures, injection, no-agreement and no-concession success. Demonstrate local Christmas end-to-end with injected responses.
+
+## Checks and handoff
+
+Run focused candidate/permission/privacy and browser evaluations plus pinned npm run check. At this milestone, show the end-to-end MVP once for user product testing/feedback. Then leave this artifact in REVIEW and pause implementation for KE09's single named independent privacy/architecture gate; do not add a separate KE08 review. No real model-call or live cloud acceptance is implied.
+
+Before development, use a separate clean clone on `main`, successfully run `git pull --ff-only origin main`, recheck current claims and record the bounded claim. One task at a time. Only reviews explicitly named in this ticket are gates; do not add broad or repeated review sessions. Follow the [token-efficient review policy](../../../../agent-workflow.md#review-scope-and-token-efficiency--user-direction-2026-09-27). No implicit publication, merge, deployment, paid calls/resources or external messages.
+
+Follow the [workflow](../../../../agent-workflow.md), [current queue](../../../../task-board.md), [product](../../../../known-enough-product.md), [architecture](../../../../known-enough-architecture.md) and [migration mapping](../../../../known-enough-pivot.md).
+
+## 2026-09-27 local MVP checkpoint
+
+- Actual worker Codex GPT-6; runtime variant/effort unexposed. The user-directed Luna/high target is not represented as observed. Work started from clean synchronized `main` baseline `1135d79` after `git pull --ff-only origin main`; claim commit `1614f18`; bounded files are listed above.
+- Added a bounded injected-model candidate worker, strict output schemas, an 8-second provider timeout/two-attempt limit, application/kernel validation, exact owner-only negotiation questions, refusal/repeat protection, and public explanations rebuilt from the evaluated public candidate. No schema or kernel implementation changed.
+- Added a loopback-only five-profile synthetic Christmas scenario and browser flow. Fixed `NON_PRODUCTION` profile labels are not authentication. Its shared state is in-memory and disappears when the API stops. The hosted HTTPS preview remains a static mock with no shared application state. No live model, cloud or paid call was made.
+- Local feedback commands, in separate WSL terminals from the repo root:
+  - `PORT=8788 node scripts/run-local-api.mjs`
+  - `npm run dev --workspace @deal-table/web -- --port 5173 --strictPort`
+  - Open `http://127.0.0.1:5173/` and use **Try the fictional Christmas decision**. Select Nina's local profile to see her private question; the selector is expressly not sign-in.
+- Final pinned `npm run check`: references 7/7; planning 15/15; lint and 132 import boundaries; typecheck; 303 unit/integration tests passed and 2 opt-in skips; production build and bundle scan passed; hosted bundle scan plus browser 1/1; browser suite 44/44. `git diff --check` passed. No live-service acceptance is implied.
+- Artifact is deliberately paused in REVIEW for the single KE09 architecture/privacy checkpoint after the user feedback pass. Do not start KE10 or real model integration before KE09 PASS and its separate authorization.

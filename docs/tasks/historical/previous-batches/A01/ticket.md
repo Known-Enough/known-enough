@@ -1,0 +1,31 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# A01 — shared-table and owner screens with mock API adapter — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+> **Known Enough migration, 2026-09-26:** retained historical scope; status remains **DONE**. Follow the [current queue](../../../../task-board.md) and [mapping](../../../../known-enough-pivot.md#complete-old-task-mapping) for future work; historical handoffs below do not restart old tasks.
+
+# A01 — shared-table and owner screens with mock API adapter
+
+> **Before development:** On a clean clone checked out on `main`, run `git pull --ff-only origin main` before any actual development of this task, including code, tests, configuration, or task artifacts. If local changes or an active rebase/merge prevent a clean pull, preserve and resolve/synchronize that state first; do not begin task development until the pull succeeds.
+
+
+- Direct worker: human selects `gpt-6-sol`, medium effort. Record the actual model in evidence; this ticket does not select a session model or require delegation.
+- Pool: Shared; either user may claim eligible unclaimed work. Historical claims below remain evidence; active claims require explicit release.
+- Status: DONE; included in main at the user’s explicit integration direction. Combined checks passed; see [main integration](../../../../main-integration.md).
+- Claim: Historical implementation; no new implementation writer assigned by this scheduling update.
+- Historical provenance: `task/a01`, based on `ca9fb636974030bfd8a620cec2b3d8581b3c8114`, and the prior Astra-led/Terra execution are historical evidence only. Future work uses a separate clone on `main`; a branch is optional.
+- Prerequisite: F02 historical foundation implementation. This is available for independent preparation.
+- Scope/files: `apps/web/**`, `tests/e2e/**`, plus the implementing developer’s work log and coordinated task/board/handoff records. Public UI mocks only; coordinate contracts/root changes.
+- Acceptance: separate strict public and owner adapters; loading, empty, failure and stale states; keyboard/mobile usability; exact timezone and consent boundaries. Never import owner mock values into shared UI, impersonate, or call mocks authenticated. Run relevant unit/browser tests and `npm run check`; record actual outcomes and make no live claim.
+- Handoff: A02 preparation. Preserve the named diff/commit, [A handoff](../../../../handoff-A.md), and [verification](../../../../verification.md#a01-verification--september-20-2026).
+
+Follow the common workflow in [agent workflow](../../../../agent-workflow.md) and [task board](../../../../task-board.md). No mandatory subagents. Human review is independent of implementation.

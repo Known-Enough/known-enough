@@ -1,0 +1,153 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# KE10 — Bedrock and async AI runtime — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+# KE10 — Bedrock and async AI runtime
+
+- Status: REVIEW — proposal-output mismatch corrected; pinned checks and the post-correction live evaluation pass. Per the user's 2026-09-28 direction, the named focused runtime follow-up is deferred to [TD-KE10-01](../../../../technical-debt/TD-KE10-01-stop-commit-race.md) until after MVP; it does not block MVP progress or separately authorized bounded MVP Bedrock tests. Keep KE10 REVIEW and do not make a release-grade runtime claim until the follow-up passes.
+- Claim: Implementation claim complete/released by Codex GPT-6 (exact runtime variant/effort unexposed) on clean synchronized `main` baseline `11fda08c9fd44e89b9a369652c222dc7a2b8af67`; `git pull --ff-only origin main` succeeded. The ticket's `gpt-6-sol` / high target is not claimed as observed. Bounded files: `packages/application/src/decision-negotiator.ts` and focused tests; `packages/adapters/src/bedrock-models.ts` and tests; `apps/api/src/model-runtime.test.ts`; `tests/evaluations/ke10.ts`, `tests/evaluations/ke10-live.ts` and fixtures; this ticket, `docs/ke10-runtime.md`, `docs/task-board.md`, `docs/work-log-B.md` and `docs/handoff-B.md`. One diagnostic live evaluation and one post-correction verification used the user's explicit KE10 authorization. No browser, infrastructure, AWS resource or deployment changes.
+- Direct worker: human selects `gpt-6-sol` / high; record actual model/effort, never infer it from this file.
+- Prerequisite: [KE09](../KE09/ticket.md) correction self-review PASS and the explicit 2026-09-28 scheduling exception allow offline implementation. Independent follow-up on the new runtime remains required before release; real Bedrock calls still need separate explicit authorization.
+- Scope/files: apps/workers/**; packages/adapters/** model/job adapters; application ports; API composition; focused tests/evaluations; operational and friction docs. Also this ticket, the current board/handoff and claimant’s own log. Name exact files and baseline at claim; coordinate contract/root/lock/CI changes.
+
+## Outcome
+
+Replace injected model ports with Bedrock-backed runtime and bounded async jobs, adapting B05/A05.5 concepts. Injected implementations remain for deterministic tests/fallbacks where feasible. Real calls require separately authorized access/spending.
+
+## Acceptance
+
+1. Implement architect, owner-private, negotiation/proposal and optional public-explanation jobs with separate context/tool/memory boundaries. Queue IDs/references only; no raw private text in messages or logs.
+2. Check context, owner/draft version, expiry and job epoch before processing and transactionally before applying output. Duplicate, superseded or revoked results cannot publish or change consent.
+3. Bound retries, repair attempts, tokens, concurrency, latency and retained data; include kill switch, safe redacted metadata and deterministic failure/fallback behavior. Verify current official model/API/region capabilities when selecting configuration.
+4. Run the reusable extraction/construction/proposal/privacy evaluations against injected and authorized real model calls. Record actual model/version/region/configuration and measured outcomes; mock evidence cannot close live acceptance.
+5. Obtain the named focused independent follow-up for the stop/commit boundary and any material model/job boundary changes before considering the runtime release-grade. Under the user's deferral, this follow-up does not block MVP progress or separately authorized bounded MVP Bedrock tests. Record actual service friction only.
+
+## Checks and handoff
+
+Run focused jobs/staleness/redaction/evaluations and pinned npm run check. Run real Bedrock smoke only when separately authorized. Mark DONE and hand off to KE11 when the ticket criteria and authorized evidence pass; otherwise record the missing live evidence as BLOCKED. No additional routine human acceptance/review is required.
+
+Before development, use a separate clean clone on `main`, successfully run `git pull --ff-only origin main`, recheck current claims and record the bounded claim. One task at a time. Only reviews explicitly named in this ticket are gates; do not add broad or repeated review sessions. Follow the [token-efficient review policy](../../../../agent-workflow.md#review-scope-and-token-efficiency). No implicit publication, merge, deployment, paid calls/resources or external messages.
+
+Follow the [workflow](../../../../agent-workflow.md), [current queue](../../../../task-board.md), [product](../../../../known-enough-product.md), [architecture](../../../../known-enough-architecture.md) and [migration mapping](../../../../known-enough-pivot.md).
+
+## KE10 offline implementation claim — 2026-09-28
+
+User B / Codex GPT-6 (exact variant/effort unexposed) claims the sole active task on clean synchronized `main` at `da76fae782e1d059554e7224ff6b1443b3ea3c84`; ff-only pull succeeded. User-directed KE09 scheduling exception applies. Bounded scope: `packages/application/src/{model-runtime,decision-architect,owner-conversation,decision-negotiator,known-enough,index}.ts` and focused tests; new Bedrock/job adapters and exports under `packages/adapters/src`; `apps/workers/src`, worker README/manifest; API runtime composition/export; adapter manifest and root lockfile for pinned Bedrock SDK; reusable synthetic evaluations; runtime operations/architecture docs, KE10 ticket/board and B log/handoff. No contracts, browser, CI, infrastructure or deployed configuration changes. Live calls remain disabled and unauthorized. Local implementation will be checked; KE10 cannot reach DONE without live evaluation evidence and its named independent follow-up.
+
+## Checked implementation evidence — 2026-09-28
+
+[Runtime operations, role boundaries and current official provider references](../../../../ke10-runtime.md). The implementation follows the bounded claim above, adding the pinned Bedrock SDK and worker dependency in the lockfile. Existing local demo composition remains injected. No browser, contracts, CI, infrastructure or deployed configuration changed.
+
+Artifact base: `da76fae782e1d059554e7224ff6b1443b3ea3c84`. SHA-256 of `git diff --binary da76fae <KE10-checkpoint> -- apps packages tests package-lock.json`: `afc30a28c298b3aec1d23edc3510d0f4bbf643dfa9d2756cd304ea9a6e0d3967`. User B / Codex GPT-6 authored and self-checked it; `gpt-6-sol` / high is the assignment, not observed runtime telemetry.
+
+| Acceptance item | Evidence / remaining boundary |
+| --- | --- |
+| Isolated roles and ID-only async jobs | Architect, owner and negotiation Converse adapters; one fresh message/system per call, no tools/history/cache markers. Process-local queue and worker accept opaque IDs only. Public explanation remains deterministic. |
+| Stale/duplicate/revoked outputs | Before/after inference capability checks, strict delivery admission, owner draft/control/member/expiry checks and candidate control/member/job-epoch/expiry checks in repository transactions. Existing kernel still checks current consent. Actual distributed/emulator/live transaction evidence is not claimed. |
+| Bounded operation | One SDK attempt, owner/architect one call, negotiation at most two, 2,048 output tokens, 64 KiB input, 32 KiB output, bounded queue/concurrency/deadlines, permanent stop, coarse metrics/errors and exact-job cleanup. |
+| Reusable evaluations | Construction, proposal/kernel, owner extraction without confirmation and privacy pass through injected Converse. Actual live calls are **not authorized or run**; no model quality, account access, measured live token/latency/cost evidence. |
+| Independent follow-up | **Pending** on this changed artifact. This session cannot independently certify its own model/job boundary. No release-grade or DONE claim. |
+
+Fresh verification used pinned Node 24.21.0/npm 11.19.0 and Playwright Chromium 153.0.8010.12. The environment cleared `/tmp` during resumption; tools/browser libraries were restored into ignored `node_modules/.cache/ke10-tools`, without installing host packages. Initial checks found test helper typings, an invalid evaluation sequence (reasoning while an owner draft was awaiting confirmation), and an unused test parameter. Those were corrected before the final passes. Only a trailing blank line was removed after the full pass; executable behavior is unchanged.
+
+```sh
+PATH="$PWD/node_modules/.cache/ke10-tools/bin:$PATH" npm test -- \
+  packages/adapters/src/model-jobs.test.ts \
+  packages/adapters/src/bedrock-models.test.ts \
+  apps/api/src/model-runtime.test.ts
+PATH="$PWD/node_modules/.cache/ke10-tools/bin:$PATH" \
+PLAYWRIGHT_BROWSERS_PATH="$PWD/node_modules/.cache/ke10-tools/playwright" \
+LD_LIBRARY_PATH="$PWD/node_modules/.cache/ke10-tools/libs/usr/lib/x86_64-linux-gnu:$PWD/node_modules/.cache/ke10-tools/libs/lib/x86_64-linux-gnu" \
+npm run check
+```
+
+Both exit 0: **27 focused tests**, then **7 imported hashes, 15 planning checks, lint/boundaries 157, typecheck, 349 tests passed / 2 DynamoDB Local skips, production and hosted builds, hosted browser 1/1, end-to-end 44/44**. Live entrypoint without authorization exits 2 and prints `KE10_LIVE_NOT_AUTHORIZED`.
+
+Evidence logs are retained locally under ignored `node_modules/.cache/ke10-evidence/`:
+
+- `ke10-focused.log`: SHA-256 `cd8ca6c85abbf93661062466f278bca6b4b18f777366837ded515ac5d3f28918`.
+- `ke10-full-check.log`: SHA-256 `c67a5af0dfc95536a3f7662a92b60c63d1c0503de6c5c8cf493a5a94aa902ad7`.
+- `ke10-live-gate.log`: SHA-256 `f465bd5436b90b1f7fc85048664fb2086b9a1870bea3c82f8a661b6b8f7f1700`.
+
+No paid provider calls, cloud changes, credential inspection, deployments or external messages occurred. The implementation is ready for its named sequential independent follow-up and separately authorized live evaluation; no further offline implementation is currently claimed. Queue restarts lose active work; durable distributed execution is not implemented here. A repository push publishes a checked blocked checkpoint and does not satisfy missing live/review evidence.
+
+## KE10 correction claim — 2026-09-28
+
+User B / Codex GPT-6 (exact runtime variant/effort unexposed) resumes the sole project task on clean synchronized `main` at `7f78349acb160a318bf11b6561ea3c62900be377`; `git pull --ff-only origin main` succeeded, ahead/behind 0/0. The user directed KE10 issue resolution and repo sync. Bounded write scope: KE10 application invocation/commit guards, Bedrock model adapter, API error mapping, their focused regressions, KE10 runtime/ticket/board and B log/handoff. No contracts, browser, root/lock, infrastructure or live cloud changes. Reproduce late kill-switch commits and provider-output HTTP misclassification, correct both, run focused and required full checks, then commit/push a checked BLOCKED checkpoint. Independently reviewed and paid-call gates remain separate.
+
+## KE10 correction checkpoint — 2026-09-28
+
+User B / Codex GPT-6 (variant/effort unexposed) finished the bounded correction on synchronized base `7f78349acb160a318bf11b6561ea3c62900be377`. Four reproduced defects were closed: (1) stop after provider completion allowed an architect draft, owner draft or proposal to pass later application guards; (2) malformed model output returned an HTTP 422 client error instead of a redacted retryable 503; (3) stop after `NEEDS_PERMISSION` could still issue an owner question and leave a question-free candidate pending; (4) an authority control change between candidate completion and question creation could issue a stale question. Runtime enablement and control/expiry guards now run inside the exact output/question transactions; a stopped or changed, question-free pending candidate is released only if its proposal identity is still current. Previously committed questions remain subject to their existing context/consent rules.
+
+Focused API/application checks passed **41/41**; pinned `npm run check` passed **355 tests / 2 DynamoDB Local skips, hosted browser 1/1, end-to-end browser 44/44**, 7 reference hashes, 15 planning checks, lint/boundaries 158, types and both builds. The initial full run stopped at four test-only `prefer-const` lint findings; those were fixed before the passing full run. Source SHA-256 of `git diff --binary 7f78349 <correction-checkpoint> -- apps packages`: **`dd8a5fe756156db33edb3b91eaa9fc140c4b02c5a966773db370b9e5e249c101`**. Evidence log hashes: focused `190d2df82136813505f2ff13610a9394a38716f0c0d066e1dbeaae299a1dfbe2`; full `04da6b45eec3a0e8e9fb0960ec01a20363ca7cb4f051b32cee42d8baf4c3c50d`.
+
+The correction claim is released for the named sequential independent KE09 follow-up. **KE10 remains BLOCKED** on that review and separately authorized live Bedrock evaluations. KE11 remains BLOCKED. No paid/provider/cloud call, deployment or external message occurred; the checked repository checkpoint is synchronized under standing push authorization. The other clone must pull `origin main` with `--ff-only` before the next task.
+
+## Independent KE09 runtime follow-up — 2026-09-28
+
+The separate User A / Codex GPT-6 review session returned **CHANGES_REQUESTED** on the exact runtime source diff `da76fae782e1d059554e7224ff6b1443b3ea3c84..8d70fd912db3902d08ff04d3778e14a113bcaffa` (SHA-256 `6e411f0e3375886d608ba776fb9804f74b7b8a3020e1cafac28c4b1188e61e3f`). See the [review record](../../../../reviews/KE10-runtime-followup.md) for scoped paths and checks.
+
+P1: a proposal write can pass the process-local `isEnabled` checks, enter an asynchronous DynamoDB transaction, then commit after `runtime.stop()` returns. A temporary barrier probe reproduced `APPLIED` with a public proposal after stop. Correct the stop/commit semantics and add a delayed-transaction regression before release. The focused reviewer run passed 38/38; pinned full check passed 355 tests, 2 DynamoDB Local skips, hosted browser 1/1 and E2E 44/44. No provider or AWS calls were made. KE10 remains BLOCKED; its review claim is released and no implementation claim is active. Separately authorized live evaluation remains required.
+
+## KE10 stop/commit technical-debt resumption — 2026-09-28
+
+User A directed that KE10's deferred P1 stop/commit debt be resumed before Bedrock tests. Actual worker: current Codex GPT-6, exact variant/effort unexposed; the ticket's Sol/high target is not claimed as observed. Clean `main` baseline `5457985ee950fdf1650a6c9e8c10e1af4aec50d1`; `git pull --ff-only origin main` succeeded. Bounded files are listed in the active claim above. The intended guarantee is that awaited `runtime.stop()` does not return until already-started model-result persistence transactions settle; add a delayed-transaction regression. No live provider calls or cloud mutations are authorized by this claim.
+
+## KE10 stop/commit correction checkpoint — 2026-09-28
+
+`runtime.stop()` now returns a promise, closes model-job admission, aborts transports, and waits for in-flight `completeReasoning`, `storeConstraintDraft`, and `askNegotiation` persistence calls. A storage write already submitted may finish while stop is pending; none of these tracked outputs can commit after awaited stop resolves. Added a delayed repository-commit test that pauses after application validation/mutation and before the repository commits, then asserts stop remains pending until commit settles. The test is deterministic and models the async repository boundary; it is not a live DynamoDB race run.
+
+Focused `apps/api/src/model-runtime.test.ts`: **16/16 passed**. Pinned Node 24.21.0/npm 11.19.0 `npm run check`: **7 reference hashes, 15 planning checks, 158 boundaries, typecheck, 356 tests passed / 2 DynamoDB Local skips, production build/bundle scan, hosted build/bundle scan/browser 1/1, E2E 44/44**. Claim released to the named sequential independent follow-up, bounded to the stop/commit semantics and delayed-storage test. Live Bedrock calls remain blocked by that review plus separate account/permission, invocation-logging/retention checks and explicit paid-call authorization. No AWS identity check succeeded, live provider call, cloud change, deployment or spending occurred.
+
+## Bedrock read-only preparation — 2026-09-28
+
+The user completed AWS SSO device login in WSL. Read-only commands explicitly used `--profile known-enough-staging-ro`:
+
+| Check | Result |
+| --- | --- |
+| `aws sts get-caller-identity` | PASS — account `092954139775`, assumed role `AWSReservedSSO_ReadOnlyAccess_4a73ffa8d53b9573/martelaxe` |
+| Region | SSO/Identity Center primary region: `us-east-1`; Bedrock test/deployment region: `us-east-1` (separate settings, currently same value) |
+| `bedrock get-foundation-model` for `amazon.nova-lite-v1:0` | PASS — Nova Lite is `ACTIVE` in `us-east-1`; direct in-region runtime model ID |
+| `bedrock get-model-invocation-logging-configuration` | PASS — empty response/no logging destination returned; AWS documents invocation logging as disabled by default |
+| `bedrock get-account-data-retention` | PASS — account mode `inherit`, so effective behavior falls back to the model default. AWS's current abuse-detection page says Bedrock is zero-data-retention by default and lists exceptions; Nova Lite is not among those listed. This is an inference from AWS's current service documentation, not an invocation-level measurement. |
+
+At this read-only preparation checkpoint, no Converse/InvokeModel request had been made. The selected SSO identity was `ReadOnlyAccess`; the app uses Bedrock `Converse`, which maps to `bedrock:InvokeModel` on `arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-lite-v1:0` under [AWS runtime IAM guidance](https://docs.aws.amazon.com/bedrock/latest/userguide/inference.html). The later authorized evaluation is recorded below. No IAM policy, permission set, account setting or AWS resource was changed in the read-only checks. The focused stop/commit review remains deferred for later by user direction.
+
+References: [Nova Lite model card](https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-nova-lite.html), [invocation logging](https://docs.aws.amazon.com/bedrock/latest/userguide/model-invocation-logging.html), [data retention](https://docs.aws.amazon.com/bedrock/latest/userguide/data-retention.html), and [abuse detection](https://docs.aws.amazon.com/bedrock/latest/userguide/abuse-detection.html).
+
+## Nova Lite structured-output correction claim — 2026-09-28
+
+User B / Codex GPT-6 (exact runtime variant/effort unexposed) resumed the KE10 live-evaluation task after the failed JSON-shape attempt. Clean synchronized `main` baseline: `d9f908d`; `git pull --ff-only origin main` succeeded before edits. Bounded files: `packages/adapters/src/bedrock-models{,.test}.ts`, `packages/application/src/decision-{architect,negotiator}{,.test}.ts`, `apps/api/src/model-runtime.test.ts`, `tests/evaluations/ke10{,-live,-injected}.ts`, `docs/ke10-runtime.md`, this ticket, `docs/handoff-B.md` and `docs/work-log-B.md`. No browser, infrastructure, lockfile, AWS resource or deployment changes.
+
+## Nova Lite structured-output correction checkpoint — 2026-09-28
+
+Nova Lite's model card says `outputConfig` structured outputs are unsupported; its documented Converse tool-use path is now used as a forced, data-only output envelope. The server fills public-only variable metadata and missing option IDs. Negotiation output is flatter; the trusted adapter creates a private `TRUSTED_BACKEND` IN adjustment from enum references, and the application continues checking owner, constraint, proposal and permission context. Public explanation metadata remains deterministic. The live harness now emits only a failing stage and allowlisted error code.
+
+Focused tests passed **51/51** across the changed adapter, application, API and evaluation code. Pinned Node 24.21.0/npm 11.19.0 `npm run check` passed: **359 tests / 2 DynamoDB Local skips**, 7 imported reference checksums, 15 planning checks, lint/boundaries 158, typecheck, production and hosted-preview builds, hosted browser 1/1 and end-to-end 44/44.
+
+The explicit read-only STS check succeeded for account `092954139775`, role `AWSReservedSSO_ReadOnlyAccess_4a73ffa8d53b9573/martelaxe`, region `us-east-1`. The final authorized synthetic live run exited 1 with `stage=proposal-kernel`, `failureCode=INVALID_MODEL_OUTPUT`; it made one construction request and two negotiation attempts. Provider text and per-attempt token counts were not retained. No AWS resources were created or deployed. Earlier traced output showed the model selected a catalog candidate but its first negotiation tool response did not satisfy the old nested question/explanation contract; the current flattening addressed that mismatch, but the final run still fails and its exact failing field is not available without a new diagnostic call.
+
+**KE10 stays REVIEW; this is not live acceptance or release approval.** The independent stop/commit and changed model/job-boundary follow-up remains pending for later as the user directed. The existing CloudFront Stage 0 preview is still an isolated static mock with no API, Cognito, Bedrock or shared state; this correction did not change it. Keep the next live diagnostic bounded to safe field/shape flags before any further paid evaluation.
+
+## KE10 negotiation catalog mismatch finding — 2026-09-28
+
+The bounded diagnostic live run again failed at `proposal-kernel`, now with content-free `diagnosticReason=CATALOG_MISMATCH`. The tool output passed envelope, question-intent, public-field and candidate-schema checks, but its values did not match any exact catalog entry. No model text or values were retained. The negotiation tool now asks for a zero-based `candidateIndex`; the trusted adapter copies that exact entry from the request's server-provided catalog. Focused synthetic tests pass **31/31**. A single post-correction synthetic live verification remains; no AWS resource or deployment changed.
+
+## KE10 live verification checkpoint — 2026-09-28
+
+After the catalog-index change, the authorized Nova Lite live evaluation passed **construction, proposal-kernel, extraction-without-consent and privacy** in `us-east-1`. STS confirmed account `092954139775` and assumed role `AWSReservedSSO_ReadOnlyAccess_4a73ffa8d53b9573/martelaxe`. Bedrock reported 29,184 input and 397 output tokens across three requests. Cost was not exposed. The pinned Node 24.21.0/npm 11.19.0 full check passed: 360 tests / 2 DynamoDB Local skips, hosted browser 1/1 and E2E 44/44; the three focused files passed 47/47. No AWS resources changed or deployed. The focused independent runtime follow-up remains deferred by user direction; KE10 stays REVIEW and is not marked accepted or release-ready.
+
+The user explicitly directed that the P1 stop/commit finding be set aside for later and authorized the synthetic Bedrock evaluation. This was a narrow scheduling exception to the ticket's pre-live follow-up order; it does not close `TD-KE10-01` or change its REVIEW verdict.
+
+## KE10 proposal-output diagnosis claim — 2026-09-28
+
+User A resumed KE10 after the authorized live evaluation failed at proposal generation. Actual worker: Codex GPT-6, exact variant/effort unexposed; the ticket's `gpt-6-sol` / high target is not claimed as observed. Clean synchronized `main` baseline `11fda08c9fd44e89b9a369652c222dc7a2b8af67`; `git pull --ff-only origin main` succeeded. Bounded changes: application negotiation output validation and its focused tests; synthetic/live evaluation diagnostics and tests; this ticket, task board, B work log and B handoff. Goal: expose only an allowlisted, content-free reason for proposal rejection; fix the demonstrated mismatch if identified locally; then make at most one synthetic live evaluation retry under the earlier explicit user authorization. No user data, provider text, credentials, infrastructure, browser, deployment or AWS resource changes. The focused runtime follow-up remains deferred and KE10 cannot be called release-ready without it.

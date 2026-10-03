@@ -8,7 +8,7 @@ Reviewer: independent Codex GPT-6 session, exact runtime variant/effort unexpose
 
 ## Inspected scope and evidence
 
-Read the working agreement/workflow, current board, [author ticket](../tasks/KE13C-policy-followup.md), [initial verdict](KE13C-policy.md), KE13C build status, A handoff and relevant A/B log entries, and the product/architecture/pivot boundaries. Inspected all ten changed paths in the named diff. Direct policy/runbook inspection covered:
+Read the working agreement/workflow, current board, [author ticket](../tasks/historical/previous-batches/KE13C-policy-followup/ticket.md), [initial verdict](KE13C-policy.md), KE13C build status, A handoff and relevant A/B log entries, and the product/architecture/pivot boundaries. Inspected all ten changed paths in the named diff. Direct policy/runbook inspection covered:
 
 - [Release identity policy](../../infra/permissions/ke13c-stage0-deploy.json): every action, resource and condition.
 - [S3 resource policy](../../infra/permissions/ke13c-preview-bucket-policy.json): principal, action, two object resources and both source conditions.

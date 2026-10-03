@@ -1,0 +1,50 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# KE03 — Generic application state and persistence adaptation — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+# KE03 — Generic application state and persistence adaptation
+
+- Status: DONE — 2026-09-27; technical criteria and pinned full check passed. No managed AWS resources or cloud evidence claimed.
+- Claim: 2026-09-27T16:52:15Z; User A / current Codex GPT-6, exact runtime variant/effort unexposed. The user-directed `gpt-6-luna` / high target is not claimed as verified runtime selection. Clean synchronized `main` baseline `a3488c3`; `git pull --ff-only origin main` succeeded and HEAD/origin were 0/0; claim checkpoint `5019604`. Bounded files: `packages/contracts/src/known-enough.ts` and its focused tests; `packages/application/src/{types.ts,index.ts,application.test.ts}` plus new `known-enough.ts` and `known-enough.test.ts`; `packages/adapters/src/{dynamodb-codec.ts,dynamodb.ts,dynamodb.local.test.ts,index.ts}` plus `dynamodb-codec.test.ts`; `apps/api/src/http-core.ts` plus `known-enough-http.test.ts` and `apps/api/README.md`; `docs/known-enough-architecture.md`, this ticket, `docs/task-board.md`, `docs/handoff-A.md` and `docs/work-log-A.md`. The additive `PRIVATE_NEGOTIATION` public status and revoke command schemas were added to the coordinated contract scope because KE03 requires them. No other contract, root/package manifest, lockfile, CI, AWS/cloud, deployment, paid-call or external-message changes were made.
+- Direct worker: `gpt-6-luna` / high by user direction for the KE01–KE08 MVP; record actual model/effort, never infer it from this file.
+- Prerequisite: [KE02](../KE02/ticket.md) is DONE with its acceptance checks recorded; all named earlier gates remain satisfied.
+- Scope/files: packages/application/**; packages/adapters/**; apps/api/**; coordinated contracts; relevant integration tests and infra design. Also this ticket, the current board/handoff and claimant’s own log. Name exact files and baseline at claim; coordinate contract/root/lock/CI changes.
+
+## Outcome
+
+Adapt the existing command/application/repository boundaries to generic decisions. Preserve identity, independent permissions, idempotency and guarded transactions. Implement lifecycle and storage migration deliberately; do not replace the repository with an unreviewed second design.
+
+## Acceptance
+
+1. Define every transition for CREATING, DEFINING, COLLECTING_PRIVATE_INPUT, READY, REASONING, PRIVATE_NEGOTIATION, PROPOSED, APPROVING and AGREED, plus clarification/no-agreement/superseded/closed outcomes, refusal, expiry and withdrawal.
+2. Reuse verified actors and auth-before-replay; never trust owner IDs from clients. Material frame/roster/input/criteria changes invalidate old authority. Concessions, disclosures and final approvals remain independent; all current required owners approve the exact proposal atomically.
+3. Bind jobs and proposals to exact context/epoch; reject stale/duplicate outputs. Model ports create drafts/candidates only. Shared status omits private recipients and reasons.
+4. Version the strict STATE v4 scheduling record and fixed-three-person assumptions explicitly. Preserve the legacy decode/adapter path or provide a reviewed migration; do not silently reinterpret/drop old data. Re-prove replay/history/byte reservations and safe refusal/revocation capacity for chosen generic bounds.
+5. Test five-person state, wrong-owner/room/display actions, duplicate/conflicting retries, context edits, revoked dependencies and concurrent approval/revision/revocation. Exercise the real repository adapter with local emulator where available; label local versus managed evidence.
+6. Record persistence, authorization and consent decisions with focused test evidence. Include the exact changed artifact in KE09's single post-MVP review bundle; do not schedule a separate KE03 review.
+
+## Checks and handoff
+
+Run focused application/API/adapter and race tests, legacy compatibility checks, then pinned npm run check. When criteria and checks pass, record evidence and mark DONE; hand off directly to KE04 without per-task human review. Include the changed artifact in KE09's post-MVP review.
+
+Before development, use a separate clean clone on `main`, successfully run `git pull --ff-only origin main`, recheck current claims and record the bounded claim. One task at a time. Only reviews explicitly named in this ticket are gates; do not add broad or repeated review sessions. Follow the [token-efficient review policy](../../../../agent-workflow.md#review-scope-and-token-efficiency). No implicit publication, merge, deployment, paid calls/resources or external messages.
+
+Follow the [workflow](../../../../agent-workflow.md), [current queue](../../../../task-board.md), [product](../../../../known-enough-product.md), [architecture](../../../../known-enough-architecture.md) and [migration mapping](../../../../known-enough-pivot.md).
+
+## Completed outcome and evidence — 2026-09-27
+
+- Implemented the generic application lifecycle, identity-scoped owner/public projections, idempotent commands, trusted draft/candidate boundaries, independent negotiation/disclosure/approval paths, material-context invalidation, and exact job/proposal epoch checks. Revocation/expiry and owner/context checks cannot leave stale proposal approval authority active.
+- Added strict generic DynamoDB STATE v5 encoding and guarded repository writes alongside the unchanged strict STATE v4 room path. No auto-migration, managed AWS request, or record rewrite occurred. Byte/history/replay bounds and protected revocation/withdrawal capacity are enforced.
+- Added local and Cognito HTTP entry points using the existing identity resolver; local demo identities remain fixed, explicitly non-production, and cannot authenticate as participants. Public snapshots remain allowlisted and omit private recipients/refusal details.
+- Pinned Node 24.21.0/npm 11.19.0 `npm run check` passed: references 7/7; planning checks 15/15; lint and 108 import-boundary references; typecheck; 277 tests passed, 2 opt-in DynamoDB Local tests skipped; production build and bundle scan; hosted-preview build/scan and browser test 1/1; browser E2E 41/41.
+- DynamoDB Local and managed AWS/Cognito/IAM were not available or exercised. The two skipped tests require `DYNAMODB_LOCAL_ENDPOINT`; this does not count as real-repository emulator evidence. No AWS resources, paid calls, deployment or external messages.
+- No separate KE03 review is scheduled. Include this exact artifact in KE09's post-MVP review bundle. Next task: KE04, eligible and unclaimed.

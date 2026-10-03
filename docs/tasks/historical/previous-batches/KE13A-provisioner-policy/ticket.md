@@ -1,0 +1,58 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# KE13A-P — Stage 0 provisioning permission candidate — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+# KE13A-P — Stage 0 provisioning permission candidate
+
+- Status: REVIEW — the focused correction is complete; independent follow-up review is required. The reviewed `known-enough-staging-ro` inspection and identity/origin/OAC checks remain intact. Strict alphanumeric ID allowlisting and case-insensitive sentinel rejection now precede ARN rendering. Assignment remains blocked by the documented CloudFront creation/specification/cost limitation.
+- Claim: finished 2026-09-27T01:28:01Z; initiating user / A log, started 2026-09-27T01:23:03Z; one sequential task, transferred by coordinating session. User explicitly requested the complex IAM work as a sequential Sol/high task. Actual worker identifies as Codex GPT-6; exact variant/effort is unexposed and is not inferred from the request.
+- Baseline: clean isolated `main` in `/tmp/known-enough-stage0-guard` at `01592c4`; `git pull --ff-only origin main` succeeded (already up to date). Board reported no active task; prior policy review claim finished.
+- Authorization: user authorized creating the scoped staging provisioning permission via CLI. This preparation phase is restricted to local candidate policy/docs and read-only AWS inspection with `--profile known-enough-staging-bootstrap --region us-east-1`; independent critical review must precede any permission-set creation, policy attachment or account assignment.
+- Bounded files: `infra/permissions/ke13a-stage0-provisioner.json`, `infra/stage0-provisioner-permission.md`, `infra/staging-runbook.md`, this ticket, `docs/tasks/KE13A.md`, `docs/task-board.md`, `docs/handoff-A.md`, `docs/work-log-A.md`.
+- Exclusions: no AWS mutations, application resources, deployment, spending, paid calls, push or application source changes. Accepted KE13A/KE13C evidence remains dated and intact; KE13B and KE13 operational acceptance remain separate.
+
+- Correction claim: root / current Codex GPT-6, exact variant/effort unexposed; finished 2026-09-27T01:36:18Z from clean-main baseline `b92024b`. Bounded files: this ticket, `infra/staging-runbook.md`, `docs/task-board.md`, `docs/handoff-A.md`, `docs/work-log-A.md`. Corrected R1 only: use verified read-only profile for CloudFront inspection and retain fail-closed account/ID/origin/OAC checks. No policy broadening or AWS mutation.
+
+- Independent review claim: finished 2026-09-27T01:32:13Z; started 2026-09-27T01:31:00Z; initiating user / A log; separate reviewer in `/tmp/known-enough-ke13ap-independent-review`; exact range `01592c461c5fc4e59c1f56a76632db5572bb12c8..4f76570887ded1e0cf17fb12bb99dec9a117b772`. Actual Codex GPT-6, exact variant/effort unexposed. Clean `main` pulled successfully from GitHub `origin/main` (`65359eb`) before recording; local review head preserved. Bounded writes: this ticket, board, A handoff/log, and `docs/reviews/KE13A-provisioner-policy.md`; reviewed source remains unchanged.
+
+- Focused follow-up review claim: finished/released 2026-09-27T01:38:35Z; started 2026-09-27T01:37:37Z; independent sequential Codex GPT-6 reviewer, exact variant/effort unexposed; separate clone `/tmp/known-enough-ke13a-profile-review`. Clean `main` at `e05ef8b`; successful `git pull --ff-only origin main` from the local current-main source `/tmp/known-enough-stage0-guard` (not a GitHub synchronization claim). Scope: separate follow-up review, this ticket, board, A handoff/log; source/policies untouched. Exact review range `b92024bc6584d806d829553b654597b8523780db..e05ef8b022ec46221224c4348a4ef4f859ebd6af`.
+
+
+
+- Focused correction claim: current Codex GPT-6 session, exact variant/effort unexposed; user requested Luna, which this runtime does not expose for verification. Started 2026-09-27T01:43:38Z on clean pulled `main` at `f77d74b`. Bounded files: `infra/staging-runbook.md`, this ticket, `docs/task-board.md`, `docs/handoff-A.md`, `docs/work-log-A.md`. Board showed no active task. Correct the remaining fail-closed ID validation only; leave candidate policy unchanged. No AWS calls/writes, permission assignment, resources, spending or push.
+
+## Acceptance and handoff
+
+Prepare exact actions/resources/conditions and limitations; inspect the target Identity Center instance and existing permissions read-only; validate JSON, supported IAM actions/conditions, documentation links and reference hashes. Pause at REVIEW for a separate independent critical review of the exact candidate. Only after that review may the authorized IAM creation/attachment/assignment phase proceed. The reviewed policy is not permission to create application resources in this phase.
+
+## Candidate result and exact review artifact
+
+The [policy](../../../../../infra/permissions/ke13a-stage0-provisioner.json) has five statements / 16 exact action names, scopes S3 to the named bucket, excludes bucket-policy/default-protection/object/IAM/Billing authority, and limits future distribution tagging to an exact ARN plus four exact request tags. All allows have a deliberately expired absolute deadline. CloudFront distribution/OAC creation requires `Resource: "*"` and cannot enforce one preview, origin/configuration or a spend cap. This is a recorded blocker, not an accepted risk or claimed least-privilege proof for arbitrary provisioning. The [permission design](../../../../../infra/stage0-provisioner-permission.md) owns action/condition details, fresh read-only account facts and later phased CLI steps.
+
+The candidate was committed locally at `4f76570` from baseline `01592c4`; no push was made. Independent review then returned CHANGES_REQUESTED and its record is integrated locally at `b92024b`. The R1 profile correction was committed at `e05ef8b`; focused independent follow-up returned CHANGES_REQUESTED for incomplete placeholder/format rejection. No AWS change has occurred.
+
+- Policy SHA-256: `eb88bb397bd6d57ffe811d39f3c600096880f63051af6a3984ba5256800992b3`.
+- Permission design SHA-256: `cedb09152a57d41de4fbe3c91d9abdd0be89b3ef83855e3be48eec69dca37ac4`.
+- Changed files: `infra/permissions/ke13a-stage0-provisioner.json`, `infra/stage0-provisioner-permission.md`, `infra/staging-runbook.md`, `docs/tasks/KE13A-provisioner-policy.md`, `docs/tasks/KE13A.md`, `docs/task-board.md`, `docs/handoff-A.md`, `docs/work-log-A.md`.
+- Fresh static evidence: candidate JSON parses; AWS Access Analyzer returned `findings: []`; 136 local action/resource/condition and synthetic allow/deny probes passed (not IAM simulation). AWS machine-readable S3/CloudFront authorization references v1.4 confirm each action and service condition. Deliberate past expiry denies present-time probes; synthetic replacement checks cover wrong bucket/account/region/location/time and missing/wrong/extra CloudFront tags plus unrelated ARN denial. Creation remains intentionally detectable as uncapped after synthetic future rendering.
+- Documentation evidence: seven reference hashes match via Python hashlib; 93 Markdown files / 782 local links and anchors passed with zero errors; protected accepted build-task/release-policy/backend-gate files equal baseline; `git diff --check` passed. The pinned Node runtime was absent from inspected documented locations; default Node 23.3.0/npm 10.9.0 was not used to claim pinned checks. No runtime install, npm planning/full check or application suite was run. Only policy/docs changed.
+- AWS evidence: explicit bootstrap-profile/us-east-1 STS and read-only Identity Center/inventory/default-protection checks as detailed in the design. Access Analyzer is validation, not an IAM write. No policy creation/attachment/assignment, app resource, cost-control, deployment, paid call or push occurred. Effective SCPs/boundaries and live authorization remain unverified.
+
+Next: correct the remaining fail-closed ID/ARN/OAC checks and clarify the Bash requirement, then obtain focused independent follow-up review of the changed runbook. Then resolve the one-preview/$25 constraint before any assignment; do not infer approval from JSON validation, the independent review, or original KE13A/KE13C acceptance. Only after those gates may the previously user-authorized IAM permission-set creation/assignment phase resume. Application provisioning/deployment remains separate and has not been authorized by this policy-preparation phase.
+
+
+## Independent critical review
+
+[Review verdict](../../../../reviews/KE13A-provisioner-policy.md): CHANGES_REQUESTED on exact `01592c4..4f76570`. R1/P2: release ARN lookup used the provisioner, which lacks `cloudfront:GetDistribution`; use the verified read-only profile without broadening the policy. Fresh Access Analyzer returned no findings. Candidate JSON remains unchanged and deliberately expired. The correction uses `known-enough-staging-ro`, verifies the expected account/read-only role, returned distribution ID/ARN, single expected S3 origin and observed OAC ID, then renders the release policy. Bash syntax, reference hashes, local Markdown link paths and unchanged policy files were checked; no application suite was run. [Focused follow-up](../../../../reviews/KE13A-provisioner-profile-followup.md) returned CHANGES_REQUESTED on `b92024b..e05ef8b`: synthetic matching placeholder/wildcard/string-null IDs pass the equality guards. Explicit format/placeholder rejection remains required; the block also needs an explicit Bash requirement or portable syntax. No IAM policy changed. The separate CloudFront residual-authority decision remains pending.
+
+
+- Focused correction complete: 2026-09-27T01:45:19Z; current Codex GPT-6 session (exact variant/effort unexposed; user requested Luna, but this session did not expose Luna). Clean-main pull succeeded from `f77d74b`; claim released to independent follow-up. `infra/staging-runbook.md` now requires Bash explicitly, rejects malformed/placeholder requested and returned distribution/OAC IDs, and checks the ARN's terminal ID before exact account/ID equality. Verified RO profile, role, origin and OAC checks remain. Local ID probes: 3 accepted valid strings, 14 rejected malformed/sentinel strings; Bash syntax and reference hashes passed; policy/design hashes remain unchanged; diff whitespace clean. Five bounded files only. No AWS calls/writes, permission assignment, resources, spending or push. Wildcard CloudFront creation still cannot enforce a $25 ceiling; do not assign/create the AWS permission. Independent follow-up remains required.

@@ -2,7 +2,7 @@
 
 # LIVE04: choose the email domain and fill in setup details
 
-Local code preparation can continue with these inputs unknown. The offline helper below saves an incomplete draft; the installer still requires concrete values and recorded initial cloud/cost authorization. No cloud resources, DNS records, messages or deployments were created for this guide. [LIVE04](tasks/LIVE04.md) owns actual installation and online proof; [setup package](live-qa-setup.md) describes resources, costs and rollback.
+Local code preparation can continue with these inputs unknown. The offline helper below saves an incomplete draft; the installer still requires concrete values and recorded initial cloud/cost authorization. No cloud resources, DNS records, messages or deployments were created for this guide. [LIVE04](tasks/active/live-testing/LIVE04/ticket.md) owns actual installation and online proof; [setup package](live-qa-setup.md) describes resources, costs and rollback.
 
 ## Current free option: no domain purchase
 

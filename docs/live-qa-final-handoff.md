@@ -35,7 +35,7 @@ After the successful readback, Settings → Secrets and variables → Actions �
 
 No AWS access key, A profile, personal mailbox or password is supplied to B. Expected installed roles are KnownEnoughGithubQaRelease, KnownEnoughGithubQaTest and KnownEnoughGithubPrimaryRelease, with repository/main OIDC trust; the existing KnownEnoughGithubStagingInspector role remains read-only and unchanged. Its existing apigateway:GET on /apis/u94iyvt6p9/* covers the new authorizer/integration collection. No additional role broadening was identified locally. Installer readback now passed; actual GitHub role assumption and complete qualification are still required.
 
-**Live QA release and qualification** starts automatically after an eligible successful main deployment. B does not need to click Run workflow; that button is optional for diagnostics. That workflow publishes QA and code-only primary artifacts within the installed finite authorization; it keeps primary paid models disabled. All report lanes, seven real journeys and CLEAN cleanup must pass on the matching source/artifact receipt. A matching complete automatic PASS is required; a separate manual run is not a prerequisite. A green deployment, offline tests, mailbox-only smoke or a downloadable report does not complete LIVE04. Follow [ASSESS07](tasks/ASSESS07.md); no recurring personal AWS login is needed after installation.
+**Live QA release and qualification** starts automatically after an eligible successful main deployment. B does not need to click Run workflow; that button is optional for diagnostics. That workflow publishes QA and code-only primary artifacts within the installed finite authorization; it keeps primary paid models disabled. All report lanes, seven real journeys and CLEAN cleanup must pass on the matching source/artifact receipt. A matching complete automatic PASS is required; a separate manual run is not a prerequisite. A green deployment, offline tests, mailbox-only smoke or a downloadable report does not complete LIVE04. Follow [ASSESS07](tasks/active/live-testing/ASSESS07/ticket.md); no recurring personal AWS login is needed after installation.
 
 ## Short read-only diagnosis after a blocked result
 
@@ -61,7 +61,7 @@ Two clean offline dry-run builds produced identical ZIPs, one fixture-free modul
 
 No AWS or Mail.tm request, deployment, paid call or personal credential was used in this verification. It establishes local package readiness, not CloudFormation eligibility, installed IAM, Cognito delivery, actual model behavior or cloud rollback. Whole-envelope ceilings remain 28 runs / 7,000,000 reserved tokens / USD 7 reserved model cost / 56 verification messages, alongside original daily/per-run limits and expiry. Reinstall/cleanup never resets TOTAL. Missing historical totals stop for usage reconciliation.
 
-[Current pilot limits](operational-limits.md) retain wider-use partition/archive, retention/erasure and durable-job obligations in OPS01/02/03. [ASSESS08](tasks/ASSESS08.md) is locally complete; ASSESS07/LIVE04 managed acceptance and A's NP00 scope remain pending.
+[Current pilot limits](operational-limits.md) retain wider-use partition/archive, retention/erasure and durable-job obligations in OPS01/02/03. [ASSESS08](tasks/historical/completed/assessments/ASSESS08/ticket.md) is locally complete; ASSESS07/LIVE04 managed acceptance and A's NP00 scope remain pending.
 
 ## 30fa91a missing-policy recovery addendum — 2026-10-02
 

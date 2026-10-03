@@ -10,7 +10,7 @@
 - An in-memory build using `write:false` reproduced the three committed output files byte-for-byte. The module graph excluded owner screens/adapters, local API code, backend packages and private fixtures. The listed local identity, API-origin and private-fixture markers were absent.
 - The committed hosted browser test passed. Thirty-two additional navigations covered encoded, duplicated, malformed and oversized query strings at `/` and `/hosted-preview/index.html`. Every run retained the collecting fixture with zero API calls, WebSockets, identity headers, owner links or page errors.
 - The runbook uploads all of `apps/web/dist-hosted-preview/`; the nested default document and root-relative asset paths match.
-- Fresh pinned checks reported: typecheck, lint, 94 import-boundary checks, seven reference hashes and hosted bundle scan passed. The full application suite was not rerun by the reviewer; the author’s earlier full `npm run check` evidence remains dated in [KE13C](../tasks/KE13C.md).
+- Fresh pinned checks reported: typecheck, lint, 94 import-boundary checks, seven reference hashes and hosted bundle scan passed. The full application suite was not rerun by the reviewer; the author’s earlier full `npm run check` evidence remains dated in [KE13C](../tasks/historical/previous-batches/KE13C/ticket.md).
 - No source, artifact, AWS resource, permission set or acceptance status was changed by the reviewer.
 
 ## Non-blocking gaps and limits

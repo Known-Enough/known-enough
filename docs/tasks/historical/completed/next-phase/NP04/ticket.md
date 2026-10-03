@@ -1,0 +1,42 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# NP04 — Qualify a fresh group and non-prefabricated decision end to end
+
+- Status: DONE — local automated qualification; managed/live criteria NP05.
+- Claim: Finished; B / verified Battosai1806, Windows/WSL, GPT-6 variant/effort unexposed; clean ff-only main f78ea12, zero ahead/behind.
+- Direct worker target: `gpt-6-sol` / high. Record actual model/effort.
+- Prerequisite: NP03 DONE; NP00–NP02 technical evidence available.
+- Scope: Automated API/browser/evaluation scenarios, bounded fixes to the new NP flows, clean setup and concise qualification evidence. Name exact files and baseline before work; own log/handoff, ticket and board included. Material scope changes require amendment within the single active task.
+
+## Outcome
+
+Prove that newly admitted users can create a decision-helper group and reach an agreement on a newly described supported objective. No volunteer trials, human feedback, independent reviewer session or Luna agents are required now.
+
+## Acceptance
+
+1. Use authorized synthetic accounts outside the old five-person fixture directory, in separate browser sessions. Exercise registration/verification, A's CLI admission, group creation, invitation delivery/acceptance and independent membership. Include an unapproved/disabled user and a wrong-recipient/wrong-group attempt.
+2. Enter at least one new supported objective from a blank creation flow, with variables/options and a roster outside the two demo templates. Demonstrate there is no hidden scenario enum or fixture fallback selecting a predetermined decision. The same contracts/kernel/lifecycle handle it; record the objective and produced public structure using fictional non-sensitive data.
+3. Run frame review/confirmation, distinct private needs, owner interpretation/confirmation, candidate generation, at least one meaningful negotiable question and explicit response, safe public explanation, and matching approvals to AGREED. Exercise refusal, clarification, revision/stale approval and disclosure independence with meaningful negative checks. Neither an organizer nor an automated assistant acts as a real participant.
+4. Verify persistence/replay/reload, session expiry/reconnect and private isolation across all sessions. Check that a display/group nonmember cannot read owner data or mutate authority; logs/public payloads contain no private reasons, secrets, grant identifiers or forbidden fixture content.
+5. Record repeatable deterministic/injected automation and an explicitly authorized bounded live-model/staging run separately. A operates A-only AWS commands and sender configuration; B receives no AWS credentials. Actual email evidence is needed only if that optional sender was enabled. Do not treat simulated model output as proof of live AI or agent simulation as human product feedback.
+6. Run clean setup plus focused checks and pinned `npm run check` on the exact final artifact. Fix observed technical failures within recorded scope, and publish a compact evidence/limitation report. State accurately which product paths are qualified and which future release work remains deferred.
+
+## Completion
+
+Mark DONE on actual technical criteria and record the completed NP batch. Pending independent/human review, volunteer trials, demo/submission preparation, official rules and publication remain outside this batch until the user schedules them. NP04 is technical qualification, not a fabricated review verdict or submission authorization.
+
+Follow [NP direction](../../../../../next-phase.md), [workflow](../../../../../agent-workflow.md#np-batch-policy) and [board](../../../../../task-board.md). Pull clean `main` ff-only and record claimant/files/baseline. One active task across A and B; no subagents. Paid calls, AWS writes/deployments and external sends require separate authorization.
+
+## Bounded claim — 2026-10-01
+
+New `tests/integration/np-qualification.test.ts` and `tests/e2e/np-qualification.spec.ts`, `tests/evaluations/np-{api,lifecycle,model}.ts` and optional new browser helper; bounded corrections only in the existing NP01–NP03 group/frontend files if an observed qualification failure requires them. `docs/np04-qualification.md`, NP04/NP05 tickets, board and own B log/handoff. No NP00 runtime/jobs/admission/test/tracking, root/lock/CI or A log changes. Real Cognito/CLI AWS/email/managed restart/live paid-model evidence transfers to NP05 under the explicit user direction; injected offline results are labeled accordingly.
+
+Observed correction scope: `apps/web/src/group-home.tsx` listens for recipient-link hash changes while the signed-in page is already open; initial-only capture otherwise hides a newly opened invitation. Preserve recipient validation and explicit acceptance. New NP04 browser flow covers this case.
+
+## Completion evidence — 2026-10-01
+
+[Qualification report](../../../../../np04-qualification.md) records four fresh browser sessions through Garden Watering/Afternoon AGREED, distinct owner needs, explicit concession and all exact approvals; seven meaningful negative/persistence API checks and a lost-response/expired-session browser check. The invitation hash-change correction passed the complete regression suite. NP00-owned source and A tracking are unchanged from this worker's baseline.
+
+Clean pinned npm ci exit 0, zero vulnerabilities. Final pinned `PLAYWRIGHT_CHANNEL=chromium npm run check` exit 0: **464 unit/integration tests / 2 optional DynamoDB Local skips, hosted 1/1, E2E 53/53**; references 7/7, planning 15/15, lint/boundaries 233, typecheck and both builds passed. Focused API 7/7 and browser 2/2 passed. Local Markdown links and git diff whitespace checks passed.
+
+NP01–NP04 local batch complete. These are injected/offline automation results; actual Cognito signup/verification, A-only deployed approval CLI, AWS/managed restart/email/live model/screen evidence is explicitly NP05 under user direction. No independent/human result, cloud write, paid call or publication is claimed. Source sync uses `[skip ci]`.

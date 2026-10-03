@@ -1,0 +1,39 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# KE16 — Hackathon demo and submission materials — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+# KE16 — Hackathon demo and submission materials
+
+- Status: BLOCKED.
+- Claim: Unclaimed. No implementation or review has started.
+- Direct worker: human selects `gpt-6-luna` / medium; record actual model/effort, never infer it from this file.
+- Prerequisite: [KE15](../KE15/ticket.md) is DONE with trial findings recorded; all named earlier gates remain satisfied.
+- Scope/files: docs/known-enough-demo.md; setup/judge/submission drafts; redacted friction/product feedback; synthetic recording assets. Also this ticket, the current board/handoff and claimant’s own log. Name exact files and baseline at claim; coordinate contract/root/lock/CI changes.
+
+## Outcome
+
+Produce a truthful maximum-three-minute narrative and reviewable submission package based on qualified behavior. Target 2:30–2:45. Follow the Known Enough demo direction; strongest interaction appears in the first minute.
+
+## Acceptance
+
+1. Record objective creation, private conversations, conditional question/permission, validated proposal, public Alexa-style explanation and privacy refusal, individual approvals to AGREED, and a short second-domain glimpse.
+2. Label simulated Alexa+ and injected/live components accurately. Show only AWS services actually used; match all claims to the recorded source/deployed artifact and scenario evidence.
+3. Verify current official deadline/timezone, track rules, video duration, repository/setup, licensing/access, judge credentials/lifetime, friction log and product feedback requirements. Preserve dated verification links and actual findings.
+4. Prepare clean instructions, final recording/materials and source hashes for independent KE17 review. Do not publish, send credentials, submit or deploy under this materials task.
+
+## Checks and handoff
+
+Check document/link/reference consistency, recording duration and setup rehearsal; run full npm run check only if executable files change. Mark DONE and hand off the exact materials to independent KE17 when these checks pass. Submission remains separately authorized; no extra per-task human review.
+
+Before development, use a separate clean clone on `main`, successfully run `git pull --ff-only origin main`, recheck current claims and record the bounded claim. One task at a time. Only reviews explicitly named in this ticket are gates; do not add broad or repeated review sessions. Follow the [token-efficient review policy](../../../../agent-workflow.md#review-scope-and-token-efficiency). No implicit publication, merge, deployment, paid calls/resources or external messages.
+
+Follow the [workflow](../../../../agent-workflow.md), [current queue](../../../../task-board.md), [product](../../../../known-enough-product.md), [architecture](../../../../known-enough-architecture.md) and [migration mapping](../../../../known-enough-pivot.md).

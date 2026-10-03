@@ -1,6 +1,6 @@
 # LIVE02 real service coverage
 
-Preparation only: live code exists, but no AWS, Cognito, paid AI, email or writable online test was run here. [LIVE01 setup](live-qa-setup.md) supplies the isolated environment. [LIVE04](tasks/LIVE04.md) must establish actual results; a collected/listed test is not a passing test. Existing NP03/NP04 local qualification remains useful separate evidence.
+Preparation only: live code exists, but no AWS, Cognito, paid AI, email or writable online test was run here. [LIVE01 setup](live-qa-setup.md) supplies the isolated environment. [LIVE04](tasks/active/live-testing/LIVE04/ticket.md) must establish actual results; a collected/listed test is not a passing test. Existing NP03/NP04 local qualification remains useful separate evidence.
 
 ## One runner command
 

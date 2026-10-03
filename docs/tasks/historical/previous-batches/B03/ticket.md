@@ -1,0 +1,40 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# B03 — local HTTP server, explicit non-production identities, validation, and errors — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+> **Known Enough migration, 2026-09-26:** retained historical scope; status remains **REVIEW**. Follow the [current queue](../../../../task-board.md) and [mapping](../../../../known-enough-pivot.md#complete-old-task-mapping) for future work; historical handoffs below do not restart old tasks.
+
+# B03 — local HTTP server, explicit non-production identities, validation, and errors
+
+> **Before development:** On a clean clone checked out on `main`, run `git pull --ff-only origin main` before any actual development of this task, including code, tests, configuration, or task artifacts. If local changes or an active rebase/merge prevent a clean pull, preserve and resolve/synchronize that state first; do not begin task development until the pull succeeds.
+
+
+- Direct worker: human selects `gpt-6-sol`, medium effort; record actual model in evidence.
+- Pool: Shared; either user may claim eligible unclaimed work. Historical claims below remain evidence; active claims require explicit release.
+- Status: REVIEW; implemented in `27a110c`, now integrated into main at the user’s direction. Live acceptance remains at A02.5/G01.
+- Claim: Implementation complete: Astra lead/integration, Terra high implementation, Sol high independent review under the earlier task workflow; no new implementation claim.
+- Prerequisites: B02 implementation must be locally usable. Acceptance additionally requires B02.5 passing and current B02 checks. An independent Astra HTTP-auth review may occur at G01; critical findings must be fixed before downstream acceptance.
+- Scope/files: `apps/api/**`, `tests/integration/**`, plus the implementing developer’s work log and coordinated task/board/handoff records; Breaking contracts require coordinated consumer review.
+- Acceptance: documented HTTP mappings, schema rejection, missing identity, non-enumerating missing/other-owner resources, display writes, and organizer escalation. Label local test identities non-production. Run relevant unit/integration tests and `npm run check`; record actual outcomes. Do not claim production auth.
+- Handoff: G01 and A02.5.
+
+Follow [agent workflow](../../../../agent-workflow.md) and [task board](../../../../task-board.md). Future work uses a separate clone on `main`; no mandatory branch or subagent.
+
+## Implementation and integration
+
+B03 source `27a110c` adds local HTTP, fixed non-production identities, bounded request validation and documented errors. No wire contract changes; three existing workspace dependencies added to the API manifest/lock entry. Original check passed 156 tests and two scaffold browser tests; independent Sol review found no remaining actionable authorization/privacy findings. See [verification](../../../../verification.md#b03-verification--september-21-2026) and [API instructions](../../../../../apps/api/README.md). Current combined main checks are recorded separately in [main integration](../../../../main-integration.md).
+
+## Resumed verification — 2026-09-22T00:04:32Z
+
+At the user's request, Astra resumed B03 verification on main `c79faeb`. API/application/adapters/contracts and integration tests are unchanged from reviewed B03 `27a110c`; no implementation repair is outstanding within this ticket. Fresh `npm test -- tests/integration/http.test.ts tests/integration/application.test.ts packages/application/src/application.test.ts` exited 0: 38 tests across three files, including all 12 HTTP tests, using pinned Node/npm and local loopback listeners.
+
+Status remains REVIEW. The latest full-project check on this same source baseline passed 169 unit/integration tests and 24 browser tests but failed the A03 receipt-wording assertion; see [A03.5 follow-up](../../../../reviews/A03.5.md). That frontend correction and A02.5/G01 live acceptance remain separate. No duplicate backend implementation, new contract changes, commit or push was performed in this resumed verification.

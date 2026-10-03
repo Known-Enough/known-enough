@@ -18,7 +18,7 @@ Current staging still has Lambda mode `BEDROCK`, paid approval `true` and the No
 
 ## Active claim
 
-A / Ricardo / GitHub `martelaxe` (ID `44531296`), WSL worker `/home/martelaxe/known-enough`, transferred from the Mac at 2026-10-01T17:56:15Z. Actual model Codex GPT-6; exact variant/effort unexposed, ticket target Sol/high. Clean `main` ff-only pull passed at `3feef260f6fb865f249ae81149a03f8774ca2d39`, equal to `origin/main` (ahead/behind `0/0`). The original claim and Mac evidence remain preserved; see [ticket and transfer record](tasks/NP00.md). One active project task; no subagents/reviewer/human trial.
+A / Ricardo / GitHub `martelaxe` (ID `44531296`), WSL worker `/home/martelaxe/known-enough`, transferred from the Mac at 2026-10-01T17:56:15Z. Actual model Codex GPT-6; exact variant/effort unexposed, ticket target Sol/high. Clean `main` ff-only pull passed at `3feef260f6fb865f249ae81149a03f8774ca2d39`, equal to `origin/main` (ahead/behind `0/0`). The original claim and Mac evidence remain preserved; see [ticket and transfer record](tasks/active/closeout/NP00/ticket.md). One active project task; no subagents/reviewer/human trial.
 
 ## WSL AWS identity preflight — 2026-10-01
 

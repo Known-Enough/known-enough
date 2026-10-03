@@ -1,0 +1,31 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# A03 — receipts, responsive/accessibility work, and browser regressions — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+> **Known Enough migration, 2026-09-26:** retained historical scope; status remains **REVIEW**. Follow the [current queue](../../../../task-board.md) and [mapping](../../../../known-enough-pivot.md#complete-old-task-mapping) for future work; historical handoffs below do not restart old tasks.
+
+# A03 — receipts, responsive/accessibility work, and browser regressions
+
+> **Before development:** On a clean clone checked out on `main`, run `git pull --ff-only origin main` before any actual development of this task, including code, tests, configuration, or task artifacts. If local changes or an active rebase/merge prevent a clean pull, preserve and resolve/synchronize that state first; do not begin task development until the pull succeeds.
+
+
+- Direct worker: human selects `gpt-6-luna`, medium effort; record actual model in evidence.
+- Pool: Shared; either user may claim eligible unclaimed work. Historical claims below remain evidence; active claims require explicit release.
+- Status: REVIEW.
+- Claim: 2026-09-21 UTC by A / Codex GPT-5 (scheduled gpt-5.6-luna unavailable); sole writer for the scoped frontend files. Baseline `6499ec4`.
+- Prerequisite: A01 implementation is available. This work runs in parallel with B; no G01 gate.
+- Scope/files: `apps/web/**`, `tests/e2e/**`, plus the implementing developer’s work log and coordinated task/board/handoff records. One writer may modify `apps/web` at a time; coordinate contracts/root changes.
+- Acceptance: private exception/disclosure receipts using UI mocks, mobile layout, reduced-motion behavior, and browser regressions. Strong consent changes require a checkpoint before continuing. Run relevant unit/browser tests and `npm run check`; record actual outcomes. Preserve independent permissions and public/private boundaries; no server-auth proof or live claim.
+- Handoff: A03.5; make the resulting UI safe for A04/A05 preparation. This mock preparation does not prove server authentication or live API behavior.
+- Checkpoint: [A03.5 PASS](../../../../reviews/A03.5.md) for the current uncommitted R2/R5 correction against `cfb3371`. All preparation findings closed; fresh browser suite 29/29. A04/A05 checkpoint blocks released. Keep REVIEW pending human acceptance; live/authentication gates remain separate.
+
+Follow [agent workflow](../../../../agent-workflow.md) and [task board](../../../../task-board.md). Future work uses a separate clone on `main`; no mandatory branch or subagent.

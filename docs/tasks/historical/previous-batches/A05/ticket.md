@@ -1,0 +1,42 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# A05 — confirmed-language input draft review and form fallback — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+> **Known Enough migration, 2026-09-26:** retained historical scope; status remains **REVIEW**. Follow the [current queue](../../../../task-board.md) and [mapping](../../../../known-enough-pivot.md#complete-old-task-mapping) for future work; historical handoffs below do not restart old tasks.
+
+# A05 — confirmed-language input draft review and form fallback
+
+> **Before development:** On a clean clone checked out on `main`, run `git pull --ff-only origin main` before any actual development of this task, including code, tests, configuration, or task artifacts. If local changes or an active rebase/merge prevent a clean pull, preserve and resolve/synchronize that state first; do not begin task development until the pull succeeds.
+
+
+- Direct worker: human selects `gpt-6-luna`, medium effort; record actual model in evidence.
+- Pool: Shared; either user may claim eligible unclaimed work. Historical claims below remain evidence; active claims require explicit release.
+- Status: REVIEW; implementation and checks complete; independent privacy follow-up PASS; human acceptance pending.
+- Current gate: [A03.5 PASS](../../../../reviews/A03.5.md) releases preparation, and the [independent A05 privacy follow-up](../../../../reviews/A03.5.md#a05-privacy-follow-up--2026-09-23) passed for the corrected mock artifact. Human acceptance and live gates remain separate.
+- Claim/result: 2026-09-23; actual worker Codex GPT-6, variant/effort not exposed (not claimed as the scheduled GPT-6-Luna/medium). Baseline `e11bac9` on clean `main`; sole writer for `apps/web/**`, `tests/e2e/**`, and coordinated A05 tracking. Implementation complete; independent privacy follow-up PASS; human acceptance pending.
+- Prerequisites: A02 and A03.5. No B05 or live-service dependency for preparation.
+- Scope/files: `apps/web/**`, `tests/e2e/**`, plus the implementing developer’s work log and coordinated task/board/handoff records; coordinate contracts/root changes.
+- Acceptance: draft-review and form-fallback UX using agreed DTOs and injected extraction responses; accurate host-simulation labeling. Run relevant unit/browser tests and `npm run check`; record actual outcomes. No live dependency or server implementation claim.
+- Handoff: A05.5.
+
+Existing scope supplies private draft review/confirmation for [T01](../T01/ticket.md) and [T02](../T02/ticket.md); the new tasks own shared-objective clarification and suggestion/public explanation behavior.
+
+Follow [agent workflow](../../../../agent-workflow.md) and [task board](../../../../task-board.md). Future work uses a separate clone on `main`; no mandatory branch or subagent.
+
+
+## A05 implementation evidence — 2026-09-23
+
+- Added a fixed, browser-local host simulation behind an injectable extraction function. Only the documented synthetic sentence yields an `InputValues` DTO; responses are parsed strictly before preview. Unsupported wording shows a safe fallback to the existing structured form. The sentence and result stay local to the mock UI; there is no model/service call, public write, consent change, backend route, contract change, or live extraction claim.
+- Changed `apps/web/src/owner-draft-extractor.ts`, `apps/web/src/owner-screen.tsx`, `apps/web/src/style.css`, `apps/web/src/owner-mock-adapter.test.ts`, `tests/e2e/a05.spec.ts`, this ticket and the A work log. The independent reviewer identified two issues: old interval checks surviving sentence changes/preparation, and a sample match that did not verify exact end time. Both are corrected; regressions cover immediate review invalidation and same-start/different-duration rejection. The A03.5 privacy follow-up passed; restore invalidation was confirmed by source inspection.
+- Pinned Node 24.21.0/npm 11.19.0. Focused owner tests: 12/12; focused A05 browser tests: 4/4. Full `npm run check`: exit 0; 181 unit/integration and 41 browser tests, references 7/7, planning 15/15, lint/boundaries, typecheck, build/bundle privacy scan. Playwright Chromium 1243 ran with libraries extracted under `/tmp`; initial launch lacked `libnspr4`, resolved without system installation. `git diff --check` passed. No external service or cloud evidence.
+- Independent review evidence: A03.5 follow-up PASS against `e11bac9`; it inspected `owner-screen.tsx`, `owner-draft-extractor.ts`, `owner-mock-adapter.test.ts`, and `tests/e2e/a05.spec.ts` read-only. Reviewed SHA256 values: owner-screen `df4d9f7693818b9cd6ce89cd16c53bdc9768b0b00a8232faa4360de6f6abab9f`; extractor `8e9c549428d27a9991a6e00c63906d3756f16ef765a12ca6bdd0fcf40ba1fcd9`; owner tests `c8cddc7ed965a2a9e61bf1981c2864cb383096995e28f80930b4665b0f4ec89b`; browser tests `53d7a7fcda0c770833ec7754c0e651409ebc8129c13d5ed12999734e8b5a8674`. Reviewer did not rerun tests; implementation checks above passed independently.
+- Current state: REVIEW pending human acceptance and live gates. No external service, deployment or live extraction claim.

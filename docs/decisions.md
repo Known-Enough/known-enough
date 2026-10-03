@@ -14,7 +14,7 @@ B04 correction `f6b93bc` and review record `1c4ea45` are already ancestors of sy
 
 User instruction replaces A/B user assignments with one shared pool. Either user may claim any eligible unclaimed task; existing claims, independent reviews, separate clones and external-action permissions remain. Historical task IDs and personal log filenames are preserved. [Workflow](agent-workflow.md) and [board](task-board.md) govern current scheduling; older ownership statements below are historical.
 
-Private extraction already belongs to A05/B05/A05.5. New [T01](tasks/T01.md) defines shared-objective clarification, solver-supported private suggestions and explanations drawn only from authorized public facts; [T02](tasks/T02.md) implements/evaluates that experience using the existing AWS plan. Neither task promises unrestricted negotiation, hidden-reason disclosure or autonomous consent. This update records scope, not implementation, live AWS evidence or human acceptance.
+Private extraction already belongs to A05/B05/A05.5. New [T01](tasks/historical/previous-batches/T01/ticket.md) defines shared-objective clarification, solver-supported private suggestions and explanations drawn only from authorized public facts; [T02](tasks/historical/previous-batches/T02/ticket.md) implements/evaluates that experience using the existing AWS plan. Neither task promises unrestricted negotiation, hidden-reason disclosure or autonomous consent. This update records scope, not implementation, live AWS evidence or human acceptance.
 
 ## Historical decisions
 

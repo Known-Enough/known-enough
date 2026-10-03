@@ -6,7 +6,7 @@ The [product definition](docs/known-enough-product.md), [architecture direction]
 
 **Current implementation:** the retained TeamTable prototype includes the React/Vite UI, strict contracts, deterministic fixture, local application/HTTP flow and reviewed local Cognito/DynamoDB adapter code. Default UI routes use synthetic mocks; explicit local routes use fixed non-production identities. B04/B04.5 await human acceptance. Generic Known Enough AI, Bedrock/SQS runtime and cloud deployment are future tasks; KE00 changes documentation only. All demo people/data are fictional. Mock identities are not authentication.
 
-Read the [current queue](docs/task-board.md) before starting work. KE00 stops for human review; KE01 is next only after acceptance. Package names such as `@deal-table/...` remain intentionally unchanged during the migration.
+Read the [task guide](docs/tasks/README.md) and [current queue](docs/task-board.md) before starting work. Earlier KE scheduling is historical; the current board governs unfinished work. Package names such as `@deal-table/...` remain intentionally unchanged during the migration.
 
 ## Setup and launch
 

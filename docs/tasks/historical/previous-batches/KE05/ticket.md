@@ -1,0 +1,48 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# KE05 — Known Enough product shell — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+# KE05 — Known Enough product shell
+
+- Status: DONE — technical acceptance met on 2026-09-27; handed off to KE06.
+- Claim: 2026-09-27T18:49:31Z; User A / current Codex GPT-6, exact runtime variant/effort unexposed. The user-directed `gpt-6-luna` / high target is not claimed as verified runtime selection. Clean synchronized `main` baseline `3369345`; `git pull --ff-only origin main` succeeded and HEAD/origin were 0/0. Bounded files: `apps/web/**`; relevant `tests/e2e/{scaffold.spec.ts,a01.spec.ts,a03.spec.ts,a05.spec.ts,hosted-preview/hosted-preview.spec.ts}` as needed; a new web setup/copy README if needed; this ticket, `docs/task-board.md`, `docs/handoff-A.md` and `docs/work-log-A.md`. No API/backend/application, contract, root/package manifest, lockfile, CI, AWS/cloud, deployment, paid-call or external-message changes planned. Coordinate and stop if shared contract changes are needed.
+- Direct worker: `gpt-6-luna` / high by user direction for the KE01–KE08 MVP; record actual model/effort, never infer it from this file.
+- Prerequisite: [KE04](../KE04/ticket.md) is DONE with its acceptance checks recorded; all named earlier gates remain satisfied.
+- Scope/files: apps/web/**; relevant tests/e2e/**; synthetic public-only UI fixtures; setup/copy documentation. Also this ticket, the current board/handoff and claimant’s own log. Name exact files and baseline at claim; coordinate contract/root/lock/CI changes.
+
+## Outcome
+
+Transition visible product identity and default experience to Known Enough. Build the generic home/create screen, decision lobby, participant list, public/private navigation, status and proposal surface using accepted contracts.
+
+## Acceptance
+
+1. Lead with “What are you trying to decide?” and show understandable decision state. Remove fixed meeting/duty assumptions from the default UX while preserving legacy routes needed by regression tests.
+2. Use Known Enough product copy and the honest trusted-processing privacy promise. Do not expose schemas or validators to ordinary users or call injected output live AI.
+3. Preserve private receipts, separate permission controls, keyboard/mobile behavior and reduced motion. The shared surface imports contracts/public fixtures only.
+4. Keep existing package IDs, auth group names and protocol identifiers unless a separate bounded migration is justified. No backend or consent-authority redesign in a shell task.
+
+## Checks and handoff
+
+Run focused accessibility/browser and boundary/build checks; run pinned npm run check for executable edits. When criteria and checks pass, record evidence and mark DONE; hand off directly to KE06 without per-task human review.
+
+Before development, use a separate clean clone on `main`, successfully run `git pull --ff-only origin main`, recheck current claims and record the bounded claim. One task at a time. Only reviews explicitly named in this ticket are gates; do not add broad or repeated review sessions. Follow the [token-efficient review policy](../../../../agent-workflow.md#review-scope-and-token-efficiency). No implicit publication, merge, deployment, paid calls/resources or external messages.
+
+Follow the [workflow](../../../../agent-workflow.md), [current queue](../../../../task-board.md), [product](../../../../known-enough-product.md), [architecture](../../../../known-enough-architecture.md) and [migration mapping](../../../../known-enough-pivot.md).
+
+## Completion — 2026-09-27
+
+- Replaced the default Deal Table view with a Known Enough home centered on “What are you trying to decide?”, using the public contract's decision-status type. The local draft, shared overview, private-space placeholder, and proposal placeholder stay in browser memory only; refresh clears the draft. Copy states that authentication, participants, private-input controls, proposal generation, persistence and shared state are not connected. No server call, model output, schema or private fixture is exposed on this default path.
+- Kept the previous TeamTable shared screen available via `?legacy=teamtable` (and existing `public=` / `local=` regression routes) and its owner receipts/independent permission controls via `?view=owner`. The retained synthetic owner identities remain local demo data, not authentication. Added responsive styling and keyboard focus for the new form and views.
+- Changed files: `apps/web/src/App.tsx`, `apps/web/src/known-enough-home.tsx`, `apps/web/src/style.css`, `tests/e2e/a01.spec.ts`, `tests/e2e/scaffold.spec.ts`, this ticket, `docs/task-board.md`, `docs/handoff-A.md`, and `docs/work-log-A.md`.
+- Actual worker: Codex GPT-6; runtime variant/effort unexposed. The requested `gpt-6-luna` / high setting is not claimed as the runtime used. No API/backend, contract schema, dependency, AWS/cloud, deployment, paid call or external message changed.
+- Pinned Node 24.21.0 / npm 11.19.0 `npm run check` passed: reference hashes 7/7; planning checks 15/15; lint/import boundaries 111; typecheck; 280 unit tests passed with two opt-in DynamoDB Local skips; production build and bundle scan; hosted-preview build/scan and browser test 1/1; full E2E 43/43. The focused scaffold browser tests also passed 4/4 after the final UI link edit. No managed AWS or shared-state evidence is claimed.
+- KE05 is DONE on its shell criteria. KE06 is next and READY; it is unclaimed pending direct-worker model selection. The handoff records the local synchronized completion. No review or project-level human acceptance gate was added or changed.

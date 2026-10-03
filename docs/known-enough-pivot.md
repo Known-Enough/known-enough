@@ -57,7 +57,7 @@ KEEP means preserve the mechanism, not certify every current implementation deta
 | LEGACY / REGRESSION | [TeamTable fixture](../packages/test-support/src/teamtable-fixture.ts), [fixture tests](../packages/test-support/src/teamtable-fixture.test.ts), [demo](../packages/test-support/src/demo.ts), [planning arithmetic](../planning-checks/teamtable-fixture-check.mjs) | Preserve 12/0/2 counts and rankings; separate old evidence from new scenario validation | KE04, KE14 |
 | LEGACY / REGRESSION | [public mocks](../apps/web/src/mocks/public), [storyboard](reference/deal-table-teamtable.html), [local tutorial](tutorials/local-negotiation.md), [verification](verification.md), [reviews](reviews/README.md) | Honest synthetic/connected-local provenance; keep legacy routes as tests require | KE04, KE05, KE16 |
 | KEEP | [package manifest](../package.json), [lockfile](../package-lock.json), [CI](../.github/workflows/check.yml), [boundaries](../scripts/check-boundaries.mjs), [bundle scan](../scripts/check-bundle.mjs), [reference checker](../scripts/check-references.mjs) | Pinned Node/npm, reproducible checks, browser/server separation; no technical package rename in KE00 | All tasks |
-| ADAPT / IMPLEMENT LATER | [workers boundary](../apps/workers/README.md), [infra design](../infra/README.md), [B05](tasks/B05.md), [B06](tasks/B06.md) | Reuse job/SQS and IAM/operations concepts; workers/SQS/Bedrock/deployment are not implemented services | KE10, KE13 |
+| ADAPT / IMPLEMENT LATER | [workers boundary](../apps/workers/README.md), [infra design](../infra/README.md), [B05](tasks/historical/previous-batches/B05/ticket.md), [B06](tasks/historical/previous-batches/B06/ticket.md) | Reuse job/SQS and IAM/operations concepts; workers/SQS/Bedrock/deployment are not implemented services | KE10, KE13 |
 | KEEP | [workflow](agent-workflow.md), [review records](reviews/README.md), [A log](work-log-A.md), [B log](work-log-B.md) | Single writer, exact-artifact independent reviews and human acceptance; preserve provenance | All tasks |
 
 ## Complete old-task mapping
@@ -66,33 +66,33 @@ All 27 pre-pivot tickets were inspected. DONE remains DONE for its original scop
 
 | Old task | Baseline → pivot status | Disposition and destination |
 | --- | --- | --- |
-| [F00](tasks/F00.md) | DONE → DONE | Preserve imported foundation/reference evidence |
-| [F01](tasks/F01.md) | DONE → DONE | Preserve workspace/tooling/CI |
-| [F02](tasks/F02.md) | DONE → DONE | Preserve strict v1 baseline; generic contracts KE01 |
-| [A01](tasks/A01.md) | DONE → DONE | Keep UI scaffold; adapt shell KE05 |
-| [B01](tasks/B01.md) | DONE → DONE | Keep deterministic legacy benchmark; KE04 |
-| [B02](tasks/B02.md) | DONE → DONE | Keep command/consent mechanics; KE02/KE03 |
-| [B02.5](tasks/B02.5.md) | DONE → DONE | Preserve exact reviewed artifact; changed boundaries KE09 |
-| [B03](tasks/B03.md) | REVIEW → REVIEW | Retain HTTP implementation/evidence; generic adaptation KE03/KE11; old acceptance not inferred |
-| [G01](tasks/G01.md) | DONE → DONE | Accepted local TeamTable checkpoint only |
-| [A02](tasks/A02.md) | REVIEW → REVIEW | Retain forms/client; adapt KE05/KE07/KE11; pending human acceptance preserved |
-| [A03](tasks/A03.md) | REVIEW → REVIEW | Retain receipts/accessibility; KE05/KE07 |
-| [A03.5](tasks/A03.5.md) | REVIEW → REVIEW | Retain preparation/A05 privacy PASS; new boundaries KE09 |
-| [A02.5](tasks/A02.5.md) | REVIEW → REVIEW | Preserve local integration evidence and G01; new sessions KE11 |
-| [B04](tasks/B04.md) | REVIEW → REVIEW | Retained identity/storage technical baseline; project sign-off deferred; adapt KE03/KE11/KE13 |
-| [B04.5](tasks/B04.5.md) | REVIEW → REVIEW | Preserve latest independent correction PASS; project sign-off deferred |
-| [A05](tasks/A05.md) | REVIEW → REVIEW | Reviewed mock draft UX retained for KE07/KE10; no live extraction claim |
-| [A04](tasks/A04.md) | READY → SUPERSEDED | Session/reconnect preparation moves to KE11 |
-| [A04.5](tasks/A04.5.md) | BLOCKED → SUPERSEDED | Real authenticated browser acceptance moves to KE11 |
-| [B05](tasks/B05.md) | BLOCKED → SUPERSEDED | Bedrock/jobs and safe routing move to KE10 |
-| [A05.5](tasks/A05.5.md) | BLOCKED → SUPERSEDED | Owner confirmation and live extraction move to KE07/KE10 |
-| [B06](tasks/B06.md) | BLOCKED → SUPERSEDED | AWS deployment/operations move to KE13 |
-| [T01](tasks/T01.md) | READY → SUPERSEDED | Bounded facilitator design expands into KE01/KE06/KE08/KE12 |
-| [T02](tasks/T02.md) | BLOCKED → SUPERSEDED | AI implementation/evaluations move to KE06/KE08/KE10/KE12 |
-| [A06](tasks/A06.md) | READY → SUPERSEDED | Preparation moves to KE14/KE15/KE16 |
-| [A06.5](tasks/A06.5.md) | BLOCKED → SUPERSEDED | Trials/recording move to KE14/KE15/KE16 |
-| [G02](tasks/G02.md) | BLOCKED → SUPERSEDED | KE09 plus mandatory post-model/session/cloud follow-up before external testers |
-| [G03](tasks/G03.md) | BLOCKED → SUPERSEDED | KE17 release gate |
+| [F00](tasks/historical/previous-batches/F00/ticket.md) | DONE → DONE | Preserve imported foundation/reference evidence |
+| [F01](tasks/historical/previous-batches/F01/ticket.md) | DONE → DONE | Preserve workspace/tooling/CI |
+| [F02](tasks/historical/previous-batches/F02/ticket.md) | DONE → DONE | Preserve strict v1 baseline; generic contracts KE01 |
+| [A01](tasks/historical/previous-batches/A01/ticket.md) | DONE → DONE | Keep UI scaffold; adapt shell KE05 |
+| [B01](tasks/historical/previous-batches/B01/ticket.md) | DONE → DONE | Keep deterministic legacy benchmark; KE04 |
+| [B02](tasks/historical/previous-batches/B02/ticket.md) | DONE → DONE | Keep command/consent mechanics; KE02/KE03 |
+| [B02.5](tasks/historical/previous-batches/B02.5/ticket.md) | DONE → DONE | Preserve exact reviewed artifact; changed boundaries KE09 |
+| [B03](tasks/historical/previous-batches/B03/ticket.md) | REVIEW → REVIEW | Retain HTTP implementation/evidence; generic adaptation KE03/KE11; old acceptance not inferred |
+| [G01](tasks/historical/previous-batches/G01/ticket.md) | DONE → DONE | Accepted local TeamTable checkpoint only |
+| [A02](tasks/historical/previous-batches/A02/ticket.md) | REVIEW → REVIEW | Retain forms/client; adapt KE05/KE07/KE11; pending human acceptance preserved |
+| [A03](tasks/historical/previous-batches/A03/ticket.md) | REVIEW → REVIEW | Retain receipts/accessibility; KE05/KE07 |
+| [A03.5](tasks/historical/previous-batches/A03.5/ticket.md) | REVIEW → REVIEW | Retain preparation/A05 privacy PASS; new boundaries KE09 |
+| [A02.5](tasks/historical/previous-batches/A02.5/ticket.md) | REVIEW → REVIEW | Preserve local integration evidence and G01; new sessions KE11 |
+| [B04](tasks/historical/previous-batches/B04/ticket.md) | REVIEW → REVIEW | Retained identity/storage technical baseline; project sign-off deferred; adapt KE03/KE11/KE13 |
+| [B04.5](tasks/historical/previous-batches/B04.5/ticket.md) | REVIEW → REVIEW | Preserve latest independent correction PASS; project sign-off deferred |
+| [A05](tasks/historical/previous-batches/A05/ticket.md) | REVIEW → REVIEW | Reviewed mock draft UX retained for KE07/KE10; no live extraction claim |
+| [A04](tasks/historical/previous-batches/A04/ticket.md) | READY → SUPERSEDED | Session/reconnect preparation moves to KE11 |
+| [A04.5](tasks/historical/previous-batches/A04.5/ticket.md) | BLOCKED → SUPERSEDED | Real authenticated browser acceptance moves to KE11 |
+| [B05](tasks/historical/previous-batches/B05/ticket.md) | BLOCKED → SUPERSEDED | Bedrock/jobs and safe routing move to KE10 |
+| [A05.5](tasks/historical/previous-batches/A05.5/ticket.md) | BLOCKED → SUPERSEDED | Owner confirmation and live extraction move to KE07/KE10 |
+| [B06](tasks/historical/previous-batches/B06/ticket.md) | BLOCKED → SUPERSEDED | AWS deployment/operations move to KE13 |
+| [T01](tasks/historical/previous-batches/T01/ticket.md) | READY → SUPERSEDED | Bounded facilitator design expands into KE01/KE06/KE08/KE12 |
+| [T02](tasks/historical/previous-batches/T02/ticket.md) | BLOCKED → SUPERSEDED | AI implementation/evaluations move to KE06/KE08/KE10/KE12 |
+| [A06](tasks/historical/previous-batches/A06/ticket.md) | READY → SUPERSEDED | Preparation moves to KE14/KE15/KE16 |
+| [A06.5](tasks/historical/previous-batches/A06.5/ticket.md) | BLOCKED → SUPERSEDED | Trials/recording move to KE14/KE15/KE16 |
+| [G02](tasks/historical/previous-batches/G02/ticket.md) | BLOCKED → SUPERSEDED | KE09 plus mandatory post-model/session/cloud follow-up before external testers |
+| [G03](tasks/historical/previous-batches/G03/ticket.md) | BLOCKED → SUPERSEDED | KE17 release gate |
 
 Retained REVIEW tickets remain acceptance records, not an instruction to finish obsolete product requirements. Resolve retained evidence/acceptance explicitly. Changed implementation belongs to a bounded KE ticket and renewed critical review.
 
@@ -115,6 +115,6 @@ Retained REVIEW tickets remain acceptance records, not an instruction to finish 
 
 ## KE00 handoff and next start
 
-Current reviewable artifact is the local documentation diff over the exact baseline above, including new files. [KE00](tasks/KE00.md) and [A handoff](handoff-A.md) record fresh checks and changed paths. No production implementation or new independent security verdict is part of this audit.
+Current reviewable artifact is the local documentation diff over the exact baseline above, including new files. [KE00](tasks/historical/previous-batches/KE00/ticket.md) and [A handoff](handoff-A.md) record fresh checks and changed paths. No production implementation or new independent security verdict is part of this audit.
 
-Historical instruction at the September 26 audit: KE00 was awaiting review and KE01 had not started. Current implementation and queue state are authoritative in the [task board](task-board.md) and [KE01 ticket](tasks/KE01.md). KE01 defines the v2 contracts while preserving v1 runtime/hash behavior; KE02 follows after recorded ticket checks and uses retained B04/B04.5 technical evidence. Project-level sign-off is deferred. No old SUPERSEDED task may be restarted from a historical handoff.
+Historical instruction at the September 26 audit: KE00 was awaiting review and KE01 had not started. Current implementation and queue state are authoritative in the [task board](task-board.md) and [KE01 ticket](tasks/historical/previous-batches/KE01/ticket.md). KE01 defines the v2 contracts while preserving v1 runtime/hash behavior; KE02 follows after recorded ticket checks and uses retained B04/B04.5 technical evidence. Project-level sign-off is deferred. No old SUPERSEDED task may be restarted from a historical handoff.

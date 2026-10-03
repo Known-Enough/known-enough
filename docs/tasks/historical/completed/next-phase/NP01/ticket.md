@@ -1,0 +1,40 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# NP01 — Registration, operator approval, groups and invitations
+
+- Status: DONE — local implementation and automated criteria; managed-service evidence remains NP05.
+- Claim: Released after the verified local implementation checkpoint.
+- Direct worker target: `gpt-6-sol` / high. Record actual model/effort.
+- Prerequisite: user-authorized NP00 bypass for local implementation, 2026-09-30.
+- Scope: Registration/authenticated API and web flows, group/member/invitation contracts and persistence, focused tests, A's account-administration CLI and narrowly scoped IAM/setup instructions. At claim, name exact files in apps/api, apps/web, packages/contracts/application/adapters, scripts, tests and infra as needed. Own log/handoff, ticket and board included; coordinate root/lock/CI changes before adding them.
+
+## Outcome
+
+An ordinary test user can register, receive A's approval, create a group and invite people who were not in the original five-person directory. Registration, group creation and invitations are one task to keep the new batch compact.
+
+## Acceptance
+
+1. Provide registration and verified-email sign-in with understandable pending, approved and disabled states. Backend admission enforces A's approval independently of browser state. Prevent unapproved or disabled users from creating/joining groups, accessing private records or applying new commands; document treatment of already-issued sessions. Choose a minimal explicit application policy after inspecting current Cognito configuration.
+2. Give A a small CLI to list pending requests and approve, reject or disable test users. Bind changes to verified server identities, provide clear confirmation/readback and safe repeat behavior, and use A's separately authorized AWS operator credentials. The browser and ordinary participant API cannot exercise operator authority. Keep secrets, recipient emails and private participant data out of repository/log output. No public administrator UI is required.
+3. Let an approved user create and name a persistent group, with server-derived creator/organizer authority. Show the user's accessible groups and member/invitation status. Membership is dynamic, bounded and linked to verified users; neither the creator nor a client field can impersonate another person. Define how later membership changes affect an existing decision's roster and confirmations; changes must not silently preserve stale approvals or broaden old private access.
+4. Create single-use expiring invitations for new recipients, with copyable-link delivery, signup/sign-in continuation, explicit acceptance, safe same-recipient replay, expiry, lost-link replacement and wrong-user denial. Joining a group never automatically confirms a decision, grants a concession/disclosure or approves an outcome. A's global access approval and the recipient's group acceptance are separate actions.
+5. Include transactional invitation email as a bounded optional delivery path, preserving copyable links if no sender is configured. Prepare configuration and previews first. A performs separately authorized sender/service configuration and live sends. Claim real email delivery only when actually verified; no marketing mail, unsolicited invitations, credential emails from an agent, or automatic external messages.
+6. Exercise pending/disabled users, organizer-only issue, new-recipient joining, cross-group isolation, token loss/replay/expiry and concurrent membership changes with synthetic identities. Group/member persistence survives reload and restart. A's CLI must have meaningful authorization and state-transition checks.
+
+## Checks and handoff
+
+Run focused identity/membership/invitation/CLI and browser checks plus pinned `npm run check`. Record actual managed-service results separately from local synthetic tests. Required registration/group onboarding must work; an optional email sender can remain explicitly deferred without calling it delivered. AWS/IAM changes and email sends need their separate authorization. No independent or human reviewer session is required under the current NP policy.
+
+On technical completion record evidence, mark DONE and release NP02 to READY. Follow [NP direction](../../../../../next-phase.md), [workflow](../../../../../agent-workflow.md#np-batch-policy), and [board](../../../../../task-board.md). A and B get the same queue; A-only credential operations use a sequential handoff. Pull clean `main` ff-only and record an exact bounded claim before implementation; no parallel tasks or subagents.
+
+## Bounded claim
+
+New `apps/api/src/group-service{,.test}.ts`, `group-repository{,.test}.ts`, `group-http.test.ts`, `group-operator{,.test}.ts`; `scripts/group-operator.mjs`; `apps/web/src/group-home.tsx` and browser tests; bounded integration in `http-core.ts`, `ke13b-lambda.ts`, `connected-app.tsx`, `cognito-session.ts`; new group DTOs in contracts; `infra/np05-deployment.md`; NP01–NP05 and own B tracking. No NP00 runtime/jobs/admission source or NP00 tracking changes, root/lock/CI changes, AWS/paid/email actions.
+
+## Implementation evidence — 2026-09-30
+
+Verified B / Battosai1806 implemented opt-in registration from verified server userInfo, per-request approval admission, A-only operator CLI, CAS persistent bounded groups, organizer-only recipient-HMAC invitations, replacement/expiry/explicit acceptance/replay and membership-version decision freeze. Browser preserves group links through login and shows pending/approved/disabled/group/member states. CLI version/readback is tested through the same state service; no browser admin route. No email addresses or bearer/link secrets in public snapshots/logs. Optional email remains deferred with configuration and template preview in `infra/np05-deployment.md`.
+
+Pinned Node 24.21.0/npm 11.19.0: focused 9/9, lint/boundaries 217 and typecheck passed. Fresh `PLAYWRIGHT_CHANNEL=chromium npm run check` exit 0: **449 tests passed / 2 optional DynamoDB Local skips; hosted 1/1; E2E 48/48**, references 7/7 and planning 15/15, builds/privacy scans passed. Initial browser launch failed for missing WSL libraries; authorized Playwright dependency installation resolved it without repository/toolchain changes. Default test timeouts retained.
+
+Evidence is offline signed JWT/injected profile and transactional transport automation, not actual Cognito signup, DynamoDB persistence, CLI AWS authorization or email delivery. Those checks/deployment are NP05 under the user's scope split. Source synchronization uses `[skip ci]`; no staging release, paid request or participant action. NP02 becomes READY independently of preserved NP00.

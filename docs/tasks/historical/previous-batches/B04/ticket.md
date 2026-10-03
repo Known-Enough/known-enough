@@ -1,0 +1,143 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# B04 — Cognito/DynamoDB adapters, scopes, and race/idempotency tests — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+> **Known Enough migration, 2026-09-26; policy update, 2026-09-27:** retained historical scope; status remains **REVIEW**. Synchronized main `65359eb` includes `f6b93bc` and independent R11/R12 PASS `1c4ea45`. Project-level user sign-off is deferred and does not block KE02; do not mark B04/B04.5 accepted or DONE. Earlier handoffs are dated evidence, not current blockers.
+
+# B04 — Cognito/DynamoDB adapters, scopes, and race/idempotency tests
+
+> **Before development:** On a clean clone checked out on `main`, run `git pull --ff-only origin main` before any actual development of this task, including code, tests, configuration, or task artifacts. If local changes or an active rebase/merge prevent a clean pull, preserve and resolve/synchronize that state first; do not begin task development until the pull succeeds.
+
+
+- Direct worker: human selects `gpt-6-sol`, high effort; record actual model in evidence.
+- Pool: Shared; either user may claim eligible unclaimed work. Historical claims below remain evidence; active claims require explicit release.
+- Status: REVIEW — local B04 technical evidence has been assessed after independent B04.5 PASS on exact source range `04bd1db..f6b93bc`; R11/R12 are closed. Identity, room/owner scope, invitation replay/expiry, auth-before-cache, and local DynamoDB transaction evidence are recorded below and in [independent review](../../../../reviews/B04.5.md). The author-reported full check passed with a documented serial-browser fallback; the independent reviewer reran focused suites and DynamoDB Local but not the full/browser suite. Project-level sign-off is deferred; the REVIEW status is preserved and does not block KE02. No managed AWS/live Cognito/IAM, deployment, or push is claimed.
+- Completed local transaction-verification claim: 2026-09-24T03:15:20Z–03:24:39Z; worker A / GPT-6 Codex, exact variant/effort not exposed (not claimed as ticket Sol/high). Baseline `4616b421f4ed68384c732445d679476277c6dab1`; scope was `packages/adapters/src/dynamodb.local.test.ts` and coordinated tracking records. The test passed against loopback-only DynamoDB Local 3.3.1. No implementation/test source changes, AWS endpoint, cloud resource, deployment, or push occurred.
+- Claim: 2026-09-23T09:48:28Z; resumed by A / Codex GPT-6, variant/effort not exposed (not claimed as the scheduled GPT-6-Sol/high). Baseline `2df501d` plus B04.5's recorded documentation-only review; sole writer for `packages/application/**`, `packages/contracts/**`, `apps/api/**`, `tests/integration/**`, `infra/**`, `apps/web/src/command-client.ts` and its focused test, plus coordinated B04/task-board/A-log records. Scope is bounded to R1–R4 corrections. Pause again for independent B04.5 follow-up before expanding identity, transaction or IAM implementation.
+- Resumed claim: 2026-09-23T10:18:50Z; A / Codex GPT-6, variant/effort not exposed (not claimed as the scheduled GPT-6-Sol/high). Baseline `35d57e7` plus completed B04.5 tracking changes. Sole writer for `packages/application/src/index.ts`, `tests/integration/application.test.ts`, `apps/web/src/command-client.test.ts`, `infra/README.md`, and coordinated B04/task-board/A-log/handoff records. Bounded scope: known-no-commit capacity responses and their client flow (R2a), absent STATE/GUARD semantics (R2b), and reserved history/replay space for all outstanding exception/disclosure decisions (R5). No adapter expansion, cloud activity, or publication before follow-up review.
+- Resumed claim: 2026-09-23T10:51:34Z; A / Codex GPT-6, variant/effort not exposed (not claimed as the ticket's scheduled GPT-6-Sol/high). Baseline `b91ff76` plus completed B04.5 review evidence. Sole writer for `infra/README.md` and coordinated B04/task-board/A-log/handoff records. Documentation-only scope: encoded-byte reservations for pending responses (R5b) and ordinary-versus-reserved safety receipt accounting (R6). No adapter expansion, cloud activity, or publication before follow-up review.
+- Resumed claim: 2026-09-23T20:24:18Z; A / Codex GPT-6, variant/effort not exposed (not claimed as the ticket's scheduled GPT-6-Sol/high). Baseline `98877e1` plus B04.5 fresh design review. Sole writer for `infra/README.md` and coordinated B04/task-board/A-log/handoff records. Documentation-only scope: reserve the future disclosure response at exception-offer admission across the complete ALLOW path (R5b). No adapter expansion, cloud activity, or publication before follow-up review.
+- Resumed claim: 2026-09-23T20:36:58Z; A / Codex GPT-6, variant/effort not exposed (not claimed as scheduled `gpt-6-sol` / high). Baseline `5297118` plus B04.5 PASS tracking. Sole implementation writer for `packages/adapters/**`, `packages/application/**`, `packages/contracts/**`, `apps/api/**`, `tests/integration/**`, `infra/**`, B04 task/board/handoff records and A work log; root dependency files only if required for the adapter. Initial scope: strict DynamoDB STATE/GUARD/REPLAY codec and repository transaction enforcement for the reviewed identity/capacity design, with focused local adapter tests. No cloud activity or publication.
+- Prerequisite: G01. B04.5 is mandatory after design and the first reviewable implementation slice, before expanding the identity, transaction, or IAM approach.
+- Scope/files: `packages/adapters/**`, `packages/application/**`, `packages/contracts/**`, `apps/api/**`, `apps/web/src/command-client.ts` and its focused test, `tests/integration/**`, `infra/**`, root `package-lock.json` for B04 runtime dependencies, plus the implementing developer’s work log and coordinated task/board/handoff records. No deployment without explicit approval; coordinate contracts/root changes.
+- Acceptance: verified identity, cross-room/owner isolation, invite replay, display scope, auth-before-cache, real-adapter transaction races, and application-enforced expiry. Address B04.5 findings; run relevant unit/integration tests and `npm run check`, recording actual outcomes. Do not fake cloud evidence.
+- Handoff: B04.5, then B05/A04.5/G02.
+
+Follow [agent workflow](../../../../agent-workflow.md) and [task board](../../../../task-board.md). Future work uses a separate clone on `main`; no mandatory branch or subagent.
+
+## Authorized integration — September 22, 2026
+
+User authorized commit/push of the reviewed repairs in `d042d8f`; synchronization found published overlapping work through `8371e7b`. Both histories are preserved in the integration. Latest implementation owner: B for this bounded integration; no new task takeover is inferred from the shared-pool policy. A02.5/G01 repair evidence is in [G01](../../../../reviews/G01.md). Incoming diagnostics/readiness fixes and coverage-review regression are preserved; initial answers stay explicit per interval, retries remain exact and snapshots must match control versions. Fresh combined `npm run check` passed 179 unit/integration and 37 browser tests; independent follow-up PASS on the exact 12-file artifact is recorded in G01. Publication is explicitly user-authorized; human checkpoint acceptance remains separate. B04 remains unclaimed pending G01 acceptance. Earlier findings remain historical evidence.
+
+
+## First implementation slice — 2026-09-23
+
+- Paused implementation at 747aac2, based on design-review checkpoint 5297118. Actual worker: A / Codex GPT-6; variant/effort not exposed, not claimed as the ticket's scheduled GPT-6-Sol/high.
+- Strict versioned STATE/GUARD/REPLAY codec; conditional DynamoDB transactions; candidate-only replay reads after current application authorization; bounded conflict retries; receipt and byte-reservation enforcement. Added local transaction-client tests for malformed/partial state, orphan replays, replay races, cross-room scope, expiry, quotas, and near-limit prompt/decline behavior.
+- Full pinned npm run check passed: 7 reference hashes, 15 planning checks, lint/import boundaries (85 references), typecheck, 210 unit/integration tests, 127 web modules and privacy scan, and 41 browser tests. B04-focused DynamoDB integration suite: 11/11.
+- This is local command-client evidence only. No DynamoDB Local, AWS account, Cognito pool, IAM simulation, cloud request, deployment, or push. The first code review has returned CHANGES_REQUESTED; see the findings and bounded repair claim below. Human acceptance and G02/live evidence remain outstanding.
+
+
+## B04.5 code review corrections — 2026-09-23
+
+- B04.5 returned CHANGES_REQUESTED on code range 5297118..747aac2 with four P2 findings: R7 valid plans may require more than three grant references; R8 exhausted ordinary receipt quota allows unreceipted semantic failures; R9 roster revision drops departed-owner permission history and conflicts with lifetime counters; R10 deterministic transaction validation cancellations are retried as contention. See [independent review](../../../../reviews/B04.5.md).
+- Resumed claim: 2026-09-23T21:46:31Z; actual worker A / Codex GPT-6, variant/effort not exposed, not claimed as scheduled GPT-6-Sol/high. Baseline cfb65f1. Sole implementation writer for `packages/adapters/src/dynamodb-codec.ts`, `packages/adapters/src/dynamodb.ts`, `packages/application/src/types.ts`, `packages/application/src/index.ts`, `tests/integration/dynamodb-repository.test.ts`, `infra/README.md`, and coordinated B04/B04.5/review/board/A-log/handoff records. Bounded scope: R7–R10 only, with regression tests; no cloud activity or publication.
+- Resumed claim: 2026-09-23T22:18:05Z; actual worker A / Codex GPT-6, exact variant/effort not exposed. Baseline `f88b4a0`. Sole implementation writer for `packages/adapters/src/dynamodb.ts`, `tests/integration/dynamodb-repository.test.ts`, and coordinated B04/B04.5/review/task-board/A-log/handoff records. Bounded scope: R10 full-list cancellation classification and regressions for mixed retryable, capacity, and unknown/validation reasons. No other implementation expansion, cloud activity, or publication.
+- After fixes, run focused tests and pinned `npm run check` and pause for independent B04.5 follow-up on the exact changed code. No push is authorized by this claim.
+
+
+## R7–R10 correction slice — 2026-09-23
+
+- Committed as `f88b4a0` over baseline `e43a5ac`. Required grant references now allow the contract maximum of 20 conditions per each of three owners. Exhausted ordinary receipt quota returns known-no-commit capacity instead of an unreceipted semantic rejection. Roster revision archives departed owners’ exception grants and disclosure decision metadata, retaining the preview hash while omitting unshared wording, drafts, and confirmations; guard lifetime history and pending-response admission include retired history. STATE schema is now v3. DynamoDB transaction cancellation reasons distinguish retryable conflict/throttle, known size capacity, and other failures without leaking provider messages.
+- Added regressions for four overlapping grants through solver completion, same-key changed-body attempt after an unreceipted capacity result, departed-owner archive/counter preservation and disclosure text minimization, archived-history response-slot admission, item-size cancellation without retry, and non-size validation cancellation without retry. B04 adapter suite passed **17/17**.
+- Pinned `npm run check` passed: reference checksums **7/7**, planning checks **15/15**, lint/import boundaries (**85 references**), typecheck, **216 unit/integration tests**, browser build/privacy scan (**127 modules**), and **41 browser tests**. `git diff --check` passed.
+- Evidence is local only: adapter commands exercised by the deterministic fake, not DynamoDB Local or an AWS account. No live Cognito, IAM simulation, cloud, deployment or push. The implementation is PAUSED for B04.5 independent follow-up on `747aac2..f88b4a0`; no broader identity/IAM work has resumed.
+
+## R10 mixed-reason follow-up — 2026-09-23
+
+- The independent `gpt-6-astra` / high follow-up closed R7–R9. R10 remains open for mixed DynamoDB cancellation reasons: the classifier retries if *any* recognized conflict/throttle is present, even alongside item-size `ValidationError` or arbitrary validation. The reviewer reproduced both eight-attempt outcomes. Required precedence: malformed/unknown/arbitrary validation means redacted non-retryable `other`; otherwise recognized item-size/collection capacity means `capacity`; otherwise retry only when at least one non-`None` reason exists and every such reason is recognized retryable; empty/all-`None` lists are `other`. See [review evidence](../../../../reviews/B04.5.md).
+- The bounded B04 claim above resumes only R10 with mixed-reason regressions. After the focused and full pinned checks, pause again for independent Astra/high follow-up on the exact code delta. No cloud activity or push is authorized.
+
+
+## R10 mixed-reason correction — 2026-09-23
+
+- Committed as b78aab99307fda1eda41776cf7bf260c72971a2a over f88b4a0. The classifier now validates the complete cancellation-reason list: malformed/unknown/arbitrary validation is redacted other; otherwise recognized capacity wins over contention; retry occurs only when at least one non-None reason exists and all failures are recognized retryable codes. Empty/all-None lists remain other.
+- Added mixed item-size + conditional capacity coverage and non-retry regressions for arbitrary validation, unknown codes, and malformed entries mixed with throttle. Focused adapter suite passed 21/21.
+- Pinned full npm run check passed with cached Chromium: references 7/7, planning 15/15, lint/import boundaries (85 references), typecheck, 220 unit/integration tests, 127-module build/privacy scan, and 41 browser tests. Initial Chrome-channel attempt failed because the system Chrome path was absent; rerun against installed /tmp/a05-playwright Chromium passed in full.
+- All evidence uses local code and the deterministic fake for DynamoDB adapter operations. No DynamoDB Local/AWS, Cognito, IAM simulation, cloud, deployment, or push. B04 is PAUSED for fresh independent B04.5 review of exact code range f88b4a0..b78aab9.
+
+## R10 independent follow-up result — 2026-09-23T22:38:42Z
+
+B04.5 returned **PASS** on exact `f88b4a0..b78aab9`; R10 is closed and prior R7–R9 closures remain valid. Independent focused adapter suite 21/21 and 35 classifier assertions passed; [review evidence](../../../../reviews/B04.5.md) records source inspection, full-list precedence, redaction and limitations. Reviewer claim finished. B04 remains PAUSED with this code gate cleared until the owner records sequential resumption. No B04 completion, human/live acceptance or publication is implied.
+
+
+## Sequential resumption — near-limit permission-response acceptance
+
+- Resumed claim: 2026-09-23T22:47:50Z; actual worker A / Codex GPT-6, variant/effort not exposed; scheduled gpt-6-sol/high is not claimed as the session model. Baseline b687d5f after the fresh B04.5 PASS was locally integrated. Sole writer for tests/integration/dynamodb-repository.test.ts, infra/README.md, and coordinated B04/task-board/A-log/handoff records. Bounded scope: exercise an actually issued exception offer near the encoded STATE/reservation limit through ALLOW, the queued solver-job write, and disclosure DECLINE; record the current implementation/review evidence and limitations. If the regression exposes an implementation defect, stop and record it before widening source scope. No cloud activity or publication.
+- Result: focused adapter suite 22/22; pinned `npm run check` passed references 7/7, planning 15/15, lint/import boundaries 85 references, typecheck, 221 unit/integration tests, build/privacy scan 127 modules, and 41 browser tests. The fake-client path preserves the active exception and proposal while the disclosure decision is declined; no cloud/live evidence is implied. B04 pauses for independent B04.5 inspection of this exact test diff before further implementation. B04.5 PASS on f88b4a0..b78aab9 remains valid; any critical implementation change still needs follow-up review.
+
+
+## Branch unification — 2026-09-23
+
+The root cause was independent B04 development in separate clones from common base `8e6d1c4`. Local `main` reached `d6c4a90` while `origin/main` reached `2087331`; both lines changed the same API, application, adapter, test, and tracking files. Their persistence designs also differed materially: this line has strict STATE/GUARD/REPLAY transactions, receipt/size reservations and reviewed R7–R10 fixes; the published line added a separate single-item conditional adapter and its own persistence review. Git therefore had both ordinary text conflicts and semantic architecture conflicts.
+
+The merge preserves both histories as parents and uses this ticket's stricter multi-item adapter as the sole current DynamoDB implementation. The published single-item adapter and its tests are removed from the working tree, while their commits, review, and DynamoDB Local 3.3.1 evidence remain in history/logs. Its useful opt-in loopback DynamoDB Local scenario has been ported to `packages/adapters/src/dynamodb.local.test.ts` against the selected adapter. Earlier review PASSes remain evidence only for their named artifacts; the unified merge requires a fresh independent B04.5 review. No push is authorized by this integration request.
+
+
+- B04.5 correction claim: 2026-09-24T02:15:25Z; A / Codex GPT-6, exact variant/effort not exposed. Baseline `436c4ae`. Bounded files: `apps/api/src/index.ts`, `apps/api/src/cognito-identity.test.ts`, `packages/adapters/package.json`, `package-lock.json`, and coordinated B04/B04.5/board/A-log/handoff tracking. Scope: restore public Cognito resolver value/type exports with a package-import regression; match DynamoDB SDK pin to verified installed 3.1135.0 and complete parent lock metadata. Pause after checks for independent B04.5 follow-up. No broader implementation, cloud activity, or publication.
+
+
+## B04.5 P2 correction result — 2026-09-24T02:20:50Z
+
+- Restored `createCognitoIdentityResolver`, `createCognitoIdentityResolverFromEnv`, and `CognitoIdentityOptions` exports from the package entrypoint `apps/api/src/index.ts`. Added a regression importing through `@deal-table/api`; focused test passed 5/5.
+- Pinned `@aws-sdk/client-dynamodb` to 3.1135.0, the actual installed and previously used version. Restored the complete pinned lockfile from the local parent; all 213 package entries carry `resolved` and `integrity` metadata. After removing npm's stale generated `node_modules/.package-lock.json`, `npm ls` and the installed package file both report 3.1135.0. `npm install --ignore-scripts --offline` was attempted but stopped because zod 4.6.5 was not cached; no clean reinstall is claimed.
+- Focused API package surface regression: 5/5 passed. Full pinned `npm run check`: references 7/7; planning 15/15; lint/import boundaries 89 references; typecheck; 227 unit/integration passed with 1 opt-in DynamoDB Local test skipped; build/privacy scan 127 modules; Playwright 41/41. No DynamoDB Local endpoint, AWS/Cognito/IAM call, cloud resource, or deployment.
+- The independent B04.5 follow-up passed on the exact correction commit; B04 remains REVIEW pending human acceptance/integration and DynamoDB Local evidence. No push/publication.
+
+
+## Unified artifact checkpoint — 2026-09-24
+
+Fresh independent B04.5 follow-up returned PASS on exact code commit `a058cc56b3b37f50f16ce01b2fbfeba68cf9a4b6`; see [review evidence](../../../../reviews/B04.5.md). The migrated DynamoDB Local transaction scenario and full local check subsequently passed; see the verification below. At the later acceptance audit, B04's single-use room-invitation requirement had no route/model. The follow-up implementation and its separate review gate are recorded in the invitation section below.
+
+## DynamoDB Local validation — 2026-09-24
+
+The SDK-backed emulator scenario passed on AWS DynamoDB Local 3.3.1, loopback-only, verifying create, duplicate-create rejection, and 12 competing STATE/GUARD transactions with the expected +12 versions. Full pinned `npm run check` passed with the emulator enabled: references 7/7, planning 15/15, lint/import boundaries 89, typecheck, 228 unit/integration tests with zero skips, 127-module build/privacy scan, and 41 browser tests. This is local emulator evidence, not managed-service or live acceptance. No source code was changed. No AWS/cloud activity or push occurred.
+
+
+## Invitation issuance/redemption slice — 2026-09-24
+
+- Implemented and locally committed as `13707c2794491666989059cf23dcaa8bcd7e2075` over baseline `30132974c457c6472290e64b35a495c676901b0e`. Actual worker: GPT-6 Codex; variant/effort unexposed, so the scheduled `gpt-6-sol` / high target is not claimed as the runtime model.
+- Added strict issue/redeem DTOs and routes. Only the room's configured organizer can issue for a pre-provisioned PENDING roster membership; the request cannot set a subject or owner. The verified subject binding is fixed by trusted bootstrap. Invites live for 24 hours; an unexpired invite cannot be reissued. The token is returned once and only its SHA-256 hash is stored. Redemption requires the exact verified subject and atomically changes that one membership to ACTIVE while retaining the consumed hash. Wrong-subject, expired, replayed, missing and cross-room attempts fail with the same not-found response. Closed rooms reject issue and redemption. Invite tokens are absent from logs and snapshot DTOs.
+- STATE schema is now v4 and strictly validates membership status and at most one invitation record per roster member. There is no v3 auto-migration. Any existing durable v3 table needs a separately reviewed migration before deployment. Trusted membership provisioning and invite delivery remain outside this bounded slice.
+- Focused tests: application + signed-Cognito HTTP + DynamoDB repository suites **56/56**; typecheck and lint/import boundaries passed (**89 references**). The real SDK-backed DynamoDB Local suite passed **1/1** against the pinned 3.3.1 image, bound to `127.0.0.1:8000`; it verified duplicate room create, 12 guarded state writers and one-success/one-rejected concurrent invitation redemption. Full pinned `npm run check` passed: references **7/7**, planning **15/15**, lint/import boundaries, typecheck, **231** unit/integration tests (one opt-in emulator test skipped in this run), 127-module build/privacy scan, and **41** Playwright tests. The emulator test was run separately on the same commit and passed.
+- B04 is **PAUSED** pending fresh independent B04.5 follow-up on this exact implementation. Earlier B04.5 verdicts remain scoped to their recorded commits. No AWS/Cognito service, IAM simulation, managed DynamoDB, cloud resource, deployment, push or human acceptance occurred.
+
+
+## Invitation review corrections — 2026-09-24
+
+- Independent B04.5 review returned CHANGES_REQUESTED with P2 findings R11/R12 on exact code `30132974c457c6472290e64b35a495c676901b0e..13707c2794491666989059cf23dcaa8bcd7e2075`; evidence and reproductions are in [B04.5](../../../../reviews/B04.5.md). The reviewer ran 86 focused tests, one DynamoDB Local scenario, typecheck, reference/planning checks and targeted probes.
+- Correction claim: 2026-09-24T23:57:17Z; implementation owner A / GPT-6 Codex, exact variant/effort unexposed (scheduled Sol/high not claimed as actual session model). Synchronized clean `main` and successfully ran `git pull --ff-only origin main` at `8d13cff3a9dc5bff6f5654df25b03c517a2ac232` before edits. Bounded scope: invitation organizer authorization and capacity error mapping in `packages/application/src/index.ts` and `apps/api/src/http-core.ts`, regression tests for those paths, and coordinated B04/review/task-board/A-log/infrastructure evidence. No unrelated adapter/schema changes, cloud activity or publication. Pause after corrections and affected/full checks for independent B04.5 follow-up.
+
+
+## Invitation R11/R12 correction checkpoint — 2026-09-25
+
+- Implemented and committed locally as `f6b93bc77ecf7b0680a1abcab4bc99d7fa836515`, parent `04bd1db`. The authorization path now establishes room scope before organizer-only denial: unrelated participants and display principals scoped elsewhere receive the same 404 for present and missing rooms; scoped room participants (including pre-provisioned pending members) remain 403 when they are not the organizer. The pre-body check and transaction-time organizer recheck remain.
+- Invitation repository capacity errors now become `ROOM_CAPACITY_REACHED` / HTTP 409 at the application boundary; other errors continue to propagate to the redacted retryable 503 handler.
+- Added signed-Cognito regressions comparing present/missing room behavior for an unrelated participant and out-of-scope display credential, using malformed bodies to verify authorization precedes parsing and asserting no invitation state was added. Added HTTP issue and redemption capacity regressions that assert 409, response code/requestId and unchanged persisted state.
+- Pinned Node 24.21.0/npm 11.19.0 full check passed with the repository's one-worker Chromium fallback: references 7/7, planning 15/15, lint/import boundaries 89, typecheck, 232 unit/integration tests with one opt-in DynamoDB Local test skipped, 127-module build/privacy scan and 41/41 Playwright tests. A default 8-worker browser run had one owner-page startup timeout; that scenario passed alone, and the serial full browser run passed all 41. No DynamoDB Local scenario was rerun for this app/API-only correction; the independent prior review ran that scenario on the invite implementation.
+- Independent B04.5 follow-up passed on exact source range `04bd1db..f6b93bc`, closing R11/R12 with no new bounded findings. After the owner assessed the local acceptance evidence, B04 is REVIEW pending human acceptance/integration. The code remains local/unpushed; no cloud acceptance is claimed.
+
+## Owner resumption — local acceptance assessment — 2026-09-25
+
+- Claim: 2026-09-25T00:37:52Z; B04 resumed after B04.5's correction follow-up PASS. Actual worker: GPT-6 Codex; variant/effort unexposed, not claimed as scheduled `gpt-6-sol` / high. Baseline `1c4ea45`. Bounded scope: assess the existing local evidence against B04's listed acceptance criteria and align status/handoff records only. No implementation edits.
+- Assessment: local evidence covers verified identity and scope isolation, invitation replay and expiry, auth-before-cache, and DynamoDB Local transaction races. The independent R11/R12 correction follow-up passed 87/87 focused tests, DynamoDB Local 1/1, nine injected adapter-to-HTTP failure paths, authorization probes, typecheck, references 7/7 and planning 15/15. The author's pinned full check is documented as 232 unit/integration passes plus one opt-in skip and 41/41 browsers; its raw output was unavailable to the independent reviewer, so this remains author-reported evidence.
+- B04 is REVIEW pending human acceptance/integration, not DONE. Managed AWS/Cognito/IAM, deployment and production acceptance remain outside this local evidence and belong to later G02/live gates. No push or publication.

@@ -1,0 +1,39 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# NP03 — Inspect every screen and clarify user-facing language
+
+- Status: DONE — local UI criteria; external/remaining live states NP05.
+- Claim: Finished; B / verified Battosai1806, Windows/WSL clone; actual GPT-6 variant/effort unexposed, baseline b9be678; clean ff-only pull passed.
+- Direct worker target: `gpt-6-luna` / medium. Record actual model/effort.
+- Prerequisite: NP02 DONE.
+- Scope: apps/web copy, presentation and navigation, relevant browser tests and a concise screen inventory; bounded error-to-user wording where required. No incidental backend authority/model/storage redesign. Name exact files and baseline; own log/handoff, ticket and board included.
+
+## Outcome
+
+The complete product speaks plainly. Remove awkward AI-generated phrasing and internal production/engineering terms that confuse users, while keeping accurate privacy, AI-processing and environment disclosures.
+
+## Acceptance
+
+1. Inventory and inspect registration/sign-in, email verification, pending/disabled access, group list/create/member views, invitation issue/accept/expire/reissue, decision creation/clarification/frame review, private input interpretation/confirmation, private questions, disclosure choices, public proposal/display/shared assistant, approval/agreement, revision and errors/loading/empty states. Inspect actual rendered states, including participant and display roles.
+2. Replace implementation terms such as kernel, semantic/control version, schema, context token, internal participant IDs, model ports and raw API errors with understandable action/status wording on ordinary user paths. Make clear what the person must review, what changes when they accept, what is private/shared and which step comes next. Do not expose sensitive technical diagnostics in errors.
+3. Preserve the exact facts needed for informed confirmation/permission/approval. Dates, units, limits, conditions and changed terms must remain legible. Keep simple honest disclosures that Known Enough and its AI process private inputs, and that local/synthetic demonstrations differ from connected use. Preserve simulated Alexa labeling where applicable.
+4. Check keyboard use, focus/status announcements, mobile layout and reduced-motion behavior. Fix confusing duplicate actions, stale labels and dead ends within this bounded UX scope. Record any required functional change for the active ticket before expanding scope.
+5. Capture a compact screen/state checklist and before/after copy examples. Use meaningful browser checks for state transitions, privacy visibility and the clarity-critical review/confirmation behavior. Automated inspection is not volunteer feedback; no people, recordings or recruitment are required.
+
+## Checks and handoff
+
+Run focused browser/accessibility checks and pinned `npm run check` for executable changes; documentation-only portions need link/reference checks. This is implementation self-inspection with automated evidence, not an independent reviewer session. No external messages or paid services are required.
+
+Mark DONE when the inventory and corrections are verified, then release NP04 to READY. Follow [NP direction](../../../../../next-phase.md), [workflow](../../../../../agent-workflow.md#np-batch-policy) and [board](../../../../../task-board.md). Pull clean `main` ff-only and record exact claimant/files/baseline; one active task, no subagents.
+
+## Bounded claim
+
+`apps/web/src/{connected-app.tsx,connected-decision.tsx,group-home.tsx,group-decisions.tsx,known-enough-home.tsx,simulated-shared-assistant.tsx,style.css}` and new `decision-copy{,.test}.ts`; `tests/e2e/np-onboarding.spec.ts` and new clarity browser tests/helpers; `docs/np03-screen-inventory.md`, own B log/handoff, NP03–NP05/board. No API/authority/storage/model/root/lock/CI or NP00-owned evidence/source change. External hosted signup/verification/managed error screens and any new live check route to NP05.
+
+Clarity scope amendment before edit: render the existing owner-only disclosure previews/allow/decline/revoke and active negotiation revocation commands in `connected-decision.tsx`. This exposes existing version-bound actions; no backend grant, automatic disclosure publication or new authority semantics. Add meaningful browser checks for owner-only visibility and independence.
+
+## Completion evidence — 2026-10-01
+
+[Screen inventory](../../../../../np03-screen-inventory.md) records actual rendered evidence and explicitly transfers external/unrendered checks to NP05 under user direction. Plain lifecycle/privacy/next-action copy, keyboard draft focus, mobile/status/error handling and existing owner disclosure/revocation controls are implemented. No backend authority or NP00 source changed.
+
+Focused Chromium 4/4; pinned full `npm run check` exit 0: 457 unit/integration tests, 2 optional DynamoDB Local skips, hosted 1/1, E2E 51/51; references 7/7, planning 15/15, lint/boundaries 233, typecheck/builds passed. Mobile screenshots inspected. No independent review, real signup/email or user feedback claimed. NP04 READY; NP05 retains service/live screens. Source sync skips deployment CI.

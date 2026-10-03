@@ -1,0 +1,40 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# LIVE03 — Run checks after every deployment
+
+- Status: DONE — trusted automation prepared and locally verified; installation/actual runs remain LIVE04.
+- Intended worker: B / Battosai1806, separate clone; record actual model/effort/baseline. Suggested direct target: gpt-6-sol / high.
+- Outcome: One GitHub result automatically follows each authorized deployment; A/B can also launch it themselves.
+- Policy: [Live delivery](../../../../../live-test-delivery.md).
+
+## Bounded preparation scope
+
+New `.github/workflows/live-qa-*.yml`, new release-receipt/report/runner files under `scripts/live-qa/` and `infra/live-qa/`, `docs/live-qa-automation.md`, this ticket and B log/handoff. Existing frontend deploy workflow may be amended only after recording exact coordinated scope; preserve A's shared-inspection workflow/scripts and NP00 fixes. Any new backend/QA deployment workflow belongs to the reviewed LIVE01 resource/artifact scope.
+
+## Deliverables and completion
+
+1. Add manual main-only dispatch for A/B and an automatic path following successful authorized GitHub deployment, readiness and release receipt. Support the approved frontend/backend QA release paths; the current Amplify workflow only deploys the frontend. Publish the same verified release artifacts to the isolated QA target before its journeys and label target differences.
+2. Bind test runs to upstream immutable SHA and verified artifact digests/deployment receipt. Preserve independent expected-release evidence; never accept arbitrary newly observed bytes as expected. Serialize target mutation/testing and handle superseded deployments honestly.
+3. Credentials exist only in trusted narrowly scoped jobs. Pin actions, verify exact repository/ref/workflow provenance, reject fork/PR execution with credentials, and if using workflow_run never execute untrusted uploaded code. Keep test-login and fixture/operator permissions separate from deploy/inspection grants.
+4. Run public checks, metadata/configuration checks, LIVE02 real journeys/screens, always-run cleanup and sanitized report generation. Reuse A's stable inspector interface read-only; if its fix remains pending, record that integration dependency without taking over its files.
+5. Report lane statuses, tested source/artifacts/targets, assertion counts, blocked coverage, failures and cleanup status. Required failed/blocked/missing lanes fail complete qualification; job-level continue-on-error must not hide them. Distinguish report availability from test PASS.
+6. After installed authorization, routine runs have no human reviewer/environment prompt, personal AWS login, participant approval, mailbox handling or manual visual check. Enforce preapproved per-run/per-period AI/email envelope and expiry; depleted authorization blocks those lanes. No automatic paid/email calls before setup authorization.
+7. Test workflow provenance/trigger/failure handling and report classification; run focused and pinned npm run check for executable changes. Provide A/B launch/read instructions and exact installation inputs. Keep workflows inactive or guarded until LIVE04 installation; sync preparation using [skip ci].
+
+DONE means automation is prepared and locally verified. Actual post-deployment trigger and B-account access are proven in LIVE04, not inferred from YAML. No deployment/cloud/paid/email operation is authorized here. Continue to [LIVE04](../../../../active/live-testing/LIVE04/ticket.md).
+
+## Claim — 2026-10-01
+
+B / Battosai1806, separate Windows/WSL clone, GPT-6 variant/effort unexposed. Clean synchronized main 8d4d6bb, 0/0. Exact new scope: .github/workflows/live-qa-release-and-check.yml; scripts/live-qa/{provenance.mjs,release.mjs,public.mjs,metadata.mjs,report.mjs}; infra/live-qa/installed-target.example.json; tests/integration/live-qa-automation.test.ts; docs/live-qa-automation.md; this ticket and own B log/handoff. Own LIVE01 template.mjs amendment: release role gets only GetItem on QA LEASE to refuse target mutations during a run; it still has no fixture operator/account/data write or environment/IAM/Cognito grant. Reuse A's stable inspector JSON/interface and public harness read-only; no NP00/shared inspector/deployment workflow/root/lock edits. Automatic/manual workflow stays guarded until LIVE04 has installed exact resources/envelope and set its repository enable/config variables. No workflow dispatch, cloud publish/write or paid/email operation occurs in this preparation. All required missing/failed/blocked lanes fail the final result.
+
+Scope clarification before edits: include own config.mjs and setup page plus existing own setup/runner regression tests for additional allowlisted PrimaryReleaseRoleArn output. Prepare a separate KnownEnoughGithubPrimaryRelease role only when primaryRollout is explicitly enabled: UpdateFunctionCode/GetFunctionConfiguration on known-enough-stage-api, GetObject on the content-addressed QA artifact bucket, and conditional GetItem on QA AUTH/LEASE. QA release role reads only AUTH/LEASE to enforce installation expiry before publication. No environment/IAM/Cognito/table writes in either deployment role. Separate job publishes primary backend code from the same independently built ZIP with model-off/config/revision guards and verified rollback; existing primary frontend workflow remains unchanged. This is preparation of the LIVE01 primary feature/artifact scope, not authorization to install/assume these roles or deploy.
+
+Rollback amendment before edits: own install.mjs must also revoke the optional exact primary-release role policy, so setup rollback disables all recurring deployment grants. No additional shared file/configuration change.
+
+## Completion — 2026-10-01
+
+B / Battosai1806; actual GPT-6 variant/effort unexposed. [Automation](../../../../../live-qa-automation.md) implements trusted main manual/automatic upstream provenance, a disabled-until-installed guard, independently expected deterministic artifacts, separate QA and optional primary backend code publication roles/jobs, revision/lease/envelope/readiness/rollback checks, primary/QA/static public bytes/screens, unchanged shared inspector collection with current expected-release/config comparison, real LIVE02 journeys and always-run exact cleanup/sanitized reports. Source/target/job failures, superseded source and all missing required lanes fail qualification. Primary paid models remain off and intentional QA differences appear in reports. No personal AWS profile or recurring human prompt is used.
+
+Focused preparation tests 26/26; full pinned npm run check exit 0: 494 passed / 2 optional DynamoDB Local skips, hosted 1/1, E2E 53/53; references 7/7, planning 15/15 and lint/typecheck/builds pass. Final reporting changes pass focused 8/8 and lint. Parsed YAML/job dependency graph 7/7; all actions pinned, no continue-on-error hiding required failure. Local links/whitespace pass. A clean committed candidate build must also construct independent primary/QA frontend and API/broker artifact manifests before synchronization; its invented target identifiers are preparation-only and no service call is made. Actual installation, role assumptions, public/hash/readback, paid/email/browser/cleanup behavior, authenticated B launch and automatic deployment PASS remain LIVE04. Existing NP00/app/root/deploy/inspector files were preserved.
+
+Clean committed artifact validation completed before push: release prepare at ec05a98b6e5166811126a74308e055313b266b90 succeeded using deliberately invented QA identifiers only for compilation. It built independent primary/QA frontend file manifests and API/broker ZIPs without AWS calls. This does not identify an installed target or actual workflow run. Source commit ec05a98 was then synchronized to origin/main with 0/0.

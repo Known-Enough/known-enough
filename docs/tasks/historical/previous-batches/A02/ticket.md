@@ -1,0 +1,32 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# A02 — frontend HTTP client and structured form commands — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+> **Known Enough migration, 2026-09-26:** retained historical scope; status remains **REVIEW**. Follow the [current queue](../../../../task-board.md) and [mapping](../../../../known-enough-pivot.md#complete-old-task-mapping) for future work; historical handoffs below do not restart old tasks.
+
+# A02 — frontend HTTP client and structured form commands
+
+> **Before development:** On a clean clone checked out on `main`, run `git pull --ff-only origin main` before any actual development of this task, including code, tests, configuration, or task artifacts. If local changes or an active rebase/merge prevent a clean pull, preserve and resolve/synchronize that state first; do not begin task development until the pull succeeds.
+
+
+- Direct worker: human selects `gpt-6-sol`, medium effort; record actual model in evidence.
+- Pool: Shared; either user may claim eligible unclaimed work. Historical claims below remain evidence; active claims require explicit release.
+- Status: REVIEW.
+- Current correction handoff: implemented by A / Codex GPT-5 against `cfb3371`; independently reviewed with [A03.5 PASS](../../../../reviews/A03.5.md). Fresh full check: 171/171 unit/integration and 29/29 browser. Keep REVIEW pending human acceptance; live integration remains A02.5.
+- Prior claim: implemented locally by Codex/GPT-5 (scheduled Terra/medium unavailable); `64cdf4f` reviewed on `c79faeb`, then correction `1119d9d` reviewed with narrower R2/R5 findings. That historical evidence is preserved in A03.5 and the work log.
+- Prerequisite: A01 implementation is available. No B02 gate for preparation. Live integration is A02.5.
+- Scope/files: `apps/web/**`, `tests/e2e/**`, plus the implementing developer’s work log and coordinated task/board/handoff records. Coordinate contracts/root changes.
+- Acceptance: use existing v1 schemas through injected transport and intercepted HTTP tests with synthetic UI-only data. Implement structured form commands and independent exception, disclosure, and approval flows. A stale refresh/reconfirmation must not automatically replay with latest versions. Unknown transport retries preserve the original key and payload. Run relevant unit/browser tests and `npm run check`; record actual outcomes. No server implementation, fake authentication, or claim of live completion.
+- Handoff: A02.5 and A03.5 review.
+- A03.5 follow-up: [PASS for the current uncommitted correction](../../../../reviews/A03.5.md). R2/R5 closed for preparation; R1/R3/R4/V1 closures retained. The saved review remains disabled after submission pending a current read. A02.5 must implement and verify actual current snapshot/revision handling; no live API acceptance claimed.
+
+Follow [agent workflow](../../../../agent-workflow.md) and [task board](../../../../task-board.md). Future work uses a separate clone on `main`; no branch or subagent is mandatory.

@@ -1,0 +1,39 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# A02.5 — live local negotiation integration — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+> **Known Enough migration, 2026-09-26:** retained historical scope; status remains **REVIEW**. Follow the [current queue](../../../../task-board.md) and [mapping](../../../../known-enough-pivot.md#complete-old-task-mapping) for future work; historical handoffs below do not restart old tasks.
+
+# A02.5 — live local negotiation integration
+
+> **Before development:** On a clean clone checked out on `main`, run `git pull --ff-only origin main` before any actual development of this task, including code, tests, configuration, or task artifacts. If local changes or an active rebase/merge prevent a clean pull, preserve and resolve/synchronize that state first; do not begin task development until the pull succeeds.
+
+
+- Direct worker: human selects `gpt-6-sol`, medium effort; record actual model in evidence.
+- Pool: Shared; either user may claim eligible unclaimed work. Historical claims below remain evidence; active claims require explicit release.
+- Status: REVIEW.
+- Current gate: [A03.5 PASS](../../../../reviews/A03.5.md) for the exact uncommitted R2/R5 correction against `cfb3371`; checkpoint block released. Preserve this reviewed artifact when synchronizing; any source change needs follow-up review. Human acceptance and live gates remain separate.
+- Claim/result: A / Codex GPT-5 (scheduled `gpt-5.6-terra` medium unavailable in this session), 2026-09-22; baseline `cfb3371` plus the preserved reviewed uncommitted A03.5 artifact. Explicit `local` routes now use B03's loopback API and fixed `NON_PRODUCTION` labels; mock routes remain defaults. Full check passed with the Chrome fallback. Source changed after A03.5, so this task remains REVIEW pending independent follow-up review and human acceptance.
+- Prerequisites: reviewed A02 and A03.5; B02 implementation reviewed through B02.5; B03. This is the live-local gate, not preparation.
+- Scope/files: `apps/web/**`, `tests/e2e/**`, plus the implementing developer’s work log and coordinated task/board/handoff records; coordinate contracts/root changes.
+- Acceptance: a real local initial negotiation completes without an LLM; refusal, disclosure, and all three approvals remain independent; duration edits invalidate exception grants and final approvals. Local identity is explicit and non-production. Run relevant unit/integration/browser tests and `npm run check`; record actual outcomes and do not claim production authentication.
+- Handoff: G01.
+
+## Current live verification finding — 2026-09-22
+
+The browser client now obtains each command's decision revision from the concurrently refreshed public snapshot, and its local API client invokes browser `fetch` with its required global receiver. A new loopback Playwright scenario starts the real local API and drives Maya, Leo and Nina through initial input, review and context-confirmation controls. TypeScript passes; the scenario currently fails after the request-to-solve step: the real fresh composition remains `COLLECTING` and returns no private Nina exception offer. This is recorded as a reproducible integration failure, so the task is not accepted and G01 remains blocked. See `docs/work-log-A.md` for the exact command/result.
+
+Follow [agent workflow](../../../../agent-workflow.md) and [task board](../../../../task-board.md). Use a separate clone on `main` for future work; no mandatory branch or subagent.
+
+## Authorized integration — September 22, 2026
+
+User authorized commit/push of the reviewed repairs in `d042d8f`; synchronization found published overlapping work through `8371e7b`. Both histories are preserved in the integration. Latest implementation owner: B for this bounded integration; no new task takeover is inferred from the shared-pool policy. A02.5/G01 repair evidence is in [G01](../../../../reviews/G01.md). Incoming diagnostics/readiness fixes and coverage-review regression are preserved; initial answers stay explicit per interval, retries remain exact and snapshots must match control versions. Fresh combined `npm run check` passed 179 unit/integration and 37 browser tests; independent follow-up PASS on the exact 12-file artifact is recorded in G01. Publication is explicitly user-authorized; human checkpoint acceptance remains separate. B04 remains unclaimed pending G01 acceptance. Earlier findings remain historical evidence.

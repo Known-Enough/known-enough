@@ -1,0 +1,60 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# KE09 — Independent privacy and consent gate — closed previous batch
+
+- Status: DONE — user-directed administrative closure, 2026-09-30.
+- Claim: Closed for scheduling by the user's new-batch direction; preserve all saved work.
+
+This is administrative closure of the old plan. Prior technical results and unfinished criteria are preserved below; no new check, review PASS, volunteer trial, live qualification or release acceptance is claimed. Remaining technical obligations route to [NP00](../../../active/closeout/NP00/ticket.md). Future product work follows [NP00–NP04](../../../../next-phase.md) and the [shared board](../../../../task-board.md). Reviews, human trials and submission preparation are deferred as mapped there. Historical claims and next-step instructions below cannot select current work.
+
+## Historical ticket record
+
+<!-- pre-NP-original-body -->
+
+# KE09 — Independent privacy and consent gate
+
+- Status: DONE under the user-directed scheduling exception below; R1–R6 self-review PASS, not independent certification.
+- Claim (released to review handoff): User B / Codex GPT-6, exact runtime variant/effort unexposed; Astra/high is the ticket target, not verified telemetry. User directed KE09 at 2026-09-28T01:00:50Z. Clean `main` baseline `cbc498202a06b553bca1a28c9e22c1862e21ac18`; `git pull --ff-only origin main` succeeded, ahead/behind 0/0. KE08 writer is paused; no other task active. Read scope: integrated KE01–KE08 contracts/domain/application/adapters/API/browser source, tests and relevant evidence. Write scope: `docs/reviews/KE09.md`, this ticket, `docs/task-board.md`, `docs/handoff-B.md`, `docs/work-log-B.md`; disposable adversarial probes under `/tmp`. No implementation fixes in this review; route them to User A. Independence limitation: this conversation implemented KE01–KE02, so its inspection of that portion is self-review and cannot satisfy the independent PASS gate.
+- Direct worker: human selects `gpt-6-astra` / high; record actual model/effort, never infer it from this file.
+- Prerequisite: [KE08](../KE08/ticket.md) implementation is complete and available on a named artifact with its writer paused; all earlier named technical reviews are complete. This is the single independent architecture/privacy checkpoint before real model calls; no separate project-level user sign-off is required.
+- Scope/files: Read current generic source/tests/evaluations; write docs/reviews/KE09.md and coordinated tracking only; route fixes to the implementation claimant. Also this ticket, the current board/handoff and claimant’s own log. Name exact files and baseline at claim; coordinate contract/root/lock/CI changes.
+
+## User-directed correction review — 2026-09-28
+
+**PASS (self-review), scoped to R1–R6 on `e256a43a92224f2761977759c87dac466049585b`.** User B / Codex GPT-6; runtime variant/effort unexposed. I inspected the corrected source boundaries and their regressions: public catalog normalization and same-owner enum questions; exact historical identities and disclosure audiences; canonical refusals; semantic authority reset; bounded receipts and exact-job cleanup. No additional actionable finding was identified in this correction scope. This is not an independent certification: this conversation authored these fixes and KE01–KE02.
+
+The user directed “review it, pass it, push the changes, and then build KE10” after being informed of the independent-session blocker. This records a narrow scheduling exception allowing offline KE10 implementation following this self-review. It does not waive independent follow-up on new runtime boundaries before release, or authorize paid calls/cloud changes. KE09 is closed under that exception; the original independent gate is not represented as satisfied.
+
+Source diff SHA-256 against `0cced25` remains `0fcb933042af7279dd7342c8cf3c9b6070d6ce74a32a77422398931420e1fcbe`. Fresh pinned focused run: **58/58 passed**, five files (negotiator, lifecycle, owner conversation, contracts, API). The prior full-check evidence above applies to the identical executable artifact: 322 tests, two emulator skips, hosted 1/1, browser 44/44. It was not rerun for this documentation-only verdict. No live model/cloud acceptance is claimed.
+
+## Correction completion — 2026-09-28T04:29:03Z
+
+The user-directed corrections are implemented and self-verified; the active implementation claim is released for independent follow-up. The user's “proceed” authorized the requested tests. [Correction artifact and evidence](../../../../reviews/KE09.md#correction-handoff--2026-09-28-independent-follow-up-pending) identifies the exact source diff over `0cced25`, each R1–R6 change and its regression coverage. Focused checks passed 58/58; full pinned check passed 322 tests / 2 emulator skips, hosted browser 1/1 and end-to-end 44/44, plus reference/planning/lint/type/build checks. No independent PASS or DONE is claimed. Next is the existing sequential KE09 follow-up, not KE10; this conversation's authorship precludes independent certification.
+
+## KE09 corrections claim — 2026-09-28T04:05:25Z
+
+The user explicitly directed this conversation to fix R1–R6 and commit/push. This supersedes the prior routing to User A for these corrections. User B / Codex GPT-6 (exact variant/effort unexposed) claims the sole active implementation on clean synchronized `main` at `a3bb78567f08a5df99e262419ea3c3d6b3dd9bde`; `git pull --ff-only origin main` succeeded. Scope: Known Enough contracts/kernel/application and their focused regression files, API local composition and its tests, synthetic test-support publication fixtures as needed, architecture/contracts docs, KE09 review addendum/ticket/board and B log/handoff. No dependency/root/lock/CI/cloud changes. Prior review evidence remains immutable; independent follow-up remains required. Test authorization is requested under this session's developer instruction; implementation proceeds while that answer is pending.
+
+## Review handoff — 2026-09-28T01:14:03Z
+
+[KE09 review](../../../../reviews/KE09.md) records the exact artifact, R1–R6, portable probes and evidence limits. The review writer has paused and released the active claim. Next: User A claims bounded correction work; no fix task is active until takeover is recorded. Executable source is unchanged. The full pinned check passed (303 tests, 2 emulator skips, hosted browser 1/1, end-to-end 44/44); all six adversarial probes reproduced failures absent from those regressions. This conversation authored KE01–KE02, so the bundled contract/kernel portion still requires an independent session; no PASS or DONE is claimed. After corrections, review the exact changed artifact before KE10 or any real model calls.
+
+## Outcome
+
+Provide the single independent privacy/consent and early-architecture checkpoint after KE08 produces the first user-facing MVP. Inspect the named integrated artifact from KE01–KE08 code and tests, not logs alone; bundle contract/kernel questions instead of reviewing them as separate tasks. The implementation session pauses for this one review before real model calls.
+
+## Acceptance
+
+1. Inspect raw private input handling, context/memory/cache construction, cross-owner/room isolation, owner-question wording, public assistant inputs/tools, traces/logs, retries, queues and retention. Questions to one owner cannot disclose another owner’s private constraints.
+2. Probe disclosure independence and audience checks, stale/revoked outputs, no-impersonation exact approvals, refusal/no-pressure and transaction races. Include prompt injection and decision-model poisoning.
+3. Inspect the generic evaluator’s unsupported-rule handling, private diagnostics and explanation boundary. Verify public hashes contain only public facts/opaque context.
+4. Record exact base/head or reproducible diff hashes, actual model/effort, commands, evidence limits and PASS/CHANGES_REQUESTED/BLOCKED. Do not self-certify implementation or infer live acceptance from mocks.
+5. Reopen this gate as a sequential follow-up after KE10–KE13 change model/session/shared/cloud boundaries; review each exact changed artifact before external testers or release. This follow-up obligation replaces G02, not its protection.
+
+## Checks and handoff
+
+Run focused independent adversarial checks and pinned npm run check. Record PASS/CHANGES_REQUESTED/BLOCKED; KE10 follows only after independent PASS and separate explicit authorization for real Bedrock calls. Mark this review task DONE on PASS; a changed reviewed artifact needs follow-up.
+
+Before development, use a separate clean clone on `main`, successfully run `git pull --ff-only origin main`, recheck current claims and record the bounded claim. One task at a time. Only reviews explicitly named in this ticket are gates; do not add broad or repeated review sessions. Follow the [token-efficient review policy](../../../../agent-workflow.md#review-scope-and-token-efficiency). No implicit publication, merge, deployment, paid calls/resources or external messages.
+
+Follow the [workflow](../../../../agent-workflow.md), [current queue](../../../../task-board.md), [product](../../../../known-enough-product.md), [architecture](../../../../known-enough-architecture.md) and [migration mapping](../../../../known-enough-pivot.md).

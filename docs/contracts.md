@@ -1,4 +1,4 @@
-> **Implementation baseline / historical TeamTable semantics (2026-09-26).** The document below retains its dated B02 description; executable schemas/source and B04 evidence describe later implementation. New generic contracts belong to [KE01](tasks/KE01.md) under the [Known Enough architecture](known-enough-architecture.md). No generic contract is implemented by KE00. See the [baseline audit](known-enough-pivot.md#b04-foundation-integrated-source-pending-acceptance).
+> **Implementation baseline / historical TeamTable semantics (2026-09-26).** The document below retains its dated B02 description; executable schemas/source and B04 evidence describe later implementation. New generic contracts belong to [KE01](tasks/historical/previous-batches/KE01/ticket.md) under the [Known Enough architecture](known-enough-architecture.md). No generic contract is implemented by KE00. See the [baseline audit](known-enough-pivot.md#b04-foundation-integrated-source-and-retained-review-status).
 
 # Contract v1 — B02 local application
 

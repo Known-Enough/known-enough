@@ -1,0 +1,44 @@
+> Historical ticket view. Links follow the current layout; [original bytes](original.md.txt) retain the old paths and evidence. This folder does not schedule work.
+
+# NP02 — Create a supported decision from a group's own objective
+
+- Status: DONE — local implementation and automated criteria; live evidence NP05.
+- Claim: Released after verified local implementation checkpoint.
+- Direct worker target: `gpt-6-sol` / high. Record actual model/effort.
+- Prerequisite: NP01 DONE.
+- Scope: Group-linked decision creation/draft confirmation, architect/owner/negotiation model boundaries, generic candidate generation, web/API/application/contracts/storage and focused evaluations/tests. Name exact files before editing; coordinate root/lock/CI or contract changes. Own log/handoff, ticket and board included.
+
+## Outcome
+
+A real group starts a decision by describing its objective, without being forced into CHRISTMAS or SHARED_PURCHASE. Preserve the supported rule vocabulary and privacy/consent engine. The two existing scenarios become optional templates and regression evidence.
+
+## Acceptance
+
+1. Start from an accessible group and a public ordinary-language objective. Resolve participant identities and creator authority on the server, with an explicit required-approver roster. Do not accept arbitrary caller-supplied subjects or silently activate people. Keep group joining, frame confirmation and final approval distinct.
+2. AI drafts bounded variables, options and supported decision criteria; users review, edit or clarify them through understandable controls. Persist the draft and bind confirmations to the current exact frame/context. Editing roster, terms or options invalidates affected readiness and approvals. Group removal/admission changes must be reflected safely in the decision lifecycle.
+3. Remove the mandatory fixed scenario enum, five-person deployment directory, scenario-specific variable IDs and fixed offer catalog from the general creation path. A reusable bounded generator/model output may propose new typed candidates, but supported schemas, references, public visibility and deterministic validation remain mandatory. Do not implement each new objective as another hard-coded scenario switch or domain solver.
+4. Connect private owner conversations, explicit condition confirmation, candidate validation, private negotiable questions, independent disclosure permissions and exact unanimous approval to newly created decisions. AI never exercises participant authority. Public explanations use only the approved public projection and currently authorized disclosures; no raw private-context prose.
+5. Ambiguous or unsupported conditions visibly require clarification. Describe outcomes as satisfying the confirmed supported rules, with no promise of universal reasoning or an objectively best choice. Preserve arithmetic/unit/date bounds and legacy regression behavior.
+6. Demonstrate a fresh group with a participant count/names outside the old roster and a supported objective outside both demo categories. Creation must produce genuinely different variables/options, survive reload, and proceed through the same lifecycle. Include malformed/injected output, unsupported conditions, stale frame/candidate and wrong-group tests; retain the old fixture/reference hashes.
+
+## Checks and handoff
+
+Focused generic-creation/model/privacy/application/browser evaluations and pinned `npm run check` must pass. Record injected tests and separately authorized live-model/staging verification as distinct evidence; no simulated success is relabeled live. No independent or human reviewer session is scheduled now. Cloud/configuration changes, paid requests and triggering deployment pushes retain separate authorization.
+
+Mark DONE on the ticket's technical criteria and release NP03 to READY. Follow [NP direction](../../../../../next-phase.md), [workflow](../../../../../agent-workflow.md#np-batch-policy) and [board](../../../../../task-board.md). Pull clean `main` ff-only, record exact claimant/files/baseline, and keep one active task across both users; no subagents.
+
+## Bounded claim
+
+`packages/contracts/src/groups.ts`; `apps/api/src/group-service.ts`, new `group-decisions{,.test}.ts`, `http-core.ts`, `ke13b-lambda.ts`; `packages/application/src/decision-architect{,.test}.ts`; `packages/adapters/src/bedrock-models.ts` and new `generic-candidates{,.test}.ts`, index export; new `apps/web/src/group-decisions.tsx`, `group-home.tsx`; `tests/evaluations/np-api.ts`, new focused NP creation/evaluation/browser files. Own B log/handoff, NP02–NP05 tickets/board, `infra/np05-deployment.md`. No NP00 model-runtime/jobs/admission files or NP00 tracking changes, no root/lock/CI changes. Existing kernel/consent vocabulary stays unchanged. Live deployment/model checks route to NP05.
+
+Scope amendment before edit: `apps/web/src/connected-decision.tsx` exports its existing variable-description formatter for reuse in group draft/roster review; no command or authority change.
+
+## Implementation evidence — 2026-10-01
+
+Persistent group-scoped architect drafts derive all subjects and required approvers from current approved membership. New public variables/options are proposed by the injected/authorized model boundary, validated, reviewed and editable before creation. Private fields/caller subjects/foreign groups reject. The general path has no mandatory scenario enum, five-person binding or static offer catalog; the public typed-domain generator enumerates at most 64 candidates from ENUM/ENUM_SET/BOOLEAN/PARTICIPANT options and explicit public numeric/date limits. Unsupported/unbounded domains ask clarification. The existing trust/owner/permission/approval lifecycle remains unchanged. Optional legacy scenarios stay regression/templates.
+
+Group version binds each decision. Membership changes block old reads/commands until the organizer explicitly reviews the new roster; revision resets confirmations, private input confirmations, permissions and approvals. Creation locks/reserves exact draft/version before application persistence; a failed write leaves a recoverable draft and identical retry. Unsaved edits cannot create an older saved frame. Refresh keeps the editor mounted.
+
+Focused architect/provider/group/generator tests passed 42/42; final affected follow-up 6/6 and connected browser 1/1 passed. Final pinned `PLAYWRIGHT_CHANNEL=chromium npm run check` exit 0: **456 tests / 2 optional DynamoDB Local skips, hosted 1/1, E2E 48/48**, references 7/7, planning 15/15, lint/boundaries 231, typecheck/builds passed. The first browser run found an ambiguous heading locator and a real refresh/unmount defect; corrected without weakening consent checks or increasing timeouts. Four new fictional users reached Gallery AGREED with explicit private negotiation and all exact approvals; a separate Garden objective generated different variables/options. Public privacy markers stayed absent.
+
+These are injected models/offline signed JWT/transactional transport checks. Cognito/signup/AWS/managed persistence/live model qualification remains NP05. No source deployment, AWS write, paid call or real participant action occurred. NP03 READY.
