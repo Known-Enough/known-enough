@@ -4,7 +4,7 @@ Start here to understand what is left. Every task has its own folder: README.md 
 
 ## Online testing
 
-Installation, GitHub settings and the automatic trigger are verified. Publishing, public website/configuration checks and cleanup passed after the IAM repair; real email/login/invitations pass; decision testing and complete live PASS are still pending. B has the next claim and two one-time approved extra runs; installed AWS allowance must be checked before dispatch. After an authorized eligible app deployment succeeds, GitHub runs the qualification automatically; B does not need A's AWS credentials or a manual Run workflow click.
+Installation, GitHub settings and the automatic trigger are verified. Publishing, public website/configuration checks and cleanup passed after the IAM repair; real email/login/invitations pass; decision testing and complete live PASS are still pending. B has the next claim and two one-time approved extra runs; installed AWS allowance must be checked before dispatch. B prepares any required change; only A applies it with A's own AWS access. After an authorized eligible app deployment succeeds, GitHub runs the qualification automatically; B does not need A's AWS credentials or a manual Run workflow click.
 
 | Task | Basic idea | Status |
 | --- | --- | --- |
