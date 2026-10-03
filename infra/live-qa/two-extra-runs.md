@@ -1,6 +1,8 @@
 # ASSESS07 — prepare B's final live test — 2026-10-03 UTC
 
-## Current status: exact CLI bug fixed; A must apply the allowance
+**New direction:** reusable [GitHub-only approvals](github-run-approvals.md) are prepared, pending one-time broker activation. This CloudShell procedure preserves the previous guarded one-use handoff. Do not combine both approval paths for the same human authorization.
+
+## Historical CloudShell path: exact CLI bug fixed; allowance not applied
 
 The user assigned B (`Battosai1806`) one final automatic live cycle. Its one-use slot is **not yet installed**. Both previous extra cycles remain spent. The deadline is `2026-10-04T00:00:00Z` (18:00 on October 3 in Mexico City).
 

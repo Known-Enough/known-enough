@@ -1,0 +1,40 @@
+name: Approve extra live QA runs
+run-name: 'QA allowance: ${{ inputs.runs }} runs for ${{ inputs.for_user }} on ${{ inputs.day }} [${{ inputs.request_id }}]'
+
+on:
+  workflow_dispatch:
+    inputs:
+      runs:
+        description: Number of additional runs (1–10), within the existing budget
+        required: true
+        type: string
+      for_user:
+        description: Person authorized to use the runs
+        required: true
+        type: choice
+        options: [Battosai1806, martelaxe]
+      day:
+        description: Today's UTC date (YYYY-MM-DD); expires at UTC midnight
+        required: true
+        type: string
+      request_id:
+        description: Unique approval UUID; reuse the same ID if retrying this approval
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  approve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Verify A's identity and record the exact dated approval
+        run: node scripts/live-qa/record-run-approval.mjs

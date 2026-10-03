@@ -11,6 +11,7 @@ import { createMailtmClient } from './mailtm.mjs';
 import { reserveTotal } from './cumulative.mjs';
 import { beginLease, actorUsername, cleanupPlan } from './fixture-core.mjs';
 import { githubRun, reserveExtra } from './extra-runs.mjs';
+import { githubApprovals, githubAllowance } from './github-allowance.mjs';
 const options = { region: 'us-east-1', maxAttempts: 1 };
 const db = new DynamoDBClient(options), users = new CognitoIdentityProviderClient(options), secrets = new SecretsManagerClient(options), s3 = new S3Client(options);
 const mailtm = createMailtmClient();
@@ -92,9 +93,21 @@ async function provision(runId) {
         if (next.runs > a.value.maxRunsPerDay) {
             const extraKey = 'EXTRA#' + day.slice(4);
             const extra = await read(extraKey);
-            if (!extra.value) throw new Error('PERIOD_BUDGET_EXHAUSTED');
-            const reservedExtra = reserveExtra(extra.value, a.value, a.version, period.value.runs, runId, await githubRun(runId), Date.now());
-            extraReservation = [put(extraKey, extra, reservedExtra)];
+            const testRun = await githubRun(runId);
+            if (extra.value) {
+                try {
+                    const reservedExtra = reserveExtra(extra.value, a.value, a.version, period.value.runs, runId, testRun, Date.now());
+                    extraReservation = [put(extraKey, extra, reservedExtra)];
+                } catch (error) {
+                    if (!['EXTRA_RUN_ALLOWANCE_BLOCKED', 'EXTRA_RUN_ACTOR_UNVERIFIED'].includes(error.message)) throw error;
+                }
+            }
+            if (!extraReservation.length) {
+                const now = Date.now();
+                const grant = await githubAllowance(await githubApprovals(now), a.value, a.version, period.value,
+                    total.value, runId, testRun, now, read);
+                extraReservation = [put(grant.id, grant.prior, grant.next)];
+            }
         }
         await db.send(new TransactWriteItemsCommand({
             TransactItems: [
