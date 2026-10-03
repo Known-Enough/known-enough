@@ -2,9 +2,11 @@
 
 Collect real online proof that all required user journeys, safety checks and cleanup pass automatically after a matching successful deployment.
 
-**Status:** BLOCKED.
+**Status:** READY.
 
-**Next step:** Use the prepared creation-wait correction and decision-test diagnostics in the next available authorized daily test slot. Real email verification, login and invitations now pass online. Decision creation/owner confirmation fails; four later tests are blocked. Publishing, website/configuration checks and cleanup pass. Today's four-run allowance is used; keep its original limits and expiry.
+**Next step:** B pulls main, claims this first-priority task and verifies the prepared decision-test correction online. The user approved two extra synthetic runs for B, including their matching deployment/automatic tests. AWS's daily allowance has not been changed: B first verifies available slots or implements a guarded one-time exception using the existing workload access. Keep accumulated usage, total cost limits, cleanup and original expiry. Real email/login/invitations pass; the full journey is still unverified.
+
+A has released this claim for B. After completion: ASSESS10, then OPS01 → OPS02 → OPS03 under their existing gates.
 
 [Latest actual report](../../../../review-artifacts/ASSESS07-email-login-pass-decision-failure.json).
 

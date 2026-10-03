@@ -4,7 +4,7 @@
 
 ## Current checkpoint — 2026-10-02
 
-AWS installation, GitHub settings, publishing permissions and automatic deployment/test triggering are verified. Latest deployment37089181120 automatically started37089230162 on matching source bef9d0d. Publication, public checks and AWS metadata PASS. Real email verification/hosted login (QA01) and admission/invitations (QA02) PASS. Decision creation/owner confirmation (QA03) FAIL, four later journeys BLOCKED; privacy and CLEAN cleanup PASS. One model attempt and one synthetic message reported. [Actual matching report](review-artifacts/ASSESS07-email-login-pass-decision-failure.json). The report does not identify the failing QA03 substep. A corrects a reproduced test timing race (reading the old decision ID before creation completes) and prepares fixed decision-stage/HTTP diagnostics; the fourth run's exact failing substep remains unproved. Full live acceptance remains pending. Four fixture-started runs on UTC2026-10-03 exhaust the existing daily allowance; no fifth dispatch or counter/grant reset. Resume the authorized matching automatic cycle when the original daily allowance is available, before original expiry.
+AWS installation, GitHub settings, publishing permissions and automatic deployment/test triggering are verified. Latest deployment37089181120 automatically started37089230162 on matching source bef9d0d. Publication, public checks and AWS metadata PASS. Real email verification/hosted login (QA01) and admission/invitations (QA02) PASS. Decision creation/owner confirmation (QA03) FAIL, four later journeys BLOCKED; privacy and CLEAN cleanup PASS. One model attempt and one synthetic message reported. [Actual matching report](review-artifacts/ASSESS07-email-login-pass-decision-failure.json). The report does not identify the failing QA03 substep. A corrects a reproduced test timing race (reading the old decision ID before creation completes) and prepares fixed decision-stage/HTTP diagnostics; the fourth run's exact failing substep remains unproved. Full live acceptance remains pending. Four fixture-started runs on UTC2026-10-03 used the installed daily allowance. The user now approves two extra one-time bounded runs for B and transfers this priority to B. AWS allowance is not changed by these docs: B verifies available slots or prepares/applies the guarded one-time exception before dispatch. Keep all prior usage, cumulative ceilings and original expiry.
 
 A's recurring observer and completed one-time follow-up are deleted. B's existing Codex automation is unchanged; B's actual scheduled execution is not yet verified. No A monitor should be recreated.
 
@@ -12,7 +12,7 @@ A's recurring observer and completed one-time follow-up are deleted. B's existin
 
 | Order | Task | Current status | What remains |
 | --- | --- | --- | --- |
-| 1 | [ASSESS07 — Real automatic qualification](tasks/active/live-testing/ASSESS07/README.md) | BLOCKED — A claim retained; decision-test diagnosis pending live retry | Inspect the complete report after an authorized eligible deployment: all required journeys, exact source receipts and CLEAN cleanup. |
+| 1 | [ASSESS07 — Real automatic qualification](tasks/active/live-testing/ASSESS07/README.md) | READY — B takeover authorized / unclaimed; live proof and allowance readback pending | Pull tested main, claim ASSESS07, verify/apply the one-time two-run allowance if needed; publish and inspect the matching automatic all-seven/CLEAN report. |
 | 2 | [ASSESS10 — B monitor verification](tasks/active/monitoring/ASSESS10/README.md) | READY / unclaimed; B-only verification after the current cycle | Identify B's existing automation, prove two unattended ticks and fresh AWS results, check stale/failure notification behavior. |
 | Delivery umbrella | [LIVE04 — Online test delivery](tasks/active/live-testing/LIVE04/README.md) | IN_PROGRESS; installation/settings checkpoint passed | Finish its remaining managed proof through ASSESS07; no mandatory B manual launch. |
 | Preserved closeout | [NP00 — Technical closeout](tasks/active/closeout/NP00/README.md) | IN_PROGRESS; A / Ricardo / martelaxe / WSL claim retained | Finish original remaining technical obligations; its model-off checkpoint is already verified. No concurrent writer. |
@@ -20,7 +20,7 @@ A's recurring observer and completed one-time follow-up are deleted. B's existin
 
 ASSESS10 is not a claim that B has started. A/B identity, execution worker, chat and task role remain distinct: A is Ricardo / martelaxe; B is Octavio / Battosai1806. A Mac session authenticated as A is not B. See [verified mapping](people-and-workers.md).
 
-User now explicitly directs A to deploy the current app and run the live tests. This sequential ASSESS07 cycle takes priority while ASSESS10 requires B's own session; no concurrent B work or NP00 writer is claimed.
+Latest user direction transfers ASSESS07 to B and approves two one-time extra synthetic cycles. A releases only ASSESS07 and stops that work; B claims after pulling main. Next is ASSESS10, then OPS01 → OPS02 → OPS03 as their prerequisites allow. NP00 remains A's preserved closeout; no concurrent writer or actual B start is claimed.
 
 ## Execution boundaries
 
@@ -28,7 +28,7 @@ Pull clean main with git pull --ff-only origin main before claiming work. Use th
 
 Eligible authorized main application deployments already trigger the complete online qualification automatically. B reads GitHub results using B's own account; no personal AWS login or required Run workflow click. Five-minute monitoring reads health/results and must not repeatedly deploy, run the paid full suite or send verification emails.
 
-The existing synthetic test grant expires 2026-10-09T03:16:41.171626Z: four runs/day, 28 total runs, USD 7 cumulative reserved-model ceiling and 56 synthetic messages. No reset or renewal is implied. AWS writes, new resources, publication and spending outside the applicable authorization still need separate authorization. Real participant identity, consent and exact approval remain mandatory.
+The existing synthetic test grant expires 2026-10-09T03:16:41.171626Z: four runs/day, 28 total runs, USD 7 cumulative reserved-model ceiling and 56 synthetic messages. The user's two-run B exception is recorded in ASSESS07; its installed enforcement is not yet verified. No usage reset, recurring increase or renewal is implied. AWS writes, new resources, publication and spending outside the applicable authorization still need separate authorization. Real participant identity, consent and exact approval remain mandatory.
 
 Verified documentation sync to origin main is standing-authorized and uses [skip ci]; it is not a deployment or test dispatch. Other clones must pull ff-only before their next task. Never force-push or discard unsaved work.
 

@@ -1,8 +1,20 @@
 # ASSESS07 — Managed verification of corrective changes
 
-- Status: BLOCKED — publication, real email/login and invitations verified; QA03 diagnosis and complete live qualification remain.
-- Worker: A installation/cloud scope, then B GitHub qualification; record actual model, identity, source and receipts.
+- Status: READY — B takeover authorized/unclaimed; local correction ready, AWS extra allowance and full live proof pending.
+- Worker: B / Octavio / Battosai1806 next; A releases ASSESS07 only. Record actual model, identity, source and receipts.
 - Scope: new read-only/service verification checklist under existing LIVE04, never NP00 takeover.
+
+## B takeover and two-run approval — user direction, 2026-10-03 UTC
+
+The user explicitly authorizes **two additional full synthetic live qualification runs for B / Octavio / Battosai1806**, and directs B to take the current priority task and then continue the remaining queue. A pauses ASSESS07 implementation/deployment and releases its ASSESS07 claim for B; NP00's separate saved A claim/state is unchanged. B has not yet claimed or executed this handoff. This latest direction supersedes older A-only claim and wait-only paragraphs for ASSESS07.
+
+This is a one-time two-run approval, not two extra runs every day. Each run remains bounded by the existing per-run model/token/email limits and original expiry2026-10-09T03:16:41.171626Z. Preserve accumulated DAY/TOTAL/LEASE reservations, CLEAN cleanup guards, 28-run/7,000,000-token/USD7/56-message cumulative ceilings and all real consent/privacy/source gates. Authorized work includes the matching GitHub deployment/automatic qualification needed for these two runs, bounded synthetic AI and verification email already covered by those caps. No real participant data, IAM widening, new resources, credentials sharing, renewal or counter reset.
+
+**Approval is recorded; AWS allowance is not changed by this documentation.** The installed four/day guard still blocks a fifth start on UTC2026-10-03. Before dispatch, B must either use available original daily slots or prepare/test/apply a narrowly guarded one-time allowance for at most these two runs using existing GitHub workload permissions. Any same-day exception must be dated/consumable, preserve existing usage and expiry/cumulative ceilings, fail closed on drift/active lease and not permanently raise daily permission. No budget-grant bypass, blind retry, reinstall or speculative broader permission change. If the installed roles cannot apply the required narrow change, prepare its exact guarded administrator command and report that specific blocker; do not ask for A's credentials. Reserve full live runs for actual qualification, not read-only health polling.
+
+B next: clean main `git pull --ff-only origin main`; authenticate GitHub as Battosai1806; read this ticket and board; record B claim/model/exact scope and allowance readback. Start from tested correction7379685 (creation waits for the generated decision ID plus fixed QA03 diagnostics), retaining original installed target source30fa91a/rollback baseline. Latest real run37089230162 passes email/login/invitations, fails QA03 with four later journeys blocked; its exact failing substep is not proved. Use the two approved attempts sequentially, inspect matching automatic reports, repair actual failures with required focused/full checks, and record real source/actor/all-seven/cleanup evidence. No B execution or full PASS is inferred here.
+
+After ASSESS07 technical completion: ASSESS10 (B's existing monitor proof), then OPS01 → OPS02 → OPS03 when their prerequisites and any separately required cloud/participant permissions are satisfied. LIVE04 remains the delivery umbrella. Do not start a second implementation while ASSESS07 is active; preserve NP00's paused A closeout and historical obligations. No new monitor or message to another chat is created.
 
 ## Required evidence
 
