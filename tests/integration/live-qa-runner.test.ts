@@ -7,7 +7,7 @@ import { EventEmitter } from 'node:events';
 import type { Page } from '@playwright/test';
 import { trackOperation } from '../live/qa/helpers.ts';
 // @ts-expect-error JavaScript runner boundary is exercised directly without AWS calls.
-import { validateTarget, validateReceipt, validateWorkload, safeResults, qualificationReport, REQUIRED_TESTS, operationStatus } from '../../scripts/live-qa/runner-core.mjs';
+import { validateTarget, validateReceipt, validateWorkload, safeResults, qualificationReport, REQUIRED_TESTS, SAFE_OPERATION_STATUSES, operationStatus, transportFailureStatus } from '../../scripts/live-qa/runner-core.mjs';
 const target={Account:'092954139775',Region:'us-east-1',SourceCommit:'a'.repeat(40),ApiUrl:'https://qabuild.execute-api.us-east-1.amazonaws.com',FrontendUrl:'https://main.qabuild.amplifyapp.com/',PoolId:'us-east-1_QaPool',ParticipantClientId:'pc',DisplayClientId:'dc',CognitoDomain:'https://known-enough-qa-092954139775.auth.us-east-1.amazoncognito.com',ApiFunction:'known-enough-qa-api',BrokerFunction:'known-enough-qa-fixtures',DecisionTable:'KnownEnoughQaDecisions',GroupTable:'KnownEnoughQaGroups',ControlTable:'KnownEnoughQaControl',MailboxBucket:'qa-mail',LoginSecret:'arn:aws:secretsmanager:us-east-1:092954139775:secret:known-enough/qa/run-login-secret',TestRoleArn:'arn:aws:iam::092954139775:role/KnownEnoughGithubQaTest',ReleaseRoleArn:'arn:aws:iam::092954139775:role/KnownEnoughGithubQaRelease',AmplifyAppId:'qaapp'};
 const receipt={schemaVersion:1,sourceCommit:target.SourceCommit,targetApi:target.ApiUrl,targetFrontend:target.FrontendUrl,workflowRunId:'12',jobId:'34',artifacts:Object.fromEntries(['api','broker','web'].map(k=>[k,{sha256:'b'.repeat(64)}]))};
 describe('LIVE02 runner preparation, no service simulation counted as live',()=>{
@@ -53,15 +53,23 @@ test('decision diagnostics keep only fixed phase/outcome tags and never response
 
 test('browser operation observer matches only the exact POST and detaches after success/failure', async () => {
   const page=new EventEmitter();const statuses:string[]=[];const url='https://qa.invalid/groups/private-group/drafts';
-  const request=(path:string,method='POST')=>({url:()=>path,method:()=>method});
+  const request=(path:string,method='POST',errorText?:string)=>({url:()=>path,method:()=>method,failure:()=>errorText===undefined?null:{errorText}});
   const response=(path:string,status:number,method='POST')=>({request:()=>request(path,method),status:()=>status,json:()=>{throw new Error('NEVER_READ_PRIVATE_BODY');}});
   await trackOperation(page as unknown as Page,url,async()=>{
     page.emit('response',response(url+'?private=value',503));page.emit('response',response(url,401,'GET'));expect(statuses).toEqual(['HTTP_PENDING']);
     page.emit('response',response(url,503));
   },status=>statuses.push(status));
   expect(statuses).toEqual(['HTTP_PENDING','HTTP_UNAVAILABLE']);expect(page.listenerCount('response')).toBe(0);expect(page.listenerCount('requestfailed')).toBe(0);
-  await expect(trackOperation(page as unknown as Page,url,async()=>{page.emit('requestfailed',request(url));throw new Error('PRIVATE_ERROR');},status=>statuses.push(status))).rejects.toThrow('PRIVATE_ERROR');
-  expect(statuses.slice(-2)).toEqual(['HTTP_PENDING','HTTP_TRANSPORT_FAILED']);expect(page.listenerCount('response')).toBe(0);expect(page.listenerCount('requestfailed')).toBe(0);
+  await expect(trackOperation(page as unknown as Page,url,async()=>{page.emit('requestfailed',request(url,'POST','net::ERR_CONNECTION_RESET'));throw new Error('PRIVATE_ERROR');},status=>statuses.push(status))).rejects.toThrow('PRIVATE_ERROR');
+  expect(statuses.slice(-2)).toEqual(['HTTP_PENDING','HTTP_CONNECTION_FAILED']);expect(page.listenerCount('response')).toBe(0);expect(page.listenerCount('requestfailed')).toBe(0);
 });
 
 test('HTTP diagnostics accept only numeric protocol outcomes',()=>{expect(operationStatus(200)).toBe('HTTP_OK');expect(operationStatus(422)).toBe('HTTP_UNPROCESSABLE');for(const status of ['toString','PRIVATE_TOKEN',undefined,null,NaN,0,600])expect(operationStatus(status)).toBe('HTTP_OTHER_FAILURE');});
+
+test('transport diagnostics expose only allowlisted failure categories',()=>{
+  expect(transportFailureStatus('net::ERR_TIMED_OUT')).toBe('HTTP_REQUEST_TIMEOUT');
+  expect(transportFailureStatus('net::ERR_CONNECTION_RESET')).toBe('HTTP_CONNECTION_FAILED');
+  expect(transportFailureStatus('net::ERR_NAME_NOT_RESOLVED')).toBe('HTTP_DNS_FAILED');
+  expect(transportFailureStatus('PRIVATE_TOKEN or private URL')).toBe('HTTP_TRANSPORT_FAILED');
+  expect(SAFE_OPERATION_STATUSES).not.toContain('PRIVATE_TOKEN');
+});

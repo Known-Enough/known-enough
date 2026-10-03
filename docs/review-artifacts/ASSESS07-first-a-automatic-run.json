@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "3a8796689374216e56354a2854d6874a542eb039",
+  "allowanceTransfer": {
+    "reportedStatus": "TWO_EXTRA_RUNS_TRANSFERRED_TO_A",
+    "remainingAtTransfer": 2,
+    "remainingAfterThisRun": 1,
+    "expiresAt": "2026-10-04T00:00:00Z",
+    "remainingAfterThisRunBasis": "The matching QA report records fixture start PASS; the broker consumes one extra use atomically with that start. No separate post-run administrator readback was performed."
+  },
+  "deployment": {
+    "runId": 37145958639,
+    "event": "workflow_dispatch",
+    "workflow": ".github/workflows/deploy-amplify-staging.yml",
+    "branch": "main",
+    "actor": "martelaxe",
+    "triggeringActor": "martelaxe",
+    "conclusion": "success",
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/37145958639"
+  },
+  "qualification": {
+    "runId": 37145997504,
+    "event": "workflow_run",
+    "workflow": ".github/workflows/live-qa-release-and-check.yml",
+    "branch": "main",
+    "actor": "martelaxe",
+    "triggeringActor": "martelaxe",
+    "conclusion": "failure",
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/37145997504",
+    "checks": {
+      "provenance": "PASS",
+      "releasePublication": "PASS",
+      "primaryBackendCode": "PASS",
+      "publicComparison": "PASS",
+      "primaryMetadata": "PASS",
+      "fixtureStart": "PASS",
+      "model": "PASS",
+      "privacy": "PASS",
+      "cleanup": "PASS"
+    },
+    "journeys": [
+      {
+        "name": "QA01 signup and managed login",
+        "status": "PASS",
+        "mail": "MAIL_CODE_READY"
+      },
+      {
+        "name": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "name": "QA03 fresh decision and owner confirmations",
+        "status": "FAIL",
+        "phase": "QA03_DRAFT",
+        "operation": "HTTP_TRANSPORT_FAILED"
+      },
+      {
+        "name": "QA04 private negotiation and exact agreement",
+        "status": "BLOCKED"
+      },
+      {
+        "name": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "name": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "name": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 2,
+      "failed": 1,
+      "blocked": 4,
+      "modelAttempts": 1,
+      "signupMessages": 1
+    }
+  },
+  "privacyNote": "This record contains only fixed statuses and counts. Raw browser errors, response bodies, model output, email addresses/codes, credentials and private AWS diagnostics are omitted."
+}

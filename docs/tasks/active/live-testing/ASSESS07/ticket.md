@@ -1,8 +1,20 @@
 # ASSESS07 — Managed verification of corrective changes
 
-- Status: IN_PROGRESS — A/Mac takeover preparation resumed after the user enables Git write access; cloud approval pending.
-- Worker: A / Ricardo / martelaxe / Mac for the user-requested takeover preparation; no cloud execution authorized by this preparation.
-- Scope: new read-only/service verification checklist under existing LIVE04, never NP00 takeover.
+- Status: IN_PROGRESS — A/Mac; first transferred automatic test cycle completed with QA03 failure; one cycle remains.
+- Worker: A / Ricardo / martelaxe / Mac. The user supplied the CloudShell transfer readback and authorized staging deployment plus bounded automatic live qualification.
+- Scope: finish ASSESS07's isolated managed verification and any narrowly verified diagnostic repair; preserve NP00's separate saved WSL claim and all existing daily, per-run, cumulative and expiry limits.
+
+## Current A execution — transfer and first automatic qualification, 2026-10-03 UTC
+
+The user supplied the pinned CloudShell result `TWO_EXTRA_RUNS_TRANSFERRED_TO_A`, `remaining: 2`, `expiresAt: 2026-10-04T00:00:00Z`, `cloudWrites: true`. This transfers the pre-existing one-time allowance; no new allowance or larger limit was created. The user then said “proceed” following the explicit approval to deploy and run ASSESS07. A dispatched the existing staging deployment workflow on synchronized `main` at `3a8796689374216e56354a2854d6874a542eb039`. Deployment [37145958639](https://github.com/Known-Enough/known-enough/actions/runs/37145958639) succeeded; GitHub automatically started matching qualification [37145997504](https://github.com/Known-Enough/known-enough/actions/runs/37145997504). Both run actor fields were `martelaxe`; source, branch, repository and workflow provenance passed.
+
+Release publication, guarded primary code update, public visual/byte comparison and primary metadata readback passed. The automatic synthetic journey had preflight, fixtures, model, signup, privacy and cleanup PASS. QA01 real signup/email/login and QA02 admission/invitations passed; QA03 fresh decision draft failed with `HTTP_TRANSPORT_FAILED` at `QA03_DRAFT`; QA04–QA07 were blocked. The report records two passed, one failed, four blocked, one model attempt and one signup message. The fixture start transaction consumed one transferred slot; one remains before `2026-10-04T00:00:00Z`. Sanitized evidence is in [ASSESS07-first-a-automatic-run.json](../../../../review-artifacts/ASSESS07-first-a-automatic-run.json). No model payload, email address/code, browser error text, credentials, or private AWS diagnostic is recorded.
+
+### Safe browser-transport diagnostic amendment
+
+The first report identifies a lost request but intentionally omits the browser's raw error text. In the same existing QA03 diagnostics scope, `scripts/live-qa/runner-core.mjs` now maps a strict allowlist of known Chromium network failures to fixed labels (timeout, connection, DNS, network, protocol, empty response, or TLS); all other values stay `HTTP_TRANSPORT_FAILED`. The live test observer passes only the error text to this local classifier; raw text is never serialized or logged. Regression coverage verifies exact mapping and rejects arbitrary/private text. Focused runner tests pass 11/11. Final pinned Node 24.21.0/npm 11.19.0 `PLAYWRIGHT_CHANNEL=chromium npm run check` passes: references 7/7, planning 15/15, lint/boundaries/typecheck, 703 application tests with two optional skips, hosted preview 1/1, and E2E 58/58. The classifier does not retry the model request, alter the app, modify AWS configuration, or loosen privacy/consent/cleanup gates.
+
+Next, synchronize this checked diagnostic update through the already-authorized main deployment path. The successful deployment automatically starts qualification. Use no more than the one remaining transferred slot, inspect the fixed safe failure category and full report, and stop if the grant expires or the slot is unavailable. Full ASSESS07/LIVE04 acceptance remains pending until all seven journeys and CLEAN/privacy checks pass. No B activity is inferred; NP00 remains untouched.
 
 ## A takeover because B is unavailable — user direction, 2026-10-03T18:30:54Z
 
