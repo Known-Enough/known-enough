@@ -6,6 +6,6 @@ These tasks follow OPS01 → OPS02 → OPS03 in the shared queue. B can use boun
 | --- | --- | --- |
 | [UX01](UX01/README.md) | Find confusing screens, layout problems and unclear next steps. | BLOCKED / unclaimed |
 | [UX02](UX02/README.md) | Fix the essential problems found by UX01. | BLOCKED / unclaimed |
-| [UX03](UX03/README.md) | Verify the finished basic app and record real completion evidence. | BLOCKED / unclaimed |
+| [UX03](UX03/README.md) | Verify the interface/journey checkpoint before final technical completion. | BLOCKED / unclaimed |
 
-[Basic completion roadmap](../../../basic-completion-plan.md) · [Task guide](../../README.md) · [Current board](../../../task-board.md)
+[Following technical completion](../technical-debt/README.md) · [Basic completion roadmap](../../../basic-completion-plan.md) · [Task guide](../../README.md) · [Current board](../../../task-board.md)

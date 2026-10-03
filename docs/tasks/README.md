@@ -25,10 +25,11 @@ Installation, GitHub settings and automatic test triggering are verified. Real s
 
 ## Later, before wider use
 
-These tasks wait for the managed ASSESS07 baseline.
+These tasks wait for the managed ASSESS07 baseline. OPS00 completes and verifies the GitHub operations path before the implementation sequence; ordinary approved operations must not repeatedly depend on A opening CloudShell.
 
 | Task | Basic idea | Status |
 | --- | --- | --- |
+| [OPS00](active/operations/OPS00/README.md) | Complete and prove the bounded GitHub operations path; prepare any unavoidable access setup once. | BLOCKED / unclaimed; after ASSESS10 |
 | [OPS01](active/operations/OPS01/README.md) | Prepare group storage and safe archiving for wider use, after the real online test baseline is verified. | BLOCKED / unclaimed |
 | [OPS02](active/operations/OPS02/README.md) | Add clear retention, export and authorized deletion of private data before wider use. | BLOCKED / unclaimed |
 | [OPS03](active/operations/OPS03/README.md) | Make AI jobs recover safely across worker restarts and retries, with current permissions and spending limits checked. | BLOCKED / unclaimed |
@@ -41,7 +42,17 @@ The [basic completion roadmap](../basic-completion-plan.md) explains what exists
 | --- | --- | --- |
 | [UX01](active/ui-ux/UX01/README.md) | Review the screens and complete participant journey on desktop and phone; record a short verified issue list. | BLOCKED / unclaimed; after OPS03 |
 | [UX02](active/ui-ux/UX02/README.md) | Fix essential navigation, progress/error messages, phone layouts and accessibility issues from the review. | BLOCKED / unclaimed; after UX01 |
-| [UX03](active/ui-ux/UX03/README.md) | Verify the matching deployed basic app, final screens and existing demos; reconcile actual closeout evidence and simple start instructions. | BLOCKED / unclaimed; after UX02; final closeout needs NP00/LIVE04 proof |
+| [UX03](active/ui-ux/UX03/README.md) | Verify matching deployed screens/journeys and simple start instructions; record remaining technical obligations for FIN01–03. | BLOCKED / unclaimed; after UX02 |
+
+## After UX: finish technical debt and group construction
+
+This is the new [technical completion folder](active/technical-debt/README.md). Keep original debt/NP00 evidence and the saved claim; FIN01 reconciles actual remaining work through its proper handoff. UX03 is the interface/journey checkpoint, and FIN03 is final basic project closure.
+
+| Task | Basic idea | Status |
+| --- | --- | --- |
+| [FIN01](active/technical-debt/FIN01/README.md) | Finish actual inherited technical debt and missing evidence without reopening proved fixes. | BLOCKED / unclaimed; after UX03 |
+| [FIN02](active/technical-debt/FIN02/README.md) | Check group creation, invitations, membership changes, decision bindings, progress and participant isolation. | BLOCKED / unclaimed; after FIN01 |
+| [FIN03](active/technical-debt/FIN03/README.md) | Reconcile final actual completion, matching deployed results and B's independent approved GitHub operation. | BLOCKED / unclaimed; after FIN02 and required original closeout |
 
 ## Where earlier work went
 

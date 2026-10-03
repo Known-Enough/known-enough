@@ -16,16 +16,20 @@ A's [two-run approval for B](https://github.com/Known-Enough/known-enough/action
 | --- | --- | --- |
 | [ASSESS07](tasks/active/live-testing/ASSESS07/README.md) | Publish the checked decision fix, repair any actual failure and prove all seven online journeys pass automatically. | B claimed; two dated extra starts approved; live result pending. |
 | [ASSESS10](tasks/active/monitoring/ASSESS10/README.md) | Prove B's existing monitor actually checks fresh results and notices failures. | Next after ASSESS07. |
-| [OPS01](tasks/active/operations/OPS01/README.md) | Keep groups from sharing one storage bottleneck and add safe archiving. | Waits for managed baseline. |
+| [OPS00](tasks/active/operations/OPS00/README.md) | Complete the approved GitHub operations path, so OPS does not repeatedly need A to run AWS commands. | After ASSESS10, before OPS01. |
+| [OPS01](tasks/active/operations/OPS01/README.md) | Keep groups from sharing one storage bottleneck and add safe archiving. | After OPS00 and managed baseline. |
 | [OPS02](tasks/active/operations/OPS02/README.md) | Give private data clear retention, export and authorized deletion behavior. | After OPS01. |
 | [OPS03](tasks/active/operations/OPS03/README.md) | Let unfinished AI work recover after restarts without duplicated work or charges. | After OPS02. |
 | [UX01](tasks/active/ui-ux/UX01/README.md) | Review the existing screens and complete participant journey on desktop and phone. | After OPS03. |
 | [UX02](tasks/active/ui-ux/UX02/README.md) | Fix the important usability, layout and accessibility problems found in that review. | After UX01. |
-| [UX03](tasks/active/ui-ux/UX03/README.md) | Verify the finished screens, complete real journeys and basic demo; publish a truthful ready/remaining report. | After UX02; final closeout also needs NP00's remaining technical criteria. |
+| [UX03](tasks/active/ui-ux/UX03/README.md) | Verify the interface/journey checkpoint and simple start instructions; route remaining debt to FIN01–03. | After UX02. |
+| [FIN01](tasks/active/technical-debt/FIN01/README.md) | Reconcile and finish actual inherited technical debt through preserved claims/handoffs. | After UX03. |
+| [FIN02](tasks/active/technical-debt/FIN02/README.md) | Check group construction, membership/decision links and safe progress across distinct participants. | After FIN01. |
+| [FIN03](tasks/active/technical-debt/FIN03/README.md) | Prove final basic completion and independent GitHub operation; reconcile actual original closeout. | After FIN02 and required NP00/LIVE04/OPS/UX proof. |
 
 [LIVE04](tasks/active/live-testing/LIVE04/README.md) remains the online-delivery umbrella. [NP00](tasks/active/closeout/NP00/README.md) preserves older unfinished technical obligations; historical DONE labels do not satisfy missing proof. Resolve it through its existing A handoff, without a concurrent writer.
 
-B can implement app changes, review screens and run authorized GitHub tests. OPS may need new AWS resources, permissions or migration/deletion operations: B prepares a concrete proposal, and A authorizes/applies it through an approved path. Existing test roles do not grant general administrator access. A finite run approval cannot replace an expired or exhausted original spending authorization.
+B can implement app changes, review screens and run authorized GitHub tests. Existing release access covers code/artifact publication and tests against installed resources. The checked-in release path does not provision new storage/job resources or grant general role editing; actual installed access must be verified before deciding any change. OPS00 defines the exact OPS01–03 operations, reuses sufficient access and prepares any unavoidable narrow administrator delegation once. Then ordinary operations inside that approved envelope run through GitHub, with actual B evidence and durable recovery, without per-task AWS logins or CloudShell scripts. New outside-envelope permissions/costs still need their specific authorization. A finite run approval cannot replace expired/exhausted original spending authority. This roadmap does not install that capability or claim it is already verified.
 
 ## Bounded Luna reviews
 
@@ -39,6 +43,6 @@ This user-directed exception permits these reviews within one parent UX task; it
 - Storage, data lifecycle and job-recovery tasks meet their actual technical and authorized managed criteria. Any remaining pilot limits are visible and accurate.
 - The current desktop/phone layouts, keyboard navigation and loading/error/retry states are checked. A newcomer can complete the core journey without developer help.
 - Existing Family Christmas and Shared Purchase demonstrations have source-matching evidence; synthetic estimates and supported limits are clearly labeled. Reuse valid unaffected evidence; do not call an offline demo a live pass.
-- NP00/LIVE04 obligations are reconciled, basic start instructions work, and the final report links actual results and any remaining limits. No blocker is hidden by moving a ticket into history.
+- FIN01 closes actual inherited obligations, FIN02 proves group construction and FIN03 reconciles final NP00/LIVE04/OPS/UX evidence, working start instructions and remaining limits. Ordinary operations inside the OPS00 approved envelope need no repeated administrator handoff. No blocker is hidden by moving a ticket into history.
 
 This finishes a tested basic demo/pilot. Human trials, wider public enrollment, Alexa/voice integration, new integrations and hackathon submission materials are separate later work, not additions to these UX tasks. Participant consent and owner approvals remain product requirements. No human sign-off gate is reinstated by this roadmap.
