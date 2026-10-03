@@ -33,6 +33,11 @@ const prompts: Record<ModelJobKind, string> = {
     + 'Also return variableIds when publicVariables is supplied; otherwise return variables. '
     + 'For an open-scope draft, every variable must include id, type, label, required, visibility="PUBLIC", and ownerParticipantId=null. '
     + 'Each ENUM and ENUM_SET variable must include options as objects with both a unique id and a label. '
+    + 'Use short lowercase IDs matching /^[A-Za-z0-9_-]{1,80}$/ for variables, options and rules; variable IDs and rule IDs must be unique in their lists, and option IDs within each variable. '
+    + 'Every variable, option, participant and rule reference must point to an ID in the supplied roster or this draft. '
+    + 'For each variable type, include exactly its contract fields and no others: NUMBER unitCode and scale; MONEY currencyCode and minorUnit; '
+    + 'DATETIME displayTimeZone; DURATION unit="SECONDS"; ENUM and ENUM_SET options; PARTICIPANT participantIds; '
+    + 'BOOLEAN, DATE and PERCENTAGE have no extra type fields. Use only the fields required by the selected rule operator. '
     + 'All rules must have visibility PUBLIC. Variable schema: '
     + schema(KE.DecisionVariable) + ' Rule schema: ' + schema(KE.ValidationRule),
   OWNER: policy + 'Extract only this owner\'s statements as a draft. Never infer consent, silently omit unsupported conditions, '

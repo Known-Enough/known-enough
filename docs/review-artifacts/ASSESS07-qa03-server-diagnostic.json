@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "qualificationRunId": 37147658807,
+  "sourceCommit": "47c2d8233ae839049969fcc00c6a30137403483b",
+  "cloudWatchRead": {
+    "profile": "known-enough-staging-ro",
+    "account": "092954139775",
+    "region": "us-east-1",
+    "logGroup": "/aws/lambda/known-enough-qa-api",
+    "windowUtc": ["2026-10-03T19:27:00Z", "2026-10-03T19:32:00Z"],
+    "eventsRead": 480,
+    "taskTimeoutEvents": 0,
+    "maximumLambdaDurationMsInWindow": 4284.68,
+    "matchingInvocationDurationMs": 4284.68
+  },
+  "safeDiagnostic": {
+    "event": "ke14-model-failure",
+    "kind": "ARCHITECT",
+    "stage": "ARCHITECT_DEFINITION",
+    "countInWindow": 1,
+    "meaning": "The generated draft failed DecisionDefinition validation or the public-variable/public-rule visibility check; the application rejects it as a retryable server error."
+  },
+  "limitations": [
+    "No raw CloudWatch lines, request identifiers, model output, participant data or credentials were retained or emitted.",
+    "The static stage identifies the validator boundary, not the specific invalid field or rule.",
+    "This read-only log finding does not make QA03 pass; QA04 through QA07 remain blocked."
+  ]
+}

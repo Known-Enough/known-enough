@@ -25,6 +25,11 @@ describe('Bedrock role adapters', () => {
     const result = await models.architect.draft({ ...architectInput, publicVariables }, guard());
     const payload = JSON.parse(received!.input.messages![0]!.content![0]!.text!);
     expect(payload.publicVariables).toEqual(publicVariables);
+    const prompt = received!.input.system!.map(part => part.text).join('\n');
+    expect(prompt).toContain('Use short lowercase IDs matching /^[A-Za-z0-9_-]{1,80}$/ for variables, options and rules; variable IDs and rule IDs must be unique in their lists');
+    expect(prompt).toContain('Every variable, option, participant and rule reference');
+    expect(prompt).toContain('NUMBER unitCode and scale; MONEY currencyCode and minorUnit');
+    expect(prompt).toContain('Use only the fields required by the selected rule operator');
     const tool = received!.input.toolConfig!.tools![0]!.toolSpec!.inputSchema!.json as {
       properties: Record<string, unknown>; required: string[];
     };
