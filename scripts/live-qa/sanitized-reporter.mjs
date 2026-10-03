@@ -1,5 +1,5 @@
 import { writeFileSync } from 'node:fs';
-import { REQUIRED_TESTS, SAFE_PHASES } from './runner-core.mjs';
+import { REQUIRED_TESTS, SAFE_PHASES, SAFE_MAIL_STATUSES } from './runner-core.mjs';
 const statuses = new Set(['passed', 'failed', 'timedOut', 'skipped', 'interrupted']);
 export default class Reporter {
     tests = [];
@@ -17,8 +17,9 @@ export default class Reporter {
         const status = statuses.has(result.status) ? result.status : 'interrupted';
         if (!['passed', 'skipped'].includes(status))
             this.failedTests++;
+        const mailStatus = (test.annotations ?? []).filter(item => item.type === 'qa-mail-status' && SAFE_MAIL_STATUSES.includes(item.description)).at(-1)?.description;
         if (REQUIRED_TESTS.includes(test.title))
-            this.tests.push({ title: test.title, status, ...(this.phases.has(test.title) ? { phase: this.phases.get(test.title) } : {}) });
+            this.tests.push({ title: test.title, status, ...(mailStatus ? { mailStatus } : {}), ...(this.phases.has(test.title) ? { phase: this.phases.get(test.title) } : {}) });
     }
     onEnd(result) {
         const status = ['passed', 'failed', 'timedout', 'interrupted'].includes(result?.status) ? result.status : 'interrupted';

@@ -81,16 +81,18 @@ export function createMailtmClient(fetcher = globalThis.fetch, pause = ms => new
                 throw new Error('MAILTM_OWNER_MISMATCH');
             return { ...mailbox, id: own.id, token: own.token };
         },
-        async code(mailbox) {
+        async code(mailbox, observe = () => {}) {
             const own = await identity(mailbox);
             for (let page = 1; page <= 3; page++) {
                 const result = await request('/messages?page=' + page, { token: own.token });
                 if (!Array.isArray(result['hydra:member']))
                     throw new Error('MAILTM_INVALID_MESSAGES');
+                if (!result['hydra:member'].length) observe('MAIL_EMPTY');
                 for (const item of result['hydra:member']) {
                     if (!idValid(item.id) || item.isDeleted || item.size > 100000)
                         continue;
                     const message = await request('/messages/' + item.id, { token: own.token });
+                    observe(mailtmMessageStatus(message, mailbox));
                     const code = mailtmVerificationCode(message, mailbox);
                     if (code)
                         return code;
@@ -113,13 +115,18 @@ export function createMailtmClient(fetcher = globalThis.fetch, pause = ms => new
         },
     };
 }
-export function mailtmVerificationCode(message, mailbox) {
-    if (message.accountId !== mailbox.id || message.isDeleted || message.from?.address !== 'no-reply@verificationemail.com'
-        || !message.to?.some(item => item.address === mailbox.address) || !Number.isFinite(Date.parse(message.createdAt))
-        || Date.parse(message.createdAt) < mailbox.createdAt)
-        return null;
+export function mailtmMessageStatus(message, mailbox) {
+    if (message.accountId !== mailbox.id || message.isDeleted) return 'MAIL_OWNER_MISMATCH';
+    if (message.from?.address !== 'no-reply@verificationemail.com') return 'MAIL_SENDER_MISMATCH';
+    if (!message.to?.some(item => item.address === mailbox.address)) return 'MAIL_RECIPIENT_MISMATCH';
+    if (!Number.isFinite(Date.parse(message.createdAt)) || Date.parse(message.createdAt) < mailbox.createdAt) return 'MAIL_OLD_MESSAGE';
+    const codes = messageCodes(message);
+    return codes.length === 1 ? 'MAIL_CODE_READY' : codes.length ? 'MAIL_CODE_AMBIGUOUS' : 'MAIL_CODE_UNRECOGNIZED';
+}
+function messageCodes(message) {
     const text = [message.text ?? '', ...(Array.isArray(message.html) ? message.html : [])].join('\n').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ');
-    const codes = [...text.matchAll(/(?:verification|confirmation) code(?:\s+is)?\s*[:=]?\s*(\d{6})(?!\d)/gi)].map(match => match[1]);
-    const distinct = [...new Set(codes)];
-    return distinct.length === 1 ? distinct[0] : null;
+    return [...new Set([...text.matchAll(/(?:verification|confirmation) code(?:\s+is)?\s*[:=]?\s*(\d{6})(?!\d)/gi)].map(match => match[1]))];
+}
+export function mailtmVerificationCode(message, mailbox) {
+    return mailtmMessageStatus(message, mailbox) === 'MAIL_CODE_READY' ? messageCodes(message)[0] : null;
 }

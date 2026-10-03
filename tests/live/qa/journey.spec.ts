@@ -28,8 +28,16 @@ test('QA01 signup and managed login',async({browser})=>{
     await page.getByLabel('Password',{exact:true}).fill(user.password);await page.getByRole('button',{name:'Create account',exact:true}).click();
     await expect(page.getByLabel('Verification code',{exact:true})).toBeVisible();
   });
-  await test.step('QA01_EMAIL',async()=>{
-    let code='';await expect.poll(()=>{const result=fixture('mail');if(result.status==='PASS')code=result.code;return !!code;},{timeout:120000,intervals:[3000]}).toBe(true);
+  let code='';
+  await test.step('QA01_EMAIL_READ',async()=>{
+    await expect.poll(()=>{
+      let mailStatus='MAIL_BROKER_UNAVAILABLE';
+      try { const result=fixture('mail');mailStatus=result.mailStatus??'MAIL_PENDING';if(result.status==='PASS')code=result.code; }
+      finally { const notes=test.info().annotations;const prior=notes.find(n=>n.type==='qa-mail-status');if(prior)prior.description=mailStatus;else notes.push({type:'qa-mail-status',description:mailStatus}); }
+      return !!code;
+    },{timeout:120000,intervals:[3000]}).toBe(true);
+  });
+  await test.step('QA01_EMAIL_CONFIRM',async()=>{
     await page.getByLabel('Verification code',{exact:true}).fill(code);await page.getByRole('button',{name:'Verify email',exact:true}).click();
     await expect(page.getByText('Email verified. Sign in to continue and request access.',{exact:true})).toBeVisible();
   });

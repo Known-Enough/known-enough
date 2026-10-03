@@ -7,7 +7,7 @@ import { draftConfiguration, configurationStatus } from '../../scripts/live-qa/c
 // @ts-expect-error Offline QA templates are exercised at runtime.
 import { renderTemplates } from '../../scripts/live-qa/template.mjs';
 // @ts-expect-error Mailbox API has a bounded injected transport for verification.
-import { createMailtmClient, mailtmVerificationCode } from '../../scripts/live-qa/mailtm.mjs';
+import { createMailtmClient, mailtmVerificationCode, mailtmMessageStatus } from '../../scripts/live-qa/mailtm.mjs';
 // @ts-expect-error Real Cognito trigger boundary is exercised with injected AWS responses.
 import { customMessage } from '../../scripts/live-qa/broker.mjs';
 
@@ -103,4 +103,16 @@ describe('LIVE04 Mail.tm preparation without AWS writes or real messages',()=>{
     a.maxSignupMessagesPerRun=0;
     await expect(customMessage(event)).rejects.toThrow('QA_MESSAGE_BUDGET');
   });
+});
+
+
+test('mail diagnosis keeps strict sender/owner/recipient/date/code checks and exposes only fixed tags', async () => {
+  expect(mailtmMessageStatus(message,mailbox)).toBe('MAIL_CODE_READY');
+  for (const [change,status] of [
+    [{accountId:'foreign'},'MAIL_OWNER_MISMATCH'],[{from:{address:'private@example.invalid'}},'MAIL_SENDER_MISMATCH'],
+    [{to:[{address:'private@example.invalid'}]},'MAIL_RECIPIENT_MISMATCH'],[{createdAt:'2025-01-01'},'MAIL_OLD_MESSAGE'],
+    [{text:'PRIVATE_BODY_PASSWORD'},'MAIL_CODE_UNRECOGNIZED'],[{text:'verification code: 123456; confirmation code: 654321'},'MAIL_CODE_AMBIGUOUS']
+  ] as const) { expect(mailtmMessageStatus({...message,...change},mailbox)).toBe(status);expect(mailtmVerificationCode({...message,...change},mailbox)).toBeNull(); }
+  const tags:string[]=[];const fetcher=vi.fn().mockResolvedValueOnce(response({id:mailbox.id,token:mailbox.token})).mockResolvedValueOnce(response({id:mailbox.id,address:mailbox.address})).mockResolvedValueOnce(response({'hydra:member':[]}));
+  expect(await createMailtmClient(fetcher,async()=>{}).code(mailbox,(tag:string)=>tags.push(tag))).toBeNull();expect(tags).toEqual(['MAIL_EMPTY']);
 });

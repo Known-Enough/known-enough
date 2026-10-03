@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "deploymentRunId": 37086526633,
+  "automaticQualificationRunId": 37086559092,
+  "sourceCommit": "9fdda716246033a72a5815263020b90d6a937b40",
+  "event": "workflow_run",
+  "publicationPublicMetadata": "PASS",
+  "qaReport": {
+    "schemaVersion": 1,
+    "runId": "gh-37086559092-1",
+    "sourceCommit": "9fdda716246033a72a5815263020b90d6a937b40",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "BLOCKED",
+      "privacy": "PASS",
+      "signup": "BLOCKED",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "phase": "QA01_EMAIL",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 0,
+      "failed": 1,
+      "blocked": 6,
+      "modelAttempts": 0,
+      "signupMessages": 1
+    }
+  },
+  "cause": "Not yet established: real signup succeeded; failure is within email retrieval/confirmation. Safe diagnosis added before any mailbox/service change.",
+  "budget": "Second real fixture run in this cycle; one verification message reserved, zero reported model attempts. Original expiry/counters retained."
+}

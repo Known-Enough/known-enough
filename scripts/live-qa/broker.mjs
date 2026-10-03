@@ -262,8 +262,15 @@ async function verification(runId) {
         const saved = await loginSecret();
         if (saved?.runId !== runId || saved.mailbox?.id !== l.value.mailboxAccountId || saved.mailbox?.address !== user.email)
             throw new Error('MAILTM_MAIL_OWNER_MISMATCH');
-        const code = await mailtm.code(saved.mailbox);
-        return code ? { status: 'PASS', code } : { status: 'WAITING' };
+        let mailStatus = 'MAIL_PENDING';
+        let code;
+        try { code = await mailtm.code(saved.mailbox, status => { mailStatus = status; }); }
+        catch (error) {
+            if (error.message === 'MAILTM_REQUEST_FAILED') mailStatus = 'MAIL_PROVIDER_UNAVAILABLE';
+            else if (error.message === 'MAILTM_INVALID_MESSAGES') mailStatus = 'MAIL_SCHEMA_UNEXPECTED';
+            else throw error; // Ownership, identity and paging failures remain blocked.
+        }
+        return code ? { status: 'PASS', code, mailStatus } : { status: 'WAITING', mailStatus };
     }
     const page = await s3.send(new ListObjectsV2Command({ Bucket: process.env.QA_MAIL_BUCKET, Prefix: 'verification/', MaxKeys: 100 }));
     for (const item of (page.Contents ?? []).sort((a, b) => Number(b.LastModified) - Number(a.LastModified))) {
