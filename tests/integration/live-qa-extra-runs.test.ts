@@ -3,6 +3,8 @@ import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 // @ts-expect-error Node-only authorization boundary exercised without live services.
 import { reserveExtra, githubRun } from '../../scripts/live-qa/extra-runs.mjs';
+// @ts-expect-error Executable cumulative grant semantics are compared against the administrator helper.
+import { cumulativeLimits } from '../../scripts/live-qa/cumulative.mjs';
 const now=Date.parse('2026-10-03T03:00:00Z');
 const auth={approved:true,maxRunsPerDay:4,expiresAt:'2026-10-09T03:16:41.171626Z'};
 const approval={schemaVersion:1,day:'2026-10-03',actor:'Battosai1806',additionalRuns:2,usedRuns:0,baseRuns:4,authorizationVersion:3,authorizationExpiresAt:auth.expiresAt,expiresAt:'2026-10-04T00:00:00Z'};
@@ -74,6 +76,30 @@ with tempfile.TemporaryDirectory() as folder:
   try:m.install(fake,now,home,True,clock=lambda:now);raise AssertionError('unexpected allowance')
   except ValueError as e:assert str(e)==reason
  assert len(writes)==1
+ for case in ['legacy','stricter']:
+  state=copy.deepcopy(base);original=json.loads(state['AUTH']['payload']['S'])
+  if case=='legacy':
+   for field in m.TOTAL_CEILINGS:del original[field]
+  else:original.update(maxRunsTotal=20,maxTokensTotal=600000,maxCostMicrosTotal=600000,maxSignupMessagesTotal=8)
+  state['AUTH']['payload']['S']=json.dumps(original);before=copy.deepcopy(state)
+  assert m.install(fake,now,home/case,True,clock=lambda:now)['remaining']==2
+  assert all(state[k]==v for k,v in before.items())
+ assert len(writes)==3
 `],{encoding:'utf8'});expect(result.status,result.stderr).toBe(0);expect(result.stdout).not.toMatch(/PRIVATE|DO_NOT_PRINT/);
+ });
+ test('administrator legacy/stricter totals match executable cumulative caps and reject partial or enlarged totals',()=>{
+  const base={approved:true,expiresAt:auth.expiresAt,maxRunsPerDay:4,maxAttemptsPerRun:200,maxTokensPerRun:250000,maxCostMicrosPerRun:250000,attemptCostMicros:1,maxSignupMessagesPerRun:2,maxSignupMessagesPerDay:8,retentionReviewed:true,invocationLoggingDisabled:true};
+  const cases=[base,{...base,maxTokensPerRun:1000,maxCostMicrosPerRun:2000,maxSignupMessagesPerDay:4},{...base,maxRunsTotal:20,maxTokensTotal:600000,maxCostMicrosTotal:600000,maxSignupMessagesTotal:8}];
+  const output=spawnSync('python3',['-B','-c',String.raw`
+import importlib.util,json,sys
+s=importlib.util.spec_from_file_location('extra','scripts/live-qa/approve-two-extra-runs.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m)
+cases=json.load(sys.stdin)
+for changed in [{'maxRunsTotal':28},{'maxRunsTotal':True,'maxTokensTotal':7000000,'maxCostMicrosTotal':7000000,'maxSignupMessagesTotal':56},{'maxRunsTotal':28,'maxTokensTotal':8000000,'maxCostMicrosTotal':7000000,'maxSignupMessagesTotal':56},{'maxRunsTotal':0,'maxTokensTotal':7000000,'maxCostMicrosTotal':7000000,'maxSignupMessagesTotal':56}]:
+ try:m.cumulative_caps({**cases[0],**changed});raise AssertionError('unsafe caps accepted')
+ except ValueError as e:assert str(e)=='CUMULATIVE_CEILINGS_CHANGED'
+print(json.dumps([m.cumulative_caps(a) for a in cases]))
+`],{input:JSON.stringify(cases),encoding:'utf8'});
+  expect(output.status,output.stderr).toBe(0);
+  expect(JSON.parse(output.stdout)).toEqual(cases.map(a=>{const limits=cumulativeLimits(a);return {maxRunsTotal:limits.runs,maxTokensTotal:limits.reservedTokens,maxCostMicrosTotal:limits.reservedCostMicros,maxSignupMessagesTotal:limits.messages};}));
  });
 });

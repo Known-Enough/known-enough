@@ -13,6 +13,24 @@ TABLE = "KnownEnoughQaControl"
 DAY = "2026-10-03"
 EXPIRY = "2026-10-09T03:16:41.171626Z"
 EXTRA_KEY = "EXTRA#" + DAY
+TOTAL_CEILINGS = {"maxRunsTotal": 28, "maxTokensTotal": 7000000,
+                  "maxCostMicrosTotal": 7000000, "maxSignupMessagesTotal": 56}
+
+
+def cumulative_caps(authorization):
+    """Match cumulative.mjs: derive legacy totals, preserve stricter explicit ones."""
+    present = [name for name in TOTAL_CEILINGS if name in authorization]
+    if present and len(present) != len(TOTAL_CEILINGS):
+        raise ValueError("CUMULATIVE_CEILINGS_CHANGED")
+    runs = min(28, authorization["maxRunsPerDay"] * 7)
+    caps = {name: authorization[name] for name in TOTAL_CEILINGS} if present else {
+        "maxRunsTotal": runs,
+        "maxTokensTotal": min(7000000, runs * authorization["maxTokensPerRun"]),
+        "maxCostMicrosTotal": min(7000000, runs * authorization["maxCostMicrosPerRun"]),
+        "maxSignupMessagesTotal": min(56, authorization["maxSignupMessagesPerDay"] * 7)}
+    if not all(type(caps[name]) is int and 0 < caps[name] <= limit for name, limit in TOTAL_CEILINGS.items()):
+        raise ValueError("CUMULATIVE_CEILINGS_CHANGED")
+    return caps
 
 
 def aws(service, operation, **parameters):
@@ -54,11 +72,10 @@ def install(call, now, home, apply=False, clock=None):
     require(a.get("approved") is True and a.get("retentionReviewed") is True
             and a.get("invocationLoggingDisabled") is True and a.get("expiresAt") == EXPIRY
             and a.get("maxRunsPerDay") == 4, "ORIGINAL_APPROVAL_CHANGED")
-    caps = {"maxRunsTotal": 28, "maxTokensTotal": 7000000, "maxCostMicrosTotal": 7000000, "maxSignupMessagesTotal": 56}
-    require(all(a.get(k) == v for k, v in caps.items()), "CUMULATIVE_CEILINGS_CHANGED")
     require(all(type(a.get(k)) is int and 0 < a[k] <= v for k, v in
                 {"maxAttemptsPerRun": 200, "maxTokensPerRun": 250000, "maxCostMicrosPerRun": 250000,
                  "maxSignupMessagesPerRun": 2, "maxSignupMessagesPerDay": 8}.items()), "PER_RUN_CEILINGS_CHANGED")
+    caps = cumulative_caps(a)
     require(lease.get("status") == "CLEAN", "CLEANUP_REQUIRED_FIRST")
     desired = {"schemaVersion": 1, "day": DAY, "actor": "Battosai1806", "additionalRuns": 2,
                "usedRuns": 0, "baseRuns": 4, "authorizationVersion": int(records["AUTH"]["version"]["N"]),
@@ -75,7 +92,7 @@ def install(call, now, home, apply=False, clock=None):
     limits = {"runs": ("maxRunsTotal", 2), "reservedTokens": ("maxTokensTotal", 2 * a["maxTokensPerRun"]),
               "reservedCostMicros": ("maxCostMicrosTotal", 2 * a["maxCostMicrosPerRun"]),
               "messages": ("maxSignupMessagesTotal", 2 * a["maxSignupMessagesPerRun"])}
-    require(all(type(total.get(k)) is int and total[k] >= 0 and total[k] + delta <= a[cap]
+    require(all(type(total.get(k)) is int and total[k] >= 0 and total[k] + delta <= caps[cap]
                 for k, (cap, delta) in limits.items()), "CUMULATIVE_BUDGET_INSUFFICIENT")
     require(type(daily.get("messages")) is int and daily["messages"] >= 0
             and daily["messages"] + 2 * a["maxSignupMessagesPerRun"] <= a["maxSignupMessagesPerDay"], "DAILY_EMAIL_BUDGET_INSUFFICIENT")
