@@ -16,12 +16,11 @@ describe('two additional B runs, never a recurring daily increase',()=>{
   expect(()=>reserveExtra(second,auth,3,6,'gh-123-1',run,now)).toThrow('EXTRA_RUN_ALLOWANCE_BLOCKED');expect(approval.usedRuns).toBe(0);expect(auth.maxRunsPerDay).toBe(4);
  });
  test('the separately authorized third start consumes once and cannot be repeated',()=>{
-  const aApproval={...approval,actor:'martelaxe',additionalRuns:3,usedRuns:2};
-  const aRun={...run,actor:{login:'martelaxe'},triggering_actor:{login:'martelaxe'}};
-  const third=reserveExtra(aApproval,auth,3,6,'gh-123-1',aRun,now);expect(third.usedRuns).toBe(3);
-  expect(()=>reserveExtra(third,auth,3,7,'gh-123-1',aRun,now)).toThrow('EXTRA_RUN_ALLOWANCE_BLOCKED');
-  for(const usedRuns of [0,1,3])expect(()=>reserveExtra({...aApproval,usedRuns},auth,3,6,'gh-123-1',aRun,now)).toThrow('EXTRA_RUN_ALLOWANCE_BLOCKED');
-  expect(auth.maxRunsPerDay).toBe(4);expect(aApproval.usedRuns).toBe(2);
+  const bApproval={...approval,additionalRuns:3,usedRuns:2};
+  const third=reserveExtra(bApproval,auth,3,6,'gh-123-1',run,now);expect(third.usedRuns).toBe(3);
+  expect(()=>reserveExtra(third,auth,3,7,'gh-123-1',run,now)).toThrow('EXTRA_RUN_ALLOWANCE_BLOCKED');
+  for(const usedRuns of [0,1,3])expect(()=>reserveExtra({...bApproval,usedRuns},auth,3,6,'gh-123-1',run,now)).toThrow('EXTRA_RUN_ALLOWANCE_BLOCKED');
+  expect(auth.maxRunsPerDay).toBe(4);expect(bApproval.usedRuns).toBe(2);
  });
  test('wrong day, expired/malformed approval, changed grant and inconsistent usage fail closed',()=>{
   for(const a of [null,{...approval,additionalRuns:3},{...approval,usedRuns:-1},{...approval,usedRuns:2},{...approval,usedRuns:0.5},{...approval,actor:'someone-else'},{...approval,expiresAt:auth.expiresAt},{...approval,unknown:'PRIVATE'}])
@@ -103,7 +102,7 @@ with tempfile.TemporaryDirectory() as folder:
  assert len(writes)==3
 `],{encoding:'utf8'});expect(result.status,result.stderr).toBe(0);expect(result.stdout).not.toMatch(/PRIVATE|DO_NOT_PRINT/);
  });
- test('administrator third-run helper adds only one guarded use and is idempotent',()=>{
+ test('administrator third-run helper assigns exactly one guarded use to B and is idempotent',()=>{
   const result=spawnSync('python3',['-B','-c',String.raw`
 import copy,datetime,importlib.util,json,tempfile
 from pathlib import Path
@@ -125,12 +124,13 @@ def fake(service,op,**p):
  raise AssertionError('unexpected AWS operation')
 with tempfile.TemporaryDirectory() as d:
  home=Path(d)
- assert m.install(fake,now,home)['status']=='THIRD_RUN_PREPARED' and not writes and not (home/'known-enough-third-extra-run').exists()
+ assert m.install(fake,now,home)['status']=='THIRD_RUN_PREPARED_FOR_B' and not writes and not (home/'known-enough-third-extra-run').exists()
  applied=m.install(fake,now,home,True,clock=lambda:now)
- assert applied=={'status':'THIRD_RUN_APPROVED','remaining':1,'expiresAt':m.EXTRA_EXPIRY,'cloudWrites':True} and len(writes)==1
+ assert applied=={'status':'THIRD_RUN_APPROVED_FOR_B','remaining':1,'expiresAt':m.EXTRA_EXPIRY,'cloudWrites':True} and len(writes)==1
+ assert json.loads(state[m.EXTRA_KEY]['payload']['S'])['actor']=='Battosai1806'
  assert all(state[k]==before[k] for k in ['AUTH','LEASE','DAY#'+m.DAY,'TOTAL'])
  snapshot=home/'known-enough-third-extra-run'/m.DAY/'before-private.json';assert snapshot.stat().st_mode&0o777==0o600
- again=m.install(fake,now,home,True,clock=lambda:now);assert again['status']=='THIRD_RUN_ALREADY_APPROVED' and again['remaining']==1 and len(writes)==1
+ again=m.install(fake,now,home,True,clock=lambda:now);assert again['status']=='THIRD_RUN_ALREADY_APPROVED_FOR_B' and again['remaining']==1 and len(writes)==1
  v=json.loads(state[m.EXTRA_KEY]['payload']['S']);v['usedRuns']=3;state[m.EXTRA_KEY]['payload']['S']=json.dumps(v)
  state['DAY#'+m.DAY]['payload']['S']=json.dumps({'runs':7,'messages':6})
  assert m.install(fake,now,home,True,clock=lambda:now)['remaining']==0 and len(writes)==1
@@ -142,6 +142,21 @@ assert len(writes)==1
 print(json.dumps({'prepared':True,'oneUseOnly':True,'idempotent':True,'priorRecordsUnchanged':True}))
 `],{encoding:'utf8'});
   expect(result.status,result.stderr).toBe(0);expect(result.stdout).toContain('"oneUseOnly": true');expect(result.stdout).not.toMatch(/PRIVATE|DO_NOT_PRINT/);
+ });
+ test('administrator helper exposes only a safe AWS error code and fixed control key',()=>{
+  const result=spawnSync('python3',['-B','-c',String.raw`
+import importlib.util,subprocess
+from types import SimpleNamespace
+s=importlib.util.spec_from_file_location('third','scripts/live-qa/approve-third-extra-run.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m)
+original=m.subprocess.run
+m.subprocess.run=lambda *a,**k:SimpleNamespace(returncode=1,stderr='aws: [ERROR]: An error occurred (AccessDeniedException) when calling the GetItem operation: PRIVATE_ARN_AND_DETAILS')
+try:
+ try:m.read(lambda *a,**k:m.aws('dynamodb','get-item',table_name=m.TABLE,key=m.key('AUTH')),'AUTH');raise AssertionError('expected safe AWS failure')
+ except ValueError as e:assert str(e)=='AWS_OPERATION_FAILED:dynamodb:get-item:AccessDeniedException:KEY=AUTH' and 'PRIVATE' not in str(e)
+finally:m.subprocess.run=original
+print('safe AWS error classification passed')
+`],{encoding:'utf8'});
+  expect(result.status,result.stderr).toBe(0);expect(result.stdout).toContain('safe AWS error classification passed');expect(result.stdout).not.toMatch(/PRIVATE|ARN/);
  });
  test('administrator legacy/stricter totals match executable cumulative caps and reject partial or enlarged totals',()=>{
   const base={approved:true,expiresAt:auth.expiresAt,maxRunsPerDay:4,maxAttemptsPerRun:200,maxTokensPerRun:250000,maxCostMicrosPerRun:250000,attemptCostMicros:1,maxSignupMessagesPerRun:2,maxSignupMessagesPerDay:8,retentionReviewed:true,invocationLoggingDisabled:true};

@@ -5,6 +5,7 @@ import datetime
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import tempfile
 
@@ -25,7 +26,9 @@ def aws(service, operation, **parameters):
     result = subprocess.run(args, capture_output=True, text=True, timeout=60,
                             env={**os.environ, "AWS_MAX_ATTEMPTS": "1", "AWS_PAGER": ""})
     if result.returncode:
-        raise ValueError("AWS_OPERATION_FAILED:" + service + ":" + operation)
+        match = re.search(r"An error occurred \(([A-Za-z][A-Za-z0-9]+)\) when calling", result.stderr)
+        error_code = match.group(1) if match else "Unknown"
+        raise ValueError("AWS_OPERATION_FAILED:" + service + ":" + operation + ":" + error_code)
     return json.loads(result.stdout) if result.stdout.strip() else {}
 
 
@@ -38,7 +41,13 @@ def value(item):
 
 
 def read(call, name):
-    return call("dynamodb", "get-item", table_name=TABLE, key=key(name), consistent_read=True).get("Item")
+    try:
+        return call("dynamodb", "get-item", table_name=TABLE, key=key(name), consistent_read=True).get("Item")
+    except ValueError as error:
+        prefix = "AWS_OPERATION_FAILED:dynamodb:get-item:"
+        if str(error).startswith(prefix):
+            raise ValueError(str(error) + ":KEY=" + name) from None
+        raise
 
 
 def cumulative_caps(a):
@@ -84,19 +93,23 @@ def install(call, now, home, apply=False, clock=None):
     caps = cumulative_caps(a)
     require(lease.get("status") == "CLEAN", "CLEANUP_REQUIRED_FIRST")
 
-    common = {"schemaVersion": 1, "day": DAY, "actor": "martelaxe", "baseRuns": 4,
+    common = {"schemaVersion": 1, "day": DAY, "actor": "Battosai1806", "baseRuns": 4,
               "authorizationVersion": int(records["AUTH"]["version"]["N"]),
               "authorizationExpiresAt": AUTH_EXPIRY, "expiresAt": EXTRA_EXPIRY}
+    prior_actor = "martelaxe" if extra.get("additionalRuns") == 2 else "Battosai1806"
     require(set(extra) == set(common) | {"additionalRuns", "usedRuns"}
-            and all(extra[k] == v for k, v in common.items()), "EXTRA_ALLOWANCE_DRIFT")
+            and all(extra[k] == v for k, v in common.items() if k != "actor")
+            and extra.get("actor") == prior_actor, "EXTRA_ALLOWANCE_DRIFT")
     require(type(daily.get("runs")) is int and daily["runs"] == 4 + extra.get("usedRuns", -100)
             and type(daily.get("messages")) is int and 0 <= daily["messages"] <= a["maxSignupMessagesPerDay"],
             "DAILY_USAGE_CHANGED")
 
     if extra.get("additionalRuns") == 3 and extra.get("usedRuns") in (2, 3):
-        return {"status": "THIRD_RUN_ALREADY_APPROVED", "remaining": 3 - extra["usedRuns"],
+        require(extra.get("actor") == "Battosai1806", "EXTRA_ALLOWANCE_DRIFT")
+        return {"status": "THIRD_RUN_ALREADY_APPROVED_FOR_B", "remaining": 3 - extra["usedRuns"],
                 "expiresAt": EXTRA_EXPIRY, "cloudWrites": False}
-    require(extra.get("additionalRuns") == 2 and extra.get("usedRuns") == 2, "EXTRA_ALLOWANCE_DRIFT")
+    require(extra.get("additionalRuns") == 2 and extra.get("usedRuns") == 2
+            and extra.get("actor") == "martelaxe", "EXTRA_ALLOWANCE_DRIFT")
     desired = {**common, "additionalRuns": 3, "usedRuns": 2}
     require(daily["messages"] + a["maxSignupMessagesPerRun"] <= a["maxSignupMessagesPerDay"],
             "DAILY_EMAIL_BUDGET_INSUFFICIENT")
@@ -109,7 +122,7 @@ def install(call, now, home, apply=False, clock=None):
                 "CUMULATIVE_BUDGET_INSUFFICIENT")
     folder = Path(home) / "known-enough-third-extra-run" / DAY
     if not apply:
-        return {"status": "THIRD_RUN_PREPARED", "remaining": 1, "expiresAt": EXTRA_EXPIRY, "cloudWrites": False}
+        return {"status": "THIRD_RUN_PREPARED_FOR_B", "remaining": 1, "expiresAt": EXTRA_EXPIRY, "cloudWrites": False}
 
     folder.mkdir(parents=True, exist_ok=True, mode=0o700)
     folder.chmod(0o700)
@@ -148,7 +161,7 @@ def install(call, now, home, apply=False, clock=None):
     result = after[EXTRA_KEY]
     require(result is not None and int(result["version"]["N"]) == version + 1
             and value(result) == desired, "ALLOWANCE_READBACK_FAILED")
-    return {"status": "THIRD_RUN_APPROVED", "remaining": 1, "expiresAt": EXTRA_EXPIRY, "cloudWrites": True}
+    return {"status": "THIRD_RUN_APPROVED_FOR_B", "remaining": 1, "expiresAt": EXTRA_EXPIRY, "cloudWrites": True}
 
 
 if __name__ == "__main__":
@@ -168,5 +181,10 @@ if __name__ == "__main__":
                     [("sts", "get-caller-identity"), ("dynamodb", "describe-table"), ("dynamodb", "get-item"),
                      ("dynamodb", "transact-write-items")])
         code = str(error) if isinstance(error, ValueError) and str(error) in safe else "THIRD_RUN_APPROVAL_CHECK_FAILED"
+        if isinstance(error, ValueError) and re.fullmatch(
+                r"AWS_OPERATION_FAILED:(?:sts:get-caller-identity:[A-Za-z0-9]+|"
+                r"dynamodb:(?:describe-table:[A-Za-z0-9]+|get-item:[A-Za-z0-9]+:KEY=(?:AUTH|LEASE|DAY#2026-10-03|TOTAL|EXTRA#2026-10-03)|transact-write-items:[A-Za-z0-9]+))",
+                str(error)):
+            code = str(error)
         print(json.dumps({"status": "BLOCKED", "code": code}))
         raise SystemExit(1)
