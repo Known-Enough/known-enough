@@ -14,7 +14,7 @@ A / Ricardo / `martelaxe` / Mac continues the same ASSESS07 task from clean sync
 
 ### One-use guard verified — 2026-10-03
 
-Focused `tests/integration/live-qa-extra-runs.test.ts` passes10/10. Pinned Node24.21.0/npm11.19.0 `PLAYWRIGHT_CHANNEL=chromium npm run check` passes: references7/7, planning15/15, lint/boundaries/typecheck/build, 705 application tests/two optional skips, hosted preview1/1, E2E58/58. Regression confirms the third start passes only from `usedRuns=2`, a fourth fails, the one-use helper preserves consumed usage and unrelated records, retries do not add another use, and insufficient cumulative headroom blocks the write. No live AWS write or qualification has been run.
+Focused `tests/integration/live-qa-extra-runs.test.ts` passes10/10. Pinned Node24.21.0/npm11.19.0 `PLAYWRIGHT_CHANNEL=chromium npm run check` passes: references7/7, planning15/15, lint/boundaries/typecheck/build, 705 application tests/two optional skips, hosted preview1/1, E2E58/58. Regression confirms the third start passes only from `usedRuns=2`, a fourth fails, the one-use helper preserves consumed usage and unrelated records, retries do not add another use, and insufficient cumulative headroom blocks the write. Source sync is `44788157c25b61bba606a41ee05d15ef5d73c81f`; the pinned CloudShell command is in the [runbook](../../../../../infra/live-qa/two-extra-runs.md). No live AWS write or qualification has been run.
 
 ## Current result — two authorized automatic cycles used, 2026-10-03 UTC
 

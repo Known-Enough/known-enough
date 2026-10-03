@@ -2,7 +2,23 @@
 
 ## Newly authorized single additional cycle — guarded helper checked, pending CloudShell apply
 
-At 2026-10-03T20:12:45Z the user authorized exactly one more live cycle after the previous two were consumed. A's read-only check found the original grant still approved, a CLEAN lease, six daily starts, five synthetic messages, and the exception at `additionalRuns=2, usedRuns=2`. The current broker correctly blocks a third use. The helper now adds one start to this exact dated exception while preserving `usedRuns=2`, original daily/per-run/cumulative caps, and expiry `2026-10-04T00:00:00Z`. Focused10/10 and pinned full checks pass. A's AWS profile is read-only; the user's CloudShell administrator session must apply the pinned helper before any deployment. Do not deploy unless its readback says exactly one start remains; one deployment starts one automatic qualification. No second cycle or renewal is authorized.
+At 2026-10-03T20:12:45Z the user authorized exactly one more live cycle after the previous two were consumed. A's read-only check found the original grant still approved, a CLEAN lease, six daily starts, five synthetic messages, and the exception at `additionalRuns=2, usedRuns=2`. The current broker correctly blocks a third use. The helper adds one start to this exact dated exception while preserving `usedRuns=2`, original daily/per-run/cumulative caps, and expiry `2026-10-04T00:00:00Z`. Focused10/10 and pinned full checks pass. Source is synced on `main` at `44788157c25b61bba606a41ee05d15ef5d73c81f`; helper SHA-256 is `75b4a81c319ac40d108bfbf1cfbe79da27d0b9a0cdaea17194db90d573c85c47`. A's AWS profile is read-only; A must use the CloudShell administrator session for the exact guarded update below. It reads current state and headroom before changing anything. `set -e` prevents applying if its read-only preparation is blocked.
+
+```bash
+set -euo pipefail
+umask 077
+COMMIT=44788157c25b61bba606a41ee05d15ef5d73c81f
+SHA256=75b4a81c319ac40d108bfbf1cfbe79da27d0b9a0cdaea17194db90d573c85c47
+DIR=$(mktemp -d "$HOME/known-enough-third-run.XXXXXX")
+curl --fail --silent --show-error \
+  "https://raw.githubusercontent.com/Known-Enough/known-enough/$COMMIT/scripts/live-qa/approve-third-extra-run.py" \
+  -o "$DIR/approve.py"
+printf '%s  %s\n' "$SHA256" "$DIR/approve.py" | sha256sum --check --status
+python3 -B "$DIR/approve.py"
+python3 -B "$DIR/approve.py" --apply
+```
+
+The first result must be `THIRD_RUN_PREPARED` with `cloudWrites:false`; the second must be `THIRD_RUN_APPROVED`, `remaining:1`, and the unchanged expiry. Stop and paste the result if either result differs or is blocked. The helper changes only the existing exception counter, from three approved/two used, preserving the previous two runs. It neither raises the recurring daily limit nor resets any totals. Once the second result is confirmed, one deployment of the synced prompt correction starts the one authorized automatic qualification.
 
 The existing two-use exception was approved for B, but B is unavailable. The user asked A to continue ASSESS07. The one-time transfer changed only the existing `EXTRA#2026-10-03/STATE` record's approved GitHub actor from `Battosai1806` to `martelaxe`. It preserved the number already used, so it transferred only remaining starts; it did not restore a spent start.
 

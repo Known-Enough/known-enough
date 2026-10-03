@@ -1,3 +1,9 @@
+## 2026-10-03T20:28:15Z — ASSESS07 one-use guard checked and synced
+
+The one-use counter helper and broker gate passed focused tests10/10 plus pinned `PLAYWRIGHT_CHANNEL=chromium npm run check` exit0: refs7/7, planning15/15, 705 application tests/two optional skips, hosted preview1/1, E2E58/58, lint/boundaries/typecheck/build. Custom local-link scan checked six updated Markdown files with no missing target; `git diff --check` and Python AST parse passed. Committed and pushed source/docs as `44788157c25b61bba606a41ee05d15ef5d73c81f` with `[skip ci]`; fetched `origin/main` and verified exact commit equality and clean tree. Helper hash is `75b4a81c319ac40d108bfbf1cfbe79da27d0b9a0cdaea17194db90d573c85c47`.
+
+A's AWS profile remains read-only; no AWS write, deployment, model call, or signup email occurred. The exact CloudShell preflight/apply command is in `infra/live-qa/two-extra-runs.md` and will be synced as a docs-only follow-up with the final pin. After A reports `THIRD_RUN_APPROVED`, remaining1, dispatch exactly one main deployment before the existing exception expiry and inspect its automatic qualification.
+
 ## 2026-10-03T20:18:35Z — ASSESS07 new one-cycle allowance claim
 
 A / Ricardo / `martelaxe` / Mac continues the existing ASSESS07 claim from clean synchronized `main` at `db8e8cdd6cf8df5a361d39432037408d87bf0fa7` (Codex GPT-6; exact variant/effort unexposed). The user explicitly authorized exactly one further bounded live cycle. Read-only AWS preflight confirmed the correct account, active original grant, two prior extra uses spent, daily starts6/messages5, and CLEAN lease. The existing exception expires at `2026-10-04T00:00:00Z`.
