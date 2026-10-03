@@ -4,7 +4,7 @@
 
 ## Current checkpoint — 2026-10-02
 
-AWS installation and GitHub settings are verified. A's authorized main deployments 37081152042 and 37082249237 succeeded, automatically triggering matching qualification runs 37081192859 and 37082289231. Source checks and QA workload login passed; actual QA publication is denied on main/deployments/* for its existing release role. Required dependent jobs/journeys were skipped; rollback reports PASS and model/email counts are zero. The [exact guarded permission correction](../infra/live-qa/release-policy-repair.md) is prepared; separate administrator authorization/application and the complete real online PASS are still pending. This proves the automatic trigger, not live product qualification.
+AWS installation, GitHub settings and the exact QA publishing permission repair are verified. Authorized deployment 37085181360 automatically started qualification 37085221562 on matching source 3b7fbad. QA/primary publication, 19 public checks and AWS metadata passed. The first signup test failed; the remaining six were blocked. Fixture/preflight/privacy/cleanup passed, with zero reported model/email counts. [Actual report and reproduced signup problems](review-artifacts/ASSESS07-post-permission-live-run.json) identify an early keyboard action and a hosted signup page without an email field. A prepares app email registration/verification and a ready-page test, then continues the same approved automatic cycle. Full live PASS is still pending.
 
 A's recurring observer and completed one-time follow-up are deleted. B's existing Codex automation is unchanged; B's actual scheduled execution is not yet verified. No A monitor should be recreated.
 
@@ -12,7 +12,7 @@ A's recurring observer and completed one-time follow-up are deleted. B's existin
 
 | Order | Task | Current status | What remains |
 | --- | --- | --- | --- |
-| 1 | [ASSESS07 — Real automatic qualification](tasks/active/live-testing/ASSESS07/README.md) | BLOCKED — A claim retained; guarded administrator permission correction required | Inspect the complete report after an authorized eligible deployment: all required journeys, exact source receipts and CLEAN cleanup. |
+| 1 | [ASSESS07 — Real automatic qualification](tasks/active/live-testing/ASSESS07/README.md) | BLOCKED — A claim retained; signup/test correction in progress | Inspect the complete report after an authorized eligible deployment: all required journeys, exact source receipts and CLEAN cleanup. |
 | 2 | [ASSESS10 — B monitor verification](tasks/active/monitoring/ASSESS10/README.md) | READY / unclaimed; B-only verification after the current cycle | Identify B's existing automation, prove two unattended ticks and fresh AWS results, check stale/failure notification behavior. |
 | Delivery umbrella | [LIVE04 — Online test delivery](tasks/active/live-testing/LIVE04/README.md) | IN_PROGRESS; installation/settings checkpoint passed | Finish its remaining managed proof through ASSESS07; no mandatory B manual launch. |
 | Preserved closeout | [NP00 — Technical closeout](tasks/active/closeout/NP00/README.md) | IN_PROGRESS; A / Ricardo / martelaxe / WSL claim retained | Finish original remaining technical obligations; its model-off checkpoint is already verified. No concurrent writer. |

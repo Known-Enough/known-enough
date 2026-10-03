@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "3b7fbad5456641b63e6bae08c62ab7d66e202ae1",
+  "deploymentRunId": 37085181360,
+  "deploymentConclusion": "success",
+  "automaticQualificationRunId": 37085221562,
+  "event": "workflow_run",
+  "initiatingAccount": "martelaxe",
+  "cloudPolicyRepair": {
+    "status": "QA_RELEASE_POLICY_READBACK_PASS",
+    "alreadyCorrect": false,
+    "cloudWrites": true,
+    "evidenceOrigin": "A user-pasted CloudShell result"
+  },
+  "completeReport": {
+    "schemaVersion": 1,
+    "status": "BLOCKED_OR_FAILED",
+    "sourceCommit": "3b7fbad5456641b63e6bae08c62ab7d66e202ae1",
+    "initiatingAccount": "martelaxe",
+    "lanes": {
+      "jobs": "BLOCKED",
+      "primaryPublication": "PASS",
+      "currentSource": "PASS",
+      "release": "PASS",
+      "public": "PASS",
+      "primaryConfiguration": "PASS",
+      "qaJourney": "BLOCKED"
+    },
+    "jobResults": {
+      "provenance": "success",
+      "release": "success",
+      "primary-release": "success",
+      "public": "success",
+      "metadata": "success",
+      "journey": "failure"
+    },
+    "targets": {
+      "primary": "https://main.d143q5ravxp5av.amplifyapp.com/",
+      "qa": "https://main.d2l23pkzmr1tio.amplifyapp.com/",
+      "staticPreview": "https://d23eowhnwtqts3.cloudfront.net/"
+    },
+    "targetDifferences": [
+      "Primary models remain disabled under NP00; real AI journeys run in isolated budgeted QA.",
+      "QA uses separate pools, clients, API and data tables; primary writable AI was not tested."
+    ],
+    "qaCounts": {
+      "passed": 0,
+      "failed": 1,
+      "blocked": 6,
+      "modelAttempts": 0,
+      "signupMessages": 0
+    },
+    "requiredCloudAcceptance": "LIVE04 requires actual B dispatch and separate authorized automatic deployment run"
+  },
+  "qaReport": {
+    "schemaVersion": 1,
+    "runId": "gh-37085221562-1",
+    "sourceCommit": "3b7fbad5456641b63e6bae08c62ab7d66e202ae1",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "BLOCKED",
+      "privacy": "PASS",
+      "signup": "BLOCKED",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 0,
+      "failed": 1,
+      "blocked": 6,
+      "modelAttempts": 0,
+      "signupMessages": 0
+    }
+  },
+  "publicChecks": 19,
+  "evidenceOrigin": "Downloaded sanitized GitHub artifacts; read-only public browser probes, no signup submission",
+  "reproducedProblems": [
+    "First Tab sent before React renders its login button; visible-button wait restores keyboard focus.",
+    "Hosted /signup renders username/password only; email field remains absent after waiting."
+  ],
+  "remaining": "Real verification email, hosted PKCE signup login and all seven journeys must pass; cleanup/privacy already PASS."
+}

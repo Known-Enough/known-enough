@@ -4,7 +4,7 @@ Start here to understand what is left. Every task has its own folder: README.md 
 
 ## Online testing
 
-Installation, GitHub settings and the automatic trigger are verified. The first live test attempt is blocked on one QA publishing permission; the complete live PASS is still pending. After an authorized eligible app deployment succeeds, GitHub runs the qualification automatically; B does not need A's AWS credentials or a manual Run workflow click.
+Installation, GitHub settings and the automatic trigger are verified. Publishing, public website/configuration checks and cleanup passed after the IAM repair; the signup test needs correction and complete live PASS is still pending. After an authorized eligible app deployment succeeds, GitHub runs the qualification automatically; B does not need A's AWS credentials or a manual Run workflow click.
 
 | Task | Basic idea | Status |
 | --- | --- | --- |

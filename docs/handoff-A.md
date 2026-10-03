@@ -1,3 +1,7 @@
+## Current ASSESS07 checkpoint — 2026-10-02 local / 2026-10-03 UTC
+
+A's exact QA publishing IAM correction passed user CloudShell readback. Matching deployment37085181360/automatic37085221562 on3b7fbad passes QA/primary publication, public19 and metadata; QA01 signup fails, six dependents blocked, fixture/privacy/CLEAN cleanup PASS. [Sanitized actual evidence](review-artifacts/ASSESS07-post-permission-live-run.json). A's same task adds email registration/confirmation on existing public Cognito APIs and waits for a rendered page before its keyboard test. After focused/full checks and verified sync, continue the already authorized automatic cycle; preserve original expiry/counters/rollback, no new IAM/pool/resources. Full live acceptance remains pending. B monitor is untouched/unclaimed; no A automation. Older handoffs below remain historical.
+
 ## Current A handoff — LIVE delivery, 2026-10-02
 
 

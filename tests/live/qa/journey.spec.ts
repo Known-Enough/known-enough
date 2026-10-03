@@ -16,8 +16,28 @@ test.beforeEach(async ({browser}) => {
   if (people.length) await renewSessions(sessions, people, prior => login(browser, prior.user.actor, {mobile: prior.user.actor === 'iris', display: prior.user.actor === 'display'}));
 });
 test('QA01 signup and managed login',async({browser})=>{
-  const {target,login:logins}=data();const user=logins.users.find(u=>u.actor==='signup')!;const context=await browser.newContext();const page=await context.newPage();sessions.push({context,page,user});await page.goto(target.FrontendUrl);await page.keyboard.press('Tab');await expect(page.getByRole('button',{name:'Sign in or register',exact:true})).toBeFocused();await page.getByRole('button',{name:'Sign in or register',exact:true}).click();await page.getByRole('link',{name:/sign up/i}).click();await page.locator('input[name="username"]:visible').fill(user.username);await page.locator('input[name="email"]:visible').fill(user.email);await page.locator('input[name="password"]:visible').fill(user.password);const confirm=page.locator('input[name="confirm_password"]:visible');if(await confirm.count())await confirm.fill(user.password);await page.locator('input[type="submit"]:visible,button[type="submit"]:visible').first().click();let code='';await expect.poll(()=>{const result=fixture('mail');if(result.status==='PASS')code=result.code;return !!code;},{timeout:120000,intervals:[3000]}).toBe(true);await page.locator('input[name="confirmation_code"]:visible,input[name="code"]:visible').first().fill(code);await page.locator('input[type="submit"]:visible,button[type="submit"]:visible').first().click();await context.close();sessions.pop();const signup=await login(browser,'signup');sessions.push(signup);await register(signup);expect((await checked(signup,'/account')).account).toMatchObject({status:'APPROVED'});
-  for(const actor of ['iris','omar','tess','vin','pending','rejected','disabled','outsider']){const s=await login(browser,actor,{mobile:actor==='iris'});sessions.push(s);if(['iris','omar','tess','vin'].includes(actor))people.push(s);}
+  const {target,login:logins}=data();const user=logins.users.find(u=>u.actor==='signup')!;
+  const context=await browser.newContext();const page=await context.newPage();sessions.push({context,page,user});
+  await test.step('QA01_ENTRY',async()=>{
+    await page.goto(target.FrontendUrl);await expect(page.getByRole('button',{name:'Sign in or register',exact:true})).toBeVisible();
+    await page.keyboard.press('Tab');await expect(page.getByRole('button',{name:'Sign in or register',exact:true})).toBeFocused();
+  });
+  await test.step('QA01_SIGNUP',async()=>{
+    await page.getByRole('button',{name:'Register with email',exact:true}).click();
+    await page.getByLabel('Username',{exact:true}).fill(user.username);await page.getByLabel('Email',{exact:true}).fill(user.email);
+    await page.getByLabel('Password',{exact:true}).fill(user.password);await page.getByRole('button',{name:'Create account',exact:true}).click();
+    await expect(page.getByLabel('Verification code',{exact:true})).toBeVisible();
+  });
+  await test.step('QA01_EMAIL',async()=>{
+    let code='';await expect.poll(()=>{const result=fixture('mail');if(result.status==='PASS')code=result.code;return !!code;},{timeout:120000,intervals:[3000]}).toBe(true);
+    await page.getByLabel('Verification code',{exact:true}).fill(code);await page.getByRole('button',{name:'Verify email',exact:true}).click();
+    await expect(page.getByText('Email verified. Sign in to continue and request access.',{exact:true})).toBeVisible();
+  });
+  await context.close();sessions.pop();
+  await test.step('QA01_LOGIN',async()=>{const signup=await login(browser,'signup');sessions.push(signup);await register(signup);expect((await checked(signup,'/account')).account).toMatchObject({status:'APPROVED'});});
+  await test.step('QA01_ACTORS',async()=>{
+    for(const actor of ['iris','omar','tess','vin','pending','rejected','disabled','outsider']){const s=await login(browser,actor,{mobile:actor==='iris'});sessions.push(s);if(['iris','omar','tess','vin'].includes(actor))people.push(s);}
+  });
 });
 test('QA02 admission and invitations',async()=>{
   for(const s of people)await register(s);

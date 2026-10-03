@@ -18,3 +18,18 @@ describe('LIVE02 runner preparation, no service simulation counted as live',()=>
    const {default:Reporter}=await import('../../scripts/live-qa/sanitized-reporter.mjs');const reporter=new Reporter();reporter.onTestEnd({title:REQUIRED_TESTS[0],attachments:[{body:'PRIVATE'}]},{status:'failed',error:{message:'SECRET_TOKEN'},stdout:['PRIVATE_EMAIL']});reporter.onEnd({status:'failed'});expect(readFileSync(process.env.QA_RESULTS_FILE,'utf8')).not.toMatch(/PRIVATE|SECRET/);writeFileSync(dir+'/empty','');
  }finally{if(before===undefined)delete process.env.QA_RESULTS_FILE;else process.env.QA_RESULTS_FILE=before;rmSync(dir,{recursive:true,force:true});}});
 });
+
+
+test('failed signup phase survives the sanitized reporter and report without assertion values', async () => {
+  const dir=mkdtempSync(resolve(tmpdir(),'ke-qa-phase-'));const before=process.env.QA_RESULTS_FILE;process.env.QA_RESULTS_FILE=dir+'/tests.json';
+  try {
+    // @ts-expect-error JavaScript reporter accepts only allowlisted phase/title/status.
+    const {default:Reporter}=await import('../../scripts/live-qa/sanitized-reporter.mjs');const reporter=new Reporter();
+    reporter.onStepEnd({title:REQUIRED_TESTS[0]}, {}, {title:'PRIVATE_EMAIL',error:{message:'PASSWORD'}});
+    reporter.onStepEnd({title:REQUIRED_TESTS[0]}, {}, {title:'QA01_EMAIL',error:{message:'PRIVATE_EMAIL_PASSWORD'}});
+    reporter.onTestEnd({title:REQUIRED_TESTS[0]}, {status:'failed',error:{message:'SECRET'}});reporter.onEnd({status:'failed'});
+    const raw=readFileSync(process.env.QA_RESULTS_FILE,'utf8');expect(raw).not.toMatch(/PRIVATE|PASSWORD|SECRET/);
+    const report=qualificationReport({runId:'run-12345',tests:JSON.parse(raw).tests});expect(report.tests[0]).toMatchObject({status:'FAIL',phase:'QA01_EMAIL'});
+    expect(safeResults([{title:REQUIRED_TESTS[0],status:'failed',phase:'PRIVATE_EMAIL'}])[0]).not.toHaveProperty('phase');
+  } finally {if(before===undefined)delete process.env.QA_RESULTS_FILE;else process.env.QA_RESULTS_FILE=before;rmSync(dir,{recursive:true,force:true});}
+});

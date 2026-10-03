@@ -4,7 +4,7 @@ Collect real online proof that all required user journeys, safety checks and cle
 
 **Status:** BLOCKED.
 
-**Next step:** A's administrator applies the [guarded one-time publishing permission fix](../../../../../infra/live-qa/release-policy-repair.md); then A continues the approved deployment and inspects the matching automatic report. Actual user journeys and cleanup are still untested.
+**Next step:** A fixes the actual signup test and adds browser email registration using the installed services, then continues the approved automatic deployment/test cycle. Publishing, website/configuration checks and cleanup passed; complete user journeys are still pending.
 
 **Related work:** [LIVE04](../LIVE04/README.md), [NP05](../../../historical/superseded/NP05/README.md).
 

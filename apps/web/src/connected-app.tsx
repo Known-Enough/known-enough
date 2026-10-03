@@ -7,6 +7,7 @@ import {
 import { SimulatedSharedAssistant } from './simulated-shared-assistant';
 import { decisionStatusText, privateReadinessText } from './decision-copy';
 import { GroupHome } from './group-home';
+import { EmailRegistration } from './email-registration-form';
 import { ConnectedDecision } from './connected-decision';
 
 const DECISION_ID = 'christmas-decision';
@@ -143,9 +144,9 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
       {session && <button className="secondary" type="button" onClick={signOut}>Sign out</button>}</header>
     <p className="ke-privacy">Known Enough and its AI process your private inputs. Other people see only the shared choices, proposal and disclosures you authorize. An outcome may still reveal something about people’s needs. Use fictional, non-sensitive data in this preview.</p>
     {!session ? <section className="ke-card ke-auth-card"><h2>Sign in to the shared decision</h2>
-      <p>Sign in or create your own account on the next page, then verify your email and request access. Group invitations wait in this browser tab while you sign in. A shared display uses a separate account and can only read public information.</p>
+      <p>Sign in, or register with email below and verify your address before requesting access. Group invitations wait in this browser tab while you sign in. A shared display uses a separate account and can only read public information.</p>
       <div className="ke-private-actions"><button type="button" onClick={() => void signIn('participant')}>Sign in or register</button>
-        <button type="button" className="secondary" onClick={() => void signIn('display')}>Shared display sign-in</button></div></section> : <>
+        <button type="button" className="secondary" onClick={() => void signIn('display')}>Shared display sign-in</button></div><EmailRegistration config={config} /></section> : <>
       {session.kind === 'participant' && <GroupHome key={session.accessToken} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} openDecision={id => { setRoomInput(id); void load(id); }} />}
       <section className="ke-card"><p className="eyebrow">{session.kind === 'display' ? 'SHARED DISPLAY' : 'PARTICIPANT SESSION'}</p>
         <h2>Shared decision</h2><label htmlFor="connected-decision-id">Decision ID from your invitation</label>
