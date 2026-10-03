@@ -17,13 +17,16 @@ export function reserveExtra(approval, authorization, authorizationVersion, dail
     const match = /^gh-(\d+)-(\d+)$/.exec(runId);
     const day = new Date(now).toISOString().slice(0, 10);
     const keys = ['schemaVersion', 'day', 'actor', 'additionalRuns', 'usedRuns', 'baseRuns', 'authorizationVersion', 'authorizationExpiresAt', 'expiresAt'].sort().join();
+    const authorizedUse = approval?.additionalRuns === 2
+        ? approval.usedRuns < 2
+        : approval?.additionalRuns === 3 && approval.usedRuns === 2;
     if (!approval || Object.keys(approval).sort().join() !== keys || approval.schemaVersion !== 1
         || day !== EXTRA_DAY || approval.day !== day || !EXTRA_ACTORS.has(approval.actor)
-        || approval.additionalRuns !== 2 || approval.baseRuns !== 4 || authorization.maxRunsPerDay !== 4
+        || !authorizedUse || approval.baseRuns !== 4 || authorization.maxRunsPerDay !== 4
         || approval.authorizationVersion !== authorizationVersion || approval.authorizationExpiresAt !== authorization.expiresAt
         || !authorization.approved || Date.parse(authorization.expiresAt) <= now
         || approval.expiresAt !== '2026-10-04T00:00:00Z' || Date.parse(approval.expiresAt) <= now
-        || !Number.isSafeInteger(approval.usedRuns) || approval.usedRuns < 0 || approval.usedRuns >= 2
+        || !Number.isSafeInteger(approval.usedRuns) || approval.usedRuns < 0 || approval.usedRuns >= approval.additionalRuns
         || dailyRuns !== approval.baseRuns + approval.usedRuns)
         throw new Error('EXTRA_RUN_ALLOWANCE_BLOCKED');
     if (!match || String(run?.id) !== match[1] || String(run?.run_attempt) !== match[2]

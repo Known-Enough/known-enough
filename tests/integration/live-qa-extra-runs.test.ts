@@ -15,6 +15,14 @@ describe('two additional B runs, never a recurring daily increase',()=>{
   const second=reserveExtra(first,auth,3,5,'gh-123-1',run,now);expect(second.usedRuns).toBe(2);
   expect(()=>reserveExtra(second,auth,3,6,'gh-123-1',run,now)).toThrow('EXTRA_RUN_ALLOWANCE_BLOCKED');expect(approval.usedRuns).toBe(0);expect(auth.maxRunsPerDay).toBe(4);
  });
+ test('the separately authorized third start consumes once and cannot be repeated',()=>{
+  const aApproval={...approval,actor:'martelaxe',additionalRuns:3,usedRuns:2};
+  const aRun={...run,actor:{login:'martelaxe'},triggering_actor:{login:'martelaxe'}};
+  const third=reserveExtra(aApproval,auth,3,6,'gh-123-1',aRun,now);expect(third.usedRuns).toBe(3);
+  expect(()=>reserveExtra(third,auth,3,7,'gh-123-1',aRun,now)).toThrow('EXTRA_RUN_ALLOWANCE_BLOCKED');
+  for(const usedRuns of [0,1,3])expect(()=>reserveExtra({...aApproval,usedRuns},auth,3,6,'gh-123-1',aRun,now)).toThrow('EXTRA_RUN_ALLOWANCE_BLOCKED');
+  expect(auth.maxRunsPerDay).toBe(4);expect(aApproval.usedRuns).toBe(2);
+ });
  test('wrong day, expired/malformed approval, changed grant and inconsistent usage fail closed',()=>{
   for(const a of [null,{...approval,additionalRuns:3},{...approval,usedRuns:-1},{...approval,usedRuns:2},{...approval,usedRuns:0.5},{...approval,actor:'someone-else'},{...approval,expiresAt:auth.expiresAt},{...approval,unknown:'PRIVATE'}])
    expect(()=>reserveExtra(a,auth,3,4,'gh-123-1',run,now)).toThrow('EXTRA_RUN_ALLOWANCE_BLOCKED');
@@ -94,6 +102,46 @@ with tempfile.TemporaryDirectory() as folder:
   assert all(state[k]==v for k,v in before.items())
  assert len(writes)==3
 `],{encoding:'utf8'});expect(result.status,result.stderr).toBe(0);expect(result.stdout).not.toMatch(/PRIVATE|DO_NOT_PRINT/);
+ });
+ test('administrator third-run helper adds only one guarded use and is idempotent',()=>{
+  const result=spawnSync('python3',['-B','-c',String.raw`
+import copy,datetime,importlib.util,json,tempfile
+from pathlib import Path
+spec=importlib.util.spec_from_file_location('third','scripts/live-qa/approve-third-extra-run.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+now=datetime.datetime(2026,10,3,20,tzinfo=datetime.timezone.utc)
+a={'approved':True,'retentionReviewed':True,'invocationLoggingDisabled':True,'expiresAt':m.AUTH_EXPIRY,'maxRunsPerDay':4,'maxRunsTotal':28,'maxTokensTotal':7000000,'maxCostMicrosTotal':7000000,'maxSignupMessagesTotal':56,'maxAttemptsPerRun':200,'maxTokensPerRun':250000,'maxCostMicrosPerRun':250000,'maxSignupMessagesPerRun':2,'maxSignupMessagesPerDay':8}
+values={'AUTH':a,'LEASE':{'status':'CLEAN','PRIVATE':'DO_NOT_PRINT'},'DAY#'+m.DAY:{'runs':6,'messages':5},'TOTAL':{'runs':6,'reservedTokens':100,'reservedCostMicros':100,'messages':5},m.EXTRA_KEY:{'schemaVersion':1,'day':m.DAY,'actor':'martelaxe','additionalRuns':2,'usedRuns':2,'baseRuns':4,'authorizationVersion':4,'authorizationExpiresAt':m.AUTH_EXPIRY,'expiresAt':m.EXTRA_EXPIRY}}
+state={k:{**m.key(k),'payload':{'S':json.dumps(v)},'version':{'N':'4'}} for k,v in values.items()};before=copy.deepcopy(state);writes=[]
+def fake(service,op,**p):
+ if op=='get-caller-identity':return {'Account':m.ACCOUNT}
+ if op=='describe-table':return {'Table':{'TableArn':'arn:aws:dynamodb:us-east-1:'+m.ACCOUNT+':table/'+m.TABLE,'TableStatus':'ACTIVE'}}
+ if op=='get-item':return {'Item':copy.deepcopy(state[p['key']['PK']['S']])}
+ if op=='transact-write-items':
+  tx=json.loads(Path(p['cli_input_json'].removeprefix('file://')).read_text())['TransactItems'];assert len(tx)==5
+  for name,t in zip(['AUTH','LEASE','DAY#'+m.DAY,'TOTAL'],tx[:4]):assert t['ConditionCheck']['Key']==m.key(name) and t['ConditionCheck']['ExpressionAttributeValues'][':v']==state[name]['version']
+  put=tx[-1]['Put'];assert put['Item']['PK']['S']==m.EXTRA_KEY and put['ConditionExpression']=='#v=:v' and put['Item']['version']['N']=='5'
+  assert json.loads(put['Item']['payload']['S'])['additionalRuns']==3 and json.loads(put['Item']['payload']['S'])['usedRuns']==2
+  writes.append(tx);state[m.EXTRA_KEY]=put['Item'];return {}
+ raise AssertionError('unexpected AWS operation')
+with tempfile.TemporaryDirectory() as d:
+ home=Path(d)
+ assert m.install(fake,now,home)['status']=='THIRD_RUN_PREPARED' and not writes and not (home/'known-enough-third-extra-run').exists()
+ applied=m.install(fake,now,home,True,clock=lambda:now)
+ assert applied=={'status':'THIRD_RUN_APPROVED','remaining':1,'expiresAt':m.EXTRA_EXPIRY,'cloudWrites':True} and len(writes)==1
+ assert all(state[k]==before[k] for k in ['AUTH','LEASE','DAY#'+m.DAY,'TOTAL'])
+ snapshot=home/'known-enough-third-extra-run'/m.DAY/'before-private.json';assert snapshot.stat().st_mode&0o777==0o600
+ again=m.install(fake,now,home,True,clock=lambda:now);assert again['status']=='THIRD_RUN_ALREADY_APPROVED' and again['remaining']==1 and len(writes)==1
+ v=json.loads(state[m.EXTRA_KEY]['payload']['S']);v['usedRuns']=3;state[m.EXTRA_KEY]['payload']['S']=json.dumps(v)
+ state['DAY#'+m.DAY]['payload']['S']=json.dumps({'runs':7,'messages':6})
+ assert m.install(fake,now,home,True,clock=lambda:now)['remaining']==0 and len(writes)==1
+
+state=copy.deepcopy(before);total=json.loads(state['TOTAL']['payload']['S']);total['reservedTokens']=m.TOTAL_CEILINGS['maxTokensTotal']-1;state['TOTAL']['payload']['S']=json.dumps(total)
+try:m.install(fake,now,tempfile.gettempdir(),True,clock=lambda:now);raise AssertionError('budget overflow accepted')
+except ValueError as e:assert str(e)=='CUMULATIVE_BUDGET_INSUFFICIENT'
+assert len(writes)==1
+print(json.dumps({'prepared':True,'oneUseOnly':True,'idempotent':True,'priorRecordsUnchanged':True}))
+`],{encoding:'utf8'});
+  expect(result.status,result.stderr).toBe(0);expect(result.stdout).toContain('"oneUseOnly": true');expect(result.stdout).not.toMatch(/PRIVATE|DO_NOT_PRINT/);
  });
  test('administrator legacy/stricter totals match executable cumulative caps and reject partial or enlarged totals',()=>{
   const base={approved:true,expiresAt:auth.expiresAt,maxRunsPerDay:4,maxAttemptsPerRun:200,maxTokensPerRun:250000,maxCostMicrosPerRun:250000,attemptCostMicros:1,maxSignupMessagesPerRun:2,maxSignupMessagesPerDay:8,retentionReviewed:true,invocationLoggingDisabled:true};
