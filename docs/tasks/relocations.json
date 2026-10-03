@@ -246,7 +246,7 @@
       "id": "ASSESS07",
       "title": "ASSESS07 \u2014 Managed verification of corrective changes",
       "purpose": "Collect real online proof that all required user journeys, safety checks and cleanup pass automatically after a matching successful deployment.",
-      "status": "BLOCKED",
+      "status": "IN_PROGRESS",
       "priorStatus": "BLOCKED \u2014 AWS installation readback passed; GitHub target/enabled variables and actual automatic managed qualification remain.",
       "classification": "active",
       "group": "live-testing",

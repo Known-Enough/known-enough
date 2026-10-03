@@ -1,6 +1,6 @@
 # ASSESS07 — Managed verification of corrective changes
 
-- Status: BLOCKED — installation and GitHub settings verified; first matching complete automatic managed qualification remains pending.
+- Status: IN_PROGRESS — A starts the explicitly authorized deployment and automatic live qualification cycle; no live PASS yet.
 - Worker: A installation/cloud scope, then B GitHub qualification; record actual model, identity, source and receipts.
 - Scope: new read-only/service verification checklist under existing LIVE04, never NP00 takeover.
 
@@ -30,3 +30,10 @@ User requires automatic tests, without B clicking Run workflow. Manual dispatch 
 ## Current GitHub settings checkpoint — 2026-10-02
 
 A / martelaxe authenticated through GitHub CLI in WSL. LIVE_QA_INSTALLED_TARGET was saved from the exact allowlisted CloudShell-installed target for original source 30fa91ad914c1dc1732680784ee368e2f30c9e92 and compared by parsed JSON readback; LIVE_QA_ENABLED=true was saved and verified through the repository API. The qualification workflow had zero runs at this checkpoint. No AWS write, deployment, test dispatch, email or paid-model call occurred. The remaining gate is an actual complete matching automatic report after an authorized eligible successful main deployment, within the existing limits and expiry. Prior setup-pending and manual-launch instructions above are dated history and do not schedule current work.
+
+
+## A execution claim and authorization — 2026-10-02 local / 2026-10-03 UTC
+
+User explicitly answered "Yes, deploy and run the live tests" in this A chat, authorizing publication of the current app through GitHub followed by automatic live qualification within the existing synthetic envelope. This is the current sequential task, before B-only monitor verification; ASSESS10 remains unclaimed and NP00's saved claim is retained without concurrent execution. A / Ricardo / martelaxe / WSL; clean ff-only main baseline 44fd65beb9d0403aaad8c99b3c7e21d4ae60cedd; actual Codex GPT-6, exact variant/effort unexposed, no subagents. GitHub identity martelaxe and target/enabled variables reverified; both workflows active. App/packages/root dependencies and deployment/qualification workflows are unchanged from approved installed source 30fa91a. No B identity or execution is inferred.
+
+Bounded scope: dispatch existing deploy-amplify-staging.yml on verified main; observe its automatic workflow_run qualification, inspect all matching artifacts/lanes/journeys/cleanup and cumulative limit evidence; update this ticket/README, current board/workflow/task-guide relocation status, A log/handoff and sanitized review evidence. If a real executable defect is found, record an exact amendment and meaningful focused/full checks before publishing the repair. Do not broaden IAM, replace the finite grant, renew expiry, reset counters, obtain personal AWS credentials or create an A monitor. GitHub workflow handles the already installed release/test workload roles and synthetic data. Preserve expiry 2026-10-09T03:16:41.171626Z and four/day, 28 total runs, USD7 reserved-model/56-message totals. Approval permits the requested deployment/test cycle; it is not permission for broader resources, enrollment or new spending.

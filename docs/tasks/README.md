@@ -9,7 +9,7 @@ Installation and GitHub settings are ready. The first complete live test result 
 | Task | Basic idea | Status |
 | --- | --- | --- |
 | [LIVE04](active/live-testing/LIVE04/README.md) | Prove the installed online test environment works from start to finish. Installation and GitHub settings are ready; real test results and cleanup evidence are still needed. | IN_PROGRESS |
-| [ASSESS07](active/live-testing/ASSESS07/README.md) | Collect real online proof that all required user journeys, safety checks and cleanup pass automatically after a matching successful deployment. | BLOCKED |
+| [ASSESS07](active/live-testing/ASSESS07/README.md) | Collect real online proof that all required user journeys, safety checks and cleanup pass automatically after a matching successful deployment. | IN_PROGRESS |
 
 ## B's existing monitor
 

@@ -12,13 +12,15 @@ A's recurring observer and completed one-time follow-up are deleted. B's existin
 
 | Order | Task | Current status | What remains |
 | --- | --- | --- | --- |
-| 1 | [ASSESS10 — B monitor verification](tasks/active/monitoring/ASSESS10/README.md) | READY / unclaimed; current B priority by user direction | Identify B's existing automation, prove two unattended ticks and fresh AWS results, check stale/failure notification behavior. |
-| 2 | [ASSESS07 — Real automatic qualification](tasks/active/live-testing/ASSESS07/README.md) | BLOCKED on actual matching automatic results | Inspect the complete report after an authorized eligible deployment: all required journeys, exact source receipts and CLEAN cleanup. |
+| 1 | [ASSESS07 — Real automatic qualification](tasks/active/live-testing/ASSESS07/README.md) | IN_PROGRESS — A / martelaxe; explicitly authorized deployment and automatic test cycle | Inspect the complete report after an authorized eligible deployment: all required journeys, exact source receipts and CLEAN cleanup. |
+| 2 | [ASSESS10 — B monitor verification](tasks/active/monitoring/ASSESS10/README.md) | READY / unclaimed; B-only verification after the current cycle | Identify B's existing automation, prove two unattended ticks and fresh AWS results, check stale/failure notification behavior. |
 | Delivery umbrella | [LIVE04 — Online test delivery](tasks/active/live-testing/LIVE04/README.md) | IN_PROGRESS; installation/settings checkpoint passed | Finish its remaining managed proof through ASSESS07; no mandatory B manual launch. |
 | Preserved closeout | [NP00 — Technical closeout](tasks/active/closeout/NP00/README.md) | IN_PROGRESS; A / Ricardo / martelaxe / WSL claim retained | Finish original remaining technical obligations; its model-off checkpoint is already verified. No concurrent writer. |
 | Later | [OPS01 — Storage and archiving](tasks/active/operations/OPS01/README.md) · [OPS02 — Retention and erasure](tasks/active/operations/OPS02/README.md) · [OPS03 — Recoverable jobs](tasks/active/operations/OPS03/README.md) | BLOCKED / unclaimed | Managed ASSESS07 baseline first, then wider-use work under the shared queue. |
 
 ASSESS10 is not a claim that B has started. A/B identity, execution worker, chat and task role remain distinct: A is Ricardo / martelaxe; B is Octavio / Battosai1806. A Mac session authenticated as A is not B. See [verified mapping](people-and-workers.md).
+
+User now explicitly directs A to deploy the current app and run the live tests. This sequential ASSESS07 cycle takes priority while ASSESS10 requires B's own session; no concurrent B work or NP00 writer is claimed.
 
 ## Execution boundaries
 
