@@ -1,0 +1,123 @@
+{
+  "task": "ASSESS07",
+  "sourceCommit": "b15d86c1844e901fbbdc462b88eb231f6987dfd3",
+  "operator": {
+    "login": "martelaxe",
+    "id": 44531296
+  },
+  "publication": {
+    "runId": 37232629480,
+    "status": "SUCCESS",
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/37232629480"
+  },
+  "qualification": {
+    "runId": 37232669890,
+    "status": "FAILED_APPLICATION_FRAME_SCENARIO",
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/37232669890",
+    "automaticTrigger": "workflow_run"
+  },
+  "installedStandingMode": {
+    "status": "VERIFIED_THROUGH_SOURCE_MATCHING_MIGRATION_GUARD",
+    "basis": "Published runner requires migrate-standing PASS, authorizationMode standing and usagePreserved true before setting fixtures PASS; actual fixtures PASS proves that guarded response. No separate direct DynamoDB readback is claimed."
+  },
+  "journeys": "NOT_YET_VERIFIED",
+  "cleanup": "PASS_CLEAN_WITH_SUCCESSFUL_RETRY_STEP",
+  "recordSync": "PREPARED_FOR_ORIGIN_MAIN_SYNC",
+  "observedUtc": "2026-10-04T20:54:36Z",
+  "qaReport": {
+    "schemaVersion": 1,
+    "runId": "gh-37232669890-1",
+    "sourceCommit": "b15d86c1844e901fbbdc462b88eb231f6987dfd3",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "PASS",
+      "privacy": "PASS",
+      "signup": "PASS",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "mailStatus": "MAIL_CODE_READY",
+        "status": "PASS"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "phase": "QA03_FRAME",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 2,
+      "failed": 1,
+      "blocked": 4,
+      "modelAttempts": 1,
+      "signupMessages": 1
+    }
+  },
+  "completeReport": {
+    "schemaVersion": 1,
+    "status": "BLOCKED_OR_FAILED",
+    "sourceCommit": "b15d86c1844e901fbbdc462b88eb231f6987dfd3",
+    "initiatingAccount": "martelaxe",
+    "lanes": {
+      "jobs": "BLOCKED",
+      "primaryPublication": "PASS",
+      "currentSource": "PASS",
+      "release": "PASS",
+      "public": "PASS",
+      "primaryConfiguration": "PASS",
+      "qaJourney": "BLOCKED"
+    },
+    "jobResults": {
+      "provenance": "success",
+      "release": "success",
+      "primary-release": "success",
+      "public": "success",
+      "metadata": "success",
+      "journey": "failure"
+    },
+    "targets": {
+      "primary": "https://main.d143q5ravxp5av.amplifyapp.com/",
+      "qa": "https://main.d2l23pkzmr1tio.amplifyapp.com/",
+      "staticPreview": "https://d23eowhnwtqts3.cloudfront.net/"
+    },
+    "targetDifferences": [
+      "Primary models remain disabled under NP00; real AI journeys run in isolated budgeted QA.",
+      "QA uses separate pools, clients, API and data tables; primary writable AI was not tested."
+    ],
+    "qaCounts": {
+      "passed": 2,
+      "failed": 1,
+      "blocked": 4,
+      "modelAttempts": 1,
+      "signupMessages": 1
+    },
+    "requiredCloudAcceptance": "LIVE04 requires actual B dispatch and separate authorized automatic deployment run"
+  },
+  "remaining": "QA03_FRAME failed; four later journeys blocked. The precise failed frame action/root cause is not established. Administrative receipt/count/expiry gates are removed in installed standing execution; per-run controls remain."
+}

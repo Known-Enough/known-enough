@@ -30,7 +30,7 @@ Start here to understand what is left. Every task has its own folder: README.md 
 | Task | Basic idea | Status |
 | --- | --- | --- |
 | [LIVE04](active/live-testing/LIVE04/README.md) | Prove the installed online test environment works from start to finish. Installation and GitHub settings are ready; real test results and cleanup evidence are still needed. | IN_PROGRESS |
-| [ASSESS07](active/live-testing/ASSESS07/README.md) | Verify the saved QA03 repair with matching deployment and all-seven/CLEAN automatic qualification. | HANDOFF_READY / designated A; B checked and idle, deployed migration pending |
+| [ASSESS07](active/live-testing/ASSESS07/README.md) | Repair real QA03_FRAME failure after verified standing-mode migration; require all-seven/CLEAN proof. | HANDOFF_READY / designated B; A stopped after published live checkpoint |
 | [ASSESS11](active/live-testing/ASSESS11/README.md) | Fix both reported signup paths, log useful safe errors and implement consistent basic password rules (minimum6, no required character classes). Separate primary proof from QA signup tests. | BLOCKED / deferred / unclaimed; checked local source synchronized, separate primary signup/cloud/live gates pending |
 
 ## B's existing monitor
