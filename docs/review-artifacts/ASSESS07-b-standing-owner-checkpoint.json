@@ -1,0 +1,117 @@
+{
+  "task": "ASSESS07",
+  "observedUtc": "2026-10-04T21:46:57Z",
+  "operator": {
+    "login": "Battosai1806",
+    "id": 143764700
+  },
+  "sourceCommit": "e5716b107cce94d77f45fb052dca75665d681026",
+  "deployment": {
+    "id": 37235704049,
+    "status": "SUCCESS",
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/37235704049"
+  },
+  "qualification": {
+    "id": 37235748447,
+    "status": "FAIL_QA03_OWNER",
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/37235748447"
+  },
+  "standingMode": "VERIFIED_BY_SOURCE_MATCHING_FIXTURES_PASS_AFTER_GUARDED_MIGRATION",
+  "qaReport": {
+    "schemaVersion": 1,
+    "runId": "gh-37235748447-1",
+    "sourceCommit": "e5716b107cce94d77f45fb052dca75665d681026",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "PASS",
+      "privacy": "PASS",
+      "signup": "PASS",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "mailStatus": "MAIL_CODE_READY",
+        "status": "PASS"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "phase": "QA03_OWNER",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 2,
+      "failed": 1,
+      "blocked": 4,
+      "modelAttempts": 1,
+      "signupMessages": 1
+    }
+  },
+  "directCounterReadback": "UNKNOWN",
+  "ci": {
+    "id": 37235704106,
+    "status": "FAILED_MISSING_LIVE_QA_DEPENDENCIES",
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/37235704106",
+    "sanitizedCode": "ERR_MODULE_NOT_FOUND"
+  },
+  "localChanges": [
+    {
+      "path": ".github/workflows/check.yml",
+      "sha256": "461b6a1ec2c97bf0d2bb8cb629b751589dd5bc0e9ea7696c7035271384b405ae"
+    },
+    {
+      "path": "scripts/live-qa/runner-core.mjs",
+      "sha256": "17a161cefb3c82467d22321f817341e36a901758d0e51344d81a07c6f9e02971"
+    },
+    {
+      "path": "scripts/live-qa/sanitized-reporter.mjs",
+      "sha256": "abaab18e3bf7e15bbe7c1e5e2ea06684c4ee2e53680c6ba2bbb70fcb8e77050b"
+    },
+    {
+      "path": "tests/live/qa/journey.spec.ts",
+      "sha256": "9ec09d1bd9aa6d4d1cfcdda618bfd065d07cc881317fe5ee13ddb84a5f718196"
+    },
+    {
+      "path": "tests/integration/live-qa-runner.test.ts",
+      "sha256": "96dda8481dc5b34e31b9cc63ca1a29ca9480f4f1db2850115318637e2a56a9c7"
+    }
+  ],
+  "focusedTestsPassed": 13,
+  "fullCheck": {
+    "exitCode": 0,
+    "node": "24.21.0",
+    "npm": "11.19.0",
+    "applicationPassed": 737,
+    "applicationSkipped": 2,
+    "hostedPassed": 1,
+    "e2ePassed": 60,
+    "referencesPassed": 7,
+    "planningPassed": 15
+  },
+  "next": "Publish CI installation repair, require server frame confirmations before owner flow, use safe owner child diagnostics in matching qualification. Actual app root remains UNKNOWN."
+}
