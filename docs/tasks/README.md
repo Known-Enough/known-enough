@@ -6,6 +6,8 @@ Start here to understand what is left. Every task has its own folder: README.md 
 
 ## Online testing
 
+**Current B authorization:** [Two new cycles approved](https://github.com/Known-Enough/known-enough/actions/runs/37167291403), expiring October4,18:00 Mexico City. B resumes the same claimed ASSESS07 worker after current budget/expiry/CLEAN/counter checks. Actual test execution/full PASS remain pending. The expired October3 allowance and readback below are historical; no prior usage or original spending ceiling is reset.
+
 Installation, GitHub settings and automatic test triggering are verified. Real signup/email/login and invitations passed; decision creation failed in the latest online run, blocking the four later journeys. The checked correction needs a new deployment and real proof. A has now recorded exactly two extra B runs through GitHub, valid until October3,18:00 Mexico City; original cost/email/cleanup limits still apply. B pulls clean main, claims ASSESS07 and starts an authorized staging deployment using B's own GitHub login. Tests follow automatically, with no personal AWS credentials, CloudShell or separate test click. Actual receipt consumption and full live PASS are still pending. [Approval evidence](../review-artifacts/ASSESS07-github-two-b-runs-approved.json).
 
 | Task | Basic idea | Status |

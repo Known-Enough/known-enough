@@ -1,8 +1,14 @@
 # ASSESS07 — Managed verification of corrective changes
 
-- Status: BLOCKED — B's existing claim remains assigned and unavailable. The two-run B receipt expired; no B deployment or qualification appears in GitHub after its approval. Current receipt consumption/CLEAN state and full seven-journey qualification remain unverified. A fresh exact finite authorization and current guards are required before another live start.
+- Status: IN_PROGRESS — fresh exact two-run B authorization recorded and verified; same existing worker remains claimed/unavailable. Current budget/expiry/CLEAN/counter gates, actual receipt consumption and complete live qualification require fresh verification before reporting progress.
 - Worker: B / Octavio / `Battosai1806` retains the bounded claim recorded at22:33:43Z, synchronized as `7e6b55d` and assigned to the dedicated conversation below. A retains run-approval authority. No actual B live run is verified; preserve this claim and NP00's separate saved claim.
 - Scope: finish ASSESS07's isolated managed verification and any narrowly verified diagnostic repair; preserve NP00's separate saved WSL claim and all existing daily, per-run, cumulative and expiry limits.
+
+### Fresh two-run B authorization verified — 2026-10-04T01:12Z
+
+The user explicitly authorizes two new runs for B after the expired-receipt reconciliation. [Approval37167291403](https://github.com/Known-Enough/known-enough/actions/runs/37167291403) succeeds on source `b9611e9402f10a8924e9fa5ab7683d4432ffc317`. Actual GitHub metadata and sanitized log pass the existing local receipt validator: both A actors/ID44531296, main/repository/workflow/source, count2, `Battosai1806`, UTC2026-10-04, UUID `19a4398a-e84c-4782-a7c0-a2b6aca547ef`, `cloudWrites:false`. [New safe evidence](../../../../review-artifacts/ASSESS07-b-two-new-runs-approved.json). Expiry is `2026-10-05T00:00:00Z` (October4,18:00 Mexico City).
+
+The same dedicated B worker retains this claim. After ff-only pull, verify B identity and current original authorization/budget/CLEAN/counters through GitHub's existing workload path; use at most two sequential authorized main staging deployment/automatic qualification cycles, with actual matching result/CLEAN inspection between cycles. Existing bounded synthetic model/email limits cover those attempts; original per-run/cumulative spending, expiry, privacy/consent and all prior usage remain. The expired October3 receipt and B reconciliation are history, unchanged; do not restore them or also install a legacy grant for this new authorization. This count approval does not expand B's source/CI/IAM/file scope, create another worker or authorize downstream tasks. Approval has not started a deployment/live test or changed AWS; present cloud guards/consumption/full seven-journey PASS remain unverified.
 
 ### User-directed dedicated worker transfer — 2026-10-04 UTC
 
