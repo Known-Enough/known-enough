@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "checkpoint": "FIRST_DIRECTLY_AUTHORIZED_B_CYCLE_COMPLETED_WITH_QA03_CREATE_FAILURE",
+  "observedAt": "2026-10-04T02:12:00Z",
+  "sourceCommit": "ed98a444c40a8c53594b7d9ed4a853ad52503051",
+  "approvalRunId": 37167291403,
+  "deployment": {
+    "runId": 37169387767,
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/37169387767",
+    "workflow": ".github/workflows/deploy-amplify-staging.yml",
+    "event": "workflow_dispatch",
+    "actor": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "conclusion": "success"
+  },
+  "qualification": {
+    "runId": 37169416229,
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/37169416229",
+    "workflow": ".github/workflows/live-qa-release-and-check.yml",
+    "event": "workflow_run",
+    "actor": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "conclusion": "failure",
+    "safeReportStatus": "BLOCKED_OR_FAILED",
+    "jobResults": {
+      "provenance": "success",
+      "release": "success",
+      "primary-release": "success",
+      "public": "success",
+      "metadata": "success",
+      "journey": "failure"
+    },
+    "lanes": {
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "signup": "PASS",
+      "model": "PASS",
+      "privacy": "PASS",
+      "cleanup": "PASS",
+      "journeys": "FAIL",
+      "execution": "BLOCKED"
+    },
+    "journeyStatuses": ["PASS", "PASS", "FAIL", "BLOCKED", "BLOCKED", "BLOCKED", "BLOCKED"],
+    "failedPhase": "QA03_CREATE",
+    "counts": {
+      "passed": 2,
+      "failed": 1,
+      "blocked": 4,
+      "modelAttempts": 1,
+      "signupMessages": 1
+    }
+  },
+  "interpretation": {
+    "currentRunClean": true,
+    "fixtureStarted": true,
+    "fullSevenJourneyPass": false,
+    "qa03CreateSubstep": "UNKNOWN_FROM_SANITIZED_REPORT",
+    "datedReceiptConsumption": "NOT_SEPARATELY_READ_BACK",
+    "currentCloudCounters": "NOT_DIRECTLY_READ_BACK",
+    "secondCycle": "PENDING_CURRENT_GUARDS"
+  }
+}
