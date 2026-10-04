@@ -1,5 +1,7 @@
 # Task guide
 
+**Latest authorization — 2026-10-04T16:34:21Z:** A recorded **ten additional B runs** through [approval37217250492](https://github.com/Known-Enough/known-enough/actions/runs/37217250492), valid until **today October4,18:00 Mexico City**. [Verified receipt](../review-artifacts/ASSESS07-b-ten-more-runs-approved.json). ASSESS07 is READY/unclaimed and highest priority for a verified claim/handoff; current workload guards and matching all-seven/CLEAN proof remain. Original budgets/usage are unchanged, no test started, and ASSESS11's signup configuration/live gates remain separate. Read this and the current board/claim log before older release instructions.
+
 Start here to understand what is left. Every task has its own folder: README.md explains the basic idea and next step; ticket.md contains its full requirements, claim and evidence. The [shared board](../task-board.md) decides the current order. One implementation task at a time; a folder move does not release an existing claim.
 
 **Latest blocked-task direction — 2026-10-04:** B explicitly releases ASSESS07, logs its pending approval/guards/seven-journey live proof in the ticket, and reserves ASSESS11 next. For future genuine external blockers, save and synchronize a checked checkpoint, record all pending work, release the B claim and select the next eligible task. Keep one active task, all technical dependencies and A's NP00 claim. The existing five-minute monitor follows the current claim, rather than remaining attached indefinitely to released ASSESS07.
@@ -15,7 +17,7 @@ Start here to understand what is left. Every task has its own folder: README.md 
 | Task | Basic idea | Status |
 | --- | --- | --- |
 | [LIVE04](active/live-testing/LIVE04/README.md) | Prove the installed online test environment works from start to finish. Installation and GitHub settings are ready; real test results and cleanup evidence are still needed. | IN_PROGRESS |
-| [ASSESS07](active/live-testing/ASSESS07/README.md) | Collect real online proof that all required user journeys, safety checks and cleanup pass automatically after a matching successful deployment. | BLOCKED / deferred / unclaimed; explicit release, live proof still pending |
+| [ASSESS07](active/live-testing/ASSESS07/README.md) | Verify the saved QA03 repair with matching deployment and all-seven/CLEAN automatic qualification. | READY / unclaimed; ten additional B cycles approved, original guards required |
 | [ASSESS11](active/live-testing/ASSESS11/README.md) | Fix both reported signup paths, log useful safe errors and implement consistent basic password rules (minimum6, no required character classes). Separate primary proof from QA signup tests. | RESERVED / B; dedicated Sol/Max intake complete, explicit start pending sync |
 
 ## B's existing monitor

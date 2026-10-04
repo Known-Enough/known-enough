@@ -2,11 +2,11 @@
 
 Collect real online proof that all required user journeys, safety checks and cleanup pass automatically after a matching successful deployment.
 
-**Current status — 2026-10-04T09:15:31Z:** BLOCKED / deferred / unclaimed. The user released B's claim so another eligible task can proceed. The verified local QA03 repair is saved; the two-run approval is exhausted and no matching repaired-code seven-journey live PASS exists.
+**Current status — 2026-10-04T16:34:21Z:** READY / unclaimed. A recorded **ten additional runs for B** through [approval37217250492](https://github.com/Known-Enough/known-enough/actions/runs/37217250492), valid until **today October4,18:00 Mexico City**. The local QA03 repair is saved; its matching real seven-journey PASS remains unproved. [Safe evidence](../../../../review-artifacts/ASSESS07-b-ten-more-runs-approved.json).
 
-**Still pending:** a fresh exact finite A-recorded B approval, current budget/source/expiry/CLEAN guards, and a matching deployment/automatic qualification with all seven journeys and cleanup passing. [Full pending-work record](ticket.md#user-directed-release-and-pending-work). Preserve the former conversation and all evidence; this release is not completion. ASSESS11 is now reserved next.
+**Next step:** B's dispatcher may claim this task after clean sync and assignment checks. Use up to ten sequential staging/automatic-test cycles within original spending/email/expiry/cleanup limits; inspect each matching result and stop when the task passes or a guard blocks. The existing path needs no AWS login or CloudShell. Approval has not started a test or updated signup settings. ASSESS11 stays separately blocked; preserve released worker history, NP00 and the one-active-task rule.
 
-## Historical execution instructions — superseded by the release above
+## Historical execution instructions — superseded by the current ten-run receipt above
 
 **Status:** IN_PROGRESS — B retains the same dedicated worker/claim. [Two new runs are approved](https://github.com/Known-Enough/known-enough/actions/runs/37167291403), valid until October4,18:00 Mexico City. B must verify current budget/expiry/cleanup/counters before testing; approval is not consumption or a live PASS. The October3 receipt is expired history; original usage and spending limits remain unchanged.
 

@@ -1,8 +1,16 @@
 # ASSESS07 — Managed verification of corrective changes
 
-- Status: BLOCKED / deferred / unclaimed — B explicitly released this task at the user's direction. The QA03 local repair passed checks and remains saved, but matching seven-journey live qualification is unproved and the prior two-run authorization is exhausted. Release is not DONE or technical acceptance.
-- Worker: no active claimant. Former B / Octavio / `Battosai1806` worker `01a1044b-4cc8-7c00-b5ee-a24a17ded137` and its bounded claim/history are preserved; no further automatic polling or execution. A retains finite run-approval authority; NP00's saved A claim is unchanged.
+- Status: READY / unclaimed — fresh ten-run B approval verified at2026-10-04T16:34:21Z; current guards and matching seven-journey proof remain required. The earlier two-run receipt is exhausted and the released claim/history remains preserved. No deployment or worker start is claimed by this approval.
+- Worker: no active claimant. B's dispatcher records a new verified claim/handoff and actual worker before execution under the fresh receipt. Former B / Octavio / `Battosai1806` worker `01a1044b-4cc8-7c00-b5ee-a24a17ded137` and its bounded claim/history remain preserved; no active assignment is inferred from that old ID. A retains finite run-approval authority; NP00's saved A claim is unchanged.
 - Scope: finish ASSESS07's isolated managed verification and any narrowly verified diagnostic repair; preserve NP00's separate saved WSL claim and all existing daily, per-run, cumulative and expiry limits.
+
+## Current ten-run B authorization — 2026-10-04T16:34:21Z
+
+The human explicitly authorizes **ten more runs for B**. A / `martelaxe` / ID44531296 dispatched one existing approval workflow: [run37217250492](https://github.com/Known-Enough/known-enough/actions/runs/37217250492) succeeded on `c9a777ad4b19c3a9d703622eddc8b5d92b139857`. Actual metadata and safe log verify both A actor IDs, exact repository/main/workflow/source, count10, recipient `Battosai1806`, UTC2026-10-04 and UUID `b9a2ab19-15cd-4618-af8b-8c07b2e4e819`; checked `approvalReceipt` validation passes. Expiry: `2026-10-05T00:00:00Z` (**today October4,18:00 Mexico City**). [Safe receipt/status evidence](../../../../review-artifacts/ASSESS07-b-ten-more-runs-approved.json). The exhausted two-run grant remains history; no duplicate legacy grant or usage reset.
+
+This is the highest-priority eligible claim. B's dispatcher must inspect actual assignments, pull clean main ff-only under B's account and record a verified claim/handoff and actual worker before execution. Preserve released worker/source history and A's NP00 saved claim; one active task only. B may use **up to ten sequential** existing staging deployment/automatic qualification cycles under this specific authority and original model/email/per-run/cumulative/expiry/CLEAN guards. Inspect each matching result and cleanup; repair only demonstrated failures within a coordinated scope, then stop once criteria pass or a concrete guard blocks. The count is a ceiling, not a requirement to spend all ten or a guarantee that original budgets have headroom for all ten.
+
+Approval starts no test, spends no model/email budget and changes no AWS setting. Current cloud guards and receipt consumption remain unverified until the workload checks them. ASSESS11's primary readback, supported hosted route, Cognito changes and separate live signup criteria remain pending. The saved QA03 repair needs matching all-seven/CLEAN proof before DONE. A sent no worker message and started no worker in this checkpoint. The released claim and pending-work record below are history; resumption requires a new verified claim/handoff.
 
 ## User-directed release and pending work
 
