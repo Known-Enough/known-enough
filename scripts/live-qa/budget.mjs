@@ -1,5 +1,6 @@
 import { GetItemCommand, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import { reserveTotal } from './cumulative.mjs';
+import { authorizationActive } from './config.mjs';
 import { reserveAttempt } from './fixture-core.mjs';
 const key = name => ({ PK: { S: name }, SK: { S: 'STATE' } });
 function update(table, name, prior, value) {
@@ -42,7 +43,7 @@ export function budgetedTransport(transport, client, table, now = Date.now) {
                     update(table, 'LEASE', lease, reserved), update(table, 'TOTAL', total, cumulative)
                 ]
             }));
-            if (Date.parse(auth.value.expiresAt) <= now() || reserved.expiresAt <= now())
+            if (!authorizationActive(auth.value, now()) || reserved.expiresAt <= now())
                 throw new Error('MODEL_BUDGET_BLOCKED');
             return transport.send(command, options);
         }

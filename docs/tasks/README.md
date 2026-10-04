@@ -1,3 +1,7 @@
+## Sequential ASSESS07 transfer — 2026-10-04T20:21:40Z
+
+A is designated to continue the same ASSESS07 task after B's checked idle handoff. See [current ticket](active/live-testing/ASSESS07/ticket.md) and [claim log](../claim-log.md). B's persistent30-minute automation remains active for logging/observation and must not compete or start another task. Tested source is not deployed migration or all-seven PASS; prior B assignment prose below is history.
+
 # Task guide
 
 **Persistent B autonomous work — latest user direction, 2026-10-04T19:38:55Z:** B works directly in chat `01a1086a-fb98-7552-b4d1-e2dbab01a404`, using own `Battosai1806` account and project-specific access. Reuse only `watch-known-enough-shared-queue`: initial wake-up approximately two minutes after setup, then every 30 minutes in this same chat. This supersedes the five-minute observer/dispatcher and new-chat-per-claim instructions below; retain them as historical evidence. Perform actual work each wake-up, continue the current claim or highest-priority eligible task, and inspect running deployments/tests rather than duplicate them. If no existing task can progress, inspect code and create one concrete evidence-based improvement task after checking duplicates. Standing authority covers code, commit/push, deployment, project tests/logs, paid AI/API, synthetic test email and necessary project configuration/permission repairs without routine reapproval. Preserve authentication, source/target checks, private data, participant consent, usage evidence, cleanup, meaningful checks and platform restrictions.
@@ -26,7 +30,7 @@ Start here to understand what is left. Every task has its own folder: README.md 
 | Task | Basic idea | Status |
 | --- | --- | --- |
 | [LIVE04](active/live-testing/LIVE04/README.md) | Prove the installed online test environment works from start to finish. Installation and GitHub settings are ready; real test results and cleanup evidence are still needed. | IN_PROGRESS |
-| [ASSESS07](active/live-testing/ASSESS07/README.md) | Verify the saved QA03 repair with matching deployment and all-seven/CLEAN automatic qualification. | RESERVED / B; renewed preserved worker intake, original guards required |
+| [ASSESS07](active/live-testing/ASSESS07/README.md) | Verify the saved QA03 repair with matching deployment and all-seven/CLEAN automatic qualification. | HANDOFF_READY / designated A; B checked and idle, deployed migration pending |
 | [ASSESS11](active/live-testing/ASSESS11/README.md) | Fix both reported signup paths, log useful safe errors and implement consistent basic password rules (minimum6, no required character classes). Separate primary proof from QA signup tests. | BLOCKED / deferred / unclaimed; checked local source synchronized, separate primary signup/cloud/live gates pending |
 
 ## B's existing monitor

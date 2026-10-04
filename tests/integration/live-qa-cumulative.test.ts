@@ -5,6 +5,8 @@ import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
 // @ts-expect-error Operational JS tested offline.
 import { cumulativeLimits, reserveTotal, emptyTotals, authorizationTransaction } from '../../scripts/live-qa/cumulative.mjs';
 // @ts-expect-error Operational JS tested offline.
+import { standingAuthorization } from '../../scripts/live-qa/config.mjs';
+// @ts-expect-error Operational JS tested offline.
 import { beginLease } from '../../scripts/live-qa/fixture-core.mjs';
 import { budgetedTransport } from '../../scripts/live-qa/budget.mjs';
 const now = Date.parse('2026-10-02T03:16:41Z');
@@ -145,4 +147,44 @@ test('failed fresh-run provisioning still charges once and retry cannot reset co
   expect((await handler({ action: 'start', runId: 'run-12345' })).status).toBe('BLOCKED');
   expect(JSON.parse(h.cells.TOTAL!.payload.S).runs).toBe(1); expect(h.transactions).toHaveLength(1);
   const day = Object.keys(h.cells).find(key => key.startsWith('DAY#'))!; expect(JSON.parse(h.cells[day]!.payload.S).runs).toBe(1);
+});
+
+const standingRun = { id: 12345, run_attempt: 1, actor: { login: 'Battosai1806', id: 143764700 },
+  triggering_actor: { login: 'Battosai1806', id: 143764700 }, repository: { id: 1377587215 }, head_repository: { id: 1377587215 },
+  head_branch: 'main', event: 'workflow_run', status: 'in_progress', path: '.github/workflows/live-qa-release-and-check.yml', head_sha: 'a'.repeat(40) };
+test('real broker migrates expired authority conditionally and preserves exhausted usage, day and receipt history', async () => {
+  const prior = { runs: 28, reservedTokens: 7000000, reservedCostMicros: 7000000, messages: 56 };
+  const h = brokerStore(prior, { ...beginLease(null, 'previous-run', a, now), status: 'CLEAN' });
+  h.cells.AUTH = item({ ...a, expiresAt: new Date(now - 1).toISOString() });
+  h.cells['DAY#historical'] = item({ runs: 4, messages: 8 }); h.cells['GITHUB-EXTRA#historical'] = item({ usedRuns: 2 });
+  const saved = structuredClone(h.cells);
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify(standingRun), { status: 200 }));
+  expect(await handler({ action: 'migrate-standing', runId: 'gh-12345-1' })).toEqual({ status: 'PASS', authorizationMode: 'standing', usagePreserved: true });
+  expect(JSON.parse(h.cells.AUTH!.payload.S).mode).toBe('standing'); expect(h.cells.AUTH!.version.N).toBe('2');
+  for (const id of ['TOTAL', 'LEASE', 'DAY#historical', 'GITHUB-EXTRA#historical']) expect(h.cells[id]).toEqual(saved[id]);
+});
+test('broker migration rejects non-CLEAN lease, missing totals, revoked authority and forged workflow identity before writes', async () => {
+  for (const change of ['lease', 'total', 'revoked', 'actor']) {
+    const h = brokerStore(emptyTotals());
+    if (change !== 'lease') h.cells.LEASE = item({ status: 'CLEAN' });
+    if (change === 'total') delete h.cells.TOTAL;
+    if (change === 'revoked') h.cells.AUTH = item({ ...a, approved: false });
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify(change === 'actor' ? { ...standingRun, actor: { login: 'unverified', id: 1 } } : standingRun), { status: 200 }));
+    expect((await handler({ action: 'migrate-standing', runId: 'gh-12345-1' })).status).toBe('BLOCKED');
+    expect(h.transactions).toHaveLength(0);
+    vi.restoreAllMocks();
+  }
+});
+test('real standing message transaction crosses historical daily and cumulative ceilings but still enforces per-run count', async () => {
+  const h = brokerStore({ ...emptyTotals(), messages: 56 }); h.cells.AUTH = item(standingAuthorization(a));
+  const day = 'DAY#' + new Date().toISOString().slice(0, 10); h.cells[day] = item({ runs: 28, messages: 8 });
+  await customMessage(signup()); await customMessage(signup());
+  await expect(customMessage(signup())).rejects.toThrow('QA_MESSAGE_BUDGET');
+  expect(JSON.parse(h.cells.TOTAL!.payload.S).messages).toBe(58); expect(JSON.parse(h.cells[day]!.payload.S).messages).toBe(10);
+});
+test('standing model transport preserves atomic cumulative usage beyond old ceilings before a provider request', async () => {
+  const h = modelStore({ ...emptyTotals(), reservedCostMicros: 7000000 });
+  h.cells.AUTH = item(standingAuthorization(a));
+  await h.invoke();
+  expect(h.sent).toHaveLength(1); expect(JSON.parse(h.cells.TOTAL!.payload.S).reservedCostMicros).toBeGreaterThan(7000000);
 });

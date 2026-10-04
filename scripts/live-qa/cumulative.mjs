@@ -3,6 +3,7 @@ export const emptyTotals = () => ({ runs: 0, reservedTokens: 0, reservedCostMicr
 /** Legacy seven-day grants gain only tighter caps, never more time or authority. */
 export function cumulativeLimits(authorization) {
     const a = validateAuthorization(authorization);
+    if (a.mode === 'standing') return Object.fromEntries(Object.keys(emptyTotals()).map(key => [key, Number.MAX_SAFE_INTEGER]));
     const runs = Math.min(28, a.maxRunsPerDay * 7);
     return {
         runs: a.maxRunsTotal ?? runs,

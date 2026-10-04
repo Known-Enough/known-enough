@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync, readdirSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { digest } from './config.mjs';
+import { digest, authorizationActive } from './config.mjs';
 import { aws, assertIdentity, SAFE_AWS_ERROR_CODES } from './aws.mjs';
 import { buildPackage } from './package.mjs';
 import { webArtifact, publishWeb } from './install.mjs';
@@ -93,7 +93,7 @@ async function ready(name, sha) {
     throw new Error('QA_CODE_UPDATE_TIMEOUT');
 }
 export function assertInstalledEnvelope(value, now = Date.now()) {
-    if (!value?.approved || Date.parse(value.expiresAt) <= now || !Number.isFinite(Date.parse(value.expiresAt)))
+    if (!authorizationActive(value, now))
         throw new Error('INSTALLED_PUBLICATION_ENVELOPE_EXPIRED');
 }
 function envelope(target) {

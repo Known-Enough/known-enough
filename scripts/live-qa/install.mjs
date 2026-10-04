@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { validateConfig, digest, targetNames, publicTarget, mailboxProvider } from './config.mjs';
+import { validateConfig, digest, targetNames, publicTarget, mailboxProvider, authorizationActive } from './config.mjs';
 import { renderTemplates } from './template.mjs';
 import { aws as command, assertIdentity } from './aws.mjs';
 import { buildPackage } from './package.mjs';
@@ -212,7 +212,7 @@ export async function install(mode, raw, directory, aws = command) {
         const logging = aws('bedrock', 'get-model-invocation-logging-configuration').loggingConfig;
         if (logging && Object.entries(logging).some(([key, value]) => key.endsWith('DataDeliveryEnabled') && value === true))
             throw new Error('MODEL_INVOCATION_LOGGING_ENABLED');
-        if (!c.authorization.approved || Date.parse(c.authorization.expiresAt) <= Date.now())
+        if (!authorizationActive(c.authorization))
             throw new Error('CONCRETE_SETUP_AND_RECURRING_AUTHORIZATION_REQUIRED');
         if (!core) {
             for (const name of [names.decisions, names.groups, names.control]) {

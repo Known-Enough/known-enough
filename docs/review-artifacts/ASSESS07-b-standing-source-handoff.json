@@ -1,0 +1,82 @@
+{
+  "observedUtc": "2026-10-04T20:21:40Z",
+  "task": "ASSESS07",
+  "account": {
+    "login": "Battosai1806",
+    "id": 143764700
+  },
+  "baseline": "d50650fd9d1141886a63e7067e40c137cdd4098f",
+  "status": "CHECKED_SOURCE_HANDOFF_READY_NOT_DEPLOYED",
+  "files": [
+    {
+      "path": "scripts/live-qa/broker.mjs",
+      "sha256": "28201978b679c584d366f8a50256536f765ff2a00027ac4a4fbf65b8ff3c3850"
+    },
+    {
+      "path": "scripts/live-qa/budget.mjs",
+      "sha256": "bafbcb701fff5d3ec6c66af2dc8aa3e88d36d01bab996a8e28e20bf13824aa82"
+    },
+    {
+      "path": "scripts/live-qa/config.mjs",
+      "sha256": "66e237cf00137b4202f8a02c22ffb8a5934ad54c1dd948e1a0cbf03a874c4c2a"
+    },
+    {
+      "path": "scripts/live-qa/cumulative.mjs",
+      "sha256": "269d58362b99e86d2bdea312b116007cd1d8f2e40b74dba5f9ea50a4f8b0af78"
+    },
+    {
+      "path": "scripts/live-qa/fixture-core.mjs",
+      "sha256": "3691167bf89b7bd08a4aabafe8315ac79c0e61a17ddfa3c3f2d3f9fee81bc265"
+    },
+    {
+      "path": "scripts/live-qa/install.mjs",
+      "sha256": "8eda20c6dcf8b0dd05f1872bfb53e8e814256b815d133073aa146b6c3c6d9372"
+    },
+    {
+      "path": "scripts/live-qa/release.mjs",
+      "sha256": "e3d2d3f34c11b03be6209500cd4d3781d421b51dcee8b424e474414723e18103"
+    },
+    {
+      "path": "scripts/live-qa/runner.mjs",
+      "sha256": "3b4efcae3ce4d07c621d27ec5b36cdd055082cfc9793960081d6941fa20338c9"
+    },
+    {
+      "path": "scripts/live-qa/standing.mjs",
+      "sha256": "1205410d395dd21d427114a99d6b2566982bed390a3e170ca92ed865e3d8af6f"
+    },
+    {
+      "path": "tests/integration/live-qa-cumulative.test.ts",
+      "sha256": "534d006ed6da000ae442fa75de61490d2f9005547e1ace64c75f6fe61fd8dcde"
+    },
+    {
+      "path": "tests/integration/live-qa-standing.test.ts",
+      "sha256": "bbee723b8580d6c635f38019452314281333ec959e1493151eb59960de8e359d"
+    },
+    {
+      "path": "infra/live-qa/standing-authority.md",
+      "sha256": "21270bb55690b0b2d338c9bb76d89098b98c54751ac2a5746aceca85843b4d2e"
+    }
+  ],
+  "focused": {
+    "initialLegacyFiles": 5,
+    "initialLegacyTestsPassed": 50,
+    "newStandingTestsPassed": 5,
+    "finalMigrationCoreFiles": 2,
+    "finalMigrationCoreTestsPassed": 24
+  },
+  "fullCheck": {
+    "command": "VITEST_MAX_WORKERS=2 PLAYWRIGHT_CHANNEL=chromium npm run check",
+    "node": "24.21.0",
+    "npm": "11.19.0",
+    "exitCode": 0,
+    "applicationTestsPassed": 736,
+    "applicationTestsSkipped": 2,
+    "hostedPreviewPassed": 1,
+    "browserTestsPassed": 60,
+    "referencesPassed": 7,
+    "planningPassed": 15
+  },
+  "deployment": "NOT_STARTED",
+  "installedStandingMode": "UNKNOWN",
+  "next": "A verifies clean ff-only checkpoint, self-inspects source, packages/deploys sequentially and proves standing migration plus all-seven/CLEAN results."
+}

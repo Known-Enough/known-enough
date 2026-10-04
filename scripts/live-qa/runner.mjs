@@ -62,6 +62,9 @@ export async function runQualification(targetFile, receiptFile, runId, output) {
         if (deployed.State !== 'Active' || deployed.LastUpdateStatus !== 'Successful' || deployed.CodeSha256 !== Buffer.from(receipt.artifacts.api.sha256, 'hex').toString('base64') || deployed.Environment?.Variables?.NP_GROUP_TABLE_NAME !== target.GroupTable || deployed.Environment?.Variables?.COGNITO_USER_POOL_ID !== target.PoolId)
             throw new Error('QA_RELEASE_READBACK_MISMATCH');
         state.preflight = 'PASS';
+        const migration = invokeBroker(target, runId, 'migrate-standing');
+        if (migration.authorizationMode !== 'standing' || migration.usagePreserved !== true)
+            throw new Error('STANDING_MIGRATION_READBACK_FAILED');
         invokeBroker(target, runId, 'start');
         state.fixtures = 'PASS';
         const secrets = aws('secretsmanager', 'get-secret-value', { SecretId: target.LoginSecret });

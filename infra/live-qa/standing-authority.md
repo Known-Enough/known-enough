@@ -1,0 +1,11 @@
+# Standing project authority
+
+Current A/B authority is recorded in [project instructions](../../docs/project-automation-authority.md). Legacy dated approval receipts and usage remain historical evidence.
+
+The explicit `mode: standing` authorization schema preserves `approved`, privacy/retention controls and finite per-run attempts, tokens, reserved cost and signup messages. It has no authority expiry, daily run/email ceiling or cumulative approval ceiling. Cumulative and daily usage are still reserved transactionally; malformed/unsafe counters fail closed. Operational leases still expire after 45 minutes, require CLEAN before a new run, and cannot reuse a completed run ID.
+
+The source-matching qualification runner invokes `migrate-standing` through the existing synthetic test workload role after API code/configuration readback, before fixture startup. The broker verifies the actual GitHub main workflow run and either A or B's numeric account identity. Its existing workload permissions perform a conditional AUTH update while version-checking AUTH, LEASE and TOTAL. Existing TOTAL, DAY and EXTRA records are never rewritten. Missing history, malformed/revoked authority, unfinished cleanup or a concurrent update blocks migration. No new IAM permission or personal AWS credentials are required by this path; actual deployed execution still must prove it works.
+
+Release requires installed authority and CLEAN cleanup before code publication. Legacy schema/expiry semantics remain for historical records until the explicit migration succeeds. Existing legacy approval helpers remain available as history; standing execution does not consult their receipts. The first migration publishes on the existing unexpired installed envelope, then converts it in qualification. If that envelope expires before first publication, diagnose the publication bootstrap and install the authorized conditional migration through verified project access; do not fabricate an expiry or reset counters.
+
+A passing local test is not evidence of deployed standing mode. Verify matching deployed code and migration result, actual seven-journey outcome, usage and CLEAN cleanup before marking ASSESS07 DONE. Failures and access restrictions belong in the [append-only scheduled log](../../docs/monitor-log.md).

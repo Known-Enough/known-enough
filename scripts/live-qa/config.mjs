@@ -23,6 +23,17 @@ export function validateConfig(value) {
     return structuredClone(value);
 }
 export function validateAuthorization(a) {
+    if (a?.mode === 'standing') {
+        const keys = ['mode', 'approved', 'maxAttemptsPerRun', 'maxTokensPerRun', 'maxCostMicrosPerRun', 'attemptCostMicros', 'maxSignupMessagesPerRun', 'retentionReviewed', 'invocationLoggingDisabled'];
+        if (Object.keys(a).sort().join() !== keys.sort().join()
+            || ['approved', 'retentionReviewed', 'invocationLoggingDisabled'].some(key => typeof a[key] !== 'boolean')
+            || keys.filter(key => key.startsWith('max') || key === 'attemptCostMicros').some(key => !Number.isSafeInteger(a[key]) || a[key] < 0))
+            throw new Error('INVALID_AUTHORIZATION');
+        if (a.approved && (!a.maxAttemptsPerRun || !a.maxTokensPerRun || !a.attemptCostMicros || !a.maxSignupMessagesPerRun
+            || a.maxCostMicrosPerRun < a.attemptCostMicros || !a.retentionReviewed || !a.invocationLoggingDisabled))
+            throw new Error('INCOMPLETE_APPROVED_ENVELOPE');
+        return structuredClone(a);
+    }
     const keys = [
         'approved', 'expiresAt', 'maxRunsPerDay', 'maxAttemptsPerRun', 'maxTokensPerRun', 'maxCostMicrosPerRun', 'attemptCostMicros', 'maxSignupMessagesPerRun', 'maxSignupMessagesPerDay', 'retentionReviewed', 'invocationLoggingDisabled'
     ];
@@ -38,6 +49,20 @@ export function validateAuthorization(a) {
         || (hasTotals && totals.some(key => !a[key])) || !a.attemptCostMicros || a.maxCostMicrosPerRun < a.attemptCostMicros || !a.retentionReviewed || !a.invocationLoggingDisabled))
         throw new Error('INCOMPLETE_APPROVED_ENVELOPE');
     return structuredClone(a);
+}
+/** Legacy records retain dated behavior; standing records must match the complete schema. */
+export function authorizationActive(a, now = Date.now()) {
+    if (a?.mode === 'standing') {
+        try { return validateAuthorization(a).approved; } catch { return false; }
+    }
+    return !!a?.approved && Number.isFinite(Date.parse(a.expiresAt)) && Date.parse(a.expiresAt) > now;
+}
+/** Preserve finite per-run controls without retaining administrative ceilings or expiry. */
+export function standingAuthorization(a) {
+    validateAuthorization(a);
+    return validateAuthorization(Object.fromEntries(['approved', 'maxAttemptsPerRun', 'maxTokensPerRun', 'maxCostMicrosPerRun',
+        'attemptCostMicros', 'maxSignupMessagesPerRun', 'retentionReviewed', 'invocationLoggingDisabled']
+        .map(key => [key, a[key]]).concat([['mode', 'standing']])));
 }
 export const digest = value => createHash('sha256').update(typeof value === 'string' || Buffer.isBuffer(value) ? value : JSON.stringify(value)).digest('hex');
 export function requireRunId(id) {

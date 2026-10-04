@@ -6,11 +6,12 @@ import { S3Client, ListObjectsV2Command, GetObjectCommand, DeleteObjectCommand }
 import { createDynamoGroupRepository, createAwsDynamoDBRoomRepository } from '../../packages/adapters/src/index.ts';
 import { KnownEnoughApplication } from '../../packages/application/src/index.ts';
 import { operateAccount } from '../../apps/api/src/group-operator.ts';
-import { ACTORS, requireRunId } from './config.mjs';
+import { ACTORS, requireRunId, authorizationActive, standingAuthorization } from './config.mjs';
 import { createMailtmClient } from './mailtm.mjs';
-import { reserveTotal } from './cumulative.mjs';
+import { reserveTotal, authorizationTransaction } from './cumulative.mjs';
 import { beginLease, actorUsername, cleanupPlan } from './fixture-core.mjs';
 import { githubRun, reserveExtra } from './extra-runs.mjs';
+import { assertStandingRun } from './standing.mjs';
 import { githubApprovals, githubAllowance } from './github-allowance.mjs';
 const options = { region: 'us-east-1', maxAttempts: 1 };
 const db = new DynamoDBClient(options), users = new CognitoIdentityProviderClient(options), secrets = new SecretsManagerClient(options), s3 = new S3Client(options);
@@ -45,7 +46,7 @@ async function save(id, prior, value) {
 }
 async function auth() {
     const a = await read('AUTH');
-    if (!a.value?.approved || Date.parse(a.value.expiresAt) <= Date.now())
+    if (!authorizationActive(a.value))
         throw new Error('AUTHORIZATION_BLOCKED');
     return a;
 }
@@ -79,6 +80,20 @@ async function setActorStatus(l, actor, action) {
     await operateAccount(repository, action, user.subject, version);
     return { status: 'PASS', actor };
 }
+async function migrateStanding(runId) {
+    assertStandingRun(runId, await githubRun(runId));
+    const readItem = async id => (await db.send(new GetItemCommand({ TableName: table(), Key: key(id), ConsistentRead: true }))).Item;
+    const a = await readItem('AUTH');
+    if (!a) throw new Error('AUTHORIZATION_BLOCKED');
+    const standing = standingAuthorization(JSON.parse(a.payload.S));
+    if (!standing.approved) throw new Error('AUTHORIZATION_BLOCKED');
+    const l = await readItem('LEASE');
+    const total = await readItem('TOTAL');
+    // CAS every observed cell; TOTAL and historical DAY/EXTRA records are never rewritten.
+    if (!total) throw new Error('CUMULATIVE_BUDGET_MIGRATION_REQUIRES_RECONCILIATION');
+    await db.send(new TransactWriteItemsCommand(authorizationTransaction(table(), a, l, total, standing)));
+    return { status: 'PASS', authorizationMode: 'standing', usagePreserved: true };
+}
 async function provision(runId) {
     const a = await auth();
     let prior = await read('LEASE');
@@ -90,6 +105,7 @@ async function provision(runId) {
         const total = await read('TOTAL');
         const reservedTotal = reserveTotal(total.value, a.value, { runs: 1 });
         let extraReservation = [];
+        if (a.value.mode === 'standing') assertStandingRun(runId, await githubRun(runId));
         if (next.runs > a.value.maxRunsPerDay) {
             const extraKey = 'EXTRA#' + day.slice(4);
             const extra = await read(extraKey);
@@ -318,7 +334,7 @@ async function messageReservation(event) {
     const period = await read(day);
     const messages = (l.value.signupMessages ?? 0) + 1;
     const daily = (period.value?.messages ?? 0) + 1;
-    if (messages > a.value.maxSignupMessagesPerRun || daily > a.value.maxSignupMessagesPerDay)
+    if (messages > a.value.maxSignupMessagesPerRun || (a.value.mode !== 'standing' && daily > a.value.maxSignupMessagesPerDay))
         throw new Error('QA_MESSAGE_BUDGET');
     const total = await read('TOTAL');
     const reservedTotal = reserveTotal(total.value, a.value, { messages: 1 });
@@ -356,6 +372,8 @@ export async function handler(event) {
         if (!event || Object.keys(event).some(key => !['action', 'runId', 'actor', 'decisionId', 'permissionId', 'audienceActor'].includes(key)))
             throw new Error('INVALID_FIXTURE_COMMAND');
         requireRunId(event.runId);
+        if (event.action === 'migrate-standing')
+            return await migrateStanding(event.runId);
         if (event.action === 'start')
             return await provision(event.runId);
         if (event.action === 'cleanup')

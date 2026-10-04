@@ -1,8 +1,8 @@
-import { ACTORS, requireRunId, validateAuthorization } from './config.mjs';
+import { ACTORS, requireRunId, validateAuthorization, authorizationActive } from './config.mjs';
 export function beginLease(prior, runId, authorization, now) {
     requireRunId(runId);
     validateAuthorization(authorization);
-    if (!authorization.approved || Date.parse(authorization.expiresAt) <= now)
+    if (!authorizationActive(authorization, now))
         throw new Error('AUTHORIZATION_ABSENT_OR_EXPIRED');
     if (prior?.status === 'CLEAN' && prior.id === runId)
         throw new Error('RUN_ID_ALREADY_USED');
@@ -12,7 +12,7 @@ export function beginLease(prior, runId, authorization, now) {
         throw new Error('LEASE_OR_CLEANUP_BLOCKED');
     }
     return {
-        id: runId, status: 'ACTIVE', expiresAt: Math.min(now + 45 * 60000, Date.parse(authorization.expiresAt)), users: [], decisionIds: [], attempts: 0, reservedTokens: 0, reservedCostMicros: 0, mailboxObjects: []
+        id: runId, status: 'ACTIVE', expiresAt: authorization.mode === 'standing' ? now + 45 * 60000 : Math.min(now + 45 * 60000, Date.parse(authorization.expiresAt)), users: [], decisionIds: [], attempts: 0, reservedTokens: 0, reservedCostMicros: 0, mailboxObjects: []
     };
 }
 export function actorUsername(runId, actor) {
@@ -34,7 +34,7 @@ export function cleanupPlan(state, lease) {
     return { decisions, groups: groups.map(group => group.id), subjects: [...subjects] };
 }
 export function reserveAttempt(lease, authorization, now, inputBytes, outputTokens) {
-    if (!lease || lease.status !== 'ACTIVE' || lease.expiresAt <= now || !authorization.approved || Date.parse(authorization.expiresAt) <= now)
+    if (!lease || lease.status !== 'ACTIVE' || lease.expiresAt <= now || !authorizationActive(authorization, now))
         throw new Error('MODEL_BUDGET_BLOCKED');
     const tokens = inputBytes + outputTokens;
     const cost = Math.max(authorization.attemptCostMicros, tokens); // Conservative $1/million total tokens; verify price ceiling during LIVE04.
