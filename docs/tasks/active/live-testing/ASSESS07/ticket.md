@@ -4,6 +4,14 @@
 - Worker: B / Octavio / `Battosai1806` recorded the bounded GitHub deployment/qualification claim at22:33:43Z, synchronized as `7e6b55d`. A retains run-approval authority and prepares only the user-requested roadmap documentation. No actual B live run is verified yet; preserve the B claim below.
 - Scope: finish ASSESS07's isolated managed verification and any narrowly verified diagnostic repair; preserve NP00's separate saved WSL claim and all existing daily, per-run, cumulative and expiry limits.
 
+### User-directed dedicated worker transfer — 2026-10-04 UTC
+
+B / `Battosai1806` / ID `143764700` retains its original claim, now assigned to conversation `01a1044b-4cc8-7c00-b5ee-a24a17ded137` (“ASSESS07 — Sol Max worker”). The user requested one conversation per claim at Sol Max on 2026-10-03. Creation tool accepted `gpt-6-sol` / `max`; the worker reports exact runtime variant/effort unexposed. Clean ff-only setup baseline: `fca5152faaf7fd150ba200377f0aff4b9e263fae`; GitHub identity verified through `/user`. Original automation conversation `01a0fe0d-e89f-7bf3-8004-df79886c616d` becomes dispatcher and stops task implementation. Original claim/source/evidence remain preserved; no source diff or untracked work exists in the checked-out baseline.
+
+Exact receiving scope: this ticket, `docs/work-log-B.md`, `docs/handoff-B.md`, `docs/claim-log.md` and sanitized `docs/review-artifacts/ASSESS07-*.json` results. No source/config/lock/CI, A log or NP00 edits. Read-only intake completed; actual reconciliation and tracking edits begin only after this transfer is checked/pushed and the worker receives its explicit start message. [Assignment procedure](../../../../claim-log.md).
+
+The two-use receipt expired at `2026-10-04T00:00:00Z`, before this setup checkpoint. Do not dispatch a deployment, live test, paid API call or email under that expired receipt. First reconcile actual GitHub runs, source/actor provenance, consumption and CLEAN evidence. Record unresolved criteria/authorization as BLOCKED without inventing PASS or renewal. This transfer grants no new cloud, spending or publication permission. ASSESS07 remains IN_PROGRESS for that bounded reconciliation; LIVE04 and downstream prerequisites are not completed by the transfer.
+
 ### Basic completion roadmap — documentation preparation, 2026-10-03T22:30Z
 
 The user asks what is implemented, what B can take, what remains to finish the basics, and proposes UI/usability tasks after OPS with Luna review helpers. A / Ricardo / `martelaxe` / WSL prepares only this queue/handoff documentation from clean ff-only synchronized `main` at `41cdbdfbce96e751a38a80fe22db2358077f0f7c`. Actual session: Codex GPT-6; exact variant/effort unexposed. B's ASSESS07 live-cycle routing and two dated GitHub-approved starts remain; no B execution is inferred. Latest actual GitHub qualification remains37147658807 failure; approval37158067754 success is not a test result.

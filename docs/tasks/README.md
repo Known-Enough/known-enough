@@ -2,6 +2,8 @@
 
 Start here to understand what is left. Every task has its own folder: README.md explains the basic idea and next step; ticket.md contains its full requirements, claim and evidence. The [shared board](../task-board.md) decides the current order. One implementation task at a time; a folder move does not release an existing claim.
 
+**B conversation dispatch — user direction, 2026-10-03:** The existing five-minute automation assigns one `gpt-6-sol` / `max` conversation per eligible claim and resumes the same worker until verified completion or explicit release. The [claim log](../claim-log.md) records assignments and excludes claimed work from availability. ASSESS07 already has its dedicated B worker; later tasks retain their prerequisites. Its extra two-run receipt expired at 2026-10-04T00:00:00Z, so first reconcile actual results; no new live start or budget renewal is implied.
+
 ## Online testing
 
 Installation, GitHub settings and automatic test triggering are verified. Real signup/email/login and invitations passed; decision creation failed in the latest online run, blocking the four later journeys. The checked correction needs a new deployment and real proof. A has now recorded exactly two extra B runs through GitHub, valid until October3,18:00 Mexico City; original cost/email/cleanup limits still apply. B pulls clean main, claims ASSESS07 and starts an authorized staging deployment using B's own GitHub login. Tests follow automatically, with no personal AWS credentials, CloudShell or separate test click. Actual receipt consumption and full live PASS are still pending. [Approval evidence](../review-artifacts/ASSESS07-github-two-b-runs-approved.json).
