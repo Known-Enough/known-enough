@@ -1,8 +1,19 @@
 # ASSESS07 — Managed verification of corrective changes
 
-- Status: READY / unclaimed — fresh ten-run B approval verified at2026-10-04T16:34:21Z; current guards and matching seven-journey proof remain required. The earlier two-run receipt is exhausted and the released claim/history remains preserved. No deployment or worker start is claimed by this approval.
-- Worker: no active claimant. B's dispatcher records a new verified claim/handoff and actual worker before execution under the fresh receipt. Former B / Octavio / `Battosai1806` worker `01a1044b-4cc8-7c00-b5ee-a24a17ded137` and its bounded claim/history remain preserved; no active assignment is inferred from that old ID. A retains finite run-approval authority; NP00's saved A claim is unchanged.
+- Status: RESERVED / B — fresh ten-run B approval verified at2026-10-04T16:34:21Z; current guards and matching seven-journey proof remain required. The earlier two-run receipt is exhausted and the released claim/history remains preserved. No deployment or worker start is claimed by this approval.
+- Worker: B / `Battosai1806`, renewed reservation with preserved worker `01a1044b-4cc8-7c00-b5ee-a24a17ded137`. B's dispatcher records a new verified claim/handoff and actual worker before execution under the fresh receipt. Former B / Octavio / `Battosai1806` worker `01a1044b-4cc8-7c00-b5ee-a24a17ded137` and its bounded claim/history remain preserved; no active assignment is inferred from that old ID. A retains finite run-approval authority; NP00's saved A claim is unchanged.
 - Scope: finish ASSESS07's isolated managed verification and any narrowly verified diagnostic repair; preserve NP00's separate saved WSL claim and all existing daily, per-run, cumulative and expiry limits.
+
+
+## Renewed ASSESS07 reservation — 2026-10-04T17:14:05Z
+
+B / `Battosai1806` / ID `143764700` reserves only ASSESS07 at clean synchronized baseline `aecba4868a23a67ed90d4ce3e05581d9ec6205e5` after successful fetch and ff-only pull, no merge/rebase or unsaved work, and final READY/unclaimed check. Reuse preserved worker `01a1044b-4cc8-7c00-b5ee-a24a17ded137` (“ASSESS07 — Sol Max worker”), already pinned in the same local project; selected `gpt-6-sol` / `max`, actual runtime fields require intake verification. ASSESS11's latest turn is idle/completed and its claim remains released. This reservation is preparation, not a deployment/test start.
+
+Bounded source scope: `tests/live/qa/journey.spec.ts`, `scripts/live-qa/runner-core.mjs`, `scripts/live-qa/sanitized-reporter.mjs`, `tests/integration/live-qa-runner.test.ts`, `tests/e2e/np-clarity.spec.ts`; tracking only ASSESS07 ticket/README/sanitized evidence, B log/handoff, current ASSESS07 board/claim/guide rows. Other files including A/NP00, ASSESS11, root/lock/CI/IAM/config are read-only without a coordinated amendment.
+
+Authority: [ten-run receipt37217250492](https://github.com/Known-Enough/known-enough/actions/runs/37217250492), UUID `b9a2ab19-15cd-4618-af8b-8c07b2e4e819`, UTC day2026-10-04, expires2026-10-05T00:00:00Z. At most ten sequential existing staging/automatic qualification cycles; stop at verified criteria or a concrete guard. Current consumption/CLEAN/source/budget guards remain UNKNOWN; original USD7/28-run/56-email and expiry/per-run/participant/privacy permissions remain, no reset or extension. ASSESS11 authorization is separate.
+
+Next: same worker read-only intake ending before edits/dispatch; verify actual runtime instructions and receipt/source/current guards approach. Explicit implementation/live start follows only synchronized assignment and successful intake. Require actual source-matching seven journeys and cleanup before DONE; focused and pinned full checks for executable changes, documentation links/reference/status checks and verified origin-main sync for checkpoints.
 
 ## Current ten-run B authorization — 2026-10-04T16:34:21Z
 
