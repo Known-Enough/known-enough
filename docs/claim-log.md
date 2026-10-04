@@ -10,7 +10,7 @@ The existing five-minute heartbeat `watch-known-enough-shared-queue` now dispatc
 
 | Task | Ticket status / assignment | Claimant and conversation | Available for a new claim? |
 | --- | --- | --- | --- |
-| [ASSESS07](tasks/active/live-testing/ASSESS07/ticket.md) | IN_PROGRESS; dedicated worker assigned; evidence reconciliation awaits synchronized start | B / `Battosai1806`; `01a1044b-4cc8-7c00-b5ee-a24a17ded137`; `gpt-6-sol` / `max` requested and accepted by creation tool | No — existing claim; extra receipt expired at 2026-10-04T00:00:00Z |
+| [ASSESS07](tasks/active/live-testing/ASSESS07/ticket.md) | BLOCKED; dedicated worker reconciled GitHub results; full live proof and current authorization pending | B / `Battosai1806`; `01a1044b-4cc8-7c00-b5ee-a24a17ded137`; `gpt-6-sol` / `max` selected by creation tool, runtime fields unexposed | No — existing claim; extra receipt expired at 2026-10-04T00:00:00Z |
 | [ASSESS10](tasks/active/monitoring/ASSESS10/ticket.md) | READY / unclaimed; after the current ASSESS07 cycle | No conversation assigned | No — prerequisite remains unfinished |
 | [OPS00](tasks/active/operations/OPS00/ticket.md) | BLOCKED / unclaimed | No conversation assigned | No — ASSESS07 / ASSESS10 prerequisites |
 | [OPS01](tasks/active/operations/OPS01/ticket.md) | BLOCKED / unclaimed | No conversation assigned | No — preceding operations prerequisites |
@@ -27,6 +27,8 @@ The existing five-minute heartbeat `watch-known-enough-shared-queue` now dispatc
 
 There is no task available for a new B claim at this checkpoint. This does not prevent the assigned ASSESS07 worker from reconciling actual results within its scope. The expired extra receipt does not establish consumption or a live result; inspect actual evidence before deciding what remains. Any later deployment/test must have its own current, specific authorization.
 
+**ASSESS07 readback — 2026-10-04T00:59:19Z:** The dedicated worker found no GitHub repository run after A's two-run approval37158067754; the latest deployment37147620296 and matching qualification37147658807 are older A runs. The latest sanitized journey reports only QA01/02 PASS, QA03 FAIL, QA04–07 BLOCKED and cleanup PASS for that prior A run. Receipt consumption and present cloud CLEAN state lack a current readback. The task is BLOCKED, still claimed and unavailable; no next claim is released. [Bounded evidence](review-artifacts/ASSESS07-b-expired-receipt-reconciliation.json).
+
 ## Claim and completion procedure
 
 1. Fetch and inspect current shared records on every tick. If the assigned worker is active, observe only. If it is idle with unfinished work, inspect its result and resume the same conversation when useful work or a resolved blocker exists. Do not repeat an unchanged authorization blocker.
@@ -38,4 +40,5 @@ There is no task available for a new B claim at this checkpoint. This does not p
 
 ## Assignment history
 
+- **2026-10-04T00:58Z — receiving scope amendment:** The assigned ASSESS07 worker started after synchronized `b4140de66d71f86b2f0d9608e5bcae81c3c52b75`, verified clean `main`, ff-only pull and own GitHub `/user` as `Battosai1806` / ID `143764700`. The same claim's documentation write scope now includes only the current ASSESS07 row and current routing note in `docs/task-board.md`, in addition to the ticket, B log/handoff, this log and sanitized ASSESS07 JSON. This ticket/B-log/claim-log amendment precedes board editing. Other board tasks, source/config/lock/CI, A log and NP00 remain excluded. Creation selected `gpt-6-sol` / `max`; exact runtime fields are unexposed. The expired receipt authorizes no new live start.
 - **2026-10-04 UTC — user-directed ASSESS07 worker transfer:** B's original automation claim at 2026-10-03T22:33:43Z / commit `7e6b55d5c1912256b31b278a0593f32e4e26313f` remains the same task and claimant. Clean ff-only setup baseline: `fca5152faaf7fd150ba200377f0aff4b9e263fae`; GitHub `/user` verified `Battosai1806` / ID `143764700`. Old automation conversation becomes dispatcher and stops task implementation. New worker: `01a1044b-4cc8-7c00-b5ee-a24a17ded137`, title “ASSESS07 — Sol Max worker”, created with `gpt-6-sol` / `max`. Its first read-only intake completed; no saved source diff or untracked work exists in this checkout. Worker scope: the ASSESS07 ticket, `docs/work-log-B.md`, `docs/handoff-B.md`, this log and sanitized `docs/review-artifacts/ASSESS07-*.json` results. Source/config/lock/CI and NP00 remain outside the transfer. Extra-run deadline has passed; reconcile results and record any unmet authorization gate without dispatching an expired run. Await checked, synchronized transfer and explicit start.

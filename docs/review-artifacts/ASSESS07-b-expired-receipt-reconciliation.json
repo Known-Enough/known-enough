@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "checkpoint": "B_EXPIRED_RECEIPT_RECONCILED",
+  "observedAtUtc": "2026-10-04T00:59:19Z",
+  "evidenceOrigin": "read-only GitHub Actions API, downloaded sanitized GitHub artifacts and local Git ancestry",
+  "observer": {
+    "githubLogin": "Battosai1806",
+    "githubId": 143764700,
+    "synchronizedMainAtStart": "b4140de66d71f86b2f0d9608e5bcae81c3c52b75"
+  },
+  "repository": {
+    "fullName": "Known-Enough/known-enough",
+    "id": 1377587215,
+    "defaultBranch": "main"
+  },
+  "expiredApproval": {
+    "runId": 37158067754,
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/37158067754",
+    "createdAt": "2026-10-03T22:19:56Z",
+    "completedAt": "2026-10-03T22:20:06Z",
+    "sourceCommit": "34a8872fd3073954032157938f6f233195abb83a",
+    "workflowPath": ".github/workflows/approve-live-qa-runs.yml",
+    "event": "workflow_dispatch",
+    "branch": "main",
+    "conclusion": "success",
+    "actor": "martelaxe",
+    "actorId": 44531296,
+    "triggeringActor": "martelaxe",
+    "triggeringActorId": 44531296,
+    "recipient": "Battosai1806",
+    "approvedStarts": 2,
+    "dayUtc": "2026-10-03",
+    "expiresAt": "2026-10-04T00:00:00Z"
+  },
+  "githubReadback": {
+    "latestRepositoryRunId": 37158067754,
+    "latestRepositoryRunCreatedAt": "2026-10-03T22:19:56Z",
+    "latestDeployment": {
+      "runId": 37147620296,
+      "url": "https://github.com/Known-Enough/known-enough/actions/runs/37147620296",
+      "createdAt": "2026-10-03T19:21:56Z",
+      "sourceCommit": "47c2d8233ae839049969fcc00c6a30137403483b",
+      "event": "push",
+      "actor": "martelaxe",
+      "triggeringActor": "martelaxe",
+      "conclusion": "success"
+    },
+    "latestQualification": {
+      "runId": 37147658807,
+      "url": "https://github.com/Known-Enough/known-enough/actions/runs/37147658807",
+      "createdAt": "2026-10-03T19:22:34Z",
+      "sourceCommit": "47c2d8233ae839049969fcc00c6a30137403483b",
+      "event": "workflow_run",
+      "actor": "martelaxe",
+      "triggeringActor": "martelaxe",
+      "conclusion": "failure",
+      "sanitizedArtifacts": {
+        "completeReportId": 11282733425,
+        "journeyResultId": 11282267776,
+        "sourceMatch": true,
+        "journeyCounts": {
+          "passed": 2,
+          "failed": 1,
+          "blocked": 4,
+          "modelAttempts": 1,
+          "signupMessages": 1
+        },
+        "journeys": {
+          "QA01": "PASS",
+          "QA02": "PASS",
+          "QA03_DRAFT": "FAIL_HTTP_REQUEST_ABORTED",
+          "QA04_TO_QA07": "BLOCKED"
+        },
+        "privacy": "PASS",
+        "cleanup": "PASS"
+      }
+    },
+    "postApprovalDeploymentOrQualificationObserved": false,
+    "bDeploymentOrQualificationObserved": false
+  },
+  "checkedPromptCorrection": {
+    "commit": "db8e8cdd6cf8df5a361d39432037408d87bf0fa7",
+    "afterLatestDeployedSourceInGitAncestry": true,
+    "presentOnSynchronizedMain": true,
+    "liveQualified": false
+  },
+  "limitsOfObservation": {
+    "githubReceiptConsumption": "NOT_VERIFIED_BY_CLOUD_READBACK",
+    "currentCloudLeaseClean": "NOT_VERIFIED_BY_CLOUD_READBACK",
+    "lastActualRunCleanup": "PASS_FOR_PRIOR_A_RUN_ONLY",
+    "fullSevenJourneyQualification": "NOT_PASSED",
+    "newDeploymentOrTestDispatched": false,
+    "newModelOrEmailCallPerformed": false,
+    "newCloudWritePerformed": false
+  },
+  "nextGate": "A fresh, exact finite authorization for B's deployment and automatic qualification, followed by current budget/expiry/CLEAN/counter checks, is required before any new live start."
+}
