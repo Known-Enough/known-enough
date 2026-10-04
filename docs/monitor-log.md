@@ -2,6 +2,8 @@
 
 **Current shared reporting:** [GitHub run receipts and independent missing-report checks](https://github.com/Known-Enough/known-enough/actions/workflows/b-monitor-log.yml) complement the detailed history below. Follow [the start/progress/finish and chat-summary protocol](monitor-reporting.md). Missing answers are explicitly unavailable; old entries do not prove current activity.
 
+First independent observation: [run37243767873](https://github.com/Known-Enough/known-enough/actions/runs/37243767873), at2026-10-04T23:26:41.816Z, recorded **NO_RECENT_REPORT** and an unavailable chat answer. This was an A verification of the logger, not another B scheduled run. [Checked evidence](review-artifacts/ASSESS07-monitor-reporting-installation.json).
+
 Append-only scheduled-run evidence. Setup below is configuration, not a scheduled execution.
 
 ## Setup — 2026-10-04T19:38:55Z

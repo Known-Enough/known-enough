@@ -1,0 +1,38 @@
+{
+  "sourceCommit": "e090e7634cd03ce4dbde0225e94cdf6caa91e3c7",
+  "runUrl": "https://github.com/Known-Enough/known-enough/actions/runs/37243767873",
+  "runStatus": "completed",
+  "runConclusion": "success",
+  "event": "workflow_dispatch",
+  "actor": {
+    "login": "martelaxe",
+    "id": 44531296
+  },
+  "observedAt": "2026-10-04T23:26:41.816Z",
+  "record": {
+    "state": "NO_RECENT_REPORT",
+    "latestReportAt": "2026-10-04T21:41:08.572Z",
+    "chatSummarySource": "unavailable",
+    "summaryIsCurrent": false
+  },
+  "validation": {
+    "loggerTests": 15,
+    "loggerTestsPassed": 15,
+    "fullCheckExitCode": 0,
+    "applicationPassed": 737,
+    "optionalSkips": 2,
+    "hostedPassed": 1,
+    "e2ePassed": 60,
+    "referencesPassed": 7,
+    "planningPassed": 15
+  },
+  "sourceHashes": {
+    "scripts/monitor/log.mjs": "9b48337114ac0a6c23882442379ab3957678aa9ad759618c69deab29384315be",
+    "scripts/monitor/log.test.mjs": "55b8b78aacc920ef784f5476edb161b97fe5bdb7a3ae219400f00fd24336b773",
+    ".github/workflows/b-monitor-log.yml": "d5ef3c8a5722904fc2e2c2b1ba90909cea7fd2889f45cfc221716f6dddc5b21d"
+  },
+  "bAutomationUpdate": "UNAVAILABLE_ON_A_APP; update returned automation not found",
+  "bMessageDelivery": "NOT_DELIVERED; thread not found",
+  "bChatSummaryAdoption": "NOT_YET_VERIFIED",
+  "changes": "Independent GitHub logs and B start/progress/finish plus matching chat-summary instructions installed. No second Codex monitor, worker, application fix or test dispatch."
+}
