@@ -2,6 +2,10 @@
 
 The user tried to sign up and saw **“An error was encountered with the requested page.”** Find which page fails, explain the cause, fix it and verify the actual public signup path on phone and desktop. A passing signup test on the separate QA website does not prove the normal website works.
 
+**Both paths fail:** The user now also reports failure through **Register with email** → **Create account**. The supplied screenshot shows the form's generic registration error. Both failures are [logged in a sanitized issue record](../../../../review-artifacts/ASSESS11-user-signup-failures.json); their underlying cause remains unknown.
+
+**Requested password change:** Allow passwords of at least six characters without mandatory capitals, numbers or symbols. Update the form, login service settings and tests together; verify the actual deployed rules. This change is queued and has not been applied.
+
 **Clarified path:** **Sign in or register** opens a login page that also offers **Sign up**, while the app separately offers **Register with email**. Check this competing route first and make account creation and sign-in clear. The later [first UI review](../../ui-ux/UX01/README.md) starts with the same case; it must verify the actual fix rather than repeat it.
 
 **Status:** READY / unclaimed; next priority before ASSESS10 and OPS. The existing ASSESS07 worker keeps its claim until completion or an explicit safe handoff. Do not start a second implementation worker or wait for all seven ASSESS07 journeys to pass before investigating this blocker.

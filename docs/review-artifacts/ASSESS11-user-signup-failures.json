@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS11",
+  "recordedAt": "2026-10-04T03:11:06Z",
+  "recordedBy": "A / martelaxe / WSL",
+  "repositoryBaseline": "3b0104bc10623c05cf1b797f943dc0ca1d4d30e9",
+  "status": "BOTH_PATHS_REPORTED_FAILING_CAUSE_UNKNOWN",
+  "failures": [
+    {
+      "path": "HOSTED_SIGNUP",
+      "entry": "Sign in or register -> provider Sign up",
+      "observation": "USER_REPORTED",
+      "visibleError": "An error was encountered with the requested page.",
+      "requestTime": null,
+      "httpStatus": null,
+      "providerErrorCode": null,
+      "requestId": null,
+      "reproducedByAgent": false
+    },
+    {
+      "path": "IN_APP_EMAIL_REGISTRATION",
+      "entry": "Register with email -> Create your account -> Create account",
+      "observation": "USER_REPORT_AND_SCREENSHOT_VIEWED",
+      "visibleError": "Registration failed. Check your details, including password requirements, and try again.",
+      "visiblePasswordHelp": "Use at least 16 characters, including uppercase and lowercase letters, a number and a symbol.",
+      "siteUrlVisible": false,
+      "requestTime": null,
+      "httpStatus": null,
+      "providerErrorCode": null,
+      "requestId": null,
+      "passwordContentsKnown": false,
+      "reproducedByAgent": false
+    }
+  ],
+  "requestedPasswordPolicy": {
+    "minimumLength": 6,
+    "requireUppercase": false,
+    "requireLowercase": false,
+    "requireNumbers": false,
+    "requireSymbols": false,
+    "implemented": false,
+    "deployedReadbackVerified": false,
+    "reference": "https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_PasswordPolicyType.html"
+  },
+  "priorPassingSignupEvidence": {
+    "qualificationRun": "https://github.com/Known-Enough/known-enough/actions/runs/37170410189",
+    "environment": "ISOLATED_QA",
+    "journey": "QA01",
+    "provesUsersPrimarySignup": false
+  },
+  "privacy": {
+    "rawScreenshotCommitted": false,
+    "accountDetailsRecorded": false,
+    "credentialsOrVerificationCodesRecorded": false
+  },
+  "cloudWrites": false,
+  "signupOrEmailAttemptedByAgent": false,
+  "nextStep": "Safely coordinate the existing claim, diagnose both affected entry paths using sanitized provider errors and deployed primary settings, then implement and verify the requested consistent password policy under applicable authorization."
+}
