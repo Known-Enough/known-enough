@@ -1,14 +1,24 @@
 # ASSESS11 — Fix public signup and make failures traceable
 
-- Status: IN_PROGRESS / B — dedicated worker started 2026-10-04T09:26:38Z after synchronized assignment; ASSESS07 remains released and deferred.
+- Status: BLOCKED / deferred / unclaimed — B's checked local checkpoint is synchronized; the primary signup, cloud policy and live acceptance criteria below remain open. Not DONE.
 - Origin: user report and priority-task request, received 2026-10-03 Mexico City; recorded 2026-10-04 UTC.
 - Worker: B / Octavio / `Battosai1806` / GitHub ID `143764700`; `01a10636-13ed-7d10-ab42-c0f27cb76942`, “ASSESS11 — Sol Max worker”, host `local`, same local project. Creation tool accepted `gpt-6-sol` / `max`; actual runtime model/effort are unexposed. Intake supplied `danger-full-access` / approval policy `never`. Reservation/intake are preparation, not implementation evidence.
 - Preparation baseline: `866590a9b2a6c6c594de048771c0c0ea4dd1c054`; A / `martelaxe` / WSL. No browser reproduction, signup or AWS operation performed during preparation.
 - Scope at claim: first record exact auth UI/session/registration, relevant configuration/inspection scripts and tests, this ticket, sanitized evidence and own log/handoff. Coordinate any workflow/shared-config change. ASSESS07 and NP00 claimed files remain excluded until an explicit bounded handoff.
 
+## User-directed safe release — 2026-10-04T11:39:24Z
+
+B / `Battosai1806` / ID `143764700` synchronized the [checked local source and evidence checkpoint](https://github.com/Known-Enough/known-enough/commit/4e72adfed3cd25ccacd52edb2b90a8954645b2ee) to `origin/main`; clean local and remote heads matched at `4e72adfed3cd25ccacd52edb2b90a8954645b2ee`. The former assigned worker conversation is `01a10636-13ed-7d10-ab42-c0f27cb76942`. Its final pinned `PLAYWRIGHT_CHANNEL=chromium npm run check` exited 0 on Node24.21.0/npm11.19.0: 727 application tests/two skips, hosted preview1/1, E2E60/60, reference7/7, planning15/15 and lint/types/boundaries/build PASS. That is local verification, not deployed signup proof.
+
+The exact external blocker is a missing current primary `DescribeUserPool`/`DescribeUserPoolClient` readback of password policy, required-email schema and callback/logout URLs, plus no task-specific authorization for a primary Cognito change, frontend/QA publication, or synthetic signup/email test. The old inspector report is stale; the latest metadata PASS omits those fields. The user's failing request, prior account state and hosted-page cause remain unverified. A read-only phone/desktop probe showed the hosted signup has no email field; [AWS documents that hosted signup prompts for required attributes](https://docs.aws.amazon.com/cognito/latest/developerguide/authentication-flows-selection-managedlogin.html) and [required status cannot be changed after pool creation](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-attributes.html). The exact supported provider-route correction depends on fresh schema readback and a separately authorized design/cloud operation. No blind signup, cloud write, deployment, paid call or email was made by this worker.
+
+Restart only through a new verified claim/handoff after an authorized readback path supplies the task helper's allowlisted summary and private full snapshot, the exact failed browser request is safely identified, and a finite approved cloud/publication/email envelope is available for the chosen repair. Then compare the helper's policy update/rollback to the complete current snapshot, obtain any required provider-route design approval, apply and read back the six/no-class policy, publish matching frontend/QA code, verify both signup routes and real synthetic confirmation/participant login on phone/desktop, and record cleanup. The ticket's six completion criteria and ASSESS07/OPS dependencies remain unmet. B's claim is released under the 2026-10-04 standing direction; the former worker stops here and the dispatcher selects any next eligible task.
+
 ## Reported problem and limits of current proof
 
 ### Current reservation
+
+This dated reservation is historical after the 2026-10-04T11:39:24Z release above.
 
 **Actual start — 2026-10-04T09:26:38Z:** Explicit start reached assigned conversation `01a10636-13ed-7d10-ab42-c0f27cb76942`. B verified clean `main`, successful `git pull --ff-only origin main`, equal local/remote heads `f954543667beb194d8b33cc44db013db2f3ce677`, and own GitHub login/ID `Battosai1806` / `143764700`. The sole B task is now IN_PROGRESS within the exact bounded files below. First substantive action is read-only comparison of the two signup routes, published primary site and available deployed auth metadata, followed by local preparation. No signup/email, deployment, paid call or cloud write is authorized or started by this claim.
 
