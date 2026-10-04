@@ -21,8 +21,8 @@ A's [two-run approval for B](https://github.com/Known-Enough/known-enough/action
 | [OPS01](tasks/active/operations/OPS01/README.md) | Keep groups from sharing one storage bottleneck and add safe archiving. | After OPS00 and managed baseline. |
 | [OPS02](tasks/active/operations/OPS02/README.md) | Give private data clear retention, export and authorized deletion behavior. | After OPS01. |
 | [OPS03](tasks/active/operations/OPS03/README.md) | Let unfinished AI work recover after restarts without duplicated work or charges. | After OPS02. |
-| [UX01](tasks/active/ui-ux/UX01/README.md) | Review the existing screens and complete participant journey on desktop and phone. | After OPS03. |
-| [UX02](tasks/active/ui-ux/UX02/README.md) | Fix the important usability, layout and accessibility problems found in that review. | After UX01. |
+| [UX01](tasks/active/ui-ux/UX01/README.md) | First Luna screen review checks signup/sign-in clarity, repeated controls and visual consistency; then review the full desktop/phone journey. | After OPS03. |
+| [UX02](tasks/active/ui-ux/UX02/README.md) | Fix verified navigation, signup wording and CSS/forms/buttons; remove unnecessary repetition and preserve accessibility. | After UX01. |
 | [UX03](tasks/active/ui-ux/UX03/README.md) | Verify the interface/journey checkpoint and simple start instructions; route remaining debt to FIN01–03. | After UX02. |
 | [FIN01](tasks/active/technical-debt/FIN01/README.md) | Reconcile and finish actual inherited technical debt through preserved claims/handoffs. | After UX03. |
 | [FIN02](tasks/active/technical-debt/FIN02/README.md) | Check group construction, membership/decision links and safe progress across distinct participants. | After FIN01. |
@@ -34,7 +34,7 @@ B can implement app changes, review screens and run authorized GitHub tests. Exi
 
 ## Bounded Luna reviews
 
-Within UX01 and UX03, B may use up to three Luna helpers to inspect different parts of the same claimed task: first-use/navigation, phone/keyboard/layout, and clarity of private versus shared information and approvals. Helpers inspect and return evidence; the direct worker owns changes, verification and integration. Prefer the minimum number needed, bounded pages and a short issue list. Do not have helpers independently change files, claim project tasks, deploy, run paid suites or send email. A review using synthetic/local data must say so. Actual B authentication and automatic execution still need their own evidence.
+Within UX01, the user's signup/UI clarification requires one Luna helper for the first-use/signup screen review. It starts with the competing **Sign in or register** → provider **Sign up** and separate **Register with email** paths, checks ASSESS11's actual fix, then reports remaining confusing actions, repeated content and inconsistent CSS. Within UX01 and UX03, B may use up to three Luna helpers total per claimed task for first-use/navigation, phone/keyboard/layout, and private/shared information clarity. The required first review counts toward that limit; extra helpers remain optional. Helpers inspect and return evidence; the direct worker owns changes, verification and integration. Prefer the minimum number needed, bounded pages and a short issue list. Do not have helpers independently change files, claim project tasks, deploy, run paid suites or send email. A review using synthetic/local data must say so. Actual B authentication and automatic execution still need their own evidence. This documentation update starts no helper.
 
 This user-directed exception permits these reviews within one parent UX task; it does not start parallel implementation or another mandatory independent-review session. It creates no helpers now and does not switch any existing session's model.
 

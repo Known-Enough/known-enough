@@ -41,12 +41,12 @@ These tasks wait for the managed ASSESS07 baseline, ASSESS11 public signup verif
 
 ## After operations: finish the interface and basics
 
-The [basic completion roadmap](../basic-completion-plan.md) explains what exists and what still needs actual proof. These tasks are prepared for the shared queue; B can take them after OPS01–03 complete, one at a time. Within UX01/UX03, bounded Luna helpers may inspect screens read-only; the direct worker owns all changes and verification. This schedules no helper or deployment now.
+The [basic completion roadmap](../basic-completion-plan.md) explains what exists and what still needs actual proof. These tasks are prepared for the shared queue; B can take them after OPS01–03 complete, one at a time. UX01 starts with one required bounded read-only Luna review of signup/first use; additional bounded helpers in UX01/UX03 remain optional. The direct worker owns all changes and verification. The urgent signup fix stays in ASSESS11 before OPS; later UI work verifies it and fixes remaining presentation issues. This starts no helper or deployment now.
 
 | Task | Basic idea | Status |
 | --- | --- | --- |
-| [UX01](active/ui-ux/UX01/README.md) | Review the screens and complete participant journey on desktop and phone; record a short verified issue list. | BLOCKED / unclaimed; after OPS03 |
-| [UX02](active/ui-ux/UX02/README.md) | Fix essential navigation, progress/error messages, phone layouts and accessibility issues from the review. | BLOCKED / unclaimed; after UX01 |
+| [UX01](active/ui-ux/UX01/README.md) | First Luna screen review: clear signup/sign-in, no confusing repeated controls, consistent styling; then the complete desktop/phone participant journey. | BLOCKED / unclaimed; after OPS03 |
+| [UX02](active/ui-ux/UX02/README.md) | Fix verified navigation/signup wording, improve existing CSS/forms/buttons and remove repeated content; retain accessibility and clear progress/errors. | BLOCKED / unclaimed; after UX01 |
 | [UX03](active/ui-ux/UX03/README.md) | Verify matching deployed screens/journeys and simple start instructions; record remaining technical obligations for FIN01–03. | BLOCKED / unclaimed; after UX02 |
 
 ## After UX: finish technical debt and group construction
