@@ -2,7 +2,7 @@
 
 Check that B's existing Codex monitor actually runs about every five minutes and reads fresh AWS results. A's monitor has been removed.
 
-**Status:** READY / unclaimed.
+**Status:** READY / unclaimed; after [ASSESS11 public signup](../../live-testing/ASSESS11/README.md) and the current ASSESS07 cycle/claim handoff under the shared board.
 
 **Next step:** B identifies the existing automation in B's own session and records two real unattended ticks with fresh results. No replacement monitor is created on A's side.
 

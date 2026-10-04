@@ -1,5 +1,7 @@
 # Task execution and collaboration
 
+**Public signup priority — user direction, 2026-10-03 Mexico City:** [ASSESS11](tasks/active/live-testing/ASSESS11/README.md) investigates the user's reported signup failure and documents safe debugging locations. It precedes ASSESS10 and OPS under the [current board](task-board.md). B's existing ASSESS07 assignment stays preserved until completion or an explicit safe handoff/release; no second implementation worker starts. All-seven PASS is not a prerequisite for signup diagnosis, while remaining ASSESS07 live proof still gates OPS00. Existing paid/email/count/expiry and cloud authorization limits remain unchanged. This task preparation creates no worker, monitor, message or live operation.
+
 ## Execution progress and observable activity
 
 **User direction, 2026-10-03:** Agents must expose execution progress through the existing shared repository records, so a task claim is followed by an actual action or a specific explanation of what prevents it. This applies to direct workers and the existing B dispatcher. It changes reporting requirements, not installed automation settings, task ownership or authorization.

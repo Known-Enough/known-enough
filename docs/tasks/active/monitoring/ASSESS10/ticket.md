@@ -1,6 +1,6 @@
 # ASSESS10 — Verify AWS health and the five-minute Codex monitor
 
-- Status: READY / unclaimed — next B priority; A has completed AWS setup/readback and ASSESS09 repairs.
+- Status: READY / unclaimed — after ASSESS11 public signup investigation and the current ASSESS07 cycle/claim handoff under the shared board; A's earlier setup/readback and ASSESS09 repairs remain historical evidence.
 - Intended worker: B / Octavio / Battosai1806 in B's own clone/session. Pull main ff-only, check the shared claim, record actual model/effort and bounded files before implementation. No subagents or concurrent implementation.
 - Authority: user requests this task and automatic checks about every five minutes on 2026-10-02; user confirms the existing B monitor is a Codex automation. Its identity/configuration and executions are not available on A's host and are not verified.
 - Scope: existing B Codex automation and its narrow monitoring prompt/helper; smallest read-only GitHub AWS health workflow if fresh workload reports require it; focused monitor regressions; this ticket and own B log/handoff. Existing deployment/test triggers may be read, not broadly rewritten. No root/lock/backend/IAM changes without coordinated scope; no new credentials, AWS resources, spending envelope, paid-model/email tests or participant actions.

@@ -1,6 +1,6 @@
 # OPS00 — Complete the GitHub operations path
 
-- Status: BLOCKED / unclaimed; prerequisites managed ASSESS07 baseline and ASSESS10 complete; immediate predecessor of OPS01.
+- Status: BLOCKED / unclaimed; prerequisites managed ASSESS07 baseline, [ASSESS11 public signup](../../live-testing/ASSESS11/ticket.md) and ASSESS10 complete; immediate predecessor of OPS01.
 - Origin: user's 2026-10-03 direction that ordinary implementation/testing should be automatic and should not repeatedly depend on A's AWS login.
 - Worker: next eligible direct worker, current routing B; select/report actual model and effort at claim. One task/worker; no subagents or credential sharing.
 - Scope at claim: exact GitHub workflow/scripts, resource/permission contracts needed by OPS01–03, bounded policy/bootstrap proposal, meaningful integration checks, safe evidence and own log/handoff. Record exact files first. No general administrator grant or live operation is authorized by this ticket.

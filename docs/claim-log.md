@@ -11,8 +11,9 @@ The existing five-minute heartbeat `watch-known-enough-shared-queue` now dispatc
 | Task | Ticket status / assignment | Claimant and conversation | Available for a new claim? |
 | --- | --- | --- | --- |
 | [ASSESS07](tasks/active/live-testing/ASSESS07/ticket.md) | BLOCKED; both B cycles failed QA03_CREATE with CLEAN cleanup; full seven-journey proof pending | B / `Battosai1806`; `01a1044b-4cc8-7c00-b5ee-a24a17ded137`; `gpt-6-sol` / `max` selected by creation tool, runtime fields unexposed | No — same claim; current receipt's two dispatches exhausted |
-| [ASSESS10](tasks/active/monitoring/ASSESS10/ticket.md) | READY / unclaimed; after the current ASSESS07 cycle | No conversation assigned | No — prerequisite remains unfinished |
-| [OPS00](tasks/active/operations/OPS00/ticket.md) | BLOCKED / unclaimed | No conversation assigned | No — ASSESS07 / ASSESS10 prerequisites |
+| [ASSESS11](tasks/active/live-testing/ASSESS11/ticket.md) | READY / unclaimed; priority public signup investigation before ASSESS10/OPS | No conversation assigned | No — current ASSESS07 claim must complete or be explicitly handed off/released; all-seven PASS is not a diagnostic prerequisite |
+| [ASSESS10](tasks/active/monitoring/ASSESS10/ticket.md) | READY / unclaimed; after signup investigation/current ASSESS07 cycle | No conversation assigned | No — earlier queue work remains unfinished |
+| [OPS00](tasks/active/operations/OPS00/ticket.md) | BLOCKED / unclaimed | No conversation assigned | No — ASSESS07 / ASSESS11 / ASSESS10 prerequisites |
 | [OPS01](tasks/active/operations/OPS01/ticket.md) | BLOCKED / unclaimed | No conversation assigned | No — preceding operations prerequisites |
 | [OPS02](tasks/active/operations/OPS02/ticket.md) | BLOCKED / unclaimed | No conversation assigned | No — preceding operations prerequisites |
 | [OPS03](tasks/active/operations/OPS03/ticket.md) | BLOCKED / unclaimed | No conversation assigned | No — preceding operations prerequisites |
@@ -26,6 +27,8 @@ The existing five-minute heartbeat `watch-known-enough-shared-queue` now dispatc
 | [LIVE04](tasks/active/live-testing/LIVE04/ticket.md) | IN_PROGRESS; delivery umbrella | Managed evidence through ASSESS07 | No — umbrella does not schedule another worker |
 
 There is no task available for a new B claim at this checkpoint. This does not prevent the assigned ASSESS07 worker from reconciling actual results within its scope. The expired extra receipt does not establish consumption or a live result; inspect actual evidence before deciding what remains. Any later deployment/test must have its own current, specific authorization.
+
+**Public signup task preparation — 2026-10-04 UTC:** A records the user's reported signup error and adds ASSESS11 as the next priority before monitor/OPS, with a safe debugging-data map. No new claim/conversation is assigned and no B execution is inferred. B's ASSESS07 claim/body/history and A's saved NP00 files remain intact. Explicit completion or bounded handoff/release is required before another implementation worker starts; signup diagnosis need not wait for all-seven PASS. No new live run, email/model budget or cloud authority is granted.
 
 **Historical expired-receipt readback — 2026-10-04T00:59:19Z:** The dedicated worker found no GitHub repository run after A's two-run approval37158067754; the latest deployment37147620296 and matching qualification37147658807 are older A runs. The latest sanitized journey reports only QA01/02 PASS, QA03 FAIL, QA04–07 BLOCKED and cleanup PASS for that prior A run. Receipt consumption and present cloud CLEAN state lack a current readback. The task is BLOCKED, still claimed and unavailable; no next claim is released. [Bounded evidence](review-artifacts/ASSESS07-b-expired-receipt-reconciliation.json).
 

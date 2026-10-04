@@ -1,6 +1,6 @@
 # Finish the basic Known Enough app
 
-User direction, 2026-10-03. This roadmap records remaining work; the [shared board](task-board.md) controls claims and order. B recorded the bounded ASSESS07 claim in commit `7e6b55d5c1912256b31b278a0593f32e4e26313f`; deployment/results remain pending. Later tasks are prepared but wait for their prerequisites. One task runs at a time; A's saved NP00 closeout stays preserved.
+User direction, 2026-10-03. This roadmap records remaining work; the [shared board](task-board.md) controls claims and order. B's two actual deployment/test cycles failed QA03_CREATE after QA01/02 PASS, with CLEAN cleanup; ASSESS07 remains BLOCKED/claimed. [Matching evidence](review-artifacts/ASSESS07-b-final-two-cycle-result.json). New [ASSESS11](tasks/active/live-testing/ASSESS11/README.md) investigates the user's public signup failure before monitor/OPS; QA signup PASS does not prove the primary website's signup. Its investigation can follow an explicit safe handoff rather than wait for all-seven PASS. Later tasks retain their prerequisites. One task runs at a time; A's saved NP00 closeout stays preserved.
 
 ## What exists
 
@@ -14,9 +14,10 @@ A's [two-run approval for B](https://github.com/Known-Enough/known-enough/action
 
 | Task | Plain-language purpose | Ready now? |
 | --- | --- | --- |
-| [ASSESS07](tasks/active/live-testing/ASSESS07/README.md) | Publish the checked decision fix, repair any actual failure and prove all seven online journeys pass automatically. | B claimed; two dated extra starts approved; live result pending. |
-| [ASSESS10](tasks/active/monitoring/ASSESS10/README.md) | Prove B's existing monitor actually checks fresh results and notices failures. | Next after ASSESS07. |
-| [OPS00](tasks/active/operations/OPS00/README.md) | Complete the approved GitHub operations path, so OPS does not repeatedly need A to run AWS commands. | After ASSESS10, before OPS01. |
+| [ASSESS07](tasks/active/live-testing/ASSESS07/README.md) | Repair the demonstrated decision failure and prove all seven online journeys pass automatically. | BLOCKED / same B claim; both approved cycles failed QA03_CREATE. |
+| [ASSESS11](tasks/active/live-testing/ASSESS11/README.md) | Fix the user's public signup error and make safe debugging evidence easy to find. | READY / unclaimed, next priority after current claim's completion or explicit safe handoff; does not require all-seven PASS to diagnose. |
+| [ASSESS10](tasks/active/monitoring/ASSESS10/README.md) | Prove B's existing monitor actually checks fresh results and notices failures. | After signup investigation/current cycle. |
+| [OPS00](tasks/active/operations/OPS00/README.md) | Complete the approved GitHub operations path, so OPS does not repeatedly need A to run AWS commands. | After ASSESS07 managed baseline, ASSESS11 and ASSESS10, before OPS01. |
 | [OPS01](tasks/active/operations/OPS01/README.md) | Keep groups from sharing one storage bottleneck and add safe archiving. | After OPS00 and managed baseline. |
 | [OPS02](tasks/active/operations/OPS02/README.md) | Give private data clear retention, export and authorized deletion behavior. | After OPS01. |
 | [OPS03](tasks/active/operations/OPS03/README.md) | Let unfinished AI work recover after restarts without duplicated work or charges. | After OPS02. |

@@ -6,14 +6,15 @@ Start here to understand what is left. Every task has its own folder: README.md 
 
 ## Online testing
 
-**Current B authorization:** [Two new cycles approved](https://github.com/Known-Enough/known-enough/actions/runs/37167291403), expiring October4,18:00 Mexico City. B resumes the same claimed ASSESS07 worker after current budget/expiry/CLEAN/counter checks. Actual test execution/full PASS remain pending. The expired October3 allowance and readback below are historical; no prior usage or original spending ceiling is reset.
+**Current evidence and priority — 2026-10-04 UTC:** B used both approved cycles; both deployments succeeded and both matching qualifications failed QA03_CREATE after QA01/02 PASS, with QA04–07 blocked and CLEAN cleanup. ASSESS07 is BLOCKED and keeps the same B worker. [Two-cycle evidence](../review-artifacts/ASSESS07-b-final-two-cycle-result.json). New [ASSESS11](active/live-testing/ASSESS11/README.md) addresses the user's public signup error before ASSESS10 and OPS; exact cause remains unknown. QA signup PASS was on the separate test website. Start its investigation only after completion or an explicit safe handoff of the current claim; do not require all-seven PASS first. No third cycle is granted.
 
-Installation, GitHub settings and automatic test triggering are verified. Real signup/email/login and invitations passed; decision creation failed in the latest online run, blocking the four later journeys. The checked correction needs a new deployment and real proof. A has now recorded exactly two extra B runs through GitHub, valid until October3,18:00 Mexico City; original cost/email/cleanup limits still apply. B pulls clean main, claims ASSESS07 and starts an authorized staging deployment using B's own GitHub login. Tests follow automatically, with no personal AWS credentials, CloudShell or separate test click. Actual receipt consumption and full live PASS are still pending. [Approval evidence](../review-artifacts/ASSESS07-github-two-b-runs-approved.json).
+**Historical installation/approval checkpoint:** Installation, GitHub settings and automatic test triggering were verified. Real QA signup/email/login and invitations passed; decision creation failed, blocking four later journeys. The earlier [October3 approval](../review-artifacts/ASSESS07-github-two-b-runs-approved.json) and later [two-cycle approval](https://github.com/Known-Enough/known-enough/actions/runs/37167291403) remain history; they do not authorize another dispatch. Existing GitHub workloads use the worker's own GitHub account without personal AWS credentials or a separate test click. Full live acceptance remains unproved.
 
 | Task | Basic idea | Status |
 | --- | --- | --- |
 | [LIVE04](active/live-testing/LIVE04/README.md) | Prove the installed online test environment works from start to finish. Installation and GitHub settings are ready; real test results and cleanup evidence are still needed. | IN_PROGRESS |
-| [ASSESS07](active/live-testing/ASSESS07/README.md) | Collect real online proof that all required user journeys, safety checks and cleanup pass automatically after a matching successful deployment. B takes the current handoff. | IN_PROGRESS / B claimed; live proof pending |
+| [ASSESS07](active/live-testing/ASSESS07/README.md) | Collect real online proof that all required user journeys, safety checks and cleanup pass automatically after a matching successful deployment. | BLOCKED / same B claim; both cycles failed QA03_CREATE |
+| [ASSESS11](active/live-testing/ASSESS11/README.md) | Fix the user's public signup failure and make safe debugging evidence easy to find. Separate primary website proof from QA signup tests. | READY / unclaimed; next priority after current claim's safe handoff |
 
 ## B's existing monitor
 
@@ -29,7 +30,7 @@ Installation, GitHub settings and automatic test triggering are verified. Real s
 
 ## Later, before wider use
 
-These tasks wait for the managed ASSESS07 baseline. OPS00 completes and verifies the GitHub operations path before the implementation sequence; ordinary approved operations must not repeatedly depend on A opening CloudShell.
+These tasks wait for the managed ASSESS07 baseline, ASSESS11 public signup verification and ASSESS10. OPS00 completes and verifies the GitHub operations path before the implementation sequence; ordinary approved operations must not repeatedly depend on A opening CloudShell.
 
 | Task | Basic idea | Status |
 | --- | --- | --- |
