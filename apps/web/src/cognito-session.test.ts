@@ -87,8 +87,28 @@ describe('KE11 Cognito browser client', () => {
     expect(fetcher).not.toHaveBeenCalled();
     await beginCognitoSignIn(config, 'participant', storage, place());
     await expect(finishCognitoSignIn(config, storage,
-      place('?error=access_denied&state=anything'), history, fetcher)).rejects.toThrow();
+      place('?error=access_denied&error_description=PRIVATE_EMAIL_TOKEN&state=anything'), history, fetcher))
+      .rejects.toMatchObject({ code: 'HOSTED_ACCESS_DENIED' });
     expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it('keeps hosted and token exchange failures within safe fixed diagnostic codes', async () => {
+    const storage = new MemoryStorage();
+    const history = { state: null, replaceState: vi.fn() } as unknown as History;
+    await beginCognitoSignIn(config, 'participant', storage, place());
+    await expect(finishCognitoSignIn(config, storage,
+      place('?error=invalid_scope&error_description=PRIVATE_QUERY_VALUE&state=anything'), history, vi.fn()))
+      .rejects.toMatchObject({ code: 'HOSTED_CONFIGURATION_REJECTED' });
+    const authorization = new URL(await beginCognitoSignIn(config, 'participant', storage, place()));
+    const fetcher = vi.fn(async () => new Response('PRIVATE_PROVIDER_BODY', { status: 400 }));
+    let rejected: unknown;
+    try {
+      await finishCognitoSignIn(config, storage,
+        place(`?code=abc&state=${authorization.searchParams.get('state')}`), history, fetcher);
+    } catch (error) { rejected = error; }
+    expect(rejected).toMatchObject({ code: 'TOKEN_REJECTED', httpStatus: 400 });
+    expect(JSON.stringify(rejected)).not.toContain('PRIVATE_PROVIDER_BODY');
+    expect(fetcher).toHaveBeenCalledOnce();
   });
 
   it('retains a one-time invitation only in the same tab across a Cognito redirect', () => {

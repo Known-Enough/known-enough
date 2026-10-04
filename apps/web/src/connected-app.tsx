@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { KnownEnough } from '@deal-table/contracts';
 import {
   beginCognitoSignIn, clearCognitoSession, clearPendingCognitoInvitation, cognitoApiFetch, cognitoLogoutUrl,
-  finishCognitoSignIn, readCognitoSession, readPendingCognitoInvitation, type CognitoBrowserConfig, type CognitoSession,
+  finishCognitoSignIn, readCognitoSession, readPendingCognitoInvitation, CognitoSignInFailure,
+  type CognitoBrowserConfig, type CognitoSession,
 } from './cognito-session';
 import { SimulatedSharedAssistant } from './simulated-shared-assistant';
 import { decisionStatusText, privateReadinessText } from './decision-copy';
@@ -44,7 +45,15 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     callbackCompletion ??= finishCognitoSignIn(config);
     void callbackCompletion.then(result => {
       if (active && result) { setSession(result); setStatus('Signed in. Open your group or review your account access to continue.'); }
-    }).catch(() => { if (active) setStatus('Sign-in could not be completed. Start again.'); });
+    }).catch(error => {
+      if (!active) return;
+      const code = error instanceof CognitoSignInFailure ? error.code : 'HOSTED_ERROR';
+      const observedAt = error instanceof CognitoSignInFailure ? error.observedAt : new Date().toISOString();
+      const httpStatus = error instanceof CognitoSignInFailure ? error.httpStatus : undefined;
+      console.info('Known Enough sign-in diagnostic', { environment: config.userPoolId, step: 'callback', code, observedAt,
+        ...(httpStatus ? { httpStatus } : {}) });
+      setStatus(`Sign-in could not be completed. Start again. Reference: ${code} at ${observedAt}.`);
+    });
     return () => { active = false; };
   }, [config]);
   const groupInvite = new URLSearchParams(window.location.hash.slice(1)).get('groupInvite');
@@ -144,7 +153,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
       {session && <button className="secondary" type="button" onClick={signOut}>Sign out</button>}</header>
     <p className="ke-privacy">Known Enough and its AI process your private inputs. Other people see only the shared choices, proposal and disclosures you authorize. An outcome may still reveal something about people’s needs. Use fictional, non-sensitive data in this preview.</p>
     {!session ? <section className="ke-card ke-auth-card"><h2>Sign in to the shared decision</h2>
-      <p>Sign in, or register with email below and verify your address before requesting access. Group invitations wait in this browser tab while you sign in. A shared display uses a separate account and can only read public information.</p>
+      <p>New account? Choose Register with email below, then verify your address. After verification, use Sign in. If the provider sign-in page offers Sign up, return here to use email registration. Group invitations wait in this browser tab while you sign in. A shared display uses a separate account and can only read public information.</p>
       <div className="ke-private-actions"><button type="button" onClick={() => void signIn('participant')}>Sign in or register</button>
         <button type="button" className="secondary" onClick={() => void signIn('display')}>Shared display sign-in</button></div><EmailRegistration config={config} /></section> : <>
       {session.kind === 'participant' && <GroupHome key={session.accessToken} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} openDecision={id => { setRoomInput(id); void load(id); }} />}

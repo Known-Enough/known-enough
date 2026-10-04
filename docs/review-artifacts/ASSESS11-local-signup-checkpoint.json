@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS11",
+  "observedAt": "2026-10-04T09:58:12Z",
+  "worker": {
+    "githubLogin": "Battosai1806",
+    "githubId": 143764700,
+    "conversation": "01a10636-13ed-7d10-ab42-c0f27cb76942",
+    "creationSettingsAccepted": "gpt-6-sol / max",
+    "runtimeModelAndEffortExposed": false
+  },
+  "sourceBaseline": "f954543667beb194d8b33cc44db013db2f3ce677",
+  "primarySite": {
+    "origin": "https://main.d143q5ravxp5av.amplifyapp.com/",
+    "userReportedTargetConfirmed": false,
+    "latestObservedDeploymentRun": "https://github.com/Known-Enough/known-enough/actions/runs/37170383599",
+    "deploymentSource": "ed98a444c40a8c53594b7d9ed4a853ad52503051",
+    "publishedBundle": "connected-app-Bi4qdhw7.js",
+    "readOnlyDesktopAndPhone": {
+      "appLoginButtonReachedHostedLogin": true,
+      "visibleHostedSignupReachedSignupPage": true,
+      "reportedErrorReproduced": false,
+      "hostedSignupFields": ["username", "password"],
+      "hostedSignupEmailFieldPresent": false,
+      "inAppEmailRegistrationVisible": true,
+      "publishedInAppPasswordMinimum": 16,
+      "publishedInAppComplexityHelpPresent": true
+    },
+    "accountSubmitted": false,
+    "emailSent": false
+  },
+  "existingCloudEvidence": {
+    "oldInspectorRun": "https://github.com/Known-Enough/known-enough/actions/runs/36932474464",
+    "oldInspectorObservedAt": "2026-10-01T22:01:53.792Z",
+    "oldInspectorResult": "self signup admin only, email auto verification unset and participant scope openid only; stale after later installation",
+    "matchingQaMetadataRun": "https://github.com/Known-Enough/known-enough/actions/runs/37170410189",
+    "matchingQaMetadataSource": "ed98a444c40a8c53594b7d9ed4a853ad52503051",
+    "matchingQaMetadataPrimaryStatus": "PASS",
+    "metadataCodeInference": "At that run, the primary check required self signup enabled, auto verified email and participant email OAuth scope; it did not report policy, schema or callback and logout URLs.",
+    "currentPrimaryPolicyAndSchema": "UNKNOWN",
+    "currentPrimaryCallbackAndLogoutUrls": "UNKNOWN"
+  },
+  "localPreparation": {
+    "passwordPolicy": "minimum six, no required character classes in request, form help and isolated QA template",
+    "diagnostics": "fixed allowlisted signup, confirmation and callback codes with UTC time, HTTP status and bounded provider request ID where available; no raw provider body or credential logging",
+    "recovery": "unknown signup result can proceed with an existing code; app copy directs email signup through the form",
+    "authConfigHelper": "read only exact pool/client summary plus private full snapshot and offline update/rollback input preparation; no cloud update command"
+  },
+  "checks": {
+    "pinnedNode": "24.21.0",
+    "pinnedNpm": "11.19.0",
+    "focusedUnit": "21/21 PASS",
+    "focusedSignupBrowser": "3/3 PASS",
+    "fullCheck": "PASS with PLAYWRIGHT_CHANNEL=chromium and one Playwright worker: 727 application tests, two skipped; hosted preview 1/1; E2E 60/60; references 7/7, planning 15/15, lint, types, boundaries and builds",
+    "intermediateFailures": [
+      "First full run: new assertion expected an explicit undefined request ID; corrected to check absence.",
+      "Later parallel full run: E2E 59/60, unrelated local port 5179 ERR_CONNECTION_REFUSED in ke14-connected; isolated file 2/2 PASS. Final single-worker full run PASS."
+    ]
+  },
+  "unmetLiveCriteria": [
+    "Exact user site, failing request time, safe provider code/status/request ID and prior account state are unverified.",
+    "Fresh primary pool/client readback must include password policy, required email schema and exact callback/logout URL; the current shared inspector omits these.",
+    "Provider hosted signup currently presents no email field; its supported correction or removal requires a confirmed pool schema and authorized design/configuration work.",
+    "The primary six-character policy, isolated QA policy and frontend source are not deployed/read back.",
+    "No authorized matching synthetic signup/email/confirmation/participant login and phone/desktop acceptance or cleanup has run."
+  ],
+  "cloudWrites": false,
+  "deploymentOrPublication": false,
+  "paidModelCalls": false,
+  "signupOrEmailAttempted": false,
+  "privateAccountOrCredentialDataSaved": false
+}

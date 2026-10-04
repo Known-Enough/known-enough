@@ -12,6 +12,27 @@ export interface CognitoSession {
   expiresAt: number;
   kind: 'participant' | 'display';
 }
+export type CognitoSignInCode = 'HOSTED_ACCESS_DENIED' | 'HOSTED_CONFIGURATION_REJECTED'
+  | 'HOSTED_UNAVAILABLE' | 'HOSTED_ERROR' | 'CALLBACK_INCOMPLETE'
+  | 'CALLBACK_STATE_INVALID' | 'TOKEN_NETWORK' | 'TOKEN_REJECTED' | 'TOKEN_RESPONSE_INVALID';
+export class CognitoSignInFailure extends Error {
+  readonly observedAt = new Date().toISOString();
+  constructor(readonly code: CognitoSignInCode, readonly httpStatus?: number) {
+    super('Sign-in could not be completed. Start again.');
+    this.name = 'CognitoSignInFailure';
+  }
+}
+function hostedErrorCode(value: string | null): CognitoSignInCode {
+  switch (value) {
+    case 'access_denied': return 'HOSTED_ACCESS_DENIED';
+    case 'invalid_scope':
+    case 'invalid_request':
+    case 'unauthorized_client': return 'HOSTED_CONFIGURATION_REJECTED';
+    case 'server_error':
+    case 'temporarily_unavailable': return 'HOSTED_UNAVAILABLE';
+    default: return 'HOSTED_ERROR';
+  }
+}
 type Pending = { state: string; verifier: string; kind: CognitoSession['kind']; createdAt: number };
 const PENDING_KEY = 'known-enough-cognito-pending';
 const SESSION_KEY = 'known-enough-cognito-session';
@@ -74,26 +95,31 @@ export async function finishCognitoSignIn(config: CognitoBrowserConfig,
   clearQuery(location, history);
   const pendingRaw = storage.getItem(PENDING_KEY);
   storage.removeItem(PENDING_KEY);
-  if (!code || !state || query.has('error') || !pendingRaw) throw new Error('Sign-in could not be completed. Start again.');
+  if (query.has('error')) throw new CognitoSignInFailure(hostedErrorCode(query.get('error')));
+  if (!code || !state || !pendingRaw) throw new CognitoSignInFailure('CALLBACK_INCOMPLETE');
   let pending: Pending;
-  try { pending = JSON.parse(pendingRaw) as Pending; } catch { throw new Error('Sign-in could not be completed. Start again.'); }
+  try { pending = JSON.parse(pendingRaw) as Pending; } catch { throw new CognitoSignInFailure('CALLBACK_STATE_INVALID'); }
   if (!BASE64URL.test(code) || !BASE64URL.test(state) || !BASE64URL.test(pending.state)
     || !BASE64URL.test(pending.verifier) || state !== pending.state
     || (pending.kind !== 'participant' && pending.kind !== 'display')
     || !Number.isFinite(pending.createdAt) || Date.now() - pending.createdAt > 5 * 60_000
-    || pending.createdAt > Date.now() + 30_000) throw new Error('Sign-in expired or did not match this browser tab. Start again.');
-  const response = await fetcher(URL.parse('/oauth2/token', config.domain)!, { method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ grant_type: 'authorization_code', client_id: clientId(config, pending.kind),
-      code, redirect_uri: callbackUrl(location), code_verifier: pending.verifier }).toString() });
-  if (!response.ok) throw new Error('Sign-in could not be completed. Start again.');
-  const value: unknown = await response.json();
-  if (value === null || typeof value !== 'object' || Array.isArray(value)) throw new Error('Invalid sign-in response.');
+    || pending.createdAt > Date.now() + 30_000) throw new CognitoSignInFailure('CALLBACK_STATE_INVALID');
+  let response: Response;
+  try {
+    response = await fetcher(URL.parse('/oauth2/token', config.domain)!, { method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ grant_type: 'authorization_code', client_id: clientId(config, pending.kind),
+        code, redirect_uri: callbackUrl(location), code_verifier: pending.verifier }).toString() });
+  } catch { throw new CognitoSignInFailure('TOKEN_NETWORK'); }
+  if (!response.ok) throw new CognitoSignInFailure('TOKEN_REJECTED', response.status);
+  let value: unknown;
+  try { value = await response.json(); } catch { throw new CognitoSignInFailure('TOKEN_RESPONSE_INVALID'); }
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) throw new CognitoSignInFailure('TOKEN_RESPONSE_INVALID');
   const raw = value as Record<string, unknown>;
   if (raw.token_type !== 'Bearer' || typeof raw.access_token !== 'string'
     || !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(raw.access_token)
     || typeof raw.expires_in !== 'number' || !Number.isFinite(raw.expires_in)
-    || raw.expires_in < 1 || raw.expires_in > 86_400) throw new Error('Invalid sign-in response.');
+    || raw.expires_in < 1 || raw.expires_in > 86_400) throw new CognitoSignInFailure('TOKEN_RESPONSE_INVALID');
   const session: CognitoSession = { accessToken: raw.access_token,
     expiresAt: Date.now() + raw.expires_in * 1000, kind: pending.kind };
   storage.setItem(SESSION_KEY, JSON.stringify(session));
