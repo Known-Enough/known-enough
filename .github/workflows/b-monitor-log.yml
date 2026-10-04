@@ -1,0 +1,57 @@
+name: B monitor log
+run-name: 'B monitor: ${{ inputs.event || ''inspect'' }}'
+
+on:
+  schedule:
+    - cron: '17,47 * * * *'
+  workflow_dispatch:
+    inputs:
+      event:
+        type: choice
+        options: [inspect, started, progress, finished]
+        default: inspect
+      scheduled_at:
+        description: Original B heartbeat timestamp in UTC
+        type: string
+      task:
+        type: string
+        default: ASSESS07
+      result:
+        type: choice
+        options: [working, completed, blocked, failed]
+        default: working
+      source_sha:
+        type: string
+      chat_summary:
+        description: One sanitized sentence; same summary as the final chat answer for finished runs
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  log:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Check log lifecycle and privacy behavior
+        run: node --test scripts/monitor/log.test.mjs
+      - name: Save the independent record and chat summary
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/monitor/log.mjs record
+      - name: Preserve record even if observation fails
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: b-monitor-record
+          path: monitor-result/
+          if-no-files-found: error
+          retention-days: 90

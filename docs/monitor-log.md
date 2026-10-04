@@ -1,5 +1,7 @@
 # Known Enough scheduled execution log
 
+**Current shared reporting:** [GitHub run receipts and independent missing-report checks](https://github.com/Known-Enough/known-enough/actions/workflows/b-monitor-log.yml) complement the detailed history below. Follow [the start/progress/finish and chat-summary protocol](monitor-reporting.md). Missing answers are explicitly unavailable; old entries do not prove current activity.
+
 Append-only scheduled-run evidence. Setup below is configuration, not a scheduled execution.
 
 ## Setup — 2026-10-04T19:38:55Z
