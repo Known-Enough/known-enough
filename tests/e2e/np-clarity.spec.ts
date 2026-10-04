@@ -102,6 +102,38 @@ test('public draft takes keyboard focus; malformed responses show a safe retry m
   } finally { await context.close(); await api.close(); }
 });
 
+test('delayed draft save clears premature review before creation can proceed', async ({ browser }) => {
+  const api = await npApi(); const context = await browser.newContext();
+  try {
+    await connect(context, api, 'iris'); await api.call('iris', '/account/register', { displayName: 'Iris' }); await api.approve('iris');
+    await api.groups.create({ kind: 'participant', subject: 'iris' }, { name: 'Small club', idempotencyKey: 'small' });
+    const page = await context.newPage(); await page.goto(url);
+    await page.getByLabel('What should this group decide?').fill('Choose a fictional gallery meetup.');
+    await page.getByRole('button', { name: 'Draft a new decision', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Review the public draft' })).toBeVisible();
+    const reviewed = page.getByRole('checkbox', { name: 'I reviewed this public draft and the required approvers' });
+    const create = page.getByRole('button', { name: 'Create decision for group review' });
+    const unsaved = page.getByText('Save these edits before creating the decision.', { exact: true });
+    await reviewed.check(); await page.getByLabel('Decision title', { exact: true }).fill('Edited gallery meetup');
+    await expect(unsaved).toBeVisible(); await expect(reviewed).not.toBeChecked(); await expect(create).toBeDisabled();
+    let markSaveStarted!: () => void; let releaseSave!: () => void;
+    const saveStarted = new Promise<void>(resolve => { markSaveStarted = resolve; });
+    const saveGate = new Promise<void>(resolve => { releaseSave = resolve; });
+    await page.route('https://api.example.test/groups/*/drafts/*', async route => {
+      if (route.request().method() === 'POST') { markSaveStarted(); await saveGate; }
+      await route.fallback();
+    });
+    await page.getByRole('button', { name: 'Save draft edits' }).click();
+    await saveStarted;
+    await reviewed.check(); // The old live harness did this while the save response was pending.
+    try { expect(await reviewed.isChecked()).toBe(true); } finally { releaseSave(); }
+    await expect(reviewed).not.toBeChecked(); await expect(create).toBeDisabled();
+    await expect(unsaved).toHaveCount(0); // The saved revision has now replaced the dirty draft.
+    await expect(page.getByRole('heading', { name: 'Review the public draft' }).locator('xpath=ancestor::section[@aria-busy][1]')).toHaveAttribute('aria-busy', 'false');
+    await reviewed.check(); await expect(create).toBeEnabled();
+  } finally { await context.close(); await api.close(); }
+});
+
 test('unanswered public questions survive saving and explicit answers create a reviewed new draft', async ({ browser }) => {
   const api = await npApi(clarificationTransport()); const context = await browser.newContext();
   try {

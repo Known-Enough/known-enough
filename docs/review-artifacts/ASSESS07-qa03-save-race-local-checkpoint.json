@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "checkpoint": "QA03_SAVE_RACE_LOCAL_REPAIR_VERIFIED_LIVE_PROOF_PENDING",
+  "observedAt": "2026-10-04T06:46:43Z",
+  "baselineCommit": "49413dd5fec5accf7a625fe46f002c8c93312dbf",
+  "worker": {
+    "githubLogin": "Battosai1806",
+    "githubId": 143764700,
+    "assignedChat": "01a1044b-4cc8-7c00-b5ee-a24a17ded137",
+    "selectedModel": "gpt-6-sol",
+    "selectedEffort": "max",
+    "runtimeFieldsExposed": false
+  },
+  "sourceSha256": {
+    "tests/live/qa/journey.spec.ts": "714cb59b5935ee8299bd847d4b1bb78153d80aab332c61769f5e00b87468bc29",
+    "scripts/live-qa/runner-core.mjs": "e7b7eed4b3e64f90d5c795decec3ed7689eababda4a9559f18cfe28d500d14ba",
+    "scripts/live-qa/sanitized-reporter.mjs": "318300ed38091c87a9a382de63c5863199f2702ee5821e3c4e09840393bb079d",
+    "tests/integration/live-qa-runner.test.ts": "288512ad6c44b4f06f0f38370ee9e890ac595a05cb2c21deecde4e87b7a7c4b6",
+    "tests/e2e/np-clarity.spec.ts": "532b588c18fc37056c50d1840a28574169c4dc24d6b555c18a2b8e2008baae77"
+  },
+  "localVerification": {
+    "node": "24.21.0",
+    "npm": "11.19.0",
+    "nodeArchiveOfficialSha256": "fd8e59d5a511510f6a298afb548f18c7d2b1be404d8b4a27d94fbe49f56cb2d6",
+    "focusedReporter": "12/12 PASS",
+    "controlledDelayedSaveBrowser": "1/1 PASS",
+    "defaultFullCheckAttempts": [
+      {"logPath": "/tmp/known-enough-assess07-qa03-final2-check.log", "exitCode": 1, "failure": "tests/integration/dynamodb-repository.test.ts:391:3 Test timed out in 5000ms"},
+      {"logPath": "/tmp/known-enough-assess07-qa03-final3-check.log", "exitCode": 1, "failure": "tests/integration/dynamodb-repository.test.ts:353:3 Test timed out in 5000ms"}
+    ],
+    "isolatedCapacityTest": "1/1 PASS in 3.62s",
+    "fullCheckEnvironment": "PLAYWRIGHT_CHANNEL=chromium VITEST_MAX_WORKERS=2",
+    "fullCheckExitCode": 0,
+    "applicationTests": "719 passed, 2 optional skipped",
+    "hostedBrowser": "1/1 PASS",
+    "e2eBrowser": "59/59 PASS",
+    "referenceHashes": "7/7 PASS",
+    "planningChecks": "15/15 PASS",
+    "lintTypeBuildBoundaries": "PASS",
+    "fullCheckLogPath": "/tmp/known-enough-assess07-qa03-final4-check.log",
+    "fullCheckLogSha256": "d6fb90df1d18d5caca1eb93abf3d995f2330ccb84ee2805a31504b2bc1de3715"
+  },
+  "finding": {
+    "priorLivePhase": "QA03_CREATE",
+    "priorLiveRuns": [37169416229, 37170410189],
+    "controlledRace": "A delayed draft-save response clears a review checkbox checked before the save completes, leaving Create disabled.",
+    "repair": "Wait for saved draft state and idle section, then check review and require Create enabled; preserve original creation and public assertions.",
+    "diagnostic": "Fixed QA03_CREATE substeps and allowlisted exact-POST HTTP category only; no raw browser, URL, body, identity or private value output.",
+    "liveRootCauseConfirmed": false,
+    "fullSevenJourneyPass": false
+  },
+  "boundaries": {
+    "cloudWrites": false,
+    "deploymentStarted": false,
+    "paidModelCall": false,
+    "syntheticEmailSent": false,
+    "receiptOrCountersChanged": false,
+    "twoRunApprovalExhausted": true,
+    "nextGate": "FRESH_EXACT_FINITE_A_RECORDED_LIVE_CYCLE_AUTHORIZATION_AND_CURRENT_INSTALLED_GUARDS"
+  }
+}

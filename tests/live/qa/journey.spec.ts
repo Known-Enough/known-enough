@@ -62,10 +62,25 @@ test('QA03 fresh decision and owner confirmations',async()=>{
   await p.getByRole('button',{name:'Refresh account and groups'}).click();await p.getByLabel('What should this group decide?').fill('Choose our fictional garden workday activity: Planting or Watering, and time: Morning or Afternoon. Only two finite enum choices; no real external data.');await p.getByRole('button',{name:'Draft a new decision',exact:true}).click();await expect(p.getByRole('heading',{name:'Review the public draft'})).toBeFocused();
   },note));
   await test.step('QA03_EDIT',async()=>{
-await p.getByRole('checkbox',{name:'I reviewed this public draft and the required approvers'}).check();await p.getByLabel('Decision title',{exact:true}).fill('Fresh live garden');await expect(p.getByRole('checkbox',{name:'I reviewed this public draft and the required approvers'})).not.toBeChecked();await expect(p.getByRole('button',{name:'Create decision for group review'})).toBeDisabled();await p.getByRole('button',{name:'Save draft edits'}).click();await p.getByRole('checkbox',{name:'I reviewed this public draft and the required approvers'}).check();
+await p.getByRole('checkbox',{name:'I reviewed this public draft and the required approvers'}).check();await p.getByLabel('Decision title',{exact:true}).fill('Fresh live garden');await expect(p.getByRole('checkbox',{name:'I reviewed this public draft and the required approvers'})).not.toBeChecked();await expect(p.getByRole('button',{name:'Create decision for group review'})).toBeDisabled();await p.getByRole('button',{name:'Save draft edits'}).click();await expect(p.getByText('Save these edits before creating the decision.',{exact:true})).toHaveCount(0);await expect(p.getByRole('heading',{name:'Review the public draft'}).locator('xpath=ancestor::section[@aria-busy][1]')).toHaveAttribute('aria-busy','false');await p.getByRole('checkbox',{name:'I reviewed this public draft and the required approvers'}).check();await expect(p.getByRole('button',{name:'Create decision for group review'})).toBeEnabled();
   });
-  await test.step('QA03_CREATE',async()=>{
-  await p.getByRole('button',{name:'Create decision for group review'}).click();await expect(p.getByLabel('Decision ID from your invitation')).toHaveValue(/^groupdecision-[a-f0-9]{40}$/);decisionId=await p.getByLabel('Decision ID from your invitation').inputValue();const snapshot=await publicView(host(),decisionId);expect(snapshot.frame.title).toBe('Fresh live garden');expect(snapshot.frame.requiredParticipantIds).toHaveLength(4);
+  const draftId=await test.step('QA03_CREATE_DRAFT',async()=>{
+    const group=Groups.GroupSnapshot.parse(((await checked(host(),'/groups')).groups as unknown[])[0]);
+    const drafts=group.drafts.filter(item=>item.current&&!item.created);
+    expect(drafts).toHaveLength(1);
+    return drafts[0]!.id;
+  });
+  await trackOperation(p,data().target.ApiUrl+`/groups/${groupId}/drafts/${draftId}/create`,async()=>{
+    await test.step('QA03_CREATE_CLICK',()=>p.getByRole('button',{name:'Create decision for group review'}).click());
+    await test.step('QA03_CREATE_ID',async()=>{
+      await expect(p.getByLabel('Decision ID from your invitation')).toHaveValue(/^groupdecision-[a-f0-9]{40}$/);
+      decisionId=await p.getByLabel('Decision ID from your invitation').inputValue();
+    });
+  },note);
+  const snapshot=await test.step('QA03_CREATE_READ',()=>publicView(host(),decisionId));
+  await test.step('QA03_CREATE_FRAME',()=>{
+    expect(snapshot.frame.title).toBe('Fresh live garden');
+    expect(snapshot.frame.requiredParticipantIds).toHaveLength(4);
   });
   let variable:KE.PublicDecisionVariable|undefined;
   await test.step('QA03_FRAME',async()=>{
