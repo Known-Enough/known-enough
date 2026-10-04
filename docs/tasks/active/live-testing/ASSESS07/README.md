@@ -1,5 +1,7 @@
 # ASSESS07 — Managed verification of corrective changes
 
+**Current direction — 2026-10-04:** Both A and B are already authorized to deploy, run live tests, paid AI and synthetic email, and fix project access/configuration. [Standing authority](../../../../project-automation-authority.md) supersedes dated approvals and A-only execution. The same reserved B worker owns removing the old installed administrative gates, checking/deploying that change, then proving all seven journeys and cleanup. Policy is recorded; runtime migration/new test execution remain pending. Do not mark this task DONE from permission changes alone.
+
 Collect real online proof that all required user journeys, safety checks and cleanup pass automatically after a matching successful deployment.
 
 **Current status — 2026-10-04T16:34:21Z:** READY / unclaimed. A recorded **ten additional runs for B** through [approval37217250492](https://github.com/Known-Enough/known-enough/actions/runs/37217250492), valid until **today October4,18:00 Mexico City**. The local QA03 repair is saved; its matching real seven-journey PASS remains unproved. [Safe evidence](../../../../review-artifacts/ASSESS07-b-ten-more-runs-approved.json).

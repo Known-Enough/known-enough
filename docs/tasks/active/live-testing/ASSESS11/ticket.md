@@ -1,5 +1,7 @@
 # ASSESS11 — Fix public signup and make failures traceable
 
+**Latest authority amendment — 2026-10-04:** [Both A and B are now authorized for project configuration repair, deployment, paid AI and synthetic signup/email without renewed human permission](../../../../project-automation-authority.md). Earlier separate cloud/publication/email authorization gates are superseded. This task remains deferred/unclaimed behind B's existing ASSESS07 reservation because fresh primary policy/schema/callback readback, supported signup-path repair and actual live proof still remain; no DONE or new worker is inferred.
+
 - Status: BLOCKED / deferred / unclaimed — B's checked local checkpoint is synchronized; the primary signup, cloud policy and live acceptance criteria below remain open. Not DONE.
 - Origin: user report and priority-task request, received 2026-10-03 Mexico City; recorded 2026-10-04 UTC.
 - Worker: B / Octavio / `Battosai1806` / GitHub ID `143764700`; `01a10636-13ed-7d10-ab42-c0f27cb76942`, “ASSESS11 — Sol Max worker”, host `local`, same local project. Creation tool accepted `gpt-6-sol` / `max`; actual runtime model/effort are unexposed. Intake supplied `danger-full-access` / approval policy `never`. Reservation/intake are preparation, not implementation evidence.
