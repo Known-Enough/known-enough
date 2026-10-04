@@ -1,12 +1,22 @@
 # ASSESS11 — Fix public signup and make failures traceable
 
-- Status: READY / unclaimed; scheduling hold while B's existing ASSESS07 claim remains assigned. Next priority before ASSESS10 and OPS00. ASSESS07 completion or explicit bounded handoff/release is required before a new implementation claim; all-seven PASS is not a diagnostic prerequisite.
+- Status: RESERVED / B — ASSESS07 was explicitly released by the user; its all-seven live proof is not a prerequisite for this local signup diagnosis/preparation. One worker assignment is being synchronized before implementation.
 - Origin: user report and priority-task request, received 2026-10-03 Mexico City; recorded 2026-10-04 UTC.
-- Worker: next eligible direct worker through the shared queue, current routing B. For a B claim conversation, the existing user-selected target is `gpt-6-sol` / `max`; report actual exposed model/effort. No worker assigned or started by this ticket.
+- Worker: B / Octavio / `Battosai1806` / GitHub ID `143764700`; dedicated `gpt-6-sol` / `max` conversation pending creation. Record accepted tool settings and exposed runtime settings separately; reservation alone is not execution.
 - Preparation baseline: `866590a9b2a6c6c594de048771c0c0ea4dd1c054`; A / `martelaxe` / WSL. No browser reproduction, signup or AWS operation performed during preparation.
 - Scope at claim: first record exact auth UI/session/registration, relevant configuration/inspection scripts and tests, this ticket, sanitized evidence and own log/handoff. Coordinate any workflow/shared-config change. ASSESS07 and NP00 claimed files remain excluded until an explicit bounded handoff.
 
 ## Reported problem and limits of current proof
+
+### Current reservation
+
+Observed 2026-10-04T09:15:31Z.
+
+The user directs B to release blocked ASSESS07, retain pending-work records and take the next eligible task. B verified clean `main`, successful `git pull --ff-only origin main`, local/remote equality at `f43e14470928b52d16f7a4868085de8aeb5b29ee`, and its own GitHub identity. The old ASSESS07 worker was idle and instructed to stop; its checked repair/history and A's NP00 claim remain preserved. This single reservation is unavailable for duplicate assignment; implementation waits for the actual dedicated thread ID and synchronized start instruction.
+
+Exact initial file scope: `apps/web/src/{cognito-session.ts,cognito-session.test.ts,email-registration.ts,email-registration.test.ts,email-registration-form.tsx,connected-app.tsx}`, `tests/e2e/email-registration.spec.ts`, `tests/integration/{cognito.test.ts,cognito-fixtures.ts,assessment-installer.test.ts}`, `scripts/live-qa/template.mjs`, and, only if needed for exact safe auth readback/preparation, new `scripts/assess11-auth-config.mjs` / `tests/integration/assess11-auth-config.test.ts`. Tracking: this ticket/README, `docs/review-artifacts/ASSESS11-*.json`, B log/handoff and this task's current claim-log/board entries. All other files are read-only until a recorded bounded amendment; exclude A/NP00's inspector/error/render/report/policy/workflow/model-runtime files, root config/lock/CI, A log and ASSESS07 source/test files.
+
+Read-only source, public page and own-account GitHub metadata inspection is allowed within the task. Do not dispatch a signup/email, paid-model call, deployment or cloud update from this claim. Prepare necessary bounded fixes and checks first. After useful local work is exhausted, log any missing live/configuration authorization or proof explicitly, synchronize a safe checkpoint and release this claim under the new blocked-task policy rather than waiting or marking DONE.
 
 **Both paths reported failing — 2026-10-04T03:11:06Z:** The user also tried the in-app **Register with email** → **Create account** path. A viewed the supplied screenshot and confirmed that it displays `Registration failed. Check your details, including password requirements, and try again.` under the form. The first hosted-page failure and this in-app failure are both in scope. [Sanitized issue evidence](../../../../review-artifacts/ASSESS11-user-signup-failures.json) records both messages and the requested simpler password rules. The screenshot includes personal account details, so it is not copied into the repository; the safe record omits those values. The cropped image supplies no site URL/provider response, and a masked password does not establish its contents or compliance. Neither path has been reproduced by this agent; root cause and whether an account was partially created remain UNKNOWN. Avoid blind repeated signup attempts when the prior result is unknown.
 

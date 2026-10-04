@@ -2,6 +2,12 @@
 
 Collect real online proof that all required user journeys, safety checks and cleanup pass automatically after a matching successful deployment.
 
+**Current status — 2026-10-04T09:15:31Z:** BLOCKED / deferred / unclaimed. The user released B's claim so another eligible task can proceed. The verified local QA03 repair is saved; the two-run approval is exhausted and no matching repaired-code seven-journey live PASS exists.
+
+**Still pending:** a fresh exact finite A-recorded B approval, current budget/source/expiry/CLEAN guards, and a matching deployment/automatic qualification with all seven journeys and cleanup passing. [Full pending-work record](ticket.md#user-directed-release-and-pending-work). Preserve the former conversation and all evidence; this release is not completion. ASSESS11 is now reserved next.
+
+## Historical execution instructions — superseded by the release above
+
 **Status:** IN_PROGRESS — B retains the same dedicated worker/claim. [Two new runs are approved](https://github.com/Known-Enough/known-enough/actions/runs/37167291403), valid until October4,18:00 Mexico City. B must verify current budget/expiry/cleanup/counters before testing; approval is not consumption or a live PASS. The October3 receipt is expired history; original usage and spending limits remain unchanged.
 
 **What happened:** Both authorized automatic runs published the matching release and passed public checks, primary metadata, preflight, fixture startup, model, privacy, and cleanup. QA01 signup/login and QA02 admissions passed in both. QA03's draft request failed in both: the first report says `HTTP_TRANSPORT_FAILED`; the second's fixed safe diagnostic says `HTTP_REQUEST_ABORTED`. QA04–QA07 were blocked. Each run recorded one model attempt and one synthetic signup message. Together, the two fixture starts consumed the transferred two-use allowance. See the [first report](../../../../review-artifacts/ASSESS07-first-a-automatic-run.json) and [second report](../../../../review-artifacts/ASSESS07-second-a-automatic-run.json).

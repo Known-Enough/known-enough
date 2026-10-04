@@ -2,19 +2,21 @@
 
 Start here to understand what is left. Every task has its own folder: README.md explains the basic idea and next step; ticket.md contains its full requirements, claim and evidence. The [shared board](../task-board.md) decides the current order. One implementation task at a time; a folder move does not release an existing claim.
 
+**Latest blocked-task direction — 2026-10-04:** B explicitly releases ASSESS07, logs its pending approval/guards/seven-journey live proof in the ticket, and reserves ASSESS11 next. For future genuine external blockers, save and synchronize a checked checkpoint, record all pending work, release the B claim and select the next eligible task. Keep one active task, all technical dependencies and A's NP00 claim. The existing five-minute monitor follows the current claim, rather than remaining attached indefinitely to released ASSESS07.
+
 **B conversation dispatch — user direction, 2026-10-03:** The existing five-minute automation assigns one `gpt-6-sol` / `max` conversation per eligible claim and resumes the same worker until verified completion or explicit release. The [claim log](../claim-log.md) records assignments and excludes claimed work from availability. ASSESS07 already has its dedicated B worker; later tasks retain their prerequisites. Its extra two-run receipt expired at 2026-10-04T00:00:00Z, so first reconcile actual results; no new live start or budget renewal is implied.
 
 ## Online testing
 
-**Current evidence and priority — 2026-10-04 UTC:** B used both approved cycles; both deployments succeeded and both matching qualifications failed QA03_CREATE after QA01/02 PASS, with QA04–07 blocked and CLEAN cleanup. ASSESS07 is BLOCKED and keeps the same B worker. [Two-cycle evidence](../review-artifacts/ASSESS07-b-final-two-cycle-result.json). New [ASSESS11](active/live-testing/ASSESS11/README.md) addresses the user's public signup error before ASSESS10 and OPS; exact cause remains unknown. QA signup PASS was on the separate test website. Start its investigation only after completion or an explicit safe handoff of the current claim; do not require all-seven PASS first. No third cycle is granted.
+**Historical pre-release evidence — 2026-10-04 UTC:** B used both approved cycles; both deployments succeeded and both matching qualifications failed QA03_CREATE after QA01/02 PASS, with QA04–07 blocked and CLEAN cleanup. ASSESS07 was BLOCKED with the same B worker at that checkpoint; the latest explicit release above supersedes that assignment. [Two-cycle evidence](../review-artifacts/ASSESS07-b-final-two-cycle-result.json). ASSESS11 addresses the user's public signup error before ASSESS10 and OPS; exact cause remains unknown. QA signup PASS was on the separate test website. The safe release now permits its local investigation without all-seven PASS. No third cycle is granted.
 
 **Historical installation/approval checkpoint:** Installation, GitHub settings and automatic test triggering were verified. Real QA signup/email/login and invitations passed; decision creation failed, blocking four later journeys. The earlier [October3 approval](../review-artifacts/ASSESS07-github-two-b-runs-approved.json) and later [two-cycle approval](https://github.com/Known-Enough/known-enough/actions/runs/37167291403) remain history; they do not authorize another dispatch. Existing GitHub workloads use the worker's own GitHub account without personal AWS credentials or a separate test click. Full live acceptance remains unproved.
 
 | Task | Basic idea | Status |
 | --- | --- | --- |
 | [LIVE04](active/live-testing/LIVE04/README.md) | Prove the installed online test environment works from start to finish. Installation and GitHub settings are ready; real test results and cleanup evidence are still needed. | IN_PROGRESS |
-| [ASSESS07](active/live-testing/ASSESS07/README.md) | Collect real online proof that all required user journeys, safety checks and cleanup pass automatically after a matching successful deployment. | BLOCKED / same B claim; both cycles failed QA03_CREATE |
-| [ASSESS11](active/live-testing/ASSESS11/README.md) | Fix both reported signup paths, log useful safe errors and implement consistent basic password rules (minimum6, no required character classes). Separate primary proof from QA signup tests. | READY / unclaimed; next priority after current claim's safe handoff |
+| [ASSESS07](active/live-testing/ASSESS07/README.md) | Collect real online proof that all required user journeys, safety checks and cleanup pass automatically after a matching successful deployment. | BLOCKED / deferred / unclaimed; explicit release, live proof still pending |
+| [ASSESS11](active/live-testing/ASSESS11/README.md) | Fix both reported signup paths, log useful safe errors and implement consistent basic password rules (minimum6, no required character classes). Separate primary proof from QA signup tests. | RESERVED / B; worker assignment pending |
 
 ## B's existing monitor
 

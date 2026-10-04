@@ -1,8 +1,21 @@
 # ASSESS07 — Managed verification of corrective changes
 
-- Status: BLOCKED — the narrow QA03 save-race repair and safe creation diagnostics pass focused and pinned full checks, but no matching live qualification has run on those bytes. The prior two B cycles failed QA03_CREATE and used the exact two-run approval. B's existing claim remains assigned/unavailable; full seven-journey acceptance needs a fresh finite authorization and actual result.
-- Worker: B / Octavio / `Battosai1806` retains the bounded claim recorded at22:33:43Z, synchronized as `7e6b55d` and assigned to the dedicated conversation below. A retains run-approval authority. Two actual B live cycles are recorded below; preserve this claim and NP00's separate saved claim.
+- Status: BLOCKED / deferred / unclaimed — B explicitly released this task at the user's direction. The QA03 local repair passed checks and remains saved, but matching seven-journey live qualification is unproved and the prior two-run authorization is exhausted. Release is not DONE or technical acceptance.
+- Worker: no active claimant. Former B / Octavio / `Battosai1806` worker `01a1044b-4cc8-7c00-b5ee-a24a17ded137` and its bounded claim/history are preserved; no further automatic polling or execution. A retains finite run-approval authority; NP00's saved A claim is unchanged.
 - Scope: finish ASSESS07's isolated managed verification and any narrowly verified diagnostic repair; preserve NP00's separate saved WSL claim and all existing daily, per-run, cumulative and expiry limits.
+
+## User-directed release and pending work
+
+Observed **2026-10-04T09:15:31Z**: the human states ASSESS07 cannot be completed from B's account now and explicitly asks to drop it, log pending work and take another eligible task. B verified clean ff-only `main` equals `origin/main` at `f43e14470928b52d16f7a4868085de8aeb5b29ee`, own GitHub identity `Battosai1806` / ID `143764700`, and the former worker's idle completed turn. Its stop instruction preserves the conversation and source; there is no unsaved/untracked checkout work to transfer. ASSESS11 is reserved next, one implementation task at a time.
+
+Still pending:
+
+1. A fresh exact finite A-recorded approval for B. [Approval37167291403](https://github.com/Known-Enough/known-enough/actions/runs/37167291403) authorized two cycles already used; it grants no third dispatch. The latest monitor's read-only check found no replacement receipt.
+2. Before any newly authorized cycle, actual current source, original budget/count/expiry and CLEAN-lease guard checks. Prior successful cleanup proves only those old runs; current counters/lease are not certified by this release.
+3. One permitted matching staging deployment and automatic qualification of the preserved repair, introduced by `9054bf5542f94d26a58b94c1e07ce3008f15b8db` and retained at the synchronized baseline above. [Local source/test evidence](../../../../review-artifacts/ASSESS07-qa03-save-race-local-checkpoint.json) proves local checks, not the sole live cause or deployed acceptance.
+4. Inspect source-matching QA01–QA07, privacy and cleanup; record actual all-seven PASS and CLEAN before DONE. The two earlier [qualifications37169416229](https://github.com/Known-Enough/known-enough/actions/runs/37169416229) and [37170410189](https://github.com/Known-Enough/known-enough/actions/runs/37170410189) failed QA03_CREATE on older code and blocked QA04–QA07. Preserve their [two-cycle evidence](../../../../review-artifacts/ASSESS07-b-final-two-cycle-result.json).
+
+Restart only after the blocker resolves, through a new verified claim/handoff using the preserved conversation/history. No cloud write, deployment, paid-model/email call, counter reset or renewed budget is authorized by this scheduling release. LIVE04/OPS acceptance gates remain unresolved. Older dated claim/resume instructions below are historical.
 
 ### B diagnostic preparation resumed — 2026-10-04T04:48:18Z
 
