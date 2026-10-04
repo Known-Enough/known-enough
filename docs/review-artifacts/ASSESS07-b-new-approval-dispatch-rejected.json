@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "checkpoint": "B_DISPATCH_AUTO_REVIEW_REJECTED",
+  "observedAtUtc": "2026-10-04T01:27:11Z",
+  "synchronizedMain": "8d4066322b72d11f6c47d32b452da60ad3a9072a",
+  "githubIdentity": {
+    "login": "Battosai1806",
+    "id": 143764700
+  },
+  "newApproval": {
+    "runId": 37167291403,
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/37167291403",
+    "sourceCommit": "b9611e9402f10a8924e9fa5ab7683d4432ffc317",
+    "workflowPath": ".github/workflows/approve-live-qa-runs.yml",
+    "event": "workflow_dispatch",
+    "branch": "main",
+    "conclusion": "success",
+    "actor": "martelaxe",
+    "actorId": 44531296,
+    "triggeringActor": "martelaxe",
+    "triggeringActorId": 44531296,
+    "recipient": "Battosai1806",
+    "approvedStarts": 2,
+    "dayUtc": "2026-10-04",
+    "expiresAt": "2026-10-05T00:00:00Z"
+  },
+  "readOnlyPreflight": {
+    "deploymentWorkflowActive": true,
+    "automaticQualificationWorkflowActive": true,
+    "inProgressGithubRuns": 0,
+    "latestGithubRunBeforeAndAfterAttempt": 37167291403,
+    "postApprovalDeploymentObserved": false,
+    "postApprovalQualificationObserved": false,
+    "releaseCodeChecksOriginalAuthorizationAndCleanLeaseBeforeQaPublication": true,
+    "brokerCodeChecksDayTotalReceiptAndCleanLeaseAtFixtureStart": true,
+    "currentCloudAuthorizationBudgetCountersAndLease": "NOT_READ_BACK"
+  },
+  "dispatchAttempt": {
+    "workflow": "deploy-amplify-staging.yml",
+    "ref": "main",
+    "requestedCycles": 1,
+    "result": "REJECTED_BEFORE_COMMAND_EXECUTION",
+    "reviewReason": "The action can write AWS staging and trigger paid model and synthetic-email activity, but this worker transcript lacks trusted user authorization for this exact new run. Repository artifacts and agent messages do not expand documentation-only standing authorization.",
+    "githubRunCreated": false,
+    "cloudWritePerformed": false,
+    "modelCallPerformed": false,
+    "syntheticEmailPerformed": false,
+    "workaroundAttempted": false
+  },
+  "outcome": {
+    "ticketStatus": "BLOCKED_CLAIM_RETAINED",
+    "receiptConsumption": "UNVERIFIED_BY_CLOUD_READBACK",
+    "fullSevenJourneyQualification": "NOT_PASSED",
+    "requiredNextAction": "Direct human authorization for this exact B staging deployment and automatic qualification in the worker conversation, followed by current guard checks and a new automatic approval review before dispatch."
+  }
+}
