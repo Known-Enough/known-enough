@@ -84,7 +84,16 @@ await p.getByRole('checkbox',{name:'I reviewed this public draft and the require
   });
   let variable:KE.PublicDecisionVariable|undefined;
   await test.step('QA03_FRAME',async()=>{
-  for(const s of people){await open(s,decisionId);await s.page.getByLabel('I reviewed this frame version, its options and public rules.').check();await s.page.getByRole('button',{name:'Confirm shared frame'}).click();}const frame=(await publicView(host(),decisionId)).frame;variable=frame.variables.find(v=>v.type==='ENUM'&&v.options.length===2);if(!variable||variable.type!=='ENUM')throw new Error('FINITE_MODEL_FRAME_REQUIRED');
+    for(const s of people){
+      await test.step('QA03_FRAME_LOAD',()=>open(s,decisionId));
+      await test.step('QA03_FRAME_REVIEW',()=>s.page.getByLabel('I reviewed this frame version, its options and public rules.').check());
+      await test.step('QA03_FRAME_CONFIRM',()=>trackOperation(s.page,data().target.ApiUrl+`/decisions/${decisionId}/commands`,()=>s.page.getByRole('button',{name:'Confirm shared frame'}).click(),note));
+    }
+    const frame=await test.step('QA03_FRAME_READ',async()=>(await publicView(host(),decisionId)).frame);
+    await test.step('QA03_FRAME_FINITE',()=>{
+      variable=frame.variables.find(v=>v.type==='ENUM'&&v.options.length===2);
+      if(!variable||variable.type!=='ENUM')throw new Error('FINITE_MODEL_FRAME_REQUIRED');
+    });
   });
   if(!variable||variable.type!=='ENUM')throw new Error('FINITE_MODEL_FRAME_REQUIRED');
   const finiteVariable=variable;

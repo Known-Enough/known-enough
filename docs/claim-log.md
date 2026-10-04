@@ -65,7 +65,7 @@ The existing five-minute heartbeat `watch-known-enough-shared-queue` now dispatc
 
 | Task | Ticket status / assignment | Claimant and conversation | Available for a new claim? |
 | --- | --- | --- | --- |
-| [ASSESS07](tasks/active/live-testing/ASSESS07/ticket.md) | HANDOFF_READY / designated B; A stopped after verified live checkpoint | Same persistent B chat `01a1086a-fb98-7552-b4d1-e2dbab01a404`; own clean intake/renewed claim required | No — sole priority handback; actual B restart unverified, QA03_FRAME/all-seven proof pending |
+| [ASSESS07](tasks/active/live-testing/ASSESS07/ticket.md) | IN_PROGRESS / B persistent chat; verified handback and diagnostic execution | Same persistent B chat `01a1086a-fb98-7552-b4d1-e2dbab01a404`; own intake verified at999634b; same sequential claim resumed | No — sole priority handback; B diagnostic source checks running; QA03_FRAME/all-seven proof pending |
 | [ASSESS11](tasks/active/live-testing/ASSESS11/ticket.md) | BLOCKED / deferred / unclaimed; checked local source `4e72adfed3cd25ccacd52edb2b90a8954645b2ee` synced, live criteria open | No active claimant; former B worker `01a10636-13ed-7d10-ab42-c0f27cb76942` retained as history; creation accepted `gpt-6-sol` / `max`, runtime fields unexposed | No — current primary readback, supported hosted route, repair and actual live proof remain; operator authority granted |
 | [ASSESS10](tasks/active/monitoring/ASSESS10/ticket.md) | READY / unclaimed; after signup investigation/current ASSESS07 cycle | No conversation assigned | No — earlier queue work remains unfinished |
 | [OPS00](tasks/active/operations/OPS00/ticket.md) | BLOCKED / unclaimed | No conversation assigned | No — ASSESS07 / ASSESS11 / ASSESS10 prerequisites |

@@ -89,3 +89,21 @@ test('transport diagnostics expose only allowlisted failure categories',()=>{
   expect(transportFailureStatus('PRIVATE_TOKEN or private URL')).toBe('HTTP_TRANSPORT_FAILED');
   expect(SAFE_OPERATION_STATUSES).not.toContain('PRIVATE_TOKEN');
 });
+
+test('nested frame failure keeps the first failed safe child rather than the later failing parent and strips private values', async () => {
+  const dir=mkdtempSync(resolve(tmpdir(),'ke-qa-nested-frame-'));const before=process.env.QA_RESULTS_FILE;process.env.QA_RESULTS_FILE=dir+'/tests.json';
+  try {
+    // @ts-expect-error Reporter accepts fixed diagnostic tags only.
+    const {default:Reporter}=await import('../../scripts/live-qa/sanitized-reporter.mjs');const reporter=new Reporter();
+    const t={title:REQUIRED_TESTS[2],annotations:[{type:'qa-operation-status',description:'HTTP_CONFLICT'}]};
+    reporter.onStepEnd(t,{}, {title:'PRIVATE_VALUE',error:{message:'SECRET'}});
+    reporter.onStepEnd(t,{}, {title:'QA03_FRAME_CONFIRM',error:{message:'PRIVATE_REQUEST_BODY'}});
+    reporter.onStepEnd(t,{}, {title:'QA03_FRAME',error:{message:'PRIVATE_PARENT'}});
+    reporter.onTestEnd(t,{status:'failed'});reporter.onEnd({status:'failed'});
+    const raw=readFileSync(process.env.QA_RESULTS_FILE,'utf8');expect(raw).not.toMatch(/PRIVATE|SECRET/);
+    const report=qualificationReport({runId:'run-12345',tests:JSON.parse(raw).tests});
+    expect(report.tests[2]).toMatchObject({status:'FAIL',phase:'QA03_FRAME_CONFIRM',operationStatus:'HTTP_CONFLICT'});
+    const load=new Reporter();load.onStepEnd(t,{}, {title:'QA03_FRAME_LOAD',error:{message:'PRIVATE_LOAD'}});load.onTestEnd(t,{status:'failed'});
+    expect(load.tests[0]).not.toHaveProperty('operationStatus');
+  } finally {if(before===undefined)delete process.env.QA_RESULTS_FILE;else process.env.QA_RESULTS_FILE=before;rmSync(dir,{recursive:true,force:true});}
+});

@@ -7,7 +7,7 @@ export default class Reporter {
     failedTests = 0;
     phases = new Map();
     onStepEnd(test, _result, step) {
-        if (step.error && REQUIRED_TESTS.includes(test.title) && SAFE_PHASES.includes(step.title))
+        if (step.error && REQUIRED_TESTS.includes(test.title) && SAFE_PHASES.includes(step.title) && !this.phases.has(test.title))
             this.phases.set(test.title, step.title);
     }
     onError() {
@@ -21,7 +21,7 @@ export default class Reporter {
         const operationStatus = (test.annotations ?? []).filter(item => item.type === 'qa-operation-status' && SAFE_OPERATION_STATUSES.includes(item.description)).at(-1)?.description;
         const phase = this.phases.get(test.title);
         if (REQUIRED_TESTS.includes(test.title))
-            this.tests.push({ title: test.title, status, ...(operationStatus && (phase === 'QA03_DRAFT' || phase?.startsWith('QA03_CREATE_')) ? { operationStatus } : {}), ...(mailStatus ? { mailStatus } : {}), ...(phase ? { phase } : {}) });
+            this.tests.push({ title: test.title, status, ...(operationStatus && (phase === 'QA03_DRAFT' || phase?.startsWith('QA03_CREATE_') || phase === 'QA03_FRAME_CONFIRM') ? { operationStatus } : {}), ...(mailStatus ? { mailStatus } : {}), ...(phase ? { phase } : {}) });
     }
     onEnd(result) {
         const status = ['passed', 'failed', 'timedout', 'interrupted'].includes(result?.status) ? result.status : 'interrupted';

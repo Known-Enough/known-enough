@@ -94,7 +94,7 @@ A's recurring observer and completed one-time follow-up are deleted. B's existin
 
 | Order | Task | Current status | What remains |
 | --- | --- | --- | --- |
-| 1 | [ASSESS07 — Real automatic qualification](tasks/active/live-testing/ASSESS07/README.md) | HANDOFF_READY / designated B; A stopped after verified live checkpoint | Standing access installed and automatic qualification proved; repair real QA03_FRAME failure, then all-seven/CLEAN evidence. No extra approval. |
+| 1 | [ASSESS07 — Real automatic qualification](tasks/active/live-testing/ASSESS07/README.md) | IN_PROGRESS / B persistent chat; verified handback and diagnostic execution | Standing access installed and automatic qualification proved; repair real QA03_FRAME failure, then all-seven/CLEAN evidence. No extra approval. |
 | Deferred | [ASSESS11 — Public signup and diagnostics](tasks/active/live-testing/ASSESS11/README.md) | BLOCKED / deferred / unclaimed — local checkpoint synced, former B worker stopped | Fresh primary policy/schema/callback readback, exact failed request, supported hosted route, configuration/publication repair and matching live proof; standing authority is already granted. Not DONE. |
 | 3 | [ASSESS10 — B monitor verification](tasks/active/monitoring/ASSESS10/README.md) | READY / unclaimed; B-only verification after signup investigation/current cycle | Identify B's existing automation, prove two unattended ticks and fresh AWS results, check stale/failure notification behavior. |
 | Delivery umbrella | [LIVE04 — Online test delivery](tasks/active/live-testing/LIVE04/README.md) | IN_PROGRESS; installation/settings checkpoint passed | Finish its remaining managed proof through ASSESS07; no mandatory B manual launch. |

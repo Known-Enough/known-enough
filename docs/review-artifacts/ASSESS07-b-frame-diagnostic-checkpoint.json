@@ -1,0 +1,44 @@
+{
+  "task": "ASSESS07",
+  "observedUtc": "2026-10-04T21:20:22Z",
+  "account": {
+    "login": "Battosai1806",
+    "id": 143764700
+  },
+  "baseline": "999634b5b13a209d45f6c25be02eb43dd25a0247",
+  "files": [
+    {
+      "path": "scripts/live-qa/runner-core.mjs",
+      "sha256": "0e2a08050b4b89c498b917539b5bb88d841691dd3d538b70ce57a85a6b2fa705"
+    },
+    {
+      "path": "scripts/live-qa/sanitized-reporter.mjs",
+      "sha256": "cd4b07af7de409f42f39345465992b6fbb11c148399bf5445206f2878bd59ac3"
+    },
+    {
+      "path": "tests/live/qa/journey.spec.ts",
+      "sha256": "efb8e5cc9a35143d9cac074a262553bbaef8d47f87ac69c0eaee65b7a8e15ff9"
+    },
+    {
+      "path": "tests/integration/live-qa-runner.test.ts",
+      "sha256": "c866e7e6d4eb0a713e430baf999a074259bda222ceedd0254b535012b0ad15d1"
+    }
+  ],
+  "demonstratedBug": "Sanitized reporter overwrote failed safe child step with parent failure. First safe failure now survives; exact frame-confirm HTTP category is allowlisted only for that request phase.",
+  "applicationFrameCause": "UNKNOWN_PENDING_REAL_DIAGNOSTIC",
+  "focusedTestsPassed": 13,
+  "finalFullCheck": {
+    "node": "24.21.0",
+    "npm": "11.19.0",
+    "command": "VITEST_MAX_WORKERS=2 PLAYWRIGHT_CHANNEL=chromium npm run check",
+    "exitCode": 0,
+    "applicationPassed": 737,
+    "applicationSkipped": 2,
+    "hostedPassed": 1,
+    "e2ePassed": 60,
+    "referencesPassed": 7,
+    "planningPassed": 15
+  },
+  "localCheckLog": "/tmp/ke-assess07-frame-diagnostic-final-check.log",
+  "liveResult": "PENDING_NORMAL_AUTO_DEPLOYMENT"
+}
