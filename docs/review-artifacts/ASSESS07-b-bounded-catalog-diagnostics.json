@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "sourceBase": "023f095e72672fb2beb825f6a58394b13abe8395",
+  "files": {
+    "scripts/live-qa/catalog-counts.mjs": "efc944ef2df0aac941d799483d34584b9654862d13f9f450d25a2f3a3646816f",
+    "scripts/live-qa/catalog-counts.d.mts": "3f9d3a930062ca42ed6b2ede80b3b44f57d6f3ebbcf2c45d738a0097959d8f9e",
+    "scripts/live-qa/kernel-diagnostics.ts": "72d550a56bc77856cd654e96791cad44bfb89700d25a98366ac6ba40cc10e8fd",
+    "scripts/live-qa/runner-core.mjs": "993efcadc1378f21bad876f2092465024cabddc69b70b8089270e89f4c5880c5",
+    "scripts/live-qa/sanitized-reporter.mjs": "92698800ce96d3335a2c050f5681d98389b24124ab7bb849d596674c6eae624a",
+    "tests/live/qa/journey.spec.ts": "102b8f951724a5c66915b3ec1ac70680744fa39fac505a7c5560adfcf7ade540",
+    "tests/integration/live-qa-kernel-diagnostics.test.ts": "512f9ab659280fae9695e58916dc17619d002dc781cf1db8d88b6cc799db6e1d",
+    "tests/integration/live-qa-runner.test.ts": "d7d81edabbdec22a637d30027dde6d4bf019dc12828e3d0be1411bcae47b3cd1"
+  },
+  "checks": {
+    "focused": 24,
+    "application": 764,
+    "optionalSkipped": 2,
+    "browser": 61,
+    "fullExit": 0
+  },
+  "bounds": {
+    "publicEnumVariants": 16,
+    "additionalModelCalls": 0,
+    "additionalAwsReads": 0
+  },
+  "limitations": [
+    "Current-time diagnostic retains pending private assignments and permission dependencies",
+    "Unsupported/over-cap frames return null, not zero",
+    "No candidate filtering, selection, question or grant generation",
+    "Live effect UNKNOWN"
+  ]
+}

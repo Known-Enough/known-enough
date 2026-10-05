@@ -1,3 +1,4 @@
+import { safeCatalogCounts } from './catalog-counts.mjs';
 import { safeKernelCodes, safeRuleFailureKinds } from './kernel-codes.mjs';
 import { writeFileSync } from 'node:fs';
 import { REQUIRED_TESTS, SAFE_PHASES, SAFE_MAIL_STATUSES, SAFE_OPERATION_STATUSES, SAFE_REASONING_OUTCOMES, SAFE_FRAME_STATUSES } from './runner-core.mjs';
@@ -23,8 +24,11 @@ export default class Reporter {
         const phase = this.phases.get(test.title);
         const frameStatus=(test.annotations ?? []).filter(item=>item.type==='qa-frame-status' && SAFE_FRAME_STATUSES.includes(item.description)).at(-1)?.description;
         const reasoningOutcome = (test.annotations ?? []).filter(item => item.type === 'qa-reasoning-outcome' && SAFE_REASONING_OUTCOMES.includes(item.description)).at(-1)?.description;
-        if (REQUIRED_TESTS.includes(test.title))
-            this.tests.push({ ...((test.annotations ?? []).some(a=>a.type==='qa-kernel-observed' && a.description==='PASS') ? {ruleFailureKinds: safeRuleFailureKinds((test.annotations ?? []).filter(a=>a.type==='qa-rule-failure-kind').map(a=>a.description)), kernelCodes: safeKernelCodes((test.annotations ?? []).filter(a=>a.type==='qa-kernel-code').map(a=>a.description))} : {}), title: test.title, status, ...(frameStatus && phase === 'QA03_FRAME_READ' ? { frameStatus } : {}), ...(reasoningOutcome && phase?.startsWith('QA04_') ? { reasoningOutcome } : {}), ...(operationStatus && (phase === 'QA03_DRAFT' || ['QA03_EDIT_DRAFT','QA03_EDIT_SAVE','QA03_EDIT_COMMIT'].includes(phase) || phase?.startsWith('QA03_CREATE_') || phase === 'QA03_FRAME_LOAD' || phase === 'QA03_FRAME_REVIEW' || phase === 'QA03_FRAME_CONFIRM' || phase === 'QA03_OWNER_INTERPRET' || phase === 'QA03_OWNER_REVIEW' || phase === 'QA03_OWNER_CONFIRM' || phase === 'QA04_EXPLORE' || phase === 'QA04_REEXPLORE' || phase?.startsWith('QA04_QUESTION')) ? { operationStatus } : {}), ...(mailStatus ? { mailStatus } : {}), ...(phase ? { phase } : {}) });
+        if (REQUIRED_TESTS.includes(test.title)) {
+            const catalogAnnotation=(test.annotations ?? []).find(a=>a.type==='qa-catalog-counts');
+            let catalogCounts=null;try{catalogCounts=safeCatalogCounts(JSON.parse(catalogAnnotation?.description ?? 'null'));}catch{ /* Malformed annotations remain UNKNOWN. */ }
+            this.tests.push({ ...(catalogAnnotation ? {catalogCounts} : {}), ...((test.annotations ?? []).some(a=>a.type==='qa-kernel-observed' && a.description==='PASS') ? {ruleFailureKinds: safeRuleFailureKinds((test.annotations ?? []).filter(a=>a.type==='qa-rule-failure-kind').map(a=>a.description)), kernelCodes: safeKernelCodes((test.annotations ?? []).filter(a=>a.type==='qa-kernel-code').map(a=>a.description))} : {}), title: test.title, status, ...(frameStatus && phase === 'QA03_FRAME_READ' ? { frameStatus } : {}), ...(reasoningOutcome && phase?.startsWith('QA04_') ? { reasoningOutcome } : {}), ...(operationStatus && (phase === 'QA03_DRAFT' || ['QA03_EDIT_DRAFT','QA03_EDIT_SAVE','QA03_EDIT_COMMIT'].includes(phase) || phase?.startsWith('QA03_CREATE_') || phase === 'QA03_FRAME_LOAD' || phase === 'QA03_FRAME_REVIEW' || phase === 'QA03_FRAME_CONFIRM' || phase === 'QA03_OWNER_INTERPRET' || phase === 'QA03_OWNER_REVIEW' || phase === 'QA03_OWNER_CONFIRM' || phase === 'QA04_EXPLORE' || phase === 'QA04_REEXPLORE' || phase?.startsWith('QA04_QUESTION')) ? { operationStatus } : {}), ...(mailStatus ? { mailStatus } : {}), ...(phase ? { phase } : {}) });
+        }
     }
     onEnd(result) {
         const status = ['passed', 'failed', 'timedout', 'interrupted'].includes(result?.status) ? result.status : 'interrupted';

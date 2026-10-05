@@ -170,3 +170,13 @@ test('keeps exact draft edit subphase and safe HTTP status while rejecting priva
   expect(reporter.tests[0]).toMatchObject({phase});if(['QA03_EDIT_DRAFT','QA03_EDIT_SAVE','QA03_EDIT_COMMIT'].includes(phase))expect(reporter.tests[0]).toHaveProperty('operationStatus','HTTP_STATUS_429');else expect(reporter.tests[0]).not.toHaveProperty('operationStatus');expect(JSON.stringify(reporter.tests)).not.toContain('PRIVATE');
  }
 });
+
+test('catalog counts survive both report boundaries while malformed/private fields stay unknown',async()=>{
+ // @ts-expect-error Standalone sanitized reporter.
+ const {default:Reporter}=await import('../../scripts/live-qa/sanitized-reporter.mjs');
+ const counts={tested:2,valid:0,invalid:1,needsPermission:1,needsClarification:0};
+ for(const [description,expected] of [[JSON.stringify(counts),counts],[JSON.stringify({...counts,secret:'PRIVATE'}),null],['PRIVATE_NOT_JSON',null]] as const){
+  const reporter=new Reporter();reporter.onTestEnd({title:REQUIRED_TESTS[3],annotations:[{type:'qa-catalog-counts',description}]},{status:'failed'});
+  const report=qualificationReport({runId:'run-12345',tests:reporter.tests});expect(report.tests[3].catalogCounts).toEqual(expected);expect(JSON.stringify(report)).not.toContain('PRIVATE');
+ }
+});
