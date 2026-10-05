@@ -12,6 +12,41 @@ type DecisionErrorCode = Extract<KETypes.DecisionCommandResult, { ok: false }>['
 type DecisionCommand = KETypes.DecisionCommand;
 type DecisionOwner = KnownEnoughOwnerRecord;
 
+async function evaluateReasoningCandidate(decision: KnownEnoughRecord, candidate: KETypes.CandidateProposal, now: string) {
+  const publicFacts = KE.PublicProposalFacts.parse({
+    schemaVersion: KE.KE_SCHEMA_VERSION,
+    decisionId: decision.decisionId,
+    contextToken: decision.definition.contextToken,
+    semanticVersion: decision.definition.semanticVersion,
+    proposalVersion: candidate.proposalVersion,
+    requiredParticipantIds: decision.definition.requiredParticipantIds,
+    values: candidate.values.filter(assignment => decision.definition.variables.some(variable =>
+      variable.id === assignment.variableId && variable.visibility === 'PUBLIC')),
+  });
+  const publicProposal = KE.PublicCandidateProposal.parse({
+    proposalId: candidate.proposalId,
+    facts: publicFacts,
+    publicHash: await KE.hashDecisionProposal(publicFacts),
+    createdAt: candidate.createdAt,
+  });
+  const evaluation = await evaluateKnownEnoughCandidate({
+    definition: decision.definition,
+    candidate,
+    publicProposal,
+    confirmedConstraints: decision.owners.flatMap(owner => owner.confirmedConstraints
+      .filter(constraint => constraint.status === 'ACTIVE')),
+    frameConfirmations: decision.frameConfirmations,
+    readyParticipantIds: decision.owners.filter(owner => owner.readiness === 'READY').map(owner => owner.participantId),
+    unresolvedConditionIds: decision.owners.flatMap(owner => owner.draft?.unsupportedConditions.map(condition => condition.id) ?? []),
+    negotiationPermissions: decision.owners.flatMap(owner => owner.negotiationPermissions
+      .filter(permission => permission.status === 'ACTIVE')),
+    disclosurePermissions: decision.owners.flatMap(owner => owner.disclosurePermissions
+      .filter(permission => permission.status === 'ACTIVE')),
+    now,
+  });
+  return {evaluation, publicProposal};
+}
+
 export interface KnownEnoughApplicationOptions {
   repository: KnownEnoughRepository;
   clock: Clock;
@@ -804,6 +839,23 @@ export class KnownEnoughApplication {
   }
 
   /** Validate worker output against trusted state; claimed validation and public hashes are recomputed. */
+  /** Read-only snapshot preview; never authorizes publication or replaces final current-state evaluation. */
+  async previewReasoning(principal: TrustedPrincipal | null, decisionId: string, jobId: string, candidateInput: unknown) {
+    const parsed = KE.CandidateProposal.safeParse(candidateInput);
+    if (!parsed.success) fail('INVALID_COMMAND');
+    return this.options.repository.transactionDecision(decisionId, async decision => {
+      if (!decision) fail('NOT_FOUND');
+      this.service(decision, principal);
+      const job = decision.job;
+      if (!job || job.id !== jobId || job.epoch !== decision.solveEpoch || decision.status !== 'REASONING'
+        || job.contextToken !== decision.definition.contextToken || job.semanticVersion !== decision.definition.semanticVersion) return 'STALE' as const;
+      const candidate = parsed.data;
+      if (candidate.decisionId !== decision.decisionId || candidate.contextToken !== job.contextToken
+        || candidate.semanticVersion !== job.semanticVersion || candidate.proposalVersion !== decision.proposalVersion + 1) return 'STALE' as const;
+      return (await evaluateReasoningCandidate(decision, candidate, this.now())).evaluation.status;
+    });
+  }
+
   async completeReasoning(
     principal: TrustedPrincipal | null,
     decisionId: string,
@@ -829,37 +881,7 @@ export class KnownEnoughApplication {
       if (candidate.decisionId !== decision.decisionId || candidate.contextToken !== job.contextToken
         || candidate.semanticVersion !== job.semanticVersion || candidate.proposalVersion !== decision.proposalVersion + 1)
         fail('STALE_CONTEXT');
-      const publicFacts = KE.PublicProposalFacts.parse({
-        schemaVersion: KE.KE_SCHEMA_VERSION,
-        decisionId: decision.decisionId,
-        contextToken: decision.definition.contextToken,
-        semanticVersion: decision.definition.semanticVersion,
-        proposalVersion: candidate.proposalVersion,
-        requiredParticipantIds: decision.definition.requiredParticipantIds,
-        values: candidate.values.filter(assignment => decision.definition.variables.some(variable =>
-          variable.id === assignment.variableId && variable.visibility === 'PUBLIC')),
-      });
-      const publicProposal = KE.PublicCandidateProposal.parse({
-        proposalId: candidate.proposalId,
-        facts: publicFacts,
-        publicHash: await KE.hashDecisionProposal(publicFacts),
-        createdAt: candidate.createdAt,
-      });
-      const evaluation = await evaluateKnownEnoughCandidate({
-        definition: decision.definition,
-        candidate,
-        publicProposal,
-        confirmedConstraints: decision.owners.flatMap(owner => owner.confirmedConstraints
-          .filter(constraint => constraint.status === 'ACTIVE')),
-        frameConfirmations: decision.frameConfirmations,
-        readyParticipantIds: decision.owners.filter(owner => owner.readiness === 'READY').map(owner => owner.participantId),
-        unresolvedConditionIds: decision.owners.flatMap(owner => owner.draft?.unsupportedConditions.map(condition => condition.id) ?? []),
-        negotiationPermissions: decision.owners.flatMap(owner => owner.negotiationPermissions
-          .filter(permission => permission.status === 'ACTIVE')),
-        disclosurePermissions: decision.owners.flatMap(owner => owner.disclosurePermissions
-          .filter(permission => permission.status === 'ACTIVE')),
-        now: this.now(),
-      });
+      const { evaluation, publicProposal } = await evaluateReasoningCandidate(decision, candidate, this.now());
       if (guard && (guard.isEnabled?.() === false || Date.parse(this.now()) >= guard.expiresAt
         || candidate.permissionDependencies.some(item => Date.parse(item.expiresAt) <= Date.parse(this.now())))) return 'STALE';
       decision.job = null;

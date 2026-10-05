@@ -263,6 +263,12 @@ export class DecisionNegotiator {
         if (selected) {
           // Publish the trusted catalog representation, never a model-controlled ordering/encoding.
           parsed.candidate.values = structuredClone(selected);
+          if (attempt < MAX_ATTEMPTS && await this.options.application.previewReasoning(service, decisionId, job.id, parsed.candidate) === 'INVALID') {
+            reportModelFailure(this.options.diagnostic, 'NEGOTIATION', 'NEGOTIATION_KERNEL_REJECTION');
+            parsed = null;
+            retryReason = 'INVALID_OUTPUT';
+            continue;
+          }
           break;
         }
         parsed = null;

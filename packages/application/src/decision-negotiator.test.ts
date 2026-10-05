@@ -467,3 +467,20 @@ it('emits only fixed validation stage while a throwing observer cannot alter bou
  expect(JSON.stringify(observed)).not.toContain('PRIVATE');
  expect((await h.application.getPublicSnapshot(participant('maya'),decisionId)).currentProposal).toBeNull();
 });
+
+it('retries a hard-invalid first candidate within the same two-attempt job and asks only after kernel acceptance', async () => {
+ const h=await setup(); let calls=0; const reasons: unknown[]=[];
+ const before=(await h.application.getOwnerSnapshot(participant('maya'),decisionId));
+ const negotiator=createNegotiator(h.application,async input=>{calls++;reasons.push(input.retryReason);return generated(input,'mazatlan',calls===1?170_000:150_000);});
+ const result=await negotiator.generate(participant('maya'),decisionId);
+ expect(calls).toBe(2);expect(reasons).toEqual([null,'INVALID_OUTPUT']);expect(result.outcome).toBe('NEEDS_PERMISSION');
+ expect(result.publicSnapshot.currentProposal).toBeNull();
+ expect((await h.application.getOwnerSnapshot(participant('nina'),decisionId)).pendingQuestions.filter(q=>q.status==='PENDING')).toHaveLength(1);
+ expect((await h.application.getOwnerSnapshot(participant('maya'),decisionId)).controlVersion).toBeGreaterThan(before.controlVersion);
+});
+it('preserves INVALID and no question after both bounded candidates violate a hard rule', async () => {
+ const h=await setup();let calls=0;
+ const negotiator=createNegotiator(h.application,async input=>{calls++;return generated(input,'mazatlan',170_000);});
+ expect((await negotiator.generate(participant('maya'),decisionId)).outcome).toBe('INVALID');expect(calls).toBe(2);
+ expect((await h.application.getOwnerSnapshot(participant('nina'),decisionId)).pendingQuestions).toEqual([]);
+});

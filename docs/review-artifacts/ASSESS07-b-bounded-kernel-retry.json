@@ -1,0 +1,90 @@
+{
+  "observedAt": "2026-10-05T10:42:06Z",
+  "account": "Battosai1806",
+  "accountId": 143764700,
+  "baselineCommit": "4d5844b31ff084750de48686e43719791e31d333",
+  "qualificationRun": 37295045374,
+  "deploymentRun": 37294950768,
+  "ciRun": 37294950751,
+  "report": {
+    "schemaVersion": 1,
+    "modelFailures": [],
+    "runId": "gh-37295045374-1",
+    "sourceCommit": "4d5844b31ff084750de48686e43719791e31d333",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "PASS",
+      "privacy": "PASS",
+      "signup": "PASS",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "mailStatus": "MAIL_CODE_READY",
+        "status": "PASS"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "ruleFailureKinds": [
+          "HARD_CONDITION"
+        ],
+        "kernelCodes": [
+          "RULE_FAILED"
+        ],
+        "reasoningOutcome": "INVALID",
+        "operationStatus": "HTTP_OK",
+        "phase": "QA04_QUESTION_SERVER",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 3,
+      "failed": 1,
+      "blocked": 3,
+      "modelAttempts": 6,
+      "signupMessages": 1
+    }
+  },
+  "checks": {
+    "focused": 42,
+    "application": 754,
+    "optionalSkipped": 2,
+    "hosted": 1,
+    "e2e": 60,
+    "fullExit": 0
+  },
+  "hashes": {
+    "packages/application/src/known-enough.ts": "8f028801b6d5ff82f6bf8579129a817946eb8cecfffad6c3233d0857f9257a7a",
+    "packages/application/src/decision-negotiator.ts": "70b6261e95fe044cbf5415429c12c37f7b813c08850a78ec9b47c1df633f8dae",
+    "packages/application/src/decision-negotiator.test.ts": "6c797e9abae6e7b3b73ad6f73bdc9d998328ab2206c8670da4a5c19e321b248c",
+    "packages/application/src/model-runtime.ts": "c465a9030ab96a04575a7d3d204f77e544e83d3542ab752c036f2a5b1e489101",
+    "scripts/live-qa/model-failure-diagnostics.mjs": "9f327d4f508deb2a9930b32365a59323ec7507e15befae4528612cb9d381e2e9"
+  },
+  "change": "Read-only trusted current-job kernel preview, reuse existing second attempt on first INVALID candidate. Shared exact evaluation helper also used by final transaction; final INVALID still rejects, no question/grant or candidate substitution.",
+  "limits": "Two model attempts and original commit expiry/per-run bounds unchanged. Adds one snapshot read; may consume existing second attempt. Live effect UNKNOWN until matching qualification."
+}
