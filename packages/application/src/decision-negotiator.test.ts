@@ -473,7 +473,7 @@ it('retries a hard-invalid first candidate within the same two-attempt job and a
  const before=(await h.application.getOwnerSnapshot(participant('maya'),decisionId));
  const negotiator=createNegotiator(h.application,async input=>{calls++;reasons.push(input.retryReason);return generated(input,'mazatlan',calls===1?170_000:150_000);});
  const result=await negotiator.generate(participant('maya'),decisionId);
- expect(calls).toBe(2);expect(reasons).toEqual([null,'INVALID_OUTPUT']);expect(result.outcome).toBe('NEEDS_PERMISSION');
+ expect(calls).toBe(2);expect(reasons).toEqual([null,'KERNEL_REJECTION']);expect(result.outcome).toBe('NEEDS_PERMISSION');
  expect(result.publicSnapshot.currentProposal).toBeNull();
  expect((await h.application.getOwnerSnapshot(participant('nina'),decisionId)).pendingQuestions.filter(q=>q.status==='PENDING')).toHaveLength(1);
  expect((await h.application.getOwnerSnapshot(participant('maya'),decisionId)).controlVersion).toBeGreaterThan(before.controlVersion);

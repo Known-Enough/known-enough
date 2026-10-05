@@ -19,7 +19,7 @@ export interface DecisionNegotiationModelInput {
   context: DecisionNegotiationContext;
   publicCandidates: KE.CandidateProposal['values'][];
   attempt: number;
-  retryReason: 'INVALID_OUTPUT' | 'MODEL_ERROR' | null;
+  retryReason: 'INVALID_OUTPUT' | 'KERNEL_REJECTION' | 'MODEL_ERROR' | null;
   signal: AbortSignal;
   invocation?: ModelInvocation;
 }
@@ -266,7 +266,7 @@ export class DecisionNegotiator {
           if (attempt < MAX_ATTEMPTS && await this.options.application.previewReasoning(service, decisionId, job.id, parsed.candidate) === 'INVALID') {
             reportModelFailure(this.options.diagnostic, 'NEGOTIATION', 'NEGOTIATION_KERNEL_REJECTION');
             parsed = null;
-            retryReason = 'INVALID_OUTPUT';
+            retryReason = 'KERNEL_REJECTION';
             continue;
           }
           break;

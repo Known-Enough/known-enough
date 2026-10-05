@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "sourceBase": "9d7098ee54570538fa656b4199faf4f3554009b0",
+  "files": {
+    "packages/application/src/decision-negotiator.ts": "b55d4530663132782839250b39852b744f86584cf93b73241e921e451fe0abbc",
+    "packages/adapters/src/bedrock-models.ts": "b8c5f9b42ef9af6a42ab4a9028fd83be71a455cae0aebb18987ec95e5da995be",
+    "packages/application/src/decision-negotiator.test.ts": "3e0297ee5ca7e093475f5bd8ad0f97b0e9f1ac41f82ef11299e14f40a110ff44"
+  },
+  "checks": {
+    "focused": 59,
+    "application": 759,
+    "optionalSkipped": 2,
+    "browser": 61,
+    "fullExit": 0
+  },
+  "limits": {
+    "attempts": 2,
+    "finalKernelChecks": "unchanged"
+  },
+  "liveEffect": "UNKNOWN",
+  "gatewayRead": "ACCESS_DENIED on prior run; no installed repair this turn"
+}
