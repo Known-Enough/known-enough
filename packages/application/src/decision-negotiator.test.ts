@@ -545,3 +545,21 @@ it.each(['permissionVersion', 'expiresAt'] as const)('rejects a stale %s twice d
  expect((await h.application.getPublicSnapshot(participant('maya'), decisionId)).currentProposal).toBeNull();
  expect((await h.application.getOwnerSnapshot(participant('nina'), decisionId)).pendingQuestions.filter(q => q.status === 'PENDING')).toEqual([]);
 });
+
+
+it('retries a nonempty intent whose adjustment excludes the selected option without creating a grant', async () => {
+ const h = await setup(); const reasons: unknown[] = [];
+ const negotiator = createNegotiator(h.application, async input => {
+  reasons.push(input.retryReason); const output = generated(input, 'mazatlan', 150_000);
+  if (input.attempt === 1) output.questionIntents[0]!.adjustment = {
+   id: 'wrong-option', visibility: 'TRUSTED_BACKEND', operator: 'COMPARE', variableId: 'destination', comparison: 'EQ', value: { type: 'ENUM', optionId: 'cancun' },
+  };
+  return output;
+ });
+ const result = await negotiator.generate(participant('maya'), decisionId);
+ expect(reasons).toEqual([null, 'MISSING_QUESTION']); expect(result.outcome).toBe('NEEDS_PERMISSION');
+ expect(result.publicSnapshot.currentProposal).toBeNull();
+ const owner = await h.application.getOwnerSnapshot(participant('nina'), decisionId);
+ expect(owner.pendingQuestions.filter(q => q.status === 'PENDING')).toHaveLength(1);
+ expect(owner.pendingQuestions[0]?.adjustment).toMatchObject({ operator: 'IN', values: [{ type: 'ENUM', optionId: 'mazatlan' }] });
+});

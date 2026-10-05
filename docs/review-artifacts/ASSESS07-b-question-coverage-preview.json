@@ -1,0 +1,22 @@
+{
+  "sourceBase": "33b2d9ad612b7c8d2c1b61fa41f4fe2f422b1598",
+  "files": {
+    "packages/application/src/known-enough.ts": "4e28b045ca0da8853a683bc6d2554203106f2a215f782b9239bc6f71ca96ed26",
+    "packages/application/src/decision-negotiator.ts": "761d8be8a79a47baa913c885b3fe228548c5fa1db5920e97700280e0fa2474c3",
+    "packages/application/src/decision-negotiator.test.ts": "4ee4ad74009d3706a97be0d53bd9da0d581df55b034270d24c9f54e9d5ae6304"
+  },
+  "checks": {
+    "focused": 29,
+    "application": 770,
+    "optionalSkipped": 2,
+    "hosted": 1,
+    "browser": 61,
+    "fullExit": 0
+  },
+  "limits": [
+    "First permission-required candidate only, same existing two attempts",
+    "Read-only service/job/epoch/context/version guarded preview; no question/grant storage",
+    "Final applicability/refusal/consent/kernel checks unchanged",
+    "Additional read uses existing time budget; live effect UNKNOWN"
+  ]
+}

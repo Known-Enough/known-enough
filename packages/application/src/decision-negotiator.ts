@@ -280,7 +280,7 @@ export class DecisionNegotiator {
           // Publish the trusted catalog representation, never a model-controlled ordering/encoding.
           parsed.candidate.values = structuredClone(selected);
           const preview = attempt < MAX_ATTEMPTS ? await this.options.application.previewReasoning(service, decisionId, job.id, parsed.candidate) : null;
-          if (preview === 'NEEDS_PERMISSION' && parsed.questionIntents.length === 0) {
+          if (preview === 'NEEDS_PERMISSION' && !await this.options.application.previewReasoningQuestions(service, decisionId, job.id, parsed.candidate, parsed.questionIntents)) {
             parsed = null;
             retryReason = 'MISSING_QUESTION';
             continue;

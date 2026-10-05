@@ -856,6 +856,36 @@ export class KnownEnoughApplication {
     });
   }
 
+  /** Coverage guidance only: no question or grant is stored; final checks remain authoritative. */
+  async previewReasoningQuestions(principal: TrustedPrincipal | null, decisionId: string, jobId: string,
+    candidateInput: unknown, intents: { ownerParticipantId: string; constraintId: string; constraintVersion: number; adjustment: unknown }[]) {
+    const candidate = KE.CandidateProposal.parse(candidateInput);
+    if (!Array.isArray(intents) || intents.length > KE.MAX_DECISION_PARTICIPANTS * 16) fail('INVALID_COMMAND');
+    return this.options.repository.transactionDecision(decisionId, async decision => {
+      if (!decision) fail('NOT_FOUND');
+      this.service(decision, principal);
+      const job = decision.job;
+      if (!job || job.id !== jobId || job.epoch !== decision.solveEpoch || decision.status !== 'REASONING'
+        || job.contextToken !== decision.definition.contextToken || job.semanticVersion !== decision.definition.semanticVersion
+        || candidate.decisionId !== decisionId || candidate.contextToken !== job.contextToken
+        || candidate.semanticVersion !== job.semanticVersion || candidate.proposalVersion !== decision.proposalVersion + 1) return false;
+      const { evaluation } = await evaluateReasoningCandidate(decision, candidate, this.now());
+      const failures = evaluation.diagnostics.filter(item => item.code === 'NEGOTIABLE_PERMISSION_REQUIRED');
+      return failures.length > 0 && failures.every(target => intents.some(intent => {
+        if (intent.ownerParticipantId !== target.ownerParticipantId || intent.constraintId !== target.constraintId) return false;
+        const constraint = decision.owners.find(owner => owner.participantId === intent.ownerParticipantId)?.confirmedConstraints
+          .find(item => item.constraintId === intent.constraintId && item.constraintVersion === intent.constraintVersion && item.status === 'ACTIVE');
+        if (!constraint) return false;
+        const adjustment = safeAdjustment(decision.definition, constraint, intent.adjustment);
+        if (!adjustment || adjustment.operator !== 'IN') return false;
+        const assignment = candidate.values.find(item => item.variableId === adjustment.variableId);
+        if (assignment?.value.type !== 'ENUM') return false;
+        const optionId = assignment.value.optionId;
+        return adjustment.values.some(value => value.type === 'ENUM' && value.optionId === optionId);
+      }));
+    });
+  }
+
   /** Bounded model guidance only; final publication still evaluates current state. */
   async previewReasoningCatalog(principal: TrustedPrincipal | null, decisionId: string, jobId: string, inputs: unknown[]) {
     if (!Array.isArray(inputs) || inputs.length < 1 || inputs.length > 16) fail('INVALID_COMMAND');
