@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "sourceCommit": "b24b241fe8492bda49a8983cc044105ce489ec29",
+  "run": 37346714691,
+  "observed": "QA01\u201303 PASS, QA04 HTTP_OK INVALID HARD_CONDITION/RULE_FAILED; retry rejection observed",
+  "checks": {
+    "focused": 42,
+    "references": 7
+  },
+  "files": {
+    "packages/application/src/decision-negotiator.ts": "098ba6b7b8062da501c11dc83ecd7f3adf63e1d86c84b6c89a3ba1f2179eabe9",
+    "packages/domain/src/known-enough-kernel.ts": "3461a171f2dd0ee8877aba8b412f095d84a0a7943cfbd3bfd9e61152848680a4",
+    "scripts/live-qa/kernel-diagnostics.ts": "3b30594a6ce647eb1f4c1322b0909f060bd41cc0d1fe68c060157e23a44a78e0"
+  },
+  "findings": [
+    "Current diagnostic re-evaluates pending candidate only at current time",
+    "It cannot establish whether another catalog candidate satisfies mandatory rules",
+    "Kernel guard remains required and both-invalid rejection passes"
+  ],
+  "nextAction": "Add bounded read-only finite-catalog feasibility diagnostic under existing active lease and run ownership; only aggregate counts, no IDs/values/private constraints, no filtering or candidate substitution."
+}
