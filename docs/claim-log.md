@@ -168,3 +168,5 @@ Run032 same-task scope before edits: decision-negotiator retryReason fixed KERNE
 Run033 same-task scope before edits: negotiator retry feedback trusted rejected public catalog index, adapter payload/prompt and bounded regression. No catalog filter/candidate substitution/extra attempt/private reason disclosure; NP00 excluded.
 
 Run034 scope before edits: existing first-attempt preview NEEDS_PERMISSION with empty intents triggers bounded MISSING_QUESTION retry feedback; adapter prompt/tests; QA04 owner read fixed HTTP status. No server-generated intent, extra attempts, grants or NP00 edits. Live missing-question cause not yet established.
+
+Run035 scope before edits: live QA shared one-second request-start pacer for existing browser gateway requests/direct helper fetches, focused pacing test. No HTTP retry, throttle change, expiry extension, credentials or NP00 edits.

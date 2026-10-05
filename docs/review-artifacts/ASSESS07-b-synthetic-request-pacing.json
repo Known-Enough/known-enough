@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "sourceBase": "227fa4567736190dd57129535018b536e5230b17",
+  "observedRun": 37334883024,
+  "observedFailure": "QA03_FRAME_LOAD HTTP_STATUS_429",
+  "checks": {
+    "focused": 19,
+    "application": 761,
+    "optionalSkipped": 2,
+    "browser": 61,
+    "fullExit": 0
+  },
+  "files": {
+    "scripts/live-qa/request-pacing.mjs": "c15477c8b06e1a25874763f61ce4e66cf5069fb252eb667e7be40e5727b3dbaf",
+    "tests/live/qa/helpers.ts": "808ee2c5861a67f5e664b941f6315a133c0dd70ec750489d0d99db0645e3aefd",
+    "tests/integration/live-qa-request-pacing.test.ts": "13294204511e0f9cedcfe1756d4f1bd920be609d90d546f31745940ddd3a55b1"
+  },
+  "change": "One shared one-second grant queue for existing synthetic browser gateway traffic and direct helper reads/writes, no retries or server-limit changes.",
+  "liveEffect": "UNKNOWN"
+}
