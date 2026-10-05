@@ -1,0 +1,82 @@
+{
+  "observedAt": "2026-10-05T04:05:17Z",
+  "account": "Battosai1806",
+  "accountId": 143764700,
+  "sourceCommit": "38589c96c04911cdf87e2893fb9171539033043e",
+  "deploymentRun": 37260385784,
+  "ciRun": 37260385783,
+  "qualificationRun": 37260418090,
+  "report": {
+    "schemaVersion": 1,
+    "runId": "gh-37260418090-1",
+    "sourceCommit": "38589c96c04911cdf87e2893fb9171539033043e",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "PASS",
+      "privacy": "PASS",
+      "signup": "PASS",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "mailStatus": "MAIL_CODE_READY",
+        "status": "PASS"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "phase": "QA03_FRAME_READ",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 2,
+      "failed": 1,
+      "blocked": 4,
+      "modelAttempts": 1,
+      "signupMessages": 1
+    }
+  },
+  "interpretation": "QA02 now PASS; latest QA03 fails FRAME_READ, later reasoning repair unexercised. Exact root cause UNKNOWN. Strengthen existing confirmation sequence with each owner server-snapshot assertion; final count diagnostic fixed category only. Privacy/CLEAN PASS; one model attempt/one signup message.",
+  "checkedCheckpoint": {
+    "at": "2026-10-05T04:10:24Z",
+    "focusedPassed": 16,
+    "fullCheckExit": 0,
+    "applicationPassed": 740,
+    "optionalSkipped": 2,
+    "hostedPassed": 1,
+    "e2ePassed": 60,
+    "referencesPassed": 7,
+    "planningPassed": 15,
+    "sourceSha256": {
+      "tests/live/qa/journey.spec.ts": "549efdffb0be051ac0340f3b890f373bfe9a80eaa175758a7edfe01b8dd3bcdd",
+      "scripts/live-qa/runner-core.mjs": "32f4ebfbb5a8f030090d2d84300534fe5dbe39e91aef8aaf59d585e2545978f1",
+      "scripts/live-qa/sanitized-reporter.mjs": "3ef621ef508fe1d8424458560683c1e4d6327485d00832aee1af861782426d55",
+      "tests/integration/live-qa-runner.test.ts": "12b3ef23d4dacefb98e097dc6fadf4792682a94442ac0b4cc63411013d646d09"
+    }
+  }
+}

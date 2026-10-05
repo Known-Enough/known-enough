@@ -97,9 +97,15 @@ await p.getByRole('checkbox',{name:'I reviewed this public draft and the require
       await test.step('QA03_FRAME_LOAD',()=>open(s,decisionId));
       await test.step('QA03_FRAME_REVIEW',()=>s.page.getByLabel('I reviewed this frame version, its options and public rules.').check());
       await test.step('QA03_FRAME_CONFIRM',()=>confirmFrameReview(s.page,data().target.ApiUrl+`/decisions/${decisionId}/commands`,note));
+      await test.step('QA03_FRAME_VERIFY',async()=>{
+        await expect.poll(async()=>{
+          const current=await owner(s,decisionId);
+          return current.publicSnapshot.frameConfirmations.some(confirmation=>confirmation.participantId===current.ownerParticipantId && confirmation.frameVersion===current.publicSnapshot.frame.frameVersion);
+        }).toBe(true);
+      });
     }
     const frame=await test.step('QA03_FRAME_READ',async()=>{
-      await expect.poll(async()=>(await publicView(host(),decisionId)).frameConfirmations.length).toBe(people.length);
+      await expect.poll(async()=>{const current=await publicView(host(),decisionId);const count=current.frameConfirmations.length;const status=count===people.length?'FRAME_COUNT_EXACT':count<people.length?'FRAME_COUNT_MISSING':'FRAME_COUNT_EXCESS';const notes=test.info().annotations;const prior=notes.find(note=>note.type==='qa-frame-status');if(prior)prior.description=status;else notes.push({type:'qa-frame-status',description:status});return count;}).toBe(people.length);
       return (await publicView(host(),decisionId)).frame;
     });
     await test.step('QA03_FRAME_FINITE',()=>{

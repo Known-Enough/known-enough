@@ -130,3 +130,13 @@ test('reasoning diagnostics keep only fixed outcomes without model payloads',asy
   expect(JSON.stringify(reporter.tests)).not.toContain('PRIVATE');
   expect(safeResults([{title:REQUIRED_TESTS[3],status:'failed',reasoningOutcome:'PRIVATE'}])[3]).not.toHaveProperty('reasoningOutcome');
 });
+
+test('frame count diagnostics expose fixed categories without participant data',async()=>{
+  // @ts-expect-error JavaScript reporter accepts fixed diagnostic tags only.
+  const {default:Reporter}=await import('../../scripts/live-qa/sanitized-reporter.mjs');
+  const reporter=new Reporter();const title={title:REQUIRED_TESTS[2],annotations:[{type:'qa-frame-status',description:'FRAME_COUNT_MISSING'},{type:'qa-frame-status',description:'PRIVATE_PARTICIPANT_ID'}]};
+  reporter.onStepEnd(title,{}, {title:'QA03_FRAME_READ',error:{message:'PRIVATE_CONFIRMATION'}});reporter.onTestEnd(title,{status:'failed'});
+  expect(safeResults(reporter.tests)[2]).toEqual({title:REQUIRED_TESTS[2],status:'FAIL',phase:'QA03_FRAME_READ',frameStatus:'FRAME_COUNT_MISSING'});
+  expect(JSON.stringify(reporter.tests)).not.toContain('PRIVATE');
+  expect(safeResults([{title:REQUIRED_TESTS[2],status:'failed',frameStatus:'PRIVATE'}])[2]).not.toHaveProperty('frameStatus');
+});
