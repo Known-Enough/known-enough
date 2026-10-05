@@ -1,0 +1,80 @@
+{
+  "observedAt": "2026-10-05T09:08:10Z",
+  "account": "Battosai1806",
+  "accountId": 143764700,
+  "sourceCommit": "08c733b3e8dbf938556593a33eae9a1b19915b5e",
+  "qualificationRun": 37285179892,
+  "deploymentRun": 37285101430,
+  "ciRun": 37285101421,
+  "report": {
+    "schemaVersion": 1,
+    "modelFailures": [],
+    "runId": "gh-37285179892-1",
+    "sourceCommit": "08c733b3e8dbf938556593a33eae9a1b19915b5e",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "PASS",
+      "privacy": "PASS",
+      "signup": "PASS",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "mailStatus": "MAIL_CODE_READY",
+        "status": "PASS"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "operationStatus": "HTTP_UNAVAILABLE",
+        "phase": "QA04_QUESTION",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 3,
+      "failed": 1,
+      "blocked": 3,
+      "modelAttempts": 7,
+      "signupMessages": 1
+    }
+  },
+  "focusedChecks": {
+    "passed": 37,
+    "exitCode": 0
+  },
+  "hashes": {
+    "packages/application/src/decision-negotiator.ts": "b8088bc14fdf39e53ae5fa94614f1b598828982ebc89c67515fa2800f8e3f7f4",
+    "packages/adapters/src/bedrock-models.ts": "8c08f11d95edbe813c4c8acea216e06e443175233f29a55558fbb16fe9a3ad01",
+    "packages/adapters/src/model-jobs.ts": "62778b15514a699f5cb7bf4ea73a94deb56cbf607a62f69130138fd296dd9502",
+    "apps/api/src/http-core.ts": "bb49a54bfd2b453a1a17adf30f83b73f67c3ddd410503dc8158733c381fe9c95",
+    "apps/api/src/ke13b-lambda.ts": "6bee472dcf78d702220184f45fc3d5797ebefcb50182c0463a09df29266d1e4b"
+  },
+  "finding": "Negotiation parse/catalog failure reason is retained on DecisionNegotiatorError but HTTP maps it to generic retryable503. Existing model stage tags do not include these validation reasons. Bridge25s/model8s bounded timers also inspected; no timeout cause inferred.",
+  "cause": "UNKNOWN",
+  "nextAction": "Add fixed allowlisted negotiation validation reason callback in existing runtime composition; exclude raw output, rule IDs, participant IDs and values, test privacy and throwing-observer behavior; retain kernel/consent/bounds before full publication."
+}
