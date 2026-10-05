@@ -1,6 +1,7 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { test, expect, type BrowserContext } from '@playwright/test';
 import { npApi } from '../evaluations/np-api.ts';
+import { confirmFrameReview } from '../live/qa/helpers.ts';
 import { freshGroup } from '../evaluations/np-lifecycle.ts';
 let server: ChildProcess;
 const url = 'http://127.0.0.1:5184/';
@@ -64,7 +65,22 @@ test('four new independent browser owners create a garden decision from blank en
       await page.getByRole('button', { name: 'Load shared decision' }).click();
       await expect(page.getByRole('list', { name: 'Frame participants and approvals' })).toContainText('vin');
       await page.getByLabel('I reviewed this frame version, its options and public rules.').check();
-      await page.getByRole('button', { name: 'Confirm shared frame' }).click();
+      const commandUrl = `https://api.example.test/decisions/${await page.getByLabel('Decision ID from your invitation').inputValue()}/commands`;
+      if (page === host) {
+        let release!: () => void; let markStarted!: () => void;
+        const held = new Promise<void>(resolve => { release = resolve; });
+        const started = new Promise<void>(resolve => { markStarted = resolve; });
+        await page.route(commandUrl, async route => { markStarted(); await held; await route.fallback(); });
+        let finished = false;
+        const confirmation = confirmFrameReview(page, commandUrl, () => {}).then(() => { finished = true; });
+        try {
+          await started;
+          await expect(page.getByRole('button', { name: 'Confirm shared frame' })).toBeDisabled();
+          await page.waitForTimeout(100); // Deliberately held server request; click alone has already completed.
+          expect(finished).toBe(false);
+        } finally { release(); }
+        await confirmation; await page.unroute(commandUrl);
+      } else await confirmFrameReview(page, commandUrl, () => {});
     }
     const needs = ['first option flexible NP_PRIVATE_RAW_CANARY', 'second required NP_PRIVATE_RAW_CANARY', 'time afternoon required NP_PRIVATE_RAW_CANARY', 'second preferred NP_PRIVATE_RAW_CANARY'];
     for (let i = 0; i < pages.length; i++) {

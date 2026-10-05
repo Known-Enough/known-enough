@@ -1,0 +1,22 @@
+{
+  "sourceBaseline": "58b264ea17d8c7266897912cd06a9600aac2842a",
+  "account": "Battosai1806",
+  "accountId": 143764700,
+  "checkedAt": "2026-10-05T02:11:33Z",
+  "files": {
+    "tests/live/qa/helpers.ts": "110f6d52b012d6ebdcbd9ddc13cb5dab5cc5de8e1d91c08612915e44b3e06a48",
+    "tests/live/qa/journey.spec.ts": "00a0455f8e4b3656a676000565ab6e0743bc51fc0a75ff5b51609fe5e59d9eb6",
+    "tests/e2e/np-qualification.spec.ts": "08200c129d91ff77e993f4af4c631c01c3ac54d0202f59eca74a0088bf538c93"
+  },
+  "check": {
+    "exit": 0,
+    "applicationPassed": 737,
+    "optionalSkipped": 2,
+    "hostedPassed": 1,
+    "e2ePassed": 60,
+    "referencesPassed": 7,
+    "planningPassed": 15
+  },
+  "regression": "Held server request proves confirmation helper cannot finish on click alone; four independent owners still reach unanimous agreement. Prior interrupted negative control failed as intended; fresh full suite passed restored repair.",
+  "liveResult": "UNKNOWN on repaired bytes; prior qualification failed QA03_FRAME_READ with CLEAN cleanup."
+}

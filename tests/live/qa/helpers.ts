@@ -46,3 +46,11 @@ export async function trackOperation(page: Page, url: string, run: () => Promise
   page.on('response', response); page.on('requestfailed', failed);
   try { await run(); } finally { page.off('response', response); page.off('requestfailed', failed); }
 }
+
+/** A browser click completes before the server mutation; serialize shared version updates. */
+export async function confirmFrameReview(page: Page, commandUrl: string, record: (status: string) => void) {
+  await trackOperation(page, commandUrl, async () => {
+    await page.getByRole('button', { name: 'Confirm shared frame' }).click();
+    await expect(page.getByRole('button', { name: 'Confirm shared frame' })).toHaveCount(0);
+  }, record);
+}

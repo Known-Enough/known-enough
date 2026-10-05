@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@playwright/test';
 import { KnownEnough as KE, Groups } from '@deal-table/contracts';
-import { data, fixture, login, register, request, checked, owner, publicView, envelope, command, open, close, renewSessions, trackOperation, type Session } from './helpers.ts';
+import { data, fixture, login, register, request, checked, owner, publicView, envelope, command, open, close, renewSessions, trackOperation, confirmFrameReview, type Session } from './helpers.ts';
 const sessions:Session[]=[];const people:Session[]=[];let groupId='',decisionId='';let offered:KE.PublicDecisionSnapshot['currentProposal']=null;
 const canary='QA_PRIVATE_CANARY_'+(process.env.QA_RUN_ID??'uninstalled');
 const host=()=>people[0]!;
@@ -87,7 +87,7 @@ await p.getByRole('checkbox',{name:'I reviewed this public draft and the require
     for(const s of people){
       await test.step('QA03_FRAME_LOAD',()=>open(s,decisionId));
       await test.step('QA03_FRAME_REVIEW',()=>s.page.getByLabel('I reviewed this frame version, its options and public rules.').check());
-      await test.step('QA03_FRAME_CONFIRM',()=>trackOperation(s.page,data().target.ApiUrl+`/decisions/${decisionId}/commands`,()=>s.page.getByRole('button',{name:'Confirm shared frame'}).click(),note));
+      await test.step('QA03_FRAME_CONFIRM',()=>confirmFrameReview(s.page,data().target.ApiUrl+`/decisions/${decisionId}/commands`,note));
     }
     const frame=await test.step('QA03_FRAME_READ',async()=>{
       await expect.poll(async()=>(await publicView(host(),decisionId)).frameConfirmations.length).toBe(people.length);
