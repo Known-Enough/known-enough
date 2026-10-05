@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-10-05T05:41:02Z",
+  "account": "Battosai1806",
+  "accountId": 143764700,
+  "sourceBaseline": "f5743062151016e649f90869bf375430d2920233",
+  "focusedPassed": 2,
+  "fullCheckExit": 0,
+  "applicationPassed": 743,
+  "optionalSkipped": 2,
+  "hostedPassed": 1,
+  "e2ePassed": 60,
+  "referencesPassed": 7,
+  "planningPassed": 15,
+  "sourceSha256": {
+    "tests/live/qa/semantic-review.ts": "6aec9d8cdbe5847519005fe1cc897646ecaba1e68f5e97d363a9ccda6bb47b6d",
+    "tests/integration/live-qa-semantic-review.test.ts": "852b30a614aa5b7b42e6b42a4994cb3e25164a899d9a23a1c454b35ee365f21d",
+    "tests/live/qa/journey.spec.ts": "9a6c6a9f5378fd75101222682233228b1349b5a1ef147ffda9d2c0b491a5a358",
+    "scripts/live-qa/runner-core.mjs": "a17c6c6248a327164343468f79adb77cac4c0008f9c5968b0c92ecc248377fa6"
+  },
+  "behavior": "Before synthetic owner consent require exactly one condition of stated HARD/NEGOTIABLE kind and equivalent stated finite option meaning. Accept EQ/NE/singleton-IN; reject altered variable/option, unsupported or extra conditions and broader permission. Fixed QA03_OWNER_SEMANTICS phase, no private payload logging or silent model correction.",
+  "liveStatus": "UNKNOWN until exact matching publication qualification; latest old qualification37264606291 failed frame transport with CLEAN."
+}
