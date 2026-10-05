@@ -178,3 +178,5 @@ Run039 scope before edits: existing run-owned kernel diagnostic bounded public E
 Run040 scope before edits: application read-only batch preview(max16, one trusted snapshot), negotiator optional catalog status hints, adapter input/prompt and focused regression. Full catalog remains unchanged, no automatic selection/permission or extra model attempts; final current-state checks remain. NP00 excluded.
 
 Run042 scope before edits: same ASSESS07 negotiator fixed PERMISSION_DEPENDENCIES retry reason, adapter prompt and behavioral regressions for fabricated/stale exact dependencies; no parser relaxation, grant invention, extra attempts or NP00 files.
+
+Follow-up same ASSESS07 scope: live reasoning helper rejects non-OK existing response at actual exploration phase, focused regression; no extra request/retry/permission waiver, NP00 excluded.

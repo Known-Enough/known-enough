@@ -65,6 +65,7 @@ export async function exploreProposals(page: Page, reasoningUrl: string, record:
       page.waitForResponse(response => response.request().method() === 'POST' && response.url() === reasoningUrl, { timeout: 180000 }),
       page.getByRole('button', { name: 'Explore proposals' }).click(),
     ]);
+    if (!response.ok()) throw new Error('QA_REASONING_REQUEST_FAILED');
     // Only an enumerated semantic outcome can leave the response; never persist its body.
     if (outcome && response.ok()) {
       const value: unknown = await response.json();

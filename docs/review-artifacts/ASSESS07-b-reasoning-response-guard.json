@@ -1,0 +1,16 @@
+{
+  "sourceBase": "d9b43673f26e55dc79cafe0f9a0cf12fd998934d",
+  "observedQualification": 37380237548,
+  "files": {
+    "tests/live/qa/helpers.ts": "601b0af61aca3c1ffae7810c1ba6076eff6f72aaf0e4d27afbaa6481f5b77fca",
+    "tests/integration/live-qa-reasoning-response.test.ts": "081a1f7af77622778a58c6bd9a91f57989757042fda913011b22750a70d26439"
+  },
+  "checks": {
+    "focused": 1,
+    "application": 769,
+    "optionalSkipped": 2,
+    "browser": 61,
+    "fullExit": 0
+  },
+  "limitation": "Fail-fast diagnostics only; provider failure cause remains UNKNOWN; no extra request/retry or permission waiver."
+}
