@@ -47,6 +47,10 @@ const prompts: Record<ModelJobKind, string> = {
     + schema(KE.AIConstraintDraft.shape.unsupportedConditions),
   NEGOTIATION: policy + 'Select exactly one entry from publicCandidates and return its zero-based array index as candidateIndex. '
     + 'Do not repeat, edit or summarize its values; the server copies the exact catalog entry. '
+    + 'First evaluate each candidate against every shared rule and every confirmed HARD constraint. Select a candidate satisfying all of them. '
+    + 'HARD constraints are mandatory; do not select a candidate violating one to satisfy a NEGOTIABLE constraint. '
+    + 'A candidate satisfying all mandatory rules may conflict with a NEGOTIABLE constraint: select that candidate and request its owner permission through questionIntents. '
+    + 'An unresolved negotiable conflict is not permission and is never a reason to relax a hard rule. Active permissions apply only to their exact owner constraint and adjustment. '
     + 'Also return permissionDependencies and questionIntents. permissionDependencies is an array of '
     + '{permissionId,permissionVersion,kind:"NEGOTIATION",expiresAt} drawn only from activePermissions when required. '
     + 'questionIntents is an array of {ownerParticipantId,constraintId,constraintVersion,adjustmentVariableId,adjustmentOptionIds}. '

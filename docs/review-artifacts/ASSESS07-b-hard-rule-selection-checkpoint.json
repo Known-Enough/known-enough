@@ -1,0 +1,89 @@
+{
+  "observedAt": "2026-10-05T08:40:27Z",
+  "account": "Battosai1806",
+  "accountId": 143764700,
+  "baselineCommit": "2197e5884f6aaad082d4a26b5a45a953f4728cc4",
+  "qualificationRun": 37282132089,
+  "deploymentRun": 37282063359,
+  "ciRun": 37282063357,
+  "report": {
+    "schemaVersion": 1,
+    "modelFailures": [],
+    "runId": "gh-37282132089-1",
+    "sourceCommit": "2197e5884f6aaad082d4a26b5a45a953f4728cc4",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "PASS",
+      "privacy": "PASS",
+      "signup": "PASS",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "mailStatus": "MAIL_CODE_READY",
+        "status": "PASS"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "ruleFailureKinds": [
+          "HARD_CONDITION"
+        ],
+        "kernelCodes": [
+          "RULE_FAILED"
+        ],
+        "reasoningOutcome": "INVALID",
+        "operationStatus": "HTTP_OK",
+        "phase": "QA04_QUESTION",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 3,
+      "failed": 1,
+      "blocked": 3,
+      "modelAttempts": 6,
+      "signupMessages": 1
+    }
+  },
+  "checks": {
+    "focused": 40,
+    "application": 750,
+    "optionalSkipped": 2,
+    "hosted": 1,
+    "e2e": 60,
+    "fullExit": 0
+  },
+  "hashes": {
+    "packages/adapters/src/bedrock-models.ts": "8c08f11d95edbe813c4c8acea216e06e443175233f29a55558fbb16fe9a3ad01",
+    "packages/adapters/src/bedrock-models.test.ts": "87f6bc73124c834bf6b39e031b2c48454e0991bd06d4d39992b2ccde774a57a3",
+    "packages/application/src/decision-negotiator.test.ts": "26b762b8480494abff0769f9a0ed498630a9e38146ef9c51ec7fe9108f7ff4cf"
+  },
+  "change": "Clarify mandatory public/HARD rule priority before negotiable permission. Exact catalog/server enforcement unchanged.",
+  "liveRepair": "UNKNOWN; new source matching qualification required",
+  "limitation": "Prior HARD_CONDITION category is read-only re-evaluation, not original-time proof. Exact model internal reasoning unknown."
+}
