@@ -1,0 +1,21 @@
+{
+  "sourceCommit": "5c014f074cd8340ca178416b3c1ec32d6850a6e3",
+  "qualification": 37382206252,
+  "observed": "QA04_QUESTION_SERVER HTTP_OK NEEDS_PERMISSION with no passing owner question assertion",
+  "unknown": [
+    "Exact question count",
+    "Exact rejected intent",
+    "First/second attempt provenance"
+  ],
+  "sourceFindings": [
+    "Parser checks intent owner/constraint/version and rule schema, not whether adjustment satisfies selected candidate",
+    "First-attempt missing-question retry checks empty array only",
+    "Post-commit target/adjustment filters may issue zero questions despite nonempty intents",
+    "Final authorization filters must remain intact"
+  ],
+  "nextAction": "Add bounded read-only applicable-intent preview and regression for nonempty wrong-option intent before existing retry; no generated questions or additional attempts.",
+  "checks": {
+    "adapterFocused": 20,
+    "result": "PASS"
+  }
+}
