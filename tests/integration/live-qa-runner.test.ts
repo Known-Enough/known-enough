@@ -108,3 +108,15 @@ test('nested frame failure keeps the first failed safe child rather than the lat
     expect(load.tests[0]).not.toHaveProperty('operationStatus');
   } finally {if(before===undefined)delete process.env.QA_RESULTS_FILE;else process.env.QA_RESULTS_FILE=before;rmSync(dir,{recursive:true,force:true});}
 });
+
+test('negotiation diagnostics retain fixed failed substeps without private details', async () => {
+  // @ts-expect-error JavaScript reporter accepts fixed diagnostic tags only.
+  const {default:Reporter}=await import('../../scripts/live-qa/sanitized-reporter.mjs');
+  const reporter=new Reporter(); const title={title:REQUIRED_TESTS[3],annotations:[]};
+  reporter.onStepEnd(title,{}, {title:'QA04_PROPOSAL_READ',error:{message:'PRIVATE_PROPOSAL_PAYLOAD'}});
+  reporter.onStepEnd(title,{}, {title:'QA04_QUESTION_PRIVACY',error:{message:'PRIVATE_OWNER_DATA'}});
+  reporter.onTestEnd(title,{status:'failed'});
+  expect(safeResults(reporter.tests)[3]).toEqual({title:REQUIRED_TESTS[3],status:'FAIL',phase:'QA04_PROPOSAL_READ'});
+  expect(JSON.stringify(reporter.tests)).not.toContain('PRIVATE');
+  expect(safeResults([{title:REQUIRED_TESTS[3],status:'failed',phase:'QA04_PRIVATE_VALUE'}])[3]).not.toHaveProperty('phase');
+});

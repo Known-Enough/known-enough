@@ -105,10 +105,33 @@ await p.getByRole('checkbox',{name:'I reviewed this public draft and the require
   });
 });
 test('QA04 private negotiation and exact agreement',async()=>{
-  await open(host(),decisionId);await host().page.getByRole('button',{name:'Explore proposals'}).click();await expect(host().page.getByRole('heading',{name:'Private negotiation question'})).toBeVisible();await expect(host().page.getByText('Permission for this adjustment does not disclose your conditions or approve a final proposal.',{exact:false})).toBeVisible();await open(people[1]!,decisionId);await expect(people[1]!.page.getByRole('heading',{name:'Private negotiation question'})).toHaveCount(0);expect(await people[1]!.page.locator('body').innerText()).not.toContain(canary+'-iris');expect(JSON.stringify(await owner(people[1]!,decisionId))).not.toContain(canary+'-iris');await host().page.getByRole('button',{name:'Allow this adjustment'}).click();await host().page.getByRole('button',{name:'Explore proposals'}).click();offered=(await publicView(host(),decisionId)).currentProposal;expect(!!offered).toBe(true);
-  fixture('disclosure',{decisionId,actor:'iris',permissionId:'declined'});await open(host(),decisionId);await expect(host().page.getByRole('heading',{name:'Review this exact disclosure'})).toBeVisible();await host().page.getByRole('button',{name:'Decline this disclosure'}).click();expect((await owner(host(),decisionId)).ownApproval).toBeNull();
-  for(const s of people){await open(s,decisionId);await expect(s.page.getByRole('heading',{name:'Current proposal',exact:true})).toBeVisible();await expect(s.page.getByRole('button',{name:'Approve this exact proposal'})).toBeDisabled();await s.page.getByLabel('I reviewed the shared outcome and my private part of this exact proposal.').check();await s.page.getByRole('button',{name:'Approve this exact proposal'}).click();}const view=await publicView(host(),decisionId);expect(view.status).toBe('AGREED');expect(view.currentProposal?.publicHash).toBe(offered!.publicHash);expect(view.approvedParticipantIds).toHaveLength(4);expect(JSON.stringify(view)).not.toMatch(new RegExp(canary+'|permissionId|constraintId|requestIdentity|refusedRequests'));
-  for(const s of people){await open(s,decisionId);await expect(s.page.getByText('Everyone approved this exact outcome.',{exact:false})).toBeVisible();}
+  const step = (name:string, action:()=>Promise<unknown>) => test.step(name,action);
+  await step('QA04_LOAD',()=>open(host(),decisionId));
+  await step('QA04_EXPLORE',()=>host().page.getByRole('button',{name:'Explore proposals'}).click());
+  await step('QA04_QUESTION',async()=>{
+    await expect(host().page.getByRole('heading',{name:'Private negotiation question'})).toBeVisible();
+    await expect(host().page.getByText('Permission for this adjustment does not disclose your conditions or approve a final proposal.',{exact:false})).toBeVisible();
+  });
+  await step('QA04_QUESTION_PRIVACY',async()=>{
+    await open(people[1]!,decisionId);
+    await expect(people[1]!.page.getByRole('heading',{name:'Private negotiation question'})).toHaveCount(0);
+    expect(await people[1]!.page.locator('body').innerText()).not.toContain(canary+'-iris');
+    expect(JSON.stringify(await owner(people[1]!,decisionId))).not.toContain(canary+'-iris');
+  });
+  await step('QA04_ALLOW',()=>host().page.getByRole('button',{name:'Allow this adjustment'}).click());
+  await step('QA04_REEXPLORE',()=>host().page.getByRole('button',{name:'Explore proposals'}).click());
+  await step('QA04_PROPOSAL_READ',async()=>{offered=(await publicView(host(),decisionId)).currentProposal;expect(!!offered).toBe(true);});
+  await step('QA04_DISCLOSURE_SETUP',async()=>{fixture('disclosure',{decisionId,actor:'iris',permissionId:'declined'});await open(host(),decisionId);});
+  await step('QA04_DISCLOSURE_REVIEW',()=>expect(host().page.getByRole('heading',{name:'Review this exact disclosure'})).toBeVisible());
+  await step('QA04_DISCLOSURE_DECLINE',()=>host().page.getByRole('button',{name:'Decline this disclosure'}).click());
+  await step('QA04_DISCLOSURE_READ',async()=>{expect((await owner(host(),decisionId)).ownApproval).toBeNull();});
+  for(const s of people){
+    await step('QA04_APPROVAL_LOAD',()=>open(s,decisionId));
+    await step('QA04_APPROVAL_REVIEW',async()=>{await expect(s.page.getByRole('heading',{name:'Current proposal',exact:true})).toBeVisible();await expect(s.page.getByRole('button',{name:'Approve this exact proposal'})).toBeDisabled();await s.page.getByLabel('I reviewed the shared outcome and my private part of this exact proposal.').check();});
+    await step('QA04_APPROVAL_CONFIRM',()=>s.page.getByRole('button',{name:'Approve this exact proposal'}).click());
+  }
+  await step('QA04_AGREEMENT_READ',async()=>{const view=await publicView(host(),decisionId);expect(view.status).toBe('AGREED');expect(view.currentProposal?.publicHash).toBe(offered!.publicHash);expect(view.approvedParticipantIds).toHaveLength(4);expect(JSON.stringify(view)).not.toMatch(new RegExp(canary+'|permissionId|constraintId|requestIdentity|refusedRequests'));});
+  await step('QA04_AGREEMENT_RENDER',async()=>{for(const s of people){await open(s,decisionId);await expect(s.page.getByText('Everyone approved this exact outcome.',{exact:false})).toBeVisible();}});
 });
 test('QA05 denial privacy and recovery',async({browser})=>{
   test.setTimeout(1100000);
