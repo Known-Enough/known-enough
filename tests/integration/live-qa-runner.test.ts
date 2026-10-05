@@ -140,3 +140,18 @@ test('frame count diagnostics expose fixed categories without participant data',
   expect(JSON.stringify(reporter.tests)).not.toContain('PRIVATE');
   expect(safeResults([{title:REQUIRED_TESTS[2],status:'failed',frameStatus:'PRIVATE'}])[2]).not.toHaveProperty('frameStatus');
 });
+
+test('missing usage readback stays unknown through qualification and combined reporting',async()=>{
+  // @ts-expect-error Combined JavaScript report validates sanitized values.
+  const {completeReport}=await import('../../scripts/live-qa/report.mjs');
+  const unknown=qualificationReport({runId:'run-12345',sourceCommit:target.SourceCommit,tests:REQUIRED_TESTS.map((title:string)=>({title,status:'passed'})),preflight:'PASS',fixtures:'PASS',privacy:'PASS',cleanup:'CLEAN'});
+  expect(unknown.counts).toMatchObject({modelAttempts:null,signupMessages:null});expect(unknown.status).toBe('BLOCKED_OR_FAILED');
+  const combined=completeReport({qa:unknown},{sourceCommit:target.SourceCommit});
+  expect(combined.qaCounts).toMatchObject({modelAttempts:null,signupMessages:null});
+  for(const value of [0,4]){
+    const observed=qualificationReport({runId:'run-12345',attempts:value,signupMessages:value});
+    expect(observed.counts).toMatchObject({modelAttempts:value,signupMessages:value});
+    expect(completeReport({qa:observed},{sourceCommit:target.SourceCommit}).qaCounts).toMatchObject({modelAttempts:value,signupMessages:value});
+  }
+  expect(qualificationReport({runId:'run-12345',attempts:-1,signupMessages:'PRIVATE'}).counts).toMatchObject({modelAttempts:null,signupMessages:null});
+});

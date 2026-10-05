@@ -20,7 +20,7 @@ export function completeReport(inputs, context) {
             primary: 'https://main.d143q5ravxp5av.amplifyapp.com/', qa: /^https:\/\/main\.[a-z0-9]+\.amplifyapp\.com\/$/.test(inputs.receipt?.targetFrontend ?? '') ? inputs.receipt.targetFrontend : null, staticPreview: 'https://d23eowhnwtqts3.cloudfront.net/'
         }, targetDifferences: [
             'Primary models remain disabled under NP00; real AI journeys run in isolated budgeted QA.', 'QA uses separate pools, clients, API and data tables; primary writable AI was not tested.'
-        ], qaCounts: Object.fromEntries(['passed', 'failed', 'blocked', 'modelAttempts', 'signupMessages'].map(key => [key, Number.isSafeInteger(inputs.qa?.counts?.[key]) && inputs.qa.counts[key] >= 0 ? inputs.qa.counts[key] : 0])), requiredCloudAcceptance: 'LIVE04 requires actual B dispatch and separate authorized automatic deployment run'
+        ], qaCounts: Object.fromEntries(['passed', 'failed', 'blocked', 'modelAttempts', 'signupMessages'].map(key => [key, Number.isSafeInteger(inputs.qa?.counts?.[key]) && inputs.qa.counts[key] >= 0 ? inputs.qa.counts[key] : null])), requiredCloudAcceptance: 'LIVE04 requires actual B dispatch and separate authorized automatic deployment run'
     };
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

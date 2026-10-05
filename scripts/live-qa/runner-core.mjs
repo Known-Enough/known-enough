@@ -58,7 +58,7 @@ export function qualificationReport(input) {
     };
     return {
         schemaVersion: 1, runId: input.runId, sourceCommit: /^[a-f0-9]{40}$/.test(input.sourceCommit ?? '') ? input.sourceCommit : null, status: Object.values(lanes).every(s => s === 'PASS') ? 'PASS' : 'BLOCKED_OR_FAILED', lanes, tests: results, counts: {
-            passed: results.filter(t => t.status === 'PASS').length, failed: results.filter(t => t.status === 'FAIL').length, blocked: results.filter(t => t.status === 'BLOCKED').length, modelAttempts: Number.isSafeInteger(input.attempts) ? input.attempts : 0, signupMessages: Number.isSafeInteger(input.signupMessages) ? input.signupMessages : 0
+            passed: results.filter(t => t.status === 'PASS').length, failed: results.filter(t => t.status === 'FAIL').length, blocked: results.filter(t => t.status === 'BLOCKED').length, modelAttempts: Number.isSafeInteger(input.attempts) && input.attempts >= 0 ? input.attempts : null, signupMessages: Number.isSafeInteger(input.signupMessages) && input.signupMessages >= 0 ? input.signupMessages : null
         }
     };
 }

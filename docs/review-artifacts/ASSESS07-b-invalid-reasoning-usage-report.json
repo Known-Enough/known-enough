@@ -1,0 +1,83 @@
+{
+  "observedAt": "2026-10-05T04:35:14Z",
+  "account": "Battosai1806",
+  "accountId": 143764700,
+  "sourceCommit": "09479dd2c0f49ed02f3de46ff6fd0f5b595adaf2",
+  "deploymentRun": 37262400856,
+  "ciRun": 37262400898,
+  "qualificationRun": 37262434743,
+  "report": {
+    "schemaVersion": 1,
+    "runId": "gh-37262434743-1",
+    "sourceCommit": "09479dd2c0f49ed02f3de46ff6fd0f5b595adaf2",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "BLOCKED",
+      "privacy": "PASS",
+      "signup": "BLOCKED",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "mailStatus": "MAIL_CODE_READY",
+        "status": "PASS"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "reasoningOutcome": "INVALID",
+        "operationStatus": "HTTP_OK",
+        "phase": "QA04_QUESTION",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 3,
+      "failed": 1,
+      "blocked": 3,
+      "modelAttempts": 0,
+      "signupMessages": 0
+    }
+  },
+  "interpretation": "QA01\u201303 PASS; QA04_QUESTION fails HTTP_OK/INVALID. Kernel existing regression proves hard-invalid candidates issue no negotiable override. Exact failed rule/model output UNKNOWN; no private payload read. Reported zero usage conflicts with observed journey execution; actual counts UNKNOWN pending broker readback. Absent usage previously defaulted to zero in both report layers; checked fix preserves null unknown versus observed zero without relaxing gates.",
+  "checkedCheckpoint": {
+    "at": "2026-10-05T04:40:03Z",
+    "focusedPassed": 17,
+    "fullCheckExit": 0,
+    "applicationPassed": 741,
+    "optionalSkipped": 2,
+    "hostedPassed": 1,
+    "e2ePassed": 60,
+    "referencesPassed": 7,
+    "planningPassed": 15,
+    "sourceSha256": {
+      "scripts/live-qa/runner-core.mjs": "63b796b89cc7213af10dff4535fdc4f327c7c4e38a40c4ba241db9dfe8004742",
+      "scripts/live-qa/report.mjs": "ba7dd378ebfda3eee7334ab1f6f8c2e35d64f5306ab64fae9172a4b1917e4ec0",
+      "tests/integration/live-qa-runner.test.ts": "0be786c7d72bd4eed3fdc70f74687898c05214f9bdbfd52aa5305f8bb5835131"
+    }
+  }
+}
