@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "sourceCommit": "4b6cc1049ac18d98c4c99e2facbf8127f802fdda",
+  "observedRun": 37304729426,
+  "finding": "HTTP_STATUS_429 at QA03_FRAME_CONFIRM; rejecting layer UNKNOWN",
+  "checks": {
+    "localAwsCli": "UNAVAILABLE",
+    "qaStageConfiguration": {
+      "rate": 5,
+      "burst": 10,
+      "provenance": "repository template only"
+    },
+    "qaTestRole": "No gateway stage read or CloudWatch metrics read in current inline policy",
+    "artifacts": "release target/receipt do not contain gateway rejection metrics"
+  },
+  "nextAction": "Add bounded sanitized gateway and Lambda metric observation through project-specific GitHub workload before changing throttle limits. No raw access logs, auth headers or request IDs.",
+  "files": {
+    "scripts/live-qa/template.mjs": "a17e69562ef3864e3da0bf50ce3d352cfd93e2b633b0661a9acda4387e1f6b92",
+    "scripts/live-qa/runner.mjs": "8e187c2dc4cd6d2f983f66c63ee5ecd2c9632b1f28d53fc303abdb43249420b1",
+    "scripts/live-qa/aws.mjs": "4756957f78b7b72fff43e4a20c473e14a1e293cdd7d013c4753b3b24607b31ad"
+  }
+}
