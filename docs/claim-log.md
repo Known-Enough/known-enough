@@ -164,3 +164,5 @@ Run029 same-task scope before edits: QA stage-only apigateway GET permission, bo
 Run030 same-task scope before edits: gateway observer fixed safe outcome categories and report wiring/regression tests; installed stage permission still UNKNOWN, normal code release does not update stack. No speculative role/throttle mutation or NP00 access.
 
 Run032 same-task scope before edits: decision-negotiator retryReason fixed KERNEL_REJECTION for first kernel-invalid candidate, adapter instructions and regression assertion. Existing attempts/bounds/final checks unchanged; no grant generation or NP00 files.
+
+Run033 same-task scope before edits: negotiator retry feedback trusted rejected public catalog index, adapter payload/prompt and bounded regression. No catalog filter/candidate substitution/extra attempt/private reason disclosure; NP00 excluded.

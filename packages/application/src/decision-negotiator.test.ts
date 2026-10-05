@@ -469,11 +469,11 @@ it('emits only fixed validation stage while a throwing observer cannot alter bou
 });
 
 it('retries a hard-invalid first candidate within the same two-attempt job and asks only after kernel acceptance', async () => {
- const h=await setup(); let calls=0; const reasons: unknown[]=[];
+ const h=await setup(); let calls=0; const reasons: unknown[]=[]; const rejected: number[][]=[];
  const before=(await h.application.getOwnerSnapshot(participant('maya'),decisionId));
- const negotiator=createNegotiator(h.application,async input=>{calls++;reasons.push(input.retryReason);return generated(input,'mazatlan',calls===1?170_000:150_000);});
+ const negotiator=createNegotiator(h.application,async input=>{calls++;reasons.push(input.retryReason);rejected.push([...(input.rejectedCandidateIndices ?? [])]);return generated(input,'mazatlan',calls===1?170_000:150_000);});
  const result=await negotiator.generate(participant('maya'),decisionId);
- expect(calls).toBe(2);expect(reasons).toEqual([null,'KERNEL_REJECTION']);expect(result.outcome).toBe('NEEDS_PERMISSION');
+ expect(calls).toBe(2);expect(reasons).toEqual([null,'KERNEL_REJECTION']);expect(rejected[0]).toEqual([]);expect(rejected[1]).toHaveLength(1);expect(Number.isInteger(rejected[1]![0])).toBe(true);expect(rejected[1]![0]).toBeGreaterThanOrEqual(0);expect(result.outcome).toBe('NEEDS_PERMISSION');
  expect(result.publicSnapshot.currentProposal).toBeNull();
  expect((await h.application.getOwnerSnapshot(participant('nina'),decisionId)).pendingQuestions.filter(q=>q.status==='PENDING')).toHaveLength(1);
  expect((await h.application.getOwnerSnapshot(participant('maya'),decisionId)).controlVersion).toBeGreaterThan(before.controlVersion);

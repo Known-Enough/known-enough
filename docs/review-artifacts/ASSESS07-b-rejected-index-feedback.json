@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "sourceBase": "b7b1c9dd6c4b4279a925c372ec9baf62fd5b3ed3",
+  "observedRun": 37326713322,
+  "observedRetryStage": "NEGOTIATION_KERNEL_REJECTION",
+  "checks": {
+    "focused": 59,
+    "application": 759,
+    "optionalSkipped": 2,
+    "browser": 61,
+    "fullExit": 0
+  },
+  "files": {
+    "packages/application/src/decision-negotiator.ts": "d4c5a645a637fbf5ac851b880fcf5500e0b828a2cbe7a83b9a378f74db9a5cae",
+    "packages/adapters/src/bedrock-models.ts": "979c6a6795b981e5861f9242e5e7f989a9656015db9c2443deb8926b57f7b03b",
+    "packages/application/src/decision-negotiator.test.ts": "0572e03ea4934964a6798af88d2ae60ad41f0825c72152f4f58c60390aabb336"
+  },
+  "change": "Copied trusted rejected public catalog index in second-attempt feedback, no filter or extra attempt",
+  "liveEffect": "UNKNOWN"
+}

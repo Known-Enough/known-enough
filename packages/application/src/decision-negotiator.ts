@@ -20,6 +20,7 @@ export interface DecisionNegotiationModelInput {
   publicCandidates: KE.CandidateProposal['values'][];
   attempt: number;
   retryReason: 'INVALID_OUTPUT' | 'KERNEL_REJECTION' | 'MODEL_ERROR' | null;
+  rejectedCandidateIndices?: number[];
   signal: AbortSignal;
   invocation?: ModelInvocation;
 }
@@ -177,12 +178,12 @@ export class DecisionNegotiator {
       throw new Error('Invalid negotiation bounds');
   }
 
-  private async invoke(context: DecisionNegotiationContext, publicCandidates: KE.CandidateProposal['values'][], attempt: number, retryReason: DecisionNegotiationModelInput['retryReason'], invocation: ModelInvocation): Promise<unknown> {
+  private async invoke(context: DecisionNegotiationContext, publicCandidates: KE.CandidateProposal['values'][], attempt: number, retryReason: DecisionNegotiationModelInput['retryReason'], invocation: ModelInvocation, rejectedCandidateIndices: number[] = []): Promise<unknown> {
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
       return await Promise.race([
-        this.options.model({ context, publicCandidates: structuredClone(publicCandidates), attempt, retryReason, signal: controller.signal, invocation }),
+        this.options.model({ context, publicCandidates: structuredClone(publicCandidates), attempt, retryReason, rejectedCandidateIndices: [...rejectedCandidateIndices], signal: controller.signal, invocation }),
         new Promise<never>((_, reject) => {
           timer = setTimeout(() => { controller.abort(); reject(new DecisionNegotiatorError('MODEL_FAILED')); }, this.timeoutMs);
         }),
@@ -236,13 +237,14 @@ export class DecisionNegotiator {
     let parsed: ParsedNegotiationOutput | null = null;
     let attempts = 0;
     let retryReason: DecisionNegotiationModelInput['retryReason'] = null;
+    const rejectedCandidateIndices: number[] = [];
     let modelFailed = false;
     let diagnosticReason: NegotiationOutputFailureReason = 'OUTPUT_ENVELOPE';
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
       attempts = attempt;
       let output: unknown;
       try {
-        output = await this.invoke(context, publicCandidates, attempt, retryReason, invocation);
+        output = await this.invoke(context, publicCandidates, attempt, retryReason, invocation, rejectedCandidateIndices);
       } catch {
         modelFailed = true;
         retryReason = 'MODEL_ERROR';
@@ -267,6 +269,8 @@ export class DecisionNegotiator {
             reportModelFailure(this.options.diagnostic, 'NEGOTIATION', 'NEGOTIATION_KERNEL_REJECTION');
             parsed = null;
             retryReason = 'KERNEL_REJECTION';
+            const rejectedIndex = publicCandidates.findIndex(values => publicValueIdentity(context, values) === publicValueIdentity(context, selected));
+            if (rejectedIndex >= 0) rejectedCandidateIndices.push(rejectedIndex);
             continue;
           }
           break;

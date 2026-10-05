@@ -48,6 +48,7 @@ const prompts: Record<ModelJobKind, string> = {
   NEGOTIATION: policy + 'Select exactly one entry from publicCandidates and return its zero-based array index as candidateIndex. '
     + 'Do not repeat, edit or summarize its values; the server copies the exact catalog entry. '
     + 'First evaluate each candidate against every shared rule and every confirmed HARD constraint. Select a candidate satisfying all of them. '
+    + 'rejectedCandidateIndices identifies prior public catalog selections rejected by the kernel in this same attempt sequence. It is feedback, not a filtered catalog or permission. Reconsider those selections against mandatory rules; never relax a hard constraint. '
     + 'When retryReason is KERNEL_REJECTION, the prior catalog selection failed mandatory kernel checks. Re-evaluate every candidate against shared rules and HARD constraints before selecting; do not repeat a rejected selection merely to satisfy a negotiable preference. '
     + 'HARD constraints are mandatory; do not select a candidate violating one to satisfy a NEGOTIABLE constraint. '
     + 'A candidate satisfying all mandatory rules may conflict with a NEGOTIABLE constraint: select that candidate and request its owner permission through questionIntents. '
@@ -301,7 +302,7 @@ export function createBedrockModels(options: {
         ownerParticipantId: permission.ownerParticipantId, constraintId: permission.constraintId,
         constraintVersion: permission.constraintVersion, adjustment: permission.adjustment, expiresAt: permission.expiresAt,
       })),
-      publicCandidates: input.publicCandidates, attempt: input.attempt, retryReason: input.retryReason,
+      publicCandidates: input.publicCandidates, attempt: input.attempt, retryReason: input.retryReason, rejectedCandidateIndices: input.rejectedCandidateIndices ?? [],
     }, input.invocation ? { ...input.invocation, signal: input.signal } : undefined),
   };
 }
