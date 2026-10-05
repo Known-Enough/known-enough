@@ -1,0 +1,82 @@
+{
+  "observedAt": "2026-10-05T05:05:15Z",
+  "account": "Battosai1806",
+  "accountId": 143764700,
+  "sourceCommit": "7d201a2ad34f42874a6b2a4ce19757193aceea22",
+  "deploymentRun": 37264571832,
+  "ciRun": 37264571828,
+  "qualificationRun": 37264606291,
+  "report": {
+    "schemaVersion": 1,
+    "runId": "gh-37264606291-1",
+    "sourceCommit": "7d201a2ad34f42874a6b2a4ce19757193aceea22",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "PASS",
+      "privacy": "PASS",
+      "signup": "PASS",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "mailStatus": "MAIL_CODE_READY",
+        "status": "PASS"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "operationStatus": "HTTP_TRANSPORT_FAILED",
+        "phase": "QA03_FRAME_CONFIRM",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 2,
+      "failed": 1,
+      "blocked": 4,
+      "modelAttempts": 1,
+      "signupMessages": 1
+    }
+  },
+  "focusedChecks": {
+    "exit": 0,
+    "testsPassed": 39,
+    "files": [
+      "packages/application/src/decision-negotiator.test.ts",
+      "tests/integration/live-qa-setup.test.ts",
+      "tests/integration/live-qa-standing.test.ts"
+    ]
+  },
+  "findings": [
+    "Current frame-confirmation failure is HTTP_TRANSPORT_FAILED; exact provider/network cause UNKNOWN. Privacy/CLEAN PASS.",
+    "Latest usage readback reports one model attempt and one signup message. Older conflicting readback remains UNKNOWN; no counter reset or inferred reconciliation.",
+    "Budget transport reads AUTH/LEASE/TOTAL consistently and atomically reserves per-run/cumulative accounting before provider call. Broker stats requires matching active lease.",
+    "Existing negotiator regression proves hard-invalid candidate must not create negotiation override.",
+    "Live owner read asserts only constraint kind, not exact finite variable/option semantics; interpreted fixture drift can reach QA04. No private output inspected."
+  ],
+  "nextAction": "Within same ASSESS07 add semantic review checks for the exact synthetic finite owner requirements before confirming conditions; reproduce correct and incorrect interpretation locally. Do not waive hard constraints or retry unchanged paid run."
+}
