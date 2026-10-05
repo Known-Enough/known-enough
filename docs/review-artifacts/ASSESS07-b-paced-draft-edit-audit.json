@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "sourceCommit": "70a23634d8a229c8fe4fda86b7264ebb412ae164",
+  "run": 37339073510,
+  "phase": "QA03_EDIT",
+  "cause": "UNKNOWN",
+  "privacy": "PASS",
+  "cleanup": "PASS",
+  "focused": 5,
+  "browser": 2,
+  "files": {
+    "tests/live/qa/journey.spec.ts": "9d3295ae8e9a4a379dde48478d2537cece81aad0b910dbff769b9c43a4bcd95c",
+    "apps/web/src/group-decisions.tsx": "810425358d9adbfe40ec56e0046f90a6b9dc6409c58f83b2f7aa389aa30284c4",
+    "scripts/live-qa/request-pacing.mjs": "c15477c8b06e1a25874763f61ce4e66cf5069fb252eb667e7be40e5727b3dbaf",
+    "tests/e2e/np-clarity.spec.ts": "193204d9fb3ab179426decdfe04e377565736df710467367d143e30ce7fac03b"
+  },
+  "findings": [
+    "Save commit and unanswered clarification guards pass focused browser regressions",
+    "Live edit phase bundles multiple assertions and does not observe draft-save HTTP outcome",
+    "No HTTP429 reported at this failure; this does not prove throttle problem resolved"
+  ],
+  "nextAction": "Split live draft-edit phase into save/review assertions and capture existing draft-save HTTP status before diagnosing or changing application behavior."
+}
