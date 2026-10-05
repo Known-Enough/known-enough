@@ -19,7 +19,7 @@ export interface DecisionNegotiationModelInput {
   context: DecisionNegotiationContext;
   publicCandidates: KE.CandidateProposal['values'][];
   attempt: number;
-  retryReason: 'INVALID_OUTPUT' | 'KERNEL_REJECTION' | 'MODEL_ERROR' | null;
+  retryReason: 'INVALID_OUTPUT' | 'KERNEL_REJECTION' | 'MISSING_QUESTION' | 'MODEL_ERROR' | null;
   rejectedCandidateIndices?: number[];
   signal: AbortSignal;
   invocation?: ModelInvocation;
@@ -265,7 +265,13 @@ export class DecisionNegotiator {
         if (selected) {
           // Publish the trusted catalog representation, never a model-controlled ordering/encoding.
           parsed.candidate.values = structuredClone(selected);
-          if (attempt < MAX_ATTEMPTS && await this.options.application.previewReasoning(service, decisionId, job.id, parsed.candidate) === 'INVALID') {
+          const preview = attempt < MAX_ATTEMPTS ? await this.options.application.previewReasoning(service, decisionId, job.id, parsed.candidate) : null;
+          if (preview === 'NEEDS_PERMISSION' && parsed.questionIntents.length === 0) {
+            parsed = null;
+            retryReason = 'MISSING_QUESTION';
+            continue;
+          }
+          if (preview === 'INVALID') {
             reportModelFailure(this.options.diagnostic, 'NEGOTIATION', 'NEGOTIATION_KERNEL_REJECTION');
             parsed = null;
             retryReason = 'KERNEL_REJECTION';

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "sourceBase": "b65e13df0bf4b8db7c05f5d17954f5d9207b7cca",
+  "observedRun": 37330814022,
+  "observedOutcome": "NEEDS_PERMISSION with NEGOTIABLE_PERMISSION_REQUIRED; question server assertion failed, exact read status unknown",
+  "checks": {
+    "focused": 78,
+    "application": 760,
+    "optionalSkipped": 2,
+    "browser": 61,
+    "fullExit": 0
+  },
+  "files": {
+    "packages/application/src/decision-negotiator.ts": "098ba6b7b8062da501c11dc83ecd7f3adf63e1d86c84b6c89a3ba1f2179eabe9",
+    "packages/adapters/src/bedrock-models.ts": "a1c26049dff9e1d11889e471e62f323af567a24cba50871313d190de7fccd10d",
+    "packages/application/src/decision-negotiator.test.ts": "ebf51665e429f1d6d967c02e26b04b0a49aefe109b611d9322fb2402c4bd3932",
+    "tests/live/qa/helpers.ts": "d4892589b3b37a75d0ef46298f87680872b5a1c2cdb970b91f88469e23ee3d93",
+    "tests/live/qa/journey.spec.ts": "9d3295ae8e9a4a379dde48478d2537cece81aad0b910dbff769b9c43a4bcd95c"
+  },
+  "change": "Existing remaining attempt retries an empty intent after permission-required preview, no server fallback question/grant; owner read records fixed status.",
+  "liveEffect": "UNKNOWN"
+}

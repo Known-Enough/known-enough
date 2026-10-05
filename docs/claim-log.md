@@ -166,3 +166,5 @@ Run030 same-task scope before edits: gateway observer fixed safe outcome categor
 Run032 same-task scope before edits: decision-negotiator retryReason fixed KERNEL_REJECTION for first kernel-invalid candidate, adapter instructions and regression assertion. Existing attempts/bounds/final checks unchanged; no grant generation or NP00 files.
 
 Run033 same-task scope before edits: negotiator retry feedback trusted rejected public catalog index, adapter payload/prompt and bounded regression. No catalog filter/candidate substitution/extra attempt/private reason disclosure; NP00 excluded.
+
+Run034 scope before edits: existing first-attempt preview NEEDS_PERMISSION with empty intents triggers bounded MISSING_QUESTION retry feedback; adapter prompt/tests; QA04 owner read fixed HTTP status. No server-generated intent, extra attempts, grants or NP00 edits. Live missing-question cause not yet established.

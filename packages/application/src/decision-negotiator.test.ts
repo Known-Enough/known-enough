@@ -484,3 +484,12 @@ it('preserves INVALID and no question after both bounded candidates violate a ha
  expect((await negotiator.generate(participant('maya'),decisionId)).outcome).toBe('INVALID');expect(calls).toBe(2);
  expect((await h.application.getOwnerSnapshot(participant('nina'),decisionId)).pendingQuestions).toEqual([]);
 });
+
+it('uses the remaining attempt for a permission-required candidate with no question intent',async()=>{
+ const h=await setup();const reasons:unknown[]=[];
+ const negotiator=createNegotiator(h.application,async input=>{reasons.push(input.retryReason);const output=generated(input,'mazatlan',150_000);return input.attempt===1?{...output,questionIntents:[]}:output;});
+ const result=await negotiator.generate(participant('maya'),decisionId);
+ expect(reasons).toEqual([null,'MISSING_QUESTION']);expect(result.outcome).toBe('NEEDS_PERMISSION');
+ expect(result.publicSnapshot.currentProposal).toBeNull();
+ expect((await h.application.getOwnerSnapshot(participant('nina'),decisionId)).pendingQuestions.filter(q=>q.status==='PENDING')).toHaveLength(1);
+});
