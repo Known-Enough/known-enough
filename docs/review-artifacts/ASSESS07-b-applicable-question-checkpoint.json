@@ -1,0 +1,87 @@
+{
+  "observedAt": "2026-10-05T10:11:10Z",
+  "account": "Battosai1806",
+  "accountId": 143764700,
+  "baselineCommit": "bbf822efd5b3cfe703f49da5c00bfb9262e3322d",
+  "qualificationRun": 37291801070,
+  "deploymentRun": 37291735268,
+  "ciRun": 37291735327,
+  "report": {
+    "schemaVersion": 1,
+    "modelFailures": [],
+    "runId": "gh-37291801070-1",
+    "sourceCommit": "bbf822efd5b3cfe703f49da5c00bfb9262e3322d",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "PASS",
+      "privacy": "PASS",
+      "signup": "PASS",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "mailStatus": "MAIL_CODE_READY",
+        "status": "PASS"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "ruleFailureKinds": [],
+        "kernelCodes": [
+          "NEGOTIABLE_PERMISSION_REQUIRED"
+        ],
+        "reasoningOutcome": "NEEDS_PERMISSION",
+        "operationStatus": "HTTP_OK",
+        "phase": "QA04_QUESTION",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 3,
+      "failed": 1,
+      "blocked": 3,
+      "modelAttempts": 6,
+      "signupMessages": 1
+    }
+  },
+  "checks": {
+    "focused": 58,
+    "application": 752,
+    "optionalSkipped": 2,
+    "hosted": 1,
+    "e2e": 60,
+    "fullExit": 0
+  },
+  "hashes": {
+    "packages/adapters/src/bedrock-models.ts": "e93174eec9b16cc2cf13aa095c8c8e9e7cc9116401fd6f580f82eb563f157d73",
+    "tests/live/qa/journey.spec.ts": "6bacc80f13167e87074f55bbbcab1f197af2b92af7516c8d03ac6cac1b80dfdb",
+    "scripts/live-qa/runner-core.mjs": "28502fc31c1aed2b70648adfd160fcaad6704120650ecb84b3783dbbe6ea968a",
+    "scripts/live-qa/sanitized-reporter.mjs": "4baa749ed970a0005d6d2853778d0698569eefbc3a398bb9552c078e9b1f4028"
+  },
+  "change": "Specify exact applicable question intent for violated negotiable constraint and selected candidate option. Authenticated live server pending-question assertion precedes UI.",
+  "limitations": "Prior missing question server/UI cause UNKNOWN. No automatic question, permission or candidate substitution. New source live effect UNKNOWN."
+}

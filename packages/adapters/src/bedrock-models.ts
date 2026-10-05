@@ -56,6 +56,9 @@ const prompts: Record<ModelJobKind, string> = {
     + 'questionIntents is an array of {ownerParticipantId,constraintId,constraintVersion,adjustmentVariableId,adjustmentOptionIds}. '
     + 'Only propose a concession to that same owner\'s explicitly NEGOTIABLE public ENUM choice, using declared public options. '
     + 'Set adjustmentVariableId to that choice variable ID and adjustmentOptionIds to one or more of its declared option IDs. '
+    + 'For every NEGOTIABLE constraint violated by the selected candidate and not covered by an active exact permission, include one questionIntent for that constraint. '
+    + 'Copy ownerParticipantId, constraintId and constraintVersion exactly from that confirmed constraint. Set adjustmentOptionIds to include the selected candidate option for adjustmentVariableId. '
+    + 'An adjustment that excludes the selected option cannot resolve the conflict. Never emit an intent for a HARD constraint or invent permissionDependencies. '
     + 'Never put private numbers, dates, reasons, identifiers or another owner\'s constraints into questions or public values. '
     + 'Do not relax hard constraints. The server constructs a trusted-backend IN rule from the flat adjustment fields; do not emit a rule object.',
 };
