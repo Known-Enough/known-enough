@@ -1,4 +1,4 @@
-import { safeKernelCodes } from './kernel-codes.mjs';
+import { safeKernelCodes, safeRuleFailureKinds } from './kernel-codes.mjs';
 import { safeModelFailures } from './model-failure-diagnostics.mjs';
 import { publicTarget, requireRunId } from './config.mjs';
 export const REQUIRED_TESTS = [
@@ -48,7 +48,7 @@ export function safeResults(tests) {
     return REQUIRED_TESTS.map(title => {
         const found = tests.filter(t => t.title === title);
         return {
-            title, ...(found.length === 1 && Array.isArray(found[0].kernelCodes) ? {kernelCodes: safeKernelCodes(found[0].kernelCodes)} : {}), ...(found.length === 1 && SAFE_FRAME_STATUSES.includes(found[0].frameStatus) ? { frameStatus: found[0].frameStatus } : {}), ...(found.length === 1 && SAFE_REASONING_OUTCOMES.includes(found[0].reasoningOutcome) ? { reasoningOutcome: found[0].reasoningOutcome } : {}), ...(found.length === 1 && SAFE_OPERATION_STATUSES.includes(found[0].operationStatus) ? { operationStatus: found[0].operationStatus } : {}), ...(found.length === 1 && SAFE_MAIL_STATUSES.includes(found[0].mailStatus) ? { mailStatus: found[0].mailStatus } : {}), ...(found.length === 1 && SAFE_PHASES.includes(found[0].phase) ? { phase: found[0].phase } : {}), status: found.length === 1 && found[0].status === 'passed' ? 'PASS' : found.some(t => ['failed', 'timedOut', 'interrupted'].includes(t.status)) ? 'FAIL' : 'BLOCKED'
+            title, ...(found.length === 1 && Array.isArray(found[0].ruleFailureKinds) ? {ruleFailureKinds: safeRuleFailureKinds(found[0].ruleFailureKinds)} : {}), ...(found.length === 1 && Array.isArray(found[0].kernelCodes) ? {kernelCodes: safeKernelCodes(found[0].kernelCodes)} : {}), ...(found.length === 1 && SAFE_FRAME_STATUSES.includes(found[0].frameStatus) ? { frameStatus: found[0].frameStatus } : {}), ...(found.length === 1 && SAFE_REASONING_OUTCOMES.includes(found[0].reasoningOutcome) ? { reasoningOutcome: found[0].reasoningOutcome } : {}), ...(found.length === 1 && SAFE_OPERATION_STATUSES.includes(found[0].operationStatus) ? { operationStatus: found[0].operationStatus } : {}), ...(found.length === 1 && SAFE_MAIL_STATUSES.includes(found[0].mailStatus) ? { mailStatus: found[0].mailStatus } : {}), ...(found.length === 1 && SAFE_PHASES.includes(found[0].phase) ? { phase: found[0].phase } : {}), status: found.length === 1 && found[0].status === 'passed' ? 'PASS' : found.some(t => ['failed', 'timedOut', 'interrupted'].includes(t.status)) ? 'FAIL' : 'BLOCKED'
         };
     });
 }

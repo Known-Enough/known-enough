@@ -1,0 +1,88 @@
+{
+  "observedAt": "2026-10-05T08:11:05Z",
+  "account": "Battosai1806",
+  "accountId": 143764700,
+  "baselineCommit": "2ca407da3dd1beb262c86bfbfecef42a0e96d51f",
+  "qualificationRun": 37279339986,
+  "deploymentRun": 37279291505,
+  "ciRun": 37279291438,
+  "report": {
+    "schemaVersion": 1,
+    "modelFailures": [],
+    "runId": "gh-37279339986-1",
+    "sourceCommit": "2ca407da3dd1beb262c86bfbfecef42a0e96d51f",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "PASS",
+      "privacy": "PASS",
+      "signup": "PASS",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "mailStatus": "MAIL_CODE_READY",
+        "status": "PASS"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "kernelCodes": [
+          "RULE_FAILED"
+        ],
+        "reasoningOutcome": "INVALID",
+        "operationStatus": "HTTP_OK",
+        "phase": "QA04_QUESTION",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 3,
+      "failed": 1,
+      "blocked": 3,
+      "modelAttempts": 6,
+      "signupMessages": 1
+    }
+  },
+  "checks": {
+    "focusedPassed": 20,
+    "applicationPassed": 750,
+    "optionalSkips": 2,
+    "hostedPassed": 1,
+    "e2ePassed": 60,
+    "fullExitCode": 0
+  },
+  "hashes": {
+    "scripts/live-qa/kernel-codes.mjs": "d84eaebed9ce1b63b9ca239856b86aa6781f637c0fec0105dd4a674b15c8430e",
+    "scripts/live-qa/kernel-codes.d.mts": "abfd2d4d01d602ae15953a8fdade89128911860d6d8a15c1fe6387dbcf0d42f4",
+    "scripts/live-qa/kernel-diagnostics.ts": "3b30594a6ce647eb1f4c1322b0909f060bd41cc0d1fe68c060157e23a44a78e0",
+    "scripts/live-qa/runner-core.mjs": "7e3b8b5600f42185e645ab37d1b74a8ac0484d9fdf0fd835e80d5cf88d80af8e",
+    "scripts/live-qa/sanitized-reporter.mjs": "dab6c6e1cecc856b8bed80fb0bd5c7dfe23ed3763c736065fc21ee497d8d5734",
+    "tests/live/qa/journey.spec.ts": "b35de4c71244e8362c34f730a4cb67a746d194deb70d64f5a3882b8517f2aef2",
+    "tests/integration/live-qa-kernel-diagnostics.test.ts": "dc898b8e1e0ebc0d7bc881c736932a463438060a621d1feb207ec15cc756210c"
+  },
+  "limitation": "RULE_FAILED is observed re-evaluation, not original commit-time diagnosis. Exact failing rule class UNKNOWN until matching new live report. Fixed class only; IDs/owners/values omitted."
+}

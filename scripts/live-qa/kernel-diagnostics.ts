@@ -1,7 +1,21 @@
 import { KnownEnough as KE } from '../../packages/contracts/src/index.ts';
-import { evaluateKnownEnoughCandidate } from '../../packages/domain/src/index.ts';
-import { safeKernelCodes } from './kernel-codes.mjs';
+import { evaluateKnownEnoughCandidate, type KnownEnoughKernelDiagnostic } from '../../packages/domain/src/index.ts';
+import { safeKernelCodes, safeRuleFailureKinds } from './kernel-codes.mjs';
 import type { KnownEnoughRecord } from '../../packages/application/src/index.ts';
+export function classifyFailedRules(
+  diagnostics: readonly KnownEnoughKernelDiagnostic[],
+  publicRuleIds: readonly string[],
+  constraints: readonly {constraintId: string; ownerParticipantId: string; status: string; kind: string; rule?: {id: string}}[],
+) {
+  return safeRuleFailureKinds(diagnostics.filter(d => d.code === 'RULE_FAILED').map(d => {
+    if (d.constraintId !== undefined || d.ownerParticipantId !== undefined) {
+      const matches = constraints.filter(c => c.constraintId === d.constraintId && c.ownerParticipantId === d.ownerParticipantId
+        && c.status === 'ACTIVE' && c.kind === 'HARD' && c.rule?.id === d.ruleId);
+      return matches.length === 1 ? 'HARD_CONDITION' : 'UNKNOWN_RULE';
+    }
+    return d.ruleId !== undefined && publicRuleIds.includes(d.ruleId) ? 'PUBLIC_RULE' : 'UNKNOWN_RULE';
+  }));
+}
 /** Internal QA only: caller checks active lease and run ownership before supplying a record. */
 export async function diagnosePendingCandidate(decision: KnownEnoughRecord | null) {
   const candidate = decision?.pendingCandidate;
@@ -18,5 +32,5 @@ export async function diagnosePendingCandidate(decision: KnownEnoughRecord | nul
     negotiationPermissions: decision.owners.flatMap(o => o.negotiationPermissions.filter(p => p.status === 'ACTIVE')),
     disclosurePermissions: decision.owners.flatMap(o => o.disclosurePermissions.filter(p => p.status === 'ACTIVE')),
     now: new Date().toISOString()});
-  return {status: 'PASS', codes: safeKernelCodes(result.diagnostics.map(d => d.code))};
+  return {status: 'PASS', codes: safeKernelCodes(result.diagnostics.map(d => d.code)), ruleFailureKinds: classifyFailedRules(result.diagnostics, decision.definition.rules.map(r => r.id), decision.owners.flatMap(o => o.confirmedConstraints))};
 }
