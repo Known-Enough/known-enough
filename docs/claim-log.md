@@ -182,3 +182,5 @@ Run042 scope before edits: same ASSESS07 negotiator fixed PERMISSION_DEPENDENCIE
 Follow-up same ASSESS07 scope: live reasoning helper rejects non-OK existing response at actual exploration phase, focused regression; no extra request/retry/permission waiver, NP00 excluded.
 
 Run049 scope: same ASSESS07 read-only job/context guarded question-intent coverage preview, existing MISSING_QUESTION retry and wrong-option regression. No grant generation, attempt increase, postcommit filter waiver or NP00 edit.
+
+Run050 scope: same ASSESS07 final-attempt question coverage validation and regression; preserve two attempts/final authorization, no fallback intent/grant or NP00 edit.

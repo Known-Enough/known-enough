@@ -279,13 +279,14 @@ export class DecisionNegotiator {
         if (selected) {
           // Publish the trusted catalog representation, never a model-controlled ordering/encoding.
           parsed.candidate.values = structuredClone(selected);
-          const preview = attempt < MAX_ATTEMPTS ? await this.options.application.previewReasoning(service, decisionId, job.id, parsed.candidate) : null;
+          const preview = await this.options.application.previewReasoning(service, decisionId, job.id, parsed.candidate);
           if (preview === 'NEEDS_PERMISSION' && !await this.options.application.previewReasoningQuestions(service, decisionId, job.id, parsed.candidate, parsed.questionIntents)) {
             parsed = null;
+            diagnosticReason = 'QUESTION_INTENTS';
             retryReason = 'MISSING_QUESTION';
             continue;
           }
-          if (preview === 'INVALID') {
+          if (preview === 'INVALID' && attempt < MAX_ATTEMPTS) {
             reportModelFailure(this.options.diagnostic, 'NEGOTIATION', 'NEGOTIATION_KERNEL_REJECTION');
             parsed = null;
             retryReason = 'KERNEL_REJECTION';

@@ -266,7 +266,7 @@ describe('KE09 negotiation corrections', () => {
       const output = generated(input);
       return { ...output, questionIntents: [{ ...output.questionIntents[0], adjustment: privateConstraint.rule }] };
     });
-    expect((await negotiator.generate(participant('maya'), decisionId)).outcome).toBe('NEEDS_PERMISSION');
+    await expect(negotiator.generate(participant('maya'), decisionId)).rejects.toMatchObject({ code: 'INVALID_MODEL_OUTPUT', diagnosticReason: 'QUESTION_INTENTS' });
     const nina = await h.application.getOwnerSnapshot(participant('nina'), decisionId);
     expect(nina.pendingQuestions).toEqual([]);
     expect(JSON.stringify(nina)).not.toContain('maya-budget-rule');
@@ -562,4 +562,17 @@ it('retries a nonempty intent whose adjustment excludes the selected option with
  const owner = await h.application.getOwnerSnapshot(participant('nina'), decisionId);
  expect(owner.pendingQuestions.filter(q => q.status === 'PENDING')).toHaveLength(1);
  expect(owner.pendingQuestions[0]?.adjustment).toMatchObject({ operator: 'IN', values: [{ type: 'ENUM', optionId: 'mazatlan' }] });
+});
+
+
+it('rejects unusable final intents after a hard-invalid first attempt without a third call or pending question', async () => {
+ const h = await setup(); let calls = 0;
+ const negotiator = createNegotiator(h.application, async input => {
+  calls++; const output = generated(input, 'mazatlan', input.attempt === 1 ? 170_000 : 150_000);
+  return { ...output, questionIntents: [] };
+ });
+ await expect(negotiator.generate(participant('maya'), decisionId)).rejects.toMatchObject({ code: 'INVALID_MODEL_OUTPUT', diagnosticReason: 'QUESTION_INTENTS' });
+ expect(calls).toBe(2);
+ expect((await h.application.getPublicSnapshot(participant('maya'), decisionId)).currentProposal).toBeNull();
+ expect((await h.application.getOwnerSnapshot(participant('nina'), decisionId)).pendingQuestions).toEqual([]);
 });

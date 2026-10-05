@@ -1,0 +1,21 @@
+{
+  "sourceBase": "2d54770dbc56a26f69a92eba065bf199e5c98662",
+  "files": {
+    "packages/application/src/decision-negotiator.ts": "d19df215e930756c2f71dbe750d0089034ddfb172b55154c69300e40ab787136",
+    "packages/application/src/decision-negotiator.test.ts": "a10f11f086a73461d6da97f30ba33daccb92b3dc54e4b444f951618c681e8261"
+  },
+  "checks": {
+    "focused": 30,
+    "application": 771,
+    "optionalSkipped": 2,
+    "hosted": 1,
+    "browser": 61,
+    "fullExit": 0
+  },
+  "limits": [
+    "Two attempts unchanged",
+    "Final hard-invalid output retains INVALID",
+    "Final unusable question intents rejected before commit, no question/grant/public proposal manufactured",
+    "Extra final preview uses existing budget; live root cause remains UNKNOWN"
+  ]
+}
