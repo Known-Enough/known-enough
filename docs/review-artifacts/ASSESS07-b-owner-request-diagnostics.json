@@ -1,0 +1,85 @@
+{
+  "observedAt": "2026-10-05T06:35:16Z",
+  "account": "Battosai1806",
+  "accountId": 143764700,
+  "sourceCommit": "4dba1dd463c3f9ea09f632ebd7e1ada314af7246",
+  "deploymentRun": 37271311906,
+  "ciRun": 37271311842,
+  "qualificationRun": 37271361287,
+  "report": {
+    "schemaVersion": 1,
+    "runId": "gh-37271361287-1",
+    "sourceCommit": "4dba1dd463c3f9ea09f632ebd7e1ada314af7246",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "PASS",
+      "privacy": "PASS",
+      "signup": "PASS",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "mailStatus": "MAIL_CODE_READY",
+        "status": "PASS"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "phase": "QA03_OWNER_REVIEW",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 2,
+      "failed": 1,
+      "blocked": 4,
+      "modelAttempts": 2,
+      "signupMessages": 1
+    }
+  },
+  "interpretation": "Frame confirmation verification passed; QA03_OWNER_REVIEW failed before semantic guard. Exact provider/model/HTTP cause UNKNOWN. Preserve fixed HTTP outcome through review and wait existing interpretation response; retain only declared kind/stage from existing guarded CloudWatch privacy scan, raw logs discarded. No added provider call, retry, log query or changed acceptance gate.",
+  "checkedCheckpoint": {
+    "at": "2026-10-05T06:41:08Z",
+    "sourceBaseline": "4dba1dd463c3f9ea09f632ebd7e1ada314af7246",
+    "focusedPassed": 19,
+    "fullCheckExit": 0,
+    "applicationPassed": 747,
+    "optionalSkipped": 2,
+    "hostedPassed": 1,
+    "e2ePassed": 60,
+    "referencesPassed": 7,
+    "planningPassed": 15,
+    "sourceSha256": {
+      "scripts/live-qa/model-failure-diagnostics.mjs": "7d492b041482eef357486ec3494c4ffef4e6abd96af08b3bdfaebc29cd318fde",
+      "scripts/live-qa/runner.mjs": "8e187c2dc4cd6d2f983f66c63ee5ecd2c9632b1f28d53fc303abdb43249420b1",
+      "scripts/live-qa/runner-core.mjs": "54c96099b8840b91a8dba7d8535fca764405c6eed4c2e2948edc27bbc236ce54",
+      "scripts/live-qa/sanitized-reporter.mjs": "b731b5dafb43f360ed8faad0057ca6ecbd3f83ae2594a2df48b6bec87c0e3aae",
+      "tests/live/qa/journey.spec.ts": "8b9be46862bb35aa1f9028f40cefc65ed9259449a9b446bf181d29f76686d57c",
+      "tests/integration/live-qa-model-failure-diagnostics.test.ts": "7c65c00e63033f56930aa314ad8c20065b51197133188366d33ba6eb3cd46f1f"
+    }
+  }
+}

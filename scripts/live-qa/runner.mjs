@@ -1,3 +1,4 @@
+import { modelFailuresFromLogs, safeModelFailures } from './model-failure-diagnostics.mjs';
 import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
@@ -28,16 +29,18 @@ export function invokeBroker(target, runId, action, extra = {}, execute = spawnS
 function collectLogPrivacy(startedAt) {
     let next;
     let total = 0;
+    const failures=[];
     do {
         const logs = aws('logs', 'filter-log-events', { logGroupName: '/aws/lambda/known-enough-qa-api', startTime: startedAt, limit: 1000, ...(next ? { nextToken: next } : {}) });
         if ((logs.events ?? []).some(e => /QA_PRIVATE_CANARY_|Bearer [a-zA-Z0-9_.-]+|Qa7!/.test(e.message ?? '')))
             throw new Error('QA_LOG_PRIVACY_FAILURE');
+        failures.push(...modelFailuresFromLogs(logs.events));
         total += (logs.events ?? []).length;
         next = logs.nextToken;
         if (total > 10000)
             throw new Error('QA_LOG_WINDOW_INCOMPLETE');
     } while (next);
-    return 'PASS';
+    return {privacy:'PASS',modelFailures:safeModelFailures(failures)};
 }
 async function play(env) {
     return new Promise(resolveDone => {
@@ -98,7 +101,9 @@ export async function runQualification(targetFile, receiptFile, runId, output) {
             try {
                 const result = invokeBroker(target, runId, 'cleanup');
                 state.cleanup = result.cleanup;
-                state.privacy = collectLogPrivacy(startedAt);
+                const privacy=collectLogPrivacy(startedAt);
+                state.privacy = privacy.privacy;
+                state.modelFailures = privacy.modelFailures;
             }
             catch { /* Cleanup failure blocks qualification and the next lease. */
             }
