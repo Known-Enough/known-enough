@@ -1,0 +1,87 @@
+{
+  "observedAt": "2026-10-05T03:05:11Z",
+  "account": "Battosai1806",
+  "accountId": 143764700,
+  "deploymentRun": 37256391614,
+  "ciRun": 37256391663,
+  "qualificationRun": 37256424311,
+  "sourceCommit": "e04e005de56e8ec61bb9c0b942726f251f173b19",
+  "report": {
+    "schemaVersion": 1,
+    "runId": "gh-37256424311-1",
+    "sourceCommit": "e04e005de56e8ec61bb9c0b942726f251f173b19",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "PASS",
+      "privacy": "PASS",
+      "signup": "PASS",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "mailStatus": "MAIL_CODE_READY",
+        "status": "PASS"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "phase": "QA04_QUESTION",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 3,
+      "failed": 1,
+      "blocked": 3,
+      "modelAttempts": 6,
+      "signupMessages": 1
+    }
+  },
+  "interpretation": "QA03 remains PASS; QA04 fails QA04_QUESTION. Exact live root cause UNKNOWN. Browser control proves click-only reasoning returns before held request; repaired helper waits for existing response, no retry or added paid call. Live expect timeout is45 seconds. Only allowlisted HTTP and reasoning outcome tags are retained.",
+  "checkedCheckpoint": {
+    "at": "2026-10-05T03:11:36Z",
+    "focusedBrowserPassed": 1,
+    "negativeControlExit": 1,
+    "negativeControl": "Expected false, Received true at reasoningFinished while request held; exact repaired helper restored in finally.",
+    "reporterPassed": 15,
+    "fullCheckExit": 0,
+    "applicationPassed": 739,
+    "optionalSkipped": 2,
+    "hostedPassed": 1,
+    "e2ePassed": 60,
+    "referencesPassed": 7,
+    "planningPassed": 15,
+    "sourceSha256": {
+      "tests/live/qa/helpers.ts": "03d54b91f46409d11c0113c7a997eb0b2450661f58401d0cf3d23452cd972ee1",
+      "tests/live/qa/journey.spec.ts": "30af54c2a1f637c91fcd7c809c9b4cd9b2229e3cd4c67c42914c7350bf1c87a2",
+      "scripts/live-qa/runner-core.mjs": "1cd960db32676d25b32333c263120963a3cbe6676cfbb751541410eae7a10179",
+      "scripts/live-qa/sanitized-reporter.mjs": "c4b497d47421d9642ddfcd166a8322f7d1230cb16005bd129cefb3dadb3d3a9a",
+      "tests/e2e/np-qualification.spec.ts": "38fa18ae13f4125fc1a6a7df181f74ff51bbc54900ba637ec816d59424780eef",
+      "tests/integration/live-qa-runner.test.ts": "1a4ff1c06b788c90586ee940b91d01990d35e6814dc05586cb9349f43c862335"
+    }
+  }
+}

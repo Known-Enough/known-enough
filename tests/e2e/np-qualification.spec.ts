@@ -1,7 +1,7 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { test, expect, type BrowserContext } from '@playwright/test';
 import { npApi } from '../evaluations/np-api.ts';
-import { confirmFrameReview } from '../live/qa/helpers.ts';
+import { confirmFrameReview, exploreProposals } from '../live/qa/helpers.ts';
 import { freshGroup } from '../evaluations/np-lifecycle.ts';
 let server: ChildProcess;
 const url = 'http://127.0.0.1:5184/';
@@ -91,7 +91,17 @@ test('four new independent browser owners create a garden decision from blank en
       await page.getByRole('button', { name: 'Confirm selected conditions' }).click();
       await expect(page.getByRole('heading', { name: 'Review the interpretation' })).toHaveCount(0);
     }
-    await host.getByRole('button', { name: 'Load shared decision' }).click(); await host.getByRole('button', { name: 'Explore proposals' }).click();
+    await host.getByRole('button', { name: 'Load shared decision' }).click();
+    const reasoningUrl = `https://api.example.test/decisions/${await host.getByLabel('Decision ID from your invitation').inputValue()}/reasoning`;
+    let releaseReasoning!: () => void; let markReasoning!: () => void;
+    const heldReasoning = new Promise<void>(resolve => { releaseReasoning = resolve; });
+    const reasoningStarted = new Promise<void>(resolve => { markReasoning = resolve; });
+    await host.route(reasoningUrl, async route => { markReasoning(); await heldReasoning; await route.fallback(); });
+    let reasoningFinished = false;
+    const reasoning = exploreProposals(host, reasoningUrl, () => {}).then(() => { reasoningFinished = true; });
+    try { await reasoningStarted; await host.waitForTimeout(100); expect(reasoningFinished).toBe(false); }
+    finally { releaseReasoning(); }
+    await reasoning; await host.unroute(reasoningUrl);
     await expect(host.getByRole('heading', { name: 'Private negotiation question' })).toBeVisible();
     await host.getByRole('button', { name: 'Allow this adjustment' }).click();
     await host.getByRole('button', { name: 'Explore proposals' }).click();

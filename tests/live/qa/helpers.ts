@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
 import { KnownEnough as KE } from '@deal-table/contracts';
 // @ts-expect-error Runtime boundary validation is covered by LIVE02 runner tests.
-import { validateTarget, operationStatus, transportFailureStatus } from '../../../scripts/live-qa/runner-core.mjs';
+import { validateTarget, operationStatus, transportFailureStatus, SAFE_REASONING_OUTCOMES } from '../../../scripts/live-qa/runner-core.mjs';
 // @ts-expect-error CLI broker uses temporary workload credentials; no personal profiles.
 import { invokeBroker } from '../../../scripts/live-qa/runner.mjs';
 export type Actor={actor:string;username:string;email:string;password:string};
@@ -52,5 +52,20 @@ export async function confirmFrameReview(page: Page, commandUrl: string, record:
   await trackOperation(page, commandUrl, async () => {
     await page.getByRole('button', { name: 'Confirm shared frame' }).click();
     await expect(page.getByRole('button', { name: 'Confirm shared frame' })).toHaveCount(0);
+  }, record);
+}
+
+/** Await the existing bounded reasoning response; a browser click does not await model work. */
+export async function exploreProposals(page: Page, reasoningUrl: string, record: (status: string) => void, outcome?: (status: string) => void) {
+  await trackOperation(page, reasoningUrl, async () => {
+    const [response] = await Promise.all([
+      page.waitForResponse(response => response.request().method() === 'POST' && response.url() === reasoningUrl, { timeout: 180000 }),
+      page.getByRole('button', { name: 'Explore proposals' }).click(),
+    ]);
+    // Only an enumerated semantic outcome can leave the response; never persist its body.
+    if (outcome && response.ok()) {
+      const value: unknown = await response.json();
+      if (value && typeof value === 'object' && 'outcome' in value && SAFE_REASONING_OUTCOMES.includes(value.outcome)) outcome(String(value.outcome));
+    }
   }, record);
 }

@@ -120,3 +120,13 @@ test('negotiation diagnostics retain fixed failed substeps without private detai
   expect(JSON.stringify(reporter.tests)).not.toContain('PRIVATE');
   expect(safeResults([{title:REQUIRED_TESTS[3],status:'failed',phase:'QA04_PRIVATE_VALUE'}])[3]).not.toHaveProperty('phase');
 });
+
+test('reasoning diagnostics keep only fixed outcomes without model payloads',async()=>{
+  // @ts-expect-error JavaScript reporter validates fixed tags only.
+  const {default:Reporter}=await import('../../scripts/live-qa/sanitized-reporter.mjs');
+  const reporter=new Reporter();const title={title:REQUIRED_TESTS[3],annotations:[{type:'qa-reasoning-outcome',description:'NEEDS_PERMISSION'},{type:'qa-reasoning-outcome',description:'PRIVATE_MODEL_PAYLOAD'},{type:'qa-operation-status',description:'HTTP_OK'}]};
+  reporter.onStepEnd(title,{}, {title:'QA04_QUESTION',error:{message:'PRIVATE_SERVER_RESPONSE'}});reporter.onTestEnd(title,{status:'failed'});
+  expect(safeResults(reporter.tests)[3]).toEqual({title:REQUIRED_TESTS[3],status:'FAIL',phase:'QA04_QUESTION',operationStatus:'HTTP_OK',reasoningOutcome:'NEEDS_PERMISSION'});
+  expect(JSON.stringify(reporter.tests)).not.toContain('PRIVATE');
+  expect(safeResults([{title:REQUIRED_TESTS[3],status:'failed',reasoningOutcome:'PRIVATE'}])[3]).not.toHaveProperty('reasoningOutcome');
+});

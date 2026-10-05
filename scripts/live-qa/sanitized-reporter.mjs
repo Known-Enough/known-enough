@@ -1,5 +1,5 @@
 import { writeFileSync } from 'node:fs';
-import { REQUIRED_TESTS, SAFE_PHASES, SAFE_MAIL_STATUSES, SAFE_OPERATION_STATUSES } from './runner-core.mjs';
+import { REQUIRED_TESTS, SAFE_PHASES, SAFE_MAIL_STATUSES, SAFE_OPERATION_STATUSES, SAFE_REASONING_OUTCOMES } from './runner-core.mjs';
 const statuses = new Set(['passed', 'failed', 'timedOut', 'skipped', 'interrupted']);
 export default class Reporter {
     tests = [];
@@ -20,8 +20,9 @@ export default class Reporter {
         const mailStatus = (test.annotations ?? []).filter(item => item.type === 'qa-mail-status' && SAFE_MAIL_STATUSES.includes(item.description)).at(-1)?.description;
         const operationStatus = (test.annotations ?? []).filter(item => item.type === 'qa-operation-status' && SAFE_OPERATION_STATUSES.includes(item.description)).at(-1)?.description;
         const phase = this.phases.get(test.title);
+        const reasoningOutcome = (test.annotations ?? []).filter(item => item.type === 'qa-reasoning-outcome' && SAFE_REASONING_OUTCOMES.includes(item.description)).at(-1)?.description;
         if (REQUIRED_TESTS.includes(test.title))
-            this.tests.push({ title: test.title, status, ...(operationStatus && (phase === 'QA03_DRAFT' || phase?.startsWith('QA03_CREATE_') || phase === 'QA03_FRAME_CONFIRM' || phase === 'QA03_OWNER_INTERPRET' || phase === 'QA03_OWNER_CONFIRM') ? { operationStatus } : {}), ...(mailStatus ? { mailStatus } : {}), ...(phase ? { phase } : {}) });
+            this.tests.push({ title: test.title, status, ...(reasoningOutcome && phase?.startsWith('QA04_') ? { reasoningOutcome } : {}), ...(operationStatus && (phase === 'QA03_DRAFT' || phase?.startsWith('QA03_CREATE_') || phase === 'QA03_FRAME_CONFIRM' || phase === 'QA03_OWNER_INTERPRET' || phase === 'QA03_OWNER_CONFIRM' || phase === 'QA04_EXPLORE' || phase === 'QA04_REEXPLORE' || phase === 'QA04_QUESTION') ? { operationStatus } : {}), ...(mailStatus ? { mailStatus } : {}), ...(phase ? { phase } : {}) });
     }
     onEnd(result) {
         const status = ['passed', 'failed', 'timedout', 'interrupted'].includes(result?.status) ? result.status : 'interrupted';

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@playwright/test';
 import { KnownEnough as KE, Groups } from '@deal-table/contracts';
-import { data, fixture, login, register, request, checked, owner, publicView, envelope, command, open, close, renewSessions, trackOperation, confirmFrameReview, type Session } from './helpers.ts';
+import { data, fixture, login, register, request, checked, owner, publicView, envelope, command, open, close, renewSessions, trackOperation, confirmFrameReview, exploreProposals, type Session } from './helpers.ts';
 const sessions:Session[]=[];const people:Session[]=[];let groupId='',decisionId='';let offered:KE.PublicDecisionSnapshot['currentProposal']=null;
 const canary='QA_PRIVATE_CANARY_'+(process.env.QA_RUN_ID??'uninstalled');
 const host=()=>people[0]!;
@@ -107,7 +107,7 @@ await p.getByRole('checkbox',{name:'I reviewed this public draft and the require
 test('QA04 private negotiation and exact agreement',async()=>{
   const step = (name:string, action:()=>Promise<unknown>) => test.step(name,action);
   await step('QA04_LOAD',()=>open(host(),decisionId));
-  await step('QA04_EXPLORE',()=>host().page.getByRole('button',{name:'Explore proposals'}).click());
+  await step('QA04_EXPLORE',()=>exploreProposals(host().page,data().target.ApiUrl+`/decisions/${decisionId}/reasoning`,status=>test.info().annotations.push({type:'qa-operation-status',description:status}),status=>test.info().annotations.push({type:'qa-reasoning-outcome',description:status})));
   await step('QA04_QUESTION',async()=>{
     await expect(host().page.getByRole('heading',{name:'Private negotiation question'})).toBeVisible();
     await expect(host().page.getByText('Permission for this adjustment does not disclose your conditions or approve a final proposal.',{exact:false})).toBeVisible();
@@ -119,7 +119,7 @@ test('QA04 private negotiation and exact agreement',async()=>{
     expect(JSON.stringify(await owner(people[1]!,decisionId))).not.toContain(canary+'-iris');
   });
   await step('QA04_ALLOW',()=>host().page.getByRole('button',{name:'Allow this adjustment'}).click());
-  await step('QA04_REEXPLORE',()=>host().page.getByRole('button',{name:'Explore proposals'}).click());
+  await step('QA04_REEXPLORE',()=>exploreProposals(host().page,data().target.ApiUrl+`/decisions/${decisionId}/reasoning`,status=>test.info().annotations.push({type:'qa-operation-status',description:status}),status=>test.info().annotations.push({type:'qa-reasoning-outcome',description:status})));
   await step('QA04_PROPOSAL_READ',async()=>{offered=(await publicView(host(),decisionId)).currentProposal;expect(!!offered).toBe(true);});
   await step('QA04_DISCLOSURE_SETUP',async()=>{fixture('disclosure',{decisionId,actor:'iris',permissionId:'declined'});await open(host(),decisionId);});
   await step('QA04_DISCLOSURE_REVIEW',()=>expect(host().page.getByRole('heading',{name:'Review this exact disclosure'})).toBeVisible());
