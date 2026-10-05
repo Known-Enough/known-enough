@@ -1,0 +1,25 @@
+{
+  "observedAt": "2026-10-05T07:42:53Z",
+  "account": "Battosai1806",
+  "accountId": 143764700,
+  "baselineCommit": "6208d9d7e0c0eaa22328303f82e4e5ac1ba95fb5",
+  "checks": {
+    "focused": 19,
+    "application": 749,
+    "optionalSkipped": 2,
+    "hosted": 1,
+    "e2e": 60,
+    "fullExit": 0
+  },
+  "hashes": {
+    "scripts/live-qa/kernel-codes.mjs": "cab12174ea87c865dbd4737361db3bbc1ceab22a42a391a167e8159998ab9c4d",
+    "scripts/live-qa/kernel-codes.d.mts": "f4a6cef8a38d51946aaab61497432ba7cbb92a5458732c0a757a2a9c5c9b19b5",
+    "scripts/live-qa/kernel-diagnostics.ts": "bbc72a52e65dfa535fea5f41c3e0a7c895ee163f194b0e39292e83f17ca6ca95",
+    "scripts/live-qa/broker.mjs": "0cf43c95212ebd11bf9ef20ec3fa3bd76173dacdfe563df6df191677dfc28bfe",
+    "scripts/live-qa/runner-core.mjs": "b98412fbeb180270a65064a20b25aed9e1c4ee27423377b9800e49a1bfb9dda7",
+    "scripts/live-qa/sanitized-reporter.mjs": "af65c333aa4e612d3c90506c29dc43ea8c155eeb115d425fdf321c0c74732545",
+    "tests/live/qa/journey.spec.ts": "0578b55b66a77292299f4bb57631f9a428ae1ca97d9fdd6fb390ba20d59f8b0b",
+    "tests/integration/live-qa-kernel-diagnostics.test.ts": "13834830976799e0ae4a0842e81503e2ac0f2d9601339fda6e488caa04f91fc8"
+  },
+  "limitation": "Read-only re-evaluation of run-owned stored pending candidate at observation time, not original commit-time diagnosis. Missing readback omitted and UNKNOWN, observed empty list distinct. No rule IDs, participant IDs, private values or raw errors returned. Live execution on new source UNKNOWN."
+}

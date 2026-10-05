@@ -387,10 +387,14 @@ export async function handler(event) {
             return {
                 status: 'PASS', attempts: l.value.attempts, reservedTokens: l.value.reservedTokens, reservedCostMicros: l.value.reservedCostMicros, signupMessages: l.value.signupMessages ?? 0
             };
-        if (event.action === 'bind-display' || event.action === 'disclosure' || event.action === 'publish-disclosure' || event.action === 'expire-invitation') {
+        if (event.action === 'kernel-diagnostics' || event.action === 'bind-display' || event.action === 'disclosure' || event.action === 'publish-disclosure' || event.action === 'expire-invitation') {
             const owned = await groupRepo().transaction(state => cleanupPlan(state, l.value));
             if (event.action !== 'expire-invitation' && !owned.decisions.includes(event.decisionId))
                 throw new Error('FOREIGN_DECISION');
+            if (event.action === 'kernel-diagnostics') {
+                const { diagnosePendingCandidate } = await import('./kernel-diagnostics.ts');
+                return await createAwsDynamoDBRoomRepository(process.env.QA_DECISION_TABLE, 'us-east-1').transactionDecision(event.decisionId, diagnosePendingCandidate);
+            }
             if (event.action === 'expire-invitation') {
                 const user = l.value.users.find(item => item.actor === event.actor);
                 if (!user)
