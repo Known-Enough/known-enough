@@ -1,4 +1,4 @@
-import { qaUnavailable } from './error-response.ts';
+import { qaUnavailable, qaReadableFailure } from './error-response.ts';
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
 import { createAuthorizedBedrockTransport } from '../../packages/adapters/src/bedrock-models.ts';
 import { createKe13bLambdaHandler, readKe13bConfig, type HttpApiEvent } from '../../apps/api/src/ke13b-lambda.ts';
@@ -13,7 +13,7 @@ export async function qaHandler(event: HttpApiEvent) {
       if (config.models) config.models.provider = { mode: 'INJECTED', transport: budgetedTransport(createAuthorizedBedrockTransport({ paidCallsApproved: true, invocationLoggingDisabled: true, retentionReviewed: true }), new DynamoDBClient({ region: config.region, maxAttempts: 1 }), process.env.QA_CONTROL_TABLE!) };
       handler = createKe13bLambdaHandler(config);
     }
-    return await handler(event);
+    return qaReadableFailure(await handler(event),event,process.env.KE13B_ALLOWED_ORIGIN);
   } catch { return qaUnavailable(event, process.env.KE13B_ALLOWED_ORIGIN); }
 }
 export { handler } from '../../apps/api/src/ke13b-lambda.ts';

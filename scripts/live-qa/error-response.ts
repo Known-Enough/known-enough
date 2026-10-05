@@ -1,4 +1,4 @@
-import type { HttpApiEvent } from '../../apps/api/src/ke13b-lambda.ts';
+import type { HttpApiEvent, HttpApiResult } from '../../apps/api/src/ke13b-lambda.ts';
 
 /** A fixed safe failure stays readable only from the exact configured HTTPS frontend. */
 export function qaUnavailable(event: HttpApiEvent, allowedOrigin: string | undefined) {
@@ -13,4 +13,12 @@ export function qaUnavailable(event: HttpApiEvent, allowedOrigin: string | undef
     headers['access-control-allow-headers'] = 'Authorization, Content-Type, X-Request-Id';
   }
   return { statusCode: 503, headers, body: JSON.stringify({ ok: false, error: { code: 'QA_NOT_READY' } }), isBase64Encoded: false as const };
+}
+
+/** Preserve the trusted handler failure; attach CORS only for an exact validated browser origin. */
+export function qaReadableFailure(result: HttpApiResult, event: HttpApiEvent, allowedOrigin: string | undefined): HttpApiResult {
+  if (result.statusCode < 400 || result.statusCode > 599 || Object.keys(result.headers).some(key=>key.toLowerCase()==='access-control-allow-origin')) return result;
+  const headers=qaUnavailable(event,allowedOrigin).headers;
+  if (!headers['access-control-allow-origin']) return result;
+  return {...result,headers:{...result.headers,...headers}};
 }

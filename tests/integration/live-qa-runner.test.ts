@@ -155,3 +155,8 @@ test('missing usage readback stays unknown through qualification and combined re
   }
   expect(qualificationReport({runId:'run-12345',attempts:-1,signupMessages:'PRIVATE'}).counts).toMatchObject({modelAttempts:null,signupMessages:null});
 });
+
+test('unmapped valid HTTP protocol statuses stay exact and private input cannot become a tag',()=>{
+ for(const status of [301,304,307,308,405,418,599]){expect(operationStatus(status)).toBe(`HTTP_STATUS_${status}`);expect(SAFE_OPERATION_STATUSES).toContain(operationStatus(status));}
+ for(const status of ['304','PRIVATE_TOKEN',1000,NaN,null])expect(operationStatus(status)).toBe('HTTP_OTHER_FAILURE');
+});

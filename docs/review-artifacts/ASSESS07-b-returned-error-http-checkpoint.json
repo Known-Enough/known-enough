@@ -1,0 +1,83 @@
+{
+  "observedAt": "2026-10-05T11:42:07Z",
+  "account": "Battosai1806",
+  "accountId": 143764700,
+  "baselineCommit": "71ee885e96741a6ceec4c1d815219be1319cbd6c",
+  "qualificationRun": 37301732120,
+  "deploymentRun": 37301658529,
+  "ciRun": 37301658528,
+  "report": {
+    "schemaVersion": 1,
+    "modelFailures": [],
+    "runId": "gh-37301732120-1",
+    "sourceCommit": "71ee885e96741a6ceec4c1d815219be1319cbd6c",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "PASS",
+      "privacy": "PASS",
+      "signup": "PASS",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "mailStatus": "MAIL_CODE_READY",
+        "status": "PASS"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "operationStatus": "HTTP_OTHER_FAILURE",
+        "phase": "QA03_FRAME_LOAD",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 2,
+      "failed": 1,
+      "blocked": 4,
+      "modelAttempts": 1,
+      "signupMessages": 1
+    }
+  },
+  "checks": {
+    "focused": 21,
+    "application": 756,
+    "optionalSkipped": 2,
+    "hosted": 1,
+    "e2e": 61,
+    "fullExit": 0
+  },
+  "hashes": {
+    "scripts/live-qa/runner-core.mjs": "b6bdb28b9943fe35783b3e1ff2344f33696380e668b8aaa39279b7c51c4f3789",
+    "scripts/live-qa/error-response.ts": "afac765cf1e2fbc8a6a73797486e7ec335ab7a60264156fe2a07c75e82777f7a",
+    "scripts/live-qa/entry.ts": "031ded4d8ae90343fdccbc008257a8b09640669d32ebaa6932612d9b82aab96e",
+    "tests/integration/live-qa-runner.test.ts": "32a70ce08d4ed75426ec1c5562f38afe629a9592919c4e9b86f8d123fe1157b1",
+    "tests/integration/live-qa-error-response.test.ts": "4f612b660df8c42bbe8d8e85aef2e6ad4f9677a884d157508a75f54b1313e0be"
+  },
+  "change": "Unmapped valid HTTP status100..599 retained as finite exact tags; invalid/private input rejected. QA returned failures get validated exact-origin CORS only if absent, preserving status/body and existing CORS.",
+  "limits": "Live load failure numeric status/cause UNKNOWN until matching execution. No request retry, timeout/permission/budget change or raw payload logging."
+}
