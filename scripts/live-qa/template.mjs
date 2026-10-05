@@ -131,7 +131,7 @@ export function renderTemplates(raw, artifacts) {
             RoleName: 'KnownEnoughGithubQaTest', MaxSessionDuration: 3600, AssumeRolePolicyDocument: oidcTrust, Policies: [
                 {
                     PolicyName: 'InvokeFixtureBrokerAndOwnLogins', PolicyDocument: policy([
-                        statement('lambda:InvokeFunction', att('Broker', 'Arn')), statement('secretsmanager:GetSecretValue', ref('LoginSecret')), statement(['lambda:GetFunctionConfiguration'], att('ApiFunction', 'Arn')), statement(['logs:FilterLogEvents'], sub(`arn:aws:logs:${c.region}:${c.account}:log-group:/aws/lambda/${n.functionName}:*`))
+                        statement('apigateway:GET', sub(`arn:aws:apigateway:${c.region}::/apis/` + '${Api}/stages/$default')), statement('lambda:InvokeFunction', att('Broker', 'Arn')), statement('secretsmanager:GetSecretValue', ref('LoginSecret')), statement(['lambda:GetFunctionConfiguration'], att('ApiFunction', 'Arn')), statement(['logs:FilterLogEvents'], sub(`arn:aws:logs:${c.region}:${c.account}:log-group:/aws/lambda/${n.functionName}:*`))
                     ])
                 }
             ]

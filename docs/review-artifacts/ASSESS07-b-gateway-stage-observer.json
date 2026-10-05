@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "sourceBase": "38bd7e077b76eb9d3db68ceb2a61eb091f1062fd",
+  "files": {
+    "scripts/live-qa/gateway-diagnostics.mjs": "7aa31f019997da46dc1917609f7187f02fe56752c32f22541a468955bb2288fc",
+    "scripts/live-qa/runner.mjs": "a250da3c9fa09bb73a1c0a22ccdddf79ef8571300068eea4b43169fa2683b365",
+    "scripts/live-qa/runner-core.mjs": "5201635816da5d6ea158ec7cca9623e9191096be42411671b55b6c0ab91b5a32",
+    "scripts/live-qa/template.mjs": "f90a8a409a942351ad1af30c76f06965981d068c1a1474179a3b9a7968cf77f7",
+    "tests/integration/live-qa-gateway-diagnostics.test.ts": "bcbab82fc65eec982d89c2c4338cc48d839d43fc952d3e9682581730b49b388a"
+  },
+  "checks": {
+    "focused": 34,
+    "application": 758,
+    "optionalSkipped": 2,
+    "browser": 61,
+    "fullExit": 0
+  },
+  "limitations": [
+    "Deployed permission and stage observation UNKNOWN until matching workload executes",
+    "Numeric stage settings do not identify HTTP429 rejecting layer",
+    "AWS errors redacted to null, no raw response persisted"
+  ]
+}

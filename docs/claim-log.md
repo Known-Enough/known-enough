@@ -158,3 +158,5 @@ B run024 scope amendment before edits: same ASSESS07 known-enough.ts read-only r
 B run025 scope amendment before edits: same ASSESS07 live helper open/loadSharedDecision awaits exact public GET and completed load button state; fixed GET HTTP outcomes collected for public/owner endpoints. Existing journey FRAME_LOAD passes safe note, reporter preserves frame load/review category. No primary UI/API change, no retries or extra read, display remains public-only. Exact live cause UNKNOWN.
 
 B run026 scope amendment before edits: same ASSESS07 scripts/live-qa runner exact bounded HTTP_STATUS codes for unmapped valid protocol status and QA returned-failure CORS helper/entry, focused runner/error-response tests. Preserve original status/body/authentication, only exact configured browser origin, no primary/API source. Original live HTTP_OTHER_FAILURE exact numeric status remains UNKNOWN.
+
+Run029 same-task scope before edits: QA stage-only apigateway GET permission, bounded get-stage numeric throttle projection, runner/report wiring and focused tests. No stage mutation, broad metrics permission or NP00 inspector/IAM edit. Rejection layer remains UNKNOWN.

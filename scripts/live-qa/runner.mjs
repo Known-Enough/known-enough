@@ -1,3 +1,4 @@
+import { collectGatewayThrottle } from './gateway-diagnostics.mjs';
 import { modelFailuresFromLogs, safeModelFailures } from './model-failure-diagnostics.mjs';
 import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -110,6 +111,7 @@ export async function runQualification(targetFile, receiptFile, runId, output) {
         }
         rmSync(directory, { recursive: true, force: true });
     }
+    if (target && state.preflight === 'PASS') state.gatewayThrottle = collectGatewayThrottle(target, aws);
     const report = qualificationReport(state);
     writeFileSync(output, JSON.stringify(report, null, 2) + '\n', { mode: 0o600 });
     return report;
