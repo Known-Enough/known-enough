@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "sourceCommit": "f12a5cd6a75737bf6df7dc4f3b430d7a912691bf",
+  "receiptRuns": [
+    37364417616,
+    37364893248
+  ],
+  "jobConclusion": "cancelled",
+  "executedSteps": 0,
+  "sanitizedPlatformAnnotation": "The job was not acquired by Runner of type hosted even after multiple attempts",
+  "finishedReceipt": {
+    "run": 37364934890,
+    "conclusion": "success"
+  },
+  "qualification": {
+    "run": 37365603096,
+    "status": "queued",
+    "outcome": "UNKNOWN"
+  },
+  "checks": {
+    "reportingTests": 15,
+    "result": "PASS"
+  },
+  "nextAction": "Inspect existing qualification and current lifecycle receipts; do not dispatch duplicate workloads or infer permissions failure."
+}
