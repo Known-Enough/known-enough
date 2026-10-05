@@ -160,3 +160,5 @@ B run025 scope amendment before edits: same ASSESS07 live helper open/loadShared
 B run026 scope amendment before edits: same ASSESS07 scripts/live-qa runner exact bounded HTTP_STATUS codes for unmapped valid protocol status and QA returned-failure CORS helper/entry, focused runner/error-response tests. Preserve original status/body/authentication, only exact configured browser origin, no primary/API source. Original live HTTP_OTHER_FAILURE exact numeric status remains UNKNOWN.
 
 Run029 same-task scope before edits: QA stage-only apigateway GET permission, bounded get-stage numeric throttle projection, runner/report wiring and focused tests. No stage mutation, broad metrics permission or NP00 inspector/IAM edit. Rejection layer remains UNKNOWN.
+
+Run030 same-task scope before edits: gateway observer fixed safe outcome categories and report wiring/regression tests; installed stage permission still UNKNOWN, normal code release does not update stack. No speculative role/throttle mutation or NP00 access.

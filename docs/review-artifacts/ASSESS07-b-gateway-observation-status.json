@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "sourceBase": "ee779657cc8333d310f8e5ca28059be858ddc731",
+  "observedRun": 37315031199,
+  "observedGatewayThrottle": null,
+  "checks": {
+    "focused": 21,
+    "application": 759,
+    "optionalSkipped": 2,
+    "browser": 61,
+    "fullExit": 0
+  },
+  "files": {
+    "scripts/live-qa/gateway-diagnostics.mjs": "f39f5585e0aa7c55a33f4a2e117ef54c296797542933eed7b46fad7c8142a648",
+    "scripts/live-qa/runner.mjs": "cb747d15b283621961a0f3ea98f3136a8c9a27db7baeb1dc0b37a8520f656a3e",
+    "scripts/live-qa/runner-core.mjs": "51f023b6b84888e4266ec6733c54bab0e758949770b3031d00453d5f6bb494ae",
+    "tests/integration/live-qa-gateway-diagnostics.test.ts": "cb71f6843cbb80c6dbd4e03be989c549f581833df3d5dbd0e311125deba58f52"
+  },
+  "limitations": [
+    "Original null does not establish access denial",
+    "Normal code release does not apply CloudFormation role policy",
+    "HTTP429 rejecting layer and deployed observation remain UNKNOWN"
+  ]
+}

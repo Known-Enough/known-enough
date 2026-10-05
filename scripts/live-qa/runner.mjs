@@ -111,7 +111,7 @@ export async function runQualification(targetFile, receiptFile, runId, output) {
         }
         rmSync(directory, { recursive: true, force: true });
     }
-    if (target && state.preflight === 'PASS') state.gatewayThrottle = collectGatewayThrottle(target, aws);
+    if (target && state.preflight === 'PASS') state.gatewayThrottle = collectGatewayThrottle(target, aws, status => { state.gatewayObservation = status; });
     const report = qualificationReport(state);
     writeFileSync(output, JSON.stringify(report, null, 2) + '\n', { mode: 0o600 });
     return report;

@@ -18,3 +18,14 @@ test('unknown observations are null, genuine zero is retained, no unsafe errors 
  expect(report.gatewayThrottle).toEqual({rate:5,burst:10});expect(JSON.stringify(report)).not.toContain('PRIVATE');
  expect(qualificationReport({runId:'run-12345'}).gatewayThrottle).toBeNull();
 });
+
+test('projects fixed observation outcomes without publishing raw AWS denials',()=>{
+ const statuses:string[]=[];const target={ApiUrl:'https://abc123.execute-api.us-east-1.amazonaws.com'};
+ const denied=Object.assign(new Error('PRIVATE_TOKEN'),{awsCode:'AccessDeniedException'});
+ expect(collectGatewayThrottle(target,()=>{throw denied;},(s:string)=>statuses.push(s))).toBeNull();
+ expect(collectGatewayThrottle(target,()=>{throw new Error('PRIVATE');},(s:string)=>statuses.push(s))).toBeNull();
+ expect(collectGatewayThrottle(target,()=>({}),(s:string)=>statuses.push(s))).toBeNull();
+ expect(statuses).toEqual(['ACCESS_DENIED','AWS_READ_FAILED','INVALID_SETTINGS']);
+ expect(qualificationReport({runId:'run-12345',gatewayObservation:'ACCESS_DENIED'}).gatewayObservation).toBe('ACCESS_DENIED');
+ expect(qualificationReport({runId:'run-12345',gatewayObservation:'PRIVATE'}).gatewayObservation).toBeNull();
+});
