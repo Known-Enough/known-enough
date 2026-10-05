@@ -1,0 +1,80 @@
+{
+  "observedAt": "2026-10-05T07:07:46Z",
+  "account": "Battosai1806",
+  "accountId": 143764700,
+  "sourceCommit": "804318cddc7456acc1f593f9aebeae5cf9922489",
+  "qualificationRun": 37273872990,
+  "deploymentRun": 37273813549,
+  "ciRun": 37273813576,
+  "report": {
+    "schemaVersion": 1,
+    "modelFailures": [],
+    "runId": "gh-37273872990-1",
+    "sourceCommit": "804318cddc7456acc1f593f9aebeae5cf9922489",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "PASS",
+      "privacy": "PASS",
+      "signup": "PASS",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "mailStatus": "MAIL_CODE_READY",
+        "status": "PASS"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "reasoningOutcome": "INVALID",
+        "operationStatus": "HTTP_OK",
+        "phase": "QA04_QUESTION",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 3,
+      "failed": 1,
+      "blocked": 3,
+      "modelAttempts": 6,
+      "signupMessages": 1
+    }
+  },
+  "focusedTests": {
+    "passed": 22,
+    "exitCode": 0
+  },
+  "inspectionHashes": {
+    "packages/application/src/decision-negotiator.ts": "b8088bc14fdf39e53ae5fa94614f1b598828982ebc89c67515fa2800f8e3f7f4",
+    "packages/application/src/known-enough.ts": "a0d4407f3b1debc1dc517e5a63ef4c627dd60aa6466d3a65733b7c7e63a51d3b",
+    "packages/adapters/src/bedrock-models.ts": "3a4c982594db4c615506c387e27770ceac09640bd900eeba25a571832d30f73b",
+    "tests/live/qa/journey.spec.ts": "8b9be46862bb35aa1f9028f40cefc65ed9259449a9b446bf181d29f76686d57c",
+    "scripts/live-qa/model-failure-diagnostics.mjs": "7d492b041482eef357486ec3494c4ffef4e6abd96af08b3bdfaebc29cd318fde"
+  },
+  "conclusion": "Kernel evaluation returned INVALID; no model-failure tags observed in completed bounded scan. Exact failed check and selected candidate UNKNOWN. Hard-invalid rejection is preserved.",
+  "nextAction": "Add aggregate allowlisted kernel rejection diagnostics in QA scope, without condition IDs, values or raw errors; validate with privacy tests before matching live execution."
+}
