@@ -1,0 +1,17 @@
+{
+  "sourceCommit": "ddc1c6d799b8ee91d4dbb2851d95b26f58faab03",
+  "qualification": "https://github.com/Known-Enough/known-enough/actions/runs/37358285144",
+  "observedStage": "NEGOTIATION_PERMISSION_DEPENDENCIES",
+  "findings": [
+    "QA01\u201303 PASS; QA04 HTTP_OK question-server FAIL; later journeys BLOCKED",
+    "Parser rejects nonexact dependency keys or a dependency not exactly matching an active permission ID/version/kind/expiry",
+    "Adapter supplies activePermissions and already forbids invented dependencies",
+    "Current retry feedback for this parser failure is generic INVALID_OUTPUT; exact rejected dependency and first/second attempt provenance are UNKNOWN",
+    "Do not manufacture a grant, remove dependency validation, or infer successful kernel selection from absence of a pending candidate"
+  ],
+  "checks": {
+    "focusedTests": 45,
+    "result": "PASS"
+  },
+  "nextAction": "Add bounded specific dependency rejection feedback and behavioral coverage for fabricated/stale dependencies, retaining exact active-permission matching and two attempts."
+}
