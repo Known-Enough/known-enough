@@ -1,0 +1,26 @@
+{
+  "observedAt": "2026-10-05T09:41:37Z",
+  "account": "Battosai1806",
+  "accountId": 143764700,
+  "baselineCommit": "8a221ef7ca506710a212c7d4cd9c9e61f6b93cfa",
+  "latestQualificationRun": 37285179892,
+  "latestLiveSource": "08c733b3e8dbf938556593a33eae9a1b19915b5e",
+  "checks": {
+    "focused": 40,
+    "application": 752,
+    "optionalSkipped": 2,
+    "hosted": 1,
+    "e2e": 60,
+    "fullExit": 0
+  },
+  "hashes": {
+    "packages/application/src/decision-negotiator.ts": "300851be51fdbdc75e302e1b7fd4c2be29ffa78d5fcbd3a871d31de7b932a634",
+    "packages/application/src/model-runtime.ts": "8d44affe3f85edd3fb64f6c0260d619c206ed08c6a7e3ab082a25f860e333391",
+    "packages/application/src/decision-negotiator.test.ts": "90b1f2f9941a23bacd4a93c22150797e8bba7daf2722e52d98ddcf764cd6c612",
+    "apps/api/src/model-runtime.ts": "1d9283177becc38f86e8fc35b3af21984ce0511f589d011211ea26e80f1357ab",
+    "scripts/live-qa/model-failure-diagnostics.mjs": "b52e48a9a7e95a4dc879edf85c9f77422ad9fb46eda9f7997f575451b0c27840",
+    "tests/integration/live-qa-model-failure-diagnostics.test.ts": "0463930c1238960614fbee5313ce7e5568a206dd3c9cd00d9f1d14be16552dad"
+  },
+  "change": "Fixed negotiation parse/catalog validation stage callback through runtime to existing safe server logger; exceptions isolated; QA parser strict projection.",
+  "limitations": "Live execution UNKNOWN; no original cause claim. Post-validation commit/transport errors not covered. MODEL_ERROR is aggregate caught invocation failure, not precise provider cause."
+}

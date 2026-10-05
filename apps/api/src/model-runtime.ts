@@ -61,7 +61,7 @@ export function createKnownEnoughModelRuntime(options: {
     ownerConversation: new OwnerConversationArchitect({ application: modelApplication, model: models.owner, clock: options.clock, ids: options.ids, isEnabled: () => enabled }),
     negotiator: new DecisionNegotiator({ application: modelApplication, model: models.negotiation, clock: options.clock,
       ids: options.ids, publicCandidates: options.publicCandidates,
-      ...(options.trustedCandidates ? { trustedCandidates: options.trustedCandidates } : {}), isEnabled: () => enabled }),
+      ...(options.trustedCandidates ? { trustedCandidates: options.trustedCandidates } : {}), ...(options.diagnostic ? { diagnostic: options.diagnostic } : {}), isEnabled: () => enabled }),
     stop,
     jobs,
   };

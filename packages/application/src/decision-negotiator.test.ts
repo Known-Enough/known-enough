@@ -4,7 +4,7 @@ import { encodeDecisionStateItem, decodeDecisionStateItem } from '../../adapters
 import { KnownEnough as KE } from '@deal-table/contracts';
 import { buildChristmasFixture, buildChristmasPublicCandidates } from '../../test-support/src/known-enough-fixtures.ts';
 import { DecisionNegotiator, DecisionNegotiatorError, KnownEnoughApplication } from './index.ts';
-import type { DecisionNegotiationModel, DecisionNegotiationModelInput } from './index.ts';
+import type { DecisionNegotiationModel, DecisionNegotiationModelInput, ModelFailureDiagnostic } from './index.ts';
 import type { TrustedPrincipal } from './types.ts';
 
 const decisionId = 'christmas-decision';
@@ -92,10 +92,10 @@ function generated(input: DecisionNegotiationModelInput, destination: 'mazatlan'
   };
 }
 
-function createNegotiator(application: KnownEnoughApplication, model: DecisionNegotiationModel) {
+function createNegotiator(application: KnownEnoughApplication, model: DecisionNegotiationModel, diagnostic?: (value: ModelFailureDiagnostic) => void) {
   let sequence = 0;
   return new DecisionNegotiator({
-    application, model, publicCandidates: buildChristmasPublicCandidates, clock: { now: () => now }, ids: { next: () => `model-proposal-${++sequence}` },
+    application, model, ...(diagnostic ? {diagnostic} : {}), publicCandidates: buildChristmasPublicCandidates, clock: { now: () => now }, ids: { next: () => `model-proposal-${++sequence}` },
   });
 }
 
@@ -457,4 +457,13 @@ it('R1 publishes the catalog representation instead of model-controlled assignme
   const result = await negotiator.generate(participant('maya'), decisionId);
   expect(result.outcome).toBe('APPLIED');
   expect(result.publicSnapshot.currentProposal?.facts.values).toEqual(buildChristmasPublicCandidates()[0]);
+});
+
+it('emits only fixed validation stage while a throwing observer cannot alter bounded rejection', async () => {
+ const h = await setup(); const observed: ModelFailureDiagnostic[]=[]; let calls=0;
+ const negotiator=createNegotiator(h.application, async input=>{calls++;return generated(input,'invented-destination');}, value=>{observed.push(value);throw new Error('PRIVATE_OBSERVER_FAILURE');});
+ await expect(negotiator.generate(participant('maya'),decisionId)).rejects.toMatchObject({code:'INVALID_MODEL_OUTPUT',diagnosticReason:'CATALOG_MISMATCH'});
+ expect(calls).toBe(2);expect(observed).toEqual([{kind:'NEGOTIATION',stage:'NEGOTIATION_CATALOG_MISMATCH'}]);
+ expect(JSON.stringify(observed)).not.toContain('PRIVATE');
+ expect((await h.application.getPublicSnapshot(participant('maya'),decisionId)).currentProposal).toBeNull();
 });

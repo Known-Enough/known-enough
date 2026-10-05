@@ -13,3 +13,7 @@ test('unknown readback differs from observed no failures and forged extras canno
  expect(safeModelFailures([{kind:'OWNER',stage:'PROVIDER',secret:'PRIVATE'},{kind:'PRIVATE',stage:'PROVIDER'},null])).toEqual([]);
  expect(modelFailuresFromLogs([{message:'malformed {'},{message:'[]'},{message:JSON.stringify({event:'other',kind:'OWNER',stage:'PROVIDER'})}])).toEqual([]);
 });
+
+test('retains declared negotiation validation stages without private metadata',()=>{
+ expect(modelFailuresFromLogs([{message:JSON.stringify({event:'ke14-model-failure',kind:'NEGOTIATION',stage:'NEGOTIATION_QUESTION_INTENTS'})},{message:JSON.stringify({event:'ke14-model-failure',kind:'NEGOTIATION',stage:'NEGOTIATION_QUESTION_INTENTS',reason:'PRIVATE_CANARY'})}])).toEqual([{kind:'NEGOTIATION',stage:'NEGOTIATION_QUESTION_INTENTS'}]);
+});

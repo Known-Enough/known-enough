@@ -1,4 +1,5 @@
-import type { ModelInvocation, ModelCommitGuard } from './model-runtime.ts';
+import { reportModelFailure } from './model-runtime.ts';
+import type { ModelFailureDiagnostic, ModelInvocation, ModelCommitGuard } from './model-runtime.ts';
 import { KnownEnough as KE } from '@deal-table/contracts';
 import { KnownEnoughApplicationError } from './known-enough.ts';
 import type { KnownEnoughApplication, DecisionNegotiationContext } from './known-enough.ts';
@@ -167,6 +168,7 @@ export class DecisionNegotiator {
     /** Trusted server offers independent of owner conditions/model output. Only their public projection reaches the model. */
     trustedCandidates?: (frame: KE.PublicDecisionFrame) => readonly KE.CandidateProposal['values'][];
     isEnabled?: () => boolean;
+    diagnostic?: (value: ModelFailureDiagnostic) => void;
   }) {
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.questionTtlMs = options.questionTtlMs ?? DEFAULT_QUESTION_TTL_MS;
@@ -273,6 +275,7 @@ export class DecisionNegotiator {
       }
     }
     if (!parsed) {
+      reportModelFailure(this.options.diagnostic, 'NEGOTIATION', modelFailed ? 'NEGOTIATION_MODEL_ERROR' : `NEGOTIATION_${diagnosticReason}`);
       await this.options.application.cancelReasoning(service, decisionId, job.id);
       throw new DecisionNegotiatorError(modelFailed ? 'MODEL_FAILED' : 'INVALID_MODEL_OUTPUT', diagnosticReason);
     }
