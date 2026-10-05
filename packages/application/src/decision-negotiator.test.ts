@@ -493,3 +493,14 @@ it('uses the remaining attempt for a permission-required candidate with no quest
  expect(result.publicSnapshot.currentProposal).toBeNull();
  expect((await h.application.getOwnerSnapshot(participant('nina'),decisionId)).pendingQuestions.filter(q=>q.status==='PENDING')).toHaveLength(1);
 });
+
+it('provides bounded status hints in catalog order without filtering or selecting the candidate',async()=>{
+ const h=await setup();let calls=0;
+ const negotiator=createNegotiator(h.application,async input=>{
+  calls++;expect(input.publicCandidates).toHaveLength(9);expect(input.candidateKernelStatuses).toHaveLength(9);
+  expect(input.candidateKernelStatuses![5]).toBe('INVALID');expect(input.candidateKernelStatuses![3]).toBe('NEEDS_PERMISSION');
+  return generated(input,'mazatlan',150_000);
+ });
+ expect((await negotiator.generate(participant('maya'),decisionId)).outcome).toBe('NEEDS_PERMISSION');expect(calls).toBe(1);
+ expect((await h.application.getPublicSnapshot(participant('maya'),decisionId)).currentProposal).toBeNull();
+});

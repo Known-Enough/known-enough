@@ -856,6 +856,27 @@ export class KnownEnoughApplication {
     });
   }
 
+  /** Bounded model guidance only; final publication still evaluates current state. */
+  async previewReasoningCatalog(principal: TrustedPrincipal | null, decisionId: string, jobId: string, inputs: unknown[]) {
+    if (!Array.isArray(inputs) || inputs.length < 1 || inputs.length > 16) fail('INVALID_COMMAND');
+    const candidates = inputs.map(input => KE.CandidateProposal.parse(input));
+    return this.options.repository.transactionDecision(decisionId, async decision => {
+      if (!decision) fail('NOT_FOUND');
+      this.service(decision, principal);
+      const job = decision.job;
+      if (!job || job.id !== jobId || job.epoch !== decision.solveEpoch || decision.status !== 'REASONING'
+        || job.contextToken !== decision.definition.contextToken || job.semanticVersion !== decision.definition.semanticVersion) return candidates.map(()=>'STALE' as const);
+      const now = this.now();
+      const statuses: string[] = [];
+      for (const candidate of candidates) {
+        if (candidate.decisionId !== decision.decisionId || candidate.contextToken !== job.contextToken
+          || candidate.semanticVersion !== job.semanticVersion || candidate.proposalVersion !== decision.proposalVersion + 1) statuses.push('STALE');
+        else statuses.push((await evaluateReasoningCandidate(decision,candidate,now)).evaluation.status);
+      }
+      return statuses;
+    });
+  }
+
   async completeReasoning(
     principal: TrustedPrincipal | null,
     decisionId: string,

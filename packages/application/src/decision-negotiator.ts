@@ -20,6 +20,7 @@ export interface DecisionNegotiationModelInput {
   publicCandidates: KE.CandidateProposal['values'][];
   attempt: number;
   retryReason: 'INVALID_OUTPUT' | 'KERNEL_REJECTION' | 'MISSING_QUESTION' | 'MODEL_ERROR' | null;
+  candidateKernelStatuses?: string[] | null;
   rejectedCandidateIndices?: number[];
   signal: AbortSignal;
   invocation?: ModelInvocation;
@@ -178,12 +179,12 @@ export class DecisionNegotiator {
       throw new Error('Invalid negotiation bounds');
   }
 
-  private async invoke(context: DecisionNegotiationContext, publicCandidates: KE.CandidateProposal['values'][], attempt: number, retryReason: DecisionNegotiationModelInput['retryReason'], invocation: ModelInvocation, rejectedCandidateIndices: number[] = []): Promise<unknown> {
+  private async invoke(context: DecisionNegotiationContext, publicCandidates: KE.CandidateProposal['values'][], attempt: number, retryReason: DecisionNegotiationModelInput['retryReason'], invocation: ModelInvocation, rejectedCandidateIndices: number[] = [], candidateKernelStatuses: string[] | null = null): Promise<unknown> {
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
       return await Promise.race([
-        this.options.model({ context, publicCandidates: structuredClone(publicCandidates), attempt, retryReason, rejectedCandidateIndices: [...rejectedCandidateIndices], signal: controller.signal, invocation }),
+        this.options.model({ context, publicCandidates: structuredClone(publicCandidates), attempt, retryReason, rejectedCandidateIndices: [...rejectedCandidateIndices], candidateKernelStatuses: candidateKernelStatuses ? [...candidateKernelStatuses] : null, signal: controller.signal, invocation }),
         new Promise<never>((_, reject) => {
           timer = setTimeout(() => { controller.abort(); reject(new DecisionNegotiatorError('MODEL_FAILED')); }, this.timeoutMs);
         }),
@@ -234,6 +235,19 @@ export class DecisionNegotiator {
           throw new DecisionNegotiatorError('MODEL_FAILED');
       },
     };
+    let candidateKernelStatuses: string[] | null = null;
+    if (publicCandidates.length <= 16) {
+      const now = this.options.clock.now();
+      const candidates = publicCandidates.map((values,index) => ({
+        schemaVersion: KE.KE_SCHEMA_VERSION,proposalId:'catalog-preview-'+index,decisionId,
+        semanticVersion: context.job.semanticVersion,contextToken:context.job.contextToken,
+        proposalVersion:context.proposalVersion,values:allowedPublicValues.get(publicValueIdentity(context,values))!,
+        validation:{status:'VALID',checkedRuleIds:[],failedRuleIds:[],unknownRuleIds:[],unsupportedConditionIds:[]},
+        permissionDependencies:[],createdAt:now,
+      }));
+      try { candidateKernelStatuses = await this.options.application.previewReasoningCatalog(service,decisionId,job.id,candidates); }
+      catch { /* Guidance unavailable; final kernel remains authoritative. */ }
+    }
     let parsed: ParsedNegotiationOutput | null = null;
     let attempts = 0;
     let retryReason: DecisionNegotiationModelInput['retryReason'] = null;
@@ -244,7 +258,7 @@ export class DecisionNegotiator {
       attempts = attempt;
       let output: unknown;
       try {
-        output = await this.invoke(context, publicCandidates, attempt, retryReason, invocation, rejectedCandidateIndices);
+        output = await this.invoke(context, publicCandidates, attempt, retryReason, invocation, rejectedCandidateIndices, candidateKernelStatuses);
       } catch {
         modelFailed = true;
         retryReason = 'MODEL_ERROR';

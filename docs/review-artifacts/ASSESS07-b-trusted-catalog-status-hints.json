@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "sourceBase": "09e237533139b4c3f9347ceb1c7fba64ddd7b849",
+  "observedRun": 37354368310,
+  "liveCounts": {
+    "tested": 4,
+    "invalid": 2,
+    "needsPermission": 2,
+    "valid": 0,
+    "needsClarification": 0
+  },
+  "files": {
+    "packages/application/src/known-enough.ts": "3e2ef49c20bd90b7331737775303ac60cc3d3b07665c786cc900f3ffcef98ad9",
+    "packages/application/src/decision-negotiator.ts": "6e2eb3ef7cc7b0198a17f7ded7cc2898742e2af031f273cc72ea75677f3f4128",
+    "packages/adapters/src/bedrock-models.ts": "f091bf7f4298c07e4b4aebbaa95662812b7f74ce2423670d09a75e4c9d448529",
+    "packages/application/src/decision-negotiator.test.ts": "1c8dcfca5391c8344a6f71dd58dff8cc3de119c89859870eade021a4aeba7ff4"
+  },
+  "checks": {
+    "focused": 61,
+    "application": 765,
+    "optionalSkipped": 2,
+    "browser": 61,
+    "fullExit": 0
+  },
+  "bounds": {
+    "snapshotReads": 1,
+    "catalogPreviewCap": 16,
+    "modelAttempts": 2
+  },
+  "limitations": [
+    "Hints omit permission dependencies and are model guidance only",
+    "Final current-state authorization/evaluation remains required",
+    "Additional snapshot may consume existing time budget",
+    "Live effect UNKNOWN"
+  ]
+}

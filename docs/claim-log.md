@@ -174,3 +174,5 @@ Run035 scope before edits: live QA shared one-second request-start pacer for exi
 Run037 scope before edits: QA03 edit nested draft/read/invalidation/save/commit/review fixed phases, existing group read moved before edit for exact save URL, checked helper optional HTTP recorder, runner phase allowlist and reporter regression. Same reads/requests/checks, no retries/clarification waiver or NP00 edits.
 
 Run039 scope before edits: existing run-owned kernel diagnostic bounded public ENUM Cartesian variants(max16), aggregate counts only with strict reporter projection/tests. Retains pending private assignments/dependencies, current-time read-only evaluation, no catalog filter/model calls/decision mutation or NP00 edit.
+
+Run040 scope before edits: application read-only batch preview(max16, one trusted snapshot), negotiator optional catalog status hints, adapter input/prompt and focused regression. Full catalog remains unchanged, no automatic selection/permission or extra model attempts; final current-state checks remain. NP00 excluded.
