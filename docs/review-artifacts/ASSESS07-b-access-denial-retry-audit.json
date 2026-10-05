@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "sourceCommit": "b66711fcd64ac7fdf44ece82dc8c9123093f5d32",
+  "run": 37318839790,
+  "verifiedActor": 143764700,
+  "gatewayObservation": "ACCESS_DENIED",
+  "live": {
+    "qa03": "PASS",
+    "qa04": "INVALID/HARD_CONDITION/RULE_FAILED",
+    "privacy": "PASS",
+    "cleanup": "PASS",
+    "modelAttempts": 7,
+    "signupMessages": 1
+  },
+  "focusedPassed": 42,
+  "files": {
+    "apps/api/src/model-runtime.ts": "1d9283177becc38f86e8fc35b3af21984ce0511f589d011211ea26e80f1357ab",
+    "packages/application/src/decision-negotiator.ts": "70b6261e95fe044cbf5415429c12c37f7b813c08850a78ec9b47c1df633f8dae",
+    "scripts/live-qa/release.mjs": "e3d2d3f34c11b03be6209500cd4d3781d421b51dcee8b424e474414723e18103",
+    "scripts/live-qa/template.mjs": "f90a8a409a942351ad1af30c76f06965981d068c1a1474179a3b9a7968cf77f7"
+  },
+  "findings": [
+    "Runtime forwards negotiation diagnostic callback",
+    "Two-attempt invalid-first retry and both-invalid rejection regressions PASS",
+    "No project role mutation path exists in normal code release",
+    "No raw AWS denial retained; fixed ACCESS_DENIED is actual workload observation"
+  ],
+  "nextAction": "Provide specific hard-invalid retry feedback within existing two-attempt bound; separately apply exact stage-read permission through verified own project installation identity when available."
+}
