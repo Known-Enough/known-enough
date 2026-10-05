@@ -71,14 +71,33 @@ test('QA03 fresh decision and owner confirmations',async()=>{
   await test.step('QA03_DRAFT',()=>trackOperation(p,data().target.ApiUrl+`/groups/${groupId}/drafts`,async()=>{
   await p.getByRole('button',{name:'Refresh account and groups'}).click();await p.getByLabel('What should this group decide?').fill('Choose our fictional garden workday activity: Planting or Watering, and time: Morning or Afternoon. Only two finite enum choices; no real external data.');await p.getByRole('button',{name:'Draft a new decision',exact:true}).click();await expect(p.getByRole('heading',{name:'Review the public draft'})).toBeFocused();
   },note));
-  await test.step('QA03_EDIT',async()=>{
-await p.getByRole('checkbox',{name:'I reviewed this public draft and the required approvers'}).check();await p.getByLabel('Decision title',{exact:true}).fill('Fresh live garden');await expect(p.getByRole('checkbox',{name:'I reviewed this public draft and the required approvers'})).not.toBeChecked();await expect(p.getByRole('button',{name:'Create decision for group review'})).toBeDisabled();await p.getByRole('button',{name:'Save draft edits'}).click();await expect(p.getByText('Save these edits before creating the decision.',{exact:true})).toHaveCount(0);await expect(p.getByRole('heading',{name:'Review the public draft'}).locator('xpath=ancestor::section[@aria-busy][1]')).toHaveAttribute('aria-busy','false');await p.getByRole('checkbox',{name:'I reviewed this public draft and the required approvers'}).check();await expect(p.getByRole('button',{name:'Create decision for group review'})).toBeEnabled();
-  });
-  const draftId=await test.step('QA03_CREATE_DRAFT',async()=>{
-    const group=Groups.GroupSnapshot.parse(((await checked(host(),'/groups')).groups as unknown[])[0]);
+  const draftId=await test.step('QA03_EDIT_DRAFT',async()=>{
+    note('HTTP_PENDING');
+    const group=Groups.GroupSnapshot.parse(((await checked(host(),'/groups',undefined,note)).groups as unknown[])[0]);
     const drafts=group.drafts.filter(item=>item.current&&!item.created);
     expect(drafts).toHaveLength(1);
     return drafts[0]!.id;
+  });
+  await test.step('QA03_EDIT',async()=>{
+    await test.step('QA03_EDIT_INVALIDATION',async()=>{
+      await p.getByRole('checkbox',{name:'I reviewed this public draft and the required approvers'}).check();
+      await p.getByLabel('Decision title',{exact:true}).fill('Fresh live garden');
+      await expect(p.getByRole('checkbox',{name:'I reviewed this public draft and the required approvers'})).not.toBeChecked();
+      await expect(p.getByRole('button',{name:'Create decision for group review'})).toBeDisabled();
+    });
+    await test.step('QA03_EDIT_SAVE',()=>trackOperation(p,data().target.ApiUrl+`/groups/${groupId}/drafts/${draftId}`,async()=>{
+      const response=p.waitForResponse(value=>value.request().method()==='POST'&&value.url()===data().target.ApiUrl+`/groups/${groupId}/drafts/${draftId}`,{timeout:45000});
+      const [saved]=await Promise.all([response,p.getByRole('button',{name:'Save draft edits'}).click()]);
+      if(!saved.ok())throw new Error('QA_DRAFT_SAVE_FAILED');
+    },note));
+    await test.step('QA03_EDIT_COMMIT',async()=>{
+      await expect(p.getByText('Save these edits before creating the decision.',{exact:true})).toHaveCount(0);
+      await expect(p.getByRole('heading',{name:'Review the public draft'}).locator('xpath=ancestor::section[@aria-busy][1]')).toHaveAttribute('aria-busy','false');
+    });
+    await test.step('QA03_EDIT_REVIEW',async()=>{
+      await p.getByRole('checkbox',{name:'I reviewed this public draft and the required approvers'}).check();
+      await expect(p.getByRole('button',{name:'Create decision for group review'})).toBeEnabled();
+    });
   });
   await trackOperation(p,data().target.ApiUrl+`/groups/${groupId}/drafts/${draftId}/create`,async()=>{
     await test.step('QA03_CREATE_CLICK',()=>p.getByRole('button',{name:'Create decision for group review'}).click());

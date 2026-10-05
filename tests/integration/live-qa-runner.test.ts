@@ -160,3 +160,13 @@ test('unmapped valid HTTP protocol statuses stay exact and private input cannot 
  for(const status of [301,304,307,308,405,418,599]){expect(operationStatus(status)).toBe(`HTTP_STATUS_${status}`);expect(SAFE_OPERATION_STATUSES).toContain(operationStatus(status));}
  for(const status of ['304','PRIVATE_TOKEN',1000,NaN,null])expect(operationStatus(status)).toBe('HTTP_OTHER_FAILURE');
 });
+
+test('keeps exact draft edit subphase and safe HTTP status while rejecting private errors',async()=>{
+ // @ts-expect-error Standalone sanitized reporter.
+ const {default:Reporter}=await import('../../scripts/live-qa/sanitized-reporter.mjs');
+ for(const phase of ['QA03_EDIT_DRAFT','QA03_EDIT_INVALIDATION','QA03_EDIT_SAVE','QA03_EDIT_COMMIT','QA03_EDIT_REVIEW']){
+  const reporter=new Reporter();const t={title:REQUIRED_TESTS[2],annotations:[{type:'qa-operation-status',description:'HTTP_STATUS_429'}]};
+  reporter.onStepEnd(t,{}, {title:phase,error:{message:'PRIVATE_EDIT_ERROR'}});reporter.onStepEnd(t,{}, {title:'QA03_EDIT',error:{message:'PRIVATE_PARENT'}});reporter.onTestEnd(t,{status:'failed'});
+  expect(reporter.tests[0]).toMatchObject({phase});if(['QA03_EDIT_DRAFT','QA03_EDIT_SAVE','QA03_EDIT_COMMIT'].includes(phase))expect(reporter.tests[0]).toHaveProperty('operationStatus','HTTP_STATUS_429');else expect(reporter.tests[0]).not.toHaveProperty('operationStatus');expect(JSON.stringify(reporter.tests)).not.toContain('PRIVATE');
+ }
+});

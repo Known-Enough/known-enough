@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "sourceBase": "29821e60a983373444d3a5e588acba18bc99c786",
+  "priorRun": 37339073510,
+  "priorFailure": "QA03_EDIT cause UNKNOWN",
+  "files": {
+    "tests/live/qa/journey.spec.ts": "856194c1221521126ada776854e79b82c3289fbdc886b3a25badd19fc0678577",
+    "tests/live/qa/helpers.ts": "a5630dfaec30c751752c847d6f4272386d97c2c4c426cf49bebcf0e83129d677",
+    "scripts/live-qa/runner-core.mjs": "560fe5dd3b58e4596249b8a6c1397c1c94582beab3d65d8baa673a1960fb7755",
+    "scripts/live-qa/sanitized-reporter.mjs": "0405405f57f6c2e6ec6e87efc89c48c9a61941da451f1f2ee3a90b17eadb3487",
+    "tests/integration/live-qa-runner.test.ts": "6c7af8ebf2dc46152d61d58cecd14d748aeb0805d981d287e3b14027690cfb7b"
+  },
+  "checks": {
+    "focused": 20,
+    "application": 762,
+    "optionalSkipped": 2,
+    "browser": 61,
+    "fullExit": 0
+  },
+  "change": "Exact edit subphases and existing draft-save HTTP response observation, same assertions and request count; existing group read moved earlier.",
+  "liveEffect": "UNKNOWN"
+}
