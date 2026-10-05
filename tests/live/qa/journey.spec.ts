@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@playwright/test';
 import { KnownEnough as KE, Groups } from '@deal-table/contracts';
-import { data, fixture, login, register, request, checked, owner, publicView, envelope, command, open, close, renewSessions, trackOperation, confirmFrameReview, exploreProposals, type Session } from './helpers.ts';
+import { data, fixture, login, register, request, checked, owner, publicView, envelope, command, open, close, renewSessions, trackOperation, confirmFrameReview, exploreProposals, createGroup, type Session } from './helpers.ts';
 const sessions:Session[]=[];const people:Session[]=[];let groupId='',decisionId='';let offered:KE.PublicDecisionSnapshot['currentProposal']=null;
 const canary='QA_PRIVATE_CANARY_'+(process.env.QA_RUN_ID??'uninstalled');
 const host=()=>people[0]!;
@@ -48,12 +48,21 @@ test('QA01 signup and managed login',async({browser})=>{
   });
 });
 test('QA02 admission and invitations',async()=>{
-  for(const s of people)await register(s);
+  await test.step('QA02_REGISTER',async()=>{for(const s of people)await register(s);});
+  await test.step('QA02_DENIAL',async()=>{
   for(const actor of ['pending','rejected','disabled','outsider']){const s=sessions.find(v=>v.user.actor===actor)!;await register(s,actor==='disabled'||actor==='outsider');if(actor==='rejected'){fixture('reject',{actor});await s.page.getByRole('button',{name:'Refresh account and groups'}).click();await expect(s.page.getByText('Your access request was declined.',{exact:false})).toBeVisible();}if(actor==='disabled'){fixture('disable',{actor});await s.page.getByRole('button',{name:'Refresh account and groups'}).click();await expect(s.page.getByText('Your access is disabled.',{exact:false})).toBeVisible();}if(actor!=='outsider')expect((await request(s,'/groups',{name:'Denied',idempotencyKey:randomUUID()})).ok()).toBe(false);}
-  await host().page.getByLabel('New group name').fill('Live fictional garden');await host().page.getByRole('button',{name:'Create group',exact:true}).click();const group=Groups.GroupSnapshot.parse(((await checked(host(),'/groups')).groups as unknown[])[0]);groupId=group.id;
+  });
+  await test.step('QA02_GROUP_CREATE',()=>createGroup(host().page,'Live fictional garden'));
+  await test.step('QA02_GROUP_READ',async()=>{const group=Groups.GroupSnapshot.parse(((await checked(host(),'/groups')).groups as unknown[])[0]);groupId=group.id;});
+  await test.step('QA02_INVITATION_REPLACE',async()=>{
   const old=await checked(host(),invitePath(),{email:people[1]!.user.email,replace:false});const replacement=await checked(host(),invitePath(),{email:people[1]!.user.email,replace:true});expect((await request(people[2]!,'/groups/accept',{token:replacement.token})).ok()).toBe(false);expect((await request(people[1]!,'/groups/accept',{token:old.token})).ok()).toBe(false);await checked(people[1]!,'/groups/accept',{token:replacement.token});const again=await checked(people[1]!,'/groups/accept',{token:replacement.token});expect((again.group as {id:string}).id).toBe(groupId);
-  for(const s of people.slice(2)){await host().page.getByRole('button',{name:'Refresh account and groups'}).click();await host().page.getByLabel('Recipient email').fill(s.user.email);await host().page.getByRole('button',{name:'Create invitation link'}).click();const link=await host().page.getByLabel('Invitation link',{exact:true}).inputValue();await s.page.goto(link);await s.page.getByRole('button',{name:'Accept group invitation',exact:true}).click();await expect(s.page.getByRole('heading',{name:'Live fictional garden',exact:true})).toBeVisible();await host().page.getByRole('button',{name:'Hide invitation link'}).click();}
+  });
+  await test.step('QA02_INVITATION_UI',async()=>{
+  for(const s of people.slice(2)){await host().page.getByRole('button',{name:'Refresh account and groups'}).click();await host().page.getByLabel('Recipient email').fill(s.user.email);await host().page.getByRole('button',{name:'Create invitation link'}).click();await expect(host().page.getByLabel('Invitation link',{exact:true})).not.toHaveValue('');const link=await host().page.getByLabel('Invitation link',{exact:true}).inputValue();await s.page.goto(link);await s.page.getByRole('button',{name:'Accept group invitation',exact:true}).click();await expect(s.page.getByRole('heading',{name:'Live fictional garden',exact:true})).toBeVisible();await host().page.getByRole('button',{name:'Hide invitation link'}).click();}
+  });
+  await test.step('QA02_INVITATION_EXPIRED',async()=>{
   const outsider=sessions.find(s=>s.user.actor==='outsider')!;const expiry=await checked(host(),invitePath(),{email:outsider.user.email,replace:false});fixture('expire-invitation',{actor:'outsider'});await outsider.page.goto(data().target.FrontendUrl+'#groupInvite='+expiry.token);await outsider.page.getByRole('button',{name:'Accept group invitation',exact:true}).click();await expect(outsider.page.getByText('This action could not be completed.',{exact:false})).toBeVisible();expect((await checked(outsider,'/groups')).groups).toEqual([]);
+  });
 });
 test('QA03 fresh decision and owner confirmations',async()=>{
   const p=host().page;

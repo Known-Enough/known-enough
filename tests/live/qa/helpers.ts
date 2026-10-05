@@ -69,3 +69,10 @@ export async function exploreProposals(page: Page, reasoningUrl: string, record:
     }
   }, record);
 }
+
+/** Read a new group only after its committed server snapshot is rendered. */
+export async function createGroup(page: Page, name: string) {
+  await page.getByLabel('New group name').fill(name);
+  await page.getByRole('button', { name: 'Create group', exact: true }).click();
+  await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
+}

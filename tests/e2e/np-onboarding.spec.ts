@@ -1,3 +1,4 @@
+import { createGroup } from '../live/qa/helpers.ts';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { test, expect, type BrowserContext } from '@playwright/test';
 import { npApi } from '../evaluations/np-api.ts';
@@ -34,7 +35,18 @@ test('new users request access, operator admits, organizer invites a new recipie
     await host.getByLabel('Your display name').fill('Iris'); await host.getByRole('button', { name: 'Request access', exact: true }).click();
     await expect(host.getByText('Access request pending.', { exact: false })).toBeVisible();
     await api.approve('iris'); await host.getByRole('button', { name: 'Refresh account and groups' }).click();
-    await host.getByLabel('New group name').fill('Garden club'); await host.getByRole('button', { name: 'Create group', exact: true }).click();
+    let release!: () => void; let markStarted!: () => void;
+    const held = new Promise<void>(resolve => { release = resolve; });
+    const started = new Promise<void>(resolve => { markStarted = resolve; });
+    await host.route('https://api.example.test/groups', async route => {
+      if (route.request().method() !== 'POST') { await route.fallback(); return; }
+      markStarted(); await held; await route.fallback();
+    });
+    let finished = false;
+    const creation = createGroup(host, 'Garden club').then(() => { finished = true; });
+    try { await started; await host.waitForTimeout(100); expect(finished).toBe(false); }
+    finally { release(); }
+    await creation; await host.unroute('https://api.example.test/groups');
     await expect(host.getByRole('heading', { name: 'Garden club', exact: true })).toBeVisible();
     await host.getByLabel('Recipient email').fill('omar@example.invalid'); await host.getByRole('button', { name: 'Create invitation link' }).click();
     const link = await host.getByLabel('Invitation link', { exact: true }).inputValue();
