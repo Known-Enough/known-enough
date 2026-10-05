@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "task": "ASSESS07",
+  "sourceBase": "2638144b12b014ee89b9412b3bb3a23e27a96ae1",
+  "files": {
+    "packages/application/src/decision-negotiator.ts": "7acd61b8e36217835882d6961a0901b5a11726c2cb12a684a3dae25eda250712",
+    "packages/application/src/decision-negotiator.test.ts": "4562187ad9a34f758c0f9b724ea701b315b121e01b97fb87016dde87f599beb1",
+    "packages/adapters/src/bedrock-models.ts": "a0fcf8f6c537ff73fccb5b1d2601ae61c55af12ba283a22531afcc9d4bf1efd9"
+  },
+  "checks": {
+    "focused": 48,
+    "application": 768,
+    "optionalSkipped": 2,
+    "hosted": 1,
+    "browser": 61,
+    "fullExit": 0
+  },
+  "limits": [
+    "Exact active-permission matching unchanged",
+    "Existing two model attempts and final authorization unchanged",
+    "No automatic dependency correction or grant generation",
+    "Live effect UNKNOWN"
+  ]
+}

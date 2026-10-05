@@ -19,7 +19,7 @@ export interface DecisionNegotiationModelInput {
   context: DecisionNegotiationContext;
   publicCandidates: KE.CandidateProposal['values'][];
   attempt: number;
-  retryReason: 'INVALID_OUTPUT' | 'KERNEL_REJECTION' | 'MISSING_QUESTION' | 'MODEL_ERROR' | null;
+  retryReason: 'INVALID_OUTPUT' | 'PERMISSION_DEPENDENCIES' | 'KERNEL_REJECTION' | 'MISSING_QUESTION' | 'MODEL_ERROR' | null;
   candidateKernelStatuses?: string[] | null;
   rejectedCandidateIndices?: number[];
   signal: AbortSignal;
@@ -271,7 +271,7 @@ export class DecisionNegotiator {
         if (!parsedOutput.ok) {
           parsed = null;
           diagnosticReason = parsedOutput.reason;
-          retryReason = 'INVALID_OUTPUT';
+          retryReason = parsedOutput.reason === 'PERMISSION_DEPENDENCIES' ? 'PERMISSION_DEPENDENCIES' : 'INVALID_OUTPUT';
           continue;
         }
         parsed = parsedOutput.value;

@@ -504,3 +504,44 @@ it('provides bounded status hints in catalog order without filtering or selectin
  expect((await negotiator.generate(participant('maya'),decisionId)).outcome).toBe('NEEDS_PERMISSION');expect(calls).toBe(1);
  expect((await h.application.getPublicSnapshot(participant('maya'),decisionId)).currentProposal).toBeNull();
 });
+
+
+it('retries a fabricated dependency without granting permission and keeps the exact owner question', async () => {
+ const h = await setup(); const reasons: unknown[] = [];
+ const negotiator = createNegotiator(h.application, async input => {
+  reasons.push(input.retryReason);
+  const output = generated(input, 'mazatlan', 150_000);
+  return input.attempt === 1 ? { ...output, permissionDependencies: [{ permissionId: 'invented-permission', permissionVersion: 1, kind: 'NEGOTIATION', expiresAt: '2026-10-02T12:00:00.000Z' }] } : output;
+ });
+ const result = await negotiator.generate(participant('maya'), decisionId);
+ expect(reasons).toEqual([null, 'PERMISSION_DEPENDENCIES']);
+ expect(result.outcome).toBe('NEEDS_PERMISSION'); expect(result.publicSnapshot.currentProposal).toBeNull();
+ expect((await h.application.getOwnerSnapshot(participant('nina'), decisionId)).pendingQuestions.filter(q => q.status === 'PENDING')).toHaveLength(1);
+});
+
+it.each(['permissionVersion', 'expiresAt'] as const)('rejects a stale %s twice despite a real exact owner grant', async field => {
+ const h = await setup();
+ await createNegotiator(h.application, async input => generated(input, 'mazatlan', 150_000)).generate(participant('maya'), decisionId);
+ const owner = await h.application.getOwnerSnapshot(participant('nina'), decisionId);
+ const question = owner.pendingQuestions.find(q => q.status === 'PENDING')!;
+ const answer = await h.application.execute(participant('nina'), {
+  schemaVersion: KE.KE_SCHEMA_VERSION, type: 'ANSWER_NEGOTIATION', requestId: 'dependency-grant', idempotencyKey: 'dependency-grant', decisionId,
+  expected: { contextToken: owner.publicSnapshot.contextToken, semanticVersion: owner.publicSnapshot.semanticVersion, controlVersion: owner.controlVersion, ownerVersion: owner.ownerVersion },
+  payload: { questionId: question.questionId, constraintVersion: question.constraintVersion, requestIdentity: question.requestIdentity, answer: 'ALLOW' },
+ });
+ expect(answer.ok).toBe(true);
+ const reasons: unknown[] = []; const diagnostic: ModelFailureDiagnostic[] = [];
+ const negotiator = createNegotiator(h.application, async input => {
+  reasons.push(input.retryReason);
+  const output = generated(input, 'mazatlan', 150_000);
+  expect(output.permissionDependencies).toHaveLength(1);
+  return { ...output, permissionDependencies: output.permissionDependencies.map(p => ({ ...p,
+   ...(field === 'permissionVersion' ? { permissionVersion: p.permissionVersion + 1 } : { expiresAt: '2026-10-03T12:00:00.000Z' }),
+  })) };
+ }, value => diagnostic.push(value));
+ await expect(negotiator.generate(participant('maya'), decisionId)).rejects.toMatchObject({ code: 'INVALID_MODEL_OUTPUT', diagnosticReason: 'PERMISSION_DEPENDENCIES' });
+ expect(reasons).toEqual([null, 'PERMISSION_DEPENDENCIES']);
+ expect(diagnostic).toEqual([{ kind: 'NEGOTIATION', stage: 'NEGOTIATION_PERMISSION_DEPENDENCIES' }]);
+ expect((await h.application.getPublicSnapshot(participant('maya'), decisionId)).currentProposal).toBeNull();
+ expect((await h.application.getOwnerSnapshot(participant('nina'), decisionId)).pendingQuestions.filter(q => q.status === 'PENDING')).toEqual([]);
+});

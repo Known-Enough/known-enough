@@ -176,3 +176,5 @@ Run037 scope before edits: QA03 edit nested draft/read/invalidation/save/commit/
 Run039 scope before edits: existing run-owned kernel diagnostic bounded public ENUM Cartesian variants(max16), aggregate counts only with strict reporter projection/tests. Retains pending private assignments/dependencies, current-time read-only evaluation, no catalog filter/model calls/decision mutation or NP00 edit.
 
 Run040 scope before edits: application read-only batch preview(max16, one trusted snapshot), negotiator optional catalog status hints, adapter input/prompt and focused regression. Full catalog remains unchanged, no automatic selection/permission or extra model attempts; final current-state checks remain. NP00 excluded.
+
+Run042 scope before edits: same ASSESS07 negotiator fixed PERMISSION_DEPENDENCIES retry reason, adapter prompt and behavioral regressions for fabricated/stale exact dependencies; no parser relaxation, grant invention, extra attempts or NP00 files.
