@@ -1,0 +1,85 @@
+{
+  "observedAt": "2026-10-05T06:05:15Z",
+  "account": "Battosai1806",
+  "accountId": 143764700,
+  "sourceCommit": "a231fd84184f3c817a188c6d6846ace9c144bc3a",
+  "deploymentRun": 37268996539,
+  "ciRun": 37268996529,
+  "qualificationRun": 37269035398,
+  "report": {
+    "schemaVersion": 1,
+    "runId": "gh-37269035398-1",
+    "sourceCommit": "a231fd84184f3c817a188c6d6846ace9c144bc3a",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "PASS",
+      "privacy": "PASS",
+      "signup": "PASS",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "mailStatus": "MAIL_CODE_READY",
+        "status": "PASS"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "operationStatus": "HTTP_OTHER_FAILURE",
+        "phase": "QA03_FRAME_CONFIRM",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 2,
+      "failed": 1,
+      "blocked": 4,
+      "modelAttempts": 1,
+      "signupMessages": 1
+    }
+  },
+  "finding": "QA entry catch returns fixed503 without CORS; approved browser cannot read failure. Error helper restores exact validated deployment HTTPS origin only, no raw error or credential reflection. Explicit500/502 fixed categories added. Underlying live server/network cause UNKNOWN; semantic guard not reached. Direct AWS CLI unavailable locally; existing QA workload log privacy was PASS, no platform denial or bypass.",
+  "checkedCheckpoint": {
+    "at": "2026-10-05T06:12:05Z",
+    "sourceBaseline": "a231fd84184f3c817a188c6d6846ace9c144bc3a",
+    "focusedPassed": 19,
+    "fullCheckExit": 0,
+    "applicationPassed": 745,
+    "optionalSkipped": 2,
+    "hostedPassed": 1,
+    "e2ePassed": 60,
+    "referencesPassed": 7,
+    "planningPassed": 15,
+    "sourceSha256": {
+      "scripts/live-qa/entry.ts": "39c81cf4026aa4bba86c4f037b754f00920f7be6c969ab4baf5737d9bc2d4f75",
+      "scripts/live-qa/error-response.ts": "f4ac6efc1635fc58341f400c6a46800359fd555db7964cc8abe64d8122482842",
+      "scripts/live-qa/runner-core.mjs": "cd62415ec2102748011b93063520b223581360c0d50e2bc72ab055652e08b0bb",
+      "tests/integration/live-qa-error-response.test.ts": "7e3bea4b13e1da8cd7d34bcc9fcb9b7072a8989883d84c594111788af3103cf2",
+      "tests/integration/live-qa-runner.test.ts": "3f6fef807091de54ab39b1bf09bbbb0c4b8bbf49107a824b8502cedccac8565d"
+    }
+  }
+}

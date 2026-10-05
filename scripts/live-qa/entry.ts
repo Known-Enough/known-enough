@@ -1,3 +1,4 @@
+import { qaUnavailable } from './error-response.ts';
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
 import { createAuthorizedBedrockTransport } from '../../packages/adapters/src/bedrock-models.ts';
 import { createKe13bLambdaHandler, readKe13bConfig, type HttpApiEvent } from '../../apps/api/src/ke13b-lambda.ts';
@@ -13,6 +14,6 @@ export async function qaHandler(event: HttpApiEvent) {
       handler = createKe13bLambdaHandler(config);
     }
     return await handler(event);
-  } catch { return { statusCode: 503, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ok: false, error: { code: 'QA_NOT_READY' } }), isBase64Encoded: false }; }
+  } catch { return qaUnavailable(event, process.env.KE13B_ALLOWED_ORIGIN); }
 }
 export { handler } from '../../apps/api/src/ke13b-lambda.ts';

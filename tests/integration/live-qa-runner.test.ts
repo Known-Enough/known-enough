@@ -80,7 +80,7 @@ test('browser operation observer matches only the exact POST and detaches after 
   expect(statuses.slice(-2)).toEqual(['HTTP_PENDING','HTTP_CONNECTION_FAILED']);expect(page.listenerCount('response')).toBe(0);expect(page.listenerCount('requestfailed')).toBe(0);
 });
 
-test('HTTP diagnostics accept only numeric protocol outcomes',()=>{expect(operationStatus(200)).toBe('HTTP_OK');expect(operationStatus(422)).toBe('HTTP_UNPROCESSABLE');for(const status of ['toString','PRIVATE_TOKEN',undefined,null,NaN,0,600])expect(operationStatus(status)).toBe('HTTP_OTHER_FAILURE');});
+test('HTTP diagnostics accept only numeric protocol outcomes',()=>{expect(operationStatus(200)).toBe('HTTP_OK');expect(operationStatus(422)).toBe('HTTP_UNPROCESSABLE');expect(operationStatus(500)).toBe('HTTP_SERVER_ERROR');expect(operationStatus(502)).toBe('HTTP_BAD_GATEWAY');for(const status of ['toString','PRIVATE_TOKEN',undefined,null,NaN,0,600])expect(operationStatus(status)).toBe('HTTP_OTHER_FAILURE');});
 
 test('transport diagnostics expose only allowlisted failure categories',()=>{
   expect(transportFailureStatus('net::ERR_TIMED_OUT')).toBe('HTTP_REQUEST_TIMEOUT');
