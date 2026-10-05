@@ -19,7 +19,7 @@ export async function owner(session:Session,id:string){return KE.OwnerDecisionSn
 export async function publicView(session:Session,id:string){return KE.PublicDecisionSnapshot.parse(await (await request(session,`/decisions/${id}/public`)).json());}
 export async function envelope(session:Session,id:string,type:string,payload:unknown){const own=await owner(session,id);const requestId=randomUUID();return {schemaVersion:2,decisionId:id,requestId,idempotencyKey:requestId,type,expected:{contextToken:own.publicSnapshot.contextToken,semanticVersion:own.publicSnapshot.semanticVersion,controlVersion:own.controlVersion,ownerVersion:own.ownerVersion},payload};}
 export async function command(session:Session,id:string,type:string,payload:unknown){return checked(session,`/decisions/${id}/commands`,await envelope(session,id,type,payload));}
-export async function open(session:Session,id:string){await session.page.reload();const input=session.page.getByLabel('Decision ID from your invitation');await input.fill(id);await session.page.getByRole('button',{name:'Load shared decision'}).click();}
+export async function open(session:Session,id:string,record:(status:string)=>void=()=>{}){await session.page.reload();await loadSharedDecision(session.page,data().target.ApiUrl,id,record);}
 export async function close(sessions:Session[]){await Promise.all(sessions.map(s=>s.context.close()));}
 export type {BrowserContext};
 
@@ -38,9 +38,9 @@ export async function renewSessions(sessions: Session[], people: Session[], auth
 }
 
 /** Observe only this existing POST; never read its body, token, URL into a report or retry it. */
-export async function trackOperation(page: Page, url: string, run: () => Promise<void>, record: (status: string) => void) {
+export async function trackOperation(page: Page, url: string, run: () => Promise<void>, record: (status: string) => void, method: 'POST' | 'GET' = 'POST') {
   record('HTTP_PENDING');
-  const matches = (request: import('@playwright/test').Request) => request.method() === 'POST' && request.url() === url;
+  const matches = (request: import('@playwright/test').Request) => request.method() === method && request.url() === url;
   const response = (value: import('@playwright/test').Response) => { if (matches(value.request())) record(operationStatus(value.status())); };
   const failed = (value: import('@playwright/test').Request) => { if (matches(value)) record(transportFailureStatus(value.failure()?.errorText)); };
   page.on('response', response); page.on('requestfailed', failed);
@@ -75,4 +75,17 @@ export async function createGroup(page: Page, name: string) {
   await page.getByLabel('New group name').fill(name);
   await page.getByRole('button', { name: 'Create group', exact: true }).click();
   await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
+}
+
+/** Observe existing reads and await committed load; never retry or retain response contents. */
+export async function loadSharedDecision(page: Page, apiUrl: string, id: string, record: (status: string) => void = () => {}) {
+  const publicUrl=apiUrl+`/decisions/${id}/public`, ownerUrl=apiUrl+`/decisions/${id}/me`;
+  await page.getByLabel('Decision ID from your invitation').fill(id);
+  const button=page.getByRole('button',{name:'Load shared decision',exact:true});
+  await trackOperation(page,publicUrl,()=>trackOperation(page,ownerUrl,async()=>{
+    const [response]=await Promise.all([page.waitForResponse(r=>r.request().method()==='GET' && r.url()===publicUrl,{timeout:45000}),button.click()]);
+    await expect(button).toBeEnabled();
+    expect(response.ok()).toBe(true);
+    await expect(page.getByText('The shared decision is unavailable. Check your session or try again.',{exact:true})).toHaveCount(0);
+  },record,'GET'),record,'GET');
 }

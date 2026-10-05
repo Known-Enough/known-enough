@@ -95,7 +95,7 @@ await p.getByRole('checkbox',{name:'I reviewed this public draft and the require
   let variable:KE.PublicDecisionVariable|undefined;
   await test.step('QA03_FRAME',async()=>{
     for(const s of people){
-      await test.step('QA03_FRAME_LOAD',()=>open(s,decisionId));
+      await test.step('QA03_FRAME_LOAD',()=>open(s,decisionId,note));
       await test.step('QA03_FRAME_REVIEW',()=>s.page.getByLabel('I reviewed this frame version, its options and public rules.').check());
       await test.step('QA03_FRAME_CONFIRM',()=>confirmFrameReview(s.page,data().target.ApiUrl+`/decisions/${decisionId}/commands`,note));
       await test.step('QA03_FRAME_VERIFY',async()=>{

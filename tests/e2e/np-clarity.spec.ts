@@ -1,3 +1,4 @@
+import { loadSharedDecision } from '../live/qa/helpers.ts';
 import { createHash } from 'node:crypto';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { test, expect, type BrowserContext } from '@playwright/test';
@@ -189,4 +190,19 @@ test('a late approved refresh cannot overwrite a newer disabled account', async 
     release();await page.waitForLoadState('networkidle');await expect(page.getByText('Your access is disabled.',{exact:false})).toBeVisible();
     await expect(page.getByRole('button',{name:'Create group',exact:true})).toHaveCount(0);
   }finally{await context.close();await api.close();}
+});
+
+test('shared load helper awaits a held signed owner read before returning', async ({browser}) => {
+ const api=await npApi();const context=await browser.newContext();let release=()=>{};
+ try {
+  const h=await freshGroup(api);await connect(context,api,'iris');const page=await context.newPage();await page.goto(url);
+  let reached=false;const held=new Promise<void>(resolve=>{release=resolve;});
+  await page.route(`https://api.example.test/decisions/${h.decisionId}/me`,async route=>{reached=true;await held;await route.fallback();});
+  let finished=false;const statuses:string[]=[];
+  const loading=loadSharedDecision(page,'https://api.example.test',h.decisionId,status=>statuses.push(status)).then(()=>{finished=true;});
+  await expect.poll(()=>reached).toBe(true);
+  await expect(page.getByRole('button',{name:'Load shared decision',exact:true})).toBeDisabled();expect(finished).toBe(false);
+  release();await loading;expect(finished).toBe(true);expect(statuses).toContain('HTTP_OK');
+  await expect(page.getByLabel('I reviewed this frame version, its options and public rules.')).toBeVisible();
+ } finally {release();await context.close();await api.close();}
 });

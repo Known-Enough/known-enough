@@ -105,7 +105,7 @@ test('nested frame failure keeps the first failed safe child rather than the lat
     expect(report.tests[2]).toMatchObject({status:'FAIL',phase:'QA03_FRAME_CONFIRM',operationStatus:'HTTP_CONFLICT'});
     const owner=new Reporter();owner.onStepEnd(t,{}, {title:'QA03_OWNER_CONFIRM',error:{message:'PRIVATE_OWNER'}});owner.onStepEnd(t,{}, {title:'QA03_OWNER',error:{message:'PRIVATE_PARENT'}});owner.onTestEnd(t,{status:'failed'});expect(owner.tests[0]).toMatchObject({phase:'QA03_OWNER_CONFIRM',operationStatus:'HTTP_CONFLICT'});
     const load=new Reporter();load.onStepEnd(t,{}, {title:'QA03_FRAME_LOAD',error:{message:'PRIVATE_LOAD'}});load.onTestEnd(t,{status:'failed'});
-    expect(load.tests[0]).not.toHaveProperty('operationStatus');
+    expect(load.tests[0]).toHaveProperty('operationStatus','HTTP_CONFLICT');
   } finally {if(before===undefined)delete process.env.QA_RESULTS_FILE;else process.env.QA_RESULTS_FILE=before;rmSync(dir,{recursive:true,force:true});}
 });
 

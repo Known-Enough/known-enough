@@ -1,0 +1,83 @@
+{
+  "observedAt": "2026-10-05T11:14:20Z",
+  "account": "Battosai1806",
+  "accountId": 143764700,
+  "baselineCommit": "07a38ca94a7d753c745dbf962809b1cc4fef0ce4",
+  "qualificationRun": 37298320294,
+  "deploymentRun": 37298254449,
+  "ciRun": 37298254438,
+  "report": {
+    "schemaVersion": 1,
+    "modelFailures": [],
+    "runId": "gh-37298320294-1",
+    "sourceCommit": "07a38ca94a7d753c745dbf962809b1cc4fef0ce4",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "BLOCKED",
+      "privacy": "PASS",
+      "signup": "BLOCKED",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "mailStatus": "MAIL_CODE_READY",
+        "status": "PASS"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "phase": "QA03_FRAME_REVIEW",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 2,
+      "failed": 1,
+      "blocked": 4,
+      "modelAttempts": null,
+      "signupMessages": null
+    }
+  },
+  "checks": {
+    "focused": 45,
+    "heldOwnerRead": 1,
+    "application": 754,
+    "optionalSkipped": 2,
+    "hosted": 1,
+    "e2e": 61,
+    "fullExit": 0
+  },
+  "hashes": {
+    "tests/live/qa/helpers.ts": "89fef68f6a6fa704993ae3548472f26e0853a2fa31605974e1e0749304986bb3",
+    "tests/live/qa/journey.spec.ts": "182371bfbbdca6dab1798c643d41a0e11668de2f37d8fb50ed23ddcea8f81dbf",
+    "scripts/live-qa/sanitized-reporter.mjs": "933a24dd240f392b18041e9ded3b2af46699affae3b2f1bda9951637ca0b6d8f",
+    "tests/integration/live-qa-runner.test.ts": "9ba40f3a55484944c788c9b60cfab3b7937acd9f139e4d9d627d7e4ad951fc44",
+    "tests/e2e/np-clarity.spec.ts": "193204d9fb3ab179426decdfe04e377565736df710467367d143e30ce7fac03b"
+  },
+  "change": "Observe existing public/owner GET outcomes, wait exact public response and completed button state, reject safe unavailable message. Held signed owner read proves helper stays pending until load completes.",
+  "limitations": "Live frame failure exact cause UNKNOWN; prior kernel retry not exercised. Usage readback null UNKNOWN. No new request/retry, display public-only preserved."
+}
