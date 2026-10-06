@@ -1,6 +1,7 @@
 # NP00 — Technical closeout of the previous batch
 
-- Status: IN_PROGRESS.
+- Status: PAUSED / saved A claim; no active implementation or deployment, 2026-10-06T17:17:44Z.
+- Current handoff: A preserves its source/private recovery and exact bounded files but no longer occupies the active scheduling slot. B is eligible for sequential nonoverlapping PRIV01 then ASSESS11 under the [current handoff](../../../../b-next-task-handoff.md). This is a pause of inactive A work, not DONE, source disposal or blanket transfer of NP00 files. Its model-off checkpoint and unfinished obligations remain; older IN_PROGRESS entries below retain historical evidence.
 - Claim: User A Ricardo / GitHub `martelaxe` (ID `44531296`), WSL worker `/home/martelaxe/known-enough`; transferred from the Mac at 2026-10-01T17:56:15Z. Actual model: Codex GPT-6; exact variant/effort unexposed. Receiving clean ff-only synchronized baseline `3feef260f6fb865f249ae81149a03f8774ca2d39`. The original Mac claim began at `5d06c6f9bf87271db480998f142d748f7f1689f8`; one active project task, no subagents.
 - Direct worker target: `gpt-6-sol` / high. Report the actual model/effort, never infer it from this ticket.
 - Prerequisite: User-directed administrative closure of pre-NP tasks; preserve their source/evidence. No review or human-test prerequisite.

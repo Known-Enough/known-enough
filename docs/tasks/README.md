@@ -1,3 +1,7 @@
+## Current B queue handoff — 2026-10-06T17:17:44Z
+
+ASSESS07 and LIVE04 are DONE on actual all-seven live proof. A's inactive NP00 is PAUSED with saved ownership/work preserved and no active writer. B's existing chat may claim **PRIV01**, then **ASSESS11** after completion, followed by the existing monitor/OPS/UX/FIN route, one task at a time. The [bounded handoff](../b-next-task-handoff.md) defines the local path fix and separately scoped GitHub signup-readback workflow using existing read-only access; no routine A permission is missing. Assignment is not execution evidence. Older active/observer/hold routing below remains dated history.
+
 ## Sequential ASSESS07 transfer — 2026-10-04T20:21:40Z
 
 A is designated to continue the same ASSESS07 task after B's checked idle handoff. See [current ticket](active/live-testing/ASSESS07/ticket.md) and [claim log](../claim-log.md). B's persistent30-minute automation remains active for logging/observation and must not compete or start another task. Tested source is not deployed migration or all-seven PASS; prior B assignment prose below is history.
@@ -29,9 +33,10 @@ Start here to understand what is left. Every task has its own folder: README.md 
 
 | Task | Basic idea | Status |
 | --- | --- | --- |
-| [LIVE04](active/live-testing/LIVE04/README.md) | Prove the installed online test environment works from start to finish. Installation and GitHub settings are ready; real test results and cleanup evidence are still needed. | IN_PROGRESS |
-| [ASSESS07](active/live-testing/ASSESS07/README.md) | Repair real QA03_FRAME failure after verified standing-mode migration; require all-seven/CLEAN proof. | IN_PROGRESS / B persistent chat; frame diagnostic verification |
-| [ASSESS11](active/live-testing/ASSESS11/README.md) | Fix both reported signup paths, log useful safe errors and implement consistent basic password rules (minimum6, no required character classes). Separate primary proof from QA signup tests. | BLOCKED / deferred / unclaimed; checked local source synchronized, separate primary signup/cloud/live gates pending |
+| [LIVE04](active/live-testing/LIVE04/README.md) | Prove the installed online test environment works from start to finish. | DONE; actual all-seven and complete qualification PASS37461438020 |
+| [ASSESS07](active/live-testing/ASSESS07/README.md) | Prove all seven real online journeys, usage/privacy and cleanup on matching deployed source. | DONE; B claim released after actual PASS37461438020 |
+| [PRIV01](active/technical-debt/PRIV01/README.md) | Keep private signup debugging files outside the repository, including aliased folders. | READY / unclaimed; B's next local task |
+| [ASSESS11](active/live-testing/ASSESS11/README.md) | Fix both reported signup paths, log useful safe errors and implement consistent basic password rules (minimum6, no required character classes). Separate primary proof from QA signup tests. | After PRIV01, READY for B's new claim and scoped helper workflow; actual public signup remains unproved |
 
 ## B's existing monitor
 
@@ -43,7 +48,7 @@ Start here to understand what is left. Every task has its own folder: README.md 
 
 | Task | Basic idea | Status |
 | --- | --- | --- |
-| [NP00](active/closeout/NP00/README.md) | Finish the remaining technical obligations from the previous batch. The model-off safety checkpoint is verified; other closeout evidence still belongs here. | IN_PROGRESS |
+| [NP00](active/closeout/NP00/README.md) | Finish the remaining technical obligations from the previous batch. The model-off safety checkpoint is verified; other closeout evidence still belongs here. | PAUSED / saved A claim; no active writer or global B scheduling hold |
 
 ## Later, before wider use
 

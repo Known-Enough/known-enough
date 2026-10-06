@@ -1,3 +1,7 @@
+## Current A scheduling pause and bounded B continuation — 2026-10-06T17:17:44Z
+
+A has no active NP00 implementation/deployment/test and pauses its inactive saved claim for scheduling, retaining source/private recovery and exact files. This frees the single active slot for B's existing chat to claim PRIV01, then ASSESS11, under the [concrete handoff](b-next-task-handoff.md). The original dirty WSL checkout is untouched. A performs coordination/documentation only and will not compete; actual B intake and implementation remain unverified. No new approval, AWS login, automation or worker is needed. Remaining NP00 obligations are preserved for their later proper closeout, not marked DONE.
+
 ## Published standing-mode result and sequential B handback — 2026-10-04T20:54:36Z
 
 A has completed the requested removal of the installed administrative testing gates. One normal own-account main [deployment37232629480](https://github.com/Known-Enough/known-enough/actions/runs/37232629480) on `b15d86c1844e901fbbdc462b88eb231f6987dfd3` succeeded and AUTOMATICALLY triggered matching [qualification37232669890](https://github.com/Known-Enough/known-enough/actions/runs/37232669890). Both actual actor IDs are verified A44531296; no CloudShell, borrowed credentials, extra-run receipt or IAM widening. All12 B handoff hashes and A's focused24/24 checks match the preserved full-check736/two skips, hosted1/1 and E2E60/60 source; GitHub independently passed its full release check before publication. Primary/QA publication, public bytes/rendering and AWS metadata PASS.

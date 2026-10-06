@@ -1,6 +1,6 @@
 # PRIV01 — Reject aliased repository paths for private auth snapshots
 
-Status: READY / deferred / unclaimed; scheduling hold while A owns NP00. No implementation started.
+Status: READY / unclaimed; next eligible task for B's existing persistent chat, 2026-10-06T17:17:44Z. A's inactive NP00 is paused with its saved work preserved; the earlier global hold is superseded by the [bounded sequential handoff](../../../../b-next-task-handoff.md). Assignment is not evidence that implementation started.
 
 Evidence recorded 2026-10-06 by own B account Battosai1806 on source `f27332e319df4c54a888fc5affa355941d1495b9`.
 
@@ -17,4 +17,4 @@ Acceptance:
 - Add meaningful temporary-directory regressions for parent symlink into repository, valid external private directory and existing output collision; use synthetic fixtures only.
 - Run focused checks and pinned full checks before source integration. No live AWS operation is required for this filesystem fix.
 
-Next action: reconcile the single active owner and record a bounded claim before implementation. Keep ASSESS11's separate installed policy/schema/readback obligations; this task does not satisfy them.
+Next action: clean ff-only intake and verified own-account single-task claim, then implement the named local fix and regressions. A has no active competing writer; no further ownership approval is required. Keep ASSESS11's separate installed policy/schema/readback obligations; this task does not satisfy them.
