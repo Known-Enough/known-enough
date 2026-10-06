@@ -1,7 +1,9 @@
-import { readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, statSync, symlinkSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 // @ts-expect-error The task helper is runtime JavaScript, exercised by Vitest.
-import { passwordMatchesPolicy, preparePasswordPolicy, SIMPLE_PASSWORD_POLICY, summarizeAuthSnapshot } from '../../scripts/assess11-auth-config.mjs';
+import { privateDirectory, privateWrite, passwordMatchesPolicy, preparePasswordPolicy, SIMPLE_PASSWORD_POLICY, summarizeAuthSnapshot } from '../../scripts/assess11-auth-config.mjs';
 // @ts-expect-error The QA template is runtime JavaScript, exercised by Vitest.
 import { renderTemplates } from '../../scripts/live-qa/template.mjs';
 
@@ -68,5 +70,39 @@ describe('ASSESS11 exact auth readback and offline preparation', () => {
     const config = { ...base, sourceCommit: 'a'.repeat(40), mailDomain: 'qa.example.org', hostedZoneId: 'Z123456789' };
     const { core } = renderTemplates(config, { apiKey: 'b'.repeat(64) + '/api.zip', brokerKey: 'c'.repeat(64) + '/broker.zip' });
     expect(core.Resources.Pool.Properties.Policies.PasswordPolicy).toEqual(SIMPLE_PASSWORD_POLICY);
+  });
+});
+
+describe('private auth snapshot filesystem boundary', () => {
+  test('rejects a repository alias in an existing parent without creating output', () => {
+    const temp = mkdtempSync(join(tmpdir(), 'assess11-path-'));
+    try {
+      symlinkSync(process.cwd(), join(temp, 'alias'), 'dir');
+      expect(() => privateDirectory(join(temp, 'alias', 'synthetic-output')))
+        .toThrow('ASSESS11_PRIVATE_PATH_REQUIRED');
+    } finally { rmSync(temp, { recursive: true, force: true }); }
+  });
+  test('rejects any symlink ancestor, including an external directory alias', () => {
+    const temp = mkdtempSync(join(tmpdir(), 'assess11-path-'));
+    try {
+      mkdirSync(join(temp, 'actual'));
+      symlinkSync(join(temp, 'actual'), join(temp, 'alias'), 'dir');
+      expect(() => privateDirectory(join(temp, 'alias', 'output')))
+        .toThrow('ASSESS11_PRIVATE_PATH_REQUIRED');
+    } finally { rmSync(temp, { recursive: true, force: true }); }
+  });
+  test('creates owner-only external output and preserves existing snapshot on collision', () => {
+    const temp = mkdtempSync(join(tmpdir(), 'assess11-path-'));
+    try {
+      const output = join(temp, 'private');
+      privateDirectory(output);
+      expect(statSync(output).mode & 0o777).toBe(0o700);
+      const file = join(output, 'synthetic.json');
+      privateWrite(file, { synthetic: true });
+      expect(statSync(file).mode & 0o777).toBe(0o600);
+      expect(() => privateWrite(file, { synthetic: false })).toThrow();
+      expect(JSON.parse(readFileSync(file, 'utf8'))).toEqual({ synthetic: true });
+      expect(() => privateDirectory(output)).toThrow();
+    } finally { rmSync(temp, { recursive: true, force: true }); }
   });
 });

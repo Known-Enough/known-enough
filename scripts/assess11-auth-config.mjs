@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { lstatSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { dirname, isAbsolute, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assertIdentity, aws, awsSkeleton, preservationInput } from './live-qa/aws.mjs';
@@ -76,12 +76,30 @@ export function preparePasswordPolicy(snapshot, updateSkeleton) {
     updateInput.Policies.PasswordPolicy = { ...updateInput.Policies.PasswordPolicy, ...SIMPLE_PASSWORD_POLICY };
     return { updateInput, rollbackInput };
 }
-function privateDirectory(path) {
-    if (!isAbsolute(path) || resolve(path) === WORKSPACE_ROOT || resolve(path).startsWith(WORKSPACE_ROOT + sep))
+export function privateDirectory(path) {
+    if (!isAbsolute(path)) throw new Error('ASSESS11_PRIVATE_PATH_REQUIRED');
+    const out = resolve(path);
+    const repository = realpathSync(WORKSPACE_ROOT);
+    if (out === repository || out.startsWith(repository + sep))
         throw new Error('ASSESS11_PRIVATE_PATH_REQUIRED');
-    mkdirSync(path, { mode: 0o700 });
+    // Inspect every existing ancestor before creating anything; lexical resolve does not follow aliases.
+    for (let parent = dirname(out); ; parent = dirname(parent)) {
+        const info = lstatSync(parent);
+        if (info.isSymbolicLink() || !info.isDirectory())
+            throw new Error('ASSESS11_PRIVATE_PATH_REQUIRED');
+        const actual = realpathSync(parent);
+        if (actual === repository || actual.startsWith(repository + sep))
+            throw new Error('ASSESS11_PRIVATE_PATH_REQUIRED');
+        if (parent === dirname(parent)) break;
+    }
+    mkdirSync(out, { mode: 0o700 }); // Exclusive directory creation also rejects existing output aliases.
+    const info = lstatSync(out);
+    if (!info.isDirectory() || info.isSymbolicLink() || (info.mode & 0o077) !== 0
+        || info.uid !== process.getuid())
+        throw new Error('ASSESS11_PRIVATE_PATH_REQUIRED');
 }
-function privateWrite(path, value) {
+
+export function privateWrite(path, value) {
     writeFileSync(path, JSON.stringify(value, null, 2) + '\n', { mode: 0o600, flag: 'wx' });
 }
 function readCurrent() {

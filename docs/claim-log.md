@@ -204,3 +204,11 @@ Run057 scope: same ASSESS07 adapter fixed pre-provider budget-blocked/exhausted 
 ## Verified B completion — 2026-10-06
 
 ASSESS07 DONE; B claim released after source-matching [qualification37461438020](https://github.com/Known-Enough/known-enough/actions/runs/37461438020) PASS on `22a40a7f679b433b7d5001bb5e65536dbe781cae`, own Battosai1806. All seven real journeys, privacy, signup and CLEAN cleanup PASS; complete report all lanes PASS. Installed standing execution and authorized allowance200/2500000/2500000 verified;31attempts/1112168 reserved tokens/costMicros/1signup. Local pinned full781 application(two optional skips)/hosted1/browser61 PASS. Primary writable AI remains disabled under preserved NP00; historical failures and approvals below remain history. Evidence: `docs/review-artifacts/ASSESS07-b-all-seven-pass.json`. No second worker/task started; next reconcile shared queue and preserve A NP00.
+
+## B PRIV01 claim — 2026-10-06T17:37Z
+
+Verified own Battosai1806 and ff-only intake372d12b18573016a4adfa051216b0a19d89972f6; A NP00 paused/no active writer per synchronized handoff. B claims only PRIV01 in existing persistent chat. Scope scripts/assess11-auth-config.mjs, tests/integration/assess11-auth-config.test.ts and B/task tracking; A protected files unchanged. Preserved local monitor tail before ff-only intake and restored it append-only.
+
+## B PRIV01 completion/release — 2026-10-06T17:40Z
+
+PRIV01 DONE on focused7 and pinned full784/two optional skips, hosted1, browser61 PASS. B releases this claim at verified source integration; no second claim yet. Next ASSESS11 exact existing handoff; NP00 remains paused/saved, not DONE.

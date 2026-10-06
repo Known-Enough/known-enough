@@ -18,3 +18,7 @@ Acceptance:
 - Run focused checks and pinned full checks before source integration. No live AWS operation is required for this filesystem fix.
 
 Next action: clean ff-only intake and verified own-account single-task claim, then implement the named local fix and regressions. A has no active competing writer; no further ownership approval is required. Keep ASSESS11's separate installed policy/schema/readback obligations; this task does not satisfy them.
+
+## Verified completion — 2026-10-06
+
+DONE / B. Existing-parent symlink traversal and repository aliases are rejected before directory creation; new output remains exclusive and owner-only. Synthetic regressions cover repository/external aliases, valid output and snapshot collision preservation. Pinned focused7 and full784 application(two optional skips)/hosted1/browser61 plus references/planning/lint/types/build/boundaries PASS. No AWS action or private snapshot used. Earlier assignment text is historical. Next ASSESS11 under the synchronized sequential handoff.

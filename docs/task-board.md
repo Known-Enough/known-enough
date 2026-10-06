@@ -166,3 +166,7 @@ Human trials, independent release review and submission preparation remain defer
 ## Deferred privacy follow-up — 2026-10-06
 
 [PRIV01 — Private auth snapshot path boundary](tasks/active/technical-debt/PRIV01/ticket.md) is READY/unclaimed and B's next eligible task under the current handoff above. A safe symlink-only probe demonstrated that ASSESS11’s lexical output-path guard accepts an aliased repository parent. No private snapshot or workspace directory was created. It precedes the helper's real snapshot use; A's saved NP00 claim is paused and preserved, with no active scheduling hold. Assignment is not evidence of B execution or signup acceptance.
+
+## Current completion — 2026-10-06T17:40Z
+
+PRIV01 DONE / B, focused7/full784(two optional skips)/hosted1/browser61 PASS. Prior READY text is historical. Next eligible ASSESS11, unclaimed until fresh sequential intake; A NP00 remains paused/saved.
