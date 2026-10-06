@@ -85,7 +85,7 @@ describe('KE14 authenticated provisioning and trusted catalog composition', () =
         clock: h.clock, isEnabled: runtime.isEnabled, diagnostic });
       if (failure === 'persistence') vi.spyOn(h.application, 'createDecision').mockRejectedValueOnce(Error('PRIVATE_STORAGE_CANARY'));
       const stages = { provider: 'PROVIDER', envelope: 'TOOL_ENVELOPE', fields: 'ARCHITECT_FIELDS',
-        definition: 'ARCHITECT_SCHEMA', selector: 'TOOL_OUTPUT', persistence: 'SCENARIO_PERSISTENCE' };
+        definition: 'ARCHITECT_SCHEMA_RULES', selector: 'TOOL_OUTPUT', persistence: 'SCENARIO_PERSISTENCE' };
       try {
         await expect(service.create(participant('maya'), createBody())).rejects.toBeDefined();
         expect(send).toHaveBeenCalledTimes(1);

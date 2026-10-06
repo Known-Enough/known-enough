@@ -185,6 +185,6 @@ it('retains schema rejection without exposing invalid model fields in diagnostic
  const diagnostic=vi.fn();
  const architect=new DecisionArchitect({draft:async()=>output},()=> 'schema-rejection',Date.now,()=>true,diagnostic);
  await expect(architect.draft('organizer',request())).rejects.toMatchObject({code:'RETRYABLE_SERVER_ERROR'});
- expect(diagnostic).toHaveBeenCalledWith({kind:'ARCHITECT',stage:'ARCHITECT_SCHEMA'});
+ expect(diagnostic).toHaveBeenCalledWith({kind:'ARCHITECT',stage:'ARCHITECT_SCHEMA_VARIABLES'});
  expect(JSON.stringify(diagnostic.mock.calls)).not.toContain('PRIVATE_UNTRUSTED_LABEL');
 });
