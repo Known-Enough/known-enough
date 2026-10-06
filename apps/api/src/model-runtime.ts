@@ -39,7 +39,7 @@ export function createKnownEnoughModelRuntime(options: {
       return typeof value === 'function' ? value.bind(target) : value;
     },
   });
-  const jobs = new BoundedModelJobs({ now: () => Date.parse(options.clock.now()),
+  const jobs = new BoundedModelJobs({ ...(options.diagnostic ? { diagnostic: options.diagnostic } : {}), now: () => Date.parse(options.clock.now()),
     ...(options.metric ? { metric: options.metric } : {}) });
   const transport = options.provider.mode === 'INJECTED'
     ? options.provider.transport : createAuthorizedBedrockTransport(options.provider);

@@ -1,6 +1,7 @@
+import { reportModelFailure } from '@deal-table/application';
 import { AsyncResource } from 'node:async_hooks';
 import { randomUUID } from 'node:crypto';
-import type { ModelInvocation, ModelJobKind, ModelJobRunner } from '@deal-table/application';
+import type { ModelInvocation, ModelJobKind, ModelJobRunner, ModelFailureDiagnostic } from '@deal-table/application';
 
 export class ModelRuntimeError extends Error {
   constructor(readonly code: 'DISABLED' | 'CAPACITY' | 'STALE' | 'EXPIRED' | 'PROVIDER_FAILED' | 'INVALID_OUTPUT' | 'INVALID_INPUT') {
@@ -34,6 +35,7 @@ export class BoundedModelJobs implements ModelJobRunner {
   private readonly capacity: number;
   constructor(private readonly options: {
     concurrency?: number; capacity?: number; timeoutMs?: number;
+    diagnostic?: (value: ModelFailureDiagnostic) => void;
     now?: () => number; metric?: (value: ModelJobMetric) => void;
   } = {}) {
     this.concurrency = options.concurrency ?? 2;
@@ -60,7 +62,10 @@ export class BoundedModelJobs implements ModelJobRunner {
       const abort = () => this.finish(jobId, new ModelRuntimeError('EXPIRED'));
       const entry: Entry = {
         kind, invocation: { ...invocation, assertCurrent: AsyncResource.bind(invocation.assertCurrent) }, task: AsyncResource.bind(task), resolve, reject, running: false, started: this.now(),
-        controller: new AbortController(), timer: setTimeout(abort, duration),
+        controller: new AbortController(), timer: setTimeout(() => {
+          if (this.entries.has(jobId)) reportModelFailure(this.options.diagnostic, kind, 'MODEL_DEADLINE');
+          abort();
+        }, duration),
         dispose: () => invocation.signal?.removeEventListener('abort', abort),
       };
       this.entries.set(jobId, entry);

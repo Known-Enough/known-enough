@@ -102,3 +102,14 @@ describe('bounded model jobs', () => {
     expect(() => new BoundedModelJobs({ concurrency: 5 })).toThrow('Invalid model job bounds');
   });
 });
+
+it('reports only timer expiry, never a private caller abort reason', async () => {
+ vi.useFakeTimers();const diagnostic=vi.fn();const jobs=new BoundedModelJobs({timeoutMs:100,diagnostic});
+ const deadline=jobs.run('ARCHITECT',invocation(),()=>new Promise(()=>{})).catch(error=>error.code);
+ await vi.advanceTimersByTimeAsync(101);expect(await deadline).toBe('EXPIRED');
+ expect(diagnostic.mock.calls).toEqual([[{kind:'ARCHITECT',stage:'MODEL_DEADLINE'}]]);
+ diagnostic.mockClear();const controller=new AbortController();
+ const cancelled=jobs.run('OWNER',{...invocation(),signal:controller.signal},async()=> 'unused').catch(error=>error.code);
+ controller.abort('PRIVATE_REASON');expect(await cancelled).toBe('EXPIRED');
+ await vi.advanceTimersByTimeAsync(101);expect(diagnostic).not.toHaveBeenCalled();
+});
