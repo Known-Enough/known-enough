@@ -192,3 +192,5 @@ Run052 scope: same ASSESS07 fixed QUESTION_COVERAGE rejection reason and strict 
 Run053 scope: same ASSESS07 adapter prompt selection guidance for available trusted VALID/NEEDS_PERMISSION hints and distinguish required trusted question metadata from user-visible private disclosures; no catalog filtering/auto selection/auth change/NP00 edit. Live hint availability UNKNOWN.
 
 Run054 scope: same ASSESS07 first-attempt parse rejection fixed-stage diagnostic before existing retry, bounded regression; no output/private fields/extra calls/NP00 edits. Live first parse failure UNKNOWN.
+
+Run056 scope: same ASSESS07 existing catalog snapshot bounded trusted question-target projection(max16 candidates, existing intent cap), negotiator/adapter hints and behavioral regression. Guidance only, no stored questions/grants/selection, original catalog/final guards/budgets/NP00 preserved.

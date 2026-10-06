@@ -49,6 +49,7 @@ const prompts: Record<ModelJobKind, string> = {
     + 'Do not repeat, edit or summarize its values; the server copies the exact catalog entry. '
     + 'First evaluate each candidate against every shared rule and every confirmed HARD constraint. Select a candidate satisfying all of them. '
     + 'candidateKernelStatuses aligns with publicCandidates and is a read-only trusted-state preview without permission dependencies. If the preview contains VALID or NEEDS_PERMISSION entries, select one of those entries; do not select an INVALID entry to preserve a negotiable preference. If preview guidance is unavailable, evaluate all shared and hard rules yourself. NEEDS_PERMISSION requires the exact negotiable intent or applicable active permission dependency; hints never grant permission and final current-state checks still apply. '
+    + 'candidateQuestionTargets aligns with publicCandidates and contains exact trusted owner/constraint/version and selected public option metadata for unresolved negotiable conflicts. For your selected entry, return those targets as questionIntents; they are guidance, not issued questions or grants. Never copy another entry’s targets or treat this metadata as consent. '
     + 'rejectedCandidateIndices identifies prior public catalog selections rejected by the kernel in this same attempt sequence. It is feedback, not a filtered catalog or permission. Reconsider those selections against mandatory rules; never relax a hard constraint. '
     + 'When retryReason is KERNEL_REJECTION, the prior catalog selection failed mandatory kernel checks. Re-evaluate every candidate against shared rules and HARD constraints before selecting; do not repeat a rejected selection merely to satisfy a negotiable preference. '
     + 'HARD constraints are mandatory; do not select a candidate violating one to satisfy a NEGOTIABLE constraint. '
@@ -305,7 +306,7 @@ export function createBedrockModels(options: {
         ownerParticipantId: permission.ownerParticipantId, constraintId: permission.constraintId,
         constraintVersion: permission.constraintVersion, adjustment: permission.adjustment, expiresAt: permission.expiresAt,
       })),
-      publicCandidates: input.publicCandidates, attempt: input.attempt, retryReason: input.retryReason, rejectedCandidateIndices: input.rejectedCandidateIndices ?? [], candidateKernelStatuses: input.candidateKernelStatuses ?? null,
+      publicCandidates: input.publicCandidates, attempt: input.attempt, retryReason: input.retryReason, rejectedCandidateIndices: input.rejectedCandidateIndices ?? [], candidateKernelStatuses: input.candidateKernelStatuses ?? null, candidateQuestionTargets: input.candidateQuestionTargets ?? null,
     }, input.invocation ? { ...input.invocation, signal: input.signal } : undefined),
   };
 }

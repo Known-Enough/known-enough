@@ -895,6 +895,10 @@ export class KnownEnoughApplication {
 
   /** Bounded model guidance only; final publication still evaluates current state. */
   async previewReasoningCatalog(principal: TrustedPrincipal | null, decisionId: string, jobId: string, inputs: unknown[]) {
+    return (await this.previewReasoningCatalogGuidance(principal, decisionId, jobId, inputs)).statuses;
+  }
+
+  async previewReasoningCatalogGuidance(principal: TrustedPrincipal | null, decisionId: string, jobId: string, inputs: unknown[]) {
     if (!Array.isArray(inputs) || inputs.length < 1 || inputs.length > 16) fail('INVALID_COMMAND');
     const candidates = inputs.map(input => KE.CandidateProposal.parse(input));
     return this.options.repository.transactionDecision(decisionId, async decision => {
@@ -902,15 +906,33 @@ export class KnownEnoughApplication {
       this.service(decision, principal);
       const job = decision.job;
       if (!job || job.id !== jobId || job.epoch !== decision.solveEpoch || decision.status !== 'REASONING'
-        || job.contextToken !== decision.definition.contextToken || job.semanticVersion !== decision.definition.semanticVersion) return candidates.map(()=>'STALE' as const);
+        || job.contextToken !== decision.definition.contextToken || job.semanticVersion !== decision.definition.semanticVersion) return { statuses: candidates.map(()=>'STALE' as const), questionTargets: candidates.map(() => []) };
       const now = this.now();
       const statuses: string[] = [];
+      const questionTargets: { ownerParticipantId: string; constraintId: string; constraintVersion: number; adjustmentVariableId: string; adjustmentOptionIds: string[] }[][] = [];
       for (const candidate of candidates) {
         if (candidate.decisionId !== decision.decisionId || candidate.contextToken !== job.contextToken
-          || candidate.semanticVersion !== job.semanticVersion || candidate.proposalVersion !== decision.proposalVersion + 1) statuses.push('STALE');
-        else statuses.push((await evaluateReasoningCandidate(decision,candidate,now)).evaluation.status);
+          || candidate.semanticVersion !== job.semanticVersion || candidate.proposalVersion !== decision.proposalVersion + 1) { statuses.push('STALE'); questionTargets.push([]); }
+        else {
+          const { evaluation } = await evaluateReasoningCandidate(decision, candidate, now);
+          statuses.push(evaluation.status);
+          const targets: typeof questionTargets[number] = [];
+          if (evaluation.status === 'NEEDS_PERMISSION') for (const failure of evaluation.diagnostics.filter(item => item.code === 'NEGOTIABLE_PERMISSION_REQUIRED')) {
+            const owner = decision.owners.find(item => item.participantId === failure.ownerParticipantId);
+            const constraint = owner?.confirmedConstraints.find(item => item.constraintId === failure.constraintId && item.status === 'ACTIVE' && item.kind === 'NEGOTIABLE');
+            if (!owner || !constraint || constraint.kind !== 'NEGOTIABLE' || !('variableId' in constraint.rule)) continue;
+            const variableId = constraint.rule.variableId;
+            const assignment = candidate.values.find(item => item.variableId === variableId);
+            if (assignment?.value.type !== 'ENUM') continue;
+            const adjustment = safeAdjustment(decision.definition, constraint, { id: 'guidance', visibility: 'TRUSTED_BACKEND', operator: 'IN', variableId: assignment.variableId, values: [assignment.value] });
+            if (!adjustment) continue;
+            targets.push({ ownerParticipantId: owner.participantId, constraintId: constraint.constraintId, constraintVersion: constraint.constraintVersion,
+              adjustmentVariableId: assignment.variableId, adjustmentOptionIds: [assignment.value.optionId] });
+          }
+          questionTargets.push(targets.length <= KE.MAX_DECISION_PARTICIPANTS * 16 ? targets : []);
+        }
       }
-      return statuses;
+      return { statuses, questionTargets };
     });
   }
 

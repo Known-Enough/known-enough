@@ -21,6 +21,7 @@ export interface DecisionNegotiationModelInput {
   attempt: number;
   retryReason: 'INVALID_OUTPUT' | 'PERMISSION_DEPENDENCIES' | 'KERNEL_REJECTION' | 'MISSING_QUESTION' | 'MODEL_ERROR' | null;
   candidateKernelStatuses?: string[] | null;
+  candidateQuestionTargets?: { ownerParticipantId: string; constraintId: string; constraintVersion: number; adjustmentVariableId: string; adjustmentOptionIds: string[] }[][] | null;
   rejectedCandidateIndices?: number[];
   signal: AbortSignal;
   invocation?: ModelInvocation;
@@ -179,12 +180,12 @@ export class DecisionNegotiator {
       throw new Error('Invalid negotiation bounds');
   }
 
-  private async invoke(context: DecisionNegotiationContext, publicCandidates: KE.CandidateProposal['values'][], attempt: number, retryReason: DecisionNegotiationModelInput['retryReason'], invocation: ModelInvocation, rejectedCandidateIndices: number[] = [], candidateKernelStatuses: string[] | null = null): Promise<unknown> {
+  private async invoke(context: DecisionNegotiationContext, publicCandidates: KE.CandidateProposal['values'][], attempt: number, retryReason: DecisionNegotiationModelInput['retryReason'], invocation: ModelInvocation, rejectedCandidateIndices: number[] = [], candidateKernelStatuses: string[] | null = null, candidateQuestionTargets: DecisionNegotiationModelInput['candidateQuestionTargets'] = null): Promise<unknown> {
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
       return await Promise.race([
-        this.options.model({ context, publicCandidates: structuredClone(publicCandidates), attempt, retryReason, rejectedCandidateIndices: [...rejectedCandidateIndices], candidateKernelStatuses: candidateKernelStatuses ? [...candidateKernelStatuses] : null, signal: controller.signal, invocation }),
+        this.options.model({ context, publicCandidates: structuredClone(publicCandidates), attempt, retryReason, rejectedCandidateIndices: [...rejectedCandidateIndices], candidateKernelStatuses: candidateKernelStatuses ? [...candidateKernelStatuses] : null, candidateQuestionTargets: candidateQuestionTargets ? structuredClone(candidateQuestionTargets) : null, signal: controller.signal, invocation }),
         new Promise<never>((_, reject) => {
           timer = setTimeout(() => { controller.abort(); reject(new DecisionNegotiatorError('MODEL_FAILED')); }, this.timeoutMs);
         }),
@@ -236,6 +237,7 @@ export class DecisionNegotiator {
       },
     };
     let candidateKernelStatuses: string[] | null = null;
+    let candidateQuestionTargets: DecisionNegotiationModelInput['candidateQuestionTargets'] = null;
     if (publicCandidates.length <= 16) {
       const now = this.options.clock.now();
       const candidates = publicCandidates.map((values,index) => ({
@@ -245,7 +247,7 @@ export class DecisionNegotiator {
         validation:{status:'VALID',checkedRuleIds:[],failedRuleIds:[],unknownRuleIds:[],unsupportedConditionIds:[]},
         permissionDependencies:[],createdAt:now,
       }));
-      try { candidateKernelStatuses = await this.options.application.previewReasoningCatalog(service,decisionId,job.id,candidates); }
+      try { const guidance = await this.options.application.previewReasoningCatalogGuidance(service,decisionId,job.id,candidates); candidateKernelStatuses = guidance.statuses; candidateQuestionTargets = guidance.questionTargets; }
       catch { /* Guidance unavailable; final kernel remains authoritative. */ }
     }
     let parsed: ParsedNegotiationOutput | null = null;
@@ -258,7 +260,7 @@ export class DecisionNegotiator {
       attempts = attempt;
       let output: unknown;
       try {
-        output = await this.invoke(context, publicCandidates, attempt, retryReason, invocation, rejectedCandidateIndices, candidateKernelStatuses);
+        output = await this.invoke(context, publicCandidates, attempt, retryReason, invocation, rejectedCandidateIndices, candidateKernelStatuses, candidateQuestionTargets);
       } catch {
         modelFailed = true;
         retryReason = 'MODEL_ERROR';

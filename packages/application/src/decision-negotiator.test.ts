@@ -604,3 +604,16 @@ it('retains a first malformed-envelope stage when the remaining candidate is har
  expect(JSON.stringify(diagnostic)).not.toContain('PRIVATE_MODEL_CANARY');
  expect((await h.application.getOwnerSnapshot(participant('nina'), decisionId)).pendingQuestions).toEqual([]);
 });
+
+
+it('provides exact unresolved public-option targets in catalog order without issuing a question itself', async () => {
+ const h = await setup(); let calls = 0;
+ const negotiator = createNegotiator(h.application, async input => {
+  calls++; expect(input.candidateQuestionTargets).toHaveLength(9);
+  expect(input.candidateQuestionTargets![5]).toEqual([]);
+  expect(input.candidateQuestionTargets![3]).toEqual([{ ownerParticipantId: 'nina', constraintId: 'nina-destination-flexibility', constraintVersion: 1, adjustmentVariableId: 'destination', adjustmentOptionIds: ['mazatlan'] }]);
+  expect((await h.application.getOwnerSnapshot(participant('nina'), decisionId)).pendingQuestions).toEqual([]);
+  return generated(input, 'mazatlan', 150_000);
+ });
+ expect((await negotiator.generate(participant('maya'), decisionId)).outcome).toBe('NEEDS_PERMISSION'); expect(calls).toBe(1);
+});

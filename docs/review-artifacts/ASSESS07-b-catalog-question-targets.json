@@ -1,0 +1,29 @@
+{
+  "sourceBase": "c72fefdb1cc316a000b75f1403044b54bbfb07fc",
+  "files": {
+    "packages/application/src/known-enough.ts": "dbe95443cbcf1aa3397338d110ca853565b6230a7f24a7c32239d7ff23b39601",
+    "packages/application/src/decision-negotiator.ts": "43ae7197c131d97a75453244f72f44789506e1b684b882e5349d0d1d6acda22b",
+    "packages/application/src/decision-negotiator.test.ts": "555946e08e576a1f1185c01910a8205029eef54d41c34b17529ad181fdafd94c",
+    "packages/adapters/src/bedrock-models.ts": "2c5e1140e6fd1607df3bcfae6240c6c73e102c7e5c759bf95d52cf1a3d8ef0ee"
+  },
+  "checks": {
+    "focused": 53,
+    "application": 775,
+    "optionalSkipped": 2,
+    "hosted": 1,
+    "browser": 61,
+    "fullExit": 0
+  },
+  "bounds": {
+    "catalogCap": 16,
+    "snapshotReads": 1,
+    "modelAttempts": 2
+  },
+  "limits": [
+    "Exact trusted metadata only, public ENUM selected option only",
+    "No stored question/grant/automatic selection",
+    "Existing final coverage/consent/kernel guards",
+    "Permission dependencies omitted from hint preview as before",
+    "Live effect UNKNOWN"
+  ]
+}
