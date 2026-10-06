@@ -1,0 +1,21 @@
+{
+  "sourceBase": "e7b595282b10992d4b16ccdb8be6870392404094",
+  "files": {
+    "packages/application/src/decision-negotiator.ts": "019bfe2a672493262e7bfe31cbe053810520095256fe6d193ebafc17bf88f9f8",
+    "packages/application/src/decision-negotiator.test.ts": "e86549bd5c964cbe4facce4ead508a3a63d7bcf8d89254057737f87a4a6e3e7f"
+  },
+  "checks": {
+    "focused": 36,
+    "application": 774,
+    "optionalSkipped": 2,
+    "hosted": 1,
+    "browser": 61,
+    "fullExit": 0
+  },
+  "change": "First-attempt parse rejection emits existing fixed reason before bounded retry; no output persisted.",
+  "limits": [
+    "At most one extra first parse stage per job; live report deduplicates",
+    "Two attempts and final outcomes unchanged",
+    "Live first failure boundary UNKNOWN"
+  ]
+}

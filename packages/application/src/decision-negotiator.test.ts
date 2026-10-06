@@ -541,7 +541,7 @@ it.each(['permissionVersion', 'expiresAt'] as const)('rejects a stale %s twice d
  }, value => diagnostic.push(value));
  await expect(negotiator.generate(participant('maya'), decisionId)).rejects.toMatchObject({ code: 'INVALID_MODEL_OUTPUT', diagnosticReason: 'PERMISSION_DEPENDENCIES' });
  expect(reasons).toEqual([null, 'PERMISSION_DEPENDENCIES']);
- expect(diagnostic).toEqual([{ kind: 'NEGOTIATION', stage: 'NEGOTIATION_PERMISSION_DEPENDENCIES' }]);
+ expect(diagnostic).toEqual([{ kind: 'NEGOTIATION', stage: 'NEGOTIATION_PERMISSION_DEPENDENCIES' }, { kind: 'NEGOTIATION', stage: 'NEGOTIATION_PERMISSION_DEPENDENCIES' }]);
  expect((await h.application.getPublicSnapshot(participant('maya'), decisionId)).currentProposal).toBeNull();
  expect((await h.application.getOwnerSnapshot(participant('nina'), decisionId)).pendingQuestions.filter(q => q.status === 'PENDING')).toEqual([]);
 });
@@ -591,4 +591,16 @@ it('requires an exact owner grant for a finite public enum NE concession without
  expect(question.adjustment).toMatchObject({ operator: 'IN', values: [{ type: 'ENUM', optionId: 'mazatlan' }] });
  expect((await negotiator.generate(participant('maya'), decisionId)).outcome).toBe('APPLIED');
  expect((await h.application.getOwnerSnapshot(participant('nina'), decisionId)).confirmedConstraints[0]).toMatchObject({ rule: { comparison: 'NE' } });
+});
+
+
+it('retains a first malformed-envelope stage when the remaining candidate is hard-invalid, without logging output', async () => {
+ const h = await setup(); let calls = 0; const diagnostic: ModelFailureDiagnostic[] = [];
+ const negotiator = createNegotiator(h.application, async input => {
+  calls++; return input.attempt === 1 ? { privateText: 'PRIVATE_MODEL_CANARY' } : generated(input, 'mazatlan', 170_000);
+ }, event => diagnostic.push(event));
+ expect((await negotiator.generate(participant('maya'), decisionId)).outcome).toBe('INVALID');
+ expect(calls).toBe(2); expect(diagnostic).toEqual([{ kind: 'NEGOTIATION', stage: 'NEGOTIATION_OUTPUT_ENVELOPE' }]);
+ expect(JSON.stringify(diagnostic)).not.toContain('PRIVATE_MODEL_CANARY');
+ expect((await h.application.getOwnerSnapshot(participant('nina'), decisionId)).pendingQuestions).toEqual([]);
 });

@@ -271,6 +271,7 @@ export class DecisionNegotiator {
         if (!parsedOutput.ok) {
           parsed = null;
           diagnosticReason = parsedOutput.reason;
+          if (attempt < MAX_ATTEMPTS) reportModelFailure(this.options.diagnostic, 'NEGOTIATION', `NEGOTIATION_${parsedOutput.reason}`);
           retryReason = parsedOutput.reason === 'PERMISSION_DEPENDENCIES' ? 'PERMISSION_DEPENDENCIES' : 'INVALID_OUTPUT';
           continue;
         }

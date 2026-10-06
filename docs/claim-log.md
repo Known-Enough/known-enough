@@ -190,3 +190,5 @@ Run051 same-task scope: safeAdjustment finite public ENUM NE originals using dec
 Run052 scope: same ASSESS07 fixed QUESTION_COVERAGE rejection reason and strict diagnostic stage allowlists/tests; separate parser/semantic failure, no model payload/private fields/new attempts/NP00 edits.
 
 Run053 scope: same ASSESS07 adapter prompt selection guidance for available trusted VALID/NEEDS_PERMISSION hints and distinguish required trusted question metadata from user-visible private disclosures; no catalog filtering/auto selection/auth change/NP00 edit. Live hint availability UNKNOWN.
+
+Run054 scope: same ASSESS07 first-attempt parse rejection fixed-stage diagnostic before existing retry, bounded regression; no output/private fields/extra calls/NP00 edits. Live first parse failure UNKNOWN.
