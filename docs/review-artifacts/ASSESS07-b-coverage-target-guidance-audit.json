@@ -1,0 +1,34 @@
+{
+  "sourceCommit": "9e1d049a6ea7995395cfba89e9abcf3f6cdaa80c",
+  "qualification": 37400363309,
+  "observedStages": [
+    "NEGOTIATION_KERNEL_REJECTION",
+    "NEGOTIATION_QUESTION_COVERAGE"
+  ],
+  "findings": [
+    "Coverage failure is semantic preview rejection, not a structurally malformed question envelope",
+    "Adapter supplies all confirmed constraints and catalog status hints; no per-candidate unresolved target mapping",
+    "Coverage preview requires every unresolved negotiable owner/constraint/version and safe adjustment containing selected option"
+  ],
+  "unknown": [
+    "Exact missing or inapplicable intent",
+    "Whether catalog hints reached live model",
+    "Original live rule operator"
+  ],
+  "proposedNextChange": {
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "scope": "same ASSESS07 bounded read-only per-candidate exact target metadata for model guidance",
+    "bounds": [
+      "public ENUM catalog <=16",
+      "verified service/job/epoch/context/version",
+      "exact existing owner/constraint/version and selected public option only",
+      "no question/grant storage or automatic selection",
+      "no raw model output/log identifiers",
+      "existing final coverage/consent/kernel/two-attempt/time guards remain"
+    ]
+  },
+  "checks": {
+    "focused": 38,
+    "result": "PASS"
+  }
+}
