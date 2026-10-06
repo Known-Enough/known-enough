@@ -1,0 +1,58 @@
+{
+  "sourceCommit": "22a40a7f679b433b7d5001bb5e65536dbe781cae",
+  "verifiedAccount": "Battosai1806",
+  "qualificationRun": "https://github.com/Known-Enough/known-enough/actions/runs/37461438020",
+  "status": "PASS",
+  "journeys": 7,
+  "privacy": "PASS",
+  "cleanup": "PASS",
+  "modelAttempts": 31,
+  "signupMessages": 1,
+  "reservedTokens": 1112168,
+  "reservedCostMicros": 1112168,
+  "limits": {
+    "attempts": 200,
+    "tokens": 2500000,
+    "costMicros": 2500000
+  },
+  "completeReport": {
+    "schemaVersion": 1,
+    "status": "PASS",
+    "sourceCommit": "22a40a7f679b433b7d5001bb5e65536dbe781cae",
+    "initiatingAccount": "Battosai1806",
+    "lanes": {
+      "jobs": "PASS",
+      "primaryPublication": "PASS",
+      "currentSource": "PASS",
+      "release": "PASS",
+      "public": "PASS",
+      "primaryConfiguration": "PASS",
+      "qaJourney": "PASS"
+    },
+    "jobResults": {
+      "provenance": "success",
+      "release": "success",
+      "primary-release": "success",
+      "public": "success",
+      "metadata": "success",
+      "journey": "success"
+    },
+    "targets": {
+      "primary": "https://main.d143q5ravxp5av.amplifyapp.com/",
+      "qa": "https://main.d2l23pkzmr1tio.amplifyapp.com/",
+      "staticPreview": "https://d23eowhnwtqts3.cloudfront.net/"
+    },
+    "targetDifferences": [
+      "Primary models remain disabled under NP00; real AI journeys run in isolated budgeted QA.",
+      "QA uses separate pools, clients, API and data tables; primary writable AI was not tested."
+    ],
+    "qaCounts": {
+      "passed": 7,
+      "failed": 0,
+      "blocked": 0,
+      "modelAttempts": 31,
+      "signupMessages": 1
+    },
+    "requiredCloudAcceptance": "LIVE04 requires actual B dispatch and separate authorized automatic deployment run"
+  }
+}
