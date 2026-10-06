@@ -33,3 +33,8 @@ One prioritized verified issue list links every affected screen to UX02; observe
 ## UX01 first bounded review — 2026-10-06T22:40Z
 
 IN_PROGRESS/B, same sole claim. Required gpt-6-luna/medium read-only helper first pass completed; root verified eight real blank public desktop/phone screenshots/inventories and deduplicated four concrete issues (provider route ambiguity, missing close/stale form instructions, dense guidance, fieldset styling). Evidence docs/review-artifacts/UX01/first-use-review.md. No account submission or app/source/cloud mutation. Sign in/focus/no overflow/current password help verified-good. Remaining core two-participant/privacy/journey/state/zoom checks required before UX01 completion; next continue local synthetic rendered review, then UX02 implementation.
+
+
+## UX01 core journey review — 2026-10-06T23:08:38.090711+00:00
+
+19 focused local Chromium checks PASS; independent synthetic participants/privacy/onboarding/refusal/disclosure/final approvals/refresh/expiry/retry covered. Root inspected phone private full-page screenshot with no horizontal overflow. Evidence docs/review-artifacts/UX01/core-journey-review.md. UX01 remains IN_PROGRESS/B; desktop core/zoom/loading visual review outstanding. No executable or cloud change, no whole-task/live PASS.
