@@ -216,3 +216,7 @@ PRIV01 DONE on focused7 and pinned full784/two optional skips, hosted1, browser6
 ## B ASSESS11 sequential claim — 2026-10-06T18:06Z
 
 PRIV01 completed/released on33dfa32884ce4b336668d61b0090e24e158b2be8 with matching CI37505411326 SUCCESS. Verified own Battosai1806/ID143764700 and equal main/origin. B claims only ASSESS11 in persistent chat under372d12b handoff; A NP00 paused/saved/no competing writer. Scope existing ASSESS11 helper/tests/app and tracking plus explicitly authorized separate .github/workflows/assess11-auth-readback.yml. Existing A inspector/policy/workflow and saved files unchanged.
+
+## ASSESS11 bounded repair scope — 2026-10-06T19:06Z
+
+Same sole B task: add .github/workflows/assess11-auth-repair.yml and helper apply command/tests for exact named-pool password repair from fresh private preservation inputs, existing project roles and sanitized errors. Standing configuration authority applies; no inspector/IAM/A file changes or permission widening. Readback and cleanup remain mandatory, record any actual denial.
