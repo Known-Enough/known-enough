@@ -38,3 +38,8 @@ IN_PROGRESS/B, same sole claim. Required gpt-6-luna/medium read-only helper firs
 ## UX01 core journey review — 2026-10-06T23:08:38.090711+00:00
 
 19 focused local Chromium checks PASS; independent synthetic participants/privacy/onboarding/refusal/disclosure/final approvals/refresh/expiry/retry covered. Root inspected phone private full-page screenshot with no horizontal overflow. Evidence docs/review-artifacts/UX01/core-journey-review.md. UX01 remains IN_PROGRESS/B; desktop core/zoom/loading visual review outstanding. No executable or cloud change, no whole-task/live PASS.
+
+
+## UX01 checked review milestone — 2026-10-06T23:37:10.551646+00:00
+
+REVIEW / CODE_READY; B claim released after verified read-only review. Required first Luna review and direct checks produce one five-item UX02 issue list. Local19 journey checks PASS; desktop/other-owner/CSSzoom2 screenshots and eight Tab sequence verified no overflow/raw leakage, owner-only question. Evidence docs/review-artifacts/UX01/core-journey-review.md and first-use-review.md. Actual browser UI zoom/device, primary signup completion and exhaustive visual-state/accessibility evidence remain explicit gaps; no whole-task DONE/live PASS. Next UX02 sequential implementation of verified findings; preserve A NP00 paused/saved.

@@ -185,3 +185,8 @@ REVIEW / CODE_READY; existing monitor code/lifecycle/privacy/stale/fallback chec
 ## Current UX01 execution — 2026-10-06T22:40Z
 
 UX01 IN_PROGRESS/B, sole claim; required first bounded Luna read-only review completed and direct-verified findings preserved. Core synthetic participant/journey checks remain, no whole-task completion or UX02 start. A NP00 paused/saved.
+
+
+## UX01 checked review milestone — 2026-10-06T23:37:10.551646+00:00
+
+REVIEW / CODE_READY; B claim released after verified read-only review. Required first Luna review and direct checks produce one five-item UX02 issue list. Local19 journey checks PASS; desktop/other-owner/CSSzoom2 screenshots and eight Tab sequence verified no overflow/raw leakage, owner-only question. Evidence docs/review-artifacts/UX01/core-journey-review.md and first-use-review.md. Actual browser UI zoom/device, primary signup completion and exhaustive visual-state/accessibility evidence remain explicit gaps; no whole-task DONE/live PASS. Next UX02 sequential implementation of verified findings; preserve A NP00 paused/saved.
