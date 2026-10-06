@@ -1,0 +1,78 @@
+[
+  {
+    "name": "phone",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "actions": [
+      "Sign in",
+      "Shared display sign-in",
+      "Register with email"
+    ],
+    "firstKeyboardFocus": "Sign in",
+    "overflow": false,
+    "passwordMinimum": "8",
+    "submittedAccount": false
+  },
+  {
+    "name": "phone",
+    "providerReachable": true,
+    "providerInputs": [
+      {
+        "type": "text",
+        "name": "username"
+      },
+      {
+        "type": "password",
+        "name": "password"
+      },
+      {
+        "type": "submit",
+        "name": "signInSubmitButton"
+      }
+    ],
+    "providerButtons": [
+      "Sign in"
+    ],
+    "submittedAccount": false
+  },
+  {
+    "name": "desktop",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "actions": [
+      "Sign in",
+      "Shared display sign-in",
+      "Register with email"
+    ],
+    "firstKeyboardFocus": "Sign in",
+    "overflow": false,
+    "passwordMinimum": "8",
+    "submittedAccount": false
+  },
+  {
+    "name": "desktop",
+    "providerReachable": true,
+    "providerInputs": [
+      {
+        "type": "text",
+        "name": "username"
+      },
+      {
+        "type": "password",
+        "name": "password"
+      },
+      {
+        "type": "submit",
+        "name": "signInSubmitButton"
+      }
+    ],
+    "providerButtons": [
+      "Sign in"
+    ],
+    "submittedAccount": false
+  }
+]

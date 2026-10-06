@@ -181,3 +181,7 @@ ASSESS11 REVIEW / CODE_READY, B claim released: installed-policy UI/live selecto
 ## ASSESS10 coding milestone — 2026-10-06T22:10Z
 
 REVIEW / CODE_READY; existing monitor code/lifecycle/privacy/stale/fallback checks and actual schedule/receipt evidence verified, final fresh-health/outage/delivery proof remains outstanding. B claim released under coding-first, no whole-task DONE. Next coding phase UX01; A NP00 paused/saved.
+
+## Current UX01 execution — 2026-10-06T22:40Z
+
+UX01 IN_PROGRESS/B, sole claim; required first bounded Luna read-only review completed and direct-verified findings preserved. Core synthetic participant/journey checks remain, no whole-task completion or UX02 start. A NP00 paused/saved.

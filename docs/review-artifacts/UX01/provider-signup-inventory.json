@@ -1,0 +1,22 @@
+[
+  {
+    "name": "phone",
+    "providerSignupReachable": true,
+    "emailInputs": 0,
+    "visibleInputNames": [
+      "username",
+      "password"
+    ],
+    "submittedAccount": false
+  },
+  {
+    "name": "desktop",
+    "providerSignupReachable": true,
+    "emailInputs": 0,
+    "visibleInputNames": [
+      "username",
+      "password"
+    ],
+    "submittedAccount": false
+  }
+]
