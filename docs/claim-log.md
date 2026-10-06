@@ -224,3 +224,7 @@ Same sole B task: add .github/workflows/assess11-auth-repair.yml and helper appl
 ## ASSESS11 entry wording/regression scope — 2026-10-06T19:36Z
 
 Same B task changes connected-app.tsx participant button to Sign in, consistent with explicit Register with email route and actual required-email readback. Update affected exact-label browser assertions in email-registration.spec.ts, np-clarity.spec.ts and np-qualification.spec.ts only; no behavioral or authorization changes in those NP regressions, no A runtime/inspector/policy/config files. No repeat denied pool update.
+
+## ASSESS11 safe release — 2026-10-06T20:08Z
+
+B releases ASSESS11 as BLOCKED/deferred/unclaimed after checked source4949f8e/full785+hosted1+browser61, exact-source deploy37520719367/CI37520719431 SUCCESS and public phone/desktop entry verification. Actual UpdateUserPool AccessDeniedException37516991882 prevents remaining primary policy/live criteria. Evidence/remaining criteria/next exact permission action preserved in ticket/B handoff; no worker resumed or second claim. Next eligible ASSESS10 after completed signup investigation, no new task claimed this run.

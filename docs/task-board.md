@@ -174,3 +174,7 @@ PRIV01 DONE / B, focused7/full784(two optional skips)/hosted1/browser61 PASS. Pr
 ## ASSESS11 actual sequential start — 2026-10-06T18:10Z
 
 ASSESS11 IN_PROGRESS/B, separate scoped readback workflow checked locally; actual installed readback pending. PRIV01 DONE, A NP00 paused/saved, no other active implementation. Earlier deferred/unclaimed text is historical.
+
+## Current B checkpoint/release — 2026-10-06T20:08Z
+
+ASSESS11 BLOCKED/deferred/unclaimed, not DONE: checked source/real published phone-desktop entry PASS, actual pool UpdateUserPool AccessDeniedException prevents configuration/live completion. Existing source/evidence preserved; no unchanged retry. ASSESS10 is next eligible after this completed signup investigation under standing blocked-task release policy. No active B claim; A NP00 remains saved/paused. Earlier IN_PROGRESS/B text is historical.
