@@ -1,0 +1,45 @@
+{
+  "sourceSha": "a662245ffa33fe01b7c3bd027b2c690f6a1086f0",
+  "observedAt": "2026-10-06T18:10:59.692Z",
+  "summary": {
+    "account": "092954139775",
+    "region": "us-east-1",
+    "poolId": "us-east-1_V9OMjd0zx",
+    "domainExact": true,
+    "selfSignupEnabled": true,
+    "emailAutoVerified": true,
+    "emailRequiredForHostedSignup": false,
+    "passwordPolicy": {
+      "minimumLength": 8,
+      "requireUppercase": true,
+      "requireLowercase": true,
+      "requireNumbers": true,
+      "requireSymbols": true
+    },
+    "participantClient": {
+      "clientId": "3accf7paalvon2m8ue8okfi853",
+      "secretless": true,
+      "codeFlow": true,
+      "scopes": [
+        "email",
+        "openid"
+      ],
+      "requiredScopesPresent": true,
+      "cognitoProvider": true,
+      "callbackExact": true,
+      "logoutExact": true
+    },
+    "displayClient": {
+      "clientId": "481ru24906sv26f30i569gq8g0",
+      "secretless": true,
+      "codeFlow": true,
+      "scopes": [
+        "openid"
+      ],
+      "requiredScopesPresent": true,
+      "cognitoProvider": true,
+      "callbackExact": true,
+      "logoutExact": true
+    }
+  }
+}

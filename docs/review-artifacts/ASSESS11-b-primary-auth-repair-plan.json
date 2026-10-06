@@ -1,0 +1,26 @@
+{
+  "sourceSha": "a662245ffa33fe01b7c3bd027b2c690f6a1086f0",
+  "readbackRun": "https://github.com/Known-Enough/known-enough/actions/runs/37509285582",
+  "status": "PREPARED_NOT_EXECUTED",
+  "targetPoolArn": "arn:aws:cognito-idp:us-east-1:092954139775:userpool/us-east-1_V9OMjd0zx",
+  "requestedPasswordPolicy": {
+    "MinimumLength": 6,
+    "RequireUppercase": false,
+    "RequireLowercase": false,
+    "RequireNumbers": false,
+    "RequireSymbols": false
+  },
+  "minimalMissingWriteStatement": {
+    "Effect": "Allow",
+    "Action": "cognito-idp:UpdateUserPool",
+    "Resource": "arn:aws:cognito-idp:us-east-1:092954139775:userpool/us-east-1_V9OMjd0zx"
+  },
+  "preservation": "Build supported update and rollback inputs from a fresh complete private snapshot; preserve every unrelated setting and compare full readback. Never upload inputs or snapshots.",
+  "limitations": [
+    "Inspector checked-in policy grants reads only.",
+    "PrimaryRelease checked-in template grants Lambda code, artifact and guarded control reads only; no Cognito update or IAM repair.",
+    "Installed write-role capability was not read or exercised; no AccessDenied result is claimed.",
+    "Required email schema cannot be repaired through a password-policy update; select a supported app registration route without pool replacement or weakening verified email identity."
+  ],
+  "nextAction": "Prepare bounded update/readback workflow and obtain or install exact project-specific write delegation through an authorized existing capability; record any actual denial. Verify synthetic signup and cleanup separately."
+}
