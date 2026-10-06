@@ -1,5 +1,7 @@
 # B handoff after ASSESS07 — 2026-10-06T17:17:44Z
 
+**Latest user direction — 2026-10-06T20:27:54Z:** PRIV01 is DONE. User skips changing AWS password rules and its permission setup. ASSESS11's released claim may be freshly resumed for unchanged-policy browser validation/help, stale live Sign in selectors and real public signup verification; no password-policy apply/delegation is in this remaining scope. Respect any actual active ASSESS10 claim before switching. Details in the current ASSESS11 ticket and board supersede older password-repair instructions below. The prior CloudShell grant should not run for the cancelled request.
+
 The user asks to unstick B after ASSESS07 passed. A is not implementing NP00 and has no active deployment or test. A pauses that saved claim for scheduling, preserving its unfinished obligations, source, private recovery artifacts and bounded files. It no longer occupies the active implementation slot. This is an A-owned scheduling handoff, not a claim that NP00 is DONE or permission to overwrite its saved work.
 
 ## One active worker and a concrete sequence

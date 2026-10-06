@@ -1,3 +1,7 @@
+## Latest eligibility amendment — 2026-10-06T20:27:54Z
+
+User cancels password simplification and its AWS UpdateUserPool/delegation work; public signup remains required. ASSESS11's prior claim stays released, but its remaining unchanged-policy UI/live-selector/signup scope is now READY for a new sequential B claim. PRIV01 is DONE and A NP00 paused/saved. Do not manufacture a new claim or interrupt an actual ASSESS10 worker; verify the sole active owner at intake. No password-repair dispatch or prior CloudShell grant is required. Record actual matching signup/test proof; earlier denied-operation evidence and cancellation are not DONE.
+
 ## Current sequential ownership — 2026-10-06T17:17:44Z
 
 User requests B be unstuck. A pauses its inactive NP00 claim for scheduling; saved ownership/source/private recovery and bounded files remain preserved, but there is no active A implementation or deployment. B may claim exactly one task in its existing persistent chat: **PRIV01**, then **ASSESS11** after actual completion, under the [bounded handoff](b-next-task-handoff.md). This is assignment/eligibility, not a claim that B has started. The ASSESS11 scope explicitly permits a separate read-only helper workflow using existing inspector access; no A credential or routine sign-off is needed. Preserve the one-active-worker rule and NP00's exact files; a paused saved claim is not a global hold on this nonoverlapping work. ASSESS07/LIVE04 remain DONE with existing real evidence. Older IN_PROGRESS/hold paragraphs below are historical where they conflict with this handoff.

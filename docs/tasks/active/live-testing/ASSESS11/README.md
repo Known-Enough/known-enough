@@ -1,5 +1,7 @@
 # ASSESS11 — Fix public signup and make failures traceable
 
+**Current user direction — 2026-10-06:** Skip changing AWS password rules and the related permission setup. Keep the current eight-character/all-character-class rules and make the browser match them. Fix the live tests' obsolete sign-in button name, then verify actual public signup. These remaining signup tasks are READY for B's next sequential claim; the cancelled policy-update denial no longer blocks them. No password-policy repair workflow or prior CloudShell command should run for this cancelled request. Older six-character/delegation instructions below are historical and superseded.
+
 **Current next step — 2026-10-06:** After PRIV01's local private-path fix, B may claim this task in its existing chat and implement the [separate read-only GitHub helper workflow](../../../../b-next-task-handoff.md). Existing inspector access supports the required reads; A's inactive NP00 is paused and does not block this scoped work. Obtain the actual configuration, fix signup and verify the normal website. No routine human reapproval is needed; older deferred-worker/authorization paragraphs below are historical.
 
 The user tried to sign up and saw **“An error was encountered with the requested page.”** Find which page fails, explain the cause, fix it and verify the actual public signup path on phone and desktop. A passing signup test on the separate QA website does not prove the normal website works.
