@@ -1,0 +1,69 @@
+{
+  "run": "https://github.com/Known-Enough/known-enough/actions/runs/37484560550",
+  "source": "4f27277850c8fab94a2ec33652f3d8485ff33f88",
+  "actor": "Battosai1806",
+  "collection": {
+    "status": "passed",
+    "issue": null
+  },
+  "identity": {
+    "account": "092954139775",
+    "role": "KnownEnoughGithubStagingInspector"
+  },
+  "cognito": {
+    "pool": {
+      "id": "us-east-1_V9OMjd0zx",
+      "domain": "known-enough-092954139775",
+      "allowAdminCreateUserOnly": false,
+      "autoVerifiedAttributes": [
+        "email"
+      ],
+      "emailSendingAccount": "COGNITO_DEFAULT"
+    },
+    "participantClient": {
+      "clientId": "3accf7paalvon2m8ue8okfi853",
+      "allowedOAuthFlows": [
+        "code"
+      ],
+      "allowedOAuthScopes": [
+        "email",
+        "openid"
+      ],
+      "hasClientSecret": false,
+      "readAttributes": [],
+      "writeAttributes": [],
+      "accessTokenValidity": 15
+    },
+    "displayClient": {
+      "clientId": "481ru24906sv26f30i569gq8g0",
+      "allowedOAuthFlows": [
+        "code"
+      ],
+      "allowedOAuthScopes": [
+        "openid"
+      ],
+      "hasClientSecret": false,
+      "readAttributes": [],
+      "writeAttributes": [],
+      "accessTokenValidity": 15
+    }
+  },
+  "failedChecks": [
+    {
+      "name": "Deployed Lambda ZIP matches the manifest",
+      "status": "failed",
+      "detail": "deployed=417eff55b6c9061444a725ad49343282085a93f904795ab0ebb1812cd415204b; manifest=d5194b8da79250fbad2422ba948d4122654947941c20822ec58de768ef2f9b4f; sourceCommit=unknown"
+    },
+    {
+      "name": "Signup and verification email remain gated",
+      "status": "failed",
+      "detail": "Cognito signup or email verification settings differ from the authorized hold state; no signup/email test was run."
+    }
+  ],
+  "missingEvidence": [
+    "password policy",
+    "required email schema",
+    "full callback configuration"
+  ],
+  "note": "Metadata only; no users, email, model calls or cloud writes. Existing inspector comparisons include historical gates/manifest."
+}
