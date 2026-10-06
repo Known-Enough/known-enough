@@ -26,6 +26,7 @@ const prompts: Record<ModelJobKind, string> = {
     + 'When publicVariables is supplied, select every supplied variable ID exactly once in variableIds instead of returning variables. '
     + 'The server copies those exact public definitions; do not add variables, reinterpret units/options or select values. '
     + 'A draft may leave decision variable values unselected. Ask clarification questions only for unresolved public frame scope. '
+    + 'For an unsupported public objective with no finite verifiable domain, return a concise draft with one public clarification question asking for a finite supported scope. Do not invent proxy variables or rules for subjective happiness, external predictions or unlimited alternatives. For open scope return empty variables and rules; for supplied publicVariables retain exact variableIds. Keep description concise and do not elaborate hypothetical plans. '
     + 'Private budgets, dates, preferences and accessibility needs to collect later belong in participantInformationRequirements; '
     + 'their absence alone does not prevent drafting the public frame. Never invent their values. '
     + 'Return title, description, rules, clarificationQuestions (string array), participantInformationRequirements '
