@@ -45,7 +45,7 @@ export class DecisionNegotiatorError extends Error {
   }
 }
 export type NegotiationOutputFailureReason = 'OUTPUT_ENVELOPE' | 'QUESTION_INTENTS' | 'PUBLIC_VALUES'
-  | 'PERMISSION_DEPENDENCIES' | 'CANDIDATE_SCHEMA' | 'CATALOG_MISMATCH' | 'VALIDATION_EXCEPTION';
+  | 'QUESTION_COVERAGE' | 'PERMISSION_DEPENDENCIES' | 'CANDIDATE_SCHEMA' | 'CATALOG_MISMATCH' | 'VALIDATION_EXCEPTION';
 
 function record(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -282,7 +282,7 @@ export class DecisionNegotiator {
           const preview = await this.options.application.previewReasoning(service, decisionId, job.id, parsed.candidate);
           if (preview === 'NEEDS_PERMISSION' && !await this.options.application.previewReasoningQuestions(service, decisionId, job.id, parsed.candidate, parsed.questionIntents)) {
             parsed = null;
-            diagnosticReason = 'QUESTION_INTENTS';
+            diagnosticReason = 'QUESTION_COVERAGE';
             retryReason = 'MISSING_QUESTION';
             continue;
           }

@@ -17,3 +17,10 @@ test('unknown readback differs from observed no failures and forged extras canno
 test('retains declared negotiation validation stages without private metadata',()=>{
  expect(modelFailuresFromLogs([{message:JSON.stringify({event:'ke14-model-failure',kind:'NEGOTIATION',stage:'NEGOTIATION_QUESTION_INTENTS'})},{message:JSON.stringify({event:'ke14-model-failure',kind:'NEGOTIATION',stage:'NEGOTIATION_QUESTION_INTENTS',reason:'PRIVATE_CANARY'})}])).toEqual([{kind:'NEGOTIATION',stage:'NEGOTIATION_QUESTION_INTENTS'}]);
 });
+
+
+test('coverage diagnostics preserve only the fixed stage and reject private extras', () => {
+ expect(modelFailuresFromLogs([{ message: JSON.stringify({ event: 'ke14-model-failure', kind: 'NEGOTIATION', stage: 'NEGOTIATION_QUESTION_COVERAGE' }) },
+  { message: JSON.stringify({ event: 'ke14-model-failure', kind: 'NEGOTIATION', stage: 'NEGOTIATION_QUESTION_COVERAGE', reason: 'PRIVATE_CANARY' }) }]))
+  .toEqual([{ kind: 'NEGOTIATION', stage: 'NEGOTIATION_QUESTION_COVERAGE' }]);
+});

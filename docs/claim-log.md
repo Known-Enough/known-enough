@@ -186,3 +186,5 @@ Run049 scope: same ASSESS07 read-only job/context guarded question-intent covera
 Run050 scope: same ASSESS07 final-attempt question coverage validation and regression; preserve two attempts/final authorization, no fallback intent/grant or NP00 edit.
 
 Run051 same-task scope: safeAdjustment finite public ENUM NE originals using declared-domain complement, exact consent/grant regression; original rule unchanged, no nonENUM/private/hard relaxation or NP00 edits. Live NE provenance UNKNOWN.
+
+Run052 scope: same ASSESS07 fixed QUESTION_COVERAGE rejection reason and strict diagnostic stage allowlists/tests; separate parser/semantic failure, no model payload/private fields/new attempts/NP00 edits.

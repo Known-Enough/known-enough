@@ -1,0 +1,24 @@
+{
+  "sourceBase": "a69b2c5da8996558c27081fb30426ae4600c4c9b",
+  "files": {
+    "packages/application/src/decision-negotiator.ts": "ff828cde2974e39500b7fe9f46a1ef0213e84ccc4e7b4199961623fddb2b1d72",
+    "packages/application/src/decision-negotiator.test.ts": "800157e8d99e69c1c3c855051a2dd3f97b0d40419c1b20b5fcc196bd9b64e5e4",
+    "packages/application/src/model-runtime.ts": "c840d52595753e2bc5a5cb134fa53b75041a07e88b8066ab7a95585d07bbdd5b",
+    "scripts/live-qa/model-failure-diagnostics.mjs": "5dd8148586908eff5c5b2789c88b1f4cf2c2c77a4dbc7bdf64c1ba5354d95be5",
+    "tests/integration/live-qa-model-failure-diagnostics.test.ts": "4c22e7a74df129f3990f72609fc34d9e90e5892c7f430050f2742ecbbb5cb190"
+  },
+  "checks": {
+    "focused": 35,
+    "application": 773,
+    "optionalSkipped": 2,
+    "hosted": 1,
+    "browser": 61,
+    "fullExit": 0
+  },
+  "change": "Fixed QUESTION_COVERAGE reason distinguishes read-only semantic preview rejection from QUESTION_INTENTS parsing failure; strict stage-only diagnostic projection rejects extra private fields.",
+  "limitations": [
+    "No model output retained",
+    "No acceptance/attempt changes",
+    "Live failing boundary UNKNOWN until matching qualification"
+  ]
+}

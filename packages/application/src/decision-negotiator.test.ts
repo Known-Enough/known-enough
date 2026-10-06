@@ -266,7 +266,7 @@ describe('KE09 negotiation corrections', () => {
       const output = generated(input);
       return { ...output, questionIntents: [{ ...output.questionIntents[0], adjustment: privateConstraint.rule }] };
     });
-    await expect(negotiator.generate(participant('maya'), decisionId)).rejects.toMatchObject({ code: 'INVALID_MODEL_OUTPUT', diagnosticReason: 'QUESTION_INTENTS' });
+    await expect(negotiator.generate(participant('maya'), decisionId)).rejects.toMatchObject({ code: 'INVALID_MODEL_OUTPUT', diagnosticReason: 'QUESTION_COVERAGE' });
     const nina = await h.application.getOwnerSnapshot(participant('nina'), decisionId);
     expect(nina.pendingQuestions).toEqual([]);
     expect(JSON.stringify(nina)).not.toContain('maya-budget-rule');
@@ -571,7 +571,7 @@ it('rejects unusable final intents after a hard-invalid first attempt without a 
   calls++; const output = generated(input, 'mazatlan', input.attempt === 1 ? 170_000 : 150_000);
   return { ...output, questionIntents: [] };
  });
- await expect(negotiator.generate(participant('maya'), decisionId)).rejects.toMatchObject({ code: 'INVALID_MODEL_OUTPUT', diagnosticReason: 'QUESTION_INTENTS' });
+ await expect(negotiator.generate(participant('maya'), decisionId)).rejects.toMatchObject({ code: 'INVALID_MODEL_OUTPUT', diagnosticReason: 'QUESTION_COVERAGE' });
  expect(calls).toBe(2);
  expect((await h.application.getPublicSnapshot(participant('maya'), decisionId)).currentProposal).toBeNull();
  expect((await h.application.getOwnerSnapshot(participant('nina'), decisionId)).pendingQuestions).toEqual([]);
