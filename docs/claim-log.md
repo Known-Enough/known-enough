@@ -235,3 +235,9 @@ Same B task changes connected-app.tsx participant button to Sign in, consistent 
 ## ASSESS11 safe release — 2026-10-06T20:08Z
 
 B releases ASSESS11 as BLOCKED/deferred/unclaimed after checked source4949f8e/full785+hosted1+browser61, exact-source deploy37520719367/CI37520719431 SUCCESS and public phone/desktop entry verification. Actual UpdateUserPool AccessDeniedException37516991882 prevents remaining primary policy/live criteria. Evidence/remaining criteria/next exact permission action preserved in ticket/B handoff; no worker resumed or second claim. Next eligible ASSESS10 after completed signup investigation, no new task claimed this run.
+
+## B renewed ASSESS11 claim — 2026-10-06T20:37Z
+
+Verified own Battosai1806/ff-only97f5c710b156b209d2132ca1a0d667d1c10e2b79 and user cancellation. No ASSESS10 claim was made. B claims ASSESS11 alone: registration validation/help/tests match existing min8/all classes; repair live QA selector; no password cloud update/IAM repair. Scope apps registration files/focused tests, tests/live/qa/journey.spec.ts, necessary QA policy test consistency and tracking. A paused files unchanged.
+
+Run092 scope clarification before edits: stale label repair includes tests/live/qa/helpers.ts and scripts/live-qa/public.mjs; remove cancelled assess11-auth-repair.yml/apply command/test so future dispatch cannot perform the cancelled update. Preserve git history/offline preparation evidence; no live/cloud policy change.

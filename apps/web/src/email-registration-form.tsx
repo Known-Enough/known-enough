@@ -5,7 +5,7 @@ import { asRegistrationFailure, confirmEmailRegistration, MIN_REGISTRATION_PASSW
 
 function recoveryText(code: RegistrationCode): string {
   switch (code) {
-    case 'INVALID_DETAILS': return 'Check your username and email, and use a password of at least six characters.';
+    case 'INVALID_DETAILS': return 'Check your username and email, and use a password of at least eight characters with uppercase, lowercase, a number and a symbol.';
     case 'PASSWORD_REJECTED': return 'This site rejected the password under its current policy. Try a different password or contact the app operator.';
     case 'ACCOUNT_EXISTS_OR_PENDING': return 'An account may already exist or await verification. If you have a code, enter it below; otherwise try signing in.';
     case 'SIGNUP_UNAVAILABLE': return 'Email registration is unavailable on this site. Contact the app operator.';
@@ -59,7 +59,7 @@ export function EmailRegistration({ config }: { config: CognitoBrowserConfig }) 
           <label htmlFor="register-username">Username</label><input id="register-username" value={username} required maxLength={128} autoComplete="username" onChange={event => setUsername(event.target.value)} />
           <label htmlFor="register-email">Email</label><input id="register-email" type="email" value={email} required maxLength={320} autoComplete="email" onChange={event => setEmail(event.target.value)} />
           <label htmlFor="register-password">Password</label><input id="register-password" type="password" value={password} required minLength={MIN_REGISTRATION_PASSWORD_LENGTH} maxLength={256} autoComplete="new-password" onChange={event => setPassword(event.target.value)} />
-          <p>Use at least six characters. No particular mix of letters, numbers or symbols is required.</p>
+          <p>Use at least eight characters, including uppercase, lowercase, a number and a symbol.</p>
         </> : <><label htmlFor="register-code">Verification code</label><input id="register-code" value={code} required pattern="[0-9]{6}" maxLength={6} inputMode="numeric" autoComplete="one-time-code" onChange={event => setCode(event.target.value)} /></>}
         <button type="submit">{busy ? 'Please wait…' : stage === 'details' ? 'Create account' : 'Verify email'}</button>
       </fieldset>

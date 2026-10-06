@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 test.use({ baseURL: 'http://127.0.0.1:5175' });
 const endpoint = 'https://cognito-idp.us-east-1.amazonaws.com/';
-const password = 'abcdef';
+const password = 'Abcdef1!';
 test('configured signup UI sends email, confirms code and retains real hosted PKCE sign-in (mock service)', async ({ page }) => {
   const requests: { action: string; body: Record<string, unknown> }[] = [];
   await page.route(endpoint, async route => {
@@ -44,7 +44,7 @@ test('five characters stop before the service; an uncertain signup offers code r
   await page.getByLabel('Password', { exact: true }).fill('abcde');
   await page.getByRole('button', { name: 'Create account', exact: true }).click();
   expect(requests).toBe(0);
-  await page.getByLabel('Password', { exact: true }).fill('abcdef');
+  await page.getByLabel('Password', { exact: true }).fill(password);
   await page.getByRole('button', { name: 'Create account', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('result is uncertain');
   await expect(page.getByRole('button', { name: 'I have a verification code' })).toBeVisible();

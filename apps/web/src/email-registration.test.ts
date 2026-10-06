@@ -27,11 +27,14 @@ describe('email registration with real service request contract, no AWS calls', 
     await expect(requestEmailRegistration(config, { ...details, password: 'abcde' }, fetcher)).rejects.toThrow();
     await expect(confirmEmailRegistration(config, details.username, 'bad', fetcher)).rejects.toThrow();expect(fetcher).not.toHaveBeenCalled();
   });
-  test('allows six lowercase characters and longer simple passwords without class rules', async () => {
+  test('rejects each missing installed password requirement before requesting signup', async () => {
     const fetcher = vi.fn(async () => Response.json({ UserConfirmed: false, CodeDeliveryDetails: { DeliveryMedium: 'EMAIL' } }));
-    await requestEmailRegistration(config, { ...details, password: 'abcdef' }, fetcher);
-    await requestEmailRegistration(config, { ...details, password: 'longsimplepassword' }, fetcher);
-    expect(fetcher).toHaveBeenCalledTimes(2);
+    for (const password of ['Ab1!xyz', 'abcdefg1!', 'ABCDEFG1!', 'Abcdefgh!', 'Abcdefgh1']) {
+      await expect(requestEmailRegistration(config, { ...details, password }, fetcher)).rejects.toThrow();
+    }
+    expect(fetcher).not.toHaveBeenCalled();
+    await requestEmailRegistration(config, { ...details, password: 'Abcdef1!' }, fetcher);
+    expect(fetcher).toHaveBeenCalledTimes(1);
   });
   test('does not treat missing email delivery or a raw service error as verified signup', async () => {
     await expect(requestEmailRegistration(config, details, async () => new Response('{}'))).rejects.toMatchObject({

@@ -1,6 +1,6 @@
 import type { CognitoBrowserConfig } from './cognito-session';
 
-export const MIN_REGISTRATION_PASSWORD_LENGTH = 6;
+export const MIN_REGISTRATION_PASSWORD_LENGTH = 8;
 export type RegistrationStep = 'signup' | 'confirmation';
 export type RegistrationCode =
   | 'INVALID_DETAILS' | 'INVALID_CODE' | 'PASSWORD_REJECTED' | 'ACCOUNT_EXISTS_OR_PENDING'
@@ -83,7 +83,9 @@ function validUsername(username: string): boolean { return /^[A-Za-z0-9_.@+-]{1,
 export async function requestEmailRegistration(config: CognitoBrowserConfig,
   details: { username: string; email: string; password: string }, fetcher: typeof fetch = fetch): Promise<void> {
   if (!validUsername(details.username) || details.email.length > 320 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(details.email)
-    || details.password.length < MIN_REGISTRATION_PASSWORD_LENGTH || details.password.length > 256)
+    || details.password.length < MIN_REGISTRATION_PASSWORD_LENGTH || details.password.length > 256
+    || !/[A-Z]/.test(details.password) || !/[a-z]/.test(details.password)
+    || !/[0-9]/.test(details.password) || !/[^A-Za-z0-9]/.test(details.password))
     throw failure('signup', 'INVALID_DETAILS');
   const response = await registrationRequest(config, 'SignUp', { Username: details.username, Password: details.password,
     UserAttributes: [{ Name: 'email', Value: details.email }] }, fetcher);

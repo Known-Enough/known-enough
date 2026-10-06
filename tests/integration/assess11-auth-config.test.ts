@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, statSync, symlinkSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 // @ts-expect-error The task helper is runtime JavaScript, exercised by Vitest.
-import { applyPasswordPolicy, privateDirectory, privateWrite, passwordMatchesPolicy, preparePasswordPolicy, SIMPLE_PASSWORD_POLICY, summarizeAuthSnapshot } from '../../scripts/assess11-auth-config.mjs';
+import { privateDirectory, privateWrite, passwordMatchesPolicy, preparePasswordPolicy, SIMPLE_PASSWORD_POLICY, summarizeAuthSnapshot } from '../../scripts/assess11-auth-config.mjs';
 // @ts-expect-error The QA template is runtime JavaScript, exercised by Vitest.
 import { renderTemplates } from '../../scripts/live-qa/template.mjs';
 
@@ -105,21 +105,4 @@ describe('private auth snapshot filesystem boundary', () => {
       expect(() => privateDirectory(output)).toThrow();
     } finally { rmSync(temp, { recursive: true, force: true }); }
   });
-});
-
-test('password repair invokes only the exact pool update with preserved options and no mutation of the snapshot', () => {
-  const calls: unknown[][] = [];
-  const skeleton = { UserPoolId: '', Policies: {}, LambdaConfig: {}, DeletionProtection: '' };
-  const result = applyPasswordPolicy(snapshot, skeleton, (...args: unknown[]) => { calls.push(args); return {}; });
-  expect(calls).toHaveLength(1);
-  expect(calls[0]).toEqual(['cognito-idp', 'update-user-pool', {
-    UserPoolId: poolId,
-    Policies: { PasswordPolicy: { ...snapshot.userPool.Policies.PasswordPolicy, ...SIMPLE_PASSWORD_POLICY } },
-    LambdaConfig: snapshot.userPool.LambdaConfig, DeletionProtection: 'ACTIVE',
-  }]);
-  expect(result.status).toBe('PASSWORD_POLICY_UPDATE_ACCEPTED');
-  expect(snapshot.userPool.Policies.PasswordPolicy.MinimumLength).toBe(16);
-  expect(() => applyPasswordPolicy({ ...snapshot, account: 'wrong' }, skeleton,
-    () => { throw new Error('must not invoke'); })).toThrow('ASSESS11_POOL_IDENTITY_MISMATCH');
-  expect(() => applyPasswordPolicy(snapshot, skeleton, () => { throw new Error('denied'); })).toThrow('denied');
 });

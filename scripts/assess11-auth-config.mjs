@@ -102,13 +102,6 @@ export function privateDirectory(path) {
 export function privateWrite(path, value) {
     writeFileSync(path, JSON.stringify(value, null, 2) + '\n', { mode: 0o600, flag: 'wx' });
 }
-export function applyPasswordPolicy(snapshot, updateSkeleton, invoke = aws) {
-    summarizeAuthSnapshot(snapshot);
-    const { updateInput } = preparePasswordPolicy(snapshot, updateSkeleton);
-    invoke('cognito-idp', 'update-user-pool', updateInput);
-    return { status: 'PASSWORD_POLICY_UPDATE_ACCEPTED', poolId: TARGET.pool,
-        requestedPolicy: SIMPLE_PASSWORD_POLICY };
-}
 function readCurrent() {
     assertIdentity(aws('sts', 'get-caller-identity'), TARGET);
     return {
@@ -140,10 +133,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
             privateWrite(join(second, 'prior-summary.json'), summary);
             console.log(JSON.stringify({ status: 'PRIVATE_UPDATE_PREPARED_NO_CLOUD_WRITE',
                 poolId: TARGET.pool, priorPolicy: summary.passwordPolicy, requestedPolicy: SIMPLE_PASSWORD_POLICY }));
-        } else if (mode === 'apply' && first && !second) {
-            assertIdentity(aws('sts', 'get-caller-identity'), TARGET);
-            const snapshot = JSON.parse(readFileSync(first, 'utf8'));
-            console.log(JSON.stringify(applyPasswordPolicy(snapshot, awsSkeleton('cognito-idp', 'update-user-pool'))));
         } else throw new Error('ASSESS11_USAGE');
     } catch (error) {
         const safe = new Set(['ASSESS11_CLIENT_IDENTITY_MISMATCH', 'ASSESS11_POOL_IDENTITY_MISMATCH',

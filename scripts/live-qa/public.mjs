@@ -41,9 +41,9 @@ export async function publicChecks(receiptFile, output) {
             try {
                 const page = await context.newPage();
                 await page.goto(url);
-                await page.getByRole('button', { name: 'Sign in or register', exact: true }).waitFor();
+                await page.getByRole('button', { name: 'Sign in', exact: true }).waitFor();
                 await page.keyboard.press('Tab');
-                if (!await page.getByRole('button', { name: 'Sign in or register', exact: true }).evaluate(e => e === document.activeElement) || !await page.evaluate(() => document.documentElement.scrollWidth <= globalThis.innerWidth))
+                if (!await page.getByRole('button', { name: 'Sign in', exact: true }).evaluate(e => e === document.activeElement) || !await page.evaluate(() => document.documentElement.scrollWidth <= globalThis.innerWidth))
                     throw new Error('PUBLIC_SCREEN_ASSERTION_FAILED');
                 result[lane] = 'PASS';
                 result.counts += 2;
