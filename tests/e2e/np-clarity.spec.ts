@@ -29,7 +29,7 @@ test('mobile keyboard entry, pending/disabled copy and private questions preserv
     const login = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' }); contexts.push(login);
     const entry = await login.newPage(); await entry.goto(url);
     await expect(entry.getByText('Known Enough and its AI process your private inputs.', { exact: false })).toBeVisible();
-    await entry.keyboard.press('Tab'); await expect(entry.getByRole('button', { name: 'Sign in or register', exact: true })).toBeFocused();
+    await entry.keyboard.press('Tab'); await expect(entry.getByRole('button', { name: 'Sign in', exact: true })).toBeFocused();
     expect(await entry.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await entry.screenshot({ path: '/tmp/np03-mobile-signin.png', fullPage: true });
     const pending = await browser.newContext({ viewport: { width: 390, height: 844 } }); contexts.push(pending); await connect(pending, api, 'newbie');

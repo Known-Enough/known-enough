@@ -154,7 +154,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     <p className="ke-privacy">Known Enough and its AI process your private inputs. Other people see only the shared choices, proposal and disclosures you authorize. An outcome may still reveal something about people’s needs. Use fictional, non-sensitive data in this preview.</p>
     {!session ? <section className="ke-card ke-auth-card"><h2>Sign in to the shared decision</h2>
       <p>New account? Choose Register with email below, then verify your address. After verification, use Sign in. If the provider sign-in page offers Sign up, return here to use email registration. Group invitations wait in this browser tab while you sign in. A shared display uses a separate account and can only read public information.</p>
-      <div className="ke-private-actions"><button type="button" onClick={() => void signIn('participant')}>Sign in or register</button>
+      <div className="ke-private-actions"><button type="button" onClick={() => void signIn('participant')}>Sign in</button>
         <button type="button" className="secondary" onClick={() => void signIn('display')}>Shared display sign-in</button></div><EmailRegistration config={config} /></section> : <>
       {session.kind === 'participant' && <GroupHome key={session.accessToken} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} openDecision={id => { setRoomInput(id); void load(id); }} />}
       <section className="ke-card"><p className="eyebrow">{session.kind === 'display' ? 'SHARED DISPLAY' : 'PARTICIPANT SESSION'}</p>

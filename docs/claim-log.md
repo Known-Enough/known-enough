@@ -220,3 +220,7 @@ PRIV01 completed/released on33dfa32884ce4b336668d61b0090e24e158b2be8 with matchi
 ## ASSESS11 bounded repair scope — 2026-10-06T19:06Z
 
 Same sole B task: add .github/workflows/assess11-auth-repair.yml and helper apply command/tests for exact named-pool password repair from fresh private preservation inputs, existing project roles and sanitized errors. Standing configuration authority applies; no inspector/IAM/A file changes or permission widening. Readback and cleanup remain mandatory, record any actual denial.
+
+## ASSESS11 entry wording/regression scope — 2026-10-06T19:36Z
+
+Same B task changes connected-app.tsx participant button to Sign in, consistent with explicit Register with email route and actual required-email readback. Update affected exact-label browser assertions in email-registration.spec.ts, np-clarity.spec.ts and np-qualification.spec.ts only; no behavioral or authorization changes in those NP regressions, no A runtime/inspector/policy/config files. No repeat denied pool update.

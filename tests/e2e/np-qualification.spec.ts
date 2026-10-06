@@ -137,7 +137,7 @@ test('a lost committed response retries the exact command once; expired browser 
     expect(bodies[0]).toBe(bodies[1]);
     expect((await h.publicView()).frameConfirmations).toHaveLength(1);
     await page.evaluate(() => { const key = 'known-enough-cognito-session'; const session = JSON.parse(sessionStorage.getItem(key)!); session.expiresAt = Date.now() - 1; sessionStorage.setItem(key, JSON.stringify(session)); });
-    await page.reload(); await expect(page.getByRole('button', { name: 'Sign in or register', exact: true })).toBeVisible();
+    await page.reload(); await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
     await page.evaluate(token => sessionStorage.setItem('known-enough-cognito-session', JSON.stringify({ accessToken: token, kind: 'participant', expiresAt: Date.now() + 900000 })), api.bearer('iris'));
     await page.reload(); await page.getByRole('button', { name: 'Open decision', exact: true }).click();
     await expect(page.getByText('1 of 4 required frame confirmations.', { exact: true })).toBeVisible();

@@ -623,3 +623,11 @@ Readback evidence37509285582 now verified with source CI37509275566 SUCCESS. Che
 ## Checked password repair operation — 2026-10-06T19:11Z
 
 Same ASSESS11 scope adds separate repair workflow and helper apply command: fresh inspector snapshot, preserved full supported update, existing PrimaryRelease role, independently reassumed inspector readback, fixed sanitized mutation errors, always private cleanup, allowlisted-only artifact. No IAM edits. Focused8/full785(two optional skips)/hosted1/browser61 plus reference/planning/lint/types/build/boundaries PASS. YAML cleanup/artifact checks PASS. Installed write capability and repair outcome pending one exact-source dispatch; source preparation is not cloud execution.
+
+## Actual password repair access result — 2026-10-06T19:12Z
+
+Run37516991882 source513f5b6336cb439136dd1f016fec2d2fc6ec2f6c failed exact mutation with `AWS_OPERATION_FAILED:cognito-idp:update-user-pool:AccessDeniedException`. Fresh private snapshot/inspector and PrimaryRelease role assumption PASS; always cleanup PASS; independent readback/upload skipped after denial. No successful policy change claimed. Evidence docs/review-artifacts/ASSESS11-b-password-repair-denial.json local pending safe sync. Need exact named-pool UpdateUserPool delegation through legitimate project IAM repair, no repeated denied writes/bypass. ASSESS11 remains sole IN_PROGRESS/B because supported signup source work can still progress; do not release useful unfinished work or mark DONE.
+
+## Signup entry clarification — 2026-10-06T19:41Z
+
+Same-task participant entry now says Sign in, consistent with separate Register with email and explicit provider-signup return guidance. Focused registration browser3/full785(two optional skips)/hosted1/browser61 plus refs/planning/lint/types/build/boundaries PASS. Existing exact pool-update denial37516991882 retained; no repeat denied mutation. UI publication from this source is pending; source/mock tests are not live signup PASS. Next inspect automatically triggered deployment and perform supported public signup routing checks, while arranging exact named-pool write capability.
