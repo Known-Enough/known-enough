@@ -864,3 +864,7 @@ Run078 queue reconciliation: verified LIVE04 inherited acceptance from all-seven
 ## PRIV01 checked completion — 2026-10-06
 
 Synchronized A pause/handoff372d12b taken ff-only with local monitor tail preserved append-only. B claimed only PRIV01; fixed private auth output ancestor guards and tested exclusive owner-only output. Focused7/full784(two optional skips)/hosted1/browser61 PASS, no AWS/private data. Next claim ASSESS11 and implement its bounded separate readback workflow from docs/b-next-task-handoff.md; preserve A files.
+
+## B readback workflow checkpoint — 2026-10-06T18:10Z
+
+ASSESS11 IN_PROGRESS/B in persistent chat, sequential claim after PRIV01. Separate assess11-auth-readback.yml uses existing inspector role, exact reviewed main source and verified B actor ID; helper validates exact account/pool/clients. Only reprojected allowlisted summary uploaded, private snapshot always removed. YAML/artifact-cleanup inspection PASS; focused7 and pinned full784(two optional skips)/hosted1/browser61 plus references/planning/lint/types/build/boundaries PASS. Configuration preparation is not actual AWS readback; next one exact-source dispatch and sanitized result inspection. A files preserved.

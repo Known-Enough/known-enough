@@ -170,3 +170,7 @@ Human trials, independent release review and submission preparation remain defer
 ## Current completion — 2026-10-06T17:40Z
 
 PRIV01 DONE / B, focused7/full784(two optional skips)/hosted1/browser61 PASS. Prior READY text is historical. Next eligible ASSESS11, unclaimed until fresh sequential intake; A NP00 remains paused/saved.
+
+## ASSESS11 actual sequential start — 2026-10-06T18:10Z
+
+ASSESS11 IN_PROGRESS/B, separate scoped readback workflow checked locally; actual installed readback pending. PRIV01 DONE, A NP00 paused/saved, no other active implementation. Earlier deferred/unclaimed text is historical.

@@ -1,0 +1,79 @@
+name: ASSESS11 auth readback
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact reviewed main commit to inspect
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: assess11-auth-readback-main
+  cancel-in-progress: false
+
+jobs:
+  readback:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && github.actor_id == '143764700'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Verify reviewed source and AWS CLI availability
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_sha }}
+          ACTUAL_SOURCE: ${{ github.sha }}
+        run: |
+          test "$EXPECTED_SOURCE" = "$ACTUAL_SOURCE"
+          test "$(git rev-parse HEAD)" = "$ACTUAL_SOURCE"
+          aws --version
+      - name: Assume existing project read-only inspector
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubStagingInspector
+          aws-region: us-east-1
+          role-session-name: assess11-read-${{ github.run_id }}
+          role-duration-seconds: 900
+          mask-aws-account-id: true
+      - name: Read exact auth configuration into private temporary storage
+        env:
+          PRIVATE_OUTPUT: ${{ runner.temp }}/assess11-private-${{ github.run_id }}
+          PUBLIC_OUTPUT: ${{ runner.temp }}/assess11-public-${{ github.run_id }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          umask 077
+          node scripts/assess11-auth-config.mjs read "$PRIVATE_OUTPUT" > /dev/null
+          mkdir "$PUBLIC_OUTPUT"
+          node --input-type=module <<'JS'
+          import { readFileSync, writeFileSync } from 'node:fs';
+          import { summarizeAuthSnapshot } from './scripts/assess11-auth-config.mjs';
+          const snapshot = JSON.parse(readFileSync(process.env.PRIVATE_OUTPUT + '/full-snapshot.json', 'utf8'));
+          const summary = summarizeAuthSnapshot(snapshot);
+          writeFileSync(process.env.PUBLIC_OUTPUT + '/auth-summary.json', JSON.stringify({
+            sourceSha: process.env.SOURCE_SHA, observedAt: new Date().toISOString(),
+            summary
+          }, null, 2) + '\n', { mode: 0o600, flag: 'wx' });
+          JS
+      - name: Remove private snapshots on success or failure
+        if: always()
+        env:
+          PRIVATE_OUTPUT: ${{ runner.temp }}/assess11-private-${{ github.run_id }}
+        run: rm -rf -- "$PRIVATE_OUTPUT"
+      - name: Publish only the allowlisted auth summary
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: assess11-auth-summary
+          path: ${{ runner.temp }}/assess11-public-${{ github.run_id }}/auth-summary.json
+          if-no-files-found: error
+          retention-days: 7
