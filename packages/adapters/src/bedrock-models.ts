@@ -233,8 +233,10 @@ export function createBedrockModels(options: {
       if (!options.enabled() || signal.aborted) throw new ModelRuntimeError('DISABLED');
       let response: ConverseCommandOutput;
       try { response = await options.transport.send(new ConverseCommand(request), { abortSignal: signal }); }
-      catch {
-        reportModelFailure(options.diagnostic, kind, 'PROVIDER');
+      catch (error) {
+        const stage = error instanceof Error && error.message === 'MODEL_BUDGET_BLOCKED' ? 'BUDGET_BLOCKED'
+          : error instanceof Error && error.message === 'MODEL_BUDGET_EXHAUSTED' ? 'BUDGET_EXHAUSTED' : 'PROVIDER';
+        reportModelFailure(options.diagnostic, kind, stage);
         throw new ModelRuntimeError('PROVIDER_FAILED');
       }
       if (!options.enabled() || signal.aborted) throw new ModelRuntimeError('EXPIRED');

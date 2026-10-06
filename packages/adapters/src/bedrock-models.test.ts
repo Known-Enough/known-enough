@@ -183,3 +183,11 @@ describe('Bedrock role adapters', () => {
       operator: 'IN', variableId: 'destination', values: [{ type: 'ENUM', optionId: 'mazatlan' }] });
   });
 });
+
+
+it.each(['MODEL_BUDGET_BLOCKED', 'MODEL_BUDGET_EXHAUSTED'] as const)('reports only a fixed pre-provider stage for %s without changing the failure', async code => {
+ const events: unknown[] = [];
+ const models = createBedrockModels({ transport: { send: async () => { throw new Error(code); } }, jobs: new BoundedModelJobs(), enabled: () => true, diagnostic: event => events.push(event) });
+ await expect(models.architect.draft(architectInput, guard())).rejects.toMatchObject({ code: 'PROVIDER_FAILED' });
+ expect(events).toEqual([{ kind: 'ARCHITECT', stage: code === 'MODEL_BUDGET_BLOCKED' ? 'BUDGET_BLOCKED' : 'BUDGET_EXHAUSTED' }]);
+});

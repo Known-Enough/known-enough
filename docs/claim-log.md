@@ -194,3 +194,5 @@ Run053 scope: same ASSESS07 adapter prompt selection guidance for available trus
 Run054 scope: same ASSESS07 first-attempt parse rejection fixed-stage diagnostic before existing retry, bounded regression; no output/private fields/extra calls/NP00 edits. Live first parse failure UNKNOWN.
 
 Run056 scope: same ASSESS07 existing catalog snapshot bounded trusted question-target projection(max16 candidates, existing intent cap), negotiator/adapter hints and behavioral regression. Guidance only, no stored questions/grants/selection, original catalog/final guards/budgets/NP00 preserved.
+
+Run057 scope: same ASSESS07 adapter fixed pre-provider budget-blocked/exhausted stages, strict allowlists and privacy regression. No ceiling/lease/auth change or new retries/NP00 edit; live cause UNKNOWN.

@@ -1,0 +1,25 @@
+{
+  "sourceBase": "d3d69596f57bb48fbff6847227479552c9a0f65c",
+  "observedQualification": 37405309491,
+  "liveQA04": "PASS",
+  "files": {
+    "packages/adapters/src/bedrock-models.ts": "dd4be92305d6f729882fd75b7639e6ebc2d9806e127f842a4e5bebee8ab7aba7",
+    "packages/adapters/src/bedrock-models.test.ts": "937f98455dbd05e8b1e20a5df6a4d54486d1026361e3e1a5702ac10ccb5e418d",
+    "packages/application/src/model-runtime.ts": "2f76e2187bcc17465685541aa843746ef4d9d0d6479d8bdd3a3aa490ca3d83ba",
+    "scripts/live-qa/model-failure-diagnostics.mjs": "8862934fe3dbb72046176c2b0d2312f0075af56ba9933843e859c01e1c78560d"
+  },
+  "checks": {
+    "focused": 26,
+    "application": 777,
+    "optionalSkipped": 2,
+    "hosted": 1,
+    "browser": 61,
+    "fullExit": 0
+  },
+  "change": "Exact local MODEL_BUDGET_BLOCKED/EXHAUSTED exceptions mapped to fixed distinct diagnostic stages; outward failure unchanged.",
+  "limits": [
+    "No ceiling/lease/CAS/auth change",
+    "No extra retries/raw error/log model output",
+    "Actual QA05 budget-vs-provider cause UNKNOWN"
+  ]
+}
