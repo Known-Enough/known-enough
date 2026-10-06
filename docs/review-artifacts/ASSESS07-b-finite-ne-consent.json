@@ -1,0 +1,22 @@
+{
+  "sourceBase": "ef4f671d66b9e09c33177be934430dc8032d3a62",
+  "files": {
+    "packages/application/src/known-enough.ts": "4ccfda24fd341ead3cf3961566cc1fc2f57fbcc2661e81fb0bf96eaeda705900",
+    "packages/application/src/decision-negotiator.test.ts": "b3c088ca810e6a303a823d77c56fcf9f855c2345a0b44a2f1d9666c178953e6b"
+  },
+  "checks": {
+    "focused": 31,
+    "application": 772,
+    "optionalSkipped": 2,
+    "hosted": 1,
+    "browser": 61,
+    "fullExit": 0
+  },
+  "finding": "Synthetic review accepts equivalent ENUM NE originals; safeAdjustment previously accepted only EQ/IN originals.",
+  "limits": [
+    "Declared finite public ENUM only",
+    "Original confirmed condition preserved",
+    "Exact owner grant required before APPLIED",
+    "Live original operator and repair effect UNKNOWN"
+  ]
+}

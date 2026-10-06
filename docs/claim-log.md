@@ -184,3 +184,5 @@ Follow-up same ASSESS07 scope: live reasoning helper rejects non-OK existing res
 Run049 scope: same ASSESS07 read-only job/context guarded question-intent coverage preview, existing MISSING_QUESTION retry and wrong-option regression. No grant generation, attempt increase, postcommit filter waiver or NP00 edit.
 
 Run050 scope: same ASSESS07 final-attempt question coverage validation and regression; preserve two attempts/final authorization, no fallback intent/grant or NP00 edit.
+
+Run051 same-task scope: safeAdjustment finite public ENUM NE originals using declared-domain complement, exact consent/grant regression; original rule unchanged, no nonENUM/private/hard relaxation or NP00 edits. Live NE provenance UNKNOWN.

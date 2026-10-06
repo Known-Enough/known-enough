@@ -126,7 +126,7 @@ function ownerRulesValid(
 function safeAdjustment(definition: KE.DecisionDefinition, constraint: KE.ConfirmedConstraint, input: unknown): KE.ValidationRule | null {
   if (constraint.kind !== 'NEGOTIABLE') return null;
   const original = constraint.rule;
-  if (!(original.operator === 'IN' || (original.operator === 'COMPARE' && original.comparison === 'EQ'))) return null;
+  if (!(original.operator === 'IN' || (original.operator === 'COMPARE' && (original.comparison === 'EQ' || original.comparison === 'NE')))) return null;
   const variable = definition.variables.find(item => item.id === original.variableId);
   if (!variable || variable.type !== 'ENUM' || variable.visibility !== 'PUBLIC') return null;
   const parsed = KE.ValidationRule.safeParse(input);
@@ -136,7 +136,14 @@ function safeAdjustment(definition: KE.DecisionDefinition, constraint: KE.Confir
     || rule.variableId !== original.variableId) return null;
   const values = rule.operator === 'IN' ? rule.values : [rule.value];
   if (!values.length || values.some(value => value.type !== 'ENUM' || !variable.options.some(option => option.id === value.optionId))) return null;
-  const alreadyAllowed = original.operator === 'IN' ? original.values : [original.value];
+  const excludedOption = original.operator === 'COMPARE' && original.comparison === 'NE' && original.value.type === 'ENUM'
+    ? original.value.optionId : null;
+  if (original.operator === 'COMPARE' && original.comparison === 'NE' && excludedOption === null) return null;
+  const alreadyAllowed = original.operator === 'IN' ? original.values
+    : excludedOption !== null
+      ? variable.options.filter(option => option.id !== excludedOption)
+        .map(option => ({ type: 'ENUM' as const, optionId: option.id }))
+      : [original.value];
   const originalOptions = new Set(alreadyAllowed.flatMap(value => value.type === 'ENUM' ? [value.optionId] : []));
   const options = new Set(values.flatMap(value => value.type === 'ENUM' && !originalOptions.has(value.optionId) ? [value.optionId] : []));
   if (!options.size) return null;

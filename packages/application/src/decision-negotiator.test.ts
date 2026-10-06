@@ -576,3 +576,19 @@ it('rejects unusable final intents after a hard-invalid first attempt without a 
  expect((await h.application.getPublicSnapshot(participant('maya'), decisionId)).currentProposal).toBeNull();
  expect((await h.application.getOwnerSnapshot(participant('nina'), decisionId)).pendingQuestions).toEqual([]);
 });
+
+
+it('requires an exact owner grant for a finite public enum NE concession without rewriting the condition', async () => {
+ const h = await setup(fixture => {
+  const constraint = fixture.drafts.find(d => d.ownerParticipantId === 'nina')!.proposedConstraints.find(c => c.constraintId === 'nina-destination-flexibility')!;
+  if (constraint.kind !== 'NEGOTIABLE') throw new Error('Fixture kind');
+  constraint.rule = { id: 'nina-ne-rule', visibility: 'TRUSTED_BACKEND', operator: 'COMPARE', variableId: 'destination', comparison: 'NE', value: { type: 'ENUM', optionId: 'mazatlan' } };
+ });
+ const negotiator = createNegotiator(h.application, async input => generated(input, 'mazatlan', 150_000));
+ const first = await negotiator.generate(participant('maya'), decisionId);
+ expect(first.outcome).toBe('NEEDS_PERMISSION'); expect(first.publicSnapshot.currentProposal).toBeNull();
+ const question = await answerCorrection(h, 'ALLOW');
+ expect(question.adjustment).toMatchObject({ operator: 'IN', values: [{ type: 'ENUM', optionId: 'mazatlan' }] });
+ expect((await negotiator.generate(participant('maya'), decisionId)).outcome).toBe('APPLIED');
+ expect((await h.application.getOwnerSnapshot(participant('nina'), decisionId)).confirmedConstraints[0]).toMatchObject({ rule: { comparison: 'NE' } });
+});
