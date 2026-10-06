@@ -1,3 +1,7 @@
+## Current scheduling instructions — 2026-10-06
+
+Latest human persistent-chat direction supersedes historical five-minute cadence: reuse only `watch-known-enough-shared-queue`, ACTIVE every30 minutes in chat `01a1086a-fb98-7552-b4d1-e2dbab01a404`. Preserve original evidence below. ASSESS07/LIVE04 completed on verified all-seven source; A NP00 claim remains preserved. This is queue reconciliation, not a new implementation claim or certified AWS-health freshness. Verify actual lifecycle receipts and failure/stale behavior against existing sanitized evidence before claiming ASSESS10 DONE. Existing signup ordering/deferred prerequisites remain as board records.
+
 # ASSESS10 — Verify AWS health and the five-minute Codex monitor
 
 - Status: READY / unclaimed — after ASSESS11 public signup investigation and the current ASSESS07 cycle/claim handoff under the shared board; A's earlier setup/readback and ASSESS09 repairs remain historical evidence.
