@@ -157,3 +157,7 @@ NP01–04, LIVE01–03 and ASSESS01–06/08–09 completed their recorded local 
 Human trials, independent release review and submission preparation remain deferred under the current user direction; participant consent is not deferred. Older status/claim/priority paragraphs remain in the previous board and individual tickets for reference and do not schedule new work.
 
 [A handoff](handoff-A.md) · [B handoff](handoff-B.md) · [A log](work-log-A.md) · [B log](work-log-B.md) · [Operational limits](operational-limits.md)
+
+## Deferred privacy follow-up — 2026-10-06
+
+[PRIV01 — Private auth snapshot path boundary](tasks/active/technical-debt/PRIV01/ticket.md) is READY/deferred/unclaimed while A owns NP00. A safe symlink-only probe demonstrated that ASSESS11’s lexical output-path guard accepts an aliased repository parent. No private snapshot or workspace directory was created. This concrete follow-up does not release A’s claim, start implementation or replace the signup/live acceptance obligations.
