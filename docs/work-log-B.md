@@ -826,3 +826,7 @@ B run057: matching37405309491 QA01–04 PASS including exact agreement; QA05FAIL
 
 
 B run058 audit: matching qualification37407814655 QA01–04 PASS, QA05 ARCHITECT BUDGET_EXHAUSTED/ARCHITECT_CALL, QA06/07 BLOCKED, privacy/CLEAN PASS,7 model/1signup. Broker stats reads reservation token/cost counters but runner drops them; current report lacks installed per-run limits and exhausted dimension. Historical cap values are not installed evidence. Planned same-task validated aggregate budget projection with strict numeric allowlist and run/source/lease identity checks before any bounded cap repair. No AUTH/lease/CAS/limits edits or extra paid calls; plan is not installed execution. ASSESS07 IN_PROGRESS/B, NP00 preserved.
+
+B run060: implemented strict six-field safe-integer aggregate budget projection from existing authenticated run lease plus active authorization into qualification. Extra/private keys, missing/negative/fractional/unsafe values rejected to null; positive limits required, observed over-limit counters retained as evidence. No AUTH export/caps/enforcement/CAS/cleanup change. Focused35 PASS; first full typecheck TS7016 missing JavaScript module declarations corrected using existing standalone test import pattern. Full final outcome pending. Next source-matched reservation evidence before bounded configuration repair.
+
+Run060 full check exit0: refs7/planning15/lint/boundaries/types/build/778 application(two optional skips)/hosted1/browser61 PASS. Live effect UNKNOWN until matching source qualification. ASSESS07 IN_PROGRESS/B.

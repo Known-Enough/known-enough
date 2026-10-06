@@ -1,3 +1,4 @@
+import { safeBudgetEvidence } from './budget-evidence.mjs';
 import { randomBytes, createHash } from 'node:crypto';
 import { DynamoDBClient, GetItemCommand, TransactWriteItemsCommand, QueryCommand, DeleteItemCommand } from '@aws-sdk/client-dynamodb';
 import { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminSetUserPasswordCommand, AdminGetUserCommand, AdminDeleteUserCommand, AdminUserGlobalSignOutCommand, CreateGroupCommand, DeleteGroupCommand, AdminAddUserToGroupCommand } from '@aws-sdk/client-cognito-identity-provider';
@@ -383,10 +384,13 @@ export async function handler(event) {
             return await verification(event.runId);
         if (['approve', 'reject', 'disable'].includes(event.action))
             return await setActorStatus(l, event.actor, event.action);
-        if (event.action === 'stats')
-            return {
+        if (event.action === 'stats') {
+            const authorization = await auth();
+            const budget = safeBudgetEvidence(Object.fromEntries(['attempts', 'reservedTokens', 'reservedCostMicros', 'maxAttemptsPerRun', 'maxTokensPerRun', 'maxCostMicrosPerRun'].map(key => [key, key.startsWith('max') ? authorization.value[key] : l.value[key]])));
+            return { budget,
                 status: 'PASS', attempts: l.value.attempts, reservedTokens: l.value.reservedTokens, reservedCostMicros: l.value.reservedCostMicros, signupMessages: l.value.signupMessages ?? 0
             };
+        }
         if (event.action === 'kernel-diagnostics' || event.action === 'bind-display' || event.action === 'disclosure' || event.action === 'publish-disclosure' || event.action === 'expire-invitation') {
             const owned = await groupRepo().transaction(state => cleanupPlan(state, l.value));
             if (event.action !== 'expire-invitation' && !owned.decisions.includes(event.decisionId))

@@ -92,6 +92,7 @@ export async function runQualification(targetFile, receiptFile, runId, output) {
         catch { /* Missing tests remain blocked. */
         }
         const stats = invokeBroker(target, runId, 'stats');
+        state.budget = stats.budget;
         state.attempts = stats.attempts;
         state.signupMessages = stats.signupMessages;
     }
