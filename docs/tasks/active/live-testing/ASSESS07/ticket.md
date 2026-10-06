@@ -659,3 +659,5 @@ Run071: matching37441140942 QA01–06/privacy/CLEAN PASS; QA07FAIL with trusted 
 Run072 scope: concise unsupported-domain public clarification prompt only, no source schema/deadline/retry/budget/consent change.
 
 Run072: concise unsupported public-domain clarification guidance asks one finite-scope question, no invented proxy variables/rules/hypothetical plans; supplied variables preserve exact IDs. Schema/time/retry/output/consent guards unchanged. Focused34/full781 application(two optional skips)/hosted1/browser61 PASS exit0 with refs7/planning15/lint/types/build/boundaries. Live deadline/QA07 effect UNKNOWN; next matching qualification.
+
+Run074: matching37451310697 QA01–06/privacy/CLEAN PASS, QA07 ARCHITECT_SCHEMA FAIL; no MODEL_DEADLINE observed,31attempts/1112533 reserved tokens/costMicros/1signup within200/2500000/2500000. Exact schema issue UNKNOWN; empty variable/rule arrays are permitted by definition, no basis to infer them as cause. Architect/contracts24 PASS. Next safe fixed top-level issue category (variables/rules/other), never arbitrary messages/path IDs/raw values; preserve schema rejection.
