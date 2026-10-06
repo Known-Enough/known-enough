@@ -48,7 +48,7 @@ const prompts: Record<ModelJobKind, string> = {
   NEGOTIATION: policy + 'Select exactly one entry from publicCandidates and return its zero-based array index as candidateIndex. '
     + 'Do not repeat, edit or summarize its values; the server copies the exact catalog entry. '
     + 'First evaluate each candidate against every shared rule and every confirmed HARD constraint. Select a candidate satisfying all of them. '
-    + 'candidateKernelStatuses aligns with publicCandidates and is a read-only trusted-state preview without permission dependencies. Prefer VALID or NEEDS_PERMISSION over INVALID when selecting. NEEDS_PERMISSION requires the exact negotiable intent or applicable active permission dependency; hints never grant permission and final current-state checks still apply. '
+    + 'candidateKernelStatuses aligns with publicCandidates and is a read-only trusted-state preview without permission dependencies. If the preview contains VALID or NEEDS_PERMISSION entries, select one of those entries; do not select an INVALID entry to preserve a negotiable preference. If preview guidance is unavailable, evaluate all shared and hard rules yourself. NEEDS_PERMISSION requires the exact negotiable intent or applicable active permission dependency; hints never grant permission and final current-state checks still apply. '
     + 'rejectedCandidateIndices identifies prior public catalog selections rejected by the kernel in this same attempt sequence. It is feedback, not a filtered catalog or permission. Reconsider those selections against mandatory rules; never relax a hard constraint. '
     + 'When retryReason is KERNEL_REJECTION, the prior catalog selection failed mandatory kernel checks. Re-evaluate every candidate against shared rules and HARD constraints before selecting; do not repeat a rejected selection merely to satisfy a negotiable preference. '
     + 'HARD constraints are mandatory; do not select a candidate violating one to satisfy a NEGOTIABLE constraint. '
@@ -64,7 +64,7 @@ const prompts: Record<ModelJobKind, string> = {
     + 'For every NEGOTIABLE constraint violated by the selected candidate and not covered by an active exact permission, include one questionIntent for that constraint. '
     + 'Copy ownerParticipantId, constraintId and constraintVersion exactly from that confirmed constraint. Set adjustmentOptionIds to include the selected candidate option for adjustmentVariableId. '
     + 'An adjustment that excludes the selected option cannot resolve the conflict. Never emit an intent for a HARD constraint or invent permissionDependencies. '
-    + 'Never put private numbers, dates, reasons, identifiers or another owner\'s constraints into questions or public values. '
+    + 'Never put private numbers, dates, reasons or another owner\'s conditions into public values or user-visible question text. Exact ownerParticipantId, constraintId and constraintVersion are required only in trusted structured questionIntents metadata, which the server uses for its independent consent checks; they are not permission and must not be copied into public values. '
     + 'Do not relax hard constraints. The server constructs a trusted-backend IN rule from the flat adjustment fields; do not emit a rule object.',
 };
 

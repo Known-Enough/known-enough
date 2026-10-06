@@ -1,0 +1,20 @@
+{
+  "sourceBase": "2728f4fd569b2a49a16a8681c9089e657e84481c",
+  "files": {
+    "packages/adapters/src/bedrock-models.ts": "8ee931d65edde5d8738066fff2e4dd26614d4535c62aef46f7c2c3e27a9ef0f1"
+  },
+  "checks": {
+    "focused": 51,
+    "application": 773,
+    "optionalSkipped": 2,
+    "hosted": 1,
+    "browser": 61,
+    "fullExit": 0
+  },
+  "change": "Explicit selection from previewed viable entries when available; required trusted question metadata distinguished from prohibited public/private text disclosure.",
+  "limits": [
+    "No catalog filtering/automatic candidate selection",
+    "No final guard/consent/attempt changes",
+    "Live hint availability and live effect UNKNOWN"
+  ]
+}

@@ -188,3 +188,5 @@ Run050 scope: same ASSESS07 final-attempt question coverage validation and regre
 Run051 same-task scope: safeAdjustment finite public ENUM NE originals using declared-domain complement, exact consent/grant regression; original rule unchanged, no nonENUM/private/hard relaxation or NP00 edits. Live NE provenance UNKNOWN.
 
 Run052 scope: same ASSESS07 fixed QUESTION_COVERAGE rejection reason and strict diagnostic stage allowlists/tests; separate parser/semantic failure, no model payload/private fields/new attempts/NP00 edits.
+
+Run053 scope: same ASSESS07 adapter prompt selection guidance for available trusted VALID/NEEDS_PERMISSION hints and distinguish required trusted question metadata from user-visible private disclosures; no catalog filtering/auto selection/auth change/NP00 edit. Live hint availability UNKNOWN.
