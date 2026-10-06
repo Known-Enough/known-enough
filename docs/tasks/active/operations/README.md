@@ -1,5 +1,7 @@
 # Future operations
 
+**Current scheduling — 2026-10-06:** Follow [coding first, administrator setup last](../../../coding-first-plan.md). Existing task code phases can progress on checked source dependencies; deferred installation/managed acceptance does not become a live PASS. Older administrator-first scheduling below is superseded.
+
 | Task | Basic idea | Status |
 | --- | --- | --- |
 | [OPS00](OPS00/README.md) | Complete the approved GitHub operations path so B does not wait for A to run AWS commands for each task. | BLOCKED / unclaimed; after ASSESS10 |

@@ -1,5 +1,8 @@
 ## Current B queue handoff — 2026-10-06T17:17:44Z
 
+**Coding-first scheduling — user direction, 2026-10-06:** Finish available coding before administrator/CloudShell setup. Follow [the two-phase queue](../coding-first-plan.md); preserve any actual active claim, then ASSESS11 → ASSESS10 → UX01–03 → OPS00–03 coding → FIN01–02 coding. Save exact setup/managed-proof gaps for the final cloud phase and FIN03; CODE_READY is a checked-source milestone, not whole-task DONE. Do not spend repeated ticks on deferred access audits when eligible independent coding remains. Existing B chat/schedule and one active writer remain unchanged.
+
+
 ASSESS07 and LIVE04 are DONE on actual all-seven live proof. A's inactive NP00 is PAUSED with saved ownership/work preserved and no active writer. B's existing chat may claim **PRIV01**, then **ASSESS11** after completion, followed by the existing monitor/OPS/UX/FIN route, one task at a time. The [bounded handoff](../b-next-task-handoff.md) defines the local path fix and separately scoped GitHub signup-readback workflow using existing read-only access; no routine A permission is missing. Assignment is not execution evidence. Older active/observer/hold routing below remains dated history.
 
 ## Sequential ASSESS07 transfer — 2026-10-04T20:21:40Z
@@ -36,13 +39,13 @@ Start here to understand what is left. Every task has its own folder: README.md 
 | [LIVE04](active/live-testing/LIVE04/README.md) | Prove the installed online test environment works from start to finish. | DONE; actual all-seven and complete qualification PASS37461438020 |
 | [ASSESS07](active/live-testing/ASSESS07/README.md) | Prove all seven real online journeys, usage/privacy and cleanup on matching deployed source. | DONE; B claim released after actual PASS37461438020 |
 | [PRIV01](active/technical-debt/PRIV01/README.md) | Keep private signup debugging files outside the repository, including aliased folders. | READY / unclaimed; B's next local task |
-| [ASSESS11](active/live-testing/ASSESS11/README.md) | Fix both reported signup paths, log useful safe errors and implement consistent basic password rules (minimum6, no required character classes). Separate primary proof from QA signup tests. | After PRIV01, READY for B's new claim and scoped helper workflow; actual public signup remains unproved |
+| [ASSESS11](active/live-testing/ASSESS11/README.md) | Fix both reported signup paths, log useful safe errors and implement consistent basic password rules (minimum6, no required character classes). Separate primary proof from QA signup tests. | READY for remaining coding; deferred administrator proof goes last |
 
 ## B's existing monitor
 
 | Task | Basic idea | Status |
 | --- | --- | --- |
-| [ASSESS10](active/monitoring/ASSESS10/README.md) | Check that B's existing Codex monitor actually runs about every five minutes and reads fresh AWS results. A's monitor has been removed. | READY / unclaimed |
+| [ASSESS10](active/monitoring/ASSESS10/README.md) | Check that B's existing Codex monitor actually runs about every five minutes and reads fresh AWS results. A's monitor has been removed. | After ASSESS11 coding checkpoint; keep any actual active claim |
 
 ## Remaining technical closeout
 
@@ -56,10 +59,10 @@ These tasks wait for the managed ASSESS07 baseline, ASSESS11 public signup verif
 
 | Task | Basic idea | Status |
 | --- | --- | --- |
-| [OPS00](active/operations/OPS00/README.md) | Complete and prove the bounded GitHub operations path; prepare any unavoidable access setup once. | BLOCKED / unclaimed; after ASSESS10 |
-| [OPS01](active/operations/OPS01/README.md) | Prepare group storage and safe archiving for wider use, after the real online test baseline is verified. | BLOCKED / unclaimed |
-| [OPS02](active/operations/OPS02/README.md) | Add clear retention, export and authorized deletion of private data before wider use. | BLOCKED / unclaimed |
-| [OPS03](active/operations/OPS03/README.md) | Make AI jobs recover safely across worker restarts and retries, with current permissions and spending limits checked. | BLOCKED / unclaimed |
+| [OPS00](active/operations/OPS00/README.md) | Complete and prove the bounded GitHub operations path; prepare any unavoidable access setup once. | Automation/setup-package coding after UX03 checkpoint; installation last |
+| [OPS01](active/operations/OPS01/README.md) | Prepare group storage and safe archiving for wider use, after the real online test baseline is verified. | Coding after OPS00 checked source; managed installation/proof last |
+| [OPS02](active/operations/OPS02/README.md) | Add clear retention, export and authorized deletion of private data before wider use. | Coding after OPS01 checked source; managed installation/proof last |
+| [OPS03](active/operations/OPS03/README.md) | Make AI jobs recover safely across worker restarts and retries, with current permissions and spending limits checked. | Coding after OPS02 checked source; managed installation/proof last |
 
 ## After operations: finish the interface and basics
 
@@ -67,9 +70,9 @@ The [basic completion roadmap](../basic-completion-plan.md) explains what exists
 
 | Task | Basic idea | Status |
 | --- | --- | --- |
-| [UX01](active/ui-ux/UX01/README.md) | First Luna screen review: clear signup/sign-in, no confusing repeated controls, consistent styling; then the complete desktop/phone participant journey. | BLOCKED / unclaimed; after OPS03 |
-| [UX02](active/ui-ux/UX02/README.md) | Fix verified navigation/signup wording, improve existing CSS/forms/buttons and remove repeated content; retain accessibility and clear progress/errors. | BLOCKED / unclaimed; after UX01 |
-| [UX03](active/ui-ux/UX03/README.md) | Verify matching deployed screens/journeys and simple start instructions; record remaining technical obligations for FIN01–03. | BLOCKED / unclaimed; after UX02 |
+| [UX01](active/ui-ux/UX01/README.md) | First Luna screen review: clear signup/sign-in, no confusing repeated controls, consistent styling; then the complete desktop/phone participant journey. | Review after ASSESS10 coding checkpoint; no OPS installation hold |
+| [UX02](active/ui-ux/UX02/README.md) | Fix verified navigation/signup wording, improve existing CSS/forms/buttons and remove repeated content; retain accessibility and clear progress/errors. | Coding after UX01 findings; no administrator setup hold |
+| [UX03](active/ui-ux/UX03/README.md) | Verify matching deployed screens/journeys and simple start instructions; record remaining technical obligations for FIN01–03. | Interface verification after UX02; later affected cloud proof stays pending |
 
 ## After UX: finish technical debt and group construction
 
@@ -77,9 +80,9 @@ This is the new [technical completion folder](active/technical-debt/README.md). 
 
 | Task | Basic idea | Status |
 | --- | --- | --- |
-| [FIN01](active/technical-debt/FIN01/README.md) | Finish actual inherited technical debt and missing evidence without reopening proved fixes. | BLOCKED / unclaimed; after UX03 |
-| [FIN02](active/technical-debt/FIN02/README.md) | Check group creation, invitations, membership changes, decision bindings, progress and participant isolation. | BLOCKED / unclaimed; after FIN01 |
-| [FIN03](active/technical-debt/FIN03/README.md) | Reconcile final actual completion, matching deployed results and B's independent approved GitHub operation. | BLOCKED / unclaimed; after FIN02 and required original closeout |
+| [FIN01](active/technical-debt/FIN01/README.md) | Finish actual inherited technical debt and missing evidence without reopening proved fixes. | Code/ledger after OPS03 checked source; administrator-only debt last |
+| [FIN02](active/technical-debt/FIN02/README.md) | Check group creation, invitations, membership changes, decision bindings, progress and participant isolation. | Code/group checks after FIN01 checkpoint; unavailable service proof last |
+| [FIN03](active/technical-debt/FIN03/README.md) | Reconcile final actual completion, matching deployed results and B's independent approved GitHub operation. | LAST: final actual acceptance after code and cloud phases |
 
 ## Where earlier work went
 

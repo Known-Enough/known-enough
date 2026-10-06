@@ -1,5 +1,7 @@
 # FIN03 — Verify final basic completion
 
+**Coding-first scheduling — user direction, 2026-10-06:** Final basic acceptance remains LAST, after the deferred administrator/service completion and required fresh matching proof. B may finish available instructions/reporting preparation earlier; no local CODE_READY checkpoint replaces final managed acceptance. Follow [the current queue](../../../../coding-first-plan.md).
+
 - Status: BLOCKED / unclaimed; prerequisite FIN02 and actual NP00/LIVE04/OPS/UX technical criteria complete.
 - Worker: next eligible direct worker, current routing B; report actual model/effort/source. One shared parent claim; no mandatory new human sign-off or independent review gate.
 - Scope: final matching-evidence inspection, safe readiness report and concise user/developer operation/recovery instructions; bounded corrective follow-up only for an actual unresolved blocker. No feature expansion or new cloud/spending authority.

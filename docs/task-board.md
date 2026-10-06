@@ -1,3 +1,7 @@
+## Latest user direction — finish coding before CloudShell setup, 2026-10-06
+
+Move administrator/CloudShell-dependent work to the END. B finishes available coding in the two-phase queue below, one existing task at a time, and saves exact setup/proof gaps for later. Do not wait on deferred OPS00 installation before writing independently testable OPS/UX/group code. Preserve checked-source dependencies, existing claims, protected saved NP00 work, meaningful checks and honest managed acceptance. [Exact coding-first policy](coding-first-plan.md). Older queue/hold directions below yield to this latest scheduling change.
+
 ## Current next work — cancelled password-rule change, 2026-10-06T20:27:54Z
 
 User cancels only the password-simplification/policy-update subtask and related AWS permission setup. Keep current primary rules; no UpdateUserPool repair/delegation for that purpose. PRIV01 is DONE. **ASSESS11 is READY/unclaimed** for its remaining useful code work: match registration validation/help to the unchanged policy, update stale live “Sign in or register” selectors to the actual “Sign in” label, and verify matching live tests plus real primary signup. Existing failure37520794342 at QA01_ENTRY is not repaired by the earlier all-seven PASS. Claim only one task in B's existing chat; if ASSESS10 is already actually claimed, finish/hand off that claim before resuming ASSESS11. A NP00 remains paused/saved. No new approval or AWS password-update capability is needed for this remaining scope. Older permission-blocked release instructions below are history.
@@ -106,48 +110,35 @@ AWS installation, GitHub settings, publishing permissions and automatic deployme
 
 A's recurring observer and completed one-time follow-up are deleted. B's existing Codex automation is unchanged; B's actual scheduled execution is not yet verified. No A monitor should be recreated.
 
-## Work order and preserved claims
+## Coding-first work order — current scheduling
 
-| Order | Task | Current status | What remains |
+[Two-phase execution rules and deferred cloud work](coding-first-plan.md). Existing claims are checked before reassignment; keep one active B task. A NP00 remains paused with saved ownership/source preserved. Completed PRIV01 and the historical ASSESS07/LIVE04 live proof remain recorded; the newer UI release still needs its stale-selector repair and matching qualification.
+
+| Coding order | Task | Current scheduling | Coding outcome |
 | --- | --- | --- | --- |
-| 1 | [ASSESS07 — Real automatic qualification](tasks/active/live-testing/ASSESS07/README.md) | DONE / B claim released | Source-matching all-seven/CLEAN and complete qualification PASS37461438020; historical failures retained. |
-| Next | [PRIV01 — Private snapshot path boundary](tasks/active/technical-debt/PRIV01/README.md) | READY / unclaimed; assigned next to B's persistent chat | Local path-boundary fix and meaningful regressions; no AWS prerequisite or A scheduling hold. |
-| Then | [ASSESS11 — Public signup and diagnostics](tasks/active/live-testing/ASSESS11/README.md) | BLOCKED only until PRIV01 completes; then READY for B's fresh claim | Implement the separately scoped helper workflow using existing read-only access, obtain primary policy/schema/callback evidence, fix signup and verify actual live behavior. Standing authority is already granted. |
-| 3 | [ASSESS10 — B monitor verification](tasks/active/monitoring/ASSESS10/README.md) | READY / unclaimed; B-only verification after signup investigation/current cycle | Identify B's existing automation, prove two unattended ticks and fresh AWS results, check stale/failure notification behavior. |
-| Delivery umbrella | [LIVE04 — Online test delivery](tasks/active/live-testing/LIVE04/README.md) | DONE / inherited ASSESS07 proof verified | Matching automatic complete PASS37461438020; NP00 and separate signup obligations preserved. |
-| Preserved closeout | [NP00 — Technical closeout](tasks/active/closeout/NP00/README.md) | PAUSED; saved A claim/source preserved, no active implementation | Later finish original obligations through a proper handoff; existing model-off checkpoint remains. No global hold on nonoverlapping B tasks. |
-| 4 | [OPS00 — Complete GitHub operations](tasks/active/operations/OPS00/README.md) | BLOCKED / unclaimed; after ASSESS07/ASSESS11/ASSESS10 | Verify existing access; prepare and install only an explicitly authorized minimal missing delegation, then prove B's GitHub operations/recovery within the exact approved envelope. |
-| Later | [OPS01 — Storage and archiving](tasks/active/operations/OPS01/README.md) · [OPS02 — Retention and erasure](tasks/active/operations/OPS02/README.md) · [OPS03 — Recoverable jobs](tasks/active/operations/OPS03/README.md) | BLOCKED / unclaimed | Managed baseline and OPS00 verified operations first, then OPS01 → OPS02 → OPS03. Ordinary approved operations use GitHub. |
+| 1 | [ASSESS11](tasks/active/live-testing/ASSESS11/README.md) | READY for remaining coding, or continue its actual current B claim | Unchanged-policy form/help, corrected Sign in test selectors and available signup proof. Password simplification cancelled. |
+| 2 | [ASSESS10](tasks/active/monitoring/ASSESS10/README.md) | After ASSESS11 coding checkpoint; preserve any actual active claim | Existing monitor/logging code and available execution proof. |
+| 3 | [UX01](tasks/active/ui-ux/UX01/README.md) | After ASSESS10 coding checkpoint | Current screen/journey review and prioritized findings. |
+| 4 | [UX02](tasks/active/ui-ux/UX02/README.md) | After UX01 coding checkpoint | Usability/style/navigation corrections and tests. |
+| 5 | [UX03](tasks/active/ui-ux/UX03/README.md) | After UX02 coding checkpoint | Available deployed interface proof and simple instructions. |
+| 6 | [OPS00](tasks/active/operations/OPS00/README.md) | Automation/setup-package coding after UX03 checkpoint | Checked GitHub operations/recovery code and exact deferred setup package. |
+| 7 | [OPS01](tasks/active/operations/OPS01/README.md) | Coding after OPS00 checkpoint | Group storage/archive/migration implementation and tests. |
+| 8 | [OPS02](tasks/active/operations/OPS02/README.md) | Coding after OPS01 checkpoint | Retention/export/erasure implementation and tests. |
+| 9 | [OPS03](tasks/active/operations/OPS03/README.md) | Coding after OPS02 checkpoint | Durable job/recovery implementation and tests. |
+| 10 | [FIN01](tasks/active/technical-debt/FIN01/README.md) | Code/ledger after OPS03 checkpoint | Remaining available code/regressions and precise closeout ledger. |
+| 11 | [FIN02](tasks/active/technical-debt/FIN02/README.md) | Code/group checks after FIN01 checkpoint | Group lifecycle/concurrency/progress/privacy fixes and tests. |
 
-**Claim readback — 2026-10-03T22:34Z:** Incoming main commit `7e6b55d5c1912256b31b278a0593f32e4e26313f` records B's ASSESS07 automation claim at22:33:43Z: GitHub deployment/qualification observation and sanitized evidence only, using at most the existing two dated cycles. A preserved the local documentation work, pulled that commit ff-only and reapplied the saved changes without conflicts. B's claim/log/body remain intact; no B live result or allowance consumption is inferred. A is preparing documentation only, with no concurrent implementation or test dispatch.
+## Final cloud/setup and acceptance order
 
-## After OPS — finish the basic app, user direction 2026-10-03
+| Final order | Existing work | Required completion |
+| --- | --- | --- |
+| 1 | [NP00](tasks/active/closeout/NP00/README.md) remaining administrator/service obligations | Proper saved-claim handoff, exact permission/identity/manifest/readback closeout; no silent DONE. |
+| 2 | OPS00 installation | Install only the actually missing bounded delegation/configuration and prove B's GitHub operation/recovery. |
+| 3 | OPS01 → OPS02 → OPS03 managed completion | Install required storage/migration/data-lifecycle/job resources and verify real behavior in dependency order. |
+| 4 | Deferred ASSESS11/ASSESS10/UX03/FIN02 proof | Finish actual unavailable evidence and fresh rechecks affected by installed changes. |
+| 5 | [FIN03](tasks/active/technical-debt/FIN03/README.md) | Actual final release/tests/privacy/recovery/UI/group/debt/operations acceptance and honest remaining limits. |
 
-The user requests a post-OPS UI/usability sequence, bounded Luna helper reviews and basic completion. Prepared documentation is not a new implementation claim. ASSESS07 remains B's immediate priority; ASSESS10 follows, then OPS00 → OPS01 → OPS02 → OPS03. No existing claim or dated run expiry is changed. [What exists and what is missing](basic-completion-plan.md).
-
-| Order after OPS | Task | Status | Required outcome |
-| --- | --- | --- | --- |
-| 1 | [UX01 — Screen and journey review](tasks/active/ui-ux/UX01/README.md) | BLOCKED / unclaimed; after OPS03 | First bounded Luna review: signup/sign-in clarity, alternate provider signup, repeated controls/text and CSS consistency. Then a verified desktop/phone/keyboard/participant-view issue list. |
-| 2 | [UX02 — Fix basic usability](tasks/active/ui-ux/UX02/README.md) | BLOCKED / unclaimed; after UX01 | Fix verified signup/navigation issues, improve existing CSS/forms/buttons and remove redundant controls/content; preserve consent/privacy and verify affected behavior. |
-| 3 | [UX03 — Verify finished basics](tasks/active/ui-ux/UX03/README.md) | BLOCKED / unclaimed; after UX02 | Matching real online interface/journey proof and simple start instructions; inherited debt and final project closure follow FIN01–03. |
-
-These tasks stay in the single shared queue, with current routing B. Luna helpers are a bounded review exception only within UX01/UX03; one direct worker claims the parent and performs any edits/integration. Helpers do not independently deploy, run paid suites, write files or claim tasks. OPS00 verifies and completes the exact GitHub operations envelope before OPS; any missing delegation needs its specific administrator authorization once. Inside-envelope routine work must not depend on repeated A-only CloudShell commands; no A credentials are shared. This roadmap grants no cloud write, paid-model/email run, wider enrollment or deployment. Human trials, voice integration and submission materials remain later work.
-
-## After UX — finish technical debt and group construction
-
-The user's latest direction adds this final technical sequence. Original NP00/debt source and evidence remain authoritative; FIN01 reconciles actual outstanding obligations through its recorded bounded handoff, without silently releasing A's saved claim or creating a concurrent writer.
-
-| Order after UX | Task | Status | Required outcome |
-| --- | --- | --- | --- |
-| 1 | [FIN01 — Finish inherited debt](tasks/active/technical-debt/FIN01/README.md) | BLOCKED / unclaimed; after UX03 | Obligation-to-evidence ledger and actual remaining technical closeout; no reopening proved fixes or calling deferred review PASS. |
-| 2 | [FIN02 — Group construction checks](tasks/active/technical-debt/FIN02/README.md) | BLOCKED / unclaimed; after FIN01 | Verify creation/invites/joins, concurrent roster and decision binding, safe cross-session progress and current participant authority; repair actual defects. |
-| 3 | [FIN03 — Final basic completion](tasks/active/technical-debt/FIN03/README.md) | BLOCKED / unclaimed; after FIN02 and required original closeout | Actual matching final journeys/UI/group/debt/operations proof, independent B GitHub operation/recovery and simple instructions; no hidden routine AWS-login dependency. |
-
-Current route: **PRIV01 → ASSESS11 → ASSESS10 → OPS00 → OPS01 → OPS02 → OPS03 → UX01 → UX02 → UX03 → FIN01 → FIN02 → FIN03**. ASSESS07/LIVE04 are DONE on actual matching proof. B claims one task at a time; A's NP00 is paused with its saved work preserved and no active writer. Final required NP00 obligations resume through their proper later handoff/closeout, not a parallel task. Standing project authority covers scoped operations, while actual installed capabilities and technical/participant consent criteria still need evidence. No general administrator access is promised to B.
-
-ASSESS10 is not a claim that B has started. A/B identity, execution worker, chat and task role remain distinct: A is Ricardo / martelaxe; B is Octavio / Battosai1806. A Mac session authenticated as A is not B. See [verified mapping](people-and-workers.md).
-
-Historical routing: A briefly took over ASSESS07 when B was unavailable, and used the earlier two-run allowance. The user's latest direction authorizes two dated GitHub-approved runs for B; the earlier uninstalled one-use request is retained as history. No actual B start is claimed yet. After ASSESS07, follow the shared queue and existing task prerequisites. NP00 remains A's preserved closeout; no concurrent writer.
+Current coding route: **ASSESS11 → ASSESS10 → UX01 → UX02 → UX03 → OPS00 (code) → OPS01 (code) → OPS02 (code) → OPS03 (code) → FIN01 (code/ledger) → FIN02 (code/groups)**. Administrator-dependent setup and final service proof follow only after available coding. A code checkpoint is not a live PASS; prepare compatible/inactive changes or use a checked `[skip ci]` checkpoint where missing infrastructure would break publication. Historical scheduling is retained in prior Git revisions and dated tickets/logs; this table controls the latest order.
 
 ## Execution boundaries
 

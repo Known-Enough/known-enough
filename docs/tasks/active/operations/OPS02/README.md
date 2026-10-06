@@ -1,8 +1,10 @@
 # OPS02 — Retention, export and authorized erasure
 
+**Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of OPS01, not deferred administrator installation. Complete retention/export/erasure code and tests now; defer administrator-dependent retention/resource/data operations and managed proof. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
+
 Add clear retention, export and authorized deletion of private data before wider use.
 
-**Status:** BLOCKED / unclaimed — after OPS01 and the managed baseline.
+**Status:** Coding phase eligible after OPS01's checked coding checkpoint; final administrator/managed completion deferred.
 
 **Next step:** After OPS01, claim the shared queue task and prepare the scoped implementation. Authorized cloud operations use the verified OPS00 GitHub path; routine work must not depend on per-task A-only CloudShell commands. Spending, migration/deletion and outside-envelope changes retain their specific authorization.
 

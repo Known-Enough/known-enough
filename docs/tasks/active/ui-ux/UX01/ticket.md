@@ -1,6 +1,8 @@
 # UX01 — Review screens and the participant journey
 
-- Status: BLOCKED / unclaimed; prerequisite OPS03 complete under the shared queue.
+**Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of ASSESS10, not deferred administrator installation. Review the existing screens and participant journeys before OPS installation; produce the named bounded review and actionable issues. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
+
+- Status: BLOCKED / unclaimed until ASSESS10 coding checkpoint; then coding phase eligible. Administrator installation/required managed acceptance deferred to final cloud phase.
 - Origin: user's 2026-10-03 request to finish the basics and add UI/usability reviews after OPS.
 - Direct worker: next eligible worker; current routing B. Record actual model/effort and bounded scope at claim; files do not switch models.
 - Review helpers: user direction recorded 2026-10-04 UTC requires one `gpt-6-luna` / medium helper for the first signup/first-use screen review; at most three bounded read-only reviews total inside this one claimed task, per the [roadmap](../../../../basic-completion-plan.md). Report actual helper/model and observations. No helper edits, independent claims, deployments, paid runs or external messages. This ticket prepares that future review; no helper starts before UX01 is eligible and claimed.

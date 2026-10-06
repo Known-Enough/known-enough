@@ -1,5 +1,8 @@
 ## Latest eligibility amendment — 2026-10-06T20:27:54Z
 
+**Coding-first scheduling — user direction, 2026-10-06:** Finish available coding before administrator/CloudShell setup. Follow [the two-phase queue](coding-first-plan.md); preserve any actual active claim, then ASSESS11 → ASSESS10 → UX01–03 → OPS00–03 coding → FIN01–02 coding. Save exact setup/managed-proof gaps for the final cloud phase and FIN03; CODE_READY is a checked-source milestone, not whole-task DONE. Do not spend repeated ticks on deferred access audits when eligible independent coding remains. Existing B chat/schedule and one active writer remain unchanged.
+
+
 User cancels password simplification and its AWS UpdateUserPool/delegation work; public signup remains required. ASSESS11's prior claim stays released, but its remaining unchanged-policy UI/live-selector/signup scope is now READY for a new sequential B claim. PRIV01 is DONE and A NP00 paused/saved. Do not manufacture a new claim or interrupt an actual ASSESS10 worker; verify the sole active owner at intake. No password-repair dispatch or prior CloudShell grant is required. Record actual matching signup/test proof; earlier denied-operation evidence and cancellation are not DONE.
 
 ## Current sequential ownership — 2026-10-06T17:17:44Z

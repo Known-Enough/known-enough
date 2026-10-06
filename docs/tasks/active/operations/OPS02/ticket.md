@@ -1,6 +1,8 @@
 # OPS02 — Retention, export and authorized erasure
 
-- Status: BLOCKED / unclaimed — prerequisite OPS01 complete, managed ASSESS07 baseline and verified OPS00 GitHub operations path; no parallel implementation.
+**Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of OPS01, not deferred administrator installation. Complete retention/export/erasure code and tests now; defer administrator-dependent retention/resource/data operations and managed proof. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
+
+- Status: BLOCKED / unclaimed until OPS01 coding checkpoint; then coding phase eligible. Administrator installation/required managed acceptance deferred to final cloud phase.
 - Origin: FA16 in [assessment](../../../../full-assessment.md), tracked by ASSESS06.
 - Priority: follow the shared queue after ASSESS07 → ASSESS10 → OPS00, then OPS01 → OPS02 → OPS03; before broader enrollment/real-person/distributed claims respectively.
 - Worker/model: select at claim under current workflow; architectural changes use the required architecture checkpoint, never an automatic model switch.

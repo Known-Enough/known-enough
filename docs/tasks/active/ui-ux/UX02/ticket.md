@@ -1,6 +1,8 @@
 # UX02 — Fix the basic usability problems
 
-- Status: BLOCKED / unclaimed; prerequisite UX01 complete.
+**Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of UX01, not deferred administrator installation. Fix and test verified usability issues before administrator setup; preserve current backend behavior and privacy. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
+
+- Status: BLOCKED / unclaimed until UX01 coding checkpoint; then coding phase eligible. Administrator installation/required managed acceptance deferred to final cloud phase.
 - Direct worker: next eligible worker; current routing B. Select/report actual model and effort at claim. One direct worker implements; no helper writes or parallel project task.
 - Scope: only verified UX01 basics in existing `apps/web/` screens/styles and necessary focused browser checks, safe UX02 evidence and tracking. Record exact files before editing. Backend contracts/IAM/root config/lockfiles/new features require their own explicit bounded scope; never silently widen this task.
 

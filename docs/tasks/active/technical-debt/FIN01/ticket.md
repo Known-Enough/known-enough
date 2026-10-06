@@ -1,6 +1,8 @@
 # FIN01 — Finish inherited technical debt
 
-- Status: BLOCKED / unclaimed; prerequisite UX03 complete. NP00's saved A claim remains authoritative for its named files/operations until a bounded release/transfer is explicitly recorded under the workflow.
+**Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of OPS03, not deferred administrator installation. Finish available inherited code/regressions and the obligation ledger; put administrator-only NP00 closeout at the end while preserving its saved work. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
+
+- Status: BLOCKED / unclaimed until OPS03 coding checkpoint; then coding phase eligible. Administrator installation/required managed acceptance deferred to final cloud phase.
 - Worker: next eligible direct worker, current routing B; report actual model/effort and exact files at claim. No second writer, subagents or new cloud/spending authorization.
 - Scope: reconcile original NP00/technical-debt/assessment obligations, finish genuinely missing technical proof and narrowly reproduced corrections through authorized handoffs. Do not duplicate OPS/UX work, reopen verified fixes or rewrite historical acceptance.
 

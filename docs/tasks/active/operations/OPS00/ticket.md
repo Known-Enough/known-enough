@@ -1,6 +1,8 @@
 # OPS00 — Complete the GitHub operations path
 
-- Status: BLOCKED / unclaimed; prerequisites managed ASSESS07 baseline, [ASSESS11 public signup](../../live-testing/ASSESS11/ticket.md) and ASSESS10 complete; immediate predecessor of OPS01.
+**Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of UX03, not deferred administrator installation. Prepare/test automation and the exact setup package now; install missing delegation only in the final cloud phase. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
+
+- Status: BLOCKED / unclaimed until UX03 coding checkpoint; then coding phase eligible. Administrator installation/required managed acceptance deferred to final cloud phase.
 - Origin: user's 2026-10-03 direction that ordinary implementation/testing should be automatic and should not repeatedly depend on A's AWS login.
 - Worker: next eligible direct worker, current routing B; select/report actual model and effort at claim. One task/worker; no subagents or credential sharing.
 - Scope at claim: exact GitHub workflow/scripts, resource/permission contracts needed by OPS01–03, bounded policy/bootstrap proposal, meaningful integration checks, safe evidence and own log/handoff. Record exact files first. No general administrator grant or live operation is authorized by this ticket.

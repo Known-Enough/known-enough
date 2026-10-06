@@ -1,5 +1,8 @@
 # B handoff after ASSESS07 — 2026-10-06T17:17:44Z
 
+**Coding-first scheduling — user direction, 2026-10-06:** Finish available coding before administrator/CloudShell setup. Follow [the two-phase queue](coding-first-plan.md); preserve any actual active claim, then ASSESS11 → ASSESS10 → UX01–03 → OPS00–03 coding → FIN01–02 coding. Save exact setup/managed-proof gaps for the final cloud phase and FIN03; CODE_READY is a checked-source milestone, not whole-task DONE. Do not spend repeated ticks on deferred access audits when eligible independent coding remains. Existing B chat/schedule and one active writer remain unchanged.
+
+
 **Latest user direction — 2026-10-06T20:27:54Z:** PRIV01 is DONE. User skips changing AWS password rules and its permission setup. ASSESS11's released claim may be freshly resumed for unchanged-policy browser validation/help, stale live Sign in selectors and real public signup verification; no password-policy apply/delegation is in this remaining scope. Respect any actual active ASSESS10 claim before switching. Details in the current ASSESS11 ticket and board supersede older password-repair instructions below. The prior CloudShell grant should not run for the cancelled request.
 
 The user asks to unstick B after ASSESS07 passed. A is not implementing NP00 and has no active deployment or test. A pauses that saved claim for scheduling, preserving its unfinished obligations, source, private recovery artifacts and bounded files. It no longer occupies the active implementation slot. This is an A-owned scheduling handoff, not a claim that NP00 is DONE or permission to overwrite its saved work.

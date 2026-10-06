@@ -1,5 +1,7 @@
 # Technical completion after UX
 
+**Current scheduling — 2026-10-06:** Follow [coding first, administrator setup last](../../../coding-first-plan.md). Existing task code phases can progress on checked source dependencies; deferred installation/managed acceptance does not become a live PASS. Older administrator-first scheduling below is superseded.
+
 Finish remaining technical obligations and verify how groups are created and maintained. These tasks follow UX03; the existing NP00 claim and original debt evidence are preserved, not duplicated or silently released.
 
 | Task | Basic idea | Status |

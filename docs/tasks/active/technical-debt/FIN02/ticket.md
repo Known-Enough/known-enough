@@ -1,6 +1,8 @@
 # FIN02 — Check group construction and membership
 
-- Status: BLOCKED / unclaimed; prerequisite FIN01 complete.
+**Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of FIN01, not deferred administrator installation. Finish group lifecycle/concurrency/progress code and tests using checked predecessors; defer only genuinely unavailable managed proof. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
+
+- Status: BLOCKED / unclaimed until FIN01 coding checkpoint; then coding phase eligible. Administrator installation/required managed acceptance deferred to final cloud phase.
 - Worker: next eligible direct worker, current routing B; select/report actual model/effort and bounded files at claim. No helper or parallel implementation.
 - Scope: group/account/invitation/membership/decision-binding inspection, focused meaningful regressions and necessary reproduced fixes; exact application/test files recorded before edits. No new social/group feature, role escalation or wider participant enrollment.
 
