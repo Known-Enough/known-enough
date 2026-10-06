@@ -1,0 +1,78 @@
+{
+  "sourceSha": "45a1ec8ba2958843de62a5a8c3d5b245329c91fe",
+  "runUrl": "https://github.com/Known-Enough/known-enough/actions/runs/37538524405",
+  "observedAt": "2026-10-06T22:07:21.188Z",
+  "collection": {
+    "status": "passed",
+    "issue": null
+  },
+  "identity": {
+    "account": "092954139775",
+    "role": "KnownEnoughGithubStagingInspector"
+  },
+  "lambda": {
+    "functionName": "known-enough-stage-api",
+    "codeSha256Hex": "417eff55b6c9061444a725ad49343282085a93f904795ab0ebb1812cd415204b",
+    "manifestCodeSha256": "d5194b8da79250fbad2422ba948d4122654947941c20822ec58de768ef2f9b4f",
+    "sourceCommit": null,
+    "runtime": "nodejs24.x",
+    "handler": "api.handler",
+    "state": "Active",
+    "lastUpdateStatus": "Successful",
+    "roleName": "KnownEnoughStageApiRole",
+    "modelMode": "DISABLED",
+    "paidCallsApproved": "false",
+    "runtimeInlineBedrockGrant": false
+  },
+  "checks": [
+    {
+      "name": "Deployed Lambda ZIP matches the manifest",
+      "status": "failed",
+      "detail": "deployed=417eff55b6c9061444a725ad49343282085a93f904795ab0ebb1812cd415204b; manifest=d5194b8da79250fbad2422ba948d4122654947941c20822ec58de768ef2f9b4f; sourceCommit=unknown"
+    },
+    {
+      "name": "Signup and verification email remain gated",
+      "status": "failed",
+      "detail": "Cognito signup or email verification settings differ from the authorized hold state; no signup/email test was run."
+    },
+    {
+      "name": "Paid-model qualification",
+      "status": "blocked",
+      "detail": "No model API is invoked. Paid-model checks need their separate budget and authorization."
+    },
+    {
+      "name": "NP05 deployment writes",
+      "status": "blocked",
+      "detail": "This role cannot create resources, update Lambda/API/Cognito, or deploy Amplify. NP05 deployment stays separate."
+    }
+  ],
+  "monitor": {
+    "id": "watch-known-enough-shared-queue",
+    "status": "ACTIVE",
+    "intervalMinutes": 30,
+    "chat": "01a1086a-fb98-7552-b4d1-e2dbab01a404"
+  },
+  "scheduledTicks": [
+    {
+      "scheduled": "2026-10-06T21:35:57.540Z",
+      "actualStart": "2026-10-06T21:36:02Z",
+      "latenessSeconds": 4.46
+    },
+    {
+      "scheduled": "2026-10-06T22:06:00.275Z",
+      "actualStart": "2026-10-06T22:06:39Z",
+      "latenessSeconds": 38.725
+    }
+  ],
+  "checksPassed": 15,
+  "receiptState": "FINISHED_REPORTED",
+  "notificationDelivery": "UNKNOWN",
+  "hostOutageEvidence": "UNKNOWN",
+  "liveQaEnabled": true,
+  "installedTargetConfigured": true,
+  "limitations": [
+    "Two actual ticks verified, not two fresh full AWS-health PASS ticks.",
+    "Shared report retains failed old ZIP-manifest/signup-hold assertions; metadata collection success is not whole AWS-health acceptance.",
+    "Local task requires host/app availability; tests cover stale/failure handling, not an actual outage."
+  ]
+}

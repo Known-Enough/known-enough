@@ -177,3 +177,7 @@ ASSESS11 BLOCKED/deferred/unclaimed, not DONE: checked source/real published pho
 ## Current coding milestone — 2026-10-06T21:39Z
 
 ASSESS11 REVIEW / CODE_READY, B claim released: installed-policy UI/live selector coding and source checks complete; current QA01–05/privacy/CLEAN PASS, QA06 FAIL/QA07 BLOCKED, final primary signup proof deferred. No whole-task DONE. Next eligible coding phase ASSESS10 under coding-first plan; no concurrent active implementation. Preserve inherited QA06 follow-up for FIN01 and final cloud/release evidence.
+
+## ASSESS10 coding milestone — 2026-10-06T22:10Z
+
+REVIEW / CODE_READY; existing monitor code/lifecycle/privacy/stale/fallback checks and actual schedule/receipt evidence verified, final fresh-health/outage/delivery proof remains outstanding. B claim released under coding-first, no whole-task DONE. Next coding phase UX01; A NP00 paused/saved.
