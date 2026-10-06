@@ -262,10 +262,10 @@ export class DecisionArchitect {
         variables: normalized.variables,
         rules: normalized.rules,
       });
-      if (!definition.success
-        || definition.data.variables.some(variable => variable.visibility !== 'PUBLIC')
+      if (!definition.success) this.rejectModel('ARCHITECT_SCHEMA');
+      if (definition.data.variables.some(variable => variable.visibility !== 'PUBLIC')
         || definition.data.rules.some(rule => rule.visibility !== 'PUBLIC')) {
-        this.rejectModel('ARCHITECT_DEFINITION');
+        this.rejectModel('ARCHITECT_PRIVATE_FIELDS');
       }
 
       if (publicVariables) {

@@ -179,3 +179,12 @@ it('general public-draft mode can propose new labels; ordinary restricted drafts
   await expect(architect.draft('organizer', { ...request(), allowedOptions: [] })).rejects.toMatchObject({ code: 'RETRYABLE_SERVER_ERROR' });
   expect((await architect.draft('organizer', { ...request(), allowedOptions: [], generateOptions: true })).frame.variables[0]!.id).toBe('destination');
 });
+
+it('retains schema rejection without exposing invalid model fields in diagnostics', async () => {
+ const output=christmasDraft();output.variables.push({...output.variables[0]!,label:'PRIVATE_UNTRUSTED_LABEL'});
+ const diagnostic=vi.fn();
+ const architect=new DecisionArchitect({draft:async()=>output},()=> 'schema-rejection',Date.now,()=>true,diagnostic);
+ await expect(architect.draft('organizer',request())).rejects.toMatchObject({code:'RETRYABLE_SERVER_ERROR'});
+ expect(diagnostic).toHaveBeenCalledWith({kind:'ARCHITECT',stage:'ARCHITECT_SCHEMA'});
+ expect(JSON.stringify(diagnostic.mock.calls)).not.toContain('PRIVATE_UNTRUSTED_LABEL');
+});
