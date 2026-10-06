@@ -22,3 +22,9 @@ Use the greater of the fresh verified existing value and each requested minimum;
 4. Record numeric before/after ceilings and actual installed readback, then inspect one matching automatic qualification through all seven journeys, usage, privacy and cleanup. Do not call the extension applied based only on this document or a successful code publication.
 
 Status at publication: **authorized and handed to the existing worker; not yet installed or verified**. Direct delivery to B's persistent chat returned an unavailable `durable` host; the shared board is the available instruction path. B remains the sole implementation worker; A has made only this documentation handoff and preserves NP00.
+
+## Verified baseline and immediate next action — 2026-10-06T05:22:51Z
+
+The [source-matching live report37416897675](https://github.com/Known-Enough/known-enough/actions/runs/37416897675) now confirms the installed baseline: 200 attempts, 250,000 reserved tokens and 250,000 reserved cost micros per run; actual reservations reached seven attempts and 244,526 tokens/cost micros before QA05 failed. Privacy/CLEAN passed. The tenfold requested token/cost increase is still unapplied. B's latest finished receipt confirms the instruction was received and the earlier synchronization failure was reconciled.
+
+Numeric readback is no longer missing. Proceed with the authorized conditional update and installed readback in this same claim, without another approval request. If application is technically blocked, record the actual attempted update and exact sanitized reason; no such new external blocker is established by the current evidence. Further general budget audits do not substitute for applying the requested change.
