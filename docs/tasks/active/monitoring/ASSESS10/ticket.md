@@ -35,3 +35,5 @@ User cancels the recurring monitor on A's side. Native tool confirms deletion of
 ## A follow-up completed — 2026-10-02
 
 The one-time A follow-up ran and reported that B scheduled execution was not yet verified; no qualification run was available. The one-time automation was deleted after that check. No recurring or one-time A monitor remains. B's existing automation is unchanged, and this READY/unclaimed ticket still requires actual B execution evidence. The GitHub target/enabled repository settings have since been saved and read back as A; this does not prove B monitoring or full live qualification.
+
+Run079 read-only reconciliation: existing automation ACTIVE30-minute samechat verified; recent started/finished receipts37472111213/37472265884 SUCCESS, downloaded finished record FINISHED_REPORTED with explicit chatSummarySource (field name verified), no invented hidden-chat access. All15 lifecycle/privacy/stale/failure fallback checks PASS. This is technical evidence, not claim transfer or certification of fresh AWS health/real outage notification; original signup ordering and A NP00 preserved.
