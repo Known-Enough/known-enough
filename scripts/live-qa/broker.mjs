@@ -7,7 +7,7 @@ import { S3Client, ListObjectsV2Command, GetObjectCommand, DeleteObjectCommand }
 import { createDynamoGroupRepository, createAwsDynamoDBRoomRepository } from '../../packages/adapters/src/index.ts';
 import { KnownEnoughApplication } from '../../packages/application/src/index.ts';
 import { operateAccount } from '../../apps/api/src/group-operator.ts';
-import { ACTORS, requireRunId, authorizationActive, standingAuthorization } from './config.mjs';
+import { ACTORS, requireRunId, authorizationActive, qa05Allowance } from './config.mjs';
 import { createMailtmClient } from './mailtm.mjs';
 import { reserveTotal, authorizationTransaction } from './cumulative.mjs';
 import { beginLease, actorUsername, cleanupPlan } from './fixture-core.mjs';
@@ -86,7 +86,7 @@ async function migrateStanding(runId) {
     const readItem = async id => (await db.send(new GetItemCommand({ TableName: table(), Key: key(id), ConsistentRead: true }))).Item;
     const a = await readItem('AUTH');
     if (!a) throw new Error('AUTHORIZATION_BLOCKED');
-    const standing = standingAuthorization(JSON.parse(a.payload.S));
+    const standing = qa05Allowance(JSON.parse(a.payload.S));
     if (!standing.approved) throw new Error('AUTHORIZATION_BLOCKED');
     const l = await readItem('LEASE');
     const total = await readItem('TOTAL');

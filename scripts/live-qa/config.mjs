@@ -85,3 +85,13 @@ export function publicTarget(outputs) {
         ...Object.fromEntries(allowed.map(key => [key, outputs[key]])), MailboxProvider: outputs.MailboxProvider ?? 'owned-ses', ...(typeof outputs.PrimaryReleaseRoleArn === 'string' ? { PrimaryReleaseRoleArn: outputs.PrimaryReleaseRoleArn } : {})
     };
 }
+
+/** Idempotent user-authorized QA05 minimums; preserve greater installed limits. */
+export function qa05Allowance(a) {
+    const standing = standingAuthorization(a);
+    if (!standing.approved) throw new Error('AUTHORIZATION_BLOCKED');
+    return validateAuthorization({...standing,
+        maxAttemptsPerRun: Math.max(standing.maxAttemptsPerRun, 200),
+        maxTokensPerRun: Math.max(standing.maxTokensPerRun, 2500000),
+        maxCostMicrosPerRun: Math.max(standing.maxCostMicrosPerRun, 2500000)});
+}
