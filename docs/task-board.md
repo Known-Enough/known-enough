@@ -173,3 +173,7 @@ ASSESS11 IN_PROGRESS/B, separate scoped readback workflow checked locally; actua
 ## Current B checkpoint/release — 2026-10-06T20:08Z
 
 ASSESS11 BLOCKED/deferred/unclaimed, not DONE: checked source/real published phone-desktop entry PASS, actual pool UpdateUserPool AccessDeniedException prevents configuration/live completion. Existing source/evidence preserved; no unchanged retry. ASSESS10 is next eligible after this completed signup investigation under standing blocked-task release policy. No active B claim; A NP00 remains saved/paused. Earlier IN_PROGRESS/B text is historical.
+
+## Current coding milestone — 2026-10-06T21:39Z
+
+ASSESS11 REVIEW / CODE_READY, B claim released: installed-policy UI/live selector coding and source checks complete; current QA01–05/privacy/CLEAN PASS, QA06 FAIL/QA07 BLOCKED, final primary signup proof deferred. No whole-task DONE. Next eligible coding phase ASSESS10 under coding-first plan; no concurrent active implementation. Preserve inherited QA06 follow-up for FIN01 and final cloud/release evidence.

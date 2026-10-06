@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "budget": {
+    "attempts": 16,
+    "reservedTokens": 580768,
+    "reservedCostMicros": 580768,
+    "maxAttemptsPerRun": 200,
+    "maxTokensPerRun": 2500000,
+    "maxCostMicrosPerRun": 2500000
+  },
+  "gatewayObservation": "ACCESS_DENIED",
+  "gatewayThrottle": null,
+  "modelFailures": [],
+  "runId": "gh-37528402407-1",
+  "sourceCommit": "e361d96e2852a8534b33e251952823ff115e6542",
+  "status": "BLOCKED_OR_FAILED",
+  "lanes": {
+    "execution": "BLOCKED",
+    "preflight": "PASS",
+    "fixtures": "PASS",
+    "journeys": "FAIL",
+    "model": "PASS",
+    "privacy": "PASS",
+    "signup": "PASS",
+    "cleanup": "PASS"
+  },
+  "tests": [
+    {
+      "title": "QA01 signup and managed login",
+      "mailStatus": "MAIL_CODE_READY",
+      "status": "PASS"
+    },
+    {
+      "title": "QA02 admission and invitations",
+      "status": "PASS"
+    },
+    {
+      "title": "QA03 fresh decision and owner confirmations",
+      "status": "PASS"
+    },
+    {
+      "title": "QA04 private negotiation and exact agreement",
+      "catalogCounts": {
+        "tested": 4,
+        "valid": 0,
+        "invalid": 2,
+        "needsPermission": 2,
+        "needsClarification": 0
+      },
+      "ruleFailureKinds": [],
+      "kernelCodes": [
+        "NEGOTIABLE_PERMISSION_REQUIRED"
+      ],
+      "status": "PASS"
+    },
+    {
+      "title": "QA05 denial privacy and recovery",
+      "status": "PASS"
+    },
+    {
+      "title": "QA06 refusal revocation revision and disclosure",
+      "status": "FAIL"
+    },
+    {
+      "title": "QA07 rendered clarification and accessibility",
+      "status": "BLOCKED"
+    }
+  ],
+  "counts": {
+    "passed": 5,
+    "failed": 1,
+    "blocked": 1,
+    "modelAttempts": 16,
+    "signupMessages": 1
+  },
+  "githubRun": "https://github.com/Known-Enough/known-enough/actions/runs/37528402407",
+  "interpretation": "QA01-05 PASS, QA06 FAIL without safe subphase, QA07 BLOCKED. ACCESS_DENIED gateway observation does not establish which request or root cause. CLEAN/privacy PASS; separate primary signup not proven."
+}

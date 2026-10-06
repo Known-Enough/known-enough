@@ -1,0 +1,28 @@
+{
+  "sourceSha": "e361d96e2852a8534b33e251952823ff115e6542",
+  "observedAt": "2026-10-06T21:06:36.029Z",
+  "results": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "httpStatus": 200,
+      "passwordMinimum": "8",
+      "installedPolicyHelpVisible": true,
+      "signInVisible": true,
+      "submittedAccount": false
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "httpStatus": 200,
+      "passwordMinimum": "8",
+      "installedPolicyHelpVisible": true,
+      "signInVisible": true,
+      "submittedAccount": false
+    }
+  ]
+}
