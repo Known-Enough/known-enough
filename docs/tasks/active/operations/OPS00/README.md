@@ -4,9 +4,9 @@
 
 Make the cloud changes needed by OPS01–03 runnable through GitHub, with clear checks and recovery, so B does not wait for A to run AWS commands for each task.
 
-**Status:** Coding phase eligible after UX03's checked coding checkpoint; final administrator/managed completion deferred.
+**Status:** REVIEW / CODE_READY; B coding claim released on checked source e90ea9e. Whole-task completion still requires final installed/managed operations proof.
 
-**Next step:** Check what the installed GitHub access already permits. Define the exact remaining operations, prepare the automation and any minimal one-time access setup, then prove B can use the approved path with B's own GitHub account.
+**Next step:** Continue OPS01–03 coding against the checked recovery foundation. After the available coding queue, install/read back the bounded setup package and prove B's actual managed operations/recovery through the matching GitHub path.
 
 The existing code-deployment/test path is already available. This task completes the operations path; creating this ticket does not install new permissions or authorize cloud changes.
 

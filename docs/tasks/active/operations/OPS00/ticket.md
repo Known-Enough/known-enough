@@ -2,7 +2,7 @@
 
 **Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of UX03, not deferred administrator installation. Prepare/test automation and the exact setup package now; install missing delegation only in the final cloud phase. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
 
-- Status: IN_PROGRESS / B — recovery automation/setup coding. Administrator installation/required managed acceptance deferred to final cloud phase.
+- Status: REVIEW / CODE_READY — B coding claim released. Administrator installation/required managed acceptance deferred to final cloud phase.
 - Origin: user's 2026-10-03 direction that ordinary implementation/testing should be automatic and should not repeatedly depend on A's AWS login.
 - Worker: next eligible direct worker, current routing B; select/report actual model and effort at claim. One task/worker; no subagents or credential sharing.
 - Scope at claim: exact GitHub workflow/scripts, resource/permission contracts needed by OPS01–03, bounded policy/bootstrap proposal, meaningful integration checks, safe evidence and own log/handoff. Record exact files first. No general administrator grant or live operation is authorized by this ticket.
@@ -99,3 +99,10 @@ OPS00 remains IN_PROGRESS/B while the credential-free GitHub verification is ins
 ## OPS00 exact-source GitHub verification repair — 2026-10-07T08:01Z
 
 Source2f1dca32be575d7f5659af3fec61d9bd562cf98f synchronized. First dispatch37590705536 FAILED with OPS_VERIFICATION_FAILED because the supplied SHA was incorrectly copied; guard stopped before dependency installation. Corrected ownB/source37590790423 passed preflight and all32operations tests, then full check failed three integration suites with ERR_MODULE_NOT_FOUND for the broker's isolated pinned AWS SDK packages (742 tests PASS/two skips; later build/browser phases skipped). Added the existing repository CI prerequisite npm ci --prefix scripts/live-qa to this scoped verification workflow; no lockfile/source/SDK version change. Local focused32/YAML/diff checks PASS; corrected full GitHub verification next, same sole OPS00 claim. No AWS credentials/calls or publication in this offline workflow.
+
+
+## OPS00 CODE_READY release — 2026-10-07T08:11:21.713735+00:00
+
+REVIEW / CODE_READY; B implementation claim released. Checked source `e90ea9eaffd7b8539b49a88ec3be362b00636319` and ownB/ID143764700 [GitHub verification37591039774](https://github.com/Known-Enough/known-enough/actions/runs/37591039774) SUCCESS. Downloaded artifact matches exact source/template hash a8c67e9a4474b8561a991e8446ae1db36e23c70de18bd09bff4241bdd5c0d627; OFFLINE_VERIFIED, installation/managedRecovery UNKNOWN, apply DISABLED. Local/GitHub32focused and full784(two optional skips)/hosted1/browser62 PASS. Clean-runner isolated SDK prerequisite repaired after logged failed attempts; no application/lockfile change.
+
+The coding foundation is strict plan/recovery validation, private versioned manifests, conditional journal persistence, bounded AWS transport, installed-state preflight, gated synthetic recovery preparation/resume and the generated exact setup package. Final cloud ledger retains inventory/CFN validation/change-set installation/effective-role readback, two actual cross-runner B preparations/negative cases and OPS01–03 exact apply/resource/participant-authority mappings after their checked schemas exist. No universal operations access, participant apply or whole-task DONE claim. Setup remains deferred; no new AWS/deployment/paid/email run. Sequential successor OPS01 coding is eligible; A NP00 paused/saved source/files/recovery remain untouched.

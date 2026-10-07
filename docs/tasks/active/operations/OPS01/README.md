@@ -4,7 +4,7 @@
 
 Prepare group storage and safe archiving for wider use, after the real online test baseline is verified.
 
-**Status:** Coding phase eligible after OPS00's checked coding checkpoint; final administrator/managed completion deferred.
+**Status:** IN_PROGRESS / B in the existing persistent chat after OPS00 CODE_READY. Administrator/managed completion remains deferred.
 
 **Next step:** After OPS00, claim the shared queue task and prepare the scoped implementation. Authorized cloud operations use the verified OPS00 GitHub path; routine work must not depend on per-task A-only CloudShell commands. Spending, migration/deletion and outside-envelope changes retain their specific authorization.
 

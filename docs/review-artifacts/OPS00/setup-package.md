@@ -42,3 +42,18 @@ The CLI uses JSON input files for nonbinary API fields and an explicit file path
 5. OPS01–03 supply their exact partition/archive, retention/erasure and ID-only job contracts and participant/operator authority checks in their sequential coding phases. Extend only the reviewed resource-specific apply/readback paths after those schemas exist; no wildcard future-table/queue permissions or claim that this synthetic preparation applies real operations. Consolidate those checked contracts into the final setup package before actual managed migration/deletion/job execution.
 
 These steps are deferred managed criteria, not a new approval requirement. Standing user authority applies; administrator installation is scheduled last. OPS00's coding milestone can hand off this recovery foundation to OPS01 while whole-task status remains REVIEW. Final OPS00 DONE requires actual bounded operations mapping/delegation and B workload/recovery proof, rather than this proposed template or synthetic fixtures alone.
+
+
+### Final-phase change-set command contract
+
+These commands are saved instructions, not executed cloud evidence. Work from the checked repository source whose setup hash is `a8c67e9a4474b8561a991e8446ae1db36e23c70de18bd09bff4241bdd5c0d627`. Verify the installed inventory and source before choosing CREATE versus UPDATE; an existing stack/resource must not be silently replaced. Use the authorized setup account/session, never another human's credentials or the recovery workload role.
+
+```bash
+sha256sum infra/operations/setup.json
+aws sts get-caller-identity --region us-east-1
+aws cloudformation validate-template --region us-east-1 --template-body file://infra/operations/setup.json
+aws cloudformation create-change-set --region us-east-1 --stack-name KnownEnoughOperationsRecovery --change-set-name ke-operations-recovery-v1 --change-set-type CREATE --capabilities CAPABILITY_NAMED_IAM --template-body file://infra/operations/setup.json
+aws cloudformation describe-change-set --region us-east-1 --stack-name KnownEnoughOperationsRecovery --change-set-name ke-operations-recovery-v1
+```
+
+The CREATE example is valid only after proving that stack and all proposed resources are absent. For a verified existing managed stack, prepare a separately reviewed UPDATE change set with its exact existing identity. Execute only the inspected change-set ARN, then read back stack/IAM/resource configuration and preserve sanitized receipts. The source-exact B GitHub preparation/resume dispatch and storage/participant operation separation above remain required. No runtime self-delegation or universal setup authority is created by this package.
