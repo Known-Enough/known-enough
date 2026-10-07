@@ -106,9 +106,9 @@ export function createPartitionGroupSession(transport: PartitionTransport,
       });
     },
     /** Private organizer roster for decision construction; never a public HTTP snapshot. */
-    roster(principal: TrustedPrincipal | null, rawId: string) {
+    roster(principal: TrustedPrincipal | null, rawId: string, supplied?: PartitionIOContext) {
       return safe(async () => {
-        const who = participant(principal); const key = groupId(rawId); const io = partitionIO(limits);
+        const who = participant(principal); const key = groupId(rawId); const io = supplied ?? partitionIO(limits);
         return selected(who, key, io, resolved => repository.transaction(resolved, state => {
           const group = current(state, who, key, true);
           return { version: group.version, members: group.members.map(subject => {
@@ -136,9 +136,9 @@ export function createPartitionGroupSession(transport: PartitionTransport,
       });
     },
     /** Conditions MUST join the actual decision transaction; assertCurrent alone cannot authorize a write. */
-    decisionFence(principal: TrustedPrincipal | null, rawDecisionId: string): Promise<PartitionFence> {
+    decisionFence(principal: TrustedPrincipal | null, rawDecisionId: string, supplied?: PartitionIOContext): Promise<PartitionFence> {
       return safe(async () => {
-        const who = participant(principal); const decisionId = groupId(rawDecisionId); const io = partitionIO(limits);
+        const who = participant(principal); const decisionId = groupId(rawDecisionId); const io = supplied ?? partitionIO(limits);
         const directory = await repository.lookup({ type: 'DECISION', decisionId }, io);
         if (directory?.type !== 'DECISION') return deny('NOT_FOUND');
         const fence = await selected(who, directory.groupId, io, resolved => repository.fence(resolved, state => {

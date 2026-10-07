@@ -5,7 +5,7 @@ import type { TrustedPrincipal } from '@deal-table/application';
 import { createPartitionGroupSession, partitionMemberId } from './partition-group-session.ts';
 import { preparePartitionMigration } from './partition-migration.ts';
 import { partitionMembershipKey } from './partition-membership-contract.ts';
-import { createPartitionedGroupRepository, type PartitionTransport, type PartitionMutation, type PartitionKey } from './partitioned-group-repository.ts';
+import { createPartitionedGroupRepository, partitionIO, type PartitionTransport, type PartitionMutation, type PartitionKey } from './partitioned-group-repository.ts';
 
 const participant = (subject = 'iris'): TrustedPrincipal => ({ kind: 'participant', subject });
 const code = (key: PartitionKey) => `${key.PK}/${key.SK}`;
@@ -147,4 +147,13 @@ it('rejects malformed/foreign authority rows and unsafe clocks while keeping sto
   const f = fixture(); const privateCause = new Error('synthetic confidential diagnostic'); f.beforeRead(() => { throw privateCause; });
   try { await f.session().snapshot(participant(), 'garden'); throw new Error('missing rejection'); }
   catch (error) { expect(error).toMatchObject({ message: 'SESSION_STORAGE_UNAVAILABLE', cause: privateCause }); }
+});
+
+
+it('keeps a supplied operation budget for private roster and decision-fence discovery', async () => {
+  for (const method of ['roster', 'decisionFence'] as const) {
+    const f = fixture(); const budget = partitionIO({ maxRequests: 3 });
+    await expect(f.session()[method](participant(), method === 'roster' ? 'garden' : 'decision', budget)).rejects.toThrow('SESSION_REQUEST_LIMIT');
+    expect(budget.signal.aborted).toBe(true); expect(f.commits).toEqual([]);
+  }
 });
