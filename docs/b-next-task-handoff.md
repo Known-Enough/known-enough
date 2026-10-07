@@ -1,5 +1,7 @@
 # B handoff after ASSESS07 — 2026-10-06T17:17:44Z
 
+**Idle-only watchdog clarification — 2026-10-07:** [Skip intervention while B works](b-idle-watchdog.md); thirty minutes is not a stop/report deadline. Continue the current task, coalesce busy ticks and update only the existing automation at a natural idle checkpoint with real readback/verification. No replacement chat/worker/monitor. B's saved scheduler fields are unavailable on A's host; installed behavior is not yet verified.
+
 **Coding-first scheduling — user direction, 2026-10-06:** Finish available coding before administrator/CloudShell setup. Follow [the two-phase queue](coding-first-plan.md); preserve any actual active claim, then ASSESS11 → ASSESS10 → UX01–03 → OPS00–03 coding → FIN01–02 coding. Save exact setup/managed-proof gaps for the final cloud phase and FIN03; CODE_READY is a checked-source milestone, not whole-task DONE. Do not spend repeated ticks on deferred access audits when eligible independent coding remains. Existing B chat/schedule and one active writer remain unchanged.
 
 

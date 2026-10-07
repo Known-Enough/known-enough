@@ -1903,3 +1903,7 @@ Run141 post-sync verification note 2026-10-07T21:39:17.929177+00:00: six-documen
 - **Next:** Sole OPS01 IN_PROGRESS/B, no CODE_READY/DONE/release/new claim/worker/agent/automation or A NP00 takeover. Next source/control-bound managed driver/config; real resource installation/version2 activation/effective-role/archive/recovery/privacy/model-usage proof deferred/UNKNOWN under coding-first. Next nominal2026-10-07T22:18:47.415Z; future actual execution UNKNOWN.
 
 **Chat answer summary:** OPS01’s inactive roster-revision route is pushed; 308 focused tests and full checks passed (1,092 application, 62 browser). Next: the source/control-bound managed driver; cloud proof remains deferred.
+
+## A clarification — watchdog only when B is idle, 2026-10-07
+
+User specifies that thirty minutes must not stop B just to document work. This is A coordination, not a B execution. [Idle-only watchdog requirements](b-idle-watchdog.md) now supersede every-wake reporting: skip active-worker intervention, coalesce busy ticks, preserve tools/checks/task and log at natural checkpoints; resume the same task only when genuinely idle. Existing sole OPS01 claim/code-first queue/schedule/credentials/privacy stay unchanged. B applies the same automation prompt/idle behavior on its own host only at a safe idle checkpoint, preserving actual saved fields and verifying the result. A cannot read the saved B config; a rendered automation card is not readback. No installed change, forced-stop cause, new automation, Goal, source/cloud action or resumed worker is claimed.

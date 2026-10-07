@@ -4,7 +4,11 @@ The [B monitor log workflow](https://github.com/Known-Enough/known-enough/action
 
 A missing reply is itself recorded: **NO_RECENT_REPORT**, with “No published chat answer is available.” This means visibility is missing, not that B refused, crashed or needs another approval. The checker does not claim to read a chat it cannot access. Historical summaries remain explicitly historical.
 
-## B's required protocol on every wake-up
+## Idle-only watchdog clarification — 2026-10-07
+
+Follow [the idle-only watchdog rule](b-idle-watchdog.md). A busy tick must not stop the worker or create a separate documentation-only execution. Preserve the ongoing task/tool/check, coalesce overlapping hints and record skipped timing at its next natural checkpoint. Apply the lifecycle protocol below to actual work/resume executions, not as a requirement to interrupt every thirty minutes. Continue useful work after progress reports. The independent GitHub observer can read public receipts without affecting B's work. Actual B-side idle gating/update remains unverified.
+
+## B's required protocol on actual work or idle-resume execution
 
 1. Before implementation, publish a **started** receipt using the actual heartbeat UTC time, current task/source and a brief planned action. Verify the GitHub log run was accepted. This does not require a main commit or alter an active application test's source.
 2. Publish **progress** at a meaningful checkpoint, and at least every ten minutes while a long run remains active. Preserve the original heartbeat time. Inspect existing work instead of starting duplicate tests.
