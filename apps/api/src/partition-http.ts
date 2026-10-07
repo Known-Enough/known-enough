@@ -168,6 +168,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         const group = /^\/groups\/([A-Za-z0-9_-]{1,80})(\/(?:remove|invite))?$/.exec(url.pathname);
         const draft = /^\/groups\/([A-Za-z0-9_-]{1,80})\/drafts(?:\/([A-Za-z0-9_-]{1,80})(\/create)?)?$/.exec(url.pathname);
         const decision = /^\/decisions\/([A-Za-z0-9_-]{1,80})\/(public|me|commands)$/.exec(url.pathname);
+        const roster = /^\/groups\/([A-Za-z0-9_-]{1,80})\/decisions\/([A-Za-z0-9_-]{1,80})\/(review|revise)$/.exec(url.pathname);
         if (request.method === 'GET' && url.pathname === '/account') {
           send(response, 200, { account: await session.status(principal) }); return;
         }
@@ -238,6 +239,38 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
             send(response, 200, { snapshot }); return;
           }
           send(response, 200, { draft: await session.editDraft(principal, draft[1]!, draft[2]!, raw, context) }); return;
+        }
+        if (roster) {
+          if (!(request.method === 'GET' && roster[3] === 'review') && !(request.method === 'POST' && roster[3] === 'revise')) return reject('NOT_FOUND');
+          const io = partitionIO(); const context = { ...io, signal: AbortSignal.any([io.signal, controller.signal]) };
+          const review = await repositories.forRoster(principal, roster[1]!, roster[2]!, undefined, context);
+          const application = new KnownEnoughApplication({ repository: review.repository, clock, ids });
+          const owner = await application.getOwnerSnapshot(principal, roster[2]!);
+          if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
+          const preview = { frame: owner.publicSnapshot.frame, controlVersion: owner.controlVersion,
+            groupVersion: review.groupVersion, participants: review.participants.map(person => ({ id: person.id, displayName: person.displayName })) };
+          if (request.method === 'GET') { send(response, 200, preview); return; }
+          // Organizer and decision membership are verified before the body; revision checks creator authority.
+          const raw = await body(request, maximum, bodyMs, controller);
+          if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return reject('INVALID_COMMAND');
+          const command = raw as Record<string, unknown>;
+          if (Object.keys(command).length !== 2 || !Number.isSafeInteger(command.controlVersion) || Number(command.controlVersion) < 0
+            || !Number.isSafeInteger(command.groupVersion) || Number(command.groupVersion) < 1) return reject('INVALID_COMMAND');
+          if (command.controlVersion !== preview.controlVersion || command.groupVersion !== preview.groupVersion) return reject('STALE_CONTEXT');
+          const revision = await repositories.forRoster(principal, roster[1]!, roster[2]!, preview.groupVersion, context);
+          if (JSON.stringify(revision.participants) !== JSON.stringify(review.participants)) return reject('STALE_CONTEXT');
+          const definition = KE.DecisionDefinition.parse({ ...preview.frame, frameVersion: preview.frame.frameVersion + 1,
+            semanticVersion: preview.frame.semanticVersion + 1, participants: revision.participants,
+            requiredParticipantIds: revision.participants.map(person => person.id),
+            variables: preview.frame.variables.map(variable => ({ ...variable, ownerParticipantId: null })) });
+          const writer = new KnownEnoughApplication({ repository: revision.repository, clock, ids });
+          await writer.reviseDecision(principal, { decisionId: roster[2]!, expectedControlVersion: preview.controlVersion,
+            definition, memberships: revision.memberships });
+          if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
+          const publication = new KnownEnoughApplication({ repository: repositories.forParticipant(principal, context), clock, ids });
+          const snapshot = await publication.getPublicSnapshot(principal, roster[2]!);
+          if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
+          send(response, 200, { snapshot }); return;
         }
         if (group && request.method === 'GET' && !group[2]) {
           send(response, 200, { group: await session.snapshot(principal, group[1]!) }); return;

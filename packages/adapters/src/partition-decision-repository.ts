@@ -63,8 +63,8 @@ function checkedWrite(items: TransactWriteItem[]) {
   if (new Set(keys.map(key => `${key.table}/${key.pk}/${key.sk}`)).size !== keys.length) fail('DECISION_INVALID');
   const puts = items.filter(item => item.Put?.TableName === PARTITION_DECISION_TARGET.partitionArn);
   if (puts.length) {
-    // Only the exact draft-creation bundle may mutate partitions through this transport.
-    if (puts.length !== 4) fail('DECISION_INVALID');
+    // Only exact draft creation or organizer roster-revision bundles may mutate partitions.
+    if (puts.length !== 4 && puts.length !== 2) fail('DECISION_INVALID');
     const rows = puts.map(item => {
       const put = item.Put!; const key = itemKey(item);
       let value: unknown; try { value = JSON.parse(put.Item?.payload?.S ?? ''); } catch { return fail('DECISION_INVALID'); }
@@ -77,13 +77,16 @@ function checkedWrite(items: TransactWriteItem[]) {
     });
     const header = rows.find(row => row.kind === 'GROUP'); const draft = rows.find(row => row.kind === 'DRAFT');
     const binding = rows.find(row => row.kind === 'BINDING'); const directory = rows.find(row => row.kind === 'DIRECTORY');
-    if (header?.kind !== 'GROUP' || draft?.kind !== 'DRAFT' || binding?.kind !== 'BINDING' || directory?.kind !== 'DIRECTORY'
+    if (header?.kind !== 'GROUP' || binding?.kind !== 'BINDING'
+      || binding.value.version !== header.value.version || !header.value.decisionIds.includes(binding.value.id)) fail('DECISION_INVALID');
+    if (puts.length === 4 && (draft?.kind !== 'DRAFT' || directory?.kind !== 'DIRECTORY'
       || directory.value.type !== 'DECISION' || binding.revision !== 1 || directory.revision !== 1
       || header.revision < 2 || draft.revision < 2
       || directory.value.groupId !== header.value.id || directory.value.decisionId !== binding.value.id
       || draft.value.createdDecisionId !== binding.value.id || draft.value.groupVersion !== header.value.version
       || binding.value.version !== header.value.version || !header.value.decisionIds.includes(binding.value.id)
-      || !header.value.draftIds.includes(draft.value.id)) fail('DECISION_INVALID');
+      || !header.value.draftIds.includes(draft.value.id))) fail('DECISION_INVALID');
+    if (puts.length === 2 && (header.revision < 2 || binding.revision < 2)) fail('DECISION_INVALID');
     for (const item of puts) {
       const key = itemKey(item);
       if (key.pk !== `GROUP#${header.value.id}` && key.pk !== `DECISION#${binding.value.id}`) fail('DECISION_INVALID');
@@ -95,9 +98,24 @@ function checkedWrite(items: TransactWriteItem[]) {
       || item.ConditionCheck.ExpressionAttributeNames?.['#r'] !== 'revision'
       || !/^[1-9][0-9]*$/.test(item.ConditionCheck.ExpressionAttributeValues?.[':r']?.N ?? ''))) fail('DECISION_INVALID');
     const decisionPuts = items.filter(item => item.Put?.TableName === PARTITION_DECISION_TARGET.decisionArn);
-    if (items.length !== 6 + accountChecks.length || decisionPuts.length !== 2 || !['STATE', 'GUARD'].every(sk => decisionPuts.some(item => itemKey(item).pk === `ROOM#${binding.value.id}`
+    if (puts.length === 4 && (items.length !== 6 + accountChecks.length || decisionPuts.length !== 2 || !['STATE', 'GUARD'].every(sk => decisionPuts.some(item => itemKey(item).pk === `ROOM#${binding.value.id}`
       && itemKey(item).sk === sk && item.Put?.ConditionExpression === 'attribute_not_exists(#pk)'
-      && item.Put.ExpressionAttributeNames?.['#pk'] === 'PK'))) fail('DECISION_INVALID');
+      && item.Put.ExpressionAttributeNames?.['#pk'] === 'PK')))) fail('DECISION_INVALID');
+    if (puts.length === 2) {
+      const state = decisionPuts[0]; const guard = items.find(item => item.Update?.TableName === PARTITION_DECISION_TARGET.decisionArn);
+      if (items.length !== 4 + accountChecks.length || decisionPuts.length !== 1 || !state || !guard
+        || itemKey(state).pk !== `ROOM#${binding.value.id}` || itemKey(state).sk !== 'STATE'
+        || state.Put?.ConditionExpression !== 'attribute_exists(#pk)' || state.Put.ExpressionAttributeNames?.['#pk'] !== 'PK'
+        || itemKey(guard).pk !== `ROOM#${binding.value.id}` || itemKey(guard).sk !== 'GUARD'
+        || guard.Update?.ConditionExpression !== '#version = :oldVersion AND #incarnation = :incarnation AND #ordinary = :oldOrdinary AND #permission = :oldPermission AND #safety = :oldSafety AND #total = :oldTotal') fail('DECISION_INVALID');
+      const names = { '#version': 'version', '#incarnation': 'incarnation', '#ordinary': 'ordinaryReceipts',
+        '#permission': 'permissionHistoryReceipts', '#safety': 'safetyReserveReceipts', '#total': 'totalReceipts' };
+      if (Object.entries(names).some(([key, value]) => guard.Update!.ExpressionAttributeNames?.[key] !== value)) fail('DECISION_INVALID');
+      const values = guard.Update!.ExpressionAttributeValues;
+      const oldVersion = Number(values?.[':oldVersion']?.N); const nextVersion = Number(values?.[':nextVersion']?.N);
+      if (!Number.isSafeInteger(oldVersion) || oldVersion < 0 || !Number.isSafeInteger(nextVersion) || nextVersion !== oldVersion + 1
+        || !values?.[':incarnation']?.S) fail('DECISION_INVALID');
+    }
   }
   for (const [index, key] of keys.entries()) {
     if (key.table === PARTITION_DECISION_TARGET.partitionArn) {
@@ -143,12 +161,12 @@ export function createPartitionDecisionRepository(options: { decisionArn: string
   }
   async function perform<T>(principal: TrustedPrincipal | null, decisionId: string, create: boolean,
     work: (repository: KnownEnoughRepository, io: PartitionIOContext, fence: PartitionFence) => Promise<T>,
-    prepared?: { io: PartitionIOContext; fence?: PartitionFence }): Promise<T> {
+    prepared?: { io: PartitionIOContext; fence?: PartitionFence; mutation?: boolean }): Promise<T> {
     return safe(async () => {
       // Mixed legacy authority is incompatible, never silently discarded or projected as one condition.
       if (currentAdmissionFence(decisionId)) fail('DECISION_INVALID');
       const io = prepared?.io ?? partitionIO(limits); const fence = prepared?.fence ?? await session.decisionFence(principal, decisionId, io);
-      const guards = conditions(fence, create && prepared?.fence !== undefined);
+      const guards = conditions(fence, prepared?.mutation === true || (create && prepared?.fence !== undefined));
       for (let attempt = 0; attempt < (create ? 1 : 6); attempt++) {
         let sdkFailure: unknown; let wrote = false; let loaded: unknown;
         async function send(command: Command) {
@@ -170,6 +188,8 @@ export function createPartitionDecisionRepository(options: { decisionArn: string
           client: { send } as unknown as DynamoDBClient, maxAttempts: 1 });
         try {
           const result = await work(repository, io, fence);
+          // A pending roster binding can only accompany an actual decision mutation, never a read.
+          if (!wrote && prepared?.mutation && fence.mutations.some(item => item.next !== null)) fail('DECISION_INVALID');
           if (!wrote && !create) {
             const responses = (loaded as { Responses?: { Item?: Item }[] } | undefined)?.Responses;
             if (!responses || responses.length < 2) fail('DECISION_INVALID');
@@ -208,6 +228,37 @@ export function createPartitionDecisionRepository(options: { decisionArn: string
     });
   }
   return {
+    /** Server-only organizer review/revision; stale bindings never authorize ordinary participant access. */
+    async forRoster(rawPrincipal: TrustedPrincipal | null, groupId: string, decisionId: string,
+      expectedGroupVersion?: number, supplied?: PartitionIOContext) {
+      return safe(async () => {
+        const principal = rawPrincipal?.kind === 'participant' ? { kind: 'participant' as const, subject: rawPrincipal.subject } : null;
+        const io = supplied ?? partitionIO(limits);
+        const prepared = await session.prepareRoster(principal, groupId, decisionId, expectedGroupVersion, io);
+        const memberships = prepared.members.map(member => ({ subject: member.subject, participantId: member.participantId, active: true }));
+        const participants = prepared.members.map(member => ({ id: member.participantId, displayName: member.displayName, requiredForApproval: true }));
+        const repository: KnownEnoughRepository = {
+          createDecision: async () => fail('DECISION_INVALID'),
+          transactionDecision: (selected, transition, transactionOptions) => safe(async () => {
+            if (selected !== decisionId || transactionOptions !== undefined) fail('DECISION_INVALID');
+            return perform(principal, decisionId, false, async repository => repository.transactionDecision(decisionId, async record => {
+              if (!record) throw new KnownEnoughApplicationError('NOT_FOUND');
+              const prior = structuredClone(record); const result = await partitionCall(io, () => Promise.resolve(transition(record)), false);
+              if (expectedGroupVersion === undefined) {
+                // Snapshot reads may sweep expired permissions; they cannot revise frame or membership.
+                if (JSON.stringify(record.definition) !== JSON.stringify(prior.definition)
+                  || JSON.stringify(record.memberships) !== JSON.stringify(prior.memberships)) fail('DECISION_INVALID');
+              } else if (record.definition.frameVersion !== prior.definition.frameVersion + 1
+                || record.definition.semanticVersion !== prior.definition.semanticVersion + 1
+                || JSON.stringify(record.memberships) !== JSON.stringify(memberships)
+                || JSON.stringify(record.definition.participants) !== JSON.stringify(participants)) fail('DECISION_INVALID');
+              return result;
+            }), { io, fence: prepared.fence, mutation: expectedGroupVersion !== undefined });
+          }),
+        };
+        return { groupVersion: prepared.version, participants: structuredClone(participants), memberships: structuredClone(memberships), repository };
+      });
+    },
     /** Server-only provisioning port. Pending binding changes join creation, never an earlier reservation. */
     async forDraft(rawPrincipal: TrustedPrincipal | null, groupId: string, draftId: string, raw: unknown, supplied?: PartitionIOContext) {
       return safe(async () => {

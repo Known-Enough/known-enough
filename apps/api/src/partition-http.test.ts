@@ -835,3 +835,142 @@ it('converges overlapping identical HTTP creation requests on one decision witho
   expect([...f.cells.keys()].filter(key => key.startsWith(`${target.decisionArn}/ROOM#${id}/`))).toHaveLength(2);
   expect(creationWrites(f)).toHaveLength(2);
 });
+
+const rosterPath = '/groups/garden/decisions/decision';
+function rosterMutation(f: Awaited<ReturnType<typeof fixture>>) {
+  return f.writes.at(-1)?.some(item => item.Put?.TableName === target.decisionArn && item.Put.ConditionExpression === 'attribute_exists(#pk)') ?? false;
+}
+async function removeHttpMember(f: Awaited<ReturnType<typeof fixture>>, a: Awaited<ReturnType<typeof api>>) {
+  expect((await a.post('/groups/garden/remove', { memberId: partitionMemberId('omar'), version: 1 })).status).toBe(200);
+  expect((await a.get('/decisions/decision/public')).status).toBe(409);
+  const response = await a.get(rosterPath + '/review'); expect(response.status).toBe(200); return response.json() as Promise<{ controlVersion: number; groupVersion: number }>;
+}
+
+it('explicitly revises a removed roster and clears old frame consent through the atomic HTTP path', async () => {
+  const f = await fixture(); await seed(f); const a = await api(f);
+  const owner = await (await a.get('/decisions/decision/me')).json() as KE.OwnerDecisionSnapshot;
+  expect((await a.post('/decisions/decision/commands', command(owner))).status).toBe(200);
+  expect(f.current().frameConfirmations).toHaveLength(1);
+  const review = await removeHttpMember(f, a); const publicReview = await (await a.get(rosterPath + '/review')).text();
+  expect(publicReview).not.toMatch(/creatorSubject|memberships|ACCOUNT#|BINDING#|emailHash|privateVariables|retiredPermissions/);
+  const response = await a.post(rosterPath + '/revise', { controlVersion: review.controlVersion, groupVersion: review.groupVersion });
+  expect(response.status).toBe(200); const value = await response.json();
+  expect(value.snapshot.frame).toMatchObject({ frameVersion: 2, semanticVersion: 2, participants: [{ id: partitionMemberId('iris'), displayName: 'IRIS' }] });
+  expect(f.current().frameConfirmations).toEqual([]); expect(f.current().status).toBe('COLLECTING_FRAME_CONFIRMATION');
+  expect(f.current().owners).toHaveLength(1); expect((await a.get('/decisions/decision/public', 'omar')).status).toBe(404);
+  expect((await a.post(rosterPath + '/revise', { controlVersion: review.controlVersion, groupVersion: review.groupVersion })).status).toBe(409);
+  expect(f.current().definition.semanticVersion).toBe(2);
+});
+
+it('admits only the organizer before consuming an unfinished roster revision body', async () => {
+  const f = await fixture(); await seed(f); const a = await api(f);
+  const status = await new Promise<number>((resolve, fail) => {
+    const request = httpRequest(a.base + rosterPath + '/revise', { method: 'POST', headers: { authorization: 'Bearer omar', 'content-type': 'application/json' } }, response => {
+      response.resume(); response.on('end', () => { request.end(); resolve(response.statusCode!); });
+    }); request.on('error', fail); request.write('{');
+  }); expect(status).toBe(403);
+  expect((await a.get(rosterPath + '/review', 'omar')).status).toBe(403);
+  expect((await a.post(rosterPath + '/revise', { controlVersion: 0, groupVersion: 1 }, 'unknown', { 'x-subject': 'iris' })).status).toBe(401);
+  expect(f.current().definition.frameVersion).toBe(1);
+});
+
+it('enforces method/group/directory and strict revision command versions without accepting caller authority', async () => {
+  const f = await fixture(); await seed(f); const a = await api(f); const review = await removeHttpMember(f, a);
+  expect((await a.get(rosterPath + '/revise')).status).toBe(404); expect((await a.post(rosterPath + '/review', {})).status).toBe(404);
+  expect((await a.get('/groups/other/decisions/decision/review')).status).toBe(404);
+  expect((await a.get('/groups/garden/decisions/missing/review')).status).toBe(404);
+  for (const raw of [{}, { controlVersion: -1, groupVersion: 2 }, { controlVersion: 1, groupVersion: '2' },
+    { controlVersion: Number.MAX_SAFE_INTEGER + 1, groupVersion: 2 }, { ...review, subject: 'iris' },
+    { controlVersion: review.controlVersion, groupVersion: review.groupVersion, frame: f.current().definition }]) {
+    const response = await a.post(rosterPath + '/revise', raw); expect((await response.json()).error.code).toBe('INVALID_COMMAND');
+  }
+  expect((await a.post(rosterPath + '/revise', { controlVersion: 1, groupVersion: 3 })).status).toBe(409);
+  expect(f.current().definition.frameVersion).toBe(1);
+});
+
+it('rejects fresh account and roster races at the actual revision transaction without partial decision changes', async () => {
+  for (const race of ['account', 'roster']) {
+    const f = await fixture(); await seed(f); const a = await api(f); const review = await removeHttpMember(f, a); const before = f.current();
+    f.beforeWrite(() => {
+      if (!rosterMutation(f)) return;
+      f.beforeWrite(() => {}); f.change(race === 'account' ? 'ACCOUNT#iris' : 'GROUP#garden', value => { if (race === 'account') value.status = 'DISABLED'; else value.version = 3; });
+    });
+    const response = await a.post(rosterPath + '/revise', { controlVersion: review.controlVersion, groupVersion: review.groupVersion });
+    expect(response.status).toBe(409); const body = await response.json(); expect(body.error.code).toBe('STALE_CONTEXT'); expect(body.snapshot).toBeUndefined();
+    expect(f.current()).toEqual(before); expect(JSON.parse(f.cells.get(`${target.partitionArn}/GROUP#garden/BINDING#decision`)!.payload!.S!).value.version).toBe(1);
+  }
+});
+
+it('preserves an uncertain applied revision, returns a fixed error and rejects reuse of its old control version', async () => {
+  const f = await fixture(); await seed(f); const a = await api(f); const review = await removeHttpMember(f, a);
+  f.afterWrite(() => { if (rosterMutation(f)) { f.afterWrite(() => {}); throw new Error('PRIVATE synthetic response lost'); } });
+  const response = await a.post(rosterPath + '/revise', { controlVersion: review.controlVersion, groupVersion: review.groupVersion });
+  expect(response.status).toBe(503); expect(await response.text()).not.toContain('PRIVATE'); expect(f.current().definition.semanticVersion).toBe(2);
+  expect((await a.post(rosterPath + '/revise', { controlVersion: review.controlVersion, groupVersion: review.groupVersion })).status).toBe(409);
+  expect(f.current().definition.semanticVersion).toBe(2);
+});
+
+it('reauthorizes the retained directory and current organizer after revision before HTTP publication', async () => {
+  for (const race of ['directory', 'account']) {
+    const f = await fixture(); await seed(f); const a = await api(f); const review = await removeHttpMember(f, a);
+    f.afterWrite(() => { if (!rosterMutation(f)) return; f.afterWrite(() => {});
+      if (race === 'directory') f.cells.delete(`${target.partitionArn}/DECISION#decision/GROUP`);
+      else f.change('ACCOUNT#iris', value => { value.status = 'DISABLED'; });
+    });
+    const response = await a.post(rosterPath + '/revise', { controlVersion: review.controlVersion, groupVersion: review.groupVersion });
+    expect(response.status).toBe(race === 'directory' ? 404 : 403); expect((await response.json()).snapshot).toBeUndefined();
+    expect(f.current().definition.semanticVersion).toBe(2); expect(f.current().frameConfirmations).toEqual([]);
+  }
+});
+
+it('uses one HTTP roster budget through final publication and retains a complete revision when it is exhausted', async () => {
+  const f = await fixture(); await seed(f); const a = await api(f); const review = await removeHttpMember(f, a);
+  const requests = new Set<() => void>(); const signals = new Set<AbortSignal>(); let used = 0; let drain = true;
+  const read = f.groups.readMany!.bind(f.groups); f.groups.readMany = async (keys, context) => {
+    requests.add(context!.request); signals.add(context!.signal); used++; return read(keys, context);
+  };
+  const send = f.transport.send.bind(f.transport); f.transport.send = async (command, context) => {
+    requests.add(context.request); signals.add(context.signal); used++;
+    const result = await send(command, context);
+    if (drain && !(command instanceof TransactGetItemsCommand) && command.input.TransactItems!.some(item => item.Put?.TableName === target.decisionArn)) {
+      drain = false; while (used < 64) { context.request(); used++; }
+    }
+    return result;
+  };
+  const response = await a.post(rosterPath + '/revise', { controlVersion: review.controlVersion, groupVersion: review.groupVersion });
+  expect(response.status).toBe(503); expect((await response.json()).snapshot).toBeUndefined();
+  expect(requests.size).toBe(1); expect(signals.size).toBe(1); expect(used).toBe(64);
+  expect(f.current().definition.semanticVersion).toBe(2);
+  const recovered = await a.get('/decisions/decision/public'); expect(recovered.status).toBe(200);
+  expect(f.current().definition.semanticVersion).toBe(2);
+});
+
+it('cancels a disconnected roster revision before body admission without a late binding or decision mutation', async () => {
+  const f = await fixture(); await seed(f); const a = await api(f); await removeHttpMember(f, a); const before = f.current();
+  let entered!: () => void; const ready = new Promise<void>(resolve => { entered = resolve; });
+  let release!: () => void; const held = new Promise<void>(resolve => { release = resolve; }); let hold = true;
+  const read = f.groups.readMany!.bind(f.groups); f.groups.readMany = async (keys, context) => {
+    if (hold) { hold = false; entered(); await held; } return read(keys, context);
+  };
+  const request = httpRequest(a.base + rosterPath + '/revise', { method: 'POST', headers: { authorization: 'Bearer iris', 'content-type': 'application/json' } });
+  request.on('error', () => {}); request.write('{'); await ready;
+  const closed = new Promise<void>(resolve => request.once('close', resolve)); request.destroy(); await closed; release();
+  await new Promise(resolve => setTimeout(resolve, 10)); expect(f.current()).toEqual(before);
+  expect(JSON.parse(f.cells.get(`${target.partitionArn}/GROUP#garden/BINDING#decision`)!.payload!.S!).value.version).toBe(1);
+  expect((await a.get('/account')).status).toBe(200);
+});
+
+it('allows only one overlapping roster revision for an exact control version without resetting consent twice', async () => {
+  const f = await fixture(); await seed(f); const a = await api(f); const review = await removeHttpMember(f, a);
+  let release!: () => void; const held = new Promise<void>(resolve => { release = resolve; }); let attempts = 0;
+  const send = f.transport.send.bind(f.transport); f.transport.send = async (command, context) => {
+    if (!(command instanceof TransactGetItemsCommand) && command.input.TransactItems!.some(item => item.Put?.TableName === target.decisionArn)) {
+      attempts++; if (attempts === 1) await held; else release();
+    }
+    return send(command, context);
+  };
+  const raw = { controlVersion: review.controlVersion, groupVersion: review.groupVersion };
+  const responses = await Promise.all([a.post(rosterPath + '/revise', raw), a.post(rosterPath + '/revise', raw)]);
+  expect(responses.map(response => response.status).sort()).toEqual([200, 409]);
+  expect(f.current().definition.semanticVersion).toBe(2); expect(f.current().controlVersion).toBe(1); expect(attempts).toBe(2);
+});

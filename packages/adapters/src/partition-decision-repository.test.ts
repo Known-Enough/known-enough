@@ -401,3 +401,98 @@ it('uses the captured supplied cancellation context for participant work without
   await expect(repository.transactionDecision('decision', record => { record!.controlVersion++; })).rejects.toThrow('DECISION_TIMEOUT');
   expect(f.writes).toHaveLength(writes); expect(f.current().controlVersion).toBe(0);
 });
+
+async function rosterRevision(f: Awaited<ReturnType<typeof fixture>>, version = 2) {
+  const prepared = await f.factory().forRoster(actor(), 'garden', 'decision', version);
+  const app = new KnownEnoughApplication({ repository: prepared.repository, clock: { now: () => '2026-10-07T15:00:00Z' }, ids: { next: () => 'synthetic' } });
+  const before = f.current();
+  const definition = KE.DecisionDefinition.parse({ ...before.definition, frameVersion: before.definition.frameVersion + 1,
+    semanticVersion: before.definition.semanticVersion + 1, participants: prepared.participants,
+    requiredParticipantIds: prepared.participants.map(person => person.id), variables: before.definition.variables.map(variable => ({ ...variable, ownerParticipantId: null })) });
+  return { prepared, app, input: { decisionId: 'decision', expectedControlVersion: before.controlVersion, definition, memberships: prepared.memberships } };
+}
+function removedRoster(f: Awaited<ReturnType<typeof fixture>>) { f.change('GROUP#garden', value => { value.members = ['iris']; value.version = 2; }); }
+function bindingVersion(f: Awaited<ReturnType<typeof fixture>>) {
+  return JSON.parse(f.cells.get(`${target.partitionArn}/GROUP#garden/BINDING#decision`)!.payload!.S!).value.version as number;
+}
+
+it('joins stale-binding recovery to the actual semantic decision revision and final ordinary admission', async () => {
+  const f = await fixture(); await f.factory().forParticipant(actor()).createDecision(f.initial); removedRoster(f); f.writes.length = 0;
+  const { prepared, app, input } = await rosterRevision(f);
+  expect(bindingVersion(f)).toBe(1); expect(f.writes).toEqual([]);
+  await app.reviseDecision(actor(), input);
+  expect(bindingVersion(f)).toBe(2); expect(f.current().definition.semanticVersion).toBe(2);
+  expect(f.current().memberships).toEqual(prepared.memberships); expect(f.current().frameConfirmations).toEqual([]);
+  const bundle = f.writes[0]!; expect(bundle.filter(item => item.Put?.TableName === target.partitionArn)).toHaveLength(2);
+  expect(bundle.filter(item => item.ConditionCheck).map(item => item.ConditionCheck!.Key!.PK!.S)).toEqual(['ACCOUNT#iris']);
+  const normal = new KnownEnoughApplication({ repository: f.factory().forParticipant(actor()), clock: { now: () => '2026-10-07T15:00:00Z' }, ids: { next: () => 'synthetic' } });
+  expect((await normal.getPublicSnapshot(actor(), 'decision')).frame.participants).toHaveLength(1);
+  await expect(f.factory().forParticipant(actor('omar')).transactionDecision('decision', () => true)).rejects.toThrow('NOT_FOUND');
+});
+
+it('permits guarded stale-roster review but forbids binding repair by reading the revision port', async () => {
+  const f = await fixture(); await f.factory().forParticipant(actor()).createDecision(f.initial); removedRoster(f); f.writes.length = 0;
+  const review = await f.factory().forRoster(actor(), 'garden', 'decision');
+  expect(await review.repository.transactionDecision('decision', record => record!.controlVersion)).toBe(0);
+  expect(f.writes[0]!.every(item => item.ConditionCheck)).toBe(true); expect(bindingVersion(f)).toBe(1);
+  const { prepared } = await rosterRevision(f);
+  await expect(prepared.repository.transactionDecision('decision', () => true)).rejects.toThrow('DECISION_INVALID');
+  expect(bindingVersion(f)).toBe(1);
+  await expect(review.repository.transactionDecision('decision', record => { record!.definition.semanticVersion++; })).rejects.toThrow('DECISION_INVALID');
+  await expect(prepared.repository.transactionDecision('other', () => true)).rejects.toThrow('DECISION_INVALID');
+});
+
+it('rejects account/roster races at the joined revision commit without partial repair', async () => {
+  for (const race of ['account', 'roster']) {
+    const f = await fixture(); await f.factory().forParticipant(actor()).createDecision(f.initial); removedRoster(f);
+    const { app, input } = await rosterRevision(f); const before = f.current();
+    f.beforeWrite(() => { f.beforeWrite(() => {}); f.change(race === 'account' ? 'ACCOUNT#iris' : 'GROUP#garden', value => { if (race === 'account') value.status = 'DISABLED'; else value.version = 3; }); });
+    await expect(app.reviseDecision(actor(), input)).rejects.toThrow('STALE_CONTEXT');
+    expect(f.current()).toEqual(before); expect(bindingVersion(f)).toBe(1);
+  }
+});
+
+it('rejects stale control versions, closed decisions and substituted revision membership without binding mutation', async () => {
+  for (const kind of ['control', 'closed', 'membership']) {
+    const f = await fixture(); if (kind === 'closed') f.initial.status = 'CLOSED';
+    await f.factory().forParticipant(actor()).createDecision(f.initial); removedRoster(f);
+    const { app, input } = await rosterRevision(f); const before = f.current();
+    if (kind === 'control') input.expectedControlVersion++;
+    if (kind === 'membership') input.memberships[0]!.subject = 'other';
+    await expect(app.reviseDecision(actor(), input)).rejects.toThrow(kind === 'closed' ? 'FORBIDDEN' : kind === 'control' ? 'STALE_CONTEXT' : 'DECISION_INVALID');
+    expect(f.current()).toEqual(before); expect(bindingVersion(f)).toBe(1);
+  }
+});
+
+it('does not retry an uncertain applied roster revision or report an already-used control version as new consent', async () => {
+  const f = await fixture(); await f.factory().forParticipant(actor()).createDecision(f.initial); removedRoster(f); f.writes.length = 0;
+  const { app, input } = await rosterRevision(f);
+  f.afterWrite(() => { f.afterWrite(() => {}); throw new Error('PRIVATE synthetic response lost'); });
+  await expect(app.reviseDecision(actor(), input)).rejects.toThrow('DECISION_STORAGE_UNAVAILABLE');
+  expect(f.writes).toHaveLength(1); expect(bindingVersion(f)).toBe(2); expect(f.current().definition.semanticVersion).toBe(2);
+  const fresh = await rosterRevision(f);
+  await expect(fresh.app.reviseDecision(actor(), { ...fresh.input, expectedControlVersion: input.expectedControlVersion })).rejects.toThrow('STALE_CONTEXT');
+  expect(f.current().definition.semanticVersion).toBe(2); expect(f.writes).toHaveLength(1);
+});
+
+it('checks exact native roster bundles before SDK execution and forbids unguarded or cross-decision writes', async () => {
+  const f = await fixture(); await f.factory().forParticipant(actor()).createDecision(f.initial); removedRoster(f); f.writes.length = 0;
+  const { app, input } = await rosterRevision(f); await app.reviseDecision(actor(), input);
+  const bundle = f.writes[0]!; const send = vi.spyOn(DynamoDBClient.prototype, 'send').mockResolvedValue({} as never);
+  const native = createDynamoPartitionDecisionTransport(target); const io = partitionIO();
+  await native.send(new TransactWriteItemsCommand({ TransactItems: bundle }), io);
+  expect(send.mock.calls[0]![1]).toMatchObject({ abortSignal: io.signal });
+  for (const kind of ['header', 'account', 'condition', 'binding', 'decision', 'guard', 'guard-name', 'guard-version']) {
+    const items = structuredClone(bundle);
+    if (kind === 'header') items.splice(items.findIndex(item => item.Put?.Item?.SK?.S === 'STATE' && item.Put?.TableName === target.partitionArn), 1);
+    if (kind === 'account') items.splice(items.findIndex(item => item.ConditionCheck), 1);
+    if (kind === 'condition') items.find(item => item.Put?.TableName === target.partitionArn)!.Put!.ConditionExpression = 'attribute_exists(PK)';
+    if (kind === 'binding') { const put = items.find(item => item.Put?.Item?.SK?.S === 'BINDING#decision')!.Put!; const row = JSON.parse(put.Item!.payload!.S!); row.value.version++; put.Item!.payload = { S: JSON.stringify(row) }; }
+    if (kind === 'decision') items.find(item => item.Put?.TableName === target.decisionArn)!.Put!.Item!.PK = { S: 'ROOM#other' };
+    if (kind === 'guard') items.find(item => item.Update)!.Update!.ConditionExpression = 'attribute_exists(PK)';
+    if (kind === 'guard-name') items.find(item => item.Update)!.Update!.ExpressionAttributeNames!['#version'] = 'other';
+    if (kind === 'guard-version') items.find(item => item.Update)!.Update!.ExpressionAttributeValues![':nextVersion'] = { N: '999' };
+    await expect(native.send(new TransactWriteItemsCommand({ TransactItems: items }), io)).rejects.toThrow('DECISION_INVALID');
+  }
+  expect(send).toHaveBeenCalledTimes(1);
+});

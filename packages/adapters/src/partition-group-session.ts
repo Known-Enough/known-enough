@@ -465,6 +465,30 @@ export function createPartitionGroupSession(transport: PartitionTransport,
         }, io));
       });
     },
+    /** Explicit organizer recovery of a stale binding; pending changes MUST join the decision revision. */
+    prepareRoster(principal: TrustedPrincipal | null, rawId: string, rawDecisionId: string,
+      expectedGroupVersion?: number, supplied?: PartitionIOContext) {
+      return safe(async () => {
+        const who = participant(principal); const key = groupId(rawId); const decisionId = groupId(rawDecisionId);
+        if (expectedGroupVersion !== undefined && (!Number.isSafeInteger(expectedGroupVersion) || expectedGroupVersion < 1)) return deny('INVALID_COMMAND');
+        const io = supplied ?? partitionIO(limits);
+        const directory = await repository.lookup({ type: 'DECISION', decisionId }, io);
+        if (directory?.type !== 'DECISION' || directory.groupId !== key) return deny('NOT_FOUND');
+        let version = 0; let members: { subject: string; participantId: string; displayName: string }[] = [];
+        const fence = await selected(who, key, io, resolved => repository.fence(resolved, state => {
+          const group = current(state, who, key, true);
+          const binding = group.decisions.find(value => value.id === decisionId);
+          if (!binding) return deny('NOT_FOUND');
+          if (expectedGroupVersion !== undefined && group.version !== expectedGroupVersion) return deny('STALE_CONTEXT');
+          version = group.version;
+          members = publicRoster(state, group).map(person => ({ subject: group.members.find(subject => partitionMemberId(subject) === person.id)!,
+            participantId: person.id, displayName: person.displayName }));
+          if (expectedGroupVersion !== undefined) binding.version = group.version;
+        }, io));
+        return { version, members: structuredClone(members), fence: { mutations: structuredClone(fence.mutations),
+          assertCurrent: () => safe(() => fence.assertCurrent()) } };
+      });
+    },
     /** Conditions MUST join the actual decision transaction; assertCurrent alone cannot authorize a write. */
     decisionFence(principal: TrustedPrincipal | null, rawDecisionId: string, supplied?: PartitionIOContext): Promise<PartitionFence> {
       return safe(async () => {

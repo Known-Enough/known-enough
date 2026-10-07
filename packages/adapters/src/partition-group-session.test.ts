@@ -920,3 +920,43 @@ it('rejects a full decision binding set and inconsistent retained draft identity
   await expect(retained.session().prepareDraftCreation(participant(), 'garden', wrong.id, { revision: 1 })).rejects.toThrow('STALE_CONTEXT');
   expect(retained.commits).toEqual([]);
 });
+
+it('prepares explicit organizer roster recovery without admitting a stale binding or committing it early', async () => {
+  const f = fixture(); const header = f.get('GROUP#garden/STATE'); header.value.version = 2; header.value.members = ['iris']; header.revision++;
+  await expect(f.session().decisionFence(participant(), 'decision')).rejects.toThrow('STALE_CONTEXT');
+  const review = await f.session().prepareRoster(participant(), 'garden', 'decision');
+  expect(review.version).toBe(2); expect(review.members).toEqual([{ subject: 'iris', participantId: partitionMemberId('iris'), displayName: 'IRIS' }]);
+  expect(review.fence.mutations.every(item => item.next === null)).toBe(true);
+  const revision = await f.session().prepareRoster(participant(), 'garden', 'decision', 2);
+  expect(revision.fence.mutations.filter(item => item.next).map(item => item.next!.kind).sort()).toEqual(['BINDING', 'GROUP']);
+  expect(f.get('GROUP#garden/BINDING#decision').value.version).toBe(1); expect(f.commits).toEqual([]);
+});
+
+it('requires fresh organizer, exact directory/group and approved current roster for recovery', async () => {
+  const f = fixture();
+  await expect(f.session().prepareRoster(participant('omar'), 'garden', 'decision')).rejects.toThrow('FORBIDDEN');
+  await expect(f.session().prepareRoster(participant(), 'other', 'decision')).rejects.toThrow('NOT_FOUND');
+  f.get('ACCOUNT#omar/STATE').value.status = 'DISABLED'; f.get('ACCOUNT#omar/STATE').revision++;
+  await expect(f.session().prepareRoster(participant(), 'garden', 'decision')).rejects.toThrow('FORBIDDEN');
+  expect(f.commits).toEqual([]);
+});
+
+it('checks safe positive roster versions before reads and preserves supplied request accounting', async () => {
+  const f = fixture();
+  for (const version of [0, -1, 1.5, Number.MAX_SAFE_INTEGER + 1]) await expect(f.session().prepareRoster(participant(), 'garden', 'decision', version)).rejects.toThrow('INVALID_COMMAND');
+  expect(f.reads).toEqual([]);
+  await expect(f.session().prepareRoster(participant(), 'garden', 'decision', 2)).rejects.toThrow('STALE_CONTEXT');
+  const io = partitionIO({ maxRequests: 1 });
+  await expect(f.session().prepareRoster(participant(), 'garden', 'decision', undefined, io)).rejects.toThrow('SESSION_REQUEST_LIMIT');
+  expect(f.commits).toEqual([]);
+});
+
+it('rechecks all pending roster revisions on account/header/binding changes without applying the update', async () => {
+  for (const key of ['ACCOUNT#iris/STATE', 'GROUP#garden/STATE', 'GROUP#garden/BINDING#decision']) {
+    const f = fixture(); const header = f.get('GROUP#garden/STATE'); header.value.version = 2; header.revision++;
+    const prepared = await f.session().prepareRoster(participant(), 'garden', 'decision', 2);
+    f.get(key).revision++;
+    await expect(prepared.fence.assertCurrent()).rejects.toThrow('STALE_CONTEXT');
+    expect(f.get('GROUP#garden/BINDING#decision').value.version).toBe(1); expect(f.commits).toEqual([]);
+  }
+});
