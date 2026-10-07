@@ -131,6 +131,11 @@ function stateRows(state: Groups.GroupState, scope: PartitionScope): Map<string,
   }
   return rows;
 }
+/** Inactive migration compiler: validate the same scoped invariants, without any I/O. */
+export function partitionSeedRows(state: Groups.GroupState, scope: PartitionScope): PartitionMutation[] {
+  scopeKeys(scope);
+  return structuredClone([...stateRows(state, scope).values()].map(({ key, row }) => ({ key, expected: 0, next: row })));
+}
 type Snapshot = { state: Groups.GroupState; rows: Map<string, { key: PartitionKey; row: PartitionRow | null }> };
 export function createPartitionedGroupRepository(transport: PartitionTransport,
   options: { timeoutMs?: number; maxRequests?: number } = {}) {
