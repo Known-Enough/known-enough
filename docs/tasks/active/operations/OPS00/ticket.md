@@ -2,7 +2,7 @@
 
 **Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of UX03, not deferred administrator installation. Prepare/test automation and the exact setup package now; install missing delegation only in the final cloud phase. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
 
-- Status: BLOCKED / unclaimed until UX03 coding checkpoint; then coding phase eligible. Administrator installation/required managed acceptance deferred to final cloud phase.
+- Status: IN_PROGRESS / B — recovery automation/setup coding. Administrator installation/required managed acceptance deferred to final cloud phase.
 - Origin: user's 2026-10-03 direction that ordinary implementation/testing should be automatic and should not repeatedly depend on A's AWS login.
 - Worker: next eligible direct worker, current routing B; select/report actual model and effort at claim. One task/worker; no subagents or credential sharing.
 - Scope at claim: exact GitHub workflow/scripts, resource/permission contracts needed by OPS01–03, bounded policy/bootstrap proposal, meaningful integration checks, safe evidence and own log/handoff. Record exact files first. No general administrator grant or live operation is authorized by this ticket.
@@ -81,3 +81,16 @@ IN_PROGRESS/B. Prior111fullFAIL lint preserve-caught-error adapterline23; fixed 
 ## OPS00 run113 checked adapter checkpoint — 2026-10-07T07:07:06.596890+00:00
 
 IN_PROGRESS/B. Corrected112fullPASS784twooptional/hosted1/browser62 and focused13PASS. ExactDynamoadapter/conditionalservice integratedsimulatedtransport tests checked; no realDynamo installation. Setup-package.md defines table/readback/PITR/preservation/OIDC/runtimedeny/sourceplanworkflow/manifest prerequisites. Bootstrap/executableworkflow/manifest stillunfinished. Checkedsource syncnow; sameclaim.
+
+
+## OPS00 run114 bounded source refinement — 2026-10-07T07:37:47.909904+00:00
+
+Same IN_PROGRESS/B claim. Add scripts/operations/manifest.mjs, setup.mjs, verify.mjs and focused .test.mjs files, .github/workflows/operations-verify.yml, and infra/operations generated setup.json. Credential-free verification workflow/source binding and recovery manifest transport only; no installation/IAM delegation or live apply. Existing A NP00 and runtime templates untouched. Root GPT-6, exact modelvariant/effort unavailable; no helper.
+
+
+OPS00 run114 final workflow scope: add scripts/operations/aws-transport.mjs and aws-transport.test.mjs, managed-preparation.mjs and managed-preparation.test.mjs, and .github/workflows/operations-recovery.yml. Bind a bounded synthetic recovery preparation/resume to own B/main/source, exact proposed storage and independently read-back configuration. Installation/managed dispatch remains deferred and the workload is gated by a technical installed-configuration flag. No participant/data apply, provider call, arbitrary command or IAM self-expansion. Existing recovery.mjs/recovery.test.mjs combine the previously declared manifest/journal foundation within the same claim.
+
+
+## OPS00 recovery package checked source checkpoint — 2026-10-07T07:57Z
+
+OPS00 remains IN_PROGRESS/B while the credential-free GitHub verification is inspected. Implemented versioned/hash-bound private manifests, recovery-first preparation, exact-resource bounded AWS CLI transport, fail-closed installed storage readback, generated preserved setup template and two source-bound workflows. Final 32 focused tests and pinned full check PASS: references7/planning15/lint/boundaries/types,784 application tests(two optional skips), build, hosted1 and browser62. Both workflow YAML files parse; new documentation links and diff check PASS. Template hash a8c67e9a4474b8561a991e8446ae1db36e23c70de18bd09bff4241bdd5c0d627. CFN service/schema validation and installed/effective IAM/managed recovery UNKNOWN; no AWS operation/deployment/AI/email/participant mutation. Prepare GitHub verification on the synchronized checked source, then release only the coding milestone to OPS01. A NP00 remains paused/saved.

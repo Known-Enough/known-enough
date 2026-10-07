@@ -301,3 +301,11 @@ OPS00 executable scope refinement: scripts/operations/plan.mjs and plan.test.mjs
 OPS00 scope adds scripts/operations/journal.mjs and journal.test.mjs: injected durable conditional storage port plus concurrency/restart tests; no managed resource installation.
 
 OPS00 scope adds scripts/operations/dynamo-journal.mjs and dynamo-journal.test.mjs: exact proposed table adapter via injected transport, no provisioning or enabled workload.
+
+
+## OPS00 run114 bounded source refinement — 2026-10-07T07:37:47.909904+00:00
+
+Same IN_PROGRESS/B claim. Add scripts/operations/manifest.mjs, setup.mjs, verify.mjs and focused .test.mjs files, .github/workflows/operations-verify.yml, and infra/operations generated setup.json. Credential-free verification workflow/source binding and recovery manifest transport only; no installation/IAM delegation or live apply. Existing A NP00 and runtime templates untouched. Root GPT-6, exact modelvariant/effort unavailable; no helper.
+
+
+OPS00 run114 final workflow scope: add scripts/operations/aws-transport.mjs and aws-transport.test.mjs, managed-preparation.mjs and managed-preparation.test.mjs, and .github/workflows/operations-recovery.yml. Bind a bounded synthetic recovery preparation/resume to own B/main/source, exact proposed storage and independently read-back configuration. Installation/managed dispatch remains deferred and the workload is gated by a technical installed-configuration flag. No participant/data apply, provider call, arbitrary command or IAM self-expansion. Existing recovery.mjs/recovery.test.mjs combine the previously declared manifest/journal foundation within the same claim.

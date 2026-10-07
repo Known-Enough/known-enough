@@ -1,0 +1,50 @@
+name: Verify operations recovery package
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact reviewed main source SHA
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: known-enough-operations-verification
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && github.actor_id == '143764700'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Bind main source and generated template before dependency installation
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_sha }}
+        run: |
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node scripts/operations/verify.mjs > "$RUNNER_TEMP/operations-report.json"
+      - name: Run focused operations and pinned full checks
+        env:
+          PLAYWRIGHT_CHANNEL: chromium
+          VITEST_MAX_WORKERS: '2'
+        run: |
+          npm ci
+          node --test scripts/operations/*.test.mjs
+          npx playwright install --with-deps chromium
+          npm run check
+      - name: Upload public setup proposal and offline verification only
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: operations-verification
+          path: |
+            infra/operations/setup.json
+            ${{ runner.temp }}/operations-report.json
+          if-no-files-found: error
+          retention-days: 30
