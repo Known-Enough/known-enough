@@ -1,6 +1,6 @@
 import { createHash, createHmac } from 'node:crypto';
 import { expect, it } from 'vitest';
-import { Groups } from '@deal-table/contracts';
+import { Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { PartitionMembershipError } from './partition-membership.ts';
 import type { TrustedPrincipal } from '@deal-table/application';
 import { createPartitionGroupSession, partitionMemberId } from './partition-group-session.ts';
@@ -573,4 +573,131 @@ it('preserves denial, stale and bounded discovery errors without exposing provid
     const f = fixture(); await expect(f.session({ discovery: async () => { throw new PartitionMembershipError(input); } }).list(participant())).rejects.toThrow(output);
     expect(f.commits).toEqual([]);
   }
+});
+
+
+function seedDraft(f: ReturnType<typeof fixture>, overrides: Partial<Groups.GroupDraft> = {}) {
+  const participants = ['iris', 'omar'].map(subject => ({ id: partitionMemberId(subject), displayName: subject.toUpperCase(), requiredForApproval: true }));
+  const draft = Groups.GroupDraft.parse({ id: 'draft-one', bodyHash: 'b'.repeat(64), revision: 1, groupVersion: 1, createdDecisionId: null,
+    clarificationQuestions: ['Confirm the public choices.'], frame: { schemaVersion: KE.KE_SCHEMA_VERSION, decisionId: 'draft-decision', frameVersion: 1,
+      semanticVersion: 1, contextToken: 'c'.repeat(64), title: 'Garden task', objective: 'Choose a task', description: '', participants,
+      requiredParticipantIds: participants.map(value => value.id), variables: [{ id: 'indoors', type: 'BOOLEAN', label: 'Indoors', required: true, visibility: 'PUBLIC' }], rules: [] }, ...overrides });
+  f.rows.set('GROUP#garden/DRAFT#draft-one', { schemaVersion: 1, kind: 'DRAFT', revision: 1, value: structuredClone(draft) });
+  f.get('GROUP#garden/STATE').value.draftIds = [draft.id];
+  return draft;
+}
+const edit = (draft: Groups.GroupDraft) => ({ revision: draft.revision, title: 'Revised garden task', objective: draft.frame.objective,
+  variables: draft.frame.variables, rules: draft.frame.rules });
+
+it('reads drafts only for an approved current organizer with a conditional privacy-safe result', async () => {
+  const f = fixture(); const draft = seedDraft(f); const session = f.session();
+  expect(await session.readDraft(participant(), 'garden', draft.id)).toEqual(draft);
+  expect(f.commits.at(-1)!.every(value => value.next === null)).toBe(true);
+  expect(JSON.stringify(draft)).not.toMatch(/subject|emailHash|recipientHash|ACCOUNT#|MEMBER#/);
+  await expect(session.readDraft(participant('omar'), 'garden', draft.id)).rejects.toThrow('FORBIDDEN');
+  await expect(session.readDraft(participant('pending'), 'garden', draft.id)).rejects.toThrow('FORBIDDEN');
+  await expect(session.readDraft(participant('luca'), 'garden', draft.id)).rejects.toThrow('NOT_FOUND');
+  await expect(session.readDraft(participant(), 'garden', 'absent')).rejects.toThrow('NOT_FOUND');
+  expect(f.reads.flat().some(value => value.PK === 'ACCOUNT#luca')).toBe(true); // Actor admission only.
+  expect(f.reads.flat().some(value => value.PK === 'GROUP#other')).toBe(false);
+});
+
+it('edits one draft atomically without changing its roster, decision identity, creation fingerprint or unresolved questions', async () => {
+  const f = fixture(); const draft = seedDraft(f); const changed = await f.session().editDraft(participant(), 'garden', draft.id, edit(draft));
+  expect(changed).toEqual({ ...draft, revision: 2, frame: { ...draft.frame, title: 'Revised garden task' } });
+  changed.frame.title = 'Caller alias';
+  expect(f.get('GROUP#garden/DRAFT#draft-one')).toMatchObject({ revision: 2, value: { revision: 2, frame: { title: 'Revised garden task' } } });
+  expect(f.get('GROUP#garden/STATE')).toMatchObject({ revision: 2, value: { version: 1, members: ['iris', 'omar'], decisionIds: ['decision'] } });
+  const writes = f.commits[0]!.filter(value => value.next);
+  expect(writes.map(value => code(value.key)).sort()).toEqual(['GROUP#garden/DRAFT#draft-one', 'GROUP#garden/STATE']);
+  expect(f.commits[0]).toEqual(expect.arrayContaining([expect.objectContaining({ key: { PK: 'ACCOUNT#iris', SK: 'STATE' }, expected: 1, next: null })]));
+  await expect(f.session().editDraft(participant(), 'garden', draft.id, edit(draft))).rejects.toThrow('STALE_CONTEXT');
+  expect(f.commits).toHaveLength(1);
+});
+
+it('rejects caller authority, private variables and invalid full-frame relationships without changing the draft', async () => {
+  const f = fixture(); const draft = seedDraft(f); const session = f.session();
+  for (const request of [{ ...edit(draft), subject: 'iris' }, { ...edit(draft), participants: [] }, { ...edit(draft), revision: Number.MAX_SAFE_INTEGER + 1 },
+    { ...edit(draft), variables: [{ ...draft.frame.variables[0]!, visibility: 'CONSENT_REQUIRED' }] },
+    { ...edit(draft), variables: [draft.frame.variables[0]!, draft.frame.variables[0]!] },
+    { ...edit(draft), rules: [{ id: 'private', visibility: 'TRUSTED_BACKEND', operator: 'COMPARE', variableId: 'indoors', comparison: 'EQ', value: { type: 'BOOLEAN', value: true } }] },
+    { ...edit(draft), rules: [{ id: 'unknown', visibility: 'PUBLIC', operator: 'COMPARE', variableId: 'unknown', comparison: 'EQ', value: { type: 'BOOLEAN', value: true } }] }]) {
+    await expect(session.editDraft(participant(), 'garden', draft.id, request)).rejects.toThrow('INVALID_COMMAND');
+  }
+  await expect(session.editDraft(participant('omar'), 'garden', draft.id, edit(draft))).rejects.toThrow('FORBIDDEN');
+  await expect(session.readDraft(participant(), 'garden', '../draft')).rejects.toThrow('INVALID_COMMAND');
+  expect(f.commits).toEqual([]); expect(f.get('GROUP#garden/DRAFT#draft-one').value).toEqual(draft);
+});
+
+it('retains unanswered clarification after catalog edits and never treats an unbounded public number as enumerated', async () => {
+  const f = fixture(); const draft = seedDraft(f); const changed = await f.session().editDraft(participant(), 'garden', draft.id, {
+    ...edit(draft), variables: [{ id: 'amount', label: 'Amount', required: true, visibility: 'PUBLIC', type: 'NUMBER', unitCode: 'kg', scale: 0 }] });
+  expect(changed.clarificationQuestions[0]).toBe(draft.clarificationQuestions[0]); expect(changed.clarificationQuestions).toHaveLength(2);
+  const replay = await f.session().editDraft(participant(), 'garden', draft.id, { ...edit(changed), title: 'Another task' });
+  expect(replay.clarificationQuestions).toEqual(changed.clarificationQuestions);
+});
+
+it('locks created and obsolete-roster drafts and fails closed before unsafe revision overflow', async () => {
+  for (const overrides of [{ createdDecisionId: 'decision' }, { groupVersion: 2 }, { revision: Number.MAX_SAFE_INTEGER }]) {
+    const f = fixture(); const draft = seedDraft(f, overrides);
+    const error = overrides.revision === Number.MAX_SAFE_INTEGER ? 'SESSION_CAPACITY' : 'STALE_CONTEXT';
+    await expect(f.session().editDraft(participant(), 'garden', draft.id, edit(draft))).rejects.toThrow(error);
+    expect(f.commits).toEqual([]);
+  }
+  const unsafe = fixture(); const draft = seedDraft(unsafe); unsafe.get('GROUP#garden/DRAFT#draft-one').value.revision = Number.MAX_SAFE_INTEGER + 1;
+  await expect(unsafe.session().readDraft(participant(), 'garden', draft.id)).rejects.toThrow('SESSION_INVALID');
+  expect(unsafe.commits).toEqual([]);
+});
+
+it('rechecks disable, organizer change, roster version and concurrent draft edits at the actual atomic commit', async () => {
+  for (const mode of ['disabled', 'organizer', 'roster', 'draft'] as const) {
+    const f = fixture(); const draft = seedDraft(f); let once = true;
+    f.beforeCommit(() => { if (!once) return; once = false;
+      if (mode === 'disabled') { const row = f.get('ACCOUNT#iris/STATE'); row.value.status = 'DISABLED'; row.revision++; }
+      if (mode === 'organizer') { const row = f.get('GROUP#garden/STATE'); row.value.organizer = 'omar'; row.revision++; }
+      if (mode === 'roster') { const row = f.get('GROUP#garden/STATE'); row.value.version = 2; row.revision++; }
+      if (mode === 'draft') { const row = f.get('GROUP#garden/DRAFT#draft-one'); row.value.revision = 2; row.revision++; }
+    });
+    await expect(f.session().editDraft(participant(), 'garden', draft.id, edit(draft))).rejects.toThrow(['disabled', 'organizer'].includes(mode) ? 'FORBIDDEN' : 'STALE_CONTEXT');
+    expect(f.commits).toHaveLength(1); expect((f.get('GROUP#garden/DRAFT#draft-one').value.frame as KE.PublicDecisionFrame).title).toBe(draft.frame.title);
+  }
+});
+
+it('does not repeat an edit after a lost applied response; a fresh read reconciles the version and stale replay is rejected', async () => {
+  const f = fixture(); const draft = seedDraft(f); let once = true;
+  f.afterCommit(() => { if (once) { once = false; throw new Error('PRIVATE_APPLIED_DRAFT_DIAGNOSTIC'); } });
+  await expect(f.session().editDraft(participant(), 'garden', draft.id, edit(draft))).rejects.toThrow('SESSION_STORAGE_UNAVAILABLE');
+  expect(f.commits).toHaveLength(1); expect(f.get('GROUP#garden/DRAFT#draft-one').value.revision).toBe(2);
+  const current = await f.session().readDraft(participant(), 'garden', draft.id); expect(current.revision).toBe(2);
+  await expect(f.session().editDraft(participant(), 'garden', draft.id, edit(draft))).rejects.toThrow('STALE_CONTEXT');
+  expect(f.get('GROUP#garden/DRAFT#draft-one')).toMatchObject({ revision: 2, value: { revision: 2 } });
+});
+
+it('keeps a shared budget, deadline and cancellation across draft admission and editing without a late write', async () => {
+  const f = fixture(); const draft = seedDraft(f); const budget = partitionIO({ maxRequests: 5 });
+  await f.session().readDraft(participant(), 'garden', draft.id, budget);
+  await expect(f.session().editDraft(participant(), 'garden', draft.id, edit(draft), budget)).rejects.toThrow('SESSION_REQUEST_LIMIT');
+  expect(f.commits.every(values => values.every(value => !value.next))).toBe(true);
+  const cancel = fixture(); seedDraft(cancel); const controller = new AbortController(); const io = partitionIO();
+  cancel.beforeRead(() => { controller.abort(); });
+  await expect(cancel.session().editDraft(participant(), 'garden', draft.id, edit(draft), { ...io, signal: controller.signal })).rejects.toThrow('SESSION_TIMEOUT');
+  expect(cancel.commits).toEqual([]);
+  const timed = fixture(); seedDraft(timed); let release!: () => void; const held = new Promise<void>(resolve => { release = resolve; });
+  timed.beforeRead(() => held);
+  await expect(timed.session({ timeoutMs: 20 }).editDraft(participant(), 'garden', draft.id, edit(draft))).rejects.toThrow('SESSION_TIMEOUT');
+  release(); await new Promise<void>(resolve => setTimeout(resolve, 1)); expect(timed.commits).toEqual([]);
+});
+
+
+it('guards a draft read against revocation at publication and re-resolves a legitimate concurrent child/header update', async () => {
+  const revoked = fixture(); const draft = seedDraft(revoked); let once = true;
+  revoked.beforeCommit(() => { if (once) { once = false; const row = revoked.get('ACCOUNT#iris/STATE'); row.value.status = 'DISABLED'; row.revision++; } });
+  await expect(revoked.session().readDraft(participant(), 'garden', draft.id)).rejects.toThrow('FORBIDDEN'); expect(revoked.commits).toHaveLength(1);
+  const changed = fixture(); seedDraft(changed); let first = true;
+  changed.beforeCommit(() => { if (!first) return; first = false;
+    const child = changed.get('GROUP#garden/DRAFT#draft-one'); child.revision++; child.value.revision = 2;
+    (child.value.frame as KE.PublicDecisionFrame).title = 'Concurrent edit'; changed.get('GROUP#garden/STATE').revision++;
+  });
+  expect(await changed.session().readDraft(participant(), 'garden', draft.id)).toMatchObject({ revision: 2, frame: { title: 'Concurrent edit' } });
+  expect(changed.commits).toHaveLength(2); expect(changed.commits.every(values => values.every(value => value.next === null))).toBe(true);
 });

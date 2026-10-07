@@ -1,9 +1,10 @@
 import { createHash, createHmac, randomBytes } from 'node:crypto';
 import { z } from 'zod';
-import { Groups } from '@deal-table/contracts';
+import { Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { KnownEnoughApplicationError, type TrustedPrincipal } from '@deal-table/application';
 import { ArchivedGroupRow } from './partition-archive.ts';
 import { PartitionMembershipError } from './partition-membership.ts';
+import { genericCandidateCatalog } from './generic-candidates.ts';
 import { createPartitionedGroupRepository, checkPartitionRow, partitionAccountKey, partitionGroupKey,
   partitionIO, partitionCall, PartitionStorageError, type PartitionIOContext, type PartitionScope,
   type PartitionTransport, type PartitionFence } from './partitioned-group-repository.ts';
@@ -19,6 +20,9 @@ const registration = z.strictObject({ displayName: label });
 const profile = z.strictObject({ subject: id, email, verified: z.literal(true) });
 const invite = z.strictObject({ email, replace: z.boolean() });
 const accept = z.strictObject({ token: z.string().regex(/^[A-Za-z0-9_-]{32,80}$/) });
+const draftEdit = z.strictObject({ revision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+  title: KE.PublicDecisionFrame.shape.title, objective: KE.PublicDecisionFrame.shape.objective,
+  variables: KE.PublicDecisionFrame.shape.variables, rules: KE.PublicDecisionFrame.shape.rules });
 const cursor = z.string().regex(/^[A-Za-z0-9_-]{40,1600}$/);
 const listing = z.strictObject({ limit: z.number().int().min(1).max(20).default(10), cursor: cursor.optional() });
 const discoveryPage = z.strictObject({ groups: z.array(Groups.GroupSnapshot.pick({ id: true, name: true, version: true, isOrganizer: true })).max(20),
@@ -67,6 +71,14 @@ function current(state: Groups.GroupState, who: string, selected: string, organi
   if (!group) return deny('NOT_FOUND');
   if (organizer && group.organizer !== who) return deny('FORBIDDEN');
   return group;
+}
+function currentDraft(state: Groups.GroupState, who: string, selected: string, draftId: string): Groups.GroupDraft {
+  const group = current(state, who, selected, true);
+  const draft = group.drafts.find(value => value.id === draftId);
+  if (!draft) return deny('NOT_FOUND');
+  if (draft.groupVersion !== group.version) return deny('STALE_CONTEXT');
+  if (!Number.isSafeInteger(draft.revision)) throw new PartitionSessionError('SESSION_INVALID');
+  return draft;
 }
 export function createPartitionGroupSession(transport: PartitionTransport,
   options: { now?: () => number; timeoutMs?: number; maxRequests?: number; emailKey?: string; token?: () => string; discovery?: PartitionGroupDiscovery } = {}) {
@@ -281,6 +293,35 @@ export function createPartitionGroupSession(transport: PartitionTransport,
         const who = participant(principal); const key = groupId(rawId); const io = partitionIO(limits);
         return selected(who, key, io, resolved => repository.transaction(resolved,
           state => snapshot(state, current(state, who, key), who), io));
+      });
+    },
+    readDraft(principal: TrustedPrincipal | null, rawId: string, rawDraftId: string, supplied?: PartitionIOContext) {
+      return safe(async () => {
+        const who = participant(principal); const key = groupId(rawId); const draftId = groupId(rawDraftId);
+        const io = supplied ?? partitionIO(limits);
+        return selected(who, key, io, resolved => repository.transaction(resolved,
+          state => Groups.GroupDraft.parse(currentDraft(state, who, key, draftId)), io));
+      });
+    },
+    editDraft(principal: TrustedPrincipal | null, rawId: string, rawDraftId: string, raw: unknown, supplied?: PartitionIOContext) {
+      return safe(async () => {
+        const who = participant(principal); const key = groupId(rawId); const draftId = groupId(rawDraftId); const request = draftEdit.safeParse(raw);
+        if (!request.success) return deny('INVALID_COMMAND');
+        const io = supplied ?? partitionIO(limits);
+        return selected(who, key, io, resolved => repository.transaction(resolved, state => {
+          const draft = currentDraft(state, who, key, draftId);
+          if (draft.createdDecisionId || request.data.revision !== draft.revision) return deny('STALE_CONTEXT');
+          if (draft.revision >= Number.MAX_SAFE_INTEGER) throw new PartitionSessionError('SESSION_CAPACITY');
+          const frame = KE.PublicDecisionFrame.safeParse({ ...draft.frame, title: request.data.title, objective: request.data.objective,
+            variables: request.data.variables, rules: request.data.rules });
+          if (!frame.success || frame.data.variables.some(value => value.visibility !== 'PUBLIC') || frame.data.rules.some(value => value.visibility !== 'PUBLIC')) return deny('INVALID_COMMAND');
+          draft.frame = frame.data; draft.revision++;
+          const catalog = genericCandidateCatalog(draft.frame);
+          // Editing never answers a previously unresolved model or public-catalog question.
+          if (catalog.clarificationQuestion && !draft.clarificationQuestions.includes(catalog.clarificationQuestion))
+            draft.clarificationQuestions = [...draft.clarificationQuestions, catalog.clarificationQuestion].slice(0, 12);
+          return Groups.GroupDraft.parse(draft);
+        }, io));
       });
     },
     /** Private organizer roster for decision construction; never a public HTTP snapshot. */

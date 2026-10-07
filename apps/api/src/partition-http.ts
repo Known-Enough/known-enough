@@ -154,6 +154,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         const url = URL.parse(request.url ?? '/', 'http://local.invalid');
         if (!url || url.hash || (url.search && (url.pathname !== '/groups' || request.method !== 'GET'))) return reject('INVALID_COMMAND');
         const group = /^\/groups\/([A-Za-z0-9_-]{1,80})(\/(?:remove|invite))?$/.exec(url.pathname);
+        const draft = /^\/groups\/([A-Za-z0-9_-]{1,80})\/drafts\/([A-Za-z0-9_-]{1,80})$/.exec(url.pathname);
         const decision = /^\/decisions\/([A-Za-z0-9_-]{1,80})\/(public|me|commands)$/.exec(url.pathname);
         if (request.method === 'GET' && url.pathname === '/account') {
           send(response, 200, { account: await session.status(principal) }); return;
@@ -191,6 +192,16 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
           const raw = await body(request, maximum, bodyMs, controller);
           if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
           send(response, 200, { group: await session.create(principal, raw) }); return;
+        }
+        if (draft && (request.method === 'GET' || request.method === 'POST')) {
+          const io = partitionIO(); const context = { ...io, signal: AbortSignal.any([io.signal, controller.signal]) };
+          // Authenticate and admit the organizer before reading an edit body; commit rechecks the same scope.
+          const current = await session.readDraft(principal, draft[1]!, draft[2]!, context);
+          if (request.method === 'GET') { send(response, 200, { draft: current }); return; }
+          if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
+          const raw = await body(request, maximum, bodyMs, controller);
+          if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
+          send(response, 200, { draft: await session.editDraft(principal, draft[1]!, draft[2]!, raw, context) }); return;
         }
         if (group && request.method === 'GET' && !group[2]) {
           send(response, 200, { group: await session.snapshot(principal, group[1]!) }); return;

@@ -476,3 +476,72 @@ it('cancels held discovery without late hydration and retains its unresolved pro
   release?.(); await new Promise(resolve => setTimeout(resolve, 20)); expect(reads.mock.calls).toHaveLength(before); expect(f.groupCommits).toEqual([]);
   expect((await a.get('/groups')).status).toBe(200); expect(discovery).toHaveBeenCalledTimes(2);
 });
+
+
+function seedHttpDraft(f: Awaited<ReturnType<typeof fixture>>) {
+  const participants = ['iris', 'omar'].map(subject => ({ id: partitionMemberId(subject), displayName: subject.toUpperCase(), requiredForApproval: true }));
+  const draft = Groups.GroupDraft.parse({ id: 'draft-one', bodyHash: 'b'.repeat(64), revision: 1, groupVersion: 1, createdDecisionId: null,
+    clarificationQuestions: ['Confirm the public choices.'], frame: { schemaVersion: KE.KE_SCHEMA_VERSION, decisionId: 'draft-decision', frameVersion: 1,
+      semanticVersion: 1, contextToken: 'c'.repeat(64), title: 'Garden task', objective: 'Choose a task', description: '', participants,
+      requiredParticipantIds: participants.map(value => value.id), variables: [{ id: 'indoors', type: 'BOOLEAN', label: 'Indoors', required: true, visibility: 'PUBLIC' }], rules: [] } });
+  const key = { PK: { S: 'GROUP#garden' }, SK: { S: 'DRAFT#draft-one' } };
+  f.cells.set(where(target.partitionArn, key), { ...key, revision: { N: '1' }, payload: { S: JSON.stringify({ schemaVersion: 1, kind: 'DRAFT', revision: 1, value: draft }) } });
+  f.change('GROUP#garden', value => { value.draftIds = [draft.id]; }); return draft;
+}
+const httpEdit = (draft: Groups.GroupDraft) => ({ revision: draft.revision, title: 'Revised task', objective: draft.frame.objective,
+  variables: draft.frame.variables, rules: draft.frame.rules });
+const draftPath = '/groups/garden/drafts/draft-one';
+
+it('reads and edits drafts only through the approved organizer boundary without publishing storage authority', async () => {
+  const f = await fixture(); const draft = seedHttpDraft(f); const a = await api(f);
+  const read = await a.get(draftPath); expect(read.status).toBe(200); expect(read.headers.get('cache-control')).toBe('no-store');
+  expect(await read.json()).toEqual({ draft });
+  expect((await a.get(draftPath, 'unknown', { 'x-subject': 'iris' })).status).toBe(401);
+  expect((await a.get(draftPath, 'omar')).status).toBe(403);
+  const edited = await a.post(draftPath, httpEdit(draft)); expect(edited.status).toBe(200); const result = (await edited.json()).draft;
+  expect(result).toMatchObject({ revision: 2, bodyHash: draft.bodyHash, groupVersion: 1, createdDecisionId: null, frame: { title: 'Revised task' } });
+  expect(JSON.stringify(result)).not.toMatch(/subject|emailHash|recipientHash|ACCOUNT#|MEMBER#|PARTITION#/);
+  expect((await a.post(draftPath, httpEdit(draft))).status).toBe(409);
+  expect((await a.post(draftPath, { ...httpEdit(result), subject: 'omar' })).status).toBe(422);
+  expect((await a.post(draftPath + '/create', {})).status).toBe(404);
+  expect(f.writes).toEqual([]); expect(f.reads).toEqual([]);
+});
+
+it('denies an unauthorized organizer edit before waiting for its body and enforces bounded partial bodies for an admitted editor', async () => {
+  const f = await fixture(); const draft = seedHttpDraft(f); const a = await api(f, { bodyTimeoutMs: 40, maxConcurrentRequests: 1 });
+  async function partial(subject: string) {
+    return new Promise<number>((resolve, fail) => {
+      const request = httpRequest(a.base + draftPath, { method: 'POST', headers: { authorization: `Bearer ${subject}`, 'content-type': 'application/json' } }, response => {
+        response.resume(); response.on('end', () => { request.end(); resolve(response.statusCode!); });
+      }); request.on('error', fail); request.write('{');
+    });
+  }
+  expect(await partial('omar')).toBe(403); expect(f.groupCommits).toEqual([]);
+  expect(await partial('iris')).toBe(503); expect(f.groupCommits.every(values => values.every(value => !(value as { next: unknown }).next))).toBe(true);
+  expect((await a.get(draftPath)).status).toBe(200);
+  expect(JSON.parse(f.cells.get(`${target.partitionArn}/GROUP#garden/DRAFT#draft-one`)!.payload!.S!).value).toEqual(draft);
+});
+
+it('rechecks organizer admission after body admission and returns fixed errors for concurrent disable or roster revision', async () => {
+  for (const mode of ['disabled', 'roster'] as const) {
+    const f = await fixture(); const draft = seedHttpDraft(f); const a = await api(f); let commits = 0;
+    f.beforeGroupCommit(() => { if (++commits !== 2) return;
+      f.change(mode === 'disabled' ? 'ACCOUNT#iris' : 'GROUP#garden', value => { if (mode === 'disabled') value.status = 'DISABLED'; else value.version = 2; });
+    });
+    const response = await a.post(draftPath, httpEdit(draft)); expect(response.status).toBe(mode === 'disabled' ? 403 : 409);
+    expect(await response.text()).not.toMatch(/ACCOUNT#|GROUP#|email|subject/);
+    expect(f.groupCommits).toHaveLength(2);
+    expect(JSON.parse(f.cells.get(`${target.partitionArn}/GROUP#garden/DRAFT#draft-one`)!.payload!.S!).value).toEqual(draft);
+  }
+});
+
+it('reconciles an unknown applied draft response through a fresh read without repeating the edit', async () => {
+  const f = await fixture(); const draft = seedHttpDraft(f); const a = await api(f);
+  f.afterGroupCommit(() => { const cell = f.cells.get(`${target.partitionArn}/GROUP#garden/DRAFT#draft-one`)!;
+    if (cell.revision!.N === '2') throw new Error('PRIVATE_APPLIED_DRAFT_DIAGNOSTIC'); });
+  const response = await a.post(draftPath, httpEdit(draft)); expect(response.status).toBe(503); expect(await response.text()).not.toContain('PRIVATE');
+  expect(f.groupCommits).toHaveLength(2); f.afterGroupCommit(() => {});
+  const read = await a.get(draftPath); expect(read.status).toBe(200); expect((await read.json()).draft.revision).toBe(2);
+  expect((await a.post(draftPath, httpEdit(draft))).status).toBe(409);
+  expect(f.cells.get(`${target.partitionArn}/GROUP#garden/DRAFT#draft-one`)!.revision!.N).toBe('2');
+});
