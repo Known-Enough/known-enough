@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, createHmac, randomBytes } from 'node:crypto';
 import { z } from 'zod';
 import { Groups } from '@deal-table/contracts';
 import { KnownEnoughApplicationError, type TrustedPrincipal } from '@deal-table/application';
@@ -10,8 +10,15 @@ import { createPartitionedGroupRepository, checkPartitionRow, partitionAccountKe
 // Inactive participant boundary: trusted identity and managed activation/atomic decision selection are external.
 const id = z.string().regex(/^[A-Za-z0-9_-]{1,80}$/);
 const remove = z.strictObject({ memberId: id, version: z.number().int().positive().max(Number.MAX_SAFE_INTEGER) });
-const create = z.strictObject({ name: z.string().max(160).refine(value => [...value].every(character => character.charCodeAt(0) >= 32 && character.charCodeAt(0) !== 127))
-  .transform(value => value.trim()).pipe(z.string().min(1).max(80)), idempotencyKey: id });
+const label = z.string().max(160).refine(value => [...value].every(character => character.charCodeAt(0) >= 32 && character.charCodeAt(0) !== 127))
+  .transform(value => value.trim()).pipe(z.string().min(1).max(80));
+const email = z.string().max(512).transform(value => value.trim().toLowerCase()).pipe(z.string().max(254).regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/));
+const create = z.strictObject({ name: label, idempotencyKey: id });
+const registration = z.strictObject({ displayName: label });
+const profile = z.strictObject({ subject: id, email, verified: z.literal(true) });
+const invite = z.strictObject({ email, replace: z.boolean() });
+const accept = z.strictObject({ token: z.string().regex(/^[A-Za-z0-9_-]{32,80}$/) });
+type Invitation = { tokenHash: string; recipientHash: string; expiresAt: number };
 const deny = (code: 'FORBIDDEN' | 'NOT_FOUND' | 'INVALID_COMMAND' | 'STALE_CONTEXT'): never => {
   throw new KnownEnoughApplicationError(code);
 };
@@ -47,13 +54,19 @@ function current(state: Groups.GroupState, who: string, selected: string, organi
   return group;
 }
 export function createPartitionGroupSession(transport: PartitionTransport,
-  options: { now?: () => number; timeoutMs?: number; maxRequests?: number } = {}) {
+  options: { now?: () => number; timeoutMs?: number; maxRequests?: number; emailKey?: string; token?: () => string } = {}) {
   const limits = { ...(options.timeoutMs === undefined ? {} : { timeoutMs: options.timeoutMs }),
     ...(options.maxRequests === undefined ? {} : { maxRequests: options.maxRequests }) };
   partitionIO(limits); const clock = options.now ?? Date.now;
+  const emailKey = options.emailKey; const tokenSource = options.token ?? (() => randomBytes(32).toString('base64url'));
+  if (emailKey !== undefined && (typeof emailKey !== 'string' || emailKey.length < 32 || emailKey.length > 4096)) throw new PartitionSessionError('SESSION_INVALID');
+  function emailHash(value: string) {
+    if (!emailKey) throw new PartitionSessionError('SESSION_INVALID');
+    return createHmac('sha256', emailKey).update(value).digest('hex');
+  }
   const repository = createPartitionedGroupRepository(transport, limits);
   function now() { const time = clock(); if (!Number.isSafeInteger(time) || time < 0) throw new PartitionSessionError('SESSION_INVALID'); return time; }
-  async function scope(who: string, selected: string, io: PartitionIOContext, allowMissing = false): Promise<PartitionScope> {
+  async function scope(who: string, selected: string, io: PartitionIOContext, allowMissing = false, admission?: Invitation): Promise<PartitionScope> {
     const keys = [partitionAccountKey(who), partitionGroupKey(selected)];
     const rows = transport.readMany ? await partitionCall(io, () => transport.readMany!(keys, io))
       : [await partitionCall(io, () => transport.read(keys[0]!, io)), await partitionCall(io, () => transport.read(keys[1]!, io))];
@@ -68,13 +81,20 @@ export function createPartitionGroupSession(transport: PartitionTransport,
     }
     const header = checkPartitionRow(rows[1], keys[1]!);
     if (header.kind !== 'GROUP' || new Set(header.value.members).size !== header.value.members.length) throw new PartitionSessionError('SESSION_INVALID');
-    if (!header.value.members.includes(who)) return deny('NOT_FOUND');
-    return { groupId: selected, accountSubjects: [...header.value.members] };
+    if (admission) {
+      const invitation = header.value.invitations.find(value => value.tokenHash === admission.tokenHash);
+      if (!invitation || invitation.recipientHash !== admission.recipientHash || invitation.expiresAt !== admission.expiresAt
+        || account.value.emailHash !== admission.recipientHash || invitation.expiresAt <= now()
+        || (invitation.acceptedBy !== null && (invitation.acceptedBy !== who || !header.value.members.includes(who)))) return deny('NOT_FOUND');
+    } else if (!header.value.members.includes(who)) return deny('NOT_FOUND');
+    const subjects = [...new Set([...header.value.members, who])];
+    if (subjects.length > 16) throw new PartitionSessionError('SESSION_CAPACITY');
+    return { groupId: selected, accountSubjects: subjects };
   }
   async function selected<T>(who: string, selected: string, io: PartitionIOContext,
-    work: (resolved: PartitionScope) => Promise<T>, allowMissing = false): Promise<T> {
+    work: (resolved: PartitionScope) => Promise<T>, allowMissing = false, admission?: Invitation): Promise<T> {
     for (let attempt = 0; attempt < 6; attempt++) {
-      const resolved = await scope(who, selected, io, allowMissing);
+      const resolved = await scope(who, selected, io, allowMissing, admission);
       try { return await work(resolved); }
       catch (error) { if (!(error instanceof PartitionStorageError) || error.code !== 'PARTITION_STALE') throw error; }
     }
@@ -91,6 +111,31 @@ export function createPartitionGroupSession(transport: PartitionTransport,
       decisions: group.decisions.map(binding => ({ id: binding.id, current: binding.version === group.version })) });
   }
   return {
+    register(principal: TrustedPrincipal | null, rawProfile: unknown, raw: unknown) {
+      return safe(async () => {
+        const who = participant(principal); const verified = profile.safeParse(rawProfile); const request = registration.safeParse(raw);
+        if (!verified.success || verified.data.subject !== who) return deny('FORBIDDEN');
+        if (!request.success) return deny('INVALID_COMMAND');
+        const hash = emailHash(verified.data.email); const io = partitionIO(limits);
+        try {
+          return await repository.transaction({ accountSubjects: [who] }, async state => {
+            let account = state.accounts.find(value => value.subject === who);
+            if (account) {
+              if (account.emailHash !== hash) return deny('FORBIDDEN');
+              const owner = await repository.lookup({ type: 'EMAIL', emailHash: hash }, io);
+              if (owner?.type !== 'EMAIL' || owner.subject !== who) return deny('FORBIDDEN');
+            } else {
+              account = { subject: who, emailHash: hash, displayName: request.data.displayName, status: 'PENDING', version: 1 };
+              state.accounts.push(account);
+            }
+            return Groups.AccountSnapshot.parse({ status: account.status, displayName: account.displayName, version: account.version });
+          }, io);
+        } catch (error) {
+          if (error instanceof PartitionStorageError && error.code === 'PARTITION_IDENTITY_CONFLICT') return deny('FORBIDDEN');
+          throw error;
+        }
+      });
+    },
     status(principal: TrustedPrincipal | null) {
       return safe(async () => {
         const who = participant(principal); const io = partitionIO(limits);
@@ -120,6 +165,59 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           }
           return snapshot(state, group, who);
         }, io), true);
+      });
+    },
+    invite(principal: TrustedPrincipal | null, rawId: string, raw: unknown) {
+      return safe(async () => {
+        const who = participant(principal); const key = groupId(rawId); const request = invite.safeParse(raw);
+        if (!request.success) return deny('INVALID_COMMAND');
+        const recipientHash = emailHash(request.data.email); const token = tokenSource();
+        if (!accept.shape.token.safeParse(token).success) throw new PartitionSessionError('SESSION_INVALID');
+        const tokenHash = createHash('sha256').update(token).digest('hex'); const expiresAt = now() + 86_400_000;
+        if (!Number.isSafeInteger(expiresAt)) throw new PartitionSessionError('SESSION_CAPACITY');
+        const io = partitionIO(limits);
+        // Replacement must never recycle a retained identifier, even for the same recipient.
+        if (await repository.lookup({ type: 'INVITATION', tokenHash }, io)) throw new PartitionSessionError('SESSION_INVALID');
+        return selected(who, key, io, resolved => repository.transaction(resolved, state => {
+          const group = current(state, who, key, true); const time = now();
+          if (group.members.some(subject => state.accounts.find(account => account.subject === subject)?.emailHash === recipientHash)) return deny('INVALID_COMMAND');
+          if (expiresAt <= time) return deny('STALE_CONTEXT');
+          if (!request.data.replace && group.invitations.some(value => value.recipientHash === recipientHash && !value.acceptedBy && value.expiresAt > time)) return deny('STALE_CONTEXT');
+          group.invitations = group.invitations.filter(value => value.recipientHash !== recipientHash && value.expiresAt > time);
+          if (group.invitations.length >= 64) throw new PartitionSessionError('SESSION_CAPACITY');
+          group.invitations.push({ tokenHash, recipientHash, expiresAt, acceptedBy: null });
+          // Organizer-private copy-link response; secrets never appear in GroupSnapshot.
+          return { token, expiresAt, delivery: 'COPY_LINK' as const };
+        }, io));
+      });
+    },
+    accept(principal: TrustedPrincipal | null, raw: unknown) {
+      return safe(async () => {
+        const who = participant(principal); const request = accept.safeParse(raw);
+        if (!request.success) return deny('INVALID_COMMAND');
+        const tokenHash = createHash('sha256').update(request.data.token).digest('hex'); const io = partitionIO(limits);
+        const directory = await repository.lookup({ type: 'INVITATION', tokenHash }, io);
+        if (directory?.type !== 'INVITATION' || directory.expiresAt <= now()) return deny('NOT_FOUND');
+        return selected(who, directory.groupId, io, resolved => repository.transaction(resolved, state => {
+          const account = state.accounts.find(value => value.subject === who);
+          if (account?.status !== 'APPROVED') return deny('FORBIDDEN');
+          const group = state.groups.find(value => value.id === directory.groupId);
+          if (!group) return deny('NOT_FOUND');
+          if (state.accounts.find(value => value.subject === group.organizer)?.status !== 'APPROVED') return deny('FORBIDDEN');
+          const invitation = group.invitations.find(value => value.tokenHash === tokenHash);
+          if (!invitation || invitation.recipientHash !== directory.recipientHash || invitation.expiresAt !== directory.expiresAt
+            || invitation.recipientHash !== account.emailHash || invitation.expiresAt <= now()) return deny('NOT_FOUND');
+          if (invitation.acceptedBy) {
+            if (invitation.acceptedBy !== who || !group.members.includes(who)) return deny('NOT_FOUND');
+          } else {
+            if (!group.members.includes(who)) {
+              if (group.members.length >= 16 || group.version >= Number.MAX_SAFE_INTEGER) throw new PartitionSessionError('SESSION_CAPACITY');
+              group.members.push(who); group.version++;
+            }
+            invitation.acceptedBy = who;
+          }
+          return snapshot(state, group, who);
+        }, io), false, directory);
       });
     },
     snapshot(principal: TrustedPrincipal | null, rawId: string) {

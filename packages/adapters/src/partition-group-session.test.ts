@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import { expect, it } from 'vitest';
 import { Groups } from '@deal-table/contracts';
 import type { TrustedPrincipal } from '@deal-table/application';
@@ -9,9 +9,11 @@ import { createPartitionedGroupRepository, partitionIO, type PartitionTransport,
 
 const participant = (subject = 'iris'): TrustedPrincipal => ({ kind: 'participant', subject });
 const code = (key: PartitionKey) => `${key.PK}/${key.SK}`;
-function fixture() {
+const syntheticKey = 'q'.repeat(64);
+function fixture(emailKey?: string) {
   const account = (subject: string, status: Groups.Account['status'] = 'APPROVED'): Groups.Account => ({ subject,
-    emailHash: createHash('sha256').update(subject).digest('hex'), displayName: subject.toUpperCase(), status, version: 1 });
+    emailHash: emailKey ? createHmac('sha256', emailKey).update(`${subject}@example.invalid`).digest('hex')
+      : createHash('sha256').update(subject).digest('hex'), displayName: subject.toUpperCase(), status, version: 1 });
   const state: Groups.GroupState = { accounts: [account('iris'), account('omar'), account('luca'), account('pending', 'PENDING')],
     groups: [{ id: 'garden', name: 'Garden', organizer: 'iris', version: 1, members: ['iris', 'omar'], drafts: [],
       decisions: [{ id: 'decision', version: 1 }], invitations: [{ tokenHash: 'e'.repeat(64), recipientHash: 'f'.repeat(64), expiresAt: 500, acceptedBy: null }] }] };
@@ -34,7 +36,7 @@ function fixture() {
     },
   };
   return { rows, reads, commits, transport, get,
-    session: (options: Parameters<typeof createPartitionGroupSession>[1] = {}) => createPartitionGroupSession(transport, { now: () => 100, ...options }),
+    session: (options: Parameters<typeof createPartitionGroupSession>[1] = {}) => createPartitionGroupSession(transport, { now: () => 100, ...(emailKey ? { emailKey } : {}), ...options }),
     beforeRead: (work: typeof beforeRead) => { beforeRead = work; }, beforeCommit: (work: typeof beforeCommit) => { beforeCommit = work; },
     afterCommit: (work: typeof afterCommit) => { afterCommit = work; } };
 }
@@ -278,4 +280,173 @@ it('keeps creation and replay within one request/deadline budget with no late mu
   const timed = fixture(); let release!: () => void; const held = new Promise<void>(resolve => { release = resolve; }); timed.beforeRead(() => held);
   await expect(timed.session({ timeoutMs: 20 }).create(participant(), { name: 'Garden', idempotencyKey: 'key' })).rejects.toThrow('SESSION_TIMEOUT');
   release(); await new Promise<void>(resolve => setTimeout(resolve, 1)); expect(timed.reads).toHaveLength(1); expect(timed.commits).toEqual([]);
+});
+
+const verifiedProfile = (subject: string, email = `${subject}@example.invalid`) => ({ subject, email, verified: true });
+it('registers a pending account and immutable email claim atomically and preserves existing admission on replay', async () => {
+  const f = fixture(syntheticKey); const session = f.session();
+  const result = await session.register(participant('new'), verifiedProfile('new', ' NEW@example.invalid '), { displayName: ' New owner ' });
+  expect(result).toEqual({ status: 'PENDING', displayName: 'New owner', version: 1 });
+  expect(f.commits[0]!.filter(item => item.next?.kind === 'ACCOUNT')).toHaveLength(1);
+  expect(f.commits[0]!.filter(item => item.next?.kind === 'DIRECTORY')).toHaveLength(1);
+  expect(f.reads.flat().every(key => key.PK === 'ACCOUNT#new' || key.PK.startsWith('EMAIL#'))).toBe(true);
+  expect(JSON.stringify(result)).not.toMatch(/subject|email|hash|revision/);
+  expect(await session.register(participant('new'), verifiedProfile('new'), { displayName: 'Different' })).toEqual(result);
+  expect(f.commits.at(-1)!.every(item => item.next === null)).toBe(true);
+  f.get('ACCOUNT#new/STATE').value.status = 'DISABLED'; f.get('ACCOUNT#new/STATE').revision++;
+  expect((await session.register(participant('new'), verifiedProfile('new'), { displayName: 'Other' })).status).toBe('DISABLED');
+  expect(f.get('ACCOUNT#new/STATE').value.displayName).toBe('New owner');
+  await expect(session.register(participant('new'), verifiedProfile('new', 'other@example.invalid'), { displayName: 'Other' })).rejects.toThrow('FORBIDDEN');
+});
+
+it('keeps verified registration subject and email ownership strict under concurrent different-subject claims', async () => {
+  const f = fixture(syntheticKey); const results = await Promise.allSettled(['new1', 'new2'].map(subject =>
+    f.session().register(participant(subject), verifiedProfile(subject, 'same@example.invalid'), { displayName: 'New' })));
+  expect(results.filter(result => result.status === 'fulfilled')).toHaveLength(1);
+  expect(results.find(result => result.status === 'rejected')).toMatchObject({ reason: { message: 'FORBIDDEN' } });
+  expect([...f.rows.keys()].filter(key => key.startsWith('ACCOUNT#new'))).toHaveLength(1);
+  const bad = fixture(syntheticKey);
+  for (const profile of [verifiedProfile('other'), { ...verifiedProfile('new'), verified: false }, { ...verifiedProfile('new'), email: 'invalid' },
+    { ...verifiedProfile('new'), status: 'APPROVED' }]) {
+    await expect(bad.session().register(participant('new'), profile, { displayName: 'New' })).rejects.toThrow('FORBIDDEN');
+  }
+  await expect(bad.session().register(participant('new'), verifiedProfile('new'), { displayName: 'New', subject: 'other' })).rejects.toThrow('INVALID_COMMAND');
+  expect(bad.reads).toEqual([]);
+});
+
+it('fails closed on missing HMAC configuration, corrupt retained ownership, request exhaustion and unknown registration commits', async () => {
+  const absent = fixture(); await expect(absent.session().register(participant('new'), verifiedProfile('new'), { displayName: 'New' })).rejects.toThrow('SESSION_INVALID'); expect(absent.reads).toEqual([]);
+  expect(() => absent.session({ emailKey: 'short' })).toThrow('SESSION_INVALID');
+  const limited = fixture(syntheticKey); await expect(limited.session({ maxRequests: 3 }).register(participant('new'), verifiedProfile('new'), { displayName: 'New' })).rejects.toThrow('SESSION_REQUEST_LIMIT'); expect(limited.commits).toEqual([]);
+  const f = fixture(syntheticKey); let once = true; f.afterCommit(() => { if (once) { once = false; throw new Error('PRIVATE_REGISTRATION_DIAGNOSTIC'); } });
+  await expect(f.session().register(participant('new'), verifiedProfile('new'), { displayName: 'New' })).rejects.toThrow('SESSION_STORAGE_UNAVAILABLE'); expect(f.commits).toHaveLength(1);
+  expect((await f.session().register(participant('new'), verifiedProfile('new'), { displayName: 'New' })).status).toBe('PENDING');
+  const hash = createHmac('sha256', syntheticKey).update('new@example.invalid').digest('hex'); f.rows.delete(`EMAIL#${hash}/CLAIM`);
+  await expect(f.session().register(participant('new'), verifiedProfile('new'), { displayName: 'New' })).rejects.toThrow('FORBIDDEN');
+});
+
+it('issues organizer-private links with retained immutable lookup, strict recipient/body checks and safe replacement', async () => {
+  const f = fixture(syntheticKey); let count = 0; const session = f.session({ token: () => (++count === 1 ? 'a' : 'b').repeat(43) });
+  const link = await session.invite(participant(), 'garden', { email: ' LUCA@example.invalid ', replace: false });
+  expect(link).toEqual({ token: 'a'.repeat(43), expiresAt: 86_400_100, delivery: 'COPY_LINK' });
+  const hash = createHash('sha256').update(link.token).digest('hex'); expect(f.get(`INVITATION#${hash}/TARGET`)).toMatchObject({ revision: 1, value: { groupId: 'garden' } });
+  expect(JSON.stringify(await session.snapshot(participant(), 'garden'))).not.toMatch(/tokenHash|recipientHash|emailHash|INVITATION#|a{43}/);
+  await expect(session.invite(participant('omar'), 'garden', { email: 'luca@example.invalid', replace: true })).rejects.toThrow('FORBIDDEN');
+  await expect(session.invite(participant(), 'garden', { email: 'omar@example.invalid', replace: false })).rejects.toThrow('INVALID_COMMAND');
+  await expect(session.invite(participant(), 'garden', { email: 'luca@example.invalid', replace: false })).rejects.toThrow('STALE_CONTEXT');
+  const next = await session.invite(participant(), 'garden', { email: 'luca@example.invalid', replace: true }); expect(next.token).not.toBe(link.token);
+  expect(f.get(`INVITATION#${hash}/TARGET`).revision).toBe(1);
+  await expect(session.accept(participant('luca'), { token: link.token })).rejects.toThrow('NOT_FOUND');
+  await expect(session.invite(participant(), 'garden', { email: 'luca@example.invalid', replace: true, subject: 'omar' })).rejects.toThrow('INVALID_COMMAND');
+});
+
+it('joins only the approved intended recipient atomically, stales prior bindings and makes explicit acceptance replay read-only', async () => {
+  const f = fixture(syntheticKey); const session = f.session({ token: () => 'a'.repeat(43) });
+  const invitation = await session.invite(participant(), 'garden', { email: 'luca@example.invalid', replace: false });
+  await expect(session.accept(participant('omar'), { token: invitation.token })).rejects.toThrow('NOT_FOUND');
+  const joined = await session.accept(participant('luca'), { token: invitation.token }); expect(joined.version).toBe(2); expect(joined.members).toHaveLength(3);
+  expect(f.commits.at(-1)!).toEqual(expect.arrayContaining([
+    expect.objectContaining({ key: partitionMembershipKey('luca', 'garden'), expected: 0 }),
+    expect.objectContaining({ key: { PK: 'ACCOUNT#luca', SK: 'STATE' }, next: null }),
+    expect.objectContaining({ key: { PK: 'GROUP#garden', SK: 'STATE' }, next: expect.objectContaining({ kind: 'GROUP' }) })]));
+  expect(f.get('MEMBER#luca/GROUP#garden')).toMatchObject({ revision: 1, value: { active: true } });
+  await expect(session.decisionFence(participant('luca'), 'decision')).rejects.toThrow('STALE_CONTEXT');
+  expect(await session.accept(participant('luca'), { token: invitation.token })).toEqual(joined);
+  expect(f.commits.at(-1)!.every(item => item.next === null)).toBe(true); expect(f.get('MEMBER#luca/GROUP#garden').revision).toBe(1);
+});
+
+it('never reuses an accepted link to restore a removed member but allows a fresh intended invitation without restoring old decision consent', async () => {
+  const f = fixture(syntheticKey); let count = 0; const session = f.session({ token: () => (++count === 1 ? 'a' : 'b').repeat(43) });
+  const first = await session.invite(participant(), 'garden', { email: 'luca@example.invalid', replace: false });
+  await session.accept(participant('luca'), { token: first.token });
+  await session.remove(participant(), 'garden', { memberId: partitionMemberId('luca'), version: 2 });
+  const writes = f.commits.length; await expect(session.accept(participant('luca'), { token: first.token })).rejects.toThrow('NOT_FOUND'); expect(f.commits).toHaveLength(writes);
+  expect(f.get('MEMBER#luca/GROUP#garden')).toMatchObject({ revision: 2, value: { active: false } });
+  const next = await session.invite(participant(), 'garden', { email: 'luca@example.invalid', replace: true });
+  const joined = await session.accept(participant('luca'), { token: next.token }); expect(joined.version).toBe(4);
+  expect(f.get('MEMBER#luca/GROUP#garden')).toMatchObject({ revision: 3, value: { active: true } });
+  await expect(session.decisionFence(participant('luca'), 'decision')).rejects.toThrow('STALE_CONTEXT');
+});
+
+it('denies expired, unknown, archived and disabled recipient or organizer invitations', async () => {
+  for (const change of ['expired', 'unknown', 'archived', 'recipient', 'organizer'] as const) {
+    const f = fixture(syntheticKey); const session = f.session({ token: () => 'a'.repeat(43) });
+    const invitation = await session.invite(participant(), 'garden', { email: 'luca@example.invalid', replace: false });
+    if (change === 'archived') f.rows.set('GROUP#garden/STATE', { schemaVersion: 1, revision: 3, kind: 'ARCHIVED_GROUP', groupId: 'garden', organizer: 'iris', groupVersion: 1,
+      sourceSha: 'a'.repeat(40), sourceHash: 'b'.repeat(64), manifestHash: 'c'.repeat(64), manifestVersion: 'immutable-v1', archivedAt: '2026-10-07T15:00:00.000Z' });
+    if (change === 'recipient' || change === 'organizer') f.get(`ACCOUNT#${change === 'recipient' ? 'luca' : 'iris'}/STATE`).value.status = 'DISABLED';
+    const count = f.commits.length; const acceptor = change === 'expired' ? f.session({ now: () => invitation.expiresAt }) : session;
+    await expect(acceptor.accept(participant('luca'), { token: change === 'unknown' ? 'z'.repeat(43) : invitation.token })).rejects.toThrow(change === 'recipient' || change === 'organizer' ? 'FORBIDDEN' : 'NOT_FOUND');
+    expect(f.commits).toHaveLength(count);
+  }
+});
+
+it('conditions actual invitation acceptance against concurrent organizer disable and invitation replacement', async () => {
+  for (const change of ['disabled', 'replaced'] as const) {
+    const f = fixture(syntheticKey); const session = f.session({ token: () => 'a'.repeat(43) });
+    const invitation = await session.invite(participant(), 'garden', { email: 'luca@example.invalid', replace: false }); let once = true;
+    f.beforeCommit(() => {
+      if (!once) return; once = false;
+      const row = f.get(change === 'disabled' ? 'ACCOUNT#iris/STATE' : 'GROUP#garden/STATE');
+      if (change === 'disabled') row.value.status = 'DISABLED'; else row.value.invitations = [];
+      row.revision++;
+    });
+    const before = f.commits.length; await expect(session.accept(participant('luca'), { token: invitation.token })).rejects.toThrow(change === 'disabled' ? 'FORBIDDEN' : 'NOT_FOUND');
+    expect(f.commits).toHaveLength(before + 1); expect(f.rows.has('MEMBER#luca/GROUP#garden')).toBe(false);
+  }
+});
+
+it('converges duplicate acceptance and preserves explicit retry after an unknown applied join', async () => {
+  const f = fixture(syntheticKey); const session = f.session({ token: () => 'a'.repeat(43) }); const invitation = await session.invite(participant(), 'garden', { email: 'luca@example.invalid', replace: false });
+  const joined = await Promise.all([session.accept(participant('luca'), { token: invitation.token }), session.accept(participant('luca'), { token: invitation.token })]);
+  expect(joined[0]).toEqual(joined[1]); expect(joined[0]!.version).toBe(2); expect(f.get('MEMBER#luca/GROUP#garden').revision).toBe(1);
+  const unknown = fixture(syntheticKey); const next = await unknown.session({ token: () => 'a'.repeat(43) }).invite(participant(), 'garden', { email: 'luca@example.invalid', replace: false }); let once = true;
+  unknown.afterCommit(() => { if (once) { once = false; throw new Error('PRIVATE_JOIN_DIAGNOSTIC'); } }); const before = unknown.commits.length;
+  await expect(unknown.session().accept(participant('luca'), { token: next.token })).rejects.toThrow('SESSION_STORAGE_UNAVAILABLE'); expect(unknown.commits).toHaveLength(before + 1);
+  expect((await unknown.session().accept(participant('luca'), { token: next.token })).version).toBe(2); expect(unknown.get('MEMBER#luca/GROUP#garden').revision).toBe(1);
+});
+
+it('bounds invitation entropy configuration, lifetime, retained collisions and one shared acceptance request/deadline budget', async () => {
+  const f = fixture(syntheticKey);
+  await expect(f.session({ token: () => 'bad' }).invite(participant(), 'garden', { email: 'luca@example.invalid', replace: false })).rejects.toThrow('SESSION_INVALID'); expect(f.reads).toEqual([]);
+  await expect(f.session({ now: () => Number.MAX_SAFE_INTEGER }).invite(participant(), 'garden', { email: 'luca@example.invalid', replace: false })).rejects.toThrow('SESSION_CAPACITY');
+  const invitation = await f.session({ token: () => 'a'.repeat(43) }).invite(participant(), 'garden', { email: 'luca@example.invalid', replace: false });
+  const before = f.commits.length; await expect(f.session({ token: () => 'a'.repeat(43) }).invite(participant(), 'garden', { email: 'luca@example.invalid', replace: true })).rejects.toThrow('SESSION_INVALID'); expect(f.commits).toHaveLength(before);
+  await expect(f.session({ maxRequests: 3 }).accept(participant('luca'), { token: invitation.token })).rejects.toThrow('SESSION_REQUEST_LIMIT'); expect(f.commits).toHaveLength(before);
+  let release!: () => void; const held = new Promise<void>(resolve => { release = resolve; }); f.beforeRead(() => held);
+  await expect(f.session({ timeoutMs: 20 }).accept(participant('luca'), { token: invitation.token })).rejects.toThrow('SESSION_TIMEOUT'); release();
+  await new Promise<void>(resolve => setTimeout(resolve, 1)); expect(f.commits).toHaveLength(before);
+});
+
+it('enforces the sixteen-member limit before hydrating an oversized invited roster', async () => {
+  const f = fixture(syntheticKey); const members = ['iris', 'omar', ...Array.from({ length: 14 }, (_, index) => `m${index}`)];
+  const state: Groups.GroupState = { accounts: [...members, 'luca'].map(subject => ({ subject, displayName: subject, status: 'APPROVED', version: 1,
+    emailHash: createHmac('sha256', syntheticKey).update(`${subject}@example.invalid`).digest('hex') })), groups: [{ id: 'garden', name: 'Garden', organizer: 'iris', members, version: 1,
+      drafts: [], decisions: [], invitations: [{ tokenHash: createHash('sha256').update('a'.repeat(43)).digest('hex'),
+        recipientHash: createHmac('sha256', syntheticKey).update('luca@example.invalid').digest('hex'), expiresAt: 500, acceptedBy: null }] }] };
+  const plan = preparePartitionMigration(Buffer.from(JSON.stringify(state)), 1, 'a'.repeat(40)); f.rows.clear();
+  for (const item of plan.batches.flat()) f.rows.set(code(item.key), structuredClone(item.next));
+  await expect(f.session().accept(participant('luca'), { token: 'a'.repeat(43) })).rejects.toThrow('SESSION_CAPACITY');
+  expect(f.reads).toHaveLength(2); expect(f.reads.flat().some(key => key.PK.startsWith('ACCOUNT#m'))).toBe(false); expect(f.commits).toEqual([]);
+});
+
+it('enforces pending-link capacity and safe group-version arithmetic before acceptance mutation', async () => {
+  const f = fixture(syntheticKey); f.get('GROUP#garden/STATE').value.invitations = Array.from({ length: 64 }, (_, index) => ({
+    tokenHash: createHash('sha256').update(`link-${index}`).digest('hex'), recipientHash: createHash('sha256').update(`recipient-${index}`).digest('hex'), expiresAt: 500, acceptedBy: null }));
+  await expect(f.session({ token: () => 'a'.repeat(43) }).invite(participant(), 'garden', { email: 'luca@example.invalid', replace: false })).rejects.toThrow('SESSION_CAPACITY'); expect(f.commits).toEqual([]);
+  const exhausted = fixture(syntheticKey); const invitation = await exhausted.session({ token: () => 'a'.repeat(43) }).invite(participant(), 'garden', { email: 'luca@example.invalid', replace: false });
+  exhausted.get('GROUP#garden/STATE').value.version = Number.MAX_SAFE_INTEGER; const count = exhausted.commits.length;
+  await expect(exhausted.session().accept(participant('luca'), { token: invitation.token })).rejects.toThrow('SESSION_CAPACITY');
+  expect(exhausted.commits).toHaveLength(count); expect(exhausted.rows.has('MEMBER#luca/GROUP#garden')).toBe(false);
+});
+
+it('never retries an unknown invitation issue automatically and requires explicit fresh replacement to recover a copy link', async () => {
+  const f = fixture(syntheticKey); let count = 0; let once = true; const session = f.session({ token: () => (++count === 1 ? 'a' : 'b').repeat(43) });
+  f.afterCommit(() => { if (once) { once = false; throw new Error('PRIVATE_ISSUE_DIAGNOSTIC'); } });
+  const request = { email: 'luca@example.invalid', replace: false };
+  await expect(session.invite(participant(), 'garden', request)).rejects.toThrow('SESSION_STORAGE_UNAVAILABLE'); expect(f.commits).toHaveLength(1); expect(count).toBe(1);
+  await expect(session.invite(participant(), 'garden', request)).rejects.toThrow('STALE_CONTEXT'); expect(f.commits).toHaveLength(1);
+  const next = await session.invite(participant(), 'garden', { ...request, replace: true }); expect(next.token).toBe('b'.repeat(43));
+  await expect(session.accept(participant('luca'), { token: 'a'.repeat(43) })).rejects.toThrow('NOT_FOUND');
+  expect((await session.accept(participant('luca'), { token: next.token })).version).toBe(2);
 });

@@ -1,5 +1,5 @@
 import { createServer, request as httpRequest, type Server } from 'node:http';
-import { createHash } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import { afterEach, expect, it, vi } from 'vitest';
 import { TransactGetItemsCommand, type TransactWriteItem, type AttributeValue } from '@aws-sdk/client-dynamodb';
 import { Groups, KnownEnough as KE } from '@deal-table/contracts';
@@ -18,12 +18,13 @@ const target = PARTITION_DECISION_TARGET;
 const where = (table: string, key: Item) => `${table}/${key.PK!.S}/${key.SK!.S}`;
 const cancellation = () => Object.assign(new Error('synthetic cancellation'), { name: 'TransactionCanceledException', CancellationReasons: [{ Code: 'ConditionalCheckFailed' }] });
 
-async function fixture() {
+const syntheticEmailKey = 'q'.repeat(64);
+async function fixture(emailKey?: string) {
   const account = (subject: string): Groups.Account => ({ subject, displayName: subject.toUpperCase(), status: 'APPROVED', version: 1,
-    emailHash: createHash('sha256').update(subject).digest('hex') });
+    emailHash: emailKey ? createHmac('sha256', emailKey).update(`${subject}@example.invalid`).digest('hex') : createHash('sha256').update(subject).digest('hex') });
   const group: Groups.Group = { id: 'garden', name: 'Garden', organizer: 'iris', members: ['iris', 'omar'], version: 1,
     drafts: [], invitations: [], decisions: [{ id: 'decision', version: 1 }] };
-  const plan = preparePartitionMigration(Buffer.from(JSON.stringify({ accounts: [account('iris'), account('omar')], groups: [group] })), 1, 'a'.repeat(40));
+  const plan = preparePartitionMigration(Buffer.from(JSON.stringify({ accounts: ['iris', 'omar', ...(emailKey ? ['luca'] : [])].map(account), groups: [group] })), 1, 'a'.repeat(40));
   const cells = new Map<string, Item>();
   for (const item of plan.batches.flat()) if (item.next) {
     const key = { PK: { S: item.key.PK }, SK: { S: item.key.SK } };
@@ -94,7 +95,7 @@ async function fixture() {
   const initial = await memory.transactionDecision('decision', value => structuredClone(value!));
   const factory = (options: Partial<Parameters<typeof createPartitionDecisionRepository>[0]> = {}) => createPartitionDecisionRepository({ ...target, groups, transport, ...options });
   const current = () => decodeDecisionStateItem(cells.get(stateLocation), 'decision');
-  return { groups, transport, cells, writes, reads, initial, factory, current, groupLocation, stateLocation, change, groupCommits,
+  return { emailKey, groups, transport, cells, writes, reads, initial, factory, current, groupLocation, stateLocation, change, groupCommits,
     beforeGroupCommit: (work: typeof beforeGroupCommit) => { beforeGroupCommit = work; }, afterGroupCommit: (work: typeof afterGroupCommit) => { afterGroupCommit = work; },
     beforeWrite: (work: typeof beforeWrite) => { beforeWrite = work; }, afterWrite: (work: typeof afterWrite) => { afterWrite = work; }, beforeRead: (work: typeof beforeRead) => { beforeRead = work; } };
 }
@@ -104,8 +105,9 @@ const servers: Server[] = [];
 afterEach(async () => { vi.restoreAllMocks(); await Promise.all(servers.splice(0).map(server => new Promise<void>(resolve => { server.closeAllConnections(); server.close(() => resolve()); }))); });
 async function api(f: Awaited<ReturnType<typeof fixture>>, overrides: Partial<PartitionParticipantApiOptions> = {}) {
   const options: PartitionParticipantApiOptions = { ...target, groups: f.groups, decisions: f.transport,
+    ...(f.emailKey === undefined ? {} : { emailKey: f.emailKey }),
     authenticate: async request => request.headers.authorization === 'Bearer iris' ? actor('iris')
-      : request.headers.authorization === 'Bearer omar' ? actor('omar') : null,
+      : request.headers.authorization === 'Bearer omar' ? actor('omar') : f.emailKey && request.headers.authorization === 'Bearer luca' ? actor('luca') : null,
     clock: { now: () => '2026-10-07T15:00:00Z' }, ids: { next: () => 'synthetic' },
     allowedOrigins: ['https://known.example.invalid'], ...overrides };
   const server = createServer(createPartitionParticipantApiHandler(options)); servers.push(server);
@@ -157,6 +159,80 @@ it('returns a sanitized unknown creation result without retry and allows explici
   const replay = await a.post('/groups', raw); expect(replay.status).toBe(200); const value = (await replay.json()).group;
   expect(f.groupCommits).toHaveLength(2);
   const location = `${target.partitionArn}/GROUP#${value.id}/STATE`; expect(f.cells.get(location)?.revision?.N).toBe('1');
+});
+
+it('registers only the trusted verified subject profile and never upgrades pending admission on replay', async () => {
+  const f = await fixture(syntheticEmailKey); const a = await api(f, { authenticate: async () => actor('new'),
+    registrationProfile: async () => ({ subject: 'new', email: ' NEW@example.invalid ', verified: true }) });
+  const response = await a.post('/account/register', { displayName: ' New owner ' }); expect(response.status).toBe(200);
+  const value = await response.json(); expect(value).toEqual({ account: { status: 'PENDING', displayName: 'New owner', version: 1 } });
+  expect(JSON.stringify(value)).not.toMatch(/subject|email|hash|revision/);
+  expect(await (await a.post('/account/register', { displayName: 'Other' })).json()).toEqual(value);
+  expect((await a.post('/groups', { name: 'Garden', idempotencyKey: 'create' })).status).toBe(403);
+  expect(response.headers.get('cache-control')).toBe('no-store');
+});
+
+it('fails closed on missing, mismatched, unverified and failed profile providers and rejects caller profile/approval fields', async () => {
+  const f = await fixture(syntheticEmailKey); const reads = vi.spyOn(f.groups, 'readMany');
+  const absent = await api(f); expect((await absent.post('/account/register', { displayName: 'New', email: 'iris@example.invalid' })).status).toBe(403);
+  for (const profile of [null, { subject: 'other', email: 'iris@example.invalid', verified: true }, { subject: 'iris', email: 'iris@example.invalid', verified: false }]) {
+    const a = await api(f, { registrationProfile: async () => profile }); expect((await a.post('/account/register', { displayName: 'New' })).status).toBe(403);
+  }
+  const throwing = await api(f, { registrationProfile: async () => { throw new Error('PRIVATE_PROFILE_DIAGNOSTIC'); } });
+  const failed = await throwing.post('/account/register', { displayName: 'New' }); expect(failed.status).toBe(403); expect(await failed.text()).not.toContain('PRIVATE');
+  const valid = await api(f, { registrationProfile: async () => ({ subject: 'iris', email: 'iris@example.invalid', verified: true }) });
+  expect((await valid.post('/account/register', { displayName: 'New', status: 'APPROVED', subject: 'other' })).status).toBe(422);
+  expect(reads).not.toHaveBeenCalled(); expect(f.groupCommits).toEqual([]);
+});
+
+it('keeps unresolved registration providers within the shared authentication limit and performs no late storage after timeout', async () => {
+  const f = await fixture(syntheticEmailKey); const reads = vi.spyOn(f.groups, 'readMany');
+  let release!: (profile: { subject: string; email: string; verified: boolean }) => void;
+  const held = new Promise<{ subject: string; email: string; verified: boolean }>(resolve => { release = resolve; });
+  const provider = vi.fn(async () => held); const a = await api(f, { authTimeoutMs: 20, maxConcurrentRequests: 1, registrationProfile: provider });
+  const response = await a.post('/account/register', { displayName: 'New' }); expect(response.status).toBe(503); expect(provider).toHaveBeenCalledTimes(1);
+  expect((await a.get('/account')).status).toBe(503); expect(reads).not.toHaveBeenCalled(); expect(f.groupCommits).toEqual([]);
+  release({ subject: 'iris', email: 'iris@example.invalid', verified: true }); await new Promise<void>(resolve => setTimeout(resolve, 1));
+  expect(reads).not.toHaveBeenCalled(); expect(f.groupCommits).toEqual([]); expect((await a.get('/account')).status).toBe(200);
+});
+
+it('returns invitation secrets only to the organizer and binds HTTP acceptance/replay/removal to the intended current account', async () => {
+  const f = await fixture(syntheticEmailKey); const a = await api(f, { invitationToken: () => 'a'.repeat(43) });
+  expect((await a.post('/groups/garden/invite', { email: 'luca@example.invalid', replace: false }, 'omar')).status).toBe(403);
+  const response = await a.post('/groups/garden/invite', { email: 'luca@example.invalid', replace: false }); expect(response.status).toBe(200);
+  const invitation = (await response.json()).invitation; expect(invitation.delivery).toBe('COPY_LINK'); expect(invitation.token).toBe('a'.repeat(43));
+  expect(await (await a.get('/groups/garden')).text()).not.toMatch(/a{43}|tokenHash|recipientHash|emailHash/);
+  expect((await a.post('/groups/accept', { token: invitation.token }, 'omar')).status).toBe(404);
+  const joined = await a.post('/groups/accept', { token: invitation.token }, 'luca'); expect(joined.status).toBe(200); const group = (await joined.json()).group;
+  expect(group.version).toBe(2); expect(group.members).toHaveLength(3);
+  expect(await (await a.post('/groups/accept', { token: invitation.token }, 'luca')).json()).toEqual({ group });
+  expect((await a.post('/groups/garden/remove', { memberId: partitionMemberId('luca'), version: 2 })).status).toBe(200);
+  expect((await a.post('/groups/accept', { token: invitation.token }, 'luca')).status).toBe(404);
+  expect((await a.get('/decisions/decision/public')).status).toBe(409);
+});
+
+it('rechecks recipient disable at the actual HTTP join and sanitizes an unknown applied join without automatic retry', async () => {
+  for (const change of ['disabled', 'unknown'] as const) {
+    const f = await fixture(syntheticEmailKey); const a = await api(f, { invitationToken: () => 'a'.repeat(43) });
+    const invitation = (await (await a.post('/groups/garden/invite', { email: 'luca@example.invalid', replace: false })).json()).invitation;
+    let once = true;
+    if (change === 'disabled') f.beforeGroupCommit(() => { if (once) { once = false; f.change('ACCOUNT#luca', value => { value.status = 'DISABLED'; }); } });
+    else f.afterGroupCommit(() => { if (once) { once = false; throw new Error('PRIVATE_JOIN_DIAGNOSTIC'); } });
+    const before = f.groupCommits.length; const response = await a.post('/groups/accept', { token: invitation.token }, 'luca');
+    expect(response.status).toBe(change === 'disabled' ? 403 : 503); expect(await response.text()).not.toContain('PRIVATE'); expect(f.groupCommits).toHaveLength(before + 1);
+    if (change === 'disabled') expect([...f.cells.keys()].some(key => key.endsWith('/MEMBER#luca/GROUP#garden'))).toBe(false);
+    else { const retry = await a.post('/groups/accept', { token: invitation.token }, 'luca'); expect(retry.status).toBe(200); expect((await retry.json()).group.version).toBe(2); }
+  }
+});
+
+it('rejects malformed invitation/acceptance envelopes and missing HMAC configuration without revealing provider or directory data', async () => {
+  const f = await fixture(syntheticEmailKey); const a = await api(f);
+  expect((await a.post('/groups/garden/invite', { email: 'bad', replace: false })).status).toBe(422);
+  expect((await a.post('/groups/garden/invite', { email: 'luca@example.invalid', replace: false, organizer: 'iris' })).status).toBe(422);
+  expect((await a.post('/groups/accept', { token: 'short' }, 'luca')).status).toBe(422);
+  expect(f.groupCommits).toEqual([]);
+  const noKey = await api(await fixture()); const response = await noKey.post('/groups/garden/invite', { email: 'luca@example.invalid', replace: false });
+  expect(response.status).toBe(503); expect(await response.text()).not.toMatch(/email|INVITATION#|recipientHash/);
 });
 
 it('uses only the injected verified participant resolver and rejects wire impersonation before any storage', async () => {

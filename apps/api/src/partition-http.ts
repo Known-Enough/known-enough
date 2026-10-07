@@ -10,6 +10,10 @@ type ErrorCode = Extract<KE.DecisionCommandResult, { ok: false }>['error']['code
 export interface PartitionParticipantApiOptions {
   /** Trusted server resolver: verify access tokens; never map caller-selected identity headers. */
   authenticate: (request: IncomingMessage, signal: AbortSignal) => Promise<TrustedPrincipal | null>;
+  /** Trusted server lookup from authenticated credentials; never a caller-provided profile. */
+  registrationProfile?: (request: IncomingMessage, signal: AbortSignal) => Promise<{ subject: string; email: string; verified: boolean } | null>;
+  emailKey?: string;
+  invitationToken?: () => string;
   groups: PartitionTransport;
   decisions: PartitionDecisionTransport;
   decisionArn: string;
@@ -91,7 +95,10 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
   const authenticate = options.authenticate;
   if (typeof authenticate !== 'function') throw new Error('PARTITION_HTTP_INVALID');
   const clock = { now: options.clock.now.bind(options.clock) }; const ids = { next: options.ids.next.bind(options.ids) };
-  const session = createPartitionGroupSession(options.groups);
+  const registrationProfile = options.registrationProfile;
+  const session = createPartitionGroupSession(options.groups, { now: () => Date.parse(clock.now()),
+    ...(options.emailKey === undefined ? {} : { emailKey: options.emailKey }),
+    ...(options.invitationToken === undefined ? {} : { token: options.invitationToken }) });
   const repositories = createPartitionDecisionRepository({ decisionArn: options.decisionArn, partitionArn: options.partitionArn,
     groups: options.groups, transport: options.decisions });
   let active = 0; let authenticating = 0;
@@ -134,10 +141,29 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
         const url = URL.parse(request.url ?? '/', 'http://local.invalid');
         if (!url || url.search || url.hash) return reject('INVALID_COMMAND');
-        const group = /^\/groups\/([A-Za-z0-9_-]{1,80})(\/remove)?$/.exec(url.pathname);
+        const group = /^\/groups\/([A-Za-z0-9_-]{1,80})(\/(?:remove|invite))?$/.exec(url.pathname);
         const decision = /^\/decisions\/([A-Za-z0-9_-]{1,80})\/(public|me|commands)$/.exec(url.pathname);
         if (request.method === 'GET' && url.pathname === '/account') {
           send(response, 200, { account: await session.status(principal) }); return;
+        }
+        if (request.method === 'POST' && url.pathname === '/account/register') {
+          if (!registrationProfile) return reject('FORBIDDEN');
+          if (authenticating >= concurrency) return reject('RETRYABLE_SERVER_ERROR');
+          authenticating++;
+          const pending = Promise.resolve().then(() => registrationProfile(request, controller.signal)).finally(() => { authenticating--; });
+          let profile;
+          try { profile = await bounded(pending, authMs, controller); }
+          catch (error) { if (controller.signal.aborted) throw error; return reject('FORBIDDEN'); }
+          if (!profile || profile.subject !== principal.subject || profile.verified !== true || typeof profile.email !== 'string') return reject('FORBIDDEN');
+          const verifiedProfile = { subject: principal.subject, email: profile.email, verified: true };
+          const raw = await body(request, maximum, bodyMs, controller);
+          if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
+          send(response, 200, { account: await session.register(principal, verifiedProfile, raw) }); return;
+        }
+        if (request.method === 'POST' && url.pathname === '/groups/accept') {
+          const raw = await body(request, maximum, bodyMs, controller);
+          if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
+          send(response, 200, { group: await session.accept(principal, raw) }); return;
         }
         if (request.method === 'POST' && url.pathname === '/groups') {
           const raw = await body(request, maximum, bodyMs, controller);
@@ -150,7 +176,8 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         if (group && request.method === 'POST' && group[2]) {
           const raw = await body(request, maximum, bodyMs, controller);
           if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
-          send(response, 200, { group: await session.remove(principal, group[1]!, raw) }); return;
+          if (group[2] === '/invite') send(response, 200, { invitation: await session.invite(principal, group[1]!, raw) });
+          else send(response, 200, { group: await session.remove(principal, group[1]!, raw) }); return;
         }
         if (!decision || (request.method === 'GET' ? decision[2] === 'commands' : request.method !== 'POST' || decision[2] !== 'commands')) return reject('NOT_FOUND');
         // Fresh request-specific repository; no shared principal, raw application or provisioning port escapes.
