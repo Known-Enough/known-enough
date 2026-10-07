@@ -166,8 +166,8 @@ it('rejects a corrupted journal revision that cannot follow its recorded batch h
   expect(store.commits).toBe(count); expect(store.targets.size).toBe(0);
 });
 
-it('rejects a control claim that would exhaust its safe revision before preservation or commit', async () => {
-  const store = storage(); store.control = { ...store.control, revision: Number.MAX_SAFE_INTEGER - 1 };
+it.each([1, 2])('reserves freeze/activation control revisions before preservation or commit (remaining %s)', async remaining => {
+  const store = storage(); store.control = { ...store.control, revision: Number.MAX_SAFE_INTEGER - remaining };
   await expect(store.runner().prepare()).rejects.toThrow('MIGRATION_RUN_INVALID');
   expect(store.saves).toBe(0); expect(store.commits).toBe(0); expect(store.targets.size).toBe(0);
 });

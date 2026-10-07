@@ -193,7 +193,7 @@ it('joins the coordinator with actual encoded transaction/read requests and resu
     return {};
   });
   const runner = () => createPartitionMigrationRunner(data.ports(), data.plan.manifestBytes, data.expected, { actorId: 143764700, sourceSha });
-  await runner().prepare(); await expect(runner().step()).rejects.toThrow('MIGRATION_COMMIT_UNKNOWN');
+  await runner().prepare(); await data.ports().freeze(); await expect(runner().step()).rejects.toThrow('MIGRATION_COMMIT_UNKNOWN');
   expect((await runner().step()).nextBatch).toBe(2);
   expect((await runner().step()).state).toBe('COPIED');
   expect((await runner().step()).completedRows).toBe(data.plan.rowCount);

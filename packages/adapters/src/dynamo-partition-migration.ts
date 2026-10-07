@@ -4,8 +4,8 @@ import { z } from 'zod';
 import { DynamoDBClient, GetItemCommand, BatchGetItemCommand, TransactWriteItemsCommand,
   type TransactWriteItem } from '@aws-sdk/client-dynamodb';
 import { loadPartitionMigration, type PartitionMigrationExpected } from './partition-migration.ts';
-import { MigrationControlSchema, MigrationJournalSchema, MigrationRunError,
-  type MigrationAtomicCommit, type MigrationControl, type MigrationRunnerPorts } from './partition-migration-runner.ts';
+import { MigrationControlSchema, MigrationJournalSchema, MigrationRunError, migrationIO, migrationCall,
+  type MigrationAtomicCommit, type MigrationControl, type MigrationJournal, type MigrationRunnerPorts } from './partition-migration-runner.ts';
 import { partitionDynamoWrites, type PartitionKey, type PartitionRow } from './partitioned-group-repository.ts';
 
 // Inactive concrete port; verified workflow identity and installed resource checks precede construction.
@@ -40,19 +40,57 @@ const expectedRecord = (value: { revision: number }) => ({
 });
 const absent = { ConditionExpression: 'attribute_not_exists(PK)' };
 
+export interface DynamoPartitionMigrationPorts extends MigrationRunnerPorts {
+  /** Operations only, after a compatible service is installed. Never a public HTTP authority. */
+  freeze(options?: { timeoutMs?: number; maxRequests?: number }): Promise<MigrationControl>;
+  activate(options?: { timeoutMs?: number; maxRequests?: number }): Promise<MigrationControl>;
+}
 export function createDynamoPartitionMigrationPorts(manifestBytes: Buffer, expected: PartitionMigrationExpected,
-  verifiedTarget: { account: string; region: string }, manifests: MigrationRunnerPorts['manifests']): MigrationRunnerPorts {
+  verifiedTarget: { account: string; region: string }, manifests: MigrationRunnerPorts['manifests']): DynamoPartitionMigrationPorts {
   if (!isDeepStrictEqual(verifiedTarget, { account: PARTITION_MIGRATION_RESOURCES.account,
     region: PARTITION_MIGRATION_RESOURCES.region }) || typeof manifests?.read !== 'function'
     || typeof manifests?.preserve !== 'function') invalid();
   const binding = structuredClone(expected);
   const plan = loadPartitionMigration(Buffer.from(manifestBytes), binding);
+  if (binding.sourceRevision > Number.MAX_SAFE_INTEGER - 2) invalid();
   const rows = new Map(plan.batches.flat().map(row => [code(row.key), row]));
   const journalKey = { PK: `PARTITION#${plan.planHash}`, SK: 'JOURNAL' };
   const emptyControl: MigrationControl = { schemaVersion: 1, account: PARTITION_MIGRATION_RESOURCES.account,
     region: PARTITION_MIGRATION_RESOURCES.region, table: 'KnownEnoughPartitions', revision: 0, active: false, planHash: null };
   const client = new DynamoDBClient({ region: PARTITION_MIGRATION_RESOURCES.region, maxAttempts: 1,
     endpoint: 'https://dynamodb.us-east-1.amazonaws.com' });
+  const markerSchema = z.strictObject({ schemaVersion: z.literal(1), kind: z.literal('PARTITION_MIGRATION'),
+    phase: z.enum(['FROZEN', 'ACTIVE']), planHash: z.string(), manifestHash: z.string(), manifestVersion: z.string(),
+    sourceSha: z.string(), sourceRevision: z.number(), sourceHash: z.string(),
+    account: z.literal('092954139775'), region: z.literal('us-east-1'), table: z.literal('KnownEnoughPartitions') });
+  function marker(journal: MigrationJournal, phase: 'FROZEN' | 'ACTIVE') {
+    return { schemaVersion: 1 as const, kind: 'PARTITION_MIGRATION' as const, phase, planHash: plan.planHash,
+      manifestHash: binding.manifestHash, manifestVersion: journal.manifestVersion, sourceSha: binding.sourceSha,
+      sourceRevision: binding.sourceRevision, sourceHash: binding.sourceHash,
+      account: PARTITION_MIGRATION_RESOURCES.account, region: PARTITION_MIGRATION_RESOURCES.region,
+      table: 'KnownEnoughPartitions' as const };
+  }
+  function sourceGuard(version: number, payload: string) {
+    return { ConditionExpression: '#v = :v AND #p = :p', ExpressionAttributeNames: { '#v': 'version', '#p': 'payload' },
+      ExpressionAttributeValues: { ':v': { N: String(version) }, ':p': { S: payload } } };
+  }
+  function legacy(raw: unknown) {
+    const item = legacyEnvelope.safeParse(raw);
+    if (!item.success || item.data.PK.S !== sourceKey.PK || item.data.SK.S !== sourceKey.SK
+      || Buffer.byteLength(item.data.payload.S) > 300_000 || !Number.isSafeInteger(Number(item.data.version.N))) return invalid();
+    return { version: Number(item.data.version.N), payload: Buffer.from(item.data.payload.S, 'utf8') };
+  }
+  function checkedJournal(raw: unknown) {
+    const parsed = MigrationJournalSchema.safeParse(raw); if (!parsed.success) return invalid();
+    const journal = parsed.data; const index = journal.nextBatch;
+    if (journal.planHash !== plan.planHash || journal.manifestHash !== binding.manifestHash
+      || journal.sourceSha !== binding.sourceSha || journal.sourceRevision !== binding.sourceRevision
+      || journal.sourceHash !== binding.sourceHash || journal.rowCount !== plan.rowCount
+      || index > plan.batches.length || journal.revision !== index + 1
+      || journal.completedRows !== plan.batches.slice(0, index).flat().length
+      || journal.state !== (index === plan.batches.length ? 'COPIED' : index === 0 ? 'PREPARED' : 'APPLYING')) return invalid();
+    return journal;
+  }
   function checkedControl(raw: unknown) {
     const value = MigrationControlSchema.safeParse(raw);
     if (!value.success || value.data.revision === Number.MAX_SAFE_INTEGER || value.data.active
@@ -79,7 +117,7 @@ export function createDynamoPartitionMigrationPorts(manifestBytes: Buffer, expec
     let control: TransactWriteItem;
     if (prepare) {
       const claimed = checkedControl(request.control.next);
-      if (current.planHash !== null || !isDeepStrictEqual(claimed,
+      if (current.planHash !== null || current.revision > Number.MAX_SAFE_INTEGER - 3 || !isDeepStrictEqual(claimed,
         { ...current, revision: current.revision + 1, planHash: plan.planHash })) return invalid();
       control = { Put: { TableName: PARTITION_MIGRATION_RESOURCES.target, Item: encoded(controlKey, claimed),
         ...(current.revision === 0 ? absent : expectedRecord(current)) } };
@@ -94,9 +132,8 @@ export function createDynamoPartitionMigrationPorts(manifestBytes: Buffer, expec
       state: priorBatch === 0 ? 'PREPARED' : 'APPLYING' });
     const writes: TransactWriteItem[] = [
       { ConditionCheck: { TableName: PARTITION_MIGRATION_RESOURCES.source, Key: attributes(sourceKey),
-        ConditionExpression: '#v = :v AND #p = :p', ExpressionAttributeNames: { '#v': 'version', '#p': 'payload' },
-        ExpressionAttributeValues: { ':v': { N: String(binding.sourceRevision) },
-          ':p': { S: plan.sourceSnapshot.payload.toString('utf8') } } } },
+        ...sourceGuard(binding.sourceRevision + (prepare ? 0 : 1),
+          prepare ? plan.sourceSnapshot.payload.toString('utf8') : JSON.stringify(marker(next, 'FROZEN'))) } },
       control,
       { Put: { TableName: PARTITION_MIGRATION_RESOURCES.journal, Item: encoded(journalKey, next),
         ...(prepare ? absent : expectedRecord(prior!)) } },
@@ -131,13 +168,19 @@ export function createDynamoPartitionMigrationPorts(manifestBytes: Buffer, expec
       { abortSignal: context.signal })).Item; }
     catch (error) { throw new MigrationRunError('MIGRATION_STORAGE_UNAVAILABLE', { cause: error }); }
   }
-  return {
+  const ports: DynamoPartitionMigrationPorts = {
     manifests,
     source: async context => {
-      const item = legacyEnvelope.safeParse(await get(PARTITION_MIGRATION_RESOURCES.source, sourceKey, context));
-      if (!item.success || item.data.PK.S !== sourceKey.PK || item.data.SK.S !== sourceKey.SK
-        || Buffer.byteLength(item.data.payload.S) > 300_000 || !Number.isSafeInteger(Number(item.data.version.N))) return invalid();
-      return { version: Number(item.data.version.N), payload: Buffer.from(item.data.payload.S, 'utf8') };
+      const stored = legacy(await get(PARTITION_MIGRATION_RESOURCES.source, sourceKey, context));
+      if (stored.version === binding.sourceRevision && stored.payload.equals(plan.sourceSnapshot.payload)) return stored;
+      let value: z.infer<typeof markerSchema>;
+      try { value = markerSchema.parse(JSON.parse(stored.payload.toString('utf8'))); }
+      catch { return invalid(); }
+      context.request();
+      const journal = checkedJournal(await ports.journal(plan.planHash, context));
+      if (stored.version !== binding.sourceRevision + 1 || !isDeepStrictEqual(value, marker(journal, 'FROZEN'))
+        || stored.payload.toString('utf8') !== JSON.stringify(value)) return invalid();
+      return { version: binding.sourceRevision, payload: Buffer.from(plan.sourceSnapshot.payload) };
     },
     control: async context => {
       const item = await get(PARTITION_MIGRATION_RESOURCES.target, controlKey, context);
@@ -189,20 +232,73 @@ export function createDynamoPartitionMigrationPorts(manifestBytes: Buffer, expec
       }
       return keys.map(key => result.get(code(key)) ?? null);
     },
+    freeze: options => transition('FROZEN', options),
+    activate: options => transition('ACTIVE', options),
     commit: async (request, context) => {
       const TransactItems = transaction(request);
-      if (context.signal.aborted) throw new MigrationRunError('MIGRATION_TIMEOUT');
-      const ClientRequestToken = createHash('sha256').update(JSON.stringify(TransactItems)).digest('hex').slice(0, 32);
-      try { await client.send(new TransactWriteItemsCommand({ TransactItems, ClientRequestToken }),
-        { abortSignal: context.signal }); return true; }
-      catch (error) {
-        if (error instanceof Error && error.name === 'TransactionConflictException') return false;
-        if (error instanceof Error && error.name === 'TransactionCanceledException' && 'CancellationReasons' in error
-          && Array.isArray(error.CancellationReasons) && error.CancellationReasons.length === TransactItems.length
-          && error.CancellationReasons.some(reason => ['ConditionalCheckFailed', 'TransactionConflict'].includes(reason?.Code))
-          && error.CancellationReasons.every(reason => ['None', 'ConditionalCheckFailed', 'TransactionConflict'].includes(reason?.Code))) return false;
-        throw new MigrationRunError('MIGRATION_STORAGE_UNAVAILABLE', { cause: error });
-      }
+      return submit(TransactItems, context);
     },
   };
+  async function submit(TransactItems: TransactWriteItem[], context: Parameters<MigrationRunnerPorts['source']>[0]) {
+    if (context.signal.aborted) throw new MigrationRunError('MIGRATION_TIMEOUT');
+    const ClientRequestToken = createHash('sha256').update(JSON.stringify(TransactItems)).digest('hex').slice(0, 32);
+    try { await client.send(new TransactWriteItemsCommand({ TransactItems, ClientRequestToken }),
+      { abortSignal: context.signal }); return true; }
+    catch (error) {
+      if (error instanceof Error && error.name === 'TransactionConflictException') return false;
+      if (error instanceof Error && error.name === 'TransactionCanceledException' && 'CancellationReasons' in error
+        && Array.isArray(error.CancellationReasons) && error.CancellationReasons.length === TransactItems.length
+        && error.CancellationReasons.some(reason => ['ConditionalCheckFailed', 'TransactionConflict'].includes(reason?.Code))
+        && error.CancellationReasons.every(reason => ['None', 'ConditionalCheckFailed', 'TransactionConflict'].includes(reason?.Code))) return false;
+      throw new MigrationRunError('MIGRATION_STORAGE_UNAVAILABLE', { cause: error });
+    }
+  }
+  async function transition(phase: 'FROZEN' | 'ACTIVE', options: { timeoutMs?: number; maxRequests?: number } = {}) {
+    const io = migrationIO(options);
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const stored = legacy(await migrationCall(io, () => get(PARTITION_MIGRATION_RESOURCES.source, sourceKey, io)));
+      const parsed = MigrationControlSchema.safeParse(await migrationCall(io, () => ports.control(io)));
+      if (!parsed.success || parsed.data.planHash !== plan.planHash || parsed.data.revision < 1) return invalid();
+      const control = parsed.data;
+      const journal = checkedJournal(await migrationCall(io, () => ports.journal(plan.planHash, io)));
+      const recovery = await migrationCall(io, () => manifests.read(binding.manifestHash, journal.manifestVersion, io));
+      if (!recovery || recovery.versionId !== journal.manifestVersion || !Buffer.isBuffer(recovery.bytes)) {
+        throw new MigrationRunError('MIGRATION_RECOVERY_INVALID');
+      }
+      try { loadPartitionMigration(recovery.bytes, binding); }
+      catch { throw new MigrationRunError('MIGRATION_RECOVERY_INVALID'); }
+      const frozen = JSON.stringify(marker(journal, 'FROZEN')); const active = JSON.stringify(marker(journal, 'ACTIVE'));
+      const already = stored.version === binding.sourceRevision + (phase === 'FROZEN' ? 1 : 2)
+        && stored.payload.toString('utf8') === (phase === 'FROZEN' ? frozen : active);
+      if (control.active !== (phase === 'ACTIVE' && already)
+        || (already && control.revision < (phase === 'FROZEN' ? 2 : 3))) return invalid();
+      if (phase === 'ACTIVE' && journal.state !== 'COPIED') throw new MigrationRunError('MIGRATION_JOURNAL_INVALID');
+      if (!already && (phase === 'FROZEN'
+        ? journal.nextBatch !== 0 || stored.version !== binding.sourceRevision || !stored.payload.equals(plan.sourceSnapshot.payload)
+        : stored.version !== binding.sourceRevision + 1 || stored.payload.toString('utf8') !== frozen)) {
+        throw new MigrationRunError('MIGRATION_SOURCE_CHANGED');
+      }
+      const required = phase === 'FROZEN' && !already ? plan.batches.flat()
+        : plan.batches.slice(0, journal.nextBatch).flat();
+      for (let index = 0; index < required.length; index += 100) {
+        const batch = required.slice(index, index + 100);
+        const actual = await migrationCall(io, () => ports.targets(batch.map(row => row.key), io));
+        if (actual.length !== batch.length || actual.some((value, n) => phase === 'FROZEN' && !already
+          ? value !== null : !isDeepStrictEqual(value, batch[n]!.next))) throw new MigrationRunError('MIGRATION_TARGET_CORRUPT');
+      }
+      if (already) return structuredClone(control);
+      if (control.revision > Number.MAX_SAFE_INTEGER - (phase === 'FROZEN' ? 2 : 1)) return invalid();
+      const next = { ...control, revision: control.revision + 1, active: phase === 'ACTIVE' };
+      const TransactItems: TransactWriteItem[] = [
+        { Put: { TableName: PARTITION_MIGRATION_RESOURCES.source, Item: { ...attributes(sourceKey),
+          version: { N: String(stored.version + 1) }, payload: { S: phase === 'FROZEN' ? frozen : active } },
+          ...sourceGuard(stored.version, stored.payload.toString('utf8')) } },
+        { Put: { TableName: PARTITION_MIGRATION_RESOURCES.target, Item: encoded(controlKey, next), ...expectedRecord(control) } },
+        { ConditionCheck: { TableName: PARTITION_MIGRATION_RESOURCES.journal, Key: attributes(journalKey), ...expectedRecord(journal) } },
+      ];
+      if (await migrationCall(io, () => submit(TransactItems, io), true)) return next;
+    }
+    throw new MigrationRunError('MIGRATION_CONFLICT');
+  }
+  return ports;
 }

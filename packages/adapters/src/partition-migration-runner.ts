@@ -48,7 +48,7 @@ export class MigrationRunError extends Error {
 }
 function fail(code: MigrationRunError['code']): never { throw new MigrationRunError(code); }
 const digest = (bytes: Buffer) => createHash('sha256').update(bytes).digest('hex');
-function context(options: { timeoutMs?: number; maxRequests?: number }): PartitionIOContext {
+export function migrationIO(options: { timeoutMs?: number; maxRequests?: number }): PartitionIOContext {
   const timeoutMs = options.timeoutMs ?? 20_000; const maxRequests = options.maxRequests ?? 64;
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 20_000
     || !Number.isSafeInteger(maxRequests) || maxRequests < 1 || maxRequests > 64) fail('MIGRATION_RUN_INVALID');
@@ -60,7 +60,7 @@ function context(options: { timeoutMs?: number; maxRequests?: number }): Partiti
     if (++requests > maxRequests) { const error = new MigrationRunError('MIGRATION_REQUEST_LIMIT'); abort.abort(error); throw error; }
   } };
 }
-async function call<T>(io: PartitionIOContext, work: () => Promise<T>, commit = false): Promise<T> {
+export async function migrationCall<T>(io: PartitionIOContext, work: () => Promise<T>, commit = false): Promise<T> {
   io.request(); let submitted = false;
   try {
     return await new Promise<T>((resolve, reject) => {
@@ -84,15 +84,15 @@ export function createPartitionMigrationRunner(ports: MigrationRunnerPorts, mani
   const trusted = z.strictObject({ actorId: actor, sourceSha: z.string().regex(/^[a-f0-9]{40}$/) }).safeParse(authority);
   if (!trusted.success || trusted.data.sourceSha !== expected.sourceSha) fail('MIGRATION_RUN_INVALID');
   const binding = structuredClone(expected); const bytes = Buffer.from(manifestBytes);
-  const plan = loadPartitionMigration(bytes, binding); context(options);
+  const plan = loadPartitionMigration(bytes, binding); migrationIO(options);
   const allRows = plan.batches.flat();
   async function current(io: PartitionIOContext) {
-    const source = await call(io, () => ports.source(io));
+    const source = await migrationCall(io, () => ports.source(io));
     if (!source || !Buffer.isBuffer(source.payload) || source.payload.length > 300_000
       || source.version !== binding.sourceRevision || digest(source.payload) !== binding.sourceHash) fail('MIGRATION_SOURCE_CHANGED');
-    const parsed = controlSchema.safeParse(await call(io, () => ports.control(io)));
+    const parsed = controlSchema.safeParse(await migrationCall(io, () => ports.control(io)));
     if (!parsed.success || parsed.data.revision === Number.MAX_SAFE_INTEGER
-      || (parsed.data.planHash === null && parsed.data.revision === Number.MAX_SAFE_INTEGER - 1)) fail('MIGRATION_RUN_INVALID');
+      || (parsed.data.planHash === null && parsed.data.revision > Number.MAX_SAFE_INTEGER - 3)) fail('MIGRATION_RUN_INVALID');
     if (parsed.data.active || (parsed.data.planHash !== null && parsed.data.planHash !== plan.planHash)) fail('MIGRATION_TARGET_CONFLICT');
     return parsed.data;
   }
@@ -110,7 +110,7 @@ export function createPartitionMigrationRunner(ports: MigrationRunnerPorts, mani
     return journal;
   }
   async function recovery(manifestVersion: string, io: PartitionIOContext) {
-    const response = await call(io, () => ports.manifests.read(binding.manifestHash, manifestVersion, io));
+    const response = await migrationCall(io, () => ports.manifests.read(binding.manifestHash, manifestVersion, io));
     if (!response || response.versionId !== manifestVersion || !Buffer.isBuffer(response.bytes)) fail('MIGRATION_RECOVERY_INVALID');
     try { loadPartitionMigration(response.bytes, binding); }
     catch (error) { throw new MigrationRunError('MIGRATION_RECOVERY_INVALID', { cause: error }); }
@@ -118,7 +118,7 @@ export function createPartitionMigrationRunner(ports: MigrationRunnerPorts, mani
   async function targets(rows: PartitionMutation[], missing: boolean, io: PartitionIOContext) {
     for (let start = 0; start < rows.length; start += 100) {
       const batch = rows.slice(start, start + 100);
-      const values = await call(io, () => ports.targets(batch.map(item => item.key), io));
+      const values = await migrationCall(io, () => ports.targets(batch.map(item => item.key), io));
       if (!Array.isArray(values) || values.length !== batch.length) fail('MIGRATION_TARGET_CORRUPT');
       if (values.some((value, n) => missing ? value !== null : !isDeepStrictEqual(value, batch[n]!.next))) {
         fail(missing ? 'MIGRATION_TARGET_CONFLICT' : 'MIGRATION_TARGET_CORRUPT');
@@ -134,14 +134,14 @@ export function createPartitionMigrationRunner(ports: MigrationRunnerPorts, mani
   });
   return {
     async prepare(): Promise<MigrationJournal> {
-      const io = context(options);
+      const io = migrationIO(options);
       let control = await current(io);
-      const preserved = await call(io, () => ports.manifests.preserve(Buffer.from(bytes), binding.manifestHash, io));
+      const preserved = await migrationCall(io, () => ports.manifests.preserve(Buffer.from(bytes), binding.manifestHash, io));
       if (!preserved || !versionId.safeParse(preserved.versionId).success || !Buffer.isBuffer(preserved.bytes)
         || digest(preserved.bytes) !== binding.manifestHash) fail('MIGRATION_RECOVERY_INVALID');
       await recovery(preserved.versionId, io);
       for (let attempt = 0; attempt < 3; attempt++) {
-        const raw = await call(io, () => ports.journal(plan.planHash, io));
+        const raw = await migrationCall(io, () => ports.journal(plan.planHash, io));
         if (raw !== null) {
           const journal = checkedJournal(raw);
           control = await current(io);
@@ -157,18 +157,18 @@ export function createPartitionMigrationRunner(ports: MigrationRunnerPorts, mani
           sourceSha: binding.sourceSha, sourceRevision: binding.sourceRevision, sourceHash: binding.sourceHash,
           rowCount: plan.rowCount, nextBatch: 0, completedRows: 0, state: plan.batches.length ? 'PREPARED' : 'COPIED' };
         const next = { ...control, revision: control.revision + 1, planHash: plan.planHash };
-        if (await call(io, () => ports.commit(request(control, journal, 0, [], next), io), true)) return structuredClone(journal);
+        if (await migrationCall(io, () => ports.commit(request(control, journal, 0, [], next), io), true)) return structuredClone(journal);
         control = await current(io);
       }
       return fail('MIGRATION_CONFLICT');
     },
     /** One successful batch per invocation; a lost response requires a fresh journal/readback resume. */
     async step(): Promise<MigrationJournal> {
-      const io = context(options);
+      const io = migrationIO(options);
       for (let attempt = 0; attempt < 3; attempt++) {
         const control = await current(io);
         if (control.planHash !== plan.planHash) fail('MIGRATION_JOURNAL_INVALID');
-        const journal = checkedJournal(await call(io, () => ports.journal(plan.planHash, io)));
+        const journal = checkedJournal(await migrationCall(io, () => ports.journal(plan.planHash, io)));
         await recovery(journal.manifestVersion, io);
         await targets(plan.batches.slice(0, journal.nextBatch).flat(), false, io);
         if (journal.state === 'COPIED') return structuredClone(journal);
@@ -176,7 +176,7 @@ export function createPartitionMigrationRunner(ports: MigrationRunnerPorts, mani
         const nextBatch = journal.nextBatch + 1;
         const next: MigrationJournal = { ...journal, revision: journal.revision + 1, nextBatch,
           completedRows: journal.completedRows + batch.length, state: nextBatch === plan.batches.length ? 'COPIED' : 'APPLYING' };
-        if (await call(io, () => ports.commit(request(control, next, journal.revision, batch, null), io), true)) return structuredClone(next);
+        if (await migrationCall(io, () => ports.commit(request(control, next, journal.revision, batch, null), io), true)) return structuredClone(next);
       }
       return fail('MIGRATION_CONFLICT');
     },
