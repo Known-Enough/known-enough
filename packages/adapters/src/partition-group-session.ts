@@ -10,6 +10,8 @@ import { createPartitionedGroupRepository, checkPartitionRow, partitionAccountKe
 // Inactive participant boundary: trusted identity and managed activation/atomic decision selection are external.
 const id = z.string().regex(/^[A-Za-z0-9_-]{1,80}$/);
 const remove = z.strictObject({ memberId: id, version: z.number().int().positive().max(Number.MAX_SAFE_INTEGER) });
+const create = z.strictObject({ name: z.string().max(160).refine(value => [...value].every(character => character.charCodeAt(0) >= 32 && character.charCodeAt(0) !== 127))
+  .transform(value => value.trim()).pipe(z.string().min(1).max(80)), idempotencyKey: id });
 const deny = (code: 'FORBIDDEN' | 'NOT_FOUND' | 'INVALID_COMMAND' | 'STALE_CONTEXT'): never => {
   throw new KnownEnoughApplicationError(code);
 };
@@ -51,14 +53,14 @@ export function createPartitionGroupSession(transport: PartitionTransport,
   partitionIO(limits); const clock = options.now ?? Date.now;
   const repository = createPartitionedGroupRepository(transport, limits);
   function now() { const time = clock(); if (!Number.isSafeInteger(time) || time < 0) throw new PartitionSessionError('SESSION_INVALID'); return time; }
-  async function scope(who: string, selected: string, io: PartitionIOContext): Promise<PartitionScope> {
+  async function scope(who: string, selected: string, io: PartitionIOContext, allowMissing = false): Promise<PartitionScope> {
     const keys = [partitionAccountKey(who), partitionGroupKey(selected)];
     const rows = transport.readMany ? await partitionCall(io, () => transport.readMany!(keys, io))
       : [await partitionCall(io, () => transport.read(keys[0]!, io)), await partitionCall(io, () => transport.read(keys[1]!, io))];
     if (!Array.isArray(rows) || rows.length !== 2) throw new PartitionSessionError('SESSION_INVALID');
     const account = rows[0] === null ? null : checkPartitionRow(rows[0], keys[0]!);
     if (account?.kind !== 'ACCOUNT' || account.value.status !== 'APPROVED') return deny('FORBIDDEN');
-    if (rows[1] === null) return deny('NOT_FOUND');
+    if (rows[1] === null) return allowMissing ? { groupId: selected, accountSubjects: [who] } : deny('NOT_FOUND');
     const archived = ArchivedGroupRow.safeParse(rows[1]);
     if (archived.success) {
       if (archived.data.groupId !== selected) throw new PartitionSessionError('SESSION_INVALID');
@@ -70,9 +72,9 @@ export function createPartitionGroupSession(transport: PartitionTransport,
     return { groupId: selected, accountSubjects: [...header.value.members] };
   }
   async function selected<T>(who: string, selected: string, io: PartitionIOContext,
-    work: (resolved: PartitionScope) => Promise<T>): Promise<T> {
+    work: (resolved: PartitionScope) => Promise<T>, allowMissing = false): Promise<T> {
     for (let attempt = 0; attempt < 6; attempt++) {
-      const resolved = await scope(who, selected, io);
+      const resolved = await scope(who, selected, io, allowMissing);
       try { return await work(resolved); }
       catch (error) { if (!(error instanceof PartitionStorageError) || error.code !== 'PARTITION_STALE') throw error; }
     }
@@ -96,6 +98,28 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           const account = state.accounts.find(account => account.subject === who);
           return account ? Groups.AccountSnapshot.parse({ status: account.status, displayName: account.displayName, version: account.version }) : null;
         }, io);
+      });
+    },
+    create(principal: TrustedPrincipal | null, raw: unknown) {
+      return safe(async () => {
+        const who = participant(principal); const request = create.safeParse(raw);
+        if (!request.success) return deny('INVALID_COMMAND');
+        // The verified server subject binds replay; caller identity never chooses the partition.
+        const key = `group-${createHash('sha256').update(JSON.stringify([who, request.data.idempotencyKey])).digest('hex').slice(0, 40)}`;
+        const io = partitionIO(limits);
+        return selected(who, key, io, resolved => repository.transaction(resolved, state => {
+          if (state.accounts.find(account => account.subject === who)?.status !== 'APPROVED') return deny('FORBIDDEN');
+          let group = state.groups.find(group => group.id === key);
+          if (group) {
+            if (group.organizer !== who || !group.members.includes(who)) return deny('NOT_FOUND');
+            if (group.name !== request.data.name) return deny('STALE_CONTEXT');
+          } else {
+            group = { id: key, name: request.data.name, organizer: who, version: 1,
+              members: [who], invitations: [], decisions: [], drafts: [] };
+            state.groups.push(group);
+          }
+          return snapshot(state, group, who);
+        }, io), true);
       });
     },
     snapshot(principal: TrustedPrincipal | null, rawId: string) {

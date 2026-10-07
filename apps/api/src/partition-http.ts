@@ -139,6 +139,11 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         if (request.method === 'GET' && url.pathname === '/account') {
           send(response, 200, { account: await session.status(principal) }); return;
         }
+        if (request.method === 'POST' && url.pathname === '/groups') {
+          const raw = await body(request, maximum, bodyMs, controller);
+          if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
+          send(response, 200, { group: await session.create(principal, raw) }); return;
+        }
         if (group && request.method === 'GET' && !group[2]) {
           send(response, 200, { group: await session.snapshot(principal, group[1]!) }); return;
         }

@@ -31,6 +31,8 @@ async function fixture() {
   }
   const groupKey = { PK: { S: 'GROUP#garden' }, SK: { S: 'STATE' } };
   const groupLocation = where(target.partitionArn, groupKey);
+  let beforeGroupCommit: () => void = () => {}; let afterGroupCommit: () => void = () => {};
+  const groupCommits: unknown[][] = [];
   const stateKey = { PK: { S: 'ROOM#decision' }, SK: { S: 'STATE' } };
   const stateLocation = where(target.decisionArn, stateKey);
   function change(pk: string, update: (value: Record<string, unknown>) => void) {
@@ -42,11 +44,13 @@ async function fixture() {
     read: async key => { const cell = cells.get(`${target.partitionArn}/${key.PK}/${key.SK}`); return cell ? JSON.parse(cell.payload!.S!) : null; },
     readMany: async keys => keys.map(key => { const cell = cells.get(`${target.partitionArn}/${key.PK}/${key.SK}`); return cell ? JSON.parse(cell.payload!.S!) : null; }),
     commit: async changes => {
+      groupCommits.push(structuredClone(changes)); beforeGroupCommit();
       if (!changes.every(item => Number(cells.get(`${target.partitionArn}/${item.key.PK}/${item.key.SK}`)?.revision?.N ?? 0) === item.expected)) return false;
       for (const item of changes) if (item.next) {
         const key = { PK: { S: item.key.PK }, SK: { S: item.key.SK } };
         cells.set(where(target.partitionArn, key), { ...key, revision: { N: String(item.next.revision) }, payload: { S: JSON.stringify(item.next) } });
       }
+      afterGroupCommit();
       return true;
     },
   };
@@ -90,7 +94,8 @@ async function fixture() {
   const initial = await memory.transactionDecision('decision', value => structuredClone(value!));
   const factory = (options: Partial<Parameters<typeof createPartitionDecisionRepository>[0]> = {}) => createPartitionDecisionRepository({ ...target, groups, transport, ...options });
   const current = () => decodeDecisionStateItem(cells.get(stateLocation), 'decision');
-  return { groups, transport, cells, writes, reads, initial, factory, current, groupLocation, stateLocation, change,
+  return { groups, transport, cells, writes, reads, initial, factory, current, groupLocation, stateLocation, change, groupCommits,
+    beforeGroupCommit: (work: typeof beforeGroupCommit) => { beforeGroupCommit = work; }, afterGroupCommit: (work: typeof afterGroupCommit) => { afterGroupCommit = work; },
     beforeWrite: (work: typeof beforeWrite) => { beforeWrite = work; }, afterWrite: (work: typeof afterWrite) => { afterWrite = work; }, beforeRead: (work: typeof beforeRead) => { beforeRead = work; } };
 }
 
@@ -118,6 +123,41 @@ function command(owner: KE.OwnerDecisionSnapshot, id = 'frame-iris'): KE.Decisio
     expected: { contextToken: owner.publicSnapshot.contextToken, semanticVersion: owner.publicSnapshot.semanticVersion,
       controlVersion: owner.controlVersion, ownerVersion: owner.ownerVersion }, payload: { frameVersion: owner.publicSnapshot.frame.frameVersion } };
 }
+
+it('creates and replays a group through the trusted participant HTTP boundary with strict public fields', async () => {
+  const f = await fixture(); const a = await api(f); const raw = { name: '  Garden two  ', idempotencyKey: 'create-garden' };
+  const response = await a.post('/groups', raw); expect(response.status).toBe(200); expect(response.headers.get('cache-control')).toBe('no-store');
+  const value = (await response.json()).group;
+  expect(value).toMatchObject({ name: 'Garden two', version: 1, isOrganizer: true, drafts: [], decisions: [], pendingInvitations: 0 });
+  expect(value.members).toEqual([{ id: partitionMemberId('iris'), displayName: 'IRIS', isOrganizer: true }]);
+  expect(JSON.stringify(value)).not.toMatch(/subject|emailHash|tokenHash|ACCOUNT#|MEMBER#|revision/);
+  const replay = await a.post('/groups', raw); expect(replay.status).toBe(200); expect(await replay.json()).toEqual({ group: value });
+  expect((await a.post('/groups', { ...raw, name: 'Changed' })).status).toBe(409);
+  const other = await a.post('/groups', raw, 'omar'); expect(other.status).toBe(200); expect((await other.json()).group.id).not.toBe(value.id);
+  expect(f.writes).toEqual([]); expect(f.reads).toEqual([]);
+});
+
+it('rejects creation impersonation and malformed bodies, and rechecks account approval at the actual group commit', async () => {
+  const f = await fixture(); const a = await api(f); const raw = { name: 'Garden', idempotencyKey: 'create' };
+  const originalKeys = [...f.cells.keys()].sort();
+  expect((await a.post('/groups', raw, 'unknown', { 'x-subject': 'iris' })).status).toBe(401);
+  expect((await a.post('/groups', { ...raw, organizer: 'omar' })).status).toBe(422);
+  expect(f.groupCommits).toEqual([]);
+  let once = true; f.beforeGroupCommit(() => { if (once) { once = false; f.change('ACCOUNT#iris', value => { value.status = 'DISABLED'; }); } });
+  const response = await a.post('/groups', raw); expect(response.status).toBe(403); expect(f.groupCommits).toHaveLength(1);
+  expect([...f.cells.keys()].sort()).toEqual(originalKeys);
+  expect(f.writes).toEqual([]);
+});
+
+it('returns a sanitized unknown creation result without retry and allows explicit HTTP replay of its committed group', async () => {
+  const f = await fixture(); const a = await api(f); let once = true;
+  f.afterGroupCommit(() => { if (once) { once = false; throw new Error('PRIVATE_GROUP_COMMIT_DIAGNOSTIC'); } });
+  const raw = { name: 'Garden', idempotencyKey: 'create' }; const response = await a.post('/groups', raw);
+  expect(response.status).toBe(503); expect(await response.text()).not.toContain('PRIVATE'); expect(f.groupCommits).toHaveLength(1);
+  const replay = await a.post('/groups', raw); expect(replay.status).toBe(200); const value = (await replay.json()).group;
+  expect(f.groupCommits).toHaveLength(2);
+  const location = `${target.partitionArn}/GROUP#${value.id}/STATE`; expect(f.cells.get(location)?.revision?.N).toBe('1');
+});
 
 it('uses only the injected verified participant resolver and rejects wire impersonation before any storage', async () => {
   const f = await fixture(); const read = vi.spyOn(f.groups, 'readMany'); const a = await api(f);
@@ -203,7 +243,7 @@ it('rejects mismatched IDs, private/unknown command fields, unsupported methods 
   expect(await (await a.post('/decisions/decision/commands', { ...command(owner), decisionId: 'other' })).json())
     .toMatchObject({ requestId: 'frame-iris', error: { code: 'INVALID_COMMAND' } });
   expect((await a.get('/decisions/decision/me?subject=omar')).status).toBe(422);
-  expect((await a.get('/groups/garden/roster')).status).toBe(404); expect((await a.post('/groups', { name: 'x' })).status).toBe(404);
+  expect((await a.get('/groups/garden/roster')).status).toBe(404); expect((await a.post('/groups', { name: 'x' })).status).toBe(422);
   const invalid = await fetch(a.base + '/groups/garden/remove', { method: 'POST', headers: { authorization: 'Bearer iris', 'content-type': 'application/json' }, body: '{' }); expect(invalid.status).toBe(422);
   const method = await fetch(a.base + '/decisions/decision/me', { method: 'DELETE', headers: { authorization: 'Bearer iris' } }); expect(method.status).toBe(404);
   expect(f.current().frameConfirmations).toEqual([]);
