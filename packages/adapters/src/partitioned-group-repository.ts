@@ -1,9 +1,11 @@
 import { z } from 'zod';
 import { Groups } from '@deal-table/contracts';
 import {
-  DynamoDBClient, GetItemCommand, TransactWriteItemsCommand,
+  DynamoDBClient, GetItemCommand, BatchGetItemCommand, TransactWriteItemsCommand,
   type TransactWriteItem,
 } from '@aws-sdk/client-dynamodb';
+import { PartitionDirectoryRow, partitionDirectoryKey, isPartitionDirectoryKey,
+  type PartitionDirectoryClaim, type PartitionDirectoryLookup } from './partition-directory.ts';
 
 // Inactive OPS01 boundary. Runtime selection and legacy callback integration are separate work.
 const id = z.string().regex(/^[A-Za-z0-9_-]{1,80}$/);
@@ -18,15 +20,20 @@ const rowSchema = z.discriminatedUnion('kind', [
   z.strictObject({ ...base, kind: z.literal('GROUP'), value: header }),
   z.strictObject({ ...base, kind: z.literal('DRAFT'), value: Groups.GroupDraft }),
   z.strictObject({ ...base, kind: z.literal('BINDING'), value: binding }),
+  PartitionDirectoryRow,
 ]);
 export type PartitionRow = z.infer<typeof rowSchema>;
+type DomainRow = Exclude<PartitionRow, { kind: 'DIRECTORY' }>;
 export type PartitionKey = { PK: string; SK: string };
 export type PartitionScope = { accountSubjects: string[]; groupId?: string };
 export type PartitionMutation = { key: PartitionKey; expected: number; next: PartitionRow | null };
+export interface PartitionIOContext { signal: AbortSignal; request(): void }
 /** All mutations, including read-only conditions, MUST commit as one atomic transaction. */
 export interface PartitionTransport {
-  read(key: PartitionKey): Promise<unknown | null>;
-  commit(mutations: PartitionMutation[]): Promise<boolean>;
+  read(key: PartitionKey, context?: PartitionIOContext): Promise<unknown | null>;
+  /** Input order preserved, missing rows null; additional underlying requests charge the context. */
+  readMany?(keys: PartitionKey[], context?: PartitionIOContext): Promise<(unknown | null)[]>;
+  commit(mutations: PartitionMutation[], context?: PartitionIOContext): Promise<boolean>;
 }
 export interface PartitionFence {
   assertCurrent(): Promise<void>;
@@ -34,13 +41,38 @@ export interface PartitionFence {
   mutations: PartitionMutation[];
 }
 export class PartitionStorageError extends Error {
-  constructor(readonly code: 'PARTITION_INVALID' | 'PARTITION_CAPACITY' | 'PARTITION_CONFLICT' | 'PARTITION_STALE') {
+  constructor(readonly code: 'PARTITION_INVALID' | 'PARTITION_CAPACITY' | 'PARTITION_CONFLICT' | 'PARTITION_STALE'
+    | 'PARTITION_TIMEOUT' | 'PARTITION_REQUEST_LIMIT' | 'PARTITION_IDENTITY_CONFLICT') {
     super(code); this.name = 'PartitionStorageError';
   }
 }
 const fail = (code: PartitionStorageError['code']): never => { throw new PartitionStorageError(code); };
 const equal = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 const encodedKey = (key: PartitionKey) => `${key.PK}/${key.SK}`;
+function ioContext(options: { timeoutMs?: number; maxRequests?: number } = {}): PartitionIOContext {
+  const timeoutMs = options.timeoutMs ?? 20_000; const maxRequests = options.maxRequests ?? 64;
+  if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 20_000
+    || !Number.isSafeInteger(maxRequests) || maxRequests < 1 || maxRequests > 64) fail('PARTITION_INVALID');
+  let requests = 0;
+  const controller = new globalThis.AbortController();
+  const signal = globalThis.AbortSignal.any([controller.signal, globalThis.AbortSignal.timeout(timeoutMs)]);
+  return { signal, request: () => {
+    if (signal.aborted) fail('PARTITION_TIMEOUT');
+    if (++requests > maxRequests) {
+      const error = new PartitionStorageError('PARTITION_REQUEST_LIMIT'); controller.abort(error); throw error;
+    }
+  } };
+}
+async function bounded<T>(context: PartitionIOContext, work: () => Promise<T>, request = true): Promise<T> {
+  if (request) context.request();
+  if (context.signal.aborted) fail('PARTITION_TIMEOUT');
+  return new Promise<T>((resolve, reject) => {
+    const abort = () => reject(context.signal.reason instanceof PartitionStorageError
+      ? context.signal.reason : new PartitionStorageError('PARTITION_TIMEOUT'));
+    context.signal.addEventListener('abort', abort, { once: true });
+    Promise.resolve().then(work).then(resolve, reject).finally(() => context.signal.removeEventListener('abort', abort));
+  });
+}
 export const partitionAccountKey = (subject: string): PartitionKey => ({ PK: `ACCOUNT#${id.parse(subject)}`, SK: 'STATE' });
 export const partitionGroupKey = (groupId: string): PartitionKey => ({ PK: `GROUP#${id.parse(groupId)}`, SK: 'STATE' });
 const childKey = (groupId: string, kind: 'DRAFT' | 'BINDING', childId: string): PartitionKey => ({
@@ -50,7 +82,8 @@ function checkedRow(raw: unknown, key: PartitionKey): PartitionRow {
   const parsed = rowSchema.safeParse(raw);
   if (!parsed.success) return fail('PARTITION_INVALID');
   const row = parsed.data;
-  const valid = row.kind === 'ACCOUNT' ? equal(key, partitionAccountKey(row.value.subject))
+  const valid = row.kind === 'DIRECTORY' ? equal(key, partitionDirectoryKey(row.value))
+    : row.kind === 'ACCOUNT' ? equal(key, partitionAccountKey(row.value.subject))
     : row.kind === 'GROUP' ? equal(key, partitionGroupKey(row.value.id))
     : /^GROUP#[A-Za-z0-9_-]{1,80}$/.test(key.PK) && key.SK === `${row.kind}#${row.value.id}`;
   if (!valid) return fail('PARTITION_INVALID');
@@ -66,13 +99,14 @@ function scopeKeys(scope: PartitionScope) {
 function uniqueIds(values: { id: string }[]) {
   if (new Set(values.map(value => value.id)).size !== values.length) fail('PARTITION_INVALID');
 }
-function stateRows(state: Groups.GroupState, scope: PartitionScope): Map<string, { key: PartitionKey; row: PartitionRow }> {
+function stateRows(state: Groups.GroupState, scope: PartitionScope): Map<string, { key: PartitionKey; row: DomainRow }> {
   const parsed = Groups.GroupState.safeParse(state);
   if (!parsed.success) return fail('PARTITION_INVALID');
-  const rows = new Map<string, { key: PartitionKey; row: PartitionRow }>();
-  const add = (key: PartitionKey, row: PartitionRow) => {
+  const rows = new Map<string, { key: PartitionKey; row: DomainRow }>();
+  const add = (key: PartitionKey, row: DomainRow) => {
     if (rows.has(encodedKey(key))) fail('PARTITION_INVALID');
-    rows.set(encodedKey(key), { key, row: checkedRow(row, key) });
+    const parsed = checkedRow(row, key); if (parsed.kind === 'DIRECTORY') return fail('PARTITION_INVALID');
+    rows.set(encodedKey(key), { key, row: parsed });
   };
   for (const account of parsed.data.accounts) {
     if (!scope.accountSubjects.includes(account.subject) || !Number.isSafeInteger(account.version)) fail('PARTITION_INVALID');
@@ -85,6 +119,7 @@ function stateRows(state: Groups.GroupState, scope: PartitionScope): Map<string,
       || group.members.some(subject => !scope.accountSubjects.includes(subject)
         || !parsed.data.accounts.some(account => account.subject === subject))) fail('PARTITION_INVALID');
     uniqueIds(group.drafts); uniqueIds(group.decisions);
+    if (new Set(group.invitations.map(item => item.tokenHash)).size !== group.invitations.length) fail('PARTITION_INVALID');
     if (group.drafts.some(draft => draft.createdDecisionId
       && !group.decisions.some(decision => decision.id === draft.createdDecisionId))) fail('PARTITION_INVALID');
     const { drafts, decisions, ...metadata } = group;
@@ -97,14 +132,26 @@ function stateRows(state: Groups.GroupState, scope: PartitionScope): Map<string,
   return rows;
 }
 type Snapshot = { state: Groups.GroupState; rows: Map<string, { key: PartitionKey; row: PartitionRow | null }> };
-export function createPartitionedGroupRepository(transport: PartitionTransport) {
-  async function read(scope: PartitionScope): Promise<Snapshot> {
+export function createPartitionedGroupRepository(transport: PartitionTransport,
+  options: { timeoutMs?: number; maxRequests?: number } = {}) {
+  ioContext(options); // Validate trusted configuration before reading or invoking callbacks.
+  async function readMany(keys: PartitionKey[], context: PartitionIOContext) {
+    if (!keys.length) return [];
+    const values: (unknown | null)[] = [];
+    if (transport.readMany) values.push(...await bounded(context, () => transport.readMany!(keys, context)));
+    else for (let start = 0; start < keys.length; start += 8) {
+      values.push(...await Promise.all(keys.slice(start, start + 8).map(key => bounded(context, () => transport.read(key, context)))));
+    }
+    if (values.length !== keys.length) fail('PARTITION_INVALID');
+    return values;
+  }
+  async function read(scope: PartitionScope, context: PartitionIOContext): Promise<Snapshot> {
     const keys = scopeKeys(scope);
     for (let attempt = 0; attempt < 6; attempt++) {
       const rows: Snapshot['rows'] = new Map();
-      // At most 17 authority reads, then at most 128 children. Sequential requests are bounded.
-      for (const key of keys) {
-        const raw = await transport.read(key);
+      const authorities = await readMany(keys, context);
+      for (const [index, key] of keys.entries()) {
+        const raw = authorities[index];
         rows.set(encodedKey(key), { key, row: raw === null ? null : checkedRow(raw, key) });
       }
       const groupRow = scope.groupId ? rows.get(encodedKey(partitionGroupKey(scope.groupId)))?.row : null;
@@ -115,22 +162,24 @@ export function createPartitionedGroupRepository(transport: PartitionTransport) 
         const { draftIds, decisionIds, ...metadata } = groupRow.value;
         if (new Set(draftIds).size !== draftIds.length || new Set(decisionIds).size !== decisionIds.length) fail('PARTITION_INVALID');
         const drafts: Groups.GroupDraft[] = []; const decisions: Groups.Group['decisions'] = [];
-        for (const [kind, ids] of [['DRAFT', draftIds], ['BINDING', decisionIds]] as const) {
-          for (const childId of ids) {
-            const key = childKey(metadata.id, kind, childId); const raw = await transport.read(key);
+        const children = draftIds.map(childId => childKey(metadata.id, 'DRAFT', childId))
+          .concat(decisionIds.map(childId => childKey(metadata.id, 'BINDING', childId)));
+        const values = await readMany(children, context);
+        for (const [index, key] of children.entries()) {
+            const raw = values[index];
             if (raw === null) fail('PARTITION_INVALID');
             const row = checkedRow(raw, key); rows.set(encodedKey(key), { key, row });
             if (row.kind === 'DRAFT') drafts.push(row.value);
             else if (row.kind === 'BINDING') decisions.push(row.value);
             else fail('PARTITION_INVALID');
-          }
         }
         groups.push({ ...metadata, drafts, decisions });
       }
       // A header is advanced in every child commit. Reject torn reads and account changes.
       let current = true;
-      for (const key of keys) {
-        const raw = await transport.read(key); const row = raw === null ? null : checkedRow(raw, key);
+      const checkedAuthorities = await readMany(keys, context);
+      for (const [index, key] of keys.entries()) {
+        const raw = checkedAuthorities[index]; const row = raw === null ? null : checkedRow(raw, key);
         if (!equal(row, rows.get(encodedKey(key))!.row)) current = false;
       }
       if (!current) continue;
@@ -138,7 +187,7 @@ export function createPartitionedGroupRepository(transport: PartitionTransport) 
     }
     return fail('PARTITION_CONFLICT');
   }
-  function mutations(snapshot: Snapshot, scope: PartitionScope): PartitionMutation[] {
+  async function mutations(snapshot: Snapshot, scope: PartitionScope, context: PartitionIOContext): Promise<PartitionMutation[]> {
     const next = stateRows(snapshot.state, scope); const output: PartitionMutation[] = [];
     // Normal mutation never deletes retained accounts, group identity or replay-bearing children.
     for (const [key, prior] of snapshot.rows) {
@@ -150,6 +199,14 @@ export function createPartitionedGroupRepository(transport: PartitionTransport) 
       if (!equal(prior?.value, row.value) && row.kind !== 'ACCOUNT') groupChanged = true;
       if (prior?.kind === 'DRAFT' && row.kind === 'DRAFT'
         && prior.value.createdDecisionId && prior.value.createdDecisionId !== row.value.createdDecisionId) fail('PARTITION_INVALID');
+      if (prior?.kind === 'ACCOUNT' && row.kind === 'ACCOUNT' && prior.value.emailHash !== row.value.emailHash) fail('PARTITION_IDENTITY_CONFLICT');
+      if (prior?.kind === 'GROUP' && row.kind === 'GROUP') {
+        for (const invitation of row.value.invitations) {
+          const old = prior.value.invitations.find(item => item.tokenHash === invitation.tokenHash);
+          if (old && (old.recipientHash !== invitation.recipientHash || old.expiresAt !== invitation.expiresAt
+            || (old.acceptedBy && old.acceptedBy !== invitation.acceptedBy))) fail('PARTITION_IDENTITY_CONFLICT');
+        }
+      }
     }
     for (const [key, entry] of next) {
       const prior = snapshot.rows.get(key)?.row; const expected = prior?.revision ?? 0;
@@ -161,27 +218,65 @@ export function createPartitionedGroupRepository(transport: PartitionTransport) 
     for (const [key, prior] of snapshot.rows) {
       if (!next.has(key)) output.push({ key: prior.key, expected: 0, next: null });
     }
+    const claims: PartitionDirectoryClaim[] = [];
+    for (const mutation of output) {
+      if (!mutation.next) continue;
+      const prior = snapshot.rows.get(encodedKey(mutation.key))?.row;
+      const row = mutation.next;
+      if (row.kind === 'ACCOUNT' && !prior) claims.push({ type: 'EMAIL', subject: row.value.subject, emailHash: row.value.emailHash });
+      if (row.kind === 'BINDING' && !prior) claims.push({ type: 'DECISION', decisionId: row.value.id, groupId: scope.groupId! });
+      if (row.kind === 'GROUP') {
+        for (const invitation of row.value.invitations) {
+          if (prior?.kind !== 'GROUP' || !prior.value.invitations.some(item => item.tokenHash === invitation.tokenHash)) {
+            claims.push({ type: 'INVITATION', groupId: row.value.id, tokenHash: invitation.tokenHash,
+              recipientHash: invitation.recipientHash, expiresAt: invitation.expiresAt });
+          }
+        }
+      }
+    }
+    const claimKeys = claims.map(partitionDirectoryKey);
+    if (new Set(claimKeys.map(encodedKey)).size !== claimKeys.length) fail('PARTITION_IDENTITY_CONFLICT');
+    if (output.length + claims.length > 100) fail('PARTITION_CAPACITY');
+    const storedClaims = await readMany(claimKeys, context);
+    for (const [index, value] of claims.entries()) {
+      const key = claimKeys[index]!; const raw = storedClaims[index];
+      const prior = raw === null ? null : checkedRow(raw, key);
+      // Existing parent rows handle replay. Retained identifiers cannot recreate removed edges.
+      if (prior) fail('PARTITION_IDENTITY_CONFLICT');
+      output.push({ key, expected: 0, next: { schemaVersion: 1, revision: 1, kind: 'DIRECTORY', value } });
+    }
     if (output.length > 100 || Buffer.byteLength(JSON.stringify(output)) > 3_500_000) fail('PARTITION_CAPACITY');
     return structuredClone(output);
   }
   return {
     async transaction<T>(scope: PartitionScope, update: (state: Groups.GroupState) => T | Promise<T>): Promise<T> {
+      const context = ioContext(options);
       for (let attempt = 0; attempt < 6; attempt++) {
-        const snapshot = await read(scope); const result = structuredClone(await update(snapshot.state));
+        const snapshot = await read(scope, context); const result = structuredClone(await bounded(context,
+          () => Promise.resolve(update(snapshot.state)), false));
         // Conditions apply even if callback only read: authority is current at the commit boundary.
-        if (await transport.commit(mutations(snapshot, scope))) return result;
+        const pending = await mutations(snapshot, scope, context);
+        if (await bounded(context, () => transport.commit(pending, context))) return result;
       }
       return fail('PARTITION_CONFLICT');
     },
     async fence(scope: PartitionScope, inspect: (state: Groups.GroupState) => void): Promise<PartitionFence> {
-      const snapshot = await read(scope); inspect(snapshot.state); const pending = mutations(snapshot, scope);
+      const context = ioContext(options);
+      const snapshot = await read(scope, context); inspect(snapshot.state); const pending = await mutations(snapshot, scope, context);
       return { mutations: pending, assertCurrent: async () => {
-        for (const mutation of pending) {
-          const raw = await transport.read(mutation.key);
+        const currentValues = await readMany(pending.map(item => item.key), ioContext(options));
+        for (const [index, mutation] of pending.entries()) {
+          const raw = currentValues[index];
           const current = raw === null ? null : checkedRow(raw, mutation.key);
           if ((current?.revision ?? 0) !== mutation.expected) fail('PARTITION_STALE');
         }
       } };
+    },
+    async lookup(raw: PartitionDirectoryLookup): Promise<PartitionDirectoryClaim | null> {
+      const key = partitionDirectoryKey(raw); const values = await readMany([key], ioContext(options));
+      const row = values[0] === null ? null : checkedRow(values[0], key);
+      if (row && row.kind !== 'DIRECTORY') fail('PARTITION_INVALID');
+      return row?.kind === 'DIRECTORY' ? structuredClone(row.value) : null;
     },
   };
 }
@@ -192,9 +287,9 @@ export function partitionDynamoWrites(tableName: string, mutations: PartitionMut
   if (Buffer.byteLength(JSON.stringify(mutations)) > 3_500_000) fail('PARTITION_CAPACITY');
   return mutations.map(({ key, expected, next }) => {
     if (!Number.isSafeInteger(expected) || expected < 0
-      || !/^(ACCOUNT|GROUP)#[A-Za-z0-9_-]{1,80}$/.test(key.PK)
-      || !/^(STATE|(DRAFT|BINDING)#[A-Za-z0-9_-]{1,80})$/.test(key.SK)
-      || (key.PK.startsWith('ACCOUNT#') && key.SK !== 'STATE')) fail('PARTITION_INVALID');
+      || (!isPartitionDirectoryKey(key) && (!/^(ACCOUNT|GROUP)#[A-Za-z0-9_-]{1,80}$/.test(key.PK)
+        || !/^(STATE|(DRAFT|BINDING)#[A-Za-z0-9_-]{1,80})$/.test(key.SK)
+        || (key.PK.startsWith('ACCOUNT#') && key.SK !== 'STATE')))) fail('PARTITION_INVALID');
     const Key = { PK: { S: key.PK }, SK: { S: key.SK } };
     const condition = expected ? { ConditionExpression: '#r=:r', ExpressionAttributeNames: { '#r': 'revision' },
       ExpressionAttributeValues: { ':r': { N: String(expected) } } } : { ConditionExpression: 'attribute_not_exists(PK)' };
@@ -209,25 +304,69 @@ export function partitionDynamoWrites(tableName: string, mutations: PartitionMut
 export function createDynamoPartitionTransport(tableName: string, region: string): PartitionTransport {
   if (tableName !== 'KnownEnoughPartitions' || region !== 'us-east-1') fail('PARTITION_INVALID');
   const client = new DynamoDBClient({ region, maxAttempts: 1 });
+  const attributes = (key: PartitionKey) => ({ PK: { S: key.PK }, SK: { S: key.SK } });
+  const decode = (item: { revision?: { N?: string }; payload?: { S?: string } }, key: PartitionKey) => {
+    try {
+      const row = checkedRow(JSON.parse(item.payload?.S ?? ''), key);
+      if (String(row.revision) !== item.revision?.N) fail('PARTITION_INVALID');
+      return row;
+    } catch { return fail('PARTITION_INVALID'); }
+  };
   return {
-    read: async key => {
+    read: async (key, supplied) => {
       // Reuse strict key validation before any I/O.
       partitionDynamoWrites(tableName, [{ key, expected: 0, next: null }]);
+      const context = supplied ?? ioContext(); if (!supplied) context.request();
       const result = await client.send(new GetItemCommand({ TableName: tableName,
-        Key: { PK: { S: key.PK }, SK: { S: key.SK } }, ConsistentRead: true }),
-      { abortSignal: globalThis.AbortSignal.timeout(30_000) })
+        Key: attributes(key), ConsistentRead: true }), { abortSignal: context.signal })
         .catch((error: unknown) => { throw new Error('PARTITION_STORAGE_UNAVAILABLE', { cause: error }); });
       if (!result.Item) return null;
-      try {
-        const row = checkedRow(JSON.parse(result.Item.payload?.S ?? ''), key);
-        if (String(row.revision) !== result.Item.revision?.N) fail('PARTITION_INVALID');
-        return row;
-      } catch { return fail('PARTITION_INVALID'); }
+      return decode(result.Item, key);
     },
-    commit: async mutations => {
+    readMany: async (keys, supplied) => {
+      if (keys.length > 145 || new Set(keys.map(encodedKey)).size !== keys.length) fail('PARTITION_INVALID');
+      keys.forEach(key => partitionDynamoWrites(tableName, [{ key, expected: 0, next: null }]));
+      const context = supplied ?? ioContext();
+      const results = new Map<string, PartitionRow | null>(); let first = true;
+      for (let start = 0; start < keys.length; start += 100) {
+        let pending = keys.slice(start, start + 100);
+        while (pending.length) {
+          if (!first || !supplied) context.request(); first = false;
+          const response = await client.send(new BatchGetItemCommand({ RequestItems: {
+            [tableName]: { Keys: pending.map(attributes), ConsistentRead: true },
+          } }), { abortSignal: context.signal })
+            .catch((error: unknown) => { throw new Error('PARTITION_STORAGE_UNAVAILABLE', { cause: error }); });
+          if (Object.keys(response.Responses ?? {}).some(table => table !== tableName)
+            || Object.keys(response.UnprocessedKeys ?? {}).some(table => table !== tableName)) fail('PARTITION_INVALID');
+          const requested = new Set(pending.map(encodedKey)); const returned = new Set<string>();
+          const fromAttributes = (raw: { PK?: { S?: string }; SK?: { S?: string } }): PartitionKey => {
+            if (!raw.PK?.S || !raw.SK?.S) return fail('PARTITION_INVALID');
+            const key = { PK: raw.PK.S, SK: raw.SK.S };
+            if (!requested.has(encodedKey(key))) fail('PARTITION_INVALID');
+            return key;
+          };
+          for (const item of response.Responses?.[tableName] ?? []) {
+            const key = fromAttributes(item); const encoded = encodedKey(key);
+            if (returned.has(encoded) || results.has(encoded)) fail('PARTITION_INVALID');
+            returned.add(encoded); results.set(encoded, decode(item, key));
+          }
+          const unprocessed = (response.UnprocessedKeys?.[tableName]?.Keys ?? []).map(fromAttributes);
+          const outstanding = new Set(unprocessed.map(encodedKey));
+          if (outstanding.size !== unprocessed.length || [...outstanding].some(key => returned.has(key) || results.has(key))) fail('PARTITION_INVALID');
+          for (const key of pending) {
+            const encoded = encodedKey(key);
+            if (!returned.has(encoded) && !outstanding.has(encoded)) results.set(encoded, null);
+          }
+          pending = unprocessed;
+        }
+      }
+      return keys.map(key => results.get(encodedKey(key)) ?? null);
+    },
+    commit: async (mutations, supplied) => {
       const TransactItems = partitionDynamoWrites(tableName, mutations);
+      const context = supplied ?? ioContext(); if (!supplied) context.request();
       try { await client.send(new TransactWriteItemsCommand({ TransactItems }),
-        { abortSignal: globalThis.AbortSignal.timeout(30_000) }); return true; }
+        { abortSignal: context.signal }); return true; }
       catch (error) {
         if (error instanceof Error && error.name === 'TransactionConflictException') return false;
         if (error instanceof Error && error.name === 'TransactionCanceledException'

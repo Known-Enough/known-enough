@@ -43,3 +43,17 @@ Final corrected source:16 focused PASS and pinned full exit0,800 application(two
 
 
 2026-10-07T08:39:09.726939+00:00: checked source [bdd5ecfc3022f86fad36f745e683ad32fe6af456](https://github.com/Known-Enough/known-enough/commit/bdd5ecfc3022f86fad36f745e683ad32fe6af456) synchronized and verified equal main/origin/main, clean checkout. OPS01 remains the sole IN_PROGRESS/B claim; this is a partial checkpoint, not CODE_READY/DONE.
+
+
+## Run116 bounded read/directory scope — 2026-10-07T08:52:51.458444+00:00
+
+Same OPS01/B active claim, synchronized598091ac93c157f33208830bb98e88d709175d71. Existing two adapter/test paths remain writable; add exactly new packages/adapters/src/partition-directory.ts and partition-directory.test.ts for strict private lookup/uniqueness contracts and their focused regression. Batch consistent reads share a finite request budget/deadline; directory claims join guarded parent puts in one atomic transaction. Email owner, invitation token/recipient/lifetime and decision/group mapping stay immutable. No deployed selection, existing application/admission/runtime/NP00/CI/lock/IAM edit; account/group source authentication remains at the verified service boundary. Archive/migration/joined decision integration still unfinished on this same claim; administrator installation deferred.
+
+
+## OPS01 bounded read and directory checkpoint — run116,2026-10-07T09:13:00.199792+00:00
+
+IN_PROGRESS/B sole claim retained; verified Battosai1806/ID143764700, baseline `598091ac93c157f33208830bb98e88d709175d71`, same persistent chat and ACTIVE30-minute schedule. Four scoped inactive adapter/test paths now implement consistent100-key batch reads, ordered partial/unprocessed responses, shared64-request/20-second operation limits, at most eight fallback reads, and immutable private email/invitation/decision claims in the same guarded atomic transaction. Retained claims prevent identifier reuse; service identity/current membership/consent checks and compatible joined decision integration remain required. No existing runtime selection/API/admission/NP00/CI/IAM/resource change or cloud operation.
+
+Final31 focused regressions PASS and pinned Node24.21.0/npm11.19.0 full check exit0: references7/planning15/lint/boundaries/types,815 application tests(two optional skips),build,hosted1,browser62. Initial typecheck failed TS2322 because DIRECTORY revision literal1 widened to number; a separate validated DomainRow union fixed it. Subsequent typechecks/lint and final full PASS. Atomic simulated-store race/reconstruction and mocked SDK responses are checked source evidence, not managed Dynamo proof. B progress receipts37597191321/37598160603 SUCCESS on baseline main/own actor; source synchronization is next.
+
+Next same-claim coding: organizer/operator archive with journaled resume/crash recovery, validated forward migration preserving identities/replay/consent, then compatible membership/list pagination and joined decision/API integration with exact additional scope recorded before edits. Installation/effective-role and managed migration proof stay in the final cloud phase. This checkpoint is partial; no CODE_READY/DONE, release, successor, new helper or A NP00 takeover.

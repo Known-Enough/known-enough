@@ -1,5 +1,6 @@
 import { expect, it, vi } from 'vitest';
-import { DynamoDBClient, GetItemCommand, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
+import { createHash } from 'node:crypto';
+import { DynamoDBClient, GetItemCommand, BatchGetItemCommand, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import { Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { MemoryGroupRepository } from './group-repository.ts';
 import {
@@ -12,6 +13,7 @@ function storage() {
   const rows = new Map<string, PartitionRow>(); let collisions = 0; let commits = 0;
   const transport: PartitionTransport = {
     read: async key => structuredClone(rows.get(keyOf(key)) ?? null),
+    readMany: async keys => keys.map(key => structuredClone(rows.get(keyOf(key)) ?? null)),
     commit: async mutations => {
       commits++;
       if (mutations.some(item => (rows.get(keyOf(item.key))?.revision ?? 0) !== item.expected)) { collisions++; return false; }
@@ -21,7 +23,7 @@ function storage() {
   };
   return { rows, transport, get collisions() { return collisions; }, get commits() { return commits; } };
 }
-const account = (subject: string): Groups.Account => ({ subject, emailHash: 'a'.repeat(64), displayName: subject, status: 'APPROVED', version: 1 });
+const account = (subject: string): Groups.Account => ({ subject, emailHash: createHash('sha256').update(subject).digest('hex'), displayName: subject, status: 'APPROVED', version: 1 });
 const group = (id: string, members = ['iris']): Groups.Group => ({ id, name: id, organizer: members[0]!, version: 1, members, drafts: [], decisions: [], invitations: [] });
 const scope = (groupId = 'garden', accountSubjects = ['iris']) => ({ groupId, accountSubjects });
 const approved = (state: Groups.GroupState, who = 'iris') => {
@@ -47,7 +49,7 @@ it('persists a realistic collection larger than the old shared-row limit as indi
   const legacy = new MemoryGroupRepository();
   await expect(legacy.transaction(state => { state.accounts.push(account('iris')); state.groups.push({ ...group('garden'), drafts }); })).rejects.toThrow('GROUP_CAPACITY_EXCEEDED');
   await repo.transaction(scope(), state => { state.groups[0]!.drafts = drafts; });
-  expect(store.rows.size).toBe(34);
+  expect(store.rows.size).toBe(35); // Account, immutable email claim, header,32 separate drafts.
   expect(Math.max(...[...store.rows.values()].map(row => Buffer.byteLength(JSON.stringify(row))))).toBeLessThan(352 * 1024);
   expect(await createPartitionedGroupRepository(store.transport).transaction(scope(), state => state.groups[0]!.drafts)).toEqual(drafts);
 });
@@ -181,16 +183,16 @@ it('rejects a missing referenced child and a too-large individual draft before w
   await expect(repo.transaction(scope(), () => {})).rejects.toThrow('PARTITION_INVALID');
 });
 
-it('reconstructs a coherent snapshot after a child changes during the sequential read', async () => {
+it('reconstructs a coherent snapshot after a child changes during the batched read', async () => {
   const store = storage(); const repo = await seed(store);
   await repo.transaction(scope(), state => { state.groups[0]!.drafts.push(draft('one')); });
   let raced = false;
-  const racing = createPartitionedGroupRepository({ ...store.transport, read: async key => {
-    if (!raced && key.SK === 'DRAFT#one') {
+  const racing = createPartitionedGroupRepository({ ...store.transport, readMany: async keys => {
+    if (!raced && keys.some(key => key.SK === 'DRAFT#one')) {
       raced = true;
       await repo.transaction(scope(), state => { state.groups[0]!.drafts[0]!.frame.title = 'Fresh title'; state.groups[0]!.drafts[0]!.revision++; });
     }
-    return store.transport.read(key);
+    return store.transport.readMany!(keys);
   } });
   expect(await racing.transaction(scope(), state => state.groups[0]!.drafts[0]!.frame.title)).toBe('Fresh title');
   expect(store.collisions).toBe(0);
@@ -216,7 +218,103 @@ it('rejects an over-wide atomic creation, then retains all children through boun
   await expect(repo.transaction(scope(), state => { state.groups[0]!.drafts = drafts; state.groups[0]!.decisions = bindings; })).rejects.toThrow('PARTITION_CAPACITY');
   expect(store.commits).toBe(commits);
   await repo.transaction(scope(), state => { state.groups[0]!.drafts = drafts; });
-  await repo.transaction(scope(), state => { state.groups[0]!.decisions = bindings; });
+  await repo.transaction(scope(), state => { state.groups[0]!.decisions = bindings.slice(0, 32); });
+  await repo.transaction(scope(), state => { state.groups[0]!.decisions.push(...bindings.slice(32)); });
   const restored = await createPartitionedGroupRepository(store.transport).transaction(scope(), state => state.groups[0]!);
   expect(restored.drafts).toEqual(drafts); expect(restored.decisions).toEqual(bindings);
+});
+
+const dynamoItem = (subject: string) => ({ PK: { S: `ACCOUNT#${subject}` }, SK: { S: 'STATE' }, revision: { N: '1' },
+  payload: { S: JSON.stringify({ schemaVersion: 1, revision: 1, kind: 'ACCOUNT', value: account(subject) }) } });
+it('retrieves a128-row snapshot in100-key chunks and restores input order despite unordered responses', async () => {
+  const subjects = Array.from({ length: 128 }, (_, index) => `user-${index}`);
+  const send = vi.spyOn(DynamoDBClient.prototype, 'send');
+  try {
+    send.mockResolvedValueOnce({ Responses: { KnownEnoughPartitions: subjects.slice(0, 100).reverse().map(dynamoItem) } } as never);
+    send.mockResolvedValueOnce({ Responses: { KnownEnoughPartitions: subjects.slice(100).reverse().map(dynamoItem) } } as never);
+    const rows = await createDynamoPartitionTransport('KnownEnoughPartitions', 'us-east-1').readMany!(subjects.map(partitionAccountKey));
+    expect(rows.map(row => (row as { value: { subject: string } }).value.subject)).toEqual(subjects);
+    expect(send).toHaveBeenCalledTimes(2);
+    const commands = send.mock.calls.map(call => call[0] as BatchGetItemCommand);
+    expect(commands.every(command => command instanceof BatchGetItemCommand)).toBe(true);
+    expect(commands.map(command => command.input.RequestItems!.KnownEnoughPartitions!.Keys!.length)).toEqual([100, 28]);
+    expect(commands.every(command => command.input.RequestItems!.KnownEnoughPartitions!.ConsistentRead)).toBe(true);
+  } finally { send.mockRestore(); }
+});
+
+it('resumes only unprocessed batch keys and treats an explicitly processed missing row as absent', async () => {
+  const send = vi.spyOn(DynamoDBClient.prototype, 'send');
+  try {
+    send.mockResolvedValueOnce({ Responses: { KnownEnoughPartitions: [dynamoItem('iris')] },
+      UnprocessedKeys: { KnownEnoughPartitions: { Keys: [{ PK: { S: 'ACCOUNT#omar' }, SK: { S: 'STATE' } }], ConsistentRead: false } } } as never);
+    send.mockResolvedValueOnce({ Responses: { KnownEnoughPartitions: [] } } as never);
+    const rows = await createDynamoPartitionTransport('KnownEnoughPartitions', 'us-east-1').readMany!(['iris', 'omar'].map(partitionAccountKey));
+    expect(rows[0]).toHaveProperty('value.subject', 'iris'); expect(rows[1]).toBeNull();
+    const command = send.mock.calls[1]![0] as BatchGetItemCommand;
+    expect(command.input.RequestItems!.KnownEnoughPartitions).toEqual({ Keys: [{ PK: { S: 'ACCOUNT#omar' }, SK: { S: 'STATE' } }], ConsistentRead: true });
+    expect(send.mock.calls[0]![1]).toEqual(send.mock.calls[1]![1]);
+  } finally { send.mockRestore(); }
+});
+
+it('fails closed on foreign or duplicate batch results and contradictory unprocessed responses', async () => {
+  const send = vi.spyOn(DynamoDBClient.prototype, 'send');
+  try {
+    const transport = createDynamoPartitionTransport('KnownEnoughPartitions', 'us-east-1');
+    for (const response of [
+      { Responses: { ForeignTable: [] } },
+      { Responses: { KnownEnoughPartitions: [dynamoItem('foreign')] } },
+      { Responses: { KnownEnoughPartitions: [dynamoItem('iris'), dynamoItem('iris')] } },
+      { Responses: { KnownEnoughPartitions: [dynamoItem('iris')] }, UnprocessedKeys: { KnownEnoughPartitions: { Keys: [{ PK: { S: 'ACCOUNT#iris' }, SK: { S: 'STATE' } }] } } },
+    ]) {
+      send.mockResolvedValueOnce(response as never);
+      await expect(transport.readMany!([partitionAccountKey('iris')])).rejects.toThrow('PARTITION_INVALID');
+    }
+    expect(send).toHaveBeenCalledTimes(4);
+  } finally { send.mockRestore(); }
+});
+
+it('enforces one shared underlying-request budget through repeated unprocessed SDK responses', async () => {
+  const send = vi.spyOn(DynamoDBClient.prototype, 'send');
+  try {
+    const key = { PK: `EMAIL#${account('iris').emailHash}`, SK: 'CLAIM' };
+    send.mockResolvedValue({ Responses: {}, UnprocessedKeys: { KnownEnoughPartitions: {
+      Keys: [{ PK: { S: key.PK }, SK: { S: key.SK } }],
+    } } } as never);
+    const repo = createPartitionedGroupRepository(createDynamoPartitionTransport('KnownEnoughPartitions', 'us-east-1'), { maxRequests: 3 });
+    await expect(repo.lookup({ type: 'EMAIL', emailHash: account('iris').emailHash })).rejects.toThrow('PARTITION_REQUEST_LIMIT');
+    expect(send).toHaveBeenCalledTimes(3);
+    expect(send.mock.calls.every(call => call[0] instanceof BatchGetItemCommand)).toBe(true);
+  } finally { send.mockRestore(); }
+});
+
+it('aborts a delayed callback before persistence and discards its eventual completion', async () => {
+  const store = storage(); await seed(store); const commits = store.commits;
+  let release!: () => void;
+  const held = new Promise<void>(resolve => { release = resolve; });
+  const repo = createPartitionedGroupRepository(store.transport, { timeoutMs: 10 });
+  await expect(repo.transaction(scope(), async state => { state.groups[0]!.name = 'Late'; await held; })).rejects.toThrow('PARTITION_TIMEOUT');
+  release(); await Promise.resolve(); await Promise.resolve();
+  expect(store.commits).toBe(commits);
+  expect(store.rows.get(keyOf(partitionGroupKey('garden')))!.value).toHaveProperty('name', 'garden');
+});
+
+it('shares the request budget across CAS retries and stops before an unguarded commit', async () => {
+  const store = storage(); await seed(store); let commits = 0;
+  const repo = createPartitionedGroupRepository({ ...store.transport, commit: async () => { commits++; return false; } }, { maxRequests: 4 });
+  await expect(repo.transaction(scope(), state => { state.groups[0]!.name = 'Contended'; })).rejects.toThrow('PARTITION_REQUEST_LIMIT');
+  expect(commits).toBe(1);
+  expect(store.rows.get(keyOf(partitionGroupKey('garden')))!.value).toHaveProperty('name', 'garden');
+});
+
+it('limits a non-batch fallback to eight concurrent reads while retaining the group snapshot', async () => {
+  const store = storage(); const repo = await seed(store);
+  await repo.transaction(scope(), state => { state.groups[0]!.drafts = Array.from({ length: 32 }, (_, index) => draft(`draft-${index}`)); });
+  let active = 0; let maximum = 0;
+  const fallback = createPartitionedGroupRepository({ commit: store.transport.commit, read: async key => {
+    active++; maximum = Math.max(maximum, active);
+    await new Promise<void>(resolve => globalThis.setTimeout(resolve, 1));
+    try { return await store.transport.read(key); } finally { active--; }
+  } });
+  expect(await fallback.transaction(scope(), state => state.groups[0]!.drafts.length)).toBe(32);
+  expect(maximum).toBe(8); expect(active).toBe(0);
 });

@@ -122,7 +122,7 @@ A's recurring observer and completed one-time follow-up are deleted. B's existin
 | 4 | [UX02](tasks/active/ui-ux/UX02/README.md) | After UX01 coding checkpoint | Usability/style/navigation corrections and tests. |
 | 5 | [UX03](tasks/active/ui-ux/UX03/README.md) | After UX02 coding checkpoint | Available deployed interface proof and simple instructions. |
 | 6 | [OPS00](tasks/active/operations/OPS00/README.md) | Automation/setup-package coding after UX03 checkpoint | Checked GitHub operations/recovery code and exact deferred setup package. |
-| 7 | [OPS01](tasks/active/operations/OPS01/README.md) | IN_PROGRESS / B, sole active coding claim after OPS00 CODE_READY | Inactive partition primitive under checks; archive/migration/API integration still unfinished. |
+| 7 | [OPS01](tasks/active/operations/OPS01/README.md) | IN_PROGRESS / B, sole active coding claim after OPS00 CODE_READY | Inactive partition/batch-read/private-directory checkpoint checked; archive/migration/membership/joined API integration still unfinished. |
 | 8 | [OPS02](tasks/active/operations/OPS02/README.md) | Coding after OPS01 checkpoint | Retention/export/erasure implementation and tests. |
 | 9 | [OPS03](tasks/active/operations/OPS03/README.md) | Coding after OPS02 checkpoint | Durable job/recovery implementation and tests. |
 | 10 | [FIN01](tasks/active/technical-debt/FIN01/README.md) | Code/ledger after OPS03 checkpoint | Remaining available code/regressions and precise closeout ledger. |
