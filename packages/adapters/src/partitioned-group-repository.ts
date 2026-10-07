@@ -73,7 +73,10 @@ async function bounded<T>(context: PartitionIOContext, work: () => Promise<T>, r
     const abort = () => reject(context.signal.reason instanceof PartitionStorageError
       ? context.signal.reason : new PartitionStorageError('PARTITION_TIMEOUT'));
     context.signal.addEventListener('abort', abort, { once: true });
-    Promise.resolve().then(work).then(resolve, reject).finally(() => context.signal.removeEventListener('abort', abort));
+    Promise.resolve().then(() => {
+      if (context.signal.aborted) return fail('PARTITION_TIMEOUT');
+      return work();
+    }).then(resolve, reject).finally(() => context.signal.removeEventListener('abort', abort));
   });
 }
 export const partitionAccountKey = (subject: string): PartitionKey => ({ PK: `ACCOUNT#${id.parse(subject)}`, SK: 'STATE' });
@@ -169,6 +172,7 @@ export function createPartitionedGroupRepository(transport: PartitionTransport,
       const groups: Groups.Group[] = [];
       if (groupRow?.kind === 'GROUP') {
         const { draftIds, decisionIds, ...metadata } = groupRow.value;
+        if (metadata.members.some(subject => !scope.accountSubjects.includes(subject))) fail('PARTITION_STALE');
         if (new Set(draftIds).size !== draftIds.length || new Set(decisionIds).size !== decisionIds.length) fail('PARTITION_INVALID');
         const drafts: Groups.GroupDraft[] = []; const decisions: Groups.Group['decisions'] = [];
         const children = draftIds.map(childId => childKey(metadata.id, 'DRAFT', childId))
@@ -278,8 +282,8 @@ export function createPartitionedGroupRepository(transport: PartitionTransport,
     return structuredClone(output);
   }
   return {
-    async transaction<T>(scope: PartitionScope, update: (state: Groups.GroupState) => T | Promise<T>): Promise<T> {
-      const context = ioContext(options);
+    async transaction<T>(scope: PartitionScope, update: (state: Groups.GroupState) => T | Promise<T>, supplied?: PartitionIOContext): Promise<T> {
+      const context = supplied ?? ioContext(options);
       for (let attempt = 0; attempt < 6; attempt++) {
         const snapshot = await read(scope, context); const result = structuredClone(await bounded(context,
           () => Promise.resolve(update(snapshot.state)), false));
@@ -289,11 +293,11 @@ export function createPartitionedGroupRepository(transport: PartitionTransport,
       }
       return fail('PARTITION_CONFLICT');
     },
-    async fence(scope: PartitionScope, inspect: (state: Groups.GroupState) => void): Promise<PartitionFence> {
-      const context = ioContext(options);
+    async fence(scope: PartitionScope, inspect: (state: Groups.GroupState) => void, supplied?: PartitionIOContext): Promise<PartitionFence> {
+      const context = supplied ?? ioContext(options);
       const snapshot = await read(scope, context); inspect(snapshot.state); const pending = await mutations(snapshot, scope, context);
       return { mutations: pending, assertCurrent: async () => {
-        const currentValues = await readMany(pending.map(item => item.key), ioContext(options));
+        const currentValues = await readMany(pending.map(item => item.key), supplied ?? ioContext(options));
         for (const [index, mutation] of pending.entries()) {
           const raw = currentValues[index];
           const current = raw === null ? null : checkedRow(raw, mutation.key);
@@ -301,14 +305,15 @@ export function createPartitionedGroupRepository(transport: PartitionTransport,
         }
       } };
     },
-    async lookup(raw: PartitionDirectoryLookup): Promise<PartitionDirectoryClaim | null> {
-      const key = partitionDirectoryKey(raw); const values = await readMany([key], ioContext(options));
+    async lookup(raw: PartitionDirectoryLookup, supplied?: PartitionIOContext): Promise<PartitionDirectoryClaim | null> {
+      const key = partitionDirectoryKey(raw); const values = await readMany([key], supplied ?? ioContext(options));
       const row = values[0] === null ? null : checkedRow(values[0], key);
       if (row && row.kind !== 'DIRECTORY') fail('PARTITION_INVALID');
       return row?.kind === 'DIRECTORY' ? structuredClone(row.value) : null;
     },
   };
 }
+export { ioContext as partitionIO, bounded as partitionCall, checkedRow as checkPartitionRow };
 
 export function partitionDynamoWrites(tableName: string, mutations: PartitionMutation[]): TransactWriteItem[] {
   if (tableName !== 'KnownEnoughPartitions' || mutations.length < 1 || mutations.length > 100

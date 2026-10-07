@@ -5,7 +5,7 @@ import { Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { MemoryGroupRepository } from './group-repository.ts';
 import { partitionMembershipKey } from './partition-membership-contract.ts';
 import {
-  createPartitionedGroupRepository, createDynamoPartitionTransport, partitionAccountKey, partitionGroupKey, partitionDynamoWrites,
+  createPartitionedGroupRepository, createDynamoPartitionTransport, partitionAccountKey, partitionGroupKey, partitionDynamoWrites, partitionIO, partitionCall,
   type PartitionKey, type PartitionMutation, type PartitionRow, type PartitionTransport,
 } from './partitioned-group-repository.ts';
 
@@ -425,4 +425,24 @@ it('counts membership puts against the100-item transaction limit and commits not
     state.groups[0]!.decisions = Array.from({ length: 32 }, (_, index) => ({ id: `decision-${index}`, version: 1 }));
   })).rejects.toThrow('PARTITION_CAPACITY');
   expect(store.commits).toBe(commits); expect(store.rows.has(keyOf(partitionMembershipKey('omar', 'garden')))).toBe(false);
+});
+
+
+it('does not start queued storage work after an operation aborts before its microtask', async () => {
+  const controller = new globalThis.AbortController(); const request = vi.fn(); const work = vi.fn(async () => true);
+  const pending = partitionCall({ signal: controller.signal, request }, work);
+  controller.abort(); await expect(pending).rejects.toThrow('PARTITION_TIMEOUT');
+  expect(request).toHaveBeenCalledTimes(1); expect(work).not.toHaveBeenCalled();
+});
+
+it('retains a supplied request budget through lookup, transaction and subsequent fence assertions', async () => {
+  const store = storage(); const repo = await seed(store); const before = store.commits;
+  const shared = partitionIO({ maxRequests: 3 });
+  expect(await repo.lookup({ type: 'DECISION', decisionId: 'missing' }, shared)).toBeNull();
+  await expect(repo.transaction({ accountSubjects: ['iris'] }, state => state.accounts[0]!.displayName, shared))
+    .rejects.toThrow('PARTITION_REQUEST_LIMIT');
+  expect(store.commits).toBe(before);
+  const retained = partitionIO({ maxRequests: 3 }); const fence = await repo.fence(scope(), state => approved(state), retained);
+  await fence.assertCurrent(); await expect(fence.assertCurrent()).rejects.toThrow('PARTITION_REQUEST_LIMIT');
+  expect(store.commits).toBe(before);
 });
