@@ -21,6 +21,7 @@ const profile = z.strictObject({ subject: id, email, verified: z.literal(true) }
 const invite = z.strictObject({ email, replace: z.boolean() });
 const accept = z.strictObject({ token: z.string().regex(/^[A-Za-z0-9_-]{32,80}$/) });
 const draftGeneration = z.strictObject({ objective: z.string().max(2000).trim().min(1), idempotencyKey: id });
+const draftCreation = z.strictObject({ revision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER) });
 const architectureOutput = z.strictObject({ draftId: id, revision: z.literal(1), status: z.enum(['DEFINING', 'NEEDS_CLARIFICATION']),
   frame: KE.PublicDecisionFrame, clarificationQuestions: Groups.GroupDraft.shape.clarificationQuestions,
   participantInformationRequirements: z.array(z.strictObject({ participantId: id, prompt: z.string().min(1).max(500) })).max(64) });
@@ -394,6 +395,44 @@ export function createPartitionGroupSession(transport: PartitionTransport,
             draft.clarificationQuestions = [...draft.clarificationQuestions, catalog.clarificationQuestion].slice(0, 12);
           return Groups.GroupDraft.parse(draft);
         }, io));
+      });
+    },
+    /** Prepare a server-only bundle; its mutations must join the actual decision creation. */
+    prepareDraftCreation(principal: TrustedPrincipal | null, rawId: string, rawDraftId: string, raw: unknown, supplied?: PartitionIOContext) {
+      return safe(async () => {
+        const who = participant(principal); const key = groupId(rawId); const draftId = groupId(rawDraftId); const request = draftCreation.safeParse(raw);
+        if (!request.success) return deny('INVALID_COMMAND');
+        const io = supplied ?? partitionIO(limits);
+        return selected(who, key, io, async resolved => {
+          let result!: { definition: KE.DecisionDefinition; memberships: { subject: string; participantId: string; active: boolean }[];
+            creationBodyHash: string; created: boolean };
+          const fence = await repository.fence(resolved, state => {
+            const group = current(state, who, key, true); const draft = currentDraft(state, who, key, draftId);
+            if (request.data.revision !== draft.revision) return deny('STALE_CONTEXT');
+            const roster = publicRoster(state, group);
+            if (JSON.stringify(draft.frame.participants) !== JSON.stringify(roster)
+              || JSON.stringify(draft.frame.requiredParticipantIds) !== JSON.stringify(roster.map(member => member.id))) return deny('STALE_CONTEXT');
+            const catalog = genericCandidateCatalog(draft.frame);
+            if (draft.clarificationQuestions.length || catalog.clarificationQuestion || !catalog.candidates.length)
+              throw new KnownEnoughApplicationError('NEEDS_CLARIFICATION');
+            if (draft.frame.variables.some(value => value.visibility !== 'PUBLIC') || draft.frame.rules.some(value => value.visibility !== 'PUBLIC'))
+              throw new PartitionSessionError('SESSION_INVALID');
+            const decisionId = `groupdecision-${createHash('sha256').update(JSON.stringify([key, draftId])).digest('hex').slice(0, 40)}`;
+            const created = draft.createdDecisionId !== null;
+            if (created && (draft.createdDecisionId !== decisionId || !group.decisions.some(binding => binding.id === decisionId && binding.version === group.version))) return deny('STALE_CONTEXT');
+            if (!created) {
+              if (group.decisions.some(binding => binding.id === decisionId)) return deny('STALE_CONTEXT');
+              if (group.decisions.length >= 64) throw new PartitionSessionError('SESSION_CAPACITY');
+              group.decisions.push({ id: decisionId, version: group.version }); draft.createdDecisionId = decisionId;
+            }
+            result = { created, definition: KE.DecisionDefinition.parse({ ...draft.frame, decisionId,
+              variables: draft.frame.variables.map(variable => ({ ...variable, ownerParticipantId: null })) }),
+              memberships: group.members.map(subject => ({ subject, participantId: partitionMemberId(subject), active: true })),
+              creationBodyHash: createHash('sha256').update(JSON.stringify([key, draftId, draft.revision, draft.groupVersion, draft.frame])).digest('hex') };
+          }, io);
+          return { ...structuredClone(result), fence: { mutations: structuredClone(fence.mutations),
+            assertCurrent: () => safe(() => fence.assertCurrent()) } };
+        });
       });
     },
     /** Private organizer roster for decision construction; never a public HTTP snapshot. */

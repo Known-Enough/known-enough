@@ -225,3 +225,161 @@ it('preserves the existing capacity classification when a joined SDK transaction
   await expect(repository.transactionDecision('decision', record => { record!.controlVersion++; })).rejects.toBeInstanceOf(RepositoryCapacityError);
   expect(f.writes.length - writes).toBe(1); expect(f.current()).toEqual(before);
 });
+
+
+function draftFixture(f: Awaited<ReturnType<typeof fixture>>) {
+  const participants = ['iris', 'omar'].map(subject => ({ id: partitionMemberId(subject), displayName: subject.toUpperCase(), requiredForApproval: true }));
+  const draft = Groups.GroupDraft.parse({ id: 'draft-one', revision: 1, groupVersion: 1, bodyHash: 'b'.repeat(64), createdDecisionId: null,
+    clarificationQuestions: [], frame: { schemaVersion: KE.KE_SCHEMA_VERSION, decisionId: 'draft-frame', frameVersion: 1, semanticVersion: 1,
+      contextToken: 'c'.repeat(64), title: 'Choose together', objective: 'Choose a task', description: '', participants,
+      requiredParticipantIds: participants.map(person => person.id), variables: [{ id: 'choice', label: 'Choice', type: 'BOOLEAN', visibility: 'PUBLIC', required: true }], rules: [] } });
+  const header = f.cells.get(f.groupLocation)!; const row = JSON.parse(header.payload!.S!); row.value.draftIds = [draft.id];
+  header.payload = { S: JSON.stringify(row) };
+  const key = { PK: { S: 'GROUP#garden' }, SK: { S: `DRAFT#${draft.id}` } };
+  f.cells.set(where(target.partitionArn, key), { ...key, revision: { N: '1' }, payload: { S: JSON.stringify({ schemaVersion: 1, kind: 'DRAFT', revision: 1, value: draft }) } });
+  return draft;
+}
+async function preparedApp(f: Awaited<ReturnType<typeof fixture>>, context = partitionIO()) {
+  draftFixture(f);
+  const prepared = await f.factory().forDraft(actor(), 'garden', 'draft-one', { revision: 1 }, context);
+  const app = new KnownEnoughApplication({ repository: prepared.repository, clock: { now: () => '2026-10-07T15:00:00Z' }, ids: { next: () => 'synthetic' } });
+  const input = { definition: prepared.definition, memberships: prepared.memberships, creationBodyHash: prepared.creationBodyHash, creatorSubject: 'iris' };
+  return { prepared, app, input };
+}
+
+it('atomically creates a decision with the draft lock, binding, directory, group header and approved account guards', async () => {
+  const f = await fixture(); const { prepared, app, input } = await preparedApp(f);
+  expect(f.writes).toEqual([]); await app.createDecision(input);
+  const items = f.writes[0]!;
+  expect(items.filter(item => item.Put)).toHaveLength(6); expect(items.filter(item => item.ConditionCheck)).toHaveLength(2);
+  const id = prepared.definition.decisionId;
+  expect(JSON.parse(f.cells.get(`${target.partitionArn}/GROUP#garden/DRAFT#draft-one`)!.payload!.S!).value.createdDecisionId).toBe(id);
+  expect(f.cells.has(`${target.partitionArn}/DECISION#${id}/GROUP`)).toBe(true);
+  expect(f.cells.has(`${target.partitionArn}/GROUP#garden/BINDING#${id}`)).toBe(true);
+  const snapshot = await app.getCreatedDecision(actor(), id, prepared.creationBodyHash);
+  expect(snapshot!.frame.decisionId).toBe(id);
+  expect(JSON.stringify(snapshot)).not.toMatch(/creationBodyHash|creatorSubject|emailHash|tokenHash|ACCOUNT#|GROUP#/);
+  const repeat = await f.factory().forDraft(actor(), 'garden', 'draft-one', { revision: 1 });
+  expect(repeat.created).toBe(true); expect(repeat.creationBodyHash).toBe(prepared.creationBodyHash);
+});
+
+it('fails atomic draft creation on commit-time disable, roster or draft edit without a partial binding', async () => {
+  for (const race of ['disable', 'roster', 'draft'] as const) {
+    const f = await fixture(); const { prepared, app, input } = await preparedApp(f);
+    f.beforeWrite(() => {
+      if (race === 'disable') f.change('ACCOUNT#omar', value => { value.status = 'DISABLED'; });
+      else f.change('GROUP#garden', value => { if (race === 'roster') { value.version = 2; value.members = ['iris']; } });
+    });
+    await expect(app.createDecision(input)).rejects.toThrow(race === 'disable' ? 'FORBIDDEN' : 'STALE_CONTEXT');
+    expect(f.cells.has(`${target.decisionArn}/ROOM#${prepared.definition.decisionId}/STATE`)).toBe(false);
+    expect(f.cells.has(`${target.partitionArn}/DECISION#${prepared.definition.decisionId}/GROUP`)).toBe(false);
+    expect(JSON.parse(f.cells.get(`${target.partitionArn}/GROUP#garden/DRAFT#draft-one`)!.payload!.S!).value.createdDecisionId).toBeNull();
+    expect(f.writes).toHaveLength(1);
+  }
+});
+
+it('recovers an uncertain applied creation through current explicit replay without repeating the creation write', async () => {
+  const f = await fixture(); const { prepared, app, input } = await preparedApp(f); let first = true;
+  f.afterWrite(() => { if (first) { first = false; throw new Error('synthetic response lost'); } });
+  await app.createDecision(input);
+  expect(f.writes.filter(items => items.some(item => item.Put?.TableName === target.decisionArn))).toHaveLength(1);
+  expect((await app.getCreatedDecision(actor(), prepared.definition.decisionId, prepared.creationBodyHash))!.frame.decisionId).toBe(prepared.definition.decisionId);
+});
+
+it('does not create a second decision during concurrent identical draft creation', async () => {
+  const f = await fixture(); const { prepared, app, input } = await preparedApp(f);
+  const second = await f.factory().forDraft(actor(), 'garden', 'draft-one', { revision: 1 });
+  const other = new KnownEnoughApplication({ repository: second.repository, clock: { now: () => '2026-10-07T15:00:00Z' }, ids: { next: () => 'synthetic' } });
+  await app.createDecision(input); await other.createDecision(input);
+  expect(f.writes.filter(items => items.some(item => item.Put?.TableName === target.decisionArn))).toHaveLength(2);
+  const keys = [...f.cells.keys()].filter(key => key.startsWith(`${target.decisionArn}/ROOM#${prepared.definition.decisionId}/`));
+  expect(keys).toHaveLength(2);
+});
+
+it('binds the creation port to immutable server input and rejects wrong decision/hash/roster before writing', async () => {
+  for (const wrong of ['id', 'hash', 'membership', 'frame'] as const) {
+    const f = await fixture(); const { app, input } = await preparedApp(f);
+    if (wrong === 'id') input.definition.decisionId = 'other';
+    if (wrong === 'hash') input.creationBodyHash = 'd'.repeat(64);
+    if (wrong === 'membership') input.memberships[0]!.subject = 'other';
+    if (wrong === 'frame') input.definition.title = 'Different';
+    await expect(app.createDecision(input)).rejects.toThrow(wrong === 'id' ? 'DECISION_INVALID' : wrong === 'membership' ? 'INVALID_COMMAND' : 'STALE_CONTEXT');
+    expect(f.writes).toEqual([]);
+  }
+});
+
+it('retains one request budget and cancellation across preparation and actual creation', async () => {
+  const f = await fixture(); const base = partitionIO(); let charged = 0;
+  const io = { signal: base.signal, request: () => { charged++; base.request(); } };
+  const { app, input } = await preparedApp(f, io);
+  while (charged < 64) io.request();
+  await expect(app.createDecision(input)).rejects.toThrow('DECISION_REQUEST_LIMIT'); expect(f.writes).toEqual([]);
+});
+
+
+it('rejects a retained directory collision without creating a decision or changing its owner', async () => {
+  const f = await fixture(); const { prepared, app, input } = await preparedApp(f);
+  const id = prepared.definition.decisionId; const key = { PK: { S: `DECISION#${id}` }, SK: { S: 'GROUP' } };
+  f.cells.set(where(target.partitionArn, key), { ...key, revision: { N: '1' }, payload: { S: JSON.stringify({ schemaVersion: 1, kind: 'DIRECTORY', revision: 1,
+    value: { type: 'DECISION', decisionId: id, groupId: 'foreign' } }) } });
+  await expect(app.createDecision(input)).rejects.toThrow('DECISION_INVALID');
+  expect(f.cells.has(`${target.decisionArn}/ROOM#${id}/STATE`)).toBe(false);
+  expect(JSON.parse(f.cells.get(where(target.partitionArn, key))!.payload!.S!).value.groupId).toBe('foreign');
+});
+
+it('denies replay after an uncertain applied write if an account was disabled and preserves the whole atomic record', async () => {
+  const f = await fixture(); const { prepared, app, input } = await preparedApp(f); let first = true;
+  f.afterWrite(() => { if (first) { first = false; f.change('ACCOUNT#iris', value => { value.status = 'DISABLED'; }); throw new Error('synthetic lost response'); } });
+  await expect(app.createDecision(input)).rejects.toThrow('FORBIDDEN');
+  expect(f.cells.has(`${target.decisionArn}/ROOM#${prepared.definition.decisionId}/STATE`)).toBe(true);
+  expect(f.cells.has(`${target.partitionArn}/DECISION#${prepared.definition.decisionId}/GROUP`)).toBe(true);
+  expect(f.writes).toHaveLength(1);
+});
+
+it('captures the trusted principal and command and denies detached provisioning or command replay ports', async () => {
+  const f = await fixture(); draftFixture(f); const who = actor(); const command = { revision: 1 };
+  const prepared = await f.factory().forDraft(who, 'garden', 'draft-one', command); who.subject = 'omar'; command.revision = 2;
+  const app = new KnownEnoughApplication({ repository: prepared.repository, clock: { now: () => '2026-10-07T15:00:00Z' }, ids: { next: () => 'synthetic' } });
+  await app.createDecision({ definition: prepared.definition, memberships: prepared.memberships, creationBodyHash: prepared.creationBodyHash, creatorSubject: 'iris' });
+  await expect(prepared.repository.transactionDecision('other', () => true)).rejects.toThrow('DECISION_INVALID');
+  await expect(prepared.repository.transactionDecision(prepared.definition.decisionId, () => true, { replay: { keyHash: Promise.resolve('a'.repeat(64)) } } as never)).rejects.toThrow('DECISION_INVALID');
+  expect(f.writes).toHaveLength(1);
+});
+
+it('validates native creation bundles before any SDK request and preserves the single shared abort signal', async () => {
+  const f = await fixture(); const { app, input } = await preparedApp(f); await app.createDecision(input);
+  const bundle = f.writes[0]!; const send = vi.spyOn(DynamoDBClient.prototype, 'send').mockResolvedValue({} as never);
+  const transport = createDynamoPartitionDecisionTransport(target); const io = partitionIO();
+  await transport.send(new TransactWriteItemsCommand({ TransactItems: bundle }), io);
+  expect(send.mock.calls[0]![1]).toMatchObject({ abortSignal: io.signal });
+  for (const wrong of ['missing', 'unguarded', 'binding', 'decision', 'revision', 'account'] as const) {
+    const items = structuredClone(bundle);
+    if (wrong === 'missing') items.splice(items.findIndex(item => item.Put?.TableName === target.partitionArn), 1);
+    if (wrong === 'unguarded') items.find(item => item.Put?.TableName === target.partitionArn)!.Put!.ConditionExpression = 'attribute_exists(PK)';
+    if (wrong === 'binding') {
+      const item = items.find(item => item.Put?.Item?.SK?.S?.startsWith('BINDING#'))!.Put!;
+      const row = JSON.parse(item.Item!.payload!.S!); row.value.version = 2; item.Item!.payload = { S: JSON.stringify(row) };
+    }
+    if (wrong === 'decision') items.find(item => item.Put?.TableName === target.decisionArn)!.Put!.Item!.PK = { S: 'ROOM#other' };
+    if (wrong === 'revision') items.find(item => item.Put?.TableName === target.partitionArn)!.Put!.Item!.revision = { N: '99' };
+    if (wrong === 'account') items.splice(items.findIndex(item => item.ConditionCheck), 1);
+    await expect(transport.send(new TransactWriteItemsCommand({ TransactItems: items }), io)).rejects.toThrow('DECISION_INVALID');
+  }
+  expect(send).toHaveBeenCalledTimes(1);
+});
+
+
+it('never adopts an orphan decision after its draft binding is missing', async () => {
+  const f = await fixture(); const { prepared, app, input } = await preparedApp(f); await app.createDecision(input);
+  const id = prepared.definition.decisionId;
+  f.cells.delete(`${target.partitionArn}/DECISION#${id}/GROUP`); f.cells.delete(`${target.partitionArn}/GROUP#garden/BINDING#${id}`);
+  f.change('GROUP#garden', value => { value.decisionIds = (value.decisionIds as string[]).filter(value => value !== id); });
+  const cell = f.cells.get(`${target.partitionArn}/GROUP#garden/DRAFT#draft-one`)!; const row = JSON.parse(cell.payload!.S!);
+  row.value.createdDecisionId = null; row.revision++; cell.revision = { N: String(row.revision) }; cell.payload = { S: JSON.stringify(row) };
+  const fresh = await f.factory().forDraft(actor(), 'garden', 'draft-one', { revision: 1 });
+  const replay = new KnownEnoughApplication({ repository: fresh.repository, clock: { now: () => '2026-10-07T15:00:00Z' }, ids: { next: () => 'synthetic' } });
+  expect(await replay.getCreatedDecision(actor(), id, fresh.creationBodyHash)).toBeNull();
+  await expect(replay.createDecision({ definition: fresh.definition, memberships: fresh.memberships, creationBodyHash: fresh.creationBodyHash, creatorSubject: 'iris' })).rejects.toThrow('DECISION_STORAGE_UNAVAILABLE');
+  expect(f.cells.has(`${target.partitionArn}/DECISION#${id}/GROUP`)).toBe(false);
+  expect(JSON.parse(cell.payload!.S!).value.createdDecisionId).toBeNull();
+});

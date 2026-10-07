@@ -848,3 +848,75 @@ it('checks draft capacity before an architect call and again if another request 
     .generateDraft(participant(), 'garden', generate)).rejects.toThrow('SESSION_CAPACITY');
   expect(raced.get('GROUP#garden/STATE').value.draftIds).toHaveLength(64); expect(raced.commits).toHaveLength(1);
 });
+
+
+it('prepares draft creation without a reservation write and exposes only a server-side atomic bundle', async () => {
+  const f = fixture(); const draft = seedDraft(f, { clarificationQuestions: [] });
+  const prepared = await f.session().prepareDraftCreation(participant(), 'garden', draft.id, { revision: 1 });
+  expect(prepared.created).toBe(false); expect(prepared.definition.decisionId).toMatch(/^groupdecision-[a-f0-9]{40}$/);
+  expect(prepared.creationBodyHash).toMatch(/^[a-f0-9]{64}$/);
+  expect(prepared.memberships.map(member => member.subject)).toEqual(['iris', 'omar']);
+  expect(f.commits).toEqual([]); expect(f.get('GROUP#garden/DRAFT#draft-one').value.createdDecisionId).toBeNull();
+  expect(prepared.fence.mutations.filter(item => item.next).map(item => item.next!.kind).sort()).toEqual(['BINDING', 'DIRECTORY', 'DRAFT', 'GROUP']);
+  expect(prepared.fence.mutations.filter(item => item.key.PK.startsWith('ACCOUNT#')).every(item => item.next === null)).toBe(true);
+  await f.transport.commit(prepared.fence.mutations);
+  const replay = await f.session().prepareDraftCreation(participant(), 'garden', draft.id, { revision: 1 });
+  expect(replay.created).toBe(true); expect(replay.creationBodyHash).toBe(prepared.creationBodyHash);
+  expect(replay.fence.mutations.every(item => item.next === null)).toBe(true);
+});
+
+it('rejects untrusted identity and malformed draft-creation commands before storage', async () => {
+  const f = fixture(); const session = f.session();
+  await expect(session.prepareDraftCreation(null, 'garden', 'draft-one', { revision: 1 })).rejects.toThrow('FORBIDDEN');
+  for (const raw of [{ revision: 0 }, { revision: 1, subject: 'iris' }, { revision: Number.MAX_SAFE_INTEGER + 1 }])
+    await expect(session.prepareDraftCreation(participant(), 'garden', 'draft-one', raw)).rejects.toThrow('INVALID_COMMAND');
+  expect(f.reads).toEqual([]); expect(f.commits).toEqual([]);
+});
+
+it('requires current exact draft revision, all approved roster names and an approved organizer', async () => {
+  for (const mismatch of ['revision', 'version', 'name', 'participant', 'required', 'disabled', 'organizer'] as const) {
+    const f = fixture(); const draft = seedDraft(f, { clarificationQuestions: [] });
+    const row = f.get('GROUP#garden/DRAFT#draft-one').value as unknown as Groups.GroupDraft;
+    if (mismatch === 'revision') row.revision = 2;
+    if (mismatch === 'version') row.groupVersion = 2;
+    if (mismatch === 'name') row.frame.participants[0]!.displayName = 'Other';
+    if (mismatch === 'participant') row.frame.participants[0]!.id = 'other';
+    if (mismatch === 'required') row.frame.requiredParticipantIds = [];
+    if (mismatch === 'disabled') f.get('ACCOUNT#omar/STATE').value.status = 'DISABLED';
+    await expect(f.session().prepareDraftCreation(participant(mismatch === 'organizer' ? 'omar' : 'iris'), 'garden', draft.id, { revision: 1 }))
+      .rejects.toThrow(['disabled', 'organizer'].includes(mismatch) ? 'FORBIDDEN' : ['participant', 'required'].includes(mismatch) ? 'SESSION_INVALID' : 'STALE_CONTEXT');
+    expect(f.commits).toEqual([]);
+  }
+});
+
+it('retains clarification and incomplete public catalog gates before locking a draft', async () => {
+  for (const unresolved of [true, false]) {
+    const f = fixture(); const draft = seedDraft(f, { clarificationQuestions: unresolved ? ['Confirm choices.'] : [] });
+    if (!unresolved) (f.get('GROUP#garden/DRAFT#draft-one').value as unknown as Groups.GroupDraft).frame.variables = [];
+    await expect(f.session().prepareDraftCreation(participant(), 'garden', draft.id, { revision: 1 })).rejects.toThrow('NEEDS_CLARIFICATION');
+    expect(f.commits).toEqual([]);
+  }
+});
+
+it('detects account or draft changes against the pending creation fence without an early reservation', async () => {
+  for (const target of ['ACCOUNT#omar/STATE', 'GROUP#garden/STATE']) {
+    const f = fixture(); const draft = seedDraft(f, { clarificationQuestions: [] });
+    const prepared = await f.session().prepareDraftCreation(participant(), 'garden', draft.id, { revision: 1 });
+    f.get(target).revision++;
+    await expect(prepared.fence.assertCurrent()).rejects.toThrow('STALE_CONTEXT');
+    expect(await f.transport.commit(prepared.fence.mutations)).toBe(false);
+    expect(f.get('GROUP#garden/DRAFT#draft-one').value.createdDecisionId).toBeNull();
+  }
+});
+
+
+it('rejects a full decision binding set and inconsistent retained draft identity without a write', async () => {
+  const full = fixture(); const draft = seedDraft(full, { clarificationQuestions: [] });
+  const ids = Array.from({ length: 64 }, (_, i) => `bound-${i}`); full.get('GROUP#garden/STATE').value.decisionIds = ids;
+  for (const id of ids) full.rows.set(`GROUP#garden/BINDING#${id}`, { schemaVersion: 1, kind: 'BINDING', revision: 1, value: { id, version: 1 } });
+  await expect(full.session().prepareDraftCreation(participant(), 'garden', draft.id, { revision: 1 })).rejects.toThrow('SESSION_CAPACITY');
+  expect(full.commits).toEqual([]);
+  const retained = fixture(); const wrong = seedDraft(retained, { clarificationQuestions: [], createdDecisionId: 'decision' });
+  await expect(retained.session().prepareDraftCreation(participant(), 'garden', wrong.id, { revision: 1 })).rejects.toThrow('STALE_CONTEXT');
+  expect(retained.commits).toEqual([]);
+});
