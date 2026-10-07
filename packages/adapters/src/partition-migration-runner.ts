@@ -19,6 +19,7 @@ const journalSchema = z.strictObject({ schemaVersion: z.literal(1), revision: in
   sourceRevision: integer.min(1), sourceHash: hash, rowCount: integer.max(1000), nextBatch: integer.max(12),
   completedRows: integer.max(1000), state: z.enum(['PREPARED', 'APPLYING', 'COPIED']) });
 export type MigrationJournal = z.infer<typeof journalSchema>;
+export { controlSchema as MigrationControlSchema, journalSchema as MigrationJournalSchema };
 export type MigrationAtomicCommit = {
   source: { table: 'KnownEnoughGroupsStage'; key: { PK: 'NP#GROUPS'; SK: 'STATE' }; revision: number; payload: Buffer };
   control: { expected: MigrationControl; next: MigrationControl | null };
@@ -90,7 +91,8 @@ export function createPartitionMigrationRunner(ports: MigrationRunnerPorts, mani
     if (!source || !Buffer.isBuffer(source.payload) || source.payload.length > 300_000
       || source.version !== binding.sourceRevision || digest(source.payload) !== binding.sourceHash) fail('MIGRATION_SOURCE_CHANGED');
     const parsed = controlSchema.safeParse(await call(io, () => ports.control(io)));
-    if (!parsed.success || parsed.data.revision === Number.MAX_SAFE_INTEGER) fail('MIGRATION_RUN_INVALID');
+    if (!parsed.success || parsed.data.revision === Number.MAX_SAFE_INTEGER
+      || (parsed.data.planHash === null && parsed.data.revision === Number.MAX_SAFE_INTEGER - 1)) fail('MIGRATION_RUN_INVALID');
     if (parsed.data.active || (parsed.data.planHash !== null && parsed.data.planHash !== plan.planHash)) fail('MIGRATION_TARGET_CONFLICT');
     return parsed.data;
   }
