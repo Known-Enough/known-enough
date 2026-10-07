@@ -36,6 +36,7 @@ jobs:
           VITEST_MAX_WORKERS: '2'
         run: |
           npm ci
+          npm ci --prefix scripts/live-qa
           node --test scripts/operations/*.test.mjs
           npx playwright install --with-deps chromium
           npm run check
