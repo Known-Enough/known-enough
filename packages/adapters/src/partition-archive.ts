@@ -208,7 +208,11 @@ export function createPartitionArchiveRunner(ports: PartitionArchivePorts, bytes
   const makeIO = () => { try { return migrationIO(options); } catch (error) { return ioFailure(error); } }; makeIO();
   const key = { PK: `ARCHIVE#${expected.groupId}`, SK: `OP#${expected.manifestHash}` };
   async function call<T>(io: PartitionIOContext, work: () => Promise<T>, commit = false): Promise<T> {
-    try { return await migrationCall(io, work, commit); } catch (error) { return ioFailure(error); }
+    try { return await migrationCall(io, work, commit); } catch (error) {
+      if (!commit && error instanceof MigrationRunError && error.code === 'MIGRATION_STORAGE_UNAVAILABLE'
+        && error.cause instanceof PartitionArchiveError) throw error.cause;
+      return ioFailure(error);
+    }
   }
   async function current(io: PartitionIOContext, archived: ArchiveJournal | null) {
     const raw = await call(io, () => ports.group(expected.groupId, io));
