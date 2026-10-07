@@ -22,6 +22,7 @@ const rowSchema = z.discriminatedUnion('kind', [
   z.strictObject({ ...base, kind: z.literal('BINDING'), value: binding }),
   PartitionDirectoryRow,
 ]);
+export { rowSchema as PartitionRowSchema };
 export type PartitionRow = z.infer<typeof rowSchema>;
 type DomainRow = Exclude<PartitionRow, { kind: 'DIRECTORY' }>;
 export type PartitionKey = { PK: string; SK: string };
