@@ -299,3 +299,5 @@ IN_PROGRESS/B soleclaim afterUX03CODE_READYrelease; ownBattosai1806/equalmainf1a
 OPS00 executable scope refinement: scripts/operations/plan.mjs and plan.test.mjs only for offline strict plan/recovery validation; no workflow/live apply yet.
 
 OPS00 scope adds scripts/operations/journal.mjs and journal.test.mjs: injected durable conditional storage port plus concurrency/restart tests; no managed resource installation.
+
+OPS00 scope adds scripts/operations/dynamo-journal.mjs and dynamo-journal.test.mjs: exact proposed table adapter via injected transport, no provisioning or enabled workload.

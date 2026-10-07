@@ -64,3 +64,20 @@ IN_PROGRESS/B. journal.mjs injected read/createIfAbsent/compareAndSwap, original
 ## OPS00 run110 checked journal checkpoint — 2026-10-07T05:36:41.562491+00:00
 
 IN_PROGRESS/B. Prior109full PASS784twooptional/hosted1/browser62; ninefocusedPASS. Conditionaljournalservice/revisiontransitions checked, fakeatomicstore explicitly not manageddurability. Exact dedicated KnownEnoughOperationsJournal PLAN#hash/JOURNAL schema and narrow setup/runtime proposal documented, not installed. Next transportadapter/conditionalrequest tests and workflow/bootstrap; no CODE_READY/liveclaim. Checkedsource sync now.
+
+OPS00 scope adds scripts/operations/dynamo-journal.mjs and dynamo-journal.test.mjs: exact proposed table adapter via injected transport, no provisioning or enabled workload.
+
+
+## OPS00 run111 Dynamo transport checkpoint — 2026-10-07T06:07:13.407728+00:00
+
+IN_PROGRESS/B. exactproposedtable adapterconsistentread/exclusivecreate/revisionCAS/errorclassification;12focusedPASS injectedrequesttests only. No installedDynamo/role/provision/liveapply. Fullsession92293 /tmp/ke-run111/full.log active, inspectnoduplicate. SourceLOCAL untilchecked. Next fullresult then adapterstrictness/integration/workflow/setup.
+
+
+## OPS00 run112 adapter integration — 2026-10-07T06:37:07.269253+00:00
+
+IN_PROGRESS/B. Prior111fullFAIL lint preserve-caught-error adapterline23; fixed internalcause with sanitized publicmessage. Added journalservice/Dynamosimulatedconditionaltransport resume/2writers integration. Focused13PASS. Updatedfullsession18399 /tmp/ke-run112/full.log active; no sourcepush until verified. Simulatedtransport is not managedproof; next fulloutcome/workflow/bootstrap.
+
+
+## OPS00 run113 checked adapter checkpoint — 2026-10-07T07:07:06.596890+00:00
+
+IN_PROGRESS/B. Corrected112fullPASS784twooptional/hosted1/browser62 and focused13PASS. ExactDynamoadapter/conditionalservice integratedsimulatedtransport tests checked; no realDynamo installation. Setup-package.md defines table/readback/PITR/preservation/OIDC/runtimedeny/sourceplanworkflow/manifest prerequisites. Bootstrap/executableworkflow/manifest stillunfinished. Checkedsource syncnow; sameclaim.
