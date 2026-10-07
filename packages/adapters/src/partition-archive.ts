@@ -30,6 +30,8 @@ type AccountRow = Extract<PartitionRow, { kind: 'ACCOUNT' }>;
 type Header = Extract<PartitionRow, { kind: 'GROUP' }>;
 const entrySchema = z.strictObject({ key: z.strictObject({ PK: z.string(), SK: z.string() }), row: PartitionRowSchema });
 export type ArchiveEntry = z.infer<typeof entrySchema>;
+// Logical bytes; the optional chunk recovery port keeps each physical object below 1MiB.
+export const ARCHIVE_MANIFEST_BYTES = 5 * 1024 * 1024;
 const manifestSchema = z.strictObject({ schemaVersion: z.literal(1), kind: z.literal('GROUP_ARCHIVE_RECOVERY'),
   sourceSha: sha, account: z.literal('092954139775'), region: z.literal('us-east-1'),
   table: z.literal('KnownEnoughPartitions'), groupId: id, sourceHeaderRevision: revision,
@@ -107,12 +109,12 @@ export function preparePartitionArchive(raw: unknown, groupId: string, sourceSha
   const manifest = manifestSchema.parse({ schemaVersion: 1, kind: 'GROUP_ARCHIVE_RECOVERY', sourceSha,
     account: resources.account, region: resources.region, table: 'KnownEnoughPartitions', groupId,
     sourceHeaderRevision: snapshot.header.revision, sourceHash, rows: snapshot.entries });
-  const manifestBytes = Buffer.from(JSON.stringify(manifest)); if (manifestBytes.length > 1024 * 1024) fail('ARCHIVE_CAPACITY');
+  const manifestBytes = Buffer.from(JSON.stringify(manifest)); if (manifestBytes.length > ARCHIVE_MANIFEST_BYTES) fail('ARCHIVE_CAPACITY');
   return { ...structuredClone(snapshot), sourceHash, manifestBytes, manifestHash: digest(manifestBytes) };
 }
 export function loadPartitionArchive(bytes: Buffer, rawExpected: ArchiveExpected) {
   const expected = expectedSchema.safeParse(rawExpected);
-  if (!expected.success || !Buffer.isBuffer(bytes) || bytes.length < 1 || bytes.length > 1024 * 1024) return fail('ARCHIVE_INVALID');
+  if (!expected.success || !Buffer.isBuffer(bytes) || bytes.length < 1 || bytes.length > ARCHIVE_MANIFEST_BYTES) return fail('ARCHIVE_INVALID');
   let manifest: z.infer<typeof manifestSchema>;
   try { manifest = manifestSchema.parse(JSON.parse(new globalThis.TextDecoder('utf8', { fatal: true }).decode(bytes))); }
   catch { return fail('ARCHIVE_INVALID'); }

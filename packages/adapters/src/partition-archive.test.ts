@@ -96,7 +96,13 @@ it('rejects private account backup, foreign/unreferenced/missing/duplicate rows,
     if (defect === 'binding') source.entries = source.entries.filter(entry => entry.row.kind !== 'BINDING');
     expect(() => preparePartitionArchive(source.entries, 'garden', sourceSha)).toThrow('ARCHIVE_INVALID');
   }
-  expect(() => preparePartitionArchive(snapshot(24, true).entries, 'garden', sourceSha)).toThrow('ARCHIVE_CAPACITY');
+  const overflow = snapshot(64, true);
+  for (const entry of overflow.entries) if (entry.row.kind === 'DRAFT') {
+    for (const variable of entry.row.value.frame.variables) if (variable.type === 'ENUM') {
+      for (const option of variable.options) option.id += 'x'.repeat(50);
+    }
+  }
+  expect(() => preparePartitionArchive(overflow.entries, 'garden', sourceSha)).toThrow('ARCHIVE_CAPACITY');
 });
 
 it('independently binds manifest source/target/hash/schema and exact canonical UTF8 before execution', () => {
