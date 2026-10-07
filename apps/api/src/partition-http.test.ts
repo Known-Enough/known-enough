@@ -503,7 +503,7 @@ it('reads and edits drafts only through the approved organizer boundary without 
   expect(JSON.stringify(result)).not.toMatch(/subject|emailHash|recipientHash|ACCOUNT#|MEMBER#|PARTITION#/);
   expect((await a.post(draftPath, httpEdit(draft))).status).toBe(409);
   expect((await a.post(draftPath, { ...httpEdit(result), subject: 'omar' })).status).toBe(422);
-  expect((await a.post(draftPath + '/create', {})).status).toBe(404);
+  expect((await a.post(draftPath + '/create', {})).status).toBe(422);
   expect(f.writes).toEqual([]); expect(f.reads).toEqual([]);
 });
 
@@ -637,4 +637,201 @@ it('cancels disconnected generation without a late write and retains unresolved 
   release(); await new Promise<void>(resolve => setTimeout(resolve, 10)); expect((await a.get('/account')).status).toBe(200);
   expect(JSON.parse(f.cells.get(f.groupLocation)!.payload!.S!).value.draftIds).toEqual([]);
   expect(f.groupCommits.every(values => values.every(value => !(value as { next: unknown }).next))).toBe(true);
+});
+
+
+const creationPath = draftPath + '/create';
+function readyHttpDraft(f: Awaited<ReturnType<typeof fixture>>) {
+  const draft = seedHttpDraft(f); draft.clarificationQuestions = [];
+  const cell = f.cells.get(`${target.partitionArn}/GROUP#garden/DRAFT#draft-one`)!;
+  const row = JSON.parse(cell.payload!.S!); row.value.clarificationQuestions = []; cell.payload = { S: JSON.stringify(row) }; return draft;
+}
+const creationWrites = (f: Awaited<ReturnType<typeof fixture>>) => f.writes.filter(items => items.some(item => item.Put?.TableName === target.decisionArn && item.Put.Item?.SK?.S === 'STATE' && item.Put.ConditionExpression === 'attribute_not_exists(#pk)'));
+
+it('creates a decision through HTTP with one atomic binding and a current public snapshot', async () => {
+  const f = await fixture(); readyHttpDraft(f); const a = await api(f);
+  const response = await a.post(creationPath, { revision: 1 }); expect(response.status).toBe(200);
+  expect(response.headers.get('cache-control')).toBe('no-store'); const value = await response.json();
+  const snapshot = KE.PublicDecisionSnapshot.parse(value.snapshot); const id = snapshot.frame.decisionId;
+  expect(snapshot.status).toBe('COLLECTING_FRAME_CONFIRMATION'); expect(id).toMatch(/^groupdecision-[a-f0-9]{40}$/);
+  expect(snapshot.frame.participants.map(member => member.id)).toEqual(['iris', 'omar'].map(partitionMemberId));
+  expect(JSON.stringify(value)).not.toMatch(/creatorSubject|creationBodyHash|emailHash|recipientHash|tokenHash|ACCOUNT#|GROUP#|MEMBER#|privateConditions/);
+  expect(creationWrites(f)).toHaveLength(1); expect(creationWrites(f)[0]!.filter(item => item.Put)).toHaveLength(6);
+  expect(f.cells.has(`${target.partitionArn}/DECISION#${id}/GROUP`)).toBe(true);
+  expect(f.writes.at(-1)!.some(item => item.ConditionCheck?.Key?.SK?.S === 'GUARD')).toBe(true);
+  expect((await a.get(`/decisions/${id}/public`, 'omar')).status).toBe(200);
+});
+
+it('returns current creation replay without resetting later consent or making another creation attempt', async () => {
+  const f = await fixture(); readyHttpDraft(f); const a = await api(f);
+  const first = await a.post(creationPath, { revision: 1 }); const id = (await first.json()).snapshot.frame.decisionId;
+  const owner = await (await a.get(`/decisions/${id}/me`)).json();
+  expect((await a.post(`/decisions/${id}/commands`, { ...command(owner, 'new-decision-frame'), decisionId: id })).status).toBe(200);
+  const before = decodeDecisionStateItem(f.cells.get(`${target.decisionArn}/ROOM#${id}/STATE`), id);
+  const current = await (await a.get(`/decisions/${id}/public`)).json();
+  const replay = await a.post(creationPath, { revision: 1 }); expect(replay.status).toBe(200); expect(await replay.json()).toEqual({ snapshot: current });
+  expect(decodeDecisionStateItem(f.cells.get(`${target.decisionArn}/ROOM#${id}/STATE`), id)).toEqual(before);
+  expect(creationWrites(f)).toHaveLength(1); expect(before.frameConfirmations).toHaveLength(1);
+});
+
+it('admits an approved organizer before a creation body and rejects caller-selected authority', async () => {
+  const f = await fixture(); readyHttpDraft(f); const a = await api(f, { bodyTimeoutMs: 40 });
+  const denied = await new Promise<number>((resolve, fail) => {
+    const request = httpRequest(a.base + creationPath, { method: 'POST', headers: { authorization: 'Bearer omar', 'content-type': 'application/json' } }, response => {
+      response.resume(); response.on('end', () => { request.end(); resolve(response.statusCode!); });
+    }); request.on('error', fail); request.write('{');
+  }); expect(denied).toBe(403);
+  expect((await a.post(creationPath, { revision: 1 }, 'unknown', { 'x-subject': 'iris' })).status).toBe(401);
+  for (const raw of [{ revision: 1, subject: 'iris' }, { revision: 1, decisionId: 'other' }, { revision: 0 }, { revision: Number.MAX_SAFE_INTEGER + 1 }]) {
+    const response = await a.post(creationPath, raw); expect((await response.json()).error.code).toBe('INVALID_COMMAND');
+  }
+  expect(creationWrites(f)).toEqual([]);
+});
+
+it('keeps creation POST-only and requires an existing draft with the exact current revision', async () => {
+  const f = await fixture(); readyHttpDraft(f); const a = await api(f);
+  expect((await a.get(creationPath)).status).toBe(404);
+  expect((await a.post('/groups/garden/drafts/missing/create', { revision: 1 })).status).toBe(404);
+  const stale = await a.post(creationPath, { revision: 2 }); expect((await stale.json()).error.code).toBe('STALE_CONTEXT');
+  expect(creationWrites(f)).toEqual([]);
+});
+
+it('preserves unanswered-question and incomplete-public-catalog gates before decision creation', async () => {
+  for (const unanswered of [true, false]) {
+    const f = await fixture(); const draft = unanswered ? seedHttpDraft(f) : readyHttpDraft(f);
+    if (!unanswered) {
+      const cell = f.cells.get(`${target.partitionArn}/GROUP#garden/DRAFT#${draft.id}`)!; const row = JSON.parse(cell.payload!.S!);
+      row.value.frame.variables = []; cell.payload = { S: JSON.stringify(row) };
+    }
+    const a = await api(f); const response = await a.post(creationPath, { revision: 1 });
+    expect((await response.json()).error.code).toBe('NEEDS_CLARIFICATION'); expect(creationWrites(f)).toEqual([]);
+  }
+});
+
+it('fails commit-time account and roster races without creating a partial binding or public result', async () => {
+  for (const race of ['disable', 'roster'] as const) {
+    const f = await fixture(); readyHttpDraft(f); const a = await api(f);
+    f.beforeWrite(() => {
+      if (race === 'disable') f.change('ACCOUNT#omar', value => { value.status = 'DISABLED'; });
+      else f.change('GROUP#garden', value => { value.version = 2; value.members = ['iris']; });
+    });
+    const response = await a.post(creationPath, { revision: 1 }); const value = await response.json();
+    expect(value.error.code).toBe(race === 'disable' ? 'FORBIDDEN' : 'STALE_CONTEXT'); expect(value.snapshot).toBeUndefined();
+    expect([...f.cells.keys()].filter(key => key.startsWith(`${target.decisionArn}/ROOM#groupdecision-`))).toEqual([]);
+    expect(JSON.parse(f.cells.get(`${target.partitionArn}/GROUP#garden/DRAFT#draft-one`)!.payload!.S!).value.createdDecisionId).toBeNull();
+  }
+});
+
+it('reconciles a lost applied creation response through fresh HTTP authorization with one creation attempt', async () => {
+  const f = await fixture(); readyHttpDraft(f); let first = true;
+  f.afterWrite(() => { if (first) { first = false; throw new Error('PRIVATE_CREATION_RESPONSE_DIAGNOSTIC'); } });
+  const a = await api(f); const response = await a.post(creationPath, { revision: 1 }); expect(response.status).toBe(200);
+  const value = await response.json(); expect(JSON.stringify(value)).not.toContain('PRIVATE_'); expect(creationWrites(f)).toHaveLength(1);
+  expect((await a.post(creationPath, { revision: 1 })).status).toBe(200); expect(creationWrites(f)).toHaveLength(1);
+});
+
+it('does not publish creation when authorization is revoked after its atomic write', async () => {
+  const f = await fixture(); readyHttpDraft(f); let first = true;
+  f.afterWrite(() => { if (first) { first = false; f.change('ACCOUNT#iris', value => { value.status = 'DISABLED'; }); } });
+  const a = await api(f); const response = await a.post(creationPath, { revision: 1 }); expect(response.status).toBe(403);
+  const value = await response.json(); expect(value.snapshot).toBeUndefined(); expect(JSON.stringify(value)).not.toMatch(/Garden|IRIS|OMAR|GROUP#/);
+  expect(creationWrites(f)).toHaveLength(1); expect([...f.cells.keys()].some(key => key.startsWith(`${target.decisionArn}/ROOM#groupdecision-`))).toBe(true);
+});
+
+it('verifies retained directory admission before publishing either initial creation or replay', async () => {
+  for (const replay of [true, false]) {
+    const f = await fixture(); readyHttpDraft(f); const a = await api(f);
+    let id: string;
+    if (replay) {
+      id = (await (await a.post(creationPath, { revision: 1 })).json()).snapshot.frame.decisionId;
+      f.cells.delete(`${target.partitionArn}/DECISION#${id}/GROUP`);
+    } else {
+      f.afterWrite(() => {
+        const key = [...f.cells.keys()].find(key => key.startsWith(`${target.partitionArn}/DECISION#groupdecision-`)); if (key) f.cells.delete(key);
+      });
+    }
+    const response = await a.post(creationPath, { revision: 1 }); expect(response.status).toBe(404);
+    expect((await response.json()).snapshot).toBeUndefined(); expect(creationWrites(f)).toHaveLength(1);
+  }
+});
+
+it('retains creation body size/type and deadline checks before any decision write', async () => {
+  const f = await fixture(); readyHttpDraft(f); const a = await api(f, { maxBodyBytes: 40, bodyTimeoutMs: 30 });
+  for (const response of [await a.post(creationPath, { revision: 1, padding: 'x'.repeat(50) }), await a.post(creationPath, { revision: 1 }, 'iris', { 'content-type': 'text/plain' })])
+    expect((await response.json()).error.code).toBe('INVALID_COMMAND');
+  const timed = await new Promise<number>((resolve, fail) => {
+    const request = httpRequest(a.base + creationPath, { method: 'POST', headers: { authorization: 'Bearer iris', 'content-type': 'application/json' } }, response => {
+      response.resume(); response.on('end', () => { request.end(); resolve(response.statusCode!); });
+    }); request.on('error', fail); request.write('{');
+  }); expect(timed).toBe(503); expect(creationWrites(f)).toEqual([]);
+});
+
+
+it('shares creation request accounting through the final HTTP publication and permits explicit replay after budget exhaustion', async () => {
+  const f = await fixture(); readyHttpDraft(f); const requests = new Set<() => void>(); const signals = new Set<AbortSignal>(); let used = 0; let drain = true;
+  const read = f.groups.readMany!.bind(f.groups); f.groups.readMany = async (keys, context) => {
+    requests.add(context!.request); signals.add(context!.signal); used++; return read(keys, context);
+  };
+  const commit = f.groups.commit.bind(f.groups); f.groups.commit = async (mutations, context) => {
+    requests.add(context!.request); signals.add(context!.signal); used++; return commit(mutations, context);
+  };
+  const send = f.transport.send.bind(f.transport); f.transport.send = async (command, context) => {
+    requests.add(context.request); signals.add(context.signal); used++;
+    const result = await send(command, context);
+    if (drain && !(command instanceof TransactGetItemsCommand) && command.input.TransactItems!.some(item => item.Put?.Item?.SK?.S === 'STATE')) {
+      drain = false; while (used < 64) { context.request(); used++; }
+    }
+    return result;
+  };
+  const a = await api(f); const exhausted = await a.post(creationPath, { revision: 1 }); expect(exhausted.status).toBe(503);
+  expect((await exhausted.json()).snapshot).toBeUndefined(); expect(creationWrites(f)).toHaveLength(1);
+  expect(requests.size).toBe(1); expect(signals.size).toBe(1); expect(used).toBe(64);
+  const replay = await a.post(creationPath, { revision: 1 }); expect(replay.status).toBe(200); expect(creationWrites(f)).toHaveLength(1);
+});
+
+it('cancels a disconnected creation during pre-body admission without a late decision or binding write', async () => {
+  const f = await fixture(); readyHttpDraft(f); let entered!: () => void; const ready = new Promise<void>(resolve => { entered = resolve; });
+  let release!: () => void; const held = new Promise<void>(resolve => { release = resolve; }); let hold = true;
+  const read = f.groups.readMany!.bind(f.groups); f.groups.readMany = async (keys, context) => {
+    if (hold) { hold = false; entered(); await held; } return read(keys, context);
+  };
+  const a = await api(f); const request = httpRequest(a.base + creationPath, { method: 'POST', headers: { authorization: 'Bearer iris', 'content-type': 'application/json' } });
+  request.on('error', () => {}); request.end(JSON.stringify({ revision: 1 })); await ready; request.destroy();
+  await new Promise<void>(resolve => setTimeout(resolve, 10)); release(); await new Promise<void>(resolve => setTimeout(resolve, 10));
+  expect(creationWrites(f)).toEqual([]); expect(JSON.parse(f.cells.get(`${target.partitionArn}/GROUP#garden/DRAFT#draft-one`)!.payload!.S!).value.createdDecisionId).toBeNull();
+  expect((await a.get('/account')).status).toBe(200);
+});
+
+it('rejects a final decision publication if the actor is disabled after its directory and account scope was loaded', async () => {
+  const f = await fixture(); readyHttpDraft(f); let first = true;
+  f.beforeRead(() => { if (first) { first = false; f.change('ACCOUNT#iris', value => { value.status = 'DISABLED'; }); } });
+  const a = await api(f); const response = await a.post(creationPath, { revision: 1 }); expect(response.status).toBe(409);
+  const value = await response.json(); expect(value.error.code).toBe('STALE_CONTEXT'); expect(value.snapshot).toBeUndefined(); expect(JSON.stringify(value)).not.toMatch(/Garden|IRIS|OMAR|subject/);
+  expect(creationWrites(f)).toHaveLength(1);
+});
+
+it('reports decision binding capacity before creating or locking an HTTP draft', async () => {
+  const f = await fixture(); readyHttpDraft(f); const ids = Array.from({ length: 64 }, (_, i) => `bound-${i}`);
+  f.change('GROUP#garden', value => { value.decisionIds = ids; });
+  for (const id of ids) {
+    const key = { PK: { S: 'GROUP#garden' }, SK: { S: `BINDING#${id}` } };
+    f.cells.set(where(target.partitionArn, key), { ...key, revision: { N: '1' }, payload: { S: JSON.stringify({ schemaVersion: 1, kind: 'BINDING', revision: 1, value: { id, version: 1 } }) } });
+  }
+  const a = await api(f); const response = await a.post(creationPath, { revision: 1 }); expect((await response.json()).error.code).toBe('CAPACITY_EXCEEDED');
+  expect(creationWrites(f)).toEqual([]); expect(JSON.parse(f.cells.get(`${target.partitionArn}/GROUP#garden/DRAFT#draft-one`)!.payload!.S!).value.createdDecisionId).toBeNull();
+});
+
+it('converges overlapping identical HTTP creation requests on one decision without exposing a stale response', async () => {
+  const f = await fixture(); readyHttpDraft(f); let release!: () => void; const held = new Promise<void>(resolve => { release = resolve; }); let creating = 0;
+  const send = f.transport.send.bind(f.transport); f.transport.send = async (command, context) => {
+    if (!(command instanceof TransactGetItemsCommand) && command.input.TransactItems!.some(item => item.Put?.Item?.SK?.S === 'STATE')) {
+      creating++; if (creating === 1) await held; else release();
+    }
+    return send(command, context);
+  };
+  const a = await api(f); const responses = await Promise.all([a.post(creationPath, { revision: 1 }), a.post(creationPath, { revision: 1 })]);
+  expect(responses.map(response => response.status)).toEqual([200, 200]); const values = await Promise.all(responses.map(response => response.json()));
+  expect(values[0]).toEqual(values[1]); const id = values[0].snapshot.frame.decisionId;
+  expect([...f.cells.keys()].filter(key => key.startsWith(`${target.decisionArn}/ROOM#${id}/`))).toHaveLength(2);
+  expect(creationWrites(f)).toHaveLength(2);
 });

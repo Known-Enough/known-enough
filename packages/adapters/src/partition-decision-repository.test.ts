@@ -383,3 +383,21 @@ it('never adopts an orphan decision after its draft binding is missing', async (
   expect(f.cells.has(`${target.partitionArn}/DECISION#${id}/GROUP`)).toBe(false);
   expect(JSON.parse(cell.payload!.S!).value.createdDecisionId).toBeNull();
 });
+
+
+it('uses a supplied physical request budget for participant admission and public publication instead of resetting it', async () => {
+  const f = await fixture(); await f.factory().forParticipant(actor()).createDecision(f.initial);
+  const base = partitionIO(); let charged = 0; const io = { signal: base.signal, request: () => { charged++; base.request(); } };
+  const repository = f.factory().forParticipant(actor(), io); await repository.transactionDecision('decision', record => record!.decisionId);
+  while (charged < 64) io.request(); const writes = f.writes.length;
+  await expect(repository.transactionDecision('decision', record => record!.decisionId)).rejects.toThrow('DECISION_REQUEST_LIMIT');
+  expect(f.writes).toHaveLength(writes);
+});
+
+it('uses the captured supplied cancellation context for participant work without a late decision write', async () => {
+  const f = await fixture(); await f.factory().forParticipant(actor()).createDecision(f.initial);
+  const controller = new AbortController(); const base = partitionIO(); const io = { ...base, signal: AbortSignal.any([base.signal, controller.signal]) };
+  const repository = f.factory().forParticipant(actor(), io); controller.abort(); const writes = f.writes.length;
+  await expect(repository.transactionDecision('decision', record => { record!.controlVersion++; })).rejects.toThrow('DECISION_TIMEOUT');
+  expect(f.writes).toHaveLength(writes); expect(f.current().controlVersion).toBe(0);
+});

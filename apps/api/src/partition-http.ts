@@ -166,7 +166,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         const url = URL.parse(request.url ?? '/', 'http://local.invalid');
         if (!url || url.hash || (url.search && (url.pathname !== '/groups' || request.method !== 'GET'))) return reject('INVALID_COMMAND');
         const group = /^\/groups\/([A-Za-z0-9_-]{1,80})(\/(?:remove|invite))?$/.exec(url.pathname);
-        const draft = /^\/groups\/([A-Za-z0-9_-]{1,80})\/drafts(?:\/([A-Za-z0-9_-]{1,80}))?$/.exec(url.pathname);
+        const draft = /^\/groups\/([A-Za-z0-9_-]{1,80})\/drafts(?:\/([A-Za-z0-9_-]{1,80})(\/create)?)?$/.exec(url.pathname);
         const decision = /^\/decisions\/([A-Za-z0-9_-]{1,80})\/(public|me|commands)$/.exec(url.pathname);
         if (request.method === 'GET' && url.pathname === '/account') {
           send(response, 200, { account: await session.status(principal) }); return;
@@ -206,6 +206,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
           send(response, 200, { group: await session.create(principal, raw) }); return;
         }
         if (draft && (request.method === 'GET' || request.method === 'POST')) {
+          if (draft[3] && request.method !== 'POST') return reject('NOT_FOUND');
           const io = partitionIO(); const context = { ...io, signal: AbortSignal.any([io.signal, controller.signal]) };
           if (!draft[2]) {
             if (request.method !== 'POST') return reject('NOT_FOUND');
@@ -221,6 +222,21 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
           if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
           const raw = await body(request, maximum, bodyMs, controller);
           if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
+          if (draft[3]) {
+            const prepared = await repositories.forDraft(principal, draft[1]!, draft[2]!, raw, context);
+            const application = new KnownEnoughApplication({ repository: prepared.repository, clock, ids });
+            const decisionId = prepared.definition.decisionId;
+            if (prepared.created) {
+              if (!await application.getCreatedDecision(principal, decisionId, prepared.creationBodyHash)) return reject('RETRYABLE_SERVER_ERROR');
+            } else await application.createDecision({ definition: prepared.definition, memberships: prepared.memberships,
+              creatorSubject: principal.subject, creationBodyHash: prepared.creationBodyHash });
+            if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
+            // Reauthorize the retained directory, group/accounts and decision guard before publication.
+            const publication = new KnownEnoughApplication({ repository: repositories.forParticipant(principal, context), clock, ids });
+            const snapshot = await publication.getPublicSnapshot(principal, decisionId);
+            if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
+            send(response, 200, { snapshot }); return;
+          }
           send(response, 200, { draft: await session.editDraft(principal, draft[1]!, draft[2]!, raw, context) }); return;
         }
         if (group && request.method === 'GET' && !group[2]) {

@@ -143,12 +143,12 @@ export function createPartitionDecisionRepository(options: { decisionArn: string
   }
   async function perform<T>(principal: TrustedPrincipal | null, decisionId: string, create: boolean,
     work: (repository: KnownEnoughRepository, io: PartitionIOContext, fence: PartitionFence) => Promise<T>,
-    prepared?: { io: PartitionIOContext; fence: PartitionFence }): Promise<T> {
+    prepared?: { io: PartitionIOContext; fence?: PartitionFence }): Promise<T> {
     return safe(async () => {
       // Mixed legacy authority is incompatible, never silently discarded or projected as one condition.
       if (currentAdmissionFence(decisionId)) fail('DECISION_INVALID');
       const io = prepared?.io ?? partitionIO(limits); const fence = prepared?.fence ?? await session.decisionFence(principal, decisionId, io);
-      const guards = conditions(fence, create && prepared !== undefined);
+      const guards = conditions(fence, create && prepared?.fence !== undefined);
       for (let attempt = 0; attempt < (create ? 1 : 6); attempt++) {
         let sdkFailure: unknown; let wrote = false; let loaded: unknown;
         async function send(command: Command) {
@@ -246,7 +246,7 @@ export function createPartitionDecisionRepository(options: { decisionArn: string
           creationBodyHash: initial.creationBodyHash, created: initial.created, repository };
       });
     },
-    forParticipant(rawPrincipal: TrustedPrincipal | null): KnownEnoughRepository {
+    forParticipant(rawPrincipal: TrustedPrincipal | null, supplied?: PartitionIOContext): KnownEnoughRepository {
     const principal = rawPrincipal?.kind === 'participant' ? { kind: 'participant' as const, subject: rawPrincipal.subject } : null;
     return {
       createDecision: decision => perform(principal, decision.decisionId, true, async (repository, io, fence) => {
@@ -260,14 +260,14 @@ export function createPartitionDecisionRepository(options: { decisionArn: string
           || decision.definition.participants.length !== roster.members.length
           || decision.definition.participants.some(person => !roster.members.some(member => member.participantId === person.id && member.displayName === person.displayName))) stale();
         await repository.createDecision(structuredClone(decision));
-      }),
+      }, supplied ? { io: supplied } : undefined),
       transactionDecision: (decisionId, transition, transactionOptions?: DecisionTransactionOptions) => perform(principal, decisionId, false, async (repository, io) => {
         const replay = transactionOptions?.replay;
         const hash = replay ? await partitionCall(io, () => replay.keyHash, false) : undefined;
         if (replay && (typeof hash !== 'string' || !/^[a-f0-9]{64}$/.test(hash))) fail('DECISION_INVALID');
         return repository.transactionDecision(decisionId, record => partitionCall(io,
           async () => structuredClone(await transition(record)), false), replay ? { replay: { ...replay, keyHash: Promise.resolve(hash!) } } : undefined);
-      }),
+      }, supplied ? { io: supplied } : undefined),
     };
   } };
 }
