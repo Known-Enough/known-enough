@@ -20,3 +20,13 @@
 The report maps every required OPS01–03 operation to an existing verified capability or an installed, verified bounded GitHub path. B's actual authorized workload success and safe recovery are recorded. Ordinary deployments/tests/migrations/maintenance inside that approved envelope need no personal AWS credentials, administrator console session or bespoke command from A. Any genuinely outside-envelope operation remains explicitly identified; do not report universal autonomous AWS access.
 
 Preparation can be checkpointed while the narrowly authorized bootstrap is pending, but OPS00 cannot be DONE or OPS01 managed readiness claimed on a proposed policy alone. Focused checks and pinned `npm run check` are required for executable changes; documentation-only checkpoints use documentation checks. Synchronize checked source with `[skip ci]`; publishing/paid tests require their applicable finite authorization. No grant/counter reset, permanent budget renewal, arbitrary delete or other-account access.
+
+
+## B OPS00 claim — 2026-10-07T02:36:24.162905+00:00
+
+IN_PROGRESS/B soleclaim afterUX03CODE_READYrelease; ownBattosai1806/equalmainf1ab255 verified. Scope scripts/operations plan/workflow validation and focusedtests, bounded infra/permissions proposal and operations contracts/evidence/tracking; exact executable paths recorded before edits. No live installation during codingphase or A NP00source/policy takeover. Rootactualvariant/effort unavailable/nohelpers.
+
+
+## OPS00 run104 checkpoint — 2026-10-07T02:37:02.071997+00:00
+
+IN_PROGRESS/B. Existing template/release/inspector and adapter evidence inspected; operations-envelope.md maps OPS01–03 gaps and next exact plan/journal validator contract. No executable/IAM/resource change or universal access claim. Newnames/keyprefixes unresolved rejectapply, not wildcard fallback. Next implementation/test bounded validator/recovery in sameclaim.
