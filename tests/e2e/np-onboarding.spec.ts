@@ -59,6 +59,7 @@ test('new users request access, operator admits, organizer invites a new recipie
     await expect(guest.getByRole('button', { name: 'Create invitation link' })).toHaveCount(0);
     await guest.reload(); await expect(guest.getByRole('heading', { name: 'Garden club', exact: true })).toBeVisible();
     await host.getByRole('button', { name: 'Refresh account and groups' }).click();
+    await host.getByText('Group members and membership changes', { exact: true }).click();
     await expect(host.getByRole('button', { name: 'Remove Omar' })).toBeVisible();
     await host.getByLabel('What should this group decide?').fill('Choose a gallery meetup venue and time.');
     await host.getByRole('button', { name: 'Draft a new decision', exact: true }).click();

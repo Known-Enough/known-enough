@@ -932,3 +932,23 @@ IN_PROGRESS/B, same sole claim. Required gpt-6-luna/medium read-only helper firs
 ## UX01 checked review milestone — 2026-10-06T23:37:10.551646+00:00
 
 REVIEW / CODE_READY; B claim released after verified read-only review. Required first Luna review and direct checks produce one five-item UX02 issue list. Local19 journey checks PASS; desktop/other-owner/CSSzoom2 screenshots and eight Tab sequence verified no overflow/raw leakage, owner-only question. Evidence docs/review-artifacts/UX01/core-journey-review.md and first-use-review.md. Actual browser UI zoom/device, primary signup completion and exhaustive visual-state/accessibility evidence remain explicit gaps; no whole-task DONE/live PASS. Next UX02 sequential implementation of verified findings; preserve A NP00 paused/saved.
+
+
+## B UX02 claim — 2026-10-07T00:06:21.702133+00:00
+
+IN_PROGRESS/B sole task after UX01 CODE_READY release; own Battosai1806/main origin78d831c verified. Scope apps/web/src/email-registration-form.tsx, connected-app.tsx, group-home.tsx, group-decisions.tsx, style.css; necessary tests/e2e and UX02 safe evidence/tracking. No backend/config/IAM/lockfile changes. Preserve min8/allclasses under latest cancellation. Actual root variant/effort unavailable; no helper. A NP00 paused/saved unchanged.
+
+
+## UX02 local checkpoint — 2026-10-07T00:07:25.531378+00:00
+
+IN_PROGRESS/B. Create account action, cancel/close clears sensitive form values, concise staged guidance, optional provider/display explanation and consistent fieldset CSS implemented locally. Current min8/allclasses preserved; provider completion remains UNKNOWN. Four focused registration checks PASS after initial1FAIL/3PASS caught first-tab regression; optional details moved after primary actions, retry4PASS. Remaining crowded core navigation, rendered before/after and pinned full check. No source commit/push/deployment until required checks; local work preserved.
+
+
+## UX02 run100 local checkpoint — 2026-10-07T00:37:19.515587+00:00
+
+IN_PROGRESS/B. Loaded decision heading focus added; synthetic desktop/other-owner/CSSzoom2 capture PASS overflow/privacy, root visual inspection. Lint/types PASS; pinned full npmcheck currently running session41688/log /tmp/ke-run100/full.log, inspect no duplicate. Remaining navigation and first-use after evidence; local uncommitted source preserved, no cloud/push.
+
+
+## UX02 checked coding milestone — 2026-10-07T01:14:26.952828+00:00
+
+REVIEW / CODE_READY; release B claim at synchronized checkpoint. Five UX01 findings mapped to fixes/deferred hosted proof in docs/review-artifacts/UX02/fix-map.md. Clear Create account/cancel recovery, shorter guidance, consistent fieldset, compact membership and loaded heading focus implemented. Provider completion/config and realbrowserzoom remain deferred, not DONE/live PASS. Pinned final full check PASS: refs7/planning/lint/boundaries/types,784app(two optional skips),build,hosted1,browser62. Initial final attempt61PASS/1FAIL assumed membership always visible; updated actual navigation check, rerunfullPASS. Next UX03 source-matching deployment proof; A NP00 paused/saved preserved.

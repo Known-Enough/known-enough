@@ -137,3 +137,11 @@ footer { margin-top: 36px; border-top: 1px solid #d4dfd7; padding-top: 20px; }
 .ke-card button { margin: 4px 8px 4px 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .ke-card p, .ke-card li, .ke-card h3, .ke-card h4 { overflow-wrap: anywhere; }
 h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
+
+.ke-registration { margin-top: 18px; }
+.ke-registration fieldset { border: 0; padding: 0; margin: 14px 0; min-width: 0; display: grid; gap: 10px; }
+.ke-auth-card details { margin: 14px 0; }
+.ke-auth-card summary { cursor: pointer; line-height: 1.5; }
+.ke-auth-card summary:focus-visible { outline: 3px solid #e7a846; outline-offset: 3px; }
+
+.ke-home h2[tabindex="-1"]:focus { outline: 3px solid #e7a846; outline-offset: 4px; }

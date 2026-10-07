@@ -50,8 +50,8 @@ export function EmailRegistration({ config }: { config: CognitoBrowserConfig }) 
     }
     finally { setBusy(false); }
   }
-  if (stage === 'closed') return <button type="button" className="secondary" onClick={() => setStage('details')}>Register with email</button>;
-  return <section aria-label="Email registration">
+  if (stage === 'closed') return <button type="button" className="secondary" onClick={() => setStage('details')}>Create account</button>;
+  return <section className="ke-registration" aria-label="Email registration">
     <h3>{stage === 'details' ? 'Create your account' : stage === 'verify' ? 'Verify your email' : 'Account created'}</h3>
     {stage !== 'complete' && <form onSubmit={event => { event.preventDefault(); void submit(); }}>
       <fieldset disabled={busy}>
@@ -67,6 +67,7 @@ export function EmailRegistration({ config }: { config: CognitoBrowserConfig }) 
     {stage === 'details' && diagnostic && ['ACCOUNT_EXISTS_OR_PENDING', 'NETWORK_RESULT_UNKNOWN', 'DELIVERY_UNCONFIRMED'].includes(diagnostic.code) && username.trim()
       && <button type="button" className="secondary" onClick={() => { setUsername(username.trim()); setPassword(''); setEmail(''); setDiagnostic(null); setMessage('Enter the code sent to your email.'); setStage('verify'); }}>I have a verification code</button>}
     {stage === 'verify' && <button type="button" className="secondary" onClick={() => { setCode(''); setDiagnostic(null); setMessage(''); setStage('details'); }}>Back to account details</button>}
+    <button type="button" className="secondary" disabled={busy} onClick={() => { setPassword(''); setEmail(''); setUsername(''); setCode(''); setDiagnostic(null); setMessage(''); setStage('closed'); }}>{stage === 'details' ? 'Cancel account creation' : 'Close registration'}</button>
     {message && <p role="status">{message}</p>}
     {diagnostic && <p className="ke-help">Reference: {diagnostic.code} at {diagnostic.observedAt}
       {diagnostic.httpStatus ? ` (HTTP ${diagnostic.httpStatus})` : ''}{diagnostic.requestId ? ` (request ${diagnostic.requestId})` : ''}.</p>}

@@ -83,7 +83,7 @@ export function GroupHome({ api, openDecision }: { api: (path: string, init?: Re
     finally { setBusy(false); }
   }
   return <section className="ke-card" aria-busy={busy}><h2>Your account and groups</h2>
-    <p>Register through the sign-in page and verify your email. Then request access here. Global access approval and accepting a group invitation are separate.</p>
+    <p>Account access and group membership are separate. After verifying your email, request access here; then create a group or accept an invitation.</p>
     <button className="secondary" disabled={busy} onClick={() => { void load().catch(() => setNotice('Refresh failed. Sign in again if needed.')); }}>Refresh account and groups</button>
     <fieldset disabled={busy || checking} style={{border: 0, padding: 0, minWidth: 0}} aria-label="Account and group actions">
     {available && !checking && !account && <><label htmlFor="group-display-name">Your display name</label><input id="group-display-name" value={name} maxLength={80} onChange={event => setName(event.target.value)} />
@@ -98,10 +98,10 @@ export function GroupHome({ api, openDecision }: { api: (path: string, init?: Re
       {token && <><p>A group invitation is waiting. Accept it only if you want to join; it does not confirm a decision or approve a proposal.</p>
         <button disabled={busy} onClick={() => void action('/groups/accept', { token }, () => { setToken(''); sessionStorage.removeItem('ke-group-invite'); })}>Accept group invitation</button>
         <button className="secondary" onClick={() => { setToken(''); sessionStorage.removeItem('ke-group-invite'); }}>Discard group invitation</button></>}
-      {groups.map(group => <article key={group.id}><h3>{group.name}</h3><ul>{group.members.map(member => <li key={member.id}>{member.displayName}{member.isOrganizer ? ' (organizer)' : ''}
+      {groups.map(group => <article key={group.id}><h3>{group.name}</h3><details><summary>Group members and membership changes</summary><ul>{group.members.map(member => <li key={member.id}>{member.displayName}{member.isOrganizer ? ' (organizer)' : ''}
         {group.isOrganizer && !member.isOrganizer && <button className="secondary" disabled={busy} onClick={() => void action(`/groups/${group.id}/remove`, { memberId: member.id, version: group.version })}>Remove {member.displayName}</button>}</li>)}</ul>
         <p>{group.pendingInvitations} pending invitation links. Joining or removing a member requires linked decisions to be reviewed with a new roster.</p>
-        <GroupDecisions group={group} api={api} reload={load} openDecision={openDecision} />
+        </details><GroupDecisions group={group} api={api} reload={load} openDecision={openDecision} />
         {group.isOrganizer && <><label htmlFor={`group-email-${group.id}`}>Recipient email</label><input id={`group-email-${group.id}`} type="email" value={email} maxLength={254} onChange={event => setEmail(event.target.value)} />
           <label><input type="checkbox" checked={replace} onChange={event => setReplace(event.target.checked)} /> Replace a lost link (the previous link stops working)</label>
           <button disabled={busy || !email.trim()} onClick={() => void action(`/groups/${group.id}/invitations`, { email, replace }, result => {

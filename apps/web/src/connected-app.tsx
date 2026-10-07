@@ -20,9 +20,12 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
   const [scenario, setScenario] = useState<'CHRISTMAS' | 'SHARED_PURCHASE'>('CHRISTMAS');
   const [objective, setObjective] = useState('Choose our synthetic Christmas trip together.');
   const loadEpoch = useRef(0);
+  const decisionHeading = useRef<HTMLHeadingElement>(null);
+
   const createRequest = useRef<{ requestId: string; idempotencyKey: string; scenario: string; objective: string } | null>(null);
   const [session, setSession] = useState<CognitoSession | null>(() => readCognitoSession());
   const [publicSnapshot, setPublicSnapshot] = useState<KnownEnough.PublicDecisionSnapshot | null>(null);
+  useEffect(() => { if (publicSnapshot) decisionHeading.current?.focus(); }, [publicSnapshot]);
   const [ownerSnapshot, setOwnerSnapshot] = useState<KnownEnough.OwnerDecisionSnapshot | null>(null);
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
@@ -153,12 +156,12 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
       {session && <button className="secondary" type="button" onClick={signOut}>Sign out</button>}</header>
     <p className="ke-privacy">Known Enough and its AI process your private inputs. Other people see only the shared choices, proposal and disclosures you authorize. An outcome may still reveal something about people’s needs. Use fictional, non-sensitive data in this preview.</p>
     {!session ? <section className="ke-card ke-auth-card"><h2>Sign in to the shared decision</h2>
-      <p>New account? Choose Register with email below, then verify your address. After verification, use Sign in. If the provider sign-in page offers Sign up, return here to use email registration. Group invitations wait in this browser tab while you sign in. A shared display uses a separate account and can only read public information.</p>
+      <p>Already registered and verified? Sign in to continue.</p><p>To join, create an account and verify your email, then sign in. Your group invitation stays in this tab.</p>
       <div className="ke-private-actions"><button type="button" onClick={() => void signIn('participant')}>Sign in</button>
-        <button type="button" className="secondary" onClick={() => void signIn('display')}>Shared display sign-in</button></div><EmailRegistration config={config} /></section> : <>
+        <button type="button" className="secondary" onClick={() => void signIn('display')}>Shared display sign-in</button></div><EmailRegistration config={config} /><details><summary>Shared display and other sign-up options</summary><p>A shared display uses a separate account and can only read public information. If the provider page offers Sign up, return here for email registration and its verification steps.</p></details></section> : <>
       {session.kind === 'participant' && <GroupHome key={session.accessToken} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} openDecision={id => { setRoomInput(id); void load(id); }} />}
       <section className="ke-card"><p className="eyebrow">{session.kind === 'display' ? 'SHARED DISPLAY' : 'PARTICIPANT SESSION'}</p>
-        <h2>Shared decision</h2><label htmlFor="connected-decision-id">Decision ID from your invitation</label>
+        <h2 ref={decisionHeading} tabIndex={-1}>Shared decision</h2><label htmlFor="connected-decision-id">Decision ID from your invitation</label>
         <input id="connected-decision-id" value={roomInput} maxLength={80} disabled={busy} onChange={event => { setRoomInput(event.target.value); setOwnerSnapshot(null); setPublicSnapshot(null); loadEpoch.current++; }} />
         <button type="button" onClick={() => void load(roomInput)} disabled={busy || !/^[A-Za-z0-9_-]{1,80}$/.test(roomInput)}>Load shared decision</button>
         {publicSnapshot && <><h3>{publicSnapshot.frame.title}</h3><p>{publicSnapshot.frame.objective}</p>

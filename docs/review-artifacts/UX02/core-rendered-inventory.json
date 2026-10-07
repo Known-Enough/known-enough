@@ -1,0 +1,142 @@
+{
+  "source": "5af3dc3cb915715149f66b84d154fec3d0a7a8a6",
+  "synthetic": true,
+  "actualBrowser": "headless Chromium",
+  "rows": [
+    {
+      "name": "desktop-private",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "cssZoomSimulation": 1,
+      "overflow": false,
+      "privateQuestion": true,
+      "rawLeak": false,
+      "tabs": [
+        {
+          "tag": "INPUT",
+          "label": ""
+        },
+        {
+          "tag": "BUTTON",
+          "label": "Load shared decision"
+        },
+        {
+          "tag": "TEXTAREA",
+          "label": ""
+        },
+        {
+          "tag": "BUTTON",
+          "label": "Allow this adjustment"
+        },
+        {
+          "tag": "BUTTON",
+          "label": "Decline this adjustment"
+        },
+        {
+          "tag": "INPUT",
+          "label": ""
+        },
+        {
+          "tag": "BODY",
+          "label": "KNOWN ENOUGHDecide togetherSign outKnown Enough and its AI process your private "
+        },
+        {
+          "tag": "BUTTON",
+          "label": "Sign out"
+        }
+      ]
+    },
+    {
+      "name": "desktop-other",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "cssZoomSimulation": 1,
+      "overflow": false,
+      "privateQuestion": false,
+      "rawLeak": false,
+      "tabs": [
+        {
+          "tag": "INPUT",
+          "label": ""
+        },
+        {
+          "tag": "BUTTON",
+          "label": "Load shared decision"
+        },
+        {
+          "tag": "TEXTAREA",
+          "label": ""
+        },
+        {
+          "tag": "INPUT",
+          "label": ""
+        },
+        {
+          "tag": "BODY",
+          "label": "KNOWN ENOUGHDecide togetherSign outKnown Enough and its AI process your private "
+        },
+        {
+          "tag": "BUTTON",
+          "label": "Sign out"
+        },
+        {
+          "tag": "BUTTON",
+          "label": "Refresh account and groups"
+        },
+        {
+          "tag": "INPUT",
+          "label": ""
+        }
+      ]
+    },
+    {
+      "name": "desktop-zoom-private",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "cssZoomSimulation": 2,
+      "overflow": false,
+      "privateQuestion": true,
+      "rawLeak": false,
+      "tabs": [
+        {
+          "tag": "INPUT",
+          "label": ""
+        },
+        {
+          "tag": "BUTTON",
+          "label": "Load shared decision"
+        },
+        {
+          "tag": "TEXTAREA",
+          "label": ""
+        },
+        {
+          "tag": "BUTTON",
+          "label": "Allow this adjustment"
+        },
+        {
+          "tag": "BUTTON",
+          "label": "Decline this adjustment"
+        },
+        {
+          "tag": "INPUT",
+          "label": ""
+        },
+        {
+          "tag": "BODY",
+          "label": "KNOWN ENOUGHDecide togetherSign outKnown Enough and its AI process your private "
+        },
+        {
+          "tag": "BUTTON",
+          "label": "Sign out"
+        }
+      ]
+    }
+  ]
+}

@@ -10,7 +10,7 @@ test('configured signup UI sends email, confirms code and retains real hosted PK
   });
   await page.goto('/');const signIn = page.getByRole('button', { name: 'Sign in', exact: true });await expect(signIn).toBeVisible();await expect(page.getByRole('button', { name: 'Sign in or register', exact: true })).toHaveCount(0);
   await page.keyboard.press('Tab');await expect(signIn).toBeFocused();
-  await page.getByRole('button', { name: 'Register with email', exact: true }).click();
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
   await page.getByLabel('Username', { exact: true }).fill('fictional-user');await page.getByLabel('Email', { exact: true }).fill('synthetic@example.invalid');
   await page.getByLabel('Password', { exact: true }).fill(password);await page.getByRole('button', { name: 'Create account', exact: true }).click();
   await expect(page.getByLabel('Verification code')).toBeVisible();expect(requests[0]!.body.UserAttributes).toEqual([{ Name: 'email', Value: 'synthetic@example.invalid' }]);
@@ -27,7 +27,7 @@ test('signup service failure stays on the form and never exposes private diagnos
   const consoleMessages: string[] = [];
   page.on('console', message => consoleMessages.push(message.text()));
   await page.route(endpoint, route => route.fulfill({ status: 400, body: 'PRIVATE_SERVICE_EMAIL_PASSWORD' }));
-  await page.goto('/');await page.getByRole('button', { name: 'Register with email', exact: true }).click();
+  await page.goto('/');await page.getByRole('button', { name: 'Create account', exact: true }).click();
   await page.getByLabel('Username', { exact: true }).fill('fictional-user');await page.getByLabel('Email', { exact: true }).fill('synthetic@example.invalid');
   await page.getByLabel('Password', { exact: true }).fill(password);await page.getByRole('button', { name: 'Create account', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Registration failed.');await expect(page.getByLabel('Password', { exact: true })).toBeVisible();
@@ -38,7 +38,7 @@ test('signup service failure stays on the form and never exposes private diagnos
 test('five characters stop before the service; an uncertain signup offers code recovery (mock service)', async ({ page }) => {
   let requests = 0;
   await page.route(endpoint, route => { requests++; return route.abort(); });
-  await page.goto('/');await page.getByRole('button', { name: 'Register with email', exact: true }).click();
+  await page.goto('/');await page.getByRole('button', { name: 'Create account', exact: true }).click();
   await page.getByLabel('Username', { exact: true }).fill('fictional-user');
   await page.getByLabel('Email', { exact: true }).fill('synthetic@example.invalid');
   await page.getByLabel('Password', { exact: true }).fill('abcde');
@@ -50,4 +50,17 @@ test('five characters stop before the service; an uncertain signup offers code r
   await expect(page.getByRole('button', { name: 'I have a verification code' })).toBeVisible();
   await page.getByRole('button', { name: 'I have a verification code' }).click();
   await expect(page.getByLabel('Verification code')).toBeVisible();
+});
+
+test('account creation can be cancelled without submitting registration', async ({ page }) => {
+  let requests = 0;
+  await page.route('https://cognito-idp.us-east-1.amazonaws.com/**', route => { requests++; return route.abort(); });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
+  await page.getByLabel('Password', { exact: true }).fill('Synthetic1!');
+  await page.getByRole('button', { name: 'Cancel account creation' }).click();
+  await expect(page.getByLabel('Password', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
+  await expect(page.getByLabel('Password', { exact: true })).toHaveValue('');
+  expect(requests).toBe(0);
 });

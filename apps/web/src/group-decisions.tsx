@@ -60,7 +60,7 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
       {pending.current && !busy && <button className="secondary" onClick={() => { pending.current = null; setNotice('Refresh saved drafts before starting a different request.'); }}>Release this draft request for editing</button>}
       {group.drafts.map(item => <p key={item.id}>{item.current ? <button disabled={busy} onClick={() => void action(async () => {
         const result = await request(`drafts/${item.id}`); setDraft(Groups.GroupDraft.parse(result.draft)); setDirty(false); setRoster(null); setReviewed(false);
-      })}>{item.created ? 'Open or retry decision' : 'Review draft'}: {item.title}</button> : 'An earlier draft needs a new request because group membership changed.'}</p>)}
+      })}>{item.created ? 'Review saved decision draft' : 'Review draft'}: {item.title}</button> : 'An earlier draft needs a new request because group membership changed.'}</p>)}
     </>}
     {draft && <div className="local-note"><h4 tabIndex={-1} ref={draftHeading}>Review the public draft</h4>
       <label htmlFor={`draft-title-${group.id}`}>Decision title</label><input id={`draft-title-${group.id}`} value={draft.frame.title} maxLength={160} disabled={busy || !!draft.createdDecisionId} onChange={event => changeFrame({ ...draft.frame, title: event.target.value })} />
