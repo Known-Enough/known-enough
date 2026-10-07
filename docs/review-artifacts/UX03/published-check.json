@@ -1,0 +1,25 @@
+{
+  "source": "2630c9f4703efae6972b27112f9908c277b4c21e",
+  "observedAt": "2026-10-07T02:06:51.394Z",
+  "browser": "headless Chromium/emulated viewports",
+  "rows": [
+    {
+      "width": 390,
+      "httpStatus": 200,
+      "firstTabSignIn": true,
+      "overflow": false,
+      "passwordMinimum": "8",
+      "cancelClosed": true,
+      "submittedAccount": false
+    },
+    {
+      "width": 1280,
+      "httpStatus": 200,
+      "firstTabSignIn": true,
+      "overflow": false,
+      "passwordMinimum": "8",
+      "cancelClosed": true,
+      "submittedAccount": false
+    }
+  ]
+}

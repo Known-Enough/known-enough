@@ -1,0 +1,108 @@
+{
+  "run": "https://github.com/Known-Enough/known-enough/actions/runs/37557999023",
+  "qa": {
+    "schemaVersion": 1,
+    "budget": {
+      "attempts": 0,
+      "reservedTokens": 0,
+      "reservedCostMicros": 0,
+      "maxAttemptsPerRun": 200,
+      "maxTokensPerRun": 2500000,
+      "maxCostMicrosPerRun": 2500000
+    },
+    "gatewayObservation": "ACCESS_DENIED",
+    "gatewayThrottle": null,
+    "modelFailures": [],
+    "runId": "gh-37557999023-1",
+    "sourceCommit": "2630c9f4703efae6972b27112f9908c277b4c21e",
+    "status": "BLOCKED_OR_FAILED",
+    "lanes": {
+      "execution": "BLOCKED",
+      "preflight": "PASS",
+      "fixtures": "PASS",
+      "journeys": "FAIL",
+      "model": "BLOCKED",
+      "privacy": "PASS",
+      "signup": "BLOCKED",
+      "cleanup": "PASS"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "phase": "QA01_SIGNUP",
+        "status": "FAIL"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "BLOCKED"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "counts": {
+      "passed": 0,
+      "failed": 1,
+      "blocked": 6,
+      "modelAttempts": 0,
+      "signupMessages": 0
+    }
+  },
+  "complete": {
+    "schemaVersion": 1,
+    "status": "BLOCKED_OR_FAILED",
+    "sourceCommit": "2630c9f4703efae6972b27112f9908c277b4c21e",
+    "initiatingAccount": "Battosai1806",
+    "lanes": {
+      "jobs": "BLOCKED",
+      "primaryPublication": "PASS",
+      "currentSource": "PASS",
+      "release": "PASS",
+      "public": "PASS",
+      "primaryConfiguration": "PASS",
+      "qaJourney": "BLOCKED"
+    },
+    "jobResults": {
+      "provenance": "success",
+      "release": "success",
+      "primary-release": "success",
+      "public": "success",
+      "metadata": "success",
+      "journey": "failure"
+    },
+    "targets": {
+      "primary": "https://main.d143q5ravxp5av.amplifyapp.com/",
+      "qa": "https://main.d2l23pkzmr1tio.amplifyapp.com/",
+      "staticPreview": "https://d23eowhnwtqts3.cloudfront.net/"
+    },
+    "targetDifferences": [
+      "Primary models remain disabled under NP00; real AI journeys run in isolated budgeted QA.",
+      "QA uses separate pools, clients, API and data tables; primary writable AI was not tested."
+    ],
+    "qaCounts": {
+      "passed": 0,
+      "failed": 1,
+      "blocked": 6,
+      "modelAttempts": 0,
+      "signupMessages": 0
+    },
+    "requiredCloudAcceptance": "LIVE04 requires actual B dispatch and separate authorized automatic deployment run"
+  }
+}
