@@ -3,7 +3,7 @@ import { createHash, createHmac } from 'node:crypto';
 import { afterEach, expect, it, vi } from 'vitest';
 import { TransactGetItemsCommand, type TransactWriteItem, type AttributeValue } from '@aws-sdk/client-dynamodb';
 import { Groups, KnownEnough as KE } from '@deal-table/contracts';
-import { KnownEnoughApplication, type TrustedPrincipal } from '@deal-table/application';
+import { KnownEnoughApplication, type TrustedPrincipal, type DecisionArchitectRequest, type DecisionArchitectureDraft } from '@deal-table/application';
 import { InMemoryRoomRepository } from '@deal-table/adapters';
 import { preparePartitionMigration } from '../../../packages/adapters/src/partition-migration.ts';
 import { partitionMemberId } from '../../../packages/adapters/src/partition-group-session.ts';
@@ -544,4 +544,97 @@ it('reconciles an unknown applied draft response through a fresh read without re
   const read = await a.get(draftPath); expect(read.status).toBe(200); expect((await read.json()).draft.revision).toBe(2);
   expect((await a.post(draftPath, httpEdit(draft))).status).toBe(409);
   expect(f.cells.get(`${target.partitionArn}/GROUP#garden/DRAFT#draft-one`)!.revision!.N).toBe('2');
+});
+
+
+function httpArchitecture(input: DecisionArchitectRequest): DecisionArchitectureDraft {
+  const participants = input.participants.map(person => ({ ...person, requiredForApproval: true }));
+  return { draftId: input.draftId, revision: input.revision, status: 'DEFINING', clarificationQuestions: [], participantInformationRequirements: [],
+    frame: KE.PublicDecisionFrame.parse({ schemaVersion: KE.KE_SCHEMA_VERSION, decisionId: 'new-frame', frameVersion: 1, semanticVersion: 1,
+      contextToken: 'c'.repeat(64), title: 'Garden task', objective: input.objective, description: '', participants,
+      requiredParticipantIds: participants.map(person => person.id), variables: [{ id: 'indoors', type: 'BOOLEAN', label: 'Indoors', required: true, visibility: 'PUBLIC' }], rules: [] }) };
+}
+const generationPath = '/groups/garden/drafts';
+const generation = { objective: ' Choose a task ', idempotencyKey: 'generation-one' };
+
+it('generates and replays a draft through trusted HTTP without caller identity or another model invocation', async () => {
+  const f = await fixture(); let calls = 0; const a = await api(f, { draftArchitect: async (subject, input, context) => {
+    expect(subject).toBe('iris'); expect(context.signal).toBeDefined(); calls++; return httpArchitecture(input);
+  } });
+  a.options.draftArchitect = async () => { throw new Error('Caller configuration alias'); };
+  const response = await a.post(generationPath, generation); expect(response.status).toBe(200); expect(response.headers.get('cache-control')).toBe('no-store');
+  const value = (await response.json()).draft; expect(value).toMatchObject({ revision: 1, groupVersion: 1, frame: { objective: 'Choose a task' } });
+  expect(JSON.stringify(value)).not.toMatch(/subject|emailHash|recipientHash|ACCOUNT#|MEMBER#/);
+  const replay = await a.post(generationPath, generation); expect(replay.status).toBe(200); expect(await replay.json()).toEqual({ draft: value }); expect(calls).toBe(1);
+  expect((await a.post(generationPath, { ...generation, objective: 'Other' })).status).toBe(409); expect(calls).toBe(1);
+  expect((await a.get(generationPath + '/' + value.id)).status).toBe(200);
+  expect((await a.get(generationPath)).status).toBe(404); expect(f.writes).toEqual([]); expect(f.reads).toEqual([]);
+});
+
+it('rejects non-organizers before reading a generation body and malformed authority before any architect invocation', async () => {
+  const f = await fixture(); const architect = vi.fn(async (_subject: string, input: DecisionArchitectRequest) => httpArchitecture(input));
+  const a = await api(f, { draftArchitect: architect, bodyTimeoutMs: 40 });
+  const denied = await new Promise<number>((resolve, fail) => {
+    const request = httpRequest(a.base + generationPath, { method: 'POST', headers: { authorization: 'Bearer omar', 'content-type': 'application/json' } }, response => {
+      response.resume(); response.on('end', () => { request.end(); resolve(response.statusCode!); });
+    }); request.on('error', fail); request.write('{');
+  }); expect(denied).toBe(403); expect(f.groupCommits).toEqual([]);
+  expect((await a.post(generationPath, { ...generation, subject: 'iris' })).status).toBe(422);
+  expect((await a.post(generationPath, generation, 'unknown', { 'x-subject': 'iris' })).status).toBe(401);
+  expect(architect).not.toHaveBeenCalled(); expect(f.groupCommits.every(values => values.every(value => !(value as { next: unknown }).next))).toBe(true);
+});
+
+it('fails closed on missing, foreign and privately malformed generation providers without leaking their diagnostics', async () => {
+  const f = await fixture(); const missing = await api(f); expect((await missing.post(generationPath, generation)).status).toBe(503);
+  for (const draftArchitect of [async () => { throw new Error('PRIVATE_GENERATION_DIAGNOSTIC'); },
+    async (_subject: string, input: DecisionArchitectRequest) => ({ ...httpArchitecture(input), draftId: 'foreign' }),
+    async (_subject: string, input: DecisionArchitectRequest) => ({ ...httpArchitecture(input), private: 'PRIVATE_GENERATION_FIELD' })]) {
+    const a = await api(f, { draftArchitect }); const response = await a.post(generationPath, generation);
+    expect(response.status).toBe(503); expect(await response.text()).not.toMatch(/PRIVATE|ACCOUNT#|MEMBER#/);
+  }
+  expect(JSON.parse(f.cells.get(f.groupLocation)!.payload!.S!).value.draftIds).toEqual([]);
+});
+
+it('rechecks pending-provider admission and roster versions before HTTP generation persistence', async () => {
+  for (const mode of ['disabled', 'version', 'name'] as const) {
+    const f = await fixture(); const a = await api(f, { draftArchitect: async (_subject, input) => {
+      f.change(mode === 'version' ? 'GROUP#garden' : 'ACCOUNT#iris', value => {
+        if (mode === 'version') value.version = 2; else if (mode === 'disabled') value.status = 'DISABLED'; else value.displayName = 'Changed name';
+      }); return httpArchitecture(input);
+    } });
+    const response = await a.post(generationPath, generation); expect(response.status).toBe(mode === 'disabled' ? 403 : 409);
+    expect(JSON.parse(f.cells.get(f.groupLocation)!.payload!.S!).value.draftIds).toEqual([]); expect(f.writes).toEqual([]);
+  }
+});
+
+it('reconciles an unknown generated commit through explicit HTTP replay while preserving exactly one draft write', async () => {
+  const f = await fixture(); let calls = 0; const a = await api(f, { draftArchitect: async (_subject, input) => { calls++; return httpArchitecture(input); } });
+  f.afterGroupCommit(() => { const header = JSON.parse(f.cells.get(f.groupLocation)!.payload!.S!);
+    if (header.value.draftIds.length) throw new Error('PRIVATE_GENERATED_COMMIT_RESPONSE');
+  });
+  const response = await a.post(generationPath, generation); expect(response.status).toBe(503); expect(await response.text()).not.toContain('PRIVATE');
+  expect(f.groupCommits).toHaveLength(3); f.afterGroupCommit(() => {});
+  const replay = await a.post(generationPath, generation); expect(replay.status).toBe(200); expect((await replay.json()).draft.revision).toBe(1); expect(calls).toBe(1);
+  const writes = f.groupCommits.flat() as { next: { kind: string } | null }[]; expect(writes.filter(value => value.next?.kind === 'DRAFT')).toHaveLength(1);
+});
+
+it('charges architect work to the existing HTTP operation budget instead of giving persistence a fresh request allowance', async () => {
+  let returned = false; const f = await fixture(); const a = await api(f, { draftArchitect: async (_subject, input, context) => {
+    for (let index = 0; index < 49; index++) context.request(); returned = true; return httpArchitecture(input);
+  } });
+  const response = await a.post(generationPath, generation); expect(response.status).toBe(503); expect(returned).toBe(true);
+  expect(JSON.parse(f.cells.get(f.groupLocation)!.payload!.S!).value.draftIds).toEqual([]);
+  expect(f.groupCommits.every(values => values.every(value => !(value as { next: unknown }).next))).toBe(true);
+});
+
+it('cancels disconnected generation without a late write and retains unresolved architect slots until actual settlement', async () => {
+  const f = await fixture(); let entered!: () => void; const started = new Promise<void>(resolve => { entered = resolve; });
+  let release!: () => void; const held = new Promise<void>(resolve => { release = resolve; }); let calls = 0;
+  const a = await api(f, { maxConcurrentRequests: 1, draftArchitect: async (_subject, input) => { calls++; entered(); await held; return httpArchitecture(input); } });
+  const request = httpRequest(a.base + generationPath, { method: 'POST', headers: { authorization: 'Bearer iris', 'content-type': 'application/json' } });
+  request.on('error', () => {}); request.end(JSON.stringify(generation)); await started; request.destroy();
+  await new Promise<void>(resolve => setTimeout(resolve, 10)); expect((await a.get('/account')).status).toBe(503); expect(calls).toBe(1);
+  release(); await new Promise<void>(resolve => setTimeout(resolve, 10)); expect((await a.get('/account')).status).toBe(200);
+  expect(JSON.parse(f.cells.get(f.groupLocation)!.payload!.S!).value.draftIds).toEqual([]);
+  expect(f.groupCommits.every(values => values.every(value => !(value as { next: unknown }).next))).toBe(true);
 });

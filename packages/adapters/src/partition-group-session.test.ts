@@ -2,7 +2,7 @@ import { createHash, createHmac } from 'node:crypto';
 import { expect, it } from 'vitest';
 import { Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { PartitionMembershipError } from './partition-membership.ts';
-import type { TrustedPrincipal } from '@deal-table/application';
+import type { TrustedPrincipal, DecisionArchitectRequest, DecisionArchitectureDraft } from '@deal-table/application';
 import { createPartitionGroupSession, partitionMemberId } from './partition-group-session.ts';
 import { preparePartitionMigration } from './partition-migration.ts';
 import { partitionMembershipKey } from './partition-membership-contract.ts';
@@ -700,4 +700,151 @@ it('guards a draft read against revocation at publication and re-resolves a legi
   });
   expect(await changed.session().readDraft(participant(), 'garden', draft.id)).toMatchObject({ revision: 2, frame: { title: 'Concurrent edit' } });
   expect(changed.commits).toHaveLength(2); expect(changed.commits.every(values => values.every(value => value.next === null))).toBe(true);
+});
+
+
+function architecture(input: DecisionArchitectRequest): DecisionArchitectureDraft {
+  const participants = input.participants.map(person => ({ ...person, requiredForApproval: true }));
+  return { draftId: input.draftId, revision: input.revision, status: 'DEFINING', clarificationQuestions: [], participantInformationRequirements: [],
+    frame: KE.PublicDecisionFrame.parse({ schemaVersion: KE.KE_SCHEMA_VERSION, decisionId: 'new-frame', frameVersion: 1, semanticVersion: 1,
+      contextToken: 'c'.repeat(64), title: 'Garden task', objective: input.objective, description: '', participants,
+      requiredParticipantIds: participants.map(person => person.id), variables: [{ id: 'indoors', type: 'BOOLEAN', label: 'Indoors', required: true, visibility: 'PUBLIC' }], rules: [] }) };
+}
+const generate = { objective: ' Choose a task ', idempotencyKey: 'generate-one' };
+
+it('generates one fingerprinted draft from the trusted public roster and replays it without invoking the architect again', async () => {
+  const f = fixture(); const calls: DecisionArchitectRequest[] = []; const options = { draftArchitect: async (subject: string, input: DecisionArchitectRequest) => {
+    expect(subject).toBe('iris'); calls.push(structuredClone(input)); return architecture(input);
+  } }; const session = f.session(options); options.draftArchitect = async () => { throw new Error('Caller mutated configuration'); };
+  const draft = await session.generateDraft(participant(), 'garden', generate);
+  expect(draft).toMatchObject({ revision: 1, groupVersion: 1, createdDecisionId: null, clarificationQuestions: [], frame: { objective: 'Choose a task' } });
+  expect(calls).toHaveLength(1); expect(calls[0]).toEqual({ draftId: draft.id, revision: 1, objective: 'Choose a task', allowedOptions: [], generateOptions: true,
+    participants: ['iris', 'omar'].map(subject => ({ id: partitionMemberId(subject), displayName: subject.toUpperCase() })) });
+  expect(JSON.stringify(calls[0])).not.toMatch(/subject|emailHash|recipientHash|ACCOUNT#|MEMBER#/);
+  expect(f.get('GROUP#garden/STATE')).toMatchObject({ revision: 2, value: { version: 1, draftIds: [draft.id], decisionIds: ['decision'] } });
+  expect(f.get(`GROUP#garden/DRAFT#${draft.id}`)).toMatchObject({ revision: 1, value: { bodyHash: draft.bodyHash } });
+  const replay = await session.generateDraft(participant(), 'garden', { ...generate, objective: 'Choose a task' }); expect(replay).toEqual(draft); expect(calls).toHaveLength(1);
+  await expect(session.generateDraft(participant(), 'garden', { ...generate, objective: 'Other task' })).rejects.toThrow('STALE_CONTEXT');
+  expect(calls).toHaveLength(1);
+});
+
+it('denies invalid commands, roles, non-organizers, missing providers and unapproved roster members before any model call', async () => {
+  const f = fixture(); let calls = 0; const session = f.session({ draftArchitect: async (_subject, input) => { calls++; return architecture(input); } });
+  for (const raw of [{ ...generate, subject: 'omar' }, { ...generate, participants: [] }, { ...generate, objective: ' ' }, { ...generate, idempotencyKey: '../key' }])
+    await expect(session.generateDraft(participant(), 'garden', raw)).rejects.toThrow('INVALID_COMMAND');
+  expect(f.reads).toEqual([]);
+  await expect(session.generateDraft(participant('omar'), 'garden', generate)).rejects.toThrow('FORBIDDEN');
+  await expect(session.generateDraft({ kind: 'service', subject: 'iris', roomIds: [] }, 'garden', generate)).rejects.toThrow('FORBIDDEN');
+  await expect(f.session().generateDraft(participant(), 'garden', generate)).rejects.toThrow('SESSION_INVALID');
+  f.get('ACCOUNT#omar/STATE').value.status = 'DISABLED';
+  await expect(session.generateDraft(participant(), 'garden', generate)).rejects.toThrow('FORBIDDEN'); expect(calls).toBe(0);
+  expect(f.commits.every(values => values.every(value => value.next === null))).toBe(true);
+});
+
+it('rejects unknown, oversized, private and roster-substituted architect output before persistence', async () => {
+  const changes: ((output: DecisionArchitectureDraft) => unknown)[] = [
+    output => ({ ...output, subject: 'iris' }), output => ({ ...output, draftId: 'foreign' }), output => ({ ...output, revision: 2 }),
+    output => ({ ...output, status: 'NEEDS_CLARIFICATION' }), output => ({ ...output, frame: { ...output.frame, objective: 'Other' } }),
+    output => ({ ...output, frame: { ...output.frame, semanticVersion: 2 } }),
+    output => ({ ...output, frame: { ...output.frame, participants: output.frame.participants.map(person => ({ ...person, displayName: 'Forged' })) } }),
+    output => ({ ...output, frame: { ...output.frame, variables: output.frame.variables.map(value => ({ ...value, visibility: 'CONSENT_REQUIRED' })) } }),
+    output => ({ ...output, participantInformationRequirements: [{ participantId: 'foreign', prompt: 'Prompt' }] }),
+    () => 'x'.repeat(256 * 1024 + 1), () => '{', () => undefined,
+  ];
+  for (const change of changes) {
+    const f = fixture(); const session = f.session({ draftArchitect: async (_subject, input) => change(architecture(input)) });
+    await expect(session.generateDraft(participant(), 'garden', generate)).rejects.toThrow('SESSION_INVALID');
+    expect(f.get('GROUP#garden/STATE').value.draftIds).toEqual([]); expect(f.commits).toHaveLength(1);
+  }
+});
+
+it('preserves model questions and appends only bounded distinct catalog clarification', async () => {
+  const f = fixture(); const session = f.session({ draftArchitect: async (_subject, input) => { const output = architecture(input);
+    output.status = 'NEEDS_CLARIFICATION'; output.clarificationQuestions = ['Clarify the public amount.'];
+    output.frame.variables = [{ id: 'amount', label: 'Amount', required: true, visibility: 'PUBLIC', type: 'NUMBER', unitCode: 'kg', scale: 0 }]; return output;
+  } });
+  const draft = await session.generateDraft(participant(), 'garden', generate); expect(draft.clarificationQuestions[0]).toBe('Clarify the public amount.');
+  expect(draft.clarificationQuestions).toHaveLength(2); expect(draft.clarificationQuestions.every(question => question.length <= 500)).toBe(true);
+});
+
+it('rejects approval, roster, display-name or organizer changes while the architect is pending', async () => {
+  for (const mode of ['disabled', 'member', 'name', 'version', 'organizer', 'archive'] as const) {
+    const f = fixture(); const session = f.session({ draftArchitect: async (_subject, input) => {
+      const header = f.get('GROUP#garden/STATE'); const account = f.get(`ACCOUNT#${mode === 'member' ? 'omar' : 'iris'}/STATE`);
+      if (mode === 'archive') f.rows.set('GROUP#garden/STATE', { schemaVersion: 1, revision: 2, kind: 'ARCHIVED_GROUP', groupId: 'garden', organizer: 'iris', groupVersion: 1,
+        sourceSha: 'a'.repeat(40), sourceHash: 'b'.repeat(64), manifestHash: 'c'.repeat(64), manifestVersion: 'immutable-v1', archivedAt: '2026-10-07T20:00:00.000Z' });
+      else if (mode === 'disabled' || mode === 'member') { account.value.status = 'DISABLED'; account.revision++; }
+      else if (mode === 'name') { account.value.displayName = 'Changed name'; account.revision++; }
+      else { header.value[mode === 'version' ? 'version' : 'organizer'] = mode === 'version' ? 2 : 'omar'; header.revision++; }
+      return architecture(input);
+    } });
+    await expect(session.generateDraft(participant(), 'garden', generate)).rejects.toThrow(mode === 'archive' ? 'NOT_FOUND' : ['disabled', 'member', 'organizer'].includes(mode) ? 'FORBIDDEN' : 'STALE_CONTEXT');
+    if (mode !== 'archive') expect(f.get('GROUP#garden/STATE').value.draftIds).toEqual([]);
+    expect(f.commits).toHaveLength(1);
+  }
+});
+
+it('joins fresh account and header conditions to the actual generated draft commit', async () => {
+  const f = fixture(); let count = 0; f.beforeCommit(() => { if (++count === 2) {
+    const account = f.get('ACCOUNT#iris/STATE'); account.value.status = 'DISABLED'; account.revision++;
+  } });
+  await expect(f.session({ draftArchitect: async (_subject, input) => architecture(input) }).generateDraft(participant(), 'garden', generate)).rejects.toThrow('FORBIDDEN');
+  expect(f.commits).toHaveLength(2); expect(f.get('GROUP#garden/STATE').value.draftIds).toEqual([]);
+});
+
+it('converges simultaneous same-key generation without overwriting the first persisted public frame', async () => {
+  const f = fixture(); let entered!: () => void; const started = new Promise<void>(resolve => { entered = resolve; }); let release!: () => void;
+  const held = new Promise<void>(resolve => { release = resolve; }); let calls = 0;
+  const session = f.session({ draftArchitect: async (_subject, input) => { const index = ++calls; if (index === 1) { entered(); await held; }
+    const output = architecture(input); output.frame.title = `Generated ${index}`; return output;
+  } });
+  const first = session.generateDraft(participant(), 'garden', generate); await started;
+  const second = await session.generateDraft(participant(), 'garden', generate); release(); expect(await first).toEqual(second);
+  expect(second.frame.title).toBe('Generated 2'); expect(f.get('GROUP#garden/STATE').value.draftIds).toEqual([second.id]);
+  expect(f.commits.flat().filter(value => value.next?.kind === 'DRAFT')).toHaveLength(1);
+});
+
+it('does not repeat generation after an unknown applied commit and reconciles a fresh explicit replay without a model call', async () => {
+  const f = fixture(); let calls = 0; let commits = 0; f.afterCommit(() => { if (++commits === 2) throw new Error('PRIVATE_DRAFT_GENERATION_RESPONSE'); });
+  const session = f.session({ draftArchitect: async (_subject, input) => { calls++; return architecture(input); } });
+  await expect(session.generateDraft(participant(), 'garden', generate)).rejects.toThrow('SESSION_STORAGE_UNAVAILABLE');
+  expect(f.commits).toHaveLength(2); expect(f.get('GROUP#garden/STATE').value.draftIds).toHaveLength(1);
+  const replay = await session.generateDraft(participant(), 'garden', generate); expect(replay.revision).toBe(1); expect(calls).toBe(1);
+  expect(f.commits.flat().filter(value => value.next?.kind === 'DRAFT')).toHaveLength(1);
+});
+
+it('shares request and timeout bounds with the architect and prevents late persistence', async () => {
+  const f = fixture(); let calls = 0; const session = f.session({ draftArchitect: async (_subject, input) => { calls++; return architecture(input); } });
+  await expect(session.generateDraft(participant(), 'garden', generate, partitionIO({ maxRequests: 5 }))).rejects.toThrow('SESSION_REQUEST_LIMIT');
+  expect(calls).toBe(0);
+  const timed = fixture(); let release!: () => void; const held = new Promise<void>(resolve => { release = resolve; });
+  await expect(timed.session({ timeoutMs: 20, draftArchitect: async (_subject, input) => { await held; return architecture(input); } })
+    .generateDraft(participant(), 'garden', generate)).rejects.toThrow('SESSION_TIMEOUT');
+  release(); await new Promise<void>(resolve => setTimeout(resolve, 1)); expect(timed.get('GROUP#garden/STATE').value.draftIds).toEqual([]);
+  expect(timed.commits).toHaveLength(1);
+});
+
+it('retains the eight unresolved architect slots after timeout until their actual provider promises settle', async () => {
+  const f = fixture(); let release!: () => void; const held = new Promise<void>(resolve => { release = resolve; }); let entered = 0;
+  const session = f.session({ timeoutMs: 60, draftArchitect: async (_subject, input) => { entered++; await held; return architecture(input); } });
+  const outcomes = await Promise.allSettled(Array.from({ length: 8 }, (_, index) => session.generateDraft(participant(), 'garden', { ...generate, idempotencyKey: `held-${index}` })));
+  expect(outcomes.every(value => value.status === 'rejected')).toBe(true); expect(entered).toBe(8);
+  await expect(session.generateDraft(participant(), 'garden', generate)).rejects.toThrow('SESSION_CAPACITY'); expect(entered).toBe(8);
+  release(); await new Promise<void>(resolve => setTimeout(resolve, 1)); expect(f.get('GROUP#garden/STATE').value.draftIds).toEqual([]);
+  const fresh = await session.generateDraft(participant(), 'garden', generate); expect(fresh.revision).toBe(1); expect(entered).toBe(9);
+});
+
+
+it('checks draft capacity before an architect call and again if another request fills the group while it is pending', async () => {
+  function fill(f: ReturnType<typeof fixture>) {
+    const draft = seedDraft(f); const ids = Array.from({ length: 64 }, (_, index) => `retained-${index}`);
+    for (const id of ids) f.rows.set(`GROUP#garden/DRAFT#${id}`, { schemaVersion: 1, kind: 'DRAFT', revision: 1, value: { ...draft, id } });
+    f.get('GROUP#garden/STATE').value.draftIds = ids; f.get('GROUP#garden/STATE').revision++;
+  }
+  const full = fixture(); fill(full); let calls = 0;
+  await expect(full.session({ draftArchitect: async (_subject, input) => { calls++; return architecture(input); } }).generateDraft(participant(), 'garden', generate))
+    .rejects.toThrow('SESSION_CAPACITY'); expect(calls).toBe(0); expect(full.commits).toEqual([]);
+  const raced = fixture(); await expect(raced.session({ draftArchitect: async (_subject, input) => { fill(raced); return architecture(input); } })
+    .generateDraft(participant(), 'garden', generate)).rejects.toThrow('SESSION_CAPACITY');
+  expect(raced.get('GROUP#garden/STATE').value.draftIds).toHaveLength(64); expect(raced.commits).toHaveLength(1);
 });

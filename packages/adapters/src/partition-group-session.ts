@@ -1,7 +1,7 @@
 import { createHash, createHmac, randomBytes } from 'node:crypto';
 import { z } from 'zod';
 import { Groups, KnownEnough as KE } from '@deal-table/contracts';
-import { KnownEnoughApplicationError, type TrustedPrincipal } from '@deal-table/application';
+import { KnownEnoughApplicationError, type TrustedPrincipal, type DecisionArchitectRequest } from '@deal-table/application';
 import { ArchivedGroupRow } from './partition-archive.ts';
 import { PartitionMembershipError } from './partition-membership.ts';
 import { genericCandidateCatalog } from './generic-candidates.ts';
@@ -20,6 +20,10 @@ const registration = z.strictObject({ displayName: label });
 const profile = z.strictObject({ subject: id, email, verified: z.literal(true) });
 const invite = z.strictObject({ email, replace: z.boolean() });
 const accept = z.strictObject({ token: z.string().regex(/^[A-Za-z0-9_-]{32,80}$/) });
+const draftGeneration = z.strictObject({ objective: z.string().max(2000).trim().min(1), idempotencyKey: id });
+const architectureOutput = z.strictObject({ draftId: id, revision: z.literal(1), status: z.enum(['DEFINING', 'NEEDS_CLARIFICATION']),
+  frame: KE.PublicDecisionFrame, clarificationQuestions: Groups.GroupDraft.shape.clarificationQuestions,
+  participantInformationRequirements: z.array(z.strictObject({ participantId: id, prompt: z.string().min(1).max(500) })).max(64) });
 const draftEdit = z.strictObject({ revision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
   title: KE.PublicDecisionFrame.shape.title, objective: KE.PublicDecisionFrame.shape.objective,
   variables: KE.PublicDecisionFrame.shape.variables, rules: KE.PublicDecisionFrame.shape.rules });
@@ -29,6 +33,8 @@ const discoveryPage = z.strictObject({ groups: z.array(Groups.GroupSnapshot.pick
   cursor: cursor.nullable() });
 /** Trusted discovery only; returned summaries never authorize a group or supply its public fields. */
 export type PartitionGroupDiscovery = (request: { subject: string; limit: number; cursor?: string }, context: PartitionIOContext) => Promise<unknown>;
+/** Captured trusted server port; only public roster fields enter its request and output is revalidated. */
+export type PartitionDraftArchitect = (subject: string, request: DecisionArchitectRequest, context: PartitionIOContext) => Promise<unknown>;
 type Invitation = { tokenHash: string; recipientHash: string; expiresAt: number };
 const deny = (code: 'FORBIDDEN' | 'NOT_FOUND' | 'INVALID_COMMAND' | 'STALE_CONTEXT'): never => {
   throw new KnownEnoughApplicationError(code);
@@ -80,14 +86,24 @@ function currentDraft(state: Groups.GroupState, who: string, selected: string, d
   if (!Number.isSafeInteger(draft.revision)) throw new PartitionSessionError('SESSION_INVALID');
   return draft;
 }
+function publicRoster(state: Groups.GroupState, group: Groups.Group) {
+  return group.members.map(subject => {
+    const account = state.accounts.find(value => value.subject === subject);
+    if (account?.status !== 'APPROVED') return deny('FORBIDDEN');
+    return { id: partitionMemberId(subject), displayName: account.displayName, requiredForApproval: true };
+  });
+}
 export function createPartitionGroupSession(transport: PartitionTransport,
-  options: { now?: () => number; timeoutMs?: number; maxRequests?: number; emailKey?: string; token?: () => string; discovery?: PartitionGroupDiscovery } = {}) {
+  options: { now?: () => number; timeoutMs?: number; maxRequests?: number; emailKey?: string; token?: () => string;
+    discovery?: PartitionGroupDiscovery; draftArchitect?: PartitionDraftArchitect } = {}) {
   const limits = { ...(options.timeoutMs === undefined ? {} : { timeoutMs: options.timeoutMs }),
     ...(options.maxRequests === undefined ? {} : { maxRequests: options.maxRequests }) };
   partitionIO(limits); const clock = options.now ?? Date.now;
   const emailKey = options.emailKey; const tokenSource = options.token ?? (() => randomBytes(32).toString('base64url'));
   const discovery = options.discovery;
+  const draftArchitect = options.draftArchitect; let generating = 0;
   if (discovery !== undefined && typeof discovery !== 'function') throw new PartitionSessionError('SESSION_INVALID');
+  if (draftArchitect !== undefined && typeof draftArchitect !== 'function') throw new PartitionSessionError('SESSION_INVALID');
   if (emailKey !== undefined && (typeof emailKey !== 'string' || emailKey.length < 32 || emailKey.length > 4096)) throw new PartitionSessionError('SESSION_INVALID');
   function emailHash(value: string) {
     if (!emailKey) throw new PartitionSessionError('SESSION_INVALID');
@@ -293,6 +309,62 @@ export function createPartitionGroupSession(transport: PartitionTransport,
         const who = participant(principal); const key = groupId(rawId); const io = partitionIO(limits);
         return selected(who, key, io, resolved => repository.transaction(resolved,
           state => snapshot(state, current(state, who, key), who), io));
+      });
+    },
+    generateDraft(principal: TrustedPrincipal | null, rawId: string, raw: unknown, supplied?: PartitionIOContext) {
+      return safe(async () => {
+        const who = participant(principal); const key = groupId(rawId); const request = draftGeneration.safeParse(raw);
+        if (!request.success) return deny('INVALID_COMMAND');
+        const io = supplied ?? partitionIO(limits);
+        const draftId = `draft-${createHash('sha256').update(JSON.stringify([key, who, request.data.idempotencyKey])).digest('hex').slice(0, 40)}`;
+        const before = await selected(who, key, io, resolved => repository.transaction(resolved, state => {
+          const group = current(state, who, key, true); const participants = publicRoster(state, group);
+          const bodyHash = createHash('sha256').update(JSON.stringify([request.data.objective, group.version])).digest('hex');
+          const existing = group.drafts.find(value => value.id === draftId);
+          if (existing && (existing.bodyHash !== bodyHash || existing.groupVersion !== group.version)) return deny('STALE_CONTEXT');
+          if (!existing && group.drafts.length >= 64) throw new PartitionSessionError('SESSION_CAPACITY');
+          return { groupVersion: group.version, participants, bodyHash, existing: existing ?? null };
+        }, io));
+        if (before.existing) return Groups.GroupDraft.parse(before.existing);
+        if (!draftArchitect) throw new PartitionSessionError('SESSION_INVALID');
+        const rawOutput = await partitionCall(io, () => {
+          if (generating >= 8) throw new PartitionSessionError('SESSION_CAPACITY');
+          generating++;
+          return Promise.resolve().then(() => {
+            if (io.signal.aborted) throw new PartitionSessionError('SESSION_TIMEOUT');
+            return draftArchitect(who, { draftId, revision: 1, objective: request.data.objective,
+              participants: before.participants.map(({ id, displayName }) => ({ id, displayName })), allowedOptions: [], generateOptions: true }, io);
+          }).finally(() => { generating--; });
+        });
+        let serialized: string | undefined;
+        try { serialized = typeof rawOutput === 'string' ? rawOutput : JSON.stringify(rawOutput); }
+        catch { throw new PartitionSessionError('SESSION_INVALID'); }
+        if (serialized === undefined || Buffer.byteLength(serialized, 'utf8') > 256 * 1024) throw new PartitionSessionError('SESSION_INVALID');
+        let output: z.infer<typeof architectureOutput>;
+        try { output = architectureOutput.parse(JSON.parse(serialized)); }
+        catch { throw new PartitionSessionError('SESSION_INVALID'); }
+        if (output.draftId !== draftId || output.frame.objective !== request.data.objective
+          || output.frame.frameVersion !== 1 || output.frame.semanticVersion !== 1
+          || JSON.stringify(output.frame.participants) !== JSON.stringify(before.participants)
+          || JSON.stringify(output.frame.requiredParticipantIds) !== JSON.stringify(before.participants.map(value => value.id))
+          || output.frame.variables.some(value => value.visibility !== 'PUBLIC')
+          || output.participantInformationRequirements.some(value => !before.participants.some(person => person.id === value.participantId))
+          || (output.status === 'NEEDS_CLARIFICATION') !== (output.clarificationQuestions.length > 0)) throw new PartitionSessionError('SESSION_INVALID');
+        const questions = [...output.clarificationQuestions]; const catalog = genericCandidateCatalog(output.frame);
+        if (catalog.clarificationQuestion && !questions.includes(catalog.clarificationQuestion)) questions.push(catalog.clarificationQuestion);
+        const draft = Groups.GroupDraft.parse({ id: draftId, bodyHash: before.bodyHash, revision: 1, groupVersion: before.groupVersion,
+          frame: output.frame, clarificationQuestions: questions.slice(0, 12), createdDecisionId: null });
+        return selected(who, key, io, resolved => repository.transaction(resolved, state => {
+          const group = current(state, who, key, true);
+          if (group.version !== before.groupVersion || JSON.stringify(publicRoster(state, group)) !== JSON.stringify(before.participants)) return deny('STALE_CONTEXT');
+          const existing = group.drafts.find(value => value.id === draftId);
+          if (existing) {
+            if (existing.bodyHash !== before.bodyHash || existing.groupVersion !== before.groupVersion) return deny('STALE_CONTEXT');
+            return Groups.GroupDraft.parse(existing);
+          }
+          if (group.drafts.length >= 64) throw new PartitionSessionError('SESSION_CAPACITY');
+          group.drafts.push(draft); return Groups.GroupDraft.parse(draft);
+        }, io));
       });
     },
     readDraft(principal: TrustedPrincipal | null, rawId: string, rawDraftId: string, supplied?: PartitionIOContext) {

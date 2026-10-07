@@ -4,7 +4,7 @@ import { Id, KnownEnough as KE } from '@deal-table/contracts';
 import { KnownEnoughApplication, KnownEnoughApplicationError, RepositoryCapacityError,
   type Clock, type IdSource, type TrustedPrincipal } from '@deal-table/application';
 import { createPartitionGroupSession, createPartitionDecisionRepository, PartitionSessionError, partitionIO,
-  type PartitionTransport, type PartitionDecisionTransport, type PartitionGroupDiscovery } from '@deal-table/adapters/partition-request';
+  type PartitionTransport, type PartitionDecisionTransport, type PartitionGroupDiscovery, type PartitionDraftArchitect } from '@deal-table/adapters/partition-request';
 
 type ErrorCode = Extract<KE.DecisionCommandResult, { ok: false }>['error']['code'];
 export interface PartitionParticipantApiOptions {
@@ -16,6 +16,8 @@ export interface PartitionParticipantApiOptions {
   invitationToken?: () => string;
   /** Server-configured, source-bound private membership discovery; candidates still require fresh admission. */
   membershipDiscovery?: PartitionGroupDiscovery;
+  /** Trusted bounded architect port; model output does not supply participant authority. */
+  draftArchitect?: PartitionDraftArchitect;
   groups: PartitionTransport;
   decisions: PartitionDecisionTransport;
   decisionArn: string;
@@ -99,11 +101,21 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
   const clock = { now: options.clock.now.bind(options.clock) }; const ids = { next: options.ids.next.bind(options.ids) };
   const registrationProfile = options.registrationProfile;
   const discovery = options.membershipDiscovery;
+  const draftArchitect = options.draftArchitect;
   if (discovery !== undefined && typeof discovery !== 'function') throw new Error('PARTITION_HTTP_INVALID');
+  if (draftArchitect !== undefined && typeof draftArchitect !== 'function') throw new Error('PARTITION_HTTP_INVALID');
   let active = 0; let authenticating = 0;
   const session = createPartitionGroupSession(options.groups, { now: () => Date.parse(clock.now()),
     ...(options.emailKey === undefined ? {} : { emailKey: options.emailKey }),
     ...(options.invitationToken === undefined ? {} : { token: options.invitationToken }),
+    ...(draftArchitect === undefined ? {} : { draftArchitect: (subject, input, io) => {
+      if (authenticating >= concurrency) return reject('RETRYABLE_SERVER_ERROR');
+      authenticating++;
+      return Promise.resolve().then(() => {
+        if (io.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
+        return draftArchitect(subject, input, io);
+      }).finally(() => { authenticating--; });
+    } }),
     ...(discovery === undefined ? {} : { discovery: (raw, io) => {
       if (authenticating >= concurrency) return reject('RETRYABLE_SERVER_ERROR');
       authenticating++;
@@ -154,7 +166,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         const url = URL.parse(request.url ?? '/', 'http://local.invalid');
         if (!url || url.hash || (url.search && (url.pathname !== '/groups' || request.method !== 'GET'))) return reject('INVALID_COMMAND');
         const group = /^\/groups\/([A-Za-z0-9_-]{1,80})(\/(?:remove|invite))?$/.exec(url.pathname);
-        const draft = /^\/groups\/([A-Za-z0-9_-]{1,80})\/drafts\/([A-Za-z0-9_-]{1,80})$/.exec(url.pathname);
+        const draft = /^\/groups\/([A-Za-z0-9_-]{1,80})\/drafts(?:\/([A-Za-z0-9_-]{1,80}))?$/.exec(url.pathname);
         const decision = /^\/decisions\/([A-Za-z0-9_-]{1,80})\/(public|me|commands)$/.exec(url.pathname);
         if (request.method === 'GET' && url.pathname === '/account') {
           send(response, 200, { account: await session.status(principal) }); return;
@@ -195,6 +207,14 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         }
         if (draft && (request.method === 'GET' || request.method === 'POST')) {
           const io = partitionIO(); const context = { ...io, signal: AbortSignal.any([io.signal, controller.signal]) };
+          if (!draft[2]) {
+            if (request.method !== 'POST') return reject('NOT_FOUND');
+            await session.roster(principal, draft[1]!, context);
+            if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
+            const raw = await body(request, maximum, bodyMs, controller);
+            if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
+            send(response, 200, { draft: await session.generateDraft(principal, draft[1]!, raw, context) }); return;
+          }
           // Authenticate and admit the organizer before reading an edit body; commit rechecks the same scope.
           const current = await session.readDraft(principal, draft[1]!, draft[2]!, context);
           if (request.method === 'GET') { send(response, 200, { draft: current }); return; }
