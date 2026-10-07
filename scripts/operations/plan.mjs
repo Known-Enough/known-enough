@@ -33,3 +33,15 @@ export function validateRecovery(journal, plan, envelope) {
     || (journal.state === 'PREPARED' && journal.completedItems !== 0)) reject();
   return Object.freeze({ ...journal });
 }
+// Storage adapters must conditionally persist this result against expectedRevision.
+// Pure transition validation alone is not a distributed lock or durable write.
+export function advanceRecovery(current, next, plan, envelope, actualRevision, expectedRevision) {
+  const before = validateRecovery(current, plan, envelope);
+  const after = validateRecovery(next, plan, envelope);
+  if (!Number.isSafeInteger(actualRevision) || actualRevision < 0
+    || actualRevision !== expectedRevision || actualRevision === Number.MAX_SAFE_INTEGER
+    || after.completedItems < before.completedItems
+    || (before.state === 'COMPLETE' && (after.state !== 'COMPLETE' || after.completedItems !== before.completedItems))
+    || (before.state === 'APPLYING' && after.state === 'PREPARED')) reject();
+  return Object.freeze({ journal: after, storageRevision: actualRevision + 1 });
+}

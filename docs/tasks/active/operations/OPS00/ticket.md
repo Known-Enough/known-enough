@@ -47,3 +47,20 @@ IN_PROGRESS/B. Prior run105full PASS784/twooptional/hosted1/browser62. Self-insp
 ## OPS00 checked validator checkpoint — 2026-10-07T04:06:34.293131+00:00
 
 IN_PROGRESS/B. Finalrun106full PASS784/twooptional/hosted1/browser62 and focused5PASS. Offline plan/recovery validator checked; recovery originalplan+envelope revalidation prevents forgedproof. Durablejournal CAS/terminal/count/restart test contract recorded in operations-envelope.md; adapter/workflow/setup remainunfinished, no installedproof/CODE_READY. Synchronize small checked source checkpoint now, keep same soleclaim.
+
+
+## OPS00 run108 transition checkpoint — 2026-10-07T04:36:55.802188+00:00
+
+IN_PROGRESS/B. advanceRecovery in existingplan.mjs validates originalplan/envelope/journal, matchingstorage revisions and monotoniccount/state; sixfocusedPASS. Puretransition notdistributedlock; adapter mustconditionallypersist. Fullsession77446/private /tmp/ke-run108/full.log active lint/boundariesPASS, remainingUNKNOWN. No push until checked; next durableadapter and real conditionalwrite tests.
+
+OPS00 scope adds scripts/operations/journal.mjs and journal.test.mjs: injected durable conditional storage port plus concurrency/restart tests; no managed resource installation.
+
+
+## OPS00 run109 conditional journal port — 2026-10-07T05:07:01.737315+00:00
+
+IN_PROGRESS/B. journal.mjs injected read/createIfAbsent/compareAndSwap, originalplan/envelope validation before everyread/write, revision guard. NinefocusedPASS inclduplicateprepare/recreatedservice/oneof2writers fakeatomicport. Fake store is not durablemanagedproof. Prior108fullPASS784twooptional/hosted1/browser62. Updatedfullsession93686 /tmp/ke-run109/full.log active; sourceLOCAL pending checks. Next exactmanagedadapter/recoverymanifest/workflow integration, no apply.
+
+
+## OPS00 run110 checked journal checkpoint — 2026-10-07T05:36:41.562491+00:00
+
+IN_PROGRESS/B. Prior109full PASS784twooptional/hosted1/browser62; ninefocusedPASS. Conditionaljournalservice/revisiontransitions checked, fakeatomicstore explicitly not manageddurability. Exact dedicated KnownEnoughOperationsJournal PLAN#hash/JOURNAL schema and narrow setup/runtime proposal documented, not installed. Next transportadapter/conditionalrequest tests and workflow/bootstrap; no CODE_READY/liveclaim. Checkedsource sync now.
