@@ -4,7 +4,7 @@ import { DynamoDBClient, GetItemCommand, QueryCommand, BatchGetItemCommand } fro
 import { z } from 'zod';
 import { PartitionMembershipRow, partitionMembershipKey } from './partition-membership-contract.ts';
 export { PartitionMembershipRow, partitionMembershipKey } from './partition-membership-contract.ts';
-import { PartitionRowSchema, partitionAccountKey, partitionGroupKey, type PartitionKey, type PartitionRow, type PartitionIOContext } from './partitioned-group-repository.ts';
+import { PartitionRowSchema, partitionAccountKey, partitionGroupKey, PartitionStorageError, type PartitionKey, type PartitionRow, type PartitionIOContext } from './partitioned-group-repository.ts';
 import { ArchivedGroupRow } from './partition-archive.ts';
 import { MigrationControlSchema, migrationIO, migrationCall, MigrationRunError } from './partition-migration-runner.ts';
 import { PARTITION_MIGRATION_RESOURCES as resources } from './dynamo-partition-migration.ts';
@@ -92,6 +92,10 @@ export function createPartitionMembershipReader(config: { sourceSha: string; pla
     try { return await migrationCall(context, work); }
     catch (error) {
       if (error instanceof PartitionMembershipError) throw error;
+      if (error instanceof PartitionStorageError) {
+        if (error.code === 'PARTITION_TIMEOUT') return fail('MEMBERSHIP_TIMEOUT');
+        if (error.code === 'PARTITION_REQUEST_LIMIT') return fail('MEMBERSHIP_REQUEST_LIMIT');
+      }
       if (error instanceof MigrationRunError) {
         if (error.cause instanceof PartitionMembershipError) throw error.cause;
         if (error.code === 'MIGRATION_TIMEOUT') return fail('MEMBERSHIP_TIMEOUT');
@@ -147,12 +151,12 @@ export function createPartitionMembershipReader(config: { sourceSha: string; pla
     return keys.map(key => output.get(key.PK) ?? null);
   }
   return {
-    async list(raw: { subject: string; limit?: number; cursor?: string }) {
+    async list(raw: { subject: string; limit?: number; cursor?: string }, supplied?: PartitionIOContext) {
       const parsed = z.strictObject({ subject: id, limit: z.number().int().min(1).max(20).default(10), cursor: z.string().optional() }).safeParse(raw);
       if (!parsed.success) return fail('MEMBERSHIP_INVALID');
       const { subject, limit, cursor } = parsed.data; const continuation = cursor === undefined ? null : open(cursor);
       if (continuation && (continuation.subject !== subject || continuation.limit !== limit)) return fail('MEMBERSHIP_INVALID');
-      const context = migrationIO(options); const beforeControl = await control(context); const beforeAccount = await account(subject, context);
+      const context = supplied ?? migrationIO(options); const beforeControl = await control(context); const beforeAccount = await account(subject, context);
       if (continuation && continuation.accountRevision !== beforeAccount.revision) return fail('MEMBERSHIP_STALE');
       const pk = `MEMBER#${subject}`;
       const result = await call(context, () => client.send(new QueryCommand({ TableName: resources.target,

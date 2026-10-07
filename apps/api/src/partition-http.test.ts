@@ -421,3 +421,58 @@ it('keeps unresolved authentication inside the concurrency bound even when a res
   expect(authenticate).toHaveBeenCalledTimes(1);
   resolve(actor());
 });
+
+const listCandidate = () => ({ id: 'garden', name: 'Ignored discovery label', version: 99, isOrganizer: true });
+const listCursor = 'x'.repeat(80);
+it('lists a verified participants current public groups with strict opaque pagination and copied configuration', async () => {
+  const f = await fixture(); const queries: unknown[] = [];
+  const a = await api(f, { membershipDiscovery: async (raw, io) => { queries.push(structuredClone(raw)); expect(io.signal).toBeDefined();
+    return { groups: [listCandidate()], cursor: listCursor }; } });
+  a.options.membershipDiscovery = async () => { throw new Error('wrong late configuration'); };
+  const response = await a.get(`/groups?limit=1&cursor=${listCursor}`, 'omar', { 'x-subject': 'iris' });
+  expect(response.status).toBe(200); expect(response.headers.get('cache-control')).toBe('no-store');
+  const value = await response.json(); expect(value.cursor).toBe(listCursor); expect(value.groups[0]).toMatchObject({ id: 'garden', name: 'Garden', version: 1, isOrganizer: false });
+  expect(queries).toEqual([{ subject: 'omar', limit: 1, cursor: listCursor }]);
+  expect(JSON.stringify(value.groups)).not.toMatch(/subject|emailHash|tokenHash|recipientHash|ACCOUNT#|MEMBER#|revision|Ignored/);
+  expect(f.writes).toEqual([]); expect(f.groupCommits).toHaveLength(1);
+});
+
+it('rejects group-list query substitution, duplication and bad bounds before discovery or group IO', async () => {
+  const f = await fixture(); const discovery = vi.fn(async () => ({ groups: [], cursor: null })); const a = await api(f, { membershipDiscovery: discovery });
+  const read = vi.spyOn(f.groups, 'readMany');
+  for (const path of ['/groups?subject=omar', '/groups?limit=01', '/groups?limit=0', '/groups?limit=21', '/groups?limit=1&limit=2',
+    '/groups?cursor=', '/groups?cursor=unsafe', `/groups?cursor=${listCursor}&cursor=${listCursor}`, '/account?limit=1', '/groups/garden?limit=1']) {
+    expect((await a.get(path)).status).toBe(422);
+  }
+  expect(read).not.toHaveBeenCalled(); expect(discovery).not.toHaveBeenCalled(); expect(f.groupCommits).toEqual([]);
+});
+
+it('keeps group-list authentication and server discovery configuration fail-closed', async () => {
+  const f = await fixture(); const missing = await api(f); expect((await missing.get('/groups')).status).toBe(503);
+  const discovery = vi.fn(async () => ({ groups: [], cursor: null })); const a = await api(f, { membershipDiscovery: discovery });
+  expect((await a.get('/groups', 'unknown')).status).toBe(401);
+  f.change('ACCOUNT#iris', value => { value.status = 'DISABLED'; }); expect((await a.get('/groups')).status).toBe(403);
+  expect(discovery).not.toHaveBeenCalled(); expect(f.groupCommits).toEqual([]);
+});
+
+it('denies a whole group-list page when an included roster changes at actual publication', async () => {
+  const f = await fixture(); const a = await api(f, { membershipDiscovery: async () => ({ groups: [listCandidate()], cursor: null }) });
+  f.beforeGroupCommit(() => { f.change('GROUP#garden', value => { value.members = ['iris']; value.version = 2; }); });
+  const response = await a.get('/groups', 'omar'); expect(response.status).toBe(409);
+  const value = await response.json(); expect(value.error.code).toBe('STALE_CONTEXT'); expect(value.groups).toBeUndefined();
+  expect(JSON.stringify(value)).not.toMatch(/Garden|IRIS|OMAR|subject|emailHash|roster/); expect(f.groupCommits).toHaveLength(1);
+});
+
+it('cancels held discovery without late hydration and retains its unresolved provider slot until settlement', async () => {
+  const f = await fixture(); let release: (() => void) | undefined; let reached: (() => void) | undefined;
+  const ready = new Promise<void>(resolve => { reached = resolve; }); let first = true;
+  const discovery = vi.fn(async () => { if (first) { first = false; reached?.(); await new Promise<void>(resolve => { release = resolve; }); }
+    return { groups: [listCandidate()], cursor: null }; });
+  const a = await api(f, { membershipDiscovery: discovery, maxConcurrentRequests: 1 }); const reads = vi.spyOn(f.groups, 'readMany');
+  const controller = new AbortController();
+  const pending = fetch(a.base + '/groups', { headers: { authorization: 'Bearer iris' }, signal: controller.signal }).catch(error => error);
+  await ready; controller.abort(); await pending; await new Promise(resolve => setTimeout(resolve, 20));
+  const before = reads.mock.calls.length; expect((await a.get('/groups')).status).toBe(503); expect(discovery).toHaveBeenCalledTimes(1);
+  release?.(); await new Promise(resolve => setTimeout(resolve, 20)); expect(reads.mock.calls).toHaveLength(before); expect(f.groupCommits).toEqual([]);
+  expect((await a.get('/groups')).status).toBe(200); expect(discovery).toHaveBeenCalledTimes(2);
+});

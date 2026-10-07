@@ -1,6 +1,7 @@
 import { createHash, createHmac } from 'node:crypto';
 import { expect, it } from 'vitest';
 import { Groups } from '@deal-table/contracts';
+import { PartitionMembershipError } from './partition-membership.ts';
 import type { TrustedPrincipal } from '@deal-table/application';
 import { createPartitionGroupSession, partitionMemberId } from './partition-group-session.ts';
 import { preparePartitionMigration } from './partition-migration.ts';
@@ -449,4 +450,127 @@ it('never retries an unknown invitation issue automatically and requires explici
   const next = await session.invite(participant(), 'garden', { ...request, replace: true }); expect(next.token).toBe('b'.repeat(43));
   await expect(session.accept(participant('luca'), { token: 'a'.repeat(43) })).rejects.toThrow('NOT_FOUND');
   expect((await session.accept(participant('luca'), { token: next.token })).version).toBe(2);
+});
+
+const pageCandidate = (id = 'garden') => ({ id, name: 'Untrusted candidate label', version: 99, isOrganizer: false });
+const pageCursor = 'x'.repeat(80);
+it('lists fresh complete public snapshots, ignoring discovery labels and retaining opaque pagination', async () => {
+  const f = fixture(); const requests: unknown[] = [];
+  const session = f.session({ discovery: async (raw, io) => { requests.push(structuredClone(raw)); expect(io.signal).toBeDefined();
+    return { groups: [pageCandidate()], cursor: pageCursor }; } });
+  const result = await session.list(participant(), { limit: 1, cursor: pageCursor });
+  expect(requests).toEqual([{ subject: 'iris', limit: 1, cursor: pageCursor }]);
+  expect(result.groups).toEqual([await f.session().snapshot(participant(), 'garden')]); expect(result.cursor).toBe(pageCursor);
+  expect(JSON.stringify(result.groups)).not.toMatch(/subject|emailHash|tokenHash|recipientHash|MEMBER#|ACCOUNT#|revision|Untrusted/);
+  expect(f.commits[0]!.every(change => change.next === null)).toBe(true);
+});
+
+it('ignores stale discovery edges for absent, archived and removed groups without granting scope', async () => {
+  const f = fixture(); const base = structuredClone(f.get('GROUP#garden/STATE'));
+  f.rows.set('GROUP#removed/STATE', { ...base, value: { ...base.value, id: 'removed', organizer: 'omar', members: ['omar'] } });
+  f.rows.set('GROUP#archived/STATE', { schemaVersion: 1, revision: 2, kind: 'ARCHIVED_GROUP', groupId: 'archived', organizer: 'iris', groupVersion: 1,
+    sourceSha: 'a'.repeat(40), sourceHash: 'f'.repeat(64), manifestHash: 'e'.repeat(64), manifestVersion: 'saved-v1',
+    archivedAt: '2026-10-07T14:00:00Z' });
+  const result = await f.session({ discovery: async () => ({ groups: ['absent', 'removed', 'archived', 'garden'].map(pageCandidate), cursor: null }) }).list(participant());
+  expect(result.groups.map(group => group.id)).toEqual(['garden']); expect(f.commits).toHaveLength(1);
+  expect(f.commits[0]!.some(change => change.key.PK === 'GROUP#removed' || change.key.PK === 'GROUP#archived')).toBe(false);
+});
+
+it('denies invalid identity, pagination and unavailable discovery before storage, and approval before discovery', async () => {
+  const f = fixture(); let calls = 0; const discovery = async () => { calls++; return { groups: [], cursor: null }; };
+  const session = f.session({ discovery });
+  for (const who of [null, { kind: 'service', subject: 'iris', roomIds: [] }, { kind: 'participant', subject: '../iris' }] as (TrustedPrincipal | null)[]) {
+    await expect(session.list(who)).rejects.toThrow('FORBIDDEN');
+  }
+  for (const raw of [{ subject: 'omar' }, { limit: 0 }, { limit: 21 }, { limit: '1' }, { cursor: '' }, { cursor: '../private' }]) {
+    await expect(session.list(participant(), raw)).rejects.toThrow('INVALID_COMMAND');
+  }
+  await expect(f.session().list(participant())).rejects.toThrow('SESSION_INVALID'); expect(f.reads).toEqual([]);
+  for (const who of ['pending', 'absent']) await expect(session.list(participant(who))).rejects.toThrow('FORBIDDEN');
+  expect(calls).toBe(0); expect(f.commits).toEqual([]);
+});
+
+it('guards the complete page against disable, removal, archive or header replacement at final publication', async () => {
+  for (const change of ['disable', 'remove', 'archive', 'rename']) {
+    const f = fixture();
+    f.beforeCommit(changes => { expect(changes.every(item => item.next === null)).toBe(true);
+      if (change === 'disable') { const row = f.get('ACCOUNT#iris/STATE'); row.value.status = 'DISABLED'; row.revision++; }
+      else if (change === 'archive') f.rows.delete('GROUP#garden/STATE');
+      else { const row = f.get('GROUP#garden/STATE'); if (change === 'remove') row.value.members = ['omar']; else row.value.name = 'Changed'; row.revision++; }
+    });
+    await expect(f.session({ discovery: async () => ({ groups: [pageCandidate()], cursor: null }) }).list(participant())).rejects.toThrow('STALE_CONTEXT');
+    expect(f.commits).toHaveLength(1);
+  }
+});
+
+it('does not publish an earlier group changed while a later candidate is hydrated', async () => {
+  const f = fixture(); const base = structuredClone(f.get('GROUP#garden/STATE'));
+  f.rows.set('GROUP#second/STATE', { ...base, value: { ...base.value, id: 'second', decisionIds: [] } });
+  let changed = false;
+  f.beforeRead(keys => { if (!changed && keys.some(key => key.PK === 'GROUP#second')) {
+    changed = true; const row = f.get('GROUP#garden/STATE'); row.value.name = 'Changed during page'; row.revision++;
+  } });
+  await expect(f.session({ discovery: async () => ({ groups: [pageCandidate(), pageCandidate('second')], cursor: null }) }).list(participant())).rejects.toThrow('STALE_CONTEXT');
+  expect(f.commits).toHaveLength(1);
+});
+
+it('rejects malformed, duplicate, oversized and limit-exceeding discovery pages before publication', async () => {
+  for (const groups of [[pageCandidate(), pageCandidate()], [pageCandidate(), pageCandidate('second')],
+    [{ ...pageCandidate(), subject: 'iris' }], Array.from({ length: 21 }, (_, index) => pageCandidate(`group-${index}`))]) {
+    const f = fixture(); await expect(f.session({ discovery: async () => ({ groups, cursor: null }) }).list(participant(), { limit: 1 })).rejects.toThrow('SESSION_INVALID');
+    expect(f.commits).toEqual([]);
+  }
+  const f = fixture(); await expect(f.session({ discovery: async () => ({ groups: [], cursor: 'unsafe?' }) }).list(participant())).rejects.toThrow('SESSION_INVALID');
+});
+
+it('shares the operation ceiling and deadline with discovery and prevents late hydration', async () => {
+  const f = fixture(); let calls = 0;
+  const session = f.session({ discovery: async () => { calls++; return { groups: [], cursor: null }; } });
+  await expect(session.list(participant(), {}, partitionIO({ maxRequests: 1 }))).rejects.toThrow('SESSION_REQUEST_LIMIT'); expect(calls).toBe(0);
+  let release: (() => void) | undefined;
+  const held = f.session({ discovery: async () => { await new Promise<void>(resolve => { release = resolve; }); return { groups: [pageCandidate()], cursor: null }; } });
+  await expect(held.list(participant(), {}, partitionIO({ timeoutMs: 20 }))).rejects.toThrow('SESSION_TIMEOUT');
+  const reads = f.reads.length; release?.(); await new Promise(resolve => setTimeout(resolve, 20)); expect(f.reads).toHaveLength(reads); expect(f.commits).toEqual([]);
+});
+
+it('caps combined page authority at one hundred unique guards before a physical commit', async () => {
+  const f = fixture(); const candidates: ReturnType<typeof pageCandidate>[] = [];
+  for (let index = 0; index < 7; index++) {
+    const members = ['iris', ...Array.from({ length: 15 }, (_, member) => `person-${index}-${member}`)];
+    for (const subject of members.slice(1)) f.rows.set(`ACCOUNT#${subject}/STATE`, { schemaVersion: 1, kind: 'ACCOUNT', revision: 1,
+      value: { subject, emailHash: createHash('sha256').update(subject).digest('hex'), displayName: subject, status: 'APPROVED', version: 1 } });
+    const id = `group-${index}`; candidates.push(pageCandidate(id));
+    f.rows.set(`GROUP#${id}/STATE`, { schemaVersion: 1, kind: 'GROUP', revision: 1, value: { id, name: id, organizer: 'iris', version: 1,
+      members, draftIds: [], decisionIds: [], invitations: [] } });
+  }
+  await expect(f.session({ discovery: async () => ({ groups: candidates, cursor: null }) }).list(participant())).rejects.toThrow('SESSION_CAPACITY');
+  expect(f.commits).toEqual([]);
+});
+
+it('guards empty pages and never automatically repeats an unknown publication outcome', async () => {
+  const empty = fixture(); empty.beforeCommit(() => { const row = empty.get('ACCOUNT#iris/STATE'); row.value.status = 'DISABLED'; row.revision++; });
+  await expect(empty.session({ discovery: async () => ({ groups: [], cursor: null }) }).list(participant())).rejects.toThrow('STALE_CONTEXT');
+  const f = fixture(); f.afterCommit(() => { throw new Error('private lost response'); });
+  const session = f.session({ discovery: async () => ({ groups: [pageCandidate()], cursor: null }) });
+  await expect(session.list(participant())).rejects.toThrow('SESSION_STORAGE_UNAVAILABLE'); expect(f.commits).toHaveLength(1);
+  expect(f.commits[0]!.every(item => item.next === null)).toBe(true); f.afterCommit(() => {});
+  expect((await session.list(participant())).groups[0]!.id).toBe('garden'); expect(f.commits).toHaveLength(2);
+});
+
+it('copies the authenticated subject and captures discovery configuration across async work', async () => {
+  const f = fixture(); const who = participant(); const options: NonNullable<Parameters<typeof createPartitionGroupSession>[1]> = {
+    discovery: async raw => { expect(raw.subject).toBe('iris'); who.subject = 'luca'; options.discovery = async () => ({ groups: [], cursor: null });
+      return { groups: [pageCandidate()], cursor: null }; } };
+  const session = f.session(options); const result = await session.list(who);
+  expect(result.groups[0]!.isOrganizer).toBe(true); expect(result.groups[0]!.id).toBe('garden');
+  expect(f.commits[0]!.some(change => change.key.PK === 'ACCOUNT#luca')).toBe(false);
+});
+
+it('preserves denial, stale and bounded discovery errors without exposing provider causes', async () => {
+  for (const [input, output] of [['MEMBERSHIP_DENIED', 'FORBIDDEN'], ['MEMBERSHIP_STALE', 'STALE_CONTEXT'],
+    ['MEMBERSHIP_INVALID', 'SESSION_INVALID'], ['MEMBERSHIP_TIMEOUT', 'SESSION_TIMEOUT'],
+    ['MEMBERSHIP_REQUEST_LIMIT', 'SESSION_REQUEST_LIMIT'], ['MEMBERSHIP_STORAGE_UNAVAILABLE', 'SESSION_STORAGE_UNAVAILABLE']] as const) {
+    const f = fixture(); await expect(f.session({ discovery: async () => { throw new PartitionMembershipError(input); } }).list(participant())).rejects.toThrow(output);
+    expect(f.commits).toEqual([]);
+  }
 });

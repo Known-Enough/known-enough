@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { Groups } from '@deal-table/contracts';
 import { KnownEnoughApplicationError, type TrustedPrincipal } from '@deal-table/application';
 import { ArchivedGroupRow } from './partition-archive.ts';
+import { PartitionMembershipError } from './partition-membership.ts';
 import { createPartitionedGroupRepository, checkPartitionRow, partitionAccountKey, partitionGroupKey,
   partitionIO, partitionCall, PartitionStorageError, type PartitionIOContext, type PartitionScope,
   type PartitionTransport, type PartitionFence } from './partitioned-group-repository.ts';
@@ -18,6 +19,12 @@ const registration = z.strictObject({ displayName: label });
 const profile = z.strictObject({ subject: id, email, verified: z.literal(true) });
 const invite = z.strictObject({ email, replace: z.boolean() });
 const accept = z.strictObject({ token: z.string().regex(/^[A-Za-z0-9_-]{32,80}$/) });
+const cursor = z.string().regex(/^[A-Za-z0-9_-]{40,1600}$/);
+const listing = z.strictObject({ limit: z.number().int().min(1).max(20).default(10), cursor: cursor.optional() });
+const discoveryPage = z.strictObject({ groups: z.array(Groups.GroupSnapshot.pick({ id: true, name: true, version: true, isOrganizer: true })).max(20),
+  cursor: cursor.nullable() });
+/** Trusted discovery only; returned summaries never authorize a group or supply its public fields. */
+export type PartitionGroupDiscovery = (request: { subject: string; limit: number; cursor?: string }, context: PartitionIOContext) => Promise<unknown>;
 type Invitation = { tokenHash: string; recipientHash: string; expiresAt: number };
 const deny = (code: 'FORBIDDEN' | 'NOT_FOUND' | 'INVALID_COMMAND' | 'STALE_CONTEXT'): never => {
   throw new KnownEnoughApplicationError(code);
@@ -36,6 +43,14 @@ async function safe<T>(work: () => Promise<T>): Promise<T> {
   try { return await work(); }
   catch (error) {
     if (error instanceof KnownEnoughApplicationError || error instanceof PartitionSessionError) throw error;
+    if (error instanceof PartitionMembershipError) {
+      if (error.code === 'MEMBERSHIP_DENIED') return deny('FORBIDDEN');
+      if (error.code === 'MEMBERSHIP_STALE') return deny('STALE_CONTEXT');
+      const code = error.code === 'MEMBERSHIP_TIMEOUT' ? 'SESSION_TIMEOUT'
+        : error.code === 'MEMBERSHIP_REQUEST_LIMIT' ? 'SESSION_REQUEST_LIMIT'
+          : error.code === 'MEMBERSHIP_INVALID' ? 'SESSION_INVALID' : 'SESSION_STORAGE_UNAVAILABLE';
+      throw new PartitionSessionError(code, { cause: error });
+    }
     if (error instanceof PartitionStorageError) {
       if (error.code === 'PARTITION_STALE' || error.code === 'PARTITION_CONFLICT') return deny('STALE_CONTEXT');
       const code = error.code === 'PARTITION_TIMEOUT' ? 'SESSION_TIMEOUT'
@@ -54,11 +69,13 @@ function current(state: Groups.GroupState, who: string, selected: string, organi
   return group;
 }
 export function createPartitionGroupSession(transport: PartitionTransport,
-  options: { now?: () => number; timeoutMs?: number; maxRequests?: number; emailKey?: string; token?: () => string } = {}) {
+  options: { now?: () => number; timeoutMs?: number; maxRequests?: number; emailKey?: string; token?: () => string; discovery?: PartitionGroupDiscovery } = {}) {
   const limits = { ...(options.timeoutMs === undefined ? {} : { timeoutMs: options.timeoutMs }),
     ...(options.maxRequests === undefined ? {} : { maxRequests: options.maxRequests }) };
   partitionIO(limits); const clock = options.now ?? Date.now;
   const emailKey = options.emailKey; const tokenSource = options.token ?? (() => randomBytes(32).toString('base64url'));
+  const discovery = options.discovery;
+  if (discovery !== undefined && typeof discovery !== 'function') throw new PartitionSessionError('SESSION_INVALID');
   if (emailKey !== undefined && (typeof emailKey !== 'string' || emailKey.length < 32 || emailKey.length > 4096)) throw new PartitionSessionError('SESSION_INVALID');
   function emailHash(value: string) {
     if (!emailKey) throw new PartitionSessionError('SESSION_INVALID');
@@ -111,6 +128,45 @@ export function createPartitionGroupSession(transport: PartitionTransport,
       decisions: group.decisions.map(binding => ({ id: binding.id, current: binding.version === group.version })) });
   }
   return {
+    list(principal: TrustedPrincipal | null, raw: unknown = {}, supplied?: PartitionIOContext) {
+      return safe(async () => {
+        const who = participant(principal); const request = listing.safeParse(raw);
+        if (!request.success) return deny('INVALID_COMMAND');
+        if (!discovery) throw new PartitionSessionError('SESSION_INVALID');
+        const io = supplied ?? partitionIO(limits);
+        const account = await repository.fence({ accountSubjects: [who] }, state => {
+          if (state.accounts.find(value => value.subject === who)?.status !== 'APPROVED') return deny('FORBIDDEN');
+        }, io);
+        const page = discoveryPage.safeParse(await partitionCall(io, () => discovery({ subject: who, limit: request.data.limit,
+          ...(request.data.cursor === undefined ? {} : { cursor: request.data.cursor }) }, io)));
+        if (!page.success || page.data.groups.length > request.data.limit
+          || new Set(page.data.groups.map(group => group.id)).size !== page.data.groups.length) throw new PartitionSessionError('SESSION_INVALID');
+        const guards = new Map(account.mutations.map(mutation => [JSON.stringify(mutation.key), mutation]));
+        const groups: Groups.GroupSnapshot[] = [];
+        for (const candidate of page.data.groups) {
+          try {
+            await selected(who, candidate.id, io, async resolved => {
+              let value: Groups.GroupSnapshot | undefined;
+              const fence = await repository.fence(resolved, state => { value = snapshot(state, current(state, who, candidate.id), who); }, io);
+              for (const mutation of fence.mutations) {
+                if (mutation.next !== null) throw new PartitionSessionError('SESSION_INVALID');
+                const key = JSON.stringify(mutation.key); const prior = guards.get(key);
+                if (prior && prior.expected !== mutation.expected) return deny('STALE_CONTEXT');
+                guards.set(key, mutation);
+              }
+              groups.push(value!);
+            });
+          } catch (error) {
+            // A stale index entry can disappear, but never authorize a missing or removed group.
+            if (!(error instanceof KnownEnoughApplicationError) || error.code !== 'NOT_FOUND') throw error;
+          }
+        }
+        if (guards.size > 100) throw new PartitionSessionError('SESSION_CAPACITY');
+        // Publish the entire page only if every included group/account remains current together.
+        if (!await partitionCall(io, () => transport.commit([...guards.values()], io))) return deny('STALE_CONTEXT');
+        return { groups, cursor: page.data.cursor };
+      });
+    },
     register(principal: TrustedPrincipal | null, rawProfile: unknown, raw: unknown) {
       return safe(async () => {
         const who = participant(principal); const verified = profile.safeParse(rawProfile); const request = registration.safeParse(raw);

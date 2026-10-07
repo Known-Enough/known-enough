@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { afterEach, expect, it, vi } from 'vitest';
 import { DynamoDBClient, GetItemCommand, BatchGetItemCommand, QueryCommand } from '@aws-sdk/client-dynamodb';
-import { PartitionRowSchema, partitionAccountKey, partitionGroupKey } from './partitioned-group-repository.ts';
+import { PartitionRowSchema, partitionAccountKey, partitionGroupKey, partitionIO } from './partitioned-group-repository.ts';
 import { createPartitionMembershipReader, partitionMembershipSeeds, PartitionMembershipRow } from './partition-membership.ts';
 import { ArchivedGroupRow } from './partition-archive.ts';
 import { MigrationControlSchema } from './partition-migration-runner.ts';
@@ -226,4 +226,17 @@ it('storage failures retain private causes but expose only a fixed safe message;
   await expect(data.reader().list({ subject: 'iris' })).rejects.toMatchObject({ message: 'MEMBERSHIP_STORAGE_UNAVAILABLE' });
   expect(() => data.reader({ maxRequests: 0 })).toThrow('MEMBERSHIP_INVALID');
   expect(() => data.reader({ timeoutMs: 20001 })).toThrow('MEMBERSHIP_INVALID');
+});
+
+it('honors an externally shared physical request budget instead of allocating a fresh one', async () => {
+  const data = fixture(1); const io = partitionIO({ maxRequests: 3 }); io.request();
+  await expect(data.reader().list({ subject: 'iris' }, io)).rejects.toThrow('MEMBERSHIP_REQUEST_LIMIT');
+  expect(data.count()).toBe(2);
+});
+
+it('honors a shared deadline and cancellation without submitting late discovery requests', async () => {
+  const data = fixture(1); let release: (() => void) | undefined;
+  data.intercept(async command => { if (command instanceof QueryCommand) await new Promise<void>(resolve => { release = resolve; }); });
+  await expect(data.reader().list({ subject: 'iris' }, partitionIO({ timeoutMs: 20 }))).rejects.toThrow('MEMBERSHIP_TIMEOUT');
+  const calls = data.count(); release?.(); await new Promise(resolve => setTimeout(resolve, 20)); expect(data.count()).toBe(calls);
 });

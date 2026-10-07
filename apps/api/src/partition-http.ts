@@ -3,8 +3,8 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { Id, KnownEnough as KE } from '@deal-table/contracts';
 import { KnownEnoughApplication, KnownEnoughApplicationError, RepositoryCapacityError,
   type Clock, type IdSource, type TrustedPrincipal } from '@deal-table/application';
-import { createPartitionGroupSession, createPartitionDecisionRepository, PartitionSessionError,
-  type PartitionTransport, type PartitionDecisionTransport } from '@deal-table/adapters/partition-request';
+import { createPartitionGroupSession, createPartitionDecisionRepository, PartitionSessionError, partitionIO,
+  type PartitionTransport, type PartitionDecisionTransport, type PartitionGroupDiscovery } from '@deal-table/adapters/partition-request';
 
 type ErrorCode = Extract<KE.DecisionCommandResult, { ok: false }>['error']['code'];
 export interface PartitionParticipantApiOptions {
@@ -14,6 +14,8 @@ export interface PartitionParticipantApiOptions {
   registrationProfile?: (request: IncomingMessage, signal: AbortSignal) => Promise<{ subject: string; email: string; verified: boolean } | null>;
   emailKey?: string;
   invitationToken?: () => string;
+  /** Server-configured, source-bound private membership discovery; candidates still require fresh admission. */
+  membershipDiscovery?: PartitionGroupDiscovery;
   groups: PartitionTransport;
   decisions: PartitionDecisionTransport;
   decisionArn: string;
@@ -96,12 +98,22 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
   if (typeof authenticate !== 'function') throw new Error('PARTITION_HTTP_INVALID');
   const clock = { now: options.clock.now.bind(options.clock) }; const ids = { next: options.ids.next.bind(options.ids) };
   const registrationProfile = options.registrationProfile;
+  const discovery = options.membershipDiscovery;
+  if (discovery !== undefined && typeof discovery !== 'function') throw new Error('PARTITION_HTTP_INVALID');
+  let active = 0; let authenticating = 0;
   const session = createPartitionGroupSession(options.groups, { now: () => Date.parse(clock.now()),
     ...(options.emailKey === undefined ? {} : { emailKey: options.emailKey }),
-    ...(options.invitationToken === undefined ? {} : { token: options.invitationToken }) });
+    ...(options.invitationToken === undefined ? {} : { token: options.invitationToken }),
+    ...(discovery === undefined ? {} : { discovery: (raw, io) => {
+      if (authenticating >= concurrency) return reject('RETRYABLE_SERVER_ERROR');
+      authenticating++;
+      return Promise.resolve().then(() => {
+        if (io.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
+        return discovery(raw, io);
+      }).finally(() => { authenticating--; });
+    } }) });
   const repositories = createPartitionDecisionRepository({ decisionArn: options.decisionArn, partitionArn: options.partitionArn,
     groups: options.groups, transport: options.decisions });
-  let active = 0; let authenticating = 0;
   return (request: IncomingMessage, response: ServerResponse): void => {
     const incomingId = request.headers['x-request-id'];
     let requestId = typeof incomingId === 'string' && Id.safeParse(incomingId).success ? incomingId : randomUUID();
@@ -140,11 +152,21 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         const principal = { kind: 'participant' as const, subject: verified.subject };
         if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
         const url = URL.parse(request.url ?? '/', 'http://local.invalid');
-        if (!url || url.search || url.hash) return reject('INVALID_COMMAND');
+        if (!url || url.hash || (url.search && (url.pathname !== '/groups' || request.method !== 'GET'))) return reject('INVALID_COMMAND');
         const group = /^\/groups\/([A-Za-z0-9_-]{1,80})(\/(?:remove|invite))?$/.exec(url.pathname);
         const decision = /^\/decisions\/([A-Za-z0-9_-]{1,80})\/(public|me|commands)$/.exec(url.pathname);
         if (request.method === 'GET' && url.pathname === '/account') {
           send(response, 200, { account: await session.status(principal) }); return;
+        }
+        if (request.method === 'GET' && url.pathname === '/groups') {
+          const params = url.searchParams;
+          if (url.search.length > 2000 || [...params.keys()].some(key => !['limit', 'cursor'].includes(key) || params.getAll(key).length !== 1)) return reject('INVALID_COMMAND');
+          const limit = params.get('limit'); const cursor = params.get('cursor');
+          if (limit !== null && !/^(?:[1-9]|1[0-9]|20)$/.test(limit)) return reject('INVALID_COMMAND');
+          const io = partitionIO();
+          const page = await session.list(principal, { ...(limit === null ? {} : { limit: Number(limit) }),
+            ...(cursor === null ? {} : { cursor }) }, { ...io, signal: AbortSignal.any([io.signal, controller.signal]) });
+          send(response, 200, page); return;
         }
         if (request.method === 'POST' && url.pathname === '/account/register') {
           if (!registrationProfile) return reject('FORBIDDEN');
