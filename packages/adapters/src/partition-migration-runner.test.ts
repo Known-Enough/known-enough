@@ -105,8 +105,8 @@ it('serializes concurrent preparation and same-plan batches with control/journal
   const prepared = await Promise.all([store.runner().prepare(), store.runner().prepare()]);
   expect(prepared[0]).toEqual(prepared[1]); expect(store.journal!.revision).toBe(1);
   await Promise.all([store.runner().step(), store.runner().step()]);
-  expect(store.journal!.nextBatch).toBe(2); expect(store.journal!.completedRows).toBe(130);
-  expect(store.collisions).toBeGreaterThanOrEqual(1); expect(store.targets.size).toBe(130);
+  expect(store.journal!.nextBatch).toBe(2); expect(store.journal!.completedRows).toBe(131);
+  expect(store.collisions).toBeGreaterThanOrEqual(1); expect(store.targets.size).toBe(131);
 });
 
 it('rejects a changed legacy revision or same-revision byte change before preparation can preserve or commit', async () => {

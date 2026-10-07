@@ -2,7 +2,6 @@ import { test, afterEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, writeFile, access } from 'node:fs/promises';
 import { dirname } from 'node:path';
-import { setTimeout as delay } from 'node:timers/promises';
 import { createHash } from 'node:crypto';
 import { DynamoDBClient, GetItemCommand, BatchGetItemCommand, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import { KnownEnough as KE } from '@deal-table/contracts';
@@ -92,22 +91,28 @@ function fixture(large = false) {
     return {};
   });
   const authority = { kind: 'ORGANIZER', subject: 'iris' };
+  const recoverySettlements = [];
+  const track = promise => {
+    recoverySettlements.push(promise.then(() => undefined, () => undefined));
+    return promise;
+  };
   const recovery = () => {
-    const storage = partitionRecoveryStorage(executor);
+    const bridge = partitionRecoveryStorage(executor);
+    const storage = { preserve: (...args) => track(bridge.preserve(...args)), read: (...args) => track(bridge.read(...args)) };
     return large ? createChunkedArchiveRecovery(storage, plan.manifestBytes, expected) : storage;
   };
   const runner = (options = {}) => createPartitionArchiveRunner(createDynamoPartitionArchivePorts(plan.manifestBytes, expected,
     authority, { account: resources.account, region: resources.region }, recovery()),
   plan.manifestBytes, expected, authority, options);
   const cleanup = async () => {
-    // Deadline/request abort can return before the interrupted transport's finally has settled.
-    for (const directory of directories) {
-      for (let attempt = 0; attempt < 20; attempt++) {
-        try { await access(directory); } catch { break; }
-        await delay(10);
-      }
-      await assert.rejects(access(directory), { code: 'ENOENT' });
-    }
+    // Abort can return before transport finally: observe actual settlement, not200ms polling.
+    let deadline;
+    try {
+      await Promise.race([Promise.all(recoverySettlements), new Promise((_, reject) => {
+        deadline = globalThis.setTimeout(() => reject(new Error('synthetic cleanup settlement timeout')), 10_000);
+      })]);
+    } finally { globalThis.clearTimeout(deadline); }
+    for (const directory of directories) await assert.rejects(access(directory), { code: 'ENOENT' });
   };
   return { runner, calls, writes, stored, plan, objects, cleanup, set wrongVersion(value) { wrongVersion = value; },
     set loseTerminal(value) { loseTerminal = value; } };

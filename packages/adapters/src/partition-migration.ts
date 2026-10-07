@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { z } from 'zod';
 import { Groups } from '@deal-table/contracts';
 import { partitionDirectoryKey, type PartitionDirectoryClaim } from './partition-directory.ts';
+import { partitionMembershipKey } from './partition-membership-contract.ts';
 import { partitionSeedRows, partitionDynamoWrites, PartitionStorageError, type PartitionMutation } from './partitioned-group-repository.ts';
 
 // Inactive, server-only preparation. No storage write, resource creation or runtime switch.
@@ -10,7 +11,7 @@ const sha = z.string().regex(/^[a-f0-9]{40}$/).refine(value => !/^0+$/.test(valu
 const revision = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
 const sourceLimit = 300_000;
 const manifestLimit = 1024 * 1024;
-const manifestSchema = z.strictObject({ schemaVersion: z.literal(1), sourceSha: sha,
+const manifestSchema = z.strictObject({ schemaVersion: z.union([z.literal(1), z.literal(2)]), sourceSha: sha,
   account: z.literal('092954139775'), region: z.literal('us-east-1'),
   sourceTable: z.literal('KnownEnoughGroupsStage'), sourceKey: z.strictObject({ PK: z.literal('NP#GROUPS'), SK: z.literal('STATE') }),
   targetTable: z.literal('KnownEnoughPartitions'), sourceRevision: revision, sourceHash: hash,
@@ -45,7 +46,7 @@ function sourceState(bytes: Buffer): Groups.GroupState {
   }
   return state;
 }
-function compileRows(state: Groups.GroupState, manifestHash: string) {
+function compileRows(state: Groups.GroupState, manifestHash: string, schemaVersion: 1 | 2) {
   const entries = new Map<string, PartitionMutation>();
   const add = (mutation: PartitionMutation) => {
     const key = `${mutation.key.PK}/${mutation.key.SK}`;
@@ -66,6 +67,10 @@ function compileRows(state: Groups.GroupState, manifestHash: string) {
     const accounts = state.accounts.filter(item => group.members.includes(item.subject));
     const rows = partitionSeedRows({ accounts, groups: [group] }, { accountSubjects: [...group.members], groupId: group.id });
     rows.filter(item => item.next?.kind !== 'ACCOUNT').forEach(add);
+    if (schemaVersion === 2) for (const subject of group.members) {
+      add({ key: partitionMembershipKey(subject, group.id), expected: 0,
+        next: { schemaVersion: 1, kind: 'MEMBERSHIP', revision: 1, value: { subject, groupId: group.id, active: true } } });
+    }
     group.invitations.forEach(item => claim({ type: 'INVITATION', groupId: group.id, tokenHash: item.tokenHash,
       recipientHash: item.recipientHash, expiresAt: item.expiresAt }));
     group.decisions.forEach(item => claim({ type: 'DECISION', groupId: group.id, decisionId: item.id }));
@@ -85,8 +90,8 @@ function compileRows(state: Groups.GroupState, manifestHash: string) {
   const body = { manifestHash, rowCount: entries.size, batches };
   return { ...structuredClone(body), planHash: digest(JSON.stringify(body)) };
 }
-function compile(state: Groups.GroupState, manifestHash: string) {
-  try { return compileRows(state, manifestHash); }
+function compile(state: Groups.GroupState, manifestHash: string, schemaVersion: 1 | 2) {
+  try { return compileRows(state, manifestHash, schemaVersion); }
   catch (error) {
     if (error instanceof PartitionMigrationError) throw error;
     throw new PartitionMigrationError(error instanceof PartitionStorageError && error.code === 'PARTITION_CAPACITY'
@@ -96,14 +101,14 @@ function compile(state: Groups.GroupState, manifestHash: string) {
 /** Preserve these exact bytes with OPS00's versioned manifest store before any apply. */
 export function preparePartitionMigration(payload: Buffer, sourceRevision: number, sourceSha: string) {
   const state = sourceState(payload);
-  const parsed = manifestSchema.safeParse({ schemaVersion: 1, sourceSha, account: '092954139775', region: 'us-east-1',
+  const parsed = manifestSchema.safeParse({ schemaVersion: 2, sourceSha, account: '092954139775', region: 'us-east-1',
     sourceTable: 'KnownEnoughGroupsStage', sourceKey: { PK: 'NP#GROUPS', SK: 'STATE' }, targetTable: 'KnownEnoughPartitions',
     sourceRevision, sourceHash: digest(payload), sourcePayloadBase64: payload.toString('base64') });
   if (!parsed.success) return fail('PARTITION_MIGRATION_INVALID');
   const manifestBytes = Buffer.from(JSON.stringify(parsed.data));
   if (manifestBytes.length > manifestLimit) return fail('PARTITION_MIGRATION_CAPACITY');
   const manifestHash = digest(manifestBytes);
-  return { manifestBytes, sourceHash: parsed.data.sourceHash, ...compile(state, manifestHash) };
+  return { manifestBytes, sourceHash: parsed.data.sourceHash, ...compile(state, manifestHash, parsed.data.schemaVersion) };
 }
 /** Expected source/hash comes from verified storage and immutable recovery readback, not submitted JSON. */
 export function loadPartitionMigration(bytes: Buffer, expected: PartitionMigrationExpected) {
@@ -119,5 +124,5 @@ export function loadPartitionMigration(bytes: Buffer, expected: PartitionMigrati
   if (payload.toString('base64') !== prior.sourcePayloadBase64 || digest(payload) !== prior.sourceHash) fail('PARTITION_MIGRATION_INVALID');
   const state = sourceState(payload);
   return { sourceSnapshot: { version: prior.sourceRevision, payload: Buffer.from(payload), state: structuredClone(state) },
-    sourceSha: prior.sourceSha, ...compile(state, authority.manifestHash) };
+    sourceSha: prior.sourceSha, ...compile(state, authority.manifestHash, prior.schemaVersion) };
 }

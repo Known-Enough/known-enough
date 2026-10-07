@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { DynamoDBClient, GetItemCommand, BatchGetItemCommand, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import { Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { MemoryGroupRepository } from './group-repository.ts';
+import { partitionMembershipKey } from './partition-membership-contract.ts';
 import {
   createPartitionedGroupRepository, createDynamoPartitionTransport, partitionAccountKey, partitionGroupKey, partitionDynamoWrites,
   type PartitionKey, type PartitionMutation, type PartitionRow, type PartitionTransport,
@@ -49,7 +50,7 @@ it('persists a realistic collection larger than the old shared-row limit as indi
   const legacy = new MemoryGroupRepository();
   await expect(legacy.transaction(state => { state.accounts.push(account('iris')); state.groups.push({ ...group('garden'), drafts }); })).rejects.toThrow('GROUP_CAPACITY_EXCEEDED');
   await repo.transaction(scope(), state => { state.groups[0]!.drafts = drafts; });
-  expect(store.rows.size).toBe(35); // Account, immutable email claim, header,32 separate drafts.
+  expect(store.rows.size).toBe(36); // Account, email claim, header, membership,32 separate drafts.
   expect(Math.max(...[...store.rows.values()].map(row => Buffer.byteLength(JSON.stringify(row))))).toBeLessThan(352 * 1024);
   expect(await createPartitionedGroupRepository(store.transport).transaction(scope(), state => state.groups[0]!.drafts)).toEqual(drafts);
 });
@@ -317,4 +318,111 @@ it('limits a non-batch fallback to eight concurrent reads while retaining the gr
   } });
   expect(await fallback.transaction(scope(), state => state.groups[0]!.drafts.length)).toBe(32);
   expect(maximum).toBe(8); expect(active).toBe(0);
+});
+
+it('atomically creates, removes and rejoins discovery edges while retaining conditioned tombstones', async () => {
+  const store = storage(); const repo = await seed(store);
+  const edge = (who: string) => store.rows.get(keyOf(partitionMembershipKey(who, 'garden')))!;
+  expect(edge('iris')).toMatchObject({ kind: 'MEMBERSHIP', revision: 1, value: { subject: 'iris', groupId: 'garden', active: true } });
+  const commits: PartitionMutation[][] = []; const original = store.transport.commit;
+  store.transport.commit = async changes => { commits.push(structuredClone(changes)); return original(changes); };
+  await repo.transaction(scope('garden', ['iris', 'omar']), state => { state.accounts.push(account('omar')); state.groups[0]!.members.push('omar'); state.groups[0]!.version++; });
+  const membership = (changes: PartitionMutation[]) => changes.filter(item => item.key.PK.startsWith('MEMBER#'));
+  expect(membership(commits[0]!)).toHaveLength(1);
+  expect(commits[0]!.filter(item => item.key.PK === 'ACCOUNT#omar' || item.key.PK === 'GROUP#garden')).toHaveLength(2);
+  expect(edge('omar')).toMatchObject({ revision: 1, value: { active: true } });
+  await repo.transaction(scope('garden', ['iris', 'omar']), state => { state.groups[0]!.members = ['iris']; state.groups[0]!.version++; });
+  expect(membership(commits[1]!)[0]).toMatchObject({ expected: 1, next: { revision: 2, value: { active: false } } });
+  await createPartitionedGroupRepository(store.transport).transaction(scope('garden', ['iris', 'omar']), state => { state.groups[0]!.members.push('omar'); state.groups[0]!.version++; });
+  expect(membership(commits[2]!)[0]).toMatchObject({ expected: 2, next: { revision: 3, value: { active: true } } });
+  expect(edge('iris').revision).toBe(1);
+  await repo.transaction(scope('garden', ['iris', 'omar']), state => { state.groups[0]!.name = 'Changed'; });
+  expect(membership(commits[3]!)).toEqual([]);
+});
+
+it('rolls back candidate creation when fresh account authority rejects the joined group write', async () => {
+  const store = storage(); const repo = await seed(store);
+  await repo.transaction({ accountSubjects: ['omar'] }, state => { state.accounts.push(account('omar')); });
+  let first = true; const original = store.transport.commit;
+  store.transport.commit = async changes => {
+    if (first && changes.some(item => item.key.PK === 'MEMBER#omar')) {
+      first = false;
+      const key = keyOf(partitionAccountKey('omar')); const prior = store.rows.get(key)!;
+      if (prior.kind !== 'ACCOUNT') throw new Error('invalid test fixture');
+      store.rows.set(key, { ...prior, revision: prior.revision + 1, value: { ...prior.value, status: 'DISABLED', version: 2 } });
+    }
+    return original(changes);
+  };
+  await expect(repo.transaction(scope('garden', ['iris', 'omar']), state => {
+    approved(state, 'omar'); state.groups[0]!.members.push('omar'); state.groups[0]!.version++;
+  })).rejects.toThrow('FORBIDDEN');
+  expect(store.rows.has(keyOf(partitionMembershipKey('omar', 'garden')))).toBe(false);
+  expect(store.rows.get(keyOf(partitionGroupKey('garden')))!.value).toHaveProperty('members', ['iris']);
+});
+
+it('retries a contested tombstone revision before publishing a rejoin, without a partial header write', async () => {
+  const store = storage(); const repo = await seed(store, 'garden', ['iris', 'omar']);
+  await repo.transaction(scope('garden', ['iris', 'omar']), state => { state.groups[0]!.members = ['iris']; });
+  const edgeKey = keyOf(partitionMembershipKey('omar', 'garden')); let first = true; const original = store.transport.commit;
+  store.transport.commit = async changes => {
+    if (first && changes.some(item => item.key.PK === 'MEMBER#omar')) {
+      first = false; const prior = store.rows.get(edgeKey)!;
+      if (prior.kind !== 'MEMBERSHIP') throw new Error('invalid test fixture');
+      store.rows.set(edgeKey, { ...prior, revision: prior.revision + 1 });
+    }
+    return original(changes);
+  };
+  await repo.transaction(scope('garden', ['iris', 'omar']), state => { state.groups[0]!.members.push('omar'); });
+  expect(store.collisions).toBe(1);
+  expect(store.rows.get(edgeKey)).toMatchObject({ revision: 4, value: { active: true } });
+  expect(store.rows.get(keyOf(partitionGroupKey('garden')))!.revision).toBe(3);
+});
+
+it('rejects missing, active-orphan, foreign and exhausted edges before writing any roster mutation', async () => {
+  for (const change of ['missing', 'inactive', 'foreign', 'exhausted'] as const) {
+    const store = storage(); const repo = await seed(store, 'garden', ['iris', 'omar']);
+    const key = keyOf(partitionMembershipKey('omar', 'garden')); const row = store.rows.get(key)!;
+    if (row.kind !== 'MEMBERSHIP') throw new Error('invalid test fixture');
+    if (change === 'missing') store.rows.delete(key);
+    if (change === 'inactive') store.rows.set(key, { ...row, value: { ...row.value, active: false } });
+    if (change === 'foreign') store.rows.set(key, { ...row, value: { ...row.value, groupId: 'art' } });
+    if (change === 'exhausted') store.rows.set(key, { ...row, revision: Number.MAX_SAFE_INTEGER });
+    const prior = structuredClone([...store.rows]); const commits = store.commits;
+    await expect(repo.transaction(scope('garden', ['iris', 'omar']), state => { state.groups[0]!.members = ['iris']; }))
+      .rejects.toThrow(change === 'exhausted' ? 'PARTITION_CAPACITY' : 'PARTITION_INVALID');
+    expect(store.commits).toBe(commits); expect([...store.rows]).toEqual(prior);
+  }
+  const store = storage(); const repo = await seed(store);
+  const key = partitionMembershipKey('omar', 'garden');
+  store.rows.set(keyOf(key), { schemaVersion: 1, kind: 'MEMBERSHIP', revision: 1, value: { subject: 'omar', groupId: 'garden', active: true } });
+  await expect(repo.transaction(scope('garden', ['iris', 'omar']), state => { state.accounts.push(account('omar')); state.groups[0]!.members.push('omar'); })).rejects.toThrow('PARTITION_INVALID');
+  expect(store.rows.has(keyOf(partitionAccountKey('omar')))).toBe(false);
+});
+
+it('enforces exact membership keys and the shared budget before an index write can be sent', async () => {
+  const row: PartitionRow = { schemaVersion: 1, kind: 'MEMBERSHIP', revision: 2, value: { subject: 'iris', groupId: 'garden', active: false } };
+  const key = partitionMembershipKey('iris', 'garden');
+  expect(partitionDynamoWrites('KnownEnoughPartitions', [{ key, expected: 1, next: row }])[0]!.Put).toMatchObject({
+    ConditionExpression: '#r=:r', ExpressionAttributeValues: { ':r': { N: '1' } }, Item: { PK: { S: key.PK }, SK: { S: key.SK } },
+  });
+  for (const bad of [{ PK: 'MEMBER#iris', SK: 'STATE' }, { PK: 'GROUP#garden', SK: 'GROUP#garden' }, partitionMembershipKey('other', 'garden')]) {
+    expect(() => partitionDynamoWrites('KnownEnoughPartitions', [{ key: bad, expected: 1, next: row }])).toThrow('PARTITION_INVALID');
+  }
+  const store = storage(); const repo = await seed(store); const commits = store.commits;
+  await expect(createPartitionedGroupRepository(store.transport, { maxRequests: 2 }).transaction(scope('garden', ['iris', 'omar']), state => {
+    state.accounts.push(account('omar')); state.groups[0]!.members.push('omar');
+  })).rejects.toThrow('PARTITION_REQUEST_LIMIT');
+  expect(store.commits).toBe(commits); expect(store.rows.has(keyOf(partitionMembershipKey('omar', 'garden')))).toBe(false);
+  expect(await repo.transaction(scope(), state => state.groups[0]!.members)).toEqual(['iris']);
+});
+
+it('counts membership puts against the100-item transaction limit and commits nothing on overflow', async () => {
+  const store = storage(); const repo = await seed(store); const commits = store.commits;
+  await expect(repo.transaction(scope('garden', ['iris', 'omar']), state => {
+    state.accounts.push(account('omar')); state.groups[0]!.members.push('omar');
+    // 96 children/directory writes +two accounts/header/email =100; the edge makes101.
+    state.groups[0]!.drafts = Array.from({ length: 32 }, (_, index) => draft(`draft-${index}`));
+    state.groups[0]!.decisions = Array.from({ length: 32 }, (_, index) => ({ id: `decision-${index}`, version: 1 }));
+  })).rejects.toThrow('PARTITION_CAPACITY');
+  expect(store.commits).toBe(commits); expect(store.rows.has(keyOf(partitionMembershipKey('omar', 'garden')))).toBe(false);
 });

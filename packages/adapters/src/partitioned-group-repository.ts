@@ -6,6 +6,7 @@ import {
 } from '@aws-sdk/client-dynamodb';
 import { PartitionDirectoryRow, partitionDirectoryKey, isPartitionDirectoryKey,
   type PartitionDirectoryClaim, type PartitionDirectoryLookup } from './partition-directory.ts';
+import { PartitionMembershipRow, partitionMembershipKey, isPartitionMembershipKey } from './partition-membership-contract.ts';
 
 // Inactive OPS01 boundary. Runtime selection and legacy callback integration are separate work.
 const id = z.string().regex(/^[A-Za-z0-9_-]{1,80}$/);
@@ -21,10 +22,11 @@ const rowSchema = z.discriminatedUnion('kind', [
   z.strictObject({ ...base, kind: z.literal('DRAFT'), value: Groups.GroupDraft }),
   z.strictObject({ ...base, kind: z.literal('BINDING'), value: binding }),
   PartitionDirectoryRow,
+  PartitionMembershipRow,
 ]);
 export { rowSchema as PartitionRowSchema };
 export type PartitionRow = z.infer<typeof rowSchema>;
-type DomainRow = Exclude<PartitionRow, { kind: 'DIRECTORY' }>;
+type DomainRow = Exclude<PartitionRow, { kind: 'DIRECTORY' | 'MEMBERSHIP' }>;
 export type PartitionKey = { PK: string; SK: string };
 export type PartitionScope = { accountSubjects: string[]; groupId?: string };
 export type PartitionMutation = { key: PartitionKey; expected: number; next: PartitionRow | null };
@@ -84,6 +86,7 @@ function checkedRow(raw: unknown, key: PartitionKey): PartitionRow {
   if (!parsed.success) return fail('PARTITION_INVALID');
   const row = parsed.data;
   const valid = row.kind === 'DIRECTORY' ? equal(key, partitionDirectoryKey(row.value))
+    : row.kind === 'MEMBERSHIP' ? equal(key, partitionMembershipKey(row.value.subject, row.value.groupId))
     : row.kind === 'ACCOUNT' ? equal(key, partitionAccountKey(row.value.subject))
     : row.kind === 'GROUP' ? equal(key, partitionGroupKey(row.value.id))
     : /^GROUP#[A-Za-z0-9_-]{1,80}$/.test(key.PK) && key.SK === `${row.kind}#${row.value.id}`;
@@ -106,7 +109,7 @@ function stateRows(state: Groups.GroupState, scope: PartitionScope): Map<string,
   const rows = new Map<string, { key: PartitionKey; row: DomainRow }>();
   const add = (key: PartitionKey, row: DomainRow) => {
     if (rows.has(encodedKey(key))) fail('PARTITION_INVALID');
-    const parsed = checkedRow(row, key); if (parsed.kind === 'DIRECTORY') return fail('PARTITION_INVALID');
+    const parsed = checkedRow(row, key); if (parsed.kind === 'DIRECTORY' || parsed.kind === 'MEMBERSHIP') return fail('PARTITION_INVALID');
     rows.set(encodedKey(key), { key, row: parsed });
   };
   for (const account of parsed.data.accounts) {
@@ -224,6 +227,26 @@ export function createPartitionedGroupRepository(transport: PartitionTransport,
     for (const [key, prior] of snapshot.rows) {
       if (!next.has(key)) output.push({ key: prior.key, expected: 0, next: null });
     }
+    // Discovery edges are private derived data, never callback-controlled authority.
+    // Only roster differences change them; the header/account guards join every put.
+    const priorHeader = scope.groupId ? snapshot.rows.get(encodedKey(partitionGroupKey(scope.groupId)))?.row : null;
+    const nextHeader = scope.groupId ? next.get(encodedKey(partitionGroupKey(scope.groupId)))?.row : null;
+    const before = priorHeader?.kind === 'GROUP' ? priorHeader.value.members : [];
+    const after = nextHeader?.kind === 'GROUP' ? nextHeader.value.members : [];
+    const changedMembers = [...new Set([...before, ...after])].filter(subject => before.includes(subject) !== after.includes(subject));
+    const edgeKeys = changedMembers.map(subject => partitionMembershipKey(subject, scope.groupId!));
+    const edges = await readMany(edgeKeys, context);
+    for (const [index, subject] of changedMembers.entries()) {
+      const key = edgeKeys[index]!; const raw = edges[index];
+      const prior = raw === null ? null : checkedRow(raw, key);
+      if (prior && prior.kind !== 'MEMBERSHIP') fail('PARTITION_INVALID');
+      const wasMember = before.includes(subject);
+      if ((prior?.kind === 'MEMBERSHIP' ? prior.value.active : false) !== wasMember) fail('PARTITION_INVALID');
+      const expected = prior?.revision ?? 0;
+      if (expected >= Number.MAX_SAFE_INTEGER) fail('PARTITION_CAPACITY');
+      output.push({ key, expected, next: { schemaVersion: 1, kind: 'MEMBERSHIP', revision: expected + 1,
+        value: { subject, groupId: scope.groupId!, active: after.includes(subject) } } });
+    }
     const claims: PartitionDirectoryClaim[] = [];
     for (const mutation of output) {
       if (!mutation.next) continue;
@@ -293,7 +316,7 @@ export function partitionDynamoWrites(tableName: string, mutations: PartitionMut
   if (Buffer.byteLength(JSON.stringify(mutations)) > 3_500_000) fail('PARTITION_CAPACITY');
   return mutations.map(({ key, expected, next }) => {
     if (!Number.isSafeInteger(expected) || expected < 0
-      || (!isPartitionDirectoryKey(key) && (!/^(ACCOUNT|GROUP)#[A-Za-z0-9_-]{1,80}$/.test(key.PK)
+      || (!isPartitionMembershipKey(key) && !isPartitionDirectoryKey(key) && (!/^(ACCOUNT|GROUP)#[A-Za-z0-9_-]{1,80}$/.test(key.PK)
         || !/^(STATE|(DRAFT|BINDING)#[A-Za-z0-9_-]{1,80})$/.test(key.SK)
         || (key.PK.startsWith('ACCOUNT#') && key.SK !== 'STATE')))) fail('PARTITION_INVALID');
     const Key = { PK: { S: key.PK }, SK: { S: key.SK } };

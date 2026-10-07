@@ -45,7 +45,7 @@ it('compiles100-plus retained children into bounded preparation batches and publ
   garden.drafts = Array.from({ length: 64 }, (_, n) => ({ ...draft(`draft-${n}`), createdDecisionId: `decision-${n}` }));
   garden.decisions = Array.from({ length: 64 }, (_, n) => ({ id: `decision-${n}`, version: 2 }));
   const plan = prepare(value);
-  expect(plan.rowCount).toBe(195); expect(plan.batches.map(batch => batch.length)).toEqual([96, 96, 2, 1]);
+  expect(plan.rowCount).toBe(196); expect(plan.batches.map(batch => batch.length)).toEqual([96, 96, 3, 1]);
   expect(plan.batches.slice(0, -1).flat().every(item => item.next!.kind !== 'GROUP')).toBe(true);
   expect(plan.batches.at(-1)!.every(item => item.next!.kind === 'GROUP')).toBe(true);
   const persisted = new Map<string, PartitionRow>();
@@ -83,7 +83,7 @@ it('binds reload to independent source revision/hash/SHA and recovery hash inste
 
 it('rejects target/account/schema/private-field and noncanonical base64 tampering before row compilation', () => {
   const plan = prepare(state());
-  for (const change of [{ targetTable: 'Other' }, { sourceTable: 'Other' }, { account: '000000000000' }, { schemaVersion: 2 },
+  for (const change of [{ targetTable: 'Other' }, { sourceTable: 'Other' }, { account: '000000000000' }, { schemaVersion: 3 },
     { privateCondition: 'do not publish' }, { sourcePayloadBase64: JSON.parse(plan.manifestBytes.toString()).sourcePayloadBase64+'\n' }]) {
     const bytes = Buffer.from(JSON.stringify({ ...JSON.parse(plan.manifestBytes.toString()), ...change }));
     expect(() => loadPartitionMigration(bytes, { ...expected(plan), manifestHash: digest(bytes) })).toThrow('PARTITION_MIGRATION_INVALID');
@@ -145,4 +145,49 @@ it('handles empty snapshots and32 group headers without making an installed-acti
   const manifest = JSON.parse(plan.manifestBytes.toString());
   expect(manifest.sourceKey).toEqual({ PK: 'NP#GROUPS', SK: 'STATE' });
   expect(manifest.targetTable).toBe('KnownEnoughPartitions');
+});
+
+it('preserves the exact version1 plan hash while new version2 manifests publish membership candidates before headers', async () => {
+  const original = state(); const plan = prepare(original);
+  const manifest = JSON.parse(plan.manifestBytes.toString()); expect(manifest.schemaVersion).toBe(2);
+  const legacyBytes = Buffer.from(JSON.stringify({ ...manifest, schemaVersion: 1 }));
+  const legacyHash = digest(legacyBytes);
+  const legacy = loadPartitionMigration(legacyBytes, { ...expected(plan), manifestHash: legacyHash });
+  // Golden hashes produced by the pre-emission compiler from the same original bytes.
+  expect(legacyHash).toBe('4930bd83b289fbf1b295d8733a813a22fb5c4a7b5e53c8245676f9bf693e4f51');
+  expect(legacy.planHash).toBe('43c5add2bfa540d9ff2f48467fabe192e3610bd543100cb9a6f642d30fd61542');
+  expect(legacy.rowCount).toBe(3); expect(legacy.batches.flat().some(item => item.next?.kind === 'MEMBERSHIP')).toBe(false);
+  expect(plan.rowCount).toBe(4); expect(plan.planHash).not.toBe(legacy.planHash);
+  expect(plan.batches[0]!.find(item => item.next?.kind === 'MEMBERSHIP')).toMatchObject({
+    key: { PK: 'MEMBER#iris', SK: 'GROUP#garden' }, expected: 0,
+    next: { kind: 'MEMBERSHIP', revision: 1, value: { subject: 'iris', groupId: 'garden', active: true } },
+  });
+  expect(plan.batches.at(-1)!.every(item => item.next?.kind === 'GROUP')).toBe(true);
+  const migrated = new Map(rows(plan).map(item => [`${item.key.PK}/${item.key.SK}`, structuredClone(item.next!)]));
+  const transport: PartitionTransport = {
+    read: async key => migrated.get(`${key.PK}/${key.SK}`) ?? null,
+    readMany: async keys => keys.map(key => structuredClone(migrated.get(`${key.PK}/${key.SK}`) ?? null)),
+    commit: async changes => {
+      if (!changes.every(item => (migrated.get(`${item.key.PK}/${item.key.SK}`)?.revision ?? 0) === item.expected)) return false;
+      for (const item of changes) if (item.next) migrated.set(`${item.key.PK}/${item.key.SK}`, structuredClone(item.next));
+      return true;
+    },
+  };
+  const repo = createPartitionedGroupRepository(transport);
+  await repo.transaction({ groupId: 'garden', accountSubjects: ['iris', 'omar'] }, current => {
+    current.accounts.push(account('omar')); current.groups[0]!.members.push('omar');
+  });
+  await repo.transaction({ groupId: 'garden', accountSubjects: ['iris', 'omar'] }, current => { current.groups[0]!.members = ['iris']; });
+  expect(migrated.get('MEMBER#omar/GROUP#garden')).toMatchObject({ revision: 2, value: { active: false } });
+});
+
+it('emits roster candidates exactly once across32 groups without granting disabled or pending identities authority', () => {
+  const value = state(); value.accounts.push(account('disabled', 'DISABLED'), account('pending', 'PENDING'));
+  value.groups = Array.from({ length: 32 }, (_, index) => ({ ...group(`garden-${index}`), members: ['iris', 'disabled', 'pending'] }));
+  const plan = prepare(value); const candidates = rows(plan).filter(item => item.next?.kind === 'MEMBERSHIP');
+  expect(candidates).toHaveLength(96); expect(new Set(candidates.map(item => `${item.key.PK}/${item.key.SK}`)).size).toBe(96);
+  expect(candidates.every(item => item.next?.kind === 'MEMBERSHIP' && item.next.value.active && Object.keys(item.next.value).length === 3)).toBe(true);
+  expect(rows(plan).filter(item => item.next?.kind === 'ACCOUNT').map(item => item.next!.value)).toEqual(value.accounts.map(item => item).sort((a,b) => a.subject < b.subject ? -1 : 1));
+  expect(plan.batches.at(-1)!.length).toBe(32);
+  expect(loadPartitionMigration(plan.manifestBytes, expected(plan)).batches).toEqual(plan.batches);
 });

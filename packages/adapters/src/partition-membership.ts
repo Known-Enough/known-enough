@@ -2,22 +2,18 @@ import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
 import { DynamoDBClient, GetItemCommand, QueryCommand, BatchGetItemCommand } from '@aws-sdk/client-dynamodb';
 import { z } from 'zod';
+import { PartitionMembershipRow, partitionMembershipKey } from './partition-membership-contract.ts';
+export { PartitionMembershipRow, partitionMembershipKey } from './partition-membership-contract.ts';
 import { PartitionRowSchema, partitionAccountKey, partitionGroupKey, type PartitionKey, type PartitionRow, type PartitionIOContext } from './partitioned-group-repository.ts';
 import { ArchivedGroupRow } from './partition-archive.ts';
 import { MigrationControlSchema, migrationIO, migrationCall, MigrationRunError } from './partition-migration-runner.ts';
 import { PARTITION_MIGRATION_RESOURCES as resources } from './dynamo-partition-migration.ts';
 
-// Inactive: index emission/atomic roster updates and verified service identity must precede runtime selection.
+// Inactive: version2 migration installation and verified service identity must precede runtime selection.
 const id = z.string().regex(/^[A-Za-z0-9_-]{1,80}$/);
 const integer = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
 const sha = z.string().regex(/^[a-f0-9]{40}$/).refine(value => !/^0+$/.test(value));
 const hash = z.string().regex(/^[a-f0-9]{64}$/).refine(value => !/^0+$/.test(value));
-export const PartitionMembershipRow = z.strictObject({ schemaVersion: z.literal(1), kind: z.literal('MEMBERSHIP'),
-  revision: integer, value: z.strictObject({ subject: id, groupId: id, active: z.boolean() }) });
-export type PartitionMembershipRow = z.infer<typeof PartitionMembershipRow>;
-export const partitionMembershipKey = (subject: string, groupId: string): PartitionKey => ({
-  PK: `MEMBER#${id.parse(subject)}`, SK: `GROUP#${id.parse(groupId)}`,
-});
 type Header = Extract<PartitionRow, { kind: 'GROUP' }>;
 type Account = Extract<PartitionRow, { kind: 'ACCOUNT' }>;
 const groupRow = z.union([PartitionRowSchema, ArchivedGroupRow]);
