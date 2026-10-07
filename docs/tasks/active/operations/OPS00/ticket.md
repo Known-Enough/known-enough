@@ -30,3 +30,20 @@ IN_PROGRESS/B soleclaim afterUX03CODE_READYrelease; ownBattosai1806/equalmainf1a
 ## OPS00 run104 checkpoint — 2026-10-07T02:37:02.071997+00:00
 
 IN_PROGRESS/B. Existing template/release/inspector and adapter evidence inspected; operations-envelope.md maps OPS01–03 gaps and next exact plan/journal validator contract. No executable/IAM/resource change or universal access claim. Newnames/keyprefixes unresolved rejectapply, not wildcard fallback. Next implementation/test bounded validator/recovery in sameclaim.
+
+OPS00 executable scope refinement: scripts/operations/plan.mjs and plan.test.mjs only for offline strict plan/recovery validation; no workflow/live apply yet.
+
+
+## OPS00 run105 local implementation — 2026-10-07T03:07:09.255027+00:00
+
+IN_PROGRESS/B. scripts/operations/plan.mjs/test.mjs strict offline envelope/plan/recovery hash validation,4focusedPASS. No apply/delegation/durablejournal yet. Current envelope only fixed account/region exact KnownEnough DynamoARN, no wildcard/queue fallback. Full pinned check session42841/private /tmp/ke-run105/full.log running lint/boundariesPASS, later phasesUNKNOWN. Do not duplicate. No commit/push until checks verified; next durablejournal/verified workload path.
+
+
+## OPS00 run106 local hardening — 2026-10-07T03:36:53.369532+00:00
+
+IN_PROGRESS/B. Prior run105full PASS784/twooptional/hosted1/browser62. Self-inspection found validateRecovery trusted arbitrary checkedPlan; now originalplan+envelope revalidation mandatory. Five focusedtestsPASS incl forgedcheckedhash/wrongsource rejection. Finalfull session83874 /tmp/ke-run106/full.log running; no duplicate. Durablejournal/workflow/installation stillunfinished. No sync until executable check complete; sameclaim.
+
+
+## OPS00 checked validator checkpoint — 2026-10-07T04:06:34.293131+00:00
+
+IN_PROGRESS/B. Finalrun106full PASS784/twooptional/hosted1/browser62 and focused5PASS. Offline plan/recovery validator checked; recovery originalplan+envelope revalidation prevents forgedproof. Durablejournal CAS/terminal/count/restart test contract recorded in operations-envelope.md; adapter/workflow/setup remainunfinished, no installedproof/CODE_READY. Synchronize small checked source checkpoint now, keep same soleclaim.

@@ -295,3 +295,5 @@ REVIEW/CODE_READY Bclaimreleased; source2630c9f deployment37557946340SUCCESS; ex
 ## B OPS00 claim — 2026-10-07T02:36:24.162905+00:00
 
 IN_PROGRESS/B soleclaim afterUX03CODE_READYrelease; ownBattosai1806/equalmainf1ab255 verified. Scope scripts/operations plan/workflow validation and focusedtests, bounded infra/permissions proposal and operations contracts/evidence/tracking; exact executable paths recorded before edits. No live installation during codingphase or A NP00source/policy takeover. Rootactualvariant/effort unavailable/nohelpers.
+
+OPS00 executable scope refinement: scripts/operations/plan.mjs and plan.test.mjs only for offline strict plan/recovery validation; no workflow/live apply yet.
