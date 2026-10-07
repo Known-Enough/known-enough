@@ -6,7 +6,7 @@ Prepare group storage and safe archiving for wider use, after the real online te
 
 **Status:** IN_PROGRESS / B in the existing persistent chat after OPS00 CODE_READY. Administrator/managed completion remains deferred.
 
-**Next step:** After OPS00, claim the shared queue task and prepare the scoped implementation. Authorized cloud operations use the verified OPS00 GitHub path; routine work must not depend on per-task A-only CloudShell commands. Spending, migration/deletion and outside-envelope changes retain their specific authorization.
+**Next step:** Continue this same active B claim from the [inactive partition contract](../../../../review-artifacts/OPS01/partition-contract.md): finish bounded scoped lookups, joined decision authority, archive/migration/recovery and meaningful checks. The first storage primitive is a checked-source checkpoint, not CODE_READY or whole-task DONE. Administrator installation and managed proof stay in the final cloud phase; preserve A NP00 saved boundaries.
 
 **Related work:** [ASSESS07](../../live-testing/ASSESS07/README.md), [ASSESS06](../../../historical/completed/assessments/ASSESS06/README.md).
 
