@@ -135,13 +135,17 @@ function checkedRead(command: TransactGetItemsCommand, decisionId?: string) {
       || !/^(STATE|GUARD|REPLAY#[a-f0-9]{64})$/.test(value.Key.SK.S)) fail('DECISION_INVALID');
   }
 }
+/** Server-only validation, before a managed driver appends its own source/control conditions. */
+export function validatePartitionDecisionCommand(command: Command): void {
+  if (command instanceof TransactGetItemsCommand) checkedRead(command);
+  else if (command instanceof TransactWriteItemsCommand) checkedWrite(command.input.TransactItems ?? []);
+  else fail('DECISION_INVALID');
+}
 export function createDynamoPartitionDecisionTransport(raw: { decisionArn: string; partitionArn: string }): PartitionDecisionTransport {
-  target(raw); const client = new DynamoDBClient({ region: 'us-east-1', maxAttempts: 1 });
+  target(raw); const client = new DynamoDBClient({ region: 'us-east-1', maxAttempts: 1, endpoint: 'https://dynamodb.us-east-1.amazonaws.com' });
   return { send: async (command, context) => {
     if (context.signal.aborted) fail('DECISION_TIMEOUT');
-    if (command instanceof TransactGetItemsCommand) checkedRead(command);
-    else if (command instanceof TransactWriteItemsCommand) checkedWrite(command.input.TransactItems ?? []);
-    else fail('DECISION_INVALID');
+    validatePartitionDecisionCommand(command);
     return command instanceof TransactGetItemsCommand ? client.send(command, { abortSignal: context.signal })
       : client.send(command, { abortSignal: context.signal });
   } };
@@ -214,7 +218,7 @@ export function createPartitionDecisionRepository(options: { decisionArn: string
           return result;
         } catch (error) {
           if (error instanceof RepositoryCapacityError || error instanceof KnownEnoughApplicationError) throw error;
-          if (sdkFailure instanceof PartitionStorageError || sdkFailure instanceof PartitionDecisionError) throw sdkFailure;
+          if (sdkFailure instanceof KnownEnoughApplicationError || sdkFailure instanceof PartitionStorageError || sdkFailure instanceof PartitionDecisionError) throw sdkFailure;
           if (sdkFailure && retryable(sdkFailure)) {
             await fence.assertCurrent();
             if (!create && attempt < 5) continue;

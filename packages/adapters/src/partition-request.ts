@@ -5,3 +5,5 @@ export { createPartitionDecisionRepository, PARTITION_DECISION_TARGET } from './
 export type { PartitionDecisionTransport } from './partition-decision-repository.ts';
 export type { PartitionTransport } from './partitioned-group-repository.ts';
 export { partitionIO } from './partitioned-group-repository.ts';
+export { createPartitionManagedDriver } from './partition-managed.ts';
+export type { PartitionManagedOptions, PartitionManagedArchiveOptions } from './partition-managed.ts';

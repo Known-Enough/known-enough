@@ -337,7 +337,7 @@ export function partitionDynamoWrites(tableName: string, mutations: PartitionMut
 /** No table is created, runtime activated or environment configuration changed by construction. */
 export function createDynamoPartitionTransport(tableName: string, region: string): PartitionTransport {
   if (tableName !== 'KnownEnoughPartitions' || region !== 'us-east-1') fail('PARTITION_INVALID');
-  const client = new DynamoDBClient({ region, maxAttempts: 1 });
+  const client = new DynamoDBClient({ region, maxAttempts: 1, endpoint: 'https://dynamodb.us-east-1.amazonaws.com' });
   const attributes = (key: PartitionKey) => ({ PK: { S: key.PK }, SK: { S: key.SK } });
   const decode = (item: { revision?: { N?: string }; payload?: { S?: string } }, key: PartitionKey) => {
     try {

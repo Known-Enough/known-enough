@@ -1,0 +1,847 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Known Enough retained partition storage only. Final cloud phase; no migration or runtime selection.",
+  "Metadata": {
+    "TargetAccount": "092954139775",
+    "TargetRegion": "us-east-1",
+    "Installation": "UNKNOWN",
+    "Migration": "NOT_EXECUTED",
+    "Activation": "DISABLED",
+    "PermissionProfiles": {
+      "participant": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "ActiveSourceRead",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:GetItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughGroupsStage",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "NP#GROUPS"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              }
+            }
+          },
+          {
+            "Sid": "ActiveSourceCondition",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:ConditionCheckItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughGroupsStage",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "NP#GROUPS"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              },
+              "ForAnyValue:StringEquals": {
+                "dynamodb:EnclosingOperation": [
+                  "TransactWriteItems"
+                ]
+              }
+            }
+          },
+          {
+            "Sid": "CopiedJournalRead",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:GetItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "PARTITION#*"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              }
+            }
+          },
+          {
+            "Sid": "CopiedJournalCondition",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:ConditionCheckItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "PARTITION#*"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              },
+              "ForAnyValue:StringEquals": {
+                "dynamodb:EnclosingOperation": [
+                  "TransactWriteItems"
+                ]
+              }
+            }
+          },
+          {
+            "Sid": "ActivationControlRead",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:GetItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "MIGRATION#CONTROL"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              }
+            }
+          },
+          {
+            "Sid": "ActivationControlCondition",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:ConditionCheckItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "MIGRATION#CONTROL"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              },
+              "ForAnyValue:StringEquals": {
+                "dynamodb:EnclosingOperation": [
+                  "TransactWriteItems"
+                ]
+              }
+            }
+          },
+          {
+            "Sid": "ScopedPartitionRead",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:GetItem",
+              "dynamodb:BatchGetItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "ACCOUNT#*",
+                  "GROUP#*",
+                  "EMAIL#*",
+                  "INVITATION#*",
+                  "DECISION#*",
+                  "MEMBER#*"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              }
+            }
+          },
+          {
+            "Sid": "PrivateMembershipQuery",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:Query"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "MEMBER#*"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              }
+            }
+          },
+          {
+            "Sid": "ScopedPartitionCommit",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:PutItem",
+              "dynamodb:ConditionCheckItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "ACCOUNT#*",
+                  "GROUP#*",
+                  "EMAIL#*",
+                  "INVITATION#*",
+                  "DECISION#*",
+                  "MEMBER#*"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              },
+              "ForAnyValue:StringEquals": {
+                "dynamodb:EnclosingOperation": [
+                  "TransactWriteItems"
+                ]
+              }
+            }
+          },
+          {
+            "Sid": "JoinedDecisionRead",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:GetItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughStage",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "ROOM#*"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              },
+              "ForAnyValue:StringEquals": {
+                "dynamodb:EnclosingOperation": [
+                  "TransactGetItems"
+                ]
+              }
+            }
+          },
+          {
+            "Sid": "JoinedDecisionCommit",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:PutItem",
+              "dynamodb:UpdateItem",
+              "dynamodb:ConditionCheckItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughStage",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "ROOM#*"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              },
+              "ForAnyValue:StringEquals": {
+                "dynamodb:EnclosingOperation": [
+                  "TransactWriteItems"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "migration": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "LegacySourceRead",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:GetItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughGroupsStage",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "NP#GROUPS"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              }
+            }
+          },
+          {
+            "Sid": "SourceFreezeAndActivation",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:PutItem",
+              "dynamodb:ConditionCheckItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughGroupsStage",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "NP#GROUPS"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              },
+              "ForAnyValue:StringEquals": {
+                "dynamodb:EnclosingOperation": [
+                  "TransactWriteItems"
+                ]
+              }
+            }
+          },
+          {
+            "Sid": "ForwardPartitionRead",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:GetItem",
+              "dynamodb:BatchGetItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "ACCOUNT#*",
+                  "GROUP#*",
+                  "EMAIL#*",
+                  "INVITATION#*",
+                  "DECISION#*",
+                  "MEMBER#*",
+                  "MIGRATION#CONTROL"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              }
+            }
+          },
+          {
+            "Sid": "ExclusiveForwardPartitionsAndControl",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:PutItem",
+              "dynamodb:ConditionCheckItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "ACCOUNT#*",
+                  "GROUP#*",
+                  "EMAIL#*",
+                  "INVITATION#*",
+                  "DECISION#*",
+                  "MEMBER#*",
+                  "MIGRATION#CONTROL"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              },
+              "ForAnyValue:StringEquals": {
+                "dynamodb:EnclosingOperation": [
+                  "TransactWriteItems"
+                ]
+              }
+            }
+          },
+          {
+            "Sid": "MigrationJournalRead",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:GetItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "PARTITION#*"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              }
+            }
+          },
+          {
+            "Sid": "ConditionalMigrationJournal",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:PutItem",
+              "dynamodb:ConditionCheckItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "PARTITION#*"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              },
+              "ForAnyValue:StringEquals": {
+                "dynamodb:EnclosingOperation": [
+                  "TransactWriteItems"
+                ]
+              }
+            }
+          },
+          {
+            "Sid": "PinnedPrivateRecoveryVersions",
+            "Effect": "Allow",
+            "Action": [
+              "s3:GetObject",
+              "s3:GetObjectVersion"
+            ],
+            "Resource": "arn:aws:s3:::known-enough-operations-recovery-092954139775-us-east-1/manifests/*",
+            "Condition": {
+              "Bool": {
+                "aws:SecureTransport": "true"
+              }
+            }
+          },
+          {
+            "Sid": "ExclusivePrivateRecoveryCreate",
+            "Effect": "Allow",
+            "Action": [
+              "s3:PutObject"
+            ],
+            "Resource": "arn:aws:s3:::known-enough-operations-recovery-092954139775-us-east-1/manifests/*",
+            "Condition": {
+              "Bool": {
+                "aws:SecureTransport": "true"
+              },
+              "Null": {
+                "s3:if-none-match": "false"
+              }
+            }
+          }
+        ]
+      },
+      "archive": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "ActiveSourceRead",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:GetItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughGroupsStage",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "NP#GROUPS"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              }
+            }
+          },
+          {
+            "Sid": "ActiveSourceCondition",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:ConditionCheckItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughGroupsStage",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "NP#GROUPS"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              },
+              "ForAnyValue:StringEquals": {
+                "dynamodb:EnclosingOperation": [
+                  "TransactWriteItems"
+                ]
+              }
+            }
+          },
+          {
+            "Sid": "CopiedJournalRead",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:GetItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "PARTITION#*"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              }
+            }
+          },
+          {
+            "Sid": "CopiedJournalCondition",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:ConditionCheckItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "PARTITION#*"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              },
+              "ForAnyValue:StringEquals": {
+                "dynamodb:EnclosingOperation": [
+                  "TransactWriteItems"
+                ]
+              }
+            }
+          },
+          {
+            "Sid": "ActivationControlRead",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:GetItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "MIGRATION#CONTROL"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              }
+            }
+          },
+          {
+            "Sid": "ActivationControlCondition",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:ConditionCheckItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "MIGRATION#CONTROL"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              },
+              "ForAnyValue:StringEquals": {
+                "dynamodb:EnclosingOperation": [
+                  "TransactWriteItems"
+                ]
+              }
+            }
+          },
+          {
+            "Sid": "ArchiveHeaderChildrenAndAuthorityRead",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:GetItem",
+              "dynamodb:BatchGetItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "GROUP#*",
+                  "ACCOUNT#*",
+                  "OPERATIONS#ARCHIVE"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              }
+            }
+          },
+          {
+            "Sid": "ArchiveAuthorityConditions",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:ConditionCheckItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "GROUP#*",
+                  "ACCOUNT#*",
+                  "OPERATIONS#ARCHIVE"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              },
+              "ForAnyValue:StringEquals": {
+                "dynamodb:EnclosingOperation": [
+                  "TransactWriteItems"
+                ]
+              }
+            }
+          },
+          {
+            "Sid": "RetainedArchiveTombstone",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:PutItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "GROUP#*"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              },
+              "ForAnyValue:StringEquals": {
+                "dynamodb:EnclosingOperation": [
+                  "TransactWriteItems"
+                ]
+              }
+            }
+          },
+          {
+            "Sid": "ArchiveJournalRead",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:GetItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "ARCHIVE#*"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              }
+            }
+          },
+          {
+            "Sid": "ConditionalArchiveJournal",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:PutItem",
+              "dynamodb:ConditionCheckItem"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+            "Condition": {
+              "ForAllValues:StringLike": {
+                "dynamodb:LeadingKeys": [
+                  "ARCHIVE#*"
+                ]
+              },
+              "Null": {
+                "dynamodb:LeadingKeys": "false"
+              },
+              "StringEqualsIfExists": {
+                "dynamodb:ReturnValues": "NONE"
+              },
+              "ForAnyValue:StringEquals": {
+                "dynamodb:EnclosingOperation": [
+                  "TransactWriteItems"
+                ]
+              }
+            }
+          },
+          {
+            "Sid": "PinnedPrivateRecoveryVersions",
+            "Effect": "Allow",
+            "Action": [
+              "s3:GetObject",
+              "s3:GetObjectVersion"
+            ],
+            "Resource": "arn:aws:s3:::known-enough-operations-recovery-092954139775-us-east-1/manifests/*",
+            "Condition": {
+              "Bool": {
+                "aws:SecureTransport": "true"
+              }
+            }
+          },
+          {
+            "Sid": "ExclusivePrivateRecoveryCreate",
+            "Effect": "Allow",
+            "Action": [
+              "s3:PutObject"
+            ],
+            "Resource": "arn:aws:s3:::known-enough-operations-recovery-092954139775-us-east-1/manifests/*",
+            "Condition": {
+              "Bool": {
+                "aws:SecureTransport": "true"
+              },
+              "Null": {
+                "s3:if-none-match": "false"
+              }
+            }
+          }
+        ]
+      },
+      "inspection": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "ExactInstalledTables",
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:DescribeTable",
+              "dynamodb:DescribeContinuousBackups",
+              "dynamodb:DescribeTimeToLive"
+            ],
+            "Resource": [
+              "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughGroupsStage",
+              "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions",
+              "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughStage",
+              "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal"
+            ]
+          }
+        ]
+      }
+    },
+    "RoleAttachment": "EXISTING_ROLE_READBACK_REQUIRED",
+    "OperatorArchivePolicy": "DISABLED_UNTIL_SEPARATE_VERIFIED_INSTALLATION"
+  },
+  "Resources": {
+    "Partitions": {
+      "Type": "AWS::DynamoDB::Table",
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain",
+      "Properties": {
+        "TableName": "KnownEnoughPartitions",
+        "BillingMode": "PAY_PER_REQUEST",
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "PK",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "SK",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "PK",
+            "KeyType": "HASH"
+          },
+          {
+            "AttributeName": "SK",
+            "KeyType": "RANGE"
+          }
+        ],
+        "SSESpecification": {
+          "SSEEnabled": true
+        },
+        "PointInTimeRecoverySpecification": {
+          "PointInTimeRecoveryEnabled": true
+        },
+        "DeletionProtectionEnabled": true
+      }
+    }
+  }
+}

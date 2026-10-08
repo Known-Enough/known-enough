@@ -39,7 +39,8 @@ jobs:
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
           node scripts/operations/verify.mjs > "$RUNNER_TEMP/operations-offline.json"
           node --input-type=module -e "import { verifyManagedInput } from './scripts/operations/managed-preparation.mjs'; verifyManagedInput(process.env);"
-          node --test scripts/operations/*.test.mjs
+          npm ci
+          node --experimental-transform-types --test scripts/operations/*.test.mjs
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
           role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubOperationsRecovery
