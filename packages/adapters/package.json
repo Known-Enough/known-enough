@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./partition-request": "./src/partition-request.ts"
+    "./partition-request": "./src/partition-request.ts",
+    "./durable-model-runtime": "./src/durable-model-runtime.ts"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "3.1135.0",

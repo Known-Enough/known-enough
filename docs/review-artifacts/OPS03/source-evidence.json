@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "task": "OPS03",
+  "status": "CHECKED_INACTIVE_SOURCE",
+  "account": "Battosai1806",
+  "actorId": 143764700,
+  "baseline": "d8afff9319f88f71ef6ae17546cd6c07236e5ec0",
+  "claimSource": "ca97a10760cbe58633a49fd9466458bee9a93d30",
+  "observedAt": "2026-10-08T02:38:14.309467+00:00",
+  "sourceHashes": {
+    "packages/adapters/src/durable-model-jobs.ts": "6a670cc00fb8b14101b7036577d37b2dd9cd7b4f2c0c0779a60fa1758f2bb71e",
+    "packages/adapters/src/durable-model-jobs.test.ts": "add22825be941aa41d2e328f2959c9f91cb33ed0e1ad7db6c68b702320abccbf",
+    "packages/adapters/src/dynamo-model-jobs.ts": "971ad6bfee827dd3c248aba54106bb2d471f9b4f5ecee3aafebd4eeea65bb108",
+    "packages/adapters/src/dynamo-model-jobs.test.ts": "f05e06675f2320561e64da1e7f0fd3a5d0c4f036e5393921e1ef9c59512b871f",
+    "apps/api/src/durable-model-worker.ts": "8c450362d60f7b1ae6c1a556ebb9af5fc4e4587134645d00036b0ec0244571d3",
+    "apps/api/src/durable-model-worker.test.ts": "a1a4fdc413aab43504ba548aa2fbc0ec2181a06606e64e539e2e0655a72420c7",
+    "scripts/operations/jobs-setup.mjs": "3ca18107f9867ce84213c731aa4ee63f0669418e185b9a7c549803de9b381c0e",
+    "scripts/operations/jobs-setup.test.mjs": "e94ae4b9c104fe0024b636727767817b67351dca6515b6025b88f72ade353dfa",
+    "scripts/operations/jobs-verify.mjs": "8bb4805dd51d999053022314e1b2a71b8989a523c22cc140b36aa5ae9ecce969",
+    "infra/operations/jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+    ".github/workflows/operations-verify.yml": "25235f43fd42eeb5ad4c868b70aceb59f864d39a4dc4c300fc8fa603aabb52e6",
+    "packages/adapters/src/test-support/durable-model-fixture.ts": "cdb009282b93c56f8a80229f9dc3578af3d580620ad2351659f810bc5ad7d709",
+    "packages/adapters/package.json": "f0a0b23cdcd26bdc5b1edab2ddce582272deaca51c018bbb10008f8e978540e0",
+    "packages/adapters/src/durable-model-runtime.ts": "1d640b06e7cb9093a03f09d03b556edb959d08b9281c0ef9e679d80609ddd372"
+  },
+  "checks": {
+    "focused": {
+      "label": "focused-final-verified",
+      "command": [
+        "npx",
+        "vitest",
+        "run",
+        "packages/adapters/src/durable-model-jobs.test.ts",
+        "packages/adapters/src/dynamo-model-jobs.test.ts",
+        "apps/api/src/durable-model-worker.test.ts",
+        "packages/adapters/src/model-jobs.test.ts",
+        "packages/adapters/src/bedrock-models.test.ts",
+        "packages/application/src/decision-negotiator.test.ts",
+        "packages/adapters/src/dynamo-partition-lifecycle.test.ts",
+        "packages/adapters/src/partition-lifecycle.test.ts",
+        "packages/adapters/src/partition-managed.test.ts"
+      ],
+      "start": "2026-10-08T02:30:49.135455+00:00",
+      "end": "2026-10-08T02:30:53.888795+00:00",
+      "exit": 0,
+      "frozen_unchanged": true
+    },
+    "operations": {
+      "label": "operations-final-verified",
+      "command": [
+        "node",
+        "--experimental-transform-types",
+        "--test",
+        "scripts/operations/archive-recovery.test.mjs",
+        "scripts/operations/aws-transport.test.mjs",
+        "scripts/operations/dynamo-journal.test.mjs",
+        "scripts/operations/jobs-setup.test.mjs",
+        "scripts/operations/journal.test.mjs",
+        "scripts/operations/managed-preparation.test.mjs",
+        "scripts/operations/manifest.test.mjs",
+        "scripts/operations/partition-recovery.test.mjs",
+        "scripts/operations/partition-setup.test.mjs",
+        "scripts/operations/plan.test.mjs",
+        "scripts/operations/recovery.test.mjs",
+        "scripts/operations/retention-setup.test.mjs",
+        "scripts/operations/setup.test.mjs"
+      ],
+      "start": "2026-10-08T02:30:50.293134+00:00",
+      "end": "2026-10-08T02:30:53.603382+00:00",
+      "exit": 0,
+      "frozen_unchanged": true
+    },
+    "finalFull": {
+      "label": "full-final-corrected",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-08T02:34:10.976410+00:00",
+      "end": "2026-10-08T02:37:32.504558+00:00",
+      "exit": 0,
+      "frozen_unchanged": true
+    }
+  },
+  "counts": {
+    "focused": 216,
+    "operations": 62,
+    "application": 1267,
+    "optionalSkips": 2,
+    "hostedPreview": 1,
+    "browser": 62
+  },
+  "installation": "UNKNOWN",
+  "activation": "DISABLED",
+  "providerCalls": "NOT_EXECUTED",
+  "managedRecovery": "UNKNOWN",
+  "participantConsent": "NOT_GRANTED",
+  "cleanup": "UNKNOWN",
+  "limitations": [
+    "Focused test fixture return annotation was corrected after focused check; unchanged assertions passed in final full.",
+    "All SDK/provider/participant data in these tests is synthetic.",
+    "Source-matching CI and checked claim release still pending at this source checkpoint."
+  ]
+}
