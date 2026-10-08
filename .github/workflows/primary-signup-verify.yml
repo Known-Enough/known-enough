@@ -1,0 +1,62 @@
+name: Primary signup driver offline verification
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact checked main source; offline checks only
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: primary-signup-offline-main
+  cancel-in-progress: false
+
+jobs:
+  offline:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && github.actor_id == '143764700' && github.triggering_actor == 'Battosai1806'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Verify exact source and pinned runtime
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_sha }}
+          ACTUAL_SOURCE: ${{ github.sha }}
+        run: |
+          test "$EXPECTED_SOURCE" = "$ACTUAL_SOURCE"
+          test "$(git rev-parse HEAD)" = "$ACTUAL_SOURCE"
+          test "$(node --version)" = "v24.21.0"
+          test "$(npm --version)" = "11.19.0"
+      - run: npm ci
+      - name: Inactive configuration and simulated ownership regressions
+        run: |
+          node scripts/live-qa/primary-signup.mjs check-setup infra/live-qa/primary-signup-setup.json
+          npm test -- tests/integration/live-qa-primary-signup.test.ts --maxWorkers=2
+      - name: Publish configuration evidence only
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+          PUBLIC_OUTPUT: ${{ runner.temp }}/primary-signup-offline
+        run: |
+          umask 077
+          mkdir "$PUBLIC_OUTPUT"
+          node --input-type=module <<'JS'
+          import { readFileSync, writeFileSync } from 'node:fs';
+          import { verifyPrimarySignupSetup } from './scripts/live-qa/primary-signup.mjs';
+          const checks = verifyPrimarySignupSetup(JSON.parse(readFileSync('infra/live-qa/primary-signup-setup.json', 'utf8')));
+          writeFileSync(process.env.PUBLIC_OUTPUT + '/configuration.json', JSON.stringify({ sourceSha: process.env.SOURCE_SHA, checks }) + '\n');
+          JS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: primary-signup-offline
+          path: ${{ runner.temp }}/primary-signup-offline/configuration.json
+          if-no-files-found: error
+          retention-days: 7

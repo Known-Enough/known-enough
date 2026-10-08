@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "enabled": false,
+  "target": {
+    "account": "092954139775",
+    "region": "us-east-1",
+    "pool": "us-east-1_V9OMjd0zx",
+    "client": "3accf7paalvon2m8ue8okfi853",
+    "actor": "143764700"
+  },
+  "limits": {
+    "signupAttempts": 1,
+    "mailReads": 3,
+    "confirmationAttempts": 1,
+    "loginAttempts": 1,
+    "deleteAttempts": 1,
+    "requestTimeoutMs": 30000,
+    "modelCalls": 0
+  },
+  "installation": "UNKNOWN",
+  "journal": "PRIVATE_DURABLE_CAS_REQUIRED",
+  "cleanup": "IMMUTABLE_SUBJECT_AND_PARTIAL_FAILURE_PROOF_REQUIRED",
+  "adapter": "NOT_INSTALLED",
+  "passwordPolicy": "PRESERVE_MIN8_ALL_CLASSES",
+  "publicSignup": "PRESERVE_VERIFICATION"
+}
