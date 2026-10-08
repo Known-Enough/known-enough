@@ -1,6 +1,6 @@
 # FIN01 inherited obligation ledger
 
-Status: CLAIMED / reconciliation in progress; no whole-task acceptance or installed proof.
+Status: CODE_READY / checked independent regressions and reconciled ledger; whole FIN01 REVIEW/unclaimed with required source/contract and managed gaps.
 
 
 ## RUN146 — FIN01 sole B coding/ledger claim, 2026-10-08T06:15:36.480264+00:00
@@ -39,3 +39,9 @@ This ledger governs FIN01 routing together with the current board; preserved NP0
 2. At the final cloud phase reconcile only actually missing source/package/configuration/immutable recovery and effective access evidence. Historical temporary-access and ReadOnly model-grant removal succeeded; do not repeat the original baseline-dependent mutation or recreate model access. Current primary remains model-off; isolated finite QA retains privacy/usage/cleanup controls.
 3. Install/verify OPS00–03 in dependency order using their checked exact setup/managed-closeout packages, then collect source-matching real lifecycle/restart/concurrency/privacy/recovery proof. Recheck current signup, the two inherited scenarios, revocation/refusal/expiry and rendered public progress. No participant consent or backup/provider erasure is inferred.
 4. FIN01 available nonoverlapping coding can reach CODE_READY after the new regressions/full/source CI, ledger links/hash/status and synchronization checks. Whole FIN01 remains REVIEW with required closeout blocked/unproved; original completion requires all obligations and NP00 handoff. FIN02 becomes coding-eligible only after the checked sequential release. No successor implementation or new worker starts in this record.
+
+
+Additional available artifact verification 2026-10-08T06:34:15.936970+00:00: existing pure package builder on checked source84520ec37c2be33aeefb52848a7305d9fcfe6564, pinned Node/npm, twice yields identical manifests/API+broker ZIP bytes; all163 manifest source-file hashes equal that Git commit. API ZIP417eff55… matches the downloaded newer release primary backend hash; API and broker module/ZIP hashes and entrypoints both match that release receipt. Fixture-content guard PASS. This establishes the current checked source/package versus recorded service hash association, superseding an unknown compiled-package association for this candidate; it is not a fresh cloud read, private original recovery verification, deployment or managed journey PASS. Private original rollback/environment remains preserved/unaccessed for the bounded NP00 closeout.
+
+
+Checked source84520ec37c2be33aeefb52848a7305d9fcfe6564 and [CI37737798380](https://github.com/Known-Enough/known-enough/actions/runs/37737798380) SUCCESS verified2026-10-08T06:34:32.066568+00:00; all counts/artifacts/protected hashes in source-evidence.json. FIN01 coding claim released; FIN02 READY/unclaimed. Required outstanding closeout above remains unproved; no whole-task DONE.

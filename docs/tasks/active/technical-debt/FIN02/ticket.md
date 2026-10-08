@@ -2,7 +2,7 @@
 
 **Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of FIN01, not deferred administrator installation. Finish group lifecycle/concurrency/progress code and tests using checked predecessors; defer only genuinely unavailable managed proof. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
 
-- Status: BLOCKED / unclaimed until FIN01 coding checkpoint; then coding phase eligible. Administrator installation/required managed acceptance deferred to final cloud phase.
+- Status: READY / unclaimed coding phase after checked FIN01 source84520ec and matching CI; required managed proof remains deferred.
 - Worker: next eligible direct worker, current routing B; select/report actual model/effort and bounded files at claim. No helper or parallel implementation.
 - Scope: group/account/invitation/membership/decision-binding inspection, focused meaningful regressions and necessary reproduced fixes; exact application/test files recorded before edits. No new social/group feature, role escalation or wider participant enrollment.
 
@@ -17,3 +17,6 @@
 ## Completion
 
 A group-construction report records source, test actors/environments, expected/actual outcomes, fixes and live-versus-local limits. Required lifecycle/privacy/concurrency/recovery cases pass; public progress/participant isolation have actual rendered evidence. Focused checks and pinned `npm run check` pass for source changes, with relevant authorized managed proof; no full-live claim from mocks. Update own log/handoff and shared status, synchronize with `[skip ci]`. This task adds no deployment/paid-test/email/deletion/budget authorization.
+
+
+Readiness reconciliation 2026-10-08T06:34:32.066568+00:00: FIN01 checked source84520ec37c2be33aeefb52848a7305d9fcfe6564 and matching own-B CI37737798380 SUCCESS satisfy its coding dependency. Whole FIN01 REVIEW/unclaimed retains required NP00 source/contract and final managed completion. FIN02 has no claim/code/worker started; verify clean ff-only intake and current claims before exactly one sequential coding claim.
