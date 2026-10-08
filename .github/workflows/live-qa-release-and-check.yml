@@ -2,6 +2,11 @@ name: Live QA release and qualification
 
 on:
   workflow_dispatch:
+    inputs:
+      signup_only:
+        description: Diagnose signup/login only; never counts as full-seven acceptance
+        type: boolean
+        default: false
   workflow_run:
     workflows: ['Deploy Known Enough staging to AWS Amplify']
     types: [completed]
@@ -236,7 +241,8 @@ jobs:
       - name: Run real journeys and exact always-run cleanup
         env:
           RUN_ID: gh-${{ github.run_id }}-${{ github.run_attempt }}
-        run: node scripts/live-qa/runner.mjs /tmp/qa-report/target.json /tmp/qa-report/receipt.json "$RUN_ID" /tmp/qa-report/qa-report.json
+          QA_SCOPE: ${{ inputs.signup_only && 'signup' || 'full' }}
+        run: node scripts/live-qa/runner.mjs /tmp/qa-report/target.json /tmp/qa-report/receipt.json "$RUN_ID" /tmp/qa-report/qa-report.json "$QA_SCOPE"
       - name: Retry exact cleanup after cancellation or runner failure
         if: always()
         env:

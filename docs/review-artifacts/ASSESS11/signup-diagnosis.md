@@ -1,0 +1,14 @@
+# ASSESS11 bounded signup diagnosis
+
+RUN149 resumes one independent available signup diagnosis after OPS00's checked setup block/release. Own B account, current source and all33 preserved source/recovery hashes are recorded in [machine evidence](signup-diagnosis.json). A saved NP00 source/claim/private recovery remain preserved. Password-policy simplification and its UpdateUserPool work remain cancelled.
+
+Downloaded [previous qualification37557999023](https://github.com/Known-Enough/known-enough/actions/runs/37557999023) binds source2630c9f4703efae6972b27112f9908c277b4c21e: QA01_SIGNUP FAIL, six downstream journeys BLOCKED, privacy/CLEAN PASS, zero model/email usage. Signup request status and provider cause are UNKNOWN. Gateway ACCESS_DENIED comes from a separate throttle-metadata read, not the browser signup request. This distinction prevents an unrelated denied read from being reported as the signup cause.
+
+The correction observes only the existing fixed Cognito SignUp/ConfirmSignUp requests. It never reads request bodies, retries or publishes response messages, names, email, credentials, headers, raw body or URL. HTTP status maps to existing fixed categories; provider output is a finite known-error enum or UNKNOWN. Wrong endpoint/action/method is ignored; asynchronous completion and listener removal preserve actual failing assertions. No assertion/consent/authentication check is weakened.
+
+The existing release workflow gains an explicit signup_only boolean, defaultfalse. Automatic/full executions still run seven journeys. The fixed diagnostic selection runs only QA01 and avoids unrelated actor logins/paid model journeys; existing immutable source/public/backend checks, installed workload roles, standing lease/usage gates, exact always-run cleanup and log-privacy inspection remain. A successful diagnostic requires actual signup message, managed login, zero model attempts and CLEAN/privacy evidence; whole-release status still BLOCKED_OR_FAILED with six untested journeys. Isolated QA acceptance is not primary-pool synthetic verification or final all-seven release acceptance.
+
+Initial focused27 tests PASS. First full application check:1287 PASS/two optional skips, one unchanged archive-recovery timeout (`Error: Test timed out in 5000ms.`); no build/browser phase reached. Focused unchanged recovery11 PASS. Final frozen full verification and one actual installed source-matching signup diagnostic remain pending; no service result is inferred from these offline checks.
+
+
+Final frozen full PASS08:02:47.386270Z–08:06:59.065654Z, exit0: references7/planning15/lint/boundaries414/types,1288 application(two optional DynamoDBLocal skips), build/hosted1/browser64. All8 source and33 protected hashes unchanged; no source/timeout/gate waiver after initial failure. Checked source sync and one own-B installed signup-only dispatch follow; no live result yet.

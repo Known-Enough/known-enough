@@ -180,3 +180,26 @@ test('catalog counts survive both report boundaries while malformed/private fiel
   const report=qualificationReport({runId:'run-12345',tests:reporter.tests});expect(report.tests[3].catalogCounts).toEqual(expected);expect(JSON.stringify(report)).not.toContain('PRIVATE');
  }
 });
+
+
+test('signup failure codes and HTTP status survive reporter and qualification without provider messages',async()=>{
+  // @ts-expect-error Fixed JavaScript reporter boundary.
+  const {default:Reporter}=await import('../../scripts/live-qa/sanitized-reporter.mjs');
+  for(const phase of ['QA01_SIGNUP','QA01_EMAIL_CONFIRM']){
+    const reporter=new Reporter();const t={title:REQUIRED_TESTS[0],annotations:[{type:'qa-operation-status',description:'HTTP_BAD_REQUEST'},{type:'qa-signup-provider-code',description:'InvalidLambdaResponseException'},{type:'qa-signup-provider-code',description:'PRIVATE_TOKEN'}]};
+    reporter.onStepEnd(t,{}, {title:phase,error:{message:'PRIVATE_EMAIL'}});reporter.onTestEnd(t,{status:'failed',error:{message:'PRIVATE_PASSWORD'}});
+    const value=safeResults(reporter.tests)[0];expect(value).toMatchObject({phase,operationStatus:'HTTP_BAD_REQUEST',signupProviderCode:'InvalidLambdaResponseException',status:'FAIL'});expect(JSON.stringify(value)).not.toContain('PRIVATE');
+  }
+  expect(safeResults([{title:REQUIRED_TESTS[0],status:'failed',phase:'QA01_EMAIL_READ',signupProviderCode:'InvalidLambdaResponseException'}])[0]).not.toHaveProperty('signupProviderCode');
+  expect(safeResults([{title:REQUIRED_TESTS[0],status:'failed',phase:'QA01_SIGNUP',signupProviderCode:'PRIVATE'}])[0]).not.toHaveProperty('signupProviderCode');
+});
+
+test('bounded signup selection cannot run paid journeys or promote partial evidence to whole-release PASS',async()=>{
+  // @ts-expect-error Exact runner selection boundary.
+  const {qualificationSelection}=await import('../../scripts/live-qa/runner-core.mjs');
+  expect(qualificationSelection()).toEqual([]);expect(qualificationSelection('signup')).toEqual(['--grep','^QA01 signup and managed login$']);expect(()=>qualificationSelection('.*')).toThrow('QA_JOURNEY_SCOPE_INVALID');
+  const good={runId:'run-12345',runScope:'SIGNUP_ONLY',processExitCode:0,processSignal:null,reportStatus:'passed',globalErrors:0,failedTests:0,preflight:'PASS',fixtures:'PASS',tests:[{title:REQUIRED_TESTS[0],status:'passed'}],attempts:0,signupMessages:1,privacy:'PASS',cleanup:'CLEAN'};
+  expect(qualificationReport(good)).toMatchObject({runScope:'SIGNUP_ONLY',diagnosticStatus:'PASS',status:'BLOCKED_OR_FAILED',counts:{passed:1,blocked:6,modelAttempts:0}});
+  for(const change of [{attempts:1},{signupMessages:0},{cleanup:'FAILED'},{privacy:'UNKNOWN'},{preflight:'BLOCKED'},{processExitCode:1},{tests:REQUIRED_TESTS.map((title:string)=>({title,status:'passed'}))}])expect(qualificationReport({...good,...change}).diagnosticStatus).toBe('BLOCKED_OR_FAILED');
+  expect(qualificationReport({...good,attempts:4,tests:REQUIRED_TESTS.map((title:string)=>({title,status:'passed'}))}).status).toBe('BLOCKED_OR_FAILED');
+});

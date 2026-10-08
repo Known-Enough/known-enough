@@ -7,7 +7,7 @@ import { spawnSync, spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { aws } from './aws.mjs';
 import { requireRunId } from './config.mjs';
-import { validateTarget, validateReceipt, validateWorkload, qualificationReport } from './runner-core.mjs';
+import { validateTarget, validateReceipt, validateWorkload, qualificationReport, qualificationSelection } from './runner-core.mjs';
 export function invokeBroker(target, runId, action, extra = {}, execute = spawnSync) {
     requireRunId(runId);
     const directory = mkdtempSync(resolve(tmpdir(), 'ke-qa-invoke-'));
@@ -43,18 +43,20 @@ function collectLogPrivacy(startedAt) {
     } while (next);
     return {privacy:'PASS',modelFailures:safeModelFailures(failures)};
 }
-async function play(env) {
+async function play(env, scope) {
+    const selection = qualificationSelection(scope);
     return new Promise(resolveDone => {
-        const child = spawn(process.execPath, ['node_modules/@playwright/test/cli.js', 'test', '--config=playwright.live-qa.config.ts'], { env: { ...process.env, ...env }, stdio: 'ignore' });
+        const child = spawn(process.execPath, ['node_modules/@playwright/test/cli.js', 'test', '--config=playwright.live-qa.config.ts', ...selection], { env: { ...process.env, ...env }, stdio: 'ignore' });
         child.on('close', (code, signal) => resolveDone({ code, signal }));
         child.on('error', () => resolveDone({ code: null, signal: null }));
     });
 }
-export async function runQualification(targetFile, receiptFile, runId, output) {
+export async function runQualification(targetFile, receiptFile, runId, output, scope = 'full') {
+    qualificationSelection(scope);
     requireRunId(runId);
     const directory = mkdtempSync(resolve(tmpdir(), 'ke-qa-run-'));
     const startedAt = Date.now();
-    const state = { runId, preflight: 'BLOCKED', fixtures: 'BLOCKED', cleanup: 'BLOCKED', tests: [], sourceCommit: null };
+    const state = { runScope: scope === 'signup' ? 'SIGNUP_ONLY' : 'FULL', runId, preflight: 'BLOCKED', fixtures: 'BLOCKED', cleanup: 'BLOCKED', tests: [], sourceCommit: null };
     let target;
     try {
         target = validateTarget(JSON.parse(readFileSync(targetFile, 'utf8')));
@@ -78,8 +80,8 @@ export async function runQualification(targetFile, receiptFile, runId, output) {
         writeFileSync(directory + '/login.json', JSON.stringify(login), { mode: 0o600 });
         const testsFile = directory + '/tests.json';
         const processResult = await play({
-            QA_TARGET_FILE: resolve(targetFile), QA_LOGIN_FILE: directory + '/login.json', QA_RUN_ID: runId, QA_RESULTS_FILE: testsFile, QA_PRIVATE_OUTPUT: directory + '/browser'
-        });
+            QA_JOURNEY_SCOPE: scope, QA_TARGET_FILE: resolve(targetFile), QA_LOGIN_FILE: directory + '/login.json', QA_RUN_ID: runId, QA_RESULTS_FILE: testsFile, QA_PRIVATE_OUTPUT: directory + '/browser'
+        }, scope);
         state.processExitCode = processResult.code;
         state.processSignal = processResult.signal;
         try {
@@ -119,9 +121,9 @@ export async function runQualification(targetFile, receiptFile, runId, output) {
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
     try {
-        const report = await runQualification(process.argv[2], process.argv[3], process.argv[4], process.argv[5]);
+        const report = await runQualification(process.argv[2], process.argv[3], process.argv[4], process.argv[5], process.argv[6]);
         console.log(JSON.stringify({ status: report.status, lanes: report.lanes, counts: report.counts }));
-        if (report.status !== 'PASS')
+        if (report.status !== 'PASS' && report.diagnosticStatus !== 'PASS')
             process.exitCode = 1;
     }
     catch {

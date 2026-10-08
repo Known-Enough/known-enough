@@ -1,3 +1,5 @@
+// @ts-expect-error JavaScript diagnostic boundary observes only fixed provider enums.
+import { trackSignupRequest } from '../../../scripts/live-qa/signup-diagnostics.mjs';
 import { syntheticConditionMatches } from './semantic-review.ts';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@playwright/test';
@@ -23,12 +25,13 @@ test('QA01 signup and managed login',async({browser})=>{
     await page.goto(target.FrontendUrl);await expect(page.getByRole('button',{name:'Sign in',exact:true})).toBeVisible();
     await page.keyboard.press('Tab');await expect(page.getByRole('button',{name:'Sign in',exact:true})).toBeFocused();
   });
-  await test.step('QA01_SIGNUP',async()=>{
+  const signupNote=(status:string,code:string)=>{for(const [type,description] of [['qa-operation-status',status],['qa-signup-provider-code',code]]){const notes=test.info().annotations;const prior=notes.find(n=>n.type===type);if(prior)prior.description=description!;else notes.push({type:type!,description:description!});}};
+  await test.step('QA01_SIGNUP',()=>trackSignupRequest(page,'SignUp',async()=>{
     await page.getByRole('button',{name:'Register with email',exact:true}).click();
     await page.getByLabel('Username',{exact:true}).fill(user.username);await page.getByLabel('Email',{exact:true}).fill(user.email);
     await page.getByLabel('Password',{exact:true}).fill(user.password);await page.getByRole('button',{name:'Create account',exact:true}).click();
     await expect(page.getByLabel('Verification code',{exact:true})).toBeVisible();
-  });
+  },signupNote));
   let code='';
   await test.step('QA01_EMAIL_READ',async()=>{
     await expect.poll(()=>{
@@ -38,13 +41,13 @@ test('QA01 signup and managed login',async({browser})=>{
       return !!code;
     },{timeout:120000,intervals:[3000]}).toBe(true);
   });
-  await test.step('QA01_EMAIL_CONFIRM',async()=>{
+  await test.step('QA01_EMAIL_CONFIRM',()=>trackSignupRequest(page,'ConfirmSignUp',async()=>{
     await page.getByLabel('Verification code',{exact:true}).fill(code);await page.getByRole('button',{name:'Verify email',exact:true}).click();
     await expect(page.getByText('Email verified. Sign in to continue and request access.',{exact:true})).toBeVisible();
-  });
+  },signupNote));
   await context.close();sessions.pop();
   await test.step('QA01_LOGIN',async()=>{const signup=await login(browser,'signup');sessions.push(signup);await register(signup);expect((await checked(signup,'/account')).account).toMatchObject({status:'APPROVED'});});
-  await test.step('QA01_ACTORS',async()=>{
+  if(process.env.QA_JOURNEY_SCOPE!=='signup')await test.step('QA01_ACTORS',async()=>{
     for(const actor of ['iris','omar','tess','vin','pending','rejected','disabled','outsider']){const s=await login(browser,actor,{mobile:actor==='iris'});sessions.push(s);if(['iris','omar','tess','vin'].includes(actor))people.push(s);}
   });
 });
