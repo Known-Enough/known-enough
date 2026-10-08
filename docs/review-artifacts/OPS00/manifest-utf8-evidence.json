@@ -117,7 +117,7 @@
     "docs/review-artifacts/OPS00/dynamo-read-integrity.md": "72f6f48da6a86e4d1774c7d1a4ee7af9816226ad72401475aa08200e56fa1ec9",
     "docs/review-artifacts/OPS00/dynamo-read-evidence.json": "0d6ca8a0173380d8293d9464acd8f60fedb6e7803cd295be83ef44fa95c79185"
   },
-  "sourceReady": "NOT_YET_CHECKED",
+  "sourceReady": "LOCAL_CHECKED_OFFLINE_PENDING",
   "installation": "UNKNOWN",
   "managedRecovery": "NOT_EXECUTED",
   "reproduction": {
@@ -175,5 +175,155 @@
   },
   "newAwsRequests": 0,
   "newModelAttempts": 0,
-  "newSignupMessages": 0
+  "newSignupMessages": 0,
+  "red": {
+    "label": "red",
+    "command": [
+      "node",
+      "--experimental-transform-types",
+      "--test",
+      "--test-concurrency=2",
+      "scripts/operations/manifest.test.mjs",
+      "scripts/operations/recovery.test.mjs"
+    ],
+    "start": "2026-10-08T22:17:22.828225+00:00",
+    "end": "2026-10-08T22:17:22.968433+00:00",
+    "exit": 1,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {}
+  },
+  "redFailed": 11,
+  "redPassed": 11,
+  "newTests": 16,
+  "focused": {
+    "label": "focused",
+    "command": [
+      "node",
+      "--experimental-transform-types",
+      "--test",
+      "--test-concurrency=2",
+      "scripts/operations/manifest.test.mjs",
+      "scripts/operations/recovery.test.mjs"
+    ],
+    "start": "2026-10-08T22:17:38.787655+00:00",
+    "end": "2026-10-08T22:17:38.905382+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/manifest.mjs": "1b97639adbcefbd0f4dc09ac8dd7d6328911a0a7535698722f197290e06bf8f7",
+      "scripts/operations/manifest.test.mjs": "f2dcb2396ebadbc60390a7b335ded1f53e85f95af25f5c3f4793821b0d137107"
+    }
+  },
+  "focusedPassed": 22,
+  "native": {
+    "label": "native",
+    "command": [
+      "node",
+      "--experimental-transform-types",
+      "--test",
+      "--test-concurrency=2",
+      "scripts/operations/archive-recovery.test.mjs",
+      "scripts/operations/aws-transport.test.mjs",
+      "scripts/operations/dynamo-journal.test.mjs",
+      "scripts/operations/installed-readback.test.mjs",
+      "scripts/operations/jobs-setup.test.mjs",
+      "scripts/operations/journal.test.mjs",
+      "scripts/operations/managed-preparation.test.mjs",
+      "scripts/operations/manifest.test.mjs",
+      "scripts/operations/partition-recovery.test.mjs",
+      "scripts/operations/partition-setup.test.mjs",
+      "scripts/operations/plan.test.mjs",
+      "scripts/operations/recovery.test.mjs",
+      "scripts/operations/retention-setup.test.mjs",
+      "scripts/operations/setup.test.mjs"
+    ],
+    "start": "2026-10-08T22:17:38.940204+00:00",
+    "end": "2026-10-08T22:17:42.301294+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/manifest.mjs": "1b97639adbcefbd0f4dc09ac8dd7d6328911a0a7535698722f197290e06bf8f7",
+      "scripts/operations/manifest.test.mjs": "f2dcb2396ebadbc60390a7b335ded1f53e85f95af25f5c3f4793821b0d137107"
+    }
+  },
+  "nativePassed": 138,
+  "postFixReproduction": {
+    "observedAt": "2026-10-08T22:18:16.264Z",
+    "observation": "SIMULATED_TRANSPORT_ONLY",
+    "realProviderRequests": 0,
+    "results": [
+      {
+        "kind": "invalid-continuation",
+        "accepted": false,
+        "error": "OPS_MANIFEST_CONTENT_REJECTED",
+        "calls": []
+      },
+      {
+        "kind": "overlong",
+        "accepted": false,
+        "error": "OPS_MANIFEST_CONTENT_REJECTED",
+        "calls": []
+      },
+      {
+        "kind": "surrogate",
+        "accepted": false,
+        "error": "OPS_MANIFEST_CONTENT_REJECTED",
+        "calls": []
+      },
+      {
+        "kind": "truncated",
+        "accepted": false,
+        "error": "OPS_MANIFEST_CONTENT_REJECTED",
+        "calls": []
+      },
+      {
+        "kind": "out-of-range",
+        "accepted": false,
+        "error": "OPS_MANIFEST_CONTENT_REJECTED",
+        "calls": []
+      }
+    ]
+  },
+  "currentSourceFiles": {
+    "scripts/operations/manifest.mjs": "1b97639adbcefbd0f4dc09ac8dd7d6328911a0a7535698722f197290e06bf8f7",
+    "scripts/operations/manifest.test.mjs": "f2dcb2396ebadbc60390a7b335ded1f53e85f95af25f5c3f4793821b0d137107"
+  },
+  "claimSync": {
+    "label": "claim",
+    "expectedRemote": "4d9f7b5df8340afdc26e8e2f72ae31e11abed7f6",
+    "sourceSha": "1a3d50d1ac0efddd583d03fd7ece242cbae9c776",
+    "observedEnd": "2026-10-08T22:16:45.068189+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 102
+  },
+  "lastObservedAt": "2026-10-08T22:21:53.821562+00:00",
+  "ownedFullSession": 22064,
+  "full": {
+    "label": "full",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "start": "2026-10-08T22:17:54.380611+00:00",
+    "end": "2026-10-08T22:21:22.641326+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/manifest.mjs": "1b97639adbcefbd0f4dc09ac8dd7d6328911a0a7535698722f197290e06bf8f7",
+      "scripts/operations/manifest.test.mjs": "f2dcb2396ebadbc60390a7b335ded1f53e85f95af25f5c3f4793821b0d137107"
+    },
+    "applicationPassed": 1398,
+    "optionalSkipped": 2,
+    "hostedPassed": 1,
+    "browserPassed": 64,
+    "boundaryReferences": 414
+  }
 }

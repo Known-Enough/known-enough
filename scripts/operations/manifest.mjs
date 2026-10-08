@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { isUtf8 } from 'node:buffer';
 export const MANIFEST_BUCKET = 'known-enough-operations-recovery-092954139775-us-east-1';
 const limit = 1024 * 1024;
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -11,7 +12,7 @@ function version(value) {
   return value;
 }
 function verify(bytes, hash) {
-  if (!Buffer.isBuffer(bytes) || bytes.length < 1 || bytes.length > limit || digest(bytes) !== hash) throw new Error('OPS_MANIFEST_CONTENT_REJECTED');
+  if (!Buffer.isBuffer(bytes) || bytes.length < 1 || bytes.length > limit || !isUtf8(bytes) || digest(bytes) !== hash) throw new Error('OPS_MANIFEST_CONTENT_REJECTED');
   // Format is JSON; its private operation-specific schema is checked by the caller.
   try { JSON.parse(bytes.toString('utf8')); } catch { throw new Error('OPS_MANIFEST_CONTENT_REJECTED'); }
   return bytes;
