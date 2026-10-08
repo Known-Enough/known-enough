@@ -116,7 +116,7 @@ A's recurring observer and completed one-time follow-up are deleted. B's existin
 
 | Coding order | Task | Current scheduling | Coding outcome |
 | --- | --- | --- | --- |
-| 1 | [ASSESS11](tasks/active/live-testing/ASSESS11/README.md) | IN_PROGRESS / B — RUN154 pending mutation correction | Inactive primary driver deletes while confirmation remains unsettled; source-bound regression/fix, no live request. |
+| 1 | [ASSESS11](tasks/active/live-testing/ASSESS11/README.md) | REVIEW / unclaimed — RUN154 primary mutation correction CODE_READY | Sourcec3ceb3b,62focused/full1390/browser64/offline37839640881 PASS; installation and primary actual signup/cleanup UNKNOWN. |
 | 2 | [ASSESS10](tasks/active/monitoring/ASSESS10/README.md) | After ASSESS11 coding checkpoint; preserve any actual active claim | Existing monitor/logging code and available execution proof. |
 | 3 | [UX01](tasks/active/ui-ux/UX01/README.md) | After ASSESS10 coding checkpoint | Current screen/journey review and prioritized findings. |
 | 4 | [UX02](tasks/active/ui-ux/UX02/README.md) | After UX01 coding checkpoint | Usability/style/navigation corrections and tests. |

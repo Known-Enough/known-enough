@@ -69,7 +69,7 @@
     "docs/review-artifacts/ASSESS11/provider-diagnostics/diagnosis.md": "072014992b0543ff8e0e41191ddbae7fc95fa99092c9b9369841a2d6114b9fb8",
     "docs/review-artifacts/ASSESS11/provider-diagnostics/source-evidence.json": "4b5634a0b995414367fee227922486e9cb750354b4704b181271d46e124b932f"
   },
-  "sourceReady": "LOCAL_CHECKED_SOURCE_SYNC_PENDING",
+  "sourceReady": "CODE_READY",
   "primaryExecution": "NOT_STARTED",
   "managedInstallation": "UNKNOWN",
   "reproduction": {
@@ -167,7 +167,7 @@
     "present": true,
     "observation": "SIMULATED_PORTS_ONLY_NO_PROVIDER_REQUEST"
   },
-  "lastObservedAt": "2026-10-08T20:26:45.161108+00:00",
+  "lastObservedAt": "2026-10-08T20:29:23.173444+00:00",
   "claimSync": {
     "label": "claim",
     "expectedRemote": "7641afae2a4266fcb1b66d93bca60bbc807de081",
@@ -182,5 +182,44 @@
   "sourceCommandParseError": "apply_patch verification failed: invalid hunk at line15, Update hunk does not contain any lines; no file modified, corrected patch succeeded",
   "newProviderRequests": 0,
   "newSignupMessages": 0,
-  "newModelAttempts": 0
+  "newModelAttempts": 0,
+  "checkedSource": "c3ceb3b36186037e3195523755ecb34dc19a6f5c",
+  "sourceSync": {
+    "label": "source",
+    "expectedRemote": "b7b7f9193a3c26a5766501acb2db04d5408ecb7c",
+    "sourceSha": "c3ceb3b36186037e3195523755ecb34dc19a6f5c",
+    "observedEnd": "2026-10-08T20:27:18.849397+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 54
+  },
+  "offline": {
+    "id": 37839640881,
+    "source": "c3ceb3b36186037e3195523755ecb34dc19a6f5c",
+    "actor": 143764700,
+    "path": ".github/workflows/primary-signup-verify.yml",
+    "event": "workflow_dispatch",
+    "createdAt": "2026-10-08T20:27:55Z",
+    "updatedAt": "2026-10-08T20:28:11Z",
+    "observedAt": "2026-10-08T20:29:23.086817+00:00",
+    "conclusion": "success",
+    "configuration": "PASS",
+    "execution": "NOT_STARTED",
+    "installation": "UNKNOWN",
+    "focusedPassed": 62,
+    "artifactSha256": "65b55be2aad8e8d94d763e63f3eb3db57bb9e001e8b1fdd27365005b7f01ca3a",
+    "jobs": [
+      {
+        "id": 113525467255,
+        "name": "offline",
+        "conclusion": "success",
+        "started_at": "2026-10-08T20:27:59Z",
+        "completed_at": "2026-10-08T20:28:10Z"
+      }
+    ]
+  },
+  "claimReleasedAt": "2026-10-08T20:29:23.173444+00:00",
+  "wholeTask": "REVIEW_UNCLAIMED_PRIMARY_MANAGED_PROOF_OPEN"
 }
