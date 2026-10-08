@@ -205,7 +205,7 @@
       "apps/api/src/ke13b-lambda.test.ts": "75648b950aee561c2b80e84521bf77e9b0c8e3b00812cdf87ebc800334df46e3"
     }
   },
-  "lastObservedAt": "2026-10-08T20:08:58.095048+00:00",
+  "lastObservedAt": "2026-10-08T20:12:20.306247+00:00",
   "full": {
     "label": "full",
     "command": [
@@ -476,5 +476,74 @@
   "claimReleasedAt": "2026-10-08T20:08:58.095048+00:00",
   "wholeTask": "REVIEW_UNCLAIMED_PRIMARY_MANAGED_PROOF_OPEN",
   "historicalProviderSubtype": "UNKNOWN",
-  "currentProviderCause": "NOT_ESTABLISHED"
+  "currentProviderCause": "NOT_ESTABLISHED",
+  "handoffSync": {
+    "label": "handoff",
+    "expectedRemote": "3fda7c9035681bf797aed244d3682628894cccff",
+    "sourceSha": "3ee0f04349b08db9897ff30aa07c10834f7e3abf",
+    "observedEnd": "2026-10-08T20:09:32.864684+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 48
+  },
+  "finishedReceipt": {
+    "id": 37837401044,
+    "createdAt": "2026-10-08T20:10:02Z",
+    "source": "3ee0f04349b08db9897ff30aa07c10834f7e3abf",
+    "verified": true,
+    "artifactMatch": true,
+    "chatSummary": "Published privacy-safe provider diagnostics on 3fda7c9; 68 focused, 1,385 application and 64 browser checks passed. [Live QA](https://github.com/Known-Enough/known-enough/actions/runs/37832948131) passed all seven journeys, privacy and CLEAN. Primary managed signup remains unverified; next is own-account signup/cleanup proof, with the earlier 329-minute reporting failure documented in the [log](https://github.com/Known-Enough/known-enough/blob/main/docs/monitor-log.md#b-run153)."
+  },
+  "executionScheduledAt": "2026-10-08T13:56:02.043Z",
+  "observedRootStart": "2026-10-08T13:56:07.899048Z",
+  "observedClosingCheckpoint": "2026-10-08T20:12:20.306247+00:00",
+  "nextNominalHint": "2026-10-08T20:26:07.285Z",
+  "nativeIdleGating": "UNKNOWN",
+  "remoteActiveNonLoggingRunsObserved": [],
+  "receiptAudit": {
+    "count": 8,
+    "allDownloadedExactArtifactsVerified": true,
+    "maxGapSeconds": 19756.0,
+    "maxResumedGapSeconds": 501.0,
+    "missingTenMinuteProgressInterval": "13:57:14Z\u201319:26:30Z",
+    "publicationDenialObserved": false,
+    "causeOrGapActivity": "UNKNOWN",
+    "receipts": [
+      {
+        "id": 37788479192,
+        "createdAt": "2026-10-08T13:57:14Z"
+      },
+      {
+        "id": 37831967053,
+        "createdAt": "2026-10-08T19:26:30Z"
+      },
+      {
+        "id": 37832838536,
+        "createdAt": "2026-10-08T19:33:27Z"
+      },
+      {
+        "id": 37833678712,
+        "createdAt": "2026-10-08T19:40:16Z"
+      },
+      {
+        "id": 37834655964,
+        "createdAt": "2026-10-08T19:48:04Z"
+      },
+      {
+        "id": 37835695437,
+        "createdAt": "2026-10-08T19:56:25Z"
+      },
+      {
+        "id": 37836624558,
+        "createdAt": "2026-10-08T20:03:48Z"
+      },
+      {
+        "id": 37837401044,
+        "createdAt": "2026-10-08T20:10:02Z"
+      }
+    ]
+  },
+  "privateClosingHelperError": "KeyError: 'artifact_match' before repository edits; corrected by reading actual verified.json schema (verified/id), receipt itself already independently verified SUCCESS"
 }
