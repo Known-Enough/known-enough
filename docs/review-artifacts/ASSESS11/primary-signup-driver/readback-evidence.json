@@ -81,7 +81,7 @@
     },
     "observedAt": "2026-10-08T13:29:21.653Z"
   },
-  "sourceReady": "CODE_CHECKED_INHERITED_PRIVACY_AND_CLEAN_VERIFIED",
+  "sourceReady": "CODE_READY",
   "inheritedQaRun": 37782679450,
   "inheritedQaSource": "4d83aca33516f25b63ed4be3791ea5b42f48134b",
   "newLiveDispatch": "NONE",
@@ -273,5 +273,51 @@
     "classificationBasis": "privacy/cleanup from qa-report lanes; cleanup PASS iff broker returned CLEAN; runner-core source-exact inspected",
     "parserCorrection": "initial parser queried absent top-level execution/privacy/cleanup/signup; original null observation retained privately, no real failing cleanup/privacy inferred"
   },
-  "integrationDecision": "skip-ci source commit; exact-source offline workflow still required; no new paid live dispatch"
+  "integrationDecision": "skip-ci source commit; exact-source offline workflow still required; no new paid live dispatch",
+  "checkedSource": "4dd8ff7bd0cba795e05b9501587ddf622e608f8e",
+  "sourceSync": {
+    "label": "source",
+    "expectedRemote": "ef2c8cd3324529b348807ae4ec5e7e1bb47e4a49",
+    "sourceSha": "4dd8ff7bd0cba795e05b9501587ddf622e608f8e",
+    "observedEnd": "2026-10-08T13:50:14.045166+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 45
+  },
+  "offline": {
+    "id": 37787575520,
+    "source": "4dd8ff7bd0cba795e05b9501587ddf622e608f8e",
+    "verifiedAt": "2026-10-08T13:51:15.713351+00:00",
+    "actor": 143764700,
+    "trigger": 143764700,
+    "branch": "main",
+    "event": "workflow_dispatch",
+    "path": ".github/workflows/primary-signup-verify.yml",
+    "conclusion": "success",
+    "createdAt": "2026-10-08T13:50:35Z",
+    "updatedAt": "2026-10-08T13:50:54Z",
+    "artifactName": "primary-signup-offline",
+    "artifactSha256": "ec9fe79bb64d98f68b34a41f2a5ddf3f3418fd4b6e52bdca1dbf50ce53455dfd",
+    "artifact": {
+      "sourceSha": "4dd8ff7bd0cba795e05b9501587ddf622e608f8e",
+      "checks": {
+        "configuration": "PASS",
+        "execution": "NOT_STARTED",
+        "installation": "UNKNOWN"
+      }
+    },
+    "focusedPassed": 57,
+    "job": {
+      "id": 113346188648,
+      "startedAt": "2026-10-08T13:50:38Z",
+      "completedAt": "2026-10-08T13:50:54Z"
+    },
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/37787575520"
+  },
+  "claimReleasedAt": "2026-10-08T13:52:47.367567+00:00",
+  "wholeTaskStatus": "REVIEW_UNCLAIMED",
+  "primaryInstallation": "UNKNOWN",
+  "latestFullQualification": "FAIL_QA06_REVOCATION_READY"
 }
