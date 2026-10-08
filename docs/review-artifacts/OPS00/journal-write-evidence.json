@@ -383,5 +383,82 @@
       }
     ]
   },
-  "currentStatus": "BLOCKED / CODE_READY / unclaimed"
+  "currentStatus": "BLOCKED / CODE_READY / unclaimed",
+  "handoffSync": {
+    "label": "handoff",
+    "expectedRemote": "d9e42b7be9ca5f7ebff723a9fd03b4f92b1b67ab",
+    "sourceSha": "4a6bb0903abdec6a5ec2ebfda60a7d7a81ffbe4b",
+    "observedEnd": "2026-10-08T21:29:21.416223+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 98
+  },
+  "receipts": {
+    "receipts": [
+      {
+        "event": "started",
+        "id": 37845290858,
+        "createdAt": "2026-10-08T21:13:52Z",
+        "observedAt": "2026-10-08T21:14:01.751Z",
+        "recordSha256": "4d710a8cd0c2b5bb7b1ac196191cb11604edf8c105924fd4272ac77fb3fe1e44",
+        "summarySha256": "8c150b027a3cdfb03596330bf63e6a2c749a442567409820d6f9d00a50f30279",
+        "source": "3f14c6ba1c42c2ebce73f9815228bd81fa3a548e",
+        "exactArtifactVerified": true
+      },
+      {
+        "event": "progress",
+        "id": 37845852596,
+        "createdAt": "2026-10-08T21:18:36Z",
+        "observedAt": "2026-10-08T21:18:44.623Z",
+        "recordSha256": "04f408240923166cb4a52d1b5fcaed43bd54ff9e2fd9f3366a10765d9e0f8450",
+        "summarySha256": "1ebbf12928719b76b1177180713b6876050048bab68d543feeda5e82228582da",
+        "source": "e4007b478d9614d29c7ecbed4627d5d0867a8c30",
+        "exactArtifactVerified": true
+      },
+      {
+        "event": "progress",
+        "id": 37846380233,
+        "createdAt": "2026-10-08T21:23:02Z",
+        "observedAt": "2026-10-08T21:23:10.531Z",
+        "recordSha256": "17bc78b48f2a486c446d9ee1fba0814f5fa7498fd6d956a3688e463ced644c20",
+        "summarySha256": "581d02b7fd4f938cb83bdd6a5b7093b6f6df95d1647156470f14c3cd745d91f4",
+        "source": "d9e42b7be9ca5f7ebff723a9fd03b4f92b1b67ab",
+        "exactArtifactVerified": true
+      },
+      {
+        "event": "finished",
+        "id": 37847157435,
+        "createdAt": "2026-10-08T21:29:37Z",
+        "observedAt": "2026-10-08T21:29:46.053Z",
+        "recordSha256": "897efc3f69bbf1efb42d54b2d55d06e6ece676a79f9b3855145ae6b87cffcdcc",
+        "summarySha256": "ff7d129461aee06ba73e6833419962574e620ef5273fcd31de6e7565af1d71fd",
+        "source": "4a6bb0903abdec6a5ec2ebfda60a7d7a81ffbe4b",
+        "exactArtifactVerified": true
+      }
+    ],
+    "gapsSeconds": [
+      284,
+      266,
+      395
+    ],
+    "maxGapSeconds": 395,
+    "reportingGapObserved": false,
+    "publicationFailureObserved": false
+  },
+  "chatSummary": "Fixed and pushed OPS00 journal integrity (d9e42b7): uncertain write results and stale readback are rejected while valid concurrent progress is preserved. 95 native operations, 1,398 application and 64 browser checks plus [offline verification](https://github.com/Known-Enough/known-enough/actions/runs/37846384621) passed. Installation and managed recovery remain unverified; next is own-account setup and recovery proof ([log](https://github.com/Known-Enough/known-enough/blob/main/docs/monitor-log.md#b-run156)).",
+  "observedClosingAt": "2026-10-08T21:31:05.929010+00:00",
+  "actualStart": "2026-10-08T21:13:21.056649932Z",
+  "scheduledAt": "2026-10-08T21:13:08.910Z",
+  "nextNominalWake": "2026-10-08T21:43:08.910Z",
+  "closingJobs": {
+    "observedAt": "2026-10-08T21:30:15.607727+00:00",
+    "nonLoggingActiveRuns": []
+  },
+  "readToolErrors": [
+    "docs/tasks/OPS00/ticket.md: No such file or directory",
+    "gh run list: unknown flag: --event"
+  ],
+  "finalSync": "PENDING_CHECKED_DOCUMENTATION_SYNC"
 }
