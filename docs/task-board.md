@@ -116,7 +116,7 @@ A's recurring observer and completed one-time follow-up are deleted. B's existin
 
 | Coding order | Task | Current scheduling | Coding outcome |
 | --- | --- | --- | --- |
-| 1 | [ASSESS11](tasks/active/live-testing/ASSESS11/README.md) | CODE_READY / REVIEW — unclaimed after RUN149 verified handoff | Current registration entry/source checks and installed QA01 signup/verification/login/privacy/CLEAN PASS on297978d. Primary signup and current all-seven final proof remain open; cancelled password policy unchanged. |
+| 1 | [ASSESS11](tasks/active/live-testing/ASSESS11/README.md) | IN_PROGRESS / B — RUN150 sole full qualification claim | Checked297978d registration fix and isolated QA01/privacy/CLEAN PASS; current full-seven phase through installed lane. Primary synthetic signup/final setup proof remains separate. |
 | 2 | [ASSESS10](tasks/active/monitoring/ASSESS10/README.md) | After ASSESS11 coding checkpoint; preserve any actual active claim | Existing monitor/logging code and available execution proof. |
 | 3 | [UX01](tasks/active/ui-ux/UX01/README.md) | After ASSESS10 coding checkpoint | Current screen/journey review and prioritized findings. |
 | 4 | [UX02](tasks/active/ui-ux/UX02/README.md) | After UX01 coding checkpoint | Usability/style/navigation corrections and tests. |
