@@ -1,0 +1,12 @@
+# FIN02 group construction and membership
+
+Status: CLAIMED / current source and coverage inspection; no new service or whole-task PASS.
+
+
+## RUN147 — sole FIN02 B coding claim, 2026-10-08T06:45:47.958164+00:00
+
+Own Battosai1806/143764700, clean successful main ff-only intake c9f8e3b58747aa772839cd858edc9f384c2b7a84; no active GitHub job or matching owned test/server process. Previous FIN01 coding claim released with checked source84520ec37c2be33aeefb52848a7305d9fcfe6564 and own-B CI37737798380 SUCCESS. Prior final log commitc9f8e3b and actual private final readback06:41:00.093715Z reconciled; its required source/contract/private recovery/current managed gaps remain preserved. Started [receipt37739236393](https://github.com/Known-Enough/known-enough/actions/runs/37739236393) SUCCESS and downloaded own-B/main/event/task/schedule/source/summary record verified. Actual root GPT-6 Codex, exact variant/effort unexposed; same persistent chat01a1086a-fb98-7552-b4d1-e2dbab01a404, unchanged idle-only30minute automation, no helper/new worker or model override.
+
+Initial exact write scope: new docs/review-artifacts/FIN02/group-construction.md and source-evidence.json, FIN02 ticket, current task-board/claim-log, own work-log-B.md/handoff-B.md, b-next-task-handoff.md and monitor-log.md. Inspect current group/account/invitation/membership/decision-binding/session/client-progress and checked inactive partition/retention/durable-job source/tests; map every ticket check to exact current coverage/rendered evidence and add only genuinely missing regressions or reproduced fixes after an exact bounded amendment. Current legacy runtime and inactive new OPS paths stay distinguished. No source/test edit before such an amendment; may run existing meaningful checks and source-matching own-B read-only GitHub verification. No full paid suite, cloud write/admin setup/data deletion/participant operation inferred.
+
+Preserve24 frozen paths: A NP00 runtime/model-job/qualification/infra/own tracking/root/lock/inspector20, plus FIN01 new test/ledger/source evidence/ticket. All unchanged; no blanket NP00 transfer. Required managed/current-service and new OPS installation/lifecycle/recovery evidence remain unproved until actual matching results. Synthetic distinct actors are not the human developers or authenticated service accounts. Next reconcile source and duplicate coverage, then finish available group/concurrency/privacy coding until its verified handoff or a genuine blocker; progress receipts do not end work.
