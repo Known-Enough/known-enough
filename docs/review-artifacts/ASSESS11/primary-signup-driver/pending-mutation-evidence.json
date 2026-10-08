@@ -167,7 +167,7 @@
     "present": true,
     "observation": "SIMULATED_PORTS_ONLY_NO_PROVIDER_REQUEST"
   },
-  "lastObservedAt": "2026-10-08T20:29:23.173444+00:00",
+  "lastObservedAt": "2026-10-08T20:34:10.704127+00:00",
   "claimSync": {
     "label": "claim",
     "expectedRemote": "7641afae2a4266fcb1b66d93bca60bbc807de081",
@@ -221,5 +221,67 @@
     ]
   },
   "claimReleasedAt": "2026-10-08T20:29:23.173444+00:00",
-  "wholeTask": "REVIEW_UNCLAIMED_PRIMARY_MANAGED_PROOF_OPEN"
+  "wholeTask": "REVIEW_UNCLAIMED_PRIMARY_MANAGED_PROOF_OPEN",
+  "scheduledAt": "2026-10-08T20:13:07.971Z",
+  "actualStart": "2026-10-08T20:13:16.651635+00:00",
+  "observedClosingAt": "2026-10-08T20:34:10.704127+00:00",
+  "handoffSync": {
+    "label": "handoff",
+    "expectedRemote": "c3ceb3b36186037e3195523755ecb34dc19a6f5c",
+    "sourceSha": "8e1d05b3fc4fca5f53dfb75edbb401273ab3efb4",
+    "observedEnd": "2026-10-08T20:30:03.648229+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 54
+  },
+  "lifecycleReceipts": [
+    {
+      "event": "started",
+      "id": 37837925021,
+      "created_at": "2026-10-08T20:14:16Z",
+      "observed_at": "2026-10-08T20:14:23.457Z",
+      "verified": true
+    },
+    {
+      "event": "progress",
+      "id": 37838896661,
+      "created_at": "2026-10-08T20:21:59Z",
+      "observed_at": "2026-10-08T20:22:08.931Z",
+      "verified": true
+    },
+    {
+      "event": "progress",
+      "id": 37839636139,
+      "created_at": "2026-10-08T20:27:53Z",
+      "observed_at": "2026-10-08T20:28:01.952Z",
+      "verified": true
+    },
+    {
+      "event": "finished",
+      "id": 37839980195,
+      "created_at": "2026-10-08T20:30:37Z",
+      "observed_at": "2026-10-08T20:30:44.435Z",
+      "verified": true
+    }
+  ],
+  "receiptMaxGapSeconds": 463,
+  "reportingGapThisExecution": false,
+  "modelVariant": "UNAVAILABLE",
+  "reasoningEffort": "UNAVAILABLE",
+  "nativeIdleGating": "UNKNOWN",
+  "nextNominalWake": "2026-10-08T20:43:07.971Z",
+  "finishedReceipt": {
+    "event": "finished",
+    "id": 37839980195,
+    "created_at": "2026-10-08T20:30:37Z",
+    "observed_at": "2026-10-08T20:30:44.435Z",
+    "verified": true,
+    "sourceSha": "8e1d05b3fc4fca5f53dfb75edbb401273ab3efb4",
+    "chatSummary": "Fixed the inactive primary signup driver to preserve recovery intent after uncertain confirmation/login outcomes (c3ceb3b). 62 focused, 1,390 application and 64 browser checks plus [offline verification](https://github.com/Known-Enough/known-enough/actions/runs/37839640881) passed. Primary managed signup remains unverified; next is own-account installation and signup/cleanup proof ([log](https://github.com/Known-Enough/known-enough/blob/main/docs/monitor-log.md#b-run154))."
+  },
+  "newDeploymentRequests": 0,
+  "newFullQualifications": 0,
+  "finalSynchronization": "PENDING_AT_OBSERVED_CLOSING_CHECKPOINT"
 }
