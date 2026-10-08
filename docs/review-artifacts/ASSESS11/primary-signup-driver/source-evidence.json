@@ -208,5 +208,47 @@
     "private durable journal and exclusive synthetic mailbox/fixture installation",
     "immutable-subject and partial-failure cleanup semantics; fenced/quiescent orphaned-account recovery",
     "source-exact managed public signup, received confirmation, PKCE login/server identity, usage/privacy/CLEAN proof"
-  ]
+  ],
+  "lifecycleReceipts": [
+    {
+      "id": 37779375147,
+      "created_at": "2026-10-08T12:47:12Z",
+      "observed_at": "2026-10-08T12:47:20.313Z",
+      "verified": true
+    },
+    {
+      "id": 37780594735,
+      "created_at": "2026-10-08T12:57:10Z",
+      "observed_at": "2026-10-08T12:57:26.274Z",
+      "verified": true
+    },
+    {
+      "id": 37781780208,
+      "created_at": "2026-10-08T13:06:28Z",
+      "observed_at": "2026-10-08T13:06:36.296Z",
+      "verified": true
+    },
+    {
+      "id": 37782621280,
+      "created_at": "2026-10-08T13:13:06Z",
+      "observed_at": "2026-10-08T13:13:15.230Z",
+      "verified": true
+    },
+    {
+      "id": 37783224430,
+      "created_at": "2026-10-08T13:17:45Z",
+      "observed_at": "2026-10-08T13:17:53.379Z",
+      "verified": true
+    },
+    {
+      "id": 37783655369,
+      "created_at": "2026-10-08T13:21:04Z",
+      "observed_at": "2026-10-08T13:21:11.759Z",
+      "verified": true
+    }
+  ],
+  "maximumReceiptGapSeconds": 598,
+  "reportingCheckpointEnd": "2026-10-08T13:23:06.737298+00:00",
+  "finishedReceiptSource": "d4a4334ba6a5bb80dcae6ab3aaa1fdad56594d16",
+  "chatSummary": "Primary signup driver source 4d83aca is CODE_READY: 44 focused tests, 1,335 application tests and 64 browser checks passed; [offline verification](https://github.com/Known-Enough/known-enough/actions/runs/37782685619) and staging publication succeeded. Primary signup and installed cleanup remain unverified; next is own-account setup and managed proof ([log](https://github.com/Known-Enough/known-enough/blob/main/docs/monitor-log.md#b-run151))."
 }
