@@ -433,5 +433,83 @@
       }
     ]
   },
-  "currentStatus": "BLOCKED / CODE_READY / unclaimed"
+  "currentStatus": "BLOCKED / CODE_READY / unclaimed",
+  "handoffSync": {
+    "label": "handoff",
+    "expectedRemote": "89273221f019ad60657e2eb709d398bd1fa5c003",
+    "sourceSha": "9bc152664a174160a80dc77bd1c65e40491e5a39",
+    "observedEnd": "2026-10-08T21:57:39.296002+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 100
+  },
+  "receipts": {
+    "receipts": [
+      {
+        "event": "started",
+        "id": 37848860424,
+        "createdAt": "2026-10-08T21:44:25Z",
+        "observedAt": "2026-10-08T21:44:35.811Z",
+        "source": "eb2786863104e6012a008d1e787f04122e693de9",
+        "recordSha256": "7b87f6d5945912c6b61e8cbb01a1ffb66578e2db0eaa1d7c6bd2d3e40723aa71",
+        "summarySha256": "e9ca38f21e0fdbfd40eed048fe516fd5918af6aca42370b5af5a557e8c5b6bd4",
+        "exactArtifactVerified": true
+      },
+      {
+        "event": "progress",
+        "id": 37849236423,
+        "createdAt": "2026-10-08T21:47:42Z",
+        "observedAt": "2026-10-08T21:47:49.147Z",
+        "source": "b4993e5c1eb758ee30206d802f4c2504e329fa0c",
+        "recordSha256": "90f2e2735ed782941ad3b50a0a91c706807ee5e680c4b6dc4d7edca7c3a539e3",
+        "summarySha256": "2fd6f152bdbb4a8a2a20007b2d81ea95ec146c97a9ffc7cabe28516bbda35bdc",
+        "exactArtifactVerified": true
+      },
+      {
+        "event": "progress",
+        "id": 37849688115,
+        "createdAt": "2026-10-08T21:51:42Z",
+        "observedAt": "2026-10-08T21:51:50.897Z",
+        "source": "89273221f019ad60657e2eb709d398bd1fa5c003",
+        "recordSha256": "0b86be41ab2d0eb9b477db667cab6d0d60810405867f69167911556e7ab0ad21",
+        "summarySha256": "06976475102a500990bd8c58a1d5f976005c1e54e7b1101f8abe3aece73f3555",
+        "exactArtifactVerified": true
+      },
+      {
+        "event": "finished",
+        "id": 37850388542,
+        "createdAt": "2026-10-08T21:58:00Z",
+        "observedAt": "2026-10-08T21:58:08.260Z",
+        "source": "9bc152664a174160a80dc77bd1c65e40491e5a39",
+        "recordSha256": "02a3433e66941d4a5b17f1ff40eb69d3b2ccfd46ec4f4a82af828dc8f7a71348",
+        "summarySha256": "d1fedc65aa338e10a21cefb8ead821e933b1fe309ee440ea4cff07f004976c29",
+        "exactArtifactVerified": true
+      }
+    ],
+    "gapsSeconds": [
+      197,
+      240,
+      378
+    ],
+    "maxGapSeconds": 378,
+    "reportingGapObserved": false,
+    "publicationFailureObserved": false
+  },
+  "chatSummary": "Fixed and pushed OPS00 Dynamo journal reads (8927322): malformed responses and non-string revisions are rejected without coercion or private error leaks. 122 native operations, 1,398 application and 64 browser checks plus [offline verification](https://github.com/Known-Enough/known-enough/actions/runs/37849683916) passed. Installation and managed recovery remain unverified; next is own-account setup and recovery proof ([log](https://github.com/Known-Enough/known-enough/blob/main/docs/monitor-log.md#b-run157)).",
+  "observedClosingAt": "2026-10-08T21:59:29.714358+00:00",
+  "actualStart": "2026-10-08T21:43:30.545125310Z",
+  "scheduledAt": "2026-10-08T21:43:09.380Z",
+  "nextNominalWake": "2026-10-08T22:13:09.380Z",
+  "closingJobs": {
+    "observedAt": "2026-10-08T21:58:22.988798+00:00",
+    "nonLoggingActiveRuns": []
+  },
+  "receiptLabelClarification": {
+    "observedAt": "2026-10-08T21:58:40.254286+00:00",
+    "progress1": 37849236423,
+    "kind": "APPEND_ONLY_LABEL_SPACE_CLARIFICATION"
+  },
+  "finalSync": "PENDING_CHECKED_DOCUMENTATION_SYNC"
 }
