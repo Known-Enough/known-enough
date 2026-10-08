@@ -69,7 +69,7 @@
     "docs/review-artifacts/ASSESS11/provider-diagnostics/diagnosis.md": "072014992b0543ff8e0e41191ddbae7fc95fa99092c9b9369841a2d6114b9fb8",
     "docs/review-artifacts/ASSESS11/provider-diagnostics/source-evidence.json": "4b5634a0b995414367fee227922486e9cb750354b4704b181271d46e124b932f"
   },
-  "sourceReady": "NOT_CHECKED",
+  "sourceReady": "LOCAL_CHECKED_SOURCE_SYNC_PENDING",
   "primaryExecution": "NOT_STARTED",
   "managedInstallation": "UNKNOWN",
   "reproduction": {
@@ -84,5 +84,103 @@
   "latestQualificationSource": "3fda7c9035681bf797aed244d3682628894cccff",
   "latestAllSeven": "PASS",
   "latestPrivacy": "PASS",
-  "latestCleanup": "CLEAN"
+  "latestCleanup": "CLEAN",
+  "red": {
+    "label": "red",
+    "command": [
+      "npm",
+      "test",
+      "--",
+      "tests/integration/live-qa-primary-signup.test.ts",
+      "--maxWorkers=2"
+    ],
+    "start": "2026-10-08T20:20:56.803045+00:00",
+    "end": "2026-10-08T20:20:57.673741+00:00",
+    "exit": 1,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {}
+  },
+  "redFailed": 7,
+  "redPassed": 55,
+  "newTests": 5,
+  "tightenedExistingTests": 3,
+  "focused": {
+    "label": "focused",
+    "command": [
+      "npm",
+      "test",
+      "--",
+      "tests/integration/live-qa-primary-signup.test.ts",
+      "--maxWorkers=2"
+    ],
+    "start": "2026-10-08T20:21:27.828419+00:00",
+    "end": "2026-10-08T20:21:28.617176+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/live-qa/primary-signup.mjs": "a6d424f7edf72d8f1624594d9cab506a537211f34f6b2c711ca65748e02ccef5",
+      "tests/integration/live-qa-primary-signup.test.ts": "85f67e5ae7fd2659cf3cbad1580627fae3f049aa134106983f44942f9e60dc45"
+    }
+  },
+  "focusedPassed": 62,
+  "full": {
+    "label": "full",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "start": "2026-10-08T20:21:54.461203+00:00",
+    "end": "2026-10-08T20:25:25.580066+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/live-qa/primary-signup.mjs": "a6d424f7edf72d8f1624594d9cab506a537211f34f6b2c711ca65748e02ccef5",
+      "tests/integration/live-qa-primary-signup.test.ts": "85f67e5ae7fd2659cf3cbad1580627fae3f049aa134106983f44942f9e60dc45"
+    },
+    "applicationPassed": 1390,
+    "optionalSkipped": 2,
+    "hostedPassed": 1,
+    "browserPassed": 64
+  },
+  "currentSourceFiles": {
+    "scripts/live-qa/primary-signup.mjs": "a6d424f7edf72d8f1624594d9cab506a537211f34f6b2c711ca65748e02ccef5",
+    "tests/integration/live-qa-primary-signup.test.ts": "85f67e5ae7fd2659cf3cbad1580627fae3f049aa134106983f44942f9e60dc45"
+  },
+  "postFixReproduction": {
+    "report": {
+      "status": "BLOCKED_OR_FAILED",
+      "execution": "FAIL",
+      "cleanup": "UNKNOWN",
+      "phase": "CONFIRM_INTENT",
+      "signupAttempts": 1,
+      "mailReads": 1,
+      "confirmationAttempts": 1,
+      "loginAttempts": 0,
+      "deleteAttempts": 0
+    },
+    "confirmationSettled": false,
+    "deleteCalls": 0,
+    "present": true,
+    "observation": "SIMULATED_PORTS_ONLY_NO_PROVIDER_REQUEST"
+  },
+  "lastObservedAt": "2026-10-08T20:26:45.161108+00:00",
+  "claimSync": {
+    "label": "claim",
+    "expectedRemote": "7641afae2a4266fcb1b66d93bca60bbc807de081",
+    "sourceSha": "b7b7f9193a3c26a5766501acb2db04d5408ecb7c",
+    "observedEnd": "2026-10-08T20:19:11.272962+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 54
+  },
+  "sourceCommandParseError": "apply_patch verification failed: invalid hunk at line15, Update hunk does not contain any lines; no file modified, corrected patch succeeded",
+  "newProviderRequests": 0,
+  "newSignupMessages": 0,
+  "newModelAttempts": 0
 }

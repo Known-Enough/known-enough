@@ -134,9 +134,12 @@ describe('inactive primary signup driver: simulated ports are not live proof', (
     await f.driver.prepare(plan); expect(await f.driver.execute(plan)).toMatchObject({ execution: 'FAIL', cleanup: 'CLEAN', confirmationAttempts: 0 }); expect(f.calls).not.toContain('confirm');
   });
 
-  test.each(['confirm', 'login'] as const)('%s exception leaves failed journey with independently clean resource', async operation => {
+  test.each(['confirm', 'login'] as const)('%s ambiguous exception retains private intent and never starts cleanup', async operation => {
     const f = fixture(); f.ports[operation] = async () => { throw new Error('PRIVATE_TOKEN'); };
-    await f.driver.prepare(plan); expect(await f.driver.execute(plan)).toMatchObject({ execution: 'FAIL', cleanup: 'CLEAN' }); expect(f.liveSubject).toBeNull();
+    await f.driver.prepare(plan);
+    const phase = operation === 'confirm' ? 'CONFIRM_INTENT' : 'LOGIN_INTENT';
+    expect(await f.driver.execute(plan)).toMatchObject({ execution: 'FAIL', cleanup: 'UNKNOWN', phase, deleteAttempts: 0 });
+    expect(f.liveSubject).toBe(ownSubject); expect(f.calls).not.toContain('delete');
   });
 
   test.each(['subject', 'pool', 'client', 'serverOwner', 'status'])('unverified login %s never passes', async key => {
@@ -234,7 +237,9 @@ describe('inactive primary signup driver: simulated ports are not live proof', (
 
   test('provider error text cannot impersonate an internal CAS conflict or leak out of preflight', async () => {
     const f = fixture(); f.ports.confirm = async () => { throw new Error('PRIMARY_JOURNAL_CONFLICT'); };
-    await f.driver.prepare(plan); expect(await f.driver.execute(plan)).toMatchObject({ execution: 'FAIL', cleanup: 'CLEAN' });
+    await f.driver.prepare(plan);
+    expect(await f.driver.execute(plan)).toMatchObject({ execution: 'FAIL', cleanup: 'UNKNOWN', phase: 'CONFIRM_INTENT', deleteAttempts: 0 });
+    expect(f.liveSubject).toBe(ownSubject); expect(f.calls).not.toContain('delete');
     const g = fixture(); g.ports.verifyContext = async () => { throw new Error('PRIVATE_TOKEN_PASSWORD'); };
     await expect(g.driver.prepare(plan)).rejects.toThrow('PRIMARY_PORT_UNKNOWN');
   });
@@ -299,5 +304,82 @@ describe('inactive primary signup driver: simulated ports are not live proof', (
       ? { status: 'PRESENT', subject: ownSubject, username: plan.username, error: 'PRIVATE_INCOMPLETE_READ' } : original(request, options);
     await f.driver.prepare(plan); expect(await f.driver.execute(plan)).toMatchObject({ status: 'BLOCKED_OR_FAILED', cleanup: 'UNKNOWN', deleteAttempts: 0 });
     expect(f.liveSubject).toBe(ownSubject); expect(f.calls).not.toContain('delete');
+  });
+
+  const pendingMutations = [
+    ['confirm', 'fulfill'], ['confirm', 'reject'], ['login', 'fulfill'], ['login', 'reject']
+  ] as const;
+
+  test.each(pendingMutations)('%s deadline keeps intent through restart and late %s without deletion', async (operation, lateOutcome) => {
+    const controllers = new Map<AbortSignal, AbortController>();
+    const timeout = vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => {
+      const controller = new AbortController(); controllers.set(controller.signal, controller); return controller.signal;
+    });
+    let settleLate: (() => void) | undefined;
+    let settlement: Promise<void> | undefined;
+    let settled = false;
+    const pending = <T>(options: Options, value: T): Promise<T> => {
+      const response = new Promise<T>((resolve, reject) => {
+        settleLate = () => lateOutcome === 'fulfill' ? resolve(value) : reject(new Error('PRIVATE_RESPONSE_LOST'));
+      });
+      settlement = response.then(() => { settled = true; }, () => { settled = true; });
+      queueMicrotask(() => controllers.get(options.signal)!.abort());
+      return response;
+    };
+    try {
+      const f = fixture();
+      if (operation === 'confirm') f.ports.confirm = async (_request, options) => {
+        f.calls.push('confirm'); return pending(options, { status: 'CONFIRMED' });
+      };
+      else f.ports.login = async (_request, options) => {
+        f.calls.push('login');
+        return pending(options, { status: 'VERIFIED', subject: ownSubject, pool: PRIMARY_SIGNUP_TARGET.pool,
+          client: PRIMARY_SIGNUP_TARGET.client, serverOwner: ownSubject });
+      };
+      await f.driver.prepare(plan);
+      const phase = operation === 'confirm' ? 'CONFIRM_INTENT' : 'LOGIN_INTENT';
+      const report = await f.driver.execute(plan);
+      expect(settled).toBe(false);
+      expect(report).toMatchObject({ status: 'BLOCKED_OR_FAILED', execution: 'FAIL', cleanup: 'UNKNOWN', phase,
+        signupAttempts: 1, confirmationAttempts: 1, loginAttempts: operation === 'login' ? 1 : 0, deleteAttempts: 0 });
+      expect(f.liveSubject).toBe(ownSubject); expect(f.record.subject).toBe(ownSubject);
+      expect(f.calls).not.toContain('delete');
+      const retained = structuredClone(f.record);
+      const restarted = primarySignupDriver({ journal: f.journal, ports: f.ports });
+      expect(await restarted.execute(plan)).toEqual(report);
+      expect(await restarted.recover(plan)).toEqual(report);
+      expect(f.record).toEqual(retained); expect(settled).toBe(false);
+      settleLate!(); await settlement;
+      expect(settled).toBe(true);
+      expect(await restarted.recover(plan)).toEqual(report);
+      expect(f.record).toEqual(retained); expect(f.calls.filter(call => call === operation)).toHaveLength(1);
+      expect(f.calls.filter(call => call === 'signup')).toHaveLength(1); expect(f.calls).not.toContain('delete');
+      expect(JSON.stringify(report)).not.toMatch(/PRIVATE|subject|username|mailbox|fixture|ke-primary/);
+    } finally { settleLate?.(); await settlement; timeout.mockRestore(); }
+  });
+
+  test('a read-only mail deadline still permits cleanup without a confirmation or login writer', async () => {
+    const controllers = new Map<AbortSignal, AbortController>();
+    const timeout = vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => {
+      const controller = new AbortController(); controllers.set(controller.signal, controller); return controller.signal;
+    });
+    let settleLate: (() => void) | undefined;
+    let settlement: Promise<void> | undefined;
+    try {
+      const f = fixture();
+      f.ports.readMail = async (_request, options) => {
+        const response = new Promise<{ status: string; leaseId: string; mailboxKey: string; code: string }>(resolve => {
+          settleLate = () => resolve({ status: 'READY', leaseId: f.lease.id, mailboxKey: f.lease.mailboxKey, code: '123456' });
+        });
+        settlement = response.then(() => undefined);
+        queueMicrotask(() => controllers.get(options.signal)!.abort()); return response;
+      };
+      await f.driver.prepare(plan);
+      expect(await f.driver.execute(plan)).toMatchObject({ execution: 'FAIL', cleanup: 'CLEAN', phase: 'CLEAN',
+        mailReads: 1, confirmationAttempts: 0, loginAttempts: 0, deleteAttempts: 1 });
+      expect(f.liveSubject).toBeNull(); settleLate!(); await settlement;
+      expect(f.calls).not.toContain('confirm'); expect(f.calls).not.toContain('login');
+      expect(f.calls.filter(call => call === 'delete')).toHaveLength(1);
+    } finally { settleLate?.(); await settlement; timeout.mockRestore(); }
   });
 });

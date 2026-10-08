@@ -213,6 +213,12 @@ export function primarySignupDriver({ journal, ports }) {
                 current = await advance(plan, current, { phase: 'VERIFIED', result: 'PASS' });
             } catch (error) {
                 if (error instanceof DriverFault && ['PRIMARY_JOURNAL_CONFLICT', 'PRIMARY_JOURNAL_UNAVAILABLE'].includes(error.message)) throw error;
+                // A lost confirmation/login response or observation deadline is
+                // not proof that the remote mutation stopped. Keep its durable
+                // intent and known subject for fenced, read-only recovery; do
+                // not race a possibly active writer with destructive cleanup.
+                if (error instanceof DriverFault && error.message === 'PRIMARY_PORT_UNKNOWN'
+                    && ['CONFIRM_INTENT', 'LOGIN_INTENT'].includes(current.phase)) return primarySignupReport(current);
                 // FAIL describes this journey, independent of cleanup's final status.
             }
             return primarySignupReport(await cleanup(plan, current));
