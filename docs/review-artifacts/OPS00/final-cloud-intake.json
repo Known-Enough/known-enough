@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "task": "OPS00",
-  "phase": "CHECKED_SOURCE_PENDING_ACTUAL_INTAKE",
+  "phase": "CODE_READY_MANAGED_BLOCKED",
   "sourceBaseline": "e6ce21a1d32dd68b1ae902e31762a89bdff40917",
-  "sourceSha": null,
+  "sourceSha": "938628fa038c3d0b3d7491811507ac08225e2843",
   "sourceFiles": {
     "scripts/operations/installed-readback.mjs": "c0045c4c5c1149df417c20845ea88eb7dbb4dcd9855344fb3554b89bc16bf121",
     "scripts/operations/installed-readback.test.mjs": "a6e1e22849daa70a9213d96c70bf0938eba2c88ee84275f90a0ba0927ad8690b",
@@ -120,7 +120,158 @@
       "Signup and verification email remain gated"
     ]
   },
-  "managedIntake": "NOT_EXECUTED",
+  "managedIntake": {
+    "runId": 37745058529,
+    "sourceSha": "938628fa038c3d0b3d7491811507ac08225e2843",
+    "actorId": 143764700,
+    "conclusion": "failure",
+    "result": "BLOCKED",
+    "artifactSha256": "3d1531bc537a0ed8bf076b5b22cede0a59c32acf3818b291335522fc24170ddf",
+    "artifact_match": true,
+    "observedAt": "2026-10-08T07:43:26.307993+00:00",
+    "report": {
+      "schemaVersion": 1,
+      "sourceSha": "938628fa038c3d0b3d7491811507ac08225e2843",
+      "account": "092954139775",
+      "region": "us-east-1",
+      "observedAt": "2026-10-08T07:42:12.828Z",
+      "result": "BLOCKED",
+      "ownOidcIdentity": "VERIFIED",
+      "installation": "UNKNOWN",
+      "effectivePermissions": "UNKNOWN",
+      "managedRecovery": "NOT_EXECUTED",
+      "mutations": 0,
+      "requests": 5,
+      "limits": {
+        "requests": 16,
+        "timeoutMs": 30000,
+        "deadlineMs": 480000,
+        "responseBytes": 131072
+      },
+      "reads": [
+        {
+          "action": "sts:GetCallerIdentity",
+          "target": "arn:aws:iam::092954139775:role/KnownEnoughGithubStagingInspector",
+          "status": "READ",
+          "code": null
+        },
+        {
+          "action": "cloudformation:DescribeStacks",
+          "target": "arn:aws:cloudformation:us-east-1:092954139775:stack/KnownEnoughOperationsRecovery/*",
+          "status": "UNKNOWN",
+          "code": "AccessDenied"
+        },
+        {
+          "action": "iam:GetRole",
+          "target": "arn:aws:iam::092954139775:role/KnownEnoughGithubOperationsRecovery",
+          "status": "UNKNOWN",
+          "code": "AccessDenied"
+        },
+        {
+          "action": "dynamodb:DescribeTable",
+          "target": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+          "status": "UNKNOWN",
+          "code": "AccessDeniedException"
+        },
+        {
+          "action": "s3:GetBucketVersioning",
+          "target": "arn:aws:s3:::known-enough-operations-recovery-092954139775-us-east-1",
+          "status": "ABSENT",
+          "code": "NoSuchBucket"
+        }
+      ],
+      "configuration": {
+        "stack": "UNKNOWN",
+        "template": "UNKNOWN",
+        "role": "UNKNOWN",
+        "inlineNames": "UNKNOWN",
+        "inlinePolicy": "UNKNOWN",
+        "attachedPolicies": "UNKNOWN",
+        "table": "UNKNOWN",
+        "backups": "UNKNOWN",
+        "ttl": "UNKNOWN",
+        "versioning": "UNKNOWN",
+        "encryption": "UNKNOWN",
+        "publicAccess": "UNKNOWN",
+        "ownership": "UNKNOWN",
+        "lifecycle": "UNKNOWN",
+        "bucketPolicy": "UNKNOWN"
+      }
+    },
+    "ciNewTests": 13,
+    "triggeringActorId": 143764700,
+    "workflowPath": ".github/workflows/operations-intake.yml",
+    "jobStart": "2026-10-08T07:42:07Z",
+    "jobEnd": "2026-10-08T07:42:23Z",
+    "steps": [
+      {
+        "name": "Set up job",
+        "conclusion": "success",
+        "started_at": "2026-10-08T07:42:08Z",
+        "completed_at": "2026-10-08T07:42:09Z"
+      },
+      {
+        "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+        "conclusion": "success",
+        "started_at": "2026-10-08T07:42:09Z",
+        "completed_at": "2026-10-08T07:42:11Z"
+      },
+      {
+        "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "conclusion": "success",
+        "started_at": "2026-10-08T07:42:11Z",
+        "completed_at": "2026-10-08T07:42:11Z"
+      },
+      {
+        "name": "Verify fixed source and setup before credentials",
+        "conclusion": "success",
+        "started_at": "2026-10-08T07:42:11Z",
+        "completed_at": "2026-10-08T07:42:12Z"
+      },
+      {
+        "name": "Run aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd",
+        "conclusion": "success",
+        "started_at": "2026-10-08T07:42:12Z",
+        "completed_at": "2026-10-08T07:42:12Z"
+      },
+      {
+        "name": "Read only fixed installation metadata",
+        "conclusion": "failure",
+        "started_at": "2026-10-08T07:42:12Z",
+        "completed_at": "2026-10-08T07:42:20Z"
+      },
+      {
+        "name": "Publish only the allowlisted readback and denial codes",
+        "conclusion": "success",
+        "started_at": "2026-10-08T07:42:20Z",
+        "completed_at": "2026-10-08T07:42:21Z"
+      },
+      {
+        "name": "Post Run aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd",
+        "conclusion": "success",
+        "started_at": "2026-10-08T07:42:21Z",
+        "completed_at": "2026-10-08T07:42:21Z"
+      },
+      {
+        "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "conclusion": "skipped",
+        "started_at": "2026-10-08T07:42:21Z",
+        "completed_at": "2026-10-08T07:42:21Z"
+      },
+      {
+        "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+        "conclusion": "success",
+        "started_at": "2026-10-08T07:42:21Z",
+        "completed_at": "2026-10-08T07:42:21Z"
+      },
+      {
+        "name": "Complete job",
+        "conclusion": "success",
+        "started_at": "2026-10-08T07:42:21Z",
+        "completed_at": "2026-10-08T07:42:21Z"
+      }
+    ]
+  },
   "environment": {
     "cloudWrites": 0,
     "paidCalls": 0,
@@ -128,5 +279,6 @@
     "dataOperations": 0,
     "participantGrants": "NOT_CREATED",
     "schedulerIdleGate": "UNKNOWN"
-  }
+  },
+  "releasedAt": "2026-10-08T07:46:22.312839+00:00"
 }
