@@ -7,16 +7,38 @@
   "checkedCodeSource": "297978d893d294caaec443bf666d2ab95c1e6063",
   "account": "Battosai1806",
   "actorId": 143764700,
-  "phase": "QA06_DIAGNOSTIC_CODING",
-  "fullQualification": "UNKNOWN",
+  "phase": "CODE_READY_RELEASED",
+  "fullQualification": "PASS",
   "primarySignup": "UNKNOWN",
   "actualUsage": {
-    "modelAttempts": 22,
-    "signupMessages": 1,
-    "reservedTokens": 779430,
-    "reservedCostMicros": 779430,
+    "modelAttempts": 53,
+    "signupMessages": 2,
+    "reservedTokens": 1891206,
+    "reservedCostMicros": 1891206,
+    "workflowCycles": 2,
+    "fixtureCycles": 2,
+    "qaReleaseLanePasses": 2,
+    "primaryReleaseLanePasses": 2,
+    "actualAwsWriteTotal": "NOT_COUNTED",
     "cloudBilling": "NOT_OBSERVED",
-    "workflowCycles": 1
+    "perCycle": [
+      {
+        "run": 37769393591,
+        "source": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba",
+        "modelAttempts": 22,
+        "signupMessages": 1,
+        "reservedTokens": 779430,
+        "reservedCostMicros": 779430
+      },
+      {
+        "run": 37774334274,
+        "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+        "modelAttempts": 31,
+        "signupMessages": 1,
+        "reservedTokens": 1111776,
+        "reservedCostMicros": 1111776
+      }
+    ]
   },
   "preserved33": {
     "apps/api/src/model-runtime.ts": "4b233b906c494db0a07b500deb697cdec1cdee402a1cd9580c9c3cbb279309d4",
@@ -245,7 +267,7 @@
     ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013",
     "tests/e2e/email-registration.spec.ts": "da14901cfc081dcb829b5345930354240ee5133fcf626f895cbde07da2cb00c7"
   },
-  "currentSourceSha": null,
+  "currentSourceSha": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
   "diagnosticPhases": [
     "QA06_REFUSAL_CREATE",
     "QA06_REFUSAL_READY",
@@ -368,5 +390,478 @@
       "verified": true
     }
   },
-  "currentCodingMilestone": "CHECKED_PENDING_SOURCE_SYNC"
+  "currentCodingMilestone": "CHECKED_PENDING_SOURCE_SYNC",
+  "secondWorkflow": {
+    "run": 37774334274,
+    "createdAt": "2026-10-08T12:04:36Z",
+    "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+    "signupOnly": false,
+    "ownActorVerified": true,
+    "statusAtObservation": "in_progress",
+    "observedAt": "2026-10-08T12:12:36.445231+00:00",
+    "laneJobs": [
+      {
+        "name": "provenance",
+        "id": 113301315559,
+        "conclusion": "success",
+        "start": "2026-10-08T12:04:39Z",
+        "end": "2026-10-08T12:04:46Z"
+      },
+      {
+        "name": "release",
+        "id": 113301371220,
+        "conclusion": "success",
+        "start": "2026-10-08T12:04:48Z",
+        "end": "2026-10-08T12:09:24Z"
+      },
+      {
+        "name": "primary-release",
+        "id": 113303143097,
+        "conclusion": "success",
+        "start": "2026-10-08T12:09:26Z",
+        "end": "2026-10-08T12:09:45Z"
+      },
+      {
+        "name": "metadata",
+        "id": 113303276094,
+        "conclusion": "success",
+        "start": "2026-10-08T12:09:48Z",
+        "end": "2026-10-08T12:10:10Z"
+      },
+      {
+        "name": "public",
+        "id": 113303276148,
+        "conclusion": "success",
+        "start": "2026-10-08T12:09:48Z",
+        "end": "2026-10-08T12:10:35Z"
+      },
+      {
+        "name": "journey",
+        "id": 113303275970,
+        "status": "in_progress",
+        "start": "2026-10-08T12:09:47Z"
+      }
+    ],
+    "laneArtifacts": {
+      "run": 37774334274,
+      "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+      "observedAt": "2026-10-08T12:13:29.479809+00:00",
+      "artifacts": {
+        "release": {
+          "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+          "status": null,
+          "sha256": "0271cc5bc0d1d0a45bab4032a3ca566a586370c2486f5d86f44e216f16a7ec0f"
+        },
+        "primary": {
+          "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+          "status": "PASS",
+          "sha256": "2c09b2cad206902737c627dfbde2aa20dee9146a8ac23e50d4841fe77e52edc0",
+          "primaryBackendZipSha256": "417eff55b6c9061444a725ad49343282085a93f904795ab0ebb1812cd415204b"
+        },
+        "public": {
+          "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+          "status": "PASS",
+          "sha256": "f760264b140c07bf3084de2496e1899706ab2b420366aa4cf1e4f3a76ac18548"
+        },
+        "metadata": {
+          "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+          "status": "PASS",
+          "sha256": "78644a94b0384968952ad8f12f1740e6ecb85c369407ec887bfa27e12e258b06"
+        }
+      }
+    },
+    "status": "completed",
+    "conclusion": "success",
+    "verified": {
+      "run": 37774334274,
+      "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+      "actor": 143764700,
+      "conclusion": "success",
+      "observedAt": "2026-10-08T12:36:57.099438+00:00",
+      "report": {
+        "schemaVersion": 1,
+        "runScope": "FULL",
+        "budget": {
+          "attempts": 31,
+          "reservedTokens": 1111776,
+          "reservedCostMicros": 1111776,
+          "maxAttemptsPerRun": 200,
+          "maxTokensPerRun": 2500000,
+          "maxCostMicrosPerRun": 2500000
+        },
+        "gatewayObservation": "ACCESS_DENIED",
+        "gatewayThrottle": null,
+        "modelFailures": [],
+        "runId": "gh-37774334274-1",
+        "sourceCommit": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+        "status": "PASS",
+        "lanes": {
+          "execution": "PASS",
+          "preflight": "PASS",
+          "fixtures": "PASS",
+          "journeys": "PASS",
+          "model": "PASS",
+          "privacy": "PASS",
+          "signup": "PASS",
+          "cleanup": "PASS"
+        },
+        "tests": [
+          {
+            "title": "QA01 signup and managed login",
+            "mailStatus": "MAIL_CODE_READY",
+            "status": "PASS"
+          },
+          {
+            "title": "QA02 admission and invitations",
+            "status": "PASS"
+          },
+          {
+            "title": "QA03 fresh decision and owner confirmations",
+            "status": "PASS"
+          },
+          {
+            "title": "QA04 private negotiation and exact agreement",
+            "catalogCounts": {
+              "tested": 4,
+              "valid": 0,
+              "invalid": 2,
+              "needsPermission": 2,
+              "needsClarification": 0
+            },
+            "ruleFailureKinds": [],
+            "kernelCodes": [
+              "NEGOTIABLE_PERMISSION_REQUIRED"
+            ],
+            "status": "PASS"
+          },
+          {
+            "title": "QA05 denial privacy and recovery",
+            "status": "PASS"
+          },
+          {
+            "title": "QA06 refusal revocation revision and disclosure",
+            "status": "PASS"
+          },
+          {
+            "title": "QA07 rendered clarification and accessibility",
+            "status": "PASS"
+          }
+        ],
+        "counts": {
+          "passed": 7,
+          "failed": 0,
+          "blocked": 0,
+          "modelAttempts": 31,
+          "signupMessages": 1
+        }
+      },
+      "artifactHashes": {
+        "release": "0271cc5bc0d1d0a45bab4032a3ca566a586370c2486f5d86f44e216f16a7ec0f",
+        "primary": "2c09b2cad206902737c627dfbde2aa20dee9146a8ac23e50d4841fe77e52edc0",
+        "public": "f760264b140c07bf3084de2496e1899706ab2b420366aa4cf1e4f3a76ac18548",
+        "metadata": "78644a94b0384968952ad8f12f1740e6ecb85c369407ec887bfa27e12e258b06",
+        "journey": "7ea1e48a4b7f3692e1f084655188feb429a47e7d607895ce6489bd4f69d32eb7",
+        "complete": "71d601396f96460ad8ae8df69d982477b5089e64b308a17b1e52a45f5799563f"
+      },
+      "cleanupRetry": "success",
+      "jobStart": "2026-10-08T12:09:47Z",
+      "jobEnd": "2026-10-08T12:36:14Z",
+      "lanes": {
+        "release": {
+          "status": null,
+          "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867"
+        },
+        "primary": {
+          "status": "PASS",
+          "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867"
+        },
+        "public": {
+          "status": "PASS",
+          "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867"
+        },
+        "metadata": {
+          "status": "PASS",
+          "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867"
+        },
+        "complete": {
+          "status": "PASS",
+          "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867"
+        }
+      }
+    },
+    "jobs": [
+      {
+        "id": 113301315559,
+        "name": "provenance",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-08T12:04:39Z",
+        "completedAt": "2026-10-08T12:04:46Z",
+        "verifiedRelevantSteps": []
+      },
+      {
+        "id": 113301371220,
+        "name": "release",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-08T12:04:48Z",
+        "completedAt": "2026-10-08T12:09:24Z",
+        "verifiedRelevantSteps": []
+      },
+      {
+        "id": 113303143097,
+        "name": "primary-release",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-08T12:09:26Z",
+        "completedAt": "2026-10-08T12:09:45Z",
+        "verifiedRelevantSteps": []
+      },
+      {
+        "id": 113303275970,
+        "name": "journey",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-08T12:09:47Z",
+        "completedAt": "2026-10-08T12:36:14Z",
+        "verifiedRelevantSteps": [
+          {
+            "name": "Run real journeys and exact always-run cleanup",
+            "status": "completed",
+            "conclusion": "success",
+            "startedAt": "2026-10-08T12:10:20Z",
+            "completedAt": "2026-10-08T12:36:10Z"
+          },
+          {
+            "name": "Retry exact cleanup after cancellation or runner failure",
+            "status": "completed",
+            "conclusion": "success",
+            "startedAt": "2026-10-08T12:36:10Z",
+            "completedAt": "2026-10-08T12:36:10Z"
+          }
+        ]
+      },
+      {
+        "id": 113303276094,
+        "name": "metadata",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-08T12:09:48Z",
+        "completedAt": "2026-10-08T12:10:10Z",
+        "verifiedRelevantSteps": []
+      },
+      {
+        "id": 113303276148,
+        "name": "public",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-08T12:09:48Z",
+        "completedAt": "2026-10-08T12:10:35Z",
+        "verifiedRelevantSteps": []
+      },
+      {
+        "id": 113313807576,
+        "name": "report",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-08T12:36:16Z",
+        "completedAt": "2026-10-08T12:36:23Z",
+        "verifiedRelevantSteps": []
+      }
+    ]
+  },
+  "authorityLiteralEquivalence": {
+    "sameOrderedAuthorityCalls": true,
+    "calls": 117,
+    "literalWhitespacePreserved": true,
+    "scope": "TypeScript printer retains string/template argument bytes; excludes outer test and added test.step calls only"
+  },
+  "verifiedProgressReceipts": [
+    {
+      "id": 37774552415,
+      "createdAt": "2026-10-08T12:06:28Z",
+      "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+      "event": "progress",
+      "artifactMatch": true
+    },
+    {
+      "id": 37775261844,
+      "createdAt": "2026-10-08T12:12:39Z",
+      "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+      "event": "progress",
+      "artifactMatch": true
+    },
+    {
+      "id": 37776195139,
+      "createdAt": "2026-10-08T12:20:44Z",
+      "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+      "event": "progress",
+      "artifactMatch": true
+    },
+    {
+      "id": 37777080500,
+      "createdAt": "2026-10-08T12:28:16Z",
+      "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+      "event": "progress",
+      "artifactMatch": true
+    },
+    {
+      "id": 37778218641,
+      "createdAt": "2026-10-08T12:37:40Z",
+      "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+      "event": "progress",
+      "artifactMatch": true
+    }
+  ],
+  "readOnlyNegotiationMapping": {
+    "observedAt": "2026-10-08T12:19:39.137460+00:00",
+    "readOnly": true,
+    "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+    "stage": "NEGOTIATION_QUESTION_INTENTS",
+    "meaning": "parseQuestionIntents rejected one attempt; category may be recovered by the second attempt and is collected across the whole fixture cycle",
+    "checks": [
+      "array and bounded count",
+      "exact structured keys and types",
+      "unique owner/constraint/version tuple",
+      "matching active NEGOTIABLE constraint",
+      "validation rule schema",
+      "TRUSTED_BACKEND visibility"
+    ],
+    "bounds": {
+      "maxAttempts": 2,
+      "commitGuardMs": 30000
+    },
+    "terminalModelFailureOrQa06Cause": "UNKNOWN",
+    "qa06UiLabels": "all reviewed exact labels match current source",
+    "changes": "NONE"
+  },
+  "claim": "REVIEW_UNCLAIMED",
+  "claimReleasedAt": "2026-10-08T12:39:21.335718+00:00",
+  "verifiedFullQualification": {
+    "run": 37774334274,
+    "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+    "actor": 143764700,
+    "conclusion": "success",
+    "observedAt": "2026-10-08T12:36:57.099438+00:00",
+    "report": {
+      "schemaVersion": 1,
+      "runScope": "FULL",
+      "budget": {
+        "attempts": 31,
+        "reservedTokens": 1111776,
+        "reservedCostMicros": 1111776,
+        "maxAttemptsPerRun": 200,
+        "maxTokensPerRun": 2500000,
+        "maxCostMicrosPerRun": 2500000
+      },
+      "gatewayObservation": "ACCESS_DENIED",
+      "gatewayThrottle": null,
+      "modelFailures": [],
+      "runId": "gh-37774334274-1",
+      "sourceCommit": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+      "status": "PASS",
+      "lanes": {
+        "execution": "PASS",
+        "preflight": "PASS",
+        "fixtures": "PASS",
+        "journeys": "PASS",
+        "model": "PASS",
+        "privacy": "PASS",
+        "signup": "PASS",
+        "cleanup": "PASS"
+      },
+      "tests": [
+        {
+          "title": "QA01 signup and managed login",
+          "mailStatus": "MAIL_CODE_READY",
+          "status": "PASS"
+        },
+        {
+          "title": "QA02 admission and invitations",
+          "status": "PASS"
+        },
+        {
+          "title": "QA03 fresh decision and owner confirmations",
+          "status": "PASS"
+        },
+        {
+          "title": "QA04 private negotiation and exact agreement",
+          "catalogCounts": {
+            "tested": 4,
+            "valid": 0,
+            "invalid": 2,
+            "needsPermission": 2,
+            "needsClarification": 0
+          },
+          "ruleFailureKinds": [],
+          "kernelCodes": [
+            "NEGOTIABLE_PERMISSION_REQUIRED"
+          ],
+          "status": "PASS"
+        },
+        {
+          "title": "QA05 denial privacy and recovery",
+          "status": "PASS"
+        },
+        {
+          "title": "QA06 refusal revocation revision and disclosure",
+          "status": "PASS"
+        },
+        {
+          "title": "QA07 rendered clarification and accessibility",
+          "status": "PASS"
+        }
+      ],
+      "counts": {
+        "passed": 7,
+        "failed": 0,
+        "blocked": 0,
+        "modelAttempts": 31,
+        "signupMessages": 1
+      }
+    },
+    "artifactHashes": {
+      "release": "0271cc5bc0d1d0a45bab4032a3ca566a586370c2486f5d86f44e216f16a7ec0f",
+      "primary": "2c09b2cad206902737c627dfbde2aa20dee9146a8ac23e50d4841fe77e52edc0",
+      "public": "f760264b140c07bf3084de2496e1899706ab2b420366aa4cf1e4f3a76ac18548",
+      "metadata": "78644a94b0384968952ad8f12f1740e6ecb85c369407ec887bfa27e12e258b06",
+      "journey": "7ea1e48a4b7f3692e1f084655188feb429a47e7d607895ce6489bd4f69d32eb7",
+      "complete": "71d601396f96460ad8ae8df69d982477b5089e64b308a17b1e52a45f5799563f"
+    },
+    "cleanupRetry": "success",
+    "jobStart": "2026-10-08T12:09:47Z",
+    "jobEnd": "2026-10-08T12:36:14Z",
+    "lanes": {
+      "release": {
+        "status": null,
+        "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867"
+      },
+      "primary": {
+        "status": "PASS",
+        "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867"
+      },
+      "public": {
+        "status": "PASS",
+        "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867"
+      },
+      "metadata": {
+        "status": "PASS",
+        "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867"
+      },
+      "complete": {
+        "status": "PASS",
+        "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867"
+      }
+    }
+  },
+  "nextAction": "Complete separately verified primary synthetic signup/mail/login/CLEAN through legitimate own capability; then deferred managed OPS completion. Do not repeat unchanged denied setup inventory or an unchanged full QA run.",
+  "nominalNextWake": "2026-10-08T12:46:59.671000+00:00",
+  "coalescedNewHints": [],
+  "nativeIdleDeliveryGate": "UNKNOWN",
+  "remainingWholeTaskCriteria": [
+    "source/target/own-account verified primary synthetic fixture and cleanup capability",
+    "actual primary signup/verification/managed login/privacy/CLEAN",
+    "deferred managed operations installation and service proof remain external project criteria"
+  ],
+  "priorQa06FailureCause": "UNKNOWN; current diagnostic-only source passed without modifying original authority calls, assertions, model or provider behavior"
 }
