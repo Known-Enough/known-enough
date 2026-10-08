@@ -2,7 +2,7 @@
 
 **Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of OPS03, not deferred administrator installation. Finish available inherited code/regressions and the obligation ledger; put administrator-only NP00 closeout at the end while preserving its saved work. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
 
-- Status: BLOCKED / unclaimed until OPS03 coding checkpoint; then coding phase eligible. Administrator installation/required managed acceptance deferred to final cloud phase.
+- Status: READY / unclaimed for the coding/ledger phase after verified OPS03 CODE_READY checkpoint. Administrator installation/required managed acceptance deferred to final cloud phase.
 - Worker: next eligible direct worker, current routing B; report actual model/effort and exact files at claim. No second writer, subagents or new cloud/spending authorization.
 - Scope: reconcile original NP00/technical-debt/assessment obligations, finish genuinely missing technical proof and narrowly reproduced corrections through authorized handoffs. Do not duplicate OPS/UX work, reopen verified fixes or rewrite historical acceptance.
 
@@ -17,3 +17,6 @@ Finish missing regressions, source/readback and authorized managed evidence. Pre
 ## Completion
 
 Every required inherited technical obligation has actual evidence and its authoritative ticket/status is reconciled, including NP00 through its real handoff. Remaining optional/deferred reviews/human trials stay explicitly deferred, not PASS. Unresolved required operations remain BLOCKED; administrative closure is not technical proof. Source changes require focused checks, pinned `npm run check` and relevant authorized managed proof. Documentation-only updates use links/reference/task consistency. Update own log/handoff and shared queue, then synchronize with `[skip ci]`.
+
+
+Readiness reconciliation 2026-10-08T02:42:37.662056+00:00: OPS03 checked [source d5bd22edba8d9a006b8401c3cba20ae6ba46b994](https://github.com/Known-Enough/known-enough/commit/d5bd22edba8d9a006b8401c3cba20ae6ba46b994) and own-B exact-source [CI 37718871377](https://github.com/Known-Enough/known-enough/actions/runs/37718871377) SUCCESS satisfy the coding dependency. Whole predecessor REVIEW/unclaimed for deferred managed proof, no FIN01 claim/code/admin operation started. Preserve original NP00 saved source/recovery and require bounded handoff before its files are touched.

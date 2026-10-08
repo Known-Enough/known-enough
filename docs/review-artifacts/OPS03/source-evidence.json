@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "task": "OPS03",
-  "status": "CHECKED_INACTIVE_SOURCE",
+  "status": "CODE_READY_INACTIVE_SOURCE",
   "account": "Battosai1806",
   "actorId": 143764700,
   "baseline": "d8afff9319f88f71ef6ae17546cd6c07236e5ec0",
@@ -101,5 +101,29 @@
     "Focused test fixture return annotation was corrected after focused check; unchanged assertions passed in final full.",
     "All SDK/provider/participant data in these tests is synthetic.",
     "Source-matching CI and checked claim release still pending at this source checkpoint."
-  ]
+  ],
+  "sourceSha": "d5bd22edba8d9a006b8401c3cba20ae6ba46b994",
+  "githubVerification": {
+    "id": 37718871377,
+    "source_sha": "d5bd22edba8d9a006b8401c3cba20ae6ba46b994",
+    "actor_id": 143764700,
+    "created_at": "2026-10-08T02:38:36Z",
+    "conclusion": "success",
+    "artifact_match": true,
+    "reports": 4,
+    "proposals": 4,
+    "native_tests": 62,
+    "application_tests": 1267,
+    "optional_skips": 2,
+    "hosted_preview_tests": 1,
+    "browser_tests": 62,
+    "installation": "UNKNOWN",
+    "activation": "DISABLED",
+    "providerCalls": "NOT_EXECUTED",
+    "participantConsent": "NOT_GRANTED",
+    "managedRecovery": "UNKNOWN",
+    "cleanup": "UNKNOWN",
+    "observed_end": "2026-10-08T02:42:20.163918+00:00"
+  },
+  "releaseObservedAt": "2026-10-08T02:42:37.662056+00:00"
 }
