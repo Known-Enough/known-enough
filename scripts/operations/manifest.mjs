@@ -33,7 +33,8 @@ export function manifestStore(transport, bucket) {
   return {
     read,
     async preserve(bytes, hash) {
-      const input = { Bucket: bucket, Key: key(hash), Body: verify(bytes, hash), IfNoneMatch: '*', ContentType: 'application/json', ServerSideEncryption: 'AES256' };
+      // Callers may change their buffer while the transport waits; upload a snapshot.
+      const input = { Bucket: bucket, Key: key(hash), Body: Buffer.from(verify(bytes, hash)), IfNoneMatch: '*', ContentType: 'application/json', ServerSideEncryption: 'AES256' };
       let response;
       try { response = await transport('PutObject', input); }
       catch (error) {

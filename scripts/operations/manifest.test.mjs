@@ -124,3 +124,87 @@ test('UTF-8 validation does not silently strip a JSON byte-order mark', async ()
   await assert.rejects(store.preserve(inputBytes, contentHash(inputBytes)), /^Error: OPS_MANIFEST_CONTENT_REJECTED$/);
   assert.equal(calls, 0);
 });
+
+test('delayed upload preserves its original bytes after the caller changes its buffer', async () => {
+  const original = Buffer.from('{"synthetic":true,"marker":"before"}');
+  const supplied = Buffer.from(original); const expectedHash = contentHash(original); const calls = [];
+  let entered, release, stored;
+  const began = new Promise(resolve => { entered = resolve; });
+  const gate = new Promise(resolve => { release = resolve; });
+  const transport = async (op, input) => {
+    calls.push(op);
+    if (op === 'PutObject') {
+      if (stored) throw Object.assign(new Error('duplicate'), { name: 'PreconditionFailed' });
+      entered(); await gate;
+      stored = { Body: Buffer.from(input.Body), VersionId: 'fixture-v1' };
+    }
+    return stored;
+  };
+  const store = manifestStore(transport, MANIFEST_BUCKET);
+  const pending = store.preserve(supplied, expectedHash); await began;
+  Buffer.from('{"synthetic":true,"marker":"after!"}').copy(supplied); release();
+  const first = await pending;
+  assert.deepEqual(stored.Body, original); assert.deepEqual(first.bytes, original);
+  first.bytes.fill(0);
+  const duplicate = await store.preserve(original, expectedHash);
+  const restarted = await manifestStore(transport, MANIFEST_BUCKET).read(expectedHash, duplicate.versionId);
+  assert.deepEqual(duplicate.bytes, original); assert.deepEqual(restarted.bytes, original);
+  assert.equal(restarted.versionId, 'fixture-v1');
+  assert.deepEqual(calls, ['PutObject', 'GetObject', 'PutObject', 'GetObject', 'GetObject']);
+});
+
+test('concurrent duplicate uploads keep one immutable version when both callers change buffers', async () => {
+  const original = Buffer.from('{"synthetic":true,"marker":"before"}');
+  const supplied = [Buffer.from(original), Buffer.from(original)]; const expectedHash = contentHash(original);
+  let entered, release, stored, waiting = 0; const calls = [];
+  const began = new Promise(resolve => { entered = resolve; });
+  const gate = new Promise(resolve => { release = resolve; });
+  const transport = async (op, input) => {
+    calls.push(op);
+    if (op === 'PutObject') {
+      if (++waiting === 2) entered(); await gate;
+      if (stored) throw Object.assign(new Error('duplicate'), { name: 'PreconditionFailed' });
+      stored = { Body: Buffer.from(input.Body), VersionId: 'fixture-v1' };
+    }
+    return stored;
+  };
+  const pending = supplied.map(value => manifestStore(transport, MANIFEST_BUCKET).preserve(value, expectedHash));
+  await began; supplied[0].fill(0); supplied[1].fill(1); release();
+  const outcomes = await Promise.allSettled(pending);
+  assert.ok(outcomes.every(value => value.status === 'fulfilled'));
+  for (const value of outcomes) {
+    assert.deepEqual(value.value.bytes, original); assert.equal(value.value.versionId, 'fixture-v1');
+  }
+  assert.deepEqual(stored.Body, original);
+  assert.deepEqual(calls, ['PutObject', 'PutObject', 'GetObject', 'GetObject']);
+});
+
+test('recovery journal preparation uses the original manifest despite later caller mutation', async () => {
+  const original = Buffer.from('{"synthetic":true,"marker":"before"}'); const supplied = Buffer.from(original);
+  const envelope = { sourceSha: 'a'.repeat(40), operation: 'PARTITION',
+    resourceArn: 'arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughGroupsStage', contractHash: 'b'.repeat(64), maxItems: 10 };
+  const plan = { schemaVersion: 1, sourceSha: envelope.sourceSha, account: '092954139775', region: 'us-east-1',
+    operation: envelope.operation, resourceArn: envelope.resourceArn, contractHash: envelope.contractHash,
+    expectedRevision: 3, maxItems: 10, recoveryManifestHash: contentHash(original) };
+  let entered, release, stored, journal; const calls = [];
+  const began = new Promise(resolve => { entered = resolve; });
+  const gate = new Promise(resolve => { release = resolve; });
+  const manifestTransport = async (op, input) => {
+    calls.push(op);
+    if (op === 'PutObject') {
+      entered(); await gate; stored = { Body: Buffer.from(input.Body), VersionId: 'fixture-v1' };
+    }
+    return stored;
+  };
+  const journalStorage = {
+    createIfAbsent: async (_key, value) => { calls.push('journal-create'); journal = structuredClone(value); return true; },
+    read: async () => { calls.push('journal-read'); return structuredClone(journal); },
+    compareAndSwap: async () => { throw new Error('unexpected progression'); }
+  };
+  const pending = prepareRecovery({ plan, envelope, manifestBytes: supplied, manifestTransport, bucket: MANIFEST_BUCKET, journalStorage });
+  await began; supplied.fill(0); release(); const result = await pending;
+  assert.deepEqual(stored.Body, original); assert.equal(result.state, 'PREPARED');
+  assert.equal(result.operationExecution, 'NOT_EXECUTED');
+  assert.deepEqual(calls, ['PutObject', 'GetObject', 'journal-create', 'journal-read']);
+  assert.ok(!JSON.stringify(result).includes('marker'));
+});

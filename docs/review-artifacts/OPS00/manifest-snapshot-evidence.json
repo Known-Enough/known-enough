@@ -121,7 +121,7 @@
     "docs/review-artifacts/OPS00/manifest-utf8-integrity.md": "6d3b5c0258fdc07ee65578ac8d40502db809c85b2aa75e61e759dd669e78c14b",
     "docs/review-artifacts/OPS00/manifest-utf8-evidence.json": "f4b66d01ead2c27de41ae3df734119742d9fafae1811e8bd44e3c9bea08dafa6"
   },
-  "sourceReady": "NOT_CHECKED",
+  "sourceReady": "LOCAL_CHECKED_OFFLINE_PENDING",
   "installation": "UNKNOWN",
   "managedRecovery": "NOT_EXECUTED",
   "reproduction": {
@@ -146,5 +146,136 @@
   "newAwsRequests": 0,
   "newModelAttempts": 0,
   "newSignupMessages": 0,
-  "execution": "RUN159"
+  "execution": "RUN159",
+  "red": {
+    "label": "red",
+    "command": [
+      "node",
+      "--experimental-transform-types",
+      "--test",
+      "--test-concurrency=2",
+      "scripts/operations/manifest.test.mjs",
+      "scripts/operations/recovery.test.mjs"
+    ],
+    "start": "2026-10-08T22:46:02.142240+00:00",
+    "end": "2026-10-08T22:46:02.278482+00:00",
+    "exit": 1,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {}
+  },
+  "focused": {
+    "label": "focused",
+    "command": [
+      "node",
+      "--experimental-transform-types",
+      "--test",
+      "--test-concurrency=2",
+      "scripts/operations/manifest.test.mjs",
+      "scripts/operations/recovery.test.mjs"
+    ],
+    "start": "2026-10-08T22:46:12.542142+00:00",
+    "end": "2026-10-08T22:46:12.663499+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/manifest.mjs": "4863f3a10aa60b06c2e0fc5bc520158c566de2f20d1aefcf6951fc7158375fa7",
+      "scripts/operations/manifest.test.mjs": "9195f5106fe886e40e4a36cfb95cf99ebec1ced8296144f49b334704703cd354"
+    }
+  },
+  "native": {
+    "label": "native",
+    "command": [
+      "node",
+      "--experimental-transform-types",
+      "--test",
+      "--test-concurrency=2",
+      "scripts/operations/archive-recovery.test.mjs",
+      "scripts/operations/aws-transport.test.mjs",
+      "scripts/operations/dynamo-journal.test.mjs",
+      "scripts/operations/installed-readback.test.mjs",
+      "scripts/operations/jobs-setup.test.mjs",
+      "scripts/operations/journal.test.mjs",
+      "scripts/operations/managed-preparation.test.mjs",
+      "scripts/operations/manifest.test.mjs",
+      "scripts/operations/partition-recovery.test.mjs",
+      "scripts/operations/partition-setup.test.mjs",
+      "scripts/operations/plan.test.mjs",
+      "scripts/operations/recovery.test.mjs",
+      "scripts/operations/retention-setup.test.mjs",
+      "scripts/operations/setup.test.mjs"
+    ],
+    "start": "2026-10-08T22:46:12.703746+00:00",
+    "end": "2026-10-08T22:46:15.909889+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/manifest.mjs": "4863f3a10aa60b06c2e0fc5bc520158c566de2f20d1aefcf6951fc7158375fa7",
+      "scripts/operations/manifest.test.mjs": "9195f5106fe886e40e4a36cfb95cf99ebec1ced8296144f49b334704703cd354"
+    }
+  },
+  "redFailed": 3,
+  "redPassed": 22,
+  "newTests": 3,
+  "focusedPassed": 25,
+  "nativePassed": 141,
+  "currentSourceFiles": {
+    "scripts/operations/manifest.mjs": "4863f3a10aa60b06c2e0fc5bc520158c566de2f20d1aefcf6951fc7158375fa7",
+    "scripts/operations/manifest.test.mjs": "9195f5106fe886e40e4a36cfb95cf99ebec1ced8296144f49b334704703cd354"
+  },
+  "postFixReproduction": {
+    "source": "86aec7311a1d149653d7c68901d5de790eb9e169",
+    "observedAt": "2026-10-08T22:46:34.342Z",
+    "observation": "SIMULATED_TRANSPORT_ONLY",
+    "realProviderRequests": 0,
+    "callerChangedAfterPutStarted": true,
+    "accepted": true,
+    "storedOriginal": true,
+    "storedChanged": false,
+    "storedHashMatchesKey": true,
+    "calls": [
+      "PutObject",
+      "GetObject",
+      "PutObject",
+      "GetObject"
+    ]
+  },
+  "claimSync": {
+    "label": "claim",
+    "expectedRemote": "69d56dab502ba911e5e499cd771ed26e13032065",
+    "sourceSha": "86aec7311a1d149653d7c68901d5de790eb9e169",
+    "observedEnd": "2026-10-08T22:45:20.331389+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 104
+  },
+  "ownedFullSession": 61874,
+  "fullResult": "PASS",
+  "lastObservedAt": "2026-10-08T22:50:18.025627+00:00",
+  "full": {
+    "label": "full",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "start": "2026-10-08T22:46:34.311088+00:00",
+    "end": "2026-10-08T22:50:03.317901+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/manifest.mjs": "4863f3a10aa60b06c2e0fc5bc520158c566de2f20d1aefcf6951fc7158375fa7",
+      "scripts/operations/manifest.test.mjs": "9195f5106fe886e40e4a36cfb95cf99ebec1ced8296144f49b334704703cd354"
+    },
+    "applicationPassed": 1398,
+    "optionalSkipped": 2,
+    "hostedPassed": 1,
+    "browserPassed": 64,
+    "boundaryReferences": 414
+  }
 }
