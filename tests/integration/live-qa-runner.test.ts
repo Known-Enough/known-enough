@@ -23,6 +23,23 @@ describe('LIVE02 runner preparation, no service simulation counted as live',()=>
 });
 
 
+test('authority journey failure keeps its first fixed subphase without private authority details', async () => {
+  // @ts-expect-error The JavaScript reporter is the actual privacy boundary.
+  const {default:Reporter}=await import('../../scripts/live-qa/sanitized-reporter.mjs');
+  for (const phase of ['QA06_REFUSAL_EXPLORE','QA06_DISCLOSURE_AUTHORITY','QA06_ROSTER_REVIEW']) {
+    const reporter=new Reporter();const title=REQUIRED_TESTS[5];
+    reporter.onStepEnd({title},{},{title:'PRIVATE_GRANT_ID',error:{message:'PRIVATE_REFUSAL'}});
+    reporter.onStepEnd({title},{},{title:phase,error:{message:'PRIVATE_CONDITION_TOKEN'}});
+    reporter.onStepEnd({title},{},{title:'QA06_REFUSAL_READY',error:{message:'PRIVATE_PARENT'}});
+    reporter.onTestEnd({title,attachments:[{body:'PRIVATE_GRANT_ID'}],annotations:[{type:'qa-operation-status',description:'PRIVATE_URL'}]},
+      {status:'failed',error:{message:'PRIVATE_MODEL_OUTPUT'},stdout:['PRIVATE_EMAIL']});
+    const report=qualificationReport({runId:'run-12345',tests:reporter.tests});
+    expect(report.tests[5]).toEqual({title,status:'FAIL',phase});
+    expect(JSON.stringify(report)).not.toMatch(/PRIVATE/);
+    expect(safeResults([{title,status:'failed',phase:'QA06_PRIVATE_GRANT_ID',error:{message:'PRIVATE_REFUSAL'}}])[5]).toEqual({title,status:'FAIL'});
+  }
+});
+
 test('failed signup phase survives the sanitized reporter and report without assertion values', async () => {
   const dir=mkdtempSync(resolve(tmpdir(),'ke-qa-phase-'));const before=process.env.QA_RESULTS_FILE;process.env.QA_RESULTS_FILE=dir+'/tests.json';
   try {

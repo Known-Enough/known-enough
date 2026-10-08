@@ -7,10 +7,17 @@
   "checkedCodeSource": "297978d893d294caaec443bf666d2ab95c1e6063",
   "account": "Battosai1806",
   "actorId": 143764700,
-  "phase": "CLAIMED_NOT_EXECUTED",
+  "phase": "QA06_DIAGNOSTIC_CODING",
   "fullQualification": "UNKNOWN",
   "primarySignup": "UNKNOWN",
-  "actualUsage": "NOT_EXECUTED",
+  "actualUsage": {
+    "modelAttempts": 22,
+    "signupMessages": 1,
+    "reservedTokens": 779430,
+    "reservedCostMicros": 779430,
+    "cloudBilling": "NOT_OBSERVED",
+    "workflowCycles": 1
+  },
   "preserved33": {
     "apps/api/src/model-runtime.ts": "4b233b906c494db0a07b500deb697cdec1cdee402a1cd9580c9c3cbb279309d4",
     "apps/api/src/model-runtime.test.ts": "614c8a6c363e1f0704019d73b85d5972cb1f0cc445df31d7d5c56b6a0e2e5584",
@@ -56,5 +63,310 @@
     "tests/integration/live-qa-runner.test.ts": "2a7a1d38a5964de21f268ac19ae0c156f6262baaa0a577007ad33a83edfe4159",
     ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013",
     "tests/e2e/email-registration.spec.ts": "da14901cfc081dcb829b5345930354240ee5133fcf626f895cbde07da2cb00c7"
-  }
+  },
+  "releaseSource": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba",
+  "workflowRun": 37769393591,
+  "createdAt": "2026-10-08T11:20:29Z",
+  "provenanceVerified": {
+    "actorId": 143764700,
+    "triggerId": 143764700,
+    "branch": "main",
+    "event": "workflow_dispatch",
+    "path": ".github/workflows/live-qa-release-and-check.yml"
+  },
+  "laneArtifacts": {
+    "run": 37769393591,
+    "source": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba",
+    "observedAt": "2026-10-08T11:29:43.201046+00:00",
+    "artifacts": {
+      "release": {
+        "source": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba",
+        "status": null,
+        "sha256": "1400b640b104c1142fd0dd082a7000954e0205bc1d784f0d0df11c05da6a9646"
+      },
+      "primary": {
+        "source": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba",
+        "status": "PASS",
+        "sha256": "44a8d4a035bfb7073113bfe235cc99c0fefd1dcd606baf130682cb384122624b"
+      },
+      "public": {
+        "source": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba",
+        "status": "PASS",
+        "sha256": "8675b99e70b0b08bae221d178eb52f067a158d47ba4cf00752609f51662b09aa"
+      },
+      "metadata": {
+        "source": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba",
+        "status": "PASS",
+        "sha256": "1dee9650ae4ec8aeb5d85f0295e1e1ba0673b55889786695c816931e0afb4bd7"
+      }
+    }
+  },
+  "progress1Verified": {
+    "id": 37769954442,
+    "created_at": "2026-10-08T11:25:34Z",
+    "observed_at": "2026-10-08T11:25:41.091Z",
+    "verified": true
+  },
+  "previousFullQualification": {
+    "run": 37769393591,
+    "source": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba",
+    "actor": 143764700,
+    "conclusion": "failure",
+    "observedAt": "2026-10-08T11:53:19.468160+00:00",
+    "report": {
+      "schemaVersion": 1,
+      "runScope": "FULL",
+      "budget": {
+        "attempts": 22,
+        "reservedTokens": 779430,
+        "reservedCostMicros": 779430,
+        "maxAttemptsPerRun": 200,
+        "maxTokensPerRun": 2500000,
+        "maxCostMicrosPerRun": 2500000
+      },
+      "gatewayObservation": "ACCESS_DENIED",
+      "gatewayThrottle": null,
+      "modelFailures": [
+        {
+          "kind": "NEGOTIATION",
+          "stage": "NEGOTIATION_QUESTION_INTENTS"
+        }
+      ],
+      "runId": "gh-37769393591-1",
+      "sourceCommit": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba",
+      "status": "BLOCKED_OR_FAILED",
+      "lanes": {
+        "execution": "BLOCKED",
+        "preflight": "PASS",
+        "fixtures": "PASS",
+        "journeys": "FAIL",
+        "model": "PASS",
+        "privacy": "PASS",
+        "signup": "PASS",
+        "cleanup": "PASS"
+      },
+      "tests": [
+        {
+          "title": "QA01 signup and managed login",
+          "mailStatus": "MAIL_CODE_READY",
+          "status": "PASS"
+        },
+        {
+          "title": "QA02 admission and invitations",
+          "status": "PASS"
+        },
+        {
+          "title": "QA03 fresh decision and owner confirmations",
+          "status": "PASS"
+        },
+        {
+          "title": "QA04 private negotiation and exact agreement",
+          "catalogCounts": {
+            "tested": 4,
+            "valid": 0,
+            "invalid": 2,
+            "needsPermission": 2,
+            "needsClarification": 0
+          },
+          "ruleFailureKinds": [],
+          "kernelCodes": [
+            "NEGOTIABLE_PERMISSION_REQUIRED"
+          ],
+          "status": "PASS"
+        },
+        {
+          "title": "QA05 denial privacy and recovery",
+          "status": "PASS"
+        },
+        {
+          "title": "QA06 refusal revocation revision and disclosure",
+          "status": "FAIL"
+        },
+        {
+          "title": "QA07 rendered clarification and accessibility",
+          "status": "BLOCKED"
+        }
+      ],
+      "counts": {
+        "passed": 5,
+        "failed": 1,
+        "blocked": 1,
+        "modelAttempts": 22,
+        "signupMessages": 1
+      }
+    },
+    "artifactHashes": {
+      "release": "1400b640b104c1142fd0dd082a7000954e0205bc1d784f0d0df11c05da6a9646",
+      "primary": "44a8d4a035bfb7073113bfe235cc99c0fefd1dcd606baf130682cb384122624b",
+      "public": "8675b99e70b0b08bae221d178eb52f067a158d47ba4cf00752609f51662b09aa",
+      "metadata": "1dee9650ae4ec8aeb5d85f0295e1e1ba0673b55889786695c816931e0afb4bd7",
+      "journey": "31ddf83b01256a000bffcea5dc8bf4456b1d83c88e4b12340a71c2d37b84f8a8",
+      "complete": "072f022a8016e7b7bc8f2695cc637cd0dcaf4cef806d1404b980194824155565"
+    },
+    "cleanupRetry": "success",
+    "jobStart": "2026-10-08T11:26:31Z",
+    "jobEnd": "2026-10-08T11:51:04Z",
+    "lanes": {
+      "release": {
+        "status": null,
+        "source": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba"
+      },
+      "primary": {
+        "status": "PASS",
+        "source": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba"
+      },
+      "public": {
+        "status": "PASS",
+        "source": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba"
+      },
+      "metadata": {
+        "status": "PASS",
+        "source": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba"
+      },
+      "complete": {
+        "status": "BLOCKED_OR_FAILED",
+        "source": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba"
+      }
+    }
+  },
+  "amendedCodePaths": [
+    "tests/live/qa/journey.spec.ts",
+    "scripts/live-qa/runner-core.mjs",
+    "tests/integration/live-qa-runner.test.ts"
+  ],
+  "currentSourceFiles": {
+    "scripts/live-qa/signup-diagnostics.mjs": "947047539d7c7ee3d5015d6912d08c252dc8b1e7aa7ec122889a59d357cfc1e5",
+    "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+    "tests/live/qa/journey.spec.ts": "11611524fc95394b89736bc4a2e0ae5308fc08f218952623b875e6a5bbebfe2f",
+    "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+    "scripts/live-qa/runner-core.mjs": "fdb5cc181984fe1a6157d4a58c5e666165ec81d1a390ced205a6fcf212a4c871",
+    "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+    "tests/integration/live-qa-runner.test.ts": "51d9e5d5dbd1054388a460f9ff06283d2d3790752964dddf4594ec2ba9839844",
+    ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013",
+    "tests/e2e/email-registration.spec.ts": "da14901cfc081dcb829b5345930354240ee5133fcf626f895cbde07da2cb00c7"
+  },
+  "currentSourceSha": null,
+  "diagnosticPhases": [
+    "QA06_REFUSAL_CREATE",
+    "QA06_REFUSAL_READY",
+    "QA06_REFUSAL_EXPLORE",
+    "QA06_REFUSAL_DECLINE",
+    "QA06_REFUSAL_RECHECK",
+    "QA06_REVOCATION_CREATE",
+    "QA06_REVOCATION_READY",
+    "QA06_REVOCATION_PROPOSAL",
+    "QA06_REVOCATION_REVOKE",
+    "QA06_DISCLOSURE_CREATE",
+    "QA06_DISCLOSURE_READY",
+    "QA06_DISCLOSURE_PROPOSAL",
+    "QA06_DISCLOSURE_AUTHORITY",
+    "QA06_DISCLOSURE_AUDIENCE",
+    "QA06_ROSTER_REMOVE",
+    "QA06_ROSTER_REVIEW"
+  ],
+  "codingChecks": {
+    "phase-regression-broken": {
+      "label": "phase-regression-broken",
+      "command": [
+        "npx",
+        "vitest",
+        "run",
+        "tests/integration/live-qa-runner.test.ts",
+        "-t",
+        "authority journey failure"
+      ],
+      "start": "2026-10-08T11:57:44.466795+00:00",
+      "end": "2026-10-08T11:57:45.955417+00:00",
+      "exit": 1,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/live-qa/signup-diagnostics.mjs": "947047539d7c7ee3d5015d6912d08c252dc8b1e7aa7ec122889a59d357cfc1e5",
+        "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+        "tests/live/qa/journey.spec.ts": "dfaba3c7d6eef2888bfbc6b87be644928b3557260c80b5fc89dff9e1229810b4",
+        "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+        "scripts/live-qa/runner-core.mjs": "76807142c0a191e531fd15614c03f28bece6ada0624e5c6dd228120d87cac963",
+        "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+        "tests/integration/live-qa-runner.test.ts": "51d9e5d5dbd1054388a460f9ff06283d2d3790752964dddf4594ec2ba9839844",
+        ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013",
+        "tests/e2e/email-registration.spec.ts": "da14901cfc081dcb829b5345930354240ee5133fcf626f895cbde07da2cb00c7"
+      }
+    },
+    "phase-focused": {
+      "label": "phase-focused",
+      "command": [
+        "npx",
+        "vitest",
+        "run",
+        "tests/integration/live-qa-runner.test.ts",
+        "tests/integration/live-qa-signup-diagnostics.test.ts"
+      ],
+      "start": "2026-10-08T11:58:55.033656+00:00",
+      "end": "2026-10-08T11:58:57.223517+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/live-qa/signup-diagnostics.mjs": "947047539d7c7ee3d5015d6912d08c252dc8b1e7aa7ec122889a59d357cfc1e5",
+        "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+        "tests/live/qa/journey.spec.ts": "11611524fc95394b89736bc4a2e0ae5308fc08f218952623b875e6a5bbebfe2f",
+        "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+        "scripts/live-qa/runner-core.mjs": "fdb5cc181984fe1a6157d4a58c5e666165ec81d1a390ced205a6fcf212a4c871",
+        "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+        "tests/integration/live-qa-runner.test.ts": "51d9e5d5dbd1054388a460f9ff06283d2d3790752964dddf4594ec2ba9839844",
+        ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013",
+        "tests/e2e/email-registration.spec.ts": "da14901cfc081dcb829b5345930354240ee5133fcf626f895cbde07da2cb00c7"
+      }
+    },
+    "phase-full": {
+      "label": "phase-full",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-08T11:59:30.388074+00:00",
+      "end": "2026-10-08T12:02:55.877312+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/live-qa/signup-diagnostics.mjs": "947047539d7c7ee3d5015d6912d08c252dc8b1e7aa7ec122889a59d357cfc1e5",
+        "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+        "tests/live/qa/journey.spec.ts": "11611524fc95394b89736bc4a2e0ae5308fc08f218952623b875e6a5bbebfe2f",
+        "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+        "scripts/live-qa/runner-core.mjs": "fdb5cc181984fe1a6157d4a58c5e666165ec81d1a390ced205a6fcf212a4c871",
+        "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+        "tests/integration/live-qa-runner.test.ts": "51d9e5d5dbd1054388a460f9ff06283d2d3790752964dddf4594ec2ba9839844",
+        ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013",
+        "tests/e2e/email-registration.spec.ts": "da14901cfc081dcb829b5345930354240ee5133fcf626f895cbde07da2cb00c7"
+      }
+    }
+  },
+  "authorityCallEquivalence": {
+    "sameOrderedAuthorityCalls": true,
+    "calls": 117,
+    "scope": "QA06 original and wrapped body; excludes test declaration and test.step wrappers only"
+  },
+  "progressReceipts": {
+    "5": {
+      "id": 37772994646,
+      "created_at": "2026-10-08T11:52:50Z",
+      "observed_at": "2026-10-08T11:52:57.656Z",
+      "verified": true
+    },
+    "6": {
+      "id": 37773304925,
+      "created_at": "2026-10-08T11:55:37Z",
+      "observed_at": "2026-10-08T11:55:44.455Z",
+      "verified": true
+    },
+    "7": {
+      "id": 37773959928,
+      "created_at": "2026-10-08T12:01:19Z",
+      "observed_at": "2026-10-08T12:01:25.847Z",
+      "verified": true
+    }
+  },
+  "currentCodingMilestone": "CHECKED_PENDING_SOURCE_SYNC"
 }
