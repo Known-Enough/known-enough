@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "task": "FIN02",
+  "phase": "CODE_READY",
+  "sourceSha": "d7d26f9179abf8a4f6a73375a1012fe25108d86f",
+  "account": {
+    "login": "Battosai1806",
+    "actorId": 143764700
+  },
+  "scheduledAt": "2026-10-08T06:42:55.532Z",
+  "observedStart": "2026-10-08T06:43:21Z",
+  "observedCheckpoint": "2026-10-08T07:10:58.393271+00:00",
+  "environment": {
+    "node": "24.21.0",
+    "npm": "11.19.0",
+    "browser": "Chromium",
+    "managedIdentity": "NOT_EXECUTED",
+    "device": "VIEWPORT_SIMULATION",
+    "model": "INJECTED_SYNTHETIC",
+    "nativeTransport": "SYNTHETIC_DYNAMODB",
+    "paidCalls": 0,
+    "signupMessages": 0,
+    "deployments": 0,
+    "cloudWrites": 0,
+    "participantDataOperations": 0
+  },
+  "checks": {
+    "baseline": {
+      "label": "focused-baseline",
+      "command": [
+        "npx",
+        "vitest",
+        "run",
+        "apps/api/src/group-service.test.ts",
+        "apps/api/src/group-decisions.test.ts",
+        "apps/api/src/group-http.test.ts",
+        "apps/api/src/partition-http.test.ts",
+        "apps/api/src/partition-runtime.test.ts",
+        "packages/adapters/src/partition-group-session.test.ts",
+        "apps/api/src/durable-model-worker.test.ts"
+      ],
+      "start": "2026-10-08T06:46:26.958226+00:00",
+      "end": "2026-10-08T06:46:32.512350+00:00",
+      "exit": 0,
+      "frozen_unchanged": true
+    },
+    "focused": {
+      "label": "focused",
+      "command": [
+        "npx",
+        "vitest",
+        "run",
+        "apps/api/src/group-service.test.ts",
+        "apps/api/src/group-decisions.test.ts",
+        "apps/api/src/group-http.test.ts",
+        "apps/api/src/partition-http.test.ts",
+        "apps/api/src/partition-runtime.test.ts",
+        "packages/adapters/src/partition-group-session.test.ts",
+        "apps/api/src/durable-model-worker.test.ts",
+        "apps/api/src/fin02-group-job-fence.test.ts",
+        "packages/adapters/src/dynamo-model-jobs.test.ts",
+        "packages/adapters/src/partition-lifecycle.test.ts",
+        "packages/adapters/src/dynamo-partition-lifecycle.test.ts"
+      ],
+      "start": "2026-10-08T06:54:45.068988+00:00",
+      "end": "2026-10-08T06:54:53.783369+00:00",
+      "exit": 0,
+      "frozen_unchanged": true
+    },
+    "newUnit": {
+      "label": "new-regressions",
+      "command": [
+        "npx",
+        "vitest",
+        "run",
+        "apps/api/src/fin02-group-job-fence.test.ts"
+      ],
+      "start": "2026-10-08T06:52:07.509723+00:00",
+      "end": "2026-10-08T06:52:10.270574+00:00",
+      "exit": 0,
+      "frozen_unchanged": true
+    },
+    "rendered": {
+      "label": "rendered-pass",
+      "command": [
+        "npx",
+        "playwright",
+        "test",
+        "tests/e2e/fin02-group-views.spec.ts",
+        "--workers=2"
+      ],
+      "start": "2026-10-08T06:58:09.216252+00:00",
+      "end": "2026-10-08T06:58:24.926646+00:00",
+      "exit": 0,
+      "frozen_unchanged": true
+    },
+    "negativeControl": {
+      "start": "2026-10-08T06:54:16.104559+00:00",
+      "end": "2026-10-08T06:54:18.618697+00:00",
+      "exit": 1,
+      "expected_failed": 5,
+      "passed_provider_pending": 5,
+      "mutation": "private archive only: omit ACCOUNT/GROUP/DECISION partition CAS checks; original checkout untouched"
+    },
+    "full": {
+      "label": "full",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-08T06:58:43.179190+00:00",
+      "end": "2026-10-08T07:02:51.482401+00:00",
+      "exit": 0,
+      "frozen_unchanged": true
+    },
+    "applicationPassed": 1281,
+    "optionalDynamoDBLocalSkipped": 2,
+    "hostedPreviewPassed": 1,
+    "browserPassed": 64,
+    "focusedPassed": 275,
+    "renderedCasesPassed": 2,
+    "newUnitCasesPassed": 10
+  },
+  "sourceFiles": {
+    "apps/api/src/fin02-group-job-fence.test.ts": "943f053ee818d2eb3812469db01da1844105209e2efb68e0ec73c3c9cf2292e8",
+    "tests/e2e/fin02-group-views.spec.ts": "3d4d4bc7dfb76a0db7c362761216ec6c8e49978951471420cb6943761f429bd1",
+    "tests/evaluations/np-api.ts": "3ceb1474bec9c04c72650a4360584315df3f9c9931c8881eef5285c5fb6628a1",
+    "apps/api/src/group-service.ts": "a0e4f71eb00b134e9715ecc0769383210a4740d083b68217277826a568ee4a48",
+    "apps/api/src/group-service.test.ts": "b828e6f0993b01c200494dd43e7aa64d775740fbf11430ceac6559a738f3ee9a",
+    "apps/api/src/group-decisions.ts": "de6ab04e79b7591466558dd7a53243c13c86d968c252ebff7cbfe2584abc71f4",
+    "apps/api/src/group-decisions.test.ts": "3affe48c37e717321f951c800c2bf266c4194ea4ac8db4cd08da6814e9728826",
+    "apps/api/src/group-http.test.ts": "da4f840b6319a8cb6cbf641e089099f9f2b9531f3b78ea439b30342500ee661b",
+    "apps/api/src/partition-http.ts": "2e4c48fadf4236f468f0125e5448c5fe9571411076ca444bdd76e9b4cd83f06e",
+    "apps/api/src/partition-http.test.ts": "aabe96f2f9286dc648f34e211a66e3b8cc2fa3414f5837c628de6dc0ca741455",
+    "apps/api/src/partition-runtime.ts": "38a2a951a14b55fa90628f47c8a80a5b34c23aabed1e5d5341d40b61f16a01d3",
+    "apps/api/src/partition-runtime.test.ts": "99ada40f3bd60c4e15d33e736c823b171f37371a3ad40c24be5cd0338793fe3a",
+    "apps/api/src/durable-model-worker.ts": "8c450362d60f7b1ae6c1a556ebb9af5fc4e4587134645d00036b0ec0244571d3",
+    "apps/api/src/durable-model-worker.test.ts": "a1a4fdc413aab43504ba548aa2fbc0ec2181a06606e64e539e2e0655a72420c7",
+    "apps/api/src/cognito-identity.ts": "3c9bcc0d8f5af52e91347ce57a4f1ac0b0abea2d452d81695eaaae7a976e0786",
+    "apps/web/src/connected-app.tsx": "72786c51eecfdcbd8c714478529dad8468eb5d2431e58c1a74fb9de2a440c489",
+    "apps/web/src/group-home.tsx": "fef749f97a7fbfd6b7d0b60f3186324c11b131b27957e820d9eceaf2cc73a7b3",
+    "apps/web/src/connected-decision.tsx": "2b4c6809a6b6a23e7a11f05ecc0999e8be570af4ff2c1a14d9cc503824eceb0e",
+    "packages/adapters/src/partition-group-session.ts": "7b736da7be7ad082916e54b174e5988c6a4aa3a5d9a95a2a2e004c309085a046",
+    "packages/adapters/src/partition-group-session.test.ts": "163ed6561c36ae031d400aae763b2b896436addd12de4baabd20f6dfc3338034",
+    "packages/adapters/src/partition-lifecycle.ts": "cbfdabdb629fb48d5c71d408bb95588eae178f7e21a12134b23d48ce63c691dc",
+    "packages/adapters/src/partition-lifecycle.test.ts": "cea2b268269f9566881540e442fc11bde8c4b2115c5446be7d3f1c5a5173696c",
+    "packages/adapters/src/dynamo-partition-lifecycle.ts": "402d5d2c22634fbb55a3faa266ac2ef755cf3420f9ec32aa5143f30832f32fe1",
+    "packages/adapters/src/dynamo-partition-lifecycle.test.ts": "15d260a2d48ba6fdfaa6706bbbcd396b01cd9bcfcabdc56ab109140baf2d3e6c",
+    "packages/adapters/src/durable-model-jobs.ts": "6a670cc00fb8b14101b7036577d37b2dd9cd7b4f2c0c0779a60fa1758f2bb71e",
+    "packages/adapters/src/dynamo-model-jobs.ts": "971ad6bfee827dd3c248aba54106bb2d471f9b4f5ecee3aafebd4eeea65bb108",
+    "packages/adapters/src/dynamo-model-jobs.test.ts": "f05e06675f2320561e64da1e7f0fd3a5d0c4f036e5393921e1ef9c59512b871f",
+    "packages/adapters/src/test-support/durable-model-fixture.ts": "cdb009282b93c56f8a80229f9dc3578af3d580620ad2351659f810bc5ad7d709",
+    "tests/evaluations/np-lifecycle.ts": "60512311bed61e0f97d92f8c7c156b90548249e1c8fcd02d8654de78dbfbb266",
+    "tests/e2e/np-onboarding.spec.ts": "16beb518b8827dc881e5e9e6656af38c0ff34caaf9fe0ac3febb27c39da09544",
+    "tests/e2e/np-qualification.spec.ts": "f759d2690e50372c24add42f2d67f766a9ae23efe4a638f23c97766773f2655a",
+    "tests/e2e/np-clarity.spec.ts": "f2fa6f171cbbeb802024711ccc8ee1c3332d313db50722dcaeb2415f945e7c3c",
+    "packages/application/src/known-enough.test.ts": "6ee581c454de0aa78f98370e03c584d051785603f889d8c14d74cd675552ef8e",
+    "packages/contracts/src/groups.ts": "10e1e537c065320c5d5cff19eae9f2c8cc7fb332fc706d518e9a49ecc2fec428",
+    "infra/operations/setup.json": "a8c67e9a4474b8561a991e8446ae1db36e23c70de18bd09bff4241bdd5c0d627",
+    "infra/operations/partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+    "infra/operations/retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+    "infra/operations/jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+    ".github/workflows/operations-verify.yml": "25235f43fd42eeb5ad4c868b70aceb59f864d39a4dc4c300fc8fa603aabb52e6"
+  },
+  "preserved24": {
+    "apps/api/src/model-runtime.ts": "4b233b906c494db0a07b500deb697cdec1cdee402a1cd9580c9c3cbb279309d4",
+    "apps/api/src/model-runtime.test.ts": "614c8a6c363e1f0704019d73b85d5972cb1f0cc445df31d7d5c56b6a0e2e5584",
+    "packages/adapters/src/model-jobs.ts": "f91666cd01731cd03b984411dc27ac53fbf796f39b23cbfc87239035e991d79a",
+    "packages/adapters/src/model-jobs.test.ts": "bc1f05218f95464b5a56ae75c8ccd0defb9474d555468b29d1da9bb03e3b3ee7",
+    "tests/integration/ke14-qualification.test.ts": "906258a710d4e41e59eabc51ef1a05fda4ea7f03bc572e464413a0fc9d716251",
+    "tests/integration/ke14-fixed-http.test.ts": "6eea88b0462637f9183dcaaa945aef1b64f1fa35451141f2f0b66325ce42c571",
+    "tests/evaluations/ke14-fixed.ts": "d5ae019c79889a08d0b3a3591cc7cad16a6b0d733341aae6146591dbdee68369",
+    "tests/e2e/ke14-connected.spec.ts": "96082263133ed8679f91c11bef58d20138a58f25ae46371b16cb692efd307eac",
+    "docs/tasks/active/closeout/NP00/ticket.md": "2693cf9129955c85ba16293ae37c2c057baedb3522f0f385816d058aac9ffacb",
+    "docs/np00-technical-closeout.md": "e9ce59f7b6a6d763288c95bb994bbf1c964f2149a6073dfec4dbbd71796efd1f",
+    "docs/technical-debt/TD-KE10-01-stop-commit-race.md": "11edb0d654c60398544be79c192e9c2f6a3495e49c84996e6e68ba108d2a7fed",
+    "docs/technical-debt/TD-KE10-02-bedrock-permission-set-name.md": "6d74ab4a6b8f428b6283a6ab43a0132afd52ab3db64cf3a31c969587327462ea",
+    "infra/np00-permission-set-cleanup.md": "e6dbb91c26fd788c4e13192c42062b01519826607c4fca8bf920a135fb62e2b0",
+    "docs/work-log-A.md": "c50e352fa2195172967794c74c9ebc248783cad1de6e4928fe21cf0ded891e5a",
+    "docs/handoff-A.md": "b89d00700b3a0efb7e63086a6782793fea46af9ea03a743480934e21f0f18ccb",
+    "package.json": "d345a8432ebad6503eefe56ac945b65108c7f9f2135fc378aa24f85a21896287",
+    "package-lock.json": "b7e0c8facbdf658c3324f60c31591b476c093183c908116759bea6c120ae269c",
+    ".github/workflows/shared-staging-check.yml": "3d4be72c73fd0b74804ca082040e54728563de059a1308a38cdbfa9aaecd3f11",
+    "scripts/inspect-shared-staging.mjs": "a544d872a07fe27fad88ff54a45ebb9a359f6bceb04d47e09f1de28604ee186a",
+    "scripts/render-shared-staging-report.mjs": "2b44a4914b5e6da36d9d70aa3923f90c678f76073cb2bb7919053607278ae524",
+    "apps/api/src/fin01-stop-output.test.ts": "69f2db7bba906072038a43e3ba484a68801223e810e38aee47287ceb19021ac7",
+    "docs/review-artifacts/FIN01/obligations.md": "905c7992fb484e35900aaded57b48222ed57f319c8c29a26d09fd8ffc90306cb",
+    "docs/review-artifacts/FIN01/source-evidence.json": "17d7459a953229ec1ea16cd7f8276c0e9ca1dc47da07fe8a71374cf2b8560130",
+    "docs/tasks/active/technical-debt/FIN01/ticket.md": "8a52d65793b333a7a28bcd9e1fffcbb490ba404eef8edb9f779d2f0dde347c81"
+  },
+  "renderedImages": [
+    {
+      "image": "desktop-outsider.png",
+      "sha256": "cffb4b8c1294d8962b0818ece89bc76fd3f0a8316077b4a1b9fdfd20c4004bcd",
+      "synthetic": true
+    },
+    {
+      "image": "desktop-member.png",
+      "sha256": "638c16858bb39f79706f50d8fbf18485475445dd03603e5b91ee6cbb06ded786",
+      "synthetic": true
+    },
+    {
+      "image": "desktop-organizer.png",
+      "sha256": "0152d39a08a1b613ac38a8eb7f91ae52914fe13534e7ba702df7a8e8514be6d1",
+      "synthetic": true
+    },
+    {
+      "image": "desktop-display.png",
+      "sha256": "4f0f0bdfddf1695831f77533c366226c6f12315ca4484a44c28d0ef903f21b87",
+      "synthetic": true
+    },
+    {
+      "image": "phone-outsider.png",
+      "sha256": "3f1ae7a6b69295c102e531a7668e6bf6dfc16c20e6c2ed01b0fc94046e1a1305",
+      "synthetic": true
+    },
+    {
+      "image": "phone-member.png",
+      "sha256": "5336ea7d97a6042771800639cd72151cf51dc91015390b1535f9d38fd946ace2",
+      "synthetic": true
+    },
+    {
+      "image": "phone-organizer.png",
+      "sha256": "753ec2342a5a01a4da33d2a66de1f34e22265029a5a4ec31cc184b6a0028dbde",
+      "synthetic": true
+    },
+    {
+      "image": "phone-display.png",
+      "sha256": "25db941bc923de3390825b8bc5372932ad59df7805eaa2d424c89ba83ed2ca23",
+      "synthetic": true
+    }
+  ],
+  "githubVerification": {
+    "id": 37741164214,
+    "source_sha": "d7d26f9179abf8a4f6a73375a1012fe25108d86f",
+    "actor_id": 143764700,
+    "created_at": "2026-10-08T07:03:56Z",
+    "conclusion": "success",
+    "artifact_match": true,
+    "reports": 4,
+    "proposals": 4,
+    "native_tests": 62,
+    "application_tests": 1281,
+    "optional_skips": 2,
+    "hosted_preview_tests": 1,
+    "browser_tests": 64,
+    "installation": "UNKNOWN",
+    "activation": "DISABLED",
+    "providerCalls": "NOT_EXECUTED",
+    "participantConsent": "NOT_GRANTED",
+    "managedRecovery": "UNKNOWN",
+    "cleanup": "UNKNOWN",
+    "observed_end": "2026-10-08T07:09:24.722482+00:00"
+  },
+  "requiredManagedEvidence": {
+    "operationsInstallation": "UNKNOWN",
+    "activation": "DISABLED_OFFLINE_CONFIGURATION",
+    "participantGrants": "NOT_GRANTED",
+    "archiveErasure": "NOT_EXECUTED",
+    "managedRecovery": "UNKNOWN",
+    "currentSignup": "LATEST_37557999023_FAIL",
+    "allSevenCurrentJourneys": "BLOCKED_BY_SIGNUP",
+    "inheritedNP00PrivatePurchase": "OPEN_SOURCE_CONTRACT_AND_MANAGED_GAP",
+    "finalRelease": "NOT_READY"
+  },
+  "wholeTask": "REVIEW_UNCLAIMED",
+  "receipts": [
+    {
+      "event": "started",
+      "id": 37739236393
+    },
+    {
+      "event": "progress",
+      "id": 37739901908
+    },
+    {
+      "event": "progress",
+      "id": 37740401177
+    },
+    {
+      "event": "progress",
+      "id": 37740984575
+    },
+    {
+      "event": "progress",
+      "id": 37741251382
+    }
+  ]
+}
