@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "task": "OPS00",
+  "phase": "CHECKED_SOURCE_PENDING_ACTUAL_INTAKE",
+  "sourceBaseline": "e6ce21a1d32dd68b1ae902e31762a89bdff40917",
+  "sourceSha": null,
+  "sourceFiles": {
+    "scripts/operations/installed-readback.mjs": "c0045c4c5c1149df417c20845ea88eb7dbb4dcd9855344fb3554b89bc16bf121",
+    "scripts/operations/installed-readback.test.mjs": "a6e1e22849daa70a9213d96c70bf0938eba2c88ee84275f90a0ba0927ad8690b",
+    ".github/workflows/operations-intake.yml": "1857e2f017582f9e76339646da3aee7434286657a4dab6a5f8f7942113def997"
+  },
+  "preserved30": {
+    "apps/api/src/model-runtime.ts": "4b233b906c494db0a07b500deb697cdec1cdee402a1cd9580c9c3cbb279309d4",
+    "apps/api/src/model-runtime.test.ts": "614c8a6c363e1f0704019d73b85d5972cb1f0cc445df31d7d5c56b6a0e2e5584",
+    "packages/adapters/src/model-jobs.ts": "f91666cd01731cd03b984411dc27ac53fbf796f39b23cbfc87239035e991d79a",
+    "packages/adapters/src/model-jobs.test.ts": "bc1f05218f95464b5a56ae75c8ccd0defb9474d555468b29d1da9bb03e3b3ee7",
+    "tests/integration/ke14-qualification.test.ts": "906258a710d4e41e59eabc51ef1a05fda4ea7f03bc572e464413a0fc9d716251",
+    "tests/integration/ke14-fixed-http.test.ts": "6eea88b0462637f9183dcaaa945aef1b64f1fa35451141f2f0b66325ce42c571",
+    "tests/evaluations/ke14-fixed.ts": "d5ae019c79889a08d0b3a3591cc7cad16a6b0d733341aae6146591dbdee68369",
+    "tests/e2e/ke14-connected.spec.ts": "96082263133ed8679f91c11bef58d20138a58f25ae46371b16cb692efd307eac",
+    "docs/tasks/active/closeout/NP00/ticket.md": "2693cf9129955c85ba16293ae37c2c057baedb3522f0f385816d058aac9ffacb",
+    "docs/np00-technical-closeout.md": "e9ce59f7b6a6d763288c95bb994bbf1c964f2149a6073dfec4dbbd71796efd1f",
+    "docs/technical-debt/TD-KE10-01-stop-commit-race.md": "11edb0d654c60398544be79c192e9c2f6a3495e49c84996e6e68ba108d2a7fed",
+    "docs/technical-debt/TD-KE10-02-bedrock-permission-set-name.md": "6d74ab4a6b8f428b6283a6ab43a0132afd52ab3db64cf3a31c969587327462ea",
+    "infra/np00-permission-set-cleanup.md": "e6dbb91c26fd788c4e13192c42062b01519826607c4fca8bf920a135fb62e2b0",
+    "docs/work-log-A.md": "c50e352fa2195172967794c74c9ebc248783cad1de6e4928fe21cf0ded891e5a",
+    "docs/handoff-A.md": "b89d00700b3a0efb7e63086a6782793fea46af9ea03a743480934e21f0f18ccb",
+    "package.json": "d345a8432ebad6503eefe56ac945b65108c7f9f2135fc378aa24f85a21896287",
+    "package-lock.json": "b7e0c8facbdf658c3324f60c31591b476c093183c908116759bea6c120ae269c",
+    ".github/workflows/shared-staging-check.yml": "3d4be72c73fd0b74804ca082040e54728563de059a1308a38cdbfa9aaecd3f11",
+    "scripts/inspect-shared-staging.mjs": "a544d872a07fe27fad88ff54a45ebb9a359f6bceb04d47e09f1de28604ee186a",
+    "scripts/render-shared-staging-report.mjs": "2b44a4914b5e6da36d9d70aa3923f90c678f76073cb2bb7919053607278ae524",
+    "apps/api/src/fin01-stop-output.test.ts": "69f2db7bba906072038a43e3ba484a68801223e810e38aee47287ceb19021ac7",
+    "docs/review-artifacts/FIN01/obligations.md": "905c7992fb484e35900aaded57b48222ed57f319c8c29a26d09fd8ffc90306cb",
+    "docs/review-artifacts/FIN01/source-evidence.json": "17d7459a953229ec1ea16cd7f8276c0e9ca1dc47da07fe8a71374cf2b8560130",
+    "docs/tasks/active/technical-debt/FIN01/ticket.md": "8a52d65793b333a7a28bcd9e1fffcbb490ba404eef8edb9f779d2f0dde347c81",
+    "apps/api/src/fin02-group-job-fence.test.ts": "943f053ee818d2eb3812469db01da1844105209e2efb68e0ec73c3c9cf2292e8",
+    "tests/e2e/fin02-group-views.spec.ts": "3d4d4bc7dfb76a0db7c362761216ec6c8e49978951471420cb6943761f429bd1",
+    "tests/evaluations/np-api.ts": "3ceb1474bec9c04c72650a4360584315df3f9c9931c8881eef5285c5fb6628a1",
+    "docs/review-artifacts/FIN02/group-construction.md": "848360bd294048b40e197ca96a9c93192b42a7e0b406c53e296a7e648aa60ec1",
+    "docs/review-artifacts/FIN02/source-evidence.json": "e49f0c6dc0eeb0f5d1810e6520720938cc263bf9e74c026b3cf59caf9f41fdae",
+    "docs/tasks/active/technical-debt/FIN02/ticket.md": "d73bcc0d3f4a5a6bc042639efd80534d3d8c99fb6e9b65ff7c8d42399fdc6c69"
+  },
+  "githubIdentity": {
+    "login": "Battosai1806",
+    "id": 143764700
+  },
+  "scheduledAt": "2026-10-08T07:15:56.109Z",
+  "observedStart": "2026-10-08T07:16:29Z",
+  "checks": {
+    "native": {
+      "label": "operations-final",
+      "command": [
+        "node",
+        "--experimental-transform-types",
+        "--test",
+        "scripts/operations/*.test.mjs"
+      ],
+      "start": "2026-10-08T07:33:17.952711+00:00",
+      "end": "2026-10-08T07:33:22.798911+00:00",
+      "exit": 0,
+      "frozen_unchanged": true
+    },
+    "newTests": 13,
+    "nativeTests": 75,
+    "negativeControl": {
+      "start": "2026-10-08T07:33:52.274212+00:00",
+      "end": "2026-10-08T07:33:52.536051+00:00",
+      "exit": 1,
+      "expectedFailure": true,
+      "isolatedMutation": "misclassify every read failure as absence",
+      "originalSourceUntouched": true
+    },
+    "initialFull": {
+      "label": "full",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-08T07:31:18.696668+00:00",
+      "end": "2026-10-08T07:35:24.321357+00:00",
+      "exit": 0,
+      "frozen_unchanged": true
+    },
+    "finalFull": {
+      "label": "full-final",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-08T07:36:40.696701+00:00",
+      "end": "2026-10-08T07:40:49.566082+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/installed-readback.mjs": "c0045c4c5c1149df417c20845ea88eb7dbb4dcd9855344fb3554b89bc16bf121",
+        "scripts/operations/installed-readback.test.mjs": "a6e1e22849daa70a9213d96c70bf0938eba2c88ee84275f90a0ba0927ad8690b",
+        ".github/workflows/operations-intake.yml": "1857e2f017582f9e76339646da3aee7434286657a4dab6a5f8f7942113def997"
+      }
+    },
+    "application": 1281,
+    "optionalDynamoLocalSkips": 2,
+    "hosted": 1,
+    "browser": 64
+  },
+  "existingInspection": {
+    "runId": 37743019693,
+    "sourceSha": "9f5e560739013cd2a4a0d7d46a096d1bfa78bde0",
+    "actorId": 143764700,
+    "conclusion": "failure",
+    "artifactSha256": "e6e7a024a3db4b81697bdce226d80530193fbc7bd7e4e20e673234a0cb19265e",
+    "collectedAt": "2026-10-08T07:22:32.128Z",
+    "observedAt": "2026-10-08T07:31:22.088625+00:00",
+    "collection": "passed",
+    "failedAssertions": [
+      "Deployed Lambda ZIP matches the manifest",
+      "Signup and verification email remain gated"
+    ]
+  },
+  "managedIntake": "NOT_EXECUTED",
+  "environment": {
+    "cloudWrites": 0,
+    "paidCalls": 0,
+    "syntheticSignupEmail": 0,
+    "dataOperations": 0,
+    "participantGrants": "NOT_CREATED",
+    "schedulerIdleGate": "UNKNOWN"
+  }
+}
