@@ -24,9 +24,21 @@ export function journalService(storage) {
       const checked = validatePlan(plan, envelope);
       const current = await load(plan, envelope);
       const result = advanceRecovery(current.journal, next, plan, envelope, current.revision, expectedRevision);
-      if (!await storage.compareAndSwap(checked.planHash, expectedRevision,
-        { revision: result.storageRevision, journal: result.journal })) throw new Error('OPS_JOURNAL_CONFLICT');
-      return load(plan, envelope);
+      const acknowledged = await storage.compareAndSwap(checked.planHash, expectedRevision,
+        { revision: result.storageRevision, journal: result.journal });
+      if (acknowledged === false) throw new Error('OPS_JOURNAL_CONFLICT');
+      if (acknowledged !== true) throw new Error('OPS_JOURNAL_UNAVAILABLE');
+      const observed = await load(plan, envelope);
+      // Readback can include legitimate later writers. It must still establish
+      // this progression, without accepting stale contents or a rollback.
+      if (observed.revision < result.storageRevision
+        || (observed.revision === result.storageRevision
+          && Object.entries(result.journal).some(([key, value]) => observed.journal[key] !== value))
+        || observed.journal.completedItems < result.journal.completedItems
+        || (result.journal.state === 'APPLYING' && observed.journal.state === 'PREPARED')
+        || (result.journal.state === 'COMPLETE' && (observed.journal.state !== 'COMPLETE'
+          || observed.journal.completedItems !== result.journal.completedItems))) throw new Error('OPS_JOURNAL_UNAVAILABLE');
+      return observed;
     }
   };
 }
