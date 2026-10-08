@@ -71,7 +71,7 @@
     "docs/review-artifacts/ASSESS11/primary-signup-driver/pending-mutation.md": "0a2ab9baf37e7a405551b0c6562045b10a3afec9d24b546bbbf5a414ca4f293d",
     "docs/review-artifacts/ASSESS11/primary-signup-driver/pending-mutation-evidence.json": "5e7da1079adfe6ab01dc911cc3549ae65ee85f9d83015687d7502ac3444a80f7"
   },
-  "sourceReady": "LOCAL_CHECKED_OFFLINE_PENDING",
+  "sourceReady": "CODE_READY",
   "primaryExecution": "NOT_STARTED",
   "managedInstallation": "UNKNOWN",
   "reproduction": {
@@ -152,7 +152,7 @@
     "scripts/live-qa/primary-signup.mjs": "d18780bec23af9a84c03f0816d07e2fe5500b2fbe1b565c28c9cc1089195ec55",
     "tests/integration/live-qa-primary-signup.test.ts": "ade853a9e28552fa867eec4b45e539d56a5ebc0ad5b69a93116141c601d610e0"
   },
-  "lastObservedAt": "2026-10-08T20:50:43.169169+00:00",
+  "lastObservedAt": "2026-10-08T20:52:56.791143+00:00",
   "claimSync": {
     "label": "claim",
     "expectedRemote": "84476381f0eb3b6c8386a5712dec74d460832700",
@@ -219,5 +219,44 @@
         "providerRequests": 0
       }
     ]
-  }
+  },
+  "checkedSource": "342e950128f99b03c8fad49ff9cefb816c8092bc",
+  "sourceSync": {
+    "label": "source",
+    "expectedRemote": "9ec2c0e13677b4a7105e3aa84948ea42977e5e92",
+    "sourceSha": "342e950128f99b03c8fad49ff9cefb816c8092bc",
+    "observedEnd": "2026-10-08T20:50:47.360888+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 56
+  },
+  "offline": {
+    "id": 37842539577,
+    "source": "342e950128f99b03c8fad49ff9cefb816c8092bc",
+    "actor": 143764700,
+    "path": ".github/workflows/primary-signup-verify.yml",
+    "event": "workflow_dispatch",
+    "createdAt": "2026-10-08T20:51:17Z",
+    "updatedAt": "2026-10-08T20:51:37Z",
+    "observedAt": "2026-10-08T20:52:02.440596+00:00",
+    "conclusion": "success",
+    "configuration": "PASS",
+    "execution": "NOT_STARTED",
+    "installation": "UNKNOWN",
+    "focusedPassed": 70,
+    "artifactSha256": "01624eaa60f59ab67ffa8a8d3af04ec8c2cda9a6d180bbde93fd62088e9c9f68",
+    "jobs": [
+      {
+        "id": 113535247360,
+        "name": "offline",
+        "conclusion": "success",
+        "started_at": "2026-10-08T20:51:20Z",
+        "completed_at": "2026-10-08T20:51:36Z"
+      }
+    ]
+  },
+  "claimReleasedAt": "2026-10-08T20:52:56.791143+00:00",
+  "wholeTask": "REVIEW_UNCLAIMED_PRIMARY_MANAGED_PROOF_OPEN"
 }

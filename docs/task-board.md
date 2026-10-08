@@ -116,7 +116,7 @@ A's recurring observer and completed one-time follow-up are deleted. B's existin
 
 | Coding order | Task | Current scheduling | Coding outcome |
 | --- | --- | --- | --- |
-| 1 | [ASSESS11](tasks/active/live-testing/ASSESS11/README.md) | IN_PROGRESS / B — RUN155 mail-code integrity correction | Verified non-string confirmation-code coercion; bounded inactive correction, prior checked source preserved; primary managed proof UNKNOWN. |
+| 1 | [ASSESS11](tasks/active/live-testing/ASSESS11/README.md) | REVIEW / unclaimed — RUN155 mail-code integrity CODE_READY | Source342e950,70focused/full1398/browser64/offline37842539577 PASS; primary installation/signup/cleanup UNKNOWN. |
 | 2 | [ASSESS10](tasks/active/monitoring/ASSESS10/README.md) | After ASSESS11 coding checkpoint; preserve any actual active claim | Existing monitor/logging code and available execution proof. |
 | 3 | [UX01](tasks/active/ui-ux/UX01/README.md) | After ASSESS10 coding checkpoint | Current screen/journey review and prioritized findings. |
 | 4 | [UX02](tasks/active/ui-ux/UX02/README.md) | After UX01 coding checkpoint | Usability/style/navigation corrections and tests. |
