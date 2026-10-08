@@ -81,9 +81,197 @@
     },
     "observedAt": "2026-10-08T13:29:21.653Z"
   },
-  "sourceReady": "UNKNOWN",
+  "sourceReady": "CODE_CHECKED_INHERITED_PRIVACY_AND_CLEAN_VERIFIED",
   "inheritedQaRun": 37782679450,
   "inheritedQaSource": "4d83aca33516f25b63ed4be3791ea5b42f48134b",
   "newLiveDispatch": "NONE",
-  "primaryExecution": "NOT_STARTED"
+  "primaryExecution": "NOT_STARTED",
+  "red": {
+    "label": "red",
+    "command": [
+      "npm",
+      "test",
+      "--",
+      "tests/integration/live-qa-primary-signup.test.ts",
+      "--maxWorkers=2"
+    ],
+    "start": "2026-10-08T13:33:41.282421+00:00",
+    "end": "2026-10-08T13:33:42.207364+00:00",
+    "exit": 1,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {}
+  },
+  "redFailed": 13,
+  "redOriginalPassed": 44,
+  "focused": {
+    "label": "focused",
+    "command": [
+      "npm",
+      "test",
+      "--",
+      "tests/integration/live-qa-primary-signup.test.ts",
+      "--maxWorkers=2"
+    ],
+    "start": "2026-10-08T13:34:34.846744+00:00",
+    "end": "2026-10-08T13:34:35.621525+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/live-qa/primary-signup.mjs": "4d454d2fd15010af97ff500f1d0becc5a20004062040a0ee1abe146e4adde15e",
+      "tests/integration/live-qa-primary-signup.test.ts": "49454f8c860614454011be1ce63e12badd7041eb8d40e82d1b19fd6c4ddbe647"
+    },
+    "testsPassed": 57
+  },
+  "currentSourceFiles": {
+    "scripts/live-qa/primary-signup.mjs": "4d454d2fd15010af97ff500f1d0becc5a20004062040a0ee1abe146e4adde15e",
+    "tests/integration/live-qa-primary-signup.test.ts": "49454f8c860614454011be1ce63e12badd7041eb8d40e82d1b19fd6c4ddbe647"
+  },
+  "full": {
+    "label": "full",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "start": "2026-10-08T13:35:40.356155+00:00",
+    "end": "2026-10-08T13:39:05.261798+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/live-qa/primary-signup.mjs": "4d454d2fd15010af97ff500f1d0becc5a20004062040a0ee1abe146e4adde15e",
+      "tests/integration/live-qa-primary-signup.test.ts": "49454f8c860614454011be1ce63e12badd7041eb8d40e82d1b19fd6c4ddbe647"
+    },
+    "applicationPassed": 1348,
+    "optionalSkipped": 2,
+    "hostedPassed": 1,
+    "browserPassed": 64
+  },
+  "inheritedPartial": {
+    "run": 37782679450,
+    "source": "4d83aca33516f25b63ed4be3791ea5b42f48134b",
+    "observedAt": "2026-10-08T13:43:33.783336+00:00",
+    "artifactHashes": {
+      "release": "3130f478cc8ca41d3f9fcb4057528d791ecf5ce099a8a4437a496323710bf381",
+      "primary": "4f5fd71877b037176d665f6c969f8ad5e361b4a95fbb83a1b5de9a3b3d521dbd",
+      "public": "70941f192c448c43ed09997dfe74da0cf075940ac9ea2b9bb97ba99ac6ae9f86",
+      "metadata": "e43955d659e54861cef3868441a51fb49b87c1e4eca8bed8726c96aa84ffced5"
+    },
+    "primaryStatus": "PASS",
+    "primaryCodeSha256": null,
+    "savedBackendHashMatches": false,
+    "publicStatus": "PASS",
+    "metadataStatus": "PASS",
+    "completeJourney": "NOT_YET_AVAILABLE",
+    "firstParserObservation": "queried absent codeSha256 field; null/false was not an observed backend mismatch",
+    "primaryFields": [
+      "backendSha256",
+      "sourceCommit",
+      "status"
+    ],
+    "backendSha256": "417eff55b6c9061444a725ad49343282085a93f904795ab0ebb1812cd415204b",
+    "metadataBackendHashMatches": true
+  },
+  "inheritedFinal": {
+    "status": "completed",
+    "run": 37782679450,
+    "source": "4d83aca33516f25b63ed4be3791ea5b42f48134b",
+    "conclusion": "failure",
+    "execution": "BLOCKED",
+    "scope": "FULL",
+    "privacy": "PASS",
+    "cleanup": "CLEAN",
+    "cleanupRetry": "success",
+    "observedAt": "2026-10-08T13:45:43.947646+00:00",
+    "artifactHashes": {
+      "release": "3130f478cc8ca41d3f9fcb4057528d791ecf5ce099a8a4437a496323710bf381",
+      "primary": "4f5fd71877b037176d665f6c969f8ad5e361b4a95fbb83a1b5de9a3b3d521dbd",
+      "public": "70941f192c448c43ed09997dfe74da0cf075940ac9ea2b9bb97ba99ac6ae9f86",
+      "metadata": "e43955d659e54861cef3868441a51fb49b87c1e4eca8bed8726c96aa84ffced5",
+      "journey": "2b12fd858f054e90ce166658e785fee30e0bfa91eecc25b70c21c1ff1fc904f0",
+      "complete": "ac3b1d3aef37821738e293455ee14820ba0191bdc6f6184300598108a7f2baa6"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "status": "PASS"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "status": "PASS"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "PASS"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "FAIL",
+        "phase": "QA06_REVOCATION_READY"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "BLOCKED"
+      }
+    ],
+    "budget": {
+      "attempts": 19,
+      "maxAttemptsPerRun": 200,
+      "reservedTokens": 707602,
+      "maxTokensPerRun": 2500000,
+      "reservedCostMicros": 707602,
+      "maxCostMicrosPerRun": 2500000
+    },
+    "signup": 1,
+    "modelFailureCount": 1,
+    "lanes": {
+      "release": {
+        "status": null,
+        "source": "4d83aca33516f25b63ed4be3791ea5b42f48134b"
+      },
+      "primary": {
+        "status": "PASS",
+        "source": "4d83aca33516f25b63ed4be3791ea5b42f48134b"
+      },
+      "public": {
+        "status": "PASS",
+        "source": "4d83aca33516f25b63ed4be3791ea5b42f48134b"
+      },
+      "metadata": {
+        "status": "PASS",
+        "source": "4d83aca33516f25b63ed4be3791ea5b42f48134b"
+      },
+      "complete": {
+        "status": "BLOCKED_OR_FAILED",
+        "source": "4d83aca33516f25b63ed4be3791ea5b42f48134b"
+      }
+    },
+    "cleanupLane": "PASS",
+    "counts": {
+      "passed": 5,
+      "failed": 1,
+      "blocked": 1,
+      "modelAttempts": 19,
+      "signupMessages": 1
+    },
+    "modelFailures": [
+      {
+        "kind": "OWNER",
+        "stage": "PROVIDER"
+      }
+    ],
+    "classificationBasis": "privacy/cleanup from qa-report lanes; cleanup PASS iff broker returned CLEAN; runner-core source-exact inspected",
+    "parserCorrection": "initial parser queried absent top-level execution/privacy/cleanup/signup; original null observation retained privately, no real failing cleanup/privacy inferred"
+  },
+  "integrationDecision": "skip-ci source commit; exact-source offline workflow still required; no new paid live dispatch"
 }

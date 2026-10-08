@@ -124,8 +124,12 @@ export function primarySignupDriver({ journal, ports }) {
     }
     async function lookup(plan, current) {
         const found = await service('lookupSubject', { plan, lease: current.lease, subject: current.subject });
-        if (!found || !['ABSENT', 'PRESENT'].includes(found.status)
-            || (found.status === 'PRESENT' && (!subjectValid(found.subject) || found.username !== plan.username))) fail('PRIMARY_LOOKUP_UNKNOWN');
+        // Absence cannot carry a subject, username, error or partial result.
+        // Require a closed observation before it can authorize create or CLEAN.
+        const absent = exact(found, ['status']) && found.status === 'ABSENT';
+        const present = exact(found, ['status', 'subject', 'username']) && found.status === 'PRESENT'
+            && subjectValid(found.subject) && found.username === plan.username;
+        if (!absent && !present) fail('PRIMARY_LOOKUP_UNKNOWN');
         return found;
     }
     async function cleanup(plan, current) {

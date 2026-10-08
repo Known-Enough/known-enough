@@ -255,4 +255,49 @@ describe('inactive primary signup driver: simulated ports are not live proof', (
     const g = fixture(); Object.assign(g.journal, { createIfAbsent: async () => ({ ok: true }) });
     await expect(g.driver.prepare(plan)).rejects.toThrow('PRIMARY_JOURNAL_UNAVAILABLE'); expect(g.calls).not.toContain('signup');
   });
+
+  const contradictoryAbsences = [
+    { status: 'ABSENT', subject: ownSubject },
+    { status: 'ABSENT', username: plan.username },
+    { status: 'ABSENT', error: 'PRIVATE_PROVIDER_ERROR' }
+  ];
+
+  test.each(contradictoryAbsences)('contradictory preflight absence %j cannot authorize signup', async response => {
+    const f = fixture(); await f.driver.prepare(plan); f.ports.lookupSubject = async () => response;
+    await expect(f.driver.execute(plan)).rejects.toThrow('PRIMARY_LOOKUP_UNKNOWN');
+    expect(f.calls).not.toContain('signup'); expect(f.record.phase).toBe('PREPARED');
+  });
+
+  test.each(contradictoryAbsences)('contradictory cleanup absence %j cannot mark a present account CLEAN', async response => {
+    const f = fixture(); const original = f.ports.lookupSubject;
+    f.ports.lookupSubject = async (request, options) => f.record?.phase === 'VERIFIED' ? response : original(request, options);
+    await f.driver.prepare(plan); const report = await f.driver.execute(plan);
+    expect(report).toMatchObject({ status: 'BLOCKED_OR_FAILED', execution: 'PASS', cleanup: 'UNKNOWN', deleteAttempts: 0 });
+    expect(f.liveSubject).toBe(ownSubject); expect(f.calls).not.toContain('delete');
+    expect(JSON.stringify(report)).not.toMatch(/PRIVATE|subject|username|ke-primary/);
+  });
+
+  test.each(contradictoryAbsences)('contradictory post-delete absence %j cannot certify a deletion that did not happen', async response => {
+    const f = fixture(); const original = f.ports.lookupSubject;
+    f.ports.deleteSubject = async () => { f.calls.push('delete'); };
+    f.ports.lookupSubject = async (request, options) => f.record?.deleteAttempts ? response : original(request, options);
+    await f.driver.prepare(plan); expect(await f.driver.execute(plan)).toMatchObject({ status: 'BLOCKED_OR_FAILED', cleanup: 'UNKNOWN', deleteAttempts: 1 });
+    expect(f.liveSubject).toBe(ownSubject); expect(f.calls.filter(value => value === 'delete')).toHaveLength(1);
+  });
+
+  test.each(contradictoryAbsences)('contradictory recovery absence %j cannot erase an unresolved private journal', async response => {
+    const f = fixture(); f.ports.deleteSubject = async () => { f.calls.push('delete'); throw new Error('PRIVATE_DENIAL'); };
+    await f.driver.prepare(plan); expect(await f.driver.execute(plan)).toMatchObject({ cleanup: 'UNKNOWN' });
+    const before = structuredClone(f.record); f.ports.lookupSubject = async () => response;
+    await expect(f.driver.recover(plan)).rejects.toThrow('PRIMARY_LOOKUP_UNKNOWN');
+    expect(f.record).toEqual(before); expect(f.liveSubject).toBe(ownSubject); expect(f.calls.filter(value => value === 'delete')).toHaveLength(1);
+  });
+
+  test('a PRESENT read with error metadata is unknown and cannot authorize destructive cleanup', async () => {
+    const f = fixture(); const original = f.ports.lookupSubject;
+    f.ports.lookupSubject = async (request, options) => f.record?.phase === 'VERIFIED'
+      ? { status: 'PRESENT', subject: ownSubject, username: plan.username, error: 'PRIVATE_INCOMPLETE_READ' } : original(request, options);
+    await f.driver.prepare(plan); expect(await f.driver.execute(plan)).toMatchObject({ status: 'BLOCKED_OR_FAILED', cleanup: 'UNKNOWN', deleteAttempts: 0 });
+    expect(f.liveSubject).toBe(ownSubject); expect(f.calls).not.toContain('delete');
+  });
 });
