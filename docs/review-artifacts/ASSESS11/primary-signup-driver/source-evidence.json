@@ -13,7 +13,7 @@
   ],
   "phase": "PRIMARY_SYNTHETIC_DRIVER_CODING",
   "primaryExecution": "NOT_STARTED",
-  "sourceReady": "CODE_CHECKED_PENDING_OFFLINE_WORKFLOW",
+  "sourceReady": "CODE_READY",
   "preserved33": {
     "apps/api/src/model-runtime.ts": "4b233b906c494db0a07b500deb697cdec1cdee402a1cd9580c9c3cbb279309d4",
     "apps/api/src/model-runtime.test.ts": "614c8a6c363e1f0704019d73b85d5972cb1f0cc445df31d7d5c56b6a0e2e5584",
@@ -134,5 +134,79 @@
       ".github/workflows/primary-signup-verify.yml": "20cb8e27a56b974e12977101802b4cf3fc607b31a56a5051820e2334146353bb"
     }
   },
-  "workflowYaml": "PASS"
+  "workflowYaml": "PASS",
+  "checkedSourceCommit": "4d83aca33516f25b63ed4be3791ea5b42f48134b",
+  "sourceSync": {
+    "label": "source",
+    "expectedRemote": "3db084381babc4176fffa761cdf0e9d97f60bdc0",
+    "sourceSha": "4d83aca33516f25b63ed4be3791ea5b42f48134b",
+    "observedEnd": "2026-10-08T13:12:29.291727+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 33
+  },
+  "automaticFrontendDeployment": {
+    "id": 37782551790,
+    "head_sha": "4d83aca33516f25b63ed4be3791ea5b42f48134b",
+    "path": ".github/workflows/deploy-amplify-staging.yml",
+    "conclusion": "success",
+    "created_at": "2026-10-08T13:12:33Z",
+    "updated_at": "2026-10-08T13:13:30Z",
+    "html_url": "https://github.com/Known-Enough/known-enough/actions/runs/37782551790",
+    "proof": "matched workflow/source/own actor and successful build/publish step; separate installed/readback/primary signup proof not supplied"
+  },
+  "offlineWorkflow": {
+    "id": 37782685619,
+    "source": "4d83aca33516f25b63ed4be3791ea5b42f48134b",
+    "verifiedAt": "2026-10-08T13:15:21.722749+00:00",
+    "actor": 143764700,
+    "trigger": 143764700,
+    "branch": "main",
+    "event": "workflow_dispatch",
+    "path": ".github/workflows/primary-signup-verify.yml",
+    "conclusion": "success",
+    "createdAt": "2026-10-08T13:13:35Z",
+    "updatedAt": "2026-10-08T13:13:59Z",
+    "artifactName": "primary-signup-offline",
+    "artifactSha256": "8bb6e5dd3aa1695bce5d206067bbb9ec33b4de4445e4e3f1c556cc437cc029f0",
+    "artifact": {
+      "sourceSha": "4d83aca33516f25b63ed4be3791ea5b42f48134b",
+      "checks": {
+        "configuration": "PASS",
+        "execution": "NOT_STARTED",
+        "installation": "UNKNOWN"
+      }
+    },
+    "job": {
+      "id": 113329493486,
+      "startedAt": "2026-10-08T13:13:39Z",
+      "completedAt": "2026-10-08T13:13:58Z"
+    },
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/37782685619"
+  },
+  "claimReleasedAt": "2026-10-08T13:19:55.196292+00:00",
+  "wholeTask": "REVIEW_UNCLAIMED_NOT_DONE",
+  "foundationCI": {
+    "id": 37782552051,
+    "path": ".github/workflows/check.yml",
+    "head_sha": "4d83aca33516f25b63ed4be3791ea5b42f48134b",
+    "event": "push",
+    "head_branch": "main",
+    "created_at": "2026-10-08T13:12:33Z",
+    "updated_at": "2026-10-08T13:15:37Z",
+    "conclusion": "success",
+    "html_url": "https://github.com/Known-Enough/known-enough/actions/runs/37782552051",
+    "verifiedAt": "2026-10-08T13:17:41.323772+00:00",
+    "actorId": 143764700,
+    "triggerId": 143764700,
+    "scope": "existing pinned npm run check job, all steps PASS; no separate raw test artifact"
+  },
+  "remaining": [
+    "own project-specific setup capability/effective resource-policy-target readback",
+    "private durable journal and exclusive synthetic mailbox/fixture installation",
+    "immutable-subject and partial-failure cleanup semantics; fenced/quiescent orphaned-account recovery",
+    "source-exact managed public signup, received confirmation, PKCE login/server identity, usage/privacy/CLEAN proof"
+  ]
 }
