@@ -490,7 +490,6 @@
   },
   "productionChanges": false,
   "installation": "NOT_EXECUTED",
-  "providerCalls": 0,
   "signupMessages": 0,
   "participantConsent": "NOT_GRANTED",
   "wholeTask": "REQUIRED_CLOSEOUT_UNPROVED",
@@ -549,5 +548,7 @@
     "cleanup": "UNKNOWN",
     "observed_end": "2026-10-08T06:33:44.005479+00:00"
   },
-  "releaseObservedAt": "2026-10-08T06:34:32.066568+00:00"
+  "releaseObservedAt": "2026-10-08T06:34:32.066568+00:00",
+  "realProviderCalls": 0,
+  "syntheticProviderCalls": "EXERCISED_BY_LOCAL_REGRESSIONS; not aggregated as paid service usage"
 }
