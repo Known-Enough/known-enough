@@ -121,7 +121,7 @@
     "docs/review-artifacts/OPS00/manifest-utf8-integrity.md": "6d3b5c0258fdc07ee65578ac8d40502db809c85b2aa75e61e759dd669e78c14b",
     "docs/review-artifacts/OPS00/manifest-utf8-evidence.json": "f4b66d01ead2c27de41ae3df734119742d9fafae1811e8bd44e3c9bea08dafa6"
   },
-  "sourceReady": "LOCAL_CHECKED_OFFLINE_PENDING",
+  "sourceReady": "CODE_READY",
   "installation": "UNKNOWN",
   "managedRecovery": "NOT_EXECUTED",
   "reproduction": {
@@ -255,7 +255,7 @@
   },
   "ownedFullSession": 61874,
   "fullResult": "PASS",
-  "lastObservedAt": "2026-10-08T22:50:18.025627+00:00",
+  "lastObservedAt": "2026-10-08T22:55:55.283103+00:00",
   "full": {
     "label": "full",
     "command": [
@@ -277,5 +277,121 @@
     "hostedPassed": 1,
     "browserPassed": 64,
     "boundaryReferences": 414
-  }
+  },
+  "sourceSync": {
+    "label": "source",
+    "expectedRemote": "86aec7311a1d149653d7c68901d5de790eb9e169",
+    "sourceSha": "1d7ced1211ffddbc3a5274aa9378bdf03686c8ba",
+    "observedEnd": "2026-10-08T22:50:22.443761+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 104
+  },
+  "checkedSource": "1d7ced1211ffddbc3a5274aa9378bdf03686c8ba",
+  "offlineVerification": {
+    "id": 37855994726,
+    "source": "1d7ced1211ffddbc3a5274aa9378bdf03686c8ba",
+    "actor": 143764700,
+    "path": ".github/workflows/operations-verify.yml",
+    "event": "workflow_dispatch",
+    "createdAt": "2026-10-08T22:50:48Z",
+    "updatedAt": "2026-10-08T22:54:52Z",
+    "observedAt": "2026-10-08T22:55:23.528684+00:00",
+    "conclusion": "success",
+    "nativePassed": 141,
+    "applicationPassed": 1398,
+    "browserPassed": 64,
+    "installation": "UNKNOWN",
+    "managedRecovery": "NOT_EXECUTED",
+    "artifactSha256": {
+      "operations-report.json": "b939469efa42c4a3d34f17c9868ef0d42ab8ccd04113d6c6963280d4706b9cff",
+      "partition-report.json": "238a79b40564200b6278af74795cd8c039c5fbd35e2f33adbab233104faad03a",
+      "retention-report.json": "56af3bdc66163347d522b84f4efb05d019865e8d96426c7cae594b3716b6420a",
+      "jobs-report.json": "82b126138806b387bdedb90ded79baa756a8749f05b200daffb525308df010c8",
+      "setup.json": "a8c67e9a4474b8561a991e8446ae1db36e23c70de18bd09bff4241bdd5c0d627",
+      "partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+      "jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639"
+    },
+    "reports": {
+      "operations-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "1d7ced1211ffddbc3a5274aa9378bdf03686c8ba",
+        "templateHash": "a8c67e9a4474b8561a991e8446ae1db36e23c70de18bd09bff4241bdd5c0d627",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "managedRecovery": "UNKNOWN",
+        "apply": "DISABLED"
+      },
+      "partition-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "1d7ced1211ffddbc3a5274aa9378bdf03686c8ba",
+        "templateHash": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "effectivePermissions": "UNKNOWN",
+        "migration": "NOT_EXECUTED",
+        "activation": "DISABLED",
+        "managedRecovery": "UNKNOWN"
+      },
+      "retention-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "1d7ced1211ffddbc3a5274aa9378bdf03686c8ba",
+        "preparationHash": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "realPersonPolicy": "UNAPPROVED",
+        "dataOperations": "NOT_EXECUTED",
+        "participantGrants": "NOT_GRANTED",
+        "managedProof": "UNKNOWN"
+      },
+      "jobs-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "1d7ced1211ffddbc3a5274aa9378bdf03686c8ba",
+        "preparationHash": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "providerCalls": "NOT_EXECUTED",
+        "managedRecovery": "UNKNOWN",
+        "participantConsent": "NOT_GRANTED",
+        "cleanup": "UNKNOWN"
+      }
+    },
+    "jobs": [
+      {
+        "id": 113580183149,
+        "name": "verify",
+        "conclusion": "success",
+        "started_at": "2026-10-08T22:50:51Z",
+        "completed_at": "2026-10-08T22:54:52Z"
+      }
+    ]
+  },
+  "releaseAt": "2026-10-08T22:55:55.283103+00:00",
+  "claimStatus": "RELEASED",
+  "wholeTaskStatus": "BLOCKED",
+  "receiptsBeforeFinished": [
+    {
+      "id": 37855275309,
+      "created_at": "2026-10-08T22:43:42Z",
+      "observed_at": "2026-10-08T22:43:52.158Z",
+      "verified": true
+    },
+    {
+      "id": 37855574449,
+      "created_at": "2026-10-08T22:46:36Z",
+      "observed_at": "2026-10-08T22:46:46.576Z",
+      "verified": true
+    },
+    {
+      "id": 37855999016,
+      "created_at": "2026-10-08T22:50:50Z",
+      "observed_at": "2026-10-08T22:50:58.312Z",
+      "verified": true
+    }
+  ]
 }
