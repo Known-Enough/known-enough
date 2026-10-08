@@ -302,7 +302,7 @@
     "equalClean": true,
     "protectedHashes": 102
   },
-  "lastObservedAt": "2026-10-08T22:27:05.780129+00:00",
+  "lastObservedAt": "2026-10-08T22:28:42.502493+00:00",
   "ownedFullSession": 22064,
   "full": {
     "label": "full",
@@ -441,5 +441,66 @@
       "observed_at": "2026-10-08T22:22:37.814Z",
       "verified": true
     }
-  ]
+  ],
+  "handoffSync": {
+    "label": "handoff",
+    "expectedRemote": "b7062a604fd0d80b09912556f5e3700bcecedb21",
+    "sourceSha": "080bb0ed621779fea8b9e180b14bd92d954c34ea",
+    "observedEnd": "2026-10-08T22:27:10.323681+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 102
+  },
+  "finishedReceiptRun": 37853579087,
+  "receipts": [
+    {
+      "event": "started",
+      "id": 37852255087,
+      "created_at": "2026-10-08T22:14:59Z",
+      "observed_at": "2026-10-08T22:15:07.808Z",
+      "verified": true,
+      "sourceSha": "4d9f7b5df8340afdc26e8e2f72ae31e11abed7f6",
+      "recordSha256": "fb8fc6eab2b409c6be790824ec0c3e31c88cdaabe962a43b4b7f852aa2f87a5d",
+      "summarySha256": "979b886b888476ef0700843881ff08e180e2eaf9841a8645cbeb595acdf3dc13"
+    },
+    {
+      "event": "progress",
+      "id": 37852613791,
+      "created_at": "2026-10-08T22:18:17Z",
+      "observed_at": "2026-10-08T22:18:24.408Z",
+      "verified": true,
+      "sourceSha": "1a3d50d1ac0efddd583d03fd7ece242cbae9c776",
+      "recordSha256": "9632b72c3e98349691786add612e879f90853825a1bc60412791f1172d228c24",
+      "summarySha256": "dafecc3e4efb12200312413ca4a9afbe2104b1a619fd521066da6655669556c9"
+    },
+    {
+      "event": "progress",
+      "id": 37853057406,
+      "created_at": "2026-10-08T22:22:29Z",
+      "observed_at": "2026-10-08T22:22:37.814Z",
+      "verified": true,
+      "sourceSha": "b7062a604fd0d80b09912556f5e3700bcecedb21",
+      "recordSha256": "c28007e9e8763f40553eff8de8046f1088a38c9963958eb46aa331158fc8e01a",
+      "summarySha256": "edf9f3decf7b1c7449006b6aebdcb68dbab3d48004718b52fe6e887ad7ef3726"
+    },
+    {
+      "event": "finished",
+      "id": 37853579087,
+      "created_at": "2026-10-08T22:27:23Z",
+      "observed_at": "2026-10-08T22:27:30.731Z",
+      "verified": true,
+      "sourceSha": "080bb0ed621779fea8b9e180b14bd92d954c34ea",
+      "recordSha256": "b43abf875f686ed803a407108a09a9a1a9c045460d96950d8a2717888d9c1cb4",
+      "summarySha256": "291ed95f78799a02d54d4e17b0ad1ca9c04665c510def4b906aaa4eb5bf76962"
+    }
+  ],
+  "maximumReceiptGapSeconds": 294,
+  "chatSummary": "Fixed and pushed OPS00 recovery-manifest validation (b7062a6): malformed UTF-8 is rejected before storage or recovery, while valid Unicode and exact bytes are preserved. 138 native operations, 1,398 application and 64 browser checks plus [offline verification](https://github.com/Known-Enough/known-enough/actions/runs/37853051890) passed. Installation and managed recovery remain unverified; next is own-account setup and recovery proof ([log](https://github.com/Known-Enough/known-enough/blob/main/docs/monitor-log.md#b-run158)).",
+  "closingObservedAt": "2026-10-08T22:28:42.502493+00:00",
+  "nextNominalWake": "2026-10-08T22:43:11.642Z",
+  "coalescedScheduledHints": [],
+  "idleDeliveryGating": "UNKNOWN",
+  "lookupError": "gh: Not Found (HTTP 404); corrected workflow lookup to b-monitor-log.yml"
 }
