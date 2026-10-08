@@ -58,7 +58,7 @@ export function safeResults(tests) {
 }
 export function qualificationSelection(scope = 'full') {
     if (scope === 'full') return [];
-    if (scope === 'signup') return ['--grep', '^QA01 signup and managed login$'];
+    if (scope === 'signup') return ['--grep', '(^| )QA01 signup and managed login$'];
     throw new Error('QA_JOURNEY_SCOPE_INVALID');
 }
 export function qualificationReport(input) {

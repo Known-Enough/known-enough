@@ -197,9 +197,20 @@ test('signup failure codes and HTTP status survive reporter and qualification wi
 test('bounded signup selection cannot run paid journeys or promote partial evidence to whole-release PASS',async()=>{
   // @ts-expect-error Exact runner selection boundary.
   const {qualificationSelection}=await import('../../scripts/live-qa/runner-core.mjs');
-  expect(qualificationSelection()).toEqual([]);expect(qualificationSelection('signup')).toEqual(['--grep','^QA01 signup and managed login$']);expect(()=>qualificationSelection('.*')).toThrow('QA_JOURNEY_SCOPE_INVALID');
+  expect(qualificationSelection()).toEqual([]);expect(qualificationSelection('signup')).toEqual(['--grep','(^| )QA01 signup and managed login$']);expect(()=>qualificationSelection('.*')).toThrow('QA_JOURNEY_SCOPE_INVALID');
   const good={runId:'run-12345',runScope:'SIGNUP_ONLY',processExitCode:0,processSignal:null,reportStatus:'passed',globalErrors:0,failedTests:0,preflight:'PASS',fixtures:'PASS',tests:[{title:REQUIRED_TESTS[0],status:'passed'}],attempts:0,signupMessages:1,privacy:'PASS',cleanup:'CLEAN'};
   expect(qualificationReport(good)).toMatchObject({runScope:'SIGNUP_ONLY',diagnosticStatus:'PASS',status:'BLOCKED_OR_FAILED',counts:{passed:1,blocked:6,modelAttempts:0}});
   for(const change of [{attempts:1},{signupMessages:0},{cleanup:'FAILED'},{privacy:'UNKNOWN'},{preflight:'BLOCKED'},{processExitCode:1},{tests:REQUIRED_TESTS.map((title:string)=>({title,status:'passed'}))}])expect(qualificationReport({...good,...change}).diagnosticStatus).toBe('BLOCKED_OR_FAILED');
   expect(qualificationReport({...good,attempts:4,tests:REQUIRED_TESTS.map((title:string)=>({title,status:'passed'}))}).status).toBe('BLOCKED_OR_FAILED');
+});
+
+
+test('signup-only selection discovers exactly QA01 using the real Playwright CLI without executing fixtures',async()=>{
+  // @ts-expect-error JavaScript selection is applied to actual fully qualified titles.
+  const {qualificationSelection}=await import('../../scripts/live-qa/runner-core.mjs');
+  const listed=spawnSync(process.execPath,['node_modules/@playwright/test/cli.js','test','--config=playwright.live-qa.config.ts','--list','--reporter=json',...qualificationSelection('signup')],{encoding:'utf8',timeout:30000,env:{...process.env,QA_RESULTS_FILE:''}});
+  expect(listed.status).toBe(0);
+  const report=JSON.parse(listed.stdout);
+  const titles=(suites:Array<{specs?:Array<{title:string}>;suites?:unknown[]}>):string[]=>suites.flatMap(suite=>[...(suite.specs??[]).map(spec=>spec.title),...titles((suite.suites??[]) as typeof suites)]);
+  expect(report.errors).toEqual([]);expect(titles(report.suites)).toEqual([REQUIRED_TESTS[0]]);
 });

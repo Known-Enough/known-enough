@@ -7,9 +7,9 @@
     "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
     "tests/live/qa/journey.spec.ts": "342472a5963c3c078e2cf4843388ce606b3dd083e4d94b2baf559af19bf00996",
     "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
-    "scripts/live-qa/runner-core.mjs": "f058b73cd626bad17e4770d9453ac0ba912049105e1fb9872f1b8b6091ec3fb5",
+    "scripts/live-qa/runner-core.mjs": "1af30a070f76a7e1617f0a9d581939534a1f88a73838b1ceec7bfca433ff06bb",
     "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
-    "tests/integration/live-qa-runner.test.ts": "8b975cd4d92159cef54393b07409c889d526fc525dc2906dcd81b8fc65b3db8a",
+    "tests/integration/live-qa-runner.test.ts": "971d3ff635347960682d9b4f6be81931639ba2d6f4c0469f421ed5696ba7a847",
     ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
   },
   "preserved33": {
@@ -133,6 +133,80 @@
         "tests/integration/live-qa-runner.test.ts": "8b975cd4d92159cef54393b07409c889d526fc525dc2906dcd81b8fc65b3db8a",
         ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
       }
+    },
+    "selector-regression-broken": {
+      "label": "selector-regression-broken",
+      "command": [
+        "npx",
+        "vitest",
+        "run",
+        "tests/integration/live-qa-runner.test.ts",
+        "-t",
+        "discovers exactly QA01"
+      ],
+      "start": "2026-10-08T08:17:30.911745+00:00",
+      "end": "2026-10-08T08:17:33.219273+00:00",
+      "exit": 1,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/live-qa/signup-diagnostics.mjs": "341268fd45fd92885753ed600513348107d1ca85a5d8ee57bbee2dca1b28262f",
+        "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+        "tests/live/qa/journey.spec.ts": "342472a5963c3c078e2cf4843388ce606b3dd083e4d94b2baf559af19bf00996",
+        "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+        "scripts/live-qa/runner-core.mjs": "f058b73cd626bad17e4770d9453ac0ba912049105e1fb9872f1b8b6091ec3fb5",
+        "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+        "tests/integration/live-qa-runner.test.ts": "b198dd67da6acebf5f93ef857ae1b0cc7da2576308f1947f6380bd3df0809890",
+        ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
+      }
+    },
+    "selector-focused": {
+      "label": "selector-focused",
+      "command": [
+        "npx",
+        "vitest",
+        "run",
+        "tests/integration/live-qa-signup-diagnostics.test.ts",
+        "tests/integration/live-qa-runner.test.ts"
+      ],
+      "start": "2026-10-08T08:17:59.363651+00:00",
+      "end": "2026-10-08T08:18:01.824146+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/live-qa/signup-diagnostics.mjs": "341268fd45fd92885753ed600513348107d1ca85a5d8ee57bbee2dca1b28262f",
+        "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+        "tests/live/qa/journey.spec.ts": "342472a5963c3c078e2cf4843388ce606b3dd083e4d94b2baf559af19bf00996",
+        "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+        "scripts/live-qa/runner-core.mjs": "1af30a070f76a7e1617f0a9d581939534a1f88a73838b1ceec7bfca433ff06bb",
+        "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+        "tests/integration/live-qa-runner.test.ts": "971d3ff635347960682d9b4f6be81931639ba2d6f4c0469f421ed5696ba7a847",
+        ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
+      }
+    },
+    "selector-full": {
+      "label": "selector-full",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-08T08:18:30.304776+00:00",
+      "end": "2026-10-08T08:22:33.848263+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/live-qa/signup-diagnostics.mjs": "341268fd45fd92885753ed600513348107d1ca85a5d8ee57bbee2dca1b28262f",
+        "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+        "tests/live/qa/journey.spec.ts": "342472a5963c3c078e2cf4843388ce606b3dd083e4d94b2baf559af19bf00996",
+        "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+        "scripts/live-qa/runner-core.mjs": "1af30a070f76a7e1617f0a9d581939534a1f88a73838b1ceec7bfca433ff06bb",
+        "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+        "tests/integration/live-qa-runner.test.ts": "971d3ff635347960682d9b4f6be81931639ba2d6f4c0469f421ed5696ba7a847",
+        ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
+      }
     }
   },
   "previousQualification": {
@@ -144,13 +218,389 @@
     "gatewayObservation": "ACCESS_DENIED",
     "gatewayPurpose": "separate metadata get-stage read; not signup-cause proof"
   },
-  "live": "NOT_STARTED",
+  "live": "FIRST_DIAGNOSTIC_NO_TESTS; SELECTOR_CORRECTION_FULL_CHECK_RUNNING",
   "primarySignup": "UNKNOWN",
   "managedOperations": "UNKNOWN",
   "actualUsage": {
     "paidCalls": 0,
     "syntheticSignup": 0,
-    "deployment": 0
+    "deployment": 1,
+    "managedFixtureCycles": 1
   },
-  "observedAt": "2026-10-08T08:07:33.715210+00:00"
+  "observedAt": "2026-10-08T08:23:26.476552+00:00",
+  "liveFirst": {
+    "run": 37747844101,
+    "source": "805948bc36191ce9c92c9357e441058258919adf",
+    "actor": 143764700,
+    "status": "completed",
+    "conclusion": "failure",
+    "observedAt": "2026-10-08T08:17:48.560785+00:00",
+    "report": {
+      "schemaVersion": 1,
+      "runScope": "SIGNUP_ONLY",
+      "diagnosticStatus": "BLOCKED_OR_FAILED",
+      "budget": {
+        "attempts": 0,
+        "reservedTokens": 0,
+        "reservedCostMicros": 0,
+        "maxAttemptsPerRun": 200,
+        "maxTokensPerRun": 2500000,
+        "maxCostMicrosPerRun": 2500000
+      },
+      "gatewayObservation": "ACCESS_DENIED",
+      "gatewayThrottle": null,
+      "modelFailures": [],
+      "runId": "gh-37747844101-1",
+      "sourceCommit": "805948bc36191ce9c92c9357e441058258919adf",
+      "status": "BLOCKED_OR_FAILED",
+      "lanes": {
+        "execution": "BLOCKED",
+        "preflight": "PASS",
+        "fixtures": "PASS",
+        "journeys": "BLOCKED",
+        "model": "BLOCKED",
+        "privacy": "PASS",
+        "signup": "BLOCKED",
+        "cleanup": "PASS"
+      },
+      "tests": [
+        {
+          "title": "QA01 signup and managed login",
+          "status": "BLOCKED"
+        },
+        {
+          "title": "QA02 admission and invitations",
+          "status": "BLOCKED"
+        },
+        {
+          "title": "QA03 fresh decision and owner confirmations",
+          "status": "BLOCKED"
+        },
+        {
+          "title": "QA04 private negotiation and exact agreement",
+          "status": "BLOCKED"
+        },
+        {
+          "title": "QA05 denial privacy and recovery",
+          "status": "BLOCKED"
+        },
+        {
+          "title": "QA06 refusal revocation revision and disclosure",
+          "status": "BLOCKED"
+        },
+        {
+          "title": "QA07 rendered clarification and accessibility",
+          "status": "BLOCKED"
+        }
+      ],
+      "counts": {
+        "passed": 0,
+        "failed": 0,
+        "blocked": 7,
+        "modelAttempts": 0,
+        "signupMessages": 0
+      }
+    },
+    "artifactSha256": "f7db1ca3457d119dbec06c0b820e7d334842417574d6fbec98b8d228567a42c3",
+    "completeArtifactSha256": "ef9a782c35f610379ae781e44e11cf476f02d9d2ec165ddd5a1fb485ed1cf484",
+    "noSignupExecuted": true,
+    "cleanupRetry": "SUCCESS"
+  },
+  "laneArtifacts": {
+    "observedAt": "2026-10-08T08:14:39.531440+00:00",
+    "run": 37747844101,
+    "source": "805948bc36191ce9c92c9357e441058258919adf",
+    "artifacts": {
+      "release": {
+        "file": "/tmp/ke-run149/release/receipt.json",
+        "sha256": "b9626aabd38820d04550077710dc37f0e7b040b066a374d971cbf40798952aaf",
+        "source": "805948bc36191ce9c92c9357e441058258919adf",
+        "status": null
+      },
+      "primary": {
+        "file": "/tmp/ke-run149/primary/primary-release.json",
+        "sha256": "151427051827ceba9475f21ffb21255b919b304367814fc7c3398809797cc700",
+        "source": "805948bc36191ce9c92c9357e441058258919adf",
+        "status": "PASS"
+      },
+      "public": {
+        "file": "/tmp/ke-run149/public/public.json",
+        "sha256": "ff270cefe8d886e64cead287d2603f96c8ba4c1cb43ec1aa19a63bc38da07fe4",
+        "source": "805948bc36191ce9c92c9357e441058258919adf",
+        "status": "PASS"
+      },
+      "metadata": {
+        "file": "/tmp/ke-run149/metadata/metadata.json",
+        "sha256": "727f5b6dc47611e575af97927800657c403126abc60faf9a39c734f29500916a",
+        "source": "805948bc36191ce9c92c9357e441058258919adf",
+        "status": "PASS"
+      }
+    },
+    "ownMainActorProvenance": "verified"
+  },
+  "previousPhases": [
+    {
+      "sourceSha": "805948bc36191ce9c92c9357e441058258919adf",
+      "sourceFiles": {
+        "scripts/live-qa/signup-diagnostics.mjs": "341268fd45fd92885753ed600513348107d1ca85a5d8ee57bbee2dca1b28262f",
+        "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+        "tests/live/qa/journey.spec.ts": "342472a5963c3c078e2cf4843388ce606b3dd083e4d94b2baf559af19bf00996",
+        "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+        "scripts/live-qa/runner-core.mjs": "f058b73cd626bad17e4770d9453ac0ba912049105e1fb9872f1b8b6091ec3fb5",
+        "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+        "tests/integration/live-qa-runner.test.ts": "8b975cd4d92159cef54393b07409c889d526fc525dc2906dcd81b8fc65b3db8a",
+        ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
+      },
+      "checks": {
+        "focused": {
+          "label": "focused",
+          "command": [
+            "npx",
+            "vitest",
+            "run",
+            "tests/integration/live-qa-signup-diagnostics.test.ts",
+            "tests/integration/live-qa-runner.test.ts"
+          ],
+          "start": "2026-10-08T08:00:20.346703+00:00",
+          "end": "2026-10-08T08:00:22.272549+00:00",
+          "exit": 0,
+          "frozen_unchanged": true,
+          "source_unchanged": true,
+          "source_hashes": {}
+        },
+        "full": {
+          "label": "full",
+          "command": [
+            "npm",
+            "run",
+            "check"
+          ],
+          "start": "2026-10-08T08:00:51.306462+00:00",
+          "end": "2026-10-08T08:02:14.843474+00:00",
+          "exit": 1,
+          "frozen_unchanged": true,
+          "source_unchanged": true,
+          "source_hashes": {
+            "scripts/live-qa/signup-diagnostics.mjs": "341268fd45fd92885753ed600513348107d1ca85a5d8ee57bbee2dca1b28262f",
+            "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+            "tests/live/qa/journey.spec.ts": "342472a5963c3c078e2cf4843388ce606b3dd083e4d94b2baf559af19bf00996",
+            "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+            "scripts/live-qa/runner-core.mjs": "f058b73cd626bad17e4770d9453ac0ba912049105e1fb9872f1b8b6091ec3fb5",
+            "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+            "tests/integration/live-qa-runner.test.ts": "8b975cd4d92159cef54393b07409c889d526fc525dc2906dcd81b8fc65b3db8a",
+            ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
+          }
+        },
+        "recovery-focus": {
+          "label": "recovery-focus",
+          "command": [
+            "npx",
+            "vitest",
+            "run",
+            "packages/adapters/src/partition-archive-recovery.test.ts"
+          ],
+          "start": "2026-10-08T08:02:27.194466+00:00",
+          "end": "2026-10-08T08:02:39.077341+00:00",
+          "exit": 0,
+          "frozen_unchanged": true,
+          "source_unchanged": true,
+          "source_hashes": {
+            "scripts/live-qa/signup-diagnostics.mjs": "341268fd45fd92885753ed600513348107d1ca85a5d8ee57bbee2dca1b28262f",
+            "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+            "tests/live/qa/journey.spec.ts": "342472a5963c3c078e2cf4843388ce606b3dd083e4d94b2baf559af19bf00996",
+            "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+            "scripts/live-qa/runner-core.mjs": "f058b73cd626bad17e4770d9453ac0ba912049105e1fb9872f1b8b6091ec3fb5",
+            "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+            "tests/integration/live-qa-runner.test.ts": "8b975cd4d92159cef54393b07409c889d526fc525dc2906dcd81b8fc65b3db8a",
+            ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
+          }
+        },
+        "full-final": {
+          "label": "full-final",
+          "command": [
+            "npm",
+            "run",
+            "check"
+          ],
+          "start": "2026-10-08T08:02:47.386270+00:00",
+          "end": "2026-10-08T08:06:59.065654+00:00",
+          "exit": 0,
+          "frozen_unchanged": true,
+          "source_unchanged": true,
+          "source_hashes": {
+            "scripts/live-qa/signup-diagnostics.mjs": "341268fd45fd92885753ed600513348107d1ca85a5d8ee57bbee2dca1b28262f",
+            "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+            "tests/live/qa/journey.spec.ts": "342472a5963c3c078e2cf4843388ce606b3dd083e4d94b2baf559af19bf00996",
+            "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+            "scripts/live-qa/runner-core.mjs": "f058b73cd626bad17e4770d9453ac0ba912049105e1fb9872f1b8b6091ec3fb5",
+            "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+            "tests/integration/live-qa-runner.test.ts": "8b975cd4d92159cef54393b07409c889d526fc525dc2906dcd81b8fc65b3db8a",
+            ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
+          }
+        },
+        "selector-regression-broken": {
+          "label": "selector-regression-broken",
+          "command": [
+            "npx",
+            "vitest",
+            "run",
+            "tests/integration/live-qa-runner.test.ts",
+            "-t",
+            "discovers exactly QA01"
+          ],
+          "start": "2026-10-08T08:17:30.911745+00:00",
+          "end": "2026-10-08T08:17:33.219273+00:00",
+          "exit": 1,
+          "frozen_unchanged": true,
+          "source_unchanged": true,
+          "source_hashes": {
+            "scripts/live-qa/signup-diagnostics.mjs": "341268fd45fd92885753ed600513348107d1ca85a5d8ee57bbee2dca1b28262f",
+            "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+            "tests/live/qa/journey.spec.ts": "342472a5963c3c078e2cf4843388ce606b3dd083e4d94b2baf559af19bf00996",
+            "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+            "scripts/live-qa/runner-core.mjs": "f058b73cd626bad17e4770d9453ac0ba912049105e1fb9872f1b8b6091ec3fb5",
+            "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+            "tests/integration/live-qa-runner.test.ts": "b198dd67da6acebf5f93ef857ae1b0cc7da2576308f1947f6380bd3df0809890",
+            ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
+          }
+        },
+        "selector-focused": {
+          "label": "selector-focused",
+          "command": [
+            "npx",
+            "vitest",
+            "run",
+            "tests/integration/live-qa-signup-diagnostics.test.ts",
+            "tests/integration/live-qa-runner.test.ts"
+          ],
+          "start": "2026-10-08T08:17:59.363651+00:00",
+          "end": "2026-10-08T08:18:01.824146+00:00",
+          "exit": 0,
+          "frozen_unchanged": true,
+          "source_unchanged": true,
+          "source_hashes": {
+            "scripts/live-qa/signup-diagnostics.mjs": "341268fd45fd92885753ed600513348107d1ca85a5d8ee57bbee2dca1b28262f",
+            "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+            "tests/live/qa/journey.spec.ts": "342472a5963c3c078e2cf4843388ce606b3dd083e4d94b2baf559af19bf00996",
+            "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+            "scripts/live-qa/runner-core.mjs": "1af30a070f76a7e1617f0a9d581939534a1f88a73838b1ceec7bfca433ff06bb",
+            "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+            "tests/integration/live-qa-runner.test.ts": "971d3ff635347960682d9b4f6be81931639ba2d6f4c0469f421ed5696ba7a847",
+            ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
+          }
+        }
+      },
+      "liveFirst": {
+        "run": 37747844101,
+        "source": "805948bc36191ce9c92c9357e441058258919adf",
+        "actor": 143764700,
+        "status": "completed",
+        "conclusion": "failure",
+        "observedAt": "2026-10-08T08:17:48.560785+00:00",
+        "report": {
+          "schemaVersion": 1,
+          "runScope": "SIGNUP_ONLY",
+          "diagnosticStatus": "BLOCKED_OR_FAILED",
+          "budget": {
+            "attempts": 0,
+            "reservedTokens": 0,
+            "reservedCostMicros": 0,
+            "maxAttemptsPerRun": 200,
+            "maxTokensPerRun": 2500000,
+            "maxCostMicrosPerRun": 2500000
+          },
+          "gatewayObservation": "ACCESS_DENIED",
+          "gatewayThrottle": null,
+          "modelFailures": [],
+          "runId": "gh-37747844101-1",
+          "sourceCommit": "805948bc36191ce9c92c9357e441058258919adf",
+          "status": "BLOCKED_OR_FAILED",
+          "lanes": {
+            "execution": "BLOCKED",
+            "preflight": "PASS",
+            "fixtures": "PASS",
+            "journeys": "BLOCKED",
+            "model": "BLOCKED",
+            "privacy": "PASS",
+            "signup": "BLOCKED",
+            "cleanup": "PASS"
+          },
+          "tests": [
+            {
+              "title": "QA01 signup and managed login",
+              "status": "BLOCKED"
+            },
+            {
+              "title": "QA02 admission and invitations",
+              "status": "BLOCKED"
+            },
+            {
+              "title": "QA03 fresh decision and owner confirmations",
+              "status": "BLOCKED"
+            },
+            {
+              "title": "QA04 private negotiation and exact agreement",
+              "status": "BLOCKED"
+            },
+            {
+              "title": "QA05 denial privacy and recovery",
+              "status": "BLOCKED"
+            },
+            {
+              "title": "QA06 refusal revocation revision and disclosure",
+              "status": "BLOCKED"
+            },
+            {
+              "title": "QA07 rendered clarification and accessibility",
+              "status": "BLOCKED"
+            }
+          ],
+          "counts": {
+            "passed": 0,
+            "failed": 0,
+            "blocked": 7,
+            "modelAttempts": 0,
+            "signupMessages": 0
+          }
+        },
+        "artifactSha256": "f7db1ca3457d119dbec06c0b820e7d334842417574d6fbec98b8d228567a42c3",
+        "completeArtifactSha256": "ef9a782c35f610379ae781e44e11cf476f02d9d2ec165ddd5a1fb485ed1cf484",
+        "noSignupExecuted": true,
+        "cleanupRetry": "SUCCESS"
+      },
+      "laneArtifacts": {
+        "observedAt": "2026-10-08T08:14:39.531440+00:00",
+        "run": 37747844101,
+        "source": "805948bc36191ce9c92c9357e441058258919adf",
+        "artifacts": {
+          "release": {
+            "file": "/tmp/ke-run149/release/receipt.json",
+            "sha256": "b9626aabd38820d04550077710dc37f0e7b040b066a374d971cbf40798952aaf",
+            "source": "805948bc36191ce9c92c9357e441058258919adf",
+            "status": null
+          },
+          "primary": {
+            "file": "/tmp/ke-run149/primary/primary-release.json",
+            "sha256": "151427051827ceba9475f21ffb21255b919b304367814fc7c3398809797cc700",
+            "source": "805948bc36191ce9c92c9357e441058258919adf",
+            "status": "PASS"
+          },
+          "public": {
+            "file": "/tmp/ke-run149/public/public.json",
+            "sha256": "ff270cefe8d886e64cead287d2603f96c8ba4c1cb43ec1aa19a63bc38da07fe4",
+            "source": "805948bc36191ce9c92c9357e441058258919adf",
+            "status": "PASS"
+          },
+          "metadata": {
+            "file": "/tmp/ke-run149/metadata/metadata.json",
+            "sha256": "727f5b6dc47611e575af97927800657c403126abc60faf9a39c734f29500916a",
+            "source": "805948bc36191ce9c92c9357e441058258919adf",
+            "status": "PASS"
+          }
+        },
+        "ownMainActorProvenance": "verified"
+      }
+    }
+  ],
+  "checkedFullLabel": "selector-full"
 }
