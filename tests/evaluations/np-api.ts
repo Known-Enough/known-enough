@@ -28,7 +28,10 @@ export async function npApi(transport: ConverseTransport = npTransport()) {
   cache.addJwks(parsed.jwksUri, { keys: [{ ...pair.publicKey.export({ format: 'jwk' }), kid: 'np', use: 'sig', alg: 'RS256' } as unknown as Jwk] });
   const bearer = (subject: string, options: { expired?: boolean; display?: boolean; decisionId?: string } = {}) => {
     const header = Buffer.from(JSON.stringify({ alg: 'RS256', kid: 'np' })).toString('base64url');
-    const payload = Buffer.from(JSON.stringify({ sub: subject, iss: parsed.issuer, token_use: 'access', client_id: options.display ? 'display-client' : 'participant-client', ...(options.decisionId ? { 'custom:decision_id': options.decisionId } : {}), exp: Math.floor(Date.now() / 1000) + (options.expired ? -60 : 900) })).toString('base64url');
+    const payload = Buffer.from(JSON.stringify({ sub: subject, iss: parsed.issuer, token_use: 'access', client_id: options.display ? 'display-client' : 'participant-client',
+      ...(options.decisionId ? { 'custom:decision_id': options.decisionId } : {}),
+      ...(options.display && options.decisionId ? { 'cognito:groups': [`deal-table-display-${options.decisionId}`] } : {}),
+      exp: Math.floor(Date.now() / 1000) + (options.expired ? -60 : 900) })).toString('base64url');
     return `${header}.${payload}.${sign('RSA-SHA256', Buffer.from(`${header}.${payload}`), pair.privateKey).toString('base64url')}`;
   };
   const server = createServer(createCognitoKnownEnoughApiHandlerWithJwksCache({ application, groups, groupDecisions, ownerConversation: runtime.ownerConversation, negotiator: runtime.negotiator,
