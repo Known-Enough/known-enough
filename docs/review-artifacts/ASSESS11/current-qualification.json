@@ -863,5 +863,145 @@
     "actual primary signup/verification/managed login/privacy/CLEAN",
     "deferred managed operations installation and service proof remain external project criteria"
   ],
-  "priorQa06FailureCause": "UNKNOWN; current diagnostic-only source passed without modifying original authority calls, assertions, model or provider behavior"
+  "priorQa06FailureCause": "UNKNOWN; current diagnostic-only source passed without modifying original authority calls, assertions, model or provider behavior",
+  "handoffSync": {
+    "label": "handoff",
+    "expectedRemote": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+    "sourceSha": "e469677a0605612b700bd2d9f3f904fcda188623",
+    "observedEnd": "2026-10-08T12:40:21.714666+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 33
+  },
+  "lifecycleReceipts": [
+    {
+      "run": 37769125474,
+      "event": "started",
+      "createdAt": "2026-10-08T11:17:57Z",
+      "observedAt": "2026-10-08T11:18:05.712Z",
+      "source": "87251b59137f99a969319651a74816cf7a5ba450",
+      "artifactMatch": true
+    },
+    {
+      "run": 37769954442,
+      "event": "progress",
+      "createdAt": "2026-10-08T11:25:34Z",
+      "observedAt": "2026-10-08T11:25:41.091Z",
+      "source": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba",
+      "artifactMatch": true
+    },
+    {
+      "run": 37770599597,
+      "event": "progress",
+      "createdAt": "2026-10-08T11:31:22Z",
+      "observedAt": "2026-10-08T11:31:33.759Z",
+      "source": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba",
+      "artifactMatch": true
+    },
+    {
+      "run": 37771424147,
+      "event": "progress",
+      "createdAt": "2026-10-08T11:38:47Z",
+      "observedAt": "2026-10-08T11:39:05.524Z",
+      "source": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba",
+      "artifactMatch": true
+    },
+    {
+      "run": 37772148521,
+      "event": "progress",
+      "createdAt": "2026-10-08T11:45:20Z",
+      "observedAt": "2026-10-08T11:46:03.785Z",
+      "source": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba",
+      "artifactMatch": true
+    },
+    {
+      "run": 37772994646,
+      "event": "progress",
+      "createdAt": "2026-10-08T11:52:50Z",
+      "observedAt": "2026-10-08T11:52:57.656Z",
+      "source": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba",
+      "artifactMatch": true
+    },
+    {
+      "run": 37773304925,
+      "event": "progress",
+      "createdAt": "2026-10-08T11:55:37Z",
+      "observedAt": "2026-10-08T11:55:44.455Z",
+      "source": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba",
+      "artifactMatch": true
+    },
+    {
+      "run": 37773959928,
+      "event": "progress",
+      "createdAt": "2026-10-08T12:01:19Z",
+      "observedAt": "2026-10-08T12:01:25.847Z",
+      "source": "bbb0026f0b94d612c9ddc69acf427e80bfc397ba",
+      "artifactMatch": true
+    },
+    {
+      "run": 37774552415,
+      "event": "progress",
+      "createdAt": "2026-10-08T12:06:28Z",
+      "observedAt": "2026-10-08T12:06:36.785Z",
+      "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+      "artifactMatch": true
+    },
+    {
+      "run": 37775261844,
+      "event": "progress",
+      "createdAt": "2026-10-08T12:12:39Z",
+      "observedAt": "2026-10-08T12:12:51.913Z",
+      "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+      "artifactMatch": true
+    },
+    {
+      "run": 37776195139,
+      "event": "progress",
+      "createdAt": "2026-10-08T12:20:44Z",
+      "observedAt": "2026-10-08T12:20:51.493Z",
+      "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+      "artifactMatch": true
+    },
+    {
+      "run": 37777080500,
+      "event": "progress",
+      "createdAt": "2026-10-08T12:28:16Z",
+      "observedAt": "2026-10-08T12:28:25.530Z",
+      "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+      "artifactMatch": true
+    },
+    {
+      "run": 37778218641,
+      "event": "progress",
+      "createdAt": "2026-10-08T12:37:40Z",
+      "observedAt": "2026-10-08T12:37:48.195Z",
+      "source": "9a2f50c0e279f34178cf0532ff5ad5faa595e867",
+      "artifactMatch": true
+    },
+    {
+      "run": 37778712191,
+      "event": "finished",
+      "createdAt": "2026-10-08T12:41:45Z",
+      "observedAt": "2026-10-08T12:41:52.912Z",
+      "source": "e469677a0605612b700bd2d9f3f904fcda188623",
+      "artifactMatch": true
+    }
+  ],
+  "actualObservedEnd": "2026-10-08T12:43:36.494484+00:00",
+  "finalChatSummary": "All seven live QA journeys, privacy and CLEAN passed on 9a2f50c ([run](https://github.com/Known-Enough/known-enough/actions/runs/37774334274)). Safe QA06 failure phases are checked; 1,291 local tests and 64 browser checks passed. Next is verified primary signup and managed operations proof; both remain open ([log](https://github.com/Known-Enough/known-enough/blob/main/docs/monitor-log.md#b-run150)).",
+  "finishedReceipt": {
+    "run": 37778712191,
+    "source": "e469677a0605612b700bd2d9f3f904fcda188623",
+    "artifactMatch": true,
+    "summaryMatch": true,
+    "result": "completed"
+  },
+  "reporting": {
+    "maxReceiptCreatedGapSeconds": 564.0,
+    "allLifecycleArtifactsVerified": true,
+    "missingPublications": [],
+    "unobservedActivityGapClaimed": false
+  }
 }
