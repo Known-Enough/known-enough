@@ -28,11 +28,13 @@ export function dynamoJournal(transport, resourceArn) {
       let response;
       try { response = await transport('GetItem', { TableName: table, Key: key(hash), ConsistentRead: true }); }
       catch { throw new Error('OPS_JOURNAL_STORAGE_FAILED'); }
-      if (!response.Item) return null;
       try {
+        if (!response || typeof response !== 'object' || Array.isArray(response)) throw new Error();
+        if (response.Item === undefined) return null;
         const item = response.Item;
         if (Object.keys(item).sort().join(',') !== 'PK,SK,journal,revision' || item.PK.S !== `PLAN#${hash}` || item.SK.S !== 'JOURNAL'
-          || !/^(0|[1-9][0-9]*)$/.test(item.revision.N) || typeof item.journal.S !== 'string' || Buffer.byteLength(item.journal.S) > 4096) throw new Error();
+          || typeof item.revision.N !== 'string' || !/^(0|[1-9][0-9]*)$/.test(item.revision.N)
+          || typeof item.journal.S !== 'string' || Buffer.byteLength(item.journal.S) > 4096) throw new Error();
         const record = { revision: Number(item.revision.N), journal: JSON.parse(item.journal.S) };
         encode(hash, record); return record;
       } catch { throw new Error('OPS_JOURNAL_RECORD_REJECTED'); }

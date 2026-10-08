@@ -115,7 +115,7 @@
     "docs/review-artifacts/OPS00/journal-write-integrity.md": "31f551507dec3ec8a80841c144f6ea863a219becd32b71b4eecaec3ae38a1096",
     "docs/review-artifacts/OPS00/journal-write-evidence.json": "bd9bf3c7806e19138f3168edc4616bb05fcf2e2c8d8aa4b90f3fac8dcca6b2a5"
   },
-  "sourceReady": "NOT_YET_CHECKED",
+  "sourceReady": "LOCAL_CHECKED_OFFLINE_PENDING",
   "installation": "UNKNOWN",
   "managedRecovery": "NOT_EXECUTED",
   "reproduction": {
@@ -175,5 +175,168 @@
   },
   "newAwsRequests": 0,
   "newModelAttempts": 0,
-  "newSignupMessages": 0
+  "newSignupMessages": 0,
+  "red": {
+    "label": "red",
+    "command": [
+      "node",
+      "--experimental-transform-types",
+      "--test",
+      "--test-concurrency=2",
+      "scripts/operations/journal.test.mjs",
+      "scripts/operations/dynamo-journal.test.mjs",
+      "scripts/operations/recovery.test.mjs"
+    ],
+    "start": "2026-10-08T21:46:52.835187+00:00",
+    "end": "2026-10-08T21:46:53.038296+00:00",
+    "exit": 1,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {}
+  },
+  "redFailed": 19,
+  "redPassed": 38,
+  "newTests": 27,
+  "focused": {
+    "label": "focused",
+    "command": [
+      "node",
+      "--experimental-transform-types",
+      "--test",
+      "--test-concurrency=2",
+      "scripts/operations/journal.test.mjs",
+      "scripts/operations/dynamo-journal.test.mjs",
+      "scripts/operations/recovery.test.mjs"
+    ],
+    "start": "2026-10-08T21:47:07.559881+00:00",
+    "end": "2026-10-08T21:47:07.742328+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/dynamo-journal.mjs": "6bb186d21214571687337cfddde14d45259826d673882b7fb07a738de55b4330",
+      "scripts/operations/dynamo-journal.test.mjs": "157ad33d4b657a62c200944309cc6190d0ad66dafa99d6c1c710fa4c079db5c7"
+    }
+  },
+  "focusedPassed": 57,
+  "native": {
+    "label": "native",
+    "command": [
+      "node",
+      "--experimental-transform-types",
+      "--test",
+      "--test-concurrency=2",
+      "scripts/operations/archive-recovery.test.mjs",
+      "scripts/operations/aws-transport.test.mjs",
+      "scripts/operations/dynamo-journal.test.mjs",
+      "scripts/operations/installed-readback.test.mjs",
+      "scripts/operations/jobs-setup.test.mjs",
+      "scripts/operations/journal.test.mjs",
+      "scripts/operations/managed-preparation.test.mjs",
+      "scripts/operations/manifest.test.mjs",
+      "scripts/operations/partition-recovery.test.mjs",
+      "scripts/operations/partition-setup.test.mjs",
+      "scripts/operations/plan.test.mjs",
+      "scripts/operations/recovery.test.mjs",
+      "scripts/operations/retention-setup.test.mjs",
+      "scripts/operations/setup.test.mjs"
+    ],
+    "start": "2026-10-08T21:47:07.778130+00:00",
+    "end": "2026-10-08T21:47:11.065521+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/dynamo-journal.mjs": "6bb186d21214571687337cfddde14d45259826d673882b7fb07a738de55b4330",
+      "scripts/operations/dynamo-journal.test.mjs": "157ad33d4b657a62c200944309cc6190d0ad66dafa99d6c1c710fa4c079db5c7"
+    }
+  },
+  "nativePassed": 122,
+  "postFixReproduction": {
+    "observedAt": "2026-10-08T21:48:20.235Z",
+    "observation": "SIMULATED_TRANSPORT_ONLY",
+    "realProviderRequests": 0,
+    "results": [
+      {
+        "kind": "number",
+        "accepted": false,
+        "error": "OPS_JOURNAL_RECORD_REJECTED",
+        "conversions": 0,
+        "requests": 1
+      },
+      {
+        "kind": "boxed",
+        "accepted": false,
+        "error": "OPS_JOURNAL_RECORD_REJECTED",
+        "conversions": 0,
+        "requests": 1
+      },
+      {
+        "kind": "coercible",
+        "accepted": false,
+        "error": "OPS_JOURNAL_RECORD_REJECTED",
+        "conversions": 0,
+        "requests": 1
+      },
+      {
+        "kind": "null-item",
+        "accepted": false,
+        "error": "OPS_JOURNAL_RECORD_REJECTED",
+        "conversions": 0,
+        "requests": 1
+      },
+      {
+        "kind": "false-item",
+        "accepted": false,
+        "error": "OPS_JOURNAL_RECORD_REJECTED",
+        "conversions": 0,
+        "requests": 1
+      },
+      {
+        "kind": "null-response",
+        "accepted": false,
+        "error": "OPS_JOURNAL_RECORD_REJECTED",
+        "conversions": 0,
+        "requests": 1
+      }
+    ]
+  },
+  "currentSourceFiles": {
+    "scripts/operations/dynamo-journal.mjs": "6bb186d21214571687337cfddde14d45259826d673882b7fb07a738de55b4330",
+    "scripts/operations/dynamo-journal.test.mjs": "157ad33d4b657a62c200944309cc6190d0ad66dafa99d6c1c710fa4c079db5c7"
+  },
+  "claimSync": {
+    "label": "claim",
+    "expectedRemote": "eb2786863104e6012a008d1e787f04122e693de9",
+    "sourceSha": "b4993e5c1eb758ee30206d802f4c2504e329fa0c",
+    "observedEnd": "2026-10-08T21:45:49.296322+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 100
+  },
+  "lastObservedAt": "2026-10-08T21:51:16.356983+00:00",
+  "ownedFullSession": 53956,
+  "full": {
+    "label": "full",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "start": "2026-10-08T21:47:22.383744+00:00",
+    "end": "2026-10-08T21:50:49.882654+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/dynamo-journal.mjs": "6bb186d21214571687337cfddde14d45259826d673882b7fb07a738de55b4330",
+      "scripts/operations/dynamo-journal.test.mjs": "157ad33d4b657a62c200944309cc6190d0ad66dafa99d6c1c710fa4c079db5c7"
+    },
+    "applicationPassed": 1398,
+    "optionalSkipped": 2,
+    "hostedPassed": 1,
+    "browserPassed": 64
+  }
 }
