@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ErasingAccount } from './partition-erasure-contract.ts';
 import { Groups } from '@deal-table/contracts';
 import {
   DynamoDBClient, GetItemCommand, BatchGetItemCommand, TransactWriteItemsCommand,
@@ -85,6 +86,8 @@ const childKey = (groupId: string, kind: 'DRAFT' | 'BINDING', childId: string): 
   PK: partitionGroupKey(groupId).PK, SK: `${kind}#${id.parse(childId)}`,
 });
 function checkedRow(raw: unknown, key: PartitionKey): PartitionRow {
+  const erasing = ErasingAccount.safeParse(raw);
+  if (erasing.success && encodedKey(key) === encodedKey(partitionAccountKey(erasing.data.subject))) fail('PARTITION_STALE');
   const parsed = rowSchema.safeParse(raw);
   if (!parsed.success) return fail('PARTITION_INVALID');
   const row = parsed.data;
@@ -238,6 +241,17 @@ export function createPartitionedGroupRepository(transport: PartitionTransport,
     const before = priorHeader?.kind === 'GROUP' ? priorHeader.value.members : [];
     const after = nextHeader?.kind === 'GROUP' ? nextHeader.value.members : [];
     const changedMembers = [...new Set([...before, ...after])].filter(subject => before.includes(subject) !== after.includes(subject));
+    // Inventory phantom fence: every discovery edge transition advances its owner's account revision.
+    // A lifecycle inventory rechecks that account revision; new groups cannot slip between enumeration and freeze.
+    for (const subject of changedMembers) {
+      const mutation = output.find(item => encodedKey(item.key) === encodedKey(partitionAccountKey(subject)));
+      const prior = snapshot.rows.get(encodedKey(partitionAccountKey(subject)))?.row;
+      if (!mutation || (prior?.kind !== 'ACCOUNT' && mutation.next?.kind !== 'ACCOUNT')) return fail('PARTITION_INVALID');
+      if (!mutation.next && prior?.kind === 'ACCOUNT') {
+        if (prior.revision >= Number.MAX_SAFE_INTEGER) fail('PARTITION_CAPACITY');
+        mutation.next = { ...structuredClone(prior), revision: prior.revision + 1 };
+      }
+    }
     const edgeKeys = changedMembers.map(subject => partitionMembershipKey(subject, scope.groupId!));
     const edges = await readMany(edgeKeys, context);
     for (const [index, subject] of changedMembers.entries()) {

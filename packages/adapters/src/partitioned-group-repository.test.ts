@@ -57,12 +57,13 @@ it('persists a realistic collection larger than the old shared-row limit as indi
 
 it('commits concurrent unrelated groups without a shared account write or retry', async () => {
   const store = storage(); const repo = await seed(store); await seed(store, 'art');
+  const initialAccountRevision = store.rows.get(keyOf(partitionAccountKey('iris')))!.revision;
   let arrived = 0; let release!: () => void; const barrier = new Promise<void>(resolve => { release = resolve; });
   await Promise.all(['garden', 'art'].map(groupId => repo.transaction(scope(groupId), async state => {
     approved(state); state.groups[0]!.name += '-changed';
     if (++arrived === 2) release(); await barrier;
   })));
-  expect(store.collisions).toBe(0); expect(store.rows.get(keyOf(partitionAccountKey('iris')))!.revision).toBe(1);
+  expect(store.collisions).toBe(0); expect(store.rows.get(keyOf(partitionAccountKey('iris')))!.revision).toBe(initialAccountRevision);
   expect(await repo.transaction(scope('art'), state => state.groups[0]!.name)).toBe('art-changed');
 });
 

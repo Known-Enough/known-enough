@@ -165,14 +165,16 @@ it('keeps a supplied operation budget for private roster and decision-fence disc
 });
 
 it('creates only the verified organizer partition with atomic account guards and a derived membership edge', async () => {
-  const f = fixture(); const snapshot = await f.session().create(participant(), { name: '  Shared garden  ', idempotencyKey: 'new-group' });
+  const f = fixture(); const accountBefore = structuredClone(f.get('ACCOUNT#iris/STATE'));
+  const snapshot = await f.session().create(participant(), { name: '  Shared garden  ', idempotencyKey: 'new-group' });
   expect(snapshot).toMatchObject({ name: 'Shared garden', version: 1, isOrganizer: true, pendingInvitations: 0, drafts: [], decisions: [] });
   expect(snapshot.members).toEqual([{ id: partitionMemberId('iris'), displayName: 'IRIS', isOrganizer: true }]);
   expect(JSON.stringify(snapshot)).not.toMatch(/subject|emailHash|tokenHash|recipientHash|ACCOUNT#|MEMBER#|revision/);
   expect(f.reads.flat().every(key => ['ACCOUNT#iris', `GROUP#${snapshot.id}`, 'MEMBER#iris'].includes(key.PK))).toBe(true);
   expect(f.commits).toHaveLength(1);
   expect(f.commits[0]).toEqual(expect.arrayContaining([
-    expect.objectContaining({ key: { PK: 'ACCOUNT#iris', SK: 'STATE' }, expected: 1, next: null }),
+    expect.objectContaining({ key: { PK: 'ACCOUNT#iris', SK: 'STATE' }, expected: accountBefore.revision,
+      next: expect.objectContaining({ revision: accountBefore.revision + 1, value: accountBefore.value }) }),
     expect.objectContaining({ key: { PK: `GROUP#${snapshot.id}`, SK: 'STATE' }, expected: 0 }),
     expect.objectContaining({ key: partitionMembershipKey('iris', snapshot.id), expected: 0 })]));
   expect(f.get(code(partitionMembershipKey('iris', snapshot.id)))).toMatchObject({ revision: 1, value: { active: true } });
@@ -345,15 +347,18 @@ it('joins only the approved intended recipient atomically, stales prior bindings
   const f = fixture(syntheticKey); const session = f.session({ token: () => 'a'.repeat(43) });
   const invitation = await session.invite(participant(), 'garden', { email: 'luca@example.invalid', replace: false });
   await expect(session.accept(participant('omar'), { token: invitation.token })).rejects.toThrow('NOT_FOUND');
+  const accountBefore = structuredClone(f.get('ACCOUNT#luca/STATE'));
   const joined = await session.accept(participant('luca'), { token: invitation.token }); expect(joined.version).toBe(2); expect(joined.members).toHaveLength(3);
   expect(f.commits.at(-1)!).toEqual(expect.arrayContaining([
     expect.objectContaining({ key: partitionMembershipKey('luca', 'garden'), expected: 0 }),
-    expect.objectContaining({ key: { PK: 'ACCOUNT#luca', SK: 'STATE' }, next: null }),
+    expect.objectContaining({ key: { PK: 'ACCOUNT#luca', SK: 'STATE' }, expected: accountBefore.revision,
+      next: expect.objectContaining({ revision: accountBefore.revision + 1, value: accountBefore.value }) }),
     expect.objectContaining({ key: { PK: 'GROUP#garden', SK: 'STATE' }, next: expect.objectContaining({ kind: 'GROUP' }) })]));
   expect(f.get('MEMBER#luca/GROUP#garden')).toMatchObject({ revision: 1, value: { active: true } });
   await expect(session.decisionFence(participant('luca'), 'decision')).rejects.toThrow('STALE_CONTEXT');
   expect(await session.accept(participant('luca'), { token: invitation.token })).toEqual(joined);
   expect(f.commits.at(-1)!.every(item => item.next === null)).toBe(true); expect(f.get('MEMBER#luca/GROUP#garden').revision).toBe(1);
+  expect(f.get('ACCOUNT#luca/STATE')).toMatchObject({ revision: accountBefore.revision + 1, value: accountBefore.value });
 });
 
 it('never reuses an accepted link to restore a removed member but allows a fresh intended invitation without restoring old decision consent', async () => {

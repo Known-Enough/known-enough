@@ -31,6 +31,7 @@ jobs:
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
           node scripts/operations/verify.mjs > "$RUNNER_TEMP/operations-report.json"
           node scripts/operations/partition-verify.mjs > "$RUNNER_TEMP/partition-report.json"
+          node scripts/operations/retention-verify.mjs > "$RUNNER_TEMP/retention-report.json"
       - name: Run focused operations and pinned full checks
         env:
           PLAYWRIGHT_CHANNEL: chromium
@@ -48,7 +49,9 @@ jobs:
           path: |
             infra/operations/setup.json
             infra/operations/partition-setup.json
+            infra/operations/retention-setup.json
             ${{ runner.temp }}/operations-report.json
             ${{ runner.temp }}/partition-report.json
+            ${{ runner.temp }}/retention-report.json
           if-no-files-found: error
           retention-days: 30

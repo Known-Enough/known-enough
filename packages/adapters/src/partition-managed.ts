@@ -13,6 +13,7 @@ import { PARTITION_DECISION_TARGET, validatePartitionDecisionCommand, type Parti
 import { createPartitionMembershipReader } from './partition-membership.ts';
 import type { PartitionGroupDiscovery } from './partition-group-session.ts';
 import { createDynamoPartitionArchivePorts } from './dynamo-partition-archive.ts';
+import { createDynamoPartitionLifecycle, type DynamoLifecycleOptions } from './dynamo-partition-lifecycle.ts';
 import { archiveDynamoWrites, PartitionArchiveError, type ArchiveExpected, type ArchiveAuthority, type PartitionArchivePorts } from './partition-archive.ts';
 
 /** Inactive server-only composition. Construction neither installs resources nor selects a runtime. */
@@ -55,6 +56,7 @@ function activationRejected(error: unknown, size: number) {
 export function createPartitionManagedDriver(options: PartitionManagedOptions): {
   groups: PartitionTransport; decisions: PartitionDecisionTransport; membershipDiscovery: PartitionGroupDiscovery;
   archivePorts: (options: PartitionManagedArchiveOptions) => PartitionArchivePorts;
+  lifecycle: (options: Omit<DynamoLifecycleOptions, 'activation' | 'verifiedTarget'>) => ReturnType<typeof createDynamoPartitionLifecycle>;
   decisionArn: string; partitionArn: string;
 } {
   const parsed = input.safeParse(options); if (!parsed.success) return invalid();
@@ -229,5 +231,15 @@ export function createPartitionManagedDriver(options: PartitionManagedOptions): 
     };
   }
   // Manifest/source bytes, recovery IDs and cursor secrets never leave the captured server closure.
-  return { groups, decisions, membershipDiscovery, archivePorts, ...target };
+  function lifecycle(options: Omit<DynamoLifecycleOptions, 'activation' | 'verifiedTarget'>) {
+    return createDynamoPartitionLifecycle({ ...options, verifiedTarget: { ...captured.verifiedTarget }, activation: {
+      read: async io => { await checkpoint(io); },
+      write: async (items, io) => {
+        const copy = structuredClone(items);
+        const TransactItems = await joined(copy, io);
+        await partitionCall(io, () => client.send(new TransactWriteItemsCommand({ TransactItems }), { abortSignal: io.signal }), false);
+      },
+    } });
+  }
+  return { groups, decisions, membershipDiscovery, archivePorts, lifecycle, ...target };
 }
