@@ -1,7 +1,7 @@
 {
   "task": "ASSESS11",
   "phase": "signup diagnostic correction",
-  "sourceSha": null,
+  "sourceSha": "297978d893d294caaec443bf666d2ab95c1e6063",
   "sourceFiles": {
     "scripts/live-qa/signup-diagnostics.mjs": "947047539d7c7ee3d5015d6912d08c252dc8b1e7aa7ec122889a59d357cfc1e5",
     "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
@@ -323,17 +323,19 @@
     "gatewayObservation": "ACCESS_DENIED",
     "gatewayPurpose": "separate metadata get-stage read; not signup-cause proof"
   },
-  "live": "ENTRY_CORRECTION_CHECKING",
+  "live": "SIGNUP_ONLY_PASS",
   "primarySignup": "UNKNOWN",
   "managedOperations": "UNKNOWN",
   "actualUsage": {
     "modelAttempts": 0,
-    "publicCognitoSignupAttempts": 0,
-    "signupMessages": 0,
-    "releaseCycles": 2,
-    "qaPublications": 2,
-    "primaryPublications": 2,
-    "managedFixtureCycles": 2,
+    "signupMessages": 1,
+    "publicCognitoSignupFlows": 1,
+    "releaseWorkflowCycles": 3,
+    "qaReleaseLanePasses": 3,
+    "primaryReleaseLanePasses": 3,
+    "managedFixtureCycles": 3,
+    "publicationWriteCounts": "NOT_COUNTED",
+    "awsMutationCounts": "NOT_COUNTED",
     "cloudBilling": "NOT_OBSERVED"
   },
   "observedAt": "2026-10-08T08:45:07.256817+00:00",
@@ -908,5 +910,123 @@
     "resumedProgress": "2026-10-08T10:50:35Z",
     "tenMinuteReporting": "MISSED",
     "cause": "UNKNOWN"
-  }
+  },
+  "progress8Verified": {
+    "id": 37766133437,
+    "created_at": "2026-10-08T10:50:35Z",
+    "observed_at": "2026-10-08T10:50:44.269Z",
+    "verified": true
+  },
+  "actualVerification": {
+    "run": 37766308072,
+    "source": "297978d893d294caaec443bf666d2ab95c1e6063",
+    "actor": 143764700,
+    "conclusion": "failure",
+    "observedAt": "2026-10-08T11:00:46.352152+00:00",
+    "report": {
+      "schemaVersion": 1,
+      "runScope": "SIGNUP_ONLY",
+      "diagnosticStatus": "PASS",
+      "budget": {
+        "attempts": 0,
+        "reservedTokens": 0,
+        "reservedCostMicros": 0,
+        "maxAttemptsPerRun": 200,
+        "maxTokensPerRun": 2500000,
+        "maxCostMicrosPerRun": 2500000
+      },
+      "gatewayObservation": "ACCESS_DENIED",
+      "gatewayThrottle": null,
+      "modelFailures": [],
+      "runId": "gh-37766308072-1",
+      "sourceCommit": "297978d893d294caaec443bf666d2ab95c1e6063",
+      "status": "BLOCKED_OR_FAILED",
+      "lanes": {
+        "execution": "PASS",
+        "preflight": "PASS",
+        "fixtures": "PASS",
+        "journeys": "BLOCKED",
+        "model": "BLOCKED",
+        "privacy": "PASS",
+        "signup": "PASS",
+        "cleanup": "PASS"
+      },
+      "tests": [
+        {
+          "title": "QA01 signup and managed login",
+          "mailStatus": "MAIL_CODE_READY",
+          "status": "PASS"
+        },
+        {
+          "title": "QA02 admission and invitations",
+          "status": "BLOCKED"
+        },
+        {
+          "title": "QA03 fresh decision and owner confirmations",
+          "status": "BLOCKED"
+        },
+        {
+          "title": "QA04 private negotiation and exact agreement",
+          "status": "BLOCKED"
+        },
+        {
+          "title": "QA05 denial privacy and recovery",
+          "status": "BLOCKED"
+        },
+        {
+          "title": "QA06 refusal revocation revision and disclosure",
+          "status": "BLOCKED"
+        },
+        {
+          "title": "QA07 rendered clarification and accessibility",
+          "status": "BLOCKED"
+        }
+      ],
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "blocked": 6,
+        "modelAttempts": 0,
+        "signupMessages": 1
+      }
+    },
+    "artifactHashes": {
+      "release": "7dd8e8445a0b98c833b3c261d2a366296302743576a37b4fe045ec05455533eb",
+      "primary": "f655167e8c6f7a81cc23be59fdb491dc2055e111dc90328cbd09a9c204cf9c5a",
+      "public": "67daf0bd03653a01e0a2e33d8943974a2b03f1acd608724d9f5fbfe78c4ccac7",
+      "metadata": "feb43765d07e6810ae9f7630fdb9b2bbc4890be60f7fa92dde3dcf07ac07146c",
+      "journey": "45dfda54c43cb84da2a57dedf25aa91f9438a7a44bc199a2bbffe88eb6528793",
+      "complete": "aa58665897522b8ffefd0740afe98ab0490ec5b230a08d1a7e4ca179f969c422"
+    },
+    "cleanupRetry": "success",
+    "jobStart": "2026-10-08T10:57:49Z",
+    "jobEnd": "2026-10-08T11:00:10Z",
+    "lanes": {
+      "release": {
+        "status": null,
+        "source": "297978d893d294caaec443bf666d2ab95c1e6063"
+      },
+      "primary": {
+        "status": "PASS",
+        "source": "297978d893d294caaec443bf666d2ab95c1e6063"
+      },
+      "public": {
+        "status": "PASS",
+        "source": "297978d893d294caaec443bf666d2ab95c1e6063"
+      },
+      "metadata": {
+        "status": "PASS",
+        "source": "297978d893d294caaec443bf666d2ab95c1e6063"
+      },
+      "complete": {
+        "status": "BLOCKED_OR_FAILED",
+        "source": "297978d893d294caaec443bf666d2ab95c1e6063"
+      }
+    }
+  },
+  "wholeTaskStatus": "REVIEW",
+  "codingPhase": "CODE_READY",
+  "claim": "RELEASED_AT_VERIFIED_CHECKPOINT",
+  "currentAllSeven": "UNKNOWN",
+  "nextAction": "Current full-seven qualification on checked source and a separately verified primary synthetic fixture/mail/login/cleanup path; deferred operations bootstrap only through verified own setup identity, never cancelled password policy repair."
 }
