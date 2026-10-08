@@ -1,0 +1,491 @@
+{
+  "schemaVersion": 1,
+  "task": "FIN01",
+  "status": "CHECKED_SOURCE_CI_PENDING",
+  "account": "Battosai1806",
+  "actorId": 143764700,
+  "baseline": "1a14b3e59a525291bd2f67571a83ca0e2e2b13e2",
+  "claimSource": "b6cf3781748c1e91c4ddb928bb99dcde3b98c19f",
+  "observedAt": "2026-10-08T06:27:28.193033+00:00",
+  "sourceHashes": {
+    "apps/api/src/fin01-stop-output.test.ts": "69f2db7bba906072038a43e3ba484a68801223e810e38aee47287ceb19021ac7"
+  },
+  "protectedSourceHashes": {
+    "apps/api/src/model-runtime.ts": "4b233b906c494db0a07b500deb697cdec1cdee402a1cd9580c9c3cbb279309d4",
+    "apps/api/src/model-runtime.test.ts": "614c8a6c363e1f0704019d73b85d5972cb1f0cc445df31d7d5c56b6a0e2e5584",
+    "packages/adapters/src/model-jobs.ts": "f91666cd01731cd03b984411dc27ac53fbf796f39b23cbfc87239035e991d79a",
+    "packages/adapters/src/model-jobs.test.ts": "bc1f05218f95464b5a56ae75c8ccd0defb9474d555468b29d1da9bb03e3b3ee7",
+    "tests/integration/ke14-qualification.test.ts": "906258a710d4e41e59eabc51ef1a05fda4ea7f03bc572e464413a0fc9d716251",
+    "tests/integration/ke14-fixed-http.test.ts": "6eea88b0462637f9183dcaaa945aef1b64f1fa35451141f2f0b66325ce42c571",
+    "tests/evaluations/ke14-fixed.ts": "d5ae019c79889a08d0b3a3591cc7cad16a6b0d733341aae6146591dbdee68369",
+    "tests/e2e/ke14-connected.spec.ts": "96082263133ed8679f91c11bef58d20138a58f25ae46371b16cb692efd307eac",
+    "docs/tasks/active/closeout/NP00/ticket.md": "2693cf9129955c85ba16293ae37c2c057baedb3522f0f385816d058aac9ffacb",
+    "docs/np00-technical-closeout.md": "e9ce59f7b6a6d763288c95bb994bbf1c964f2149a6073dfec4dbbd71796efd1f",
+    "docs/technical-debt/TD-KE10-01-stop-commit-race.md": "11edb0d654c60398544be79c192e9c2f6a3495e49c84996e6e68ba108d2a7fed",
+    "docs/technical-debt/TD-KE10-02-bedrock-permission-set-name.md": "6d74ab4a6b8f428b6283a6ab43a0132afd52ab3db64cf3a31c969587327462ea",
+    "infra/np00-permission-set-cleanup.md": "e6dbb91c26fd788c4e13192c42062b01519826607c4fca8bf920a135fb62e2b0",
+    "docs/work-log-A.md": "c50e352fa2195172967794c74c9ebc248783cad1de6e4928fe21cf0ded891e5a",
+    "docs/handoff-A.md": "b89d00700b3a0efb7e63086a6782793fea46af9ea03a743480934e21f0f18ccb",
+    "package.json": "d345a8432ebad6503eefe56ac945b65108c7f9f2135fc378aa24f85a21896287",
+    "package-lock.json": "b7e0c8facbdf658c3324f60c31591b476c093183c908116759bea6c120ae269c",
+    ".github/workflows/shared-staging-check.yml": "3d4be72c73fd0b74804ca082040e54728563de059a1308a38cdbfa9aaecd3f11",
+    "scripts/inspect-shared-staging.mjs": "a544d872a07fe27fad88ff54a45ebb9a359f6bceb04d47e09f1de28604ee186a",
+    "scripts/render-shared-staging-report.mjs": "2b44a4914b5e6da36d9d70aa3923f90c678f76073cb2bb7919053607278ae524"
+  },
+  "checks": {
+    "focused": {
+      "label": "focused-stop",
+      "command": [
+        "npx",
+        "vitest",
+        "run",
+        "apps/api/src/fin01-stop-output.test.ts",
+        "apps/api/src/model-runtime.test.ts",
+        "packages/adapters/src/model-jobs.test.ts",
+        "tests/integration/ke14-qualification.test.ts",
+        "tests/integration/ke14-fixed-http.test.ts"
+      ],
+      "start": "2026-10-08T06:19:34.199768+00:00",
+      "end": "2026-10-08T06:19:39.349862+00:00",
+      "exit": 0,
+      "frozen_unchanged": true
+    },
+    "negativeControl": {
+      "start": "2026-10-08T06:23:25.145549+00:00",
+      "end": "2026-10-08T06:23:28.410683+00:00",
+      "exit": 1,
+      "protected_unchanged": true,
+      "mutation": "isolated runtime output drain omitted then restored",
+      "repo_source_changed": false
+    },
+    "full": {
+      "label": "full",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-08T06:22:43.413147+00:00",
+      "end": "2026-10-08T06:26:49.860503+00:00",
+      "exit": 0,
+      "frozen_unchanged": true
+    }
+  },
+  "counts": {
+    "newRegressions": 4,
+    "focused": 41,
+    "application": 1271,
+    "optionalSkips": 2,
+    "hostedPreview": 1,
+    "browser": 62
+  },
+  "originalReview": {
+    "observed_at": "2026-10-08T06:25:00.315254+00:00",
+    "reviewed_commit": "5e875439f412c21f830f2747087ca991f5ccfb22",
+    "patch_sha256": "6160910f39881f39e3fd44e08765d36cd5811ecfdd71a2e4c1c9ba389fd0f66b",
+    "reviewed_source_match": true,
+    "current_comparison": [
+      {
+        "file": "apps/api/src/ke13b-lambda.test.ts",
+        "reviewed_sha256": "db0c55acce1b2da364c23bb945f3876e8d5b268a5afbf76359c74c68788c9d19",
+        "current_sha256": "db0c55acce1b2da364c23bb945f3876e8d5b268a5afbf76359c74c68788c9d19",
+        "unchanged": true
+      },
+      {
+        "file": "apps/api/src/ke13b-lambda.ts",
+        "reviewed_sha256": "ccf78e5bf3267323811ad2e4addd595d3c079dffdd8ea5f4732c839e72cc730e",
+        "current_sha256": "6bee472dcf78d702220184f45fc3d5797ebefcb50182c0463a09df29266d1e4b",
+        "unchanged": false
+      },
+      {
+        "file": "apps/api/src/model-runtime.ts",
+        "reviewed_sha256": "105c5651e4cf64f3bee3508e82a73901d6a22b54f3aa8845dfc09e4a9ec6000a",
+        "current_sha256": "4b233b906c494db0a07b500deb697cdec1cdee402a1cd9580c9c3cbb279309d4",
+        "unchanged": false
+      },
+      {
+        "file": "apps/api/src/scenario-service.test.ts",
+        "reviewed_sha256": "b162195992c4aab5ec149a59cda86f593a1e8534399e7f518d920489669c5d7f",
+        "current_sha256": "f14c03fdffc0458fba3b2badcdf5a568119ca8f212764f28423b63aa756b0b1f",
+        "unchanged": false
+      },
+      {
+        "file": "apps/api/src/scenario-service.ts",
+        "reviewed_sha256": "5c0a12802d1083eac22084c32a5dbebc3e44118be2b6ef47618ce2884cac2d2c",
+        "current_sha256": "5c0a12802d1083eac22084c32a5dbebc3e44118be2b6ef47618ce2884cac2d2c",
+        "unchanged": true
+      },
+      {
+        "file": "packages/adapters/src/bedrock-models.test.ts",
+        "reviewed_sha256": "db8c15922c4db78d52cd1ef19918a435ca5c59687584fdd1f671c516c1077874",
+        "current_sha256": "937f98455dbd05e8b1e20a5df6a4d54486d1026361e3e1a5702ac10ccb5e418d",
+        "unchanged": false
+      },
+      {
+        "file": "packages/adapters/src/bedrock-models.ts",
+        "reviewed_sha256": "ee8441971a13260fe2b29a14be962ebac631d3f1a67aa0eca1c42b2eda3e490a",
+        "current_sha256": "2b89417258a9f45fa5a657f115b1b6f9edb5bb6140ef7b064a963bff13402376",
+        "unchanged": false
+      },
+      {
+        "file": "packages/application/src/decision-architect.test.ts",
+        "reviewed_sha256": "2e12029511936d24539c134f33f145ac65838d0127771db873740904eb66042d",
+        "current_sha256": "688f5e91eddcde4233c702e0a0ff20294228b7a3fad72d93e50fb4c63858ebe6",
+        "unchanged": false
+      },
+      {
+        "file": "packages/application/src/decision-architect.ts",
+        "reviewed_sha256": "ab06b540d191cb31849e87b03b91bfc54a4be4ff776c0df120bcdfd86a8d5a8d",
+        "current_sha256": "1c1aebe155289c4fa9711d56abbacf35b2656313fa97039e321f50281813b64f",
+        "unchanged": false
+      },
+      {
+        "file": "packages/application/src/index.ts",
+        "reviewed_sha256": "9b912d431338ed883d45ebbd68f6c052834d4bd316784d16665b0e83086915c4",
+        "current_sha256": "9b912d431338ed883d45ebbd68f6c052834d4bd316784d16665b0e83086915c4",
+        "unchanged": true
+      },
+      {
+        "file": "packages/application/src/model-runtime.ts",
+        "reviewed_sha256": "7c9a43029eebe22bd0561f7356907a96b1a02f9087e9dd08b352377481f20adf",
+        "current_sha256": "79b677956aa74a5845b761978df3e5b3d6cf518b4a094dff2b2fbc05adbd4051",
+        "unchanged": false
+      },
+      {
+        "file": "tests/evaluations/ke14-fixed.ts",
+        "reviewed_sha256": "d5ae019c79889a08d0b3a3591cc7cad16a6b0d733341aae6146591dbdee68369",
+        "current_sha256": "d5ae019c79889a08d0b3a3591cc7cad16a6b0d733341aae6146591dbdee68369",
+        "unchanged": true
+      }
+    ],
+    "meaning": "Changed current bytes reflect later recorded integration/corrections; original review is bounded to original patch, not current acceptance."
+  },
+  "githubEvidence": {
+    "observed_at": "2026-10-08T06:23:54.310508+00:00",
+    "runs": [
+      {
+        "id": 37461438020,
+        "url": "https://github.com/Known-Enough/known-enough/actions/runs/37461438020",
+        "source_sha": "22a40a7f679b433b7d5001bb5e65536dbe781cae",
+        "actor": "Battosai1806",
+        "actor_id": 143764700,
+        "triggering_actor": "Battosai1806",
+        "event": "workflow_run",
+        "branch": "main",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-06T12:10:57Z",
+        "artifacts": [
+          {
+            "name": "live-qa-journey-result",
+            "expired": false
+          },
+          {
+            "name": "live-qa-complete-report",
+            "expired": false
+          },
+          {
+            "name": "live-qa-public-result",
+            "expired": false
+          },
+          {
+            "name": "live-qa-metadata-result",
+            "expired": false
+          },
+          {
+            "name": "live-qa-primary-release-result",
+            "expired": false
+          },
+          {
+            "name": "live-qa-release-receipt",
+            "expired": false
+          }
+        ]
+      },
+      {
+        "id": 37557946340,
+        "url": "https://github.com/Known-Enough/known-enough/actions/runs/37557946340",
+        "source_sha": "2630c9f4703efae6972b27112f9908c277b4c21e",
+        "actor": "Battosai1806",
+        "actor_id": 143764700,
+        "triggering_actor": "Battosai1806",
+        "event": "workflow_dispatch",
+        "branch": "main",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-07T01:36:29Z",
+        "artifacts": []
+      },
+      {
+        "id": 37557999023,
+        "url": "https://github.com/Known-Enough/known-enough/actions/runs/37557999023",
+        "source_sha": "2630c9f4703efae6972b27112f9908c277b4c21e",
+        "actor": "Battosai1806",
+        "actor_id": 143764700,
+        "triggering_actor": "Battosai1806",
+        "event": "workflow_run",
+        "branch": "main",
+        "status": "completed",
+        "conclusion": "failure",
+        "created_at": "2026-10-07T01:37:09Z",
+        "artifacts": [
+          {
+            "name": "live-qa-complete-report",
+            "expired": false
+          },
+          {
+            "name": "live-qa-metadata-result",
+            "expired": false
+          },
+          {
+            "name": "live-qa-release-receipt",
+            "expired": false
+          },
+          {
+            "name": "live-qa-primary-release-result",
+            "expired": false
+          },
+          {
+            "name": "live-qa-public-result",
+            "expired": false
+          },
+          {
+            "name": "live-qa-journey-result",
+            "expired": false
+          }
+        ]
+      },
+      {
+        "id": 37718871377,
+        "url": "https://github.com/Known-Enough/known-enough/actions/runs/37718871377",
+        "source_sha": "d5bd22edba8d9a006b8401c3cba20ae6ba46b994",
+        "actor": "Battosai1806",
+        "actor_id": 143764700,
+        "triggering_actor": "Battosai1806",
+        "event": "workflow_dispatch",
+        "branch": "main",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-08T02:38:36Z",
+        "artifacts": [
+          {
+            "name": "operations-verification",
+            "expired": false
+          }
+        ]
+      }
+    ]
+  },
+  "recordedRelease": {
+    "observed_at": "2026-10-08T06:25:40.501157+00:00",
+    "runs": [
+      {
+        "run": 37461438020,
+        "source_sha": "22a40a7f679b433b7d5001bb5e65536dbe781cae",
+        "actor_id": 143764700,
+        "github_conclusion": "success",
+        "complete_status": "PASS",
+        "primary_backend_sha256": "417eff55b6c9061444a725ad49343282085a93f904795ab0ebb1812cd415204b",
+        "primary_metadata": "PASS",
+        "counts": {
+          "passed": 7,
+          "failed": 0,
+          "blocked": 0,
+          "modelAttempts": 31,
+          "signupMessages": 1
+        },
+        "source_receipt_metadata_match": true,
+        "stored_report_match": "historical complete downloaded"
+      },
+      {
+        "run": 37557999023,
+        "source_sha": "2630c9f4703efae6972b27112f9908c277b4c21e",
+        "actor_id": 143764700,
+        "github_conclusion": "failure",
+        "complete_status": "BLOCKED_OR_FAILED",
+        "primary_backend_sha256": "417eff55b6c9061444a725ad49343282085a93f904795ab0ebb1812cd415204b",
+        "primary_metadata": "PASS",
+        "counts": {
+          "passed": 0,
+          "failed": 1,
+          "blocked": 6,
+          "modelAttempts": 0,
+          "signupMessages": 0
+        },
+        "source_receipt_metadata_match": true,
+        "stored_report_match": true
+      }
+    ],
+    "latest_existing_deployment": {
+      "id": 37557946340,
+      "source_sha": "2630c9f4703efae6972b27112f9908c277b4c21e",
+      "conclusion": "success"
+    },
+    "limitation": "Matching recorded deployment/artifacts, not a new live control-plane read or managed acceptance."
+  },
+  "artifactInventory": {
+    "observed_at": "2026-10-08T06:24:18.101576+00:00",
+    "runs": [
+      {
+        "run": 37461438020,
+        "files": [
+          {
+            "file": "live-qa-complete-report/complete-report.json",
+            "sha256": "ecd61f9b50cff34e988441afcb3c2de58a286d7b64c283dc0d055c389dfc56c8",
+            "keys": [
+              "schemaVersion",
+              "status",
+              "sourceCommit",
+              "initiatingAccount",
+              "lanes",
+              "jobResults",
+              "targets",
+              "targetDifferences",
+              "qaCounts",
+              "requiredCloudAcceptance"
+            ]
+          },
+          {
+            "file": "live-qa-metadata-result/metadata.json",
+            "sha256": "ddc0d3f8948aa769b057ca99e4df88fd827e1db1f017490eac183f2a03db8871",
+            "keys": [
+              "status",
+              "primary",
+              "sourceCommit",
+              "backendSha256",
+              "differences"
+            ]
+          },
+          {
+            "file": "live-qa-release-receipt/receipt.json",
+            "sha256": "80839901345f8b3876504f9113b902b7bc59e17bc4cb0925949b2d940a5023fb",
+            "keys": [
+              "schemaVersion",
+              "sourceCommit",
+              "workflowRunId",
+              "targetApi",
+              "targetFrontend",
+              "artifacts",
+              "webFiles",
+              "primary",
+              "jobId"
+            ]
+          },
+          {
+            "file": "live-qa-release-receipt/target.json",
+            "sha256": "ae2f87eb632b4376c7aa68645d611d103dddab9f9f44294be066ef7ad83563da",
+            "keys": [
+              "Account",
+              "Region",
+              "ApiUrl",
+              "FrontendUrl",
+              "PoolId",
+              "ParticipantClientId",
+              "DisplayClientId",
+              "CognitoDomain",
+              "ApiFunction",
+              "BrokerFunction",
+              "DecisionTable",
+              "GroupTable",
+              "ControlTable",
+              "MailboxBucket",
+              "LoginSecret",
+              "TestRoleArn",
+              "ReleaseRoleArn",
+              "SourceCommit",
+              "AmplifyAppId",
+              "MailboxProvider",
+              "PrimaryReleaseRoleArn"
+            ]
+          }
+        ]
+      },
+      {
+        "run": 37557999023,
+        "files": [
+          {
+            "file": "live-qa-complete-report/complete-report.json",
+            "sha256": "3e3c1b8db9c80d9fb554cc3dcde2204a6aae4d3ea40af40d768739cd02935d7c",
+            "keys": [
+              "schemaVersion",
+              "status",
+              "sourceCommit",
+              "initiatingAccount",
+              "lanes",
+              "jobResults",
+              "targets",
+              "targetDifferences",
+              "qaCounts",
+              "requiredCloudAcceptance"
+            ]
+          },
+          {
+            "file": "live-qa-metadata-result/metadata.json",
+            "sha256": "19231d320a5132797aafaa36189a0a19c0d666d3a3c1a581d8964e606c1b7536",
+            "keys": [
+              "status",
+              "primary",
+              "sourceCommit",
+              "backendSha256",
+              "differences"
+            ]
+          },
+          {
+            "file": "live-qa-release-receipt/receipt.json",
+            "sha256": "b220ad6d8648556298619ee7a7f79aa1505abde1733bef020567a366ee6bdd89",
+            "keys": [
+              "schemaVersion",
+              "sourceCommit",
+              "workflowRunId",
+              "targetApi",
+              "targetFrontend",
+              "artifacts",
+              "webFiles",
+              "primary",
+              "jobId"
+            ]
+          },
+          {
+            "file": "live-qa-release-receipt/target.json",
+            "sha256": "ae2f87eb632b4376c7aa68645d611d103dddab9f9f44294be066ef7ad83563da",
+            "keys": [
+              "Account",
+              "Region",
+              "ApiUrl",
+              "FrontendUrl",
+              "PoolId",
+              "ParticipantClientId",
+              "DisplayClientId",
+              "CognitoDomain",
+              "ApiFunction",
+              "BrokerFunction",
+              "DecisionTable",
+              "GroupTable",
+              "ControlTable",
+              "MailboxBucket",
+              "LoginSecret",
+              "TestRoleArn",
+              "ReleaseRoleArn",
+              "SourceCommit",
+              "AmplifyAppId",
+              "MailboxProvider",
+              "PrimaryReleaseRoleArn"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "productionChanges": false,
+  "installation": "NOT_EXECUTED",
+  "providerCalls": 0,
+  "signupMessages": 0,
+  "participantConsent": "NOT_GRANTED",
+  "wholeTask": "REQUIRED_CLOSEOUT_UNPROVED",
+  "limitations": [
+    "All new regressions use deterministic synthetic repository/provider barriers.",
+    "Original source/contract-and-managed private Purchase gap requires a real bounded NP00 handoff; administrator setup alone does not resolve it.",
+    "Newer source2630 qualification fails signup; historical source22a seven-journey PASS remains historical.",
+    "Two optional DynamoDB Local checks skipped; no current cloud-control-plane or real-device check executed."
+  ]
+}
