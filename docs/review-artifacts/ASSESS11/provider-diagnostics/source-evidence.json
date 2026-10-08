@@ -71,7 +71,7 @@
     "tests/integration/live-qa-primary-signup.test.ts": "49454f8c860614454011be1ce63e12badd7041eb8d40e82d1b19fd6c4ddbe647",
     "docs/review-artifacts/ASSESS11/primary-signup-driver/readback-evidence.json": "0d4d90d8fdd65c126ab433d3bb11dfd0242cbf5b78d6d1f3c042b3d224fec818"
   },
-  "sourceReady": "CLAIMED_NOT_CHECKED",
+  "sourceReady": "CODE_CHECKED_WAITING_SOURCE_AND_LIVE",
   "liveCause": "UNKNOWN",
   "priorQaRun": 37782679450,
   "priorQaSource": "4d83aca33516f25b63ed4be3791ea5b42f48134b",
@@ -83,5 +83,152 @@
   "priorQaPrivacy": "PASS",
   "priorQaCleanup": "CLEAN",
   "newLiveDispatch": "NONE",
-  "primarySignup": "NOT_STARTED"
+  "primarySignup": "NOT_STARTED",
+  "red": {
+    "label": "red",
+    "command": [
+      "npm",
+      "test",
+      "--",
+      "packages/adapters/src/bedrock-models.test.ts",
+      "apps/api/src/ke13b-lambda.test.ts",
+      "tests/integration/live-qa-model-failure-diagnostics.test.ts",
+      "--maxWorkers=2"
+    ],
+    "start": "2026-10-08T14:03:10.739310+00:00",
+    "end": "2026-10-08T14:03:12.534913+00:00",
+    "exit": 1,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {}
+  },
+  "redFailed": 29,
+  "redPassed": 39,
+  "focused": {
+    "label": "focused2",
+    "command": [
+      "npm",
+      "test",
+      "--",
+      "packages/adapters/src/bedrock-models.test.ts",
+      "apps/api/src/ke13b-lambda.test.ts",
+      "tests/integration/live-qa-model-failure-diagnostics.test.ts",
+      "--maxWorkers=2"
+    ],
+    "start": "2026-10-08T19:28:52.908013+00:00",
+    "end": "2026-10-08T19:28:54.719218+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "packages/adapters/src/bedrock-models.ts": "f140e6f37969dc467cd90949294a930f0eaea908aad54a926a7e02c1ce96b2f4",
+      "packages/adapters/src/bedrock-models.test.ts": "6a7c144651dadb4889b04dfe9219a8175cf23707a7da95fe816ce02d808cc1c5",
+      "packages/application/src/model-runtime.ts": "2c1d46c630a955bfd6a0c751c17bab8cccd0485fa81183f52e296df916eaec80",
+      "scripts/live-qa/model-failure-diagnostics.mjs": "1a7e9bdb7302b81325e1e9202f06b2df171730d79dd68d06c7b7ea5d2dbbc311",
+      "tests/integration/live-qa-model-failure-diagnostics.test.ts": "8e658173d7ddaed6fc08d5d4a1f7500b621430208fa4c93b52375b20db3c1123",
+      "apps/api/src/ke13b-lambda.test.ts": "8d675adc80f2e4703fd414258b367f03942918d73db152285e55104743e246a1"
+    }
+  },
+  "focusedPassed": 68,
+  "newRegressions": 37,
+  "currentSourceFiles": {
+    "packages/adapters/src/bedrock-models.ts": "f140e6f37969dc467cd90949294a930f0eaea908aad54a926a7e02c1ce96b2f4",
+    "packages/adapters/src/bedrock-models.test.ts": "6a7c144651dadb4889b04dfe9219a8175cf23707a7da95fe816ce02d808cc1c5",
+    "packages/application/src/model-runtime.ts": "2c1d46c630a955bfd6a0c751c17bab8cccd0485fa81183f52e296df916eaec80",
+    "scripts/live-qa/model-failure-diagnostics.mjs": "1a7e9bdb7302b81325e1e9202f06b2df171730d79dd68d06c7b7ea5d2dbbc311",
+    "tests/integration/live-qa-model-failure-diagnostics.test.ts": "8e658173d7ddaed6fc08d5d4a1f7500b621430208fa4c93b52375b20db3c1123",
+    "apps/api/src/ke13b-lambda.test.ts": "8d675adc80f2e4703fd414258b367f03942918d73db152285e55104743e246a1"
+  },
+  "coalescedHints": [
+    "2026-10-08T14:26:02.498Z",
+    "2026-10-08T14:56:02.985Z",
+    "2026-10-08T15:26:03.439Z",
+    "2026-10-08T15:56:03.944Z",
+    "2026-10-08T16:26:04.343Z",
+    "2026-10-08T16:56:04.838Z",
+    "2026-10-08T17:26:05.314Z",
+    "2026-10-08T17:56:05.807Z",
+    "2026-10-08T18:26:06.307Z",
+    "2026-10-08T18:56:06.742Z",
+    "2026-10-08T19:26:07.285Z"
+  ],
+  "reportingGapSeconds": 19756,
+  "activityGap": "owned focused14:04:09.953711Z\u201314:04:11.659384Z completed; next actual observation19:26:26.389701Z; activity/cause after completion UNKNOWN",
+  "progressGap": "started13:57:14Z to progress19:26:30Z;329m16s; ten-minute reporting missed",
+  "fullFailedLint": {
+    "label": "full",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "start": "2026-10-08T19:26:50.907555+00:00",
+    "end": "2026-10-08T19:26:58.665459+00:00",
+    "exit": 1,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "packages/adapters/src/bedrock-models.ts": "f140e6f37969dc467cd90949294a930f0eaea908aad54a926a7e02c1ce96b2f4",
+      "packages/adapters/src/bedrock-models.test.ts": "6a7c144651dadb4889b04dfe9219a8175cf23707a7da95fe816ce02d808cc1c5",
+      "packages/application/src/model-runtime.ts": "2c1d46c630a955bfd6a0c751c17bab8cccd0485fa81183f52e296df916eaec80",
+      "scripts/live-qa/model-failure-diagnostics.mjs": "1a7e9bdb7302b81325e1e9202f06b2df171730d79dd68d06c7b7ea5d2dbbc311",
+      "tests/integration/live-qa-model-failure-diagnostics.test.ts": "ab26f4f5c15b2f919c79127b5f64adc384ae130b240c830045398766c1c89d2b",
+      "apps/api/src/ke13b-lambda.test.ts": "75648b950aee561c2b80e84521bf77e9b0c8e3b00812cdf87ebc800334df46e3"
+    },
+    "sanitizedErrors": [
+      "apps/api/src/ke13b-lambda.test.ts:49:5 no-unexpected-multiline",
+      "tests/integration/live-qa-model-failure-diagnostics.test.ts:9:2 no-unexpected-multiline"
+    ]
+  },
+  "focusedBeforeLintFormat": {
+    "label": "focused",
+    "command": [
+      "npm",
+      "test",
+      "--",
+      "packages/adapters/src/bedrock-models.test.ts",
+      "apps/api/src/ke13b-lambda.test.ts",
+      "tests/integration/live-qa-model-failure-diagnostics.test.ts",
+      "--maxWorkers=2"
+    ],
+    "start": "2026-10-08T14:04:09.953711+00:00",
+    "end": "2026-10-08T14:04:11.659384+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "packages/adapters/src/bedrock-models.ts": "f140e6f37969dc467cd90949294a930f0eaea908aad54a926a7e02c1ce96b2f4",
+      "packages/adapters/src/bedrock-models.test.ts": "6a7c144651dadb4889b04dfe9219a8175cf23707a7da95fe816ce02d808cc1c5",
+      "packages/application/src/model-runtime.ts": "2c1d46c630a955bfd6a0c751c17bab8cccd0485fa81183f52e296df916eaec80",
+      "scripts/live-qa/model-failure-diagnostics.mjs": "1a7e9bdb7302b81325e1e9202f06b2df171730d79dd68d06c7b7ea5d2dbbc311",
+      "tests/integration/live-qa-model-failure-diagnostics.test.ts": "ab26f4f5c15b2f919c79127b5f64adc384ae130b240c830045398766c1c89d2b",
+      "apps/api/src/ke13b-lambda.test.ts": "75648b950aee561c2b80e84521bf77e9b0c8e3b00812cdf87ebc800334df46e3"
+    }
+  },
+  "lastObservedAt": "2026-10-08T19:30:13.791028+00:00",
+  "full": {
+    "label": "full",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "start": "2026-10-08T19:29:02.817807+00:00",
+    "end": "2026-10-08T19:32:30.669312+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "packages/adapters/src/bedrock-models.ts": "f140e6f37969dc467cd90949294a930f0eaea908aad54a926a7e02c1ce96b2f4",
+      "packages/adapters/src/bedrock-models.test.ts": "6a7c144651dadb4889b04dfe9219a8175cf23707a7da95fe816ce02d808cc1c5",
+      "packages/application/src/model-runtime.ts": "2c1d46c630a955bfd6a0c751c17bab8cccd0485fa81183f52e296df916eaec80",
+      "scripts/live-qa/model-failure-diagnostics.mjs": "1a7e9bdb7302b81325e1e9202f06b2df171730d79dd68d06c7b7ea5d2dbbc311",
+      "tests/integration/live-qa-model-failure-diagnostics.test.ts": "8e658173d7ddaed6fc08d5d4a1f7500b621430208fa4c93b52375b20db3c1123",
+      "apps/api/src/ke13b-lambda.test.ts": "8d675adc80f2e4703fd414258b367f03942918d73db152285e55104743e246a1"
+    },
+    "applicationPassed": 1385,
+    "optionalSkipped": 2,
+    "hostedPassed": 1,
+    "browserPassed": 64
+  }
 }

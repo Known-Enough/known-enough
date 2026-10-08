@@ -44,6 +44,14 @@ async function setup() {
 }
 
 describe('KE13B signed HTTP API composition', () => {
+  it.each(['PROVIDER_ACCESS_DENIED', 'PROVIDER_INTERNAL', 'PROVIDER_MODEL_ERROR', 'PROVIDER_NOT_READY',
+    'PROVIDER_TIMEOUT', 'PROVIDER_NOT_FOUND', 'PROVIDER_UNAVAILABLE', 'PROVIDER_THROTTLED', 'PROVIDER_VALIDATION'])(
+    'logs only fixed provider category %s and rejects its private extras', stage => {
+      const write = vi.fn(); logModelFailure({ kind: 'OWNER', stage } as ModelFailureDiagnostic, write);
+      expect(write.mock.calls).toEqual([[JSON.stringify({ event: 'ke14-model-failure', kind: 'OWNER', stage })]]);
+      logModelFailure({ kind: 'OWNER', stage, name: 'PRIVATE', requestId: 'PRIVATE' } as unknown as ModelFailureDiagnostic, write);
+      expect(write).toHaveBeenCalledTimes(1); expect(JSON.stringify(write.mock.calls)).not.toContain('PRIVATE');
+    });
   it('logs only declared model failure stages; private extras/errors/identities never reach the sink', () => {
     const write = vi.fn();
     logModelFailure({ kind: 'ARCHITECT', stage: 'ARCHITECT_DEFINITION' }, write);

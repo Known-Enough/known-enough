@@ -11,6 +11,27 @@ export const BEDROCK_CONFIGURATION = Object.freeze({
   region: 'us-east-1', modelId: 'amazon.nova-lite-v1:0', maxTokens: 2_048, temperature: 0,
   maxInputBytes: 65_536, maxOutputBytes: 32_768, sdkAttempts: 1,
 });
+function providerFailureStage(error: unknown): ModelFailureDiagnostic['stage'] {
+  try {
+    if (!(error instanceof Error)) return 'PROVIDER';
+    // Internal budget failures keep precedence. Provider text and metadata never
+    // enter diagnostics; an unrecognized name remains an unknown provider error.
+    if (error.message === 'MODEL_BUDGET_BLOCKED') return 'BUDGET_BLOCKED';
+    if (error.message === 'MODEL_BUDGET_EXHAUSTED') return 'BUDGET_EXHAUSTED';
+    switch (error.name) {
+      case 'AccessDeniedException': return 'PROVIDER_ACCESS_DENIED';
+      case 'InternalServerException': return 'PROVIDER_INTERNAL';
+      case 'ModelErrorException': return 'PROVIDER_MODEL_ERROR';
+      case 'ModelNotReadyException': return 'PROVIDER_NOT_READY';
+      case 'ModelTimeoutException': return 'PROVIDER_TIMEOUT';
+      case 'ResourceNotFoundException': return 'PROVIDER_NOT_FOUND';
+      case 'ServiceUnavailableException': return 'PROVIDER_UNAVAILABLE';
+      case 'ThrottlingException': return 'PROVIDER_THROTTLED';
+      case 'ValidationException': return 'PROVIDER_VALIDATION';
+      default: return 'PROVIDER';
+    }
+  } catch { return 'PROVIDER'; } // Diagnostic getters cannot replace PROVIDER_FAILED.
+}
 export interface ConverseTransport {
   send(command: ConverseCommand, options: { abortSignal: AbortSignal }): Promise<ConverseCommandOutput>;
 }
@@ -235,9 +256,7 @@ export function createBedrockModels(options: {
       let response: ConverseCommandOutput;
       try { response = await options.transport.send(new ConverseCommand(request), { abortSignal: signal }); }
       catch (error) {
-        const stage = error instanceof Error && error.message === 'MODEL_BUDGET_BLOCKED' ? 'BUDGET_BLOCKED'
-          : error instanceof Error && error.message === 'MODEL_BUDGET_EXHAUSTED' ? 'BUDGET_EXHAUSTED' : 'PROVIDER';
-        reportModelFailure(options.diagnostic, kind, stage);
+        reportModelFailure(options.diagnostic, kind, providerFailureStage(error));
         throw new ModelRuntimeError('PROVIDER_FAILED');
       }
       if (!options.enabled() || signal.aborted) throw new ModelRuntimeError('EXPIRED');

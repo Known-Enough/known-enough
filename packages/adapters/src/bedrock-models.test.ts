@@ -1,6 +1,8 @@
 import { response, syntheticResponse } from '../../../tests/evaluations/ke10-injected.ts';
 import { describe, expect, it, vi } from 'vitest';
-import type { ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
+import { AccessDeniedException, InternalServerException, ModelErrorException, ModelNotReadyException,
+  ModelTimeoutException, ResourceNotFoundException, ServiceUnavailableException, ThrottlingException,
+  ValidationException, type ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 import type { DecisionNegotiationModelInput, ModelInvocation } from '@deal-table/application';
 import type { KnownEnough as KE } from '@deal-table/contracts';
 import { BoundedModelJobs } from './model-jobs.ts';
@@ -15,6 +17,54 @@ const publicVariables: KE.PublicDecisionVariable[] = [
 ];
 
 describe('Bedrock role adapters', () => {
+  const providerFailures = [
+    [AccessDeniedException, 'PROVIDER_ACCESS_DENIED'], [InternalServerException, 'PROVIDER_INTERNAL'],
+    [ModelErrorException, 'PROVIDER_MODEL_ERROR'], [ModelNotReadyException, 'PROVIDER_NOT_READY'],
+    [ModelTimeoutException, 'PROVIDER_TIMEOUT'], [ResourceNotFoundException, 'PROVIDER_NOT_FOUND'],
+    [ServiceUnavailableException, 'PROVIDER_UNAVAILABLE'], [ThrottlingException, 'PROVIDER_THROTTLED'],
+    [ValidationException, 'PROVIDER_VALIDATION'],
+  ] as const;
+  it.each(providerFailures)('retains fixed category for %s without provider metadata or retries', async (Exception, stage) => {
+    const diagnostic = vi.fn();
+    const error = new Exception({ message: 'Bearer PRIVATE_PROVIDER_MESSAGE', $metadata: { requestId: 'PRIVATE_REQUEST' } });
+    const send = vi.fn(async () => { throw error; });
+    const models = createBedrockModels({ transport: { send }, jobs: new BoundedModelJobs(), enabled: () => true, diagnostic });
+    await expect(models.architect.draft(architectInput, guard())).rejects.toMatchObject({ code: 'PROVIDER_FAILED' });
+    expect(diagnostic.mock.calls).toEqual([[{ kind: 'ARCHITECT', stage }]]);
+    expect(JSON.stringify(diagnostic.mock.calls)).not.toMatch(/PRIVATE|Bearer|Exception|requestId|message/);
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+  it.each([null, { name: 'AccessDeniedException', message: 'PRIVATE' },
+    Object.assign(Error('ThrottlingException PRIVATE'), { name: 'PRIVATE_NAME' }),
+    Error('AccessDeniedException')])('unknown or message-only provider failures stay generic: %s', async error => {
+    const diagnostic = vi.fn(); const send = vi.fn(async () => { throw error; });
+    const models = createBedrockModels({ transport: { send }, jobs: new BoundedModelJobs(), enabled: () => true, diagnostic });
+    await expect(models.architect.draft(architectInput, guard())).rejects.toMatchObject({ code: 'PROVIDER_FAILED' });
+    expect(diagnostic.mock.calls).toEqual([[{ kind: 'ARCHITECT', stage: 'PROVIDER' }]]); expect(send).toHaveBeenCalledTimes(1);
+  });
+  it.each(['MODEL_BUDGET_BLOCKED', 'MODEL_BUDGET_EXHAUSTED'])('preserves internal budget precedence for %s', async message => {
+    const diagnostic = vi.fn(); const error = Object.assign(Error(message), { name: 'AccessDeniedException' });
+    const send = vi.fn(async () => { throw error; });
+    const models = createBedrockModels({ transport: { send }, jobs: new BoundedModelJobs(), enabled: () => true, diagnostic });
+    await expect(models.architect.draft(architectInput, guard())).rejects.toMatchObject({ code: 'PROVIDER_FAILED' });
+    expect(diagnostic.mock.calls).toEqual([[{ kind: 'ARCHITECT', stage: message.replace('MODEL_', '') }]]);
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+  it.each(['name', 'message'])('a throwing %s getter cannot change the public provider failure', async property => {
+    const diagnostic = vi.fn(); const error = Error('PRIVATE');
+    Object.defineProperty(error, property, { get: () => { throw Error('PRIVATE_GETTER'); } });
+    const send = vi.fn(async () => { throw error; });
+    const models = createBedrockModels({ transport: { send }, jobs: new BoundedModelJobs(), enabled: () => true, diagnostic });
+    await expect(models.architect.draft(architectInput, guard())).rejects.toMatchObject({ code: 'PROVIDER_FAILED' });
+    expect(diagnostic.mock.calls).toEqual([[{ kind: 'ARCHITECT', stage: 'PROVIDER' }]]); expect(send).toHaveBeenCalledTimes(1);
+  });
+  it('a broken provider-category observer cannot cause a retry or change the public error', async () => {
+    const events: unknown[] = []; const send = vi.fn(async () => { throw new ThrottlingException({ message: 'PRIVATE', $metadata: {} }); });
+    const models = createBedrockModels({ transport: { send }, jobs: new BoundedModelJobs(), enabled: () => true,
+      diagnostic: event => { events.push(event); throw Error('PRIVATE_SINK'); } });
+    await expect(models.architect.draft(architectInput, guard())).rejects.toMatchObject({ code: 'PROVIDER_FAILED' });
+    expect(events).toEqual([{ kind: 'ARCHITECT', stage: 'PROVIDER_THROTTLED' }]); expect(send).toHaveBeenCalledTimes(1);
+  });
   it('sends structured public scope and copies exact definitions only after all declared IDs are selected', async () => {
     let received: ConverseCommand | undefined;
     const models = createBedrockModels({ transport: { send: async command => {
