@@ -71,7 +71,7 @@
     "docs/review-artifacts/ASSESS11/primary-signup-driver/pending-mutation.md": "0a2ab9baf37e7a405551b0c6562045b10a3afec9d24b546bbbf5a414ca4f293d",
     "docs/review-artifacts/ASSESS11/primary-signup-driver/pending-mutation-evidence.json": "5e7da1079adfe6ab01dc911cc3549ae65ee85f9d83015687d7502ac3444a80f7"
   },
-  "sourceReady": "IN_PROGRESS",
+  "sourceReady": "LOCAL_CHECKED_OFFLINE_PENDING",
   "primaryExecution": "NOT_STARTED",
   "managedInstallation": "UNKNOWN",
   "reproduction": {
@@ -87,5 +87,137 @@
   },
   "newProviderRequests": 0,
   "newSignupMessages": 0,
-  "newModelAttempts": 0
+  "newModelAttempts": 0,
+  "red": {
+    "label": "red",
+    "command": [
+      "npm",
+      "test",
+      "--",
+      "tests/integration/live-qa-primary-signup.test.ts",
+      "--maxWorkers=2"
+    ],
+    "start": "2026-10-08T20:46:36.992878+00:00",
+    "end": "2026-10-08T20:46:37.832782+00:00",
+    "exit": 1,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {}
+  },
+  "redFailed": 7,
+  "redPassed": 63,
+  "newTests": 8,
+  "focused": {
+    "label": "focused",
+    "command": [
+      "npm",
+      "test",
+      "--",
+      "tests/integration/live-qa-primary-signup.test.ts",
+      "--maxWorkers=2"
+    ],
+    "start": "2026-10-08T20:46:45.490930+00:00",
+    "end": "2026-10-08T20:46:46.290182+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/live-qa/primary-signup.mjs": "d18780bec23af9a84c03f0816d07e2fe5500b2fbe1b565c28c9cc1089195ec55",
+      "tests/integration/live-qa-primary-signup.test.ts": "ade853a9e28552fa867eec4b45e539d56a5ebc0ad5b69a93116141c601d610e0"
+    }
+  },
+  "focusedPassed": 70,
+  "full": {
+    "label": "full",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "start": "2026-10-08T20:47:04.755306+00:00",
+    "end": "2026-10-08T20:50:33.280307+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/live-qa/primary-signup.mjs": "d18780bec23af9a84c03f0816d07e2fe5500b2fbe1b565c28c9cc1089195ec55",
+      "tests/integration/live-qa-primary-signup.test.ts": "ade853a9e28552fa867eec4b45e539d56a5ebc0ad5b69a93116141c601d610e0"
+    },
+    "applicationPassed": 1398,
+    "optionalSkipped": 2,
+    "hostedPassed": 1,
+    "browserPassed": 64
+  },
+  "currentSourceFiles": {
+    "scripts/live-qa/primary-signup.mjs": "d18780bec23af9a84c03f0816d07e2fe5500b2fbe1b565c28c9cc1089195ec55",
+    "tests/integration/live-qa-primary-signup.test.ts": "ade853a9e28552fa867eec4b45e539d56a5ebc0ad5b69a93116141c601d610e0"
+  },
+  "lastObservedAt": "2026-10-08T20:50:43.169169+00:00",
+  "claimSync": {
+    "label": "claim",
+    "expectedRemote": "84476381f0eb3b6c8386a5712dec74d460832700",
+    "sourceSha": "9ec2c0e13677b4a7105e3aa84948ea42977e5e92",
+    "observedEnd": "2026-10-08T20:46:01.497219+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 56
+  },
+  "postFixReproduction": {
+    "observation": "SIMULATED_PORTS_ONLY",
+    "outcomes": [
+      {
+        "kind": "number",
+        "report": {
+          "status": "BLOCKED_OR_FAILED",
+          "execution": "FAIL",
+          "cleanup": "CLEAN",
+          "phase": "CLEAN",
+          "signupAttempts": 1,
+          "mailReads": 1,
+          "confirmationAttempts": 0,
+          "loginAttempts": 0,
+          "deleteAttempts": 1
+        },
+        "confirmations": 0,
+        "nonStringSubmitted": false,
+        "providerRequests": 0
+      },
+      {
+        "kind": "array",
+        "report": {
+          "status": "BLOCKED_OR_FAILED",
+          "execution": "FAIL",
+          "cleanup": "CLEAN",
+          "phase": "CLEAN",
+          "signupAttempts": 1,
+          "mailReads": 1,
+          "confirmationAttempts": 0,
+          "loginAttempts": 0,
+          "deleteAttempts": 1
+        },
+        "confirmations": 0,
+        "nonStringSubmitted": false,
+        "providerRequests": 0
+      },
+      {
+        "kind": "object",
+        "report": {
+          "status": "BLOCKED_OR_FAILED",
+          "execution": "FAIL",
+          "cleanup": "CLEAN",
+          "phase": "CLEAN",
+          "signupAttempts": 1,
+          "mailReads": 1,
+          "confirmationAttempts": 0,
+          "loginAttempts": 0,
+          "deleteAttempts": 1
+        },
+        "confirmations": 0,
+        "nonStringSubmitted": false,
+        "providerRequests": 0
+      }
+    ]
+  }
 }

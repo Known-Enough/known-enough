@@ -195,7 +195,8 @@ export function primarySignupDriver({ journal, ports }) {
                     current = await advance(plan, current, { mailReads: current.mailReads + 1 });
                     const response = await service('readMail', { plan, lease: current.lease });
                     if (response?.status === 'READY' && response.leaseId === current.lease.id
-                        && response.mailboxKey === current.lease.mailboxKey && /^\d{6}$/.test(response.code)) mail = response;
+                        && response.mailboxKey === current.lease.mailboxKey && typeof response.code === 'string'
+                        && /^\d{6}$/.test(response.code)) mail = response;
                     else if (response?.status !== 'EMPTY') fail('PRIMARY_MAIL_REJECTED');
                 }
                 if (!mail) fail('PRIMARY_MAIL_UNKNOWN');

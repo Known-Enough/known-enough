@@ -134,6 +134,34 @@ describe('inactive primary signup driver: simulated ports are not live proof', (
     await f.driver.prepare(plan); expect(await f.driver.execute(plan)).toMatchObject({ execution: 'FAIL', cleanup: 'CLEAN', confirmationAttempts: 0 }); expect(f.calls).not.toContain('confirm');
   });
 
+  test.each(['number', 'string array', 'number array', 'boxed string', 'boxed number', 'toString object', 'toPrimitive object'])('non-string mail code (%s) cannot invoke conversion or reach confirmation', async kind => {
+    const f = fixture(); const original = f.ports.readMail;
+    const conversion = vi.fn(() => '123456');
+    const samples: Record<string, unknown> = { number: 123456, 'string array': ['123456'], 'number array': [123456],
+      'boxed string': Object('123456'), 'boxed number': Object(123456), 'toString object': { toString: conversion },
+      'toPrimitive object': { [Symbol.toPrimitive]: conversion } };
+    // Deliberately violate the installed port's shape to test the runtime boundary.
+    f.ports.readMail = async (request, options) => ({ ...await original(request, options), code: samples[kind] as string });
+    await f.driver.prepare(plan); const report = await f.driver.execute(plan);
+    expect(report).toMatchObject({ status: 'BLOCKED_OR_FAILED', execution: 'FAIL', cleanup: 'CLEAN', phase: 'CLEAN',
+      mailReads: 1, confirmationAttempts: 0, loginAttempts: 0, deleteAttempts: 1 });
+    expect(conversion).not.toHaveBeenCalled(); expect(f.calls).not.toContain('confirm'); expect(f.calls).not.toContain('login');
+    expect(f.calls.filter(value => value === 'delete')).toHaveLength(1); expect(f.liveSubject).toBeNull();
+    const calls = f.calls.slice(); expect(await f.driver.execute(plan)).toEqual(report); expect(await f.driver.recover(plan)).toEqual(report);
+    expect(f.calls).toEqual(calls); expect(JSON.stringify(report)).not.toMatch(/123456|fixture|mailbox|ke-primary/);
+  });
+
+  test('primitive six-digit string with leading zeros reaches confirmation unchanged', async () => {
+    const f = fixture(); const original = f.ports.readMail;
+    f.ports.readMail = async (request, options) => ({ ...await original(request, options), code: '000123' });
+    f.ports.confirm = async (request, options) => {
+      expect(options.signal.aborted).toBe(false); expect(f.record.phase).toBe('CONFIRM_INTENT');
+      expect(request.code).toBe('000123'); f.calls.push('confirm'); return { status: 'CONFIRMED' };
+    };
+    await f.driver.prepare(plan); expect(await f.driver.execute(plan)).toMatchObject({ status: 'PASS', cleanup: 'CLEAN', confirmationAttempts: 1 });
+    expect(f.calls.filter(value => value === 'confirm')).toHaveLength(1); expect(f.liveSubject).toBeNull();
+  });
+
   test.each(['confirm', 'login'] as const)('%s ambiguous exception retains private intent and never starts cleanup', async operation => {
     const f = fixture(); f.ports[operation] = async () => { throw new Error('PRIVATE_TOKEN'); };
     await f.driver.prepare(plan);
