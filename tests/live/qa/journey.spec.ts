@@ -1,5 +1,5 @@
 // @ts-expect-error JavaScript diagnostic boundary observes only fixed provider enums.
-import { trackSignupRequest } from '../../../scripts/live-qa/signup-diagnostics.mjs';
+import { trackSignupRequest, openSignupForm } from '../../../scripts/live-qa/signup-diagnostics.mjs';
 import { syntheticConditionMatches } from './semantic-review.ts';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@playwright/test';
@@ -26,8 +26,8 @@ test('QA01 signup and managed login',async({browser})=>{
     await page.keyboard.press('Tab');await expect(page.getByRole('button',{name:'Sign in',exact:true})).toBeFocused();
   });
   const signupNote=(status:string,code:string)=>{for(const [type,description] of [['qa-operation-status',status],['qa-signup-provider-code',code]]){const notes=test.info().annotations;const prior=notes.find(n=>n.type===type);if(prior)prior.description=description!;else notes.push({type:type!,description:description!});}};
+  await test.step('QA01_REGISTRATION_ENTRY',()=>openSignupForm(page));
   await test.step('QA01_SIGNUP',()=>trackSignupRequest(page,'SignUp',async()=>{
-    await page.getByRole('button',{name:'Register with email',exact:true}).click();
     await page.getByLabel('Username',{exact:true}).fill(user.username);await page.getByLabel('Email',{exact:true}).fill(user.email);
     await page.getByLabel('Password',{exact:true}).fill(user.password);await page.getByRole('button',{name:'Create account',exact:true}).click();
     await expect(page.getByLabel('Verification code',{exact:true})).toBeVisible();

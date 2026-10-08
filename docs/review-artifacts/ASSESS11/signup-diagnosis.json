@@ -3,14 +3,15 @@
   "phase": "signup diagnostic correction",
   "sourceSha": null,
   "sourceFiles": {
-    "scripts/live-qa/signup-diagnostics.mjs": "341268fd45fd92885753ed600513348107d1ca85a5d8ee57bbee2dca1b28262f",
+    "scripts/live-qa/signup-diagnostics.mjs": "947047539d7c7ee3d5015d6912d08c252dc8b1e7aa7ec122889a59d357cfc1e5",
     "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
-    "tests/live/qa/journey.spec.ts": "342472a5963c3c078e2cf4843388ce606b3dd083e4d94b2baf559af19bf00996",
+    "tests/live/qa/journey.spec.ts": "dfaba3c7d6eef2888bfbc6b87be644928b3557260c80b5fc89dff9e1229810b4",
     "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
-    "scripts/live-qa/runner-core.mjs": "1af30a070f76a7e1617f0a9d581939534a1f88a73838b1ceec7bfca433ff06bb",
+    "scripts/live-qa/runner-core.mjs": "76807142c0a191e531fd15614c03f28bece6ada0624e5c6dd228120d87cac963",
     "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
-    "tests/integration/live-qa-runner.test.ts": "971d3ff635347960682d9b4f6be81931639ba2d6f4c0469f421ed5696ba7a847",
-    ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
+    "tests/integration/live-qa-runner.test.ts": "2a7a1d38a5964de21f268ac19ae0c156f6262baaa0a577007ad33a83edfe4159",
+    ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013",
+    "tests/e2e/email-registration.spec.ts": "da14901cfc081dcb829b5345930354240ee5133fcf626f895cbde07da2cb00c7"
   },
   "preserved33": {
     "apps/api/src/model-runtime.ts": "4b233b906c494db0a07b500deb697cdec1cdee402a1cd9580c9c3cbb279309d4",
@@ -207,6 +208,110 @@
         "tests/integration/live-qa-runner.test.ts": "971d3ff635347960682d9b4f6be81931639ba2d6f4c0469f421ed5696ba7a847",
         ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
       }
+    },
+    "entry-regression-broken": {
+      "label": "entry-regression-broken",
+      "command": [
+        "npx",
+        "playwright",
+        "test",
+        "tests/e2e/email-registration.spec.ts",
+        "--grep",
+        "configured signup UI sends email",
+        "--workers=1"
+      ],
+      "start": "2026-10-08T08:40:46.926005+00:00",
+      "end": "2026-10-08T08:41:07.081787+00:00",
+      "exit": 1,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/live-qa/signup-diagnostics.mjs": "6faab245d15c4328899e45a310b12147cb8c98867d84af8bb385883e8adef868",
+        "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+        "tests/live/qa/journey.spec.ts": "dfaba3c7d6eef2888bfbc6b87be644928b3557260c80b5fc89dff9e1229810b4",
+        "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+        "scripts/live-qa/runner-core.mjs": "76807142c0a191e531fd15614c03f28bece6ada0624e5c6dd228120d87cac963",
+        "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+        "tests/integration/live-qa-runner.test.ts": "971d3ff635347960682d9b4f6be81931639ba2d6f4c0469f421ed5696ba7a847",
+        ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013",
+        "tests/e2e/email-registration.spec.ts": "da14901cfc081dcb829b5345930354240ee5133fcf626f895cbde07da2cb00c7"
+      }
+    },
+    "entry-browser": {
+      "label": "entry-browser",
+      "command": [
+        "npx",
+        "playwright",
+        "test",
+        "tests/e2e/email-registration.spec.ts",
+        "--workers=1"
+      ],
+      "start": "2026-10-08T08:42:03.511289+00:00",
+      "end": "2026-10-08T08:42:10.554014+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/live-qa/signup-diagnostics.mjs": "947047539d7c7ee3d5015d6912d08c252dc8b1e7aa7ec122889a59d357cfc1e5",
+        "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+        "tests/live/qa/journey.spec.ts": "dfaba3c7d6eef2888bfbc6b87be644928b3557260c80b5fc89dff9e1229810b4",
+        "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+        "scripts/live-qa/runner-core.mjs": "76807142c0a191e531fd15614c03f28bece6ada0624e5c6dd228120d87cac963",
+        "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+        "tests/integration/live-qa-runner.test.ts": "971d3ff635347960682d9b4f6be81931639ba2d6f4c0469f421ed5696ba7a847",
+        ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013",
+        "tests/e2e/email-registration.spec.ts": "da14901cfc081dcb829b5345930354240ee5133fcf626f895cbde07da2cb00c7"
+      }
+    },
+    "entry-focused": {
+      "label": "entry-focused",
+      "command": [
+        "npx",
+        "vitest",
+        "run",
+        "tests/integration/live-qa-signup-diagnostics.test.ts",
+        "tests/integration/live-qa-runner.test.ts"
+      ],
+      "start": "2026-10-08T08:43:08.390984+00:00",
+      "end": "2026-10-08T08:43:10.488250+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/live-qa/signup-diagnostics.mjs": "947047539d7c7ee3d5015d6912d08c252dc8b1e7aa7ec122889a59d357cfc1e5",
+        "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+        "tests/live/qa/journey.spec.ts": "dfaba3c7d6eef2888bfbc6b87be644928b3557260c80b5fc89dff9e1229810b4",
+        "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+        "scripts/live-qa/runner-core.mjs": "76807142c0a191e531fd15614c03f28bece6ada0624e5c6dd228120d87cac963",
+        "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+        "tests/integration/live-qa-runner.test.ts": "2a7a1d38a5964de21f268ac19ae0c156f6262baaa0a577007ad33a83edfe4159",
+        ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013",
+        "tests/e2e/email-registration.spec.ts": "da14901cfc081dcb829b5345930354240ee5133fcf626f895cbde07da2cb00c7"
+      }
+    },
+    "entry-full": {
+      "label": "entry-full",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-08T08:44:10.289005+00:00",
+      "end": "2026-10-08T08:47:35.690852+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/live-qa/signup-diagnostics.mjs": "947047539d7c7ee3d5015d6912d08c252dc8b1e7aa7ec122889a59d357cfc1e5",
+        "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+        "tests/live/qa/journey.spec.ts": "dfaba3c7d6eef2888bfbc6b87be644928b3557260c80b5fc89dff9e1229810b4",
+        "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+        "scripts/live-qa/runner-core.mjs": "76807142c0a191e531fd15614c03f28bece6ada0624e5c6dd228120d87cac963",
+        "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+        "tests/integration/live-qa-runner.test.ts": "2a7a1d38a5964de21f268ac19ae0c156f6262baaa0a577007ad33a83edfe4159",
+        ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013",
+        "tests/e2e/email-registration.spec.ts": "da14901cfc081dcb829b5345930354240ee5133fcf626f895cbde07da2cb00c7"
+      }
     }
   },
   "previousQualification": {
@@ -218,16 +323,20 @@
     "gatewayObservation": "ACCESS_DENIED",
     "gatewayPurpose": "separate metadata get-stage read; not signup-cause proof"
   },
-  "live": "FIRST_DIAGNOSTIC_NO_TESTS; SELECTOR_CORRECTION_FULL_CHECK_RUNNING",
+  "live": "ENTRY_CORRECTION_CHECKING",
   "primarySignup": "UNKNOWN",
   "managedOperations": "UNKNOWN",
   "actualUsage": {
-    "paidCalls": 0,
-    "syntheticSignup": 0,
-    "deployment": 1,
-    "managedFixtureCycles": 1
+    "modelAttempts": 0,
+    "publicCognitoSignupAttempts": 0,
+    "signupMessages": 0,
+    "releaseCycles": 2,
+    "qaPublications": 2,
+    "primaryPublications": 2,
+    "managedFixtureCycles": 2,
+    "cloudBilling": "NOT_OBSERVED"
   },
-  "observedAt": "2026-10-08T08:23:26.476552+00:00",
+  "observedAt": "2026-10-08T08:45:07.256817+00:00",
   "liveFirst": {
     "run": 37747844101,
     "source": "805948bc36191ce9c92c9357e441058258919adf",
@@ -437,57 +546,6 @@
             "tests/integration/live-qa-runner.test.ts": "8b975cd4d92159cef54393b07409c889d526fc525dc2906dcd81b8fc65b3db8a",
             ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
           }
-        },
-        "selector-regression-broken": {
-          "label": "selector-regression-broken",
-          "command": [
-            "npx",
-            "vitest",
-            "run",
-            "tests/integration/live-qa-runner.test.ts",
-            "-t",
-            "discovers exactly QA01"
-          ],
-          "start": "2026-10-08T08:17:30.911745+00:00",
-          "end": "2026-10-08T08:17:33.219273+00:00",
-          "exit": 1,
-          "frozen_unchanged": true,
-          "source_unchanged": true,
-          "source_hashes": {
-            "scripts/live-qa/signup-diagnostics.mjs": "341268fd45fd92885753ed600513348107d1ca85a5d8ee57bbee2dca1b28262f",
-            "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
-            "tests/live/qa/journey.spec.ts": "342472a5963c3c078e2cf4843388ce606b3dd083e4d94b2baf559af19bf00996",
-            "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
-            "scripts/live-qa/runner-core.mjs": "f058b73cd626bad17e4770d9453ac0ba912049105e1fb9872f1b8b6091ec3fb5",
-            "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
-            "tests/integration/live-qa-runner.test.ts": "b198dd67da6acebf5f93ef857ae1b0cc7da2576308f1947f6380bd3df0809890",
-            ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
-          }
-        },
-        "selector-focused": {
-          "label": "selector-focused",
-          "command": [
-            "npx",
-            "vitest",
-            "run",
-            "tests/integration/live-qa-signup-diagnostics.test.ts",
-            "tests/integration/live-qa-runner.test.ts"
-          ],
-          "start": "2026-10-08T08:17:59.363651+00:00",
-          "end": "2026-10-08T08:18:01.824146+00:00",
-          "exit": 0,
-          "frozen_unchanged": true,
-          "source_unchanged": true,
-          "source_hashes": {
-            "scripts/live-qa/signup-diagnostics.mjs": "341268fd45fd92885753ed600513348107d1ca85a5d8ee57bbee2dca1b28262f",
-            "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
-            "tests/live/qa/journey.spec.ts": "342472a5963c3c078e2cf4843388ce606b3dd083e4d94b2baf559af19bf00996",
-            "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
-            "scripts/live-qa/runner-core.mjs": "1af30a070f76a7e1617f0a9d581939534a1f88a73838b1ceec7bfca433ff06bb",
-            "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
-            "tests/integration/live-qa-runner.test.ts": "971d3ff635347960682d9b4f6be81931639ba2d6f4c0469f421ed5696ba7a847",
-            ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
-          }
         }
       },
       "liveFirst": {
@@ -600,7 +658,255 @@
         },
         "ownMainActorProvenance": "verified"
       }
+    },
+    {
+      "sourceSha": "cec218585c9eee17a4d20d797b39f2b0c4ef7a24",
+      "sourceFiles": {
+        "scripts/live-qa/signup-diagnostics.mjs": "341268fd45fd92885753ed600513348107d1ca85a5d8ee57bbee2dca1b28262f",
+        "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+        "tests/live/qa/journey.spec.ts": "342472a5963c3c078e2cf4843388ce606b3dd083e4d94b2baf559af19bf00996",
+        "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+        "scripts/live-qa/runner-core.mjs": "1af30a070f76a7e1617f0a9d581939534a1f88a73838b1ceec7bfca433ff06bb",
+        "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+        "tests/integration/live-qa-runner.test.ts": "971d3ff635347960682d9b4f6be81931639ba2d6f4c0469f421ed5696ba7a847",
+        ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
+      },
+      "checks": {
+        "selector-regression-broken": {
+          "label": "selector-regression-broken",
+          "command": [
+            "npx",
+            "vitest",
+            "run",
+            "tests/integration/live-qa-runner.test.ts",
+            "-t",
+            "discovers exactly QA01"
+          ],
+          "start": "2026-10-08T08:17:30.911745+00:00",
+          "end": "2026-10-08T08:17:33.219273+00:00",
+          "exit": 1,
+          "frozen_unchanged": true,
+          "source_unchanged": true,
+          "source_hashes": {
+            "scripts/live-qa/signup-diagnostics.mjs": "341268fd45fd92885753ed600513348107d1ca85a5d8ee57bbee2dca1b28262f",
+            "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+            "tests/live/qa/journey.spec.ts": "342472a5963c3c078e2cf4843388ce606b3dd083e4d94b2baf559af19bf00996",
+            "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+            "scripts/live-qa/runner-core.mjs": "f058b73cd626bad17e4770d9453ac0ba912049105e1fb9872f1b8b6091ec3fb5",
+            "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+            "tests/integration/live-qa-runner.test.ts": "b198dd67da6acebf5f93ef857ae1b0cc7da2576308f1947f6380bd3df0809890",
+            ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
+          }
+        },
+        "selector-focused": {
+          "label": "selector-focused",
+          "command": [
+            "npx",
+            "vitest",
+            "run",
+            "tests/integration/live-qa-signup-diagnostics.test.ts",
+            "tests/integration/live-qa-runner.test.ts"
+          ],
+          "start": "2026-10-08T08:17:59.363651+00:00",
+          "end": "2026-10-08T08:18:01.824146+00:00",
+          "exit": 0,
+          "frozen_unchanged": true,
+          "source_unchanged": true,
+          "source_hashes": {
+            "scripts/live-qa/signup-diagnostics.mjs": "341268fd45fd92885753ed600513348107d1ca85a5d8ee57bbee2dca1b28262f",
+            "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+            "tests/live/qa/journey.spec.ts": "342472a5963c3c078e2cf4843388ce606b3dd083e4d94b2baf559af19bf00996",
+            "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+            "scripts/live-qa/runner-core.mjs": "1af30a070f76a7e1617f0a9d581939534a1f88a73838b1ceec7bfca433ff06bb",
+            "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+            "tests/integration/live-qa-runner.test.ts": "971d3ff635347960682d9b4f6be81931639ba2d6f4c0469f421ed5696ba7a847",
+            ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
+          }
+        },
+        "selector-full": {
+          "label": "selector-full",
+          "command": [
+            "npm",
+            "run",
+            "check"
+          ],
+          "start": "2026-10-08T08:18:30.304776+00:00",
+          "end": "2026-10-08T08:22:33.848263+00:00",
+          "exit": 0,
+          "frozen_unchanged": true,
+          "source_unchanged": true,
+          "source_hashes": {
+            "scripts/live-qa/signup-diagnostics.mjs": "341268fd45fd92885753ed600513348107d1ca85a5d8ee57bbee2dca1b28262f",
+            "tests/integration/live-qa-signup-diagnostics.test.ts": "740226cd9154f0cad70e89d03f4f8fcd0f8037b50b6afc86c0456b7148e8b340",
+            "tests/live/qa/journey.spec.ts": "342472a5963c3c078e2cf4843388ce606b3dd083e4d94b2baf559af19bf00996",
+            "scripts/live-qa/sanitized-reporter.mjs": "355c9496a5a1653a08209b6606d7d432d662d086c8149571f8df1a67556ca18c",
+            "scripts/live-qa/runner-core.mjs": "1af30a070f76a7e1617f0a9d581939534a1f88a73838b1ceec7bfca433ff06bb",
+            "scripts/live-qa/runner.mjs": "deaeda4c943e923ddc8c09756c347fb92d9a266fe2492de85a08a711e16f81c4",
+            "tests/integration/live-qa-runner.test.ts": "971d3ff635347960682d9b4f6be81931639ba2d6f4c0469f421ed5696ba7a847",
+            ".github/workflows/live-qa-release-and-check.yml": "0b69cda965e0e7680b15cecc6dcc887d01645bd00dc1cf25d87314acc0144013"
+          }
+        }
+      },
+      "liveSecond": {
+        "run": 37749605976,
+        "source": "cec218585c9eee17a4d20d797b39f2b0c4ef7a24",
+        "actor": 143764700,
+        "conclusion": "failure",
+        "observedAt": "2026-10-08T08:41:30.200053+00:00",
+        "report": {
+          "schemaVersion": 1,
+          "runScope": "SIGNUP_ONLY",
+          "diagnosticStatus": "BLOCKED_OR_FAILED",
+          "budget": {
+            "attempts": 0,
+            "reservedTokens": 0,
+            "reservedCostMicros": 0,
+            "maxAttemptsPerRun": 200,
+            "maxTokensPerRun": 2500000,
+            "maxCostMicrosPerRun": 2500000
+          },
+          "gatewayObservation": "ACCESS_DENIED",
+          "gatewayThrottle": null,
+          "modelFailures": [],
+          "runId": "gh-37749605976-1",
+          "sourceCommit": "cec218585c9eee17a4d20d797b39f2b0c4ef7a24",
+          "status": "BLOCKED_OR_FAILED",
+          "lanes": {
+            "execution": "BLOCKED",
+            "preflight": "PASS",
+            "fixtures": "PASS",
+            "journeys": "FAIL",
+            "model": "BLOCKED",
+            "privacy": "PASS",
+            "signup": "BLOCKED",
+            "cleanup": "PASS"
+          },
+          "tests": [
+            {
+              "title": "QA01 signup and managed login",
+              "operationStatus": "HTTP_PENDING",
+              "signupProviderCode": "COGNITO_NO_RESPONSE",
+              "phase": "QA01_SIGNUP",
+              "status": "FAIL"
+            },
+            {
+              "title": "QA02 admission and invitations",
+              "status": "BLOCKED"
+            },
+            {
+              "title": "QA03 fresh decision and owner confirmations",
+              "status": "BLOCKED"
+            },
+            {
+              "title": "QA04 private negotiation and exact agreement",
+              "status": "BLOCKED"
+            },
+            {
+              "title": "QA05 denial privacy and recovery",
+              "status": "BLOCKED"
+            },
+            {
+              "title": "QA06 refusal revocation revision and disclosure",
+              "status": "BLOCKED"
+            },
+            {
+              "title": "QA07 rendered clarification and accessibility",
+              "status": "BLOCKED"
+            }
+          ],
+          "counts": {
+            "passed": 0,
+            "failed": 1,
+            "blocked": 6,
+            "modelAttempts": 0,
+            "signupMessages": 0
+          }
+        },
+        "artifactSha256": "3a1415fba94c2aa8b401464e3ce67f83bef3f8d80fac48ab02001e5f9107dc9c",
+        "completeArtifactSha256": "be4d725d7703da062a8ab6a4fba159d62f73011c80421d101dcbc1ef73d09adc",
+        "cleanupRetry": "SUCCESS",
+        "jobStart": "2026-10-08T08:29:30Z",
+        "jobEnd": "2026-10-08T08:36:25Z"
+      },
+      "laneArtifacts": {
+        "observedAt": "2026-10-08T08:33:41.466402+00:00",
+        "run": 37749605976,
+        "source": "cec218585c9eee17a4d20d797b39f2b0c4ef7a24",
+        "artifacts": {
+          "release": {
+            "sha256": "e13a44c5ebcbf2e7c24f590061c40cbc7185e11e8c4517a7e97cf0f4747db77f",
+            "source": "cec218585c9eee17a4d20d797b39f2b0c4ef7a24",
+            "status": null
+          },
+          "primary": {
+            "sha256": "ab78dd6b4dbdf00d428531186bb563b946bb94d25ee15a3f0b9854d11f354fe2",
+            "source": "cec218585c9eee17a4d20d797b39f2b0c4ef7a24",
+            "status": "PASS"
+          },
+          "public": {
+            "sha256": "cd0cc4224acb13a03bde2daf6d8183d8fab92c56d6c780dccbeb6da0bf085c30",
+            "source": "cec218585c9eee17a4d20d797b39f2b0c4ef7a24",
+            "status": "PASS"
+          },
+          "metadata": {
+            "sha256": "5197c19cca9d8c4774634503f037d28069c0f96f8dbfc651afc9f99a6fdf8aff",
+            "source": "cec218585c9eee17a4d20d797b39f2b0c4ef7a24",
+            "status": "PASS"
+          }
+        },
+        "ownMainActorProvenance": "verified",
+        "primaryBackendUnchanged": true
+      }
     }
   ],
-  "checkedFullLabel": "selector-full"
+  "checkedFullLabel": "entry-full",
+  "secondDispatch": {
+    "source": "cec218585c9eee17a4d20d797b39f2b0c4ef7a24",
+    "at": "2026-10-08T08:24:17.276462+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "workflow": "live-qa-release-and-check.yml",
+    "signupOnly": true,
+    "duplicateActive": false,
+    "previousCleanVerified": true
+  },
+  "secondRun": {
+    "id": 37749605976,
+    "source": "cec218585c9eee17a4d20d797b39f2b0c4ef7a24",
+    "status": "in_progress",
+    "conclusion": null,
+    "createdAt": "2026-10-08T08:24:17Z",
+    "observedAt": "2026-10-08T08:25:17.775858+00:00",
+    "actorTriggerMainWorkflowVerified": true
+  },
+  "passiveEntry": {
+    "source": "cec218585c9eee17a4d20d797b39f2b0c4ef7a24",
+    "observedAt": "2026-10-08T08:41:33.559Z",
+    "oldEntryCount": 0,
+    "currentEntryCount": 1,
+    "fieldsVisible": [
+      true,
+      true,
+      true
+    ],
+    "cognitoPosts": 0,
+    "noSubmission": true
+  },
+  "coalescedHints": [
+    "2026-10-08T08:46:57.398Z",
+    "2026-10-08T09:16:57.807Z",
+    "2026-10-08T09:46:58.276Z",
+    "2026-10-08T10:16:58.744Z",
+    "2026-10-08T10:46:59.235Z"
+  ],
+  "visibilityGap": {
+    "lastObservedTool": "2026-10-08T08:45:59Z",
+    "observedResume": "2026-10-08T10:50:19Z",
+    "unobservedActivity": "UNKNOWN",
+    "ownedCheckActualEnd": "2026-10-08T08:47:35.690852+00:00",
+    "lastProgress": "2026-10-08T08:41:33Z",
+    "resumedProgress": "2026-10-08T10:50:35Z",
+    "tenMinuteReporting": "MISSED",
+    "cause": "UNKNOWN"
+  }
 }

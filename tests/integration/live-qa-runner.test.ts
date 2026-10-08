@@ -214,3 +214,12 @@ test('signup-only selection discovers exactly QA01 using the real Playwright CLI
   const titles=(suites:Array<{specs?:Array<{title:string}>;suites?:unknown[]}>):string[]=>suites.flatMap(suite=>[...(suite.specs??[]).map(spec=>spec.title),...titles((suite.suites??[]) as typeof suites)]);
   expect(report.errors).toEqual([]);expect(titles(report.suites)).toEqual([REQUIRED_TESTS[0]]);
 });
+
+
+test('missing registration entry is reported before a submitted Cognito operation without stale provider annotations',async()=>{
+  // @ts-expect-error Fixed reporter boundary handles the real entry-phase failure.
+  const {default:Reporter}=await import('../../scripts/live-qa/sanitized-reporter.mjs');
+  const reporter=new Reporter();const t={title:REQUIRED_TESTS[0],annotations:[{type:'qa-operation-status',description:'HTTP_BAD_REQUEST'},{type:'qa-signup-provider-code',description:'InvalidPasswordException'}]};
+  reporter.onStepEnd(t,{}, {title:'QA01_REGISTRATION_ENTRY',error:{message:'PRIVATE_ENTRY_DETAIL'}});reporter.onTestEnd(t,{status:'failed'});
+  expect(safeResults(reporter.tests)[0]).toEqual({title:REQUIRED_TESTS[0],phase:'QA01_REGISTRATION_ENTRY',status:'FAIL'});
+});

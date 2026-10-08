@@ -53,3 +53,10 @@ export async function trackSignupRequest(page, action, run, record) {
     try { await run(); }
     finally { page.off('response', response); page.off('requestfailed', failed); await pending; }
 }
+
+
+/** Shared live/offline entry contract; a stale label fails before any signup request. */
+export async function openSignupForm(page) {
+    await page.getByRole('button', { name: 'Create account', exact: true }).click({ timeout: 15000 });
+    await page.getByLabel('Username', { exact: true }).waitFor({ state: 'visible', timeout: 15000 });
+}
