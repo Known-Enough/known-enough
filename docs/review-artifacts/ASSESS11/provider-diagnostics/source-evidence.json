@@ -71,7 +71,7 @@
     "tests/integration/live-qa-primary-signup.test.ts": "49454f8c860614454011be1ce63e12badd7041eb8d40e82d1b19fd6c4ddbe647",
     "docs/review-artifacts/ASSESS11/primary-signup-driver/readback-evidence.json": "0d4d90d8fdd65c126ab433d3bb11dfd0242cbf5b78d6d1f3c042b3d224fec818"
   },
-  "sourceReady": "CODE_CHECKED_WAITING_SOURCE_AND_LIVE",
+  "sourceReady": "CODE_READY_CHECKED_SYNCED",
   "liveCause": "UNKNOWN",
   "priorQaRun": 37782679450,
   "priorQaSource": "4d83aca33516f25b63ed4be3791ea5b42f48134b",
@@ -82,8 +82,8 @@
   },
   "priorQaPrivacy": "PASS",
   "priorQaCleanup": "CLEAN",
-  "newLiveDispatch": "NONE",
-  "primarySignup": "NOT_STARTED",
+  "newLiveDispatch": "ONE_AUTOMATIC_WORKFLOW_RUN_FROM_SOURCE_PUSH_NO_MANUAL_DISPATCH",
+  "primarySignup": "NOT_STARTED_BY_PRIMARY_DRIVER",
   "red": {
     "label": "red",
     "command": [
@@ -205,7 +205,7 @@
       "apps/api/src/ke13b-lambda.test.ts": "75648b950aee561c2b80e84521bf77e9b0c8e3b00812cdf87ebc800334df46e3"
     }
   },
-  "lastObservedAt": "2026-10-08T19:30:13.791028+00:00",
+  "lastObservedAt": "2026-10-08T20:08:58.095048+00:00",
   "full": {
     "label": "full",
     "command": [
@@ -230,5 +230,251 @@
     "optionalSkipped": 2,
     "hostedPassed": 1,
     "browserPassed": 64
-  }
+  },
+  "checkedSource": "3fda7c9035681bf797aed244d3682628894cccff",
+  "sourceSync": {
+    "label": "source",
+    "expectedRemote": "da1ff2933b093f2da7c544b0a97921a53db2c787",
+    "sourceSha": "3fda7c9035681bf797aed244d3682628894cccff",
+    "observedEnd": "2026-10-08T19:33:44.209538+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 48
+  },
+  "publicationRuns": {
+    "observedAt": "2026-10-08T19:34:14.368982+00:00",
+    "source": "3fda7c9035681bf797aed244d3682628894cccff",
+    "runs": [
+      {
+        "id": 37832879734,
+        "path": ".github/workflows/check.yml",
+        "event": "push",
+        "status": "in_progress",
+        "conclusion": null,
+        "createdAt": "2026-10-08T19:33:47Z",
+        "source": "3fda7c9035681bf797aed244d3682628894cccff",
+        "actor": 143764700,
+        "trigger": 143764700,
+        "branch": "main"
+      },
+      {
+        "id": 37832879626,
+        "path": ".github/workflows/deploy-amplify-staging.yml",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "createdAt": "2026-10-08T19:33:47Z",
+        "source": "3fda7c9035681bf797aed244d3682628894cccff",
+        "actor": 143764700,
+        "trigger": 143764700,
+        "branch": "main"
+      }
+    ]
+  },
+  "ci": {
+    "id": 37832879734,
+    "source": "3fda7c9035681bf797aed244d3682628894cccff",
+    "actor": 143764700,
+    "conclusion": "success",
+    "event": "push",
+    "path": ".github/workflows/check.yml",
+    "createdAt": "2026-10-08T19:33:47Z",
+    "updatedAt": "2026-10-08T19:36:38Z",
+    "observedAt": "2026-10-08T19:37:31.327278+00:00",
+    "jobs": [
+      {
+        "id": 113502433394,
+        "name": "check",
+        "conclusion": "success",
+        "start": "2026-10-08T19:33:50Z",
+        "end": "2026-10-08T19:36:37Z"
+      }
+    ]
+  },
+  "automaticQualification": {
+    "observedAt": "2026-10-08T19:35:21.674536+00:00",
+    "id": 37832948131,
+    "source": "3fda7c9035681bf797aed244d3682628894cccff",
+    "status": "in_progress",
+    "createdAt": "2026-10-08T19:34:19Z",
+    "actor": 143764700,
+    "trigger": 143764700,
+    "event": "workflow_run",
+    "path": ".github/workflows/live-qa-release-and-check.yml",
+    "manualDispatch": false
+  },
+  "livePartial": {
+    "observedAt": "2026-10-08T19:43:12.319576+00:00",
+    "source": "3fda7c9035681bf797aed244d3682628894cccff",
+    "lanes": {
+      "release": {
+        "source": "3fda7c9035681bf797aed244d3682628894cccff",
+        "status": null
+      },
+      "primary": {
+        "source": "3fda7c9035681bf797aed244d3682628894cccff",
+        "status": "PASS"
+      },
+      "public": {
+        "source": "3fda7c9035681bf797aed244d3682628894cccff",
+        "status": "PASS"
+      },
+      "metadata": {
+        "source": "3fda7c9035681bf797aed244d3682628894cccff",
+        "status": "PASS"
+      }
+    },
+    "artifactHashes": {
+      "release": "452ae97f380d165af18cb30cd2638202d184212b05adbb409031bc418b566506",
+      "primary": "1521cf1a3f149c0e676cc64dd8118ea686534b4f380dda35efce187ba2ceaa42",
+      "public": "91049ee263b4c98ac5d21af62681adcb839fe8c7ca814d16db386dd376fb2754",
+      "metadata": "453340e9edc83ccb9ba97e06e12bf72a484a1cc34235b9dcb7c1fe99ee6cfc62"
+    },
+    "primaryBackendSha256": "e82d83901840372648e6494ee5663a9a6025715b2c91675c48e56882f4991b36",
+    "journeyAcceptance": "PENDING",
+    "primaryMetadataBackendMatch": true
+  },
+  "newUsage": {
+    "attempts": 31,
+    "maxAttemptsPerRun": 200,
+    "reservedTokens": 1113039,
+    "maxTokensPerRun": 2500000,
+    "reservedCostMicros": 1113039,
+    "maxCostMicrosPerRun": 2500000,
+    "syntheticSignupMessages": 1,
+    "uniqueAutomaticCycle": 1,
+    "manualLiveDispatches": 0,
+    "reservedUnitsNotBilling": true,
+    "actualInvoice": "NOT_OBSERVED",
+    "actualCloudWriteCounts": "NOT_OBSERVED"
+  },
+  "manualLiveDispatches": 0,
+  "progressReceipts": [
+    {
+      "id": 37834655964,
+      "event": "progress",
+      "createdAt": "2026-10-08T19:48:04Z",
+      "source": "3fda7c9035681bf797aed244d3682628894cccff",
+      "artifactMatch": true
+    },
+    {
+      "id": 37835695437,
+      "event": "progress",
+      "createdAt": "2026-10-08T19:56:25Z",
+      "source": "3fda7c9035681bf797aed244d3682628894cccff",
+      "artifactMatch": true
+    },
+    {
+      "id": 37836624558,
+      "event": "progress",
+      "createdAt": "2026-10-08T20:03:48Z",
+      "source": "3fda7c9035681bf797aed244d3682628894cccff",
+      "artifactMatch": true
+    }
+  ],
+  "postSourceFrozenVerification": {
+    "observedAt": "2026-10-08T19:52:04.269406+00:00",
+    "protected": 48,
+    "checkedSourceFiles": 6,
+    "unchanged": true
+  },
+  "privateHandoffHelperPreparation": {
+    "observedAt": "2026-10-08T19:56:04.431597+00:00",
+    "firstAttempt": "SyntaxError: unexpected character after line continuation character",
+    "cause": "nested triple-quote text in private helper preparation",
+    "repositoryEditsFromFailedAttempt": false,
+    "correctedHelperSyntax": "PASS",
+    "phaseClosureExecuted": false,
+    "correctedSyntaxCheckedAt": "2026-10-08T19:58:30.253735+00:00"
+  },
+  "qualification": {
+    "status": "completed",
+    "run": 37832948131,
+    "source": "3fda7c9035681bf797aed244d3682628894cccff",
+    "conclusion": "success",
+    "execution": "PASS",
+    "scope": "FULL",
+    "privacy": "PASS",
+    "cleanup": "CLEAN",
+    "cleanupRetry": "success",
+    "observedAt": "2026-10-08T20:08:27.892164+00:00",
+    "artifactHashes": {
+      "release": "452ae97f380d165af18cb30cd2638202d184212b05adbb409031bc418b566506",
+      "primary": "1521cf1a3f149c0e676cc64dd8118ea686534b4f380dda35efce187ba2ceaa42",
+      "public": "91049ee263b4c98ac5d21af62681adcb839fe8c7ca814d16db386dd376fb2754",
+      "metadata": "453340e9edc83ccb9ba97e06e12bf72a484a1cc34235b9dcb7c1fe99ee6cfc62",
+      "journey": "be1cfb4bcee3cd645053e8cc9fdd7d926ef2a55779adaae211eca87e41021e55",
+      "complete": "8af3f7485f74e6672b79c9f1a775a1fc95ca507df5161d6235147af7061b97a6"
+    },
+    "tests": [
+      {
+        "title": "QA01 signup and managed login",
+        "status": "PASS"
+      },
+      {
+        "title": "QA02 admission and invitations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA03 fresh decision and owner confirmations",
+        "status": "PASS"
+      },
+      {
+        "title": "QA04 private negotiation and exact agreement",
+        "status": "PASS"
+      },
+      {
+        "title": "QA05 denial privacy and recovery",
+        "status": "PASS"
+      },
+      {
+        "title": "QA06 refusal revocation revision and disclosure",
+        "status": "PASS"
+      },
+      {
+        "title": "QA07 rendered clarification and accessibility",
+        "status": "PASS"
+      }
+    ],
+    "budget": {
+      "attempts": 31,
+      "maxAttemptsPerRun": 200,
+      "reservedTokens": 1113039,
+      "maxTokensPerRun": 2500000,
+      "reservedCostMicros": 1113039,
+      "maxCostMicrosPerRun": 2500000
+    },
+    "signup": 1,
+    "modelFailures": [],
+    "modelFailureCount": 0,
+    "lanes": {
+      "release": {
+        "status": null,
+        "source": "3fda7c9035681bf797aed244d3682628894cccff"
+      },
+      "primary": {
+        "status": "PASS",
+        "source": "3fda7c9035681bf797aed244d3682628894cccff"
+      },
+      "public": {
+        "status": "PASS",
+        "source": "3fda7c9035681bf797aed244d3682628894cccff"
+      },
+      "metadata": {
+        "status": "PASS",
+        "source": "3fda7c9035681bf797aed244d3682628894cccff"
+      },
+      "complete": {
+        "status": "PASS",
+        "source": "3fda7c9035681bf797aed244d3682628894cccff"
+      }
+    }
+  },
+  "allSevenLatest": "PASS",
+  "claimReleasedAt": "2026-10-08T20:08:58.095048+00:00",
+  "wholeTask": "REVIEW_UNCLAIMED_PRIMARY_MANAGED_PROOF_OPEN",
+  "historicalProviderSubtype": "UNKNOWN",
+  "currentProviderCause": "NOT_ESTABLISHED"
 }
