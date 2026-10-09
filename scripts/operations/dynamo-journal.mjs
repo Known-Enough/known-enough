@@ -5,17 +5,25 @@ function key(hash) {
   return { PK: { S: `PLAN#${hash}` }, SK: { S: 'JOURNAL' } };
 }
 function encode(hash, record) {
-  if (!Number.isSafeInteger(record?.revision) || record.revision < 0 || !record.journal
-    || record.journal.planHash !== hash) throw new Error('OPS_JOURNAL_RECORD_REJECTED');
-  const payload = JSON.stringify(record.journal);
-  if (Buffer.byteLength(payload) > 4096) throw new Error('OPS_JOURNAL_RECORD_REJECTED');
-  return { ...key(hash), revision: { N: String(record.revision) }, journal: { S: payload } };
+  const itemKey = key(hash);
+  try {
+    // Capture getters once and discard inherited serializers before checking the
+    // revision and payload. Enumerable callable fields are not journal data.
+    record = structuredClone(record);
+    if (!record || typeof record !== 'object' || Array.isArray(record)
+      || !Number.isSafeInteger(record.revision) || record.revision < 0
+      || !record.journal || typeof record.journal !== 'object' || Array.isArray(record.journal)
+      || record.journal.planHash !== hash) throw new Error();
+    const payload = JSON.stringify(record.journal);
+    if (Buffer.byteLength(payload) > 4096) throw new Error();
+    return { ...itemKey, revision: { N: String(record.revision) }, journal: { S: payload } };
+  } catch { throw new Error('OPS_JOURNAL_RECORD_REJECTED'); }
 }
 export function dynamoJournal(transport, resourceArn) {
   if (resourceArn !== arn || typeof transport !== 'function') throw new Error('OPS_JOURNAL_TARGET_REJECTED');
-  async function put(hash, record, condition, values) {
+  async function put(item, condition, values) {
     try {
-      await transport('PutItem', { TableName: table, Item: encode(hash, record), ConditionExpression: condition,
+      await transport('PutItem', { TableName: table, Item: item, ConditionExpression: condition,
         ...(values ? { ExpressionAttributeValues: values } : {}) });
       return true;
     } catch (error) {
@@ -39,10 +47,12 @@ export function dynamoJournal(transport, resourceArn) {
         encode(hash, record); return record;
       } catch { throw new Error('OPS_JOURNAL_RECORD_REJECTED'); }
     },
-    createIfAbsent(hash, record) { return put(hash, record, 'attribute_not_exists(PK)'); },
+    async createIfAbsent(hash, record) { return put(encode(hash, record), 'attribute_not_exists(PK)'); },
     compareAndSwap(hash, expected, record) {
-      if (!Number.isSafeInteger(expected) || expected < 0 || expected === Number.MAX_SAFE_INTEGER || record?.revision !== expected + 1) throw new Error('OPS_JOURNAL_REVISION_REJECTED');
-      return put(hash, record, 'revision = :expected', { ':expected': { N: String(expected) } });
+      if (!Number.isSafeInteger(expected) || expected < 0 || expected === Number.MAX_SAFE_INTEGER) throw new Error('OPS_JOURNAL_REVISION_REJECTED');
+      const item = encode(hash, record);
+      if (item.revision.N !== String(expected + 1)) throw new Error('OPS_JOURNAL_REVISION_REJECTED');
+      return put(item, 'revision = :expected', { ':expected': { N: String(expected) } });
     }
   };
 }

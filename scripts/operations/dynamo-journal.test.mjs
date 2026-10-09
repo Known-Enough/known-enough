@@ -118,3 +118,103 @@ test('a malformed response accessor cannot expose its private exception', async 
   await assert.rejects(port.read(hash), /^Error: OPS_JOURNAL_RECORD_REJECTED$/);
   assert.equal(calls.length, 1);
 });
+
+for (const method of ['createIfAbsent', 'compareAndSwap']) {
+  test(`${method} captures record getters once before validating and serializing`, async () => {
+    const counts = { revision: 0, journal: 0, planHash: 0 }; const calls = [];
+    const journal = { get planHash() { return ++counts.planHash === 1 ? hash : 'b'.repeat(64); }, state: 'APPLYING' };
+    const input = { get revision() { return ++counts.revision === 1 ? (method === 'compareAndSwap' ? 1 : 0) : 99; },
+      get journal() { counts.journal++; return counts.journal === 1 ? journal : { planHash: 'b'.repeat(64) }; } };
+    const port = dynamoJournal(async (operation, request) => { calls.push({ operation, request }); return {}; }, arn);
+    assert.equal(await (method === 'compareAndSwap' ? port[method](hash, 0, input) : port[method](hash, input)), true);
+    assert.deepEqual(counts, { revision: 1, journal: 1, planHash: 1 });
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].request.Item.revision.N, method === 'compareAndSwap' ? '1' : '0');
+    assert.deepEqual(JSON.parse(calls[0].request.Item.journal.S), { planHash: hash, state: 'APPLYING' });
+    assert.equal(calls[0].request.Item.PK.S, `PLAN#${hash}`);
+  });
+}
+test('caller serializers are rejected without execution or a storage request', async () => {
+  let serializers = 0, calls = 0;
+  const rewrite = () => { serializers++; return { planHash: 'b'.repeat(64) }; };
+  const port = dynamoJournal(async () => { calls++; return {}; }, arn);
+  for (const input of [
+    { ...record, toJSON: rewrite },
+    { revision: 0, journal: { planHash: hash, toJSON: rewrite } },
+    { revision: 0, journal: { planHash: hash, private: { toJSON: rewrite } } },
+    { revision: 0, journal: { planHash: hash, private: [rewrite] } }
+  ]) await assert.rejects(async () => port.createIfAbsent(hash, input), /^Error: OPS_JOURNAL_RECORD_REJECTED$/);
+  assert.equal(serializers, 0); assert.equal(calls, 0);
+});
+test('inherited and nonenumerable serializers cannot rewrite owned journal data', async () => {
+  let serializers = 0; const requests = [];
+  for (const inherited of [true, false]) {
+    const rewrite = () => { serializers++; return { planHash: 'b'.repeat(64) }; };
+    const journal = inherited ? Object.assign(Object.create({ toJSON: rewrite }), record.journal) : { ...record.journal };
+    if (!inherited) Object.defineProperty(journal, 'toJSON', { value: rewrite });
+    const port = dynamoJournal(async (_operation, request) => { requests.push(request); return {}; }, arn);
+    assert.equal(await port.createIfAbsent(hash, { revision: 0, journal }), true);
+    assert.deepEqual(JSON.parse(requests.at(-1).Item.journal.S), record.journal);
+    assert.equal(journal.toJSON, rewrite);
+  }
+  assert.equal(serializers, 0); assert.equal(requests.length, 2);
+});
+test('unreadable and nonserializable records fail privately before storage', async () => {
+  let calls = 0; const port = dynamoJournal(async () => { calls++; return {}; }, arn);
+  const cyclic = { planHash: hash }; cyclic.self = cyclic;
+  const privateError = () => { throw new Error('private journal value'); };
+  const inputs = [null, [], { revision: -1, journal: record.journal }, { revision: Number.MAX_SAFE_INTEGER + 1, journal: record.journal },
+    { revision: 0, journal: { planHash: 'b'.repeat(64) } }, { revision: 0, journal: cyclic },
+    { revision: 0, journal: { planHash: hash, value: 1n } }, { revision: 0, journal: { planHash: hash, value() {} } },
+    { get revision() { return privateError(); }, journal: record.journal },
+    { revision: 0, get journal() { return privateError(); } },
+    { revision: 0, journal: { get planHash() { return privateError(); } } }];
+  for (const input of inputs) {
+    await assert.rejects(async () => port.createIfAbsent(hash, input), error => {
+      assert.equal(error.message, 'OPS_JOURNAL_RECORD_REJECTED'); assert.equal(error.cause, undefined); return true;
+    });
+  }
+  assert.equal(calls, 0);
+});
+test('the 4096-byte payload bound is exact and survives caller mutation during transport', async () => {
+  const journal = { planHash: hash, padding: '' }; const overhead = Buffer.byteLength(JSON.stringify(journal));
+  journal.padding = 'x'.repeat(4096 - overhead); const input = { revision: 0, journal }; const requests = [];
+  const port = dynamoJournal(async (_operation, request) => {
+    requests.push(request); input.revision = 99; journal.padding = 'changed'; await Promise.resolve(); return {};
+  }, arn);
+  assert.equal(await port.createIfAbsent(hash, input), true);
+  assert.equal(Buffer.byteLength(requests[0].Item.journal.S), 4096); assert.equal(requests[0].Item.revision.N, '0');
+  assert.equal(input.revision, 99); assert.equal(journal.padding, 'changed');
+  for (const padding of ['x'.repeat(4097 - overhead), 'é'.repeat(Math.ceil((4097 - overhead) / 2))]) {
+    await assert.rejects(async () => port.createIfAbsent(hash, { revision: 0, journal: { planHash: hash, padding } }), /^Error: OPS_JOURNAL_RECORD_REJECTED$/);
+  }
+  assert.equal(requests.length, 1);
+});
+test('the actual CLI request retains the checked revision and cleans private files', async () => {
+  const { awsTransport } = await import('./aws-transport.mjs');
+  const { readFile, access } = await import('node:fs/promises');
+  const requests = []; let revisions = 0;
+  const port = dynamoJournal(awsTransport(async (_command, args) => {
+    const file = args[args.indexOf('--cli-input-json') + 1].slice(7);
+    requests.push({ file, data: JSON.parse(await readFile(file, 'utf8')) }); return { stdout: '{}' };
+  }), arn);
+  const input = { get revision() { return ++revisions === 1 ? 1 : 99; }, journal: { planHash: hash } };
+  assert.equal(await port.compareAndSwap(hash, 0, input), true);
+  assert.equal(revisions, 1); assert.equal(requests.length, 1);
+  assert.equal(requests[0].data.Item.revision.N, '1');
+  assert.deepEqual(requests[0].data.ExpressionAttributeValues, { ':expected': { N: '0' } });
+  assert.equal(requests[0].data.ConditionExpression, 'revision = :expected');
+  assert.deepEqual(JSON.parse(requests[0].data.Item.journal.S), record.journal);
+  await assert.rejects(access(requests[0].file), { code: 'ENOENT' });
+});
+test('record and journal arrays cannot lose named identity fields in JSON', async () => {
+  let calls = 0; const port = dynamoJournal(async () => { calls++; return {}; }, arn);
+  for (const method of ['createIfAbsent', 'compareAndSwap']) {
+    const revision = method === 'compareAndSwap' ? 1 : 0;
+    for (const input of [Object.assign([], { revision, journal: record.journal }),
+      { revision, journal: Object.assign([], { planHash: hash }) }]) {
+      await assert.rejects(async () => method === 'compareAndSwap' ? port[method](hash, 0, input) : port[method](hash, input), /^Error: OPS_JOURNAL_RECORD_REJECTED$/);
+    }
+  }
+  assert.equal(calls, 0);
+});
