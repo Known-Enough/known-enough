@@ -2,7 +2,7 @@
   "phase": "RUN187",
   "sourceBase": "70795349d7d87cf2de985e915e7fa103b20bb25b",
   "claimObserved": "2026-10-09T22:48:34.574082+00:00",
-  "status": "IN_PROGRESS",
+  "status": "BOUNDED_CALL_DENIALS_VERIFIED_CLAIM_RELEASED",
   "managedProbes": "NOT_EXECUTED",
   "protectedTrackedHashes": 975,
   "startedReceipt": 38000928676,
@@ -594,5 +594,284 @@
       "artifactVerified": true
     }
   },
-  "unobservedNominalWake": "2026-10-09T23:12:35.195Z"
+  "unobservedNominalWake": "2026-10-09T23:12:35.195Z",
+  "wholeTask": "REVIEW_UNCLAIMED_NOT_DONE",
+  "managedScope": {
+    "id": 38003660620,
+    "source": "5bf0d920e14d4a897801e40b12ff67dc08730dc9",
+    "actor": 143764700,
+    "event": "workflow_dispatch",
+    "conclusion": "success",
+    "createdAt": "2026-10-09T23:17:19Z",
+    "updatedAt": "2026-10-09T23:18:01Z",
+    "observedAt": "2026-10-09T23:20:17.707588+00:00",
+    "jobs": [
+      {
+        "id": 114067385602,
+        "name": "scope",
+        "conclusion": "success",
+        "startedAt": "2026-10-09T23:17:23Z",
+        "completedAt": "2026-10-09T23:18:01Z"
+      }
+    ],
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1,
+        "started_at": "2026-10-09T23:17:24Z",
+        "completed_at": "2026-10-09T23:17:25Z"
+      },
+      {
+        "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2,
+        "started_at": "2026-10-09T23:17:25Z",
+        "completed_at": "2026-10-09T23:17:26Z"
+      },
+      {
+        "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3,
+        "started_at": "2026-10-09T23:17:26Z",
+        "completed_at": "2026-10-09T23:17:27Z"
+      },
+      {
+        "name": "Verify frozen source and inputs before credentials",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4,
+        "started_at": "2026-10-09T23:17:27Z",
+        "completed_at": "2026-10-09T23:17:35Z"
+      },
+      {
+        "name": "Run aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5,
+        "started_at": "2026-10-09T23:17:35Z",
+        "completed_at": "2026-10-09T23:17:36Z"
+      },
+      {
+        "name": "Read preserved recovery and run fixed non-destructive probes",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6,
+        "started_at": "2026-10-09T23:17:36Z",
+        "completed_at": "2026-10-09T23:17:56Z"
+      },
+      {
+        "name": "Upload finite scope result only",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7,
+        "started_at": "2026-10-09T23:17:56Z",
+        "completed_at": "2026-10-09T23:17:57Z"
+      },
+      {
+        "name": "Post Run aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 12,
+        "started_at": "2026-10-09T23:17:57Z",
+        "completed_at": "2026-10-09T23:17:57Z"
+      },
+      {
+        "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 13,
+        "started_at": "2026-10-09T23:17:57Z",
+        "completed_at": "2026-10-09T23:17:57Z"
+      },
+      {
+        "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 14,
+        "started_at": "2026-10-09T23:17:57Z",
+        "completed_at": "2026-10-09T23:17:57Z"
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 15,
+        "started_at": "2026-10-09T23:17:57Z",
+        "completed_at": "2026-10-09T23:17:57Z"
+      }
+    ],
+    "artifact": {
+      "schemaVersion": 1,
+      "sourceSha": "5bf0d920e14d4a897801e40b12ff67dc08730dc9",
+      "result": "BOUNDED_PROBES_VERIFIED",
+      "installation": "READBACK_VERIFIED",
+      "recoveryPreservation": "READBACK_VERIFIED",
+      "syntheticManifestVersionHash": "e2234fe02b44cd8ade9789896f64fd367e339b5d9f9dacc778a5a232ba3a3673",
+      "probes": [
+        {
+          "name": "JOURNAL_OUTSIDE_PREFIX",
+          "action": "dynamodb:GetItem",
+          "target": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+          "outcome": "DENIED",
+          "code": "AccessDeniedException"
+        },
+        {
+          "name": "OUTSIDE_TABLE_METADATA",
+          "action": "dynamodb:DescribeTable",
+          "target": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughGroupsStage",
+          "outcome": "DENIED",
+          "code": "AccessDeniedException"
+        },
+        {
+          "name": "S3_OUTSIDE_PREFIX_ATTEMPT",
+          "action": "s3:GetObject",
+          "target": "arn:aws:s3:::known-enough-operations-recovery-092954139775-us-east-1/scope-probes/outside-manifests.json",
+          "outcome": "DENIED",
+          "code": "AccessDenied"
+        },
+        {
+          "name": "IAM_ROLE_READ",
+          "action": "iam:GetRole",
+          "target": "arn:aws:iam::092954139775:role/KnownEnoughGithubOperationsRecovery",
+          "outcome": "DENIED",
+          "code": "AccessDenied"
+        },
+        {
+          "name": "SELF_ASSUME_ROLE",
+          "action": "sts:AssumeRole",
+          "target": "arn:aws:iam::092954139775:role/KnownEnoughGithubOperationsRecovery",
+          "outcome": "DENIED",
+          "code": "AccessDenied"
+        }
+      ],
+      "operationExecution": "NOT_EXECUTED",
+      "participantAccess": "NOT_EXECUTED",
+      "policyMutation": "NOT_EXECUTED",
+      "limits": {
+        "outsideS3ObjectExistence": "NOT_ESTABLISHED",
+        "existingOutsideS3ObjectProof": "NOT_EXECUTED",
+        "iamMutationProof": "NOT_EXECUTED",
+        "denyPolicyAttribution": "NOT_ESTABLISHED",
+        "broaderOperationsCloseout": "OPEN"
+      }
+    },
+    "artifactHash": "25b1e24edaec04c2e6ad3c1adcd06a15976cd60bb46a2e71171615710d4ad3af",
+    "verifiedSourceProbeInPrivateLogs": true,
+    "preCredentialNativeTests": 277,
+    "originalSyntheticManifestVersionMatched": true
+  },
+  "phaseHandoffObserved": "2026-10-09T23:21:59.884696+00:00",
+  "sourceSynchronization": {
+    "label": "wrapper",
+    "expectedRemote": "5cc00bf18f30ebf7c746385961fbc43076082307",
+    "sourceSha": "5bf0d920e14d4a897801e40b12ff67dc08730dc9",
+    "observedEnd": "2026-10-09T23:15:15.914792+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 975
+  },
+  "finalSummary": "OPS00\u2019s [scope run](https://github.com/Known-Enough/known-enough/actions/runs/38003660620) passed: five fixed requests returned denials and the original manifest version matched. Fixed parsing of the [AWS CLI error prefix](https://github.com/aws/aws-cli/blob/v2/awscli/errorformat.py); 277 operations tests and the full check passed. Known-object S3 proof, IAM mutation proof and OPS01\u201303 managed closeout remain open.",
+  "remaining": {
+    "outsideS3ObjectExistence": "NOT_ESTABLISHED",
+    "existingOutsideS3ObjectProof": "NOT_EXECUTED",
+    "iamMutationProof": "NOT_EXECUTED",
+    "denyPolicyAttribution": "NOT_ESTABLISHED",
+    "broaderOperationsCloseout": "OPEN"
+  },
+  "nextNominalWake": "2026-10-09T23:42:35.195Z",
+  "finalDocumentationSync": "PENDING_AT_THIS_DATED_CHECKPOINT",
+  "lifecycleReceipts": [
+    {
+      "label": "started",
+      "run": 38000928676,
+      "created": "2026-10-09T22:45:33Z",
+      "source": "70795349d7d87cf2de985e915e7fa103b20bb25b",
+      "artifactVerified": true
+    },
+    {
+      "label": "progress-1",
+      "run": 38001424365,
+      "created": "2026-10-09T22:51:16Z",
+      "source": "2db1e5846752067f1c2acc2905f36b91554b9e1d",
+      "artifactVerified": true
+    },
+    {
+      "label": "progress-2-retry",
+      "run": 38001730680,
+      "created": "2026-10-09T22:54:46Z",
+      "source": "2db1e5846752067f1c2acc2905f36b91554b9e1d",
+      "artifactVerified": true
+    },
+    {
+      "label": "progress-3",
+      "run": 38001843865,
+      "created": "2026-10-09T22:56:02Z",
+      "source": "f24a3b17f3e7765ea3d9a1c70b744ce9aaa7ee4d",
+      "artifactVerified": true
+    },
+    {
+      "label": "progress-4",
+      "run": 38002166469,
+      "created": "2026-10-09T22:59:53Z",
+      "source": "f24a3b17f3e7765ea3d9a1c70b744ce9aaa7ee4d",
+      "artifactVerified": true
+    },
+    {
+      "label": "progress-5",
+      "run": 38002530152,
+      "created": "2026-10-09T23:04:03Z",
+      "source": "5cc00bf18f30ebf7c746385961fbc43076082307",
+      "artifactVerified": true
+    },
+    {
+      "label": "progress-6",
+      "run": 38003057245,
+      "created": "2026-10-09T23:10:15Z",
+      "source": "5cc00bf18f30ebf7c746385961fbc43076082307",
+      "artifactVerified": true
+    },
+    {
+      "label": "progress-7",
+      "run": 38003537982,
+      "created": "2026-10-09T23:15:51Z",
+      "source": "5bf0d920e14d4a897801e40b12ff67dc08730dc9",
+      "artifactVerified": true
+    },
+    {
+      "label": "finished",
+      "run": 38004056860,
+      "created": "2026-10-09T23:22:02Z",
+      "source": "5bf0d920e14d4a897801e40b12ff67dc08730dc9",
+      "artifactVerified": true
+    }
+  ],
+  "lifecycleCadence": {
+    "maximumCreationGapSeconds": 372.0,
+    "gapsSeconds": [
+      343.0,
+      210.0,
+      76.0,
+      231.0,
+      250.0,
+      372.0,
+      336.0,
+      371.0
+    ],
+    "result": "PASS",
+    "startedLagSeconds": 169,
+    "earlierRUN186Gap": "7417_seconds_FAILED_PRESERVED"
+  },
+  "closingWorkObserved": "2026-10-09T23:25:21.282475+00:00",
+  "actualActiveGithubJobs": [],
+  "finishedReceipt": {
+    "run": 38004056860,
+    "artifactVerified": true,
+    "summaryMatchesFinalChat": true
+  }
 }
