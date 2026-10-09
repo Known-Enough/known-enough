@@ -69,7 +69,11 @@ export function awsTransport(executor = execute) {
       const { stdout } = await executor('aws', args, { env, timeout: 30000, maxBuffer: limit });
       return JSON.parse(stdout);
     } catch (error) {
-      const observed = typeof error?.stderr === 'string' ? error.stderr.match(/An error occurred \(([A-Za-z0-9]+)\)/)?.[1] : undefined;
+      let observed;
+      try {
+        const stderr = error?.stderr;
+        observed = typeof stderr === 'string' ? stderr.match(/An error occurred \(([A-Za-z0-9]+)\)/)?.[1] : undefined;
+      } catch { /* Unreadable diagnostics retain the generic failure. */ }
       const failure = new Error('OPS_AWS_FAILED', { cause: error });
       failure.name = codes.includes(observed) ? observed : 'OPS_AWS_FAILED'; throw failure;
     }

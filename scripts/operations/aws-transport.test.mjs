@@ -2,8 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, writeFile, stat, access } from 'node:fs/promises';
 import { dirname } from 'node:path';
+import { createHash } from 'node:crypto';
 import { awsTransport } from './aws-transport.mjs';
-import { MANIFEST_BUCKET } from './manifest.mjs';
+import { manifestStore, MANIFEST_BUCKET } from './manifest.mjs';
 const object = { Bucket: MANIFEST_BUCKET, Key: `manifests/${'a'.repeat(64)}.json` };
 test('CLI keeps JSON/booleans/private bytes out of argv, bounds calls and cleans temporary files', async () => {
   let directory;
@@ -52,6 +53,98 @@ test('classifies genuine conditional/denied service errors without exposing stde
   });
   await assert.rejects(transport('PutObject', { ...object, Body: Buffer.from('{}'), IfNoneMatch: '*' }), error => error.name === 'AccessDenied' && error.message === 'OPS_AWS_FAILED');
   assert.equal(calls, 1); await assert.rejects(access(directory));
+});
+
+function failedManifestUpload(error) {
+  const bytes = Buffer.from('{"synthetic":true}');
+  const hash = createHash('sha256').update(bytes).digest('hex');
+  const calls = []; const directories = new Set();
+  const transport = awsTransport(async (_file, args) => {
+    calls.push(args[1]); const path = args[args.indexOf('--cli-input-json') + 1].slice(7);
+    directories.add(dirname(path));
+    const request = JSON.parse(await readFile(path, 'utf8'));
+    assert.equal(request.Key, `manifests/${hash}.json`); assert.equal(request.ExpectedBucketOwner, '092954139775');
+    if (args[1] === 'put-object') { assert.equal(request.IfNoneMatch, '*'); throw error; }
+    if (args[1] === 'head-object') return { stdout: JSON.stringify({ ContentLength: bytes.length, VersionId: 'synthetic-v1' }) };
+    assert.equal(args[1], 'get-object'); assert.equal(request.VersionId, 'synthetic-v1');
+    await writeFile(args.at(-1), bytes); return { stdout: '{"VersionId":"synthetic-v1"}' };
+  });
+  return { bytes, hash, calls, directories, transport, store: manifestStore(transport, MANIFEST_BUCKET) };
+}
+async function assertClean(fixture) {
+  for (const directory of fixture.directories) await assert.rejects(access(directory));
+}
+test('changing denial diagnostics cannot trigger successful duplicate manifest readback', async () => {
+  let reads = 0; const error = new Error('SYNTHETIC_PRIVATE_DIAGNOSTIC');
+  Object.defineProperty(error, 'stderr', { get: () =>
+    `An error occurred (${reads++ === 0 ? 'AccessDenied' : 'PreconditionFailed'}) when calling PutObject` });
+  const f = failedManifestUpload(error);
+  try {
+    await assert.rejects(f.store.preserve(f.bytes, f.hash), failure => {
+      assert.equal(failure.message, 'OPS_MANIFEST_STORAGE_FAILED'); assert.equal(failure.cause.name, 'AccessDenied');
+      assert.equal(failure.cause.message, 'OPS_AWS_FAILED'); assert.equal(failure.cause.cause, error); return true;
+    });
+    assert.equal(reads, 1); assert.deepEqual(f.calls, ['put-object']);
+  } finally { await assertClean(f); }
+});
+test('first genuine conditional failure still reads the exact duplicate manifest version', async () => {
+  let reads = 0; const error = new Error('SYNTHETIC_PRIVATE_DIAGNOSTIC');
+  Object.defineProperty(error, 'stderr', { get: () =>
+    `An error occurred (${reads++ === 0 ? 'PreconditionFailed' : 'AccessDenied'}) when calling PutObject` });
+  const f = failedManifestUpload(error);
+  try {
+    const result = await f.store.preserve(f.bytes, f.hash);
+    assert.deepEqual(result.bytes, f.bytes); assert.equal(result.versionId, 'synthetic-v1');
+    assert.equal(reads, 1); assert.deepEqual(f.calls, ['put-object', 'head-object', 'get-object']);
+  } finally { await assertClean(f); }
+});
+test('unreadable and nonprimitive diagnostics retain a finite failure and cleanup', async () => {
+  let hooks = 0;
+  const nonprimitive = { match() { hooks++; return ['synthetic', 'PreconditionFailed']; },
+    toString() { hooks++; return 'SYNTHETIC_PRIVATE_DIAGNOSTIC'; }, toJSON() { hooks++; return 'SYNTHETIC_PRIVATE_DIAGNOSTIC'; } };
+  for (const [value, throws] of [[undefined, false], [null, false], [nonprimitive, false],
+    [new String('An error occurred (PreconditionFailed)'), false],
+    [new Error('SYNTHETIC_PRIVATE_GETTER'), true], ['SYNTHETIC_PRIVATE_GETTER', true], [nonprimitive, true]]) {
+    let reads = 0; const error = new Error('SYNTHETIC_PRIVATE_DIAGNOSTIC');
+    Object.defineProperty(error, 'stderr', { get() { reads++; if (throws) throw value; return value; } });
+    const f = failedManifestUpload(error);
+    try {
+      await assert.rejects(f.transport('PutObject', { Bucket: MANIFEST_BUCKET, Key: `manifests/${f.hash}.json`, Body: f.bytes, IfNoneMatch: '*' }), failure => {
+        assert.equal(failure.name, 'OPS_AWS_FAILED'); assert.equal(failure.message, 'OPS_AWS_FAILED');
+        assert.equal(failure.cause, error); assert.ok(!JSON.stringify(failure).includes('SYNTHETIC_PRIVATE')); return true;
+      });
+      assert.equal(reads, 1); assert.deepEqual(f.calls, ['put-object']); assert.equal(hooks, 0);
+    } finally { await assertClean(f); }
+  }
+});
+test('later diagnostic objects cannot invoke match hooks or forge a conditional failure', async () => {
+  let reads = 0; let hooks = 0; const error = new Error('SYNTHETIC_PRIVATE_DIAGNOSTIC');
+  const later = { match() { hooks++; return ['synthetic', 'ConditionalCheckFailedException']; },
+    toJSON() { hooks++; return 'SYNTHETIC_PRIVATE_DIAGNOSTIC'; } };
+  Object.defineProperty(error, 'stderr', { get: () => reads++ === 0 ? 'SYNTHETIC_PRIVATE_DIAGNOSTIC' : later });
+  const f = failedManifestUpload(error);
+  try {
+    await assert.rejects(f.transport('PutObject', { Bucket: MANIFEST_BUCKET, Key: `manifests/${f.hash}.json`, Body: f.bytes, IfNoneMatch: '*' }), failure => {
+      assert.equal(failure.name, 'OPS_AWS_FAILED'); assert.equal(failure.message, 'OPS_AWS_FAILED'); assert.equal(failure.cause, error); return true;
+    });
+    assert.equal(reads, 1); assert.equal(hooks, 0); assert.deepEqual(f.calls, ['put-object']);
+  } finally { await assertClean(f); }
+});
+test('all stable provider codes are captured once without touching caller diagnostics', async () => {
+  for (const code of ['ConditionalCheckFailedException', 'PreconditionFailed', 'AccessDenied', 'AccessDeniedException',
+    'ResourceNotFoundException', 'NoSuchKey', 'NoSuchBucket', 'NoSuchLifecycleConfiguration', 'ExpiredToken', 'RequestTimeout']) {
+    let reads = 0; const error = new Error('SYNTHETIC_PRIVATE_DIAGNOSTIC');
+    const getter = () => { if (++reads > 1) throw new Error('SYNTHETIC_PRIVATE_LATER'); return `An error occurred (${code}) when calling PutObject`; };
+    Object.defineProperty(error, 'stderr', { get: getter }); const descriptor = Object.getOwnPropertyDescriptor(error, 'stderr');
+    const f = failedManifestUpload(error);
+    try {
+      await assert.rejects(f.transport('PutObject', { Bucket: MANIFEST_BUCKET, Key: `manifests/${f.hash}.json`, Body: f.bytes, IfNoneMatch: '*' }), failure => {
+        assert.equal(failure.name, code); assert.equal(failure.message, 'OPS_AWS_FAILED'); assert.equal(failure.cause, error); return true;
+      });
+      assert.equal(reads, 1); assert.deepEqual(Object.getOwnPropertyDescriptor(error, 'stderr'), descriptor);
+      assert.deepEqual(f.calls, ['put-object']);
+    } finally { await assertClean(f); }
+  }
 });
 
 test('caller serializers cannot retarget the checked table or key or remove a write condition', async () => {
