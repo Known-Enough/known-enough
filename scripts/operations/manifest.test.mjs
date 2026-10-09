@@ -208,3 +208,120 @@ test('recovery journal preparation uses the original manifest despite later call
   assert.deepEqual(calls, ['PutObject', 'GetObject', 'journal-create', 'journal-read']);
   assert.ok(!JSON.stringify(result).includes('marker'));
 });
+
+function withPrivateDecoder(original, behavior) {
+  const supplied = Buffer.from(original); let hooks = 0;
+  const decode = () => {
+    hooks++;
+    if (behavior === 'mutate') supplied.fill(0);
+    if (behavior === 'throw') throw new Error('private decoder details');
+    return original.toString('utf8');
+  };
+  if (behavior === 'getter') Object.defineProperty(supplied, 'toString', { get() { hooks++; throw new Error('private getter details'); } });
+  else supplied.toString = decode;
+  return { supplied, hooks: () => hooks };
+}
+
+for (const behavior of ['mutate', 'throw', 'getter']) {
+  test(`preservation validates actual bytes without invoking a ${behavior} decoder hook`, async () => {
+    const original = Buffer.from('{"synthetic":true,"marker":"before"}');
+    const input = withPrivateDecoder(original, behavior); const expectedHash = contentHash(original);
+    let stored; const calls = [];
+    const transport = async (op, args) => {
+      calls.push(op);
+      if (op === 'PutObject') {
+        assert.notEqual(args.Body, input.supplied);
+        assert.equal(Object.hasOwn(args.Body, 'toString'), false);
+        if (stored) throw Object.assign(new Error('duplicate'), { name: 'PreconditionFailed' });
+        stored = { Body: Buffer.from(args.Body), VersionId: 'fixture-v1' };
+      }
+      return stored;
+    };
+    const store = manifestStore(transport, MANIFEST_BUCKET);
+    const first = await store.preserve(input.supplied, expectedHash);
+    assert.equal(input.hooks(), 0); assert.deepEqual(stored.Body, original);
+    assert.deepEqual(first.bytes, original); assert.equal(contentHash(first.bytes), expectedHash);
+    first.bytes.fill(0);
+    const duplicate = await store.preserve(original, expectedHash);
+    const restarted = await manifestStore(transport, MANIFEST_BUCKET).read(expectedHash, 'fixture-v1');
+    assert.deepEqual(duplicate.bytes, original); assert.deepEqual(restarted.bytes, original);
+    assert.deepEqual(calls, ['PutObject', 'GetObject', 'PutObject', 'GetObject', 'GetObject']);
+  });
+  test(`read validates actual bytes without invoking a ${behavior} decoder hook`, async () => {
+    const original = Buffer.from('{"synthetic":true,"marker":"before"}');
+    const input = withPrivateDecoder(original, behavior); const calls = [];
+    const store = manifestStore(async (op, args) => {
+      calls.push({ op, args }); return { Body: input.supplied, VersionId: 'fixture-v1' };
+    }, MANIFEST_BUCKET);
+    const result = await store.read(contentHash(original), 'fixture-v1');
+    assert.equal(input.hooks(), 0); assert.deepEqual(result.bytes, original);
+    assert.equal(contentHash(result.bytes), contentHash(original));
+    result.bytes.fill(0); assert.deepEqual(Buffer.from(input.supplied), original);
+    assert.equal(calls.length, 1); assert.equal(calls[0].op, 'GetObject');
+    assert.equal(calls[0].args.VersionId, 'fixture-v1');
+  });
+}
+
+for (const path of ['preserve', 'read']) {
+  test(`a forged JSON decoder cannot admit invalid physical JSON through ${path}`, async () => {
+    const input = Buffer.from('{"synthetic":'); const expectedHash = contentHash(input);
+    let hooks = 0; input.toString = () => { hooks++; return '{"synthetic":true}'; };
+    const calls = []; let stored;
+    const store = manifestStore(async (op, args) => {
+      calls.push(op);
+      if (op === 'PutObject') stored = { Body: Buffer.from(args.Body), VersionId: 'fixture-v1' };
+      return stored ?? { Body: input, VersionId: 'fixture-v1' };
+    }, MANIFEST_BUCKET);
+    await assert.rejects(path === 'preserve' ? store.preserve(input, expectedHash) : store.read(expectedHash, 'fixture-v1'),
+      /^Error: OPS_MANIFEST_CONTENT_REJECTED$/);
+    assert.equal(hooks, 0); assert.deepEqual(calls, path === 'preserve' ? [] : ['GetObject']);
+  });
+}
+
+function recoveryFixture(input) {
+  const envelope = { sourceSha: 'a'.repeat(40), operation: 'PARTITION',
+    resourceArn: 'arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughGroupsStage', contractHash: 'b'.repeat(64), maxItems: 10 };
+  const plan = { schemaVersion: 1, sourceSha: envelope.sourceSha, account: '092954139775', region: 'us-east-1',
+    operation: envelope.operation, resourceArn: envelope.resourceArn, contractHash: envelope.contractHash,
+    expectedRevision: 3, maxItems: 10, recoveryManifestHash: contentHash(input) };
+  return { plan, envelope };
+}
+
+test('forged JSON validation cannot upload recovery or prepare its journal', async () => {
+  const input = Buffer.from('{"synthetic":'); let hooks = 0;
+  input.toString = () => { hooks++; return '{"synthetic":true}'; };
+  let stored, journal; const calls = [];
+  const manifestTransport = async (op, args) => {
+    calls.push(op); if (op === 'PutObject') stored = { Body: Buffer.from(args.Body), VersionId: 'fixture-v1' };
+    return stored;
+  };
+  const journalStorage = {
+    createIfAbsent: async (_key, value) => { calls.push('journal-create'); journal = structuredClone(value); return true; },
+    read: async () => { calls.push('journal-read'); return structuredClone(journal); },
+    compareAndSwap: async () => { throw new Error('unexpected progression'); }
+  };
+  await assert.rejects(prepareRecovery({ ...recoveryFixture(input), manifestBytes: input, manifestTransport,
+    bucket: MANIFEST_BUCKET, journalStorage }), /^Error: OPS_MANIFEST_CONTENT_REJECTED$/);
+  assert.equal(hooks, 0); assert.deepEqual(calls, []);
+});
+
+test('recovery validates owned manifest bytes before any decoder hook or journal write', async () => {
+  const original = Buffer.from('{"synthetic":true,"marker":"before"}');
+  const input = withPrivateDecoder(original, 'mutate'); let stored, journal; const calls = [];
+  const manifestTransport = async (op, args) => {
+    calls.push(op); if (op === 'PutObject') stored = { Body: Buffer.from(args.Body), VersionId: 'fixture-v1' };
+    return stored;
+  };
+  const journalStorage = {
+    createIfAbsent: async (_key, value) => { calls.push('journal-create'); journal = structuredClone(value); return true; },
+    read: async () => { calls.push('journal-read'); return structuredClone(journal); },
+    compareAndSwap: async () => { throw new Error('unexpected progression'); }
+  };
+  const result = await prepareRecovery({ ...recoveryFixture(original), manifestBytes: input.supplied, manifestTransport,
+    bucket: MANIFEST_BUCKET, journalStorage });
+  assert.equal(input.hooks(), 0); assert.deepEqual(stored.Body, original);
+  assert.equal(contentHash(stored.Body), contentHash(original));
+  assert.equal(result.state, 'PREPARED'); assert.equal(result.operationExecution, 'NOT_EXECUTED');
+  assert.ok(!JSON.stringify(result).includes('marker'));
+  assert.deepEqual(calls, ['PutObject', 'GetObject', 'journal-create', 'journal-read']);
+});

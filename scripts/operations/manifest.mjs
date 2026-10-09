@@ -12,10 +12,13 @@ function version(value) {
   return value;
 }
 function verify(bytes, hash) {
-  if (!Buffer.isBuffer(bytes) || bytes.length < 1 || bytes.length > limit || !isUtf8(bytes) || digest(bytes) !== hash) throw new Error('OPS_MANIFEST_CONTENT_REJECTED');
+  if (!Buffer.isBuffer(bytes) || bytes.length < 1 || bytes.length > limit) throw new Error('OPS_MANIFEST_CONTENT_REJECTED');
+  // Validate owned bytes so caller-provided decoding hooks cannot alter the content.
+  const snapshot = Buffer.from(bytes);
+  if (!isUtf8(snapshot) || digest(snapshot) !== hash) throw new Error('OPS_MANIFEST_CONTENT_REJECTED');
   // Format is JSON; its private operation-specific schema is checked by the caller.
-  try { JSON.parse(bytes.toString('utf8')); } catch { throw new Error('OPS_MANIFEST_CONTENT_REJECTED'); }
-  return bytes;
+  try { JSON.parse(snapshot.toString('utf8')); } catch { throw new Error('OPS_MANIFEST_CONTENT_REJECTED'); }
+  return snapshot;
 }
 export function manifestStore(transport, bucket) {
   if (bucket !== MANIFEST_BUCKET || typeof transport !== 'function') throw new Error('OPS_MANIFEST_TARGET_REJECTED');
@@ -28,13 +31,13 @@ export function manifestStore(transport, bucket) {
     if (versionId !== undefined && observedVersion !== versionId) throw new Error('OPS_MANIFEST_VERSION_REJECTED');
     // Transport must return bounded bytes, rather than consuming an unbounded body.
     const bytes = verify(response.Body, hash);
-    return { bytes: Buffer.from(bytes), versionId: observedVersion };
+    return { bytes, versionId: observedVersion };
   }
   return {
     read,
     async preserve(bytes, hash) {
       // Callers may change their buffer while the transport waits; upload a snapshot.
-      const input = { Bucket: bucket, Key: key(hash), Body: Buffer.from(verify(bytes, hash)), IfNoneMatch: '*', ContentType: 'application/json', ServerSideEncryption: 'AES256' };
+      const input = { Bucket: bucket, Key: key(hash), Body: verify(bytes, hash), IfNoneMatch: '*', ContentType: 'application/json', ServerSideEncryption: 'AES256' };
       let response;
       try { response = await transport('PutObject', input); }
       catch (error) {
