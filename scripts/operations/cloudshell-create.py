@@ -166,8 +166,10 @@ class Aws:
             value = json.loads(raw)
         except ValueError:
             raise Rejected('AWS_RESPONSE_REJECTED') from None
-        require(isinstance(value, dict) and not any(value.get(k) for k in ('NextToken', 'Marker', 'NextMarker'))
-                and value.get('IsTruncated', False) is False, 'AWS_RESPONSE_REJECTED')
+        require(isinstance(value, dict), 'AWS_RESPONSE_REJECTED')
+        cursors = [value.get(k) for k in ('NextToken', 'Marker', 'NextMarker')]
+        require(all(cursor is None or isinstance(cursor, str) for cursor in cursors)
+                and not any(cursors) and value.get('IsTruncated', False) is False, 'AWS_RESPONSE_REJECTED')
         return value
 
 

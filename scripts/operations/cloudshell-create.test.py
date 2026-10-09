@@ -381,6 +381,99 @@ class CreateTests(unittest.TestCase):
         self.reject(self.installer.readback, 'AWS_RESPONSE_REJECTED')
         self.assertIsNone(self.state.load('configuration.json'))
 
+    def test_malformed_cursors_stop_readback_before_configuration(self):
+        self.installed()
+        for field in ('NextToken', 'Marker', 'NextMarker'):
+            for value in (0, False, [], {}):
+                with self.subTest(field=field, value=value):
+                    self.fake.overrides['list-role-policies'] = dict(
+                        IsTruncated=False, PolicyNames=['ExactRecoveryStorage'], **{field: value})
+                    self.installer = self.new_installer()
+                    before = len(self.fake.calls)
+                    self.reject(self.installer.readback, 'AWS_RESPONSE_REJECTED')
+                    self.assertEqual(len(self.fake.calls) - before, 7)
+                    self.assertEqual(self.fake.calls[-1][2], 'list-role-policies')
+                    self.assertIsNone(self.state.load('configuration.json'))
+                    self.assertEqual(len(self.fake.mutations()), 2)
+
+    def test_nonterminal_cursors_and_malformed_truncation_still_rejected(self):
+        self.installed()
+        variants = [{field: value} for field in ('NextToken', 'Marker', 'NextMarker')
+                    for value in (1, True, 'PRIVATE_CURSOR')]
+        variants += [dict(IsTruncated=value) for value in (0, 1, None, '', [], {}, True)]
+        for metadata in variants:
+            with self.subTest(metadata=metadata):
+                self.fake.overrides['list-role-policies'] = dict(
+                    dict(IsTruncated=False, PolicyNames=['ExactRecoveryStorage']), **metadata)
+                self.installer = self.new_installer()
+                self.reject(self.installer.readback, 'AWS_RESPONSE_REJECTED')
+                self.assertIsNone(self.state.load('configuration.json'))
+                self.assertEqual(len(self.fake.mutations()), 2)
+
+    def test_malformed_identity_cursors_stop_before_create_intent(self):
+        for field in ('NextToken', 'Marker', 'NextMarker'):
+            for value in (0, False, [], {}):
+                with self.subTest(field=field, value=value):
+                    self.fake.overrides['get-caller-identity'] = dict(
+                        Account=module.ACCOUNT, Arn=f'arn:aws:iam::{module.ACCOUNT}:root', **{field: value})
+                    self.installer = self.new_installer()
+                    before = len(self.fake.calls)
+                    self.reject(self.installer.prepare, 'AWS_RESPONSE_REJECTED')
+                    self.assertEqual(len(self.fake.calls) - before, 1)
+                    self.assertIsNone(self.state.load('create.intent.json'))
+                    self.assertEqual(self.fake.mutations(), [])
+
+    def test_malformed_preview_cursors_stop_before_execute_intent(self):
+        review = self.prepared()
+        baseline = copy.deepcopy(self.fake.preview)
+        for field in ('NextToken', 'Marker', 'NextMarker'):
+            for value in (0, False, [], {}):
+                with self.subTest(field=field, value=value):
+                    self.fake.preview = dict(baseline, **{field: value})
+                    self.installer = self.new_installer()
+                    self.reject(lambda: self.installer.execute(review), 'AWS_RESPONSE_REJECTED')
+                    self.assertIsNone(self.state.load('execute.intent.json'))
+                    self.assertEqual(len(self.fake.mutations()), 1)
+
+    def test_terminal_cursor_shapes_preserve_configuration_only_result(self):
+        self.installed()
+        for cursors in ({}, dict(NextToken=None, Marker=None, NextMarker=None),
+                        dict(NextToken='', Marker='', NextMarker='')):
+            with self.subTest(cursors=cursors):
+                self.fake.overrides['list-role-policies'] = dict(
+                    IsTruncated=False, PolicyNames=['ExactRecoveryStorage'], **cursors)
+                self.installer = self.new_installer()
+                before = len(self.fake.calls)
+                self.assertEqual(self.installer.readback(), 'CONFIGURATION_MATCH')
+                self.assertEqual(len(self.fake.calls) - before, 18)
+                record = self.state.load('configuration.json')
+                self.assertEqual(record['effectivePermissions'], 'UNKNOWN')
+                self.assertEqual(record['managedRecovery'], 'NOT_EXECUTED')
+                self.assertEqual(len(self.fake.mutations()), 2)
+
+    def test_cli_cursor_rejection_keeps_values_private(self):
+        self.state.close()
+        fresh_state = self.home / '.private' / 'cursor-cli'
+        self.fake.overrides['get-caller-identity'] = dict(
+            Account=module.ACCOUNT, Arn=f'arn:aws:iam::{module.ACCOUNT}:root', NextToken=['PRIVATE_CURSOR'])
+        original_aws = module.Aws
+        output = io.StringIO()
+        with patch.object(module, 'verify_checkout'), patch.object(module.Path, 'home', return_value=self.home), \
+                patch.object(module, 'Aws', side_effect=lambda state: original_aws(state, self.fake)), \
+                patch.object(sys, 'argv', ['create', 'prepare', '--source', SOURCE, '--state', str(fresh_state)]), \
+                contextlib.redirect_stdout(output):
+            self.assertEqual(module.main(), 1)
+        value = json.loads(output.getvalue())
+        self.assertEqual(value['classification'], 'AWS_RESPONSE_REJECTED')
+        self.assertEqual(value['requests'], 1)
+        self.assertEqual(value['mutations'], 0)
+        self.assertNotIn('PRIVATE_CURSOR', output.getvalue())
+        self.assertNotIn(module.ACCOUNT, output.getvalue())
+        diagnostics = list(fresh_state.glob('run-*/*.out'))
+        self.assertTrue(any(b'PRIVATE_CURSOR' in path.read_bytes() for path in diagnostics))
+        self.assertTrue(all(path.stat().st_mode & 0o777 == 0o600 for path in diagnostics))
+        self.state = module.State(self.home / '.private' / 'state', self.home)
+
     def test_changed_source_or_template_preserves_original_state(self):
         original = (self.state.folder / 'plan.json').read_bytes()
         self.reject(lambda: module.Installer(self.state, 'b' * 40, TEMPLATE, self.installer.aws), 'STATE_CONFLICT')
