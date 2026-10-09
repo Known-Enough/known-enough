@@ -1,0 +1,284 @@
+{
+  "schemaVersion": 1,
+  "task": "OPS00",
+  "phase": "manifest-validation-snapshot",
+  "workerAccount": "Battosai1806",
+  "actorId": 143764700,
+  "scheduledAt": "2026-10-09T01:13:14.356Z",
+  "actualStart": "2026-10-09T01:13:26.984006Z",
+  "preparedAt": "2026-10-09T01:27:30.872269+00:00",
+  "intakeSource": "05637719d3d60839309067eed0f945fe898a6d33",
+  "claim": {
+    "label": "claim",
+    "expectedRemote": "05637719d3d60839309067eed0f945fe898a6d33",
+    "sourceSha": "64ac331d07aed7c09d315569049d1aa08f34e4ed",
+    "observedEnd": "2026-10-09T01:17:17.780218+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 910
+  },
+  "checkedSource": "8b07c9c56a0e1b40154eb745edffaea4e540197f",
+  "checkedSourceSha256": {
+    "scripts/operations/manifest.mjs": "989f420de5f5f2a46b207e4eeb4ba50454c737e7bbbedda2ad9322e39eb7410f",
+    "scripts/operations/manifest.test.mjs": "eac4f8551455197539ab37dafd6598c25e7ea0e257245b836f4c26c99fbd2932"
+  },
+  "protectedTrackedFiles": 910,
+  "protectedUnchanged": true,
+  "cloudshellPackageSha256": "c18d9921bd58e9b10bce79637f1cbd123e6e7d498a541c2f2204109a7aa616b3",
+  "originalReproduction": {
+    "source": "05637719d3d60839309067eed0f945fe898a6d33",
+    "observedAt": "2026-10-09T01:16:34.293Z",
+    "observation": "SIMULATED_TRANSPORT_ONLY",
+    "realProviderRequests": 0,
+    "preservation": {
+      "hooks": 1,
+      "error": "OPS_MANIFEST_CONTENT_REJECTED",
+      "duplicateError": "OPS_MANIFEST_CONTENT_REJECTED",
+      "storedHashMatchesKey": false,
+      "storedChanged": true,
+      "calls": [
+        "PutObject",
+        "GetObject",
+        "PutObject",
+        "GetObject"
+      ]
+    },
+    "read": {
+      "hooks": 1,
+      "accepted": true,
+      "returnedHashMatchesKey": false,
+      "returnedChanged": true
+    }
+  },
+  "fixedReproduction": {
+    "source": "64ac331d07aed7c09d315569049d1aa08f34e4ed",
+    "observedAt": "2026-10-09T01:18:29.695Z",
+    "observation": "SIMULATED_TRANSPORT_ONLY",
+    "realProviderRequests": 0,
+    "preservation": {
+      "hooks": 0,
+      "storedHashMatchesKey": true,
+      "storedChanged": false,
+      "calls": [
+        "PutObject",
+        "GetObject",
+        "PutObject",
+        "GetObject"
+      ]
+    },
+    "read": {
+      "hooks": 0,
+      "accepted": true,
+      "returnedHashMatchesKey": true,
+      "returnedChanged": false
+    },
+    "sourceState": "CHECKED_WORKING_BYTES_BEFORE_SOURCE_COMMIT",
+    "sourceHashes": {
+      "scripts/operations/manifest.mjs": "989f420de5f5f2a46b207e4eeb4ba50454c737e7bbbedda2ad9322e39eb7410f",
+      "scripts/operations/manifest.test.mjs": "eac4f8551455197539ab37dafd6598c25e7ea0e257245b836f4c26c99fbd2932"
+    }
+  },
+  "red": {
+    "label": "red",
+    "command": [
+      "node",
+      "--test",
+      "scripts/operations/manifest.test.mjs"
+    ],
+    "start": "2026-10-09T01:17:54.562170+00:00",
+    "end": "2026-10-09T01:17:54.777065+00:00",
+    "exit": 1,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {},
+    "counts": {
+      "tests": "32",
+      "pass": "22",
+      "fail": "10",
+      "skipped": "0"
+    }
+  },
+  "focused": {
+    "label": "focused",
+    "command": [
+      "node",
+      "--test",
+      "scripts/operations/manifest.test.mjs"
+    ],
+    "start": "2026-10-09T01:18:08.728332+00:00",
+    "end": "2026-10-09T01:18:08.901330+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {},
+    "counts": {
+      "tests": "32",
+      "pass": "32",
+      "fail": "0",
+      "skipped": "0"
+    }
+  },
+  "initialNativeAttempt": {
+    "label": "native",
+    "command": [
+      "bash",
+      "-c",
+      "node --test scripts/operations/*.test.mjs scripts/operations/managed/*.test.mjs"
+    ],
+    "start": "2026-10-09T01:18:29.755319+00:00",
+    "end": "2026-10-09T01:18:30.068756+00:00",
+    "exit": 1,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/manifest.mjs": "989f420de5f5f2a46b207e4eeb4ba50454c737e7bbbedda2ad9322e39eb7410f",
+      "scripts/operations/manifest.test.mjs": "eac4f8551455197539ab37dafd6598c25e7ea0e257245b836f4c26c99fbd2932"
+    },
+    "counts": {
+      "tests": "149",
+      "pass": "148",
+      "fail": "1",
+      "skipped": "0"
+    },
+    "error": "SyntaxError [ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX]: TypeScript parameter property is not supported in strip-only mode",
+    "reason": "Local invocation omitted required --experimental-transform-types; no source/assertion change made for rerun."
+  },
+  "native": {
+    "label": "native-fixed",
+    "command": [
+      "bash",
+      "-c",
+      "node --experimental-transform-types --test scripts/operations/*.test.mjs"
+    ],
+    "start": "2026-10-09T01:18:46.515759+00:00",
+    "end": "2026-10-09T01:18:49.978647+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/manifest.mjs": "989f420de5f5f2a46b207e4eeb4ba50454c737e7bbbedda2ad9322e39eb7410f",
+      "scripts/operations/manifest.test.mjs": "eac4f8551455197539ab37dafd6598c25e7ea0e257245b836f4c26c99fbd2932"
+    },
+    "counts": {
+      "tests": "152",
+      "pass": "152",
+      "fail": "0",
+      "skipped": "0"
+    }
+  },
+  "full": {
+    "label": "full",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "start": "2026-10-09T01:18:30.195304+00:00",
+    "end": "2026-10-09T01:22:02.211420+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/manifest.mjs": "989f420de5f5f2a46b207e4eeb4ba50454c737e7bbbedda2ad9322e39eb7410f",
+      "scripts/operations/manifest.test.mjs": "eac4f8551455197539ab37dafd6598c25e7ea0e257245b836f4c26c99fbd2932"
+    },
+    "applicationPassed": 1398,
+    "existingOptionalApplicationSkips": 2,
+    "hostedPassed": 1,
+    "browserPassed": 64,
+    "referencesPassed": 7,
+    "planningPassed": 15,
+    "boundaryReferences": 414
+  },
+  "offlineVerification": {
+    "id": 37869466047,
+    "source": "8b07c9c56a0e1b40154eb745edffaea4e540197f",
+    "actor": 143764700,
+    "path": ".github/workflows/operations-verify.yml",
+    "event": "workflow_dispatch",
+    "createdAt": "2026-10-09T01:22:31Z",
+    "updatedAt": "2026-10-09T01:26:12Z",
+    "observedAt": "2026-10-09T01:27:30.819460+00:00",
+    "conclusion": "success",
+    "nativePassed": 152,
+    "applicationPassed": 1398,
+    "browserPassed": 64,
+    "installation": "UNKNOWN",
+    "managedRecovery": "NOT_EXECUTED",
+    "artifactSha256": {
+      "operations-report.json": "6385247f6d4abcbecc6e302415ce13deeb8747634e305124dc9ae9d601d4f6bb",
+      "partition-report.json": "0aa903a5c9cb8d2ab75ebdc972818576b822b17d4c4fc4338ccd894b70183e9d",
+      "retention-report.json": "b98ccffbf62b551608723b1a0d26a330de1932c2e22a4fe3aa4dadb6aa7f0cd4",
+      "jobs-report.json": "0dcbac493131e6e69d4134d226de8d236b120f97eed9d969295f421f214aa009",
+      "setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+      "partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+      "jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639"
+    },
+    "reports": {
+      "operations-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "8b07c9c56a0e1b40154eb745edffaea4e540197f",
+        "templateHash": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "managedRecovery": "UNKNOWN",
+        "apply": "DISABLED"
+      },
+      "partition-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "8b07c9c56a0e1b40154eb745edffaea4e540197f",
+        "templateHash": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "effectivePermissions": "UNKNOWN",
+        "migration": "NOT_EXECUTED",
+        "activation": "DISABLED",
+        "managedRecovery": "UNKNOWN"
+      },
+      "retention-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "8b07c9c56a0e1b40154eb745edffaea4e540197f",
+        "preparationHash": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "realPersonPolicy": "UNAPPROVED",
+        "dataOperations": "NOT_EXECUTED",
+        "participantGrants": "NOT_GRANTED",
+        "managedProof": "UNKNOWN"
+      },
+      "jobs-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "8b07c9c56a0e1b40154eb745edffaea4e540197f",
+        "preparationHash": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "providerCalls": "NOT_EXECUTED",
+        "managedRecovery": "UNKNOWN",
+        "participantConsent": "NOT_GRANTED",
+        "cleanup": "UNKNOWN"
+      }
+    },
+    "jobs": [
+      {
+        "id": 113623962794,
+        "name": "verify",
+        "conclusion": "success",
+        "started_at": "2026-10-09T01:22:34Z",
+        "completed_at": "2026-10-09T01:26:11Z"
+      }
+    ]
+  },
+  "realAwsRequests": 0,
+  "setupExecution": "NOT_EXECUTED",
+  "installation": "UNKNOWN",
+  "managedRecovery": "NOT_EXECUTED",
+  "wholeTask": "BLOCKED",
+  "codingMilestone": "CODE_READY",
+  "participantConsent": "NOT_GRANTED",
+  "nextAction": "Run the existing CloudShell package read-only first block through legitimate setup identity and return sanitized inventory; reconcile install/effective scope/private recovery before same-corrected-source two-run managed proof and OPS01\u201303/FIN03."
+}
