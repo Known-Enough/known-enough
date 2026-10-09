@@ -31,3 +31,17 @@ test('checked generated template and credential-free workflow publish no install
   assert.ok(workflow.includes('node scripts/operations/verify.mjs'));
   assert.ok(!/id-token:|configure-aws-credentials|secrets\./.test(workflow));
 });
+
+test('recovery trust matches current immutable repository subject without broadening main or audience', () => {
+  const trust = setupTemplate().Resources.RecoveryRole.Properties.AssumeRolePolicyDocument;
+  const expected = JSON.parse(readFileSync('infra/permissions/shared-staging-github-inspect-trust.json', 'utf8')).Statement[0];
+  assert.equal(trust.Statement.length, 1);
+  const only = trust.Statement[0];
+  assert.deepEqual(only.Principal, expected.Principal);
+  assert.equal(only.Action, 'sts:AssumeRoleWithWebIdentity');
+  assert.deepEqual(only.Condition, expected.Condition);
+  assert.equal(only.Condition.StringEquals['token.actions.githubusercontent.com:sub'],
+    'repo:Known-Enough@331386621/known-enough@1377587215:ref:refs/heads/main');
+  assert.equal(only.Condition.StringEquals['token.actions.githubusercontent.com:aud'], 'sts.amazonaws.com');
+  assert.ok(!JSON.stringify(trust).includes('StringLike'));
+});

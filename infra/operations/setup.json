@@ -137,7 +137,7 @@
               "Condition": {
                 "StringEquals": {
                   "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
-                  "token.actions.githubusercontent.com:sub": "repo:Known-Enough/known-enough:ref:refs/heads/main"
+                  "token.actions.githubusercontent.com:sub": "repo:Known-Enough@331386621/known-enough@1377587215:ref:refs/heads/main"
                 }
               }
             }

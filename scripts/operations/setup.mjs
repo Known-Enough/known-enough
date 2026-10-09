@@ -32,7 +32,7 @@ export function setupTemplate() {
       RecoveryRole: {
         Type: 'AWS::IAM::Role', Properties: { RoleName: RECOVERY_ROLE, MaxSessionDuration: 3600,
           AssumeRolePolicyDocument: { Version: '2012-10-17', Statement: [{ Effect: 'Allow', Principal: { Federated: 'arn:aws:iam::092954139775:oidc-provider/token.actions.githubusercontent.com' },
-            Action: 'sts:AssumeRoleWithWebIdentity', Condition: { StringEquals: { 'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com', 'token.actions.githubusercontent.com:sub': 'repo:Known-Enough/known-enough:ref:refs/heads/main' } } }] },
+            Action: 'sts:AssumeRoleWithWebIdentity', Condition: { StringEquals: { 'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com', 'token.actions.githubusercontent.com:sub': 'repo:Known-Enough@331386621/known-enough@1377587215:ref:refs/heads/main' } } }] },
           Policies: [{ PolicyName: 'ExactRecoveryStorage', PolicyDocument: { Version: '2012-10-17', Statement: [
             { Effect: 'Allow', Action: ['dynamodb:GetItem', 'dynamodb:PutItem'], Resource: JOURNAL_ARN, Condition: { 'ForAllValues:StringLike': { 'dynamodb:LeadingKeys': ['PLAN#*'] } } },
             { Effect: 'Allow', Action: ['dynamodb:DescribeTable', 'dynamodb:DescribeContinuousBackups', 'dynamodb:DescribeTimeToLive'], Resource: JOURNAL_ARN },
