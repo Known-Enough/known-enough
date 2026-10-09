@@ -7,5 +7,85 @@
   "protectedTrackedHashes": 975,
   "startedReceipt": 38000928676,
   "schedulerIdleGating": "UNKNOWN",
-  "modelEffort": "UNVERIFIED"
+  "modelEffort": "UNVERIFIED",
+  "codingCheckpoint": {
+    "observed": "2026-10-09T22:55:26.851498+00:00",
+    "checks": {
+      "focused-final": {
+        "label": "focused-final",
+        "command": [
+          "node",
+          "--experimental-transform-types",
+          "--test",
+          "scripts/operations/managed-scope.test.mjs"
+        ],
+        "start": "2026-10-09T22:51:00.799529+00:00",
+        "end": "2026-10-09T22:51:01.081817+00:00",
+        "exit": 0,
+        "frozen_unchanged": true,
+        "source_unchanged": true,
+        "source_hashes": {
+          "scripts/operations/managed-scope.mjs": "b8b0ad53f4b6c9725133e2fc2f6e046f08e961e460ffa703b63655aef50b314f",
+          "scripts/operations/managed-scope.test.mjs": "1c3e0380f98ac9f81e73845e669c167907141f022cb5c9fba695aed4050e56dd",
+          ".github/workflows/operations-scope.yml": "9584195296bcad831ad4319904ce16ef180f4266f4bc36cc9421ba0357da690f"
+        }
+      },
+      "native": {
+        "label": "native",
+        "command": [
+          "bash",
+          "-c",
+          "node --experimental-transform-types --test scripts/operations/*.test.mjs"
+        ],
+        "start": "2026-10-09T22:51:01.230645+00:00",
+        "end": "2026-10-09T22:51:05.000971+00:00",
+        "exit": 0,
+        "frozen_unchanged": true,
+        "source_unchanged": true,
+        "source_hashes": {
+          "scripts/operations/managed-scope.mjs": "b8b0ad53f4b6c9725133e2fc2f6e046f08e961e460ffa703b63655aef50b314f",
+          "scripts/operations/managed-scope.test.mjs": "1c3e0380f98ac9f81e73845e669c167907141f022cb5c9fba695aed4050e56dd",
+          ".github/workflows/operations-scope.yml": "9584195296bcad831ad4319904ce16ef180f4266f4bc36cc9421ba0357da690f"
+        }
+      },
+      "full": {
+        "label": "full",
+        "command": [
+          "npm",
+          "run",
+          "check"
+        ],
+        "start": "2026-10-09T22:51:01.239259+00:00",
+        "end": "2026-10-09T22:54:36.847813+00:00",
+        "exit": 0,
+        "frozen_unchanged": true,
+        "source_unchanged": true,
+        "source_hashes": {
+          "scripts/operations/managed-scope.mjs": "b8b0ad53f4b6c9725133e2fc2f6e046f08e961e460ffa703b63655aef50b314f",
+          "scripts/operations/managed-scope.test.mjs": "1c3e0380f98ac9f81e73845e669c167907141f022cb5c9fba695aed4050e56dd",
+          ".github/workflows/operations-scope.yml": "9584195296bcad831ad4319904ce16ef180f4266f4bc36cc9421ba0357da690f"
+        }
+      }
+    },
+    "counts": {
+      "focused": 13,
+      "native": 273,
+      "application": 1407,
+      "optionalSkips": 2,
+      "hosted": 1,
+      "browser": 64,
+      "references": 7,
+      "planning": 15,
+      "boundaries": 414
+    },
+    "scopeProbe": "NOT_EXECUTED",
+    "publicationError": "LOG_PUBLICATION_FAILED",
+    "publicationRetry": {
+      "run": 38001730680,
+      "artifactVerified": true,
+      "observed": "2026-10-09T22:55:36.945504+00:00"
+    },
+    "misreportedFocused14": "CORRECTED_TO_13_HISTORY_RETAINED",
+    "inspection": "Own scoped code inspection 2026-10-09T22:52:45.179736+00:00: fixed five requests, no arbitrary action/target/policy, existing awsTransport guards unchanged; source and own identity validation before credentials/metadata; installed storage and original version/content readback before probes; private600 inputs/temp700, fixed CLI timeouts/maxBuffer/retry configuration, one-byte range and cleanup; response discarded including unexpected STS success; finite per-operation denial, absence/local error UNKNOWN not PASS. Workflow uses same recovery concurrency/cancel=false, pinned actions/fixed role/account/region/main/ownB/manual flag and precredential native suite. Focused actual13PASS/native273PASS; prior progress-1/chat mistakenly said14, corrected explicitly here, retained original receipt history. Full still owned/running; managed scope NOT_EXECUTED. No task/worker/config/permission/data/state mutation. Prior actual RUN186 final707sync/end22:41:16 retained. Missing-directory rg errors infra/primary, scripts/operations/primary*, scripts/cloudshell corrected by rg --files/current inventory. Broad historic output truncated, unseen content not inferred; old private scope identifier unnecessarily printed to local tool output, no lifecycle/doc/artifact publication of it; all new private inputs retained mode600."
+  }
 }

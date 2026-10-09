@@ -1,0 +1,71 @@
+name: Verify bounded operations role scope
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact checked main source SHA
+        required: true
+        type: string
+      probe_id:
+        description: Existing synthetic recovery UUID v4; never reset or replace
+        required: true
+        type: string
+      expected_manifest_version_hash:
+        description: Verified preparation pair manifest version fingerprint
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: known-enough-operations-recovery
+  cancel-in-progress: false
+jobs:
+  scope:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && github.actor_id == '143764700' && vars.OPERATIONS_RECOVERY_ENABLED == 'true'
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Verify frozen source and inputs before credentials
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_sha }}
+          PROBE_ID: ${{ inputs.probe_id }}
+          EXPECTED_MANIFEST_VERSION_HASH: ${{ inputs.expected_manifest_version_hash }}
+          OPERATIONS_RECOVERY_ENABLED: ${{ vars.OPERATIONS_RECOVERY_ENABLED }}
+        run: |
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node scripts/operations/verify.mjs > "$RUNNER_TEMP/operations-offline.json"
+          node --input-type=module -e "import { verifyScopeInput } from './scripts/operations/managed-scope.mjs'; verifyScopeInput(process.env);"
+          npm ci
+          node --experimental-transform-types --test scripts/operations/*.test.mjs
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubOperationsRecovery
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+      - name: Read preserved recovery and run fixed non-destructive probes
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_sha }}
+          PROBE_ID: ${{ inputs.probe_id }}
+          EXPECTED_MANIFEST_VERSION_HASH: ${{ inputs.expected_manifest_version_hash }}
+          OPERATIONS_RECOVERY_ENABLED: ${{ vars.OPERATIONS_RECOVERY_ENABLED }}
+        run: |
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node scripts/operations/managed-scope.mjs > "$RUNNER_TEMP/operations-scope.json"
+      - name: Upload finite scope result only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: operations-scope-result
+          path: ${{ runner.temp }}/operations-scope.json
+          if-no-files-found: warn
+          retention-days: 30
