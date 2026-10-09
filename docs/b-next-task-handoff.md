@@ -1,5 +1,7 @@
 # B handoff after ASSESS07 — 2026-10-06T17:17:44Z
 
+**Next actual blocker — CloudShell credentials:** A confirmed NO_CREDENTIALS with provider configured; installer strips its connection. Claim [the bounded OPS00 credential correction](tasks/active/operations/OPS00/cloudshell-credentials-handoff.md) at next genuine idle intake before unrelated work, then publish tested source-pinned continuation preserving old private state. No new AWS permission/credential sharing; no B start observed.
+
 **Next idle intake — A inventory received, 2026-10-09:** [Successful CloudShell inventory](review-artifacts/OPS00/a-cloudshell-inventory-20261009.md) now proves the proposed recovery resources absent at the recorded time. After any genuine active claim, prepare concrete recovery CREATE preview/install/resume/readback commands within OPS00. Do not keep repeating the resolved root/inventory blocker or invent unrelated fixes first. Preserve private source state, NP00 and real managed acceptance; no B start/apply claimed.
 
 **Next idle intake — actual root blocker:** A's checked CloudShell inventory succeeded STS but rejected the same-account root login before resource reads. Take [OPS00 read-only root correction](tasks/active/operations/OPS00/root-inventory-handoff.md) next; publish a new pinned/tested block preserving old HOME state. No apply/root-write change or competing worker; B start not yet observed.

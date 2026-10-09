@@ -1,0 +1,17 @@
+# OPS00: restore CloudShell's existing credential connection
+
+## Confirmed real failure
+
+A ran checked source589f6c4a0170597ffe359b688d257fb519c52af7 with state `$HOME/.known-enough/ops00-create-pagination-20261009`. prepare reports BLOCKED/AWS_REQUEST_FAILED,requests1,mutations0. A's sanitized saved diagnostic is SavedError=NO_CREDENTIALS and CloudShellCredentialProviderPresent=true. Earlier source3c1edea inventory succeeded with the same CloudShell setup. The installer removes both AWS_CONTAINER_CREDENTIALS_FULL_URI and AWS_CONTAINER_CREDENTIALS_RELATIVE_URI from its AWS subprocess environment. Its first request is STS get-caller-identity; failure occurs before conflict checks or submission. Current shared source9a78902 still has this filter. This is an installer authentication-chain bug, not observed AWS access denial, missing root permission or a failed installation. No credential values/private raw diagnostics were shared.
+
+## B's next bounded phase
+
+At the next genuine idle intake claim this existing OPS00 correction before unrelated bugs or an unchanged installer retry. Preserve any actual active worker, own account, source/target checks, paused NP00 and one task. Exact executable scope before edits: scripts/operations/cloudshell-create.py and its existing focused tests, refreshed CloudShell command/evidence plus existing scoped tracking. No new IAM/profile/role/console user, borrowed credentials or model/email/signup operation is needed to fix this source bug.
+
+Preserve the legitimate existing CloudShell credential-provider chain for bounded own-account AWS calls. Review credential-source handling using AWS primary documentation; do not solve this by manually exporting/copying session credentials, exposing provider tokens/URIs, or permitting arbitrary endpoint redirects. Keep verified STS account/accepted identity before resource operations, endpoint/region restrictions, bounded calls/capture, source pin, private HOME durable intent, exact template/conflict/change-set guards, no automatic retries and separate installation/recovery proof. Use finite NO_CREDENTIALS diagnostics rather than concealing the proven failure as generic AWS_REQUEST_FAILED.
+
+Add a regression showing the current source loses configured container-provider credentials and the corrected subprocess preserves the required provider settings without public leakage. Verify wrong-account and malformed identity stop before writes, unsupported credential sources/endpoint substitution remain bounded, and existing prepare/uncertain-submit/execute/resume behavior remains. Focused and required pinned full checks, plus source-matched verification before updated commands.
+
+Refresh the public runbook to the tested source/hash and give A one paste-ready continuation. Old state contains private plan/template/read diagnostics and must not be silently repinned/reset. Inspect whether CREATE/execute intent exists before any source migration. In this observed first-call failure mutation0 and prepare's ordering precede CREATE intent, but confirm actual state technically; preserve old files. Provide a reviewed pre-intent migration or separate private state with exact server conflict checks. If an intent exists, keep its original source/token and use guarded recovery instead of creating a competing plan.
+
+Deliver the corrected command and a short summary of checks. Do not ask A to create credentials or another routine approval. No A implementation/cloud action is happening; this handoff is evidence and routing, not B execution.

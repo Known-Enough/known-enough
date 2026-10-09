@@ -1600,3 +1600,8 @@ User asks how and whether B is doing the fix. A's CloudShell STS succeeds in exa
 ## A successful CloudShell inventory handoff — 2026-10-09
 
 User supplied source3c1edea/account092954139775/us-east-1 inventory observed15:41:39.125259Z:45reads/0writes, account accepted, proposed recovery/partition stacks/role/tables/bucket absent, existing metadata readable/OIDC audienceMATCH. Stored only allowlisted summary and scoped next-package note; private metadata contents not inferred from hashes. Reconciled candidate recovery CREATE and routes concrete preview/install/resume/readback package after any actually active B claim. Root fix done; no generic reapproval or unrelated bug hunting before this deliverable. Effective writes/installation/managed proof still unknown; no A AWS/implementation/worker/automation action, NP00 protected. Docs checks/sync follow; native B messaging unavailable, so repository route does not prove B start.
+
+
+## A confirmed installer credentials defect — 2026-10-09
+
+A supplies BLOCKED/AWS_REQUEST_FAILED/requests1/mutations0 on checked589f6c4 and saved NO_CREDENTIALS/provider-present=true. Inspected exact source/current9a78902: both container URI settings removed before STS; previous inventory preserved them and worked. Routes concrete OPS00 correction READY without new AWS identity or access. B remains sole implementation owner; A edits docs only, no credential values, AWS action, worker or monitor. [Scoped next fix](tasks/active/operations/OPS00/cloudshell-credentials-handoff.md) includes meaningful regressions/finite errors and preserving private pre-intent state/new pin. Direct B host previously unavailable; repository handoff is not verified delivery/start. Docs checks/main sync follow.
