@@ -98,7 +98,13 @@ export async function finishCognitoSignIn(config: CognitoBrowserConfig,
   if (query.has('error')) throw new CognitoSignInFailure(hostedErrorCode(query.get('error')));
   if (!code || !state || !pendingRaw) throw new CognitoSignInFailure('CALLBACK_INCOMPLETE');
   let pending: Pending;
-  try { pending = JSON.parse(pendingRaw) as Pending; } catch { throw new CognitoSignInFailure('CALLBACK_STATE_INVALID'); }
+  try {
+    const value: unknown = JSON.parse(pendingRaw);
+    if (value === null || typeof value !== 'object' || Array.isArray(value)) throw new Error();
+    const record = value as Record<string, unknown>;
+    if (typeof record.state !== 'string' || typeof record.verifier !== 'string') throw new Error();
+    pending = value as Pending;
+  } catch { throw new CognitoSignInFailure('CALLBACK_STATE_INVALID'); }
   if (!BASE64URL.test(code) || !BASE64URL.test(state) || !BASE64URL.test(pending.state)
     || !BASE64URL.test(pending.verifier) || state !== pending.state
     || (pending.kind !== 'participant' && pending.kind !== 'display')

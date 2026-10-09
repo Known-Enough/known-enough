@@ -157,3 +157,74 @@ describe('KE11 Cognito browser client', () => {
   });
 
 });
+
+
+describe('stored Cognito callback record validation', () => {
+  const pendingKey = 'known-enough-cognito-pending';
+  const savedKey = 'known-enough-cognito-session';
+  const pending = () => ({ state: 'fixture_state', verifier: 'fixture_verifier', kind: 'participant', createdAt: Date.now() });
+  const callback = () => place('?code=abc&state=fixture_state');
+  const history = () => ({ state: null, replaceState: vi.fn() }) as unknown as History;
+
+  it('rejects malformed JSON record shapes with a finite failure and consumes the callback once', async () => {
+    for (const value of [null, false, true, 0, 'private-record-sentinel', [], {}]) {
+      const storage = new MemoryStorage(); const h = history(); const fetcher = vi.fn();
+      storage.setItem(pendingKey, JSON.stringify(value));
+      await expect(finishCognitoSignIn(config, storage, callback(), h, fetcher))
+        .rejects.toMatchObject({ name: 'CognitoSignInFailure', code: 'CALLBACK_STATE_INVALID', message: 'Sign-in could not be completed. Start again.' });
+      expect(storage.getItem(pendingKey)).toBeNull(); expect(storage.getItem(savedKey)).toBeNull();
+      expect(fetcher).not.toHaveBeenCalled(); expect(h.replaceState).toHaveBeenCalledWith(null, '', '/');
+      await expect(finishCognitoSignIn(config, storage, callback(), h, fetcher)).rejects.toMatchObject({ code: 'CALLBACK_INCOMPLETE' });
+      expect(fetcher).not.toHaveBeenCalled();
+    }
+  });
+
+  it('rejects non-string verifiers before exchange without coercing them into a saved session', async () => {
+    for (const verifier of [null, false, true, 0, 123, [], ['fixture_verifier'], {}, ['one', 'two']]) {
+      const storage = new MemoryStorage(); const fetcher = vi.fn(async () => Response.json({ token_type: 'Bearer', access_token: jwt, expires_in: 300 }));
+      storage.setItem(pendingKey, JSON.stringify({ ...pending(), verifier }));
+      await expect(finishCognitoSignIn(config, storage, callback(), history(), fetcher)).rejects.toMatchObject({ code: 'CALLBACK_STATE_INVALID' });
+      expect(fetcher).not.toHaveBeenCalled(); expect(storage.getItem(pendingKey)).toBeNull(); expect(storage.getItem(savedKey)).toBeNull();
+    }
+  });
+
+  it('rejects malformed state, kind and timestamp fields before token exchange', async () => {
+    for (const patch of [{ state: null }, { state: ['fixture_state'] }, { state: 123 }, { state: false },
+      { kind: 'operator' }, { kind: ['participant'] }, { createdAt: String(Date.now()) },
+      { createdAt: null }, { createdAt: Date.now() - 6 * 60_000 }, { createdAt: Date.now() + 60_000 }]) {
+      const storage = new MemoryStorage(); const fetcher = vi.fn(); storage.setItem(pendingKey, JSON.stringify({ ...pending(), ...patch }));
+      await expect(finishCognitoSignIn(config, storage, callback(), history(), fetcher)).rejects.toMatchObject({ code: 'CALLBACK_STATE_INVALID' });
+      expect(fetcher).not.toHaveBeenCalled(); expect(storage.getItem(pendingKey)).toBeNull(); expect(storage.getItem(savedKey)).toBeNull();
+    }
+  });
+
+  it('malformed pending records cannot overwrite an existing session or expose their contents', async () => {
+    for (const value of [null, { ...pending(), verifier: [123] }]) {
+      const storage = new MemoryStorage(); storage.setItem(savedKey, JSON.stringify(session)); storage.setItem(pendingKey, JSON.stringify(value));
+      const fetcher = vi.fn(async () => Response.json({ token_type: 'Bearer', access_token: 'other.payload.signature', expires_in: 300 }));
+      let failure: unknown;
+      try { await finishCognitoSignIn(config, storage, callback(), history(), fetcher); } catch (error) { failure = error; }
+      expect(failure).toMatchObject({ code: 'CALLBACK_STATE_INVALID' });
+      expect(JSON.stringify(failure)).not.toContain('fixture_verifier');
+      expect(storage.getItem(savedKey)).toBe(JSON.stringify(session)); expect(fetcher).not.toHaveBeenCalled();
+    }
+  });
+
+  it('valid participant and display records retain the exact verifier and one-time token exchange', async () => {
+    for (const kind of ['participant', 'display'] as const) {
+      const storage = new MemoryStorage(); storage.setItem(pendingKey, JSON.stringify({ ...pending(), kind, extra: 'ignored-fixture' }));
+      const fetcher = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        const body = new URLSearchParams(init?.body as string);
+        expect(body.get('code_verifier')).toBe('fixture_verifier'); expect(body.get('state')).toBeNull();
+        expect(body.get('client_id')).toBe(kind === 'participant' ? 'participant-client' : 'display-client');
+        expect(body.get('grant_type')).toBe('authorization_code'); expect(body.get('code')).toBe('abc');
+        return Response.json({ token_type: 'Bearer', access_token: jwt, expires_in: 300 });
+      });
+      const result = await finishCognitoSignIn(config, storage, callback(), history(), fetcher);
+      expect(result).toMatchObject({ kind, accessToken: jwt }); expect(readCognitoSession(storage)).toEqual(result);
+      expect(fetcher).toHaveBeenCalledOnce(); expect(storage.getItem(pendingKey)).toBeNull();
+      await expect(finishCognitoSignIn(config, storage, callback(), history(), fetcher)).rejects.toMatchObject({ code: 'CALLBACK_INCOMPLETE' });
+      expect(fetcher).toHaveBeenCalledOnce();
+    }
+  });
+});

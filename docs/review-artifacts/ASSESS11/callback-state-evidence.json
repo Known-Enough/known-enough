@@ -1,6 +1,36 @@
 {
   "run": "RUN180",
-  "stage": "CLAIMED",
+  "claim": {
+    "run": "RUN180",
+    "stage": "CLAIMED",
+    "scope": {
+      "source": "cd7ce010008aa887996a0af1eeba0979fa6be587",
+      "code": [
+        "apps/web/src/cognito-session.ts",
+        "apps/web/src/cognito-session.test.ts"
+      ],
+      "docs": [
+        "docs/tasks/active/live-testing/ASSESS11/ticket.md",
+        "docs/task-board.md",
+        "docs/claim-log.md",
+        "docs/work-log-B.md",
+        "docs/handoff-B.md",
+        "docs/b-next-task-handoff.md",
+        "docs/monitor-log.md",
+        "docs/review-artifacts/ASSESS11/callback-state-integrity.md",
+        "docs/review-artifacts/ASSESS11/callback-state-evidence.json"
+      ]
+    },
+    "reproduction": {
+      "start": "2026-10-09T14:16:37.955350+00:00",
+      "end": "2026-10-09T14:16:38.080327+00:00",
+      "exit": 0,
+      "stdout": "{\"results\":[{\"name\":\"null\",\"calls\":0,\"error\":{\"name\":\"TypeError\",\"message\":\"Cannot read properties of null (reading 'state')\"},\"pendingConsumed\":true,\"sessionStored\":false},{\"name\":\"array-verifier\",\"calls\":1,\"posted\":\"synthetic_verifier\",\"pendingConsumed\":true,\"sessionStored\":true},{\"name\":\"numeric-verifier\",\"calls\":1,\"posted\":\"123\",\"pendingConsumed\":true,\"sessionStored\":true}],\"providerRequests\":0}\n",
+      "stderr": "(node:2380521) ExperimentalWarning: Transform Types is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+    },
+    "protectedHashes": 949,
+    "managedPrimaryProof": "UNKNOWN"
+  },
   "scope": {
     "source": "cd7ce010008aa887996a0af1eeba0979fa6be587",
     "code": [
@@ -26,6 +56,105 @@
     "stdout": "{\"results\":[{\"name\":\"null\",\"calls\":0,\"error\":{\"name\":\"TypeError\",\"message\":\"Cannot read properties of null (reading 'state')\"},\"pendingConsumed\":true,\"sessionStored\":false},{\"name\":\"array-verifier\",\"calls\":1,\"posted\":\"synthetic_verifier\",\"pendingConsumed\":true,\"sessionStored\":true},{\"name\":\"numeric-verifier\",\"calls\":1,\"posted\":\"123\",\"pendingConsumed\":true,\"sessionStored\":true}],\"providerRequests\":0}\n",
     "stderr": "(node:2380521) ExperimentalWarning: Transform Types is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
   },
+  "checks": {
+    "red": {
+      "label": "red",
+      "command": [
+        "npm",
+        "exec",
+        "--",
+        "vitest",
+        "run",
+        "apps/web/src/cognito-session.test.ts"
+      ],
+      "start": "2026-10-09T14:20:24.521668+00:00",
+      "end": "2026-10-09T14:20:25.975201+00:00",
+      "exit": 1,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {}
+    },
+    "focused": {
+      "label": "focused",
+      "command": [
+        "npm",
+        "exec",
+        "--",
+        "vitest",
+        "run",
+        "apps/web/src/cognito-session.test.ts"
+      ],
+      "start": "2026-10-09T14:20:59.628275+00:00",
+      "end": "2026-10-09T14:21:00.410576+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "apps/web/src/cognito-session.ts": "b1d2eae00b1ac78349e77b0ba419561e360e4da7850670cb90656fb56547de49",
+        "apps/web/src/cognito-session.test.ts": "ac19d09f5ef4582fff6065a967d1e20bcc5c886e9dfeb19d584009e9edf129f2"
+      }
+    },
+    "full": {
+      "label": "full",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-09T14:21:10.376344+00:00",
+      "end": "2026-10-09T14:24:40.083879+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "apps/web/src/cognito-session.ts": "b1d2eae00b1ac78349e77b0ba419561e360e4da7850670cb90656fb56547de49",
+        "apps/web/src/cognito-session.test.ts": "ac19d09f5ef4582fff6065a967d1e20bcc5c886e9dfeb19d584009e9edf129f2"
+      }
+    }
+  },
+  "counts": {
+    "red": {
+      "tests": 15,
+      "pass": 12,
+      "fail": 3
+    },
+    "focused": {
+      "tests": 15,
+      "pass": 15,
+      "fail": 0
+    },
+    "full": {
+      "applicationPassed": 1403,
+      "existingOptionalSkipped": 2,
+      "hostedPassed": 1,
+      "browserPassed": 64,
+      "references": 7,
+      "planning": 15,
+      "boundaries": 414
+    },
+    "localNative": "NOT_RUN_UNCHANGED_OPERATIONS_SOURCE"
+  },
+  "versions": {
+    "start": "2026-10-09T14:21:44.322330+00:00",
+    "end": "2026-10-09T14:21:44.415009+00:00",
+    "versions": {
+      "node": "v24.21.0",
+      "npm": "11.19.0"
+    }
+  },
+  "selfInspection": {
+    "observed": "2026-10-09T14:20:59.573806+00:00",
+    "outsidePendingParse": "EXACT",
+    "sourceHashes": {
+      "apps/web/src/cognito-session.ts": "b1d2eae00b1ac78349e77b0ba419561e360e4da7850670cb90656fb56547de49",
+      "apps/web/src/cognito-session.test.ts": "ac19d09f5ef4582fff6065a967d1e20bcc5c886e9dfeb19d584009e9edf129f2"
+    }
+  },
+  "sourceHashes": {
+    "apps/web/src/cognito-session.ts": "b1d2eae00b1ac78349e77b0ba419561e360e4da7850670cb90656fb56547de49",
+    "apps/web/src/cognito-session.test.ts": "ac19d09f5ef4582fff6065a967d1e20bcc5c886e9dfeb19d584009e9edf129f2"
+  },
   "protectedHashes": 949,
+  "localNative": "NOT_RUN_UNCHANGED_OPERATIONS_SOURCE",
   "managedPrimaryProof": "UNKNOWN"
 }
