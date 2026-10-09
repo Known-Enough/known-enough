@@ -8,6 +8,7 @@ readback does not establish effective permissions or managed recovery success.
 import argparse
 import fcntl
 import importlib.util
+import ipaddress
 import json
 import os
 from pathlib import Path
@@ -16,6 +17,7 @@ import stat
 import subprocess
 import time
 import uuid
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location('ops_inventory', ROOT / 'scripts/operations/cloudshell-inventory.py')
@@ -37,6 +39,46 @@ class Rejected(Exception):
 def require(condition, code):
     if not condition:
         raise Rejected(code)
+
+
+def credential_environment():
+    # Keep the session's container provider, without profile/role redirection.
+    env = {k: v for k, v in os.environ.items() if not k.startswith('AWS_ENDPOINT_URL')
+           and k not in ('AWS_PROFILE', 'AWS_DEFAULT_PROFILE', 'AWS_ROLE_ARN',
+                         'AWS_WEB_IDENTITY_TOKEN_FILE')}
+    for key in ('AWS_CONTAINER_CREDENTIALS_FULL_URI', 'AWS_CONTAINER_CREDENTIALS_RELATIVE_URI'):
+        uri = env.get(key)
+        if not uri:
+            continue
+        require(len(uri) <= 4096 and not any(c.isspace() or ord(c) < 32 for c in uri)
+                and '\\' not in uri, 'CREDENTIAL_PROVIDER_REJECTED')
+        try:
+            parsed = urlsplit(uri)
+            if key.endswith('RELATIVE_URI'):
+                valid = uri.startswith('/') and not uri.startswith('//') and not parsed.scheme and not parsed.netloc
+            else:
+                host = parsed.hostname
+                try:
+                    loopback = ipaddress.ip_address(host).is_loopback
+                except ValueError:
+                    loopback = False
+                valid = (parsed.scheme in ('http', 'https') and (loopback or host in (
+                    'localhost', '169.254.170.2', '169.254.170.23', 'fd00:ec2::23'))
+                    and parsed.username is None and parsed.password is None
+                    and (parsed.port is None or 0 < parsed.port <= 65535))
+            require(valid and not parsed.fragment, 'CREDENTIAL_PROVIDER_REJECTED')
+        except ValueError:
+            raise Rejected('CREDENTIAL_PROVIDER_REJECTED') from None
+    if env.get('AWS_CONTAINER_CREDENTIALS_FULL_URI') or env.get('AWS_CONTAINER_CREDENTIALS_RELATIVE_URI'):
+        token = env.get('AWS_CONTAINER_AUTHORIZATION_TOKEN', '')
+        token_file = env.get('AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE', '')
+        require(len(token) <= 4096 and not any(ord(c) < 32 for c in token)
+                and (not token_file or (os.path.isabs(token_file)
+                     and not any(ord(c) < 32 for c in token_file))), 'CREDENTIAL_PROVIDER_REJECTED')
+    env.update(AWS_MAX_ATTEMPTS='1', AWS_RETRY_MODE='standard', AWS_PAGER='',
+               AWS_REGION=REGION, AWS_DEFAULT_REGION=REGION, AWS_CONFIG_FILE='/dev/null',
+               AWS_SHARED_CREDENTIALS_FILE='/dev/null', AWS_EC2_METADATA_DISABLED='true')
+    return env
 
 
 def encoded(value):
@@ -122,14 +164,8 @@ class Aws:
     def call(self, args, mutation=False, missing=None, missing_stack=False):
         remaining = 180 - (self.clock() - self.start)
         require(self.calls < 32 and remaining > 0, 'REQUEST_BUDGET_EXHAUSTED')
+        env = credential_environment()
         self.calls += 1
-        env = {k: v for k, v in os.environ.items() if not k.startswith('AWS_ENDPOINT_URL')
-               and k not in ('AWS_PROFILE', 'AWS_DEFAULT_PROFILE', 'AWS_ROLE_ARN',
-                             'AWS_WEB_IDENTITY_TOKEN_FILE', 'AWS_CONTAINER_CREDENTIALS_FULL_URI',
-                             'AWS_CONTAINER_CREDENTIALS_RELATIVE_URI')}
-        env.update(AWS_MAX_ATTEMPTS='1', AWS_RETRY_MODE='standard', AWS_PAGER='',
-                   AWS_REGION=REGION, AWS_DEFAULT_REGION=REGION, AWS_CONFIG_FILE='/dev/null',
-                   AWS_SHARED_CREDENTIALS_FILE='/dev/null', AWS_EC2_METADATA_DISABLED='true')
         command = ['aws', *args, '--region', REGION, '--output', 'json', '--no-cli-pager',
                    '--no-paginate', '--cli-connect-timeout', '5', '--cli-read-timeout', '8']
         self.mutations += int(mutation)
@@ -148,9 +184,11 @@ class Aws:
         error = (self.folder / f'{self.calls}.err').read_bytes()
         require(max(len(raw), len(error)) <= inventory.CAPTURE_LIMIT, 'AWS_RESPONSE_LIMIT')
         if result.returncode:
+            if re.search(rb'(?m)^(?:botocore\.exceptions\.NoCredentialsError: )?Unable to locate credentials(?:[.\r\n]|$)', error):
+                raise Rejected('NO_CREDENTIALS')
             match = re.search(rb'An error occurred \(([A-Za-z0-9]+)\)', error)
             code = match[1].decode() if match else None
-            if code == missing and not missing_stack:
+            if missing is not None and code == missing and not missing_stack:
                 return None
             if missing_stack and code == 'ValidationError' and re.search(
                     rb': Stack with id ' + re.escape(STACK.encode()) + rb' does not exist\s*$', error):

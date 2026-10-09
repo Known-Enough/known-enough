@@ -474,6 +474,161 @@ class CreateTests(unittest.TestCase):
         self.assertTrue(all(path.stat().st_mode & 0o777 == 0o600 for path in diagnostics))
         self.state = module.State(self.home / '.private' / 'state', self.home)
 
+    def test_cloudshell_provider_survives_prepare_execute_and_uncertain_resume(self):
+        settings = dict(AWS_CONTAINER_CREDENTIALS_FULL_URI='http://localhost:1338/synthetic',
+                        AWS_CONTAINER_AUTHORIZATION_TOKEN='PRIVATE_SYNTHETIC_TOKEN',
+                        AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE='/synthetic/private/token')
+        captured = []
+        def executor(command, **options):
+            captured.append(options['env'])
+            if not options['env'].get('AWS_CONTAINER_CREDENTIALS_FULL_URI'):
+                options['stderr'].write(b'Unable to locate credentials.\n')
+                return subprocess.CompletedProcess(command, 253)
+            return self.fake(command, **options)
+        self.installer.aws.executor = executor
+        with patch.dict(os.environ, settings, clear=True):
+            review = self.prepared()
+            self.installer.aws = module.Aws(self.state, executor)
+            self.fake.lost.add('execute-change-set')
+            self.reject(lambda: self.installer.execute(review), 'AWS_RESPONSE_UNCERTAIN')
+            self.installer.aws = module.Aws(self.state, executor)
+            self.assertEqual(self.installer.resume(), ('INSTALL_PENDING', None))
+            self.fake.installed = True
+            self.installer.aws = module.Aws(self.state, executor)
+            self.assertEqual(self.installer.resume(), ('CONFIGURATION_MATCH', None))
+        self.assertEqual(len(self.fake.mutations()), 2)
+        self.assertEqual([c[2] for c in self.fake.mutations()], ['create-change-set', 'execute-change-set'])
+        self.assertTrue(captured)
+        for env in captured:
+            self.assertTrue(all(env[k] == v for k, v in settings.items()))
+            self.assertEqual(env['AWS_EC2_METADATA_DISABLED'], 'true')
+            self.assertEqual(env['AWS_MAX_ATTEMPTS'], '1')
+        saved = (self.state.folder / 'configuration.json').read_text()
+        self.assertNotIn('PRIVATE_SYNTHETIC_TOKEN', saved)
+        self.assertNotIn('http://localhost', saved)
+
+    def test_relative_container_provider_reaches_identity_and_preview(self):
+        settings = dict(AWS_CONTAINER_CREDENTIALS_RELATIVE_URI='/synthetic-credentials?version=1')
+        original = self.fake
+        def executor(command, **options):
+            self.assertEqual(options['env'].get('AWS_CONTAINER_CREDENTIALS_RELATIVE_URI'), settings['AWS_CONTAINER_CREDENTIALS_RELATIVE_URI'])
+            return original(command, **options)
+        self.installer.aws.executor = executor
+        with patch.dict(os.environ, settings, clear=True):
+            self.assertEqual(self.installer.prepare(), ('PREVIEW_SUBMITTED', None))
+        self.assertEqual(len(self.fake.mutations()), 1)
+
+    def test_supported_local_provider_hosts_preserved_verbatim(self):
+        for uri in ['http://localhost:1338/path?version=1', 'http://127.0.0.1:1338/path',
+                    'http://127.2.3.4/path', 'http://[::1]:1338/path',
+                    'http://169.254.170.2/path', 'http://169.254.170.23/path',
+                    'http://[fd00:ec2::23]/path', 'https://localhost/path']:
+            with self.subTest(uri=uri), patch.dict(os.environ, {'AWS_CONTAINER_CREDENTIALS_FULL_URI': uri}, clear=True):
+                def executor(command, **options):
+                    self.assertEqual(options['env'].get('AWS_CONTAINER_CREDENTIALS_FULL_URI'), uri)
+                    return self.fake(command, **options)
+                self.installer.aws.executor = executor
+                self.installer.identity()
+        self.assertEqual(self.fake.mutations(), [])
+
+    def test_arbitrary_or_malformed_provider_stops_before_cli_and_intent(self):
+        bad = [{'AWS_CONTAINER_CREDENTIALS_FULL_URI': uri} for uri in [
+            'https://example.invalid/credentials', 'http://example.invalid/credentials',
+            'http://localhost.example.invalid/credentials', 'file:///private/credentials',
+            'http://user:secret@localhost/path', 'http://localhost:70000/path',
+            'http://localhost/path#fragment', 'http://localhost/\nprivate',
+            'http://[bad]/path', 'http://169.254.169.254/latest/meta-data/credentials']]
+        bad += [{'AWS_CONTAINER_CREDENTIALS_RELATIVE_URI': uri} for uri in [
+            '//example.invalid/path', 'https://example.invalid/path', 'relative/path', '/path#fragment', '/path\nprivate']]
+        bad += [dict(AWS_CONTAINER_CREDENTIALS_FULL_URI='http://localhost/path', AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE='relative/token'),
+                dict(AWS_CONTAINER_CREDENTIALS_FULL_URI='http://localhost/path', AWS_CONTAINER_AUTHORIZATION_TOKEN='private\nheader')]
+        for settings in bad:
+            with self.subTest(keys=list(settings)), patch.dict(os.environ, settings, clear=True):
+                self.installer.aws = module.Aws(self.state, self.fake)
+                self.reject(self.installer.prepare, 'CREDENTIAL_PROVIDER_REJECTED')
+                self.assertEqual(self.installer.aws.calls, 0)
+                self.assertIsNone(self.state.load('create.intent.json'))
+        self.assertEqual(self.fake.calls, [])
+
+    def test_profile_web_identity_and_service_endpoints_stay_disabled(self):
+        settings = dict(AWS_CONTAINER_CREDENTIALS_FULL_URI='http://localhost/path',
+                        AWS_PROFILE='private-profile', AWS_DEFAULT_PROFILE='private-profile',
+                        AWS_ROLE_ARN='private-role', AWS_WEB_IDENTITY_TOKEN_FILE='/private/token',
+                        AWS_ENDPOINT_URL='https://example.invalid', AWS_ENDPOINT_URL_STS='https://example.invalid',
+                        AWS_CONFIG_FILE='/private/config', AWS_SHARED_CREDENTIALS_FILE='/private/credentials',
+                        AWS_EC2_METADATA_DISABLED='false', AWS_REGION='eu-west-1', AWS_MAX_ATTEMPTS='9')
+        def executor(command, **options):
+            env = options['env']
+            for key in ['AWS_PROFILE', 'AWS_DEFAULT_PROFILE', 'AWS_ROLE_ARN', 'AWS_WEB_IDENTITY_TOKEN_FILE', 'AWS_ENDPOINT_URL', 'AWS_ENDPOINT_URL_STS']:
+                self.assertNotIn(key, env)
+            self.assertEqual(env['AWS_CONTAINER_CREDENTIALS_FULL_URI'], settings['AWS_CONTAINER_CREDENTIALS_FULL_URI'])
+            self.assertEqual(env['AWS_CONFIG_FILE'], '/dev/null')
+            self.assertEqual(env['AWS_SHARED_CREDENTIALS_FILE'], '/dev/null')
+            self.assertEqual(env['AWS_EC2_METADATA_DISABLED'], 'true')
+            return self.fake(command, **options)
+        self.installer.aws.executor = executor
+        with patch.dict(os.environ, settings, clear=True):
+            self.installer.identity()
+        self.assertEqual(self.fake.mutations(), [])
+
+    def test_missing_credentials_and_unrecognized_errors_are_not_absence(self):
+        for diagnostic, code in [(b'Unable to locate credentials. Private detail\n', 'NO_CREDENTIALS'),
+                                  (b'botocore.exceptions.NoCredentialsError: Unable to locate credentials\n', 'NO_CREDENTIALS'),
+                                  (b'PRIVATE_UNKNOWN_ERROR\n', 'AWS_REQUEST_FAILED')]:
+            def executor(command, **options):
+                options['stderr'].write(diagnostic)
+                return subprocess.CompletedProcess(command, 253)
+            self.installer.aws = module.Aws(self.state, executor)
+            with patch.dict(os.environ, {}, clear=True):
+                self.reject(self.installer.prepare, code)
+            self.assertIsNone(self.state.load('create.intent.json'))
+            self.assertEqual(self.installer.aws.mutations, 0)
+        self.fake.overrides['get-caller-identity'] = ('AccessDenied', 'PRIVATE_DENIAL')
+        self.installer.aws = module.Aws(self.state, self.fake)
+        with patch.dict(os.environ, {}, clear=True):
+            self.reject(self.installer.prepare, 'AccessDenied')
+        self.assertEqual(self.fake.mutations(), [])
+
+    def test_provider_wrong_account_or_malformed_identity_cannot_submit(self):
+        for value in [dict(Account='111111111111', Arn=f'arn:aws:iam::{module.ACCOUNT}:root'),
+                      dict(Account=module.ACCOUNT, Arn=None), dict(Account=module.ACCOUNT, Arn=7),
+                      dict(Account=module.ACCOUNT, Arn='not-an-arn'), dict(Arn=f'arn:aws:iam::{module.ACCOUNT}:root')]:
+            self.fake.overrides['get-caller-identity'] = value
+            def executor(command, **options):
+                self.assertEqual(options['env'].get('AWS_CONTAINER_CREDENTIALS_FULL_URI'), 'http://localhost/path')
+                return self.fake(command, **options)
+            self.installer.aws = module.Aws(self.state, executor)
+            with patch.dict(os.environ, {'AWS_CONTAINER_CREDENTIALS_FULL_URI': 'http://localhost/path'}, clear=True):
+                self.reject(self.installer.prepare, 'IDENTITY_REJECTED')
+            self.assertEqual(self.installer.aws.calls, 1)
+            self.assertIsNone(self.state.load('create.intent.json'))
+        self.assertEqual(self.fake.mutations(), [])
+
+    def test_no_credentials_cli_summary_is_finite_and_private(self):
+        self.state.close()
+        fresh = self.home / '.private' / 'credentials-cli'
+        def executor(command, **options):
+            options['stderr'].write(b'Unable to locate credentials. PRIVATE_SYNTHETIC_TOKEN http://localhost/private\n')
+            return subprocess.CompletedProcess(command, 253)
+        original_aws = module.Aws
+        output = io.StringIO()
+        with patch.dict(os.environ, {'AWS_CONTAINER_CREDENTIALS_FULL_URI': 'http://localhost/path'}, clear=True), \
+                patch.object(module, 'verify_checkout'), patch.object(module.Path, 'home', return_value=self.home), \
+                patch.object(module, 'Aws', side_effect=lambda state: original_aws(state, executor)), \
+                patch.object(sys, 'argv', ['create', 'prepare', '--source', SOURCE, '--state', str(fresh)]), \
+                contextlib.redirect_stdout(output):
+            self.assertEqual(module.main(), 1)
+        value = json.loads(output.getvalue())
+        self.assertEqual(value['classification'], 'NO_CREDENTIALS')
+        self.assertEqual((value['requests'], value['mutations']), (1, 0))
+        self.assertNotIn('PRIVATE_SYNTHETIC_TOKEN', output.getvalue())
+        self.assertNotIn('http://localhost', output.getvalue())
+        self.assertFalse((fresh / 'create.intent.json').exists())
+        private = list(fresh.glob('run-*/*.err'))
+        self.assertTrue(any(b'PRIVATE_SYNTHETIC_TOKEN' in f.read_bytes() for f in private))
+        self.assertTrue(all(f.stat().st_mode & 0o777 == 0o600 for f in private))
+        self.state = module.State(self.home / '.private' / 'state', self.home)
+
     def test_changed_source_or_template_preserves_original_state(self):
         original = (self.state.folder / 'plan.json').read_bytes()
         self.reject(lambda: module.Installer(self.state, 'b' * 40, TEMPLATE, self.installer.aws), 'STATE_CONFLICT')
