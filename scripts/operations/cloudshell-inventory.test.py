@@ -64,9 +64,9 @@ class InventoryTests(unittest.TestCase):
                 self.assertEqual(args[args.index('--expected-bucket-owner') + 1], module.ACCOUNT)
         self.assertTrue(all(p.stat().st_mode & 0o077 == 0 for p in self.folder.glob('*.json')))
 
-    def test_wrong_account_root_foreign_arn_and_missing_identity_stop_before_inventory(self):
+    def test_wrong_account_foreign_root_arn_and_missing_identity_stop_before_inventory(self):
         for identity in ({'Account': '000000000000', 'Arn': 'private'},
-                         {'Account': module.ACCOUNT, 'Arn': f'arn:aws:iam::{module.ACCOUNT}:root'},
+                         {'Account': module.ACCOUNT, 'Arn': 'arn:aws:iam::000000000000:root'},
                          {'Account': module.ACCOUNT, 'Arn': 'arn:aws:sts::000000000000:assumed-role/Own/x'},
                          {'Account': module.ACCOUNT}, (1, 'An error occurred (ExpiredToken): ' + PRIVATE)):
             with self.subTest(identity=identity), tempfile.TemporaryDirectory() as folder:
@@ -75,6 +75,80 @@ class InventoryTests(unittest.TestCase):
                 self.assertEqual(report['identity'], 'REJECTED')
                 self.assertEqual(len(self.calls), 1)
                 self.assertNotIn(PRIVATE, json.dumps(report))
+
+    def test_same_account_root_collects_bounded_metadata_without_principal_or_permission_claims(self):
+        arn = f'arn:aws:iam::{module.ACCOUNT}:root'
+        report = module.Inventory(self.folder, 'a' * 40, self.executor({
+            'get-caller-identity': {'Account': module.ACCOUNT, 'Arn': arn, 'UserId': PRIVATE}})).collect()
+        self.assertEqual(report['identity'], 'VERIFIED_ACCOUNT_ONLY')
+        self.assertGreater(len(self.calls), 1)
+        self.assertEqual(report['requests'], len(self.calls))
+        self.assertLessEqual(report['requests'], 64)
+        self.assertEqual(report['mutations'], 0)
+        self.assertEqual(report['result'], 'INVENTORY_REQUIRED')
+        self.assertEqual(report['setupCapabilities'], 'UNKNOWN')
+        self.assertEqual(report['effectivePermissions'], 'UNKNOWN')
+        self.assertEqual(report['managedProof'], 'NOT_EXECUTED')
+        self.assertIn(PRIVATE, (self.folder / 'identity.json').read_text())
+        self.assertIn(PRIVATE, (self.folder / 'primary-runtime.json').read_text())
+        self.assertNotIn(PRIVATE, json.dumps(report))
+        self.assertNotIn(arn, json.dumps(report))
+        for args, options in self.calls:
+            self.assertRegex(args[2], r'^(get-|describe-|list-)')
+            self.assertNotIn('get-secret-value', args)
+            self.assertNotIn('list-users', args)
+            self.assertIn('--no-paginate', args)
+            self.assertEqual(options['env']['AWS_MAX_ATTEMPTS'], '1')
+            self.assertLessEqual(options['timeout'], 10)
+        self.assertTrue(all(p.stat().st_mode & 0o077 == 0 for p in self.folder.glob('*.json')))
+
+    def test_existing_user_and_assumed_role_continue_account_only_metadata_collection(self):
+        for arn in (f'arn:aws:iam::{module.ACCOUNT}:user/OwnSetupUser',
+                    f'arn:aws:sts::{module.ACCOUNT}:assumed-role/OwnSetupRole/private-session'):
+            with self.subTest(arn=arn), tempfile.TemporaryDirectory() as folder:
+                self.calls.clear()
+                report = module.Inventory(Path(folder), 'a' * 40, self.executor({
+                    'get-caller-identity': {'Account': module.ACCOUNT, 'Arn': arn, 'UserId': PRIVATE}})).collect()
+                self.assertEqual(report['identity'], 'VERIFIED_ACCOUNT_ONLY')
+                self.assertGreater(len(self.calls), 1)
+                self.assertEqual(report['mutations'], 0)
+                self.assertEqual(report['effectivePermissions'], 'UNKNOWN')
+                self.assertNotIn(PRIVATE, json.dumps(report))
+                self.assertNotIn(arn, json.dumps(report))
+
+    def test_root_requires_exact_account_and_arn_before_resource_reads(self):
+        own = f'arn:aws:iam::{module.ACCOUNT}:root'
+        bad = [{'Account': '000000000000', 'Arn': own}]
+        bad.extend({'Account': module.ACCOUNT, 'Arn': arn} for arn in (
+            'arn:aws:iam::000000000000:root', own + '/', own + '/user', own + ' ',
+            ' ' + own, own.replace('arn:aws:', 'arn:aws-cn:'),
+            own.replace('iam::', 'sts::'), own.replace('iam::', 'iam:us-east-1:'), None, 1))
+        for identity in bad:
+            with self.subTest(identity=identity), tempfile.TemporaryDirectory() as folder:
+                self.calls.clear()
+                report = module.Inventory(Path(folder), 'a' * 40, self.executor({
+                    'get-caller-identity': identity})).collect()
+                self.assertEqual(report['identity'], 'REJECTED')
+                self.assertEqual(len(self.calls), 1)
+                self.assertEqual(report['mutations'], 0)
+                self.assertEqual(report['configuration'], {})
+
+    def test_root_metadata_denials_remain_unknown_skip_dependents_and_publish_no_private_details(self):
+        error = (1, 'An error occurred (AccessDenied): ' + PRIVATE)
+        patch = {name: error for name in ('describe-stacks', 'get-role', 'describe-table', 'get-bucket-versioning')}
+        patch['get-caller-identity'] = {'Account': module.ACCOUNT,
+                                     'Arn': f'arn:aws:iam::{module.ACCOUNT}:root', 'UserId': PRIVATE}
+        report = module.Inventory(self.folder, 'a' * 40, self.executor(patch)).collect()
+        self.assertEqual(report['identity'], 'VERIFIED_ACCOUNT_ONLY')
+        denied = [row for row in report['reads'] if row['code'] == 'AccessDenied']
+        self.assertGreater(len(denied), 0)
+        self.assertTrue(all(row['status'] == 'UNKNOWN' for row in denied))
+        self.assertFalse(any(args[2] in ('get-template', 'list-role-policies', 'describe-continuous-backups')
+                             for args, _ in self.calls))
+        self.assertEqual(report['mutations'], 0)
+        self.assertEqual(report['setupCapabilities'], 'UNKNOWN')
+        self.assertEqual(report['effectivePermissions'], 'UNKNOWN')
+        self.assertNotIn(PRIVATE, json.dumps(report))
 
     def test_denied_parents_skip_dependents_and_are_unknown_not_absent(self):
         error = (1, 'An error occurred (AccessDenied): ' + PRIVATE)

@@ -130,7 +130,9 @@ class Inventory:
             r['identity'] = 'REJECTED'
             return r
         arn = identity['Arn']
-        if not (re.fullmatch(f'arn:aws:sts::{ACCOUNT}:assumed-role/[^/]+/[^/]+', arn)
+        # Account verification permits metadata reads only, including the exact root ARN.
+        if not (arn == f'arn:aws:iam::{ACCOUNT}:root'
+                or re.fullmatch(f'arn:aws:sts::{ACCOUNT}:assumed-role/[^/]+/[^/]+', arn)
                 or re.fullmatch(f'arn:aws:iam::{ACCOUNT}:user/[A-Za-z0-9+=,.@_/-]+', arn)):
             r['identity'] = 'REJECTED'
             return r
