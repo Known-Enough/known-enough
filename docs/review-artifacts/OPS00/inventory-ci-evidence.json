@@ -1,0 +1,274 @@
+{
+  "schemaVersion": 1,
+  "execution": "RUN164",
+  "task": "OPS00",
+  "phase": "existing Python inventory regression suite in credential-free CI",
+  "scheduled": "2026-10-09T02:43:15.683Z",
+  "actualStart": "2026-10-09T02:43:50.444139+00:00",
+  "checkedHandoffAt": "2026-10-09T02:57:01.818702+00:00",
+  "account": "Battosai1806",
+  "actorId": 143764700,
+  "intake": {
+    "scheduled": "2026-10-09T02:43:15.683Z",
+    "actualStart": "2026-10-09T02:43:50.444139+00:00",
+    "initialHead": "943a45ae6b48d1f2a9aab4a72658db63f9cc7d5a",
+    "branch": "main",
+    "origin": "https://github.com/Known-Enough/known-enough.git",
+    "status": "",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "fetchedHead": "943a45ae6b48d1f2a9aab4a72658db63f9cc7d5a",
+    "source": "943a45ae6b48d1f2a9aab4a72658db63f9cc7d5a",
+    "cleanEqual": true,
+    "jobs": [],
+    "observed": "2026-10-09T02:43:53.217298+00:00"
+  },
+  "claim": {
+    "at": "2026-10-09T02:46:28.417100+00:00",
+    "source": "943a45ae6b48d1f2a9aab4a72658db63f9cc7d5a",
+    "task": "OPS00",
+    "phase": "missing Python inventory coverage in credential-free CI"
+  },
+  "claimSync": {
+    "label": "claim",
+    "expectedRemote": "943a45ae6b48d1f2a9aab4a72658db63f9cc7d5a",
+    "sourceSha": "8e4458e26461aab54a4a071bf89d0a4d39555d69",
+    "observedEnd": "2026-10-09T02:47:03.664846+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 918
+  },
+  "sourceSync": {
+    "label": "source",
+    "expectedRemote": "8e4458e26461aab54a4a071bf89d0a4d39555d69",
+    "sourceSha": "95102961437ff5554b766a3dcea927d2aba15be2",
+    "observedEnd": "2026-10-09T02:51:12.658729+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 918
+  },
+  "scope": {
+    "source": "943a45ae6b48d1f2a9aab4a72658db63f9cc7d5a",
+    "docs": [
+      "docs/tasks/active/operations/OPS00/ticket.md",
+      "docs/task-board.md",
+      "docs/claim-log.md",
+      "docs/work-log-B.md",
+      "docs/handoff-B.md",
+      "docs/b-next-task-handoff.md",
+      "docs/monitor-log.md",
+      "docs/review-artifacts/OPS00/inventory-ci-coverage.md",
+      "docs/review-artifacts/OPS00/inventory-ci-evidence.json"
+    ],
+    "code": [
+      ".github/workflows/operations-verify.yml"
+    ],
+    "protectedCount": 918
+  },
+  "workflowDelta": {
+    "observed": "2026-10-09T02:47:26.068829+00:00",
+    "onlyDelta": "one Python version/existing12test step after source binding and before dependency install",
+    "originalSourceIdentityPermissionsConcurrencyActionsAndArtifacts": "UNCHANGED",
+    "noAwsCredentialsOrProvider": "PRESERVED",
+    "hash": {
+      ".github/workflows/operations-verify.yml": "09639cdee3641842877a94e1656541a5fce590638fde171fd00800f14046d30d"
+    }
+  },
+  "sourceHashes": {
+    ".github/workflows/operations-verify.yml": "09639cdee3641842877a94e1656541a5fce590638fde171fd00800f14046d30d"
+  },
+  "protectedManifestSha256": "98183f2203ebc179ec36b3c05159fbebb5b88e8d45e10a72bc7f06d3190f30ad",
+  "historicalReproduction": {
+    "start": "2026-10-09T02:45:17.414717+00:00",
+    "end": "2026-10-09T02:45:17.578146+00:00",
+    "exit": 1,
+    "originalHelper": "b4637cf1a5c5ae83540c816cc47199473b213a3c",
+    "tests": "current checked root tests from943a45a",
+    "pass": 10,
+    "fail": 2,
+    "actualAwsCalls": 0,
+    "purpose": "Existing suite catches historical root regression; currently omitted by CI"
+  },
+  "localChecks": {
+    "focused": {
+      "label": "focused",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/operations/cloudshell-inventory.test.py"
+      ],
+      "start": "2026-10-09T02:47:26.128636+00:00",
+      "end": "2026-10-09T02:47:26.328990+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        ".github/workflows/operations-verify.yml": "09639cdee3641842877a94e1656541a5fce590638fde171fd00800f14046d30d"
+      }
+    },
+    "native": {
+      "label": "native",
+      "command": [
+        "bash",
+        "-c",
+        "node --experimental-transform-types --test scripts/operations/*.test.mjs"
+      ],
+      "start": "2026-10-09T02:47:26.458639+00:00",
+      "end": "2026-10-09T02:47:30.335906+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        ".github/workflows/operations-verify.yml": "09639cdee3641842877a94e1656541a5fce590638fde171fd00800f14046d30d"
+      }
+    },
+    "full": {
+      "label": "full",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-09T02:47:26.466984+00:00",
+      "end": "2026-10-09T02:51:02.303626+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        ".github/workflows/operations-verify.yml": "09639cdee3641842877a94e1656541a5fce590638fde171fd00800f14046d30d"
+      }
+    }
+  },
+  "localCounts": {
+    "pythonInventory": 12,
+    "native": 174,
+    "application": 1398,
+    "optionalSkips": 2,
+    "hosted": 1,
+    "browser": 64,
+    "references": 7,
+    "planning": 15,
+    "boundaries": 414
+  },
+  "offlineVerification": {
+    "id": 37876567261,
+    "source": "95102961437ff5554b766a3dcea927d2aba15be2",
+    "actor": 143764700,
+    "path": ".github/workflows/operations-verify.yml",
+    "event": "workflow_dispatch",
+    "createdAt": "2026-10-09T02:51:43Z",
+    "updatedAt": "2026-10-09T02:56:06Z",
+    "observedAt": "2026-10-09T02:56:34.644590+00:00",
+    "conclusion": "success",
+    "nativePassed": 174,
+    "applicationPassed": 1398,
+    "browserPassed": 64,
+    "installation": "UNKNOWN",
+    "managedRecovery": "NOT_EXECUTED",
+    "artifactSha256": {
+      "operations-report.json": "7c156fd3f04d27622a300b78ef8170551b7e1d603fbdc822c625f3354465e965",
+      "partition-report.json": "3e0c5c120b87920c1d1367e48245bdcd9ae447260559e8e32c9df187f93cde78",
+      "retention-report.json": "d23e3d12830b5c3168e0e49b56dd24fc6cfdeea9e85bd548ceb7f8a8f21a1909",
+      "jobs-report.json": "958fdec2262eb2641290621bfae0c1123652b4922763e5dcf6e621d852a9d0b7",
+      "setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+      "partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+      "jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639"
+    },
+    "reports": {
+      "operations-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "95102961437ff5554b766a3dcea927d2aba15be2",
+        "templateHash": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "managedRecovery": "UNKNOWN",
+        "apply": "DISABLED"
+      },
+      "partition-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "95102961437ff5554b766a3dcea927d2aba15be2",
+        "templateHash": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "effectivePermissions": "UNKNOWN",
+        "migration": "NOT_EXECUTED",
+        "activation": "DISABLED",
+        "managedRecovery": "UNKNOWN"
+      },
+      "retention-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "95102961437ff5554b766a3dcea927d2aba15be2",
+        "preparationHash": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "realPersonPolicy": "UNAPPROVED",
+        "dataOperations": "NOT_EXECUTED",
+        "participantGrants": "NOT_GRANTED",
+        "managedProof": "UNKNOWN"
+      },
+      "jobs-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "95102961437ff5554b766a3dcea927d2aba15be2",
+        "preparationHash": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "providerCalls": "NOT_EXECUTED",
+        "managedRecovery": "UNKNOWN",
+        "participantConsent": "NOT_GRANTED",
+        "cleanup": "UNKNOWN"
+      }
+    },
+    "jobs": [
+      {
+        "id": 113646432755,
+        "name": "verify",
+        "conclusion": "success",
+        "started_at": "2026-10-09T02:51:47Z",
+        "completed_at": "2026-10-09T02:56:05Z"
+      }
+    ],
+    "inventoryPythonPassed": 12,
+    "pythonVersion": "3.12.3",
+    "inventoryStep": {
+      "name": "Run read-only CloudShell inventory regressions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-10-09T02:51:53Z",
+      "completed_at": "2026-10-09T02:51:53Z"
+    }
+  },
+  "coverageBefore": "Python12 tests LOCAL only; previous source-exact37874183694 did not execute them",
+  "coverageAfter": "Actual dedicated Python step SUCCESS; version/12tests/OK plus step ordering before full checks verified in remote logs/jobs",
+  "dataPlaneCodeAndTests": "UNCHANGED",
+  "rootCommandPackage": "UNCHANGED, sourcec2046b4; source-bound private state preserved",
+  "credentialsAndPermissions": "contents:read only; no id-token, AWS/provider/mail credentials or changes; B actor/main/source/event/concurrency gates preserved",
+  "installation": "UNKNOWN",
+  "apply": "INVENTORY_REQUIRED",
+  "managedRecovery": "NOT_EXECUTED",
+  "wholeTask": "BLOCKED/unclaimed after checked phase release",
+  "actualAwsCalls": 0,
+  "awsMutations": 0,
+  "providerCalls": 0,
+  "modelCalls": 0,
+  "emailCalls": 0,
+  "deployments": 0,
+  "participantChanges": "NOT_EXECUTED",
+  "billing": "UNMEASURED; no project provider/paid-model/mail starts",
+  "approvalDenials": "NONE_OBSERVED",
+  "reportingGaps": "NONE_OBSERVED; finished receipt/append-only monitor follow release",
+  "localDiagnostics": [
+    "Initial bounded multi-file intake output truncated; narrowed current rows/workflow plus required instruction hashes read.",
+    "Controlled originalb463 helper replay against current root suite:10PASS/2expectedFAIL; not a current production source failure."
+  ],
+  "nextAction": "A runs existing corrected root-compatible read-only block1 and returns sanitized summary; B reconciles before separately reviewed setup/effective/private-preservation/source-matched two-run managed proof and OPS01\u201303/FIN03",
+  "nominalNextWake": "2026-10-09T03:13:15.683Z",
+  "schedulerIdleGating": "UNKNOWN; existing30minute same-chat preferences/cadence unchanged"
+}
