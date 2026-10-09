@@ -335,5 +335,264 @@
       }
     },
     "checkedObserved": "2026-10-09T23:03:40.636582+00:00"
-  }
+  },
+  "secondManagedScopeAttempt": {
+    "id": 38002636624,
+    "source": "5cc00bf18f30ebf7c746385961fbc43076082307",
+    "actor": 143764700,
+    "event": "workflow_dispatch",
+    "conclusion": "failure",
+    "createdAt": "2026-10-09T23:05:17Z",
+    "updatedAt": "2026-10-09T23:05:47Z",
+    "observedAt": "2026-10-09T23:06:02.637374+00:00",
+    "jobs": [
+      {
+        "id": 114064091625,
+        "name": "scope",
+        "conclusion": "failure",
+        "startedAt": "2026-10-09T23:05:20Z",
+        "completedAt": "2026-10-09T23:05:47Z"
+      }
+    ],
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1,
+        "started_at": "2026-10-09T23:05:21Z",
+        "completed_at": "2026-10-09T23:05:22Z"
+      },
+      {
+        "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2,
+        "started_at": "2026-10-09T23:05:22Z",
+        "completed_at": "2026-10-09T23:05:23Z"
+      },
+      {
+        "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3,
+        "started_at": "2026-10-09T23:05:23Z",
+        "completed_at": "2026-10-09T23:05:24Z"
+      },
+      {
+        "name": "Verify frozen source and inputs before credentials",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4,
+        "started_at": "2026-10-09T23:05:24Z",
+        "completed_at": "2026-10-09T23:05:32Z"
+      },
+      {
+        "name": "Run aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5,
+        "started_at": "2026-10-09T23:05:32Z",
+        "completed_at": "2026-10-09T23:05:32Z"
+      },
+      {
+        "name": "Read preserved recovery and run fixed non-destructive probes",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 6,
+        "started_at": "2026-10-09T23:05:32Z",
+        "completed_at": "2026-10-09T23:05:44Z"
+      },
+      {
+        "name": "Upload finite scope result only",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7,
+        "started_at": "2026-10-09T23:05:44Z",
+        "completed_at": "2026-10-09T23:05:45Z"
+      },
+      {
+        "name": "Post Run aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 12,
+        "started_at": "2026-10-09T23:05:45Z",
+        "completed_at": "2026-10-09T23:05:45Z"
+      },
+      {
+        "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 13,
+        "started_at": "2026-10-09T23:05:45Z",
+        "completed_at": "2026-10-09T23:05:45Z"
+      },
+      {
+        "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 14,
+        "started_at": "2026-10-09T23:05:45Z",
+        "completed_at": "2026-10-09T23:05:45Z"
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 15,
+        "started_at": "2026-10-09T23:05:45Z",
+        "completed_at": "2026-10-09T23:05:45Z"
+      }
+    ],
+    "artifact": {
+      "schemaVersion": 1,
+      "sourceSha": "5cc00bf18f30ebf7c746385961fbc43076082307",
+      "result": "FAILED",
+      "installation": "READBACK_VERIFIED",
+      "recoveryPreservation": "READBACK_VERIFIED",
+      "syntheticManifestVersionHash": "e2234fe02b44cd8ade9789896f64fd367e339b5d9f9dacc778a5a232ba3a3673",
+      "probes": [
+        {
+          "name": "JOURNAL_OUTSIDE_PREFIX",
+          "action": "dynamodb:GetItem",
+          "target": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+          "outcome": "UNVERIFIED",
+          "code": "CLI_FAILURE"
+        },
+        {
+          "name": "OUTSIDE_TABLE_METADATA",
+          "action": "dynamodb:DescribeTable",
+          "target": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughGroupsStage",
+          "outcome": "UNVERIFIED",
+          "code": "CLI_FAILURE"
+        },
+        {
+          "name": "S3_OUTSIDE_PREFIX_ATTEMPT",
+          "action": "s3:GetObject",
+          "target": "arn:aws:s3:::known-enough-operations-recovery-092954139775-us-east-1/scope-probes/outside-manifests.json",
+          "outcome": "UNVERIFIED",
+          "code": "CLI_FAILURE"
+        },
+        {
+          "name": "IAM_ROLE_READ",
+          "action": "iam:GetRole",
+          "target": "arn:aws:iam::092954139775:role/KnownEnoughGithubOperationsRecovery",
+          "outcome": "UNVERIFIED",
+          "code": "CLI_FAILURE"
+        },
+        {
+          "name": "SELF_ASSUME_ROLE",
+          "action": "sts:AssumeRole",
+          "target": "arn:aws:iam::092954139775:role/KnownEnoughGithubOperationsRecovery",
+          "outcome": "UNVERIFIED",
+          "code": "CLI_FAILURE"
+        }
+      ],
+      "operationExecution": "NOT_EXECUTED",
+      "participantAccess": "NOT_EXECUTED",
+      "policyMutation": "NOT_EXECUTED",
+      "limits": {
+        "outsideS3ObjectExistence": "NOT_ESTABLISHED",
+        "existingOutsideS3ObjectProof": "NOT_EXECUTED",
+        "iamMutationProof": "NOT_EXECUTED",
+        "denyPolicyAttribution": "NOT_ESTABLISHED",
+        "broaderOperationsCloseout": "OPEN"
+      }
+    },
+    "artifactHash": "86646c80e320b54dc56c571a975522ed0add87351264aeff503046d321eef771",
+    "verifiedSourceProbeInPrivateLogs": true,
+    "preCredentialNativeTests": 275,
+    "originalSyntheticManifestVersionMatched": true
+  },
+  "cliWrapperCorrection": {
+    "observed": "2026-10-09T23:11:30.729161+00:00",
+    "primarySources": {
+      "aws-clidriver.py": "46f78575345d06d21f51d96cc139c7560b5078d8538cb14e1d86640fd91307dc",
+      "aws-errorhandler.py": "5e0d094069ea7e5e6edf1ec34ffa8e8f94051fea41db0aebc89ac45d113033ad",
+      "aws-errorformat.py": "0e7917becf571e27ab7363a0df8332fdec1cbc60d771db4755b2487822b4eee8"
+    },
+    "red": {
+      "label": "wrapper-red-final",
+      "command": [
+        "node",
+        "--experimental-transform-types",
+        "--test",
+        "scripts/operations/managed-scope.test.mjs"
+      ],
+      "start": "2026-10-09T23:09:52.398381+00:00",
+      "end": "2026-10-09T23:09:52.945162+00:00",
+      "exit": 1,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/managed-scope.mjs": "512146181d28dd0a73883ab292facb2e2e0bc5f49f87be25bf416834158785d1",
+        "scripts/operations/managed-scope.test.mjs": "811893a844b8c947afcd9ca5edc8fb9243fdd1297ce1fad1d51bf2c41d8484c0",
+        ".github/workflows/operations-scope.yml": "9584195296bcad831ad4319904ce16ef180f4266f4bc36cc9421ba0357da690f"
+      }
+    },
+    "focused": {
+      "label": "wrapper-focused",
+      "command": [
+        "node",
+        "--experimental-transform-types",
+        "--test",
+        "scripts/operations/managed-scope.test.mjs"
+      ],
+      "start": "2026-10-09T23:10:11.259394+00:00",
+      "end": "2026-10-09T23:10:11.975460+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/managed-scope.mjs": "0aca93f9aca96045b63d7e1ebef70183bc7b0b3da69a7f872a27bf8be205758d",
+        "scripts/operations/managed-scope.test.mjs": "811893a844b8c947afcd9ca5edc8fb9243fdd1297ce1fad1d51bf2c41d8484c0",
+        ".github/workflows/operations-scope.yml": "9584195296bcad831ad4319904ce16ef180f4266f4bc36cc9421ba0357da690f"
+      }
+    },
+    "native": {
+      "label": "native-wrapper",
+      "command": [
+        "bash",
+        "-c",
+        "node --experimental-transform-types --test scripts/operations/*.test.mjs"
+      ],
+      "start": "2026-10-09T23:10:12.114585+00:00",
+      "end": "2026-10-09T23:10:15.874324+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/managed-scope.mjs": "0aca93f9aca96045b63d7e1ebef70183bc7b0b3da69a7f872a27bf8be205758d",
+        "scripts/operations/managed-scope.test.mjs": "811893a844b8c947afcd9ca5edc8fb9243fdd1297ce1fad1d51bf2c41d8484c0",
+        ".github/workflows/operations-scope.yml": "9584195296bcad831ad4319904ce16ef180f4266f4bc36cc9421ba0357da690f"
+      }
+    },
+    "full": {
+      "label": "full-wrapper",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-09T23:10:12.124783+00:00",
+      "end": "2026-10-09T23:13:43.964094+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/managed-scope.mjs": "0aca93f9aca96045b63d7e1ebef70183bc7b0b3da69a7f872a27bf8be205758d",
+        "scripts/operations/managed-scope.test.mjs": "811893a844b8c947afcd9ca5edc8fb9243fdd1297ce1fad1d51bf2c41d8484c0",
+        ".github/workflows/operations-scope.yml": "9584195296bcad831ad4319904ce16ef180f4266f4bc36cc9421ba0357da690f"
+      }
+    },
+    "providerUnderlyingMessages": "UNAVAILABLE_NOT_INFERRED",
+    "checkedObserved": "2026-10-09T23:15:11.020015+00:00",
+    "receiptVerification": {
+      "run": 38003057245,
+      "initialError": "dial tcp 140.82.114.6:443: i/o timeout",
+      "existingRunVerificationRetryCount": 1,
+      "artifactVerified": true
+    }
+  },
+  "unobservedNominalWake": "2026-10-09T23:12:35.195Z"
 }

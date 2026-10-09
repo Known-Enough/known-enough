@@ -1,8 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, stat, access } from 'node:fs/promises';
+import { readFile, stat, access, mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { dirname, join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
 import { runScopeProbes, managedScope, verifyScopeInput, safeScopeFailure } from './managed-scope.mjs';
 import { setupTemplate, JOURNAL_ARN, RECOVERY_ROLE } from './setup.mjs';
@@ -128,6 +129,37 @@ test('nonzero, malformed retry suffixes and wrong operations remain unverified',
   const wrong = await runScopeProbes(async () => { throw { stderr:
     'An error occurred (AccessDeniedException) when calling the PutItem operation (reached max retries: 0): private' }; });
   assert.equal(wrong[0].outcome, 'UNVERIFIED');
+});
+test('real subprocess errors support the canonical CLI wrapper with pinned noninteractive legacy formatting', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'ke-fake-cli-'));
+  const previous = { PATH: process.env.PATH, AWS_CLI_ERROR_FORMAT: process.env.AWS_CLI_ERROR_FORMAT, AWS_CLI_AUTO_PROMPT: process.env.AWS_CLI_AUTO_PROMPT };
+  const script = `#!${process.execPath}\nconst commands = ${JSON.stringify(operations)};
+    if (process.env.AWS_CLI_ERROR_FORMAT !== 'legacy' || process.env.AWS_CLI_AUTO_PROMPT !== 'off') {
+      process.stderr.write('SYNTHETIC_WRONG_FORMAT_CONFIGURATION'); process.exit(252);
+    }
+    const code = process.argv[2] === 'dynamodb' ? 'AccessDeniedException' : 'AccessDenied';
+    process.stderr.write('\\naws: [ERROR]: An error occurred (' + code + ') when calling the ' + commands[process.argv[3]] + ' operation (reached max retries: 0): SYNTHETIC_PRIVATE_MESSAGE\\n');
+    process.exit(254);\n`;
+  try {
+    await writeFile(join(directory, 'aws'), script, { mode: 0o700 });
+    process.env.PATH = `${directory}:${previous.PATH}`;
+    process.env.AWS_CLI_ERROR_FORMAT = 'json'; process.env.AWS_CLI_AUTO_PROMPT = 'on';
+    const outcomes = await runScopeProbes();
+    assert.equal(outcomes.length, 5); assert.ok(outcomes.every(probe => probe.outcome === 'DENIED'));
+    assert.ok(!JSON.stringify(outcomes).includes('SYNTHETIC_PRIVATE'));
+  } finally {
+    for (const [key, value] of Object.entries(previous)) { if (value === undefined) delete process.env[key]; else process.env[key] = value; }
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+test('canonical CLI prefix allows only the same code and operation, never arbitrary banners', async () => {
+  const allowed = await runScopeProbes(async (_file, args) => { throw { stderr:
+    `\naws: [ERROR]: An error occurred (${args[0] === 'dynamodb' ? 'AccessDeniedException' : 'AccessDenied'}) when calling the ${operations[args[1]]} operation: private` }; });
+  assert.ok(allowed.every(probe => probe.outcome === 'DENIED'));
+  for (const prefix of ['aws: [WARNING]: ', 'SYNTHETIC_PRIVATE: ', 'aws: [ERROR]: aws: [ERROR]: ']) {
+    const outcomes = await runScopeProbes(async () => { throw { stderr: `${prefix}An error occurred (AccessDeniedException) when calling the GetItem operation: private` }; });
+    assert.equal(outcomes[0].outcome, 'UNVERIFIED');
+  }
 });
 test('unexpected successful data and credentials are discarded without accessing response properties or retrying', async () => {
   let calls = 0; let outputReads = 0;

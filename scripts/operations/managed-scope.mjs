@@ -51,7 +51,7 @@ function observedCode(error, operation) {
     if (typeof stderr !== 'string' || stderr.length > 16384) return 'CLI_FAILURE';
     // ClientError may report zero retries when AWS_MAX_ATTEMPTS is one.
     // An unexpected nonzero retry count remains unverified under this bound.
-    const match = stderr.trimStart().match(/^An error occurred \(([A-Za-z0-9]+)\) when calling the ([A-Za-z0-9]+) operation(?: \(reached max retries: 0\))?:/);
+    const match = stderr.trimStart().match(/^(?:aws: \[ERROR\]: )?An error occurred \(([A-Za-z0-9]+)\) when calling the ([A-Za-z0-9]+) operation(?: \(reached max retries: 0\))?:/);
     if (match?.[2] !== operation) return 'CLI_FAILURE';
     return ['AccessDenied', 'AccessDeniedException', 'NoSuchKey', 'NoSuchBucket', 'ResourceNotFoundException',
       'ExpiredToken', 'RequestTimeout'].includes(match[1]) ? match[1] : 'CLI_FAILURE';
@@ -80,7 +80,8 @@ export async function runScopeProbes(executor = execute) {
         args.push('--cli-input-json', `file://${path}`);
       }
       const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('AWS_ENDPOINT_URL')));
-      Object.assign(env, { AWS_MAX_ATTEMPTS: '1', AWS_PAGER: '', AWS_CONFIG_FILE: '/dev/null', AWS_SHARED_CREDENTIALS_FILE: '/dev/null' });
+      Object.assign(env, { AWS_MAX_ATTEMPTS: '1', AWS_PAGER: '', AWS_CONFIG_FILE: '/dev/null', AWS_SHARED_CREDENTIALS_FILE: '/dev/null',
+        AWS_CLI_ERROR_FORMAT: 'legacy', AWS_CLI_AUTO_PROMPT: 'off' });
       let outcome = 'UNEXPECTED_SUCCESS', code = 'NONE';
       try {
         // Never read or serialize stdout: this may contain data or temporary credentials.
