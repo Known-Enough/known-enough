@@ -33,6 +33,10 @@ jobs:
           node scripts/operations/partition-verify.mjs > "$RUNNER_TEMP/partition-report.json"
           node scripts/operations/retention-verify.mjs > "$RUNNER_TEMP/retention-report.json"
           node scripts/operations/jobs-verify.mjs > "$RUNNER_TEMP/jobs-report.json"
+      - name: Run read-only CloudShell inventory regressions
+        run: |
+          python3 --version
+          python3 -B scripts/operations/cloudshell-inventory.test.py
       - name: Run focused operations and pinned full checks
         env:
           PLAYWRIGHT_CHANNEL: chromium
