@@ -91,9 +91,11 @@ export async function installedReadback(env, executor = execute, clock = Date.no
         '--region', 'us-east-1', '--output', 'json', '--no-cli-pager', '--no-paginate'],
       { env: credentialEnvironment(), timeout: Math.min(limits.timeoutMs, remainingMs),
         maxBuffer: limits.responseBytes });
-      if (typeof result?.stdout !== 'string' || Buffer.byteLength(result.stdout) > limits.responseBytes)
+      // Check and parse the same owned output, even when executor properties change.
+      const stdout = result?.stdout;
+      if (typeof stdout !== 'string' || Buffer.byteLength(stdout) > limits.responseBytes)
         throw new Error('invalid read size');
-      const value = JSON.parse(result.stdout);
+      const value = JSON.parse(stdout);
       if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('invalid read shape');
       const hasFlag = Object.hasOwn(value, 'IsTruncated');
       const cursors = ['NextToken', 'Marker', 'NextMarker'].map(key => value[key]);

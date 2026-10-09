@@ -245,3 +245,89 @@ test('partial identity response stops before all resource reads and exposes no c
   assert.equal(result.reads[0].code, 'AWS_INCOMPLETE_RESPONSE');
   assert.ok(!JSON.stringify(result).includes('SYNTHETIC_PRIVATE'));
 });
+
+test('a later stdout getter cannot replace the checked identity response', async () => {
+  const f = fixture(); let reads = 0;
+  const result = await installedReadback(env, async (...args) => {
+    const response = await f.executor(...args);
+    return args[1][1] === 'get-caller-identity' ? {
+      get stdout() { return ++reads < 3 ? '{}' : response.stdout; }
+    } : response;
+  });
+  assert.equal(result.result, 'BLOCKED'); assert.equal(result.ownOidcIdentity, 'UNKNOWN');
+  assert.equal(result.identityFailure, 'IDENTITY_REJECTED');
+  assert.equal(result.requests, 1); assert.equal(f.calls.length, 1); assert.equal(reads, 1);
+});
+test('the first valid identity remains the identity parsed despite later getter drift', async () => {
+  const f = fixture(); let reads = 0;
+  const other = JSON.stringify({ Account: '000000000000', Arn: 'SYNTHETIC_PRIVATE_OTHER_IDENTITY' });
+  const result = await installedReadback(env, async (...args) => {
+    const response = await f.executor(...args);
+    return args[1][1] === 'get-caller-identity' ? {
+      get stdout() { return ++reads < 3 ? response.stdout : other; }
+    } : response;
+  });
+  assert.equal(result.result, 'READBACK_COMPLETE'); assert.equal(result.ownOidcIdentity, 'VERIFIED');
+  assert.equal(result.installation, 'CONFIGURATION_MATCH'); assert.equal(result.effectivePermissions, 'UNKNOWN');
+  assert.equal(result.managedRecovery, 'NOT_EXECUTED'); assert.equal(result.mutations, 0);
+  assert.equal(result.requests, 16); assert.equal(f.calls.length, 16); assert.equal(reads, 1);
+  assert.ok(!JSON.stringify(result).includes('SYNTHETIC_PRIVATE'));
+});
+test('readback owns one stdout value without mutating executor properties or exposing getter errors', async () => {
+  const f = fixture(); const observations = [];
+  const result = await installedReadback(env, async (...args) => {
+    const response = await f.executor(...args); let reads = 0;
+    const row = { get stdout() {
+      if (++reads > 1) throw new Error('SYNTHETIC_PRIVATE_UNREADABLE_LATER_STDOUT');
+      return response.stdout;
+    } };
+    const getter = Object.getOwnPropertyDescriptor(row, 'stdout').get;
+    observations.push(() => { assert.equal(reads, 1);
+      assert.equal(Object.getOwnPropertyDescriptor(row, 'stdout').get, getter); });
+    return row;
+  });
+  assert.equal(result.result, 'READBACK_COMPLETE'); assert.equal(result.requests, 16);
+  assert.equal(f.calls.length, 16); assert.equal(observations.length, 15);
+  for (const inspect of observations) inspect();
+  const unreadable = await installedReadback(env, async () => ({ get stdout() {
+    throw new Error('SYNTHETIC_PRIVATE_UNREADABLE_FIRST_STDOUT');
+  } }));
+  assert.equal(unreadable.result, 'BLOCKED'); assert.equal(unreadable.requests, 1);
+  assert.equal(unreadable.reads[0].code, 'AWS_READ_FAILED');
+  for (const report of [result, unreadable]) assert.ok(!JSON.stringify(report).includes('SYNTHETIC_PRIVATE'));
+});
+function sizedIdentity(identity, bytes) {
+  const body = { ...identity, padding: '' };
+  const remaining = bytes - Buffer.byteLength(JSON.stringify(body));
+  body.padding = 'é'.repeat(Math.floor(remaining / 2)) + 'x'.repeat(remaining % 2);
+  const stdout = JSON.stringify(body); assert.equal(Buffer.byteLength(stdout), bytes);
+  return stdout;
+}
+test('the first malformed or oversized stdout cannot be replaced by a later bounded identity', async () => {
+  for (const invalid of ['SYNTHETIC_PRIVATE_INVALID_JSON', '', 'null', '[]',
+    sizedIdentity(fixture().values['get-caller-identity'], 131073)]) {
+    const f = fixture(); let reads = 0;
+    const result = await installedReadback(env, async (...args) => {
+      const response = await f.executor(...args);
+      return { get stdout() { return ++reads === 1 ? invalid : response.stdout; } };
+    });
+    assert.equal(result.result, 'BLOCKED'); assert.equal(result.ownOidcIdentity, 'UNKNOWN');
+    assert.equal(result.reads[0].code, 'AWS_READ_FAILED'); assert.equal(result.reads[0].status, 'UNKNOWN');
+    assert.equal(result.requests, 1); assert.equal(f.calls.length, 1); assert.equal(reads, 1);
+    assert.ok(!JSON.stringify(result).includes('SYNTHETIC_PRIVATE'));
+  }
+});
+test('UTF8 byte-limit edges preserve bounded matching readback from the first captured string', async () => {
+  for (const bytes of [131071, 131072]) {
+    const f = fixture(); const body = sizedIdentity(f.values['get-caller-identity'], bytes); let reads = 0;
+    assert.ok(body.length < bytes);
+    const result = await installedReadback(env, async (...args) => {
+      const response = await f.executor(...args);
+      return args[1][1] === 'get-caller-identity' ? { get stdout() { reads++; return body; } } : response;
+    });
+    assert.equal(result.result, 'READBACK_COMPLETE'); assert.equal(result.requests, 16);
+    assert.equal(result.effectivePermissions, 'UNKNOWN'); assert.equal(result.managedRecovery, 'NOT_EXECUTED');
+    assert.equal(result.mutations, 0); assert.equal(f.calls.length, 16); assert.equal(reads, 1);
+    assert.ok(!JSON.stringify(result).includes('SYNTHETIC_PRIVATE'));
+  }
+});
