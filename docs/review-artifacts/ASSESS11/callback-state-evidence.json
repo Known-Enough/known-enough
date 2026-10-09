@@ -156,5 +156,109 @@
   },
   "protectedHashes": 949,
   "localNative": "NOT_RUN_UNCHANGED_OPERATIONS_SOURCE",
-  "managedPrimaryProof": "UNKNOWN"
+  "managedPrimaryProof": "UNKNOWN",
+  "sourceSync": {
+    "label": "source",
+    "expectedRemote": "a088726290a6a883756b5b053716179c2eaf20b5",
+    "sourceSha": "93ddada7dae72fbeed2a8ae5d9ef42cb88f7bc58",
+    "observedEnd": "2026-10-09T14:25:26.323055+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 949
+  },
+  "offlineVerification": {
+    "id": 37944099711,
+    "source": "93ddada7dae72fbeed2a8ae5d9ef42cb88f7bc58",
+    "actor": 143764700,
+    "path": ".github/workflows/operations-verify.yml",
+    "event": "workflow_dispatch",
+    "createdAt": "2026-10-09T14:25:45Z",
+    "updatedAt": "2026-10-09T14:29:52Z",
+    "observedAt": "2026-10-09T14:30:47.878479+00:00",
+    "conclusion": "success",
+    "nativePassed": 251,
+    "applicationPassed": 1403,
+    "browserPassed": 64,
+    "installation": "UNKNOWN",
+    "managedRecovery": "NOT_EXECUTED",
+    "artifactSha256": {
+      "operations-report.json": "d6020cd5ee5425705be76cbf237b724da34ebf096f15996c21e71e02d40ff2ad",
+      "partition-report.json": "fc43bde21b6e2cb738c9b3bfd8e49c1366e11e83ccbbf4d274deedfd7cf97d88",
+      "retention-report.json": "a26fdd3323e0649f34996ba14c384615a7668b32ce1c6adb9c91a2f8d6591619",
+      "jobs-report.json": "c5a363bafccc0124f9b5eab81f590b2c0b64213edba8c26f9259b30ac83986c6",
+      "setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+      "partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+      "jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639"
+    },
+    "reports": {
+      "operations-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "93ddada7dae72fbeed2a8ae5d9ef42cb88f7bc58",
+        "templateHash": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "managedRecovery": "UNKNOWN",
+        "apply": "DISABLED"
+      },
+      "partition-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "93ddada7dae72fbeed2a8ae5d9ef42cb88f7bc58",
+        "templateHash": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "effectivePermissions": "UNKNOWN",
+        "migration": "NOT_EXECUTED",
+        "activation": "DISABLED",
+        "managedRecovery": "UNKNOWN"
+      },
+      "retention-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "93ddada7dae72fbeed2a8ae5d9ef42cb88f7bc58",
+        "preparationHash": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "realPersonPolicy": "UNAPPROVED",
+        "dataOperations": "NOT_EXECUTED",
+        "participantGrants": "NOT_GRANTED",
+        "managedProof": "UNKNOWN"
+      },
+      "jobs-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "93ddada7dae72fbeed2a8ae5d9ef42cb88f7bc58",
+        "preparationHash": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "providerCalls": "NOT_EXECUTED",
+        "managedRecovery": "UNKNOWN",
+        "participantConsent": "NOT_GRANTED",
+        "cleanup": "UNKNOWN"
+      }
+    },
+    "jobs": [
+      {
+        "id": 113865745596,
+        "name": "verify",
+        "conclusion": "success",
+        "started_at": "2026-10-09T14:25:49Z",
+        "completed_at": "2026-10-09T14:29:52Z"
+      }
+    ],
+    "inventoryPythonPassed": 23,
+    "pythonVersion": "3.12.3",
+    "inventoryStep": {
+      "name": "Run read-only CloudShell inventory regressions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-10-09T14:25:54Z",
+      "completed_at": "2026-10-09T14:25:58Z"
+    }
+  },
+  "releaseObserved": "2026-10-09T14:30:56.577656+00:00",
+  "soleClaim": "RELEASED"
 }
