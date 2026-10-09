@@ -45,3 +45,71 @@ test('recovery trust matches current immutable repository subject without broade
   assert.equal(only.Condition.StringEquals['token.actions.githubusercontent.com:aud'], 'sts.amazonaws.com');
   assert.ok(!JSON.stringify(trust).includes('StringLike'));
 });
+
+
+test('workflow verification rejects nonprimitive sources without coercion or report serialization', () => {
+  const template = readFileSync('infra/operations/setup.json', 'utf8');
+  let hooks = 0;
+  for (const source of [[env.GITHUB_SHA], new String(env.GITHUB_SHA),
+    { toString() { hooks++; return env.GITHUB_SHA; } },
+    { [Symbol.toPrimitive]() { hooks++; return env.GITHUB_SHA; } },
+    { toString() { hooks++; throw new Error('private-source-sentinel'); } },
+    BigInt('1'.repeat(40)), Symbol('synthetic-source'), undefined, null, 0, true, {}]) {
+    assert.throws(() => verifySource({ ...env, GITHUB_SHA: source, EXPECTED_SOURCE: source, CHECKOUT_SOURCE: source }), /^Error: OPS_SOURCE_REJECTED$/);
+    assert.throws(() => verificationReport(source, template), /^Error: OPS_SOURCE_REJECTED$/);
+  }
+  assert.equal(hooks, 0);
+});
+
+test('workflow source is captured once and remains bound to expected and checkout identities', () => {
+  for (const later of ['b'.repeat(40), [env.GITHUB_SHA], undefined]) {
+    let reads = 0;
+    const submitted = { ...env };
+    Object.defineProperty(submitted, 'GITHUB_SHA', { enumerable: true, get() { return ++reads === 1 ? env.GITHUB_SHA : later; } });
+    assert.equal(verifySource(submitted), env.GITHUB_SHA);
+    assert.equal(reads, 1);
+  }
+  for (const field of ['EXPECTED_SOURCE', 'CHECKOUT_SOURCE']) {
+    assert.throws(() => verifySource({ ...env, [field]: 'b'.repeat(40) }), /^Error: OPS_SOURCE_REJECTED$/);
+  }
+});
+
+test('unreadable workflow context returns the finite source rejection', () => {
+  for (const field of Object.keys(env)) {
+    for (const thrown of [new Error('private-workflow-sentinel'), 'private-workflow-sentinel', undefined]) {
+      const submitted = { ...env }; let reads = 0;
+      Object.defineProperty(submitted, field, { enumerable: true, get() { reads++; throw thrown; } });
+      assert.throws(() => verifySource(submitted), /^Error: OPS_SOURCE_REJECTED$/);
+      assert.equal(reads, 1);
+    }
+  }
+  for (const submitted of [undefined, null]) assert.throws(() => verifySource(submitted), /^Error: OPS_SOURCE_REJECTED$/);
+});
+
+test('valid primitive sources retain exact offline report and template binding', () => {
+  const template = readFileSync('infra/operations/setup.json', 'utf8');
+  for (const source of ['0'.repeat(40), '1'.repeat(40), 'a'.repeat(40), 'f'.repeat(40)]) {
+    assert.equal(verifySource({ ...env, GITHUB_SHA: source, EXPECTED_SOURCE: source, CHECKOUT_SOURCE: source }), source);
+    const report = verificationReport(source, template);
+    assert.equal(report.sourceSha, source); assert.equal(typeof report.sourceSha, 'string');
+    assert.equal(report.result, 'OFFLINE_VERIFIED'); assert.equal(report.installation, 'UNKNOWN');
+    assert.equal(report.managedRecovery, 'UNKNOWN'); assert.equal(report.apply, 'DISABLED');
+    assert.match(report.templateHash, /^[a-f0-9]{64}$/);
+    assert.throws(() => verificationReport(source, template + ' '), /^Error: OPS_TEMPLATE_DRIFT$/);
+  }
+  for (const source of ['', 'a'.repeat(39), 'a'.repeat(41), 'A'.repeat(40), env.GITHUB_SHA + '\n']) {
+    assert.throws(() => verificationReport(source, template), /^Error: OPS_SOURCE_REJECTED$/);
+    assert.throws(() => verifySource({ ...env, GITHUB_SHA: source, EXPECTED_SOURCE: source, CHECKOUT_SOURCE: source }), /^Error: OPS_SOURCE_REJECTED$/);
+  }
+});
+
+test('malformed source stops managed preparation before installation or storage requests', async () => {
+  const { managedPreparation } = await import('./managed-preparation.mjs');
+  for (const source of [[env.GITHUB_SHA], new String(env.GITHUB_SHA)]) {
+    const calls = [];
+    await assert.rejects(managedPreparation({ ...env, GITHUB_SHA: source, EXPECTED_SOURCE: source, CHECKOUT_SOURCE: source,
+      OPERATIONS_RECOVERY_ENABLED: 'true', PROBE_ID: '12345678-1234-4123-8123-123456789abc' }, async op => { calls.push(op); throw new Error('unexpected-provider-call'); }),
+      /^Error: OPS_SOURCE_REJECTED$/);
+    assert.deepEqual(calls, []);
+  }
+});

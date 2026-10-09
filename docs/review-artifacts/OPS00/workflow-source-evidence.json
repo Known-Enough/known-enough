@@ -1,7 +1,38 @@
 {
   "run": "RUN179",
-  "stage": "CLAIMED",
-  "source": "662f2d62ecc0e95e2c8d15d46a2afcb3f6819afc",
+  "claim": {
+    "run": "RUN179",
+    "stage": "CLAIMED",
+    "source": "662f2d62ecc0e95e2c8d15d46a2afcb3f6819afc",
+    "scope": {
+      "source": "662f2d62ecc0e95e2c8d15d46a2afcb3f6819afc",
+      "code": [
+        "scripts/operations/verify.mjs",
+        "scripts/operations/setup.test.mjs"
+      ],
+      "docs": [
+        "docs/tasks/active/operations/OPS00/ticket.md",
+        "docs/task-board.md",
+        "docs/claim-log.md",
+        "docs/work-log-B.md",
+        "docs/handoff-B.md",
+        "docs/b-next-task-handoff.md",
+        "docs/monitor-log.md",
+        "docs/review-artifacts/OPS00/workflow-source-integrity.md",
+        "docs/review-artifacts/OPS00/workflow-source-evidence.json"
+      ]
+    },
+    "reproduction": {
+      "start": "2026-10-09T13:49:17.295679+00:00",
+      "end": "2026-10-09T13:49:17.332507+00:00",
+      "exit": 0,
+      "stdout": "{\"results\":[{\"case\":\"array\",\"returnedType\":\"object\",\"reportSourceType\":\"object\"},{\"case\":\"boxed\",\"returnedType\":\"object\",\"reportSourceType\":\"object\"},{\"case\":\"changing-source\",\"returned\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"expected\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"reads\":4}],\"providerRequests\":0}\n",
+      "stderr": ""
+    },
+    "protectedHashes": 947,
+    "managedInstallation": "UNKNOWN",
+    "managedProof": "NOT_EXECUTED"
+  },
   "scope": {
     "source": "662f2d62ecc0e95e2c8d15d46a2afcb3f6819afc",
     "code": [
@@ -26,6 +57,133 @@
     "exit": 0,
     "stdout": "{\"results\":[{\"case\":\"array\",\"returnedType\":\"object\",\"reportSourceType\":\"object\"},{\"case\":\"boxed\",\"returnedType\":\"object\",\"reportSourceType\":\"object\"},{\"case\":\"changing-source\",\"returned\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"expected\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"reads\":4}],\"providerRequests\":0}\n",
     "stderr": ""
+  },
+  "checks": {
+    "red": {
+      "label": "red",
+      "command": [
+        "node",
+        "--test",
+        "scripts/operations/setup.test.mjs"
+      ],
+      "start": "2026-10-09T13:50:44.296902+00:00",
+      "end": "2026-10-09T13:50:44.445112+00:00",
+      "exit": 1,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {}
+    },
+    "focused": {
+      "label": "focused",
+      "command": [
+        "node",
+        "--test",
+        "scripts/operations/setup.test.mjs"
+      ],
+      "start": "2026-10-09T13:51:01.422486+00:00",
+      "end": "2026-10-09T13:51:01.537705+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/verify.mjs": "c0219025119b01a93b702724cae1ad9d89ff2f11b9ac001952da3ee7e22a045e",
+        "scripts/operations/setup.test.mjs": "e7df8c08911f15dc93b8837d4cfee2f53717207756837adf7c58ae40a4eff42f"
+      }
+    },
+    "native": {
+      "label": "native",
+      "command": [
+        "node",
+        "--experimental-transform-types",
+        "--test",
+        "scripts/operations/archive-recovery.test.mjs",
+        "scripts/operations/aws-transport.test.mjs",
+        "scripts/operations/dynamo-journal.test.mjs",
+        "scripts/operations/installed-readback.test.mjs",
+        "scripts/operations/jobs-setup.test.mjs",
+        "scripts/operations/journal.test.mjs",
+        "scripts/operations/managed-preparation.test.mjs",
+        "scripts/operations/manifest.test.mjs",
+        "scripts/operations/partition-recovery.test.mjs",
+        "scripts/operations/partition-setup.test.mjs",
+        "scripts/operations/plan.test.mjs",
+        "scripts/operations/recovery.test.mjs",
+        "scripts/operations/retention-setup.test.mjs",
+        "scripts/operations/setup.test.mjs"
+      ],
+      "start": "2026-10-09T13:51:11.121772+00:00",
+      "end": "2026-10-09T13:51:14.624932+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/verify.mjs": "c0219025119b01a93b702724cae1ad9d89ff2f11b9ac001952da3ee7e22a045e",
+        "scripts/operations/setup.test.mjs": "e7df8c08911f15dc93b8837d4cfee2f53717207756837adf7c58ae40a4eff42f"
+      }
+    },
+    "full": {
+      "label": "full",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-09T13:51:11.128492+00:00",
+      "end": "2026-10-09T13:54:52.995760+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/verify.mjs": "c0219025119b01a93b702724cae1ad9d89ff2f11b9ac001952da3ee7e22a045e",
+        "scripts/operations/setup.test.mjs": "e7df8c08911f15dc93b8837d4cfee2f53717207756837adf7c58ae40a4eff42f"
+      }
+    }
+  },
+  "counts": {
+    "red": {
+      "tests": 9,
+      "pass": 5,
+      "fail": 4
+    },
+    "focused": {
+      "tests": 9,
+      "pass": 9,
+      "fail": 0
+    },
+    "native": {
+      "tests": 251,
+      "pass": 251,
+      "fail": 0
+    },
+    "full": {
+      "applicationPassed": 1398,
+      "existingOptionalSkipped": 2,
+      "hostedPassed": 1,
+      "browserPassed": 64,
+      "references": 7,
+      "planning": 15,
+      "boundaries": 414
+    }
+  },
+  "versions": {
+    "start": "2026-10-09T13:51:57.870884+00:00",
+    "end": "2026-10-09T13:51:57.951301+00:00",
+    "versions": {
+      "node": "v24.21.0",
+      "npm": "11.19.0"
+    }
+  },
+  "selfInspection": {
+    "observed": "2026-10-09T13:51:01.368769+00:00",
+    "outsideSourceValidation": "EXACT",
+    "codeHashes": {
+      "scripts/operations/verify.mjs": "c0219025119b01a93b702724cae1ad9d89ff2f11b9ac001952da3ee7e22a045e",
+      "scripts/operations/setup.test.mjs": "e7df8c08911f15dc93b8837d4cfee2f53717207756837adf7c58ae40a4eff42f"
+    }
+  },
+  "codeHashes": {
+    "scripts/operations/verify.mjs": "c0219025119b01a93b702724cae1ad9d89ff2f11b9ac001952da3ee7e22a045e",
+    "scripts/operations/setup.test.mjs": "e7df8c08911f15dc93b8837d4cfee2f53717207756837adf7c58ae40a4eff42f"
   },
   "protectedHashes": 947,
   "managedInstallation": "UNKNOWN",
