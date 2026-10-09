@@ -1,5 +1,7 @@
 # Coding first, administrator setup last
 
+**Next priority — 2026-10-08:** The available coding checkpoints are preserved. User now directs B to prepare the final CloudShell command package within [OPS00](tasks/active/operations/OPS00/cloudshell-command-handoff.md), before inventing unrelated coding improvements. Command preparation is READY without administrator credentials; actual installation/proof remains gated by known technical facts. Preserve any actual active task and NP00 dependency/ownership; this scheduling change starts no new worker or cloud operation.
+
 User direction, 2026-10-06: “move all the tasks that need cloud shell changes to the end … just let B end all the coding”. This supersedes earlier scheduling dependencies that made available coding wait for administrator setup. It does not claim uninstalled software is live or remove participant/privacy checks.
 
 ## Coding queue

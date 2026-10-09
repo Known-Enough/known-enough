@@ -1,8 +1,10 @@
 # OPS00 — Complete the GitHub operations path
 
+**Priority phase — user direction, 2026-10-08:** [Prepare the CloudShell command package](cloudshell-command-handoff.md) at B's next verified idle intake, before unrelated improvements. This preparation is READY and does not depend on administrator credentials. Publish an immediately usable read-only first block and source-pinned conditional install/resume/verification package; explicitly name unavailable installed facts. Whole-task installation/managed acceptance stays blocked and original evidence remains. No new B claim or execution is inferred from this handoff.
+
 **Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of UX03, not deferred administrator installation. Prepare/test automation and the exact setup package now; install missing delegation only in the final cloud phase. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
 
-- Status: BLOCKED / CODE_READY / unclaimed — RUN159 manifest-buffer snapshot checked; installation/managed recovery remain unverified.
+- Status: READY / unclaimed for priority command-package preparation; installation/managed recovery BLOCKED. RUN159 checked source/evidence preserved.
 - Origin: user's 2026-10-03 direction that ordinary implementation/testing should be automatic and should not repeatedly depend on A's AWS login.
 - Worker: next eligible direct worker, current routing B; select/report actual model and effort at claim. One task/worker; no subagents or credential sharing.
 - Scope at claim: exact GitHub workflow/scripts, resource/permission contracts needed by OPS01–03, bounded policy/bootstrap proposal, meaningful integration checks, safe evidence and own log/handoff. Record exact files first. No general administrator grant or live operation is authorized by this ticket.

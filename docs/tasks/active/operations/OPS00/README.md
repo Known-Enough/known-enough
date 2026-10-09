@@ -4,7 +4,7 @@
 
 Make the cloud changes needed by OPS01–03 runnable through GitHub, with clear checks and recovery, so B does not wait for A to run AWS commands for each task.
 
-**Status:** REVIEW / CODE_READY; B coding claim released on checked source e90ea9e. Whole-task completion still requires final installed/managed operations proof.
+**Status:** READY/unclaimed for [priority CloudShell-command preparation](cloudshell-command-handoff.md), user direction 2026-10-08. Prior checked coding milestones remain; whole-task installation/managed proof is BLOCKED. B must record actual intake/claim before preparation; this routing handoff is not execution.
 
 **Next step:** Continue OPS01–03 coding against the checked recovery foundation. After the available coding queue, install/read back the bounded setup package and prove B's actual managed operations/recovery through the matching GitHub path.
 
