@@ -80,8 +80,19 @@ export async function managedPreparation(env, transport) {
   const sourceSha = verifyManagedInput(env);
   const originalTransport = transport;
   let phase = 'INSTALLATION_READBACK';
+  let manifestVersion;
   transport = async (op, input) => {
-    try { return await originalTransport(op, input); }
+    try {
+      const response = await originalTransport(op, input);
+      if (op === 'GetObject' && phase === 'STORAGE_PREPARATION') {
+        // Capture the exact response subsequently validated by manifestStore.
+        // Only this synthetic probe publishes its opaque version fingerprint.
+        const owned = { VersionId: response?.VersionId, Body: response?.Body };
+        manifestVersion = owned.VersionId;
+        return owned;
+      }
+      return response;
+    }
     catch (error) {
       if (error && (typeof error === 'object' || typeof error === 'function') && Object.hasOwn(targets, op)) failures.set(error, context(op, phase));
       throw error;
@@ -95,7 +106,8 @@ export async function managedPreparation(env, transport) {
   await inspectInstallation(transport);
   phase = 'STORAGE_PREPARATION';
   const prepared = await prepareRecovery({ plan, envelope, manifestBytes, manifestTransport: transport, bucket: MANIFEST_BUCKET, journalStorage: dynamoJournal(transport, JOURNAL_ARN) });
-  return { ...prepared, result: 'PREPARATION_VERIFIED', installation: 'READBACK_VERIFIED' };
+  return { ...prepared, syntheticManifestVersionHash: digest(manifestVersion),
+    result: 'PREPARATION_VERIFIED', installation: 'READBACK_VERIFIED' };
 }
 export function safeFailure(error) {
   const codes = ['AccessDenied', 'AccessDeniedException', 'ResourceNotFoundException', 'NoSuchKey', 'NoSuchBucket', 'ExpiredToken', 'RequestTimeout'];

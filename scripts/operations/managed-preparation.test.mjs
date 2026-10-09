@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { managedPreparation, inspectInstallation, safeFailure } from './managed-preparation.mjs';
 import { setupTemplate, JOURNAL_ARN, RECOVERY_ROLE } from './setup.mjs';
 const env = { GITHUB_REPOSITORY: 'Known-Enough/known-enough', GITHUB_REF: 'refs/heads/main', GITHUB_ACTOR_ID: '143764700', GITHUB_EVENT_NAME: 'workflow_dispatch', GITHUB_SHA: 'a'.repeat(40), EXPECTED_SOURCE: 'a'.repeat(40), CHECKOUT_SOURCE: 'a'.repeat(40), OPERATIONS_RECOVERY_ENABLED: 'true', PROBE_ID: '12345678-1234-4123-8123-123456789abc' };
@@ -49,6 +50,29 @@ test('IAM policy JSON key order does not cause a false configuration mismatch', 
   const original = setupTemplate().Resources.ManifestPolicy.Properties.PolicyDocument;
   original.Statement = original.Statement.map(s => Object.fromEntries(Object.entries(s).reverse()));
   await inspectInstallation(fixture({ GetBucketPolicy: { Policy: JSON.stringify(original) } }).transport);
+});
+test('synthetic version proof uses the same captured version that manifest readback validates', async () => {
+  const f = fixture(); let reads = 0;
+  const transport = async (op, input) => {
+    const response = await f.transport(op, input);
+    if (op !== 'GetObject') return response;
+    return { Body: response.Body, get VersionId() { reads++; return reads % 2 ? 'v1' : 'SYNTHETIC_PRIVATE_CHANGED_VERSION'; } };
+  };
+  const report = await managedPreparation(env, transport);
+  assert.equal(reads, 1);
+  assert.equal(report.syntheticManifestVersionHash, createHash('sha256').update('v1').digest('hex'));
+  assert.ok(!JSON.stringify(report).includes('SYNTHETIC_PRIVATE'));
+  assert.ok(!Object.hasOwn(report, 'VersionId'));
+});
+test('paired synthetic preparation retains its opaque version proof without extra storage requests', async () => {
+  const f = fixture(); const first = await managedPreparation(env, f.transport);
+  const before = f.calls.length; const second = await managedPreparation(env, f.transport);
+  assert.deepEqual(second, first);
+  assert.match(first.syntheticManifestVersionHash, /^[a-f0-9]{64}$/);
+  assert.equal(f.calls.slice(before).filter(op => op === 'GetObject').length, 1);
+  assert.equal(f.calls.slice(before).filter(op => op === 'PutItem').length, 1);
+  assert.equal(f.calls.slice(before).filter(op => op === 'GetItem').length, 1);
+  assert.ok(!JSON.stringify(first).includes(env.PROBE_ID));
 });
 test('absent S3 lifecycle is accepted while other service denials remain failures', async () => {
   const f = fixture();

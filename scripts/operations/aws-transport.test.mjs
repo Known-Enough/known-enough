@@ -5,7 +5,51 @@ import { dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 import { awsTransport } from './aws-transport.mjs';
 import { manifestStore, MANIFEST_BUCKET } from './manifest.mjs';
+import { dynamoJournal } from './dynamo-journal.mjs';
+import { journalService } from './journal.mjs';
 const object = { Bucket: MANIFEST_BUCKET, Key: `manifests/${'a'.repeat(64)}.json` };
+test('empty CLI write output still reads back and resumes the original conditional journal', async () => {
+  let item; let writes = 0; const calls = []; const directories = new Set();
+  const transport = awsTransport(async (_file, args) => {
+    calls.push(args[1]); directories.add(dirname(requestPath(args)));
+    const input = await requestInput(args);
+    if (args[1] === 'get-item') {
+      assert.equal(input.ConsistentRead, true); assert.deepEqual(input.Key, { PK: item.PK, SK: item.SK });
+      return { stdout: JSON.stringify({ Item: item }) };
+    }
+    assert.equal(args[1], 'put-item'); assert.equal(input.ConditionExpression, 'attribute_not_exists(PK)');
+    if (item) throw Object.assign(new Error('SYNTHETIC_PRIVATE'), { stderr: 'An error occurred (ConditionalCheckFailedException) when calling PutItem' });
+    item = input.Item; writes++; return { stdout: '' };
+  });
+  const sourceSha = 'a'.repeat(40), contractHash = 'b'.repeat(64);
+  const resourceArn = 'arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal';
+  const envelope = { sourceSha, contractHash, resourceArn, operation: 'JOB_RECOVERY', maxItems: 1 };
+  const plan = { schemaVersion: 1, ...envelope, account: '092954139775', region: 'us-east-1', expectedRevision: 0, recoveryManifestHash: 'c'.repeat(64) };
+  try {
+    const initial = await journalService(dynamoJournal(transport, resourceArn)).prepare(plan, envelope);
+    const saved = structuredClone(item);
+    const resumed = await journalService(dynamoJournal(transport, resourceArn)).prepare(plan, envelope);
+    assert.deepEqual(resumed, initial); assert.deepEqual(item, saved); assert.equal(writes, 1);
+    assert.equal(initial.revision, 0); assert.equal(initial.journal.state, 'PREPARED');
+    assert.deepEqual(calls, ['put-item', 'get-item', 'put-item', 'get-item']);
+  } finally { for (const directory of directories) await assert.rejects(access(directory)); }
+});
+test('empty CLI GetItem means absence; malformed output and failed calls still reject', async () => {
+  const resourceArn = 'arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal';
+  const hash = 'a'.repeat(64); let directory;
+  const executor = stdout => async (_file, args) => { directory = dirname(requestPath(args)); return { stdout }; };
+  assert.equal(await dynamoJournal(awsTransport(executor('')), resourceArn).read(hash), null);
+  await assert.rejects(access(directory));
+  for (const stdout of [' ', '{', 'SYNTHETIC_PRIVATE']) {
+    await assert.rejects(dynamoJournal(awsTransport(executor(stdout)), resourceArn).read(hash), /OPS_JOURNAL_STORAGE_FAILED/);
+    await assert.rejects(access(directory));
+  }
+  let calls = 0;
+  await assert.rejects(dynamoJournal(awsTransport(async () => { calls++; throw Object.assign(new Error('SYNTHETIC_PRIVATE'), { stdout: '' }); }), resourceArn).read(hash), /OPS_JOURNAL_STORAGE_FAILED/);
+  assert.equal(calls, 1);
+  await assert.rejects(awsTransport(executor(''))('DescribeTable', { TableName: 'KnownEnoughOperationsJournal' }), /OPS_AWS_FAILED/);
+  await assert.rejects(access(directory));
+});
 function requestPath(args) {
   return args[args.indexOf(args[1] === 'get-object' ? '--bucket' : '--cli-input-json') + 1].slice(7);
 }

@@ -79,6 +79,10 @@ export function awsTransport(executor = execute) {
     Object.assign(env, { AWS_MAX_ATTEMPTS: '1', AWS_PAGER: '', AWS_CONFIG_FILE: '/dev/null', AWS_SHARED_CREDENTIALS_FILE: '/dev/null' });
     try {
       const { stdout } = await executor('aws', args, { env, timeout: 30000, maxBuffer: limit });
+      // The CLI suppresses an empty response object for acknowledged writes and
+      // missing items. Only these Dynamo calls permit an absent response body;
+      // journal callers still require a separate consistent readback.
+      if (stdout === '' && ['PutItem', 'GetItem'].includes(op)) return {};
       return JSON.parse(stdout);
     } catch (error) {
       let observed;
