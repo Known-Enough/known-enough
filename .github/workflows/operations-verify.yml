@@ -33,6 +33,7 @@ jobs:
           node scripts/operations/partition-verify.mjs > "$RUNNER_TEMP/partition-report.json"
           node scripts/operations/retention-verify.mjs > "$RUNNER_TEMP/retention-report.json"
           node scripts/operations/jobs-verify.mjs > "$RUNNER_TEMP/jobs-report.json"
+          node scripts/operations/capabilities.mjs > "$RUNNER_TEMP/capabilities-report.json"
       - name: Run read-only CloudShell inventory regressions
         run: |
           python3 --version
@@ -62,5 +63,6 @@ jobs:
             ${{ runner.temp }}/partition-report.json
             ${{ runner.temp }}/retention-report.json
             ${{ runner.temp }}/jobs-report.json
+            ${{ runner.temp }}/capabilities-report.json
           if-no-files-found: error
           retention-days: 30

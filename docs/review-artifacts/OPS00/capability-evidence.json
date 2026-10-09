@@ -1,0 +1,263 @@
+{
+  "schemaVersion": 1,
+  "task": "OPS00",
+  "phase": "RUN188_OFFLINE_CAPABILITY_MAPPING",
+  "observed": "2026-10-09T23:37:47.950325+00:00",
+  "scheduled": "2026-10-09T23:28:35.872Z",
+  "observedStart": "2026-10-09T23:28:54.359909Z",
+  "sourceCandidate": "f0aaba96a5da22474e5e6c466bd3301d611b5e54",
+  "checkedFiles": {
+    "scripts/operations/capabilities.mjs": "62917d5d4f3c7ad47b88ab43e8cf2614e13863da4b202bbcabb0bcb1f5839237",
+    "scripts/operations/capabilities.test.mjs": "ed4fa6e2b8160409a78c8671cd34a0c03dde3d7244fb3cea511cc3d2f51a9ec9",
+    ".github/workflows/operations-verify.yml": "0859aa4d3029206919ab5417b54d8279bf08e9acce5c92a040489ca146372adc"
+  },
+  "proposalHashes": {
+    "infra/operations/setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+    "infra/operations/partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+    "infra/operations/retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+    "infra/operations/jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639"
+  },
+  "counts": {
+    "profiles": 8,
+    "operations": 117,
+    "reuseCandidates": 9,
+    "differentLeadingKeys": 20,
+    "undeclaredResourceActions": 88
+  },
+  "profiles": [
+    {
+      "task": "OPS01",
+      "profile": "participant",
+      "statementIds": [
+        "ActiveSourceRead",
+        "ActiveSourceCondition",
+        "CopiedJournalRead",
+        "CopiedJournalCondition",
+        "ActivationControlRead",
+        "ActivationControlCondition",
+        "ScopedPartitionRead",
+        "PrivateMembershipQuery",
+        "ScopedPartitionCommit",
+        "JoinedDecisionRead",
+        "JoinedDecisionCommit"
+      ]
+    },
+    {
+      "task": "OPS01",
+      "profile": "migration",
+      "statementIds": [
+        "LegacySourceRead",
+        "SourceFreezeAndActivation",
+        "ForwardPartitionRead",
+        "ExclusiveForwardPartitionsAndControl",
+        "MigrationJournalRead",
+        "ConditionalMigrationJournal",
+        "PinnedPrivateRecoveryVersions",
+        "ExclusivePrivateRecoveryCreate"
+      ]
+    },
+    {
+      "task": "OPS01",
+      "profile": "archive",
+      "statementIds": [
+        "ActiveSourceRead",
+        "ActiveSourceCondition",
+        "CopiedJournalRead",
+        "CopiedJournalCondition",
+        "ActivationControlRead",
+        "ActivationControlCondition",
+        "ArchiveHeaderChildrenAndAuthorityRead",
+        "ArchiveAuthorityConditions",
+        "RetainedArchiveTombstone",
+        "ArchiveJournalRead",
+        "ConditionalArchiveJournal",
+        "PinnedPrivateRecoveryVersions",
+        "ExclusivePrivateRecoveryCreate"
+      ]
+    },
+    {
+      "task": "OPS01",
+      "profile": "inspection",
+      "statementIds": [
+        "ExactInstalledTables"
+      ]
+    },
+    {
+      "task": "OPS02",
+      "profile": "ownerService",
+      "statementIds": [
+        "ActiveSourceRead",
+        "ActiveSourceCondition",
+        "CopiedJournalRead",
+        "CopiedJournalCondition",
+        "ActivationControlRead",
+        "ActivationControlCondition",
+        "LifecyclePartitionInventory",
+        "LifecycleDecisionInventory",
+        "LifecyclePolicyStampRead",
+        "LifecyclePolicyStampConditions",
+        "LifecyclePartitionConditions",
+        "LifecycleDecisionConditions",
+        "ConsentRead",
+        "VerifiedSelfConsentWrite"
+      ]
+    },
+    {
+      "task": "OPS02",
+      "profile": "erasureExecutor",
+      "statementIds": [
+        "ActiveSourceRead",
+        "ActiveSourceCondition",
+        "CopiedJournalRead",
+        "CopiedJournalCondition",
+        "ActivationControlRead",
+        "ActivationControlCondition",
+        "LifecyclePartitionInventory",
+        "LifecycleDecisionInventory",
+        "LifecyclePolicyStampRead",
+        "LifecyclePolicyStampConditions",
+        "LifecyclePartitionConditions",
+        "LifecycleDecisionConditions",
+        "ExactPlanJournalConsentRead",
+        "ParticipantConsentConditionOnly",
+        "SealedPlanAndProgress",
+        "AccountFreezeAndGroupTombstone",
+        "ConsentScopedGroupChildrenErase",
+        "GuardStateAndReplayErase"
+      ]
+    },
+    {
+      "task": "OPS02",
+      "profile": "policyInstallation",
+      "statementIds": [
+        "RetentionConfigurationRead",
+        "SourceCheckedRetentionConfiguration"
+      ]
+    },
+    {
+      "task": "OPS03",
+      "profile": "worker",
+      "statementIds": [
+        "ActiveSourceRead",
+        "ActiveSourceCondition",
+        "CopiedJournalRead",
+        "CopiedJournalCondition",
+        "ActivationControlRead",
+        "ActivationControlCondition",
+        "JobControlDeliveryRead",
+        "JobLeaseAndDeliveryCAS",
+        "ExistingStandingBudgetRead",
+        "PreservedCumulativeReservationCAS",
+        "CurrentStandingAuthorityCondition",
+        "CurrentAllMemberAdmissionRead",
+        "CurrentAllMemberAdmissionConditions",
+        "CurrentAllMemberRetentionRead",
+        "CurrentAllMemberRetentionConditions",
+        "CurrentDecisionContextRead",
+        "JoinedKernelStateAndGuardCAS"
+      ]
+    }
+  ],
+  "checks": {
+    "focused": {
+      "label": "focused",
+      "command": [
+        "/tmp/node-v24.21.0-linux-x64/bin/node",
+        "--test",
+        "scripts/operations/capabilities.test.mjs"
+      ],
+      "start": "2026-10-09T23:33:20.501840+00:00",
+      "end": "2026-10-09T23:33:20.848123+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/capabilities.mjs": "62917d5d4f3c7ad47b88ab43e8cf2614e13863da4b202bbcabb0bcb1f5839237",
+        "scripts/operations/capabilities.test.mjs": "ed4fa6e2b8160409a78c8671cd34a0c03dde3d7244fb3cea511cc3d2f51a9ec9",
+        ".github/workflows/operations-verify.yml": "0859aa4d3029206919ab5417b54d8279bf08e9acce5c92a040489ca146372adc"
+      }
+    },
+    "native": {
+      "label": "native",
+      "command": [
+        "/tmp/node-v24.21.0-linux-x64/bin/node",
+        "--experimental-transform-types",
+        "--test",
+        "scripts/operations/archive-recovery.test.mjs",
+        "scripts/operations/aws-transport.test.mjs",
+        "scripts/operations/capabilities.test.mjs",
+        "scripts/operations/dynamo-journal.test.mjs",
+        "scripts/operations/installed-readback.test.mjs",
+        "scripts/operations/jobs-setup.test.mjs",
+        "scripts/operations/journal.test.mjs",
+        "scripts/operations/managed-preparation.test.mjs",
+        "scripts/operations/managed-scope.test.mjs",
+        "scripts/operations/manifest.test.mjs",
+        "scripts/operations/partition-recovery.test.mjs",
+        "scripts/operations/partition-setup.test.mjs",
+        "scripts/operations/plan.test.mjs",
+        "scripts/operations/recovery.test.mjs",
+        "scripts/operations/retention-setup.test.mjs",
+        "scripts/operations/setup.test.mjs"
+      ],
+      "start": "2026-10-09T23:33:47.023188+00:00",
+      "end": "2026-10-09T23:33:50.757270+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/capabilities.mjs": "62917d5d4f3c7ad47b88ab43e8cf2614e13863da4b202bbcabb0bcb1f5839237",
+        "scripts/operations/capabilities.test.mjs": "ed4fa6e2b8160409a78c8671cd34a0c03dde3d7244fb3cea511cc3d2f51a9ec9",
+        ".github/workflows/operations-verify.yml": "0859aa4d3029206919ab5417b54d8279bf08e9acce5c92a040489ca146372adc"
+      }
+    },
+    "full": {
+      "label": "full",
+      "command": [
+        "/tmp/node-v24.21.0-linux-x64/bin/npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-09T23:33:47.010633+00:00",
+      "end": "2026-10-09T23:37:20.559120+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/capabilities.mjs": "62917d5d4f3c7ad47b88ab43e8cf2614e13863da4b202bbcabb0bcb1f5839237",
+        "scripts/operations/capabilities.test.mjs": "ed4fa6e2b8160409a78c8671cd34a0c03dde3d7244fb3cea511cc3d2f51a9ec9",
+        ".github/workflows/operations-verify.yml": "0859aa4d3029206919ab5417b54d8279bf08e9acce5c92a040489ca146372adc"
+      }
+    }
+  },
+  "effectivePermissions": "UNKNOWN",
+  "managedOperations": "NOT_EXECUTED",
+  "mutations": [],
+  "protectedTrackedHashes": 979,
+  "startedReceipt": "https://github.com/Known-Enough/known-enough/actions/runs/38004701381",
+  "progressReceipt": "https://github.com/Known-Enough/known-enough/actions/runs/38005033737",
+  "sourceMatchingWorkflow": "PENDING_CHECKED_SOURCE_INTEGRATION",
+  "nextAction": "finish owned pinned full check; integrate source then one existing credential-free source-matching verification run",
+  "nominalNextWake": "2026-10-09T23:58:35.872Z",
+  "idleGating": "UNKNOWN",
+  "modelEffort": "UNEXPOSED",
+  "checkCounts": {
+    "focused": 9,
+    "operations": 286,
+    "application": 1407,
+    "applicationExistingOptionalSkips": 2,
+    "hosted": 1,
+    "browser": 64,
+    "references": 7,
+    "planning": 15,
+    "boundaries": 414
+  },
+  "reportingGaps": [
+    {
+      "observed": "2026-10-09T23:35:14.933509Z",
+      "action": "documentation link check",
+      "error": "AssertionError: ('docs/review-artifacts/OPS00/capability-map.md', 'effective-permission-proof.md')",
+      "result": "Failed locally; located actual managed-two-run-proof.md and corrected before source integration."
+    }
+  ]
+}
