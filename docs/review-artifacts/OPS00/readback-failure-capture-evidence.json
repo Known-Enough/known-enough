@@ -1,0 +1,270 @@
+{
+  "run": 177,
+  "scheduledAt": "2026-10-09T12:43:24.724Z",
+  "firstClock": "2026-10-09T12:43:43Z",
+  "intake": {
+    "start": "2026-10-09T12:43:43.844046+00:00",
+    "end": "2026-10-09T12:43:46.595336+00:00",
+    "scheduled": "2026-10-09T12:43:24.724Z",
+    "source": "e45bfb84e9cb8435dda6bcecdc5353cd22214703",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "mainEqualClean": true,
+    "actualJobs": [],
+    "priorWork": "RUN176 verified final receipt/released phase/clean acknowledgment sync; all owned tool/test/watch sessions completed"
+  },
+  "sourceSha": "1ba16e309bfcaa28f8d07454ab63311fe7881b31",
+  "sourceHashes": {
+    "scripts/operations/installed-readback.mjs": "794eed8638e2e52ddd0f2ee88f3b3b9da8461791d95282b9fff6e6b8c86ac015",
+    "scripts/operations/installed-readback.test.mjs": "2d5f6412224f797fb561dc58f3f4e7c6346adb58f54a21359e7a60e492134cd1"
+  },
+  "protectedHashes": 943,
+  "selfInspection": {
+    "observed": "2026-10-09T12:53:30.162246+00:00",
+    "onlyFailureFunctionChanged": true,
+    "outsideFunctionBytesPreserved": true,
+    "protected": 943,
+    "newMethods": 6,
+    "scope": [
+      "scripts/operations/installed-readback.mjs",
+      "scripts/operations/installed-readback.test.mjs"
+    ],
+    "hashes": {
+      "scripts/operations/installed-readback.mjs": "794eed8638e2e52ddd0f2ee88f3b3b9da8461791d95282b9fff6e6b8c86ac015",
+      "scripts/operations/installed-readback.test.mjs": "2d5f6412224f797fb561dc58f3f4e7c6346adb58f54a21359e7a60e492134cd1"
+    }
+  },
+  "preFix": {
+    "start": "2026-10-09T12:47:59.132210+00:00",
+    "end": "2026-10-09T12:47:59.205432+00:00",
+    "exit": 0,
+    "result": {
+      "stderrReads": 2,
+      "denialStatus": "ABSENT",
+      "denialCode": "NoSuchEntity",
+      "simulatedReads": 13,
+      "unreadableEscaped": true,
+      "unreadableSimulatedReads": 4,
+      "codeReads": 2,
+      "changingCodeClassification": "AWS_READ_TIMEOUT",
+      "changingCodeSimulatedReads": 1,
+      "awsCalls": 0
+    },
+    "stderr": ""
+  },
+  "checks": {
+    "red": {
+      "label": "red",
+      "command": [
+        "node",
+        "--test",
+        "scripts/operations/installed-readback.test.mjs"
+      ],
+      "start": "2026-10-09T12:53:08.758770+00:00",
+      "end": "2026-10-09T12:53:09.072693+00:00",
+      "exit": 1,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {}
+    },
+    "focused": {
+      "label": "focused",
+      "command": [
+        "node",
+        "--test",
+        "scripts/operations/installed-readback.test.mjs"
+      ],
+      "start": "2026-10-09T12:53:30.212647+00:00",
+      "end": "2026-10-09T12:53:30.558870+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/installed-readback.mjs": "794eed8638e2e52ddd0f2ee88f3b3b9da8461791d95282b9fff6e6b8c86ac015",
+        "scripts/operations/installed-readback.test.mjs": "2d5f6412224f797fb561dc58f3f4e7c6346adb58f54a21359e7a60e492134cd1"
+      }
+    },
+    "native": {
+      "label": "native",
+      "command": [
+        "node",
+        "--experimental-transform-types",
+        "--test",
+        "scripts/operations/archive-recovery.test.mjs",
+        "scripts/operations/aws-transport.test.mjs",
+        "scripts/operations/dynamo-journal.test.mjs",
+        "scripts/operations/installed-readback.test.mjs",
+        "scripts/operations/jobs-setup.test.mjs",
+        "scripts/operations/journal.test.mjs",
+        "scripts/operations/managed-preparation.test.mjs",
+        "scripts/operations/manifest.test.mjs",
+        "scripts/operations/partition-recovery.test.mjs",
+        "scripts/operations/partition-setup.test.mjs",
+        "scripts/operations/plan.test.mjs",
+        "scripts/operations/recovery.test.mjs",
+        "scripts/operations/retention-setup.test.mjs",
+        "scripts/operations/setup.test.mjs"
+      ],
+      "start": "2026-10-09T12:54:49.079801+00:00",
+      "end": "2026-10-09T12:54:52.608252+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/installed-readback.mjs": "794eed8638e2e52ddd0f2ee88f3b3b9da8461791d95282b9fff6e6b8c86ac015",
+        "scripts/operations/installed-readback.test.mjs": "2d5f6412224f797fb561dc58f3f4e7c6346adb58f54a21359e7a60e492134cd1"
+      }
+    },
+    "full": {
+      "label": "full",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-09T12:54:49.087474+00:00",
+      "end": "2026-10-09T12:58:17.317677+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/installed-readback.mjs": "794eed8638e2e52ddd0f2ee88f3b3b9da8461791d95282b9fff6e6b8c86ac015",
+        "scripts/operations/installed-readback.test.mjs": "2d5f6412224f797fb561dc58f3f4e7c6346adb58f54a21359e7a60e492134cd1"
+      }
+    }
+  },
+  "counts": {
+    "red": {
+      "tests": 28,
+      "pass": 22,
+      "fail": 6
+    },
+    "focused": {
+      "tests": 28,
+      "pass": 28,
+      "fail": 0
+    },
+    "native": {
+      "tests": 241,
+      "pass": 241,
+      "fail": 0
+    },
+    "full": {
+      "applicationPassed": 1398,
+      "existingOptionalSkipped": 2,
+      "hostedPassed": 1,
+      "browserPassed": 64,
+      "references": 7,
+      "planning": 15,
+      "boundaries": 414
+    }
+  },
+  "offlineVerification": {
+    "id": 37933610784,
+    "source": "1ba16e309bfcaa28f8d07454ab63311fe7881b31",
+    "actor": 143764700,
+    "path": ".github/workflows/operations-verify.yml",
+    "event": "workflow_dispatch",
+    "createdAt": "2026-10-09T12:58:40Z",
+    "updatedAt": "2026-10-09T13:03:09Z",
+    "observedAt": "2026-10-09T13:03:50.308246+00:00",
+    "conclusion": "success",
+    "nativePassed": 241,
+    "applicationPassed": 1398,
+    "browserPassed": 64,
+    "installation": "UNKNOWN",
+    "managedRecovery": "NOT_EXECUTED",
+    "artifactSha256": {
+      "operations-report.json": "3d08ffe8e3918aec39e346bc19991eaead841830b19db0a720dd1cb97a1baf15",
+      "partition-report.json": "85baf67979530cb18c8d9075f56e6efe84d81af0844929a885f2ecdc07d282f7",
+      "retention-report.json": "ba08a6e49c2d5486149c3041d203d42bad6d122b23b69820bb935d9c28238b10",
+      "jobs-report.json": "8b2fd5c66101e32f490f24286f455c7f342dd309c8a30d65fa732db8565c79d3",
+      "setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+      "partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+      "jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639"
+    },
+    "reports": {
+      "operations-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "1ba16e309bfcaa28f8d07454ab63311fe7881b31",
+        "templateHash": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "managedRecovery": "UNKNOWN",
+        "apply": "DISABLED"
+      },
+      "partition-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "1ba16e309bfcaa28f8d07454ab63311fe7881b31",
+        "templateHash": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "effectivePermissions": "UNKNOWN",
+        "migration": "NOT_EXECUTED",
+        "activation": "DISABLED",
+        "managedRecovery": "UNKNOWN"
+      },
+      "retention-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "1ba16e309bfcaa28f8d07454ab63311fe7881b31",
+        "preparationHash": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "realPersonPolicy": "UNAPPROVED",
+        "dataOperations": "NOT_EXECUTED",
+        "participantGrants": "NOT_GRANTED",
+        "managedProof": "UNKNOWN"
+      },
+      "jobs-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "1ba16e309bfcaa28f8d07454ab63311fe7881b31",
+        "preparationHash": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "providerCalls": "NOT_EXECUTED",
+        "managedRecovery": "UNKNOWN",
+        "participantConsent": "NOT_GRANTED",
+        "cleanup": "UNKNOWN"
+      }
+    },
+    "jobs": [
+      {
+        "id": 113830109014,
+        "name": "verify",
+        "conclusion": "success",
+        "started_at": "2026-10-09T12:58:44Z",
+        "completed_at": "2026-10-09T13:03:08Z"
+      }
+    ],
+    "inventoryPythonPassed": 23,
+    "pythonVersion": "3.12.3",
+    "inventoryStep": {
+      "name": "Run read-only CloudShell inventory regressions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-10-09T12:58:48Z",
+      "completed_at": "2026-10-09T12:58:52Z"
+    }
+  },
+  "errors": [
+    "Expected red regressions:28 methods,22 PASS,6 FAIL; fixed28 PASS.",
+    "Continuation discovery: cat /tmp/ke-run176/claim-time.json and tail docs/tasks/OPS00/ticket.md failed with missing-file diagnostics; current ticket is docs/tasks/active/operations/OPS00/ticket.md. No execution evidence inferred from missing files.",
+    "Claim board writer temporarily changed rank/link/column structure; restored exact existing rank6/README/four-column structure at guarded claim-correction commit.",
+    "First correction sync guard raised AssertionError at sync.py line17 due to two unstaged checked code files; no commit or push in that failed guard/no divergence. Preserved exact edits privately, restored two HEAD file bytes for successful doc-only correction sync, then restored matching checked edits."
+  ],
+  "phase": "CODE_READY/released",
+  "wholeTask": "BLOCKED/unclaimed",
+  "installation": "UNKNOWN",
+  "effectiveScope": "UNKNOWN",
+  "privateManagedPreservation": "UNKNOWN",
+  "apply": "INVENTORY_REQUIRED",
+  "managedProof": "NOT_EXECUTED",
+  "awsCalls": 0,
+  "releasedAt": "2026-10-09T13:04:13.843409+00:00",
+  "nextWake": "2026-10-09T13:13:24.724Z",
+  "idleGating": "UNKNOWN"
+}
