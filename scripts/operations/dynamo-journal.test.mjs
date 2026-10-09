@@ -218,3 +218,97 @@ test('record and journal arrays cannot lose named identity fields in JSON', asyn
   }
   assert.equal(calls, 0);
 });
+
+test('read captures the response Item once and returns that checked record', async () => {
+  let reads = 0; const first = encodedItem('0'), later = encodedItem('99');
+  later.journal.S = JSON.stringify({ planHash: hash, state: 'COMPLETE', completedItems: 10 });
+  const response = { get Item() { return ++reads === 1 ? first : later; }, $metadata: { hook() {} } };
+  const { port, calls } = readPort(response);
+  assert.deepEqual(await port.read(hash), record); assert.equal(reads, 1); assert.equal(calls.length, 1);
+  assert.equal(calls[0].input.ConsistentRead, true);
+});
+test('revision and journal getters are captured before validation and decoding', async () => {
+  let revisions = 0, journals = 0; const item = encodedItem();
+  item.revision = { get N() { return ++revisions < 3 ? '0' : '99'; } };
+  item.journal = { get S() { return JSON.stringify(++journals < 3 ? record.journal : { planHash: hash, state: 'COMPLETE', completedItems: 10 }); } };
+  const { port, calls } = readPort({ Item: item });
+  assert.deepEqual(await port.read(hash), record); assert.equal(revisions, 1); assert.equal(journals, 1); assert.equal(calls.length, 1);
+});
+test('all item and typed-attribute getters are read once without changing caller objects', async () => {
+  const input = encodedItem(); const counts = {}; const item = {};
+  for (const [field, value] of Object.entries(input)) {
+    const kind = field === 'revision' ? 'N' : 'S'; const attribute = {};
+    Object.defineProperty(attribute, kind, { enumerable: true, get() { counts[field + kind] = (counts[field + kind] ?? 0) + 1; return value[kind]; } });
+    Object.defineProperty(item, field, { enumerable: true, get() { counts[field] = (counts[field] ?? 0) + 1; return attribute; } });
+  }
+  const { port } = readPort({ Item: item }); assert.deepEqual(await port.read(hash), record);
+  assert.deepEqual(counts, Object.fromEntries(Object.keys(input).flatMap(field => [[field, 1], [field + (field === 'revision' ? 'N' : 'S'), 1]])));
+  assert.equal(typeof Object.getOwnPropertyDescriptor(item, 'journal').get, 'function');
+});
+test('each AttributeValue requires exactly its single primitive S or N member', async () => {
+  for (const field of ['PK', 'SK', 'revision', 'journal']) {
+    const original = encodedItem()[field]; const kind = field === 'revision' ? 'N' : 'S'; const value = original[kind];
+    const malformed = [null, false, value, Object.assign([], original), { ...original, BOOL: false },
+      { [kind === 'S' ? 'N' : 'S']: value }, { [kind]: new String(value) }];
+    for (const attribute of malformed) {
+      const item = encodedItem(); item[field] = attribute; const { port, calls } = readPort({ Item: item });
+      await assert.rejects(port.read(hash), /^Error: OPS_JOURNAL_RECORD_REJECTED$/);
+      assert.equal(calls.length, 1); assert.equal(calls[0].operation, 'GetItem');
+    }
+  }
+});
+test('array rows and unreadable or callable item fields fail without exposing private diagnostics', async () => {
+  let hooks = 0; const privateError = () => { throw new Error('private recovery response'); };
+  const cases = [Object.assign([], encodedItem()), { ...encodedItem(), get revision() { return privateError(); } },
+    { ...encodedItem(), journal: { get S() { return privateError(); } } },
+    { ...encodedItem(), PK: { S: `PLAN#${hash}`, toJSON() { hooks++; return { S: 'other' }; } } }];
+  for (const item of cases) {
+    const { port, calls } = readPort({ Item: item });
+    await assert.rejects(port.read(hash), error => { assert.equal(error.message, 'OPS_JOURNAL_RECORD_REJECTED'); assert.equal(error.cause, undefined); return true; });
+    assert.equal(calls.length, 1);
+  }
+  assert.equal(hooks, 0);
+});
+test('journal service load cannot invent terminal progress from a changing response', async () => {
+  const { validatePlan } = await import('./plan.mjs');
+  const envelope = { sourceSha: 'a'.repeat(40), operation: 'PARTITION', resourceArn: 'arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughGroupsStage', contractHash: 'b'.repeat(64), maxItems: 10 };
+  const plan = { schemaVersion: 1, sourceSha: envelope.sourceSha, account: '092954139775', region: 'us-east-1', operation: envelope.operation,
+    resourceArn: envelope.resourceArn, contractHash: envelope.contractHash, expectedRevision: 3, maxItems: 10, recoveryManifestHash: 'c'.repeat(64) };
+  const planHash = validatePlan(plan, envelope).planHash;
+  const initial = { schemaVersion: 1, planHash, resourceArn: envelope.resourceArn, expectedRevision: 3, completedItems: 0, state: 'PREPARED' };
+  let reads = 0; const operations = []; const item = encodedItem(); item.PK.S = `PLAN#${planHash}`;
+  item.journal = { get S() { return JSON.stringify(++reads < 3 ? initial : { ...initial, completedItems: 10, state: 'COMPLETE' }); } };
+  const service = journalService(dynamoJournal(async (operation, request) => {
+    operations.push(operation); assert.equal(request.Key.PK.S, `PLAN#${planHash}`); return { Item: item };
+  }, arn));
+  assert.deepEqual(await service.load(plan, envelope), { revision: 0, journal: initial });
+  assert.equal(reads, 1); assert.deepEqual(operations, ['GetItem']);
+});
+test('actual CLI responses preserve valid numeric edges and reject ambiguous attributes with cleanup', async () => {
+  const { awsTransport } = await import('./aws-transport.mjs'); const { readFile, access } = await import('node:fs/promises');
+  const malformed = encodedItem(); malformed.PK.N = '99'; const cases = [encodedItem('0'), encodedItem(String(Number.MAX_SAFE_INTEGER)), malformed];
+  for (const [index, item] of cases.entries()) {
+    const files = []; const port = dynamoJournal(awsTransport(async (_command, args) => {
+      assert.deepEqual(args.slice(0, 2), ['dynamodb', 'get-item']);
+      const file = args[args.indexOf('--cli-input-json') + 1].slice(7); files.push(file);
+      const request = JSON.parse(await readFile(file, 'utf8')); assert.equal(request.ConsistentRead, true);
+      assert.equal(request.TableName, 'KnownEnoughOperationsJournal'); assert.equal(request.Key.PK.S, `PLAN#${hash}`);
+      return { stdout: JSON.stringify({ Item: item }) };
+    }), arn);
+    if (index === 2) await assert.rejects(port.read(hash), /^Error: OPS_JOURNAL_RECORD_REJECTED$/);
+    else assert.deepEqual(await port.read(hash), { ...record, revision: index === 1 ? Number.MAX_SAFE_INTEGER : 0 });
+    assert.equal(files.length, 1); await assert.rejects(access(files[0]), { code: 'ENOENT' });
+  }
+});
+test('read applies the raw 4096-byte bound to the same captured journal string', async () => {
+  const payload = JSON.stringify(record.journal);
+  for (const [text, valid] of [[payload + ' '.repeat(4096 - Buffer.byteLength(payload)), true],
+    [payload + ' '.repeat(4097 - Buffer.byteLength(payload)), false], [JSON.stringify({ ...record.journal, padding: 'é'.repeat(4096) }), false]]) {
+    const item = encodedItem(); item.journal.S = text; const { port, calls } = readPort({ Item: item });
+    if (valid) assert.deepEqual(await port.read(hash), record);
+    else await assert.rejects(port.read(hash), /^Error: OPS_JOURNAL_RECORD_REJECTED$/);
+    assert.equal(calls.length, 1);
+  }
+  let reads = 0; const item = encodedItem(); item.journal = { get S() { return ++reads < 3 ? payload : payload + ' '.repeat(5000); } };
+  const { port, calls } = readPort({ Item: item }); assert.deepEqual(await port.read(hash), record); assert.equal(reads, 1); assert.equal(calls.length, 1);
+});

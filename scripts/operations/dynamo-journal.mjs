@@ -4,6 +4,12 @@ function key(hash) {
   if (typeof hash !== 'string' || !/^[a-f0-9]{64}$/.test(hash)) throw new Error('OPS_JOURNAL_KEY_REJECTED');
   return { PK: { S: `PLAN#${hash}` }, SK: { S: 'JOURNAL' } };
 }
+function attribute(value, kind) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)
+    || Object.keys(value).length !== 1 || !Object.hasOwn(value, kind)
+    || typeof value[kind] !== 'string') throw new Error();
+  return value[kind];
+}
 function encode(hash, record) {
   const itemKey = key(hash);
   try {
@@ -38,12 +44,15 @@ export function dynamoJournal(transport, resourceArn) {
       catch { throw new Error('OPS_JOURNAL_STORAGE_FAILED'); }
       try {
         if (!response || typeof response !== 'object' || Array.isArray(response)) throw new Error();
-        if (response.Item === undefined) return null;
-        const item = response.Item;
-        if (Object.keys(item).sort().join(',') !== 'PK,SK,journal,revision' || item.PK.S !== `PLAN#${hash}` || item.SK.S !== 'JOURNAL'
-          || typeof item.revision.N !== 'string' || !/^(0|[1-9][0-9]*)$/.test(item.revision.N)
-          || typeof item.journal.S !== 'string' || Buffer.byteLength(item.journal.S) > 4096) throw new Error();
-        const record = { revision: Number(item.revision.N), journal: JSON.parse(item.journal.S) };
+        // Capture only Item: response metadata cannot affect journal validation.
+        const item = structuredClone(response.Item);
+        if (item === undefined) return null;
+        if (!item || typeof item !== 'object' || Array.isArray(item)
+          || Object.keys(item).sort().join(',') !== 'PK,SK,journal,revision') throw new Error();
+        const revision = attribute(item.revision, 'N'), payload = attribute(item.journal, 'S');
+        if (attribute(item.PK, 'S') !== `PLAN#${hash}` || attribute(item.SK, 'S') !== 'JOURNAL'
+          || !/^(0|[1-9][0-9]*)$/.test(revision) || Buffer.byteLength(payload) > 4096) throw new Error();
+        const record = { revision: Number(revision), journal: JSON.parse(payload) };
         encode(hash, record); return record;
       } catch { throw new Error('OPS_JOURNAL_RECORD_REJECTED'); }
     },
