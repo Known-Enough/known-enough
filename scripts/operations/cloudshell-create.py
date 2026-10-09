@@ -453,8 +453,11 @@ def main():
         aws = Aws(state)
         installer = Installer(state, args.source, (ROOT / 'infra/operations/setup.json').read_bytes(), aws)
         if args.action == 'review':
-            installer.identity()
-            result, review_hash = 'REVIEW_READY', installer.review()['reviewHash']
+            if state.load('execute.intent.json') is not None:
+                result, review_hash = installer.resume()
+            else:
+                installer.identity()
+                result, review_hash = 'REVIEW_READY', installer.review()['reviewHash']
         elif args.action == 'execute':
             result, review_hash = installer.execute(args.review_hash)
         elif args.action == 'readback':

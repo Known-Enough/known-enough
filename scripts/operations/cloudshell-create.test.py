@@ -701,6 +701,98 @@ class CreateTests(unittest.TestCase):
         self.assertNotIn(str(folder), output.getvalue())
         self.assertEqual({f.name: f.read_bytes() for f in folder.iterdir() if f.is_file()}, saved)
 
+    def cli_review(self):
+        folder = self.state.folder
+        self.state.close()
+        original_aws = module.Aws
+        output = io.StringIO()
+        try:
+            with patch.object(module, 'verify_checkout'), patch.object(module.Path, 'home', return_value=self.home), \
+                    patch.object(module, 'Aws', side_effect=lambda state: original_aws(state, self.fake)), \
+                    patch.object(sys, 'argv', ['create', 'review', '--source', SOURCE, '--state', str(folder)]), \
+                    contextlib.redirect_stdout(output):
+                code = module.main()
+        finally:
+            self.state = module.State(folder, self.home)
+        self.assertNotIn(module.ACCOUNT, output.getvalue())
+        self.assertNotIn('synthetic-stack', output.getvalue())
+        self.assertNotIn(str(folder), output.getvalue())
+        return code, json.loads(output.getvalue())
+
+    def test_cli_review_before_execution_still_returns_matching_review_hash(self):
+        review = self.prepared()
+        saved = {f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}
+        mutations = len(self.fake.mutations())
+        code, value = self.cli_review()
+        self.assertEqual((code, value['result'], value['reviewHash']), (0, 'REVIEW_READY', review))
+        self.assertEqual((value['requests'], value['mutations']), (5, 0))
+        self.assertEqual(len(self.fake.mutations()), mutations)
+        self.assertEqual({f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}, saved)
+
+    def test_cli_review_after_timeout_before_processing_reconciles_saved_execution(self):
+        review = self.prepared()
+        def uncertain(command, **options):
+            if command[2] == 'execute-change-set':
+                self.fake.calls.append(command)
+                raise subprocess.TimeoutExpired(command, 10)
+            return self.fake(command, **options)
+        self.installer.aws.executor = uncertain
+        self.reject(lambda: self.installer.execute(review), 'AWS_RESPONSE_UNCERTAIN')
+        saved = {f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}
+        before, mutations = len(self.fake.calls), len(self.fake.mutations())
+        code, value = self.cli_review()
+        self.assertEqual((code, value['result']), (0, 'INSTALL_PENDING'))
+        self.assertNotIn('reviewHash', value)
+        self.assertEqual((value['requests'], value['mutations']), (3, 0))
+        self.assertEqual([c[2] for c in self.fake.calls[before:]],
+                         ['get-caller-identity', 'get-open-id-connect-provider', 'describe-stacks'])
+        self.assertEqual(len(self.fake.mutations()), mutations)
+        self.assertEqual({f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}, saved)
+
+    def test_cli_review_after_accepted_execution_lost_ack_reports_pending(self):
+        review = self.prepared()
+        self.fake.lost.add('execute-change-set')
+        self.reject(lambda: self.installer.execute(review), 'AWS_RESPONSE_UNCERTAIN')
+        saved = {f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}
+        mutations = len(self.fake.mutations())
+        code, value = self.cli_review()
+        self.assertEqual((code, value['result']), (0, 'INSTALL_PENDING'))
+        self.assertNotIn('reviewHash', value)
+        self.assertEqual((value['requests'], value['mutations']), (3, 0))
+        self.assertEqual(len(self.fake.mutations()), mutations)
+        self.assertEqual({f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}, saved)
+
+    def test_cli_review_cannot_ignore_present_corrupt_execution_intent(self):
+        self.prepared()
+        self.state.save('execute.intent.json', {})
+        for intent, classification, requests in [({}, 'EXECUTE_INTENT_REJECTED', 2),
+                                                  (False, 'STATE_REJECTED', 0),
+                                                  ({'review': {'stackId': 'foreign-stack'}}, 'EXECUTE_INTENT_REJECTED', 2)]:
+            with self.subTest(classification=classification, intent=intent):
+                path = self.state.folder / 'execute.intent.json'
+                path.write_bytes(module.encoded(intent))
+                saved = {f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}
+                mutations = len(self.fake.mutations())
+                code, value = self.cli_review()
+                self.assertEqual((code, value['result'], value['classification']), (1, 'BLOCKED', classification))
+                self.assertNotIn('reviewHash', value)
+                self.assertEqual((value['requests'], value['mutations']), (requests, 0))
+                self.assertEqual(len(self.fake.mutations()), mutations)
+                self.assertEqual({f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}, saved)
+
+    def test_cli_review_after_installation_performs_configuration_only_readback(self):
+        self.installed()
+        saved = {f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}
+        mutations = len(self.fake.mutations())
+        code, value = self.cli_review()
+        self.assertEqual((code, value['result']), (0, 'CONFIGURATION_MATCH'))
+        self.assertNotIn('reviewHash', value)
+        self.assertEqual((value['requests'], value['mutations']), (21, 0))
+        self.assertEqual((value['effectivePermissions'], value['managedRecovery']), ('UNKNOWN', 'NOT_EXECUTED'))
+        self.assertEqual(len(self.fake.mutations()), mutations)
+        for name, raw in saved.items():
+            self.assertEqual((self.state.folder / name).read_bytes(), raw)
+
     def test_changed_source_or_template_preserves_original_state(self):
         original = (self.state.folder / 'plan.json').read_bytes()
         self.reject(lambda: module.Installer(self.state, 'b' * 40, TEMPLATE, self.installer.aws), 'STATE_CONFLICT')
