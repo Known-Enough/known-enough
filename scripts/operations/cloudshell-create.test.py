@@ -629,6 +629,78 @@ class CreateTests(unittest.TestCase):
         self.assertTrue(all(f.stat().st_mode & 0o777 == 0o600 for f in private))
         self.state = module.State(self.home / '.private' / 'state', self.home)
 
+    def test_present_empty_create_intent_requires_reconciliation(self):
+        self.state.save('create.intent.json', {})
+        saved = {f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}
+        self.reject(self.installer.prepare, 'CREATE_INTENT_REQUIRED')
+        self.assertEqual([c[2] for c in self.fake.calls], ['get-caller-identity', 'get-open-id-connect-provider'])
+        self.assertEqual(self.fake.mutations(), [])
+        self.assertEqual({f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}, saved)
+        self.assertFalse((self.state.folder / 'review.json').exists())
+
+    def test_present_empty_execute_intent_cannot_report_review_ready(self):
+        self.prepared()
+        self.state.save('execute.intent.json', {})
+        saved = {f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}
+        before = len(self.fake.calls)
+        mutations = len(self.fake.mutations())
+        self.reject(self.installer.resume, 'EXECUTE_INTENT_REJECTED')
+        self.assertEqual([c[2] for c in self.fake.calls[before:]], ['get-caller-identity', 'get-open-id-connect-provider'])
+        self.assertEqual(len(self.fake.mutations()), mutations)
+        self.assertEqual({f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}, saved)
+
+    def test_execute_with_empty_saved_intent_reconciles_without_revalidation_or_mutation(self):
+        review = self.prepared()
+        self.state.save('execute.intent.json', {})
+        saved = {f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}
+        before = len(self.fake.calls)
+        mutations = len(self.fake.mutations())
+        self.reject(lambda: self.installer.execute(review), 'EXECUTE_INTENT_REJECTED')
+        self.assertEqual([c[2] for c in self.fake.calls[before:]], ['get-caller-identity', 'get-open-id-connect-provider'])
+        self.assertEqual(len(self.fake.mutations()), mutations)
+        self.assertEqual({f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}, saved)
+
+    def test_nonobject_false_values_are_corruption_not_missing_intents(self):
+        for filename, action in [('create.intent.json', self.installer.prepare),
+                                 ('execute.intent.json', self.installer.resume),
+                                 ('execute.intent.json', lambda: self.installer.execute('0' * 64))]:
+            for value in [False, 0, None, [], '']:
+                with self.subTest(filename=filename, value=value):
+                    raw = module.encoded(value)
+                    self.state.save_bytes(filename, raw)
+                    try:
+                        self.installer.aws = module.Aws(self.state, self.fake)
+                        self.reject(action, 'STATE_REJECTED')
+                        self.assertEqual((self.state.folder / filename).read_bytes(), raw)
+                    finally:
+                        (self.state.folder / filename).unlink()
+        self.assertEqual(self.fake.mutations(), [])
+
+    def test_cli_empty_execute_intent_is_blocked_and_saved_bytes_stay_private(self):
+        self.prepared()
+        self.state.save('execute.intent.json', {})
+        folder = self.state.folder
+        saved = {f.name: f.read_bytes() for f in folder.iterdir() if f.is_file()}
+        self.state.close()
+        original_aws = module.Aws
+        output = io.StringIO()
+        with patch.object(module, 'verify_checkout'), patch.object(module.Path, 'home', return_value=self.home), \
+                patch.object(module, 'Aws', side_effect=lambda state: original_aws(state, self.fake)), \
+                patch.object(sys, 'argv', ['create', 'resume', '--source', SOURCE, '--state', str(folder)]), \
+                contextlib.redirect_stdout(output):
+            code = module.main()
+        self.state = module.State(folder, self.home)
+        self.assertEqual(code, 1)
+        value = json.loads(output.getvalue())
+        self.assertEqual(value['result'], 'BLOCKED')
+        self.assertEqual(value['classification'], 'EXECUTE_INTENT_REJECTED')
+        self.assertEqual((value['requests'], value['mutations']), (2, 0))
+        self.assertNotIn('reviewHash', value)
+        self.assertNotIn(module.ACCOUNT, output.getvalue())
+        self.assertNotIn('synthetic-stack', output.getvalue())
+        self.assertNotIn(str(folder), output.getvalue())
+        self.assertEqual({f.name: f.read_bytes() for f in folder.iterdir() if f.is_file()}, saved)
+
     def test_changed_source_or_template_preserves_original_state(self):
         original = (self.state.folder / 'plan.json').read_bytes()
         self.reject(lambda: module.Installer(self.state, 'b' * 40, TEMPLATE, self.installer.aws), 'STATE_CONFLICT')

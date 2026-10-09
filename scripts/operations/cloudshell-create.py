@@ -247,7 +247,7 @@ class Installer:
                                '--expected-bucket-owner', ACCOUNT], missing='NoSuchBucket') is None, 'BUCKET_ALREADY_EXISTS')
 
     def prepare(self):
-        if self.state.load('create.intent.json'):
+        if self.state.load('create.intent.json') is not None:
             return self.resume()
         self.identity()
         self.conflicts()
@@ -335,7 +335,7 @@ class Installer:
         return review
 
     def execute(self, review_hash):
-        if self.state.load('execute.intent.json'):
+        if self.state.load('execute.intent.json') is not None:
             return self.resume()
         self.identity()
         saved = self.state.load('review.json')
@@ -352,7 +352,7 @@ class Installer:
     def resume(self):
         self.identity()
         intent = self.state.load('execute.intent.json')
-        if intent:
+        if intent is not None:
             saved = self.execution_intent()
             status = self.stack(saved['stackId']).get('StackStatus')
             if status == 'CREATE_COMPLETE':
