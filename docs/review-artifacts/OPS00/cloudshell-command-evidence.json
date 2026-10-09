@@ -556,6 +556,20 @@
       "pythonRemoteExecution": "NOT_EXECUTED by existing workflow;12 local inventory tests only",
       "remoteRun": "https://github.com/Known-Enough/known-enough/actions/runs/37874183694",
       "remoteStatus": "IN_PROGRESS; not PASS yet"
+    },
+    {
+      "execution": "RUN163",
+      "checkpoint": "CODE_READY / phase released; managed setup BLOCKED",
+      "observed": "2026-10-09T02:26:51.088146+00:00",
+      "source": "c2046b43185669db98ae2a44c8a54d0e98e08931",
+      "verification": "https://github.com/Known-Enough/known-enough/actions/runs/37874183694",
+      "review": "root-readonly-integrity.md",
+      "evidence": "root-readonly-evidence.json",
+      "inventoryTests": "12 local PASS; not executed by remote workflow",
+      "commandBlocks": "checked public download/63 simulated reads/old-source and changed-checkout guards PASS",
+      "managedApply": "UNCHANGED / INVENTORY_REQUIRED",
+      "installation": "UNKNOWN",
+      "actualBawsCalls": 0
     }
   ]
 }
