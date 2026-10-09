@@ -1,0 +1,289 @@
+{
+  "evidenceOrigin": "user-supplied CloudShell allowlisted summary; no A-side AWS call",
+  "inventory": {
+    "schemaVersion": 1,
+    "sourceSha": "3c1edea0d450d2552bf08754fca6c568d172026d",
+    "account": "092954139775",
+    "region": "us-east-1",
+    "observedAt": "2026-10-09T15:41:39.125259+00:00",
+    "result": "INVENTORY_REQUIRED",
+    "mutations": 0,
+    "requests": 45,
+    "identity": "VERIFIED_ACCOUNT_ONLY",
+    "setupCapabilities": "UNKNOWN",
+    "effectivePermissions": "UNKNOWN",
+    "managedProof": "NOT_EXECUTED",
+    "expectedOidcSubject": "repo:Known-Enough@331386621/known-enough@1377587215:ref:refs/heads/main",
+    "reads": [
+      {
+        "id": "identity",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "165d01df3c723f1b6dbb97dddf53a29a4ee9389e7003c946b6ebec04b986c9c9"
+      },
+      {
+        "id": "KnownEnoughOperationsRecovery",
+        "status": "ABSENT",
+        "code": "ValidationError"
+      },
+      {
+        "id": "KnownEnoughPartitionsStorage",
+        "status": "ABSENT",
+        "code": "ValidationError"
+      },
+      {
+        "id": "known-enough-live-qa",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "53005aa33cabcf167e5fa868efe973fb580f45847e099c1591e581bd27b571a2"
+      },
+      {
+        "id": "known-enough-live-qa-get-template",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "6acce5dd138ade20cec56e2457627f4d69d82c07617e2882c2446205c0784920"
+      },
+      {
+        "id": "known-enough-live-qa-list-stack-resources",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "c784dd196b804fd4827b4d7e9cb02ea898fcfaa6fb978d6d27d61f8a04b53fee"
+      },
+      {
+        "id": "oidc",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "719ddec997befd51850180a26132d3c6a139e35fa2e6851caec4916670837b36"
+      },
+      {
+        "id": "KnownEnoughGithubOperationsRecovery",
+        "status": "ABSENT",
+        "code": "NoSuchEntity"
+      },
+      {
+        "id": "KnownEnoughStageApiRole",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "52901aada1c7b58ff10cc9b5dd9a7885591e29d7056404821a44eeae07ee0959"
+      },
+      {
+        "id": "KnownEnoughStageApiRole-inline",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "8e6931154999f36013fa3345ce2aa7baec24a3f1425409718030c31ad8a3b124"
+      },
+      {
+        "id": "KnownEnoughStageApiRole-attached",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "70ce8d269b083a62b1a56b8aa0748b3ce48d6379f224d74290e92f56c8475712"
+      },
+      {
+        "id": "KnownEnoughStageApiRole-policy-0",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "a927fa5178504b62a85f8e666e242bc68d537c5b79afab1801dde73d01df2849"
+      },
+      {
+        "id": "KnownEnoughStageApiRole-policy-1",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "18a2d827548fc7e0f2e7253e76dd255efd7d36952a8add0983b5b5d28ed9856b"
+      },
+      {
+        "id": "KnownEnoughGithubStagingInspector",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "d4160494c513713dc25cbfc504cf591e8a92e6cfa94625db36d514fb0059b922"
+      },
+      {
+        "id": "KnownEnoughGithubStagingInspector-inline",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "7ce0dbb2de9c9b9798f8fe204bbe2cb901ecf89b93d014e06ecb2e3cf0143d36"
+      },
+      {
+        "id": "KnownEnoughGithubStagingInspector-attached",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "70ce8d269b083a62b1a56b8aa0748b3ce48d6379f224d74290e92f56c8475712"
+      },
+      {
+        "id": "KnownEnoughGithubStagingInspector-policy-0",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "b5ed22066c49ecd1dc703430512b02cecd44d91b82521c3a69a69e797be7269c"
+      },
+      {
+        "id": "KnownEnoughGithubPrimaryRelease",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "0672fd3e241279b58d04bae6bb7966704461873dcfe597b0e42b163a4348e138"
+      },
+      {
+        "id": "KnownEnoughGithubPrimaryRelease-inline",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "3b08bc7e747ff908417ea859b350c2afe4ed1509277ebc07b62d57a869221cbf"
+      },
+      {
+        "id": "KnownEnoughGithubPrimaryRelease-attached",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "70ce8d269b083a62b1a56b8aa0748b3ce48d6379f224d74290e92f56c8475712"
+      },
+      {
+        "id": "KnownEnoughGithubPrimaryRelease-policy-0",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "c41453633a6de298e7589f5b1fe25f38770f26adcebf16725a2f38c8fb652ef7"
+      },
+      {
+        "id": "KnownEnoughGithubQaRelease",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "0951772b2b19c150b66e67b714bc8946638902746ce102583c644531b2febcb5"
+      },
+      {
+        "id": "KnownEnoughGithubQaRelease-inline",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "91a1cf121cb87d419ae4965e633a590c23d5ac6e0d63c80f6c89f522d401d6dc"
+      },
+      {
+        "id": "KnownEnoughGithubQaRelease-attached",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "70ce8d269b083a62b1a56b8aa0748b3ce48d6379f224d74290e92f56c8475712"
+      },
+      {
+        "id": "KnownEnoughGithubQaRelease-policy-0",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "8153d542329bd88fbfde18fcff0d0c372f2757cd4460ded5162ff496a47382be"
+      },
+      {
+        "id": "KnownEnoughGithubQaTest",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "037b6442440e19c183e1caeebde2de14d95b7e97fe0cac4d1224d71ffdf2a83f"
+      },
+      {
+        "id": "KnownEnoughGithubQaTest-inline",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "0a29e71c960d508d2ebbfeb1c805595d56f0e68e85485a6739c9a36a9abb5920"
+      },
+      {
+        "id": "KnownEnoughGithubQaTest-attached",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "70ce8d269b083a62b1a56b8aa0748b3ce48d6379f224d74290e92f56c8475712"
+      },
+      {
+        "id": "KnownEnoughGithubQaTest-policy-0",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "cb033cd278b7d1fe62a1ea020173b36c7bdb0e708221b3b73c9dcae6580d41a9"
+      },
+      {
+        "id": "KnownEnoughOperationsJournal",
+        "status": "ABSENT",
+        "code": "ResourceNotFoundException"
+      },
+      {
+        "id": "KnownEnoughPartitions",
+        "status": "ABSENT",
+        "code": "ResourceNotFoundException"
+      },
+      {
+        "id": "KnownEnoughGroupsStage",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "9a55235c92fb49496f47491b1ca2838a7163b6f6b2695b7344292e2e030db444"
+      },
+      {
+        "id": "KnownEnoughGroupsStage-describe-continuous-backups",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "bab441d0e57edcee1bd8f2d3d0f34d784fc436bcc044d2d776e07e51a922988a"
+      },
+      {
+        "id": "KnownEnoughGroupsStage-describe-time-to-live",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "d229c3a890e64a846767b890593349ac6c06173040b49781591a6332efbc93aa"
+      },
+      {
+        "id": "KnownEnoughStage",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "64d3c64989e87e92641093a69237a4278fdd52e115f83456d8c70157bf830feb"
+      },
+      {
+        "id": "KnownEnoughStage-describe-continuous-backups",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "bab441d0e57edcee1bd8f2d3d0f34d784fc436bcc044d2d776e07e51a922988a"
+      },
+      {
+        "id": "KnownEnoughStage-describe-time-to-live",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "d229c3a890e64a846767b890593349ac6c06173040b49781591a6332efbc93aa"
+      },
+      {
+        "id": "KnownEnoughQaControl",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "73a7ae5874a3f8f8130d2effdd806df5a241c8db8f9c1ff1fa684a1db69f45a6"
+      },
+      {
+        "id": "KnownEnoughQaControl-describe-continuous-backups",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "bab441d0e57edcee1bd8f2d3d0f34d784fc436bcc044d2d776e07e51a922988a"
+      },
+      {
+        "id": "KnownEnoughQaControl-describe-time-to-live",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "d229c3a890e64a846767b890593349ac6c06173040b49781591a6332efbc93aa"
+      },
+      {
+        "id": "get-bucket-versioning",
+        "status": "ABSENT",
+        "code": "NoSuchBucket"
+      },
+      {
+        "id": "primary-runtime",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "727b8960241fb5485cf21e089699ab0eb2ef3a2d762af2a58cfa10a013609bb4"
+      },
+      {
+        "id": "primary-pool",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "ce97e0e64b3210db2d9fd911682e1cefd7a86df7d1cc27971a813dd394e0fa96"
+      },
+      {
+        "id": "primary-participant",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "76d4be376ff54bf2c552dccce60bfeabfbb41a4505767e49c13970a4553c9bf4"
+      },
+      {
+        "id": "primary-display",
+        "status": "READ",
+        "code": null,
+        "metadataHash": "aef3728bbb86620fb9afdc37f0271178f46dbd78a5917be6cae13a3e3f123672"
+      }
+    ],
+    "configuration": {
+      "oidcAudience": "MATCH",
+      "recoveryTrust": "UNKNOWN"
+    },
+    "templateHash": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e"
+  }
+}

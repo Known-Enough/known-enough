@@ -1,5 +1,7 @@
 # OPS00 — Complete the GitHub operations path
 
+**A inventory received — 2026-10-09:** [Sanitized facts and concrete next action](../../../../review-artifacts/OPS00/a-cloudshell-inventory-20261009.md): proposed recovery resources service-reported absent,45reads/0writes; existing setup readable. Next package phase READY after any actual active claim: runnable CREATE preview/install/resume/readback and own-B recovery verification. Root blocker fixed; effective writes/installation still unverified.
+
 **Next phase — A's actual inventory result:** [Read-only root-identity correction](root-inventory-handoff.md) is READY/unclaimed. Exact same-account root is rejected locally before resource reads; installation/permissions remain unknown. Publish corrected tested commands while preserving private source-pinned state.
 
 **Priority phase — user direction, 2026-10-08:** [Prepare the CloudShell command package](cloudshell-command-handoff.md) at B's next verified idle intake, before unrelated improvements. This preparation is READY and does not depend on administrator credentials. Publish an immediately usable read-only first block and source-pinned conditional install/resume/verification package; explicitly name unavailable installed facts. Whole-task installation/managed acceptance stays blocked and original evidence remains. No new B claim or execution is inferred from this handoff.
