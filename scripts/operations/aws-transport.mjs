@@ -19,7 +19,7 @@ const commands = {
 };
 const codes = ['ConditionalCheckFailedException', 'PreconditionFailed', 'AccessDenied', 'AccessDeniedException', 'ResourceNotFoundException', 'NoSuchKey', 'NoSuchBucket', 'NoSuchLifecycleConfiguration', 'ExpiredToken', 'RequestTimeout'];
 function guard(op, input) {
-  if (!Object.hasOwn(commands, op) || !input || typeof input !== 'object' || Array.isArray(input)) throw new Error('OPS_AWS_REQUEST_REJECTED');
+  if (typeof op !== 'string' || !Object.hasOwn(commands, op) || !input || typeof input !== 'object' || Array.isArray(input)) throw new Error('OPS_AWS_REQUEST_REJECTED');
   if (commands[op][0] === 'dynamodb' && input.TableName !== table) throw new Error('OPS_AWS_TARGET_REJECTED');
   if (['GetItem', 'PutItem'].includes(op)) {
     const item = op === 'GetItem' ? input.Key : input.Item;
@@ -30,6 +30,21 @@ function guard(op, input) {
   if (commands[op][0] === 's3api' && (input.Bucket !== MANIFEST_BUCKET
     || (['PutObject', 'HeadObject', 'GetObject'].includes(op) && !/^manifests\/[a-f0-9]{64}\.json$/.test(input.Key ?? '')))) throw new Error('OPS_AWS_TARGET_REJECTED');
   if (op === 'PutObject' && (input.IfNoneMatch !== '*' || !Buffer.isBuffer(input.Body) || input.Body.length < 1 || input.Body.length > limit)) throw new Error('OPS_AWS_REQUEST_REJECTED');
+}
+function ownRequest(op, input) {
+  try {
+    if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error();
+    const { Body, ...fields } = input;
+    let bytes;
+    if (Body !== undefined) {
+      if (op !== 'PutObject' || !Buffer.isBuffer(Body) || Body.length < 1 || Body.length > limit) throw new Error();
+      bytes = Buffer.from(Body);
+    }
+    // Clone data before validating; caller serializers cannot rewrite the CLI input.
+    const request = JSON.parse(JSON.stringify(structuredClone(fields)));
+    if (bytes) request.Body = bytes;
+    return request;
+  } catch { throw new Error('OPS_AWS_REQUEST_REJECTED'); }
 }
 // No shell, automatic retry, private argv or raw subprocess diagnostics in output.
 // The injected executor is solely for subprocess-shape/failure/cleanup tests.
@@ -60,6 +75,7 @@ export function awsTransport(executor = execute) {
     }
   }
   return async (op, input) => {
+    input = ownRequest(op, input);
     guard(op, input);
     const directory = await mkdtemp(join(tmpdir(), 'ke-operations-'));
     try {
