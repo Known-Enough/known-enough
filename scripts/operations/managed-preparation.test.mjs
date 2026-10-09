@@ -125,9 +125,48 @@ test('actual preparation failure publishes the captured code before any syntheti
   let observed;
   try { await managedPreparation(env, async operation => { calls.push(operation); throw error; }); }
   catch (caught) { observed = safeFailure(caught); }
-  assert.deepEqual(observed, failure('AccessDenied'));
+  assert.deepEqual(observed, { ...failure('AccessDenied'), phase: 'INSTALLATION_READBACK',
+    action: 'sts:GetCallerIdentity', target: `arn:aws:iam::092954139775:role/${RECOVERY_ROLE}` });
   assert.deepEqual(calls, ['GetCallerIdentity']);
   assert.equal(reads, 1);
+});
+test('installed table rejection identifies a finite check before storage mutation', async () => {
+  const f = fixture({ DescribeTable: { Table: { ...fixtureTable(), SSEDescription: undefined } } });
+  let observed;
+  try { await managedPreparation(env, f.transport); } catch (error) { observed = safeFailure(error); }
+  assert.deepEqual(observed, { ...failure('OPS_INSTALLATION_REJECTED'), phase: 'INSTALLATION_READBACK',
+    action: 'dynamodb:DescribeTable', target: JOURNAL_ARN, check: 'TABLE_ENCRYPTION' });
+  assert.deepEqual(f.calls, ['GetCallerIdentity', 'DescribeTable']);
+});
+function fixtureTable() {
+  const resources = setupTemplate().Resources;
+  return { TableArn: JOURNAL_ARN, TableStatus: 'ACTIVE', DeletionProtectionEnabled: true,
+    BillingModeSummary: { BillingMode: 'PAY_PER_REQUEST' }, SSEDescription: { Status: 'ENABLED' },
+    KeySchema: resources.Journal.Properties.KeySchema, AttributeDefinitions: resources.Journal.Properties.AttributeDefinitions };
+}
+test('owned transport diagnostics keep finite action and target without private messages or fields', async () => {
+  const f = fixture(); const provider = Object.assign(new Error('synthetic-private-message'),
+    { name: 'AccessDenied', action: 'synthetic-private-action', target: 'synthetic-private-target' });
+  let observed;
+  try { await managedPreparation(env, async (op, input) => {
+    if (op === 'PutObject') throw provider;
+    return f.transport(op, input);
+  }); } catch (error) { observed = safeFailure(error); }
+  assert.deepEqual(observed, { ...failure('AccessDenied'), phase: 'STORAGE_PREPARATION',
+    action: 's3:PutObject', target: 'arn:aws:s3:::known-enough-operations-recovery-092954139775-us-east-1/manifests/*' });
+  assert.ok(!JSON.stringify(observed).includes('synthetic-private'));
+});
+test('unowned diagnostic-looking properties never enter the public failure', () => {
+  const error = { name: 'AccessDenied', phase: 'private', action: 'private', target: 'private', check: 'private' };
+  assert.deepEqual(safeFailure(error), failure('AccessDenied'));
+});
+test('malformed installed policy identifies the fixed check without exposing its bytes', async () => {
+  const f = fixture({ GetBucketPolicy: { Policy: 'synthetic-private-malformed' } });
+  let observed;
+  try { await managedPreparation(env, f.transport); } catch (error) { observed = safeFailure(error); }
+  assert.deepEqual(observed, { ...failure('OPS_INSTALLATION_REJECTED'), phase: 'INSTALLATION_READBACK',
+    action: 's3:GetBucketPolicy', target: 'arn:aws:s3:::known-enough-operations-recovery-092954139775-us-east-1', check: 'MANIFEST_POLICY_FORMAT' });
+  assert.ok(!f.calls.includes('PutObject') && !JSON.stringify(observed).includes('synthetic-private'));
 });
 test('the command-line reporting pattern emits finite JSON with empty stderr for unreadable errors', () => {
   const url = new URL('./managed-preparation.mjs', import.meta.url).href;
