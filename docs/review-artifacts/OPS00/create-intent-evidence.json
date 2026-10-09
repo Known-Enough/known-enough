@@ -1,0 +1,205 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-09T19:09:08.160952+00:00",
+  "phase": "CODE_READY_RELEASED",
+  "wholeTask": "REVIEW_UNCLAIMED",
+  "account": "Battosai1806",
+  "actorId": 143764700,
+  "scheduledAt": "2026-10-09T18:53:30.010Z",
+  "source": "6409b54dd819c22fb62999cd5238d00ea10f6568",
+  "sourceHashes": {
+    "scripts/operations/cloudshell-create.py": "6400b6d5a10464a0634be02e967c8d442a4a5935f7c335661972baa1612b302c",
+    "scripts/operations/cloudshell-create.test.py": "f261329c1e20f3432a69d7e7f281bf556192d0195077fc391c3cdf026621065f"
+  },
+  "intake": {
+    "start": "2026-10-09T18:54:15.437059+00:00",
+    "end": "2026-10-09T18:54:18.228485+00:00",
+    "scheduled": "2026-10-09T18:53:30.010Z",
+    "firstObservedClock": "2026-10-09T18:53:55Z",
+    "source": "7d3d0d6b6fbc0a4d7beaa2ae86eb3bb3b76d3e49",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "mainEqualClean": true,
+    "actualJobs": {
+      "queued": [],
+      "in_progress": []
+    }
+  },
+  "reproduction": {
+    "start": "2026-10-09T18:55:24.910635+00:00",
+    "end": "2026-10-09T18:55:24.951534+00:00",
+    "source": "7d3d0d6b6fbc0a4d7beaa2ae86eb3bb3b76d3e49",
+    "savedExecuteIntent": "EMPTY_OBJECT_PRESENT",
+    "resumeResult": "REVIEW_READY",
+    "resumeSimulatedReads": 6,
+    "subsequentExecute": "STATE_CONFLICT",
+    "extraMutations": 0,
+    "savedBytesUnchanged": true,
+    "actualAwsCalls": 0
+  },
+  "red": {
+    "label": "red",
+    "command": [
+      "python3",
+      "-B",
+      "scripts/operations/cloudshell-create.test.py"
+    ],
+    "start": "2026-10-09T18:58:08.969184+00:00",
+    "end": "2026-10-09T18:58:10.165620+00:00",
+    "exit": 1,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {}
+  },
+  "focused": {
+    "label": "focused",
+    "command": [
+      "python3",
+      "-B",
+      "scripts/operations/cloudshell-create.test.py"
+    ],
+    "start": "2026-10-09T18:58:24.841975+00:00",
+    "end": "2026-10-09T18:58:26.163174+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/cloudshell-create.py": "6400b6d5a10464a0634be02e967c8d442a4a5935f7c335661972baa1612b302c",
+      "scripts/operations/cloudshell-create.test.py": "f261329c1e20f3432a69d7e7f281bf556192d0195077fc391c3cdf026621065f"
+    }
+  },
+  "full": {
+    "label": "full",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "start": "2026-10-09T18:58:56.205760+00:00",
+    "end": "2026-10-09T19:02:30.666266+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/cloudshell-create.py": "6400b6d5a10464a0634be02e967c8d442a4a5935f7c335661972baa1612b302c",
+      "scripts/operations/cloudshell-create.test.py": "f261329c1e20f3432a69d7e7f281bf556192d0195077fc391c3cdf026621065f"
+    }
+  },
+  "driverDiff": {
+    "changedConditions": 3,
+    "allOtherDriverBytesUnchanged": true,
+    "source": "7d3d0d6b6fbc0a4d7beaa2ae86eb3bb3b76d3e49"
+  },
+  "sourceVerification": {
+    "id": 37977654123,
+    "source": "6409b54dd819c22fb62999cd5238d00ea10f6568",
+    "actor": 143764700,
+    "path": ".github/workflows/operations-verify.yml",
+    "event": "workflow_dispatch",
+    "createdAt": "2026-10-09T19:04:01Z",
+    "updatedAt": "2026-10-09T19:07:56Z",
+    "observedAt": "2026-10-09T19:08:34.473971+00:00",
+    "conclusion": "success",
+    "nativePassed": 251,
+    "applicationPassed": 1407,
+    "browserPassed": 64,
+    "installation": "UNKNOWN",
+    "managedRecovery": "NOT_EXECUTED",
+    "artifactSha256": {
+      "operations-report.json": "bfeadafe73c3970c326cb4fcde94236875c8a54b5d11029c50d3a8b644df034b",
+      "partition-report.json": "6ce6e89964731cf70446fa8c3fe35fce161eda67769e46b3e835390ba1a0cf33",
+      "retention-report.json": "1c3dbc34ccc311dc2a7f20ba9519c415972cc7b8d590df74b2e04fe80bf67f38",
+      "jobs-report.json": "4218e9151e9b8d5ecc81a522b506c3f320e08852480f372acb4752201e6f3863",
+      "setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+      "partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+      "jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639"
+    },
+    "reports": {
+      "operations-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "6409b54dd819c22fb62999cd5238d00ea10f6568",
+        "templateHash": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "managedRecovery": "UNKNOWN",
+        "apply": "DISABLED"
+      },
+      "partition-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "6409b54dd819c22fb62999cd5238d00ea10f6568",
+        "templateHash": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "effectivePermissions": "UNKNOWN",
+        "migration": "NOT_EXECUTED",
+        "activation": "DISABLED",
+        "managedRecovery": "UNKNOWN"
+      },
+      "retention-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "6409b54dd819c22fb62999cd5238d00ea10f6568",
+        "preparationHash": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "realPersonPolicy": "UNAPPROVED",
+        "dataOperations": "NOT_EXECUTED",
+        "participantGrants": "NOT_GRANTED",
+        "managedProof": "UNKNOWN"
+      },
+      "jobs-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "6409b54dd819c22fb62999cd5238d00ea10f6568",
+        "preparationHash": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "providerCalls": "NOT_EXECUTED",
+        "managedRecovery": "UNKNOWN",
+        "participantConsent": "NOT_GRANTED",
+        "cleanup": "UNKNOWN"
+      }
+    },
+    "jobs": [
+      {
+        "id": 113979896399,
+        "name": "verify",
+        "conclusion": "success",
+        "started_at": "2026-10-09T19:04:07Z",
+        "completed_at": "2026-10-09T19:07:55Z"
+      }
+    ],
+    "createPythonPassed": 49,
+    "createStep": {
+      "name": "Run CREATE command package regressions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 6,
+      "started_at": "2026-10-09T19:04:17Z",
+      "completed_at": "2026-10-09T19:04:17Z"
+    },
+    "inventoryPythonPassed": 23,
+    "pythonVersion": "3.12.3",
+    "inventoryStep": {
+      "name": "Run read-only CloudShell inventory regressions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-10-09T19:04:13Z",
+      "completed_at": "2026-10-09T19:04:17Z"
+    }
+  },
+  "protectedTrackedHashes": 964,
+  "currentOperatorSource": "b4aac38762e8668bb29373b02d2d75e1b0abb10a",
+  "currentCommandPackage": "UNCHANGED_NOT_REPINNED",
+  "actualOperatorState": "UNOBSERVED",
+  "actualAwsCalls": 0,
+  "installation": "UNKNOWN",
+  "effectivePermissions": "UNKNOWN",
+  "managedRecovery": "NOT_EXECUTED",
+  "requestedMonitorModel": "gpt-6-sol",
+  "requestedMonitorEffort": "medium",
+  "actualModelEffort": "UNVERIFIED",
+  "actualIdleDeliveryGating": "UNKNOWN"
+}
