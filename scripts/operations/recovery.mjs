@@ -5,6 +5,11 @@ import { journalService } from './journal.mjs';
 // no participant/data mutation and cannot advance a journal to COMPLETE.
 export async function prepareRecovery({ plan, envelope, manifestBytes, manifestTransport, bucket, journalStorage }) {
   const checked = validatePlan(plan, envelope);
+  // Keep validated primitive facts through every manifest and journal wait.
+  plan = Object.freeze(Object.fromEntries(Object.entries(checked).filter(([field]) => field !== 'planHash')));
+  envelope = Object.freeze(Object.fromEntries(
+    ['sourceSha', 'operation', 'resourceArn', 'contractHash', 'maxItems'].map(field => [field, checked[field]])
+  ));
   const manifests = manifestStore(manifestTransport, bucket);
   const journals = journalService(journalStorage);
   await manifests.preserve(manifestBytes, checked.recoveryManifestHash);
