@@ -1,10 +1,12 @@
 # OPS00: CloudShell commands for A
 
-**INVENTORY_REQUIRED. Start with block 1.** It downloads checked public source and reads configuration. Installation, activation and live acceptance are separate. Read-only inventory source: **9c2b168a25c6de345bce44e52397cfb8c666e928**. A uses A’s own AWS console session; B continues in its existing chat with its own GitHub account. No credentials are shared.
+**INVENTORY_REQUIRED. Start with block 1.** It downloads checked public source and reads configuration. Installation, activation and live acceptance are separate. Read-only inventory source: **3c1edea0d450d2552bf08754fca6c568d172026d**. A uses A’s own AWS console session; B continues in its existing chat with its own GitHub account. No credentials are shared.
 
 This update validates the types of OIDC audience and role/trust comparison metadata before interpreting a successful read. Malformed comparison fields produce `AWS_RESPONSE_REJECTED`/UNKNOWN, skip their dependents and allow the remaining sanitized inventory to finish. Valid configuration comparisons remain MATCH/MISMATCH; this is not installation proof.
 
-Preserve both earlier packages: original **b4637cf1a5c5ae83540c816cc47199473b213a3c** under `$HOME/.known-enough/ops00-20261009`, and root-compatible **c2046b43185669db98ae2a44c8a54d0e98e08931** under `$HOME/.known-enough/ops00-root-20261009`. Keep every private source marker, inventory and resume file. The new checked read-only package uses the separate `$HOME/.known-enough/ops00-metadata-20261009` directory. Do not repin, overwrite or delete either older clone.
+Capture now enforces128KiB per output stream while each command runs, drains both pipes and terminates/waits on overflow or timeout. Oversized output remains AWS_RESPONSE_LIMIT/UNKNOWN; no unbounded temporary output file is accepted. All existing account/private-state/metadata and installation guards remain.
+
+Preserve all three earlier packages: original **b4637cf1a5c5ae83540c816cc47199473b213a3c** under `$HOME/.known-enough/ops00-20261009`, root-compatible **c2046b43185669db98ae2a44c8a54d0e98e08931** under `$HOME/.known-enough/ops00-root-20261009`, and typed-metadata **9c2b168a25c6de345bce44e52397cfb8c666e928** under `$HOME/.known-enough/ops00-metadata-20261009`. Keep every private source marker, inventory and resume file. This checked read-only package uses the separate `$HOME/.known-enough/ops00-capture-20261009` directory. Do not repin, overwrite or delete older clones.
 
 ## 1. Copy this read-only block into standard CloudShell
 
@@ -13,8 +15,8 @@ Open account **092954139775**, region **us-east-1**, using your existing authori
 ```bash
 set -euo pipefail
 umask 077
-KE_PACKAGE_SHA=9c2b168a25c6de345bce44e52397cfb8c666e928
-KE_PACKAGE_HOME="$HOME/.known-enough/ops00-metadata-20261009"
+KE_PACKAGE_SHA=3c1edea0d450d2552bf08754fca6c568d172026d
+KE_PACKAGE_HOME="$HOME/.known-enough/ops00-capture-20261009"
 python3 - "$KE_PACKAGE_HOME" <<'PY'
 import os, sys
 from pathlib import Path
@@ -41,7 +43,7 @@ test "$(git remote get-url origin)" = https://github.com/Known-Enough/known-enou
 test "$(git rev-parse HEAD)" = "$KE_PACKAGE_SHA"
 test -z "$(git status --porcelain)"
 sha256sum --check <<'HASHES'
-2fa295f9a3757da0fc75191b69351f531828f43cd2b169df016f597531ae2405  scripts/operations/cloudshell-inventory.py
+ba8feef68de6ebe7cf9ba65f705cd61d773eb92c3dd424f4612c17b7e202e66f  scripts/operations/cloudshell-inventory.py
 3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e  infra/operations/setup.json
 262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0  infra/operations/partition-setup.json
 b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450  infra/operations/retention-setup.json
@@ -52,16 +54,16 @@ if [[ ! -e "$KE_PACKAGE_HOME/resume.sh" ]]; then
 #!/usr/bin/env bash
 set -euo pipefail
 umask 077
-cd "$HOME/.known-enough/ops00-metadata-20261009/source"
-test "$(git rev-parse HEAD)" = 9c2b168a25c6de345bce44e52397cfb8c666e928
+cd "$HOME/.known-enough/ops00-capture-20261009/source"
+test "$(git rev-parse HEAD)" = 3c1edea0d450d2552bf08754fca6c568d172026d
 test -z "$(git status --porcelain)"
 sha256sum --check <<'HASHES'
-2fa295f9a3757da0fc75191b69351f531828f43cd2b169df016f597531ae2405  scripts/operations/cloudshell-inventory.py
+ba8feef68de6ebe7cf9ba65f705cd61d773eb92c3dd424f4612c17b7e202e66f  scripts/operations/cloudshell-inventory.py
 3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e  infra/operations/setup.json
 HASHES
 python3 -B scripts/operations/cloudshell-inventory.py \
-  --source-sha 9c2b168a25c6de345bce44e52397cfb8c666e928 \
-  --state-dir "$HOME/.known-enough/ops00-metadata-20261009/state"
+  --source-sha 3c1edea0d450d2552bf08754fca6c568d172026d \
+  --state-dir "$HOME/.known-enough/ops00-capture-20261009/state"
 RESUME
   )
 fi
@@ -74,7 +76,7 @@ Return only its printed JSON summary (or `state/inventory-*/summary.json`), pack
 Resume after session expiry with one command:
 
 ```bash
-bash "$HOME/.known-enough/ops00-metadata-20261009/resume.sh"
+bash "$HOME/.known-enough/ops00-capture-20261009/resume.sh"
 ```
 
 Each inventory is a new dated attempt; the original source record and all prior files are retained. Interrupted download, changed source, unsafe path, expired/denied access or conflicting state stops. Preserve it and return the sanitized error; do not delete state, reset the clone or switch pins. HOME is regional,1GB and expires after120days of regional inactivity; retain a controlled private backup before that limit. `/tmp` is rebuildable tools only.

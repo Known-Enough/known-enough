@@ -663,5 +663,75 @@
       "apply": "INVENTORY_REQUIRED",
       "managedRecovery": "NOT_EXECUTED"
     }
+  ],
+  "captureBoundRevisions": [
+    {
+      "at": "2026-10-09T05:53:24.550147+00:00",
+      "source": "3c1edea0d450d2552bf08754fca6c568d172026d",
+      "status": "LOCAL_CHECKED_REMOTE_PENDING",
+      "localPythonPassed": 21,
+      "nativePassed": 174,
+      "pinnedFull": "1398 application/two existing optional skips/hosted1/browser64/reference7/planning15/lint/types/build/boundaries414 PASS",
+      "helperSha256": "ba8feef68de6ebe7cf9ba65f705cd61d773eb92c3dd424f4612c17b7e202e66f",
+      "readOnlyHome": "$HOME/.known-enough/ops00-capture-20261009",
+      "olderHomes": [
+        "$HOME/.known-enough/ops00-20261009",
+        "$HOME/.known-enough/ops00-root-20261009",
+        "$HOME/.known-enough/ops00-metadata-20261009"
+      ],
+      "commandChecks": {
+        "start": "2026-10-09T05:52:35.626400+00:00",
+        "end": "2026-10-09T05:52:41.540568+00:00",
+        "source": "3c1edea0d450d2552bf08754fca6c568d172026d",
+        "syntax": "3Bash/2embeddedPython/PASS",
+        "checks": [
+          {
+            "label": "first-download-root-read",
+            "exit": 0,
+            "expected": 0
+          },
+          {
+            "label": "saved-root-resume",
+            "exit": 0,
+            "expected": 0
+          },
+          {
+            "label": "saved-overflow-resume",
+            "exit": 0,
+            "expected": 0
+          },
+          {
+            "label": "first-block-root-repeat",
+            "exit": 0,
+            "expected": 0
+          },
+          {
+            "label": "old-source-marker-preserved-before-aws",
+            "exit": 1,
+            "expected": 1
+          },
+          {
+            "label": "changed-checkout-rejects-before-aws",
+            "exit": 1,
+            "expected": 1
+          }
+        ],
+        "attemptsPreserved": 4,
+        "simulatedReads": 84,
+        "actualAwsCalls": 0,
+        "awsMutations": 0,
+        "sourceDownload": "public exact Git commit fetched; five checksum pins PASS",
+        "docHash": "d7b5f79203142125e85430c4945818ccfa6e425c424059d38de9fadd66290d55",
+        "home": "Actual HOME unchanged; unique synthetic package-directory substitution only",
+        "legacySourceMarker": "PRESERVED",
+        "managedApply": "UNCHANGED; syntax-only, NOT_EXECUTED",
+        "syntheticStateRetention": "private mode700/600; no real credentials or metadata"
+      },
+      "remoteVerification": "37890665629 IN_PROGRESS; execution result UNKNOWN",
+      "installation": "UNKNOWN",
+      "apply": "INVENTORY_REQUIRED",
+      "managedRecovery": "NOT_EXECUTED",
+      "managedApplySection": "UNCHANGED; original source/private HOME preserved"
+    }
   ]
 }
