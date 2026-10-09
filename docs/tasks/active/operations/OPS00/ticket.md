@@ -1,5 +1,7 @@
 # OPS00 — Complete the GitHub operations path
 
+**Immediate priority — user directs tests, 2026-10-09:** [Two real sequential GitHub recovery runs](managed-test-priority.md), using the same frozen source/UUID and own B account. Installed configuration matched; A enabled/read back the missing test switch. Existing coding phase released; next managed-test phase READY, no unrelated bug hunting or prolonged doc closeout. Effective scope/managed proof remains open until actual evidence.
+
 **Installation milestone — A supplied CONFIGURATION_MATCH, 2026-10-09:** [Receipt and next proof](../../../../review-artifacts/OPS00/a-installed-recovery-20261009.md). Recovery stack configuration now matches on checked b4aac38; next phase is actual own-B effective-scope/two-run recovery, READY at next genuine idle intake. Whole-task DONE and other OPS installation remain unproved.
 
 **Next phase — real first-request failure:** [CloudShell credential handling](cloudshell-credentials-handoff.md) is READY/unclaimed. A confirms NO_CREDENTIALS/provider-present/zero mutations. Restore legitimate credential chain and finite diagnostics; publish guarded new commands preserving source-bound state.
@@ -12,7 +14,7 @@
 
 **Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of UX03, not deferred administrator installation. Prepare/test automation and the exact setup package now; install missing delegation only in the final cloud phase. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
 
-- Status: REVIEW / unclaimed — RUN186 public review recovery CODE_READY; own-B managed verification is next.
+- Status: READY / unclaimed for immediate own-B managed tests; installed configuration matched, prior coding phase released, effective-scope/two-run proof open.
 - Origin: user's 2026-10-03 direction that ordinary implementation/testing should be automatic and should not repeatedly depend on A's AWS login.
 - Worker: next eligible direct worker, current routing B; select/report actual model and effort at claim. One task/worker; no subagents or credential sharing.
 - Scope at claim: exact GitHub workflow/scripts, resource/permission contracts needed by OPS01–03, bounded policy/bootstrap proposal, meaningful integration checks, safe evidence and own log/handoff. Record exact files first. No general administrator grant or live operation is authorized by this ticket.
