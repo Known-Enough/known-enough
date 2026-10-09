@@ -392,5 +392,170 @@
   "wholeTask": "BLOCKED / unclaimed after checked phase release",
   "nextAction": "A runs block1 through own legitimate CloudShell setup session and returns only sanitized summary/comparisons; B reconciles before CREATE/UPDATE, then installed effective/source-matched two-run proof and OPS01\u219202\u219203/FIN03",
   "nominalNextWake": "2026-10-09T01:13:13.905Z",
-  "schedulerIdleGating": "UNKNOWN; existing same-chat30minute cadence/preferences unchanged"
+  "schedulerIdleGating": "UNKNOWN; existing same-chat30minute cadence/preferences unchanged",
+  "rootReadOnlyRevisions": [
+    {
+      "execution": "RUN163",
+      "phase": "root-compatible read-only inventory",
+      "checkpoint": "COMMANDS_CHECKED_LOCAL / remote verification PENDING",
+      "observed": "2026-10-09T02:22:47.418837+00:00",
+      "scheduled": "2026-10-09T02:13:15.293Z",
+      "sourceSync": {
+        "label": "source",
+        "expectedRemote": "9c866a8322c50be5a63a3e0f2701020dc2b677f3",
+        "sourceSha": "c2046b43185669db98ae2a44c8a54d0e98e08931",
+        "observedEnd": "2026-10-09T02:21:02.650992+00:00",
+        "account": "Battosai1806",
+        "actorId": 143764700,
+        "branch": "main",
+        "equalClean": true,
+        "protectedHashes": 913
+      },
+      "helperHashes": {
+        "scripts/operations/cloudshell-inventory.py": "aca919eb5f4acc586ea16f466900efad1625fb2c4c4806cbac3d42dc45fe22c6",
+        "scripts/operations/cloudshell-inventory.test.py": "dbaa6e864103b48646fbdd459f1ef89fe374831bfc683cee91f749a8488f71d5"
+      },
+      "commandRefresh": {
+        "at": "2026-10-09T02:21:21.953745+00:00",
+        "source": "c2046b43185669db98ae2a44c8a54d0e98e08931",
+        "helperSha256": "aca919eb5f4acc586ea16f466900efad1625fb2c4c4806cbac3d42dc45fe22c6",
+        "documentSha256": "0ace8e4529228c5bf1e01ed4da85516948e56b74cb9c36f585eb2e3a154649be",
+        "readOnlyHome": "$HOME/.known-enough/ops00-root-20261009",
+        "oldHome": "$HOME/.known-enough/ops00-20261009",
+        "managedApplySection": "UNCHANGED",
+        "installation": "UNKNOWN",
+        "apply": "INVENTORY_REQUIRED"
+      },
+      "commandBlockChecks": {
+        "start": "2026-10-09T02:21:21.991990+00:00",
+        "end": "2026-10-09T02:21:28.461118+00:00",
+        "source": "c2046b43185669db98ae2a44c8a54d0e98e08931",
+        "syntax": "3Bash/2embeddedPython/PASS",
+        "checks": [
+          {
+            "label": "first-download-root-read",
+            "exit": 0,
+            "expected": 0
+          },
+          {
+            "label": "saved-root-resume",
+            "exit": 0,
+            "expected": 0
+          },
+          {
+            "label": "first-block-root-repeat",
+            "exit": 0,
+            "expected": 0
+          },
+          {
+            "label": "old-source-marker-preserved-before-aws",
+            "exit": 1,
+            "expected": 1
+          },
+          {
+            "label": "changed-checkout-rejects-before-aws",
+            "exit": 1,
+            "expected": 1
+          }
+        ],
+        "attemptsPreserved": 3,
+        "simulatedReads": 63,
+        "actualAwsCalls": 0,
+        "awsMutations": 0,
+        "sourceDownload": "public exact Git commit fetched; five checksum pins PASS",
+        "docHash": "0ace8e4529228c5bf1e01ed4da85516948e56b74cb9c36f585eb2e3a154649be",
+        "home": "Actual HOME unchanged; unique synthetic package-directory substitution only",
+        "legacySourceMarker": "PRESERVED",
+        "managedApply": "UNCHANGED; syntax-only, NOT_EXECUTED",
+        "syntheticStateRetention": "private mode700/600; no real credentials or metadata"
+      },
+      "localChecks": {
+        "red": {
+          "label": "red",
+          "command": [
+            "python3",
+            "-B",
+            "scripts/operations/cloudshell-inventory.test.py"
+          ],
+          "start": "2026-10-09T02:16:40.024288+00:00",
+          "end": "2026-10-09T02:16:40.207323+00:00",
+          "exit": 1,
+          "frozen_unchanged": true,
+          "source_unchanged": true,
+          "source_hashes": {}
+        },
+        "focused": {
+          "label": "focused",
+          "command": [
+            "python3",
+            "-B",
+            "scripts/operations/cloudshell-inventory.test.py"
+          ],
+          "start": "2026-10-09T02:16:57.351299+00:00",
+          "end": "2026-10-09T02:16:57.551586+00:00",
+          "exit": 0,
+          "frozen_unchanged": true,
+          "source_unchanged": true,
+          "source_hashes": {
+            "scripts/operations/cloudshell-inventory.py": "aca919eb5f4acc586ea16f466900efad1625fb2c4c4806cbac3d42dc45fe22c6",
+            "scripts/operations/cloudshell-inventory.test.py": "dbaa6e864103b48646fbdd459f1ef89fe374831bfc683cee91f749a8488f71d5"
+          }
+        },
+        "native": {
+          "label": "native",
+          "command": [
+            "bash",
+            "-c",
+            "node --experimental-transform-types --test scripts/operations/*.test.mjs"
+          ],
+          "start": "2026-10-09T02:16:57.695856+00:00",
+          "end": "2026-10-09T02:17:01.741319+00:00",
+          "exit": 0,
+          "frozen_unchanged": true,
+          "source_unchanged": true,
+          "source_hashes": {
+            "scripts/operations/cloudshell-inventory.py": "aca919eb5f4acc586ea16f466900efad1625fb2c4c4806cbac3d42dc45fe22c6",
+            "scripts/operations/cloudshell-inventory.test.py": "dbaa6e864103b48646fbdd459f1ef89fe374831bfc683cee91f749a8488f71d5"
+          }
+        },
+        "full": {
+          "label": "full",
+          "command": [
+            "npm",
+            "run",
+            "check"
+          ],
+          "start": "2026-10-09T02:16:57.703711+00:00",
+          "end": "2026-10-09T02:20:46.840677+00:00",
+          "exit": 0,
+          "frozen_unchanged": true,
+          "source_unchanged": true,
+          "source_hashes": {
+            "scripts/operations/cloudshell-inventory.py": "aca919eb5f4acc586ea16f466900efad1625fb2c4c4806cbac3d42dc45fe22c6",
+            "scripts/operations/cloudshell-inventory.test.py": "dbaa6e864103b48646fbdd459f1ef89fe374831bfc683cee91f749a8488f71d5"
+          }
+        }
+      },
+      "counts": {
+        "redPass": 10,
+        "redFail": 2,
+        "inventory": 12,
+        "native": 174,
+        "application": 1398,
+        "optionalSkips": 2,
+        "browser": 64,
+        "boundaries": 414
+      },
+      "identity": "VERIFIED_ACCOUNT_ONLY; exact same-account root for metadata reads; no user/principal/effective capability mapping",
+      "privateOldHome": "PRESERVED; separate ops00-root-20261009 directory",
+      "installation": "UNKNOWN",
+      "apply": "INVENTORY_REQUIRED; original conditional install section unchanged",
+      "actualBawsCalls": 0,
+      "actualBawsMutations": 0,
+      "participantChanges": "NOT_EXECUTED",
+      "pythonRemoteExecution": "NOT_EXECUTED by existing workflow;12 local inventory tests only",
+      "remoteRun": "https://github.com/Known-Enough/known-enough/actions/runs/37874183694",
+      "remoteStatus": "IN_PROGRESS; not PASS yet"
+    }
+  ]
 }

@@ -1,16 +1,18 @@
 # OPS00: CloudShell commands for A
 
-**INVENTORY_REQUIRED. Start with block 1.** It downloads checked public source and reads configuration. Installation, activation and live acceptance are separate. Package source: **b4637cf1a5c5ae83540c816cc47199473b213a3c**. A uses A’s own AWS console session; B continues in its existing chat with its own GitHub account. No credentials are shared.
+**INVENTORY_REQUIRED. Start with block 1.** It downloads checked public source and reads configuration. Installation, activation and live acceptance are separate. Read-only inventory source: **c2046b43185669db98ae2a44c8a54d0e98e08931**. A uses A’s own AWS console session; B continues in its existing chat with its own GitHub account. No credentials are shared.
+
+The prior package at **b4637cf1a5c5ae83540c816cc47199473b213a3c** rejected root locally after STS. Preserve `$HOME/.known-enough/ops00-20261009` and every old private inventory/source marker/resume file. This corrected read-only package uses the separate `$HOME/.known-enough/ops00-root-20261009` directory; the block downloads its checked pin there and the new resume command uses that directory. Do not repin or overwrite the old clone.
 
 ## 1. Copy this read-only block into standard CloudShell
 
-Open account **092954139775**, region **us-east-1**, using your existing authorized setup identity. Account identity is checked before resource reads; account matching does not prove setup permissions. Root, foreign-account and unavailable identities stop. Standard CloudShell preserves HOME across sessions; VPC CloudShell does not. [AWS storage limits](https://docs.aws.amazon.com/cloudshell/latest/userguide/limits.html), [environment limitations](https://docs.aws.amazon.com/cloudshell/latest/userguide/working-with-aws-cloudshell.html).
+Open account **092954139775**, region **us-east-1**, using your existing authorized setup identity. Account identity is checked before resource reads; account matching does not prove setup permissions. The exact same-account root ARN, IAM user and assumed-role identities are accepted for these bounded metadata reads only. Foreign-account, malformed and unavailable identities stop. Root is not attributed to an IAM user or a workload role; setup capabilities and effective permissions remain UNKNOWN. Standard CloudShell preserves HOME across sessions; VPC CloudShell does not. [AWS storage limits](https://docs.aws.amazon.com/cloudshell/latest/userguide/limits.html), [environment limitations](https://docs.aws.amazon.com/cloudshell/latest/userguide/working-with-aws-cloudshell.html).
 
 ```bash
 set -euo pipefail
 umask 077
-KE_PACKAGE_SHA=b4637cf1a5c5ae83540c816cc47199473b213a3c
-KE_PACKAGE_HOME="$HOME/.known-enough/ops00-20261009"
+KE_PACKAGE_SHA=c2046b43185669db98ae2a44c8a54d0e98e08931
+KE_PACKAGE_HOME="$HOME/.known-enough/ops00-root-20261009"
 python3 - "$KE_PACKAGE_HOME" <<'PY'
 import os, sys
 from pathlib import Path
@@ -37,7 +39,7 @@ test "$(git remote get-url origin)" = https://github.com/Known-Enough/known-enou
 test "$(git rev-parse HEAD)" = "$KE_PACKAGE_SHA"
 test -z "$(git status --porcelain)"
 sha256sum --check <<'HASHES'
-caba2a291d203607a3e199ede3b54fd216ca79b12212efd732fb8f2cb8beb3e1  scripts/operations/cloudshell-inventory.py
+aca919eb5f4acc586ea16f466900efad1625fb2c4c4806cbac3d42dc45fe22c6  scripts/operations/cloudshell-inventory.py
 3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e  infra/operations/setup.json
 262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0  infra/operations/partition-setup.json
 b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450  infra/operations/retention-setup.json
@@ -48,16 +50,16 @@ if [[ ! -e "$KE_PACKAGE_HOME/resume.sh" ]]; then
 #!/usr/bin/env bash
 set -euo pipefail
 umask 077
-cd "$HOME/.known-enough/ops00-20261009/source"
-test "$(git rev-parse HEAD)" = b4637cf1a5c5ae83540c816cc47199473b213a3c
+cd "$HOME/.known-enough/ops00-root-20261009/source"
+test "$(git rev-parse HEAD)" = c2046b43185669db98ae2a44c8a54d0e98e08931
 test -z "$(git status --porcelain)"
 sha256sum --check <<'HASHES'
-caba2a291d203607a3e199ede3b54fd216ca79b12212efd732fb8f2cb8beb3e1  scripts/operations/cloudshell-inventory.py
+aca919eb5f4acc586ea16f466900efad1625fb2c4c4806cbac3d42dc45fe22c6  scripts/operations/cloudshell-inventory.py
 3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e  infra/operations/setup.json
 HASHES
 python3 -B scripts/operations/cloudshell-inventory.py \
-  --source-sha b4637cf1a5c5ae83540c816cc47199473b213a3c \
-  --state-dir "$HOME/.known-enough/ops00-20261009/state"
+  --source-sha c2046b43185669db98ae2a44c8a54d0e98e08931 \
+  --state-dir "$HOME/.known-enough/ops00-root-20261009/state"
 RESUME
   )
 fi
@@ -70,7 +72,7 @@ Return only its printed JSON summary (or `state/inventory-*/summary.json`), pack
 Resume after session expiry with one command:
 
 ```bash
-bash "$HOME/.known-enough/ops00-20261009/resume.sh"
+bash "$HOME/.known-enough/ops00-root-20261009/resume.sh"
 ```
 
 Each inventory is a new dated attempt; the original source record and all prior files are retained. Interrupted download, changed source, unsafe path, expired/denied access or conflicting state stops. Preserve it and return the sanitized error; do not delete state, reset the clone or switch pins. HOME is regional,1GB and expires after120days of regional inactivity; retain a controlled private backup before that limit. `/tmp` is rebuildable tools only.
@@ -87,6 +89,8 @@ Along with the summary, review saved files locally and return these **sanitized 
 - Primary pool/client verified-email/self-signup/callback/scopes and unchanged minimum8/all-character-class comparisons; source-bound primary model-off/release/configuration identity. These are configuration facts, not signup/journey execution.
 
 Own-B GitHub OIDC GET verified `use_default=true`, `use_immutable_subject=true`, prefix `repo:Known-Enough@331386621/known-enough@1377587215`. The checked proposal now trusts exactly `repo:Known-Enough@331386621/known-enough@1377587215:ref:refs/heads/main` plus `aud=sts.amazonaws.com` on the existing exact provider. This corrects the proposal’s obsolete name-only subject; no installed trust, GitHub setting or runtime permission was changed. [GitHub immutable subjects](https://docs.github.com/en/actions/reference/security/oidc). Installed effective assumption remains unverified.
+
+The conditional install section below is preserved on its original source pin and old private directory. Successful root metadata collection does not enable installation or establish root deployment capability. Return the new sanitized inventory first; B must separately reconcile its source/resources/capabilities before any reviewed install package or apply.
 
 ## 2. Conditional preview/install — wait for inventory reconciliation
 
