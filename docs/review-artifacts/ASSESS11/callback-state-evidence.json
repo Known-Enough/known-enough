@@ -1,0 +1,31 @@
+{
+  "run": "RUN180",
+  "stage": "CLAIMED",
+  "scope": {
+    "source": "cd7ce010008aa887996a0af1eeba0979fa6be587",
+    "code": [
+      "apps/web/src/cognito-session.ts",
+      "apps/web/src/cognito-session.test.ts"
+    ],
+    "docs": [
+      "docs/tasks/active/live-testing/ASSESS11/ticket.md",
+      "docs/task-board.md",
+      "docs/claim-log.md",
+      "docs/work-log-B.md",
+      "docs/handoff-B.md",
+      "docs/b-next-task-handoff.md",
+      "docs/monitor-log.md",
+      "docs/review-artifacts/ASSESS11/callback-state-integrity.md",
+      "docs/review-artifacts/ASSESS11/callback-state-evidence.json"
+    ]
+  },
+  "reproduction": {
+    "start": "2026-10-09T14:16:37.955350+00:00",
+    "end": "2026-10-09T14:16:38.080327+00:00",
+    "exit": 0,
+    "stdout": "{\"results\":[{\"name\":\"null\",\"calls\":0,\"error\":{\"name\":\"TypeError\",\"message\":\"Cannot read properties of null (reading 'state')\"},\"pendingConsumed\":true,\"sessionStored\":false},{\"name\":\"array-verifier\",\"calls\":1,\"posted\":\"synthetic_verifier\",\"pendingConsumed\":true,\"sessionStored\":true},{\"name\":\"numeric-verifier\",\"calls\":1,\"posted\":\"123\",\"pendingConsumed\":true,\"sessionStored\":true}],\"providerRequests\":0}\n",
+    "stderr": "(node:2380521) ExperimentalWarning: Transform Types is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+  },
+  "protectedHashes": 949,
+  "managedPrimaryProof": "UNKNOWN"
+}
