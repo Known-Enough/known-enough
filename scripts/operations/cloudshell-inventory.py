@@ -8,6 +8,8 @@ import json
 import os
 from pathlib import Path
 import re
+import selectors
+import signal
 import subprocess
 import time
 
@@ -25,6 +27,49 @@ CODES = frozenset(('AccessDenied', 'AccessDeniedException', 'UnauthorizedOperati
                   'NoSuchEntity', 'NoSuchBucket', 'ResourceNotFoundException',
                   'NoSuchLifecycleConfiguration', 'ValidationError', 'ExpiredToken',
                   'ExpiredTokenException', 'InvalidClientTokenId', 'Throttling', 'ThrottlingException'))
+CAPTURE_LIMIT = 131072
+
+
+class ResponseLimit(ValueError):
+    """A child exceeded the private per-stream capture bound."""
+
+
+def bounded_run(command, *, env, timeout, stdout, stderr, check=False):
+    """Drain both pipes, limiting bytes written while retaining the deadline."""
+    deadline = time.monotonic() + timeout
+    with subprocess.Popen(command, env=env, stdin=subprocess.DEVNULL,
+                          stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                          start_new_session=True) as child:
+        try:
+            with selectors.DefaultSelector() as ready:
+                for stream, target in ((child.stdout, stdout), (child.stderr, stderr)):
+                    ready.register(stream, selectors.EVENT_READ, [target, 0])
+                while ready.get_map():
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise subprocess.TimeoutExpired(command, timeout)
+                    for key, _ in ready.select(remaining):
+                        target, size = key.data
+                        chunk = os.read(key.fd, min(65536, CAPTURE_LIMIT - size + 1))
+                        if not chunk:
+                            ready.unregister(key.fileobj)
+                            continue
+                        target.write(chunk[:CAPTURE_LIMIT - size])
+                        if size + len(chunk) > CAPTURE_LIMIT:
+                            raise ResponseLimit('AWS_RESPONSE_LIMIT')
+                        key.data[1] += len(chunk)
+            code = child.wait(timeout=max(0, deadline - time.monotonic()))
+        except BaseException:
+            # Kill the owned session too if a credential helper keeps a pipe open.
+            try:
+                os.killpg(child.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            child.wait()
+            raise
+    if check and code:
+        raise subprocess.CalledProcessError(code, command)
+    return subprocess.CompletedProcess(command, code)
 
 
 def digest(data):
@@ -73,7 +118,7 @@ def persistent_dir(path, home):
 
 
 class Inventory:
-    def __init__(self, folder, source, executor=subprocess.run, clock=time.monotonic):
+    def __init__(self, folder, source, executor=bounded_run, clock=time.monotonic):
         self.folder, self.execute, self.clock = folder, executor, clock
         self.start = clock()
         self.report = dict(schemaVersion=1, sourceSha=source, account=ACCOUNT, region=REGION,
@@ -97,7 +142,7 @@ class Inventory:
         command = ['aws', *args, '--region', REGION, '--output', 'json', '--no-cli-pager', '--no-paginate',
                    '--cli-connect-timeout', '5', '--cli-read-timeout', '8']
         try:
-            # TemporaryFile also bounds captured output without keeping a pipe blocked.
+            # The transport bounds each file during execution, draining both pipes.
             import tempfile
             with tempfile.TemporaryFile(dir=self.folder) as out, tempfile.TemporaryFile(dir=self.folder) as err:
                 result = self.execute(command, env=env, timeout=min(10, remaining), stdout=out, stderr=err, check=False)
@@ -129,6 +174,8 @@ class Inventory:
             row['metadataHash'] = private_write(self.folder / (name + '.json'), value)
             row['status'] = 'READ'
             return value
+        except ResponseLimit:
+            row['code'] = 'AWS_RESPONSE_LIMIT'
         except subprocess.TimeoutExpired:
             row['code'] = 'AWS_READ_TIMEOUT'
         except FileNotFoundError:

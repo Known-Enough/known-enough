@@ -7,6 +7,7 @@ import sys
 import tempfile
 import types
 import unittest
+from unittest import mock
 
 sys.dont_write_bytecode = True
 spec = importlib.util.spec_from_file_location('inventory', Path(__file__).with_name('cloudshell-inventory.py'))
@@ -280,6 +281,82 @@ class InventoryTests(unittest.TestCase):
         inv = module.Inventory(self.folder, 'a' * 40, self.executor(), clock=iter((0, 181)).__next__)
         self.assertIsNone(inv.read('expired', ['iam', 'get-role']))
         self.assertEqual(self.calls, [])
+
+    def child_executor(self, script, observed, timeout=None):
+        """Exercise actual child pipes without AWS credentials or network calls."""
+        def run(command, **options):
+            if timeout is not None:
+                options['timeout'] = timeout
+            try:
+                return getattr(module, 'bounded_run', subprocess.run)(
+                    [sys.executable, '-c', script], **options)
+            finally:
+                observed['sizes'] = [os.fstat(options[name].fileno()).st_size
+                                     for name in ('stdout', 'stderr')]
+        return run
+
+    def test_live_capture_overflow_stops_child_and_bounds_both_temporary_files(self):
+        for stream in ('stdout', 'stderr'):
+            with self.subTest(stream=stream):
+                observed = {}
+                script = f'import sys;sys.{stream}.buffer.write(b"x" * 2097152)'
+                inv = module.Inventory(self.folder, 'a' * 40, self.child_executor(script, observed))
+                self.assertIsNone(inv.read('overflow', ['lambda', 'get-function-configuration']))
+                self.assertEqual(inv.report['reads'][0]['code'], 'AWS_RESPONSE_LIMIT')
+                self.assertTrue(all(size <= 131072 for size in observed['sizes']), observed)
+                self.assertFalse((self.folder / 'overflow.json').exists())
+                self.assertEqual(inv.report['requests'], 1)
+                self.assertEqual(inv.report['mutations'], 0)
+
+    def test_live_capture_drains_simultaneous_stdout_and_stderr_without_deadlock(self):
+        script = ('import sys,threading;'
+                  't=threading.Thread(target=lambda:sys.stderr.buffer.write(b"e"*131072));'
+                  't.start();sys.stdout.buffer.write(b"{\\\"ok\\\":true}"+b" "*131061);t.join()')
+        observed = {}
+        inv = module.Inventory(self.folder, 'a' * 40, self.child_executor(script, observed))
+        self.assertEqual(inv.read('simultaneous', ['lambda', 'get-function-configuration']), {'ok': True})
+        self.assertEqual(observed['sizes'], [131072, 131072])
+        self.assertEqual(inv.report['reads'][0]['status'], 'READ')
+
+    def test_live_capture_accepts_exact_boundary_but_rejects_one_extra_byte(self):
+        for extra, expected in ((0, 'READ'), (1, 'UNKNOWN')):
+            with self.subTest(extra=extra), tempfile.TemporaryDirectory() as folder:
+                observed = {}
+                script = f'import sys;sys.stdout.buffer.write(b"{{}}"+b" "*{131070+extra})'
+                inv = module.Inventory(Path(folder), 'a' * 40, self.child_executor(script, observed))
+                inv.read('boundary', ['lambda', 'get-function-configuration'])
+                row = inv.report['reads'][0]
+                self.assertEqual(row['status'], expected)
+                self.assertLessEqual(observed['sizes'][0], 131072)
+                self.assertEqual(row['code'], 'AWS_RESPONSE_LIMIT' if extra else None)
+
+    def test_live_capture_preserves_sanitized_denial_and_private_diagnostic_limit(self):
+        observed = {}
+        script = 'import sys;sys.stderr.write("An error occurred (AccessDenied): '+PRIVATE+'");sys.exit(1)'
+        inv = module.Inventory(self.folder, 'a' * 40, self.child_executor(script, observed))
+        self.assertIsNone(inv.read('denied', ['lambda', 'get-function-configuration']))
+        self.assertEqual(inv.report['reads'][0]['code'], 'AccessDenied')
+        self.assertNotIn(PRIVATE, json.dumps(inv.report))
+        self.assertFalse((self.folder / 'denied.json').exists())
+
+    def test_live_capture_timeout_terminates_and_reaps_owned_child(self):
+        original = subprocess.Popen
+        for script in ('import time;time.sleep(60)',
+                       'import os,time;os.close(1);os.close(2);time.sleep(60)'):
+            with self.subTest(script=script):
+                observed, children = {}, []
+                def record(*args, **options):
+                    child = original(*args, **options)
+                    children.append(child)
+                    return child
+                inv = module.Inventory(self.folder, 'a' * 40, self.child_executor(
+                    script, observed, timeout=0.1))
+                with mock.patch.object(module.subprocess, 'Popen', side_effect=record):
+                    self.assertIsNone(inv.read('timeout', ['lambda', 'get-function-configuration']))
+                self.assertEqual(inv.report['reads'][0]['code'], 'AWS_READ_TIMEOUT')
+                self.assertEqual(len(children), 1)
+                self.assertIsNotNone(children[0].returncode)
+                self.assertEqual(observed['sizes'], [0, 0])
 
     def test_persistent_home_rejects_outside_symlink_or_loose_state_and_never_overwrites(self):
         home = self.folder / 'home'; home.mkdir(mode=0o700)
