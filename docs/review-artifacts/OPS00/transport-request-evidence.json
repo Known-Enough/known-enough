@@ -1,0 +1,288 @@
+{
+  "schemaVersion": 1,
+  "run": 169,
+  "scheduled": "2026-10-09T07:13:19.801Z",
+  "intake": {
+    "scheduled": "2026-10-09T07:13:19.801Z",
+    "actualStart": "2026-10-09T07:13:29Z",
+    "observed": "2026-10-09T07:14:14.413738+00:00",
+    "source": "a39532c0f22edcab8bff27f9e8e06ff52c783977",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "mainCleanEqual": true,
+    "jobs": []
+  },
+  "claim": {
+    "observed": "2026-10-09T07:17:48.620622+00:00"
+  },
+  "claimSync": {
+    "label": "claim",
+    "expectedRemote": "a39532c0f22edcab8bff27f9e8e06ff52c783977",
+    "sourceSha": "7697a9e93099eda4f126a69fba7143b3f905cbc9",
+    "observedEnd": "2026-10-09T07:17:53.303530+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 927
+  },
+  "sourceSync": {
+    "label": "source",
+    "expectedRemote": "7697a9e93099eda4f126a69fba7143b3f905cbc9",
+    "sourceSha": "31bdb0dadf8226fda1e958828eebc3dea6a91ee2",
+    "observedEnd": "2026-10-09T07:25:41.197421+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 927
+  },
+  "releaseObserved": "2026-10-09T07:30:29.734099+00:00",
+  "scope": {
+    "source": "a39532c0f22edcab8bff27f9e8e06ff52c783977",
+    "docs": [
+      "docs/tasks/active/operations/OPS00/ticket.md",
+      "docs/task-board.md",
+      "docs/claim-log.md",
+      "docs/work-log-B.md",
+      "docs/handoff-B.md",
+      "docs/b-next-task-handoff.md",
+      "docs/monitor-log.md",
+      "docs/review-artifacts/OPS00/transport-request-integrity.md",
+      "docs/review-artifacts/OPS00/transport-request-evidence.json"
+    ],
+    "code": [
+      "scripts/operations/aws-transport.mjs",
+      "scripts/operations/aws-transport.test.mjs"
+    ],
+    "protectedCount": 927
+  },
+  "sourceSha256": {
+    "scripts/operations/aws-transport.mjs": "773ab442982ce58c3a93b6b0ab828ad5d598989f375f9475c9f8f32142d5f7f6",
+    "scripts/operations/aws-transport.test.mjs": "a1837096f62d86294eb6ea9d1f542fdb74c1fb7046a1fc24e8fe494172fae0e9"
+  },
+  "reproduction": {
+    "start": "2026-10-09T07:17:04.611612+00:00",
+    "end": "2026-10-09T07:17:04.690630+00:00",
+    "exit": 0,
+    "stdout": "{\"case\":\"root serializer target\",\"guardedRequestChanged\":true,\"simulatedCalls\":1,\"actualAwsCalls\":0,\"temporaryFilesRemoved\":true}\n{\"case\":\"nested serializer key\",\"guardedRequestChanged\":true,\"simulatedCalls\":1,\"actualAwsCalls\":0,\"temporaryFilesRemoved\":true}\n{\"case\":\"root serializer condition\",\"guardedRequestChanged\":true,\"simulatedCalls\":1,\"actualAwsCalls\":0,\"temporaryFilesRemoved\":true}\n",
+    "stderr": ""
+  },
+  "selfInspection": {
+    "observed": "2026-10-09T07:21:54.576558+00:00",
+    "selfInspection": "PASS",
+    "protectedHashes": 927,
+    "sourceHashes": {
+      "scripts/operations/aws-transport.mjs": "773ab442982ce58c3a93b6b0ab828ad5d598989f375f9475c9f8f32142d5f7f6",
+      "scripts/operations/aws-transport.test.mjs": "a1837096f62d86294eb6ea9d1f542fdb74c1fb7046a1fc24e8fe494172fae0e9"
+    },
+    "cloudshellPackage": "UNCHANGED",
+    "focused": 11,
+    "native": 185,
+    "newMethods": 7,
+    "initialRedFailed": 6,
+    "finalRedFailed": 7,
+    "reproductionActualAwsCalls": 0,
+    "requestBeforeAwait": "OWNED",
+    "serializers": "REJECTED_WITHOUT_EXECUTION",
+    "operationIdentifier": "PRIMITIVE_STRING"
+  },
+  "checks": {
+    "red": {
+      "label": "red",
+      "command": [
+        "node",
+        "--test",
+        "scripts/operations/aws-transport.test.mjs"
+      ],
+      "start": "2026-10-09T07:19:24.397661+00:00",
+      "end": "2026-10-09T07:19:24.656166+00:00",
+      "exit": 1,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {}
+    },
+    "red-final": {
+      "label": "red-final",
+      "command": [
+        "node",
+        "--test",
+        "scripts/operations/aws-transport.test.mjs"
+      ],
+      "start": "2026-10-09T07:20:40.982635+00:00",
+      "end": "2026-10-09T07:20:41.193766+00:00",
+      "exit": 1,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {}
+    },
+    "focused": {
+      "label": "focused",
+      "command": [
+        "node",
+        "--test",
+        "scripts/operations/aws-transport.test.mjs"
+      ],
+      "start": "2026-10-09T07:20:41.329934+00:00",
+      "end": "2026-10-09T07:20:41.553334+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/aws-transport.mjs": "773ab442982ce58c3a93b6b0ab828ad5d598989f375f9475c9f8f32142d5f7f6",
+        "scripts/operations/aws-transport.test.mjs": "a1837096f62d86294eb6ea9d1f542fdb74c1fb7046a1fc24e8fe494172fae0e9"
+      }
+    },
+    "native": {
+      "label": "native",
+      "command": [
+        "node",
+        "--experimental-strip-types",
+        "--experimental-transform-types",
+        "--test",
+        "scripts/operations/archive-recovery.test.mjs",
+        "scripts/operations/aws-transport.test.mjs",
+        "scripts/operations/dynamo-journal.test.mjs",
+        "scripts/operations/installed-readback.test.mjs",
+        "scripts/operations/jobs-setup.test.mjs",
+        "scripts/operations/journal.test.mjs",
+        "scripts/operations/managed-preparation.test.mjs",
+        "scripts/operations/manifest.test.mjs",
+        "scripts/operations/partition-recovery.test.mjs",
+        "scripts/operations/partition-setup.test.mjs",
+        "scripts/operations/plan.test.mjs",
+        "scripts/operations/recovery.test.mjs",
+        "scripts/operations/retention-setup.test.mjs",
+        "scripts/operations/setup.test.mjs"
+      ],
+      "start": "2026-10-09T07:20:41.720681+00:00",
+      "end": "2026-10-09T07:20:47.948271+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/aws-transport.mjs": "773ab442982ce58c3a93b6b0ab828ad5d598989f375f9475c9f8f32142d5f7f6",
+        "scripts/operations/aws-transport.test.mjs": "a1837096f62d86294eb6ea9d1f542fdb74c1fb7046a1fc24e8fe494172fae0e9"
+      }
+    },
+    "full": {
+      "label": "full",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-09T07:20:41.721860+00:00",
+      "end": "2026-10-09T07:25:06.226626+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/aws-transport.mjs": "773ab442982ce58c3a93b6b0ab828ad5d598989f375f9475c9f8f32142d5f7f6",
+        "scripts/operations/aws-transport.test.mjs": "a1837096f62d86294eb6ea9d1f542fdb74c1fb7046a1fc24e8fe494172fae0e9"
+      }
+    }
+  },
+  "offlineVerification": {
+    "id": 37898956692,
+    "source": "31bdb0dadf8226fda1e958828eebc3dea6a91ee2",
+    "actor": 143764700,
+    "path": ".github/workflows/operations-verify.yml",
+    "event": "workflow_dispatch",
+    "createdAt": "2026-10-09T07:25:45Z",
+    "updatedAt": "2026-10-09T07:29:26Z",
+    "observedAt": "2026-10-09T07:29:58.911593+00:00",
+    "conclusion": "success",
+    "nativePassed": 185,
+    "applicationPassed": 1398,
+    "browserPassed": 64,
+    "installation": "UNKNOWN",
+    "managedRecovery": "NOT_EXECUTED",
+    "artifactSha256": {
+      "operations-report.json": "39d54f6388a51c98fefa6257f0f3f8003bee6a52a0a161f4beff4b6ceedd649c",
+      "partition-report.json": "1b82968a44b82589b9e090316230c16b44696f7ad1f56a93a6b9f9d75ed5037e",
+      "retention-report.json": "a1e25faba62e46de78199540898e2660a3a00a26145bb9fc8f11d3669eb1164d",
+      "jobs-report.json": "42a3571b848210dbf7d951c69664df970d8d390eb32c1886f00a6b8626d47ff7",
+      "setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+      "partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+      "jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639"
+    },
+    "reports": {
+      "operations-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "31bdb0dadf8226fda1e958828eebc3dea6a91ee2",
+        "templateHash": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "managedRecovery": "UNKNOWN",
+        "apply": "DISABLED"
+      },
+      "partition-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "31bdb0dadf8226fda1e958828eebc3dea6a91ee2",
+        "templateHash": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "effectivePermissions": "UNKNOWN",
+        "migration": "NOT_EXECUTED",
+        "activation": "DISABLED",
+        "managedRecovery": "UNKNOWN"
+      },
+      "retention-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "31bdb0dadf8226fda1e958828eebc3dea6a91ee2",
+        "preparationHash": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "realPersonPolicy": "UNAPPROVED",
+        "dataOperations": "NOT_EXECUTED",
+        "participantGrants": "NOT_GRANTED",
+        "managedProof": "UNKNOWN"
+      },
+      "jobs-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "31bdb0dadf8226fda1e958828eebc3dea6a91ee2",
+        "preparationHash": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "providerCalls": "NOT_EXECUTED",
+        "managedRecovery": "UNKNOWN",
+        "participantConsent": "NOT_GRANTED",
+        "cleanup": "UNKNOWN"
+      }
+    },
+    "jobs": [
+      {
+        "id": 113716766458,
+        "name": "verify",
+        "conclusion": "success",
+        "started_at": "2026-10-09T07:25:48Z",
+        "completed_at": "2026-10-09T07:29:25Z"
+      }
+    ],
+    "inventoryPythonPassed": 23,
+    "pythonVersion": "3.12.3",
+    "inventoryStep": {
+      "name": "Run read-only CloudShell inventory regressions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-10-09T07:25:55Z",
+      "completed_at": "2026-10-09T07:25:59Z"
+    }
+  },
+  "coding": "CODE_READY",
+  "wholeTask": "BLOCKED/unclaimed",
+  "managedInstallation": "UNKNOWN",
+  "effectivePermissions": "UNKNOWN",
+  "privateManagedPreservation": "UNKNOWN",
+  "apply": "INVENTORY_REQUIRED",
+  "managedRecovery": "NOT_EXECUTED",
+  "actualAwsCalls": 0,
+  "mutations": 0,
+  "cloudshellPackage": "UNCHANGED",
+  "frozenHashes": 927
+}
