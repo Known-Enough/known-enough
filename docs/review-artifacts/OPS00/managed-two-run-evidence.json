@@ -1,0 +1,428 @@
+{
+  "schemaVersion": 1,
+  "checkpoint": "OPS00_MANAGED_PREPARATION_PAIR_VERIFIED",
+  "wholeTask": "REVIEW",
+  "sourceSha": "fba41c350264073a5583c4bfb5ed10158f9a24e8",
+  "observedAt": "2026-10-09T22:37:36.059733+00:00",
+  "scheduledAt": "2026-10-09T19:23:30.508Z",
+  "actualManagedPhaseStart": "2026-10-09T21:59:36.301105+00:00",
+  "account": "Battosai1806",
+  "actorId": 143764700,
+  "singleWorker": true,
+  "sameOriginalSyntheticProbe": "PRIVATELY_VERIFIED",
+  "sameFrozenSource": true,
+  "noMainPushBetweenPair": true,
+  "sameArtifactFacts": {
+    "sourceSha": "fba41c350264073a5583c4bfb5ed10158f9a24e8",
+    "planHash": "7b8c0fb2f61f67457bc463df531500ff151bce64bf12dad897ac45ad97107943",
+    "contractHash": "eb9c9a2f4bd87da6d88c1574615817c84dc840ff0ce840adc274dda0f9a512c0",
+    "state": "PREPARED",
+    "storageRevision": 0,
+    "completedItems": 0,
+    "recoveryPreservation": "READBACK_VERIFIED",
+    "operationExecution": "NOT_EXECUTED",
+    "syntheticManifestVersionHash": "e2234fe02b44cd8ade9789896f64fd367e339b5d9f9dacc778a5a232ba3a3673",
+    "result": "PREPARATION_VERIFIED",
+    "installation": "READBACK_VERIFIED"
+  },
+  "expectedPlanHash": "7b8c0fb2f61f67457bc463df531500ff151bce64bf12dad897ac45ad97107943",
+  "sameManifestKeyAndBytes": "SOURCE_BOUND_HASH_CHECKED",
+  "sameManifestVersionFingerprint": "VERIFIED",
+  "sameJournalIdentityAndProgress": "VERIFIED",
+  "runs": [
+    {
+      "id": 38000037864,
+      "url": "https://github.com/Known-Enough/known-enough/actions/runs/38000037864",
+      "source": "fba41c350264073a5583c4bfb5ed10158f9a24e8",
+      "createdAt": "2026-10-09T22:35:28Z",
+      "observedAt": "2026-10-09T22:36:11.037056+00:00",
+      "jobs": [
+        {
+          "id": 114055612629,
+          "name": "prepare",
+          "conclusion": "success",
+          "startedAt": "2026-10-09T22:35:31Z",
+          "completedAt": "2026-10-09T22:36:00Z"
+        }
+      ],
+      "artifactHash": "be4d3dd1610a926c5d14ef59638deafecfc5717f2857409de10e56e1e4d03858",
+      "conclusion": "success",
+      "sourceProbeInPrivateLogsVerified": true
+    },
+    {
+      "id": 38000129667,
+      "url": "https://github.com/Known-Enough/known-enough/actions/runs/38000129667",
+      "source": "fba41c350264073a5583c4bfb5ed10158f9a24e8",
+      "createdAt": "2026-10-09T22:36:29Z",
+      "observedAt": "2026-10-09T22:37:10.231680+00:00",
+      "jobs": [
+        {
+          "id": 114055919023,
+          "name": "prepare",
+          "conclusion": "success",
+          "startedAt": "2026-10-09T22:36:33Z",
+          "completedAt": "2026-10-09T22:36:59Z"
+        }
+      ],
+      "artifactHash": "be4d3dd1610a926c5d14ef59638deafecfc5717f2857409de10e56e1e4d03858",
+      "conclusion": "success",
+      "sourceProbeInPrivateLogsVerified": true
+    }
+  ],
+  "failedFirstAttempts": [
+    {
+      "id": 37996870316,
+      "url": "https://github.com/Known-Enough/known-enough/actions/runs/37996870316",
+      "source": "94e44e0d3141e0717ce1288cdfd923e4fd52d184",
+      "conclusion": "failure",
+      "artifact": {
+        "result": "FAILED",
+        "classification": "OPS_PREPARATION_FAILED",
+        "storagePreparation": "UNKNOWN",
+        "operationExecution": "NOT_EXECUTED"
+      },
+      "jobs": [
+        {
+          "id": 114045061859,
+          "name": "prepare",
+          "conclusion": "failure",
+          "startedAt": "2026-10-09T22:01:19Z",
+          "completedAt": "2026-10-09T22:01:45Z"
+        }
+      ],
+      "observedAt": "2026-10-09T22:02:13.171694+00:00"
+    },
+    {
+      "id": 37997597927,
+      "url": "https://github.com/Known-Enough/known-enough/actions/runs/37997597927",
+      "source": "d52075804840119f85a434c964228b82a8efa469",
+      "conclusion": "failure",
+      "artifact": {
+        "result": "FAILED",
+        "classification": "OPS_PREPARATION_FAILED",
+        "storagePreparation": "UNKNOWN",
+        "operationExecution": "NOT_EXECUTED",
+        "phase": "STORAGE_PREPARATION",
+        "action": "s3:GetObjectVersion",
+        "target": "arn:aws:s3:::known-enough-operations-recovery-092954139775-us-east-1/manifests/*"
+      },
+      "jobs": [
+        {
+          "id": 114047503521,
+          "name": "prepare",
+          "conclusion": "failure",
+          "startedAt": "2026-10-09T22:08:59Z",
+          "completedAt": "2026-10-09T22:09:22Z"
+        }
+      ],
+      "observedAt": "2026-10-09T22:09:35.925880+00:00"
+    },
+    {
+      "id": 37999042429,
+      "url": "https://github.com/Known-Enough/known-enough/actions/runs/37999042429",
+      "source": "728fe1b06bb2cf5bd78b003ee3acbfce02c72fc0",
+      "conclusion": "failure",
+      "artifact": {
+        "result": "FAILED",
+        "classification": "OPS_PREPARATION_FAILED",
+        "storagePreparation": "UNKNOWN",
+        "operationExecution": "NOT_EXECUTED",
+        "phase": "STORAGE_PREPARATION",
+        "action": "dynamodb:PutItem",
+        "target": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal"
+      },
+      "jobs": [
+        {
+          "id": 114052328874,
+          "name": "prepare",
+          "conclusion": "failure",
+          "startedAt": "2026-10-09T22:24:33Z",
+          "completedAt": "2026-10-09T22:25:03Z"
+        }
+      ],
+      "observedAt": "2026-10-09T22:25:11.833357+00:00"
+    }
+  ],
+  "tests": {
+    "focused": {
+      "count": 48,
+      "label": "focused",
+      "command": [
+        "node",
+        "--experimental-transform-types",
+        "--test",
+        "scripts/operations/aws-transport.test.mjs",
+        "scripts/operations/managed-preparation.test.mjs",
+        "scripts/operations/archive-recovery.test.mjs",
+        "scripts/operations/partition-recovery.test.mjs"
+      ],
+      "start": "2026-10-09T22:30:46.078324+00:00",
+      "end": "2026-10-09T22:30:49.728069+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        ".github/workflows/operations-recovery.yml": "966cb55cc6c399ef1c884e8dc67b977fc778aeec3b4a4a215d6013c8e047abe6",
+        "scripts/operations/managed-preparation.mjs": "0c70c1429943fd8c6f5ce235bef705dd494e675399a7eb0cd9413d86556cded4",
+        "scripts/operations/managed-preparation.test.mjs": "f3ac65f8b714eaa7bfdfc408e23a4d279d52170ff1840a50f3d5a64937b66943",
+        "scripts/operations/aws-transport.mjs": "c141f1c19a3c59f277b02b45ae9b649b4132224553e539c0e19597cb8dc28c18",
+        "scripts/operations/aws-transport.test.mjs": "65e8c15a81f8444cc303a15aac15b5c65780090be68896b569a953a094a140a8",
+        "scripts/operations/setup.mjs": "daea8a2497fb404dfe020546cdf978d00dcf2c443acaf2d721b3b031205a8ced",
+        "scripts/operations/setup.test.mjs": "e7df8c08911f15dc93b8837d4cfee2f53717207756837adf7c58ae40a4eff42f",
+        "infra/operations/setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+        "scripts/operations/archive-recovery.test.mjs": "e7655c30e4123c5d3b6e58546fc59789af05bd8fa9839d0bd9685594da6b7e27",
+        "scripts/operations/partition-recovery.test.mjs": "40222c21b2e78fdda5adb910c367d9b370190f52f4843ec3c8176965338c7458"
+      }
+    },
+    "native": {
+      "count": 260,
+      "label": "native",
+      "command": [
+        "bash",
+        "-c",
+        "node --experimental-transform-types --test scripts/operations/*.test.mjs"
+      ],
+      "start": "2026-10-09T22:30:54.451175+00:00",
+      "end": "2026-10-09T22:30:58.006343+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        ".github/workflows/operations-recovery.yml": "966cb55cc6c399ef1c884e8dc67b977fc778aeec3b4a4a215d6013c8e047abe6",
+        "scripts/operations/managed-preparation.mjs": "0c70c1429943fd8c6f5ce235bef705dd494e675399a7eb0cd9413d86556cded4",
+        "scripts/operations/managed-preparation.test.mjs": "f3ac65f8b714eaa7bfdfc408e23a4d279d52170ff1840a50f3d5a64937b66943",
+        "scripts/operations/aws-transport.mjs": "c141f1c19a3c59f277b02b45ae9b649b4132224553e539c0e19597cb8dc28c18",
+        "scripts/operations/aws-transport.test.mjs": "65e8c15a81f8444cc303a15aac15b5c65780090be68896b569a953a094a140a8",
+        "scripts/operations/setup.mjs": "daea8a2497fb404dfe020546cdf978d00dcf2c443acaf2d721b3b031205a8ced",
+        "scripts/operations/setup.test.mjs": "e7df8c08911f15dc93b8837d4cfee2f53717207756837adf7c58ae40a4eff42f",
+        "infra/operations/setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+        "scripts/operations/archive-recovery.test.mjs": "e7655c30e4123c5d3b6e58546fc59789af05bd8fa9839d0bd9685594da6b7e27",
+        "scripts/operations/partition-recovery.test.mjs": "40222c21b2e78fdda5adb910c367d9b370190f52f4843ec3c8176965338c7458"
+      }
+    },
+    "full": {
+      "application": 1407,
+      "existingOptionalSkips": 2,
+      "hosted": 1,
+      "browser": 64,
+      "reference": 7,
+      "planHash": 15,
+      "boundaries": 414,
+      "label": "full",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-09T22:30:54.451175+00:00",
+      "end": "2026-10-09T22:34:25.285948+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        ".github/workflows/operations-recovery.yml": "966cb55cc6c399ef1c884e8dc67b977fc778aeec3b4a4a215d6013c8e047abe6",
+        "scripts/operations/managed-preparation.mjs": "0c70c1429943fd8c6f5ce235bef705dd494e675399a7eb0cd9413d86556cded4",
+        "scripts/operations/managed-preparation.test.mjs": "f3ac65f8b714eaa7bfdfc408e23a4d279d52170ff1840a50f3d5a64937b66943",
+        "scripts/operations/aws-transport.mjs": "c141f1c19a3c59f277b02b45ae9b649b4132224553e539c0e19597cb8dc28c18",
+        "scripts/operations/aws-transport.test.mjs": "65e8c15a81f8444cc303a15aac15b5c65780090be68896b569a953a094a140a8",
+        "scripts/operations/setup.mjs": "daea8a2497fb404dfe020546cdf978d00dcf2c443acaf2d721b3b031205a8ced",
+        "scripts/operations/setup.test.mjs": "e7df8c08911f15dc93b8837d4cfee2f53717207756837adf7c58ae40a4eff42f",
+        "infra/operations/setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+        "scripts/operations/archive-recovery.test.mjs": "e7655c30e4123c5d3b6e58546fc59789af05bd8fa9839d0bd9685594da6b7e27",
+        "scripts/operations/partition-recovery.test.mjs": "40222c21b2e78fdda5adb910c367d9b370190f52f4843ec3c8176965338c7458"
+      }
+    }
+  },
+  "protectedTrackedHashes": 963,
+  "installationTemplateHash": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+  "originalCloudShellSource": "b4aac38762e8668bb29373b02d2d75e1b0abb10a",
+  "effectiveNegativeScope": "NOT_EXECUTED",
+  "operationExecution": "NOT_EXECUTED",
+  "participantOperation": "NOT_EXECUTED",
+  "otherOpsManagedProof": "NOT_EXECUTED",
+  "costBillingReadback": "UNKNOWN",
+  "actualAwsRequestCount": "NOT_INSTRUMENTED",
+  "syntheticStateCleanup": "RETAINED_FOR_RECOVERY_PROOF",
+  "temporaryRequestCleanup": "SOURCE_FINALLY_AND_FOCUSED_CHECKS_VERIFIED",
+  "reporting": {
+    "earlierWholeExecutionCadence": "FAILED",
+    "maximumEarlierPublicationGapSeconds": 7417,
+    "unobservedActivityCause": "UNKNOWN",
+    "latestModelEffort": "UNVERIFIED",
+    "schedulerIdleDeliveryGating": "UNKNOWN",
+    "managedPhaseLifecycle": {
+      "rows": [
+        {
+          "label": "started",
+          "id": 37996704168,
+          "url": "https://github.com/Known-Enough/known-enough/actions/runs/37996704168",
+          "createdAt": "2026-10-09T21:59:39Z",
+          "sourceSha": "2d814eacbf6753f4aef47a4f33f7150d00eaa518",
+          "artifactVerified": true,
+          "summaryMatch": true
+        },
+        {
+          "label": "progress-1",
+          "id": 37997017846,
+          "url": "https://github.com/Known-Enough/known-enough/actions/runs/37997017846",
+          "createdAt": "2026-10-09T22:02:46Z",
+          "sourceSha": "94e44e0d3141e0717ce1288cdfd923e4fd52d184",
+          "artifactVerified": true,
+          "summaryMatch": true
+        },
+        {
+          "label": "progress-2",
+          "id": 37997592528,
+          "url": "https://github.com/Known-Enough/known-enough/actions/runs/37997592528",
+          "createdAt": "2026-10-09T22:08:52Z",
+          "sourceSha": "d52075804840119f85a434c964228b82a8efa469",
+          "artifactVerified": true,
+          "summaryMatch": true
+        },
+        {
+          "label": "progress-3",
+          "id": 37997799870,
+          "url": "https://github.com/Known-Enough/known-enough/actions/runs/37997799870",
+          "createdAt": "2026-10-09T22:11:03Z",
+          "sourceSha": "d52075804840119f85a434c964228b82a8efa469",
+          "artifactVerified": true,
+          "summaryMatch": true
+        },
+        {
+          "label": "progress-4",
+          "id": 37998475688,
+          "url": "https://github.com/Known-Enough/known-enough/actions/runs/37998475688",
+          "createdAt": "2026-10-09T22:18:22Z",
+          "sourceSha": "d52075804840119f85a434c964228b82a8efa469",
+          "artifactVerified": true,
+          "summaryMatch": true
+        },
+        {
+          "label": "progress-5",
+          "id": 37999036180,
+          "url": "https://github.com/Known-Enough/known-enough/actions/runs/37999036180",
+          "createdAt": "2026-10-09T22:24:26Z",
+          "sourceSha": "728fe1b06bb2cf5bd78b003ee3acbfce02c72fc0",
+          "artifactVerified": true,
+          "summaryMatch": true
+        },
+        {
+          "label": "progress-6",
+          "id": 37999189464,
+          "url": "https://github.com/Known-Enough/known-enough/actions/runs/37999189464",
+          "createdAt": "2026-10-09T22:26:05Z",
+          "sourceSha": "728fe1b06bb2cf5bd78b003ee3acbfce02c72fc0",
+          "artifactVerified": true,
+          "summaryMatch": true
+        },
+        {
+          "label": "progress-7",
+          "id": 38000031927,
+          "url": "https://github.com/Known-Enough/known-enough/actions/runs/38000031927",
+          "createdAt": "2026-10-09T22:35:24Z",
+          "sourceSha": "fba41c350264073a5583c4bfb5ed10158f9a24e8",
+          "artifactVerified": true,
+          "summaryMatch": true
+        },
+        {
+          "label": "finished",
+          "id": 38000230759,
+          "url": "https://github.com/Known-Enough/known-enough/actions/runs/38000230759",
+          "createdAt": "2026-10-09T22:37:38Z",
+          "sourceSha": "fba41c350264073a5583c4bfb5ed10158f9a24e8",
+          "artifactVerified": true,
+          "summaryMatch": true
+        }
+      ],
+      "gaps": [
+        187.0,
+        366.0,
+        131.0,
+        439.0,
+        364.0,
+        99.0,
+        559.0,
+        134.0
+      ],
+      "maximumSeconds": 559.0,
+      "managedPhaseCadence": "PASS",
+      "wholeExecutionEarlierCadence": "FAILED_7417_SECONDS",
+      "observedAt": "2026-10-09T22:39:28.481673+00:00"
+    },
+    "finishedReceipt": {
+      "label": "finished",
+      "id": 38000230759,
+      "url": "https://github.com/Known-Enough/known-enough/actions/runs/38000230759",
+      "createdAt": "2026-10-09T22:37:38Z",
+      "sourceSha": "fba41c350264073a5583c4bfb5ed10158f9a24e8",
+      "artifactVerified": true,
+      "summaryMatch": true
+    },
+    "finalPreparedChatSummary": "OPS00\u2019s [first probe](https://github.com/Known-Enough/known-enough/actions/runs/38000037864) and [restart probe](https://github.com/Known-Enough/known-enough/actions/runs/38000129667) passed on the same source and identity, preserving the manifest version and journal. Fixed both CLI failures; 260 operations tests and the full check passed. Negative-scope proof remains open, and the earlier reporting gap is recorded.",
+    "externalChatRender": "UNOBSERVED_UNTIL_FINAL_RESPONSE",
+    "coalescedScheduledHints": [
+      "2026-10-09T19:53:30.952Z",
+      "2026-10-09T20:23:31.400Z",
+      "2026-10-09T20:53:31.866Z",
+      "2026-10-09T21:23:32.302Z",
+      "2026-10-09T21:53:34.583Z"
+    ],
+    "toolObservationGaps": [
+      {
+        "from": "2026-10-09T19:44:48Z",
+        "to": "2026-10-09T19:54:18Z",
+        "seconds": 570,
+        "activity": "UNOBSERVED",
+        "cause": "UNKNOWN"
+      },
+      {
+        "from": "2026-10-09T19:54:18Z",
+        "to": "2026-10-09T21:56:00Z",
+        "seconds": 7302,
+        "activity": "UNOBSERVED",
+        "cause": "UNKNOWN"
+      }
+    ]
+  },
+  "nextAction": "Fresh verified sequential claim for bounded non-destructive negative resource/key-prefix/IAM/self-delegation probes; then remaining OPS00 operation-capability and OPS01\u201303 managed closeout. Do not reset original installation or synthetic recovery state.",
+  "preCredentialHostedNativeTests": [
+    {
+      "id": 38000037864,
+      "observedAt": "2026-10-09T22:36:36.658148+00:00",
+      "preCredentialNativeCounts": {
+        "tests": [
+          260
+        ],
+        "pass": [
+          260
+        ],
+        "fail": [
+          0
+        ],
+        "skipped": [
+          0
+        ]
+      }
+    },
+    {
+      "id": 38000129667,
+      "observedAt": "2026-10-09T22:37:35.469486+00:00",
+      "preCredentialNativeCounts": {
+        "tests": [
+          260
+        ],
+        "pass": [
+          260
+        ],
+        "fail": [
+          0
+        ],
+        "skipped": [
+          0
+        ]
+      }
+    }
+  ],
+  "observedWorkCheckpointEnd": "2026-10-09T22:39:28.481673+00:00",
+  "finalSynchronization": "PENDING"
+}
