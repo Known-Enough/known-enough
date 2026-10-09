@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "phase": "RUN183",
+  "task": "OPS00",
+  "status": "IN_PROGRESS",
+  "claimAt": "2026-10-09T18:00:16.255978+00:00",
+  "baseline": "e6e60e2f76aa0cf07992b0bf0bc216ebee283389",
+  "account": "Battosai1806",
+  "actorId": 143764700,
+  "scope": {
+    "source": "e6e60e2f76aa0cf07992b0bf0bc216ebee283389",
+    "code": [
+      "scripts/operations/cloudshell-create.py",
+      "scripts/operations/cloudshell-create.test.py"
+    ],
+    "docs": [
+      "docs/tasks/active/operations/OPS00/ticket.md",
+      "docs/task-board.md",
+      "docs/claim-log.md",
+      "docs/work-log-B.md",
+      "docs/handoff-B.md",
+      "docs/b-next-task-handoff.md",
+      "docs/monitor-log.md",
+      "docs/review-artifacts/OPS00/cloudshell-commands.md",
+      "docs/review-artifacts/OPS00/create-pagination-integrity.md",
+      "docs/review-artifacts/OPS00/create-pagination-evidence.json"
+    ]
+  },
+  "protectedHashes": 958,
+  "reproduction": {
+    "start": "2026-10-09T17:55:57.881988+00:00",
+    "end": "2026-10-09T17:55:58.101382+00:00",
+    "source": "e6e60e2f76aa0cf07992b0bf0bc216ebee283389",
+    "cases": [
+      {
+        "field": "NextToken",
+        "valueType": "int",
+        "result": "CONFIGURATION_MATCH",
+        "configurationWritten": true,
+        "simulatedReads": 18,
+        "actualAws": 0
+      },
+      {
+        "field": "Marker",
+        "valueType": "bool",
+        "result": "CONFIGURATION_MATCH",
+        "configurationWritten": true,
+        "simulatedReads": 18,
+        "actualAws": 0
+      },
+      {
+        "field": "NextMarker",
+        "valueType": "list",
+        "result": "CONFIGURATION_MATCH",
+        "configurationWritten": true,
+        "simulatedReads": 18,
+        "actualAws": 0
+      },
+      {
+        "field": "NextToken",
+        "valueType": "dict",
+        "result": "CONFIGURATION_MATCH",
+        "configurationWritten": true,
+        "simulatedReads": 18,
+        "actualAws": 0
+      }
+    ],
+    "realAwsCalls": 0
+  },
+  "actualAwsCalls": 0,
+  "installation": "UNKNOWN",
+  "managedRecovery": "NOT_EXECUTED"
+}
