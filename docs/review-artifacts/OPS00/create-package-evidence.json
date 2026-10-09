@@ -1,0 +1,28 @@
+{
+  "run": 182,
+  "baseline": "1a4eeeea746cc4bca55ebf60a59e0738bc79e05b",
+  "claimObserved": "2026-10-09T17:19:05.548511+00:00",
+  "scope": {
+    "source": "1a4eeeea746cc4bca55ebf60a59e0738bc79e05b",
+    "code": [
+      "scripts/operations/cloudshell-create.py",
+      "scripts/operations/cloudshell-create.test.py",
+      ".github/workflows/operations-verify.yml"
+    ],
+    "docs": [
+      "docs/tasks/active/operations/OPS00/ticket.md",
+      "docs/task-board.md",
+      "docs/claim-log.md",
+      "docs/work-log-B.md",
+      "docs/handoff-B.md",
+      "docs/b-next-task-handoff.md",
+      "docs/monitor-log.md",
+      "docs/review-artifacts/OPS00/cloudshell-commands.md",
+      "docs/review-artifacts/OPS00/create-package-integrity.md",
+      "docs/review-artifacts/OPS00/create-package-evidence.json"
+    ]
+  },
+  "protectedHashes": 955,
+  "inventorySource": "3c1edea0d450d2552bf08754fca6c568d172026d",
+  "managedProof": "NOT_EXECUTED"
+}
