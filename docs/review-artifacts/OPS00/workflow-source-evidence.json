@@ -1,0 +1,33 @@
+{
+  "run": "RUN179",
+  "stage": "CLAIMED",
+  "source": "662f2d62ecc0e95e2c8d15d46a2afcb3f6819afc",
+  "scope": {
+    "source": "662f2d62ecc0e95e2c8d15d46a2afcb3f6819afc",
+    "code": [
+      "scripts/operations/verify.mjs",
+      "scripts/operations/setup.test.mjs"
+    ],
+    "docs": [
+      "docs/tasks/active/operations/OPS00/ticket.md",
+      "docs/task-board.md",
+      "docs/claim-log.md",
+      "docs/work-log-B.md",
+      "docs/handoff-B.md",
+      "docs/b-next-task-handoff.md",
+      "docs/monitor-log.md",
+      "docs/review-artifacts/OPS00/workflow-source-integrity.md",
+      "docs/review-artifacts/OPS00/workflow-source-evidence.json"
+    ]
+  },
+  "reproduction": {
+    "start": "2026-10-09T13:49:17.295679+00:00",
+    "end": "2026-10-09T13:49:17.332507+00:00",
+    "exit": 0,
+    "stdout": "{\"results\":[{\"case\":\"array\",\"returnedType\":\"object\",\"reportSourceType\":\"object\"},{\"case\":\"boxed\",\"returnedType\":\"object\",\"reportSourceType\":\"object\"},{\"case\":\"changing-source\",\"returned\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"expected\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"reads\":4}],\"providerRequests\":0}\n",
+    "stderr": ""
+  },
+  "protectedHashes": 947,
+  "managedInstallation": "UNKNOWN",
+  "managedProof": "NOT_EXECUTED"
+}
