@@ -1,0 +1,429 @@
+{
+  "schemaVersion": 1,
+  "task": "OPS00",
+  "phase": "source-bound-owned-input-validation",
+  "workerAccount": "Battosai1806",
+  "actorId": 143764700,
+  "scheduledAt": "2026-10-09T01:43:14.853Z",
+  "actualStart": "2026-10-09T01:43:25.648101Z",
+  "preparedAt": "2026-10-09T02:03:28.766380+00:00",
+  "intakeSource": "3d9e43771deb24eedadd744ba260b59552f2a7c5",
+  "claim": {
+    "label": "claim",
+    "expectedRemote": "3d9e43771deb24eedadd744ba260b59552f2a7c5",
+    "sourceSha": "7f005bf822bece456ca686ba54465c9401faff7d",
+    "observedEnd": "2026-10-09T01:46:27.381996+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 912
+  },
+  "claimAmendment": {
+    "utc": "2026-10-09T01:50:56.431008+00:00"
+  },
+  "localAmendmentSyncDiagnostic": {
+    "observedAt": "2026-10-09T01:52:34.068695+00:00",
+    "outcome": "LOCAL_GATE_STOP_BEFORE_COMMIT_OR_PUSH",
+    "error": "AssertionError: unstaged scoped source present in documentation-only sync",
+    "privateHelperLine": 17,
+    "remoteDivergence": false,
+    "disposition": "Own seven staged amendment records retained; integrate only with final checked source in same existing claim; no new task starts."
+  },
+  "checkedSource": "d20f67383ad224908e80c8a44a05ec5266ee0e71",
+  "checkedSourceSha256": {
+    "scripts/operations/plan.mjs": "7e5f4858e619ff94eb575892164ea3de9dcd85ba5956671bf8c1539b8c358b29",
+    "scripts/operations/plan.test.mjs": "9c78eac06a4e5ef3b1f631f4609edebeffc92b912b7a1ec3df7669a688368ef1"
+  },
+  "protectedTrackedFiles": 912,
+  "protectedUnchanged": true,
+  "cloudshellPackageSha256": "c18d9921bd58e9b10bce79637f1cbd123e6e7d498a541c2f2204109a7aa616b3",
+  "originalPureReproduction": {
+    "source": "3d9e43771deb24eedadd744ba260b59552f2a7c5",
+    "observedAt": "2026-10-09T01:45:30.318Z",
+    "kind": "PURE_VALIDATOR_ONLY",
+    "realProviderRequests": 0,
+    "observations": [
+      {
+        "name": "array",
+        "accepted": true,
+        "returnedSourceType": "object",
+        "arraySource": true,
+        "hooks": 0
+      },
+      {
+        "name": "boxed",
+        "accepted": true,
+        "returnedSourceType": "object",
+        "arraySource": false,
+        "hooks": 0
+      },
+      {
+        "name": "object",
+        "accepted": true,
+        "returnedSourceType": "object",
+        "arraySource": false,
+        "hooks": 1
+      },
+      {
+        "name": "bigint",
+        "accepted": false,
+        "error": "Do not know how to serialize a BigInt",
+        "hooks": 0
+      }
+    ]
+  },
+  "intermediateGetterReproduction": {
+    "observedAt": "2026-10-09T01:50:16.930Z",
+    "state": "INTERMEDIATE_WORKING_PRIMITIVE_GUARD",
+    "providerRequests": 0,
+    "observations": [
+      {
+        "mode": "envelope",
+        "accepted": true,
+        "reads": 3,
+        "returnedType": "object",
+        "approvedSourceMatches": false,
+        "foreignSource": false
+      },
+      {
+        "mode": "plan",
+        "accepted": true,
+        "reads": 2,
+        "returnedType": "string",
+        "approvedSourceMatches": false,
+        "foreignSource": true
+      }
+    ],
+    "sourceHashes": {
+      "scripts/operations/plan.mjs": "ded4f159f4e20afc0895377e75373e459583a79b942a9972ebe1ad2af164886f",
+      "scripts/operations/plan.test.mjs": "d4e20cea6c5bb2664495f5c92106bcc664209abc4c92f3e04445418e8a664dfb"
+    }
+  },
+  "finalTypeReproduction": {
+    "source": "7f005bf822bece456ca686ba54465c9401faff7d",
+    "observedAt": "2026-10-09T01:53:37.332Z",
+    "kind": "PURE_VALIDATOR_ONLY",
+    "realProviderRequests": 0,
+    "observations": [
+      {
+        "name": "array",
+        "accepted": false,
+        "error": "OPS_PLAN_REJECTED",
+        "hooks": 0
+      },
+      {
+        "name": "boxed",
+        "accepted": false,
+        "error": "OPS_PLAN_REJECTED",
+        "hooks": 0
+      },
+      {
+        "name": "object",
+        "accepted": false,
+        "error": "OPS_PLAN_REJECTED",
+        "hooks": 0
+      },
+      {
+        "name": "bigint",
+        "accepted": false,
+        "error": "OPS_PLAN_REJECTED",
+        "hooks": 0
+      }
+    ],
+    "sourceState": "FINAL_WORKING_BYTES_BEFORE_SOURCE_COMMIT",
+    "sourceHashes": {
+      "scripts/operations/plan.mjs": "7e5f4858e619ff94eb575892164ea3de9dcd85ba5956671bf8c1539b8c358b29",
+      "scripts/operations/plan.test.mjs": "9c78eac06a4e5ef3b1f631f4609edebeffc92b912b7a1ec3df7669a688368ef1"
+    }
+  },
+  "finalGetterReproduction": {
+    "observedAt": "2026-10-09T01:53:37.376Z",
+    "state": "FINAL_OWNED_SNAPSHOT_WORKING_BYTES",
+    "providerRequests": 0,
+    "observations": [
+      {
+        "mode": "envelope",
+        "accepted": false,
+        "reads": 1,
+        "error": "OPS_PLAN_REJECTED"
+      },
+      {
+        "mode": "plan",
+        "accepted": true,
+        "reads": 1,
+        "returnedType": "string",
+        "approvedSourceMatches": true,
+        "foreignSource": false
+      }
+    ]
+  },
+  "checks": {
+    "red": {
+      "label": "red",
+      "command": [
+        "node",
+        "--test",
+        "scripts/operations/plan.test.mjs"
+      ],
+      "start": "2026-10-09T01:47:39.987851+00:00",
+      "end": "2026-10-09T01:47:40.159635+00:00",
+      "exit": 1,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {},
+      "counts": {
+        "tests": "21",
+        "pass": "12",
+        "fail": "9",
+        "skipped": "0"
+      }
+    },
+    "focused-intermediate": {
+      "label": "focused",
+      "command": [
+        "node",
+        "--test",
+        "scripts/operations/plan.test.mjs"
+      ],
+      "start": "2026-10-09T01:47:50.756427+00:00",
+      "end": "2026-10-09T01:47:50.886430+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {},
+      "counts": {
+        "tests": "21",
+        "pass": "21",
+        "fail": "0",
+        "skipped": "0"
+      }
+    },
+    "native-intermediate": {
+      "label": "native",
+      "command": [
+        "bash",
+        "-c",
+        "node --experimental-transform-types --test scripts/operations/*.test.mjs"
+      ],
+      "start": "2026-10-09T01:47:51.055425+00:00",
+      "end": "2026-10-09T01:47:55.435467+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/plan.mjs": "ded4f159f4e20afc0895377e75373e459583a79b942a9972ebe1ad2af164886f",
+        "scripts/operations/plan.test.mjs": "d4e20cea6c5bb2664495f5c92106bcc664209abc4c92f3e04445418e8a664dfb"
+      },
+      "counts": {
+        "tests": "167",
+        "pass": "167",
+        "fail": "0",
+        "skipped": "0"
+      }
+    },
+    "full-intermediate": {
+      "label": "full",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-09T01:47:51.974210+00:00",
+      "end": "2026-10-09T01:51:41.739592+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/plan.mjs": "ded4f159f4e20afc0895377e75373e459583a79b942a9972ebe1ad2af164886f",
+        "scripts/operations/plan.test.mjs": "d4e20cea6c5bb2664495f5c92106bcc664209abc4c92f3e04445418e8a664dfb"
+      },
+      "counts": {}
+    },
+    "red-additional": {
+      "label": "red-additional",
+      "command": [
+        "node",
+        "--test",
+        "scripts/operations/plan.test.mjs"
+      ],
+      "start": "2026-10-09T01:53:09.293024+00:00",
+      "end": "2026-10-09T01:53:09.492902+00:00",
+      "exit": 1,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/plan.mjs": "ded4f159f4e20afc0895377e75373e459583a79b942a9972ebe1ad2af164886f",
+        "scripts/operations/plan.test.mjs": "9c78eac06a4e5ef3b1f631f4609edebeffc92b912b7a1ec3df7669a688368ef1"
+      },
+      "counts": {
+        "tests": "28",
+        "pass": "21",
+        "fail": "7",
+        "skipped": "0"
+      }
+    },
+    "focused": {
+      "label": "focused",
+      "command": [
+        "node",
+        "--test",
+        "scripts/operations/plan.test.mjs"
+      ],
+      "start": "2026-10-09T01:53:37.445807+00:00",
+      "end": "2026-10-09T01:53:37.582512+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/plan.mjs": "7e5f4858e619ff94eb575892164ea3de9dcd85ba5956671bf8c1539b8c358b29",
+        "scripts/operations/plan.test.mjs": "9c78eac06a4e5ef3b1f631f4609edebeffc92b912b7a1ec3df7669a688368ef1"
+      },
+      "counts": {
+        "tests": "28",
+        "pass": "28",
+        "fail": "0",
+        "skipped": "0"
+      }
+    },
+    "native": {
+      "label": "native",
+      "command": [
+        "bash",
+        "-c",
+        "node --experimental-transform-types --test scripts/operations/*.test.mjs"
+      ],
+      "start": "2026-10-09T01:53:37.668155+00:00",
+      "end": "2026-10-09T01:53:41.564101+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/plan.mjs": "7e5f4858e619ff94eb575892164ea3de9dcd85ba5956671bf8c1539b8c358b29",
+        "scripts/operations/plan.test.mjs": "9c78eac06a4e5ef3b1f631f4609edebeffc92b912b7a1ec3df7669a688368ef1"
+      },
+      "counts": {
+        "tests": "174",
+        "pass": "174",
+        "fail": "0",
+        "skipped": "0"
+      }
+    },
+    "full": {
+      "label": "full",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-09T01:53:38.512959+00:00",
+      "end": "2026-10-09T01:57:21.875705+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/plan.mjs": "7e5f4858e619ff94eb575892164ea3de9dcd85ba5956671bf8c1539b8c358b29",
+        "scripts/operations/plan.test.mjs": "9c78eac06a4e5ef3b1f631f4609edebeffc92b912b7a1ec3df7669a688368ef1"
+      },
+      "counts": {}
+    }
+  },
+  "finalFullCounts": {
+    "applicationPassed": 1398,
+    "existingOptionalSkips": 2,
+    "hostedPassed": 1,
+    "browserPassed": 64,
+    "referencesPassed": 7,
+    "planningPassed": 15,
+    "boundaryReferences": 414
+  },
+  "offlineVerification": {
+    "id": 37872287302,
+    "source": "d20f67383ad224908e80c8a44a05ec5266ee0e71",
+    "actor": 143764700,
+    "path": ".github/workflows/operations-verify.yml",
+    "event": "workflow_dispatch",
+    "createdAt": "2026-10-09T01:57:56Z",
+    "updatedAt": "2026-10-09T02:02:11Z",
+    "observedAt": "2026-10-09T02:03:28.715511+00:00",
+    "conclusion": "success",
+    "nativePassed": 174,
+    "applicationPassed": 1398,
+    "browserPassed": 64,
+    "installation": "UNKNOWN",
+    "managedRecovery": "NOT_EXECUTED",
+    "artifactSha256": {
+      "operations-report.json": "3687d457d255d25d53f88639a749b5ea57ee8e8e44f61df7bbff3e6630b71d9d",
+      "partition-report.json": "681c5314de6bb87e6fd6de46fc260a7699c4adc656cb7b98e35cae5b623b7e9a",
+      "retention-report.json": "fe127c216acffc7340b26ab3343d14193c23840df31a11cc4dbd49e2160a76f0",
+      "jobs-report.json": "c95e447f1ecca5b656211bb12697bd114a28821ce0905742789e48ff94c8686e",
+      "setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+      "partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+      "jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639"
+    },
+    "reports": {
+      "operations-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "d20f67383ad224908e80c8a44a05ec5266ee0e71",
+        "templateHash": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "managedRecovery": "UNKNOWN",
+        "apply": "DISABLED"
+      },
+      "partition-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "d20f67383ad224908e80c8a44a05ec5266ee0e71",
+        "templateHash": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "effectivePermissions": "UNKNOWN",
+        "migration": "NOT_EXECUTED",
+        "activation": "DISABLED",
+        "managedRecovery": "UNKNOWN"
+      },
+      "retention-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "d20f67383ad224908e80c8a44a05ec5266ee0e71",
+        "preparationHash": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "realPersonPolicy": "UNAPPROVED",
+        "dataOperations": "NOT_EXECUTED",
+        "participantGrants": "NOT_GRANTED",
+        "managedProof": "UNKNOWN"
+      },
+      "jobs-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "d20f67383ad224908e80c8a44a05ec5266ee0e71",
+        "preparationHash": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "providerCalls": "NOT_EXECUTED",
+        "managedRecovery": "UNKNOWN",
+        "participantConsent": "NOT_GRANTED",
+        "cleanup": "UNKNOWN"
+      }
+    },
+    "jobs": [
+      {
+        "id": 113632880019,
+        "name": "verify",
+        "conclusion": "success",
+        "started_at": "2026-10-09T01:58:00Z",
+        "completed_at": "2026-10-09T02:02:11Z"
+      }
+    ]
+  },
+  "realProviderRequests": 0,
+  "setupExecution": "NOT_EXECUTED",
+  "installation": "UNKNOWN",
+  "managedRecovery": "NOT_EXECUTED",
+  "wholeTask": "BLOCKED",
+  "codingMilestone": "CODE_READY",
+  "participantConsent": "NOT_GRANTED",
+  "nextAction": "Run preserved CloudShell read-only block1 through legitimate setup identity; return sanitized inventory, reconcile installed/effective/private-recovery facts before same-reviewed-source two-run managed proof and OPS01\u201303/FIN03."
+}
