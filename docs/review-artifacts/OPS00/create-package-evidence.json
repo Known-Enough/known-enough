@@ -24,5 +24,73 @@
   },
   "protectedHashes": 955,
   "inventorySource": "3c1edea0d450d2552bf08754fca6c568d172026d",
-  "managedProof": "NOT_EXECUTED"
+  "managedProof": "NOT_EXECUTED",
+  "focused": {
+    "label": "focus",
+    "command": [
+      "python3",
+      "-B",
+      "scripts/operations/cloudshell-create.test.py"
+    ],
+    "start": "2026-10-09T17:30:44.626455+00:00",
+    "end": "2026-10-09T17:30:45.307644+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/cloudshell-create.py": "247109202b653d06028e89f9edbc22785baf12137bac505f1917defb8e3d064a",
+      "scripts/operations/cloudshell-create.test.py": "5ba915a5f21fd4fe6cda7a63302c88edfe79d50e65492eabcebf5560389457cc",
+      ".github/workflows/operations-verify.yml": "09f2d31133aa7e8234c94231022c5fc49130764dbdcc029374181e2ad07c7804"
+    }
+  },
+  "full": {
+    "label": "full",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "start": "2026-10-09T17:30:48.521103+00:00",
+    "end": "2026-10-09T17:34:22.185571+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/cloudshell-create.py": "247109202b653d06028e89f9edbc22785baf12137bac505f1917defb8e3d064a",
+      "scripts/operations/cloudshell-create.test.py": "5ba915a5f21fd4fe6cda7a63302c88edfe79d50e65492eabcebf5560389457cc",
+      ".github/workflows/operations-verify.yml": "09f2d31133aa7e8234c94231022c5fc49130764dbdcc029374181e2ad07c7804"
+    }
+  },
+  "inspection": {
+    "observedAt": "2026-10-09T17:33:04.237298+00:00",
+    "protectedHashes": 955,
+    "workflowOnlyNewOfflineStep": true,
+    "templateUnchanged": true,
+    "python": "Python 3.10.12",
+    "node": "v24.21.0",
+    "npm": "11.19.0",
+    "liveAwsCalls": 0,
+    "sourceHashes": {
+      "scripts/operations/cloudshell-create.py": "247109202b653d06028e89f9edbc22785baf12137bac505f1917defb8e3d064a",
+      "scripts/operations/cloudshell-create.test.py": "5ba915a5f21fd4fe6cda7a63302c88edfe79d50e65492eabcebf5560389457cc",
+      ".github/workflows/operations-verify.yml": "09f2d31133aa7e8234c94231022c5fc49130764dbdcc029374181e2ad07c7804"
+    },
+    "inspection": [
+      "CREATE only; exact four additions and original template; region/account/provider/OIDC binding",
+      "exclusive owner-only durable source/token/intent files; whole-invocation lock; fsync file and directory",
+      "lost mutation acknowledgment always resumes same plan through reads; no automatic create/execute retry",
+      "exact policy/configuration comparison preserves JSON boolean types; no participant/storage/model/workload requests",
+      "private bounded subprocess output with existing kill/reap transport; one poll and 32 requests/180-second deadline",
+      "configuration/effective permissions/managed execution remain distinct; no inspector policy/template/runtime change"
+    ]
+  },
+  "focusedPassed": 28,
+  "applicationPassed": 1407,
+  "browserPassed": 64,
+  "installation": "UNKNOWN",
+  "effectivePermissions": "UNKNOWN",
+  "managedRecovery": "NOT_EXECUTED",
+  "awsCalls": 0,
+  "sourceVerification": "PENDING",
+  "commands": "PENDING_CHECKED_SOURCE_PIN"
 }
