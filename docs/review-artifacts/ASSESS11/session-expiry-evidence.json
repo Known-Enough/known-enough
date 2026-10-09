@@ -199,5 +199,118 @@
     "cause": "UNKNOWN",
     "progressReporting": "GAP_OVER_TEN_MINUTES",
     "nextNominalWake": "2026-10-09T17:13:28.178Z"
-  }
+  },
+  "sourceSync": {
+    "label": "source",
+    "expectedRemote": "c3485b9e46952560d2eb7f95e756309326e48fc4",
+    "sourceSha": "75fec217fb89fa7acf08040109b23ee0234411d7",
+    "observedEnd": "2026-10-09T16:46:33.891718+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 953
+  },
+  "offlineVerification": {
+    "id": 37961565051,
+    "source": "75fec217fb89fa7acf08040109b23ee0234411d7",
+    "actor": 143764700,
+    "path": ".github/workflows/operations-verify.yml",
+    "event": "workflow_dispatch",
+    "createdAt": "2026-10-09T16:46:48Z",
+    "updatedAt": "2026-10-09T16:51:18Z",
+    "observedAt": "2026-10-09T16:52:05.389682+00:00",
+    "conclusion": "success",
+    "nativePassed": 251,
+    "applicationPassed": 1407,
+    "browserPassed": 64,
+    "installation": "UNKNOWN",
+    "managedRecovery": "NOT_EXECUTED",
+    "artifactSha256": {
+      "operations-report.json": "14aef4f58ee23c3560a6ef122cc819e371f25a369a1ad88c022dc8ac4f387648",
+      "partition-report.json": "3691c7ce4901655f77e6856a101529e7ea5d84e01d1002974b7869c02f0e2ae1",
+      "retention-report.json": "00d23043be823aa9733c2809883a2c38c83745086b6c2e67222e79adc86e5069",
+      "jobs-report.json": "78e55b412fb97ccec49eb68a7b7e0452dfb7864d9f1821fd438010afb5cf2df6",
+      "setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+      "partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+      "jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639"
+    },
+    "reports": {
+      "operations-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "75fec217fb89fa7acf08040109b23ee0234411d7",
+        "templateHash": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "managedRecovery": "UNKNOWN",
+        "apply": "DISABLED"
+      },
+      "partition-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "75fec217fb89fa7acf08040109b23ee0234411d7",
+        "templateHash": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "effectivePermissions": "UNKNOWN",
+        "migration": "NOT_EXECUTED",
+        "activation": "DISABLED",
+        "managedRecovery": "UNKNOWN"
+      },
+      "retention-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "75fec217fb89fa7acf08040109b23ee0234411d7",
+        "preparationHash": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "realPersonPolicy": "UNAPPROVED",
+        "dataOperations": "NOT_EXECUTED",
+        "participantGrants": "NOT_GRANTED",
+        "managedProof": "UNKNOWN"
+      },
+      "jobs-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "75fec217fb89fa7acf08040109b23ee0234411d7",
+        "preparationHash": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "providerCalls": "NOT_EXECUTED",
+        "managedRecovery": "UNKNOWN",
+        "participantConsent": "NOT_GRANTED",
+        "cleanup": "UNKNOWN"
+      }
+    },
+    "jobs": [
+      {
+        "id": 113925417177,
+        "name": "verify",
+        "conclusion": "success",
+        "started_at": "2026-10-09T16:46:51Z",
+        "completed_at": "2026-10-09T16:51:17Z"
+      }
+    ],
+    "inventoryPythonPassed": 23,
+    "pythonVersion": "3.12.3",
+    "inventoryStep": {
+      "name": "Run read-only CloudShell inventory regressions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-10-09T16:46:57Z",
+      "completed_at": "2026-10-09T16:47:01Z"
+    }
+  },
+  "remoteCommitIdentity": {
+    "observedAt": "2026-10-09T16:50:52.414226+00:00",
+    "sha": "c3485b9e46952560d2eb7f95e756309326e48fc4",
+    "authorAccount": null,
+    "committerAccount": null,
+    "verification": false,
+    "identityAssociation": "UNKNOWN",
+    "contentProvenance": "Repository A-labeled user-supplied inventory handoff; no account or actual AWS execution inferred from author display"
+  },
+  "releaseObserved": "2026-10-09T16:52:28.590233+00:00",
+  "soleClaim": "RELEASED"
 }
