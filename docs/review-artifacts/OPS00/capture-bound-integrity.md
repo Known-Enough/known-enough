@@ -1,0 +1,13 @@
+# OPS00 inventory capture bound
+
+The original helper wrote child output into temporary files before checking its size. A synthetic read saved2,097,152bytes on each stream despite the advertised128KiB limit, then returned AWS_RESPONSE_LIMIT. This was a disk-capture bug, not an observed AWS failure.
+
+[Checked source](https://github.com/Known-Enough/known-enough/commit/3c1edea0d450d2552bf08754fca6c568d172026d) drains stdout/stderr concurrently and stores at most131,072bytes per stream while the child runs. One excess byte rejects the read. Overflow and the existing deadline terminate the owned process session and wait for the child; bounded diagnostics stay private. Existing64request/180second total/10second process/no-pagination/one-attempt/account/root/private-state/source/typed-metadata/no-mutation guards remain.
+
+Five new real synthetic-child behavioral tests cover stdout/stderr overflow, exact boundary/one-byte excess, simultaneous full pipes, sanitized denial and timeout with pipes open or already closed. Expected red21methods/three subtest failures; fixed21Python/174native and pinned full1398application(two optional skips)/hosted1/browser64/reference7/planning15/lint/types/build/boundaries414 PASS. No network or credentials are used by the new tests. [Source-exact GitHub checks](https://github.com/Known-Enough/known-enough/actions/runs/37890665629) SUCCESS, actual remote21Python on3.12.3,174native/1398application/64browser and eight exact proposal/report artifacts verified.
+
+Only the two Python executable files changed; all919other tracked hashes frozen. [Read-only commands](cloudshell-commands.md) pin this source and helper SHA under a fourth private ops00-capture-20261009 directory, retaining all older clones/source markers/inventory/resume. Public exact-source download/five checksums/three Bash/two Python syntax, valid read/repeat, malformed metadata and overflowing saved resumes, four private attempts plus old-source/dirty-checkout rejection PASS;84simulated reads, zero actual AWS calls/mutations. Entire conditional installation section remains byte-identical and INVENTORY_REQUIRED.
+
+CODE_READY/released; whole OPS00 BLOCKED/unclaimed. Installation/effective scope/private recovery UNKNOWN; managed two-run proof NOT_EXECUTED. A returns only block1's sanitized summary before any managed setup reconciliation. Primary password policy/cancelled UpdateUserPool, participant consent/identity/privacy/usage and A paused NP00 remain unchanged.
+
+Observed reporting gap and missed ten-minute receipts retained in [UTC/hash evidence](capture-bound-evidence.json); cause and unobserved activity UNKNOWN. Four hints coalesced, no separate workers/executions. Root GPT-6 exposed; exact variant/effort unavailable, no helpers.
