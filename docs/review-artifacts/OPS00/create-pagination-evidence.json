@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "phase": "RUN183",
   "task": "OPS00",
-  "status": "IN_PROGRESS",
+  "status": "CODE_READY_RELEASED",
   "claimAt": "2026-10-09T18:00:16.255978+00:00",
   "baseline": "e6e60e2f76aa0cf07992b0bf0bc216ebee283389",
   "account": "Battosai1806",
@@ -69,5 +69,235 @@
   },
   "actualAwsCalls": 0,
   "installation": "UNKNOWN",
-  "managedRecovery": "NOT_EXECUTED"
+  "managedRecovery": "NOT_EXECUTED",
+  "releasedAt": "2026-10-09T18:12:13.232390+00:00",
+  "sourceSha": "589f6c4a0170597ffe359b688d257fb519c52af7",
+  "sourceHashes": {
+    "scripts/operations/cloudshell-create.py": "d29a43957b99099dadf9cbc654fdfceabfc79b5846304f12e2b02fff00600c1f",
+    "scripts/operations/cloudshell-create.test.py": "32d60c42e26fcf0e9afb975edace27fcdc58e3b987891afbfe670028958ce9dd"
+  },
+  "redInitial": {
+    "label": "red",
+    "command": [
+      "python3",
+      "-B",
+      "scripts/operations/cloudshell-create.test.py"
+    ],
+    "start": "2026-10-09T18:01:09.416330+00:00",
+    "end": "2026-10-09T18:01:10.474798+00:00",
+    "exit": 1,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {}
+  },
+  "redRefined": {
+    "label": "red-refined",
+    "command": [
+      "python3",
+      "-B",
+      "scripts/operations/cloudshell-create.test.py"
+    ],
+    "start": "2026-10-09T18:01:38.916338+00:00",
+    "end": "2026-10-09T18:01:40.065292+00:00",
+    "exit": 1,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {}
+  },
+  "focused": {
+    "label": "focused",
+    "command": [
+      "python3",
+      "-B",
+      "scripts/operations/cloudshell-create.test.py"
+    ],
+    "start": "2026-10-09T18:01:50.386142+00:00",
+    "end": "2026-10-09T18:01:51.406592+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/cloudshell-create.py": "d29a43957b99099dadf9cbc654fdfceabfc79b5846304f12e2b02fff00600c1f",
+      "scripts/operations/cloudshell-create.test.py": "32d60c42e26fcf0e9afb975edace27fcdc58e3b987891afbfe670028958ce9dd"
+    }
+  },
+  "full": {
+    "label": "full",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "start": "2026-10-09T18:02:04.993779+00:00",
+    "end": "2026-10-09T18:05:40.213988+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/cloudshell-create.py": "d29a43957b99099dadf9cbc654fdfceabfc79b5846304f12e2b02fff00600c1f",
+      "scripts/operations/cloudshell-create.test.py": "32d60c42e26fcf0e9afb975edace27fcdc58e3b987891afbfe670028958ce9dd"
+    }
+  },
+  "selfReview": {
+    "observedAt": "2026-10-09T18:02:06.154908+00:00",
+    "driverOutsideResponseGuard": "BYTE_IDENTICAL",
+    "focusedTests": 36,
+    "regressionMethodsAdded": 6,
+    "redRefinedFailures": 36,
+    "redFailureClasses": [
+      "Rejected not raised"
+    ],
+    "sourceHashes": {
+      "scripts/operations/cloudshell-create.py": "d29a43957b99099dadf9cbc654fdfceabfc79b5846304f12e2b02fff00600c1f",
+      "scripts/operations/cloudshell-create.test.py": "32d60c42e26fcf0e9afb975edace27fcdc58e3b987891afbfe670028958ce9dd"
+    },
+    "liveAws": 0
+  },
+  "sourceVerification": {
+    "id": 37970965826,
+    "source": "589f6c4a0170597ffe359b688d257fb519c52af7",
+    "actor": 143764700,
+    "path": ".github/workflows/operations-verify.yml",
+    "event": "workflow_dispatch",
+    "createdAt": "2026-10-09T18:06:26Z",
+    "updatedAt": "2026-10-09T18:10:48Z",
+    "observedAt": "2026-10-09T18:11:49.596717+00:00",
+    "conclusion": "success",
+    "nativePassed": 251,
+    "applicationPassed": 1407,
+    "browserPassed": 64,
+    "installation": "UNKNOWN",
+    "managedRecovery": "NOT_EXECUTED",
+    "artifactSha256": {
+      "operations-report.json": "800fe6199c7eb27824b29dbf46d0b053aa1e966ebb07997e27f11c6224b86693",
+      "partition-report.json": "fa35aa7d17d8e5c4172ebe94eb0c3aecc9c193fed33f2b7799c0c4e3944d0aa6",
+      "retention-report.json": "0b01a9faca47ec5d156a5e3b585b659c1c36979241e47e25277d38cd72d36336",
+      "jobs-report.json": "c7afd3f852d7d96769eb7e2693a96355dd4ed40ec4a82969edc3353a2ede88bb",
+      "setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+      "partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+      "jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639"
+    },
+    "reports": {
+      "operations-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "589f6c4a0170597ffe359b688d257fb519c52af7",
+        "templateHash": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "managedRecovery": "UNKNOWN",
+        "apply": "DISABLED"
+      },
+      "partition-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "589f6c4a0170597ffe359b688d257fb519c52af7",
+        "templateHash": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "effectivePermissions": "UNKNOWN",
+        "migration": "NOT_EXECUTED",
+        "activation": "DISABLED",
+        "managedRecovery": "UNKNOWN"
+      },
+      "retention-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "589f6c4a0170597ffe359b688d257fb519c52af7",
+        "preparationHash": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "realPersonPolicy": "UNAPPROVED",
+        "dataOperations": "NOT_EXECUTED",
+        "participantGrants": "NOT_GRANTED",
+        "managedProof": "UNKNOWN"
+      },
+      "jobs-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "589f6c4a0170597ffe359b688d257fb519c52af7",
+        "preparationHash": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "providerCalls": "NOT_EXECUTED",
+        "managedRecovery": "UNKNOWN",
+        "participantConsent": "NOT_GRANTED",
+        "cleanup": "UNKNOWN"
+      }
+    },
+    "jobs": [
+      {
+        "id": 113957173034,
+        "name": "verify",
+        "conclusion": "success",
+        "started_at": "2026-10-09T18:06:30Z",
+        "completed_at": "2026-10-09T18:10:47Z"
+      }
+    ],
+    "createPythonPassed": 36,
+    "createStep": {
+      "name": "Run CREATE command package regressions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 6,
+      "started_at": "2026-10-09T18:06:39Z",
+      "completed_at": "2026-10-09T18:06:40Z"
+    },
+    "inventoryPythonPassed": 23,
+    "pythonVersion": "3.12.3",
+    "inventoryStep": {
+      "name": "Run read-only CloudShell inventory regressions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-10-09T18:06:36Z",
+      "completed_at": "2026-10-09T18:06:39Z"
+    }
+  },
+  "runbook": {
+    "observedAt": "2026-10-09T18:06:54.871400+00:00",
+    "source": "589f6c4a0170597ffe359b688d257fb519c52af7",
+    "blocks": 6,
+    "bashSyntax": "PASS",
+    "allSixBlocksSourceStateBound": true,
+    "oldCommandBytes": "EXACT_SUFFIX_PRESERVED",
+    "commandsExecuted": "BASH_SYNTAX_ONLY",
+    "awsInvocations": 0,
+    "documentSha": "99774b37805aefdd1ae4e58239f3df531c3243bef82cb1a493b6bfa87ab83d49"
+  },
+  "savedPlanGuard": {
+    "observedAt": "2026-10-09T18:06:54.938121+00:00",
+    "cases": [
+      {
+        "case": "empty",
+        "result": "PASS",
+        "savedBytes": "UNCHANGED"
+      },
+      {
+        "case": "no-intent",
+        "result": "PASS",
+        "savedBytes": "UNCHANGED"
+      },
+      {
+        "case": "create-intent",
+        "result": "OPS_SAVED_CREATE_INTENT_REQUIRES_ORIGINAL_PIN",
+        "savedBytes": "UNCHANGED"
+      },
+      {
+        "case": "execute-intent",
+        "result": "OPS_SAVED_CREATE_INTENT_REQUIRES_ORIGINAL_PIN",
+        "savedBytes": "UNCHANGED"
+      },
+      {
+        "case": "dangling-state",
+        "result": "OPS_SAVED_STATE_RECONCILIATION_REQUIRED",
+        "savedBytes": "UNCHANGED"
+      }
+    ],
+    "allBlocksGuarded": true,
+    "gitCalls": 0,
+    "awsCalls": 0,
+    "actualOperatorState": "UNOBSERVED"
+  },
+  "effectivePermissions": "UNKNOWN",
+  "successor": "NOT_STARTED"
 }
