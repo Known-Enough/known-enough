@@ -1,13 +1,36 @@
 {
   "run": 181,
-  "claimObserved": "2026-10-09T14:48:23.122650+00:00",
-  "baseline": "b329c6af9cf6f7b361ac2661f145369b56bbf442",
-  "reproduction": {
-    "start": "2026-10-09T14:47:24.441014+00:00",
-    "end": "2026-10-09T14:47:24.564301+00:00",
-    "exit": 0,
-    "stdout": "{\"decodedExpiry\":\"Infinity\",\"retained\":true,\"simulatedRequests\":1,\"unauthorized\":0,\"realRequests\":0}\n",
-    "stderr": "(node:2389384) ExperimentalWarning: Transform Types is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+  "claim": {
+    "run": 181,
+    "claimObserved": "2026-10-09T14:48:23.122650+00:00",
+    "baseline": "b329c6af9cf6f7b361ac2661f145369b56bbf442",
+    "reproduction": {
+      "start": "2026-10-09T14:47:24.441014+00:00",
+      "end": "2026-10-09T14:47:24.564301+00:00",
+      "exit": 0,
+      "stdout": "{\"decodedExpiry\":\"Infinity\",\"retained\":true,\"simulatedRequests\":1,\"unauthorized\":0,\"realRequests\":0}\n",
+      "stderr": "(node:2389384) ExperimentalWarning: Transform Types is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+    },
+    "scope": {
+      "source": "b329c6af9cf6f7b361ac2661f145369b56bbf442",
+      "code": [
+        "apps/web/src/cognito-session.ts",
+        "apps/web/src/cognito-session.test.ts"
+      ],
+      "docs": [
+        "docs/tasks/active/live-testing/ASSESS11/ticket.md",
+        "docs/task-board.md",
+        "docs/claim-log.md",
+        "docs/work-log-B.md",
+        "docs/handoff-B.md",
+        "docs/b-next-task-handoff.md",
+        "docs/monitor-log.md",
+        "docs/review-artifacts/ASSESS11/session-expiry-integrity.md",
+        "docs/review-artifacts/ASSESS11/session-expiry-evidence.json"
+      ]
+    },
+    "managedProof": "UNKNOWN",
+    "realRequests": 0
   },
   "scope": {
     "source": "b329c6af9cf6f7b361ac2661f145369b56bbf442",
@@ -25,8 +48,156 @@
       "docs/monitor-log.md",
       "docs/review-artifacts/ASSESS11/session-expiry-integrity.md",
       "docs/review-artifacts/ASSESS11/session-expiry-evidence.json"
-    ]
+    ],
+    "integrationBase": "c3485b9e46952560d2eb7f95e756309326e48fc4"
   },
-  "managedProof": "UNKNOWN",
-  "realRequests": 0
+  "reproduction": {
+    "start": "2026-10-09T14:47:24.441014+00:00",
+    "end": "2026-10-09T14:47:24.564301+00:00",
+    "exit": 0,
+    "stdout": "{\"decodedExpiry\":\"Infinity\",\"retained\":true,\"simulatedRequests\":1,\"unauthorized\":0,\"realRequests\":0}\n",
+    "stderr": "(node:2389384) ExperimentalWarning: Transform Types is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+  },
+  "checks": {
+    "red": {
+      "label": "red",
+      "command": [
+        "npm",
+        "exec",
+        "--",
+        "vitest",
+        "run",
+        "apps/web/src/cognito-session.test.ts"
+      ],
+      "start": "2026-10-09T14:49:03.690820+00:00",
+      "end": "2026-10-09T14:49:05.288917+00:00",
+      "exit": 1,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {}
+    },
+    "focus": {
+      "label": "focus",
+      "command": [
+        "npm",
+        "exec",
+        "--",
+        "vitest",
+        "run",
+        "apps/web/src/cognito-session.test.ts"
+      ],
+      "start": "2026-10-09T14:49:18.651706+00:00",
+      "end": "2026-10-09T14:49:19.495740+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "apps/web/src/cognito-session.ts": "c31207fafa1602285995c8d73d10320a69041b47a1e8175eaa044808691d8bb5",
+        "apps/web/src/cognito-session.test.ts": "d275abd095a8b467e6ee532bca6737a2bd80b01666c82ada38c1793ca7cf6e77"
+      }
+    },
+    "full": {
+      "label": "full",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-09T14:49:29.310108+00:00",
+      "end": "2026-10-09T14:52:58.831564+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "apps/web/src/cognito-session.ts": "c31207fafa1602285995c8d73d10320a69041b47a1e8175eaa044808691d8bb5",
+        "apps/web/src/cognito-session.test.ts": "d275abd095a8b467e6ee532bca6737a2bd80b01666c82ada38c1793ca7cf6e77"
+      }
+    }
+  },
+  "counts": {
+    "red": {
+      "tests": 19,
+      "pass": 17,
+      "fail": 2
+    },
+    "focus": {
+      "tests": 19,
+      "pass": 19,
+      "fail": 0
+    },
+    "full": {
+      "applicationPassed": 1407,
+      "existingOptionalSkipped": 2,
+      "hostedPassed": 1,
+      "browserPassed": 64,
+      "references": 7,
+      "planning": 15,
+      "boundaries": 414
+    },
+    "localNative": "NOT_RUN_UNCHANGED_OPERATIONS_SOURCE"
+  },
+  "selfInspection": {
+    "observedAt": "2026-10-09T14:50:03.587966+00:00",
+    "exactTwoGuardDiff": "PASS",
+    "testHistoryPrefix": "PASS",
+    "versions": {
+      "node": "v24.21.0",
+      "npm": "11.19.0"
+    },
+    "scopeExcludesPausedA": "PASS",
+    "providerRequests": 0
+  },
+  "sourceHashes": {
+    "apps/web/src/cognito-session.ts": "c31207fafa1602285995c8d73d10320a69041b47a1e8175eaa044808691d8bb5",
+    "apps/web/src/cognito-session.test.ts": "d275abd095a8b467e6ee532bca6737a2bd80b01666c82ada38c1793ca7cf6e77"
+  },
+  "protectedHashes": 953,
+  "fullProtectedHashes": 951,
+  "forwardReconciliation": {
+    "observedStart": "2026-10-09T16:45:49.323513+00:00",
+    "observedEnd": "2026-10-09T16:45:49.960908+00:00",
+    "before": "ef8a061f4f64663f4b7daa2413c88b226d7f1835",
+    "fetched": "c3485b9e46952560d2eb7f95e756309326e48fc4",
+    "result": "FF_ONLY_FORWARD_DOCUMENTATION",
+    "changedRemote": [
+      "AGENTS.md",
+      "docs/b-next-task-handoff.md",
+      "docs/claim-log.md",
+      "docs/review-artifacts/OPS00/a-cloudshell-inventory-20261009.json",
+      "docs/review-artifacts/OPS00/a-cloudshell-inventory-20261009.md",
+      "docs/task-board.md",
+      "docs/tasks/active/operations/OPS00/ticket.md",
+      "docs/work-log-A.md"
+    ],
+    "preservedLocalHashes": {
+      "apps/web/src/cognito-session.test.ts": "d275abd095a8b467e6ee532bca6737a2bd80b01666c82ada38c1793ca7cf6e77",
+      "apps/web/src/cognito-session.ts": "c31207fafa1602285995c8d73d10320a69041b47a1e8175eaa044808691d8bb5",
+      "docs/review-artifacts/ASSESS11/session-expiry-evidence.json": "9b0d2da4e98cf86fdb018512443f1c17ff1d565956c9764afd7a0fffc7740231",
+      "docs/review-artifacts/ASSESS11/session-expiry-integrity.md": "426e38e008c7f8d5a84d94ee11a83949f5805a8c128545396d4cd9b149e31922"
+    },
+    "executableRemoteChanges": 0,
+    "protectedHashesBefore": 951,
+    "protectedHashesAfter": 953,
+    "stdout": "Updating ef8a061..c3485b9\nFast-forward\n AGENTS.md                                          |   2 +\n docs/b-next-task-handoff.md                        |   2 +\n docs/claim-log.md                                  |   5 +\n .../OPS00/a-cloudshell-inventory-20261009.json     | 289 +++++++++++++++++++++\n .../OPS00/a-cloudshell-inventory-20261009.md       |  13 +\n docs/task-board.md                                 |   6 +-\n docs/tasks/active/operations/OPS00/ticket.md       |   2 +\n docs/work-log-A.md                                 |   5 +\n 8 files changed, 323 insertions(+), 1 deletion(-)\n create mode 100644 docs/review-artifacts/OPS00/a-cloudshell-inventory-20261009.json\n create mode 100644 docs/review-artifacts/OPS00/a-cloudshell-inventory-20261009.md\n",
+    "stderr": "From https://github.com/Known-Enough/known-enough\n * branch            main       -> FETCH_HEAD\n",
+    "sourceGuard": "Stopped before staging/commit/push on fresh-head assertion; no divergence or forced action"
+  },
+  "localNative": "NOT_RUN_UNCHANGED_OPERATIONS_SOURCE",
+  "managedPrimaryProof": "UNKNOWN",
+  "realProviderRequests": 0,
+  "reportingGap": {
+    "coalescedHints": [
+      "2026-10-09T15:13:26.929Z",
+      "2026-10-09T15:43:27.352Z",
+      "2026-10-09T16:13:27.809Z",
+      "2026-10-09T16:43:28.178Z"
+    ],
+    "lastObservedToolClock": "2026-10-09T14:52:47Z",
+    "resumedObservedClock": "2026-10-09T16:43:35Z",
+    "toolObservationGapSeconds": 6648,
+    "unobservedActivity": "UNKNOWN",
+    "cause": "UNKNOWN",
+    "progressReporting": "GAP_OVER_TEN_MINUTES",
+    "nextNominalWake": "2026-10-09T17:13:28.178Z"
+  }
 }

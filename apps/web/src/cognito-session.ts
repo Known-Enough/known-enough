@@ -137,7 +137,7 @@ export function readCognitoSession(storage: Storage = sessionStorage): CognitoSe
   if (value === null || typeof value !== 'object' || Array.isArray(value)) { storage.removeItem(SESSION_KEY); return null; }
   const raw = value as Record<string, unknown>;
   if (typeof raw.accessToken !== 'string' || !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(raw.accessToken)
-    || typeof raw.expiresAt !== 'number' || raw.expiresAt <= Date.now() + 5000
+    || typeof raw.expiresAt !== 'number' || !Number.isFinite(raw.expiresAt) || raw.expiresAt <= Date.now() + 5000
     || (raw.kind !== 'participant' && raw.kind !== 'display')) { storage.removeItem(SESSION_KEY); return null; }
   return raw as unknown as CognitoSession;
 }
@@ -177,7 +177,7 @@ export async function cognitoApiFetch(config: CognitoBrowserConfig, session: Cog
   onUnauthorized: () => void, init?: RequestInit, fetcher: typeof fetch = fetch): Promise<Response> {
   if (!path.startsWith('/') || path.startsWith('//') || path.includes('..')
     || (path !== '/decisions' && !path.startsWith('/decisions/') && path !== '/account' && path !== '/account/register' && path !== '/groups' && !path.startsWith('/groups/'))) throw new Error('Invalid API path');
-  if (session.expiresAt <= Date.now() + 5000) { onUnauthorized(); throw new Error('Session expired'); }
+  if (!Number.isFinite(session.expiresAt) || session.expiresAt <= Date.now() + 5000) { onUnauthorized(); throw new Error('Session expired'); }
   const headers = new Headers(init?.headers);
   headers.set('authorization', `Bearer ${session.accessToken}`);
   const deadline = AbortSignal.timeout(45000);

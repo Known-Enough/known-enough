@@ -228,3 +228,62 @@ describe('stored Cognito callback record validation', () => {
     }
   });
 });
+
+describe('finite Cognito session expiry', () => {
+  const savedKey = 'known-enough-cognito-session';
+
+  it('removes an overflowing stored expiry without disturbing pending sign-in or invitation data', () => {
+    const storage = new MemoryStorage();
+    storage.setItem(savedKey, '{"accessToken":"header.payload.signature","kind":"participant","expiresAt":1e400}');
+    storage.setItem('known-enough-cognito-pending', 'pending-fixture');
+    storage.setItem('known-enough-cognito-invite', 'invitation-fixture');
+    expect(readCognitoSession(storage)).toBeNull();
+    expect(storage.getItem(savedKey)).toBeNull();
+    expect(storage.getItem('known-enough-cognito-pending')).toBe('pending-fixture');
+    expect(storage.getItem('known-enough-cognito-invite')).toBe('invitation-fixture');
+  });
+
+  it('rejects non-finite API sessions before fetch and invokes recovery exactly once', async () => {
+    for (const expiresAt of [Infinity, -Infinity, NaN]) {
+      const unauthorized = vi.fn(); const fetcher = vi.fn();
+      await expect(cognitoApiFetch(config, { ...session, expiresAt }, '/account', unauthorized, {}, fetcher))
+        .rejects.toThrow('Session expired');
+      expect(unauthorized).toHaveBeenCalledOnce(); expect(fetcher).not.toHaveBeenCalled();
+    }
+  });
+
+  it('restores finite participant and display sessions only beyond the existing five-second margin', () => {
+    const now = 1_800_000_000_000; vi.spyOn(Date, 'now').mockReturnValue(now);
+    for (const kind of ['participant', 'display'] as const) {
+      for (const remaining of [-1, 0, 4999, 5000, 5001, 60_000]) {
+        const storage = new MemoryStorage(); const value = { ...session, kind, expiresAt: now + remaining };
+        storage.setItem(savedKey, JSON.stringify(value));
+        if (remaining <= 5000) {
+          expect(readCognitoSession(storage)).toBeNull(); expect(storage.getItem(savedKey)).toBeNull();
+        } else {
+          expect(readCognitoSession(storage)).toEqual(value); expect(storage.getItem(savedKey)).toBe(JSON.stringify(value));
+        }
+      }
+    }
+  });
+
+  it('blocks expired finite sessions but preserves bearer requests for both valid client kinds', async () => {
+    const now = 1_800_000_000_000; vi.spyOn(Date, 'now').mockReturnValue(now);
+    for (const kind of ['participant', 'display'] as const) {
+      for (const remaining of [0, 5000, 5001]) {
+        const unauthorized = vi.fn(); const fetcher = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+          expect(new Headers(init?.headers).get('authorization')).toBe(`Bearer ${jwt}`);
+          expect(init?.credentials).toBe('omit'); expect(init?.redirect).toBe('error');
+          return new Response('{}');
+        });
+        const request = cognitoApiFetch(config, { ...session, kind, expiresAt: now + remaining }, '/account', unauthorized, {}, fetcher);
+        if (remaining <= 5000) {
+          await expect(request).rejects.toThrow('Session expired');
+          expect(unauthorized).toHaveBeenCalledOnce(); expect(fetcher).not.toHaveBeenCalled();
+        } else {
+          expect((await request).status).toBe(200); expect(fetcher).toHaveBeenCalledOnce(); expect(unauthorized).not.toHaveBeenCalled();
+        }
+      }
+    }
+  });
+});
