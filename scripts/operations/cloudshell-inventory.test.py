@@ -1,10 +1,13 @@
 import importlib.util
+import ctypes
 import json
 import os
 from pathlib import Path
 import subprocess
+import signal
 import sys
 import tempfile
+import time
 import types
 import unittest
 from unittest import mock
@@ -357,6 +360,70 @@ class InventoryTests(unittest.TestCase):
                 self.assertEqual(len(children), 1)
                 self.assertIsNotNone(children[0].returncode)
                 self.assertEqual(observed['sizes'], [0, 0])
+
+    def assert_helper_descendant_cleanup(self, mode):
+        # Confine adoption/reaping to this test process and restore its old state.
+        libc = ctypes.CDLL(None, use_errno=True)
+        previous = ctypes.c_int()
+        self.assertEqual(libc.prctl(37, ctypes.byref(previous), 0, 0, 0), 0)
+        self.assertEqual(libc.prctl(36, 1, 0, 0, 0), 0)
+        marker = self.folder / ('helper-' + mode + '.json')
+        script = f'''
+import json,os,time,sys
+from pathlib import Path
+marker=Path({str(marker)!r})
+pid=os.fork()
+if pid == 0:
+    start=Path('/proc/self/stat').read_text().rpartition(') ')[2].split()[19]
+    staging=marker.with_suffix('.tmp')
+    fd=os.open(staging,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)
+    with os.fdopen(fd,'w') as out:json.dump(dict(pid=os.getpid(),start=start),out)
+    os.rename(staging,marker)
+    time.sleep(60)
+    os._exit(0)
+deadline=time.monotonic()+2
+while not marker.exists() and time.monotonic()<deadline:time.sleep(0.001)
+assert marker.exists()
+if {mode!r} == 'overflow':sys.stdout.buffer.write(b'x'*2097152)
+os._exit(0)
+'''
+        owned = None
+        try:
+            inv = module.Inventory(self.folder, 'a' * 40,
+                                   self.child_executor(script, {}, timeout=3))
+            self.assertIsNone(inv.read('helper', ['lambda', 'get-function-configuration']))
+            owned = json.loads(marker.read_text())
+            fields = Path(f'/proc/{owned["pid"]}/stat').read_text().rpartition(') ')[2].split()
+            deadline = time.monotonic() + 2
+            while fields[0] != 'Z' and time.monotonic() < deadline:
+                time.sleep(0.005)
+                fields = Path(f'/proc/{owned["pid"]}/stat').read_text().rpartition(') ')[2].split()
+            self.assertEqual(fields[19], owned['start'])
+            self.assertEqual(fields[0], 'Z', 'the owned helper must terminate after session cleanup')
+            expected = 'AWS_RESPONSE_LIMIT' if mode == 'overflow' else 'AWS_READ_TIMEOUT'
+            self.assertEqual(inv.report['reads'][0]['code'], expected)
+            self.assertNotIn('pid', inv.report)
+        finally:
+            # Also reap a live descendant after a deliberately weakened cleanup.
+            try:
+                if marker.exists():
+                    owned = owned or json.loads(marker.read_text())
+                    fields = Path(f'/proc/{owned["pid"]}/stat').read_text().rpartition(') ')[2].split()
+                    self.assertEqual(fields[19], owned['start'])
+                    if fields[0] != 'Z':
+                        os.kill(owned['pid'], signal.SIGKILL)
+                    pid, status = os.waitpid(owned['pid'], 0)
+                    self.assertEqual(pid, owned['pid'])
+                    self.assertTrue(os.WIFSIGNALED(status))
+                    self.assertEqual(os.WTERMSIG(status), signal.SIGKILL)
+            finally:
+                self.assertEqual(libc.prctl(36, previous.value, 0, 0, 0), 0)
+
+    def test_timeout_stops_and_reaps_helper_that_keeps_pipes_after_parent_exit(self):
+        self.assert_helper_descendant_cleanup('timeout')
+
+    def test_output_overflow_stops_and_reaps_helper_in_owned_session(self):
+        self.assert_helper_descendant_cleanup('overflow')
 
     def test_persistent_home_rejects_outside_symlink_or_loose_state_and_never_overwrites(self):
         home = self.folder / 'home'; home.mkdir(mode=0o700)
