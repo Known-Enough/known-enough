@@ -1,0 +1,32 @@
+{
+  "run": 181,
+  "claimObserved": "2026-10-09T14:48:23.122650+00:00",
+  "baseline": "b329c6af9cf6f7b361ac2661f145369b56bbf442",
+  "reproduction": {
+    "start": "2026-10-09T14:47:24.441014+00:00",
+    "end": "2026-10-09T14:47:24.564301+00:00",
+    "exit": 0,
+    "stdout": "{\"decodedExpiry\":\"Infinity\",\"retained\":true,\"simulatedRequests\":1,\"unauthorized\":0,\"realRequests\":0}\n",
+    "stderr": "(node:2389384) ExperimentalWarning: Transform Types is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+  },
+  "scope": {
+    "source": "b329c6af9cf6f7b361ac2661f145369b56bbf442",
+    "code": [
+      "apps/web/src/cognito-session.ts",
+      "apps/web/src/cognito-session.test.ts"
+    ],
+    "docs": [
+      "docs/tasks/active/live-testing/ASSESS11/ticket.md",
+      "docs/task-board.md",
+      "docs/claim-log.md",
+      "docs/work-log-B.md",
+      "docs/handoff-B.md",
+      "docs/b-next-task-handoff.md",
+      "docs/monitor-log.md",
+      "docs/review-artifacts/ASSESS11/session-expiry-integrity.md",
+      "docs/review-artifacts/ASSESS11/session-expiry-evidence.json"
+    ]
+  },
+  "managedProof": "UNKNOWN",
+  "realRequests": 0
+}
