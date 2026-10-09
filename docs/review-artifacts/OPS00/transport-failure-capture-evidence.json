@@ -1,0 +1,304 @@
+{
+  "run": 178,
+  "scheduledAt": "2026-10-09T13:13:25.133Z",
+  "firstClock": "2026-10-09T13:14:02Z",
+  "intake": {
+    "start": "2026-10-09T13:14:02.053335+00:00",
+    "end": "2026-10-09T13:14:04.790278+00:00",
+    "scheduled": "2026-10-09T13:13:25.133Z",
+    "source": "32ea67d1b415ad7952efda9521c68ea41fde174d",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "mainEqualClean": true,
+    "actualJobs": {
+      "queued": [],
+      "in_progress": []
+    },
+    "priorWork": "RUN177 final response/verified finished receipt/released phase/final clean acknowledgment and all owned sessions closed"
+  },
+  "sourceSha": "2a93205a8e359603f712db681198502f8b6c4d1b",
+  "sourceHashes": {
+    "scripts/operations/aws-transport.mjs": "ccbcabe723b066f10a2c99652e47ab1439a59b06e51235964fa4717ec0fb8112",
+    "scripts/operations/aws-transport.test.mjs": "b9615f645d6570a5e5374bf89e217a444b87367217afc95d883b16392fb40fd9"
+  },
+  "protectedHashes": 945,
+  "selfInspection": {
+    "observed": "2026-10-09T13:20:09.831834+00:00",
+    "onlyCommandFailureClassificationChanged": true,
+    "outsideClassificationBytesPreserved": true,
+    "privateCausePreserved": true,
+    "providerAllowlistUnchanged": true,
+    "protected": 945,
+    "newMethods": 5,
+    "hashes": {
+      "scripts/operations/aws-transport.mjs": "ccbcabe723b066f10a2c99652e47ab1439a59b06e51235964fa4717ec0fb8112",
+      "scripts/operations/aws-transport.test.mjs": "b9615f645d6570a5e5374bf89e217a444b87367217afc95d883b16392fb40fd9"
+    }
+  },
+  "preFix": {
+    "start": "2026-10-09T13:17:35.758688+00:00",
+    "end": "2026-10-09T13:17:35.810352+00:00",
+    "exit": 0,
+    "result": {
+      "changingDenial": {
+        "stderrReads": 2,
+        "calls": [
+          "put-object",
+          "head-object",
+          "get-object"
+        ],
+        "preserved": true,
+        "finiteFailure": false,
+        "unreadableEscaped": false,
+        "cleanup": true,
+        "awsCalls": 0
+      },
+      "changingConditional": {
+        "stderrReads": 2,
+        "calls": [
+          "put-object"
+        ],
+        "preserved": false,
+        "finiteFailure": true,
+        "unreadableEscaped": false,
+        "cleanup": true,
+        "awsCalls": 0
+      },
+      "unreadable": {
+        "stderrReads": 1,
+        "calls": [
+          "put-object"
+        ],
+        "preserved": false,
+        "finiteFailure": false,
+        "unreadableEscaped": true,
+        "cleanup": true,
+        "awsCalls": 0
+      }
+    },
+    "stderr": ""
+  },
+  "checks": {
+    "red": {
+      "label": "red",
+      "command": [
+        "node",
+        "--test",
+        "scripts/operations/aws-transport.test.mjs"
+      ],
+      "start": "2026-10-09T13:19:39.884479+00:00",
+      "end": "2026-10-09T13:19:40.084971+00:00",
+      "exit": 1,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {}
+    },
+    "focused": {
+      "label": "focused",
+      "command": [
+        "node",
+        "--test",
+        "scripts/operations/aws-transport.test.mjs"
+      ],
+      "start": "2026-10-09T13:20:09.885052+00:00",
+      "end": "2026-10-09T13:20:10.094074+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/aws-transport.mjs": "ccbcabe723b066f10a2c99652e47ab1439a59b06e51235964fa4717ec0fb8112",
+        "scripts/operations/aws-transport.test.mjs": "b9615f645d6570a5e5374bf89e217a444b87367217afc95d883b16392fb40fd9"
+      }
+    },
+    "native": {
+      "label": "native",
+      "command": [
+        "node",
+        "--experimental-transform-types",
+        "--test",
+        "scripts/operations/archive-recovery.test.mjs",
+        "scripts/operations/aws-transport.test.mjs",
+        "scripts/operations/dynamo-journal.test.mjs",
+        "scripts/operations/installed-readback.test.mjs",
+        "scripts/operations/jobs-setup.test.mjs",
+        "scripts/operations/journal.test.mjs",
+        "scripts/operations/managed-preparation.test.mjs",
+        "scripts/operations/manifest.test.mjs",
+        "scripts/operations/partition-recovery.test.mjs",
+        "scripts/operations/partition-setup.test.mjs",
+        "scripts/operations/plan.test.mjs",
+        "scripts/operations/recovery.test.mjs",
+        "scripts/operations/retention-setup.test.mjs",
+        "scripts/operations/setup.test.mjs"
+      ],
+      "start": "2026-10-09T13:20:10.230478+00:00",
+      "end": "2026-10-09T13:20:13.977690+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/aws-transport.mjs": "ccbcabe723b066f10a2c99652e47ab1439a59b06e51235964fa4717ec0fb8112",
+        "scripts/operations/aws-transport.test.mjs": "b9615f645d6570a5e5374bf89e217a444b87367217afc95d883b16392fb40fd9"
+      }
+    },
+    "full": {
+      "label": "full",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-09T13:20:10.235436+00:00",
+      "end": "2026-10-09T13:23:40.356266+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/aws-transport.mjs": "ccbcabe723b066f10a2c99652e47ab1439a59b06e51235964fa4717ec0fb8112",
+        "scripts/operations/aws-transport.test.mjs": "b9615f645d6570a5e5374bf89e217a444b87367217afc95d883b16392fb40fd9"
+      }
+    }
+  },
+  "counts": {
+    "red": {
+      "tests": 16,
+      "pass": 11,
+      "fail": 5
+    },
+    "focused": {
+      "tests": 16,
+      "pass": 16,
+      "fail": 0
+    },
+    "native": {
+      "tests": 246,
+      "pass": 246,
+      "fail": 0
+    },
+    "full": {
+      "applicationPassed": 1398,
+      "existingOptionalSkipped": 2,
+      "hostedPassed": 1,
+      "browserPassed": 64,
+      "references": 7,
+      "planning": 15,
+      "boundaries": 414
+    }
+  },
+  "versions": {
+    "start": "2026-10-09T13:21:18.661522+00:00",
+    "end": "2026-10-09T13:21:18.739977+00:00",
+    "node": "v24.21.0",
+    "npm": "11.19.0",
+    "checkRunnerPinnedEnvironment": true,
+    "correctedProbe": "direct npm --version used default PATH: /usr/bin/env: \u2018node\u2019: Permission denied, exit126; corrected only this version probe with the required pinned PATH, no permission or check change"
+  },
+  "offlineVerification": {
+    "id": 37936629928,
+    "source": "2a93205a8e359603f712db681198502f8b6c4d1b",
+    "actor": 143764700,
+    "path": ".github/workflows/operations-verify.yml",
+    "event": "workflow_dispatch",
+    "createdAt": "2026-10-09T13:24:37Z",
+    "updatedAt": "2026-10-09T13:29:09Z",
+    "observedAt": "2026-10-09T13:29:56.822954+00:00",
+    "conclusion": "success",
+    "nativePassed": 246,
+    "applicationPassed": 1398,
+    "browserPassed": 64,
+    "installation": "UNKNOWN",
+    "managedRecovery": "NOT_EXECUTED",
+    "artifactSha256": {
+      "operations-report.json": "feefff1394fff8f3f696e006adfa48e976ad203e48017e6472b21747def1bb6c",
+      "partition-report.json": "ca637c7b75e020aace68d0db6f6c2944a46ce13d74acc5b1cdc1b48d7a53ea92",
+      "retention-report.json": "caecde10af209e55635dc2a24a9e47f7b6b45bf238875c30de5ebcd7872a0741",
+      "jobs-report.json": "cec3fb19623ed20c8bc4d1c0c9f29d86b1d584fd858dcbe2855cb9b98260cfd2",
+      "setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+      "partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+      "jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639"
+    },
+    "reports": {
+      "operations-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "2a93205a8e359603f712db681198502f8b6c4d1b",
+        "templateHash": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "managedRecovery": "UNKNOWN",
+        "apply": "DISABLED"
+      },
+      "partition-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "2a93205a8e359603f712db681198502f8b6c4d1b",
+        "templateHash": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "effectivePermissions": "UNKNOWN",
+        "migration": "NOT_EXECUTED",
+        "activation": "DISABLED",
+        "managedRecovery": "UNKNOWN"
+      },
+      "retention-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "2a93205a8e359603f712db681198502f8b6c4d1b",
+        "preparationHash": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "realPersonPolicy": "UNAPPROVED",
+        "dataOperations": "NOT_EXECUTED",
+        "participantGrants": "NOT_GRANTED",
+        "managedProof": "UNKNOWN"
+      },
+      "jobs-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "2a93205a8e359603f712db681198502f8b6c4d1b",
+        "preparationHash": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "providerCalls": "NOT_EXECUTED",
+        "managedRecovery": "UNKNOWN",
+        "participantConsent": "NOT_GRANTED",
+        "cleanup": "UNKNOWN"
+      }
+    },
+    "jobs": [
+      {
+        "id": 113840203680,
+        "name": "verify",
+        "conclusion": "success",
+        "started_at": "2026-10-09T13:24:41Z",
+        "completed_at": "2026-10-09T13:29:08Z"
+      }
+    ],
+    "inventoryPythonPassed": 23,
+    "pythonVersion": "3.12.3",
+    "inventoryStep": {
+      "name": "Run read-only CloudShell inventory regressions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-10-09T13:24:47Z",
+      "completed_at": "2026-10-09T13:24:51Z"
+    }
+  },
+  "errors": [
+    "Expected red regressions:16 methods/11 PASS/5 FAIL; fixed16 PASS.",
+    "Discovery rg returned exit2: rg: docs/review-artifacts/OPS00/aws-request-capture.md: No such file or directory (os error 2). rg --files located actual transport-request-integrity.md, inspected BEFORE claim/source edits; no invented review.",
+    "direct npm --version used default PATH: /usr/bin/env: \u2018node\u2019: Permission denied, exit126; corrected only this version probe with the required pinned PATH, no permission or check change",
+    "Progress1 said focused/native/full checks were running; focused had actually completed13:20:10.094074Z before dispatch. Native/full were running. Preserve the receipt; actual timestamps establish focused PASS."
+  ],
+  "phase": "CODE_READY/released",
+  "wholeTask": "BLOCKED/unclaimed",
+  "installation": "UNKNOWN",
+  "effectiveScope": "UNKNOWN",
+  "privateManagedPreservation": "UNKNOWN",
+  "apply": "INVENTORY_REQUIRED",
+  "managedProof": "NOT_EXECUTED",
+  "awsCalls": 0,
+  "releasedAt": "2026-10-09T13:30:51.325198+00:00",
+  "nextWake": "2026-10-09T13:43:25.133Z",
+  "idleGating": "UNKNOWN"
+}
