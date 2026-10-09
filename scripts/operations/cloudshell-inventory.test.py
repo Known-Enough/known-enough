@@ -176,6 +176,74 @@ class InventoryTests(unittest.TestCase):
         inv.read('missing', ['cloudformation', 'describe-stacks'], missing_stack='KnownEnoughOperationsRecovery')
         self.assertEqual(inv.report['reads'][0]['status'], 'ABSENT')
 
+    def test_malformed_oidc_audience_never_matches_or_aborts_inventory(self):
+        values = [None, 1, True, 'prefix-sts.amazonaws.com-suffix',
+                  {'sts.amazonaws.com': PRIVATE}, ['sts.amazonaws.com', None],
+                  [PRIVATE, 1], [True]]
+        providers = [{'Url': 'token.actions.githubusercontent.com', 'ClientIDList': value}
+                     for value in values]
+        providers.append({'Url': 'token.actions.githubusercontent.com'})
+        for provider in providers:
+            with self.subTest(provider=provider), tempfile.TemporaryDirectory() as folder:
+                self.calls.clear()
+                report = module.Inventory(Path(folder), 'a' * 40, self.executor({
+                    'get-open-id-connect-provider': provider})).collect()
+                row = next(row for row in report['reads'] if row['id'] == 'oidc')
+                self.assertEqual(report['configuration']['oidcAudience'], 'UNKNOWN')
+                self.assertEqual((row['status'], row['code']), ('UNKNOWN', 'AWS_RESPONSE_REJECTED'))
+                self.assertNotIn('metadataHash', row)
+                self.assertFalse((Path(folder) / 'oidc.json').exists())
+                self.assertTrue((Path(folder) / 'primary-runtime.json').exists())
+                self.assertEqual(report['mutations'], 0)
+                self.assertEqual(report['effectivePermissions'], 'UNKNOWN')
+                self.assertNotIn(PRIVATE, json.dumps(report))
+
+    def test_malformed_oidc_url_is_unknown_not_a_configuration_comparison(self):
+        for url in (None, 1, True, [], {'private': PRIVATE}):
+            with self.subTest(url=url), tempfile.TemporaryDirectory() as folder:
+                report = module.Inventory(Path(folder), 'a' * 40, self.executor({
+                    'get-open-id-connect-provider': {'Url': url, 'ClientIDList': ['sts.amazonaws.com']}})).collect()
+                row = next(row for row in report['reads'] if row['id'] == 'oidc')
+                self.assertEqual(report['configuration']['oidcAudience'], 'UNKNOWN')
+                self.assertEqual((row['status'], row['code']), ('UNKNOWN', 'AWS_RESPONSE_REJECTED'))
+                self.assertNotIn(PRIVATE, json.dumps(report))
+
+    def test_malformed_role_or_trust_document_skips_dependents_and_keeps_summary(self):
+        roles = [None, [], PRIVATE, 1, True, {}]
+        roles.extend({'AssumeRolePolicyDocument': value} for value in (None, [], PRIVATE, 1, True))
+        responses = [{'Role': role} for role in roles] + [{'private': PRIVATE}]
+        for response in responses:
+            with self.subTest(response=response), tempfile.TemporaryDirectory() as folder:
+                self.calls.clear()
+                report = module.Inventory(Path(folder), 'a' * 40, self.executor({'get-role': response})).collect()
+                rows = [row for row in report['reads'] if row['id'] in module.ROLES]
+                self.assertEqual(len(rows), len(module.ROLES))
+                self.assertTrue(all((row['status'], row['code']) == ('UNKNOWN', 'AWS_RESPONSE_REJECTED')
+                                    for row in rows))
+                self.assertTrue(all('metadataHash' not in row for row in rows))
+                self.assertEqual(report['configuration']['recoveryTrust'], 'UNKNOWN')
+                self.assertFalse(any(args[2] in ('list-role-policies', 'list-attached-role-policies', 'get-role-policy')
+                                     for args, _ in self.calls))
+                self.assertTrue((Path(folder) / 'primary-runtime.json').exists())
+                self.assertEqual(report['mutations'], 0)
+                self.assertNotIn(PRIVATE, json.dumps(report))
+
+    def test_valid_provider_metadata_keeps_exact_match_mismatch_and_private_readback(self):
+        cases = [('token.actions.githubusercontent.com', ['other', 'sts.amazonaws.com'], 'MATCH'),
+                 ('token.actions.githubusercontent.com', [], 'MISMATCH'),
+                 ('other-provider.example', ['sts.amazonaws.com'], 'MISMATCH')]
+        for url, audiences, expected in cases:
+            with self.subTest(expected=expected), tempfile.TemporaryDirectory() as folder:
+                report = module.Inventory(Path(folder), 'a' * 40, self.executor({
+                    'get-open-id-connect-provider': {'Url': url, 'ClientIDList': audiences, 'private': PRIVATE},
+                    'get-role': {'Role': {'AssumeRolePolicyDocument': {}, 'private': PRIVATE}}})).collect()
+                row = next(row for row in report['reads'] if row['id'] == 'oidc')
+                self.assertEqual((row['status'], row['code']), ('READ', None))
+                self.assertEqual(report['configuration']['oidcAudience'], expected)
+                self.assertEqual(report['configuration']['recoveryTrust'], 'MISMATCH')
+                self.assertIn(PRIVATE, (Path(folder) / 'oidc.json').read_text())
+                self.assertNotIn(PRIVATE, json.dumps(report))
+
     def test_custom_subject_and_audience_comparison_keeps_other_trust_conditions_exact(self):
         trust = {'Version': '2012-10-17', 'Statement': [{'Effect': 'Allow',
             'Principal': {'Federated': module.PROVIDER}, 'Action': 'sts:AssumeRoleWithWebIdentity',

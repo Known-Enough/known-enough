@@ -31,6 +31,18 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def comparison_metadata_valid(args, value):
+    """Require typed comparison fields before interpreting a metadata read."""
+    if args[:2] == ['iam', 'get-open-id-connect-provider']:
+        audiences = value.get('ClientIDList')
+        return (isinstance(value.get('Url'), str) and isinstance(audiences, list)
+                and all(isinstance(audience, str) for audience in audiences))
+    if args[:2] == ['iam', 'get-role']:
+        role = value.get('Role')
+        return isinstance(role, dict) and isinstance(role.get('AssumeRolePolicyDocument'), dict)
+    return True
+
+
 def private_write(path, value):
     data = (json.dumps(value, indent=2) + '\n').encode()
     fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
@@ -112,6 +124,8 @@ class Inventory:
                     value.get(k) for k in ('NextToken', 'Marker', 'NextMarker')):
                 row['code'] = 'AWS_INCOMPLETE_RESPONSE'
                 return None
+            if not comparison_metadata_valid(args, value):
+                raise ValueError('AWS_COMPARISON_METADATA_SHAPE')
             row['metadataHash'] = private_write(self.folder / (name + '.json'), value)
             row['status'] = 'READ'
             return value
@@ -145,6 +159,7 @@ class Inventory:
         provider = self.read('oidc', ['iam', 'get-open-id-connect-provider', '--open-id-connect-provider-arn', PROVIDER], 'NoSuchEntity')
         r['configuration']['oidcAudience'] = ('MATCH' if provider.get('Url') == 'token.actions.githubusercontent.com'
                 and 'sts.amazonaws.com' in provider.get('ClientIDList', []) else 'MISMATCH') if provider else 'UNKNOWN'
+        r['configuration']['recoveryTrust'] = 'UNKNOWN'
         for role in ROLES:
             v = self.read(role, ['iam', 'get-role', '--role-name', role], 'NoSuchEntity')
             if not v:
