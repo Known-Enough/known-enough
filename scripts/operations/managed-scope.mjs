@@ -49,7 +49,9 @@ function observedCode(error, operation) {
     // Read once. Raw messages, output, causes and arbitrary error names stay private.
     const stderr = error?.stderr;
     if (typeof stderr !== 'string' || stderr.length > 16384) return 'CLI_FAILURE';
-    const match = stderr.trimStart().match(/^An error occurred \(([A-Za-z0-9]+)\) when calling the ([A-Za-z0-9]+) operation:/);
+    // ClientError may report zero retries when AWS_MAX_ATTEMPTS is one.
+    // An unexpected nonzero retry count remains unverified under this bound.
+    const match = stderr.trimStart().match(/^An error occurred \(([A-Za-z0-9]+)\) when calling the ([A-Za-z0-9]+) operation(?: \(reached max retries: 0\))?:/);
     if (match?.[2] !== operation) return 'CLI_FAILURE';
     return ['AccessDenied', 'AccessDeniedException', 'NoSuchKey', 'NoSuchBucket', 'ResourceNotFoundException',
       'ExpiredToken', 'RequestTimeout'].includes(match[1]) ? match[1] : 'CLI_FAILURE';

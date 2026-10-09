@@ -113,6 +113,22 @@ test('stderr is captured once and unreadable diagnostics remain finite', async (
   const unreadable = await runScopeProbes(async () => { throw { get stderr() { throw new Error('private'); } }; });
   assert.ok(unreadable.every(probe => probe.code === 'CLI_FAILURE' && probe.outcome === 'UNVERIFIED'));
 });
+test('AWS ClientError zero-retry suffix preserves the exact denied code and operation', async () => {
+  const outcomes = await runScopeProbes(async (_file, args) => { throw { stderr:
+    `\nAn error occurred (${args[0] === 'dynamodb' ? 'AccessDeniedException' : 'AccessDenied'}) when calling the ${operations[args[1]]} operation (reached max retries: 0): SYNTHETIC_PRIVATE_MESSAGE` }; });
+  assert.ok(outcomes.every(probe => probe.outcome === 'DENIED'));
+  assert.ok(!JSON.stringify(outcomes).includes('SYNTHETIC_PRIVATE'));
+});
+test('nonzero, malformed retry suffixes and wrong operations remain unverified', async () => {
+  for (const suffix of [' (reached max retries: 1)', ' (reached max retries: -1)', ' (reached max retries: private)', ' (private)']) {
+    const outcomes = await runScopeProbes(async () => { throw { stderr:
+      `An error occurred (AccessDeniedException) when calling the GetItem operation${suffix}: SYNTHETIC_PRIVATE_MESSAGE` }; });
+    assert.equal(outcomes[0].outcome, 'UNVERIFIED'); assert.equal(outcomes[0].code, 'CLI_FAILURE');
+  }
+  const wrong = await runScopeProbes(async () => { throw { stderr:
+    'An error occurred (AccessDeniedException) when calling the PutItem operation (reached max retries: 0): private' }; });
+  assert.equal(wrong[0].outcome, 'UNVERIFIED');
+});
 test('unexpected successful data and credentials are discarded without accessing response properties or retrying', async () => {
   let calls = 0; let outputReads = 0;
   const outcomes = await runScopeProbes(async () => { calls++; return { get stdout() { outputReads++; throw new Error('private credentials'); } }; });
