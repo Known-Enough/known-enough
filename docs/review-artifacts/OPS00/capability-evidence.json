@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "task": "OPS00",
   "phase": "RUN188_OFFLINE_CAPABILITY_MAPPING",
-  "observed": "2026-10-09T23:37:47.950325+00:00",
+  "observed": "2026-10-09T23:45:16.108007+00:00",
   "scheduled": "2026-10-09T23:28:35.872Z",
   "observedStart": "2026-10-09T23:28:54.359909Z",
   "sourceCandidate": "f0aaba96a5da22474e5e6c466bd3301d611b5e54",
@@ -236,7 +236,98 @@
   "protectedTrackedHashes": 979,
   "startedReceipt": "https://github.com/Known-Enough/known-enough/actions/runs/38004701381",
   "progressReceipt": "https://github.com/Known-Enough/known-enough/actions/runs/38005033737",
-  "sourceMatchingWorkflow": "PENDING_CHECKED_SOURCE_INTEGRATION",
+  "sourceMatchingWorkflow": {
+    "observed": "2026-10-09T23:43:27.396700+00:00",
+    "sourceSha": "39e3fe1db7eaba54dd5d0230a56709a462890527",
+    "runId": 38005381113,
+    "runUrl": "https://github.com/Known-Enough/known-enough/actions/runs/38005381113",
+    "actorId": 143764700,
+    "jobId": 114072852345,
+    "jobStart": "2026-10-09T23:38:11Z",
+    "jobEnd": "2026-10-09T23:42:21Z",
+    "result": "SUCCESS_SOURCE_ARTIFACT_VERIFIED",
+    "steps": [
+      {
+        "name": "Set up job",
+        "number": 1,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+        "number": 2,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "number": 3,
+        "conclusion": "success"
+      },
+      {
+        "name": "Bind main source and generated template before dependency installation",
+        "number": 4,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run read-only CloudShell inventory regressions",
+        "number": 5,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run CREATE command package regressions",
+        "number": 6,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run focused operations and pinned full checks",
+        "number": 7,
+        "conclusion": "success"
+      },
+      {
+        "name": "Upload public setup proposal and offline verification only",
+        "number": 8,
+        "conclusion": "success"
+      },
+      {
+        "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "number": 15,
+        "conclusion": "success"
+      },
+      {
+        "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+        "number": 16,
+        "conclusion": "success"
+      },
+      {
+        "name": "Complete job",
+        "number": 17,
+        "conclusion": "success"
+      }
+    ],
+    "artifacts": {
+      "jobs-report.json": "8259bd6aa959a6e30c0fdb0829f2f5b5d83991ba0fd61cf8b3119d74c0c59a72",
+      "retention-report.json": "a3ac847157250c04d4365c052420e2030c6e8ba560a6fa6810d1ae846528fd28",
+      "operations-report.json": "6b1b6675c31f575e42546e0ae2593312f3444a81b9ffff2eb20268307031fe38",
+      "partition-report.json": "f58579683dde169671edf66afd9c06da0ffb85b0b44f6af93555225cc715c5e0",
+      "capabilities-report.json": "5aa613e0b3623a05e7a008ec8e69a01865122a2607a16c5d0c1da7b6d314136b",
+      "jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+      "partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+      "retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450"
+    },
+    "counts": {
+      "profiles": 8,
+      "operations": 117,
+      "reuseCandidates": 9,
+      "differentLeadingKeys": 20,
+      "undeclaredResourceActions": 88
+    },
+    "nativePass": 286,
+    "applicationPass": 1407,
+    "applicationOptionalSkips": 2,
+    "browserPass": 64,
+    "cloudCredentials": "NOT_GRANTED",
+    "managedActions": "NOT_EXECUTED"
+  },
   "nextAction": "finish owned pinned full check; integrate source then one existing credential-free source-matching verification run",
   "nominalNextWake": "2026-10-09T23:58:35.872Z",
   "idleGating": "UNKNOWN",
@@ -259,5 +350,98 @@
       "error": "AssertionError: ('docs/review-artifacts/OPS00/capability-map.md', 'effective-permission-proof.md')",
       "result": "Failed locally; located actual managed-two-run-proof.md and corrected before source integration."
     }
-  ]
+  ],
+  "checkedSource": "39e3fe1db7eaba54dd5d0230a56709a462890527",
+  "sourceSynchronization": {
+    "label": "source",
+    "expectedRemote": "f0aaba96a5da22474e5e6c466bd3301d611b5e54",
+    "sourceSha": "39e3fe1db7eaba54dd5d0230a56709a462890527",
+    "observedEnd": "2026-10-09T23:37:52.756072+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 979
+  },
+  "progressReceipts": [
+    38005033737,
+    38005411487,
+    38005838505
+  ],
+  "capabilityArtifactHash": "5aa613e0b3623a05e7a008ec8e69a01865122a2607a16c5d0c1da7b6d314136b",
+  "phaseHandoff": {
+    "observed": "2026-10-09T23:45:16.108007+00:00",
+    "phase": "CODE_READY_VERIFIED_RELEASED",
+    "wholeTask": "REVIEW_NOT_DONE",
+    "nextAction": "verify exact service/operator roles and prepare fixed retained partition/profile/GitHub apply/readback setup without widening recovery or resetting source/counters"
+  },
+  "actualAgentObservation": {
+    "observed": "2026-10-09T23:42:33.393656+00:00",
+    "agents": [
+      {
+        "name": "/root",
+        "status": "running"
+      }
+    ],
+    "newAgents": 0,
+    "ownedSource": "39e3fe1db7eaba54dd5d0230a56709a462890527",
+    "ownedVerificationRun": 38005381113,
+    "ownedVerification": "IN_PROGRESS_LAST_API_OBSERVATION",
+    "noDuplicateCheck": true
+  },
+  "finishedReceipt": {
+    "id": 38005961832,
+    "runUrl": "https://github.com/Known-Enough/known-enough/actions/runs/38005961832",
+    "exactSummary": "OPS00\u2019s [capability ledger](https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/OPS00/capability-map.md) now maps eight storage profiles and 117 scoped entries. [Source verification](https://github.com/Known-Enough/known-enough/actions/runs/38005381113), 286 operations tests and the full check passed; role setup, activation and managed proof remain open.",
+    "verified": true
+  },
+  "finalSummary": "OPS00\u2019s [capability ledger](https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/OPS00/capability-map.md) now maps eight storage profiles and 117 scoped entries. [Source verification](https://github.com/Known-Enough/known-enough/actions/runs/38005381113), 286 operations tests and the full check passed; role setup, activation and managed proof remain open.",
+  "closingObserved": "2026-10-09T23:47:18.436041+00:00",
+  "lifecycle": [
+    {
+      "event": "started",
+      "id": 38004701381,
+      "createdAt": "2026-10-09T23:29:50Z",
+      "sourceSha": "2abcf86384384744ef12f8ee0d5f0b8347a480f1",
+      "summary": "OPS00 intake verified own B identity, clean ff-only main and no active owned jobs. Next map checked OPS01\u201303 requirements against installed recovery capabilities, preserving original recovery state and one sequential claim."
+    },
+    {
+      "event": "progress",
+      "id": 38005033737,
+      "createdAt": "2026-10-09T23:33:49Z",
+      "sourceSha": "f0aaba96a5da22474e5e6c466bd3301d611b5e54",
+      "summary": "OPS00 source-bound capability ledger passes nine focused checks. It preserves distinct role/key/transaction/consent scopes; installed recovery declarations do not establish OPS01\u201303 effective access. Frozen native and pinned full checks are now running on this same phase."
+    },
+    {
+      "event": "progress",
+      "id": 38005411487,
+      "createdAt": "2026-10-09T23:38:30Z",
+      "sourceSha": "39e3fe1db7eaba54dd5d0230a56709a462890527",
+      "summary": "OPS00 ledger source 39e3fe1 is synchronized after nine focused, 286 operations and full 1407 application/64 browser checks passed. Source-matching offline verification run38005381113 is queued; uploaded artifact proof remains pending. No AWS permission, data or runtime activation change."
+    },
+    {
+      "event": "progress",
+      "id": 38005838505,
+      "createdAt": "2026-10-09T23:43:49Z",
+      "sourceSha": "39e3fe1db7eaba54dd5d0230a56709a462890527",
+      "summary": "OPS00 source-matching verification38005381113 passed. Own B/main/source39e3fe1, all nine downloaded proposal/report files and the exact capability ledger verified; CI passed 286 operations tests and full 1407 application/64 browser checks. Capability mapping is checked source; role installation, activation and managed proof remain open."
+    },
+    {
+      "event": "finished",
+      "id": 38005961832,
+      "createdAt": "2026-10-09T23:45:18Z",
+      "sourceSha": "39e3fe1db7eaba54dd5d0230a56709a462890527",
+      "summary": "OPS00\u2019s [capability ledger](https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/OPS00/capability-map.md) now maps eight storage profiles and 117 scoped entries. [Source verification](https://github.com/Known-Enough/known-enough/actions/runs/38005381113), 286 operations tests and the full check passed; role setup, activation and managed proof remain open."
+    }
+  ],
+  "lifecycleGapsSeconds": [
+    239.0,
+    281.0,
+    319.0,
+    89.0
+  ],
+  "maximumLifecycleGapSeconds": 319.0,
+  "startedPublicationLagSeconds": 55.640091,
+  "activeGitHubJobsAtClosingCheckpoint": [],
+  "documentationSynchronization": "PENDING_OWNED_FINAL_STEP_AT_THIS_DATED_SNAPSHOT"
 }
