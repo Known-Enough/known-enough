@@ -158,6 +158,10 @@ class Aws:
             raise Rejected(code if code in inventory.CODES | {'ChangeSetNotFound', 'ChangeSetNotFoundException',
                            'AlreadyExistsException', 'TokenAlreadyExistsException', 'InsufficientCapabilitiesException',
                            'LimitExceededException', 'RequestTimeout'} else 'AWS_REQUEST_FAILED')
+        # ExecuteChangeSet has no CLI output on success. Only this exact mutation
+        # accepts an empty acknowledgment; metadata and CREATE still require JSON.
+        if mutation and args[:2] == ['cloudformation', 'execute-change-set'] and not raw.strip():
+            return {}
         try:
             value = json.loads(raw)
         except ValueError:

@@ -29,6 +29,7 @@ class FakeAws:
         self.calls, self.overrides = [], {}
         self.created, self.executed, self.installed = False, False, False
         self.lost = set()
+        self.empty = set()
         self.preview = dict(ChangeSetId=CHANGE_ID, ChangeSetName='ke-ops00-create-' + SOURCE[:20],
                             StackId=STACK_ID, StackName=module.STACK, Status='CREATE_COMPLETE',
                             ExecutionStatus='AVAILABLE', Capabilities=['CAPABILITY_NAMED_IAM'], Changes=[
@@ -116,6 +117,8 @@ class FakeAws:
             value = self.response(operation)
         if operation in self.lost:
             raise subprocess.TimeoutExpired(command, 10)
+        if operation in self.empty:
+            return subprocess.CompletedProcess(command, 0)
         if isinstance(value, tuple):
             options['stderr'].write(f'An error occurred ({value[0]}) when calling the operation: {value[1]}\n'.encode())
             return subprocess.CompletedProcess(command, 1)
@@ -294,6 +297,23 @@ class CreateTests(unittest.TestCase):
         self.installer.aws.executor = execute
         self.installer.execute(review)
         self.assertEqual(len(self.fake.mutations()), 2)
+
+    def test_successful_execute_accepts_documented_empty_cli_output(self):
+        review = self.prepared()
+        self.fake.empty.add('execute-change-set')
+        self.assertEqual(self.installer.execute(review), ('INSTALL_SUBMITTED', None))
+        self.assertEqual(self.state.load('execute.ack.json'), {})
+        self.assertEqual(self.new_installer().execute(review), ('INSTALL_PENDING', None))
+        self.assertEqual(len(self.fake.mutations()), 2)
+
+    def test_empty_metadata_and_create_ack_still_rejected(self):
+        self.fake.empty.add('get-caller-identity')
+        self.reject(self.installer.prepare, 'AWS_RESPONSE_REJECTED')
+        self.assertEqual(self.fake.mutations(), [])
+        self.fake.empty = {'create-change-set'}
+        self.reject(self.installer.prepare, 'AWS_RESPONSE_REJECTED')
+        self.assertIsNotNone(self.state.load('create.intent.json'))
+        self.assertIsNone(self.state.load('create.ack.json'))
 
     def test_complete_configuration_does_not_claim_effective_permissions(self):
         self.installed()
