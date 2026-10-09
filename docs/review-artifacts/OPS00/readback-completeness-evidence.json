@@ -1,0 +1,288 @@
+{
+  "schemaVersion": 1,
+  "run": 168,
+  "scheduled": "2026-10-09T06:43:19.322Z",
+  "intake": {
+    "scheduled": "2026-10-09T06:43:19.322Z",
+    "actualStart": "2026-10-09T06:43:25Z",
+    "observed": "2026-10-09T06:43:54.016296+00:00",
+    "source": "3e85f4e5bafac67eca8649413f7f88be00c1b233",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "mainCleanEqual": true,
+    "jobs": []
+  },
+  "claim": {
+    "observed": "2026-10-09T06:45:26.805537+00:00"
+  },
+  "claimSync": {
+    "label": "claim",
+    "expectedRemote": "3e85f4e5bafac67eca8649413f7f88be00c1b233",
+    "sourceSha": "89cce8e9324a1edbd1cec0feb618e30d34cda733",
+    "observedEnd": "2026-10-09T06:45:31.273204+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 925
+  },
+  "sourceSync": {
+    "label": "source",
+    "expectedRemote": "89cce8e9324a1edbd1cec0feb618e30d34cda733",
+    "sourceSha": "7f60f8429ab8e40454917405598ce7597fb8f18f",
+    "observedEnd": "2026-10-09T06:50:49.609845+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 925
+  },
+  "releaseObserved": "2026-10-09T06:55:00.841618+00:00",
+  "scope": {
+    "source": "3e85f4e5bafac67eca8649413f7f88be00c1b233",
+    "docs": [
+      "docs/tasks/active/operations/OPS00/ticket.md",
+      "docs/task-board.md",
+      "docs/claim-log.md",
+      "docs/work-log-B.md",
+      "docs/handoff-B.md",
+      "docs/b-next-task-handoff.md",
+      "docs/monitor-log.md",
+      "docs/review-artifacts/OPS00/readback-completeness.md",
+      "docs/review-artifacts/OPS00/readback-completeness-evidence.json"
+    ],
+    "code": [
+      "scripts/operations/installed-readback.mjs",
+      "scripts/operations/installed-readback.test.mjs"
+    ],
+    "protectedCount": 925
+  },
+  "sourceSha256": {
+    "scripts/operations/installed-readback.mjs": "9f617934be9643a834f604a08b3fac63b8e6b0f96ce2b841f241a81bdcf0b170",
+    "scripts/operations/installed-readback.test.mjs": "4faa8554963455724a11d644e29e1f6c6ed5c34cbcfce0359ecf8598394e7c66"
+  },
+  "reproduction": {
+    "observedBeforeClaim": true,
+    "exactToolBoundaryUtc": "NOT_CAPTURED",
+    "cases": 3,
+    "resultEach": "READBACK_COMPLETE",
+    "installationEach": "CONFIGURATION_MATCH",
+    "requestsEach": 16,
+    "actualAwsCalls": 0
+  },
+  "checks": {
+    "red": {
+      "label": "red",
+      "command": [
+        "node",
+        "--test",
+        "scripts/operations/installed-readback.test.mjs"
+      ],
+      "start": "2026-10-09T06:46:02.973732+00:00",
+      "end": "2026-10-09T06:46:03.211062+00:00",
+      "exit": 1,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {}
+    },
+    "focused": {
+      "label": "focused",
+      "command": [
+        "node",
+        "--test",
+        "scripts/operations/installed-readback.test.mjs"
+      ],
+      "start": "2026-10-09T06:46:26.624380+00:00",
+      "end": "2026-10-09T06:46:26.991540+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/installed-readback.mjs": "9f617934be9643a834f604a08b3fac63b8e6b0f96ce2b841f241a81bdcf0b170",
+        "scripts/operations/installed-readback.test.mjs": "4faa8554963455724a11d644e29e1f6c6ed5c34cbcfce0359ecf8598394e7c66"
+      }
+    },
+    "native": {
+      "label": "native",
+      "command": [
+        "node",
+        "--test",
+        "scripts/operations/archive-recovery.test.mjs",
+        "scripts/operations/aws-transport.test.mjs",
+        "scripts/operations/dynamo-journal.test.mjs",
+        "scripts/operations/installed-readback.test.mjs",
+        "scripts/operations/jobs-setup.test.mjs",
+        "scripts/operations/journal.test.mjs",
+        "scripts/operations/managed-preparation.test.mjs",
+        "scripts/operations/manifest.test.mjs",
+        "scripts/operations/partition-recovery.test.mjs",
+        "scripts/operations/partition-setup.test.mjs",
+        "scripts/operations/plan.test.mjs",
+        "scripts/operations/recovery.test.mjs",
+        "scripts/operations/retention-setup.test.mjs",
+        "scripts/operations/setup.test.mjs"
+      ],
+      "start": "2026-10-09T06:46:27.153897+00:00",
+      "end": "2026-10-09T06:46:27.649662+00:00",
+      "exit": 1,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/installed-readback.mjs": "9f617934be9643a834f604a08b3fac63b8e6b0f96ce2b841f241a81bdcf0b170",
+        "scripts/operations/installed-readback.test.mjs": "4faa8554963455724a11d644e29e1f6c6ed5c34cbcfce0359ecf8598394e7c66"
+      }
+    },
+    "native-fixed": {
+      "label": "native-fixed",
+      "command": [
+        "node",
+        "--experimental-strip-types",
+        "--experimental-transform-types",
+        "--test",
+        "scripts/operations/archive-recovery.test.mjs",
+        "scripts/operations/aws-transport.test.mjs",
+        "scripts/operations/dynamo-journal.test.mjs",
+        "scripts/operations/installed-readback.test.mjs",
+        "scripts/operations/jobs-setup.test.mjs",
+        "scripts/operations/journal.test.mjs",
+        "scripts/operations/managed-preparation.test.mjs",
+        "scripts/operations/manifest.test.mjs",
+        "scripts/operations/partition-recovery.test.mjs",
+        "scripts/operations/partition-setup.test.mjs",
+        "scripts/operations/plan.test.mjs",
+        "scripts/operations/recovery.test.mjs",
+        "scripts/operations/retention-setup.test.mjs",
+        "scripts/operations/setup.test.mjs"
+      ],
+      "start": "2026-10-09T06:46:48.672969+00:00",
+      "end": "2026-10-09T06:46:53.179311+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/installed-readback.mjs": "9f617934be9643a834f604a08b3fac63b8e6b0f96ce2b841f241a81bdcf0b170",
+        "scripts/operations/installed-readback.test.mjs": "4faa8554963455724a11d644e29e1f6c6ed5c34cbcfce0359ecf8598394e7c66"
+      }
+    },
+    "full": {
+      "label": "full",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-09T06:46:27.163401+00:00",
+      "end": "2026-10-09T06:50:24.528117+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/installed-readback.mjs": "9f617934be9643a834f604a08b3fac63b8e6b0f96ce2b841f241a81bdcf0b170",
+        "scripts/operations/installed-readback.test.mjs": "4faa8554963455724a11d644e29e1f6c6ed5c34cbcfce0359ecf8598394e7c66"
+      }
+    }
+  },
+  "newScenarios": 52,
+  "offlineVerification": {
+    "id": 37895692457,
+    "source": "7f60f8429ab8e40454917405598ce7597fb8f18f",
+    "actor": 143764700,
+    "path": ".github/workflows/operations-verify.yml",
+    "event": "workflow_dispatch",
+    "createdAt": "2026-10-09T06:50:54Z",
+    "updatedAt": "2026-10-09T06:54:21Z",
+    "observedAt": "2026-10-09T06:54:48.390070+00:00",
+    "conclusion": "success",
+    "nativePassed": 178,
+    "applicationPassed": 1398,
+    "browserPassed": 64,
+    "installation": "UNKNOWN",
+    "managedRecovery": "NOT_EXECUTED",
+    "artifactSha256": {
+      "operations-report.json": "9dca3635db7bf447e9cfaf5f776c88c820fc50a8178c602947b8d621ccac5203",
+      "partition-report.json": "92b379da42f67a71b2bb29dd994653cbe792015eaff4aa86b6af285e28d9bbdb",
+      "retention-report.json": "4c979680606bbd87455f0e07738a8f058ef54878ce75d879754efbbfb4ab3c8f",
+      "jobs-report.json": "40e2fd2b98f4a5e9be291cd62d0f0e5909ebdd16e8c6a402529734388ba69bd8",
+      "setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+      "partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+      "jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639"
+    },
+    "reports": {
+      "operations-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "7f60f8429ab8e40454917405598ce7597fb8f18f",
+        "templateHash": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "managedRecovery": "UNKNOWN",
+        "apply": "DISABLED"
+      },
+      "partition-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "7f60f8429ab8e40454917405598ce7597fb8f18f",
+        "templateHash": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "effectivePermissions": "UNKNOWN",
+        "migration": "NOT_EXECUTED",
+        "activation": "DISABLED",
+        "managedRecovery": "UNKNOWN"
+      },
+      "retention-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "7f60f8429ab8e40454917405598ce7597fb8f18f",
+        "preparationHash": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "realPersonPolicy": "UNAPPROVED",
+        "dataOperations": "NOT_EXECUTED",
+        "participantGrants": "NOT_GRANTED",
+        "managedProof": "UNKNOWN"
+      },
+      "jobs-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "7f60f8429ab8e40454917405598ce7597fb8f18f",
+        "preparationHash": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "providerCalls": "NOT_EXECUTED",
+        "managedRecovery": "UNKNOWN",
+        "participantConsent": "NOT_GRANTED",
+        "cleanup": "UNKNOWN"
+      }
+    },
+    "jobs": [
+      {
+        "id": 113706419638,
+        "name": "verify",
+        "conclusion": "success",
+        "started_at": "2026-10-09T06:50:58Z",
+        "completed_at": "2026-10-09T06:54:20Z"
+      }
+    ],
+    "inventoryPythonPassed": 23,
+    "pythonVersion": "3.12.3",
+    "inventoryStep": {
+      "name": "Run read-only CloudShell inventory regressions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-10-09T06:51:02Z",
+      "completed_at": "2026-10-09T06:51:06Z"
+    }
+  },
+  "coding": "CODE_READY",
+  "wholeTask": "BLOCKED/unclaimed",
+  "managedInstallation": "UNKNOWN",
+  "effectivePermissions": "UNKNOWN",
+  "privateManagedPreservation": "UNKNOWN",
+  "apply": "INVENTORY_REQUIRED",
+  "managedRecovery": "NOT_EXECUTED",
+  "actualAwsCalls": 0,
+  "mutations": 0,
+  "cloudshellPackage": "UNCHANGED",
+  "frozenHashes": 925
+}
