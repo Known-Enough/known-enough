@@ -1,0 +1,532 @@
+{
+  "schemaVersion": 1,
+  "execution": "RUN165",
+  "task": "OPS00",
+  "phase": "typed comparison metadata in bounded read-only inventory",
+  "scheduled": "2026-10-09T03:13:16.104Z",
+  "actualStart": "2026-10-09T03:13:28.992156+00:00",
+  "checkedHandoffAt": "2026-10-09T03:31:14.666132+00:00",
+  "account": "Battosai1806",
+  "actorId": 143764700,
+  "intake": {
+    "scheduled": "2026-10-09T03:13:16.104Z",
+    "actualStart": "2026-10-09T03:13:28.992156+00:00",
+    "initialHead": "5056176045f7237bc389d1ce4fb9d9e93f4fc4b1",
+    "source": "5056176045f7237bc389d1ce4fb9d9e93f4fc4b1",
+    "branch": "main",
+    "origin": "https://github.com/Known-Enough/known-enough.git",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "status": "",
+    "cleanEqual": true,
+    "jobs": [],
+    "observed": "2026-10-09T03:13:31.790180+00:00"
+  },
+  "instructionHashes": [
+    {
+      "path": "AGENTS.md",
+      "unchanged": true,
+      "sha256": "86ad738cfe84e511c832f3d283b717338677a1ffce79cfbc3422de16d5c50e04"
+    },
+    {
+      "path": "docs/agent-workflow.md",
+      "unchanged": true,
+      "sha256": "0ca75b2505dad86cb9e65b3664783354b8378d3211506e1501538182ae63b0e2"
+    },
+    {
+      "path": "docs/coding-first-plan.md",
+      "unchanged": true,
+      "sha256": "b6e5761eb151b0b7c3c241805e2340c12f30712c69175cdabf9f16d8d17932b0"
+    },
+    {
+      "path": "docs/b-idle-watchdog.md",
+      "unchanged": true,
+      "sha256": "1ddef83658f2f73347abb6ed9bde37a4b0db935097af8f44a34f64fc8d525117"
+    },
+    {
+      "path": "docs/monitor-reporting.md",
+      "unchanged": true,
+      "sha256": "7c2b274ac04d5099c151bac8091e65d99980e0b45653739a87c21812ebe8107a"
+    },
+    {
+      "path": "docs/task-board.md",
+      "unchanged": true,
+      "sha256": "edf1d90a6ddd987db9ddc57a5d184038665ae7db425284bcff01ede0f47de823"
+    },
+    {
+      "path": "docs/claim-log.md",
+      "unchanged": true,
+      "sha256": "331d800fa28fe96c495c9734449617b440376002667d284872f9470570328869"
+    },
+    {
+      "path": "docs/tasks/active/operations/OPS00/ticket.md",
+      "unchanged": true,
+      "sha256": "f0c1e5ca301b9e9c458fe31b996a1a8bc055575cf3c94b599a2f0325f3046619"
+    },
+    {
+      "path": "docs/handoff-B.md",
+      "unchanged": true,
+      "sha256": "39664bf0bf0fd86d2470449f06c60f75a42770980746b6e071b87554b6660c2e"
+    },
+    {
+      "path": "docs/b-next-task-handoff.md",
+      "unchanged": true,
+      "sha256": "fe578f77d2d7f407b3159d1d2a0ea201dd8a6e111997e7effc099f316658e518"
+    },
+    {
+      "path": "docs/tasks/active/operations/OPS00/root-inventory-handoff.md",
+      "unchanged": true,
+      "sha256": "b0d780b79d77e8c938ff636f74195f76d8d410bbcac913c2c16f8cefe36449cb"
+    },
+    {
+      "path": "docs/handoff-A.md",
+      "unchanged": true,
+      "sha256": "b89d00700b3a0efb7e63086a6782793fea46af9ea03a743480934e21f0f18ccb"
+    }
+  ],
+  "scope": {
+    "source": "5056176045f7237bc389d1ce4fb9d9e93f4fc4b1",
+    "docs": [
+      "docs/tasks/active/operations/OPS00/ticket.md",
+      "docs/task-board.md",
+      "docs/claim-log.md",
+      "docs/work-log-B.md",
+      "docs/handoff-B.md",
+      "docs/b-next-task-handoff.md",
+      "docs/monitor-log.md",
+      "docs/review-artifacts/OPS00/cloudshell-commands.md",
+      "docs/review-artifacts/OPS00/cloudshell-command-evidence.json",
+      "docs/review-artifacts/OPS00/metadata-response-integrity.md",
+      "docs/review-artifacts/OPS00/metadata-response-evidence.json"
+    ],
+    "code": [
+      "scripts/operations/cloudshell-inventory.py",
+      "scripts/operations/cloudshell-inventory.test.py"
+    ],
+    "protectedCount": 917
+  },
+  "claim": {
+    "at": "2026-10-09T03:18:07.113167+00:00",
+    "source": "5056176045f7237bc389d1ce4fb9d9e93f4fc4b1",
+    "task": "OPS00",
+    "phase": "typed comparison metadata rejects false MATCH and sanitized-summary crashes"
+  },
+  "claimSync": {
+    "label": "claim",
+    "expectedRemote": "5056176045f7237bc389d1ce4fb9d9e93f4fc4b1",
+    "sourceSha": "2107407ff4aa5290260f015ee235122befd36634",
+    "observedEnd": "2026-10-09T03:18:12.106222+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 917
+  },
+  "reproduction": {
+    "start": "2026-10-09T03:16:37.209164+00:00",
+    "end": "2026-10-09T03:16:37.266573+00:00",
+    "source": "5056176045f7237bc389d1ce4fb9d9e93f4fc4b1",
+    "cases": [
+      {
+        "case": "string-audience",
+        "completed": true,
+        "oidcAudience": "MATCH",
+        "mutations": 0,
+        "requests": 54
+      },
+      {
+        "case": "dictionary-audience",
+        "completed": true,
+        "oidcAudience": "MATCH",
+        "mutations": 0,
+        "requests": 54
+      },
+      {
+        "case": "null-audience",
+        "completed": false,
+        "exceptionType": "TypeError",
+        "requests": 11,
+        "mutations": 0
+      },
+      {
+        "case": "list-role",
+        "completed": false,
+        "exceptionType": "AttributeError",
+        "requests": 12,
+        "mutations": 0
+      },
+      {
+        "case": "string-role",
+        "completed": false,
+        "exceptionType": "AttributeError",
+        "requests": 12,
+        "mutations": 0
+      },
+      {
+        "case": "valid-provider-control",
+        "completed": true,
+        "oidcAudience": "MATCH",
+        "mutations": 0,
+        "requests": 54
+      }
+    ],
+    "actualAwsCalls": 0,
+    "purpose": "Typed comparison metadata: malformed audience can report MATCH, malformed fields abort sanitized summary"
+  },
+  "red": {
+    "label": "red",
+    "command": [
+      "python3",
+      "-B",
+      "scripts/operations/cloudshell-inventory.test.py"
+    ],
+    "start": "2026-10-09T03:19:19.725586+00:00",
+    "end": "2026-10-09T03:19:20.280905+00:00",
+    "exit": 1,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {}
+  },
+  "redResult": "16 test methods;18 subtest failures/8 subtest errors, before correction",
+  "localChecks": {
+    "focused": {
+      "label": "focused",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/operations/cloudshell-inventory.test.py"
+      ],
+      "start": "2026-10-09T03:20:15.769932+00:00",
+      "end": "2026-10-09T03:20:16.581289+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/cloudshell-inventory.py": "2fa295f9a3757da0fc75191b69351f531828f43cd2b169df016f597531ae2405",
+        "scripts/operations/cloudshell-inventory.test.py": "17cbd19c4ad32be1bcb7d6178f5cc7f4b1ce38770eda8d0e2c893c789b8ea4f5"
+      }
+    },
+    "native": {
+      "label": "native",
+      "command": [
+        "bash",
+        "-c",
+        "node --experimental-transform-types --test scripts/operations/*.test.mjs"
+      ],
+      "start": "2026-10-09T03:20:15.773005+00:00",
+      "end": "2026-10-09T03:20:19.790847+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/cloudshell-inventory.py": "2fa295f9a3757da0fc75191b69351f531828f43cd2b169df016f597531ae2405",
+        "scripts/operations/cloudshell-inventory.test.py": "17cbd19c4ad32be1bcb7d6178f5cc7f4b1ce38770eda8d0e2c893c789b8ea4f5"
+      }
+    },
+    "full": {
+      "label": "full",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-09T03:20:15.790069+00:00",
+      "end": "2026-10-09T03:24:03.230849+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/cloudshell-inventory.py": "2fa295f9a3757da0fc75191b69351f531828f43cd2b169df016f597531ae2405",
+        "scripts/operations/cloudshell-inventory.test.py": "17cbd19c4ad32be1bcb7d6178f5cc7f4b1ce38770eda8d0e2c893c789b8ea4f5"
+      }
+    }
+  },
+  "localCounts": {
+    "inventoryPython": 16,
+    "newBehavioralTestMethods": 4,
+    "native": 174,
+    "application": 1398,
+    "optionalSkips": 2,
+    "hosted": 1,
+    "browser": 64,
+    "references": 7,
+    "planning": 15,
+    "boundaries": 414
+  },
+  "checkedSourceHashes": {
+    "scripts/operations/cloudshell-inventory.py": "2fa295f9a3757da0fc75191b69351f531828f43cd2b169df016f597531ae2405",
+    "scripts/operations/cloudshell-inventory.test.py": "17cbd19c4ad32be1bcb7d6178f5cc7f4b1ce38770eda8d0e2c893c789b8ea4f5"
+  },
+  "sourceSync": {
+    "label": "source",
+    "expectedRemote": "2107407ff4aa5290260f015ee235122befd36634",
+    "sourceSha": "9c2b168a25c6de345bce44e52397cfb8c666e928",
+    "observedEnd": "2026-10-09T03:24:25.130102+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 917
+  },
+  "offlineVerification": {
+    "id": 37879167702,
+    "source": "9c2b168a25c6de345bce44e52397cfb8c666e928",
+    "actor": 143764700,
+    "path": ".github/workflows/operations-verify.yml",
+    "event": "workflow_dispatch",
+    "createdAt": "2026-10-09T03:24:58Z",
+    "updatedAt": "2026-10-09T03:29:18Z",
+    "observedAt": "2026-10-09T03:30:23.801221+00:00",
+    "conclusion": "success",
+    "nativePassed": 174,
+    "applicationPassed": 1398,
+    "browserPassed": 64,
+    "installation": "UNKNOWN",
+    "managedRecovery": "NOT_EXECUTED",
+    "artifactSha256": {
+      "operations-report.json": "b99eaaf6f2079b3add56338486c16a0d3576a365322108af0cf1ac8137481746",
+      "partition-report.json": "6e1f80292f133d47f7cf5bbc1c749941d5eef9dd3a312efdd0e4447c2248feb9",
+      "retention-report.json": "6e8e6088c851fbdd9af22dfa47c90e6d25aebdd44a1683944d539b0bf6fd2138",
+      "jobs-report.json": "2791547001d7b96711a4fee5e3af68ad589aaf1ad4a519dfb050748598eca4ce",
+      "setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+      "partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+      "jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639"
+    },
+    "reports": {
+      "operations-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "9c2b168a25c6de345bce44e52397cfb8c666e928",
+        "templateHash": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "managedRecovery": "UNKNOWN",
+        "apply": "DISABLED"
+      },
+      "partition-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "9c2b168a25c6de345bce44e52397cfb8c666e928",
+        "templateHash": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "effectivePermissions": "UNKNOWN",
+        "migration": "NOT_EXECUTED",
+        "activation": "DISABLED",
+        "managedRecovery": "UNKNOWN"
+      },
+      "retention-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "9c2b168a25c6de345bce44e52397cfb8c666e928",
+        "preparationHash": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "realPersonPolicy": "UNAPPROVED",
+        "dataOperations": "NOT_EXECUTED",
+        "participantGrants": "NOT_GRANTED",
+        "managedProof": "UNKNOWN"
+      },
+      "jobs-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "9c2b168a25c6de345bce44e52397cfb8c666e928",
+        "preparationHash": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "providerCalls": "NOT_EXECUTED",
+        "managedRecovery": "UNKNOWN",
+        "participantConsent": "NOT_GRANTED",
+        "cleanup": "UNKNOWN"
+      }
+    },
+    "jobs": [
+      {
+        "id": 113654620362,
+        "name": "verify",
+        "conclusion": "success",
+        "started_at": "2026-10-09T03:25:02Z",
+        "completed_at": "2026-10-09T03:29:17Z"
+      }
+    ],
+    "inventoryPythonPassed": 16,
+    "pythonVersion": "3.12.3",
+    "inventoryStep": {
+      "name": "Run read-only CloudShell inventory regressions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-10-09T03:25:08Z",
+      "completed_at": "2026-10-09T03:25:08Z"
+    }
+  },
+  "commandRefresh": {
+    "at": "2026-10-09T03:25:21.729090+00:00",
+    "source": "9c2b168a25c6de345bce44e52397cfb8c666e928",
+    "helperSha256": "2fa295f9a3757da0fc75191b69351f531828f43cd2b169df016f597531ae2405",
+    "documentSha256": "f4a77c6cb0436b53abb2893d3f84968c34f47a6e73cc90d0dc94c1afae31a375",
+    "readOnlyHome": "$HOME/.known-enough/ops00-metadata-20261009",
+    "olderHomes": [
+      "$HOME/.known-enough/ops00-20261009",
+      "$HOME/.known-enough/ops00-root-20261009"
+    ],
+    "managedApplySection": "UNCHANGED",
+    "installation": "UNKNOWN",
+    "apply": "INVENTORY_REQUIRED"
+  },
+  "commandChecks": {
+    "start": "2026-10-09T03:25:21.759493+00:00",
+    "end": "2026-10-09T03:25:26.821406+00:00",
+    "source": "9c2b168a25c6de345bce44e52397cfb8c666e928",
+    "syntax": "3Bash/2embeddedPython/PASS",
+    "checks": [
+      {
+        "label": "first-download-root-read",
+        "exit": 0,
+        "expected": 0
+      },
+      {
+        "label": "saved-root-resume",
+        "exit": 0,
+        "expected": 0
+      },
+      {
+        "label": "first-block-root-repeat",
+        "exit": 0,
+        "expected": 0
+      },
+      {
+        "label": "old-source-marker-preserved-before-aws",
+        "exit": 1,
+        "expected": 1
+      },
+      {
+        "label": "changed-checkout-rejects-before-aws",
+        "exit": 1,
+        "expected": 1
+      }
+    ],
+    "attemptsPreserved": 3,
+    "simulatedReads": 63,
+    "actualAwsCalls": 0,
+    "awsMutations": 0,
+    "sourceDownload": "public exact Git commit fetched; five checksum pins PASS",
+    "docHash": "f4a77c6cb0436b53abb2893d3f84968c34f47a6e73cc90d0dc94c1afae31a375",
+    "home": "Actual HOME unchanged; unique synthetic package-directory substitution only",
+    "legacySourceMarker": "PRESERVED",
+    "managedApply": "UNCHANGED; syntax-only, NOT_EXECUTED",
+    "syntheticStateRetention": "private mode700/600; no real credentials or metadata"
+  },
+  "commandCheckpoint": {
+    "at": "2026-10-09T03:26:09.167442+00:00",
+    "source": "9c2b168a25c6de345bce44e52397cfb8c666e928",
+    "phase": "typed comparison metadata/read-only command refresh",
+    "checkpoint": "LOCAL_CODE_AND_COMMANDS_CHECKED; REMOTE_PENDING",
+    "sourceHashes": {
+      "scripts/operations/cloudshell-inventory.py": "2fa295f9a3757da0fc75191b69351f531828f43cd2b169df016f597531ae2405",
+      "scripts/operations/cloudshell-inventory.test.py": "17cbd19c4ad32be1bcb7d6178f5cc7f4b1ce38770eda8d0e2c893c789b8ea4f5"
+    },
+    "commandRefresh": {
+      "at": "2026-10-09T03:25:21.729090+00:00",
+      "source": "9c2b168a25c6de345bce44e52397cfb8c666e928",
+      "helperSha256": "2fa295f9a3757da0fc75191b69351f531828f43cd2b169df016f597531ae2405",
+      "documentSha256": "f4a77c6cb0436b53abb2893d3f84968c34f47a6e73cc90d0dc94c1afae31a375",
+      "readOnlyHome": "$HOME/.known-enough/ops00-metadata-20261009",
+      "olderHomes": [
+        "$HOME/.known-enough/ops00-20261009",
+        "$HOME/.known-enough/ops00-root-20261009"
+      ],
+      "managedApplySection": "UNCHANGED",
+      "installation": "UNKNOWN",
+      "apply": "INVENTORY_REQUIRED"
+    },
+    "commandChecks": {
+      "start": "2026-10-09T03:25:21.759493+00:00",
+      "end": "2026-10-09T03:25:26.821406+00:00",
+      "source": "9c2b168a25c6de345bce44e52397cfb8c666e928",
+      "syntax": "3Bash/2embeddedPython/PASS",
+      "checks": [
+        {
+          "label": "first-download-root-read",
+          "exit": 0,
+          "expected": 0
+        },
+        {
+          "label": "saved-root-resume",
+          "exit": 0,
+          "expected": 0
+        },
+        {
+          "label": "first-block-root-repeat",
+          "exit": 0,
+          "expected": 0
+        },
+        {
+          "label": "old-source-marker-preserved-before-aws",
+          "exit": 1,
+          "expected": 1
+        },
+        {
+          "label": "changed-checkout-rejects-before-aws",
+          "exit": 1,
+          "expected": 1
+        }
+      ],
+      "attemptsPreserved": 3,
+      "simulatedReads": 63,
+      "actualAwsCalls": 0,
+      "awsMutations": 0,
+      "sourceDownload": "public exact Git commit fetched; five checksum pins PASS",
+      "docHash": "f4a77c6cb0436b53abb2893d3f84968c34f47a6e73cc90d0dc94c1afae31a375",
+      "home": "Actual HOME unchanged; unique synthetic package-directory substitution only",
+      "legacySourceMarker": "PRESERVED",
+      "managedApply": "UNCHANGED; syntax-only, NOT_EXECUTED",
+      "syntheticStateRetention": "private mode700/600; no real credentials or metadata"
+    },
+    "inventoryPythonLocalPassed": 16,
+    "nativeLocalPassed": 174,
+    "applicationLocalPassed": 1398,
+    "browserLocalPassed": 64,
+    "verificationRun": 37879167702,
+    "verificationStatus": "PENDING; one owned workflow, not yet remote PASS",
+    "installation": "UNKNOWN",
+    "managedRecovery": "NOT_EXECUTED",
+    "apply": "INVENTORY_REQUIRED",
+    "actualAwsCalls": 0,
+    "participantActions": "NOT_EXECUTED"
+  },
+  "commandSync": {
+    "label": "commands",
+    "expectedRemote": "9c2b168a25c6de345bce44e52397cfb8c666e928",
+    "sourceSha": "45cda30cc8810d448d154efc1bd275dbd2a0f4cd",
+    "observedEnd": "2026-10-09T03:26:13.607288+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 917
+  },
+  "protectedManifestSha256": "a336b8ba866cdddb716c19a1ca8375a2e4a56e89a687854960050b5b5da5ee0d",
+  "oldCommandEvidence": "All original fields including rootReadOnlyRevisions unchanged; typedMetadataRevisions appended",
+  "managedApplySection": "UNCHANGED original source/old HOME; NOT_EXECUTED",
+  "participantChanges": "NOT_EXECUTED",
+  "installation": "UNKNOWN",
+  "apply": "INVENTORY_REQUIRED",
+  "managedRecovery": "NOT_EXECUTED",
+  "wholeTask": "BLOCKED/unclaimed after checked phase release",
+  "actualAwsCalls": 0,
+  "awsMutations": 0,
+  "deployments": 0,
+  "providerCalls": 0,
+  "modelCalls": 0,
+  "emailCalls": 0,
+  "billing": "UNMEASURED; zero scoped paid/provider/mail starts is not an invoice claim",
+  "approvalDenials": "NONE_OBSERVED",
+  "localDiagnostics": [
+    "Initial instruction lookup requested nonexistent handoff.md: git show exit128/CalledProcessError; corrected to tracked root-inventory-handoff and own A handoff, all12 instruction paths unchanged.",
+    "Broad combined discovery outputs truncated; narrowed missing helper/instruction/private-helper regions read, no unseen activity inferred.",
+    "Controlled current-source malformed metadata reproduction and expected red suite are test evidence, not actual installed AWS errors."
+  ],
+  "nextAction": "A runs checked new read-only block1 and returns sanitized inventory; reconcile managed resources/source/permissions/private recovery before setup/readback/two-run recovery and OPS01\u201303/FIN03",
+  "nominalNextWake": "2026-10-09T03:43:16.104Z",
+  "schedulerIdleGating": "UNKNOWN; existing same-chat30minute settings unchanged"
+}
