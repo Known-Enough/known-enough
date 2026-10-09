@@ -107,7 +107,6 @@ test('resource drift, trust expansion, extra effective-policy surfaces and reten
     ['get-template', value => value.TemplateBody = '{}', 'template'],
     ['get-role', value => value.Role.AssumeRolePolicyDocument.Statement[0].Condition = {}, 'role'],
     ['get-role', value => value.Role.PermissionsBoundary = { PermissionsBoundaryArn: 'synthetic' }, 'role'],
-    ['list-role-policies', value => value.IsTruncated = true, 'inlineNames'],
     ['get-role-policy', value => value.PolicyDocument.Statement.push({ Effect: 'Allow', Action: 'iam:*', Resource: '*' }), 'inlinePolicy'],
     ['list-attached-role-policies', value => value.AttachedPolicies.push({ PolicyArn: 'synthetic-extra' }), 'attachedPolicies'],
     ['describe-table', value => value.Table.TableArn = JOURNAL_ARN + '-other', 'table'],
@@ -182,4 +181,67 @@ test('workflow uses the existing inspector with source and own-B guards before O
   assert.ok(!source.includes('OPERATIONS_RECOVERY_ENABLED')); assert.ok(!source.includes('live-qa-release'));
   assert.ok(!source.includes('secrets.')); assert.ok(source.includes('operations-intake-result'));
   assert.equal(MANIFEST_BUCKET, 'known-enough-operations-recovery-092954139775-us-east-1');
+});
+
+test('continuation tokens and truncation flags keep partial control-plane reads UNKNOWN', async () => {
+  for (const [op, field] of [['describe-stacks', 'stack'], ['get-template', 'template'],
+    ['list-role-policies', 'inlineNames'], ['list-attached-role-policies', 'attachedPolicies']]) {
+    for (const metadata of [{ NextToken: 'SYNTHETIC_PRIVATE_CURSOR' }, { Marker: 'SYNTHETIC_PRIVATE_CURSOR' },
+      { NextMarker: 'SYNTHETIC_PRIVATE_CURSOR' }, { IsTruncated: true }]) {
+      const f = fixture(); Object.assign(f.values[op], metadata);
+      const result = await installedReadback(env, f.executor);
+      assert.equal(result.result, 'BLOCKED', op);
+      assert.equal(result.installation, 'UNKNOWN', op);
+      assert.equal(result.configuration[field], 'UNKNOWN', op);
+      const row = result.reads.find(read => read.action === {
+        'describe-stacks': 'cloudformation:DescribeStacks', 'get-template': 'cloudformation:GetTemplate',
+        'list-role-policies': 'iam:ListRolePolicies', 'list-attached-role-policies': 'iam:ListAttachedRolePolicies'
+      }[op]);
+      assert.equal(row.status, 'UNKNOWN'); assert.equal(row.code, 'AWS_INCOMPLETE_RESPONSE');
+      if (op === 'describe-stacks') assert.ok(!f.calls.some(call => call.args[1] === 'get-template'));
+      assert.ok(!JSON.stringify(result).includes('SYNTHETIC_PRIVATE'));
+      assert.ok(f.calls.length <= 16);
+      for (const call of f.calls) assert.ok(call.args.includes('--no-paginate'));
+    }
+  }
+});
+test('malformed pagination metadata and missing IAM completeness flags cannot prove configuration', async () => {
+  for (const op of ['list-role-policies', 'list-attached-role-policies']) {
+    for (const flag of [undefined, null, 'true', 'false', 0, 1, {}, []]) {
+      const f = fixture();
+      if (flag === undefined) delete f.values[op].IsTruncated;
+      else f.values[op].IsTruncated = flag;
+      const result = await installedReadback(env, f.executor);
+      assert.equal(result.result, 'BLOCKED', `${op}:${JSON.stringify(flag)}`);
+      assert.equal(result.configuration[op === 'list-role-policies' ? 'inlineNames' : 'attachedPolicies'], 'UNKNOWN');
+      assert.ok(result.reads.some(row => row.code === 'AWS_RESPONSE_REJECTED' && row.status === 'UNKNOWN'));
+    }
+  }
+  for (const key of ['NextToken', 'Marker', 'NextMarker']) {
+    for (const token of [false, 0, 1, {}, []]) {
+      const f = fixture(); f.values['describe-stacks'][key] = token;
+      const result = await installedReadback(env, f.executor);
+      assert.equal(result.configuration.stack, 'UNKNOWN');
+      assert.equal(result.reads[1].code, 'AWS_RESPONSE_REJECTED');
+      assert.ok(!f.calls.some(call => call.args[1] === 'get-template'));
+    }
+  }
+});
+test('complete response markers preserve existing matching behavior without pagination', async () => {
+  for (const metadata of [{}, { IsTruncated: false }, { NextToken: null, Marker: null, NextMarker: null },
+    { NextToken: '', Marker: '', NextMarker: '' }]) {
+    const f = fixture();
+    for (const value of Object.values(f.values)) if (!(value instanceof Error)) Object.assign(value, metadata);
+    const result = await installedReadback(env, f.executor);
+    assert.equal(result.result, 'READBACK_COMPLETE'); assert.equal(result.requests, 16);
+    assert.equal(result.effectivePermissions, 'UNKNOWN'); assert.equal(result.managedRecovery, 'NOT_EXECUTED');
+  }
+});
+test('partial identity response stops before all resource reads and exposes no cursor', async () => {
+  const f = fixture(); f.values['get-caller-identity'].NextToken = 'SYNTHETIC_PRIVATE_CURSOR';
+  const result = await installedReadback(env, f.executor);
+  assert.equal(result.result, 'BLOCKED'); assert.equal(result.requests, 1); assert.equal(f.calls.length, 1);
+  assert.equal(result.ownOidcIdentity, 'UNKNOWN'); assert.equal(result.identityFailure, 'IDENTITY_UNAVAILABLE');
+  assert.equal(result.reads[0].code, 'AWS_INCOMPLETE_RESPONSE');
+  assert.ok(!JSON.stringify(result).includes('SYNTHETIC_PRIVATE'));
 });

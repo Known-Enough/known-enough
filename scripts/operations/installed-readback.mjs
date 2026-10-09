@@ -95,6 +95,17 @@ export async function installedReadback(env, executor = execute, clock = Date.no
         throw new Error('invalid read size');
       const value = JSON.parse(result.stdout);
       if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('invalid read shape');
+      const hasFlag = Object.hasOwn(value, 'IsTruncated');
+      const cursors = ['NextToken', 'Marker', 'NextMarker'].map(key => value[key]);
+      // A bounded single page cannot establish configuration completeness.
+      if ((hasFlag && typeof value.IsTruncated !== 'boolean')
+        || (['inline', 'attached'].includes(id) && !hasFlag)
+        || cursors.some(cursor => cursor != null && typeof cursor !== 'string')) {
+        record.code = 'AWS_RESPONSE_REJECTED'; return null;
+      }
+      if (value.IsTruncated === true || cursors.some(cursor => typeof cursor === 'string' && cursor.length > 0)) {
+        record.code = 'AWS_INCOMPLETE_RESPONSE'; return null;
+      }
       record.status = 'READ'; return value;
     } catch (error) {
       record.code = failure(error);
