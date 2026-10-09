@@ -1,5 +1,7 @@
 # B handoff after ASSESS07 — 2026-10-06T17:17:44Z
 
+**Next idle task — recovery now installed:** A reports CONFIGURATION_MATCH on checked b4aac38 after actual execution. [Receipt and next proof](review-artifacts/OPS00/a-installed-recovery-20261009.md) replace the generic installation blocker: claim OPS00 source/scope/flag review and own-B sequential same-source/same-probe GitHub recovery verification before unrelated coding. Preserve any genuinely active claim, installed private state and A NP00; effective managed proof remains open.
+
 **Next actual blocker — CloudShell credentials:** A confirmed NO_CREDENTIALS with provider configured; installer strips its connection. Claim [the bounded OPS00 credential correction](tasks/active/operations/OPS00/cloudshell-credentials-handoff.md) at next genuine idle intake before unrelated work, then publish tested source-pinned continuation preserving old private state. No new AWS permission/credential sharing; no B start observed.
 
 **Next idle intake — A inventory received, 2026-10-09:** [Successful CloudShell inventory](review-artifacts/OPS00/a-cloudshell-inventory-20261009.md) now proves the proposed recovery resources absent at the recorded time. After any genuine active claim, prepare concrete recovery CREATE preview/install/resume/readback commands within OPS00. Do not keep repeating the resolved root/inventory blocker or invent unrelated fixes first. Preserve private source state, NP00 and real managed acceptance; no B start/apply claimed.

@@ -1,5 +1,7 @@
 # OPS00 — Complete the GitHub operations path
 
+**Installation milestone — A supplied CONFIGURATION_MATCH, 2026-10-09:** [Receipt and next proof](../../../../review-artifacts/OPS00/a-installed-recovery-20261009.md). Recovery stack configuration now matches on checked b4aac38; next phase is actual own-B effective-scope/two-run recovery, READY at next genuine idle intake. Whole-task DONE and other OPS installation remain unproved.
+
 **Next phase — real first-request failure:** [CloudShell credential handling](cloudshell-credentials-handoff.md) is READY/unclaimed. A confirms NO_CREDENTIALS/provider-present/zero mutations. Restore legitimate credential chain and finite diagnostics; publish guarded new commands preserving source-bound state.
 
 **A inventory received — 2026-10-09:** [Sanitized facts and concrete next action](../../../../review-artifacts/OPS00/a-cloudshell-inventory-20261009.md): proposed recovery resources service-reported absent,45reads/0writes; existing setup readable. Next package phase READY after any actual active claim: runnable CREATE preview/install/resume/readback and own-B recovery verification. Root blocker fixed; effective writes/installation still unverified.

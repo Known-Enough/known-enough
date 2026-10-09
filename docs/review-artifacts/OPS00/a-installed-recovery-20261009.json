@@ -1,0 +1,38 @@
+{
+  "evidenceOrigin": "A user-supplied CloudShell results; not an A tool live AWS inspection",
+  "sourceSha": "b4aac38762e8668bb29373b02d2d75e1b0abb10a",
+  "account": "092954139775",
+  "region": "us-east-1",
+  "stateDirectory": "$HOME/.known-enough/ops00-create-credentials-20261009",
+  "reviewHash": "2dba644e43611e045fc3ded895f1fb8ddc1dc2df524c7cccb7622671a545bbe2",
+  "results": [
+    {
+      "result": "REVIEW_READY",
+      "classification": null,
+      "requests": 6,
+      "mutations": 0
+    },
+    {
+      "result": "INSTALL_SUBMITTED",
+      "classification": null,
+      "requests": 9,
+      "mutations": 1
+    },
+    {
+      "result": "INSTALL_PENDING",
+      "classification": null,
+      "requests": 3,
+      "mutations": 0
+    },
+    {
+      "result": "CONFIGURATION_MATCH",
+      "classification": null,
+      "requests": 21,
+      "mutations": 0
+    }
+  ],
+  "effectivePermissions": "UNKNOWN",
+  "managedRecovery": "NOT_EXECUTED",
+  "cloudObservationTimestamp": "not supplied",
+  "recordedAt": "2026-10-09T19:25:28Z"
+}
