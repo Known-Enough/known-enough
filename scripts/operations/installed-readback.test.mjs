@@ -46,6 +46,109 @@ function fixture(patch = {}) {
   };
   return { executor, calls, values };
 }
+test('changing denial diagnostics cannot become resource absence', async () => {
+  for (const [op, missing, action, count] of [
+    ['get-role', 'NoSuchEntity', 'iam:GetRole', 13],
+    ['describe-table', 'ResourceNotFoundException', 'dynamodb:DescribeTable', 14],
+    ['get-bucket-versioning', 'NoSuchBucket', 's3:GetBucketVersioning', 11]
+  ]) {
+    let reads = 0;
+    const error = new Error('SYNTHETIC_PRIVATE_DIAGNOSTIC');
+    Object.defineProperty(error, 'stderr', { get: () =>
+      `An error occurred (${reads++ === 0 ? 'AccessDenied' : missing}) when calling a read: SYNTHETIC_PRIVATE_DIAGNOSTIC` });
+    const f = fixture({ [op]: error });
+    const result = await installedReadback(env, f.executor);
+    const record = result.reads.find(read => read.action === action);
+    assert.equal(record.status, 'UNKNOWN', op); assert.equal(record.code, 'AccessDenied', op);
+    assert.equal(reads, 1); assert.equal(result.result, 'BLOCKED'); assert.equal(f.calls.length, count);
+    assert.ok(!JSON.stringify(result).includes('SYNTHETIC_PRIVATE'));
+  }
+});
+test('first genuine missing diagnostics retain exact absence despite later drift', async () => {
+  for (const [op, missing, action] of [
+    ['get-role', 'NoSuchEntity', 'iam:GetRole'],
+    ['describe-table', 'ResourceNotFoundException', 'dynamodb:DescribeTable'],
+    ['get-bucket-versioning', 'NoSuchBucket', 's3:GetBucketVersioning']
+  ]) {
+    let reads = 0;
+    const error = new Error('SYNTHETIC_PRIVATE_DIAGNOSTIC');
+    Object.defineProperty(error, 'stderr', { get: () =>
+      `An error occurred (${reads++ === 0 ? missing : 'AccessDenied'}) when calling a read` });
+    const f = fixture({ [op]: error }); const result = await installedReadback(env, f.executor);
+    const record = result.reads.find(read => read.action === action);
+    assert.equal(record.status, 'ABSENT', op); assert.equal(record.code, missing, op);
+    assert.equal(reads, 1); assert.equal(result.installation, 'UNKNOWN'); assert.equal(result.mutations, 0);
+  }
+});
+test('later nonprimitive diagnostics cannot invoke match or serialization hooks', async () => {
+  let reads = 0; let hooks = 0;
+  const later = { match() { hooks++; return ['synthetic', 'NoSuchEntity']; },
+    toString() { hooks++; return 'SYNTHETIC_PRIVATE_DIAGNOSTIC'; },
+    toJSON() { hooks++; return 'SYNTHETIC_PRIVATE_DIAGNOSTIC'; } };
+  const error = new Error('SYNTHETIC_PRIVATE_DIAGNOSTIC');
+  Object.defineProperty(error, 'stderr', { get: () => reads++ === 0 ? 'SYNTHETIC_PRIVATE_DIAGNOSTIC' : later });
+  const f = fixture({ 'get-role': error }); const result = await installedReadback(env, f.executor);
+  const record = result.reads.find(read => read.action === 'iam:GetRole');
+  assert.equal(record.status, 'UNKNOWN'); assert.equal(record.code, 'AWS_READ_FAILED');
+  assert.equal(reads, 1); assert.equal(hooks, 0); assert.equal(f.calls.length, 13);
+  assert.ok(!JSON.stringify(result).includes('SYNTHETIC_PRIVATE'));
+});
+test('unreadable failure properties preserve the report and independent reads', async () => {
+  for (const property of ['code', 'killed', 'stderr']) {
+    for (const thrown of [new Error('SYNTHETIC_PRIVATE_DIAGNOSTIC'), 'SYNTHETIC_PRIVATE_DIAGNOSTIC',
+      { toString() { throw new Error('must not coerce'); } }]) {
+      let reads = 0;
+      const error = new Error('SYNTHETIC_PRIVATE_DIAGNOSTIC');
+      Object.defineProperty(error, property, { get() { reads++; throw thrown; } });
+      const f = fixture({ 'get-role': error }); const result = await installedReadback(env, f.executor);
+      const record = result.reads.find(read => read.action === 'iam:GetRole');
+      assert.equal(record.status, 'UNKNOWN'); assert.equal(record.code, 'AWS_READ_FAILED');
+      assert.equal(reads, 1); assert.equal(result.ownOidcIdentity, 'VERIFIED');
+      assert.equal(result.result, 'BLOCKED'); assert.equal(result.mutations, 0); assert.equal(f.calls.length, 13);
+      assert.ok(f.calls.some(call => call.args[1] === 'describe-table'));
+      assert.ok(f.calls.some(call => call.args[1] === 'get-bucket-versioning'));
+      assert.ok(!JSON.stringify(result).includes('SYNTHETIC_PRIVATE'));
+    }
+  }
+});
+test('local failure code is classified once with missing CLI and timeout precedence', async () => {
+  for (const [first, later, expected] of [
+    [undefined, 'ETIMEDOUT', 'AWS_READ_FAILED'], ['unrecognized', 'ETIMEDOUT', 'AWS_READ_FAILED'],
+    [new String('ETIMEDOUT'), 'ENOENT', 'AWS_READ_FAILED'],
+    ['ETIMEDOUT', 'ENOENT', 'AWS_READ_TIMEOUT'], ['ENOENT', 'ETIMEDOUT', 'AWS_CLI_UNAVAILABLE']
+  ]) {
+    let reads = 0; let killedReads = 0; let stderrReads = 0;
+    const error = new Error('SYNTHETIC_PRIVATE_DIAGNOSTIC');
+    Object.defineProperties(error, {
+      code: { get: () => reads++ === 0 ? first : later },
+      killed: { get: () => { killedReads++; return false; } },
+      stderr: { get: () => { stderrReads++; return 'SYNTHETIC_PRIVATE_DIAGNOSTIC'; } }
+    });
+    const f = fixture({ 'get-caller-identity': error }); const result = await installedReadback(env, f.executor);
+    assert.equal(result.reads[0].code, expected); assert.equal(reads, 1); assert.equal(f.calls.length, 1);
+    if (first === 'ENOENT') { assert.equal(killedReads, 0); assert.equal(stderrReads, 0); }
+    if (first === 'ETIMEDOUT') assert.equal(stderrReads, 0);
+    assert.equal(result.ownOidcIdentity, 'UNKNOWN'); assert.ok(!JSON.stringify(result).includes('SYNTHETIC_PRIVATE'));
+  }
+});
+test('stable provider codes are captured once and ordinary local failures remain finite', async () => {
+  for (const code of ['AccessDenied', 'AccessDeniedException', 'UnauthorizedOperation',
+    'ResourceNotFoundException', 'NoSuchEntity', 'NoSuchBucket', 'NoSuchLifecycleConfiguration',
+    'ValidationError', 'ExpiredToken', 'ExpiredTokenException', 'InvalidClientTokenId',
+    'RequestTimeout', 'Throttling', 'ThrottlingException']) {
+    let reads = 0; const error = new Error('SYNTHETIC_PRIVATE_DIAGNOSTIC');
+    Object.defineProperty(error, 'stderr', { get() { reads++; return `An error occurred (${code}) when calling a read`; } });
+    const f = fixture({ 'get-caller-identity': error }); const result = await installedReadback(env, f.executor);
+    assert.equal(result.reads[0].code, code); assert.equal(reads, 1); assert.equal(f.calls.length, 1);
+  }
+  for (const [properties, expected] of [[{ code: 'ENOENT', killed: true }, 'AWS_CLI_UNAVAILABLE'],
+    [{ code: 'ETIMEDOUT' }, 'AWS_READ_TIMEOUT'], [{ killed: true }, 'AWS_READ_TIMEOUT']]) {
+    const f = fixture({ 'get-caller-identity': Object.assign(denied('AccessDenied'), properties) });
+    const result = await installedReadback(env, f.executor);
+    assert.equal(result.reads[0].code, expected); assert.equal(f.calls.length, 1);
+    assert.ok(!JSON.stringify(result).includes('SYNTHETIC_PRIVATE'));
+  }
+});
 test('fixed positive control-plane readback has sixteen bounded sequential calls and never proves effective scope or recovery', async () => {
   const f = fixture(); let active = 0;
   const result = await installedReadback(env, async (...args) => {

@@ -53,11 +53,15 @@ function canonical(value) {
 function document(value) { return typeof value === 'string' ? JSON.parse(value) : value; }
 const equal = (a, b) => JSON.stringify(canonical(a)) === JSON.stringify(canonical(b));
 function failure(error) {
-  if (error?.code === 'ENOENT') return 'AWS_CLI_UNAVAILABLE';
-  if (error?.killed || error?.code === 'ETIMEDOUT') return 'AWS_READ_TIMEOUT';
-  const code = typeof error?.stderr === 'string'
-    ? error.stderr.match(/An error occurred \(([A-Za-z0-9]+)\)/)?.[1] : undefined;
-  return codes.has(code) ? code : 'AWS_READ_FAILED';
+  try {
+    const localCode = error?.code;
+    if (localCode === 'ENOENT') return 'AWS_CLI_UNAVAILABLE';
+    if (error?.killed || localCode === 'ETIMEDOUT') return 'AWS_READ_TIMEOUT';
+    const stderr = error?.stderr;
+    const code = typeof stderr === 'string'
+      ? stderr.match(/An error occurred \(([A-Za-z0-9]+)\)/)?.[1] : undefined;
+    return codes.has(code) ? code : 'AWS_READ_FAILED';
+  } catch { return 'AWS_READ_FAILED'; }
 }
 function credentialEnvironment() {
   const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('AWS_ENDPOINT_URL')
