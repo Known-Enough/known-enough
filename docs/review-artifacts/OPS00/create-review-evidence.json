@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-09T19:43:16.540526+00:00",
+  "scheduledAt": "2026-10-09T19:23:30.508Z",
+  "account": "Battosai1806",
+  "actorId": 143764700,
+  "phase": "CODE_READY_RELEASED",
+  "wholeTask": "REVIEW_UNCLAIMED",
+  "source": "4c680ec4a952f2ff7170a82352a1df7e5810411c",
+  "sourceHashes": {
+    "scripts/operations/cloudshell-create.py": "d1b6533ae6d3360d3bd8ccea569f6bc56563bab2a4618611c3f20b004e0ad298",
+    "scripts/operations/cloudshell-create.test.py": "9fd8eb3603e7832319841a809b645b0e92a3cab247fec43a500c718e29d48fe1"
+  },
+  "intake": {
+    "start": "2026-10-09T19:23:55.691980+00:00",
+    "end": "2026-10-09T19:23:58.652184+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "previousHead": "ac0e1cd492650830551980185bfa5b5e49b65975",
+    "source": "ac0e1cd492650830551980185bfa5b5e49b65975",
+    "mainEqualClean": true,
+    "actualJobs": [],
+    "priorRunClosed": "2026-10-09T19:11:11.501444+00:00"
+  },
+  "reproduction": {
+    "start": "2026-10-09T19:26:25.611799+00:00",
+    "end": "2026-10-09T19:26:25.659349+00:00",
+    "source": "ac0e1cd492650830551980185bfa5b5e49b65975",
+    "scenario": "saved execute intent after simulated timeout before execution processing, preview remains AVAILABLE",
+    "publicReview": "REVIEW_READY",
+    "emitsReviewHash": true,
+    "exit": 0,
+    "newReads": 5,
+    "extraMutations": 0,
+    "savedBytesUnchanged": true,
+    "actualAwsCalls": 0,
+    "firstAcceptedTimeoutObservation": {
+      "start": "2026-10-09T19:26:01.256681+00:00",
+      "end": "2026-10-09T19:26:01.322382+00:00",
+      "source": "ac0e1cd492650830551980185bfa5b5e49b65975",
+      "scenario": "saved execute intent after uncertain acknowledgement, preview still AVAILABLE",
+      "publicReview": "BLOCKED",
+      "emitsReviewHash": false,
+      "exit": 1,
+      "newReads": 5,
+      "extraMutations": 0,
+      "savedBytesUnchanged": true,
+      "actualAwsCalls": 0
+    }
+  },
+  "red": {
+    "label": "red",
+    "command": [
+      "python3",
+      "-B",
+      "scripts/operations/cloudshell-create.test.py"
+    ],
+    "start": "2026-10-09T19:28:01.107264+00:00",
+    "end": "2026-10-09T19:28:02.539258+00:00",
+    "exit": 1,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {}
+  },
+  "initialFocusedFixtureFailure": {
+    "label": "focused",
+    "command": [
+      "python3",
+      "-B",
+      "scripts/operations/cloudshell-create.test.py"
+    ],
+    "start": "2026-10-09T19:28:28.476036+00:00",
+    "end": "2026-10-09T19:28:30.013532+00:00",
+    "exit": 1,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/cloudshell-create.py": "d1b6533ae6d3360d3bd8ccea569f6bc56563bab2a4618611c3f20b004e0ad298",
+      "scripts/operations/cloudshell-create.test.py": "ab894c5a92c204c05a197b3a134179e4ede306ed4884ad6a013b5cdcffaa7fa2"
+    }
+  },
+  "fixtureCorrection": {
+    "observedAt": "2026-10-09T19:29:23.204301+00:00",
+    "focused54": "FAILED_3_SUBTESTS",
+    "cause": "new corrupt-intent fixture used Path.write_bytes on absent file, resulting mode0644; existing private-file guard correctly rejected before intended validation",
+    "fullStartedBeforeInspectingFocusedFailure": true,
+    "fullSourcePreservedWhileOwnedCheckRuns": true,
+    "next": "after owned full completes, create fixture through private State.save_bytes; rerun focused and final pinned full"
+  },
+  "preFixtureFull": {
+    "label": "full",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "start": "2026-10-09T19:28:39.663368+00:00",
+    "end": "2026-10-09T19:32:12.555268+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/cloudshell-create.py": "d1b6533ae6d3360d3bd8ccea569f6bc56563bab2a4618611c3f20b004e0ad298",
+      "scripts/operations/cloudshell-create.test.py": "ab894c5a92c204c05a197b3a134179e4ede306ed4884ad6a013b5cdcffaa7fa2"
+    }
+  },
+  "finalFocused": {
+    "label": "focused",
+    "command": [
+      "python3",
+      "-B",
+      "scripts/operations/cloudshell-create.test.py"
+    ],
+    "start": "2026-10-09T19:33:27.759772+00:00",
+    "end": "2026-10-09T19:33:29.180195+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/cloudshell-create.py": "d1b6533ae6d3360d3bd8ccea569f6bc56563bab2a4618611c3f20b004e0ad298",
+      "scripts/operations/cloudshell-create.test.py": "9fd8eb3603e7832319841a809b645b0e92a3cab247fec43a500c718e29d48fe1"
+    }
+  },
+  "finalFull": {
+    "label": "full",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "start": "2026-10-09T19:33:47.489173+00:00",
+    "end": "2026-10-09T19:37:18.914309+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/cloudshell-create.py": "d1b6533ae6d3360d3bd8ccea569f6bc56563bab2a4618611c3f20b004e0ad298",
+      "scripts/operations/cloudshell-create.test.py": "9fd8eb3603e7832319841a809b645b0e92a3cab247fec43a500c718e29d48fe1"
+    }
+  },
+  "sourceVerification": {
+    "id": 37981529398,
+    "source": "4c680ec4a952f2ff7170a82352a1df7e5810411c",
+    "actor": 143764700,
+    "path": ".github/workflows/operations-verify.yml",
+    "event": "workflow_dispatch",
+    "createdAt": "2026-10-09T19:37:53Z",
+    "updatedAt": "2026-10-09T19:41:58Z",
+    "observedAt": "2026-10-09T19:42:31.282988+00:00",
+    "conclusion": "success",
+    "nativePassed": 251,
+    "applicationPassed": 1407,
+    "browserPassed": 64,
+    "installation": "UNKNOWN",
+    "managedRecovery": "NOT_EXECUTED",
+    "artifactSha256": {
+      "operations-report.json": "2d943edf40c0bc188f962b966effc5be9a83633d36a12979792f9f8bfb29a05b",
+      "partition-report.json": "1b94721f3d16555c8bbd18cb958637a54ee3da56974311257d253ef8e46cf52d",
+      "retention-report.json": "7e8e4d6d71eab97a5a2310828d3ea1cbc0424955e69d6803ae62a7143c75e440",
+      "jobs-report.json": "8324e3b5423cd3c440698f3dc32d9377e35613ad28db13d1e2e27ddfb5c3df8d",
+      "setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+      "partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+      "jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639"
+    },
+    "reports": {
+      "operations-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "4c680ec4a952f2ff7170a82352a1df7e5810411c",
+        "templateHash": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "managedRecovery": "UNKNOWN",
+        "apply": "DISABLED"
+      },
+      "partition-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "4c680ec4a952f2ff7170a82352a1df7e5810411c",
+        "templateHash": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "effectivePermissions": "UNKNOWN",
+        "migration": "NOT_EXECUTED",
+        "activation": "DISABLED",
+        "managedRecovery": "UNKNOWN"
+      },
+      "retention-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "4c680ec4a952f2ff7170a82352a1df7e5810411c",
+        "preparationHash": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "realPersonPolicy": "UNAPPROVED",
+        "dataOperations": "NOT_EXECUTED",
+        "participantGrants": "NOT_GRANTED",
+        "managedProof": "UNKNOWN"
+      },
+      "jobs-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "4c680ec4a952f2ff7170a82352a1df7e5810411c",
+        "preparationHash": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "providerCalls": "NOT_EXECUTED",
+        "managedRecovery": "UNKNOWN",
+        "participantConsent": "NOT_GRANTED",
+        "cleanup": "UNKNOWN"
+      }
+    },
+    "jobs": [
+      {
+        "id": 113992994887,
+        "name": "verify",
+        "conclusion": "success",
+        "started_at": "2026-10-09T19:37:57Z",
+        "completed_at": "2026-10-09T19:41:57Z"
+      }
+    ],
+    "createPythonPassed": 54,
+    "createStep": {
+      "name": "Run CREATE command package regressions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 6,
+      "started_at": "2026-10-09T19:38:07Z",
+      "completed_at": "2026-10-09T19:38:08Z"
+    },
+    "inventoryPythonPassed": 23,
+    "pythonVersion": "3.12.3",
+    "inventoryStep": {
+      "name": "Run read-only CloudShell inventory regressions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-10-09T19:38:03Z",
+      "completed_at": "2026-10-09T19:38:07Z"
+    }
+  },
+  "driverDiff": {
+    "allOtherDriverBytesUnchanged": true,
+    "original49TestBytesUnchanged": true,
+    "newTestMethods": 5,
+    "newHelper": "CLI invocation only",
+    "finalFixturePrivateFileCreatedThroughStateSave": true
+  },
+  "incomingReconciliation": {
+    "observedAt": "2026-10-09T19:33:04.982635+00:00",
+    "previousMain": "b679ed8e8e85a50687b29ed0fa38d47c0b9847d9",
+    "incomingMain": "3798fb0cff0bd7b5e47ca9682a6f0082f9bb318d",
+    "method": "ff-only preserving both local scoped Python edits",
+    "externalProtectedChanges": [
+      "AGENTS.md",
+      "docs/work-log-A.md"
+    ],
+    "newProtectedFiles": [
+      "docs/review-artifacts/OPS00/a-installed-recovery-20261009.md",
+      "docs/review-artifacts/OPS00/a-installed-recovery-20261009.json"
+    ],
+    "newProtectedCount": 968,
+    "scopedPythonBytesPreserved": true,
+    "originalFrozenEvidencePreserved": "start-frozen.json"
+  },
+  "receiptGap": {
+    "observedAt": "2026-10-09T19:31:47.302196+00:00",
+    "id": 37980568821,
+    "created_at": "2026-10-09T19:29:27Z",
+    "conclusion": "success",
+    "declaredWorkingSource": "b679ed8e8e85a50687b29ed0fa38d47c0b9847d9",
+    "actualWorkflowHead": "3798fb0cff0bd7b5e47ca9682a6f0082f9bb318d",
+    "artifactFieldsMatch": true,
+    "strictExactHeadVerification": "FAILED_HEAD_MISMATCH",
+    "publication": "RUN_AND_ARTIFACT_PRESENT",
+    "retryOnceAtNextSafeCheckpoint": "SUCCESS_EXACT_HEAD_ARTIFACT_VERIFIED",
+    "retryRun": 37981075824,
+    "retryObservedAt": "2026-10-09T19:35:19.396719+00:00"
+  },
+  "protectedTrackedHashes": 968,
+  "currentOperatorSource": "b4aac38762e8668bb29373b02d2d75e1b0abb10a",
+  "operatorPackage": "UNCHANGED_NOT_REPINNED",
+  "installation": "A_REPORTED_CONFIGURATION_MATCH",
+  "effectivePermissions": "UNKNOWN",
+  "managedRecovery": "NOT_EXECUTED_BY_B",
+  "actualAwsCallsByThisPhase": 0,
+  "requestedMonitorModel": "gpt-6-sol",
+  "requestedMonitorEffort": "medium",
+  "actualModelEffort": "UNVERIFIED",
+  "actualIdleDeliveryGating": "UNKNOWN"
+}
