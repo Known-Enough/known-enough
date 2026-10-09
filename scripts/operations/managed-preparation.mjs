@@ -64,9 +64,13 @@ export async function managedPreparation(env, transport) {
 export function safeFailure(error) {
   const codes = ['AccessDenied', 'AccessDeniedException', 'ResourceNotFoundException', 'NoSuchKey', 'NoSuchBucket', 'ExpiredToken', 'RequestTimeout'];
   let current = error;
-  for (let depth = 0; current && depth < 5; depth++, current = current.cause) {
-    if (codes.includes(current.name)) return { result: 'FAILED', classification: current.name, storagePreparation: 'UNKNOWN', operationExecution: 'NOT_EXECUTED' };
-  }
+  try {
+    for (let depth = 0; current && depth < 5; depth++, current = current.cause) {
+      // Publish the same finite name that was checked, without rereading getters.
+      const name = current.name;
+      if (typeof name === 'string' && codes.includes(name)) return { result: 'FAILED', classification: name, storagePreparation: 'UNKNOWN', operationExecution: 'NOT_EXECUTED' };
+    }
+  } catch { /* Unreadable error properties cannot escape the public reporter. */ }
   return { result: 'FAILED', classification: 'OPS_PREPARATION_FAILED', storagePreparation: 'UNKNOWN', operationExecution: 'NOT_EXECUTED' };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
