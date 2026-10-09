@@ -29,6 +29,7 @@ function guard(op, input) {
   }
   if (commands[op][0] === 's3api' && (input.Bucket !== MANIFEST_BUCKET
     || (['PutObject', 'HeadObject', 'GetObject'].includes(op) && !/^manifests\/[a-f0-9]{64}\.json$/.test(input.Key ?? '')))) throw new Error('OPS_AWS_TARGET_REJECTED');
+  if (['HeadObject', 'GetObject'].includes(op) && Object.keys(input).some(key => !['Bucket', 'Key', 'VersionId', 'ExpectedBucketOwner'].includes(key))) throw new Error('OPS_AWS_REQUEST_REJECTED');
   if (op === 'PutObject' && (input.IfNoneMatch !== '*' || !Buffer.isBuffer(input.Body) || input.Body.length < 1 || input.Body.length > limit)) throw new Error('OPS_AWS_REQUEST_REJECTED');
 }
 function ownRequest(op, input) {
@@ -62,7 +63,18 @@ export function awsTransport(executor = execute) {
     }
     const requestPath = join(directory, 'request.json');
     await writeFile(requestPath, JSON.stringify(request), { mode: 0o600 });
-    const args = [...commands[op], ...binaryArgs, '--region', 'us-east-1', '--output', 'json', '--no-cli-pager', '--cli-input-json', `file://${requestPath}`, ...(outfile ? [outfile] : [])];
+    const inputArgs = [];
+    if (op === 'GetObject') {
+      // Streaming AWS CLI commands do not support --cli-input-json. Individual
+      // parameter files preserve private keys/versions without exposing argv.
+      for (const [field, flag] of [['Bucket', '--bucket'], ['Key', '--key'], ['VersionId', '--version-id'], ['ExpectedBucketOwner', '--expected-bucket-owner']]) {
+        if (typeof request[field] !== 'string' || !request[field].length) throw new Error('OPS_AWS_REQUEST_REJECTED');
+        const path = join(directory, field);
+        await writeFile(path, request[field], { mode: 0o600 });
+        inputArgs.push(flag, `file://${path}`);
+      }
+    } else inputArgs.push('--cli-input-json', `file://${requestPath}`);
+    const args = [...commands[op], ...binaryArgs, '--region', 'us-east-1', '--output', 'json', '--no-cli-pager', ...inputArgs, ...(outfile ? [outfile] : [])];
     const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('AWS_ENDPOINT_URL')));
     Object.assign(env, { AWS_MAX_ATTEMPTS: '1', AWS_PAGER: '', AWS_CONFIG_FILE: '/dev/null', AWS_SHARED_CREDENTIALS_FILE: '/dev/null' });
     try {

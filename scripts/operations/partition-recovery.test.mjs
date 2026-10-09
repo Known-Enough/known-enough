@@ -17,8 +17,16 @@ function fixture() {
   const executor = async (command, argv, options) => {
     assert.equal(command, 'aws'); assert.ok(options.signal instanceof globalThis.AbortSignal);
     assert.equal(options.env.AWS_MAX_ATTEMPTS, '1'); assert.equal(options.env.AWS_CONFIG_FILE, '/dev/null');
-    const file = argv[argv.indexOf('--cli-input-json') + 1].slice(7);
-    directories.add(dirname(file)); const input = JSON.parse(await readFile(file, 'utf8'));
+    const streaming = argv[1] === 'get-object';
+    const file = argv[argv.indexOf(streaming ? '--bucket' : '--cli-input-json') + 1].slice(7);
+    directories.add(dirname(file));
+    const input = streaming ? Object.fromEntries(await Promise.all(
+      [['Bucket', '--bucket'], ['Key', '--key'], ['VersionId', '--version-id'], ['ExpectedBucketOwner', '--expected-bucket-owner']].map(async ([key, flag]) => {
+        assert.ok(!argv.includes('--cli-input-json') && argv.includes(flag));
+        const path = argv[argv.indexOf(flag) + 1]; assert.ok(path.startsWith('file://'));
+        assert.equal((await stat(path.slice(7))).mode & 0o777, 0o600);
+        const value = await readFile(path.slice(7), 'utf8'); assert.ok(!argv.includes(value)); return [key, value];
+      }))) : JSON.parse(await readFile(file, 'utf8'));
     assert.equal((await stat(file)).mode & 0o777, 0o600);
     assert.equal(input.Bucket, MANIFEST_BUCKET); assert.equal(input.ExpectedBucketOwner, '092954139775');
     assert.equal(input.Key, `manifests/${hash}.json`);

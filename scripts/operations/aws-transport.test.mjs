@@ -6,6 +6,23 @@ import { createHash } from 'node:crypto';
 import { awsTransport } from './aws-transport.mjs';
 import { manifestStore, MANIFEST_BUCKET } from './manifest.mjs';
 const object = { Bucket: MANIFEST_BUCKET, Key: `manifests/${'a'.repeat(64)}.json` };
+function requestPath(args) {
+  return args[args.indexOf(args[1] === 'get-object' ? '--bucket' : '--cli-input-json') + 1].slice(7);
+}
+async function requestInput(args) {
+  if (args[1] !== 'get-object') return JSON.parse(await readFile(requestPath(args), 'utf8'));
+  // AWS CLI streaming output commands have no --cli-input-json argument.
+  assert.ok(!args.includes('--cli-input-json'));
+  const request = {};
+  for (const [name, flag] of [['Bucket', '--bucket'], ['Key', '--key'], ['VersionId', '--version-id'], ['ExpectedBucketOwner', '--expected-bucket-owner']]) {
+    assert.ok(args.includes(flag));
+    const value = args[args.indexOf(flag) + 1]; assert.ok(value.startsWith('file://'));
+    assert.equal((await stat(value.slice(7))).mode & 0o777, 0o600);
+    request[name] = await readFile(value.slice(7), 'utf8');
+    assert.ok(!args.includes(request[name]));
+  }
+  return request;
+}
 test('CLI keeps JSON/booleans/private bytes out of argv, bounds calls and cleans temporary files', async () => {
   let directory;
   const transport = awsTransport(async (file, args, options) => {
@@ -22,8 +39,8 @@ test('CLI keeps JSON/booleans/private bytes out of argv, bounds calls and cleans
 test('manifest upload uses an exclusive create and binary file; download pins bounded HEAD version', async () => {
   const bytes = Buffer.from('{"synthetic":true}'); const calls = []; const directories = [];
   const transport = awsTransport(async (_file, args) => {
-    calls.push(args[1]); const requestPath = args[args.indexOf('--cli-input-json') + 1].slice(7); directories.push(dirname(requestPath));
-    const request = JSON.parse(await readFile(requestPath, 'utf8'));
+    calls.push(args[1]); directories.push(dirname(requestPath(args)));
+    const request = await requestInput(args);
     assert.equal(request.ExpectedBucketOwner, '092954139775');
     if (args[1] === 'put-object') {
       assert.equal(request.IfNoneMatch, '*'); assert.equal(request.ContentLength, bytes.length);
@@ -60,9 +77,9 @@ function failedManifestUpload(error) {
   const hash = createHash('sha256').update(bytes).digest('hex');
   const calls = []; const directories = new Set();
   const transport = awsTransport(async (_file, args) => {
-    calls.push(args[1]); const path = args[args.indexOf('--cli-input-json') + 1].slice(7);
+    calls.push(args[1]); const path = requestPath(args);
     directories.add(dirname(path));
-    const request = JSON.parse(await readFile(path, 'utf8'));
+    const request = await requestInput(args);
     assert.equal(request.Key, `manifests/${hash}.json`); assert.equal(request.ExpectedBucketOwner, '092954139775');
     if (args[1] === 'put-object') { assert.equal(request.IfNoneMatch, '*'); throw error; }
     if (args[1] === 'head-object') return { stdout: JSON.stringify({ ContentLength: bytes.length, VersionId: 'synthetic-v1' }) };
@@ -203,8 +220,8 @@ test('manifest upload owns exact bytes and request metadata before caller mutati
 test('HEAD and download use the same owned object and requested version despite caller mutation', async () => {
   const bytes = Buffer.from('{}'); const input = { ...object, VersionId: 'v1' }; const calls = []; let directory;
   const transport = awsTransport(async (_file, args) => {
-    const path = args[args.indexOf('--cli-input-json') + 1].slice(7); directory = dirname(path);
-    const request = JSON.parse(await readFile(path, 'utf8')); calls.push(request);
+    const path = requestPath(args); directory = dirname(path);
+    const request = await requestInput(args); calls.push(request);
     if (args[1] === 'head-object') {
       input.Key = `manifests/${'b'.repeat(64)}.json`; input.VersionId = 'changed'; input.Bucket = 'SYNTHETIC_OTHER_BUCKET';
       return { stdout: '{"ContentLength":2,"VersionId":"v1"}' };
@@ -214,6 +231,13 @@ test('HEAD and download use the same owned object and requested version despite 
   const response = await transport('GetObject', input); assert.deepEqual(response.Body, bytes); assert.equal(calls.length, 2);
   for (const request of calls) { assert.equal(request.Key, object.Key); assert.equal(request.Bucket, object.Bucket); assert.equal(request.VersionId, 'v1'); }
   await assert.rejects(access(directory));
+});
+test('download rejects extra service flags before invoking the executor', async () => {
+  let calls = 0;
+  const transport = awsTransport(async () => { calls++; return { stdout: '{}' }; });
+  for (const patch of [{ Range: 'bytes=0-1' }, { ResponseContentType: 'synthetic-private' }, { Unrecognized: true }])
+    await assert.rejects(transport('GetObject', { ...object, ...patch }), /OPS_AWS_REQUEST_REJECTED/);
+  assert.equal(calls, 0);
 });
 test('changing getters are captured once and the same values are checked and sent', async () => {
   let tableReads = 0; let keyReads = 0; let directory;

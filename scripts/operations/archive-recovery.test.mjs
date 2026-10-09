@@ -1,6 +1,6 @@
 import { test, afterEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, writeFile, access } from 'node:fs/promises';
+import { readFile, writeFile, access, stat } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 import { DynamoDBClient, GetItemCommand, BatchGetItemCommand, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
@@ -48,8 +48,16 @@ function fixture(large = false) {
   const executor = async (command, argv, options) => {
     assert.equal(command, 'aws'); assert.ok(options.signal instanceof globalThis.AbortSignal);
     assert.equal(options.env.AWS_MAX_ATTEMPTS, '1');
-    const filename = argv[argv.indexOf('--cli-input-json') + 1].slice(7); directories.add(dirname(filename));
-    const input = JSON.parse(await readFile(filename, 'utf8')); calls.push(argv[1]);
+    const streaming = argv[1] === 'get-object';
+    const filename = argv[argv.indexOf(streaming ? '--bucket' : '--cli-input-json') + 1].slice(7); directories.add(dirname(filename));
+    const input = streaming ? Object.fromEntries(await Promise.all(
+      [['Bucket', '--bucket'], ['Key', '--key'], ['VersionId', '--version-id'], ['ExpectedBucketOwner', '--expected-bucket-owner']].map(async ([key, flag]) => {
+        assert.ok(!argv.includes('--cli-input-json') && argv.includes(flag));
+        const path = argv[argv.indexOf(flag) + 1]; assert.ok(path.startsWith('file://'));
+        assert.equal((await stat(path.slice(7))).mode & 0o777, 0o600);
+        const value = await readFile(path.slice(7), 'utf8'); assert.ok(!argv.includes(value)); return [key, value];
+      }))) : JSON.parse(await readFile(filename, 'utf8'));
+    calls.push(argv[1]);
     assert.equal(input.Bucket, MANIFEST_BUCKET); assert.equal(input.ExpectedBucketOwner, resources.account);
     assert.match(input.Key, /^manifests\/[a-f0-9]{64}\.json$/);
     if (argv[1] === 'put-object') {
