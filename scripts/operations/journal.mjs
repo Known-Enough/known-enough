@@ -15,8 +15,14 @@ export function journalService(storage) {
   async function load(plan, envelope) {
     const checked = capture(plan, envelope);
     const record = await storage.read(checked.planHash);
-    if (!record || !Number.isSafeInteger(record.revision) || record.revision < 0) throw new Error('OPS_JOURNAL_UNAVAILABLE');
-    return { revision: record.revision, journal: validateRecovery(record.journal, checked.plan, checked.envelope) };
+    let revision, journal;
+    try {
+      // Validate and return the same storage revision without rereading getters.
+      revision = record?.revision;
+      if (!Number.isSafeInteger(revision) || revision < 0) throw new Error();
+      journal = record.journal;
+    } catch { throw new Error('OPS_JOURNAL_UNAVAILABLE'); }
+    return { revision, journal: validateRecovery(journal, checked.plan, checked.envelope) };
   }
   return {
     load,

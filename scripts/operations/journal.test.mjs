@@ -204,3 +204,63 @@ test('invalid submitted intent is rejected before reading or mutating storage', 
     assert.deepEqual(p.calls, []);
   }
 });
+
+test('load returns the revision it checked without rereading or changing the storage record', async () => {
+  const p = await mutableJournal(); let reads = 0, calls = 0;
+  const row = { get revision() { return ++reads === 1 ? 0 : Number.NaN; }, journal: p.initial.journal };
+  const getter = Object.getOwnPropertyDescriptor(row, 'revision').get;
+  p.raw.read = async () => { calls++; return row; };
+  assert.deepEqual(await p.service.load(plan, envelope), p.initial);
+  assert.equal(reads, 1); assert.equal(calls, 1);
+  assert.equal(Object.getOwnPropertyDescriptor(row, 'revision').get, getter);
+  assert.equal(row.journal, p.initial.journal);
+});
+test('prepare keeps the checked revision returned by its existing conditional storage', async () => {
+  const p = await mutableJournal(); let reads = 0;
+  p.raw.read = async () => ({ get revision() { return ++reads === 1 ? 0 : Number.NaN; },
+    journal: p.initial.journal });
+  assert.deepEqual(await p.service.prepare(plan, envelope), p.initial);
+  assert.equal(reads, 1);
+  assert.deepEqual(p.calls.map(call => call.method), ['createIfAbsent']);
+});
+test('changing readback revisions cannot disguise a stale CAS acknowledgment as later progress', async () => {
+  const p = await mutableJournal(); const read = p.raw.read; let calls = 0, getters = 0;
+  p.raw.read = async key => {
+    const row = await read(key);
+    return ++calls === 2 ? { get revision() { return ++getters < 3 ? 0 : 2; }, journal: row.journal } : row;
+  };
+  const next = { ...p.initial.journal, state: 'APPLYING', completedItems: 2 };
+  await assert.rejects(p.service.advance(plan, envelope, 0, next), /^Error: OPS_JOURNAL_UNAVAILABLE$/);
+  assert.equal(calls, 2); assert.equal(getters, 1);
+  assert.deepEqual(p.calls.map(call => call.method), ['read', 'compareAndSwap', 'read']);
+  assert.deepEqual(await read(p.initial.journal.planHash), { revision: 1, journal: next });
+});
+test('unreadable storage record fields return finite unavailability without private causes', async () => {
+  for (const field of ['revision', 'journal']) {
+    const p = await mutableJournal(); const row = { revision: 0, journal: p.initial.journal };
+    Object.defineProperty(row, field, { get() { throw new Error('synthetic-private-storage-property'); } });
+    p.raw.read = async () => row;
+    await assert.rejects(p.service.load(plan, envelope), error => {
+      assert.equal(error.message, 'OPS_JOURNAL_UNAVAILABLE');
+      assert.equal(error.cause, undefined); return true;
+    });
+    assert.deepEqual(p.calls, []);
+  }
+});
+test('the first revision value determines validity before any journal property is read', async () => {
+  for (const invalid of [-1, 0.5, Number.NaN, Infinity, Number.MAX_SAFE_INTEGER + 1, '0', 0n, null,
+    undefined, new Number(0)]) {
+    const p = await mutableJournal(); let revisions = 0, journals = 0;
+    p.raw.read = async () => ({ get revision() { return ++revisions === 1 ? invalid : 0; },
+      get journal() { journals++; return p.initial.journal; } });
+    await assert.rejects(p.service.load(plan, envelope), /^Error: OPS_JOURNAL_UNAVAILABLE$/);
+    assert.equal(revisions, 1); assert.equal(journals, 0);
+  }
+  for (const revision of [0, 1, Number.MAX_SAFE_INTEGER]) {
+    const p = await mutableJournal(); let reads = 0;
+    p.raw.read = async () => ({ get revision() { reads++; return revision; }, journal: p.initial.journal });
+    const observed = await p.service.load(plan, envelope);
+    assert.equal(observed.revision, revision); assert.equal(reads, 1);
+    assert.ok(Object.isFrozen(observed.journal));
+  }
+});
