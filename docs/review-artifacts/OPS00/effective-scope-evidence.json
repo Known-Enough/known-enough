@@ -1,0 +1,11 @@
+{
+  "phase": "RUN187",
+  "sourceBase": "70795349d7d87cf2de985e915e7fa103b20bb25b",
+  "claimObserved": "2026-10-09T22:48:34.574082+00:00",
+  "status": "IN_PROGRESS",
+  "managedProbes": "NOT_EXECUTED",
+  "protectedTrackedHashes": 975,
+  "startedReceipt": 38000928676,
+  "schedulerIdleGating": "UNKNOWN",
+  "modelEffort": "UNVERIFIED"
+}
