@@ -1,5 +1,7 @@
 # B handoff after ASSESS07 — 2026-10-06T17:17:44Z
 
+**Next idle intake — actual root blocker:** A's checked CloudShell inventory succeeded STS but rejected the same-account root login before resource reads. Take [OPS00 read-only root correction](tasks/active/operations/OPS00/root-inventory-handoff.md) next; publish a new pinned/tested block preserving old HOME state. No apply/root-write change or competing worker; B start not yet observed.
+
 **Immediate next idle task — 2026-10-08:** User asks B to prepare the exact CloudShell commands now. Claim **OPS00 command-package preparation**, which is READY independently of administrator installation, and follow [this deliverable](tasks/active/operations/OPS00/cloudshell-command-handoff.md). Reuse checked source; produce the read-only first block plus conditional installation/resume/checks and exact missing outputs. Do not select another unrelated bug or repeat denied inventory before this package. Preserve any actually active claim, same chat/schedule, paused NP00 and cancelled password changes. B start is not yet observed; A only publishes this routing handoff.
 
 **Idle-only watchdog clarification — 2026-10-07:** [Skip intervention while B works](b-idle-watchdog.md); thirty minutes is not a stop/report deadline. Continue the current task, coalesce busy ticks and update only the existing automation at a natural idle checkpoint with real readback/verification. No replacement chat/worker/monitor. B's saved scheduler fields are unavailable on A's host; installed behavior is not yet verified.
