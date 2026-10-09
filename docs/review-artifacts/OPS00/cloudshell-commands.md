@@ -1,3 +1,301 @@
+# OPS00 recovery CREATE: checked CloudShell credential correction
+
+Use the paste-ready continuation or the six component blocks in order in **standard persistent CloudShell, account 092954139775, region us-east-1**, using your own existing authorized setup credentials. This is the concrete CREATE route requested after the supplied [inventory](a-cloudshell-inventory-20261009.md) observed the named recovery resources absent at 2026-10-09T15:41:39.125259Z. Each submission checks fresh identity, OIDC and named-resource conflicts; the older inventory is context, not current authorization or installation proof. No credentials are shared.
+
+Checked source **b4aac38762e8668bb29373b02d2d75e1b0abb10a**. [Driver](../../../scripts/operations/cloudshell-create.py), [44 offline regressions](../../../scripts/operations/cloudshell-create.test.py), [integrity/evidence](create-credentials-integrity.md). The template remains SHA256 **3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e**. New private state is `$HOME/.known-enough/ops00-create-credentials-20261009`; retain it and every earlier package/private recovery file. Do not repin, delete, overwrite, or recreate state to get past a failure.
+
+**Pre-intent continuation gate:** The first block checks BOTH previous private CREATE folders without reading or copying credential values or changing any saved file. If either `$HOME/.known-enough/ops00-create-20261009` or `$HOME/.known-enough/ops00-create-pagination-20261009` already contains a CREATE or execute intent, these new blocks stop before any AWS request. Retain that original state and its original source (dfee148ab3e10b05e7b089ac1d37eab60244a2b4 or 589f6c4a0170597ffe359b688d257fb519c52af7 respectively). Keep its original token/source and reconcile that intent before any new plan. The historical driver drops CloudShell provider settings; do not retry it unchanged or manually export credentials. A future reviewed saved-intent recovery is required if an intent is present; do not run original block 2 or 4 again merely to change pins. An uncertain intent, malformed readback, unexpected stack or source conflict requires technical reconciliation of that saved plan before further mutation. Do not delete/reset/repin an intent or start a competing new CREATE plan. Saved-plan read-only reconciliation remains a separate source/token-bound handoff; new checked-package installation is a distinct fresh-plan path only after conflicts are reconciled.
+
+The corrected subprocess preserves the existing CloudShell container credential provider and authorization settings for local loopback or documented container metadata hosts. It rejects arbitrary HTTP/HTTPS hosts, invalid relative paths, userinfo, fragments, malformed ports and control characters before any AWS CLI request; profile/web-identity and service endpoint overrides remain disabled. Missing credentials report NO_CREDENTIALS; unrecognized CLI failures report AWS_REQUEST_FAILED rather than absence. Existing strict pagination/configuration checks remain. No provider token, URI, credential value or raw diagnostic is printed publicly. [AWS container-provider settings](https://docs.aws.amazon.com/sdkref/latest/guide/feature-container-credentials.html), [AWS CLI metadata control](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-metadata.html), [SDK host handling](https://github.com/boto/botocore/blob/develop/botocore/utils.py).
+
+A's supplied first-call result was requests1/mutations0/NO_CREDENTIALS on589f6c4; no live intent/state inspection occurred here. The gate below technically checks for intents in the actual session before using a separate new private state. If both old folders contain no intent and have safe owner/mode, retain their plan/template/diagnostics and use this new source/state; do not repin or overwrite them. Fresh identity/conflict checks still prevent competing resource creation. Do not create or copy credentials. If NO_CREDENTIALS persists, retain private diagnostics and report only the finite classification; installation remains unverified.
+
+**This package has been checked offline; none of these AWS commands was executed during its preparation.** It creates only KnownEnoughOperationsRecovery and the existing four-resource template: journal, private manifest bucket/policy and exact GitHub recovery role. It does not update/import existing resources, install partition/job/retention stacks, enable flags, dispatch managed tests, or touch participant/model data. Whole OPS00 remains open until real installation, scope checks and same-source two-run recovery proof finish.
+
+## Paste-ready continuation after the observed first-call failure
+
+Paste this one block in your own existing standard CloudShell session. It checks both old states for saved intents, downloads/verifies the corrected source, runs 44 offline regressions, and then prepares one CREATE preview with fresh identity/conflict checks. Keep all old private files. On PREVIEW_SUBMITTED or PREVIEW_PENDING, continue at block 3; on REVIEW_READY, continue at block 4. BLOCKED stops the sequence. No successful installation is implied.
+
+```bash
+set -euo pipefail
+umask 077
+KE_OPS_SOURCE=b4aac38762e8668bb29373b02d2d75e1b0abb10a
+KE_OPS_ROOT="$HOME/.known-enough/ops00-create-tools-$KE_OPS_SOURCE"
+KE_OPS_STATE="$HOME/.known-enough/ops00-create-credentials-20261009"
+python3 - <<'PY_SAVED'
+import os, stat, sys
+from pathlib import Path
+for folder in ('ops00-create-20261009', 'ops00-create-pagination-20261009'):
+    old = Path.home() / '.known-enough' / folder
+    if old.is_symlink():
+        sys.exit('OPS_SAVED_STATE_RECONCILIATION_REQUIRED')
+    if old.exists():
+        info = old.lstat()
+        if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
+            sys.exit('OPS_SAVED_STATE_RECONCILIATION_REQUIRED')
+    for name in ('create.intent.json', 'execute.intent.json'):
+        marker = old / name
+        if marker.exists() or marker.is_symlink():
+            sys.exit('OPS_SAVED_CREATE_INTENT_REQUIRES_ORIGINAL_PIN')
+PY_SAVED
+python3 - "$KE_OPS_ROOT" "$KE_OPS_STATE" <<'PY_HOME'
+import os, sys
+from pathlib import Path
+home = Path.home().resolve(strict=True)
+for name in sys.argv[1:]:
+    target = Path(name).absolute()
+    assert target != home and target.is_relative_to(home), 'Private HOME required'
+    current = home
+    for part in target.relative_to(home).parts:
+        assert part not in ('.', '..'), 'Unsafe path'
+        current = current / part
+        try:
+            current.mkdir(mode=0o700)
+        except FileExistsError:
+            pass
+        info = current.lstat()
+        assert not current.is_symlink() and current.is_dir(), 'Private directory required'
+        assert info.st_uid == os.getuid() and not info.st_mode & 0o077, 'Private owner/mode required'
+PY_HOME
+if [ ! -e "$KE_OPS_ROOT/.git" ]; then
+  git clone https://github.com/Known-Enough/known-enough.git "$KE_OPS_ROOT"
+  git -C "$KE_OPS_ROOT" checkout --detach "$KE_OPS_SOURCE"
+fi
+cd "$KE_OPS_ROOT"
+test "$(git rev-parse HEAD)" = "$KE_OPS_SOURCE"
+test "$(git remote get-url origin)" = https://github.com/Known-Enough/known-enough.git
+test -z "$(git status --porcelain)"
+printf '%s  %s\n' '6595b9957d87385ac2172d05fd9e9ba1be958ff34938e675d2b400c7a0a7cc21' 'scripts/operations/cloudshell-create.py' | sha256sum --check --strict -
+printf '%s  %s\n' 'dc6d64854c901380039a302c34d69daf2cd6bfd60cf7b823e4006a0919718610' 'scripts/operations/cloudshell-create.test.py' | sha256sum --check --strict -
+printf '%s  %s\n' 'ba8feef68de6ebe7cf9ba65f705cd61d773eb92c3dd424f4612c17b7e202e66f' 'scripts/operations/cloudshell-inventory.py' | sha256sum --check --strict -
+printf '%s  %s\n' '3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e' 'infra/operations/setup.json' | sha256sum --check --strict -
+python3 -B scripts/operations/cloudshell-create.test.py
+python3 -B scripts/operations/cloudshell-create.py prepare --source "$KE_OPS_SOURCE" --state "$KE_OPS_STATE"
+```
+
+## 1. Download and verify this exact source, once
+
+CloudShell needs git, AWS CLI and Python 3.9 or later. The new directory is private and source pinned; a partial or changed checkout stops instead of resetting saved work. The regression suite makes no real AWS request.
+
+```bash
+set -euo pipefail
+umask 077
+KE_OPS_SOURCE=b4aac38762e8668bb29373b02d2d75e1b0abb10a
+KE_OPS_ROOT="$HOME/.known-enough/ops00-create-tools-$KE_OPS_SOURCE"
+KE_OPS_STATE="$HOME/.known-enough/ops00-create-credentials-20261009"
+python3 - <<'PY_SAVED'
+import os, stat, sys
+from pathlib import Path
+for folder in ('ops00-create-20261009', 'ops00-create-pagination-20261009'):
+    old = Path.home() / '.known-enough' / folder
+    if old.is_symlink():
+        sys.exit('OPS_SAVED_STATE_RECONCILIATION_REQUIRED')
+    if old.exists():
+        info = old.lstat()
+        if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
+            sys.exit('OPS_SAVED_STATE_RECONCILIATION_REQUIRED')
+    for name in ('create.intent.json', 'execute.intent.json'):
+        marker = old / name
+        if marker.exists() or marker.is_symlink():
+            sys.exit('OPS_SAVED_CREATE_INTENT_REQUIRES_ORIGINAL_PIN')
+PY_SAVED
+python3 - "$KE_OPS_ROOT" "$KE_OPS_STATE" <<'PY_HOME'
+import os, sys
+from pathlib import Path
+home = Path.home().resolve(strict=True)
+for name in sys.argv[1:]:
+    target = Path(name).absolute()
+    assert target != home and target.is_relative_to(home), 'Private HOME required'
+    current = home
+    for part in target.relative_to(home).parts:
+        assert part not in ('.', '..'), 'Unsafe path'
+        current = current / part
+        try:
+            current.mkdir(mode=0o700)
+        except FileExistsError:
+            pass
+        info = current.lstat()
+        assert not current.is_symlink() and current.is_dir(), 'Private directory required'
+        assert info.st_uid == os.getuid() and not info.st_mode & 0o077, 'Private owner/mode required'
+PY_HOME
+if [ ! -e "$KE_OPS_ROOT/.git" ]; then
+  git clone https://github.com/Known-Enough/known-enough.git "$KE_OPS_ROOT"
+  git -C "$KE_OPS_ROOT" checkout --detach "$KE_OPS_SOURCE"
+fi
+cd "$KE_OPS_ROOT"
+test "$(git rev-parse HEAD)" = "$KE_OPS_SOURCE"
+test "$(git remote get-url origin)" = https://github.com/Known-Enough/known-enough.git
+test -z "$(git status --porcelain)"
+printf '%s  %s\n' '6595b9957d87385ac2172d05fd9e9ba1be958ff34938e675d2b400c7a0a7cc21' 'scripts/operations/cloudshell-create.py' | sha256sum --check --strict -
+printf '%s  %s\n' 'dc6d64854c901380039a302c34d69daf2cd6bfd60cf7b823e4006a0919718610' 'scripts/operations/cloudshell-create.test.py' | sha256sum --check --strict -
+printf '%s  %s\n' 'ba8feef68de6ebe7cf9ba65f705cd61d773eb92c3dd424f4612c17b7e202e66f' 'scripts/operations/cloudshell-inventory.py' | sha256sum --check --strict -
+printf '%s  %s\n' '3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e' 'infra/operations/setup.json' | sha256sum --check --strict -
+python3 -B scripts/operations/cloudshell-create.test.py
+```
+
+## 2. Submit the CREATE preview
+
+This is the first AWS mutation: one CREATE change set with a durable client token, after identity/OIDC/conflict/ValidateTemplate reads. CloudFormation creates a REVIEW_IN_PROGRESS stack placeholder; resources are installed only by block 4. The driver fsyncs `create.intent.json` before submission. A repeated block 2 with an intent already present performs read-only resume, never another CREATE submission.
+
+```bash
+set -euo pipefail
+umask 077
+KE_OPS_SOURCE=b4aac38762e8668bb29373b02d2d75e1b0abb10a
+KE_OPS_ROOT="$HOME/.known-enough/ops00-create-tools-$KE_OPS_SOURCE"
+KE_OPS_STATE="$HOME/.known-enough/ops00-create-credentials-20261009"
+python3 - <<'PY_SAVED'
+import os, stat, sys
+from pathlib import Path
+for folder in ('ops00-create-20261009', 'ops00-create-pagination-20261009'):
+    old = Path.home() / '.known-enough' / folder
+    if old.is_symlink():
+        sys.exit('OPS_SAVED_STATE_RECONCILIATION_REQUIRED')
+    if old.exists():
+        info = old.lstat()
+        if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
+            sys.exit('OPS_SAVED_STATE_RECONCILIATION_REQUIRED')
+    for name in ('create.intent.json', 'execute.intent.json'):
+        marker = old / name
+        if marker.exists() or marker.is_symlink():
+            sys.exit('OPS_SAVED_CREATE_INTENT_REQUIRES_ORIGINAL_PIN')
+PY_SAVED
+cd "$KE_OPS_ROOT"
+python3 -B scripts/operations/cloudshell-create.py prepare --source "$KE_OPS_SOURCE" --state "$KE_OPS_STATE"
+```
+
+## 3. Resume and inspect the preview
+
+Run this block again if the result is PREVIEW_PENDING. Each invocation performs one bounded poll, with at most 32 AWS requests, a 180-second overall AWS deadline, 10 seconds per request, one CLI attempt and 128 KiB per output stream. REVIEW_READY requires CREATE_COMPLETE/AVAILABLE, exactly the four expected Add resources, the original template and the same REVIEW_IN_PROGRESS stack. The returned reviewHash binds source, template, exact stack/change-set IDs and additions; it is technical scope verification under existing standing authorization.
+
+```bash
+set -euo pipefail
+umask 077
+KE_OPS_SOURCE=b4aac38762e8668bb29373b02d2d75e1b0abb10a
+KE_OPS_ROOT="$HOME/.known-enough/ops00-create-tools-$KE_OPS_SOURCE"
+KE_OPS_STATE="$HOME/.known-enough/ops00-create-credentials-20261009"
+python3 - <<'PY_SAVED'
+import os, stat, sys
+from pathlib import Path
+for folder in ('ops00-create-20261009', 'ops00-create-pagination-20261009'):
+    old = Path.home() / '.known-enough' / folder
+    if old.is_symlink():
+        sys.exit('OPS_SAVED_STATE_RECONCILIATION_REQUIRED')
+    if old.exists():
+        info = old.lstat()
+        if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
+            sys.exit('OPS_SAVED_STATE_RECONCILIATION_REQUIRED')
+    for name in ('create.intent.json', 'execute.intent.json'):
+        marker = old / name
+        if marker.exists() or marker.is_symlink():
+            sys.exit('OPS_SAVED_CREATE_INTENT_REQUIRES_ORIGINAL_PIN')
+PY_SAVED
+cd "$KE_OPS_ROOT"
+python3 -B scripts/operations/cloudshell-create.py resume --source "$KE_OPS_SOURCE" --state "$KE_OPS_STATE"
+```
+
+## 4. Execute the verified preview, once
+
+This is the second AWS mutation. This block first obtains the current reviewHash, then rechecks the preview/template/stack, identity and role/table/bucket conflicts before submitting one execute request with its saved token. `execute.intent.json` is fsynced before the request. Do not run the historical commented-out manual CREATE/UPDATE commands below.
+
+```bash
+set -euo pipefail
+umask 077
+KE_OPS_SOURCE=b4aac38762e8668bb29373b02d2d75e1b0abb10a
+KE_OPS_ROOT="$HOME/.known-enough/ops00-create-tools-$KE_OPS_SOURCE"
+KE_OPS_STATE="$HOME/.known-enough/ops00-create-credentials-20261009"
+python3 - <<'PY_SAVED'
+import os, stat, sys
+from pathlib import Path
+for folder in ('ops00-create-20261009', 'ops00-create-pagination-20261009'):
+    old = Path.home() / '.known-enough' / folder
+    if old.is_symlink():
+        sys.exit('OPS_SAVED_STATE_RECONCILIATION_REQUIRED')
+    if old.exists():
+        info = old.lstat()
+        if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
+            sys.exit('OPS_SAVED_STATE_RECONCILIATION_REQUIRED')
+    for name in ('create.intent.json', 'execute.intent.json'):
+        marker = old / name
+        if marker.exists() or marker.is_symlink():
+            sys.exit('OPS_SAVED_CREATE_INTENT_REQUIRES_ORIGINAL_PIN')
+PY_SAVED
+cd "$KE_OPS_ROOT"
+KE_OPS_REVIEW="$(python3 -B scripts/operations/cloudshell-create.py review --source "$KE_OPS_SOURCE" --state "$KE_OPS_STATE")"
+printf '%s\n' "$KE_OPS_REVIEW"
+KE_OPS_REVIEW_HASH="$(python3 -c 'import json,re,sys; v=json.load(sys.stdin); assert v["result"]=="REVIEW_READY" and re.fullmatch("[0-9a-f]{64}",v["reviewHash"]); print(v["reviewHash"])' <<< "$KE_OPS_REVIEW")"
+python3 -B scripts/operations/cloudshell-create.py execute --source "$KE_OPS_SOURCE" --state "$KE_OPS_STATE" --review-hash "$KE_OPS_REVIEW_HASH"
+```
+
+## 5. Resume the same installation after waiting or reconnecting
+
+The block sets its own paths, so it also works after reconnecting. INSTALL_PENDING is pending, not a failure or PASS. Run the same block again at a later checkpoint. After an execute intent exists, block 5 issues only configuration reads, including when the previous execute acknowledgment was lost. No automatic mutation retry, new token, reset, cleanup, rollback or parallel installation is issued.
+
+```bash
+set -euo pipefail
+umask 077
+KE_OPS_SOURCE=b4aac38762e8668bb29373b02d2d75e1b0abb10a
+KE_OPS_ROOT="$HOME/.known-enough/ops00-create-tools-$KE_OPS_SOURCE"
+KE_OPS_STATE="$HOME/.known-enough/ops00-create-credentials-20261009"
+python3 - <<'PY_SAVED'
+import os, stat, sys
+from pathlib import Path
+for folder in ('ops00-create-20261009', 'ops00-create-pagination-20261009'):
+    old = Path.home() / '.known-enough' / folder
+    if old.is_symlink():
+        sys.exit('OPS_SAVED_STATE_RECONCILIATION_REQUIRED')
+    if old.exists():
+        info = old.lstat()
+        if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
+            sys.exit('OPS_SAVED_STATE_RECONCILIATION_REQUIRED')
+    for name in ('create.intent.json', 'execute.intent.json'):
+        marker = old / name
+        if marker.exists() or marker.is_symlink():
+            sys.exit('OPS_SAVED_CREATE_INTENT_REQUIRES_ORIGINAL_PIN')
+PY_SAVED
+cd "$KE_OPS_ROOT"
+python3 -B scripts/operations/cloudshell-create.py resume --source "$KE_OPS_SOURCE" --state "$KE_OPS_STATE"
+```
+
+## 6. Repeat exact configuration readback
+
+CONFIGURATION_MATCH requires CREATE_COMPLETE, original template/four physical resources, exact role/trust/inline policy/no attachments or boundary, table encryption/backups/TTL/deletion protection, and private/versioned/encrypted/TLS/exclusive-create bucket configuration. The driver retains the existing encrypted-table metadata criterion; missing metadata remains a mismatch rather than a waived check. This result is configuration only: effectivePermissions remains UNKNOWN and managedRecovery remains NOT_EXECUTED.
+
+```bash
+set -euo pipefail
+umask 077
+KE_OPS_SOURCE=b4aac38762e8668bb29373b02d2d75e1b0abb10a
+KE_OPS_ROOT="$HOME/.known-enough/ops00-create-tools-$KE_OPS_SOURCE"
+KE_OPS_STATE="$HOME/.known-enough/ops00-create-credentials-20261009"
+python3 - <<'PY_SAVED'
+import os, stat, sys
+from pathlib import Path
+for folder in ('ops00-create-20261009', 'ops00-create-pagination-20261009'):
+    old = Path.home() / '.known-enough' / folder
+    if old.is_symlink():
+        sys.exit('OPS_SAVED_STATE_RECONCILIATION_REQUIRED')
+    if old.exists():
+        info = old.lstat()
+        if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
+            sys.exit('OPS_SAVED_STATE_RECONCILIATION_REQUIRED')
+    for name in ('create.intent.json', 'execute.intent.json'):
+        marker = old / name
+        if marker.exists() or marker.is_symlink():
+            sys.exit('OPS_SAVED_CREATE_INTENT_REQUIRES_ORIGINAL_PIN')
+PY_SAVED
+cd "$KE_OPS_ROOT"
+python3 -B scripts/operations/cloudshell-create.py readback --source "$KE_OPS_SOURCE" --state "$KE_OPS_STATE"
+```
+
+For BLOCKED, stop the dependent sequence and retain all private intent, acknowledgment, response and diagnostic files. AccessDenied is not absence. Expired credentials may be renewed in your own authorized session, followed by block 3 or 5 using the same state. ChangeSetNotFound after uncertain submission, failed/rollback stacks, source/state conflict, unexpected resources or configuration drift require reconciliation of that saved plan; do not create another state directory or resubmit manually. Raw diagnostics/identities/configuration and resource IDs stay private, mode 600 under mode-700 HOME directories. Share only the finite result/classification/request/mutation counts and review hash, after checking the text for private data.
+
+After configuration matches, B's own Battosai1806 workflow must separately verify installed scope and positive/negative behavior, then complete two sequential operations-recovery runs at the same verified source using the existing bounded synthetic probe and private recovery records. Keep `OPERATIONS_RECOVERY_ENABLED` and runtime/deployment state unchanged until the applicable installed guard is verified. Existing inspector access denials are not repaired or retried by this package. Record actual run links/artifacts, positive/negative outcomes and cleanup; preparation alone is not DONE.
+
+AWS semantics: [CreateChangeSet](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_CreateChangeSet.html), [DescribeChangeSet](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_DescribeChangeSet.html), [ExecuteChangeSet](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_ExecuteChangeSet.html), [GetTemplate](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_GetTemplate.html). The CREATE type is bound in the saved request and exact Add/template/stack review; DescribeChangeSet does not supply a ChangeSetType field. No platform restriction is bypassed and no new approval is requested by this prepared package.
+
+## Historical packages retained verbatim
+
+The following is preserved evidence of older preparation and pins. The current six-block sequence above supersedes its manual placeholders; all old HOME folders and source markers remain untouched.
+
 # OPS00 recovery CREATE: checked pagination correction
 
 Use the six blocks below in order in **standard persistent CloudShell, account 092954139775, region us-east-1**, using your own existing authorized setup credentials. This is the concrete CREATE route requested after the supplied [inventory](a-cloudshell-inventory-20261009.md) observed the named recovery resources absent at 2026-10-09T15:41:39.125259Z. Each submission checks fresh identity, OIDC and named-resource conflicts; the older inventory is context, not current authorization or installation proof. No credentials are shared.
