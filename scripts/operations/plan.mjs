@@ -2,15 +2,19 @@ import { createHash } from 'node:crypto';
 const operations = ['PARTITION', 'ARCHIVE', 'ERASE', 'JOB_RECOVERY'];
 function reject() { throw new Error('OPS_PLAN_REJECTED'); }
 function exact(value, keys) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)
-    || Object.keys(value).length !== keys.length || keys.some(key => !Object.hasOwn(value, key))) reject();
+  try {
+    if (!value || typeof value !== 'object' || Array.isArray(value)
+      || Object.keys(value).length !== keys.length || keys.some(key => !Object.hasOwn(value, key))) reject();
+    // Validate and hash owned values, without rereading caller-controlled getters.
+    return Object.fromEntries(keys.map(key => [key, value[key]]));
+  } catch { reject(); }
 }
 const hash = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 // Envelope comes from a separately verified resource contract, never the submitted plan.
 export function validatePlan(plan, envelope) {
-  exact(envelope, ['sourceSha', 'operation', 'resourceArn', 'contractHash', 'maxItems']);
-  exact(plan, ['schemaVersion', 'sourceSha', 'account', 'region', 'operation', 'resourceArn', 'contractHash', 'expectedRevision', 'maxItems', 'recoveryManifestHash']);
-  if (!/^[a-f0-9]{40}$/.test(envelope.sourceSha) || !operations.includes(envelope.operation)
+  envelope = exact(envelope, ['sourceSha', 'operation', 'resourceArn', 'contractHash', 'maxItems']);
+  plan = exact(plan, ['schemaVersion', 'sourceSha', 'account', 'region', 'operation', 'resourceArn', 'contractHash', 'expectedRevision', 'maxItems', 'recoveryManifestHash']);
+  if (typeof envelope.sourceSha !== 'string' || !/^[a-f0-9]{40}$/.test(envelope.sourceSha) || !operations.includes(envelope.operation)
     || !hash(envelope.contractHash) || !Number.isSafeInteger(envelope.maxItems) || envelope.maxItems < 1 || envelope.maxItems > 1000
     || typeof envelope.resourceArn !== 'string'
     || !/^arn:aws:dynamodb:us-east-1:092954139775:table\/KnownEnough[A-Za-z0-9_-]+$/.test(envelope.resourceArn)) reject();
@@ -25,7 +29,7 @@ export function validatePlan(plan, envelope) {
 }
 export function validateRecovery(journal, plan, envelope) {
   const checkedPlan = validatePlan(plan, envelope);
-  exact(journal, ['schemaVersion', 'planHash', 'resourceArn', 'expectedRevision', 'completedItems', 'state']);
+  journal = exact(journal, ['schemaVersion', 'planHash', 'resourceArn', 'expectedRevision', 'completedItems', 'state']);
   if (!hash(checkedPlan?.planHash) || journal.schemaVersion !== 1 || journal.planHash !== checkedPlan.planHash
     || journal.resourceArn !== checkedPlan.resourceArn || journal.expectedRevision !== checkedPlan.expectedRevision
     || !Number.isSafeInteger(journal.completedItems) || journal.completedItems < 0 || journal.completedItems > checkedPlan.maxItems
