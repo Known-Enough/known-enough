@@ -255,7 +255,7 @@
   },
   "ownedFullSession": 61874,
   "fullResult": "PASS",
-  "lastObservedAt": "2026-10-08T22:55:55.283103+00:00",
+  "lastObservedAt": "2026-10-09T00:17:04.334852+00:00",
   "full": {
     "label": "full",
     "command": [
@@ -393,5 +393,176 @@
       "observed_at": "2026-10-08T22:50:58.312Z",
       "verified": true
     }
-  ]
+  ],
+  "handoffSync": {
+    "label": "handoff",
+    "expectedRemote": "1d7ced1211ffddbc3a5274aa9378bdf03686c8ba",
+    "sourceSha": "0708cdcb5f29f1da9a6f98b7526064a5c6d8dae1",
+    "observedEnd": "2026-10-08T22:55:59.855775+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 104
+  },
+  "finishedReceiptRun": 37863829806,
+  "receipts": [
+    {
+      "event": "started",
+      "id": 37855275309,
+      "created_at": "2026-10-08T22:43:42Z",
+      "observed_at": "2026-10-08T22:43:52.158Z",
+      "verified": true,
+      "sourceSha": "69d56dab502ba911e5e499cd771ed26e13032065",
+      "recordSha256": "063a014e00a678c985aa805fe21b3c7957491acd787a9f14369bded8afa65134",
+      "summarySha256": "e7dd8969d7a49318335f999b91dedac2532b72214e970c33d90fb27fdc529a08"
+    },
+    {
+      "event": "progress",
+      "id": 37855574449,
+      "created_at": "2026-10-08T22:46:36Z",
+      "observed_at": "2026-10-08T22:46:46.576Z",
+      "verified": true,
+      "sourceSha": "86aec7311a1d149653d7c68901d5de790eb9e169",
+      "recordSha256": "c168e846a8b5c4fca4e2974550a778a8e878f58729f65264c78bd014322098fa",
+      "summarySha256": "2ba41f88a8c8c45ab4e1c9ee062242f0b31b7751819218b004069f16dbebdbe1"
+    },
+    {
+      "event": "progress",
+      "id": 37855999016,
+      "created_at": "2026-10-08T22:50:50Z",
+      "observed_at": "2026-10-08T22:50:58.312Z",
+      "verified": true,
+      "sourceSha": "1d7ced1211ffddbc3a5274aa9378bdf03686c8ba",
+      "recordSha256": "82aaab64b7ff552d6e986837b98f8c6ec2a0bc8408bb2843c7d78154e96e7f9e",
+      "summarySha256": "ac76fc43d06b7061f1f716ac47ab28332856c559e8de06748ed64314b8cb1086"
+    },
+    {
+      "event": "finished",
+      "id": 37856547779,
+      "created_at": "2026-10-08T22:56:21Z",
+      "observed_at": "2026-10-08T22:56:30.443Z",
+      "verified": true,
+      "sourceSha": "0708cdcb5f29f1da9a6f98b7526064a5c6d8dae1",
+      "recordSha256": "8a8666b1fe1b6bd7c264ac649902c30e8c0f20f332d137d3e11948da5480bb36",
+      "summarySha256": "e7ddfaced54443f42efc9613c69aff7bab5e31073d0f875c97357959d1c83ae1"
+    },
+    {
+      "event": "progress",
+      "id": 37863715434,
+      "created_at": "2026-10-09T00:14:05Z",
+      "observed_at": "2026-10-09T00:14:13.588Z",
+      "verified": true,
+      "sourceSha": "0708cdcb5f29f1da9a6f98b7526064a5c6d8dae1",
+      "recordSha256": "d2924d51279b59ad7f6a659e7e7e7200e1666ecc35fb11d2ce8faeb3873cf349",
+      "summarySha256": "44e540a6dad231546fafbf3dccee457dd9223d6c0f183a2763e0206c40c1ddba"
+    },
+    {
+      "event": "finished",
+      "id": 37863829806,
+      "created_at": "2026-10-09T00:15:24Z",
+      "observed_at": "2026-10-09T00:15:31.188Z",
+      "verified": true,
+      "sourceSha": "0708cdcb5f29f1da9a6f98b7526064a5c6d8dae1",
+      "recordSha256": "d7eb42d5b16f18e23d2cd75c7877661c046afdcb2fc8cb5c8c877859608f6efd",
+      "summarySha256": "f64ec747b8b8822c4e1594a32d8387f7c23b00a9120751977c185fd1e267d86f"
+    }
+  ],
+  "maximumReceiptGapSeconds": 4664,
+  "chatSummary": "Fixed OPS00 recovery uploads (1d7ced1) by snapshotting bytes before waiting; 141 native operations, 1,398 application and 64 browser checks plus [source-matched verification](https://github.com/Known-Enough/known-enough/actions/runs/37855994726) passed. A 77-minute observation gap delayed closeout, and three watchdog hints were coalesced in this same execution. Installation and managed recovery remain unverified; next is own-account setup and recovery proof ([log](https://github.com/Known-Enough/known-enough/blob/main/docs/monitor-log.md#b-run159)).",
+  "closingObservedAt": "2026-10-09T00:17:04.334852+00:00",
+  "nextNominalWake": "2026-10-09T00:43:13.447Z",
+  "coalescedScheduledHints": [
+    "2026-10-08T23:13:12.542Z",
+    "2026-10-08T23:43:12.987Z",
+    "2026-10-09T00:13:13.447Z"
+  ],
+  "observationGap": {
+    "observedAt": "2026-10-09T00:13:35.200672+00:00",
+    "unobservedActivity": "UNKNOWN",
+    "cause": "UNKNOWN",
+    "coalescedScheduledHints": [
+      "2026-10-08T23:13:12.542Z",
+      "2026-10-08T23:43:12.987Z",
+      "2026-10-09T00:13:13.447Z"
+    ],
+    "runsAtHandoffSource": [
+      {
+        "id": 37862334384,
+        "status": "completed",
+        "conclusion": "success",
+        "display_title": "B monitor: inspect",
+        "created_at": "2026-10-08T23:58:24Z",
+        "updated_at": "2026-10-08T23:58:38Z",
+        "head_sha": "0708cdcb5f29f1da9a6f98b7526064a5c6d8dae1",
+        "event": "schedule"
+      },
+      {
+        "id": 37856547779,
+        "status": "completed",
+        "conclusion": "success",
+        "display_title": "B monitor: finished",
+        "created_at": "2026-10-08T22:56:21Z",
+        "updated_at": "2026-10-08T22:56:35Z",
+        "head_sha": "0708cdcb5f29f1da9a6f98b7526064a5c6d8dae1",
+        "event": "workflow_dispatch"
+      }
+    ],
+    "lastObservedPublicationAttempt": "2026-10-08T22:56:19.380019+00:00",
+    "actualObservationResumed": "2026-10-09T00:13:35.200672+00:00",
+    "progressReportingGap": "No agent lifecycle publication observed after first finished creation22:56:21Z until this closeout observation.",
+    "observationGapSeconds": 4635.820653,
+    "tenMinuteReportingMissed": true,
+    "nextNominalWake": "2026-10-09T00:43:13.447Z",
+    "independentObserver": {
+      "id": 37862334384,
+      "observedAt": "2026-10-09T00:14:28.077017+00:00",
+      "recordSha256": "b9233932733cc6ec19634c0262b5f1d979252a9784c64a4e5ef770510f50dece",
+      "summarySha256": "be890edf5ffe3840df84577f826d78141de54c4795913ca2099de59163c928ed",
+      "record": {
+        "schemaVersion": 1,
+        "event": "inspect",
+        "state": "NO_RECENT_REPORT",
+        "observedAt": "2026-10-08T23:58:30.582Z",
+        "actorId": 44531296,
+        "runUrl": "https://github.com/Known-Enough/known-enough/actions/runs/37862334384",
+        "chatSummary": "Fixed and pushed OPS00 recovery uploads (1d7ced1): buffer changes while uploads wait no longer corrupt immutable manifests, including concurrent uploads and recovery preparation. 141 native operations, 1,398 application and 64 browser checks plus [source-matched verification](https://github.com/Known-Enough/known-enough/actions/runs/37855994726) passed. Installation and managed recovery remain unverified; next is own-account setup and recovery proof ([log](https://github.com/Known-Enough/known-enough/blob/main/docs/monitor-log.md#b-run159)).",
+        "chatSummarySource": "agent-published-answer-summary",
+        "summaryIsCurrent": false,
+        "latestReportAt": "2026-10-08T22:56:30.443Z",
+        "lastReportedResult": "completed",
+        "task": "OPS00",
+        "receiptRunUrl": "https://github.com/Known-Enough/known-enough/actions/runs/37856547779",
+        "explanation": "No lifecycle report was published within 45 minutes. This detects a reporting gap; it does not establish that the worker stopped or why.",
+        "legacyReportAt": "2026-10-08T00:48:50.204Z"
+      }
+    }
+  },
+  "tenMinuteReportingContinuity": "MISSED",
+  "firstFinishedReceiptRun": 37856547779,
+  "independentObserver": {
+    "id": 37862334384,
+    "observedAt": "2026-10-09T00:14:28.077017+00:00",
+    "recordSha256": "b9233932733cc6ec19634c0262b5f1d979252a9784c64a4e5ef770510f50dece",
+    "summarySha256": "be890edf5ffe3840df84577f826d78141de54c4795913ca2099de59163c928ed",
+    "record": {
+      "schemaVersion": 1,
+      "event": "inspect",
+      "state": "NO_RECENT_REPORT",
+      "observedAt": "2026-10-08T23:58:30.582Z",
+      "actorId": 44531296,
+      "runUrl": "https://github.com/Known-Enough/known-enough/actions/runs/37862334384",
+      "chatSummary": "Fixed and pushed OPS00 recovery uploads (1d7ced1): buffer changes while uploads wait no longer corrupt immutable manifests, including concurrent uploads and recovery preparation. 141 native operations, 1,398 application and 64 browser checks plus [source-matched verification](https://github.com/Known-Enough/known-enough/actions/runs/37855994726) passed. Installation and managed recovery remain unverified; next is own-account setup and recovery proof ([log](https://github.com/Known-Enough/known-enough/blob/main/docs/monitor-log.md#b-run159)).",
+      "chatSummarySource": "agent-published-answer-summary",
+      "summaryIsCurrent": false,
+      "latestReportAt": "2026-10-08T22:56:30.443Z",
+      "lastReportedResult": "completed",
+      "task": "OPS00",
+      "receiptRunUrl": "https://github.com/Known-Enough/known-enough/actions/runs/37856547779",
+      "explanation": "No lifecycle report was published within 45 minutes. This detects a reporting gap; it does not establish that the worker stopped or why.",
+      "legacyReportAt": "2026-10-08T00:48:50.204Z"
+    }
+  },
+  "idleDeliveryGating": "UNKNOWN",
+  "githubBilling": "UNMEASURED"
 }
