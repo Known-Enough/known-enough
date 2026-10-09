@@ -91,8 +91,117 @@
   "effectivePermissions": "UNKNOWN",
   "managedRecovery": "NOT_EXECUTED",
   "awsCalls": 0,
-  "sourceVerification": "PENDING_REVISED_EXACT_SOURCE",
-  "commands": "PENDING_REVISED_SOURCE_PIN",
+  "sourceVerification": {
+    "id": 37968083534,
+    "source": "dfee148ab3e10b05e7b089ac1d37eab60244a2b4",
+    "actor": 143764700,
+    "path": ".github/workflows/operations-verify.yml",
+    "event": "workflow_dispatch",
+    "createdAt": "2026-10-09T17:41:45Z",
+    "updatedAt": "2026-10-09T17:45:42Z",
+    "observedAt": "2026-10-09T17:47:11.108899+00:00",
+    "conclusion": "success",
+    "nativePassed": 251,
+    "applicationPassed": 1407,
+    "browserPassed": 64,
+    "installation": "UNKNOWN",
+    "managedRecovery": "NOT_EXECUTED",
+    "artifactSha256": {
+      "operations-report.json": "d7a8afbe1bd863e4ce82393d70865101565f40b2317da06a33201eaeaa29e7a0",
+      "partition-report.json": "af3469eb3d52e8efe08946092145dc0686df2636d044ac47c2ae7cf05f835b07",
+      "retention-report.json": "9c3c03790d543ab415a24fc416a05dd344240f4feab793c51a447459e8d10720",
+      "jobs-report.json": "62fda779f02bce6122f21cccfce3ee72f87f65ece8178c96e6f87473f6f27aad",
+      "setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+      "partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+      "jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639"
+    },
+    "reports": {
+      "operations-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "dfee148ab3e10b05e7b089ac1d37eab60244a2b4",
+        "templateHash": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "managedRecovery": "UNKNOWN",
+        "apply": "DISABLED"
+      },
+      "partition-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "dfee148ab3e10b05e7b089ac1d37eab60244a2b4",
+        "templateHash": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "effectivePermissions": "UNKNOWN",
+        "migration": "NOT_EXECUTED",
+        "activation": "DISABLED",
+        "managedRecovery": "UNKNOWN"
+      },
+      "retention-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "dfee148ab3e10b05e7b089ac1d37eab60244a2b4",
+        "preparationHash": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "realPersonPolicy": "UNAPPROVED",
+        "dataOperations": "NOT_EXECUTED",
+        "participantGrants": "NOT_GRANTED",
+        "managedProof": "UNKNOWN"
+      },
+      "jobs-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "dfee148ab3e10b05e7b089ac1d37eab60244a2b4",
+        "preparationHash": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "providerCalls": "NOT_EXECUTED",
+        "managedRecovery": "UNKNOWN",
+        "participantConsent": "NOT_GRANTED",
+        "cleanup": "UNKNOWN"
+      }
+    },
+    "jobs": [
+      {
+        "id": 113947413875,
+        "name": "verify",
+        "conclusion": "success",
+        "started_at": "2026-10-09T17:41:51Z",
+        "completed_at": "2026-10-09T17:45:41Z"
+      }
+    ],
+    "createPythonPassed": 30,
+    "createStep": {
+      "name": "Run CREATE command package regressions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 6,
+      "started_at": "2026-10-09T17:41:59Z",
+      "completed_at": "2026-10-09T17:42:00Z"
+    },
+    "inventoryPythonPassed": 23,
+    "pythonVersion": "3.12.3",
+    "inventoryStep": {
+      "name": "Run read-only CloudShell inventory regressions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-10-09T17:41:56Z",
+      "completed_at": "2026-10-09T17:41:59Z"
+    }
+  },
+  "commands": {
+    "observedAt": "2026-10-09T17:42:04.540255+00:00",
+    "source": "dfee148ab3e10b05e7b089ac1d37eab60244a2b4",
+    "blocks": 6,
+    "bashSyntax": "PASS",
+    "allSixBlocksSourceStateBound": true,
+    "oldCommandBytes": "EXACT_SUFFIX_PRESERVED",
+    "commandsExecuted": "BASH_SYNTAX_ONLY",
+    "awsInvocations": 0,
+    "documentSha": "a91b8f524e4eda17e925e0186d6eaf38cd4be1ad908fbbca677acef92a4a664d"
+  },
   "initialCheckpoint": {
     "focused": {
       "label": "focus",
@@ -169,5 +278,132 @@
     "red": "30 tests:29 pass,1 expected error AWS_RESPONSE_REJECTED on successful empty execute stdout",
     "fixed": "30 PASS; accept empty output only after zero-exit exact execute mutation; empty metadata/CREATE remain rejected",
     "liveRequests": 0
+  },
+  "sourceSha": "dfee148ab3e10b05e7b089ac1d37eab60244a2b4",
+  "initialVerification": {
+    "id": 37967427279,
+    "source": "92ab8ccd23f95ee58c8ce1863282219a47874348",
+    "actor": 143764700,
+    "path": ".github/workflows/operations-verify.yml",
+    "event": "workflow_dispatch",
+    "createdAt": "2026-10-09T17:36:05Z",
+    "updatedAt": "2026-10-09T17:40:37Z",
+    "observedAt": "2026-10-09T17:41:39.003896+00:00",
+    "conclusion": "success",
+    "nativePassed": 251,
+    "applicationPassed": 1407,
+    "browserPassed": 64,
+    "installation": "UNKNOWN",
+    "managedRecovery": "NOT_EXECUTED",
+    "artifactSha256": {
+      "operations-report.json": "3ca56edafc927d91239a35eae3b6559d3a9093c62b2153576ce39472570b0830",
+      "partition-report.json": "951b51319d25128db79af0fb5862e45828ec43e031f0f54e03c5be591589e64f",
+      "retention-report.json": "fafa7c13999762d8f79e0c30a62f75fe4fba683ec21f2758143030cdeeead203",
+      "jobs-report.json": "22fe69d517cb5ac73a159639a38d65e4f9f5c3fd36d408118811936900c584f9",
+      "setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+      "partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+      "jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639"
+    },
+    "reports": {
+      "operations-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "92ab8ccd23f95ee58c8ce1863282219a47874348",
+        "templateHash": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "managedRecovery": "UNKNOWN",
+        "apply": "DISABLED"
+      },
+      "partition-report.json": {
+        "schemaVersion": 1,
+        "sourceSha": "92ab8ccd23f95ee58c8ce1863282219a47874348",
+        "templateHash": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+        "result": "OFFLINE_VERIFIED",
+        "installation": "UNKNOWN",
+        "effectivePermissions": "UNKNOWN",
+        "migration": "NOT_EXECUTED",
+        "activation": "DISABLED",
+        "managedRecovery": "UNKNOWN"
+      },
+      "retention-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "92ab8ccd23f95ee58c8ce1863282219a47874348",
+        "preparationHash": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "realPersonPolicy": "UNAPPROVED",
+        "dataOperations": "NOT_EXECUTED",
+        "participantGrants": "NOT_GRANTED",
+        "managedProof": "UNKNOWN"
+      },
+      "jobs-report.json": {
+        "schemaVersion": 1,
+        "result": "OFFLINE_VERIFIED",
+        "sourceSha": "92ab8ccd23f95ee58c8ce1863282219a47874348",
+        "preparationHash": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+        "installation": "UNKNOWN",
+        "activation": "DISABLED",
+        "providerCalls": "NOT_EXECUTED",
+        "managedRecovery": "UNKNOWN",
+        "participantConsent": "NOT_GRANTED",
+        "cleanup": "UNKNOWN"
+      }
+    },
+    "jobs": [
+      {
+        "id": 113945174979,
+        "name": "verify",
+        "conclusion": "success",
+        "started_at": "2026-10-09T17:36:09Z",
+        "completed_at": "2026-10-09T17:40:36Z"
+      }
+    ],
+    "createPythonPassed": 28,
+    "createStep": {
+      "name": "Run CREATE command package regressions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 6,
+      "started_at": "2026-10-09T17:36:19Z",
+      "completed_at": "2026-10-09T17:36:21Z"
+    },
+    "inventoryPythonPassed": 23,
+    "pythonVersion": "3.12.3",
+    "inventoryStep": {
+      "name": "Run read-only CloudShell inventory regressions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-10-09T17:36:15Z",
+      "completed_at": "2026-10-09T17:36:19Z"
+    }
+  },
+  "claim": "RELEASED_CODE_READY",
+  "wholeTask": "REVIEW_UNCLAIMED",
+  "finishedChatSummary": "Prepared [OPS00 CREATE commands](https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/OPS00/cloudshell-commands.md); all 30 focused tests and [checks on the exact commit](https://github.com/Known-Enough/known-enough/actions/runs/37968083534) passed. The coding phase is released; AWS installation and two-run managed recovery proof remain open.",
+  "observedRelease": "2026-10-09T17:47:34.390341+00:00",
+  "localErrors": {
+    "errors": [
+      {
+        "purpose": "receipt discovery",
+        "error": "Unknown JSON field: \"displayTitle\"",
+        "outcome": "Corrected to supported run-list fields; exact receipt then verified."
+      },
+      {
+        "purpose": "npm version probe only",
+        "error": "/usr/bin/env: node: Permission denied",
+        "outcome": "Unpinned shebang probe failed; no application check used this environment."
+      },
+      {
+        "purpose": "npm version probe only",
+        "error": "env: Files/Common: No such file or directory",
+        "outcome": "Unquoted PATH contained spaces; corrected with Python subprocess environment dictionary. Node v24.21.0/npm11.19.0 verified."
+      }
+    ],
+    "broadReads": "Truncated, then narrowed; no unavailable output interpreted as PASS.",
+    "platformAwsDenials": "NONE_EXECUTED",
+    "publicationGaps": "NONE_OBSERVED"
   }
 }

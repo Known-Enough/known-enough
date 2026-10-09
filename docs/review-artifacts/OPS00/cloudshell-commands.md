@@ -1,3 +1,138 @@
+# OPS00 recovery CREATE: current checked command package
+
+Use the six blocks below in order in **standard persistent CloudShell, account 092954139775, region us-east-1**, using your own existing authorized setup credentials. This is the concrete CREATE route requested after the supplied [inventory](a-cloudshell-inventory-20261009.md) observed the named recovery resources absent at 2026-10-09T15:41:39.125259Z. Each submission checks fresh identity, OIDC and named-resource conflicts; the older inventory is context, not current authorization or installation proof. No credentials are shared.
+
+Checked source **dfee148ab3e10b05e7b089ac1d37eab60244a2b4**. [Driver](../../../scripts/operations/cloudshell-create.py), [30 offline regressions](../../../scripts/operations/cloudshell-create.test.py), [integrity/evidence](create-package-integrity.md). The template remains SHA256 **3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e**. New private state is `$HOME/.known-enough/ops00-create-20261009`; retain it and every earlier package/private recovery file. Do not repin, delete, overwrite, or recreate state to get past a failure.
+
+**This package has been checked offline; none of these AWS commands was executed during its preparation.** It creates only KnownEnoughOperationsRecovery and the existing four-resource template: journal, private manifest bucket/policy and exact GitHub recovery role. It does not update/import existing resources, install partition/job/retention stacks, enable flags, dispatch managed tests, or touch participant/model data. Whole OPS00 remains open until real installation, scope checks and same-source two-run recovery proof finish.
+
+## 1. Download and verify this exact source, once
+
+CloudShell needs git, AWS CLI and Python 3.9 or later. The new directory is private and source pinned; a partial or changed checkout stops instead of resetting saved work. The regression suite makes no real AWS request.
+
+```bash
+set -euo pipefail
+umask 077
+KE_OPS_SOURCE=dfee148ab3e10b05e7b089ac1d37eab60244a2b4
+KE_OPS_ROOT="$HOME/.known-enough/ops00-create-tools-$KE_OPS_SOURCE"
+KE_OPS_STATE="$HOME/.known-enough/ops00-create-20261009"
+python3 - "$KE_OPS_ROOT" "$KE_OPS_STATE" <<'PY_HOME'
+import os, sys
+from pathlib import Path
+home = Path.home().resolve(strict=True)
+for name in sys.argv[1:]:
+    target = Path(name).absolute()
+    assert target != home and target.is_relative_to(home), 'Private HOME required'
+    current = home
+    for part in target.relative_to(home).parts:
+        assert part not in ('.', '..'), 'Unsafe path'
+        current = current / part
+        try:
+            current.mkdir(mode=0o700)
+        except FileExistsError:
+            pass
+        info = current.lstat()
+        assert not current.is_symlink() and current.is_dir(), 'Private directory required'
+        assert info.st_uid == os.getuid() and not info.st_mode & 0o077, 'Private owner/mode required'
+PY_HOME
+if [ ! -e "$KE_OPS_ROOT/.git" ]; then
+  git clone https://github.com/Known-Enough/known-enough.git "$KE_OPS_ROOT"
+  git -C "$KE_OPS_ROOT" checkout --detach "$KE_OPS_SOURCE"
+fi
+cd "$KE_OPS_ROOT"
+test "$(git rev-parse HEAD)" = "$KE_OPS_SOURCE"
+test "$(git remote get-url origin)" = https://github.com/Known-Enough/known-enough.git
+test -z "$(git status --porcelain)"
+printf '%s  %s\n' '97942c7f427c27dd3efd411b08b7894ba8840bf52f70bbc96d741e97bb711987' 'scripts/operations/cloudshell-create.py' | sha256sum --check --strict -
+printf '%s  %s\n' '6e8423eaeb94554dddfbf105c7aa98df4baab5288d7936b7df586c130851b9d9' 'scripts/operations/cloudshell-create.test.py' | sha256sum --check --strict -
+printf '%s  %s\n' 'ba8feef68de6ebe7cf9ba65f705cd61d773eb92c3dd424f4612c17b7e202e66f' 'scripts/operations/cloudshell-inventory.py' | sha256sum --check --strict -
+printf '%s  %s\n' '3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e' 'infra/operations/setup.json' | sha256sum --check --strict -
+python3 -B scripts/operations/cloudshell-create.test.py
+```
+
+## 2. Submit the CREATE preview
+
+This is the first AWS mutation: one CREATE change set with a durable client token, after identity/OIDC/conflict/ValidateTemplate reads. CloudFormation creates a REVIEW_IN_PROGRESS stack placeholder; resources are installed only by block 4. The driver fsyncs `create.intent.json` before submission. A repeated block 2 with an intent already present performs read-only resume, never another CREATE submission.
+
+```bash
+set -euo pipefail
+umask 077
+KE_OPS_SOURCE=dfee148ab3e10b05e7b089ac1d37eab60244a2b4
+KE_OPS_ROOT="$HOME/.known-enough/ops00-create-tools-$KE_OPS_SOURCE"
+KE_OPS_STATE="$HOME/.known-enough/ops00-create-20261009"
+cd "$KE_OPS_ROOT"
+python3 -B scripts/operations/cloudshell-create.py prepare --source "$KE_OPS_SOURCE" --state "$KE_OPS_STATE"
+```
+
+## 3. Resume and inspect the preview
+
+Run this block again if the result is PREVIEW_PENDING. Each invocation performs one bounded poll, with at most 32 AWS requests, a 180-second overall AWS deadline, 10 seconds per request, one CLI attempt and 128 KiB per output stream. REVIEW_READY requires CREATE_COMPLETE/AVAILABLE, exactly the four expected Add resources, the original template and the same REVIEW_IN_PROGRESS stack. The returned reviewHash binds source, template, exact stack/change-set IDs and additions; it is technical scope verification under existing standing authorization.
+
+```bash
+set -euo pipefail
+umask 077
+KE_OPS_SOURCE=dfee148ab3e10b05e7b089ac1d37eab60244a2b4
+KE_OPS_ROOT="$HOME/.known-enough/ops00-create-tools-$KE_OPS_SOURCE"
+KE_OPS_STATE="$HOME/.known-enough/ops00-create-20261009"
+cd "$KE_OPS_ROOT"
+python3 -B scripts/operations/cloudshell-create.py resume --source "$KE_OPS_SOURCE" --state "$KE_OPS_STATE"
+```
+
+## 4. Execute the verified preview, once
+
+This is the second AWS mutation. This block first obtains the current reviewHash, then rechecks the preview/template/stack, identity and role/table/bucket conflicts before submitting one execute request with its saved token. `execute.intent.json` is fsynced before the request. Do not run the historical commented-out manual CREATE/UPDATE commands below.
+
+```bash
+set -euo pipefail
+umask 077
+KE_OPS_SOURCE=dfee148ab3e10b05e7b089ac1d37eab60244a2b4
+KE_OPS_ROOT="$HOME/.known-enough/ops00-create-tools-$KE_OPS_SOURCE"
+KE_OPS_STATE="$HOME/.known-enough/ops00-create-20261009"
+cd "$KE_OPS_ROOT"
+KE_OPS_REVIEW="$(python3 -B scripts/operations/cloudshell-create.py review --source "$KE_OPS_SOURCE" --state "$KE_OPS_STATE")"
+printf '%s\n' "$KE_OPS_REVIEW"
+KE_OPS_REVIEW_HASH="$(python3 -c 'import json,re,sys; v=json.load(sys.stdin); assert v["result"]=="REVIEW_READY" and re.fullmatch("[0-9a-f]{64}",v["reviewHash"]); print(v["reviewHash"])' <<< "$KE_OPS_REVIEW")"
+python3 -B scripts/operations/cloudshell-create.py execute --source "$KE_OPS_SOURCE" --state "$KE_OPS_STATE" --review-hash "$KE_OPS_REVIEW_HASH"
+```
+
+## 5. Resume the same installation after waiting or reconnecting
+
+The block sets its own paths, so it also works after reconnecting. INSTALL_PENDING is pending, not a failure or PASS. Run the same block again at a later checkpoint. After an execute intent exists, block 5 issues only configuration reads, including when the previous execute acknowledgment was lost. No automatic mutation retry, new token, reset, cleanup, rollback or parallel installation is issued.
+
+```bash
+set -euo pipefail
+umask 077
+KE_OPS_SOURCE=dfee148ab3e10b05e7b089ac1d37eab60244a2b4
+KE_OPS_ROOT="$HOME/.known-enough/ops00-create-tools-$KE_OPS_SOURCE"
+KE_OPS_STATE="$HOME/.known-enough/ops00-create-20261009"
+cd "$KE_OPS_ROOT"
+python3 -B scripts/operations/cloudshell-create.py resume --source "$KE_OPS_SOURCE" --state "$KE_OPS_STATE"
+```
+
+## 6. Repeat exact configuration readback
+
+CONFIGURATION_MATCH requires CREATE_COMPLETE, original template/four physical resources, exact role/trust/inline policy/no attachments or boundary, table encryption/backups/TTL/deletion protection, and private/versioned/encrypted/TLS/exclusive-create bucket configuration. The driver retains the existing encrypted-table metadata criterion; missing metadata remains a mismatch rather than a waived check. This result is configuration only: effectivePermissions remains UNKNOWN and managedRecovery remains NOT_EXECUTED.
+
+```bash
+set -euo pipefail
+umask 077
+KE_OPS_SOURCE=dfee148ab3e10b05e7b089ac1d37eab60244a2b4
+KE_OPS_ROOT="$HOME/.known-enough/ops00-create-tools-$KE_OPS_SOURCE"
+KE_OPS_STATE="$HOME/.known-enough/ops00-create-20261009"
+cd "$KE_OPS_ROOT"
+python3 -B scripts/operations/cloudshell-create.py readback --source "$KE_OPS_SOURCE" --state "$KE_OPS_STATE"
+```
+
+For BLOCKED, stop the dependent sequence and retain all private intent, acknowledgment, response and diagnostic files. AccessDenied is not absence. Expired credentials may be renewed in your own authorized session, followed by block 3 or 5 using the same state. ChangeSetNotFound after uncertain submission, failed/rollback stacks, source/state conflict, unexpected resources or configuration drift require reconciliation of that saved plan; do not create another state directory or resubmit manually. Raw diagnostics/identities/configuration and resource IDs stay private, mode 600 under mode-700 HOME directories. Share only the finite result/classification/request/mutation counts and review hash, after checking the text for private data.
+
+After configuration matches, B's own Battosai1806 workflow must separately verify installed scope and positive/negative behavior, then complete two sequential operations-recovery runs at the same verified source using the existing bounded synthetic probe and private recovery records. Keep `OPERATIONS_RECOVERY_ENABLED` and runtime/deployment state unchanged until the applicable installed guard is verified. Existing inspector access denials are not repaired or retried by this package. Record actual run links/artifacts, positive/negative outcomes and cleanup; preparation alone is not DONE.
+
+AWS semantics: [CreateChangeSet](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_CreateChangeSet.html), [DescribeChangeSet](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_DescribeChangeSet.html), [ExecuteChangeSet](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_ExecuteChangeSet.html), [GetTemplate](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_GetTemplate.html). The CREATE type is bound in the saved request and exact Add/template/stack review; DescribeChangeSet does not supply a ChangeSetType field. No platform restriction is bypassed and no new approval is requested by this prepared package.
+
+## Historical packages retained verbatim
+
+The following is preserved evidence of older preparation and pins. The current six-block sequence above supersedes its manual placeholders; all old HOME folders and source markers remain untouched.
+
 # OPS00: CloudShell commands for A
 
 **INVENTORY_REQUIRED. Start with block 1.** It downloads checked public source and reads configuration. Installation, activation and live acceptance are separate. Read-only inventory source: **3c1edea0d450d2552bf08754fca6c568d172026d**. A uses A’s own AWS console session; B continues in its existing chat with its own GitHub account. No credentials are shared.
