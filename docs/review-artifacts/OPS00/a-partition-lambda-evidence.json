@@ -1,0 +1,47 @@
+{
+  "recordedAt": "2026-10-10T17:58:22.024350+00:00",
+  "phase": "INACTIVE_PARTITION_LAMBDA_FACTORY_CODE_READY",
+  "sourceHashes": {
+    "apps/api/src/partition-lambda.test.ts": "3c2c25d1410baf996c8c433b912ef46e27f38366687a808e2267941ebd326fa4",
+    "apps/api/src/partition-lambda.ts": "494e7e74797c668178942ef19d1b6c66fc125f9b8fc6dffc34294aee2901dc8d"
+  },
+  "actualImplementationFiles": 2,
+  "existingLambdaSelectorChanged": false,
+  "existingRuntimeAdmissionRootLockProfilesChanged": false,
+  "red": {
+    "cases": 1,
+    "observation": "Existing invokeHttpApi receives Gateway rawPath=/groups and rawQueryString=limit=2&cursor=signed-cursor but listener sees only /groups; direct expected-query assertion fails"
+  },
+  "checks": {
+    "focusedLambdaRuntimeAuthenticationCases": 62,
+    "newFactoryCases": 24,
+    "lint": {
+      "status": "PASS",
+      "boundaries": 416
+    },
+    "typecheck": "PASS",
+    "full": {
+      "application": 1431,
+      "optionalSkips": 2,
+      "hosted": 1,
+      "browser": 64,
+      "references": 7,
+      "planning": 15,
+      "status": "PASS"
+    }
+  },
+  "earlierFinding": "no-control-regex lint failed; replaced control-character regex with bounded explicit character checks, reran focused/lint/full with fixed source",
+  "coverage": [
+    "raw membership query/encoded cursor preservation through actual Node HTTP",
+    "header allowlist/private response headers/forged Gateway claims",
+    "signed Cognito JWT accepted; missing and display credentials rejected by real verifier with local key cache",
+    "invalid envelope/path/query/oversize/body/method refusal",
+    "concurrent targets and one trusted constructor",
+    "invalid trusted configuration never falls back"
+  ],
+  "awsRequestsForFactoryTests": 0,
+  "paidModelEmailSignupDeploymentMigration": 0,
+  "liveParticipantWorkload": "NOT_VERIFIED",
+  "runtimeSelection": "NOT_IMPLEMENTED",
+  "activation": "NOT_EXECUTED"
+}
