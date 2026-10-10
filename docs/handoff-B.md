@@ -1,3 +1,5 @@
+Current A OPS00: [private deployment initializer](review-artifacts/OPS00/a-partition-deployment.md) checked,51new tests/full1482app/64browser PASS. GitHub storage inspection and participant permission remain verified. Next: runnable migration job/role, protected package/entry and route compatibility; no data copied or live app switch. Sole A claim/B observer-only.
+
 Current A OPS00: GitHub storage inspection is verified; [inactive Lambda request adapter](review-artifacts/OPS00/a-partition-lambda.md) passed24new tests and full1431app/64browser checks. Next: private source-bound initializer/migration package and route compatibility before live selection. No deployment/migration/activation yet; A sole claim/B observer-only.
 
 Current A OPS00: [GitHub storage inspection now passed](review-artifacts/OPS00/a-installed-inspector-partitions-20261010.md), nine actual read-only AWS requests via own GitHub OIDC; participant permission separately installed. Next: bounded app Lambda adapter then source-bound migration/activation preparation. Whole task remains IN_PROGRESS/A; B observer-only.

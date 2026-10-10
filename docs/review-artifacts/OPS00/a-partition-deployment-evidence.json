@@ -1,0 +1,44 @@
+{
+  "recordedAt": "2026-10-10T18:31:38.149681+00:00",
+  "phase": "PRIVATE_BYTE_INITIALIZER_CODE_READY_NOT_INSTALLED",
+  "sourceHashes": {
+    "apps/api/src/partition-deployment.test.ts": "86552c7319299e96426a75180a9bb7afb0f77eebd6ec120fbe3a8bc716d8526d",
+    "apps/api/src/partition-deployment.ts": "3a40e2710a4a631efb1fe0c1d81ffdc19843f06c288c51aaa46bbbf14fc977be"
+  },
+  "newImplementationFiles": 2,
+  "independentReleaseBinding": [
+    "sourceSha",
+    "configurationHash",
+    "manifestHash",
+    "manifestVersion",
+    "sourceRevision",
+    "sourceHash"
+  ],
+  "privateConfigurationLimitBytes": 16384,
+  "privateManifestLimitBytes": 1048576,
+  "sourcePayloadLimitBytes": 300000,
+  "newTests": 51,
+  "focusedCases": 99,
+  "checks": {
+    "lint": "PASS",
+    "boundaries": 419,
+    "typecheck": "PASS",
+    "full": {
+      "application": 1482,
+      "optionalSkips": 2,
+      "hosted": 1,
+      "browser": 64,
+      "references": 7,
+      "planning": 15,
+      "status": "PASS"
+    }
+  },
+  "observedEarlierLint": "descriptor.hasOwnProperty rejected by no-prototype-builtins; replaced with Object.hasOwn without suppressing rule",
+  "semanticCompositionTest": "Actual Lambda/runtime composition rejects non-group-state source despite matching byte hashes; no fetch request observed",
+  "originalLambdaRuntimeRootLockTemplatesWorkflowsChanged": false,
+  "migrationActorAudit": "Existing runner already accepts A44531296 and B143764700; no actor code change",
+  "filesReadOrWrittenByInitializer": 0,
+  "cloudDeploymentMigrationEmailModelActions": 0,
+  "liveParticipantQualification": "NOT_EXECUTED",
+  "entrySelectionPackagingMigrationJob": "NOT_IMPLEMENTED"
+}
