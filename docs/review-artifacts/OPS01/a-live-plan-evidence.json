@@ -32,12 +32,12 @@
     "credentialStep": "PASS",
     "cause": "actions/checkout origin has no .git suffix; local CLI rejected that exact legitimate repository URL before source reads"
   },
-  "snapshotValidity": "ABSENT_CONFIRMED",
+  "snapshotValidity": "VALID_EMPTY_LEGACY_STATE",
   "sourceFreeze": "NOT_EXECUTED",
   "migration": "NOT_EXECUTED",
   "activation": "NOT_EXECUTED",
   "np00": "PAUSED_SAVED_UNCHANGED",
-  "phase": "CHECKED_WORKFLOW_AWAITING_LIVE_SOURCE_PLAN",
+  "phase": "LIVE_EMPTY_DEFAULTS_AND_SOURCE_PLAN_VERIFIED",
   "repair": {
     "checks": {
       "focused": 21,
@@ -109,7 +109,7 @@
     "finding": "Authenticated consistent GetItem found no legacy group STATE; not corruption or an inferred empty valid source."
   },
   "initialization": {
-    "result": "PREPARED_NOT_APPLIED",
+    "result": "LEGACY_EMPTY_SOURCE_INITIALIZED",
     "sourceHashes": {
       "scripts/operations/partition-transfer.mjs": "d96703b6ceed93385c4e069c5872c506e6f128a810ef8bca76c238cb074b5df4",
       "scripts/operations/partition-transfer.test.mjs": "648b99260ad2f864a5786812c5e7470038830ca814ae1426056de0e38f9fbe0a",
@@ -130,6 +130,56 @@
       }
     },
     "effect": "Exact empty legacy defaults/version1 conditional on absence; existing/concurrent source never overwritten. No freeze or partition copy.",
-    "initialFullFailure": "Lint: test used bare AbortSignal; corrected to globalThis.AbortSignal without changing behavior."
+    "initialFullFailure": "Lint: test used bare AbortSignal; corrected to globalThis.AbortSignal without changing behavior.",
+    "liveRun": {
+      "id": 38091619326,
+      "url": "https://github.com/Known-Enough/known-enough/actions/runs/38091619326",
+      "actor": "martelaxe",
+      "actorId": 44531296,
+      "source": "cae37e17901efc61c5dc804333eccd49da3c3bd3",
+      "createdAt": "2026-10-10T22:29:35Z",
+      "completedAt": "2026-10-10T22:29:58Z",
+      "report": {
+        "schemaVersion": 1,
+        "sourceSha": "cae37e17901efc61c5dc804333eccd49da3c3bd3",
+        "account": "092954139775",
+        "region": "us-east-1",
+        "result": "TRANSFER_PLAN_READY",
+        "plannedRows": 0,
+        "plannedBatches": 0,
+        "completedRows": 0,
+        "nextBatch": 0,
+        "state": "NOT_PREPARED",
+        "activation": "NOT_EXECUTED",
+        "deployment": "NOT_EXECUTED",
+        "legacySourceInitialization": "LEGACY_EMPTY_SOURCE_INITIALIZED",
+        "initializationRequests": 3,
+        "initializationChangeSubmissions": 1
+      },
+      "cleanup": "PASS",
+      "artifactSha": "c43bcdcf769be2c9942d400d4c896e0679d9181a3e490be63a57632fa421b5b1"
+    },
+    "repeat": {
+      "id": 38091857152,
+      "url": "https://github.com/Known-Enough/known-enough/actions/runs/38091857152",
+      "report": {
+        "schemaVersion": 1,
+        "sourceSha": "cae37e17901efc61c5dc804333eccd49da3c3bd3",
+        "account": "092954139775",
+        "region": "us-east-1",
+        "result": "TRANSFER_PLAN_READY",
+        "plannedRows": 0,
+        "plannedBatches": 0,
+        "completedRows": 0,
+        "nextBatch": 0,
+        "state": "NOT_PREPARED",
+        "activation": "NOT_EXECUTED",
+        "deployment": "NOT_EXECUTED",
+        "legacySourceInitialization": "LEGACY_SOURCE_ALREADY_PRESENT",
+        "initializationRequests": 1,
+        "initializationChangeSubmissions": 0
+      },
+      "artifactSha": "0f79460b6ea43e4b7e877dc3d12dc722ff385f02b70048cf5a233170ddfeb0bd"
+    }
   }
 }
