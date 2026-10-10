@@ -974,3 +974,24 @@ it('allows only one overlapping roster revision for an exact control version wit
   expect(responses.map(response => response.status).sort()).toEqual([200, 409]);
   expect(f.current().definition.semanticVersion).toBe(2); expect(f.current().controlVersion).toBe(1); expect(attempts).toBe(2);
 });
+
+
+it('supports the current group screen invitation route and flat copy-link contract without public token leakage', async () => {
+  const f = await fixture(syntheticEmailKey); const a = await api(f, { emailKey: syntheticEmailKey, invitationToken: () => 't'.repeat(40) });
+  const response = await a.post('/groups/garden/invitations', { email: 'luca@example.invalid', replace: false });
+  expect(response.status).toBe(200); const result = await response.json();
+  expect(result).toEqual({ token: 't'.repeat(40), expiresAt: expect.any(Number), delivery: 'COPY_LINK' });
+  const group = await (await a.get('/groups/garden')).json();
+  expect(JSON.stringify(group)).not.toContain(result.token); expect(JSON.stringify(group)).not.toContain('luca@example.invalid');
+  expect((await a.post('/groups/accept', { token: result.token }, 'luca')).status).toBe(200);
+});
+
+it('current group screen invitation route retains organizer-only authorization and exact body validation', async () => {
+  const f = await fixture(syntheticEmailKey); const a = await api(f, { emailKey: syntheticEmailKey, invitationToken: () => 't'.repeat(40) });
+  for (const who of ['omar', 'luca', 'display', 'unknown']) {
+    const response = await a.post('/groups/garden/invitations', { email: 'luca@example.invalid', replace: false }, who);
+    expect(response.status).not.toBe(200); expect(await response.text()).not.toContain('t'.repeat(40));
+  }
+  expect((await a.post('/groups/garden/invitations', { email: 'luca@example.invalid', replace: false, subject: 'iris' })).status).toBe(422);
+  expect(f.groupCommits).toHaveLength(0);
+});

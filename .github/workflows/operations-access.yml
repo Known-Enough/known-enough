@@ -1,0 +1,92 @@
+name: Verify operations access
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact main source to verify
+        required: true
+        type: string
+      probe_id:
+        description: Synthetic UUID v4; reuse with the same source to verify resume
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: known-enough-operations-access
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && (github.actor_id == '143764700' || github.actor_id == '44531296')
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          - profile: migration
+            role: KnownEnoughGithubPartitionMigration
+          - profile: archive
+            role: KnownEnoughGithubGroupArchive
+          - profile: erasure
+            role: KnownEnoughGithubLifecycleExecutor
+          - profile: retention
+            role: KnownEnoughGithubRetentionPolicy
+          - profile: jobs
+            role: KnownEnoughGithubModelJobOperations
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Verify source and focused contracts before credentials
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_sha }}
+        run: |
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node scripts/operations/verify.mjs > /dev/null
+          npm ci
+          node --experimental-transform-types --test scripts/operations/access-*.test.mjs
+          python3 -B scripts/operations/access-install.test.py
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/${{ matrix.role }}
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          role-session-name: ops-access-${{ github.run_id }}
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+      - name: Scoped synthetic journal and recovery proof
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_sha }}
+          PROBE_ID: ${{ inputs.probe_id }}
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          NODE_NO_WARNINGS=1 node --experimental-transform-types scripts/operations/access-probe.mjs '${{ matrix.profile }}' > "$RUNNER_TEMP/access-${{ matrix.profile }}.json" 2>&1
+      - name: Record checks that could not start
+        if: always()
+        env:
+          ACCESS_PROFILE: ${{ matrix.profile }}
+        run: |
+          python3 -B - <<'PY'
+          import json, os
+          from pathlib import Path
+          target = Path(os.environ['RUNNER_TEMP']) / ('access-' + os.environ['ACCESS_PROFILE'] + '.json')
+          if not target.exists() or target.stat().st_size == 0:
+              target.write_text(json.dumps({'sourceSha': os.environ['GITHUB_SHA'], 'profile': os.environ['ACCESS_PROFILE'], 'result': 'NOT_EXECUTED', 'reason': 'Inspect setup/credential step in this matching GitHub run; no workload PASS recorded.'}) + '\n')
+          PY
+      - name: Publish only allowlisted outcome
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: operations-access-${{ matrix.profile }}
+          path: ${{ runner.temp }}/access-${{ matrix.profile }}.json
+          if-no-files-found: warn
+          retention-days: 30

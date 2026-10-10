@@ -1,0 +1,48 @@
+{
+  "recordedAt": "2026-10-10T21:21:05.945765+00:00",
+  "phase": "INSTALL_PACKAGE_CHECKED_AWAITING_OWN_CLOUDSHELL",
+  "baseSource": "36087ef4d02dc847f6944265bf6dc56342a6848c",
+  "sourceHashes": {
+    "apps/api/src/partition-http.ts": "62a102395ef709366650ecc7c6fbbeac438022c7fa3ffe3feffe169d882b7ac1",
+    "apps/api/src/partition-http.test.ts": "fa92d0c9d36d57af7f473723b708f316d20519937c54c0cf64bdd645c81644af",
+    ".github/workflows/operations-access.yml": "1555cb68e8cdb689d92bec0dc6405d628e061a5360044a41c22f860e6941d2ff",
+    "infra/operations/access-setup.json": "fcda140a81615db236647690352e706110d15fbf9a062e87c35248ab32b25171",
+    "infra/operations/access-profiles.json": "ab99e571df7689d97e8142b62e641942d8d83494232d0459ad45c0faa15675be",
+    "scripts/operations/access-setup.mjs": "d5bd27ebf94722448a445f3ec532845746dafb9a5388329246bcd440fb3971da",
+    "scripts/operations/access-setup.test.mjs": "5a6603707584e8a4b47a520e590addd91ad4ddee19707ffe7d8e2f9cfb880f6e",
+    "scripts/operations/access-install.py": "ed75f0fc904e0fa5a1150699f979bc5acf159a34104f597a61037930624da46c",
+    "scripts/operations/access-install.test.py": "8336433ebbbac1081d76df5a843757455dd57f3245e4a0b7f4ad2af949242b60",
+    "scripts/operations/access-probe.mjs": "c5be93579fde450ac894c8571d50ff4b4a095584dde33ebbcaf6d13cc6ef617c",
+    "scripts/operations/access-probe.test.mjs": "7d81f0473270b3e3ad3e79862a05fcabc3f2c690e0a2de8b3eda128b09b0e931"
+  },
+  "checks": {
+    "full": "PASS",
+    "application": 1484,
+    "optionalSkips": 2,
+    "hosted": 1,
+    "browser": 64,
+    "references": 7,
+    "planning": 15,
+    "boundaries": 422,
+    "allNativeOperations": 326,
+    "installerOffline": 12,
+    "invitationHttpFocused": 66
+  },
+  "newGithubRoles": 5,
+  "namedIamStackResources": 13,
+  "existingRolesPreserved": [
+    "KnownEnoughStageApiRole",
+    "KnownEnoughGithubStagingInspector"
+  ],
+  "primaryModelGrantRestored": false,
+  "installerMutations": "Two source/plan-bound CloudFormation submissions; no direct data/function/model operation",
+  "negativeAndRecoveryTests": "Missing account/source, unowned role/policy, policy findings, baseline drift, partial/mixed state, lost preview/execute ack, duplicate resume, source/schema drift and forbidden-prefix evidence",
+  "publicReports": "Strict counts/codes; no private baseline, raw SDK stderr, private payload, grant or credential",
+  "liveBootstrap": "NOT_EXECUTED",
+  "liveCapabilityProbe": "NOT_EXECUTED",
+  "existingBRecoveryProof": "Previously recorded38000037864/38000129667; no new B execution claimed",
+  "localAwsAttempt": "known-enough-staging-ro: SSO token expired and refresh failed",
+  "computerUseAttempt": "node_repl sandboxCwd not a local file URI; no UI action performed",
+  "wholeTask": "OPS00 IN_PROGRESS/A; completion awaits exact install/probe receipts",
+  "runtimeTrust": "Only Lambda service trust accepted for owner/consent runtime; recorded inspector main trust hash checked"
+}
