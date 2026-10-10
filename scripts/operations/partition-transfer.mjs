@@ -25,6 +25,14 @@ const validSource = value => typeof value === 'string' && sourcePattern.test(val
 const keys = (value, expected) => value && typeof value === 'object' && !Array.isArray(value)
   && isDeepStrictEqual(Object.keys(value).sort(), [...expected].sort());
 
+export function verifyTransferCheckout(sourceSha, checkout) {
+  if (!validSource(sourceSha) || !checkout || !['head', 'branch', 'remote', 'dirty'].every(key => typeof checkout[key] === 'string')
+    || checkout.head.trim() !== sourceSha || checkout.branch.trim() !== 'main' || checkout.dirty.trim()
+    || !['https://github.com/Known-Enough/known-enough', 'https://github.com/Known-Enough/known-enough.git',
+      'git@github.com:Known-Enough/known-enough.git'].includes(checkout.remote.trim())) fail('TRANSFER_CHECKOUT_INVALID');
+  return sourceSha;
+}
+
 // This verifies execution provenance; an operator ID in an argument is not a login.
 export function transferAuthority(sourceSha, identity, env = process.env) {
   if (!validSource(sourceSha) || identity?.Account !== target.account || typeof identity.Arn !== 'string') fail('TRANSFER_ACCOUNT_INVALID');
@@ -170,9 +178,8 @@ async function main(argv) {
   const [{ stdout: checkout }, { stdout: branch }, { stdout: remote }, { stdout: dirty }] = await Promise.all([
     execute('git', ['rev-parse', 'HEAD'], cliOptions), execute('git', ['branch', '--show-current'], cliOptions),
     execute('git', ['remote', 'get-url', 'origin'], cliOptions), execute('git', ['status', '--porcelain'], cliOptions)]);
-  if (dirty.trim() || resolve('scripts/operations/partition-transfer.mjs') !== fileURLToPath(import.meta.url)
-    || checkout.trim() !== sourceSha || branch.trim() !== 'main'
-    || !['https://github.com/Known-Enough/known-enough.git', 'git@github.com:Known-Enough/known-enough.git'].includes(remote.trim())) fail('TRANSFER_CHECKOUT_INVALID');
+  verifyTransferCheckout(sourceSha, { head: checkout, branch, remote, dirty });
+  if (resolve('scripts/operations/partition-transfer.mjs') !== fileURLToPath(import.meta.url)) fail('TRANSFER_CHECKOUT_INVALID');
   const { stdout } = await execute('aws', ['sts', 'get-caller-identity', '--region', target.region,
     '--output', 'json', '--no-cli-pager'], cliOptions);
   const authority = transferAuthority(sourceSha, JSON.parse(stdout));

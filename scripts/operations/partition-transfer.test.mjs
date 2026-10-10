@@ -8,7 +8,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { DynamoDBClient, GetItemCommand, BatchGetItemCommand, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import { createDynamoPartitionMigrationPorts, PARTITION_MIGRATION_RESOURCES as resources } from '@deal-table/adapters/partition-operations';
-import { partitionTransfer, transferAuthority, transferError } from './partition-transfer.mjs';
+import { partitionTransfer, transferAuthority, transferError, verifyTransferCheckout } from './partition-transfer.mjs';
 
 const sourceSha = 'a'.repeat(40); const folders = [];
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -232,4 +232,21 @@ test('CLI refuses incomplete arguments before any Git/AWS invocation and emits o
   await assert.rejects(promisify(execFile)(process.execPath, ['--experimental-transform-types', 'scripts/operations/partition-transfer.mjs', 'activate']), error => {
     const line = error.stderr.trim().split('\n').at(-1); assert.equal(JSON.parse(line).code, 'TRANSFER_INPUT_INVALID'); return true;
   });
+});
+
+
+test('checkout provenance accepts the exact GitHub Actions origin without .git and rejects changed or foreign work', () => {
+  const checkout = { head: sourceSha + '\n', branch: 'main\n', remote: 'https://github.com/Known-Enough/known-enough\n', dirty: '' };
+  assert.equal(verifyTransferCheckout(sourceSha, checkout), sourceSha);
+  for (const remote of ['https://github.com/Known-Enough/known-enough.git', 'git@github.com:Known-Enough/known-enough.git']) {
+    assert.equal(verifyTransferCheckout(sourceSha, { ...checkout, remote }), sourceSha);
+  }
+  for (const change of [
+    { head: 'b'.repeat(40) }, { branch: '' }, { branch: 'other' },
+    { dirty: ' M package-lock.json' }, { dirty: '?? private.json' },
+    { remote: 'https://github.com/Other/known-enough' },
+    { remote: 'https://github.com/Known-Enough/known-enough.git.evil' },
+    { remote: 'https://github.com/Known-Enough/known-enough?token=PRIVATE' },
+    { remote: 'https://PRIVATE@github.com/Known-Enough/known-enough' },
+  ]) assert.throws(() => verifyTransferCheckout(sourceSha, { ...checkout, ...change }), /TRANSFER_CHECKOUT_INVALID/);
 });

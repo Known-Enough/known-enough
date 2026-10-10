@@ -11,3 +11,9 @@ Current compatibility inspection confirms the inactive partition HTTP listener a
 Pinned full check and actual exact-source GitHub planning report remain to record. Actual stored source validity is unknown until that job's downloaded report is checked; mocks/installed table metadata are not its substitute. Remaining managed archive/runtime/migration/service acceptance stays in the same OPS01 task.
 
 Final pinned full check exit0:1484 application/two optional skips, hosted1/browser64/ref7/planning15/lint/types/build/boundaries422 PASS. Workflow bytes unchanged after checks. Actual source plan is still pending; publish this checked source/claim with [skip ci], then dispatch exactly one matching read-only plan job.
+
+## Actual first planning run and correction
+
+[Run38090158778](https://github.com/Known-Enough/known-enough/actions/runs/38090158778), source8e17a2c, obtained the exact migration role but failed TRANSFER_CHECKOUT_INVALID before the transfer CLI STS/source reads. Downloaded finite report and checkout logs confirm GitHub creates origin `https://github.com/Known-Enough/known-enough`; CLI allowed only the same URL with `.git` or its fixed SSH form. It now accepts that exact additional origin, retaining all SHA/main/clean-checkout/path and foreign/credential/lookalike checks. Extracted unchanged guard reproduced20PASS/1FAIL; corrected21PASS. No IAM, source payload, compiler or runtime change. No live plan/readback or migration is claimed by this failure. Required final full check and one new exact-source plan follow.
+
+Origin repair final full check exit0:1484 application/two optional skips, hosted1/browser64/ref7/planning15/lint/types/build/boundaries422 PASS; both corrected CLI/test hashes unchanged. Next source-matching GitHub plan is necessary; this checked correction is not an observed source plan.

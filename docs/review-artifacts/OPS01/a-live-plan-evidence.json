@@ -18,11 +18,46 @@
       "boundaries": 422
     }
   },
-  "liveRun": null,
+  "liveRun": {
+    "id": 38090158778,
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/38090158778",
+    "source": "8e17a2ccbbea6603d535c1de0bbc8751b0696d0e",
+    "result": "FAILURE",
+    "report": {
+      "result": "BLOCKED",
+      "code": "TRANSFER_CHECKOUT_INVALID",
+      "activation": "NOT_EXECUTED",
+      "deployment": "NOT_EXECUTED"
+    },
+    "credentialStep": "PASS",
+    "cause": "actions/checkout origin has no .git suffix; local CLI rejected that exact legitimate repository URL before source reads"
+  },
   "snapshotValidity": "UNKNOWN",
   "sourceFreeze": "NOT_EXECUTED",
   "migration": "NOT_EXECUTED",
   "activation": "NOT_EXECUTED",
   "np00": "PAUSED_SAVED_UNCHANGED",
-  "phase": "CHECKED_WORKFLOW_AWAITING_LIVE_SOURCE_PLAN"
+  "phase": "CHECKED_WORKFLOW_AWAITING_LIVE_SOURCE_PLAN",
+  "repair": {
+    "checks": {
+      "focused": 21,
+      "full": {
+        "result": "PASS",
+        "command": "npm run check -- -- --workers=1",
+        "application": 1484,
+        "optionalSkips": 2,
+        "browser": 64,
+        "hosted": 1,
+        "references": 7,
+        "planning": 15,
+        "boundaries": 422
+      }
+    },
+    "sourceHashes": {
+      "scripts/operations/partition-transfer.mjs": "e446fc50aa54c18421f9f3eb3c3a396608523c5c1d9969fb17cc164991909641",
+      "scripts/operations/partition-transfer.test.mjs": "39013205074b78dea240299c6ab69b6d0d75237151196849c0cd8a4cc153afc1"
+    },
+    "oldGuardRed": "TRANSFER_CHECKOUT_INVALID on actual GitHub origin,20 PASS/1 FAIL",
+    "planOutcome": "NO_SOURCE_READ_YET"
+  }
 }
