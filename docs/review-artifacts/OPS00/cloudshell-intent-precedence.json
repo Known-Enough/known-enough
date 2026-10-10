@@ -1,0 +1,32 @@
+{
+  "phase": "RUN191 original installer execution-intent correction",
+  "status": "IN_PROGRESS",
+  "claimTime": "2026-10-10T04:03:07.314790+00:00",
+  "baseline": "ce2f6a256efb38c8c6c578edcd284fe01c7315d1",
+  "reproduction": {
+    "start": "2026-10-10T04:02:30.393589+00:00",
+    "end": "2026-10-10T04:02:30.402414+00:00",
+    "source": "ce2f6a256efb38c8c6c578edcd284fe01c7315d1",
+    "result": [
+      "PREVIEW_SUBMITTED",
+      null
+    ],
+    "simulatedOperations": [
+      "get-caller-identity",
+      "get-open-id-connect-provider",
+      "describe-stacks",
+      "get-role",
+      "describe-table",
+      "get-bucket-versioning",
+      "validate-template",
+      "create-change-set"
+    ],
+    "simulatedMutations": 1,
+    "savedExecutionBytesUnchanged": true,
+    "actualAwsRequests": 0,
+    "state": "ISOLATED_SYNTHETIC_TEMP_ONLY"
+  },
+  "protectedFiles": 989,
+  "actualAwsRequests": 0,
+  "checks": "PENDING"
+}
