@@ -1,3 +1,5 @@
+**Immediate continuation:** [Inspector metadata access repair](../../../../review-artifacts/OPS00/inspector-partitions-apply.md) is prepared; user executes one own-CloudShell block, then A performs the source-matched GitHub metadata check. No further routine approval is required.
+
 **Current: IN_PROGRESS/A after explicit user takeover.** Recovery and partition storage are installed; [participant permission attachment](../../../../review-artifacts/OPS00/a-installed-participant-20261010.md) now matches. Own-A operator verification and runtime/migration/activation proof remain. Older status paragraphs below are historical and yield to the current board/claim.
 
 # OPS00 — Complete the GitHub operations path

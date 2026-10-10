@@ -1,0 +1,20 @@
+{
+  "preparedAt": "2026-10-10T17:30:14.782433+00:00",
+  "role": "KnownEnoughGithubStagingInspector",
+  "policy": "KnownEnoughPartitionsMetadata",
+  "policySha": "aaf403ab18488dbe76347c56d997b9a4bb3400134addfc4ae3f780a645cbf0a1",
+  "runbookSha": "65a555e7baf44bf34b251f1aa461e46b77552bd54a5376b256275f0a3edf5651",
+  "standingAuthority": "KNOWN_ENOUGH_BOTH_OPERATORS",
+  "actions": 6,
+  "statementCount": 2,
+  "dataAccess": false,
+  "appActivation": false,
+  "exactPreparedInspectionDelta": "PASS",
+  "simulatedExecutions": 32,
+  "bashPythonSyntax": "PASS",
+  "sourceAndInstalledTemplatesChanged": false,
+  "actualAWSRequestsByWorker": 0,
+  "actualAWSValidation": "PENDING",
+  "attachment": "NOT_EXECUTED",
+  "effectivePermissions": "PENDING_GITHUB_READBACK"
+}
