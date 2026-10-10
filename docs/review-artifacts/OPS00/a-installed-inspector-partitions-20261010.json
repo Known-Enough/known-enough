@@ -1,0 +1,96 @@
+{
+  "recordedAt": "2026-10-10T17:38:11.949539+00:00",
+  "origin": "A user-supplied own CloudShell result, not independent AWS IAM readback by A worker",
+  "sourceSha": "19599a3114b137ec8ac1ce1f6f074aaf74d7a52b",
+  "readback": {
+    "result": "INSPECTOR_PARTITIONS_POLICY_READBACK_PASS",
+    "role": "KnownEnoughGithubStagingInspector",
+    "policy": "KnownEnoughPartitionsMetadata",
+    "policySha": "aaf403ab18488dbe76347c56d997b9a4bb3400134addfc4ae3f780a645cbf0a1",
+    "baselineSha": "ed5cb5f2957a3e9080d1a9135f590c9e9ff6b71ec4f0fb81abc6f6696332ec81",
+    "originalInlinePolicyCount": 1,
+    "totalInlineCharactersAfter": 1802,
+    "requests": 16,
+    "mutations": 1,
+    "alreadyPresent": false,
+    "activation": "DISABLED",
+    "effectivePermissions": "PENDING_GITHUB_READBACK"
+  },
+  "githubReadback": {
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/38072490823",
+    "status": "SUCCESS",
+    "actor": "martelaxe",
+    "actorId": "44531296",
+    "sourceSha": "19599a3114b137ec8ac1ce1f6f074aaf74d7a52b",
+    "jobId": 114272614351,
+    "startedAt": "2026-10-10T17:37:27Z",
+    "completedAt": "2026-10-10T17:37:44Z",
+    "artifactSha256": "8528c350fe8e0b8bb5bd1905dc0d82cb9346cf1efea6f15c6840c09f19e7de0c",
+    "report": {
+      "schemaVersion": 1,
+      "sourceSha": "19599a3114b137ec8ac1ce1f6f074aaf74d7a52b",
+      "account": "092954139775",
+      "region": "us-east-1",
+      "table": "KnownEnoughPartitions",
+      "stack": "KnownEnoughPartitionsStorage",
+      "templateSha": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "result": "CONFIGURATION_MATCH",
+      "classification": null,
+      "requests": 9,
+      "mutations": 0,
+      "effectivePermissions": "UNKNOWN",
+      "roleAttachment": "NOT_EXECUTED",
+      "activation": "DISABLED",
+      "migration": "NOT_EXECUTED",
+      "managedRecovery": "NOT_EXECUTED",
+      "reads": [
+        {
+          "action": "sts:get-caller-identity",
+          "status": "READ",
+          "code": null
+        },
+        {
+          "action": "dynamodb:describe-table",
+          "status": "READ",
+          "code": null
+        },
+        {
+          "action": "cloudformation:describe-stacks",
+          "status": "READ",
+          "code": null
+        },
+        {
+          "action": "cloudformation:describe-stacks",
+          "status": "READ",
+          "code": null
+        },
+        {
+          "action": "cloudformation:get-template",
+          "status": "READ",
+          "code": null
+        },
+        {
+          "action": "cloudformation:list-stack-resources",
+          "status": "READ",
+          "code": null
+        },
+        {
+          "action": "dynamodb:describe-table",
+          "status": "READ",
+          "code": null
+        },
+        {
+          "action": "dynamodb:describe-continuous-backups",
+          "status": "READ",
+          "code": null
+        },
+        {
+          "action": "dynamodb:describe-time-to-live",
+          "status": "READ",
+          "code": null
+        }
+      ]
+    },
+    "provenScope": "SIGNED_GITHUB_INSPECTOR_PARTITION_AND_STACK_METADATA_READS_ONLY"
+  }
+}
