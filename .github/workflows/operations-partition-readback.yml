@@ -34,6 +34,7 @@ jobs:
           node scripts/operations/verify.mjs > /dev/null
           node scripts/operations/partition-verify.mjs > /dev/null
           python3 -B scripts/operations/partition-create.test.py
+          python3 -B -c 'import os, runpy; runpy.run_path("scripts/operations/partition-create.py")["verify_checkout"](os.environ["EXPECTED_SOURCE"], True)'
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
           role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubStagingInspector

@@ -301,7 +301,10 @@ class PackageTests(unittest.TestCase):
         env = dict(GITHUB_ACTIONS='true', GITHUB_REPOSITORY='Known-Enough/known-enough', GITHUB_REF='refs/heads/main',
                    GITHUB_EVENT_NAME='workflow_dispatch', GITHUB_ACTOR='Battosai1806',
                    GITHUB_ACTOR_ID='143764700', GITHUB_SHA=SOURCE, EXPECTED_SOURCE=SOURCE)
-        with patch.dict(os.environ, env), patch.object(module.common, 'verify_checkout'), patch.object(module.subprocess, 'check_output', return_value=''):
+        def git(command, **options):
+            args = command[3:]
+            return SOURCE if args == ['rev-parse', 'HEAD'] else module.common.ORIGIN if args == ['remote', 'get-url', 'origin'] else ''
+        with patch.dict(os.environ, env), patch.object(module.subprocess, 'check_output', side_effect=git):
             module.verify_checkout(SOURCE, True)
             with patch.dict(os.environ, {'GITHUB_ACTOR_ID': '1'}):
                 with self.assertRaisesRegex(module.Rejected, 'GITHUB_SOURCE_REJECTED'):
@@ -311,6 +314,28 @@ class PackageTests(unittest.TestCase):
                 self.assertEqual(module.main(), 1)
                 self.assertEqual(json.loads(out.getvalue())['classification'], 'GITHUB_READ_ONLY')
                 state.assert_not_called()
+
+    def test_exact_github_checkout_url_variants_and_remote_drift(self):
+        env = dict(GITHUB_REPOSITORY='Known-Enough/known-enough', GITHUB_REF='refs/heads/main',
+                   GITHUB_EVENT_NAME='workflow_dispatch', GITHUB_ACTOR='Battosai1806',
+                   GITHUB_ACTOR_ID='143764700', GITHUB_SHA=SOURCE, EXPECTED_SOURCE=SOURCE)
+        values = {('rev-parse', 'HEAD'): SOURCE, ('remote', 'get-url', 'origin'): module.common.ORIGIN,
+                  ('status', '--porcelain'): '', ('branch', '--show-current'): 'main'}
+        def git(command, **options):
+            return values[tuple(command[3:])]
+        with patch.dict(os.environ, env), patch.object(module.subprocess, 'check_output', side_effect=git):
+            for remote in (module.common.ORIGIN, module.common.ORIGIN[:-4]):
+                values[('remote', 'get-url', 'origin')] = remote
+                module.verify_checkout(SOURCE, True)
+            for remote in ('https://github.com/OTHER/known-enough.git', module.common.ORIGIN + '?redirect=1',
+                           'https://user@github.com/Known-Enough/known-enough.git'):
+                values[('remote', 'get-url', 'origin')] = remote
+                with self.assertRaisesRegex(module.Rejected, 'CHECKOUT_REJECTED'):
+                    module.verify_checkout(SOURCE, True)
+            values[('remote', 'get-url', 'origin')] = module.common.ORIGIN
+            values[('status', '--porcelain')] = ' M private-file'
+            with self.assertRaisesRegex(module.Rejected, 'CHECKOUT_REJECTED'):
+                module.verify_checkout(SOURCE, True)
 
     def test_cli_summary_sanitizes_identity_and_private_denials(self):
         secret = 'private diagnostic should never escape'
@@ -332,6 +357,7 @@ class PackageTests(unittest.TestCase):
         text = (module.ROOT / '.github/workflows/operations-partition-readback.yml').read_text()
         self.assertLess(text.index('node scripts/operations/verify.mjs'), text.index('aws-actions/configure-aws-credentials'))
         self.assertLess(text.index('python3 -B scripts/operations/partition-create.test.py'), text.index('aws-actions/configure-aws-credentials'))
+        self.assertLess(text.index('["verify_checkout"]'), text.index('aws-actions/configure-aws-credentials'))
         self.assertIn('KnownEnoughGithubStagingInspector', text)
         self.assertIn("github.actor_id == '143764700'", text)
         self.assertIn('partition-create.py inventory', text)

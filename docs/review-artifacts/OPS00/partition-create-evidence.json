@@ -4,13 +4,13 @@
   "scheduledAt": "2026-10-09T23:58:36.312Z",
   "sourceBase": "0f7dba5f22894fc9280792d222cf7ef5e60d5613",
   "phase": "FIXED_RETAINED_PARTITION_CREATE_READBACK_PREPARATION",
-  "status": "LOCAL_CHECKS_VERIFIED_INTEGRATION_PENDING",
-  "observedAt": "2026-10-10T03:04:05.009208+00:00",
+  "status": "CHECKOUT_CORRECTION_LOCAL_VERIFIED",
+  "observedAt": "2026-10-10T03:13:09.729757+00:00",
   "checkedSourceSha": null,
   "codeHashes": {
-    "scripts/operations/partition-create.py": "2d161da29a1ec8cf8599b728a0e9fbdf828930cfa6f0e39ae255ad2c8a270aac",
-    "scripts/operations/partition-create.test.py": "b5e5db9bebd230931698cfb8ce7c7ec17eddb2f193376902056e6e363fba0d12",
-    ".github/workflows/operations-partition-readback.yml": "8ada826f2af0c081015249a6f7815662ee9bff08dfe6ed9e900f46e613e7c2fb",
+    "scripts/operations/partition-create.py": "0cddb2f249dccad3bf98b6f381e5fd812f1fdb99f00949a2cb0864671517a924",
+    "scripts/operations/partition-create.test.py": "483b3f2b3b07e5f863f12a6620cf8f4990a7758026ccf23cd87efbede2dc6676",
+    ".github/workflows/operations-partition-readback.yml": "f0467c2230fddfa0ae127584005855be4310092ce456e9d1dee3516d19baead0",
     ".github/workflows/operations-verify.yml": "d6c50af910be9f22cbf9f6240349dc0ad4d9bcd73c3d58d95a00501b3affc136"
   },
   "protectedHashes": 983,
@@ -89,7 +89,7 @@
       }
     },
     "counts": {
-      "partitionPackage": 23,
+      "partitionPackage": 24,
       "native": 286,
       "application": 1407,
       "optionalSkipped": 2,
@@ -98,6 +98,100 @@
       "reference": 7,
       "plan": 15,
       "boundaries": 414
+    },
+    "focusedCheckout": {
+      "label": "focused-checkout",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/operations/partition-create.test.py"
+      ],
+      "start": "2026-10-10T03:08:51.366518+00:00",
+      "end": "2026-10-10T03:08:53.569341+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/partition-create.py": "0cddb2f249dccad3bf98b6f381e5fd812f1fdb99f00949a2cb0864671517a924",
+        "scripts/operations/partition-create.test.py": "483b3f2b3b07e5f863f12a6620cf8f4990a7758026ccf23cd87efbede2dc6676",
+        ".github/workflows/operations-partition-readback.yml": "f0467c2230fddfa0ae127584005855be4310092ce456e9d1dee3516d19baead0",
+        ".github/workflows/operations-verify.yml": "d6c50af910be9f22cbf9f6240349dc0ad4d9bcd73c3d58d95a00501b3affc136"
+      }
+    },
+    "nativeCheckout": "RUNNING_LAST_OBSERVED",
+    "fullCheckout": "RUNNING_LAST_OBSERVED",
+    "focusedFinal": {
+      "label": "focused-checkout",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/operations/partition-create.test.py"
+      ],
+      "start": "2026-10-10T03:08:51.366518+00:00",
+      "end": "2026-10-10T03:08:53.569341+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/partition-create.py": "0cddb2f249dccad3bf98b6f381e5fd812f1fdb99f00949a2cb0864671517a924",
+        "scripts/operations/partition-create.test.py": "483b3f2b3b07e5f863f12a6620cf8f4990a7758026ccf23cd87efbede2dc6676",
+        ".github/workflows/operations-partition-readback.yml": "f0467c2230fddfa0ae127584005855be4310092ce456e9d1dee3516d19baead0",
+        ".github/workflows/operations-verify.yml": "d6c50af910be9f22cbf9f6240349dc0ad4d9bcd73c3d58d95a00501b3affc136"
+      }
+    },
+    "nativeFinal": {
+      "label": "native-checkout",
+      "command": [
+        "node",
+        "--experimental-transform-types",
+        "--test",
+        "scripts/operations/archive-recovery.test.mjs",
+        "scripts/operations/aws-transport.test.mjs",
+        "scripts/operations/capabilities.test.mjs",
+        "scripts/operations/dynamo-journal.test.mjs",
+        "scripts/operations/installed-readback.test.mjs",
+        "scripts/operations/jobs-setup.test.mjs",
+        "scripts/operations/journal.test.mjs",
+        "scripts/operations/managed-preparation.test.mjs",
+        "scripts/operations/managed-scope.test.mjs",
+        "scripts/operations/manifest.test.mjs",
+        "scripts/operations/partition-recovery.test.mjs",
+        "scripts/operations/partition-setup.test.mjs",
+        "scripts/operations/plan.test.mjs",
+        "scripts/operations/recovery.test.mjs",
+        "scripts/operations/retention-setup.test.mjs",
+        "scripts/operations/setup.test.mjs"
+      ],
+      "start": "2026-10-10T03:08:56.550033+00:00",
+      "end": "2026-10-10T03:09:00.296622+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/partition-create.py": "0cddb2f249dccad3bf98b6f381e5fd812f1fdb99f00949a2cb0864671517a924",
+        "scripts/operations/partition-create.test.py": "483b3f2b3b07e5f863f12a6620cf8f4990a7758026ccf23cd87efbede2dc6676",
+        ".github/workflows/operations-partition-readback.yml": "f0467c2230fddfa0ae127584005855be4310092ce456e9d1dee3516d19baead0",
+        ".github/workflows/operations-verify.yml": "d6c50af910be9f22cbf9f6240349dc0ad4d9bcd73c3d58d95a00501b3affc136"
+      }
+    },
+    "fullFinal": {
+      "label": "full-checkout",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-10T03:08:56.558141+00:00",
+      "end": "2026-10-10T03:12:42.423127+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/partition-create.py": "0cddb2f249dccad3bf98b6f381e5fd812f1fdb99f00949a2cb0864671517a924",
+        "scripts/operations/partition-create.test.py": "483b3f2b3b07e5f863f12a6620cf8f4990a7758026ccf23cd87efbede2dc6676",
+        ".github/workflows/operations-partition-readback.yml": "f0467c2230fddfa0ae127584005855be4310092ce456e9d1dee3516d19baead0",
+        ".github/workflows/operations-verify.yml": "d6c50af910be9f22cbf9f6240349dc0ad4d9bcd73c3d58d95a00501b3affc136"
+      }
     }
   },
   "coalescedHints": {
@@ -117,7 +211,10 @@
   "lifecycle": [
     "38007211707",
     "38018943100",
-    "38019120798"
+    "38019120798",
+    "38019319792",
+    "38019334466",
+    "38019536329"
   ],
   "limits": {
     "cloudInstallation": "NOT_EXECUTED",
@@ -153,6 +250,131 @@
       "action": "unassigned receipt identification",
       "error": "AssertionError before artifact download for run38018280676: required own143/current source/main/SUCCESS conjunction not met",
       "result": "NOT_AN_OWN_VERIFIED_LIFECYCLE_RECEIPT_NO_DOWNLOAD_NO_CADENCE_PROMOTION"
+    },
+    {
+      "observedAt": "2026-10-10T03:09:53.544643+00:00",
+      "action": "separate operations-verify dispatch",
+      "result": "HELD_BEFORE_API_OWN_PUSH_CHECK_ACTIVE",
+      "error": "AssertionError active run guard; no dispatch file or GitHub verification run created",
+      "incorrectReceipt": 38019319792,
+      "correctionReceipt": 38019334466
+    },
+    {
+      "observedAt": "2026-10-10T03:09:53.544643+00:00",
+      "action": "unassigned monitor run38018280676",
+      "result": "A_SCHEDULED_INSPECT_ONLY_OWN_RECEIPT_EXCLUDED",
+      "actor": "martelaxe",
+      "actorId": 44531296,
+      "event": "schedule"
+    },
+    {
+      "observedAt": "2026-10-10T03:09:53.544643+00:00",
+      "action": "progress3 lookup",
+      "error": "AssertionError multiple own same-source later progress candidates",
+      "correction": "Bounded each existing invocation by next dispatch timestamp; exact progress3/progress4 artifacts verified with no duplicate publication"
     }
-  ]
+  ],
+  "attempt1": {
+    "pushFull": {
+      "observed": "2026-10-10T03:08:01.724697+00:00",
+      "sourceSha": "3ef0b32f198d49a375f044d76d14881a9cbed489",
+      "runId": 38019303277,
+      "runUrl": "https://github.com/Known-Enough/known-enough/actions/runs/38019303277",
+      "actorId": 143764700,
+      "jobId": 114116505558,
+      "start": "2026-10-10T03:05:03Z",
+      "end": "2026-10-10T03:07:41Z",
+      "result": "SUCCESS_FULL_CHECK_VERIFIED",
+      "application": 1407,
+      "browser": 64,
+      "boundaries": 414
+    },
+    "readback": {
+      "observed": "2026-10-10T03:07:46.460735+00:00",
+      "sourceSha": "3ef0b32f198d49a375f044d76d14881a9cbed489",
+      "runId": 38019429797,
+      "runUrl": "https://github.com/Known-Enough/known-enough/actions/runs/38019429797",
+      "conclusion": "failure",
+      "actorId": 143764700,
+      "jobId": 114116894750,
+      "jobStart": "2026-10-10T03:07:08Z",
+      "jobEnd": "2026-10-10T03:07:16Z",
+      "artifactSha256": "a8e1ad4de44d6c142e38cc3daa17fdd6674a39230eca70bbd9658a651eb31b87",
+      "summary": {
+        "schemaVersion": 1,
+        "sourceSha": "3ef0b32f198d49a375f044d76d14881a9cbed489",
+        "account": "092954139775",
+        "region": "us-east-1",
+        "table": "KnownEnoughPartitions",
+        "stack": "KnownEnoughPartitionsStorage",
+        "templateSha": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+        "result": "BLOCKED",
+        "classification": "CHECKOUT_REJECTED",
+        "requests": 0,
+        "mutations": 0,
+        "effectivePermissions": "UNKNOWN",
+        "roleAttachment": "NOT_EXECUTED",
+        "activation": "DISABLED",
+        "migration": "NOT_EXECUTED",
+        "managedRecovery": "NOT_EXECUTED"
+      },
+      "steps": [
+        {
+          "name": "Set up job",
+          "number": 1,
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+          "number": 2,
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "number": 3,
+          "conclusion": "success"
+        },
+        {
+          "name": "Bind source and partition proposal before credentials",
+          "number": 4,
+          "conclusion": "success"
+        },
+        {
+          "name": "Run aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd",
+          "number": 5,
+          "conclusion": "success"
+        },
+        {
+          "name": "Read only fixed partition metadata",
+          "number": 6,
+          "conclusion": "failure"
+        },
+        {
+          "name": "Publish only finite metadata outcome",
+          "number": 7,
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd",
+          "number": 12,
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "number": 13,
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+          "number": 14,
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "number": 15,
+          "conclusion": "success"
+        }
+      ]
+    }
+  }
 }

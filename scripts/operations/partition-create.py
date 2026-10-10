@@ -270,7 +270,18 @@ class Installer:
 
 
 def verify_checkout(source, github):
-    common.verify_checkout(source)
+    if github:
+        require(re.fullmatch('[0-9a-f]{40}', source) is not None, 'SOURCE_REJECTED')
+        def git(*args):
+            return subprocess.check_output(['git', '-C', str(ROOT), *args], timeout=5,
+                                           stderr=subprocess.DEVNULL, text=True).strip()
+        # Checkout's canonical HTTPS URL omits .git; accept only these two exact
+        # spellings of this fixed repository, never arbitrary URL normalization.
+        require(git('rev-parse', 'HEAD') == source
+                and git('remote', 'get-url', 'origin') in (common.ORIGIN, common.ORIGIN[:-4])
+                and not git('status', '--porcelain'), 'CHECKOUT_REJECTED')
+    else:
+        common.verify_checkout(source)
     branch = subprocess.check_output(['git', '-C', str(ROOT), 'branch', '--show-current'], text=True, timeout=5).strip()
     require(branch == 'main' or (github and branch == ''), 'MAIN_REQUIRED')
     if github:
