@@ -59,5 +59,41 @@
     },
     "oldGuardRed": "TRANSFER_CHECKOUT_INVALID on actual GitHub origin,20 PASS/1 FAIL",
     "planOutcome": "NO_SOURCE_READ_YET"
+  },
+  "originCorrectedRun": {
+    "id": 38090473475,
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/38090473475",
+    "source": "d32e2e080d2b20eeaa4850ab322f49c5e50d7ee1",
+    "result": "FAILURE",
+    "report": {
+      "result": "BLOCKED",
+      "code": "TRANSFER_SOURCE_INVALID",
+      "activation": "NOT_EXECUTED",
+      "deployment": "NOT_EXECUTED"
+    },
+    "credentialStep": "PASS",
+    "sourceBoundaryReached": true,
+    "sourceValidity": "UNKNOWN_OLD_ERROR_DID_NOT_DISTINGUISH_ABSENT_FROM_MALFORMED"
+  },
+  "sourceDiagnostic": {
+    "checks": {
+      "focused": 22,
+      "full": {
+        "result": "PASS",
+        "command": "npm run check -- -- --workers=1",
+        "application": 1484,
+        "optionalSkips": 2,
+        "hosted": 1,
+        "browser": 64,
+        "references": 7,
+        "planning": 15,
+        "boundaries": 422
+      }
+    },
+    "sourceHashes": {
+      "scripts/operations/partition-transfer.mjs": "267270df8d352b9cefdbcece4b3d974510f28ff2fa567167960105084eb4c507",
+      "scripts/operations/partition-transfer.test.mjs": "16803fb689a9fbfb774b31e214d4ab96602a31e5f20161148c01203ec23d9c2c"
+    },
+    "privacy": "Finite absent/shape/revision/payload codes only; no raw payload/field values logged"
   }
 }

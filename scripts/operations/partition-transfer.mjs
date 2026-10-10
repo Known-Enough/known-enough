@@ -19,6 +19,7 @@ const hashPattern = /^[a-f0-9]{64}$/;
 const actions = ['plan', 'status', 'prepare', 'step'];
 const codes = new Set(['TRANSFER_INPUT_INVALID', 'TRANSFER_AUTHORITY_INVALID', 'TRANSFER_CHECKOUT_INVALID',
   'TRANSFER_STATE_INVALID', 'TRANSFER_STATE_INCOMPLETE', 'TRANSFER_STATE_LOCKED', 'TRANSFER_SOURCE_INVALID',
+  'TRANSFER_SOURCE_ABSENT', 'TRANSFER_SOURCE_SHAPE_INVALID', 'TRANSFER_SOURCE_REVISION_INVALID', 'TRANSFER_SOURCE_PAYLOAD_INVALID',
   'TRANSFER_STORAGE_FAILED', 'TRANSFER_ACCOUNT_INVALID', 'TRANSFER_ROLE_INVALID', 'TRANSFER_FREEZE_REQUIRED']);
 function fail(code) { throw new Error(code); }
 const validSource = value => typeof value === 'string' && sourcePattern.test(value) && !/^0+$/.test(value);
@@ -84,6 +85,15 @@ function snapshot(raw) {
     || raw.version > Number.MAX_SAFE_INTEGER - 2 || !Buffer.isBuffer(raw.payload)
     || raw.payload.length < 1 || raw.payload.length > 300_000) fail('TRANSFER_SOURCE_INVALID');
   return { version: raw.version, payload: Buffer.from(raw.payload) };
+}
+export function transferSourceSnapshot(item) {
+  if (item === undefined) fail('TRANSFER_SOURCE_ABSENT');
+  if (!keys(item, ['PK', 'SK', 'version', 'payload']) || item.PK?.S !== 'NP#GROUPS' || item.SK?.S !== 'STATE') fail('TRANSFER_SOURCE_SHAPE_INVALID');
+  if (!keys(item.version, ['N']) || typeof item.version.N !== 'string' || !/^[1-9][0-9]*$/.test(item.version.N)
+    || !Number.isSafeInteger(Number(item.version.N)) || Number(item.version.N) > Number.MAX_SAFE_INTEGER - 2) fail('TRANSFER_SOURCE_REVISION_INVALID');
+  if (!keys(item.payload, ['S']) || typeof item.payload.S !== 'string'
+    || Buffer.byteLength(item.payload.S) < 1 || Buffer.byteLength(item.payload.S) > 300_000) fail('TRANSFER_SOURCE_PAYLOAD_INVALID');
+  return snapshot({ version: Number(item.version.N), payload: Buffer.from(item.payload.S) });
 }
 function summary(sourceSha, plan, phase, journal = null) {
   return { schemaVersion: 1, sourceSha, account: target.account, region: target.region, result: phase,
@@ -187,11 +197,7 @@ async function main(argv) {
   const source = async () => {
     const response = await client.send(new GetItemCommand({ TableName: target.source,
       Key: { PK: { S: 'NP#GROUPS' }, SK: { S: 'STATE' } }, ConsistentRead: true }), { abortSignal: globalThis.AbortSignal.timeout(10_000) });
-    const item = response.Item;
-    if (!keys(item, ['PK', 'SK', 'version', 'payload']) || item.PK?.S !== 'NP#GROUPS' || item.SK?.S !== 'STATE'
-      || !keys(item.version, ['N']) || !/^[1-9][0-9]*$/.test(item.version.N) || !keys(item.payload, ['S'])
-      || typeof item.payload.S !== 'string') fail('TRANSFER_SOURCE_INVALID');
-    return snapshot({ version: Number(item.version.N), payload: Buffer.from(item.payload.S) });
+    return transferSourceSnapshot(response.Item);
   };
   return partitionTransfer({ action, sourceSha, directory, authority, source, recovery: partitionRecoveryStorage(), ports: createDynamoPartitionMigrationPorts });
 }

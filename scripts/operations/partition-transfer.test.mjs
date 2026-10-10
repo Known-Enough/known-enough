@@ -8,7 +8,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { DynamoDBClient, GetItemCommand, BatchGetItemCommand, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import { createDynamoPartitionMigrationPorts, PARTITION_MIGRATION_RESOURCES as resources } from '@deal-table/adapters/partition-operations';
-import { partitionTransfer, transferAuthority, transferError, verifyTransferCheckout } from './partition-transfer.mjs';
+import { partitionTransfer, transferAuthority, transferError, verifyTransferCheckout, transferSourceSnapshot } from './partition-transfer.mjs';
 
 const sourceSha = 'a'.repeat(40); const folders = [];
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -249,4 +249,22 @@ test('checkout provenance accepts the exact GitHub Actions origin without .git a
     { remote: 'https://github.com/Known-Enough/known-enough?token=PRIVATE' },
     { remote: 'https://PRIVATE@github.com/Known-Enough/known-enough' },
   ]) assert.throws(() => verifyTransferCheckout(sourceSha, { ...checkout, ...change }), /TRANSFER_CHECKOUT_INVALID/);
+});
+
+
+test('actual source boundary distinguishes absence and malformed private shapes without exposing payload', () => {
+  const item = { PK: { S: 'NP#GROUPS' }, SK: { S: 'STATE' }, version: { N: '4' }, payload: { S: '{"PRIVATE":"CANARY"}' } };
+  assert.deepEqual(transferSourceSnapshot(item), { version: 4, payload: Buffer.from(item.payload.S) });
+  for (const [raw, expected] of [
+    [undefined, 'TRANSFER_SOURCE_ABSENT'], [null, 'TRANSFER_SOURCE_SHAPE_INVALID'],
+    [{ ...item, PRIVATE: 'CANARY' }, 'TRANSFER_SOURCE_SHAPE_INVALID'],
+    [{ ...item, PK: { S: 'OTHER' } }, 'TRANSFER_SOURCE_SHAPE_INVALID'],
+    [{ ...item, version: { N: '0' } }, 'TRANSFER_SOURCE_REVISION_INVALID'],
+    [{ ...item, version: { N: '9007199254740992' } }, 'TRANSFER_SOURCE_REVISION_INVALID'],
+    [{ ...item, payload: { S: '' } }, 'TRANSFER_SOURCE_PAYLOAD_INVALID'],
+    [{ ...item, payload: { S: 'p'.repeat(300001) } }, 'TRANSFER_SOURCE_PAYLOAD_INVALID'],
+  ]) {
+    try { transferSourceSnapshot(raw); assert.fail('Malformed source accepted'); }
+    catch (error) { const report = transferError(error); assert.equal(report.code, expected); assert.ok(!JSON.stringify(report).includes('PRIVATE')); }
+  }
 });
