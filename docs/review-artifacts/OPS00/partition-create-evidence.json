@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "execution": "RUN189",
+  "scheduledAt": "2026-10-09T23:58:36.312Z",
+  "sourceBase": "0f7dba5f22894fc9280792d222cf7ef5e60d5613",
+  "phase": "FIXED_RETAINED_PARTITION_CREATE_READBACK_PREPARATION",
+  "status": "LOCAL_CHECKS_VERIFIED_INTEGRATION_PENDING",
+  "observedAt": "2026-10-10T03:04:05.009208+00:00",
+  "checkedSourceSha": null,
+  "codeHashes": {
+    "scripts/operations/partition-create.py": "2d161da29a1ec8cf8599b728a0e9fbdf828930cfa6f0e39ae255ad2c8a270aac",
+    "scripts/operations/partition-create.test.py": "b5e5db9bebd230931698cfb8ce7c7ec17eddb2f193376902056e6e363fba0d12",
+    ".github/workflows/operations-partition-readback.yml": "8ada826f2af0c081015249a6f7815662ee9bff08dfe6ed9e900f46e613e7c2fb",
+    ".github/workflows/operations-verify.yml": "d6c50af910be9f22cbf9f6240349dc0ad4d9bcd73c3d58d95a00501b3affc136"
+  },
+  "protectedHashes": 983,
+  "checks": {
+    "focused": {
+      "label": "focused",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/operations/partition-create.test.py"
+      ],
+      "start": "2026-10-10T02:59:51.739931+00:00",
+      "end": "2026-10-10T02:59:52.324890+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/partition-create.py": "2d161da29a1ec8cf8599b728a0e9fbdf828930cfa6f0e39ae255ad2c8a270aac",
+        "scripts/operations/partition-create.test.py": "b5e5db9bebd230931698cfb8ce7c7ec17eddb2f193376902056e6e363fba0d12",
+        ".github/workflows/operations-partition-readback.yml": "8ada826f2af0c081015249a6f7815662ee9bff08dfe6ed9e900f46e613e7c2fb",
+        ".github/workflows/operations-verify.yml": "d6c50af910be9f22cbf9f6240349dc0ad4d9bcd73c3d58d95a00501b3affc136"
+      }
+    },
+    "native": {
+      "label": "native",
+      "command": [
+        "node",
+        "--experimental-transform-types",
+        "--test",
+        "scripts/operations/archive-recovery.test.mjs",
+        "scripts/operations/aws-transport.test.mjs",
+        "scripts/operations/capabilities.test.mjs",
+        "scripts/operations/dynamo-journal.test.mjs",
+        "scripts/operations/installed-readback.test.mjs",
+        "scripts/operations/jobs-setup.test.mjs",
+        "scripts/operations/journal.test.mjs",
+        "scripts/operations/managed-preparation.test.mjs",
+        "scripts/operations/managed-scope.test.mjs",
+        "scripts/operations/manifest.test.mjs",
+        "scripts/operations/partition-recovery.test.mjs",
+        "scripts/operations/partition-setup.test.mjs",
+        "scripts/operations/plan.test.mjs",
+        "scripts/operations/recovery.test.mjs",
+        "scripts/operations/retention-setup.test.mjs",
+        "scripts/operations/setup.test.mjs"
+      ],
+      "start": "2026-10-10T02:59:52.461176+00:00",
+      "end": "2026-10-10T02:59:56.740782+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/partition-create.py": "2d161da29a1ec8cf8599b728a0e9fbdf828930cfa6f0e39ae255ad2c8a270aac",
+        "scripts/operations/partition-create.test.py": "b5e5db9bebd230931698cfb8ce7c7ec17eddb2f193376902056e6e363fba0d12",
+        ".github/workflows/operations-partition-readback.yml": "8ada826f2af0c081015249a6f7815662ee9bff08dfe6ed9e900f46e613e7c2fb",
+        ".github/workflows/operations-verify.yml": "d6c50af910be9f22cbf9f6240349dc0ad4d9bcd73c3d58d95a00501b3affc136"
+      }
+    },
+    "full": {
+      "label": "full",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "start": "2026-10-10T02:59:52.469641+00:00",
+      "end": "2026-10-10T03:03:33.555724+00:00",
+      "exit": 0,
+      "frozen_unchanged": true,
+      "source_unchanged": true,
+      "source_hashes": {
+        "scripts/operations/partition-create.py": "2d161da29a1ec8cf8599b728a0e9fbdf828930cfa6f0e39ae255ad2c8a270aac",
+        "scripts/operations/partition-create.test.py": "b5e5db9bebd230931698cfb8ce7c7ec17eddb2f193376902056e6e363fba0d12",
+        ".github/workflows/operations-partition-readback.yml": "8ada826f2af0c081015249a6f7815662ee9bff08dfe6ed9e900f46e613e7c2fb",
+        ".github/workflows/operations-verify.yml": "d6c50af910be9f22cbf9f6240349dc0ad4d9bcd73c3d58d95a00501b3affc136"
+      }
+    },
+    "counts": {
+      "partitionPackage": 23,
+      "native": 286,
+      "application": 1407,
+      "optionalSkipped": 2,
+      "hosted": 1,
+      "browser": 64,
+      "reference": 7,
+      "plan": 15,
+      "boundaries": 414
+    }
+  },
+  "coalescedHints": {
+    "observed": "2026-10-10T02:59:09.230127+00:00",
+    "timestamps": [
+      "2026-10-10T00:28:36.669Z",
+      "2026-10-10T00:58:37.135Z",
+      "2026-10-10T01:28:37.560Z",
+      "2026-10-10T01:58:37.989Z",
+      "2026-10-10T02:28:38.396Z",
+      "2026-10-10T02:58:38.839Z"
+    ],
+    "handling": "COALESCED_SAME_OWNED_PHASE_NO_NEW_EXECUTION",
+    "interveningActivity": "UNKNOWN_NOT_INVENTED",
+    "publicationGap": "NO_PROGRESS_RECEIPT_OBSERVED_SINCE_STARTED"
+  },
+  "lifecycle": [
+    "38007211707",
+    "38018943100",
+    "38019120798"
+  ],
+  "limits": {
+    "cloudInstallation": "NOT_EXECUTED",
+    "roleAttachment": "NOT_EXECUTED",
+    "activation": "DISABLED",
+    "managedAcceptance": "UNKNOWN",
+    "monitorModel": "UNKNOWN",
+    "idleGating": "UNKNOWN"
+  },
+  "pinnedRuntime": {
+    "node": "24.21.0",
+    "npm": "11.19.0",
+    "playwright": "EXISTING_CHROMIUM",
+    "workers": 2
+  },
+  "reportingErrors": [
+    {
+      "observedAt": "2026-10-10T03:04:05.009208+00:00",
+      "action": "progress2 receipt workflow lookup",
+      "error": "GET api.github.com workflow list: dial tcp 140.82.112.5:443: i/o timeout",
+      "retry": "EXISTING_RUN_VERIFIED_ONCE",
+      "publication": "38019120798_SUCCESS_EXACT_ARTIFACT_VERIFIED"
+    },
+    {
+      "observedAt": "2026-10-10T03:04:55.306305+00:00",
+      "action": "local closing log summary assertion",
+      "error": "AssertionError: expected nonexistent text 414 assertions passed",
+      "corrected": "actual Import/dependency boundaries passed (414 references) inspected; application/browser/boundary assertions PASS before integration",
+      "sourceChanged": false
+    },
+    {
+      "observedAt": "2026-10-10T03:04:55.306305+00:00",
+      "action": "unassigned receipt identification",
+      "error": "AssertionError before artifact download for run38018280676: required own143/current source/main/SUCCESS conjunction not met",
+      "result": "NOT_AN_OWN_VERIFIED_LIFECYCLE_RECEIPT_NO_DOWNLOAD_NO_CADENCE_PROMOTION"
+    }
+  ]
+}

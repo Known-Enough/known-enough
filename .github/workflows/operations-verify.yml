@@ -40,6 +40,8 @@ jobs:
           python3 -B scripts/operations/cloudshell-inventory.test.py
       - name: Run CREATE command package regressions
         run: python3 -B scripts/operations/cloudshell-create.test.py
+      - name: Run retained partition CREATE and inspector regressions
+        run: python3 -B scripts/operations/partition-create.test.py
       - name: Run focused operations and pinned full checks
         env:
           PLAYWRIGHT_CHANNEL: chromium
