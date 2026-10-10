@@ -1,5 +1,7 @@
 # B handoff after ASSESS07 — 2026-10-06T17:17:44Z
 
+**Next after current safe handoff — partitions installed:** [A CONFIGURATION_MATCH receipt](review-artifacts/OPS00/a-installed-partitions-20261010.md) replaces the missing-table assumption. Prepare concrete scoped role/runtime connection and test commands within OPS00/OPS01, preserving current installer claim until checked handoff. Do not reinstall or repeat unchanged denied inventory; installed metadata does not prove access/activation.
+
 **Immediate user priority — actual recovery tests:** Follow [the concrete two-run instruction](tasks/active/operations/OPS00/managed-test-priority.md). A enabled/read back OPERATIONS_RECOVERY_ENABLED=true after finding it absent. Finish genuine current work with a concise checkpoint, then claim OPS00 managed verification; no unrelated new coding/doc-only hold. Freeze same SHA/UUID across both runs, no main push between them. Actual start/results remain unobserved.
 
 **Next idle task — recovery now installed:** A reports CONFIGURATION_MATCH on checked b4aac38 after actual execution. [Receipt and next proof](review-artifacts/OPS00/a-installed-recovery-20261009.md) replace the generic installation blocker: claim OPS00 source/scope/flag review and own-B sequential same-source/same-probe GitHub recovery verification before unrelated coding. Preserve any genuinely active claim, installed private state and A NP00; effective managed proof remains open.

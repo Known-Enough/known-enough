@@ -1,0 +1,56 @@
+{
+  "evidenceOrigin": "A user-supplied CloudShell allowlisted results; no A tool live AWS call",
+  "recordedAt": "2026-10-10T06:51:44Z",
+  "sourceSha": "f7632841284907411a0e9adb0de15f447c2eec00",
+  "account": "092954139775",
+  "region": "us-east-1",
+  "table": "KnownEnoughPartitions",
+  "stack": "KnownEnoughPartitionsStorage",
+  "templateSha": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+  "stateDirectory": "$HOME/.known-enough/ops00-partition-f7632841284907411a0e9adb0de15f447c2eec00",
+  "reviewHash": "0ca2e505fe130a5c7f43cc9f76cd2c1cce15d5b47f3bacd768f6fc5cf3077116",
+  "results": [
+    {
+      "result": "CREATE_REQUIRED",
+      "requests": 3,
+      "mutations": 0
+    },
+    {
+      "result": "PREVIEW_SUBMITTED",
+      "requests": 5,
+      "mutations": 1
+    },
+    {
+      "result": "PREVIEW_PENDING",
+      "requests": 2,
+      "mutations": 0
+    },
+    {
+      "result": "REVIEW_READY",
+      "requests": 4,
+      "mutations": 0
+    },
+    {
+      "result": "INSTALL_SUBMITTED",
+      "requests": 6,
+      "mutations": 1
+    },
+    {
+      "result": "INSTALL_PENDING",
+      "requests": 2,
+      "mutations": 0
+    },
+    {
+      "result": "CONFIGURATION_MATCH",
+      "requests": 8,
+      "mutations": 0
+    }
+  ],
+  "classification": null,
+  "effectivePermissions": "UNKNOWN",
+  "roleAttachment": "NOT_EXECUTED",
+  "activation": "DISABLED",
+  "migration": "NOT_EXECUTED",
+  "managedRecovery": "NOT_EXECUTED",
+  "cloudObservationTimestamp": "not supplied"
+}

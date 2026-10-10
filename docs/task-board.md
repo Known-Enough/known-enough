@@ -1,3 +1,7 @@
+## Installed milestone — partition storage configuration matched, 2026-10-10
+
+[Actual A receipt and next package](review-artifacts/OPS00/a-installed-partitions-20261010.md): KnownEnoughPartitions installed, access/runtime/activation remain unproved. Preserve actual active claim through safe handoff; next useful priority is scoped role/runtime package and real OPS01 tests, not reinstall or unrelated bug hunting.
+
 ## Immediate next execution — OPS00 real recovery tests
 
 User explicitly prioritizes tests. [Concrete run instructions](tasks/active/operations/OPS00/managed-test-priority.md): installed configuration matched; missing GitHub switch now enabled/read back by A. Finish actual active work safely, then claim the two-run proof; documentation closeout is not another-cycle blocker. No unrelated coding before actual test checkpoint.

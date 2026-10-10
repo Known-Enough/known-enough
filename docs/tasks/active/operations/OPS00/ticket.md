@@ -1,5 +1,7 @@
 # OPS00 — Complete the GitHub operations path
 
+**A partition installation milestone — 2026-10-10:** [Exact receipt/next work](../../../../review-artifacts/OPS00/a-installed-partitions-20261010.md). Table/stack configuration matched on f763284. Preserve current claim; next concrete package is minimum verified role mapping/runtime connection and managed tests. roleAttachment NOT_EXECUTED/activation DISABLED; whole-task acceptance stays open.
+
 **Immediate priority — user directs tests, 2026-10-09:** [Two real sequential GitHub recovery runs](managed-test-priority.md), using the same frozen source/UUID and own B account. Installed configuration matched; A enabled/read back the missing test switch. Existing coding phase released; next managed-test phase READY, no unrelated bug hunting or prolonged doc closeout. Effective scope/managed proof remains open until actual evidence.
 
 **Installation milestone — A supplied CONFIGURATION_MATCH, 2026-10-09:** [Receipt and next proof](../../../../review-artifacts/OPS00/a-installed-recovery-20261009.md). Recovery stack configuration now matches on checked b4aac38; next phase is actual own-B effective-scope/two-run recovery, READY at next genuine idle intake. Whole-task DONE and other OPS installation remain unproved.
