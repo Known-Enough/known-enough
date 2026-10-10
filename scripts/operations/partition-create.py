@@ -133,6 +133,10 @@ class Installer:
         return self.configuration(stack_id)
 
     def prepare(self):
+        # Execution recovery takes precedence even if its older CREATE intent
+        # was lost or damaged. A saved mutation must never become a fresh plan.
+        if self.state.load('partition.execute.intent.json') is not None:
+            return self.resume()
         if self.state.load('partition.create.intent.json') is not None:
             return self.resume()
         require(self.inventory() == 'CREATE_REQUIRED', 'EXISTING_RESOURCE_RECONCILIATION_REQUIRED')

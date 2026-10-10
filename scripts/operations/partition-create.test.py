@@ -234,6 +234,89 @@ class PackageTests(unittest.TestCase):
             self.installer.resume()
         self.assertEqual(self.mutation_count(), 2)
 
+    def test_prepare_rejects_orphan_empty_execution_intent_without_new_preview(self):
+        self.state.save('partition.execute.intent.json', {})
+        before = {p.name: p.read_bytes() for p in self.state.folder.iterdir()}
+        with self.assertRaisesRegex(module.Rejected, 'EXECUTE_INTENT_REJECTED'):
+            self.installer.prepare()
+        self.assertEqual([c[2] for c in self.fake.calls], ['get-caller-identity'])
+        self.assertEqual(self.mutation_count(), 0)
+        self.assertEqual(before, {p.name: p.read_bytes() for p in self.state.folder.iterdir()})
+
+    def test_prepare_resumes_orphan_execution_pending_and_installed_without_replay(self):
+        review = self.prepared_review()
+        self.installer.execute(review)
+        (self.state.folder / 'partition.create.intent.json').unlink()
+        before = {p.name: p.read_bytes() for p in self.state.folder.iterdir()}
+        start = len(self.fake.calls)
+        self.assertEqual(self.installer.prepare(), ('INSTALL_PENDING', None))
+        self.assertEqual([c[2] for c in self.fake.calls[start:]], ['get-caller-identity', 'describe-stacks'])
+        self.fake.installed = True
+        self.assertEqual(self.installer.prepare(), ('CONFIGURATION_MATCH', None))
+        self.assertEqual(self.mutation_count(), 2)
+        self.assertEqual(before, {p.name: p.read_bytes() for p in self.state.folder.iterdir()})
+
+    def test_prepare_rejects_non_object_or_unreadable_orphan_execution_intents(self):
+        for index, raw in enumerate((b'null', b'false', b'0', b'[]', b'"private diagnostic"', b'{"private diagnostic":')):
+            with self.subTest(raw=raw):
+                state = module.common.State(self.home / f'ops00-partition-malformed-{index}', self.home)
+                try:
+                    fake = FakeAws()
+                    installer = module.Installer(state, SOURCE, TEMPLATE, module_aws(state, fake))
+                    path = state.folder / 'partition.execute.intent.json'
+                    path.write_bytes(raw)
+                    path.chmod(0o600)
+                    before = {p.name: p.read_bytes() for p in state.folder.iterdir()}
+                    with self.assertRaises((module.Rejected, ValueError)):
+                        installer.prepare()
+                    self.assertEqual(fake.calls, [])
+                    self.assertEqual(before, {p.name: p.read_bytes() for p in state.folder.iterdir()})
+                finally:
+                    state.close()
+
+    def test_prepare_preserves_nonempty_corrupt_orphan_execution_intent(self):
+        self.state.save('partition.execute.intent.json', {'review': {'private': 'diagnostic'}, 'args': ['delete-stack']})
+        before = {p.name: p.read_bytes() for p in self.state.folder.iterdir()}
+        with self.assertRaisesRegex(module.Rejected, 'EXECUTE_INTENT_REJECTED'):
+            self.installer.prepare()
+        self.assertEqual([c[2] for c in self.fake.calls], ['get-caller-identity'])
+        self.assertEqual(self.mutation_count(), 0)
+        self.assertEqual(before, {p.name: p.read_bytes() for p in self.state.folder.iterdir()})
+
+    def test_prepare_uses_valid_execution_recovery_before_damaged_create_intent(self):
+        review = self.prepared_review()
+        self.installer.execute(review)
+        (self.state.folder / 'partition.create.intent.json').write_bytes(b'private incomplete CREATE record')
+        before = {p.name: p.read_bytes() for p in self.state.folder.iterdir()}
+        start = len(self.fake.calls)
+        self.assertEqual(self.installer.prepare(), ('INSTALL_PENDING', None))
+        self.assertEqual([c[2] for c in self.fake.calls[start:]], ['get-caller-identity', 'describe-stacks'])
+        self.assertEqual(self.mutation_count(), 2)
+        self.assertEqual(before, {p.name: p.read_bytes() for p in self.state.folder.iterdir()})
+
+    def test_cli_prepare_orphan_execution_summary_and_private_state_are_preserved(self):
+        folder = self.home / 'ops00-partition-orphan-cli'
+        state = module.common.State(folder, self.home)
+        try:
+            module.Installer(state, SOURCE, TEMPLATE, module_aws(state, self.fake))
+            state.save('partition.execute.intent.json', {})
+            state.save('private-marker.json', {'private': 'synthetic diagnostic never public'})
+        finally:
+            state.close()
+        before = {p.name: p.read_bytes() for p in folder.iterdir()}
+        with patch('sys.argv', ['partition-create.py', 'prepare', '--source', SOURCE, '--state', str(folder)]), \
+                patch.object(module, 'verify_checkout'), patch.object(module.Path, 'home', return_value=self.home), \
+                patch.object(module, 'Aws', side_effect=lambda owned: module_aws(owned, self.fake)), \
+                patch.dict(os.environ, {'GITHUB_ACTIONS': 'false'}), contextlib.redirect_stdout(io.StringIO()) as out:
+            self.assertEqual(module.main(), 1)
+        value = json.loads(out.getvalue())
+        self.assertEqual((value['result'], value['classification'], value['requests'], value['mutations']),
+                         ('BLOCKED', 'EXECUTE_INTENT_REJECTED', 1, 0))
+        self.assertNotIn('synthetic diagnostic', out.getvalue())
+        self.assertNotIn(str(folder), out.getvalue())
+        self.assertNotIn('assumed-role', out.getvalue())
+        self.assertEqual(before, {p.name: p.read_bytes() for p in folder.iterdir()})
+
     def test_installed_configuration_matches_without_recreate_or_attachment(self):
         self.fake.created = self.fake.installed = True
         self.assertEqual(self.installer.inventory(), 'CONFIGURATION_MATCH')

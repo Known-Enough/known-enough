@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "task": "OPS00",
+  "phase": "RUN190 partition execution-intent precedence correction",
+  "scheduled": "2026-10-10T03:28:39.297Z",
+  "firstVisibleObservation": "2026-10-10T03:33:44.616994Z",
+  "sourceBase": "204062e74b051ee5eb583fc3b527df93df5364f7",
+  "claimSource": "8e494e4acb794534eebdb9022e644968aa4a73c7",
+  "account": "Battosai1806",
+  "actorId": 143764700,
+  "reproduction": {
+    "start": "2026-10-10T03:35:46.164952+00:00",
+    "end": "2026-10-10T03:35:46.175150+00:00",
+    "simulatedOnly": true,
+    "actualAwsRequests": 0,
+    "outcome": [
+      "PREVIEW_SUBMITTED",
+      null
+    ],
+    "simulatedOperations": [
+      "get-caller-identity",
+      "describe-table",
+      "describe-stacks",
+      "validate-template",
+      "create-change-set"
+    ],
+    "simulatedMutations": 1,
+    "existingExecuteIntentUnchanged": true
+  },
+  "red": {
+    "label": "red-isolated",
+    "command": [
+      "python3",
+      "-B",
+      "scripts/operations/partition-create.test.py"
+    ],
+    "start": "2026-10-10T03:37:55.716227+00:00",
+    "end": "2026-10-10T03:37:56.819372+00:00",
+    "exit": 1,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {}
+  },
+  "focused": {
+    "label": "focused-final",
+    "command": [
+      "python3",
+      "-B",
+      "scripts/operations/partition-create.test.py"
+    ],
+    "start": "2026-10-10T03:38:09.736311+00:00",
+    "end": "2026-10-10T03:38:10.423605+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/partition-create.py": "2e9c4bcedfbeda1fe93bb92260237828ba97771b047084f2ecb92170a60a73ae",
+      "scripts/operations/partition-create.test.py": "ac65818bb3209638be0d4dcd0870599184a1698a5c4433dd9b9ecf57c5d4cffe"
+    }
+  },
+  "native": {
+    "label": "native",
+    "command": [
+      "/tmp/node-v24.21.0-linux-x64/bin/node",
+      "--experimental-transform-types",
+      "--test",
+      "scripts/operations/archive-recovery.test.mjs",
+      "scripts/operations/aws-transport.test.mjs",
+      "scripts/operations/capabilities.test.mjs",
+      "scripts/operations/dynamo-journal.test.mjs",
+      "scripts/operations/installed-readback.test.mjs",
+      "scripts/operations/jobs-setup.test.mjs",
+      "scripts/operations/journal.test.mjs",
+      "scripts/operations/managed-preparation.test.mjs",
+      "scripts/operations/managed-scope.test.mjs",
+      "scripts/operations/manifest.test.mjs",
+      "scripts/operations/partition-recovery.test.mjs",
+      "scripts/operations/partition-setup.test.mjs",
+      "scripts/operations/plan.test.mjs",
+      "scripts/operations/recovery.test.mjs",
+      "scripts/operations/retention-setup.test.mjs",
+      "scripts/operations/setup.test.mjs"
+    ],
+    "start": "2026-10-10T03:38:10.560148+00:00",
+    "end": "2026-10-10T03:38:14.897362+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/partition-create.py": "2e9c4bcedfbeda1fe93bb92260237828ba97771b047084f2ecb92170a60a73ae",
+      "scripts/operations/partition-create.test.py": "ac65818bb3209638be0d4dcd0870599184a1698a5c4433dd9b9ecf57c5d4cffe"
+    }
+  },
+  "full": "RETRY_RUNNING_NO_FINAL_RESULT",
+  "sourceHashes": {
+    "scripts/operations/partition-create.py": "2e9c4bcedfbeda1fe93bb92260237828ba97771b047084f2ecb92170a60a73ae",
+    "scripts/operations/partition-create.test.py": "ac65818bb3209638be0d4dcd0870599184a1698a5c4433dd9b9ecf57c5d4cffe"
+  },
+  "unchangedTrackedFiles": 987,
+  "driverOutsideFourAddedLines": "BYTE_IDENTICAL",
+  "existingRecoveryPackageSource": "c2eaadb85d72b318f2360325d1cbed0e6928f531",
+  "savedStateRepin": "NOT_EXECUTED",
+  "managedReadback": "NOT_RETRIED_UNCHANGED_ACCESS_DENIED",
+  "actualAwsRequests": 0,
+  "actualAwsMutations": 0,
+  "deployment": "NOT_EXECUTED",
+  "phaseStatus": "IN_PROGRESS",
+  "wholeTaskStatus": "NOT_DONE",
+  "cloudAcceptance": "UNKNOWN",
+  "verificationWorkflow": "NOT_YET_SUBMITTED",
+  "startedReceipt": 38021049077,
+  "progressReceipts": [
+    38021256748,
+    38021356456
+  ],
+  "reportingErrors": [
+    "Initial local started publication: node: command not found at incorrect /opt/node24/bin; corrected pinned Node retry succeeded before code",
+    "Initial gh run query: unsupported workflowName JSON field; corrected name query succeeded",
+    "Broad initial documentation output truncated; unseen content not inferred"
+  ],
+  "runtimeIdleGating": "UNKNOWN",
+  "requestedMonitorSolMedium": "UNKNOWN",
+  "observedCheckpoint": "2026-10-10T03:40:39.168781+00:00",
+  "fullInitialFailure": {
+    "label": "full",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "start": "2026-10-10T03:38:10.569638+00:00",
+    "end": "2026-10-10T03:39:36.446997+00:00",
+    "exit": 1,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/partition-create.py": "2e9c4bcedfbeda1fe93bb92260237828ba97771b047084f2ecb92170a60a73ae",
+      "scripts/operations/partition-create.test.py": "ac65818bb3209638be0d4dcd0870599184a1698a5c4433dd9b9ecf57c5d4cffe"
+    }
+  },
+  "fullInitialCounts": {
+    "applicationPass": 1406,
+    "applicationFail": 1,
+    "optionalSkips": 2
+  },
+  "focusedArchiveRetry": {
+    "label": "archive-focused",
+    "command": [
+      "npm",
+      "exec",
+      "--",
+      "vitest",
+      "run",
+      "packages/adapters/src/partition-archive-recovery.test.ts"
+    ],
+    "start": "2026-10-10T03:39:55.048340+00:00",
+    "end": "2026-10-10T03:40:09.893243+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/partition-create.py": "2e9c4bcedfbeda1fe93bb92260237828ba97771b047084f2ecb92170a60a73ae",
+      "scripts/operations/partition-create.test.py": "ac65818bb3209638be0d4dcd0870599184a1698a5c4433dd9b9ecf57c5d4cffe"
+    }
+  },
+  "activityLookupError": {
+    "observed": "2026-10-10T03:44:32.407434+00:00",
+    "action": "GitHub project-wide queued/in_progress activity lookup",
+    "result": "FAILED_QUEUED_QUERY_IN_PROGRESS_NOT_REACHED",
+    "error": "GET api.github.com actions/runs?status=queued&per_page=100: dial tcp 140.82.114.6:443: i/o timeout",
+    "publication": "Existing lifecycle receipts already verified; no new source CI dispatched",
+    "next": "Retry this activity lookup once at next safe full-check checkpoint; do not infer no jobs from failure",
+    "requestStart": "UNEXPOSED",
+    "requestEnd": "UNEXPOSED"
+  }
+}
