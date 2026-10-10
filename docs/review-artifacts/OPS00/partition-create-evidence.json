@@ -4,9 +4,9 @@
   "scheduledAt": "2026-10-09T23:58:36.312Z",
   "sourceBase": "0f7dba5f22894fc9280792d222cf7ef5e60d5613",
   "phase": "FIXED_RETAINED_PARTITION_CREATE_READBACK_PREPARATION",
-  "status": "CHECKOUT_CORRECTION_LOCAL_VERIFIED",
+  "status": "CODE_READY_PHASE_RELEASED_WHOLE_TASK_REVIEW",
   "observedAt": "2026-10-10T03:13:09.729757+00:00",
-  "checkedSourceSha": null,
+  "checkedSourceSha": "c2eaadb85d72b318f2360325d1cbed0e6928f531",
   "codeHashes": {
     "scripts/operations/partition-create.py": "0cddb2f249dccad3bf98b6f381e5fd812f1fdb99f00949a2cb0864671517a924",
     "scripts/operations/partition-create.test.py": "483b3f2b3b07e5f863f12a6620cf8f4990a7758026ccf23cd87efbede2dc6676",
@@ -214,7 +214,10 @@
     "38019120798",
     "38019319792",
     "38019334466",
-    "38019536329"
+    "38019536329",
+    "38019795597",
+    "38019946019",
+    "38020161390"
   ],
   "limits": {
     "cloudInstallation": "NOT_EXECUTED",
@@ -376,5 +379,371 @@
         }
       ]
     }
-  }
+  },
+  "synchronizations": {
+    "claim": {
+      "label": "claim",
+      "expectedRemote": "0f7dba5f22894fc9280792d222cf7ef5e60d5613",
+      "sourceSha": "6391dd47c88d7494f38cc6b0ec9bd7ec666f9645",
+      "observedEnd": "2026-10-10T00:02:56.722901+00:00",
+      "account": "Battosai1806",
+      "actorId": 143764700,
+      "branch": "main",
+      "equalClean": true,
+      "protectedHashes": 983
+    },
+    "source": {
+      "label": "source",
+      "expectedRemote": "6391dd47c88d7494f38cc6b0ec9bd7ec666f9645",
+      "sourceSha": "3ef0b32f198d49a375f044d76d14881a9cbed489",
+      "observedEnd": "2026-10-10T03:04:59.881632+00:00",
+      "account": "Battosai1806",
+      "actorId": 143764700,
+      "branch": "main",
+      "equalClean": true,
+      "protectedHashes": 983
+    },
+    "checkout": {
+      "label": "checkout",
+      "expectedRemote": "3ef0b32f198d49a375f044d76d14881a9cbed489",
+      "sourceSha": "c2eaadb85d72b318f2360325d1cbed0e6928f531",
+      "observedEnd": "2026-10-10T03:13:14.384444+00:00",
+      "account": "Battosai1806",
+      "actorId": 143764700,
+      "branch": "main",
+      "equalClean": true,
+      "protectedHashes": 983
+    }
+  },
+  "finalVerification": {
+    "observed": "2026-10-10T03:18:30.442602+00:00",
+    "sourceSha": "c2eaadb85d72b318f2360325d1cbed0e6928f531",
+    "runId": 38019793134,
+    "runUrl": "https://github.com/Known-Enough/known-enough/actions/runs/38019793134",
+    "actorId": 143764700,
+    "jobId": 114118032408,
+    "jobStart": "2026-10-10T03:13:22Z",
+    "jobEnd": "2026-10-10T03:17:54Z",
+    "result": "SUCCESS_SOURCE_ARTIFACT_VERIFIED",
+    "steps": [
+      {
+        "name": "Set up job",
+        "number": 1,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+        "number": 2,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "number": 3,
+        "conclusion": "success"
+      },
+      {
+        "name": "Bind main source and generated template before dependency installation",
+        "number": 4,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run read-only CloudShell inventory regressions",
+        "number": 5,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run CREATE command package regressions",
+        "number": 6,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run retained partition CREATE and inspector regressions",
+        "number": 7,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run focused operations and pinned full checks",
+        "number": 8,
+        "conclusion": "success"
+      },
+      {
+        "name": "Upload public setup proposal and offline verification only",
+        "number": 9,
+        "conclusion": "success"
+      },
+      {
+        "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "number": 17,
+        "conclusion": "success"
+      },
+      {
+        "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+        "number": 18,
+        "conclusion": "success"
+      },
+      {
+        "name": "Complete job",
+        "number": 19,
+        "conclusion": "success"
+      }
+    ],
+    "artifacts": {
+      "jobs-report.json": "164f9cb5fc11f2495d2aaca0a813bdae84a9bfeba060a1bd5329345489463f2c",
+      "retention-report.json": "75a026145c32a2d1a868c17910abc5c1a743ba5ccbb2b59f434505d0171e5113",
+      "operations-report.json": "c978bc374cf8eb4491f8ced770a2311742cf2dc2053c94cb0a4793483c477f2b",
+      "partition-report.json": "de0e3c735f7349b6f1979db6525cabae73122705cf8af144d72607d87c6d0c76",
+      "capabilities-report.json": "14455e5bd595ce87effc0e4bd2aa122aade499701793483bc56f0ed65e240215",
+      "jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+      "partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+      "retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450"
+    },
+    "counts": {
+      "profiles": 8,
+      "operations": 117,
+      "reuseCandidates": 9,
+      "differentLeadingKeys": 20,
+      "undeclaredResourceActions": 88
+    },
+    "partitionPackagePass": 24,
+    "nativePass": 286,
+    "applicationPass": 1407,
+    "applicationOptionalSkips": 2,
+    "browserPass": 64,
+    "cloudCredentials": "NOT_GRANTED",
+    "managedActions": "NOT_EXECUTED"
+  },
+  "finalReadbackDispatch": {
+    "start": "2026-10-10T03:14:05.059292+00:00",
+    "end": "2026-10-10T03:14:06.602916+00:00",
+    "sourceSha": "c2eaadb85d72b318f2360325d1cbed0e6928f531",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "priorIds": [
+      38019429797
+    ]
+  },
+  "finalReadback": {
+    "observed": "2026-10-10T03:14:46.475954+00:00",
+    "sourceSha": "c2eaadb85d72b318f2360325d1cbed0e6928f531",
+    "runId": 38019839052,
+    "runUrl": "https://github.com/Known-Enough/known-enough/actions/runs/38019839052",
+    "conclusion": "failure",
+    "actorId": 143764700,
+    "jobId": 114118178975,
+    "jobStart": "2026-10-10T03:14:09Z",
+    "jobEnd": "2026-10-10T03:14:18Z",
+    "artifactSha256": "4882248f64fab1ee204cb6352d6805e8bf280cc9cce86b154979485e2b5eca00",
+    "summary": {
+      "schemaVersion": 1,
+      "sourceSha": "c2eaadb85d72b318f2360325d1cbed0e6928f531",
+      "account": "092954139775",
+      "region": "us-east-1",
+      "table": "KnownEnoughPartitions",
+      "stack": "KnownEnoughPartitionsStorage",
+      "templateSha": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "result": "BLOCKED",
+      "classification": "AccessDeniedException",
+      "requests": 2,
+      "mutations": 0,
+      "effectivePermissions": "UNKNOWN",
+      "roleAttachment": "NOT_EXECUTED",
+      "activation": "DISABLED",
+      "migration": "NOT_EXECUTED",
+      "managedRecovery": "NOT_EXECUTED",
+      "reads": [
+        {
+          "action": "sts:get-caller-identity",
+          "status": "READ",
+          "code": null
+        },
+        {
+          "action": "dynamodb:describe-table",
+          "status": "UNKNOWN",
+          "code": "AccessDeniedException"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "name": "Set up job",
+        "number": 1,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+        "number": 2,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "number": 3,
+        "conclusion": "success"
+      },
+      {
+        "name": "Bind source and partition proposal before credentials",
+        "number": 4,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd",
+        "number": 5,
+        "conclusion": "success"
+      },
+      {
+        "name": "Read only fixed partition metadata",
+        "number": 6,
+        "conclusion": "failure"
+      },
+      {
+        "name": "Publish only finite metadata outcome",
+        "number": 7,
+        "conclusion": "success"
+      },
+      {
+        "name": "Post Run aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd",
+        "number": 12,
+        "conclusion": "success"
+      },
+      {
+        "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "number": 13,
+        "conclusion": "skipped"
+      },
+      {
+        "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+        "number": 14,
+        "conclusion": "success"
+      },
+      {
+        "name": "Complete job",
+        "number": 15,
+        "conclusion": "success"
+      }
+    ]
+  },
+  "blocker": {
+    "action": "dynamodb:DescribeTable",
+    "resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions",
+    "code": "AccessDeniedException",
+    "callerRole": "KnownEnoughGithubStagingInspector",
+    "callerIdentity": "SIGNED_FIXED_INSPECTOR_ACCOUNT_VERIFIED",
+    "tableExistence": "UNKNOWN",
+    "cloudFormationReadback": "NOT_EXECUTED",
+    "metadataRepair": "OWN_SUPPORTED_IAM_OPERATOR_REQUIRED_NOT_EXECUTED",
+    "authorization": "EXISTING_STANDING_AUTHORITY_RETAINED",
+    "nextAction": "Read verified installed inspector role/trust/policies; apply only actually missing fixed metadata delta using an available own authorized IAM route; repeat fixed readback once access changes, then retained CREATE only if service confirms absence."
+  },
+  "preparedInspectionDelta": {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "ReadFixedRetainedPartitionMetadata",
+        "Effect": "Allow",
+        "Action": [
+          "dynamodb:DescribeTable",
+          "dynamodb:DescribeContinuousBackups",
+          "dynamodb:DescribeTimeToLive"
+        ],
+        "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions"
+      },
+      {
+        "Sid": "ReadFixedRetainedPartitionStack",
+        "Effect": "Allow",
+        "Action": [
+          "cloudformation:DescribeStacks",
+          "cloudformation:GetTemplate",
+          "cloudformation:ListStackResources"
+        ],
+        "Resource": "arn:aws:cloudformation:us-east-1:092954139775:stack/KnownEnoughPartitionsStorage/*"
+      }
+    ]
+  },
+  "handoffAt": "2026-10-10T03:19:35.091815+00:00",
+  "wholeTask": "REVIEW_NOT_DONE",
+  "claim": "RELEASED_NO_SUCCESSOR",
+  "chatSummary": "[OPS00\u2019s partition setup package](https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/OPS00/partition-create-package.md) passed 24 package tests, 286 operations tests and full checks. [Own-B readback](https://github.com/Known-Enough/known-enough/actions/runs/38019839052) returned AccessDeniedException; installation, role setup and activation remain open. Missed progress receipts are recorded.",
+  "nextNominalWake": "2026-10-10T03:28:38.839Z",
+  "finalSynchronization": "PENDING_AT_THIS_DATED_CLOSING_SNAPSHOT",
+  "finishedReceipt": {
+    "runId": 38020161390,
+    "runUrl": "https://github.com/Known-Enough/known-enough/actions/runs/38020161390",
+    "createdAt": "2026-10-10T03:19:38Z",
+    "result": "SUCCESS_EXACT_SOURCE_SUMMARY_ARTIFACT_VERIFIED"
+  },
+  "lifecycleCadence": {
+    "rows": [
+      {
+        "id": 38007211707,
+        "created_at": "2026-10-10T00:01:36Z",
+        "observed_at": "2026-10-10T00:01:43.999Z",
+        "verified": true
+      },
+      {
+        "id": 38018943100,
+        "created_at": "2026-10-10T02:59:11Z",
+        "observed_at": "2026-10-10T02:59:18.986Z",
+        "verified": true
+      },
+      {
+        "id": 38019120798,
+        "created_at": "2026-10-10T03:01:58Z",
+        "observed_at": "2026-10-10T03:02:09.935Z",
+        "verified": true
+      },
+      {
+        "id": 38019319792,
+        "created_at": "2026-10-10T03:05:15Z",
+        "observed_at": "2026-10-10T03:05:23.380Z",
+        "verified": true
+      },
+      {
+        "id": 38019334466,
+        "created_at": "2026-10-10T03:05:30Z",
+        "observed_at": "2026-10-10T03:05:41.096Z",
+        "verified": true
+      },
+      {
+        "id": 38019536329,
+        "created_at": "2026-10-10T03:08:56Z",
+        "observed_at": "2026-10-10T03:09:03.449Z",
+        "verified": true
+      },
+      {
+        "id": 38019795597,
+        "created_at": "2026-10-10T03:13:21Z",
+        "observed_at": "2026-10-10T03:13:31.608Z",
+        "verified": true
+      },
+      {
+        "id": 38019946019,
+        "created_at": "2026-10-10T03:15:53Z",
+        "observed_at": "2026-10-10T03:16:00.577Z",
+        "verified": true
+      },
+      {
+        "id": 38020161390,
+        "created_at": "2026-10-10T03:19:38Z",
+        "observed_at": "2026-10-10T03:19:45.776Z",
+        "verified": true
+      }
+    ],
+    "gaps": [
+      10655.0,
+      167.0,
+      197.0,
+      15.0,
+      206.0,
+      265.0,
+      152.0,
+      225.0
+    ],
+    "cadence": "FAIL",
+    "maxGapSeconds": 10655.0
+  },
+  "closingObservedAt": "2026-10-10T03:21:13.601718+00:00",
+  "activeGitHubJobs": [],
+  "phaseEnd": "2026-10-10T03:19:35.091815+00:00",
+  "actualExecutionEnd": "PENDING_AFTER_OWNED_DOCUMENTATION_SYNC"
 }
