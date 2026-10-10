@@ -973,3 +973,13 @@ Started receipt38022634278 SUCCESS ownB/main/manual/sourcece2f6a2/schedule/task/
 ## A transferred correction checkpoint — 2026-10-10
 
 [Verified source/checks](../../../../review-artifacts/OPS00/a-intent-precedence.md): 2production lines,60focused/30partition/286native/full1407+hosted1+browser64 PASS. Current coding fix CODE_READY, whole OPS00 still IN_PROGRESS/A for [scoped role/runtime next work](../../../../review-artifacts/OPS00/a-role-runtime-next.md). B observer-only, no reverse transfer or cloud/runtime activation.
+
+
+## A OPS00 scope amendment — participant access preparation, 2026-10-10
+
+User supplied fresh exact Lambda role binding and IAM summary: KnownEnoughStageApiRole, no boundary, two complete inline policies, candidate KnownEnoughPartitionParticipant absent, zero complete managed attachments. A continues the SAME OPS00 claim; no second worker/task. After verified sourceeedc351 correction, allowed scope extends to generated public participant policy/review artifacts and paste-ready preview/apply/readback commands under docs/review-artifacts/OPS00, plus current ticket/board/claim/own-log/routing. Derive ONLY the unchanged participant profile from checked partition proposal; no other profile union, migration/erasure/job authority, IAM trust change, application activation or NP00/password mutation. Source/helper/template/root/lockfiles stay unchanged for this preparation. Validate JSON/exact profile equality/finite actions/resources/conditions and Bash syntax; existing passed application checks cover unchanged executable source. Live policy validation/baseline/effective permission requires A's own CloudShell output, not inferred from offline tests. Preserve existing policies and private installation state.
+
+
+## A participant-access package checkpoint — 2026-10-10
+
+[Preview/preflight contract](../../../../review-artifacts/OPS00/participant-access.md) and [checks](../../../../review-artifacts/OPS00/participant-access-evidence.json). Exact existing participant profile only, no grants applied. Seven offline preview scenarios/static scope/syntax PASS; live baseline/validation pending. A keeps sole OPS00 claim; next actual output determines attachment/readback before runtime wiring. No app activation or effective permission PASS.

@@ -1,0 +1,23 @@
+{
+  "preparedAt": "2026-10-10T16:56:01.599332+00:00",
+  "evidenceOrigin": "A user-supplied CloudShell role summaries plus A offline preparation",
+  "role": "KnownEnoughStageApiRole",
+  "boundary": null,
+  "inlinePolicyCount": 2,
+  "participantPolicyAlreadyPresent": false,
+  "attachedPolicyCount": 0,
+  "bothPolicyListsComplete": true,
+  "policyName": "KnownEnoughPartitionParticipant",
+  "sourceProposalSha": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+  "policySha": "4bad8979fc3c43db6411c9b491c844ec65e26808e5ecf7ded74be88abeff99eb",
+  "statements": 11,
+  "exactTableResources": 4,
+  "noIAMBedrockS3DeleteScanOrProfileUnion": true,
+  "bashAndEmbeddedPythonSyntax": "PASS",
+  "offlinePreviewScenarios": 7,
+  "awsCallsByAWorker": 0,
+  "attachment": "NOT_EXECUTED",
+  "liveValidation": "NOT_EXECUTED",
+  "activation": "DISABLED",
+  "effectivePermissions": "UNKNOWN"
+}
