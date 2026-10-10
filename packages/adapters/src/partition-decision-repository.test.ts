@@ -496,3 +496,55 @@ it('checks exact native roster bundles before SDK execution and forbids unguarde
   }
   expect(send).toHaveBeenCalledTimes(1);
 });
+
+
+it('publishes only the strict public display projection, including an atomic absent-account guard', async () => {
+  const f = await fixture(); await f.factory().forParticipant(actor()).createDecision(f.initial); f.writes.length = 0;
+  const principal: TrustedPrincipal = { kind: 'display', subject: 'screen', roomId: 'decision' };
+  const app = new KnownEnoughApplication({ repository: f.factory().forDisplay(principal), clock: { now: () => '2026-10-07T12:00:00Z' }, ids: { next: () => 'synthetic' } });
+  const value = await app.getPublicSnapshot(principal, 'decision');
+  expect(value.frame.decisionId).toBe('decision'); expect(value.viewerParticipantId).toBeNull();
+  expect(JSON.stringify(value)).not.toMatch(/creatorSubject|creationBodyHash|memberships|confirmedConstraints|emailHash|ACCOUNT#|GROUP#/);
+  const checks = f.writes.at(-1)!;
+  expect(checks.every(item => item.ConditionCheck)).toBe(true);
+  expect(checks.some(item => item.ConditionCheck?.Key?.PK?.S === 'ACCOUNT#screen'
+    && item.ConditionCheck.ConditionExpression === 'attribute_not_exists(PK)')).toBe(true);
+});
+
+it('display repository refuses creation, private-shaped callbacks, replay and foreign-room selection without data writes', async () => {
+  const f = await fixture(); await f.factory().forParticipant(actor()).createDecision(f.initial); f.writes.length = 0;
+  const principal: TrustedPrincipal = { kind: 'display', subject: 'screen', roomId: 'decision' };
+  const repository = f.factory().forDisplay(principal);
+  await expect(repository.createDecision(f.initial)).rejects.toThrow('FORBIDDEN');
+  await expect(repository.transactionDecision('other', record => record)).rejects.toThrow('FORBIDDEN');
+  await expect(repository.transactionDecision('decision', record => record)).rejects.toThrow('FORBIDDEN');
+  await expect(repository.transactionDecision('decision', () => 'PRIVATE')).rejects.toThrow('FORBIDDEN');
+  expect(f.writes).toEqual([]);
+});
+
+it('account creation or group removal at final display publication blocks the captured snapshot', async () => {
+  for (const change of ['account', 'group'] as const) {
+    const f = await fixture(); await f.factory().forParticipant(actor()).createDecision(f.initial); f.writes.length = 0;
+    const principal: TrustedPrincipal = { kind: 'display', subject: 'screen', roomId: 'decision' };
+    const app = new KnownEnoughApplication({ repository: f.factory().forDisplay(principal), clock: { now: () => '2026-10-07T12:00:00Z' }, ids: { next: () => 'synthetic' } });
+    f.beforeWrite(() => {
+      if (change === 'group') f.change('GROUP#garden', group => { group.version = 2; group.members = ['iris']; });
+      else f.cells.set(where(target.partitionArn, { PK: { S: 'ACCOUNT#screen' }, SK: { S: 'STATE' } }),
+        { PK: { S: 'ACCOUNT#screen' }, SK: { S: 'STATE' }, revision: { N: '1' }, payload: { S: JSON.stringify({ schemaVersion: 1, kind: 'ACCOUNT', revision: 1,
+          value: { subject: 'screen', emailHash: 'a'.repeat(64), displayName: 'Screen', status: 'PENDING', version: 1 } }) } });
+    });
+    await expect(app.getPublicSnapshot(principal, 'decision')).rejects.toThrow();
+  }
+});
+
+
+it('a display projection can sweep its copied record while backing storage stays unchanged', async () => {
+  const f = await fixture(); await f.factory().forParticipant(actor()).createDecision(f.initial);
+  const principal: TrustedPrincipal = { kind: 'display', subject: 'screen', roomId: 'decision' };
+  const repository = f.factory().forDisplay(principal);
+  const app = new KnownEnoughApplication({ repository, clock: { now: () => '2026-10-07T12:00:00Z' }, ids: { next: () => 'synthetic' } });
+  const snapshot = await app.getPublicSnapshot(principal, 'decision'); const before = structuredClone(f.current()); f.writes.length = 0;
+  const value = await repository.transactionDecision('decision', record => { record!.controlVersion++; return snapshot; });
+  expect(value).toEqual(snapshot); expect(f.current()).toEqual(before);
+  expect(f.writes.flat().every(item => item.ConditionCheck)).toBe(true);
+});

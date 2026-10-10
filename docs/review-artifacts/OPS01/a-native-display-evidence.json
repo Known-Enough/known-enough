@@ -1,0 +1,37 @@
+{
+  "recordedAt": "2026-10-10T23:00:19.819574+00:00",
+  "baseSource": "6dd2bc10fa7db9d620e362c90743f5a4bbfaf113",
+  "task": "OPS01 IN_PROGRESS/A",
+  "phase": "NATIVE_PUBLIC_DISPLAY_CODE_READY_NOT_DEPLOYED",
+  "sourceHashes": {
+    "packages/adapters/src/partition-group-session.ts": "6133674f478a99ba5a4a4c4739be9f565c3c87cde92040c76701eb4c1e7af4aa",
+    "packages/adapters/src/partition-group-session.test.ts": "93379c194a262f7016082cb48e0afe8b68d62b24eb3622c2f628eece5e3cd8d3",
+    "packages/adapters/src/partition-decision-repository.ts": "07a615e31752d4e66c1363a9a25713e8eb960ccad01765a7dccdb3ec6682b743",
+    "packages/adapters/src/partition-decision-repository.test.ts": "150332f73b9314458d98c03b518c73629a5ce81dff6165ce19dbf16662b3b521",
+    "apps/api/src/partition-http.ts": "cd71a239bfb372075acfa945e50bb895778c20dc093b94fbabbac4d8c60dba8a",
+    "apps/api/src/partition-http.test.ts": "85052eeb6239c74d8f969e398d53a231d8ccf36a98c33a03edd2532124ca66e3",
+    "apps/api/src/partition-runtime.ts": "9f37a989c8784b6cda5532ed4a8aed322983c552b6379c151fc634a77a816ec8"
+  },
+  "checks": {
+    "focused": 204,
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "boundaries": 423,
+    "full": {
+      "result": "PASS",
+      "command": "npm run check -- -- --workers=1",
+      "application": 1491,
+      "optionalSkips": 2,
+      "hosted": 1,
+      "browser": 64,
+      "references": 7,
+      "planning": 15,
+      "boundaries": 423
+    }
+  },
+  "nativeDisplay": "Trusted room-only public snapshot; current account/group/room publication conditions, absent actor guarded, no provisioning/replay/private-shaped results/storage mutation. Expiry sweep on a copy.",
+  "liveDeployment": "NOT_EXECUTED",
+  "freeze": "NOT_EXECUTED",
+  "migration": "NOT_EXECUTED",
+  "legacyCompatibility": "Still to integrate/audit before live source switch; grouped display addition alone is not complete cutover."
+}

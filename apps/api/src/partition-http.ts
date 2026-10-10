@@ -18,6 +18,8 @@ export interface PartitionParticipantApiOptions {
   membershipDiscovery?: PartitionGroupDiscovery;
   /** Trusted bounded architect port; model output does not supply participant authority. */
   draftArchitect?: PartitionDraftArchitect;
+  /** Trusted composition only; enables GET public for an independently verified room-bound display. */
+  displayAccess?: boolean;
   groups: PartitionTransport;
   decisions: PartitionDecisionTransport;
   decisionArn: string;
@@ -126,6 +128,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
     } }) });
   const repositories = createPartitionDecisionRepository({ decisionArn: options.decisionArn, partitionArn: options.partitionArn,
     groups: options.groups, transport: options.decisions });
+  const displayAccess = options.displayAccess === true;
   return (request: IncomingMessage, response: ServerResponse): void => {
     const incomingId = request.headers['x-request-id'];
     let requestId = typeof incomingId === 'string' && Id.safeParse(incomingId).success ? incomingId : randomUUID();
@@ -160,7 +163,16 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
           return reject('UNAUTHENTICATED');
         }
         if (!verified) return reject('UNAUTHENTICATED');
-        if (verified.kind !== 'participant' || !Id.safeParse(verified.subject).success) return reject('FORBIDDEN');
+        if (!Id.safeParse(verified.subject).success) return reject('FORBIDDEN');
+        if (verified.kind === 'display') {
+          const url = URL.parse(request.url ?? '', 'http://partition.invalid');
+          const selected = url && !url.search && !url.hash ? /^\/decisions\/([A-Za-z0-9_-]{1,80})\/public$/.exec(url.pathname) : null;
+          if (!displayAccess || request.method !== 'GET' || !selected || verified.roomId !== selected[1]) return reject('FORBIDDEN');
+          const principal = { kind: 'display' as const, subject: verified.subject, roomId: verified.roomId };
+          const application = new KnownEnoughApplication({ repository: repositories.forDisplay(principal), clock, ids });
+          send(response, 200, await application.getPublicSnapshot(principal, selected[1]!)); return;
+        }
+        if (verified.kind !== 'participant') return reject('FORBIDDEN');
         const principal = { kind: 'participant' as const, subject: verified.subject };
         if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
         const url = URL.parse(request.url ?? '/', 'http://local.invalid');

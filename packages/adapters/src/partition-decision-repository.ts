@@ -5,6 +5,7 @@ import { KnownEnoughApplicationError, RepositoryCapacityError,
 import { currentAdmissionFence } from './admission-context.ts';
 import { DynamoDBRoomRepository } from './dynamodb.ts';
 import { decodeGuardItem } from './dynamodb-codec.ts';
+import { KnownEnough as KE } from '@deal-table/contracts';
 import { createPartitionGroupSession, PartitionSessionError } from './partition-group-session.ts';
 import { partitionIO, partitionCall, partitionDynamoWrites, PartitionStorageError, checkPartitionRow,
   type PartitionIOContext, type PartitionTransport, type PartitionFence } from './partitioned-group-repository.ts';
@@ -156,9 +157,10 @@ export function createPartitionDecisionRepository(options: { decisionArn: string
   const limits = { ...(options.timeoutMs === undefined ? {} : { timeoutMs: options.timeoutMs }),
     ...(options.maxRequests === undefined ? {} : { maxRequests: options.maxRequests }) };
   const transport = options.transport; partitionIO(limits); const session = createPartitionGroupSession(options.groups, { ...limits, ...(options.now ? { now: options.now } : {}) });
-  function conditions(fence: PartitionFence, creation = false) {
-    if (fence.mutations.length < 2 || fence.mutations.length > (creation ? 21 : 17)
-      || (!creation && fence.mutations.some(item => item.next !== null || item.expected < 1))) fail('DECISION_INVALID');
+  function conditions(fence: PartitionFence, creation = false, displaySubject?: string) {
+    if (fence.mutations.length < 2 || fence.mutations.length > (creation ? 21 : displaySubject ? 18 : 17)
+      || (!creation && fence.mutations.some(item => item.next !== null || (item.expected < 1
+        && !(displaySubject && item.expected === 0 && item.key.PK === `ACCOUNT#${displaySubject}` && item.key.SK === 'STATE'))))) fail('DECISION_INVALID');
     const items = partitionDynamoWrites('KnownEnoughPartitions', structuredClone(fence.mutations));
     for (const item of items) { const action = item.ConditionCheck ?? item.Put; if (!action) fail('DECISION_INVALID'); action!.TableName = PARTITION_DECISION_TARGET.partitionArn; }
     if (!creation) checkedWrite(items); return items;
@@ -169,8 +171,10 @@ export function createPartitionDecisionRepository(options: { decisionArn: string
     return safe(async () => {
       // Mixed legacy authority is incompatible, never silently discarded or projected as one condition.
       if (currentAdmissionFence(decisionId)) fail('DECISION_INVALID');
-      const io = prepared?.io ?? partitionIO(limits); const fence = prepared?.fence ?? await session.decisionFence(principal, decisionId, io);
-      const guards = conditions(fence, prepared?.mutation === true || (create && prepared?.fence !== undefined));
+      const io = prepared?.io ?? partitionIO(limits); const fence = prepared?.fence ?? (principal?.kind === 'display'
+        ? await session.displayFence(principal, decisionId, io) : await session.decisionFence(principal, decisionId, io));
+      const guards = conditions(fence, prepared?.mutation === true || (create && prepared?.fence !== undefined),
+        principal?.kind === 'display' ? principal.subject : undefined);
       for (let attempt = 0; attempt < (create ? 1 : 6); attempt++) {
         let sdkFailure: unknown; let wrote = false; let loaded: unknown;
         async function send(command: Command) {
@@ -300,6 +304,23 @@ export function createPartitionDecisionRepository(options: { decisionArn: string
         return { definition: structuredClone(initial.definition), memberships: structuredClone(initial.memberships),
           creationBodyHash: initial.creationBodyHash, created: initial.created, repository };
       });
+    },
+    /** Server-only public projection: expiry sweeping occurs on a copy, never a storage mutation. */
+    forDisplay(rawPrincipal: TrustedPrincipal | null, supplied?: PartitionIOContext): KnownEnoughRepository {
+      const principal = rawPrincipal?.kind === 'display' ? { kind: 'display' as const, subject: rawPrincipal.subject, roomId: rawPrincipal.roomId } : null;
+      return {
+        createDecision: async () => { throw new KnownEnoughApplicationError('FORBIDDEN'); },
+        transactionDecision: async (decisionId, transition, transactionOptions) => {
+          if (principal === null || principal.roomId !== decisionId || transactionOptions !== undefined) throw new KnownEnoughApplicationError('FORBIDDEN');
+          return perform(principal, decisionId, false, (repository, io) => repository.transactionDecision(decisionId, record => partitionCall(io, async () => {
+            const result = await transition(structuredClone(record));
+            const projected = KE.PublicDecisionSnapshot.safeParse(result);
+            if (!projected.success || projected.data.viewerParticipantId !== null || projected.data.frame.decisionId !== decisionId)
+              throw new KnownEnoughApplicationError('FORBIDDEN');
+            return structuredClone(projected.data) as typeof result;
+          }, false)), supplied ? { io: supplied } : undefined);
+        },
+      };
     },
     forParticipant(rawPrincipal: TrustedPrincipal | null, supplied?: PartitionIOContext): KnownEnoughRepository {
     const principal = rawPrincipal?.kind === 'participant' ? { kind: 'participant' as const, subject: rawPrincipal.subject } : null;

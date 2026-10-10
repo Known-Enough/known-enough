@@ -965,3 +965,20 @@ it('rechecks all pending roster revisions on account/header/binding changes with
     expect(f.get('GROUP#garden/BINDING#decision').value.version).toBe(1); expect(f.commits).toEqual([]);
   }
 });
+
+
+it('display room identity is checked before storage and registered pending accounts cannot publish', async () => {
+  const f = fixture(); const session = f.session();
+  for (const principal of [null, participant(), { kind: 'display', subject: '../screen', roomId: 'decision' },
+    { kind: 'display', subject: 'screen', roomId: 'foreign' }] as (TrustedPrincipal | null)[]) {
+    await expect(session.displayFence(principal, 'decision')).rejects.toThrow('FORBIDDEN');
+  }
+  expect(f.reads).toEqual([]);
+  await expect(session.displayFence({ kind: 'display', subject: 'pending', roomId: 'decision' }, 'decision')).rejects.toThrow('FORBIDDEN');
+  const fence = await session.displayFence({ kind: 'display', subject: 'screen', roomId: 'decision' }, 'decision');
+  expect(fence.mutations.some(item => item.key.PK === 'ACCOUNT#screen' && item.expected === 0 && item.next === null)).toBe(true);
+  expect(fence.mutations.every(item => item.next === null)).toBe(true);
+  f.rows.set('ACCOUNT#screen/STATE', { schemaVersion: 1, kind: 'ACCOUNT', revision: 1,
+    value: { subject: 'screen', emailHash: 'a'.repeat(64), displayName: 'Screen', status: 'PENDING', version: 1 } });
+  await expect(fence.assertCurrent()).rejects.toThrow('STALE_CONTEXT');
+});

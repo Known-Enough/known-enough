@@ -995,3 +995,25 @@ it('current group screen invitation route retains organizer-only authorization a
   expect((await a.post('/groups/garden/invitations', { email: 'luca@example.invalid', replace: false, subject: 'iris' })).status).toBe(422);
   expect(f.groupCommits).toHaveLength(0);
 });
+
+
+it('explicit display composition serves only its exact room public view and rejects private/group/command paths', async () => {
+  const f = await fixture(); await seed(f);
+  const a = await api(f, { displayAccess: true, authenticate: async () => ({ kind: 'display', subject: 'screen', roomId: 'decision' }) });
+  const response = await a.get('/decisions/decision/public'); expect(response.status).toBe(200);
+  const result = await response.json(); expect(result.viewerParticipantId).toBeNull(); expect(result.frame.decisionId).toBe('decision');
+  expect(JSON.stringify(result)).not.toMatch(/creatorSubject|creationBodyHash|memberships|confirmedConstraints|emailHash|ACCOUNT#|GROUP#/);
+  for (const path of ['/account', '/groups', '/decisions/decision/me', '/decisions/other/public', '/decisions/decision/public?private=true']) {
+    expect((await a.get(path)).status).toBe(403);
+  }
+  expect((await a.post('/decisions/decision/commands', { PRIVATE: 'CANARY' })).status).toBe(403);
+  expect(f.writes.every(items => items.every(item => item.ConditionCheck))).toBe(true);
+});
+
+it('participant-only default cannot be changed into a display endpoint through later option mutation', async () => {
+  const f = await fixture(); await seed(f);
+  const a = await api(f, { authenticate: async () => ({ kind: 'display', subject: 'screen', roomId: 'decision' }) });
+  a.options.displayAccess = true;
+  expect((await a.get('/decisions/decision/public')).status).toBe(403);
+  expect(f.writes).toEqual([]); expect(f.reads).toEqual([]);
+});

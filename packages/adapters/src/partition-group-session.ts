@@ -489,6 +489,47 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           assertCurrent: () => safe(() => fence.assertCurrent()) } };
       });
     },
+    /** A verified display grant permits only its room's public publication, independently of membership. */
+    displayFence(rawPrincipal: TrustedPrincipal | null, rawDecisionId: string, supplied?: PartitionIOContext): Promise<PartitionFence> {
+      return safe(async () => {
+        if (rawPrincipal?.kind !== 'display' || !id.safeParse(rawPrincipal.subject).success
+          || rawPrincipal.roomId !== rawDecisionId) return deny('FORBIDDEN');
+        const who = rawPrincipal.subject; const decisionId = groupId(rawDecisionId); const io = supplied ?? partitionIO(limits);
+        const directory = await repository.lookup({ type: 'DECISION', decisionId }, io);
+        if (directory?.type !== 'DECISION') return deny('NOT_FOUND');
+        const accountKey = partitionAccountKey(who); const headerKey = partitionGroupKey(directory.groupId);
+        for (let attempt = 0; attempt < 6; attempt++) {
+          const rawHeader = await partitionCall(io, () => transport.read(headerKey, io));
+          if (rawHeader === null || ArchivedGroupRow.safeParse(rawHeader).success) return deny('NOT_FOUND');
+          const header = checkPartitionRow(rawHeader, headerKey);
+          if (header.kind !== 'GROUP') throw new PartitionSessionError('SESSION_INVALID');
+          const rawAccount = await partitionCall(io, () => transport.read(accountKey, io));
+          const account = rawAccount === null ? null : checkPartitionRow(rawAccount, accountKey);
+          if (account !== null && (account.kind !== 'ACCOUNT' || account.value.status !== 'APPROVED')) return deny('FORBIDDEN');
+          try {
+            const fence = await repository.fence({ groupId: directory.groupId, accountSubjects: [...header.value.members] }, state => {
+              const group = state.groups.find(value => value.id === directory.groupId);
+              const binding = group?.decisions.find(value => value.id === decisionId);
+              if (!group || !binding) return deny('NOT_FOUND');
+              if (binding.version !== group.version) return deny('STALE_CONTEXT');
+            }, io);
+            const expected = account?.revision ?? 0;
+            const actorGuard = fence.mutations.find(item => item.key.PK === accountKey.PK && item.key.SK === accountKey.SK);
+            if (actorGuard && actorGuard.expected !== expected) return deny('STALE_CONTEXT');
+            const guards = actorGuard ? fence.mutations : [...fence.mutations, { key: accountKey, expected, next: null }];
+            return { mutations: structuredClone(guards), assertCurrent: async () => {
+              await safe(() => fence.assertCurrent());
+              const latest = await partitionCall(io, () => transport.read(accountKey, io));
+              const current = latest === null ? null : checkPartitionRow(latest, accountKey);
+              if ((current?.revision ?? 0) !== expected) return deny('STALE_CONTEXT');
+            } };
+          } catch (error) {
+            if (!(error instanceof PartitionStorageError) || error.code !== 'PARTITION_STALE') throw error;
+          }
+        }
+        return deny('STALE_CONTEXT');
+      });
+    },
     /** Conditions MUST join the actual decision transaction; assertCurrent alone cannot authorize a write. */
     decisionFence(principal: TrustedPrincipal | null, rawDecisionId: string, supplied?: PartitionIOContext): Promise<PartitionFence> {
       return safe(async () => {
