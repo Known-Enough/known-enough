@@ -1,3 +1,5 @@
+**Current status: IN_PROGRESS/A** under the user's explicit OPS01 request after installed OPS00 access verification. First: validate the actual legacy data and migration plan through GitHub, then finish compatible runtime/cutover and managed acceptance. Saved NP00 remains protected; B unavailable. Earlier coding claims below are history.
+
 # OPS01 — Partition group state and archive safely
 
 **Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of OPS00, not deferred administrator installation. Complete storage/archive/migration code and tests now; defer required resource/data migration installation and managed proof. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.

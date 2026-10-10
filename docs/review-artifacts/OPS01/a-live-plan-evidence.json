@@ -1,0 +1,28 @@
+{
+  "recordedAt": "2026-10-10T22:04:30.136820+00:00",
+  "baseSource": "f600326a9692da4b11d2122b0e0e334ee322eb89",
+  "status": "OPS01 IN_PROGRESS/A",
+  "workflowHash": "c8e27f3949a8ef57a855e2527110d984bcd97feadc0412333d9a01c76438e1de",
+  "checks": {
+    "focusedTransfer": 20,
+    "yaml": "PASS",
+    "full": {
+      "result": "PASS",
+      "command": "npm run check -- -- --workers=1",
+      "application": 1484,
+      "optionalSkips": 2,
+      "browser": 64,
+      "hosted": 1,
+      "references": 7,
+      "planning": 15,
+      "boundaries": 422
+    }
+  },
+  "liveRun": null,
+  "snapshotValidity": "UNKNOWN",
+  "sourceFreeze": "NOT_EXECUTED",
+  "migration": "NOT_EXECUTED",
+  "activation": "NOT_EXECUTED",
+  "np00": "PAUSED_SAVED_UNCHANGED",
+  "phase": "CHECKED_WORKFLOW_AWAITING_LIVE_SOURCE_PLAN"
+}
