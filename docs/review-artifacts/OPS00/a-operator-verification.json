@@ -44,6 +44,50 @@
   },
   "appRuntimeAndInstalledTemplatesUnchanged": true,
   "AWSRequestsByWorker": 0,
-  "githubVerification": "PENDING",
+  "githubVerification": {
+    "sourceSha": "f5d1eaf39d4312ec8ec92eb48561afb9ca3e742a",
+    "actor": "martelaxe",
+    "actorId": "44531296",
+    "firstRun": {
+      "url": "https://github.com/Known-Enough/known-enough/actions/runs/38071040032",
+      "outcome": "FAILURE",
+      "cause": "A entered incorrect source_sha=509490BAD; OPS_VERIFICATION_FAILED before dependency setup",
+      "cancellation": "Already completed; cancellation rejected",
+      "awsAccess": false
+    },
+    "correctedRun": {
+      "url": "https://github.com/Known-Enough/known-enough/actions/runs/38071059109",
+      "jobId": 114268383741,
+      "observedAt": "2026-10-10T17:22:29.186727+00:00",
+      "outcome": "SUCCESS",
+      "sourceAndThreePythonSteps": "PASS",
+      "startedAt": "2026-10-10T17:16:30Z",
+      "completedAt": "2026-10-10T17:20:53Z",
+      "artifacts": "FIVE_REPORTS_EXACT_SOURCE_VERIFIED",
+      "awsAccess": false,
+      "reports": {
+        "jobs-report.json": {
+          "sha256": "d88174e6f7c2e928ad739b4a4e7e96ea1ea101c0a0dac7f592963eccab95e709",
+          "result": "OFFLINE_VERIFIED"
+        },
+        "operations-report.json": {
+          "sha256": "219670e2c52164ab5aacc7e03d360636754272926bbf6f2345d66aa3aaf5ae4e",
+          "result": "OFFLINE_VERIFIED"
+        },
+        "capabilities-report.json": {
+          "sha256": "1f9507b350bdff61e7aabe51425c893b09a78db366b8b3b238f47d29f260cfc8",
+          "result": "OFFLINE_REQUIREMENTS_MAPPED"
+        },
+        "partition-report.json": {
+          "sha256": "65ca8742517f145356f8fcfca2e69038f8a3db9df7ca91a09dd2a4b195721649",
+          "result": "OFFLINE_VERIFIED"
+        },
+        "retention-report.json": {
+          "sha256": "820d28423b0a442dcc073d337e6f801bd6aa4948d49cd14a5286a7d7aab0dbe9",
+          "result": "OFFLINE_VERIFIED"
+        }
+      }
+    }
+  },
   "partitionReadback": "NOT_RETRIED_KNOWN_METADATA_DENIAL"
 }

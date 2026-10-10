@@ -1005,3 +1005,13 @@ Exact operator amendment file inventory after inspection: five existing operatio
 ## A operator correction checked — 2026-10-10T17:15:49.290290+00:00
 
 [Evidence](../../../../review-artifacts/OPS00/a-operator-verification.md): two fixed authorized operator IDs accepted, unknown/source/identity gates retained, five manual workflows and Python matched login/ID guard updated. Final31partition/60create/23inventory/290native and one pinned full1407app/two skips/hosted1/browser64 PASS;13source hashes unchanged after full launch. Original templates/runtime/credential transports preserved. Own-A exact-source offline GitHub run next after source push. Planned partition inspector retry cancelled: exact prior38019839052 establishes unchanged DescribeTable AccessDeniedException; participant role attachment does not repair inspector metadata policy. No denied retry/AWS request/deployment/paid/email. Same A OPS00 claim/B observer-only; installed participant policy matching, app activation disabled.
+
+
+## A actual GitHub verification dispatch — 2026-10-10T17:17:23.266213+00:00
+
+Published sourcef5d1eaf39d4312ec8ec92eb48561afb9ca3e742a clean/equal, ownmartelaxe44531296 verified. A mistakenly supplied source_sha=509490BAD to first38071040032; actual OPS_VERIFICATION_FAILED before dependencies, terminal FAILURE/no AWS access. Cancellation rejected because already completed. Corrected exact-source run38071059109/job114268383741 is actually IN_PROGRESS; fixed source and all three Python steps PASS. No final CI PASS yet, no second concurrent run or AWS permission bypass. Main source frozen while owned verification finishes.
+
+
+## A verified operator checkpoint — 2026-10-10T17:22:29.186727+00:00
+
+[Own-A exact-source GitHub verification](https://github.com/Known-Enough/known-enough/actions/runs/38071059109) SUCCESS on sourcef5d1eaf39d4312ec8ec92eb48561afb9ca3e742a, actual17:16:30Z–17:20:53Z; actor44531296/manual/main verified. Three Python suites23/60/31,290native and full1407app/two optional skips/hosted1/browser64 PASS. Five downloaded report hashes/source bindings match; offline capability reports do not claim installed scope/runtime proof. Failed wrong-source run preserved; all jobs terminal, no AWS/paid/email/deploy. User participant IAM receipt is matching and stored; original templates/installation state remain. Same A OPS00 claim/B observer-only; next finite inspector metadata attachment and source-bound runtime/migration connection remain, app activation DISABLED. No source change after verified freeze; closing docs-only synchronization follows.
