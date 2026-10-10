@@ -1,0 +1,27 @@
+{
+  "recordedAt": "2026-10-10T23:11:14.107551+00:00",
+  "baseSource": "9f28054eefae854925a5c9e96837b630f0fe6c08",
+  "task": "OPS01 IN_PROGRESS/A",
+  "phase": "PREFLIGHT_CODE_CHECKED_AWAITING_REAL_INSPECTOR_RUN",
+  "hashes": {
+    "scripts/operations/partition-release-preflight.mjs": "ed868623c4803c17558341266aab4e4b94a66d38670038940f9b0dfc6439948c",
+    "scripts/operations/partition-release-preflight.test.mjs": "6ab14ee2f87b00bb83ae8ee89166ab9ddbdfbbf38794d849cf0c011f86685602",
+    ".github/workflows/operations-partition-preflight.yml": "780395a22359270e93c0df91b356472f2157e528ad45032e0d9c0a79ee72669e"
+  },
+  "checks": {
+    "focused": 4,
+    "full": "PASS",
+    "application": 1491,
+    "optionalSkips": 2,
+    "hosted": 1,
+    "browser": 64,
+    "references": 7,
+    "planning": 15
+  },
+  "role": "KnownEnoughGithubStagingInspector",
+  "privateSnapshot": "Complete Lambda environment stays mode600 in a mode700 runner directory, never an artifact.",
+  "publicSummary": "Fixed source/account/region, model/group/signup/OAuth/callback booleans and explicitly approximate table count; no secret/config dump.",
+  "lambdaSourceChange": "NONE",
+  "cloudWrites": 0,
+  "liveRun": null
+}
