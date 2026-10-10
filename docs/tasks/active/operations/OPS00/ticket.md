@@ -983,3 +983,13 @@ User supplied fresh exact Lambda role binding and IAM summary: KnownEnoughStageA
 ## A participant-access package checkpoint — 2026-10-10
 
 [Preview/preflight contract](../../../../review-artifacts/OPS00/participant-access.md) and [checks](../../../../review-artifacts/OPS00/participant-access-evidence.json). Exact existing participant profile only, no grants applied. Seven offline preview scenarios/static scope/syntax PASS; live baseline/validation pending. A keeps sole OPS00 claim; next actual output determines attachment/readback before runtime wiring. No app activation or effective permission PASS.
+
+
+## A participant policy correction/apply scope — 2026-10-10T17:02:38.627632+00:00
+
+User supplied five actual AWS DYNAMODB_WRONG_CONDITION_FOR_ACTION findings at statements0/2/4/6/9, all GetItem with ReturnValues. Same OPS00 A claim extends to a corrected attachable participant artifact and tested paste-ready validation/one-write/readback runbook. Remove only the inapplicable ReturnValues condition on all six pure-read statements, including Query for the same documented reason; retain all actions/resources/key/transaction/write conditions. Original proposal/template and installed pins remain immutable, with a documented projection rather than a CloudFormation update. Preserve prior private baseline/validation, verify its exact recorded hash and fresh original role/policies before one additive PutRolePolicy; record durable intent and reconcile uncertain/empty acknowledgments by readback without retry. No runtime activation, migration, old policy/trust changes or application source changes. No new permission request under standing authority.
+
+
+## A corrected participant attachment prepared — 2026-10-10T17:06:10.042577+00:00
+
+Actual five AWS warnings identify inherited GetItem/ReturnValues mismatch,0mutations. [Corrected continuation](../../../../review-artifacts/OPS00/participant-corrected-apply.md) removes only inapplicable return conditions on six pure-read statements including Query;11statements/all actions/resources/meaningful key/write/transaction gates unchanged. Old template and private baselines preserved, separate persistent attachment state.21 simulated executions and exact projection/Bash/Python syntax PASS. One guarded additive write, fresh zero-finding validation and complete baseline/readback; empty acknowledgment reconciles without resend. AWS by A worker0; corrected live validation/attachment pending, activation DISABLED/effective permission UNKNOWN. Same A OPS00 claim/B observer-only; no application changes or new worker. Next: user runs checked continuation and returns allowlisted result, then runtime connection work.

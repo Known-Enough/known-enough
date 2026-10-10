@@ -1,0 +1,46 @@
+{
+  "preparedAt": "2026-10-10T17:06:10.042577+00:00",
+  "origin": "A user-supplied actual Access Analyzer report plus A offline checks",
+  "oldPolicySha": "4bad8979fc3c43db6411c9b491c844ec65e26808e5ecf7ded74be88abeff99eb",
+  "baselineSha": "cab6a950a1e451156bbb2546cb3b37a05371c52654619aa1f0df5e194a133bba",
+  "observedWarnings": {
+    "code": "DYNAMODB_WRONG_CONDITION_FOR_ACTION",
+    "count": 5,
+    "statementIndices": [
+      0,
+      2,
+      4,
+      6,
+      9
+    ]
+  },
+  "removedInapplicableReadConditionIndices": [
+    0,
+    2,
+    4,
+    6,
+    7,
+    9
+  ],
+  "retainedStatementCount": 11,
+  "allOtherPolicyFieldsUnchanged": true,
+  "correctedPolicySha": "0859906345e54c60b2c0f8eb6384a7038263d56b32e109de70500fa4c3328d82",
+  "runbookSha": "aa9d2ab3a722e5b6bf2ed5ec6fc46589bb15a373a8f62fe94fe95b1b7938ec6b",
+  "simulatedExecutionsPassed": 21,
+  "simulationCoverage": [
+    "successful JSON/empty/uncertain acknowledgments and repeat readback",
+    "uncertain unapplied write never repeated",
+    "exact existing policy versus mismatched candidate",
+    "post-write role drift never repeated",
+    "saved baseline tamper",
+    "foreign account/wrong runtime role/boundary/truncated lists/managed attachment/old policy drift",
+    "new validation warning/pagination"
+  ],
+  "syntax": "BASH_AND_PYTHON_PASS",
+  "originalInstalledTemplateUnchanged": true,
+  "awsRequestsByWorker": 0,
+  "attachment": "NOT_EXECUTED",
+  "correctedLiveValidation": "PENDING",
+  "activation": "DISABLED",
+  "effectivePermissions": "UNKNOWN"
+}

@@ -1,3 +1,5 @@
+Current A OPS00 continuation: [corrected participant access package](review-artifacts/OPS00/participant-corrected-apply.md) replaces the original warning-bearing draft only. Checked offline; actual CloudShell validation/attachment pending. A retains sole claim, B observer-only. Storage remains inactive; runtime connection follows matching attachment readback.
+
 ## Sole active work — OPS00 transferred to A, 2026-10-10
 
 User directs A to continue while B is unavailable. [Recorded transfer and scope](tasks/active/operations/OPS00/a-takeover-20261010.md). Preserve B local history; B observes only until reverse handoff. A finishes current intent correction then exact role/runtime package, with one task and no new worker/monitor.

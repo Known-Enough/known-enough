@@ -1,3 +1,5 @@
+> Historical original preview: the user ran this and AWS returned five condition/action warnings, with0mutations. Use the [corrected one-write continuation](participant-corrected-apply.md); preserve this original policy and private state.
+
 # Participant access: fixed existing Lambda role, separate additive policy
 
 A supplied exact primary Lambda runtime binding and IAM summary: KnownEnoughStageApiRole, no boundary, two inline policies, new KnownEnoughPartitionParticipant absent, zero managed attachments, both lists complete. Own CloudShell credentials remain private. The next change is only the existing reviewed participant profile, not a union with migration/archive/erasure/job/operator profiles. [Exact policy](participant-policy.json) is the unchanged partition proposal participant document with11statements/four exact DynamoDB table ARNs; canonical SHA256 **4bad8979fc3c43db6411c9b491c844ec65e26808e5ecf7ded74be88abeff99eb**. No IAM/S3/Bedrock/grant/delete/scan authority is added. Existing source/control/copied-journal, leading-key, transaction and return-value conditions are retained. IAM access never replaces server identity/participant consent.
