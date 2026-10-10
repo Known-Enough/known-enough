@@ -32,7 +32,7 @@
     "credentialStep": "PASS",
     "cause": "actions/checkout origin has no .git suffix; local CLI rejected that exact legitimate repository URL before source reads"
   },
-  "snapshotValidity": "UNKNOWN",
+  "snapshotValidity": "ABSENT_CONFIRMED",
   "sourceFreeze": "NOT_EXECUTED",
   "migration": "NOT_EXECUTED",
   "activation": "NOT_EXECUTED",
@@ -95,5 +95,41 @@
       "scripts/operations/partition-transfer.test.mjs": "16803fb689a9fbfb774b31e214d4ab96602a31e5f20161148c01203ec23d9c2c"
     },
     "privacy": "Finite absent/shape/revision/payload codes only; no raw payload/field values logged"
+  },
+  "sourceClassifiedRun": {
+    "id": 38090876955,
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/38090876955",
+    "source": "378c806b2256a5b251bc17603b01500d01c48281",
+    "report": {
+      "result": "BLOCKED",
+      "code": "TRANSFER_SOURCE_ABSENT",
+      "activation": "NOT_EXECUTED",
+      "deployment": "NOT_EXECUTED"
+    },
+    "finding": "Authenticated consistent GetItem found no legacy group STATE; not corruption or an inferred empty valid source."
+  },
+  "initialization": {
+    "result": "PREPARED_NOT_APPLIED",
+    "sourceHashes": {
+      "scripts/operations/partition-transfer.mjs": "d96703b6ceed93385c4e069c5872c506e6f128a810ef8bca76c238cb074b5df4",
+      "scripts/operations/partition-transfer.test.mjs": "648b99260ad2f864a5786812c5e7470038830ca814ae1426056de0e38f9fbe0a",
+      ".github/workflows/operations-partition-plan.yml": "2419d41d37a8eab7a685b1ec67551a0474ed2a9150e357b2511e5bed459c8e90"
+    },
+    "checks": {
+      "focused": 26,
+      "full": {
+        "result": "PASS",
+        "command": "npm run check -- -- --workers=1",
+        "application": 1484,
+        "optionalSkips": 2,
+        "hosted": 1,
+        "browser": 64,
+        "references": 7,
+        "planning": 15,
+        "boundaries": 422
+      }
+    },
+    "effect": "Exact empty legacy defaults/version1 conditional on absence; existing/concurrent source never overwritten. No freeze or partition copy.",
+    "initialFullFailure": "Lint: test used bare AbortSignal; corrected to globalThis.AbortSignal without changing behavior."
   }
 }

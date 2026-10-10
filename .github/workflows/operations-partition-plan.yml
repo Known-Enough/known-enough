@@ -6,6 +6,14 @@ on:
         description: Exact checked main source SHA
         required: true
         type: string
+      action:
+        description: Read-only plan, or exclusively initialize missing empty legacy defaults then plan
+        required: true
+        default: plan
+        type: choice
+        options:
+          - plan
+          - initialize-empty-source
 permissions:
   contents: read
 concurrency:
@@ -45,10 +53,11 @@ jobs:
       - name: Read private live source and compile migration plan
         env:
           EXPECTED_SOURCE: ${{ inputs.source_sha }}
+          TRANSFER_ACTION: ${{ inputs.action }}
         run: |
           umask 077
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
-          NODE_NO_WARNINGS=1 node --experimental-transform-types scripts/operations/partition-transfer.mjs plan \
+          NODE_NO_WARNINGS=1 node --experimental-transform-types scripts/operations/partition-transfer.mjs "$TRANSFER_ACTION" \
             --source "$EXPECTED_SOURCE" --state "$RUNNER_TEMP/partition-plan-private" \
             > "$RUNNER_TEMP/partition-plan-report.json" 2>&1
       - name: Record a plan that could not start

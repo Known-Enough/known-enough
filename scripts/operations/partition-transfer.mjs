@@ -6,7 +6,7 @@ import { mkdir, lstat, open, unlink } from 'node:fs/promises';
 import { resolve, join, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isDeepStrictEqual } from 'node:util';
-import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient, GetItemCommand, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import { preparePartitionMigration, loadPartitionMigration, createDynamoPartitionMigrationPorts,
   createPartitionMigrationRunner, PARTITION_MIGRATION_RESOURCES as target } from '@deal-table/adapters/partition-operations';
 import { partitionRecoveryStorage } from './partition-recovery.mjs';
@@ -17,9 +17,11 @@ const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const sourcePattern = /^[a-f0-9]{40}$/;
 const hashPattern = /^[a-f0-9]{64}$/;
 const actions = ['plan', 'status', 'prepare', 'step'];
+const cliActions = [...actions, 'initialize-empty-source'];
 const codes = new Set(['TRANSFER_INPUT_INVALID', 'TRANSFER_AUTHORITY_INVALID', 'TRANSFER_CHECKOUT_INVALID',
   'TRANSFER_STATE_INVALID', 'TRANSFER_STATE_INCOMPLETE', 'TRANSFER_STATE_LOCKED', 'TRANSFER_SOURCE_INVALID',
   'TRANSFER_SOURCE_ABSENT', 'TRANSFER_SOURCE_SHAPE_INVALID', 'TRANSFER_SOURCE_REVISION_INVALID', 'TRANSFER_SOURCE_PAYLOAD_INVALID',
+  'TRANSFER_INITIALIZATION_NOT_APPLIED',
   'TRANSFER_STORAGE_FAILED', 'TRANSFER_ACCOUNT_INVALID', 'TRANSFER_ROLE_INVALID', 'TRANSFER_FREEZE_REQUIRED']);
 function fail(code) { throw new Error(code); }
 const validSource = value => typeof value === 'string' && sourcePattern.test(value) && !/^0+$/.test(value);
@@ -94,6 +96,35 @@ export function transferSourceSnapshot(item) {
   if (!keys(item.payload, ['S']) || typeof item.payload.S !== 'string'
     || Buffer.byteLength(item.payload.S) < 1 || Buffer.byteLength(item.payload.S) > 300_000) fail('TRANSFER_SOURCE_PAYLOAD_INVALID');
   return snapshot({ version: Number(item.version.N), payload: Buffer.from(item.payload.S) });
+}
+
+/** Verified operator context only. Exclusive defaults creation cannot overwrite a user's concurrent registration. */
+export async function initializeEmptyLegacySource({ sourceSha, authority, send }) {
+  if (!validSource(sourceSha) || !keys(authority, ['actorId', 'sourceSha']) || authority.sourceSha !== sourceSha
+    || ![44531296, 143764700].includes(authority.actorId) || typeof send !== 'function') fail('TRANSFER_AUTHORITY_INVALID');
+  const signal = globalThis.AbortSignal.timeout(20_000); let requests = 0;
+  const request = command => { if (signal.aborted) fail('TRANSFER_STORAGE_FAILED'); requests++; return send(command, { abortSignal: signal }); };
+  const key = { PK: { S: 'NP#GROUPS' }, SK: { S: 'STATE' } };
+  const get = () => request(new GetItemCommand({ TableName: target.source, Key: key, ConsistentRead: true }));
+  const current = await get();
+  if (current.Item !== undefined) {
+    const prior = transferSourceSnapshot(current.Item);
+    preparePartitionMigration(prior.payload, prior.version, sourceSha);
+    return { result: 'LEGACY_SOURCE_ALREADY_PRESENT', requests, changeSubmissions: 0 };
+  }
+  let acknowledged = false; let writeError;
+  try {
+    await request(new TransactWriteItemsCommand({ TransactItems: [{ Put: { TableName: target.source,
+      Item: { ...key, version: { N: '1' }, payload: { S: JSON.stringify({ accounts: [], groups: [] }) } },
+      ConditionExpression: 'attribute_not_exists(PK)' } }], ClientRequestToken: digest(`${sourceSha}:initialize-empty-source`).slice(0, 32) }));
+    acknowledged = true;
+  } catch (error) { writeError = error; /* Reconcile by reads; never repeat the submitted write. */ }
+  const observed = await get();
+  if (observed.Item === undefined) throw new Error('TRANSFER_INITIALIZATION_NOT_APPLIED', { cause: writeError });
+  const prior = transferSourceSnapshot(observed.Item);
+  preparePartitionMigration(prior.payload, prior.version, sourceSha);
+  return { result: acknowledged ? 'LEGACY_EMPTY_SOURCE_INITIALIZED' : 'LEGACY_SOURCE_INITIALIZATION_RECONCILED',
+    requests, changeSubmissions: 1 };
 }
 function summary(sourceSha, plan, phase, journal = null) {
   return { schemaVersion: 1, sourceSha, account: target.account, region: target.region, result: phase,
@@ -180,7 +211,7 @@ export function transferError(error) {
 }
 
 async function main(argv) {
-  if (argv.length !== 5 || argv[1] !== '--source' || argv[3] !== '--state' || !actions.includes(argv[0])
+  if (argv.length !== 5 || argv[1] !== '--source' || argv[3] !== '--state' || !cliActions.includes(argv[0])
     || !validSource(argv[2]) || !isAbsolute(argv[4])) fail('TRANSFER_INPUT_INVALID');
   const [action, , sourceSha, , directory] = argv;
   if (process.versions.node !== '24.21.0') fail('TRANSFER_INPUT_INVALID');
@@ -199,7 +230,12 @@ async function main(argv) {
       Key: { PK: { S: 'NP#GROUPS' }, SK: { S: 'STATE' } }, ConsistentRead: true }), { abortSignal: globalThis.AbortSignal.timeout(10_000) });
     return transferSourceSnapshot(response.Item);
   };
-  return partitionTransfer({ action, sourceSha, directory, authority, source, recovery: partitionRecoveryStorage(), ports: createDynamoPartitionMigrationPorts });
+  const initialized = action === 'initialize-empty-source'
+    ? await initializeEmptyLegacySource({ sourceSha, authority, send: client.send.bind(client) }) : null;
+  const result = await partitionTransfer({ action: initialized ? 'plan' : action, sourceSha, directory, authority, source,
+    recovery: partitionRecoveryStorage(), ports: createDynamoPartitionMigrationPorts });
+  return initialized ? { ...result, legacySourceInitialization: initialized.result,
+    initializationRequests: initialized.requests, initializationChangeSubmissions: initialized.changeSubmissions } : result;
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try { console.log(JSON.stringify(await main(process.argv.slice(2)))); }

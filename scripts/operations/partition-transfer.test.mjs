@@ -8,7 +8,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { DynamoDBClient, GetItemCommand, BatchGetItemCommand, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import { createDynamoPartitionMigrationPorts, PARTITION_MIGRATION_RESOURCES as resources } from '@deal-table/adapters/partition-operations';
-import { partitionTransfer, transferAuthority, transferError, verifyTransferCheckout, transferSourceSnapshot } from './partition-transfer.mjs';
+import { partitionTransfer, transferAuthority, transferError, verifyTransferCheckout, transferSourceSnapshot, initializeEmptyLegacySource } from './partition-transfer.mjs';
 
 const sourceSha = 'a'.repeat(40); const folders = [];
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -267,4 +267,66 @@ test('actual source boundary distinguishes absence and malformed private shapes 
     try { transferSourceSnapshot(raw); assert.fail('Malformed source accepted'); }
     catch (error) { const report = transferError(error); assert.equal(report.code, expected); assert.ok(!JSON.stringify(report).includes('PRIVATE')); }
   }
+});
+
+
+function initializerFixture(existing) {
+  let item = existing; let beforeWrite = () => {}; let lose = false; let unapplied = false;
+  const calls = [];
+  const send = async (command, options) => {
+    assert.ok(options.abortSignal instanceof globalThis.AbortSignal); calls.push(command);
+    if (command instanceof GetItemCommand) { assert.equal(command.input.ConsistentRead, true); return { Item: structuredClone(item) }; }
+    assert.ok(command instanceof TransactWriteItemsCommand); beforeWrite();
+    assert.equal(command.input.TransactItems.length, 1);
+    const put = command.input.TransactItems[0].Put;
+    assert.equal(put.TableName, resources.source);
+    assert.equal(put.ConditionExpression, 'attribute_not_exists(PK)');
+    if (item) throw Object.assign(new Error('PRIVATE_OTHER_REGISTRATION'), { name: 'TransactionCanceledException' });
+    if (!unapplied) item = structuredClone(put.Item);
+    if (lose || unapplied) throw Object.assign(new Error('PRIVATE_WRITE_UNKNOWN'), { name: 'AccessDeniedException' });
+    return {};
+  };
+  const run = () => initializeEmptyLegacySource({ sourceSha, authority: { sourceSha, actorId: 44531296 }, send });
+  return { calls, run, get item() { return item; }, set beforeWrite(fn) { beforeWrite = fn; },
+    set lose(value) { lose = value; }, set unapplied(value) { unapplied = value; }, set item(value) { item = value; } };
+}
+const emptySourceItem = () => ({ PK: { S: 'NP#GROUPS' }, SK: { S: 'STATE' }, version: { N: '1' }, payload: { S: '{"accounts":[],"groups":[]}' } });
+
+test('missing legacy defaults are exclusively created once, then a duplicate uses the current source without writing', async () => {
+  const f = initializerFixture();
+  assert.deepEqual(await f.run(), { result: 'LEGACY_EMPTY_SOURCE_INITIALIZED', requests: 3, changeSubmissions: 1 });
+  assert.deepEqual(f.item, emptySourceItem());
+  assert.deepEqual(await f.run(), { result: 'LEGACY_SOURCE_ALREADY_PRESENT', requests: 1, changeSubmissions: 0 });
+  assert.equal(f.calls.filter(c => c instanceof TransactWriteItemsCommand).length, 1);
+});
+
+test('a concurrent real source creation wins and remains byte-for-byte intact instead of being reset', async () => {
+  const f = initializerFixture(); const existing = emptySourceItem();
+  existing.version.N = '7'; existing.payload.S = JSON.stringify({ accounts: [{ subject: 'PRIVATE_OWNER', emailHash: 'a'.repeat(64), displayName: 'PRIVATE_LABEL', status: 'PENDING', version: 1 }], groups: [] });
+  f.beforeWrite = () => { f.item = existing; };
+  const report = await f.run();
+  assert.equal(report.result, 'LEGACY_SOURCE_INITIALIZATION_RECONCILED');
+  assert.deepEqual(f.item, existing); assert.ok(!JSON.stringify(report).includes('PRIVATE'));
+  assert.equal(f.calls.filter(c => c instanceof TransactWriteItemsCommand).length, 1);
+});
+
+test('a lost initialization acknowledgement is read back without another write; unapplied writes retain finite AWS error evidence', async () => {
+  const f = initializerFixture(); f.lose = true;
+  assert.equal((await f.run()).result, 'LEGACY_SOURCE_INITIALIZATION_RECONCILED');
+  assert.equal(f.calls.filter(c => c instanceof TransactWriteItemsCommand).length, 1);
+  const blocked = initializerFixture(); blocked.unapplied = true;
+  await assert.rejects(blocked.run(), error => {
+    const report = transferError(error); assert.equal(report.code, 'TRANSFER_INITIALIZATION_NOT_APPLIED');
+    assert.equal(report.awsError, 'AccessDeniedException'); assert.ok(!JSON.stringify(report).includes('PRIVATE')); return true;
+  });
+  assert.equal(blocked.calls.filter(c => c instanceof TransactWriteItemsCommand).length, 1);
+});
+
+test('foreign initialization authority and malformed existing state are rejected without any conditional creation', async () => {
+  let calls = 0;
+  await assert.rejects(initializeEmptyLegacySource({ sourceSha, authority: { sourceSha, actorId: 7 }, send: async () => { calls++; return {}; } }), /TRANSFER_AUTHORITY_INVALID/);
+  assert.equal(calls, 0);
+  const f = initializerFixture({ PRIVATE: 'INVALID' });
+  await assert.rejects(f.run(), /TRANSFER_SOURCE_SHAPE_INVALID/);
+  assert.equal(f.calls.filter(c => c instanceof TransactWriteItemsCommand).length, 0);
 });
