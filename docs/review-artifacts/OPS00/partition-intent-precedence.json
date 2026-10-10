@@ -91,7 +91,23 @@
       "scripts/operations/partition-create.test.py": "ac65818bb3209638be0d4dcd0870599184a1698a5c4433dd9b9ecf57c5d4cffe"
     }
   },
-  "full": "RETRY_RUNNING_NO_FINAL_RESULT",
+  "full": {
+    "label": "full-retry",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "start": "2026-10-10T03:40:38.021188+00:00",
+    "end": "2026-10-10T03:44:29.231837+00:00",
+    "exit": 0,
+    "frozen_unchanged": true,
+    "source_unchanged": true,
+    "source_hashes": {
+      "scripts/operations/partition-create.py": "2e9c4bcedfbeda1fe93bb92260237828ba97771b047084f2ecb92170a60a73ae",
+      "scripts/operations/partition-create.test.py": "ac65818bb3209638be0d4dcd0870599184a1698a5c4433dd9b9ecf57c5d4cffe"
+    }
+  },
   "sourceHashes": {
     "scripts/operations/partition-create.py": "2e9c4bcedfbeda1fe93bb92260237828ba97771b047084f2ecb92170a60a73ae",
     "scripts/operations/partition-create.test.py": "ac65818bb3209638be0d4dcd0870599184a1698a5c4433dd9b9ecf57c5d4cffe"
@@ -104,14 +120,113 @@
   "actualAwsRequests": 0,
   "actualAwsMutations": 0,
   "deployment": "NOT_EXECUTED",
-  "phaseStatus": "IN_PROGRESS",
-  "wholeTaskStatus": "NOT_DONE",
+  "phaseStatus": "CODE_READY_CLAIM_RELEASED",
+  "wholeTaskStatus": "REVIEW_UNCLAIMED_NOT_DONE",
   "cloudAcceptance": "UNKNOWN",
-  "verificationWorkflow": "NOT_YET_SUBMITTED",
+  "verificationWorkflow": {
+    "observed": "2026-10-10T03:51:11.506140+00:00",
+    "sourceSha": "f7632841284907411a0e9adb0de15f447c2eec00",
+    "runId": 38021742004,
+    "runUrl": "https://github.com/Known-Enough/known-enough/actions/runs/38021742004",
+    "actorId": 143764700,
+    "jobId": 114124016574,
+    "jobStart": "2026-10-10T03:46:31Z",
+    "jobEnd": "2026-10-10T03:51:05Z",
+    "result": "SUCCESS_SOURCE_ARTIFACT_VERIFIED",
+    "steps": [
+      {
+        "name": "Set up job",
+        "number": 1,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+        "number": 2,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "number": 3,
+        "conclusion": "success"
+      },
+      {
+        "name": "Bind main source and generated template before dependency installation",
+        "number": 4,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run read-only CloudShell inventory regressions",
+        "number": 5,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run CREATE command package regressions",
+        "number": 6,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run retained partition CREATE and inspector regressions",
+        "number": 7,
+        "conclusion": "success"
+      },
+      {
+        "name": "Run focused operations and pinned full checks",
+        "number": 8,
+        "conclusion": "success"
+      },
+      {
+        "name": "Upload public setup proposal and offline verification only",
+        "number": 9,
+        "conclusion": "success"
+      },
+      {
+        "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "number": 17,
+        "conclusion": "success"
+      },
+      {
+        "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+        "number": 18,
+        "conclusion": "success"
+      },
+      {
+        "name": "Complete job",
+        "number": 19,
+        "conclusion": "success"
+      }
+    ],
+    "artifacts": {
+      "jobs-report.json": "09dfc615c800d353fdfba52895f6eaba95e81c706bced6a946758c088e2f571f",
+      "retention-report.json": "d9729e5bd72873257da2174fc29c1fe4f7d91c81a94efeeae2ab6d1922b0a90f",
+      "operations-report.json": "a432fa5f79fd7880eebddadb630cc49d70e1b5783b40f05d6ec72df5526adde7",
+      "partition-report.json": "8c7ce338bd8298a2df665d18970db21e265ca989cb55849bbc0f4e58b25e735c",
+      "capabilities-report.json": "4f8c851f9e676f00481d33feb928cd01dbbfcc54b300f2414327c82967bb4a6e",
+      "jobs-setup.json": "c16ec37ce4753ccf600fc3503aee50209f2da6f30263c25659744df1e6e2a639",
+      "partition-setup.json": "262afec3e0c6d5306e819a723d3589c86f8499e1f9995ab33956046d9ff705f0",
+      "setup.json": "3370a0d1a03fc3792eb53f5cc5778d7202af0e4c32db06a6d6b553be9895f59e",
+      "retention-setup.json": "b39de7214e126786e17ac0b87d736164f056c4a98c9b80fa405813118d865450"
+    },
+    "counts": {
+      "profiles": 8,
+      "operations": 117,
+      "reuseCandidates": 9,
+      "differentLeadingKeys": 20,
+      "undeclaredResourceActions": 88
+    },
+    "partitionPackagePass": 30,
+    "nativePass": 286,
+    "applicationPass": 1407,
+    "applicationOptionalSkips": 2,
+    "browserPass": 64,
+    "cloudCredentials": "NOT_GRANTED",
+    "managedActions": "NOT_EXECUTED"
+  },
   "startedReceipt": 38021049077,
   "progressReceipts": [
     38021256748,
-    38021356456
+    38021356456,
+    38021697180,
+    38021834781
   ],
   "reportingErrors": [
     "Initial local started publication: node: command not found at incorrect /opt/node24/bin; corrected pinned Node retry succeeded before code",
@@ -120,7 +235,7 @@
   ],
   "runtimeIdleGating": "UNKNOWN",
   "requestedMonitorSolMedium": "UNKNOWN",
-  "observedCheckpoint": "2026-10-10T03:40:39.168781+00:00",
+  "observedCheckpoint": "2026-10-10T03:52:42.538073+00:00",
   "fullInitialFailure": {
     "label": "full",
     "command": [
@@ -172,5 +287,337 @@
     "next": "Retry this activity lookup once at next safe full-check checkpoint; do not infer no jobs from failure",
     "requestStart": "UNEXPOSED",
     "requestEnd": "UNEXPOSED"
-  }
+  },
+  "fullRetryCounts": {
+    "applicationPass": 1407,
+    "optionalSkips": 2,
+    "hostedPreviewPass": 1,
+    "browserPass": 64,
+    "references": 7,
+    "planningChecks": 15,
+    "boundaries": 414
+  },
+  "sourceSynchronization": {
+    "label": "source",
+    "expectedRemote": "8e494e4acb794534eebdb9022e644968aa4a73c7",
+    "sourceSha": "f7632841284907411a0e9adb0de15f447c2eec00",
+    "observedEnd": "2026-10-10T03:45:46.173184+00:00",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "branch": "main",
+    "equalClean": true,
+    "protectedHashes": 987
+  },
+  "checkedExecutableSource": "f7632841284907411a0e9adb0de15f447c2eec00",
+  "activityLookupRetry": {
+    "start": "2026-10-10T03:44:52.905771+00:00",
+    "purpose": "Single safe-checkpoint retry of failed activity lookup",
+    "queries": [
+      {
+        "status": "queued",
+        "start": "2026-10-10T03:44:52.905812+00:00",
+        "end": "2026-10-10T03:44:53.457752+00:00",
+        "exit": 0,
+        "total": 0,
+        "runs": []
+      },
+      {
+        "status": "in_progress",
+        "start": "2026-10-10T03:44:53.457800+00:00",
+        "end": "2026-10-10T03:44:54.000340+00:00",
+        "exit": 0,
+        "total": 0,
+        "runs": []
+      }
+    ],
+    "result": "NO_ACTIVE_GITHUB_JOBS",
+    "end": "2026-10-10T03:44:54.000455+00:00"
+  },
+  "sourceVerificationDispatch": {
+    "sourceSha": "f7632841284907411a0e9adb0de15f447c2eec00",
+    "priorIds": [
+      38019793134,
+      38005381113,
+      37981529398,
+      37977654123,
+      37974605647,
+      37970965826,
+      37968083534,
+      37967427279,
+      37961565051,
+      37944099711,
+      37940328563,
+      37936629928,
+      37933610784,
+      37929898704,
+      37926699163,
+      37923484566,
+      37911177261,
+      37908469469,
+      37904633062,
+      37901822427
+    ],
+    "start": "2026-10-10T03:46:26.438357+00:00",
+    "end": "2026-10-10T03:46:27.955578+00:00",
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "summaryError": {
+    "error": "AssertionError: 7 reference checks passed",
+    "purpose": "Additional documentation summary matched nonexistent wording",
+    "effect": "Documentation refresh halted before writes; subsequent source sync still used successful full-retry/frozen/candidate/doc guards",
+    "next": "Inspect actual reference output; record correction at next documentation checkpoint"
+  },
+  "currentJobSnapshot": {
+    "observed": "2026-10-10T03:47:53.595120+00:00",
+    "jobs": [
+      {
+        "id": 114124016574,
+        "run_id": 38021742004,
+        "workflow_name": "Verify operations recovery package",
+        "head_branch": "main",
+        "run_url": "https://api.github.com/repos/Known-Enough/known-enough/actions/runs/38021742004",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOUhxQD88AAAAaklJLvg",
+        "head_sha": "f7632841284907411a0e9adb0de15f447c2eec00",
+        "url": "https://api.github.com/repos/Known-Enough/known-enough/actions/jobs/114124016574",
+        "html_url": "https://github.com/Known-Enough/known-enough/actions/runs/38021742004/job/114124016574",
+        "status": "in_progress",
+        "conclusion": null,
+        "created_at": "2026-10-10T03:46:29Z",
+        "started_at": "2026-10-10T03:46:31Z",
+        "completed_at": null,
+        "name": "verify",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-10T03:46:32Z",
+            "completed_at": "2026-10-10T03:46:33Z"
+          },
+          {
+            "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-10T03:46:33Z",
+            "completed_at": "2026-10-10T03:46:34Z"
+          },
+          {
+            "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-10T03:46:34Z",
+            "completed_at": "2026-10-10T03:46:37Z"
+          },
+          {
+            "name": "Bind main source and generated template before dependency installation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-10T03:46:37Z",
+            "completed_at": "2026-10-10T03:46:37Z"
+          },
+          {
+            "name": "Run read-only CloudShell inventory regressions",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-10T03:46:37Z",
+            "completed_at": "2026-10-10T03:46:41Z"
+          },
+          {
+            "name": "Run CREATE command package regressions",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-10T03:46:41Z",
+            "completed_at": "2026-10-10T03:46:42Z"
+          },
+          {
+            "name": "Run retained partition CREATE and inspector regressions",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-10T03:46:42Z",
+            "completed_at": "2026-10-10T03:46:42Z"
+          },
+          {
+            "name": "Run focused operations and pinned full checks",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 8,
+            "started_at": "2026-10-10T03:46:42Z",
+            "completed_at": null
+          },
+          {
+            "name": "Upload public setup proposal and offline verification only",
+            "status": "pending",
+            "conclusion": null,
+            "number": 9,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+            "status": "pending",
+            "conclusion": null,
+            "number": 17,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+            "status": "pending",
+            "conclusion": null,
+            "number": 18,
+            "started_at": null,
+            "completed_at": null
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/Known-Enough/known-enough/check-runs/114124016574",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000001435,
+        "runner_name": "GitHub Actions 1000001435",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      }
+    ]
+  },
+  "releasedAt": "2026-10-10T03:52:42.538073+00:00",
+  "finalSummary": "Fixed and pushed OPS00\u2019s partition recovery bug: saved execution intents now prevent a new preview. [Exact-source verification](https://github.com/Known-Enough/known-enough/actions/runs/38021742004) passed 30 package tests, 286 operations tests and full checks; the initial archive timeout passed retry. Installation, role setup and activation remain open.",
+  "closingCheckpoint": {
+    "observed": "2026-10-10T03:54:21.419392+00:00",
+    "firstVisibleObservation": "2026-10-10T03:33:44.616994Z",
+    "earlierActualStart": "UNEXPOSED_TRUNCATED_INTAKE",
+    "scheduled": "2026-10-10T03:28:39.297Z",
+    "account": "Battosai1806",
+    "actorId": 143764700,
+    "checkedSource": "f7632841284907411a0e9adb0de15f447c2eec00",
+    "phaseReleased": true,
+    "wholeTask": "REVIEW_NOT_DONE",
+    "receipts": [
+      {
+        "id": 38021049077,
+        "event": "started",
+        "created": "2026-10-10T03:34:35Z"
+      },
+      {
+        "id": 38021256748,
+        "event": "progress",
+        "created": "2026-10-10T03:38:09Z"
+      },
+      {
+        "id": 38021356456,
+        "event": "progress",
+        "created": "2026-10-10T03:39:54Z"
+      },
+      {
+        "id": 38021697180,
+        "event": "progress",
+        "created": "2026-10-10T03:45:41Z"
+      },
+      {
+        "id": 38021834781,
+        "event": "progress",
+        "created": "2026-10-10T03:48:07Z"
+      },
+      {
+        "id": 38022101419,
+        "event": "finished",
+        "created": "2026-10-10T03:52:45Z"
+      }
+    ],
+    "receiptCreationGapsSeconds": [
+      214,
+      105,
+      347,
+      146,
+      278
+    ],
+    "cadenceMeasuredWindow": "PASS_MAX_347_SECONDS",
+    "earlierUnexposedActivity": "UNKNOWN",
+    "finishedSummary": "Fixed and pushed OPS00\u2019s partition recovery bug: saved execution intents now prevent a new preview. [Exact-source verification](https://github.com/Known-Enough/known-enough/actions/runs/38021742004) passed 30 package tests, 286 operations tests and full checks; the initial archive timeout passed retry. Installation, role setup and activation remain open.",
+    "summarySha256": "28753bced35f4e2a8b626be16203d91bf5295e2835c744f49bcfb2978de6d7d3",
+    "closingActivity": {
+      "observed": "2026-10-10T03:53:50.818912+00:00",
+      "queries": [
+        {
+          "status": "queued",
+          "total": 0,
+          "runs": []
+        },
+        {
+          "status": "in_progress",
+          "total": 0,
+          "runs": []
+        }
+      ]
+    },
+    "ownedWatch": {
+      "start": "2026-10-10T03:49:45.538192+00:00",
+      "end": "2026-10-10T03:51:50.684246+00:00",
+      "exit": 0,
+      "purpose": "Wait for existing exact-source verification; no dispatch or mutation"
+    },
+    "finalDocumentationSync": "NEXT_OWNED_CLOSING_STEP",
+    "actualFinalEnd": "NOT_YET_OBSERVED",
+    "nextNominalWake": "2026-10-10T03:58:39.297Z",
+    "coalescedAdditionalDeliveredHints": [],
+    "runtimeIdleGating": "UNKNOWN",
+    "monitorModelSelection": "UNKNOWN_PENDING_APP_MODEL_SELECTION"
+  },
+  "reportingCadence": {
+    "measuredWindow": "PASS",
+    "maximumSeconds": 347,
+    "gaps": [
+      214,
+      105,
+      347,
+      146,
+      278
+    ],
+    "earlierUnexposedStart": "UNKNOWN",
+    "historicCadenceFailures": "PRESERVED"
+  },
+  "finishedReceipt": 38022101419,
+  "finishedSummary": "Fixed and pushed OPS00\u2019s partition recovery bug: saved execution intents now prevent a new preview. [Exact-source verification](https://github.com/Known-Enough/known-enough/actions/runs/38021742004) passed 30 package tests, 286 operations tests and full checks; the initial archive timeout passed retry. Installation, role setup and activation remain open.",
+  "lifecycleReceipts": [
+    {
+      "id": 38021049077,
+      "event": "started",
+      "created": "2026-10-10T03:34:35Z"
+    },
+    {
+      "id": 38021256748,
+      "event": "progress",
+      "created": "2026-10-10T03:38:09Z"
+    },
+    {
+      "id": 38021356456,
+      "event": "progress",
+      "created": "2026-10-10T03:39:54Z"
+    },
+    {
+      "id": 38021697180,
+      "event": "progress",
+      "created": "2026-10-10T03:45:41Z"
+    },
+    {
+      "id": 38021834781,
+      "event": "progress",
+      "created": "2026-10-10T03:48:07Z"
+    },
+    {
+      "id": 38022101419,
+      "event": "finished",
+      "created": "2026-10-10T03:52:45Z"
+    }
+  ]
 }
