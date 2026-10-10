@@ -291,9 +291,9 @@ def verify_checkout(source, github):
     if github:
         require(all(os.environ.get(k) == v for k, v in {
             'GITHUB_REPOSITORY': 'Known-Enough/known-enough', 'GITHUB_REF': 'refs/heads/main',
-            'GITHUB_EVENT_NAME': 'workflow_dispatch', 'GITHUB_ACTOR': 'Battosai1806',
-            'GITHUB_ACTOR_ID': '143764700', 'GITHUB_SHA': source,
-            'EXPECTED_SOURCE': source}.items()), 'GITHUB_SOURCE_REJECTED')
+            'GITHUB_EVENT_NAME': 'workflow_dispatch', 'GITHUB_SHA': source,
+            'EXPECTED_SOURCE': source}.items()) and (os.environ.get('GITHUB_ACTOR'), os.environ.get('GITHUB_ACTOR_ID'))
+                in (('Battosai1806', '143764700'), ('martelaxe', '44531296')), 'GITHUB_SOURCE_REJECTED')
 
 
 def main():

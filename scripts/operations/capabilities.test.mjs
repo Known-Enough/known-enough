@@ -89,7 +89,7 @@ test('consent writers, erasure conditions and AUTH/TOTAL boundaries stay separat
 test('source rejection precedes proposal access; untrusted objects cannot contribute serialized fields', () => {
   let accesses = 0;
   const unreadable = new Proxy({}, { get() { accesses++; throw new Error('private-sentinel'); } });
-  for (const patch of [{ GITHUB_ACTOR_ID: '44531296' }, { GITHUB_REPOSITORY: 'other/repo' },
+  for (const patch of [{ GITHUB_ACTOR_ID: '999999999' }, { GITHUB_REPOSITORY: 'other/repo' },
     { GITHUB_REF: 'refs/heads/other' }, { GITHUB_EVENT_NAME: 'push' }, { EXPECTED_SOURCE: 'b'.repeat(40) },
     { CHECKOUT_SOURCE: 'b'.repeat(40) }, { GITHUB_SHA: new String(sha) }]) {
     assert.throws(() => operationCapabilityReport({ ...env, ...patch }, unreadable), /^Error: OPS_SOURCE_REJECTED$/);
@@ -121,7 +121,7 @@ test('each saved proposal is captured once and reports share no mutable conditio
 test('actual CLI emits only offline JSON; foreign source fails with a finite error', () => {
   const result = JSON.parse(execFileSync(process.execPath, ['scripts/operations/capabilities.mjs'], { env: { ...process.env, ...env }, encoding: 'utf8' }));
   assert.deepEqual(result, report());
-  const rejected = spawnSync(process.execPath, ['scripts/operations/capabilities.mjs'], { env: { ...process.env, ...env, GITHUB_ACTOR_ID: '44531296' }, encoding: 'utf8' });
+  const rejected = spawnSync(process.execPath, ['scripts/operations/capabilities.mjs'], { env: { ...process.env, ...env, GITHUB_ACTOR_ID: '999999999' }, encoding: 'utf8' });
   assert.equal(rejected.status, 1); assert.equal(rejected.stdout, '');
   assert.equal(rejected.stderr, 'OPS_CAPABILITY_REPORT_FAILED\n');
 });

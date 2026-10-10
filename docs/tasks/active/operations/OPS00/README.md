@@ -1,3 +1,5 @@
+**Current: IN_PROGRESS/A after explicit user takeover.** Recovery and partition storage are installed; [participant permission attachment](../../../../review-artifacts/OPS00/a-installed-participant-20261010.md) now matches. Own-A operator verification and runtime/migration/activation proof remain. Older status paragraphs below are historical and yield to the current board/claim.
+
 # OPS00 — Complete the GitHub operations path
 
 **Next phase READY/unclaimed:** [Fix the observed read-only root-login rejection](root-inventory-handoff.md) and refresh A's pinned block. Installation remains INVENTORY_REQUIRED; earlier command/source evidence stays preserved.

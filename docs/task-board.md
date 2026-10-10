@@ -1,3 +1,5 @@
+Current A OPS00: [participant permission installed](review-artifacts/OPS00/a-installed-participant-20261010.md). [Both-operator verification correction](review-artifacts/OPS00/a-operator-verification.md) passed local focused/full checks; exact-source GitHub run next. Inspector metadata grant still missing, app remains inactive. A sole claim/B observer-only.
+
 Current A OPS00 continuation: [corrected participant access package](review-artifacts/OPS00/participant-corrected-apply.md) replaces the original warning-bearing draft only. Checked offline; actual CloudShell validation/attachment pending. A retains sole claim, B observer-only. Storage remains inactive; runtime connection follows matching attachment readback.
 
 ## Sole active work — OPS00 transferred to A, 2026-10-10

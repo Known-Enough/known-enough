@@ -7,7 +7,7 @@ export function verifySource(env) {
   try {
     const sourceSha = env.GITHUB_SHA;
     if (env.GITHUB_REPOSITORY !== 'Known-Enough/known-enough' || env.GITHUB_REF !== 'refs/heads/main'
-      || env.GITHUB_ACTOR_ID !== '143764700' || env.GITHUB_EVENT_NAME !== 'workflow_dispatch'
+      || !['143764700', '44531296'].includes(env.GITHUB_ACTOR_ID) || env.GITHUB_EVENT_NAME !== 'workflow_dispatch'
       || typeof sourceSha !== 'string' || !/^[a-f0-9]{40}$/.test(sourceSha) || env.EXPECTED_SOURCE !== sourceSha
       || env.CHECKOUT_SOURCE !== sourceSha) throw new Error();
     return sourceSha;

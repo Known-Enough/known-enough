@@ -1,0 +1,49 @@
+{
+  "recordedAt": "2026-10-10T17:15:49.290290+00:00",
+  "operatorIds": [
+    "44531296",
+    "143764700"
+  ],
+  "sourceHashes": {
+    ".github/workflows/operations-intake.yml": "1d5a9740b9605b06da8cadc2d74b5674cd23fbb8251202f5dd2931ea10537bfa",
+    ".github/workflows/operations-partition-readback.yml": "787ab64ed6b46e20959ce984c9f1d5750bd3c512cffc9457cf44e98507a5a734",
+    ".github/workflows/operations-recovery.yml": "3373c4f6f0df777b45571b8701c245369bd00d39caba7893770702e50e110b51",
+    ".github/workflows/operations-scope.yml": "e2591a704d070d0c901e2e4bec93fd3e795ae73b79bec64106de819a3ba0bb83",
+    ".github/workflows/operations-verify.yml": "d8edd1bb28981cd5057066c4fdd3f7f698f69e6e491f24becb49f91e5dde926d",
+    "scripts/operations/capabilities.test.mjs": "c70bb19a752db4f79dcec415f2b5dcd897df7a8f3ef18a571e095fffad502d0f",
+    "scripts/operations/installed-readback.test.mjs": "414db26aff4524e4cbe279b6f0b7fa2028532594566bee64968ce3c66b14cbc9",
+    "scripts/operations/partition-create.py": "b5241596dc2c38c6029bd78b2668031dbb51d4a740f282ea4b870f37ec9312cd",
+    "scripts/operations/partition-create.test.py": "4d5401a131309e63f7b6828b0e19d4c52db3456c870e5b83d5d5790f892919e2",
+    "scripts/operations/partition-setup.test.mjs": "3007cd8b0f07b86d956b2f5fd09f84ee51051053cd29f9a63240093c02be2c8f",
+    "scripts/operations/retention-setup.test.mjs": "e0bc66490f2e3da623d01f53ea8dcbe021529a14122c5faa7065a5eda5cdf8a5",
+    "scripts/operations/verify.mjs": "b410ac893e5f54f2f4b3a8fcadd71a1dad57308192fe91b91cf852fac31cf438",
+    "scripts/operations/verify.test.mjs": "19f72eefe438e089e89cb1148c70d30c5f82a95941544fda723fdecbb5e06dee"
+  },
+  "red": {
+    "newNativeTests": {
+      "pass": 1,
+      "fail": 2
+    },
+    "partitionPython": {
+      "tests": 31,
+      "errors": 1
+    }
+  },
+  "finalLocal": {
+    "native": 290,
+    "partitionPython": 31,
+    "originalCreatePython": 60,
+    "inventoryPython": 23,
+    "application": 1407,
+    "optionalSkips": 2,
+    "hosted": 1,
+    "browser": 64,
+    "referenceHashes": 7,
+    "planning": 15,
+    "lintTypecheckBuild": "PASS"
+  },
+  "appRuntimeAndInstalledTemplatesUnchanged": true,
+  "AWSRequestsByWorker": 0,
+  "githubVerification": "PENDING",
+  "partitionReadback": "NOT_RETRIED_KNOWN_METADATA_DENIAL"
+}

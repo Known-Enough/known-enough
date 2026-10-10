@@ -398,6 +398,23 @@ class PackageTests(unittest.TestCase):
                 self.assertEqual(json.loads(out.getvalue())['classification'], 'GITHUB_READ_ONLY')
                 state.assert_not_called()
 
+    def test_both_authorized_login_id_pairs_and_crossed_identity_rejection(self):
+        env = dict(GITHUB_REPOSITORY='Known-Enough/known-enough', GITHUB_REF='refs/heads/main',
+                   GITHUB_EVENT_NAME='workflow_dispatch', GITHUB_SHA=SOURCE, EXPECTED_SOURCE=SOURCE)
+        values = {('rev-parse', 'HEAD'): SOURCE, ('remote', 'get-url', 'origin'): module.common.ORIGIN,
+                  ('status', '--porcelain'): '', ('branch', '--show-current'): 'main'}
+        def git(command, **options):
+            return values[tuple(command[3:])]
+        with patch.dict(os.environ, env), patch.object(module.subprocess, 'check_output', side_effect=git):
+            for login, actor in [('martelaxe', '44531296'), ('Battosai1806', '143764700')]:
+                with patch.dict(os.environ, {'GITHUB_ACTOR': login, 'GITHUB_ACTOR_ID': actor}):
+                    module.verify_checkout(SOURCE, True)
+            for login, actor in [('martelaxe', '143764700'), ('Battosai1806', '44531296'),
+                                 ('unknown', '44531296'), ('martelaxe', '999999999')]:
+                with patch.dict(os.environ, {'GITHUB_ACTOR': login, 'GITHUB_ACTOR_ID': actor}):
+                    with self.assertRaisesRegex(module.Rejected, 'GITHUB_SOURCE_REJECTED'):
+                        module.verify_checkout(SOURCE, True)
+
     def test_exact_github_checkout_url_variants_and_remote_drift(self):
         env = dict(GITHUB_REPOSITORY='Known-Enough/known-enough', GITHUB_REF='refs/heads/main',
                    GITHUB_EVENT_NAME='workflow_dispatch', GITHUB_ACTOR='Battosai1806',
@@ -442,7 +459,7 @@ class PackageTests(unittest.TestCase):
         self.assertLess(text.index('python3 -B scripts/operations/partition-create.test.py'), text.index('aws-actions/configure-aws-credentials'))
         self.assertLess(text.index('["verify_checkout"]'), text.index('aws-actions/configure-aws-credentials'))
         self.assertIn('KnownEnoughGithubStagingInspector', text)
-        self.assertIn("github.actor_id == '143764700'", text)
+        self.assertIn("(github.actor_id == '143764700' || github.actor_id == '44531296')", text)
         self.assertIn('partition-create.py inventory', text)
         self.assertNotIn('partition-create.py execute', text)
         self.assertNotIn('secrets.', text)

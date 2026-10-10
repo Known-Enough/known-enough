@@ -60,7 +60,7 @@ test('source-bound offline verification rejects edited templates and foreign pro
   const report = partitionVerificationReport(env, saved); assert.equal(report.result, 'OFFLINE_VERIFIED');
   assert.equal(report.installation, 'UNKNOWN'); assert.equal(report.activation, 'DISABLED'); assert.equal(report.migration, 'NOT_EXECUTED');
   assert.throws(() => partitionVerificationReport(env, saved + ' '), /PARTITION_SETUP_DRIFT/);
-  for (const patch of [{ GITHUB_ACTOR_ID: '44531296' }, { EXPECTED_SOURCE: 'b'.repeat(40) }, { GITHUB_EVENT_NAME: 'push' }]) {
+  for (const patch of [{ GITHUB_ACTOR_ID: '999999999' }, { EXPECTED_SOURCE: 'b'.repeat(40) }, { GITHUB_EVENT_NAME: 'push' }]) {
     assert.throws(() => partitionVerificationReport({ ...env, ...patch }, saved), /OPS_SOURCE_REJECTED/);
   }
   const workflow = readFileSync('.github/workflows/operations-verify.yml', 'utf8');

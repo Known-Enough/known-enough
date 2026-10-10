@@ -172,7 +172,7 @@ test('fixed positive control-plane readback has sixteen bounded sequential calls
 });
 test('source, actor, event, repository and branch drift rejects before credentials or any subprocess', async () => {
   const f = fixture();
-  for (const patch of [{ GITHUB_ACTOR_ID: '44531296' }, { GITHUB_REF: 'refs/heads/other' },
+  for (const patch of [{ GITHUB_ACTOR_ID: '999999999' }, { GITHUB_REF: 'refs/heads/other' },
     { GITHUB_REPOSITORY: 'other/known-enough' }, { GITHUB_EVENT_NAME: 'push' },
     { GITHUB_SHA: 'unverified' }, { EXPECTED_SOURCE: 'b'.repeat(40) }, { CHECKOUT_SOURCE: 'b'.repeat(40) }])
     await assert.rejects(installedReadback({ ...env, ...patch }, f.executor), /OPS_SOURCE_REJECTED/);
@@ -433,4 +433,12 @@ test('UTF8 byte-limit edges preserve bounded matching readback from the first ca
     assert.equal(result.mutations, 0); assert.equal(f.calls.length, 16); assert.equal(reads, 1);
     assert.ok(!JSON.stringify(result).includes('SYNTHETIC_PRIVATE'));
   }
+});
+
+test('own A performs the same fixed-role readback without any write', async () => {
+  const f = fixture();
+  const result = await installedReadback({ ...env, GITHUB_ACTOR_ID: '44531296' }, f.executor);
+  assert.equal(result.installation, 'CONFIGURATION_MATCH');
+  assert.equal(result.mutations, 0);
+  assert.equal(result.requests, 16);
 });

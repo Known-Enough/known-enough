@@ -47,7 +47,7 @@ test('source/identity-bound offline report verifies generated immutable proposal
   const report = retentionVerificationReport(env, saved); assert.equal(report.result, 'OFFLINE_VERIFIED'); assert.equal(report.sourceSha, env.GITHUB_SHA);
   assert.equal(report.managedProof, 'UNKNOWN'); assert.equal(report.dataOperations, 'NOT_EXECUTED'); assert.equal(report.participantGrants, 'NOT_GRANTED');
   assert.throws(() => retentionVerificationReport(env, saved + ' '), /RETENTION_PREPARATION_DRIFT/);
-  for (const patch of [{ EXPECTED_SOURCE: 'b'.repeat(40) }, { GITHUB_ACTOR_ID: '44531296' }, { GITHUB_EVENT_NAME: 'push' }]) {
+  for (const patch of [{ EXPECTED_SOURCE: 'b'.repeat(40) }, { GITHUB_ACTOR_ID: '999999999' }, { GITHUB_EVENT_NAME: 'push' }]) {
     assert.throws(() => retentionVerificationReport({ ...env, ...patch }, saved), /OPS_SOURCE_REJECTED/);
   }
 });

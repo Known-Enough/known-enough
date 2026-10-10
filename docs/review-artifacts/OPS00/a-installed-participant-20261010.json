@@ -1,0 +1,18 @@
+{
+  "recordedAt": "2026-10-10T17:10:55.871069+00:00",
+  "origin": "A user-supplied checked CloudShell result; AWS execution timestamp unavailable",
+  "sourceSha": "c98cc0e8d7e13248e6e6ba8b989eb8fd942f01d5",
+  "readback": {
+    "result": "PARTICIPANT_POLICY_READBACK_PASS",
+    "role": "KnownEnoughStageApiRole",
+    "policy": "KnownEnoughPartitionParticipant",
+    "policySha": "0859906345e54c60b2c0f8eb6384a7038263d56b32e109de70500fa4c3328d82",
+    "baselineSha": "cab6a950a1e451156bbb2546cb3b37a05371c52654619aa1f0df5e194a133bba",
+    "totalInlineCharactersAfter": 5126,
+    "requests": 22,
+    "mutations": 1,
+    "alreadyPresent": false,
+    "activation": "DISABLED",
+    "effectivePermissions": "UNKNOWN"
+  }
+}
