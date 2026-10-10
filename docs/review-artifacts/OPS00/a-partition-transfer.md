@@ -1,0 +1,23 @@
+# OPS00 — Executable private partition transfer checkpoint
+
+A continues the same sole OPS00 claim while B is unavailable. The [command](../../../scripts/operations/partition-transfer.mjs) composes the existing server compiler, concrete Dynamo migration ports and immutable versioned recovery store. Its [integration tests](../../../scripts/operations/partition-transfer.test.mjs) exercise actual SDK command objects against synthetic storage and real private filesystem state. No live transfer or AWS write occurred during this coding checkpoint.
+
+## Commands and evidence
+
+`plan` reads the existing group aggregate once and saves its exact private manifest and independent binding under the operator's persistent home directory. Repeating it reuses those bytes; it does not silently refresh a changed source. `status` uses the runner's new read-only `inspect()` to validate source/control, journal counts, preserved recovery bytes and copied target rows. It never creates a recovery object or claims control. `prepare` preserves recovery first and conditionally creates/resumes the control and journal. `step` copies one bounded batch only after an independently installed, exact FROZEN source marker. This command exposes no freeze, activation or deployment operation.
+
+**Important sequencing finding:** the existing concrete Dynamo copy transaction requires FROZEN even though the runner can read an unchanged legacy source. Running copy directly after prepare would fail its source condition. The new command reports `TRANSFER_FREEZE_REQUIRED` before submitting that write. Freezing now would stop the existing aggregate writer, so live migration must wait for a compatible service/cutover package; no instruction is given to freeze today's app. Synthetic integration fixtures explicitly perform the existing freeze transition to test all three copy batches and final readback. The concrete adapter already treats an absent control row as the initial inactive control; an additional bootstrap command is unnecessary.
+
+The CLI checks pinned Node 24.21.0, a clean main checkout, exact source and repository, then its actual own AWS account identity. A's own root CloudShell is accepted as already established in the setup history. GitHub mode accepts A44531296 and B143764700 only with source/main/manual workflow checks and the dedicated migration role. That role and workload are **not installed/configured by this checkpoint**; source gates do not establish actual B execution. No chosen actor or credentials/profile flag is accepted.
+
+Private files are create-only, owned by the executing user, mode0600 in a mode0700 directory. Symlink/foreign-source/tampered/partial state is refused. An exclusive local lock prevents overlapping commands and is removed on ordinary success/failure; forced termination may leave it behind. Inspect private state and confirm no command remains active before a reviewed lock-only repair; never erase or repin the manifest/binding to hide an uncertain cloud write. Raw payloads, identities, SDK causes and paths are omitted from output. Fixed error codes include allowlisted AWS error names or NO_CREDENTIALS when available, so failures retain useful diagnosis without private diagnostic text.
+
+## Actual checks
+
+Focused transfer integration20/20 PASS and all native operations310/310 PASS. Full project check is recorded in the [evidence JSON](a-partition-transfer-evidence.json) after completion. Earlier focused failures identified the required freeze sequencing and corrected synthetic cancellation metadata/batch counts; existing production freeze/copy semantics remain unchanged. This checkpoint adds read-only runner inspection and the server-only partition-operations export, with no new dependency or lockfile change.
+
+## Remaining work before selection
+
+The current Known Enough UI uses `/decisions`; historical `/rooms` clients are not a present-route defect. A **real** compatibility gap is the group invitation screen posting `/groups/:id/invitations` while the inactive partition HTTP handler accepts `/groups/:id/invite`. Current reasoning/owner-conversation/decision-invitation/display paths and model composition also need their own source/test verification before selection. Implement that compatibility, private handler packaging, mapped migration role/workload and the cutover/rollback sequence before freezing or activating live data. Only then do matching deployed participant/display/AI/group journeys establish acceptance.
+
+Current claim remains IN_PROGRESS/A, B observer-only; saved NP00 scope and original runtime/templates/workflows/policies remain protected.

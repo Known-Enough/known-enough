@@ -1,3 +1,8 @@
+## Current A sole OPS00 continuation — 2026-10-10T18:49:46.786512+00:00
+
+Current A OPS00: [executable private transfer tool](review-artifacts/OPS00/a-partition-transfer.md) checked,20focused native/310operations/full1482app/64browser PASS. Copy explicitly requires the existing source-freeze sequence; tool never freezes or activates the live app. Next: actual group-invitation route/body and AI/display compatibility, private package and migration role/job/cutover. No live data copied; sole A/B observer-only.
+
+
 ## Current A scheduling pause and bounded B continuation — 2026-10-06T17:17:44Z
 
 A has no active NP00 implementation/deployment/test and pauses its inactive saved claim for scheduling, retaining source/private recovery and exact files. This frees the single active slot for B's existing chat to claim PRIV01, then ASSESS11, under the [concrete handoff](b-next-task-handoff.md). The original dirty WSL checkout is untouched. A performs coordination/documentation only and will not compete; actual B intake and implementation remain unverified. No new approval, AWS login, automation or worker is needed. Remaining NP00 obligations are preserved for their later proper closeout, not marked DONE.

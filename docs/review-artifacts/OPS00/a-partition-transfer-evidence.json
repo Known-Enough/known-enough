@@ -1,0 +1,44 @@
+{
+  "recordedAt": "2026-10-10T18:49:46.786512+00:00",
+  "phase": "EXECUTABLE_TRANSFER_CODE_READY_NOT_LIVE",
+  "baseSource": "a78d331be856d16556f28b241c9fbaa94f0d6e33",
+  "sourceHashes": {
+    "packages/adapters/package.json": "20da02db46f5fd0d65c9d89831d83303f0106ab438196f9867ffcadda727e3cf",
+    "packages/adapters/src/partition-operations.ts": "533444a3f00dcf9c8b6af8c4d004eb3eff4f55013dc6123c9b33cc121217747f",
+    "packages/adapters/src/partition-migration-runner.ts": "206e3ac543c4d4b30a6b388b6f72a488e1175b0827a808cf9755e4377dcf5916",
+    "scripts/operations/partition-transfer.mjs": "30e33928bdfa81ddd6927002d8f298e37316b60ec2fbdd4725c00d560e38199b",
+    "scripts/operations/partition-transfer.test.mjs": "1692c0fd42d069fcde17bdcce1caa4db816ebb4e4feb5c158112c7f930cbc9de"
+  },
+  "focusedNativeCases": 20,
+  "allNativeOperationsCases": 310,
+  "checks": {
+    "full": "PASS",
+    "application": 1482,
+    "optionalSkips": 2,
+    "hosted": 1,
+    "browser": 64,
+    "references": 7,
+    "planning": 15,
+    "boundaries": 422,
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "build": "PASS"
+  },
+  "modes": [
+    "plan",
+    "status",
+    "prepare",
+    "step"
+  ],
+  "liveCloudWrites": 0,
+  "liveDataTransfer": "NOT_EXECUTED",
+  "freezeActivationDeployment": "NOT_EXPOSED",
+  "migrationRoleAndWorkflow": "NOT_INSTALLED",
+  "sourceControlBootstrap": "Concrete ports return initial inactive control when absent",
+  "copyPrecondition": "Exact separately installed FROZEN source; CLI does not freeze existing writer",
+  "syntheticRealSdkIntegration": "prepare; explicit fixture-only freeze; three batches; full readback; lost write acknowledgement resumes without duplicate writes",
+  "currentUiRouteFinding": "group-home posts /groups/:id/invitations; partition-http currently accepts /groups/:id/invite",
+  "oldRoomsClientFinding": "Historical /rooms clients are not a confirmed current Known Enough route defect",
+  "dependenciesLockRuntimePoliciesTemplatesWorkflowsChanged": false,
+  "status": "CODE_READY; OPS00 IN_PROGRESS/A"
+}

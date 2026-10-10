@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./partition-request": "./src/partition-request.ts",
+    "./partition-operations": "./src/partition-operations.ts",
     "./durable-model-runtime": "./src/durable-model-runtime.ts"
   },
   "dependencies": {

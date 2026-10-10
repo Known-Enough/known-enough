@@ -133,6 +133,22 @@ export function createPartitionMigrationRunner(ports: MigrationRunnerPorts, mani
     journal: structuredClone({ expectedRevision: priorRevision, next: journal }), rows: structuredClone(rows),
   });
   return {
+    /** Read-only evidence: never preserves a manifest, claims control or writes a journal. */
+    async inspect(): Promise<MigrationJournal | null> {
+      const io = migrationIO(options);
+      const control = await current(io);
+      const raw = await migrationCall(io, () => ports.journal(plan.planHash, io));
+      if (raw === null) {
+        if (control.planHash !== null) fail('MIGRATION_JOURNAL_INVALID');
+        await targets(allRows, true, io);
+        return null;
+      }
+      const journal = checkedJournal(raw);
+      if (control.planHash !== plan.planHash) fail('MIGRATION_JOURNAL_INVALID');
+      await recovery(journal.manifestVersion, io);
+      await targets(plan.batches.slice(0, journal.nextBatch).flat(), false, io);
+      return structuredClone(journal);
+    },
     async prepare(): Promise<MigrationJournal> {
       const io = migrationIO(options);
       let control = await current(io);

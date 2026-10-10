@@ -1,3 +1,5 @@
+Current A OPS00: [executable private transfer tool](review-artifacts/OPS00/a-partition-transfer.md) checked,20focused native/310operations/full1482app/64browser PASS. Copy explicitly requires the existing source-freeze sequence; tool never freezes or activates the live app. Next: actual group-invitation route/body and AI/display compatibility, private package and migration role/job/cutover. No live data copied; sole A/B observer-only.
+
 Current A OPS00: [private deployment initializer](review-artifacts/OPS00/a-partition-deployment.md) checked,51new tests/full1482app/64browser PASS. GitHub storage inspection and participant permission remain verified. Next: runnable migration job/role, protected package/entry and route compatibility; no data copied or live app switch. Sole A claim/B observer-only.
 
 Current A OPS00: GitHub storage inspection is verified; [inactive Lambda request adapter](review-artifacts/OPS00/a-partition-lambda.md) passed24new tests and full1431app/64browser checks. Next: private source-bound initializer/migration package and route compatibility before live selection. No deployment/migration/activation yet; A sole claim/B observer-only.
