@@ -247,6 +247,8 @@ class Installer:
                                '--expected-bucket-owner', ACCOUNT], missing='NoSuchBucket') is None, 'BUCKET_ALREADY_EXISTS')
 
     def prepare(self):
+        if self.state.load('execute.intent.json') is not None:
+            return self.resume()
         if self.state.load('create.intent.json') is not None:
             return self.resume()
         self.identity()

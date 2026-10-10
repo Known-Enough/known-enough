@@ -157,6 +157,86 @@ class CreateTests(unittest.TestCase):
         with self.assertRaisesRegex(module.Rejected, '^' + code + '$'):
             action()
 
+    def test_prepare_rejects_orphan_empty_execution_without_new_preview(self):
+        self.state.save('execute.intent.json', {})
+        saved = {f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}
+        self.reject(self.installer.prepare, 'EXECUTE_INTENT_REJECTED')
+        self.assertEqual(self.fake.mutations(), [])
+        self.assertFalse((self.state.folder / 'create.intent.json').exists())
+        self.assertEqual({f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}, saved)
+
+    def test_prepare_recovers_uncertain_execution_before_processing_without_create_record(self):
+        review = self.prepared()
+        original = self.fake.__call__
+        def uncertain(command, **options):
+            if command[2] == 'execute-change-set':
+                self.fake.calls.append(command)
+                raise subprocess.TimeoutExpired(command, 10)
+            return original(command, **options)
+        self.installer.aws.executor = uncertain
+        self.reject(lambda: self.installer.execute(review), 'AWS_RESPONSE_UNCERTAIN')
+        (self.state.folder / 'create.intent.json').unlink()
+        saved = {f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}
+        before, mutations = len(self.fake.calls), len(self.fake.mutations())
+        self.assertEqual(self.new_installer().prepare(), ('INSTALL_PENDING', None))
+        self.assertEqual([c[2] for c in self.fake.calls[before:]],
+                         ['get-caller-identity', 'get-open-id-connect-provider', 'describe-stacks'])
+        self.assertEqual(len(self.fake.mutations()), mutations)
+        self.assertEqual({f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}, saved)
+
+    def test_prepare_recovers_accepted_execution_with_lost_ack_and_create_records(self):
+        review = self.prepared()
+        self.fake.lost.add('execute-change-set')
+        self.reject(lambda: self.installer.execute(review), 'AWS_RESPONSE_UNCERTAIN')
+        for name in ('create.intent.json', 'create.ack.json'):
+            (self.state.folder / name).unlink()
+        saved = {f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}
+        mutations = len(self.fake.mutations())
+        self.assertEqual(self.new_installer().prepare(), ('INSTALL_PENDING', None))
+        self.assertEqual(len(self.fake.mutations()), mutations)
+        self.assertEqual({f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}, saved)
+
+    def test_prepare_reads_installed_configuration_without_create_records(self):
+        self.installed()
+        for name in ('create.intent.json', 'create.ack.json'):
+            (self.state.folder / name).unlink()
+        saved = {f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}
+        mutations = len(self.fake.mutations())
+        self.assertEqual(self.new_installer().prepare(), ('CONFIGURATION_MATCH', None))
+        self.assertEqual(len(self.fake.mutations()), mutations)
+        for name, raw in saved.items():
+            self.assertEqual((self.state.folder / name).read_bytes(), raw)
+        self.assertEqual(self.state.load('configuration.json')['effectivePermissions'], 'UNKNOWN')
+        self.assertFalse((self.state.folder / 'create.intent.json').exists())
+
+    def test_prepare_does_not_ignore_nonobject_or_malformed_execution_records(self):
+        for raw in (b'false\n', b'[]\n', b'0\n', b'null\n', b'{broken-private-content'):
+            with self.subTest(raw=raw), tempfile.TemporaryDirectory(dir=self.home) as home:
+                state = module.State(Path(home) / 'state', self.home)
+                try:
+                    fake = FakeAws()
+                    installer = module.Installer(state, SOURCE, TEMPLATE, module.Aws(state, fake))
+                    state.save_bytes('execute.intent.json', raw)
+                    saved = {f.name: f.read_bytes() for f in state.folder.iterdir() if f.is_file()}
+                    with self.assertRaises((module.Rejected, ValueError)):
+                        installer.prepare()
+                    self.assertEqual(fake.calls, [])
+                    self.assertFalse((state.folder / 'create.intent.json').exists())
+                    self.assertEqual({f.name: f.read_bytes() for f in state.folder.iterdir() if f.is_file()}, saved)
+                finally:
+                    state.close()
+
+    def test_cli_prepare_orphan_execution_is_finite_private_and_read_only(self):
+        self.state.save('execute.intent.json', {})
+        saved = {f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}
+        code, value = self.cli_review(action='prepare')
+        self.assertEqual((code, value['result'], value['classification']),
+                         (1, 'BLOCKED', 'EXECUTE_INTENT_REJECTED'))
+        self.assertEqual((value['requests'], value['mutations']), (2, 0))
+        self.assertNotIn('reviewHash', value)
+        self.assertEqual(self.fake.mutations(), [])
+        self.assertEqual({f.name: f.read_bytes() for f in self.state.folder.iterdir() if f.is_file()}, saved)
+
     def test_prepare_exact_template_and_durable_intent_before_request(self):
         original = self.fake.__call__
         def execute(command, **options):
@@ -701,7 +781,7 @@ class CreateTests(unittest.TestCase):
         self.assertNotIn(str(folder), output.getvalue())
         self.assertEqual({f.name: f.read_bytes() for f in folder.iterdir() if f.is_file()}, saved)
 
-    def cli_review(self):
+    def cli_review(self, action='review'):
         folder = self.state.folder
         self.state.close()
         original_aws = module.Aws
@@ -709,7 +789,7 @@ class CreateTests(unittest.TestCase):
         try:
             with patch.object(module, 'verify_checkout'), patch.object(module.Path, 'home', return_value=self.home), \
                     patch.object(module, 'Aws', side_effect=lambda state: original_aws(state, self.fake)), \
-                    patch.object(sys, 'argv', ['create', 'review', '--source', SOURCE, '--state', str(folder)]), \
+                    patch.object(sys, 'argv', ['create', action, '--source', SOURCE, '--state', str(folder)]), \
                     contextlib.redirect_stdout(output):
                 code = module.main()
         finally:

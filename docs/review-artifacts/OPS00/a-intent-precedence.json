@@ -1,0 +1,36 @@
+{
+  "claimBaseline": "294d928",
+  "worker": "A / martelaxe",
+  "verificationObservedAt": "2026-10-10T16:14:54.206366+00:00",
+  "runtime": {
+    "node": "24.21.0",
+    "npm": "11.19.0"
+  },
+  "change": "prepare reconciles existing execution before testing CREATE absence",
+  "productionAddedLines": 2,
+  "redRegression": {
+    "tests": 60,
+    "failuresIncludingSubtests": 7,
+    "errors": 3,
+    "allFailuresInNewRegressionMethods": true
+  },
+  "focusedPython": 60,
+  "partitionPython": 30,
+  "nativeOperations": 286,
+  "fullCheck": {
+    "exitCode": 0,
+    "applicationPassed": 1407,
+    "applicationOptionalSkipped": 2,
+    "hostedPreviewPassed": 1,
+    "browserPassed": 64
+  },
+  "sha256": {
+    "scripts/operations/cloudshell-create.py": "72d5f894ac548e4a80f8b63e91a5aaebcc6042dd7e98eaa8e15400b6ee067bb2",
+    "scripts/operations/cloudshell-create.test.py": "4e0dad584642f8003bcac81c5f8442369a3be3b152d04a3f95ea5048a2fbeabd"
+  },
+  "awsCalls": 0,
+  "awsMutations": 0,
+  "deployment": "NOT_EXECUTED",
+  "existingCloudShellState": "UNCHANGED / never accessed in A worker",
+  "bUnpublishedFix": "unavailable; preserved as historical reported evidence, not imported"
+}
