@@ -1,3 +1,5 @@
+**Current outcome: installed and verified; OPS00 DONE.** [Actual installation and two matching GitHub runs](access-installed-proof.md). This prepared-package document records the earlier checkpoint; its then-pending installation statements are historical.
+
 # OPS00 — Final fixed GitHub access package
 
 A continues the sole OPS00 claim under the user's explicit takeover and finish instruction. The [installer](../../../scripts/operations/access-install.py), [generated access stack](../../../infra/operations/access-setup.json), [profiles](../../../infra/operations/access-profiles.json) and [sequential GitHub proof](../../../.github/workflows/operations-access.yml) are prepared. [Actual source/check evidence](finish-access-evidence.json) records pinned full checks and failure/recovery tests. **Installation and new-role effective proof have not happened; OPS00 is not DONE.**

@@ -1,3 +1,5 @@
+Current OPS00: **DONE** — [installed access and two actual GitHub proofs](review-artifacts/OPS00/access-installed-proof.md). Both runs passed5/5, repeat resumed existing records, all ten cleanup passed. A takeover claim released; no new B execution/monitor claimed. Shared GitHub path ready within the fixed envelope; actual OPS01–03 service/cutover acceptance and saved NP00 closeout remain. No successor started. Older dated preparation entries below are history.
+
 Current A OPS00: user preview saved; template response exceeded 128 KiB before installation. [Response repair](review-artifacts/OPS00/access-response-repair.md) preserves exact template and existing preview/state;18 installer/16 native/full 1484 application/64 browser checks PASS. Next: same-state repaired resume, then two actual GitHub proofs. IN_PROGRESS/A, B observer-only; NP00 preserved.
 
 ## Current A OPS00 final access execution — 2026-10-10T21:21:05.945765+00:00

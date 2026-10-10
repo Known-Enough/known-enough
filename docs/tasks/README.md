@@ -1,3 +1,5 @@
+**OPS00 access completed under A takeover:** [Installed envelope and two real GitHub proofs](../review-artifacts/OPS00/access-installed-proof.md). A claim released; actual OPS01–03 services/cutover, final-order saved NP00 closeout and release acceptance remain. New B session/monitor activity unavailable; no new worker or successor started. The current board and verified claim log control the next intake.
+
 ## Current B queue handoff — 2026-10-06T17:17:44Z
 
 **Coding-first scheduling — user direction, 2026-10-06:** Finish available coding before administrator/CloudShell setup. Follow [the two-phase queue](../coding-first-plan.md); preserve any actual active claim, then ASSESS11 → ASSESS10 → UX01–03 → OPS00–03 coding → FIN01–02 coding. Save exact setup/managed-proof gaps for the final cloud phase and FIN03; CODE_READY is a checked-source milestone, not whole-task DONE. Do not spend repeated ticks on deferred access audits when eligible independent coding remains. Existing B chat/schedule and one active writer remain unchanged.

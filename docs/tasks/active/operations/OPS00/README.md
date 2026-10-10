@@ -1,3 +1,5 @@
+**Current status: DONE.** [Installed access and actual two-run proof](../../../../review-artifacts/OPS00/access-installed-proof.md). Routine work inside the fixed envelope uses own GitHub credentials. A completed the explicit takeover; claim released, no new B activity inferred. OPS01–03 actual services/cutover and saved NP00 obligations remain. Earlier status/setup instructions below are dated history.
+
 **Verified milestone:** [GitHub partition inspection passed](../../../../review-artifacts/OPS00/a-installed-inspector-partitions-20261010.md). No AWS login is needed for this routine metadata check. App runtime connection/migration/activation and remaining operations scopes are still open.
 
 **Immediate continuation:** [Inspector metadata access repair](../../../../review-artifacts/OPS00/inspector-partitions-apply.md) is prepared; user executes one own-CloudShell block, then A performs the source-matched GitHub metadata check. No further routine approval is required.

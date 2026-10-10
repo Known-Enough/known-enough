@@ -1,3 +1,5 @@
+**Current status: DONE, 2026-10-10T22:00:08.651451+00:00.** [Actual installation, two-run proof and capability mapping](../../../../review-artifacts/OPS00/access-installed-proof.md). Earlier dated IN_PROGRESS/B or A-only approval instructions below remain historical; latest standing authority and explicit A takeover control this completion. Saved NP00 is preserved.
+
 # OPS00 — Complete the GitHub operations path
 
 **Current claim — A, 2026-10-10:** User transfers B's unavailable RUN191 to A on synchronized3de3b7c. [Bounded takeover](a-takeover-20261010.md): original installer execution-intent precedence source/tests, own tracking/evidence; then scope amendment for installed-partition role/runtime package. B local60test claim remains unverified and preserved. No whole-task DONE or new cloud action.
@@ -18,7 +20,7 @@
 
 **Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of UX03, not deferred administrator installation. Prepare/test automation and the exact setup package now; install missing delegation only in the final cloud phase. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
 
-- Status: IN_PROGRESS / A — user-directed RUN191 transfer; bounded published-source intent correction, installed partition access/runtime next.
+- Status: DONE — installed bounded GitHub access and two actual five-profile capability/resume runs verified under the user-directed A takeover. Claim released; OPS01–03 service acceptance remains separate.
 - Origin: user's 2026-10-03 direction that ordinary implementation/testing should be automatic and should not repeatedly depend on A's AWS login.
 - Worker: next eligible direct worker, current routing B; select/report actual model and effort at claim. One task/worker; no subagents or credential sharing.
 - Scope at claim: exact GitHub workflow/scripts, resource/permission contracts needed by OPS01–03, bounded policy/bootstrap proposal, meaningful integration checks, safe evidence and own log/handoff. Record exact files first. No general administrator grant or live operation is authorized by this ticket.
@@ -1083,3 +1085,13 @@ User explicitly directs finish OPS00. Sole A continues synchronized36087ef; B ob
 ## A OPS00 template response repair — 2026-10-10T21:47:36.950355+00:00
 
 User supplied actual preview then AWS_RESPONSE_LIMIT at get-template; no installation/probe PASS. Sole A resumes the same saved preview/state. B observer-only, NP00 preserved. Exact bounded executable scope: access-install.py/test only plus own evidence/tracking. Compact only this read via native JMESPath, preserve all template fields/equality and 128 KiB capture bounds. Explicit predecessor resume verifies existing immutable binding/intent and does not repin or recreate. Red large-response regression reproduced;18 offline checks PASS, actual JMESPath object/string encoding44,794 bytes and exact semantic equality PASS. Initial parallel browser run had two loopback server failures (62/64); final entire pinned check with one browser worker PASS: 1484 application/two optional skips, hosted1/browser64/ref7/planning15/boundaries422. All16 native access checks PASS. No application/browser source change; all cases retained, no failure suppression. No new agent cloud action. [Repair](../../../../review-artifacts/OPS00/access-response-repair.md).
+
+
+## A final access installation and real GitHub proof — 2026-10-10T21:54:17.691587+00:00
+
+User supplied actual ACCESS_INSTALL_SUBMITTED16requests/one execution submission, then ACCESS_INSTALL_READBACK_PASS48reads/zero writes; the guarded installer verifies13 resources and preserves runtime/inspector baseline/trust. Original installation binding625cc16 and exact-template repairc8a600a retained. Clean equal main/current ownmartelaxe44531296 confirmed. First actual five-profile sequential [run38089352303](https://github.com/Known-Enough/known-enough/actions/runs/38089352303) dispatched on exactc8a600a with synthetic UUID11f5ad1a-a03f-43f6-8daa-96974a1c276a. Actual outcome pending; second identical-source/UUID proof only after inspection. Main frozen during proof. No paid call/email/participant change/app activation/new B execution. Same sole A takeover; B observer-only and saved NP00 preserved.
+
+
+## A OPS00 completed on installed access and actual two-run proof — 2026-10-10T22:00:08.651451+00:00
+
+DONE under explicit user takeover. [Installation/mapping/proof](../../../../review-artifacts/OPS00/access-installed-proof.md): guarded own-CloudShell readback and actual own-A runs38089352303/38089511617 on exactc8a600a/same UUID, five fresh plus five existing-record resumes, real forbidden-prefix denial, migration/archive versioned readback and all ten cleanup PASS. Downloaded report/source/actor/event/account/region/hash checks match. Probe reports total50 requests, zero provider calls; no signup/email/application publication/transfer/activation/data reset. Both verified operator IDs use the same checked GitHub path; fresh B execution remains unavailable, older genuine B recovery proof preserved. Release A OPS00 only; saved NP00 PAUSED/protected and final-order obligations retained. OPS01 next operations managed item remains CODE_READY/released and requires actual compatible cutover/service acceptance; no successor claim or monitor created. Documentation-only closeout checks/main synchronization follow.
