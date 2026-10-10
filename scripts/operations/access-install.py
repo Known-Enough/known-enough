@@ -24,6 +24,20 @@ STACK = 'KnownEnoughOperationsAccess'
 PREFIX = f'arn:aws:cloudformation:{m.REGION}:{m.ACCOUNT}:stack/{STACK}/'
 TEMPLATE_SHA = 'fcda140a81615db236647690352e706110d15fbf9a062e87c35248ab32b25171'
 PARTICIPANT_SHA = '0859906345e54c60b2c0f8eb6384a7038263d56b32e109de70500fa4c3328d82'
+RESPONSE_REPAIR_SOURCE = '625cc169f534952b1c8858c131a95631faa94bfd'
+
+
+def installation_source(state, source, resume_source):
+    """Use an existing same-template preview without repinning its private journal."""
+    if resume_source is None:
+        return source
+    require(resume_source == RESPONSE_REPAIR_SOURCE, 'RESUME_SOURCE_REJECTED')
+    binding = {'source': resume_source, 'templateSha': TEMPLATE_SHA, 'stack': STACK}
+    require(m.same(state.load('binding.json'), binding), 'RESUME_BINDING_REJECTED')
+    intent = state.load('preview.intent.json')
+    require(isinstance(intent, dict) and all(intent.get(key) == value for key, value in binding.items()),
+            'RESUME_INTENT_REJECTED')
+    return resume_source
 
 
 class Aws:
@@ -41,6 +55,10 @@ class Aws:
         outpath, errpath = self.folder / f'{self.calls}.out', self.folder / f'{self.calls}.err'
         command = ['aws', service, action, *args, '--region', m.REGION, '--output', 'json',
                    '--no-cli-pager', '--no-paginate', '--cli-connect-timeout', '5', '--cli-read-timeout', '8']
+        if (service, action) == ('cloudformation', 'get-template'):
+            # AWS CLI's pretty object output exceeds 128KiB for this exact stack.
+            # Compact only this read, preserving every template field for equality.
+            command += ['--query', '{TemplateBody:to_string(TemplateBody)}']
         with os.fdopen(m.safe_file(outpath, os.O_WRONLY | os.O_CREAT | os.O_EXCL), 'wb') as out, \
                 os.fdopen(m.safe_file(errpath, os.O_WRONLY | os.O_CREAT | os.O_EXCL), 'wb') as err:
             try:
@@ -240,6 +258,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source', required=True)
     parser.add_argument('--state', required=True)
+    parser.add_argument('--resume-source', choices=[RESPONSE_REPAIR_SOURCE])
     args = parser.parse_args()
     state = None
     aws = None
@@ -251,8 +270,9 @@ def main():
         require(hashlib.sha256(raw).hexdigest() == TEMPLATE_SHA, 'TEMPLATE_CHANGED')
         template = json.loads(raw)
         state = m.State(Path(args.state), Path.home())
+        source = installation_source(state, args.source, args.resume_source)
         aws = Aws(state)
-        report['result'] = Installation(state, aws, args.source, template).run()
+        report['result'] = Installation(state, aws, source, template).run()
     except m.Rejected as error:
         report['classification'] = str(error)
     except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError):

@@ -5,6 +5,8 @@ import importlib.util
 import json
 from pathlib import Path
 import tempfile
+import subprocess
+import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -212,6 +214,81 @@ class Tests(unittest.TestCase):
         with self.assertRaisesRegex(module.m.Rejected, 'RUNTIME_TRUST_REJECTED'):
             self.run_install()
         self.assertEqual(self.aws.writes, [])
+
+
+class TransportTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.home = Path(self.temp.name)
+        self.state = module.m.State(self.home / 'state', self.home)
+
+    def tearDown(self):
+        self.state.close()
+        self.temp.cleanup()
+
+    def test_actual_large_template_response_compacts_before_bounded_capture(self):
+        # AWS CLI's four-space JSON response exceeds the unchanged 128KiB bound.
+        original = json.dumps({'TemplateBody': TEMPLATE}, indent=4)
+        self.assertGreater(len(original.encode()), module.m.inventory.CAPTURE_LIMIT)
+        observed = []
+        def execute(command, **options):
+            observed.append(command)
+            if '--query' in command:
+                self.assertEqual(command[command.index('--query') + 1], '{TemplateBody:to_string(TemplateBody)}')
+                raw = json.dumps({'TemplateBody': json.dumps(TEMPLATE, separators=(',', ':'))}, indent=4)
+            else:
+                raw = original
+            response = self.home / 'response.json'
+            response.write_text(raw)
+            return module.m.inventory.bounded_run([sys.executable, '-c',
+                'import sys;sys.stdout.buffer.write(open(sys.argv[1],"rb").read())', str(response)], **options)
+        aws = module.Aws(self.state, execute)
+        result = aws.call('cloudformation', 'get-template', '--change-set-name', CHANGE_ID)
+        self.assertTrue(module.m.same(module.m.document(result['TemplateBody']), TEMPLATE))
+        self.assertEqual(aws.mutations, 0)
+        self.assertEqual(len(observed), 1)
+
+    def test_oversized_response_is_still_stopped_and_private_capture_bounded(self):
+        def execute(command, **options):
+            return module.m.inventory.bounded_run([sys.executable, '-c',
+                'import sys;sys.stdout.buffer.write(b"x"*262144)'], **options)
+        aws = module.Aws(self.state, execute)
+        with self.assertRaisesRegex(module.m.Rejected, 'AWS_RESPONSE_LIMIT'):
+            aws.call('cloudformation', 'get-template', '--change-set-name', CHANGE_ID)
+        self.assertEqual((aws.folder / '1.out').stat().st_size, module.m.inventory.CAPTURE_LIMIT)
+        self.assertEqual(aws.mutations, 0)
+
+    def test_other_operations_do_not_project_away_identity_or_plan_fields(self):
+        def execute(command, **options):
+            self.assertNotIn('--query', command)
+            options['stdout'].write(b'{"Account":"092954139775"}')
+            return subprocess.CompletedProcess(command, 0)
+        self.assertEqual(module.Aws(self.state, execute).call('sts', 'get-caller-identity'),
+                         {'Account': '092954139775'})
+
+    def test_explicit_same_template_resume_preserves_existing_source_intent(self):
+        old = '625cc169f534952b1c8858c131a95631faa94bfd'
+        binding = {'source': old, 'templateSha': module.TEMPLATE_SHA, 'stack': module.STACK}
+        self.state.save('binding.json', binding)
+        self.state.save('preview.intent.json', dict(binding, changeSetName='saved', token='saved'))
+        self.assertEqual(module.installation_source(self.state, 'b' * 40, old), old)
+        self.assertEqual(self.state.load('binding.json'), binding)
+        self.assertEqual(self.state.load('preview.intent.json')['token'], 'saved')
+
+    def test_resume_cannot_adopt_fresh_state_or_foreign_template_intent(self):
+        old = '625cc169f534952b1c8858c131a95631faa94bfd'
+        with self.assertRaisesRegex(module.m.Rejected, 'RESUME_BINDING_REJECTED'):
+            module.installation_source(self.state, 'b' * 40, old)
+        binding = {'source': old, 'templateSha': module.TEMPLATE_SHA, 'stack': module.STACK}
+        self.state.save('binding.json', binding)
+        self.state.save('preview.intent.json', dict(binding, templateSha='wrong'))
+        with self.assertRaisesRegex(module.m.Rejected, 'RESUME_INTENT_REJECTED'):
+            module.installation_source(self.state, 'b' * 40, old)
+
+    def test_resume_source_is_the_single_explicit_predecessor_only(self):
+        with self.assertRaisesRegex(module.m.Rejected, 'RESUME_SOURCE_REJECTED'):
+            module.installation_source(self.state, 'b' * 40, 'c' * 40)
+        self.assertEqual(module.installation_source(self.state, 'b' * 40, None), 'b' * 40)
 
 
 if __name__ == '__main__':

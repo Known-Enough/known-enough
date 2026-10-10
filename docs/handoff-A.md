@@ -1,3 +1,5 @@
+Current A OPS00: user preview saved; template response exceeded 128 KiB before installation. [Response repair](review-artifacts/OPS00/access-response-repair.md) preserves exact template and existing preview/state;18 installer/16 native/full 1484 application/64 browser checks PASS. Next: same-state repaired resume, then two actual GitHub proofs. IN_PROGRESS/A, B observer-only; NP00 preserved.
+
 ## Current A OPS00 final access execution — 2026-10-10T21:21:05.945765+00:00
 
 Current A OPS00: [final GitHub access package](review-artifacts/OPS00/finish-access.md) checked; five operation roles and trusted runtime/inspector additions. Full1484app/64browser/native326/installer11 PASS. Next: one pinned own-CloudShell install, then two real same-source/UUID capability/resume runs; not DONE before receipts. App migration/AI/display selection belongs to OPS01–03 managed acceptance. Sole A/B observer-only; no new live AWS action.

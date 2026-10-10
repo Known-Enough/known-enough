@@ -1,0 +1,61 @@
+{
+  "recordedAt": "2026-10-10T21:50:54.151460+00:00",
+  "baseSource": "625cc169f534952b1c8858c131a95631faa94bfd",
+  "phase": "RESPONSE_REPAIR_CHECKED_AWAITING_SAME_STATE_RESUME",
+  "userReceipt": {
+    "preview": {
+      "result": "ACCESS_PREVIEW_PENDING",
+      "requests": 39,
+      "mutations": 1
+    },
+    "blocked": {
+      "result": "BLOCKED",
+      "classification": "AWS_RESPONSE_LIMIT",
+      "requests": 4,
+      "mutations": 0,
+      "action": "cloudformation:get-template"
+    }
+  },
+  "reproduction": {
+    "awsStyleResponseBytes": 134895,
+    "captureLimit": 131072,
+    "projectedResponseBytes": 44794
+  },
+  "sourceHashes": {
+    "scripts/operations/access-install.py": "bdff964895b2115920d6273f3e9a853cd32f119478eb557e4ad412c618735948",
+    "scripts/operations/access-install.test.py": "42c7af9b93cee9499489ecdb427eb7b7b61db1d9089c43fa3a5a55dc457ce922"
+  },
+  "checks": {
+    "installer": 18,
+    "redRegression": "AWS_RESPONSE_LIMIT reproduced before fix",
+    "actualJmespath": "1.0.1, object/string TemplateBody both semantic equality PASS",
+    "full": {
+      "result": "PASS",
+      "command": "npm run check -- -- --workers=1",
+      "node": "24.21.0",
+      "npm": "11.19.0",
+      "application": 1484,
+      "optionalSkips": 2,
+      "browser": 64,
+      "hosted": 1,
+      "references": 7,
+      "planning": 15,
+      "boundaries": 422
+    },
+    "initialFull": {
+      "result": "FAIL",
+      "browserPassed": 62,
+      "browserFailed": 2,
+      "errors": [
+        "net::ERR_CONNECTION_REFUSED at loopback port5179",
+        "net::ERR_CONNECTION_REFUSED at loopback port5184"
+      ],
+      "applicationSourceChanged": false
+    },
+    "accessNative": 16
+  },
+  "templateUnchanged": true,
+  "newAgentCloudWrites": 0,
+  "samePreviewStatePreserved": true,
+  "task": "OPS00 IN_PROGRESS/A; B observer-only; saved NP00 preserved"
+}
