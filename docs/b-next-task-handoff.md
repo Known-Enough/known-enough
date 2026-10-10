@@ -1,5 +1,7 @@
 # B handoff after ASSESS07 — 2026-10-06T17:17:44Z
 
+**A owns OPS00 — user-directed takeover, 2026-10-10:** [Exact transfer/scope](tasks/active/operations/OPS00/a-takeover-20261010.md). B is unavailable according to the human; current RUN191 transfers to A. If B resumes, preserve unpublished/local work and observe only; no code/test dispatch/claim or successor until reverse handoff. Do not reset either clone or assume B local fix discarded.
+
 **Next after current safe handoff — partitions installed:** [A CONFIGURATION_MATCH receipt](review-artifacts/OPS00/a-installed-partitions-20261010.md) replaces the missing-table assumption. Prepare concrete scoped role/runtime connection and test commands within OPS00/OPS01, preserving current installer claim until checked handoff. Do not reinstall or repeat unchanged denied inventory; installed metadata does not prove access/activation.
 
 **Immediate user priority — actual recovery tests:** Follow [the concrete two-run instruction](tasks/active/operations/OPS00/managed-test-priority.md). A enabled/read back OPERATIONS_RECOVERY_ENABLED=true after finding it absent. Finish genuine current work with a concise checkpoint, then claim OPS00 managed verification; no unrelated new coding/doc-only hold. Freeze same SHA/UUID across both runs, no main push between them. Actual start/results remain unobserved.

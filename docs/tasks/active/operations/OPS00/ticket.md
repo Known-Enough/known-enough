@@ -1,5 +1,7 @@
 # OPS00 — Complete the GitHub operations path
 
+**Current claim — A, 2026-10-10:** User transfers B's unavailable RUN191 to A on synchronized3de3b7c. [Bounded takeover](a-takeover-20261010.md): original installer execution-intent precedence source/tests, own tracking/evidence; then scope amendment for installed-partition role/runtime package. B local60test claim remains unverified and preserved. No whole-task DONE or new cloud action.
+
 **A partition installation milestone — 2026-10-10:** [Exact receipt/next work](../../../../review-artifacts/OPS00/a-installed-partitions-20261010.md). Table/stack configuration matched on f763284. Preserve current claim; next concrete package is minimum verified role mapping/runtime connection and managed tests. roleAttachment NOT_EXECUTED/activation DISABLED; whole-task acceptance stays open.
 
 **Immediate priority — user directs tests, 2026-10-09:** [Two real sequential GitHub recovery runs](managed-test-priority.md), using the same frozen source/UUID and own B account. Installed configuration matched; A enabled/read back the missing test switch. Existing coding phase released; next managed-test phase READY, no unrelated bug hunting or prolonged doc closeout. Effective scope/managed proof remains open until actual evidence.
@@ -16,7 +18,7 @@
 
 **Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of UX03, not deferred administrator installation. Prepare/test automation and the exact setup package now; install missing delegation only in the final cloud phase. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
 
-- Status: IN_PROGRESS / B — RUN191 original installer execution-intent correction; whole-task managed criteria remain open.
+- Status: IN_PROGRESS / A — user-directed RUN191 transfer; bounded published-source intent correction, installed partition access/runtime next.
 - Origin: user's 2026-10-03 direction that ordinary implementation/testing should be automatic and should not repeatedly depend on A's AWS login.
 - Worker: next eligible direct worker, current routing B; select/report actual model and effort at claim. One task/worker; no subagents or credential sharing.
 - Scope at claim: exact GitHub workflow/scripts, resource/permission contracts needed by OPS01–03, bounded policy/bootstrap proposal, meaningful integration checks, safe evidence and own log/handoff. Record exact files first. No general administrator grant or live operation is authorized by this ticket.

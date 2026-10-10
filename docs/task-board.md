@@ -1,3 +1,7 @@
+## Sole active work — OPS00 transferred to A, 2026-10-10
+
+User directs A to continue while B is unavailable. [Recorded transfer and scope](tasks/active/operations/OPS00/a-takeover-20261010.md). Preserve B local history; B observes only until reverse handoff. A finishes current intent correction then exact role/runtime package, with one task and no new worker/monitor.
+
 ## Installed milestone — partition storage configuration matched, 2026-10-10
 
 [Actual A receipt and next package](review-artifacts/OPS00/a-installed-partitions-20261010.md): KnownEnoughPartitions installed, access/runtime/activation remain unproved. Preserve actual active claim through safe handoff; next useful priority is scoped role/runtime package and real OPS01 tests, not reinstall or unrelated bug hunting.
@@ -149,7 +153,7 @@ A's recurring observer and completed one-time follow-up are deleted. B's existin
 | 3 | [UX01](tasks/active/ui-ux/UX01/README.md) | REVIEW / CODE_READY / unclaimed — checked handoff 2026-10-06T23:37Z | Named bounded review and five findings recorded; provider completion and exhaustive device/visual proof remain open. |
 | 4 | [UX02](tasks/active/ui-ux/UX02/README.md) | REVIEW / CODE_READY / unclaimed — checked handoff 2026-10-07T01:14Z | Five findings addressed/deferred with pinned full proof; provider completion and actual browser zoom remain open. |
 | 5 | [UX03](tasks/active/ui-ux/UX03/README.md) | REVIEW / CODE_READY / unclaimed — checked handoff 2026-10-07T02:07Z | Available UI/release/instructions checked; preserved historical QA01 failure and required later live acceptance remain open. |
-| 6 | [OPS00](tasks/active/operations/OPS00/ticket.md) | IN_PROGRESS / B — original installer intent correction | Synthetic orphan execution bug reproduced; one bounded correction, managed installation/roles/activation open. |
+| 6 | [OPS00](tasks/active/operations/OPS00/ticket.md) | IN_PROGRESS / A — user-directed takeover of current correction | [Exact scope/handoff](tasks/active/operations/OPS00/a-takeover-20261010.md); recovery/partition installs preserved, role/runtime next. B observes only. |
 | 7 | [OPS01](tasks/active/operations/OPS01/README.md) | REVIEW / unclaimed; CODE_READY verified, B coding claim released | Inactive source/control/copied-journal-bound driver/runtime, guarded archive, setup/profile proposal and CI fixes:364 focused,48 operations,full1148 application/62 browser PASS. [Exact managed closeout](review-artifacts/OPS01/managed-closeout.md); installation/cutover/effective permissions/managed proof deferred. |
 | 8 | [OPS02](tasks/active/operations/OPS02/README.md) | REVIEW / unclaimed; CODE_READY verified, B coding claim released | Inactive owner-only export, synthetic retention/expiry and sealed current-consent erasure/recovery:409focused,55operations,full1190application/62browser PASS; matching own-B CI37714186412 verified. [Exact managed closeout](review-artifacts/OPS02/managed-closeout.md); runtime/policy/installation/managed proof deferred. |
 | 9 | [OPS03](tasks/active/operations/OPS03/README.md) | CODE_READY / REVIEW, released RUN145 | Checked inactive durable ID-only jobs/leases/recovery and atomic consent/usage fences; administrator installation/managed proof deferred. |
