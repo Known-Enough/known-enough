@@ -1,0 +1,25 @@
+{
+  "task": "OPS01 IN_PROGRESS/A",
+  "recordedAt": "2026-10-11T03:17:18.763295+00:00",
+  "baseSource": "b0735d07488fbc75ac13ef3d131a4f82b6a92575",
+  "purpose": "Actual archive directory IAM coverage before owned signup or participant tests",
+  "hashes": {
+    "scripts/operations/partition-service-check.mjs": "8fb6e93e6558ff18b9bca97f0d6530222749d7297096c5f40981565c5df7ac86",
+    "scripts/operations/partition-service-check.test.mjs": "4ad0b6bba77c048858d7bdd176277bc5ac6d645e32a9047a8237128a56ad5b77",
+    ".github/workflows/operations-partition-service.yml": "3f6bef68d609979c674c15212291e69da66664da63343f4229d384928ffc5840"
+  },
+  "focused": 3,
+  "full": "PASS",
+  "liveAccess": "NOT_YET_VERIFIED",
+  "participantActions": 0,
+  "signup": 0,
+  "email": 0,
+  "modelCalls": 0,
+  "deployment": "ALREADY_ACTIVATED_SEPARATELY",
+  "application": 1507,
+  "optionalSkipped": 2,
+  "browser": 64,
+  "hostedPreview": 1,
+  "references": 7,
+  "planning": 15
+}

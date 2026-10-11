@@ -28,13 +28,103 @@
     "bytes": 559560,
     "actorId": 44531296
   },
-  "publication": "NOT_EXECUTED",
-  "sourceFreeze": "NOT_EXECUTED",
-  "activation": "NOT_EXECUTED",
+  "publication": "VERIFIED",
+  "sourceFreeze": "VERIFIED",
+  "activation": "ACTIVE",
   "proofRequired": [
     "actual immutable recovery and copied journal",
     "actual code-only publication preserving environment",
     "native source/control/journal activation readback",
     "managed service/archive/privacy proof"
-  ]
+  ],
+  "actualCutover": {
+    "runId": 38107337674,
+    "source": "b0735d07488fbc75ac13ef3d131a4f82b6a92575",
+    "actorId": 44531296,
+    "event": "workflow_dispatch",
+    "startedAt": "2026-10-11T03:06:48Z",
+    "finishedAt": "2026-10-11T03:07:53Z",
+    "reports": {
+      "partition-publish-report.json": {
+        "sourceSha": "b0735d07488fbc75ac13ef3d131a4f82b6a92575",
+        "result": "PARTITION_STANDBY_CODE_READBACK_PASS",
+        "environment": "UNCHANGED",
+        "sourceFreeze": "NOT_EXECUTED",
+        "activation": "NOT_EXECUTED"
+      },
+      "partition-readback-report.json": {
+        "sourceSha": "b0735d07488fbc75ac13ef3d131a4f82b6a92575",
+        "result": "PARTITION_ACTIVE_RESUME_READBACK_PASS",
+        "activation": "ACTIVE"
+      },
+      "partition-activate-report.json": {
+        "sourceSha": "b0735d07488fbc75ac13ef3d131a4f82b6a92575",
+        "result": "PARTITION_ACTIVE_READBACK_PASS",
+        "recovery": "VERIFIED",
+        "completedRows": 0,
+        "deployment": "STANDBY_CODE_VERIFIED",
+        "activation": "ACTIVE",
+        "environment": "UNCHANGED"
+      },
+      "partition-upload-report.json": {
+        "sourceSha": "b0735d07488fbc75ac13ef3d131a4f82b6a92575",
+        "result": "PARTITION_PRIVATE_PACKAGE_UPLOADED",
+        "deployment": "NOT_EXECUTED",
+        "activation": "NOT_EXECUTED"
+      },
+      "partition-backup-report.json": {
+        "sourceSha": "b0735d07488fbc75ac13ef3d131a4f82b6a92575",
+        "account": "092954139775",
+        "region": "us-east-1",
+        "result": "PARTITION_PRIOR_CODE_BACKUP_VERIFIED",
+        "privateBackupBytes": 559560,
+        "codeUpdate": "NOT_EXECUTED",
+        "sourceFreeze": "NOT_EXECUTED",
+        "activation": "NOT_EXECUTED"
+      },
+      "partition-prepare-report.json": {
+        "sourceSha": "b0735d07488fbc75ac13ef3d131a4f82b6a92575",
+        "result": "PARTITION_STANDBY_PACKAGE_PREPARED",
+        "recovery": "VERIFIED",
+        "plannedRows": 0,
+        "sourceFreeze": "NOT_EXECUTED",
+        "deployment": "NOT_EXECUTED",
+        "activation": "NOT_EXECUTED"
+      }
+    }
+  },
+  "actualSeparateResume": {
+    "runId": 38107509806,
+    "result": "SUCCESS",
+    "source": "b0735d07488fbc75ac13ef3d131a4f82b6a92575",
+    "reports": {
+      "partition-recover-report.json": {
+        "sourceSha": "b0735d07488fbc75ac13ef3d131a4f82b6a92575",
+        "result": "PARTITION_INSTALLED_PACKAGE_RECOVERED",
+        "deployment": "UNCHANGED",
+        "activation": "NOT_EXECUTED"
+      },
+      "partition-readback-report.json": {
+        "sourceSha": "b0735d07488fbc75ac13ef3d131a4f82b6a92575",
+        "result": "PARTITION_ACTIVE_RESUME_READBACK_PASS",
+        "activation": "ACTIVE"
+      },
+      "partition-activate-report.json": {
+        "sourceSha": "b0735d07488fbc75ac13ef3d131a4f82b6a92575",
+        "result": "PARTITION_ACTIVE_ALREADY_VERIFIED",
+        "activation": "ACTIVE",
+        "deployment": "UNCHANGED"
+      },
+      "partition-backup-report.json": {
+        "sourceSha": "b0735d07488fbc75ac13ef3d131a4f82b6a92575",
+        "account": "092954139775",
+        "region": "us-east-1",
+        "result": "PARTITION_PRIOR_CODE_BACKUP_VERIFIED",
+        "privateBackupBytes": 405731,
+        "codeUpdate": "NOT_EXECUTED",
+        "sourceFreeze": "NOT_EXECUTED",
+        "activation": "NOT_EXECUTED"
+      }
+    }
+  }
 }
