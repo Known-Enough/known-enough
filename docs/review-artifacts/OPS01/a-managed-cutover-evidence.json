@@ -1,0 +1,40 @@
+{
+  "task": "OPS01 IN_PROGRESS/A",
+  "recordedAt": "2026-10-11T03:06:36.508737+00:00",
+  "baseSource": "8338e6347d469a9b93cd90a63438dc25cbb6e5d0",
+  "hashes": {
+    "scripts/operations/partition-cutover.mjs": "f0078fe47c9ce48e5a554ae491cedfdea57b87b07b2a5cbc67d28755d7baa167",
+    "scripts/operations/partition-cutover.test.mjs": "e9f95dd6db8b30e01cce41f1eb662400046959aa815f0b1acf1de6832bf2dac7",
+    "scripts/operations/partition-entry.ts": "a378e5b97a5c8bc4a73c211c1fafbd972fbd66ea582f958728c4420b14b5cc87",
+    ".github/workflows/operations-partition-cutover.yml": "dc1fabdfe3032e9da475762790051e0d6c2005b2b584cfca343c690936c10520"
+  },
+  "checks": {
+    "native": 35,
+    "full": "PASS",
+    "manualBundleBuildImport": "PASS",
+    "bundleModuleBytes": 1985331,
+    "fixtureContent": "ABSENT",
+    "application": 1507,
+    "optionalSkipped": 2,
+    "hostedPreview": 1,
+    "browser": 64,
+    "references": 7,
+    "planning": 15
+  },
+  "actualBackup": {
+    "runId": 38106690355,
+    "source": "8338e6347d469a9b93cd90a63438dc25cbb6e5d0",
+    "result": "PARTITION_PRIOR_CODE_BACKUP_VERIFIED",
+    "bytes": 559560,
+    "actorId": 44531296
+  },
+  "publication": "NOT_EXECUTED",
+  "sourceFreeze": "NOT_EXECUTED",
+  "activation": "NOT_EXECUTED",
+  "proofRequired": [
+    "actual immutable recovery and copied journal",
+    "actual code-only publication preserving environment",
+    "native source/control/journal activation readback",
+    "managed service/archive/privacy proof"
+  ]
+}

@@ -1,0 +1,146 @@
+name: Publish and activate checked group partition storage
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact checked main source SHA
+        required: true
+        type: string
+      operation:
+        description: New cutover or resume the exact installed private package
+        required: true
+        type: choice
+        default: cutover
+        options:
+          - cutover
+          - resume
+permissions:
+  contents: read
+concurrency:
+  group: known-enough-partition-cutover
+  cancel-in-progress: false
+jobs:
+  cutover:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && (github.actor_id == '143764700' || github.actor_id == '44531296')
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      EXPECTED_SOURCE: ${{ inputs.source_sha }}
+      NODE_NO_WARNINGS: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Verify exact source and conditional migration/release behaviors before credentials
+        run: |
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node scripts/operations/verify.mjs > /dev/null
+          npm ci
+          node --experimental-transform-types --test scripts/operations/partition-transfer.test.mjs scripts/operations/partition-backup.test.mjs scripts/operations/partition-cutover.test.mjs
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPrimaryRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          role-session-name: partition-backup-${{ github.run_id }}
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Execute bounded private backup and publish only finite status
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/partition-backup.mjs  > "$RUNNER_TEMP/partition-backup-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPartitionMigration
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          role-session-name: partition-prepare-${{ github.run_id }}
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Recover the verified installed private package for an interrupted run
+        if: inputs.operation == 'resume'
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/partition-cutover.mjs recover > "$RUNNER_TEMP/partition-recover-report.json" 2>&1
+      - name: Execute bounded private prepare and publish only finite status
+        if: inputs.operation == 'cutover'
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/partition-cutover.mjs prepare > "$RUNNER_TEMP/partition-prepare-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubQaRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          role-session-name: partition-upload-${{ github.run_id }}
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Execute bounded private upload and publish only finite status
+        if: inputs.operation == 'cutover'
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/partition-cutover.mjs upload > "$RUNNER_TEMP/partition-upload-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPrimaryRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          role-session-name: partition-publish-${{ github.run_id }}
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Execute bounded private publish and publish only finite status
+        if: inputs.operation == 'cutover'
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/partition-cutover.mjs publish > "$RUNNER_TEMP/partition-publish-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPartitionMigration
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          role-session-name: partition-activate-${{ github.run_id }}
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Execute bounded private activate and publish only finite status
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/partition-cutover.mjs activate > "$RUNNER_TEMP/partition-activate-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPartitionMigration
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          role-session-name: partition-readback-${{ github.run_id }}
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Execute bounded private readback and publish only finite status
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/partition-cutover.mjs status > "$RUNNER_TEMP/partition-readback-report.json" 2>&1
+      - name: Publish only completed or failed finite phase reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: operations-partition-cutover
+          path: ${{ runner.temp }}/partition-*-report.json
+          if-no-files-found: warn
+          retention-days: 30
