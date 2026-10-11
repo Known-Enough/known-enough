@@ -1,0 +1,12 @@
+{
+  "recordedAt": "2026-10-11T22:30:11.437815+00:00",
+  "evidenceOrigin": "User CloudShell output in A chat",
+  "stackArn": "arn:aws:cloudformation:us-east-1:092954139775:stack/KnownEnoughModelJobRuntime/b7bab570-c5c2-11f1-82db-0ef4eab46d73",
+  "stackStatus": "CREATE_COMPLETE",
+  "preparedSourceSha": "9a27a99f20b1462183e8843ca9960bd53feed57b",
+  "preparedRun": "https://github.com/Known-Enough/known-enough/actions/runs/38180021249",
+  "workerSha256": "a123823764f35df6abdc09a288d1c26962ed76f94b6956c7e77bf89ef6cc2214",
+  "independentWorkerCodeRoleRuleReadback": "PENDING",
+  "apiPublication": "NOT_EXECUTED_BY_A",
+  "liveQualification": "PENDING"
+}
