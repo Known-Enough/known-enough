@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { nativeConfiguration, verifyCodePublication, recoveryBinding } from './partition-cutover.mjs';
+import { nativeConfiguration, verifyCodePublication, recoveryBinding, recoveryArchiveScript } from './partition-cutover.mjs';
 const digest = 'a'.repeat(64);
 function fixture() {
   return { FunctionArn: 'arn:aws:lambda:us-east-1:092954139775:function:known-enough-stage-api',
@@ -50,4 +50,18 @@ test('restart uses the exact persisted migration anchors and rejects mismatched,
   const stale = structuredClone(j); stale.revision.N = '9'; assert.throws(() => recoveryBinding(c,stale));
   assert.throws(() => recoveryBinding(envelope('MIGRATION#CONTROL','STATE',{...control,active:true}),j));
   assert.throws(() => recoveryBinding(c,envelope(j.PK.S,'JOURNAL',{...journal,planHash:'e'.repeat(64)})));
+});
+
+
+test('actual archive recovery accepts legacy/new private packages but refuses duplicate or unexpected members before extraction', async () => {
+ const {mkdtemp,readFile,rm}=await import('node:fs/promises');const {tmpdir}=await import('node:os');
+ const {join}=await import('node:path');const {execFile}=await import('node:child_process');const {promisify}=await import('node:util');
+ const run=promisify(execFile);const folder=await mkdtemp(join(tmpdir(),'ops02-recovery-test-'));
+ try {
+  for(const extra of ['none','lifecycle','foreign','duplicate']) {
+   await run('python3',['-c',"import pathlib,zipfile,sys; p=pathlib.Path(sys.argv[1]); z=zipfile.ZipFile(p/'test.zip','w'); names=['api.mjs','configuration-private.json','manifest-private.json','release-private.json']; names+=['lifecycle-private.json'] if sys.argv[2]=='lifecycle' else ['foreign.json'] if sys.argv[2]=='foreign' else ['manifest-private.json'] if sys.argv[2]=='duplicate' else []; [(z.writestr(n,b'PRIVATE_TEST_BYTES')) for n in names]; z.close(); (p/'out').mkdir(exist_ok=True)",folder,extra]);
+   const operation=run('python3',['-c',recoveryArchiveScript,join(folder,'test.zip'),join(folder,'out')]);
+   if(['foreign','duplicate'].includes(extra))await assert.rejects(operation);else {await operation;assert.equal((await readFile(join(folder,'out','manifest-private.json'))).toString(),'PRIVATE_TEST_BYTES');}
+  }
+ } finally {await rm(folder,{recursive:true,force:true});}
 });

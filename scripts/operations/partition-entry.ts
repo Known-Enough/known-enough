@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
 import { createPartitionReleaseHandler } from '../../apps/api/src/partition-release.ts';
+import { loadLifecyclePackage } from './lifecycle-package.ts';
 import { createKe13bLambdaHandler, readKe13bConfig, type HttpApiEvent, type HttpApiResult } from '../../apps/api/src/ke13b-lambda.ts';
 let selected: ((event: HttpApiEvent) => Promise<HttpApiResult>) | undefined;
 export async function handler(event: HttpApiEvent): Promise<HttpApiResult> {
@@ -18,7 +19,11 @@ export async function handler(event: HttpApiEvent): Promise<HttpApiResult> {
         || config.groups?.tableName !== 'KnownEnoughGroupsStage' || config.groups.emailKey !== configuration.emailKey
         || config.groups.cognitoDomain !== configuration.cognitoDomain) throw new Error('PARTITION_RELEASE_INVALID');
       const client = new DynamoDBClient({ region: 'us-east-1', endpoint: 'https://dynamodb.us-east-1.amazonaws.com', maxAttempts: 1 });
+      let lifecycle;
+      try { lifecycle = loadLifecyclePackage(readFileSync(join(directory, 'lifecycle-private.json'))); }
+      catch (error) { if (!(error instanceof Error && 'code' in error && error.code === 'ENOENT')) throw error; }
       selected = createPartitionReleaseHandler({ configurationBytes,
+        ...(lifecycle ? { lifecycle } : {}),
         manifestBytes: readFileSync(join(directory, 'manifest-private.json')),
         release: JSON.parse(readFileSync(join(directory, 'release-private.json'), 'utf8')),
         legacy: createKe13bLambdaHandler(config), readSource: async signal => {

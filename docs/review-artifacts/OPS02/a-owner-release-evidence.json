@@ -1,0 +1,24 @@
+{
+  "observedAt": "2026-10-11T06:12:20.405800+00:00",
+  "result": "SOURCE_CHECKED_NOT_DEPLOYED",
+  "files": {
+    "scripts/operations/lifecycle-package.ts": "78cf04734d21def45f316cd8f88a3d65966c24b50fb966df7ded04debaab3f22",
+    "scripts/operations/lifecycle-package.test.mjs": "35a5c5fe51e0ad2a76144cc61de1dcc5e31bec48fcc0462b067b5ed2e3709179",
+    "scripts/operations/lifecycle-release.mjs": "0668cc8f5724de9cfcc30cca83f00596c0f9cbb9da4b8d205686da9fd570e119",
+    "scripts/operations/lifecycle-release.test.mjs": "16de8e4355872c0f24df342eebd64f5c64c4241f993bc0857ca4635a5196e707",
+    "scripts/operations/partition-entry.ts": "86a8bbd323da20c809179cef81ca1cf392862f0e3257720eb092e589e27e43f0",
+    "scripts/operations/partition-cutover.mjs": "15e3b504f32ae914a08e4cc669abb0316b5ee85982f471d4e29225b761f6d53b",
+    "scripts/operations/partition-cutover.test.mjs": "fbbac4aa3261db084746dad31032dce31ef4085c1e66a92466091dfa387f6a59",
+    ".github/workflows/operations-lifecycle-release.yml": "d26966426faff87e3a11ba061197d5831e59c56dc0d4098d85fd3d51a453ce3c"
+  },
+  "checks": {
+    "nativePackageReleaseRecovery": 10,
+    "focusedRuntimeDeploymentRelease": 89,
+    "fullCheck": "EXIT_0",
+    "browser": 64,
+    "entryBundle": "COMPILED"
+  },
+  "dataChanges": 0,
+  "retentionEnforcement": "NOT_INSTALLED",
+  "ownerProof": "NOT_EXECUTED"
+}

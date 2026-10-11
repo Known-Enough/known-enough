@@ -14,6 +14,8 @@ import { partitionTransfer, transferSourceSnapshot, transferAuthority, transferE
 import { partitionRecoveryStorage } from './partition-recovery.mjs';
 import { primaryBackupKey } from './partition-backup.mjs';
 import { verifySource } from './verify.mjs';
+import { loadLifecyclePackage } from './lifecycle-package.ts';
+export const recoveryArchiveScript = "import pathlib,zipfile,sys; z=zipfile.ZipFile(sys.argv[1]); p=pathlib.Path(sys.argv[2]); names=['api.mjs','configuration-private.json','manifest-private.json','release-private.json']; optional=['lifecycle-private.json'] if 'lifecycle-private.json' in z.namelist() else []; names+=optional; assert sorted(z.namelist())==sorted(names); assert all(z.getinfo(n).file_size <= (40000000 if n=='api.mjs' else 1048576) for n in names); [(p/n).write_bytes(z.read(n)) for n in names if n!='api.mjs']";
 const execute = promisify(execFile);
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const bucket = 'known-enough-qa-artifacts-092954139775';
@@ -132,11 +134,14 @@ async function main(action) {
     const previous = JSON.parse(await readFile(priorPath, 'utf8'));
     const currentZip = join(process.env.RUNNER_TEMP, 'partition-backup-private/previous-api.zip');
     await mkdir(directory, { mode: 0o700 });
-    await execute('python3', ['-c', "import pathlib,zipfile,sys; z=zipfile.ZipFile(sys.argv[1]); p=pathlib.Path(sys.argv[2]); names=['api.mjs','configuration-private.json','manifest-private.json','release-private.json']; assert sorted(z.namelist())==sorted(names); assert all(z.getinfo(n).file_size <= (40000000 if n=='api.mjs' else 1048576) for n in names); [(p/n).write_bytes(z.read(n)) for n in names if n!='api.mjs']", currentZip, directory], { timeout: 10_000 });
+    await execute('python3', ['-c', recoveryArchiveScript, currentZip, directory], { timeout: 10_000 });
     const manifest = await readFile(join(directory, 'manifest-private.json'));
     const config = await readFile(join(directory, 'configuration-private.json'));
     const release = JSON.parse(await readFile(join(directory, 'release-private.json'), 'utf8'));
-    createPartitionDeploymentHandler(config, manifest, release);
+    let lifecycle;
+    try { lifecycle = loadLifecyclePackage(await readFile(join(directory, 'lifecycle-private.json'))); }
+    catch (error) { if (error.code !== 'ENOENT') throw error; }
+    createPartitionDeploymentHandler(config, manifest, release, undefined, lifecycle);
     const actual = nativeConfiguration(previous); const packaged = JSON.parse(config);
     for (const field of ['userPoolId','participantClientId','displayClientId','cognitoDomain','allowedOrigin','emailKey'])
       if (actual[field] !== packaged[field]) return invalid();
