@@ -42,6 +42,7 @@ jobs:
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
           node scripts/operations/verify.mjs > /dev/null
           npm ci
+          python3 -B scripts/operations/jobs-worker-release.test.py
           node --experimental-transform-types --test scripts/operations/partition-transfer.test.mjs scripts/operations/partition-backup.test.mjs scripts/operations/partition-cutover.test.mjs scripts/operations/lifecycle-release.test.mjs scripts/operations/lifecycle-package.test.mjs scripts/operations/jobs-api-release.test.mjs scripts/operations/jobs-source-transition.test.mjs scripts/operations/jobs-runtime-package.test.mjs
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
@@ -108,6 +109,21 @@ jobs:
           w['artifactStorage'] = 'VERIFIED'
           (root/'partition-prepare-report.json').write_text(json.dumps(report)+'\n')
           PYCODE
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: inputs.publish_api
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          role-session-name: coordinated-worker-${{ github.run_id }}
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Publish exact matching worker code while schedule remains disabled
+        if: inputs.publish_api
+        env:
+          AWS_MAX_ATTEMPTS: '1'
+        run: python3 -B scripts/operations/jobs-worker-release.py
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         if: inputs.publish_api
         with:

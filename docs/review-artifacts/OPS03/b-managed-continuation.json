@@ -1,0 +1,127 @@
+{
+  "observedAt": "2026-10-11T22:43:48.013266+00:00",
+  "account": "Battosai1806",
+  "actorId": 143764700,
+  "task": "OPS03",
+  "status": "IN_PROGRESS",
+  "runs": [
+    {
+      "url": "https://github.com/Known-Enough/known-enough/actions/runs/38181096528",
+      "sourceSha": "97e54039f785280800f1b937528f59520cb69c3a",
+      "conclusion": "success",
+      "report": {
+        "sourceSha": "97e54039f785280800f1b937528f59520cb69c3a",
+        "account": "092954139775",
+        "region": "us-east-1",
+        "result": "JOB_READ_ACCESS_PASS",
+        "checks": [
+          {
+            "capability": "control",
+            "result": "READ_ALLOWED",
+            "state": "DISABLED",
+            "sourceMatches": false,
+            "active": 0,
+            "slots": 0
+          },
+          {
+            "capability": "authority",
+            "result": "READ_ALLOWED",
+            "state": "STANDING_APPROVED",
+            "loggingDeclaration": "DISABLED",
+            "actualProviderLogging": "NOT_READ"
+          },
+          {
+            "capability": "totals",
+            "result": "READ_ALLOWED",
+            "state": "PRESENT_VALID",
+            "runs": 65,
+            "reservedTokens": 16605273,
+            "reservedCostMicros": 16605273,
+            "messages": 60
+          },
+          {
+            "capability": "retention",
+            "result": "READ_ALLOWED",
+            "state": "DISABLED",
+            "dataClass": "SYNTHETIC"
+          },
+          {
+            "capability": "migration",
+            "result": "READ_ALLOWED",
+            "state": "ACTIVE"
+          }
+        ],
+        "requests": 5,
+        "mutations": 0,
+        "providerCalls": 0,
+        "runtimePublication": "NOT_EXECUTED",
+        "allMemberRetention": "NOT_EXECUTED",
+        "actualProviderLogging": "NOT_READ"
+      }
+    },
+    {
+      "url": "https://github.com/Known-Enough/known-enough/actions/runs/38181292446",
+      "sourceSha": "01cde0dcc5ba04e24c4670940d1cf91516375b18",
+      "conclusion": "success",
+      "report": {
+        "result": "INSTALLED_WORKER_READBACK_PASS",
+        "checks": {
+          "codeHash": true,
+          "artifactHash": true,
+          "function": true,
+          "runtime": true,
+          "handler": true,
+          "role": true,
+          "timeout": true,
+          "memory": true,
+          "state": true,
+          "environment": true,
+          "rule": true,
+          "schedule": true
+        },
+        "workerSha256": "a123823764f35df6abdc09a288d1c26962ed76f94b6956c7e77bf89ef6cc2214",
+        "packageSource": "9a27a99f20b1462183e8843ca9960bd53feed57b",
+        "mutations": 0,
+        "providerCalls": 0,
+        "effectiveRuntimePermissions": "NOT_EXECUTED",
+        "reservedConcurrency": "NOT_READ",
+        "targetBinding": "NOT_READ",
+        "sourceSha": "01cde0dcc5ba04e24c4670940d1cf91516375b18"
+      }
+    },
+    {
+      "url": "https://github.com/Known-Enough/known-enough/actions/runs/38181353244",
+      "sourceSha": "01cde0dcc5ba04e24c4670940d1cf91516375b18",
+      "conclusion": "success",
+      "report": {
+        "sourceSha": "01cde0dcc5ba04e24c4670940d1cf91516375b18",
+        "result": "COORDINATED_JOBS_PACKAGES_PREPARED",
+        "apiSha256": "f74e15a90cfb43c1c89c62d04f31847e36eb72b9b6878130aaa8b57af41bcb89",
+        "priorApiSha256": "2a0683f5413790ac74d5cc5a2b146ff4272a0795ea2c2d6b6c9957221ee7e278",
+        "worker": {
+          "sourceSha": "01cde0dcc5ba04e24c4670940d1cf91516375b18",
+          "result": "MODEL_JOB_RUNTIME_PREPARED",
+          "sha256": "3400d191278d403c911f0cab064148f94eedbc119d4785e745e7aebb72ed5d35",
+          "bytes": 364716,
+          "workerKey": "3400d191278d403c911f0cab064148f94eedbc119d4785e745e7aebb72ed5d35/model-worker.zip",
+          "schedule": "DISABLED",
+          "deployment": "NOT_EXECUTED",
+          "providerCalls": 0,
+          "artifactStorage": "VERIFIED"
+        },
+        "signingKey": "PRESERVED",
+        "migration": "UNCHANGED",
+        "modelFlags": "UNCHANGED_DISABLED",
+        "controlActivation": "NOT_EXECUTED",
+        "providerCalls": 0
+      }
+    }
+  ],
+  "remaining": [
+    "matching worker/API/control publication",
+    "owned signed live provider/result/restart/duplicate/stale/usage/cleanup qualification",
+    "current synthetic policy/all-member stamps and participant frame/private readiness consent",
+    "installed trusted unknown-provider quiescence/usage reconciliation",
+    "terminal journal retention and legacy adoption/recovery rollback"
+  ]
+}
