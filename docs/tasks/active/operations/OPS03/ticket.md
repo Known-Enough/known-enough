@@ -2,7 +2,7 @@
 
 **Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of OPS02, not deferred administrator installation. Complete durable job/lease/retry code and tests now; defer missing queues/permissions/runtime installation and managed proof. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
 
-- Status: REVIEW / unclaimed; CODE_READY checked inactive source. Administrator installation/required managed acceptance deferred to final cloud phase.
+- Status: IN_PROGRESS / A — managed continuation; prior B checked source preserved, installed readback next.
 - Origin: FA16 in [assessment](../../../../full-assessment.md), tracked by ASSESS06.
 - Priority: follow the shared queue after ASSESS07 → ASSESS10 → OPS00, then OPS01 → OPS02 → OPS03; before broader enrollment/real-person/distributed claims respectively.
 - Worker/model: select at claim under current workflow; architectural changes use the required architecture checkpoint, never an automatic model switch.
@@ -64,3 +64,13 @@ Chat answer summary: OPS03 CODE_READY is synced: 216 focused, 62 operations, 1,2
 ## User-directed next priority — 2026-10-11T06:27:38.911184+00:00
 
 Remaining OPS02 work is deferred after this task; A releases its OPS02 claim at the verified8c7e8d3 checkpoint. OPS03 is next for a fresh sequential managed intake, not claimed or executed by this scheduling note. Checked OPS02 code and actual owner proof38117710515 remain available; required installed retention/consent/use fences still need verification before provider/result execution. Scheduling does not waive them or enable paid-model flags. No new worker, automation, AWS operation or test in this note.
+
+
+## OPS03 managed continuation claimed by A — 2026-10-11T06:29:10.036180+00:00
+
+User explicitly directs OPS03 after deferring remaining OPS02. Clean main4963104 fetched/equal origin, own martelaxe/44531296 verified, all previous owned runs terminal; no active project claim besides protected PAUSED NP00. A takes the sole OPS03 managed task; B remains unavailable/observer-only. Actual Codex/GPT-6; precise variant/effort unavailable, no helper/worker/monitor. Initial bounded executable scope: new scripts/operations/jobs-installed-check.mjs/.test.mjs and .github/workflows/operations-jobs-check.yml; OPS03 own evidence/ticket/README, board/claim/A log/handoff. Read exact current jobs/control/AUTH/TOTAL/retention/migration access before any activation/provider call; record runtime/snapshot/control/fixture/queue/provider source scope before changes. Deferral of OPS02 does not waive real all-member retention/consent fences. Preserve cumulative TOTAL, own credentials, privacy, cleanup, existing runtime/model-disabled flags and saved NP00. No paid provider/deployment/data write in intake.
+
+
+## OPS03 checked installed-intake package — 2026-10-11T06:33:00.954630+00:00
+
+Five readback/privacy/standing-control/retention/totals tests PASS; pinned full exit0,1,520application/two optional skips/hosted1/browser64 PASS. New own-main GitHub readback checks exact existing job control, standing AUTH, preserved TOTAL, retention and migration activation via the existing model-job role; it does not seed usage, activate jobs, claim all-member retention or infer actual provider logging from an AUTH declaration. [Evidence](../../../../review-artifacts/OPS03/a-installed-intake.json). Actual source-pinned readback next, same sole OPS03/A claim, B unavailable and NP00 saved. Zero AWS writes/provider calls/publication in this checkpoint.

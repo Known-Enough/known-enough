@@ -1,3 +1,5 @@
+Current OPS03: **IN_PROGRESS/A — installed job/control/usage/retention intake next**. Existing B durable-job code is checked; actual runtime and managed provider/recovery proof remain unverified. A sole active task, B unavailable/observer-only. OPS02 remainder stays DEFERRED/unclaimed; passed controls and owner live proof preserved, real retention/consent guards still required. NP00 saved/protected; no new worker, monitor or provider call.
+
 # OPS03 — Recoverable distributed model jobs
 
 **Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of OPS02, not deferred administrator installation. Complete durable job/lease/retry code and tests now; defer missing queues/permissions/runtime installation and managed proof. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.

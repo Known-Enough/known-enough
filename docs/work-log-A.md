@@ -1963,3 +1963,13 @@ Own-A main/source d6e9706 [38117710515](https://github.com/Known-Enough/known-en
 ## User priority change — 2026-10-11T06:27:38.911184+00:00
 
 User asks to move current OPS02 remainder to the end and explain OPS03. Saved clean8c7e8d3 contains passing source/deployment/owned live receipts. OPS02 claim released DEFERRED/unclaimed; preserve exact gaps, participant authority and protected NP00. Current operations queue advances to OPS03, then remaining OPS02 before final acceptance. No OPS03 worker/claim/implementation or external action started. Docs-only scheduling update; previous dated statuses remain history.
+
+
+## OPS03 managed continuation claimed by A — 2026-10-11T06:29:10.036180+00:00
+
+User explicitly directs OPS03 after deferring remaining OPS02. Clean main4963104 fetched/equal origin, own martelaxe/44531296 verified, all previous owned runs terminal; no active project claim besides protected PAUSED NP00. A takes the sole OPS03 managed task; B remains unavailable/observer-only. Actual Codex/GPT-6; precise variant/effort unavailable, no helper/worker/monitor. Initial bounded executable scope: new scripts/operations/jobs-installed-check.mjs/.test.mjs and .github/workflows/operations-jobs-check.yml; OPS03 own evidence/ticket/README, board/claim/A log/handoff. Read exact current jobs/control/AUTH/TOTAL/retention/migration access before any activation/provider call; record runtime/snapshot/control/fixture/queue/provider source scope before changes. Deferral of OPS02 does not waive real all-member retention/consent fences. Preserve cumulative TOTAL, own credentials, privacy, cleanup, existing runtime/model-disabled flags and saved NP00. No paid provider/deployment/data write in intake.
+
+
+## OPS03 checked installed-intake package — 2026-10-11T06:33:00.954630+00:00
+
+Five readback/privacy/standing-control/retention/totals tests PASS; pinned full exit0,1,520application/two optional skips/hosted1/browser64 PASS. New own-main GitHub readback checks exact existing job control, standing AUTH, preserved TOTAL, retention and migration activation via the existing model-job role; it does not seed usage, activate jobs, claim all-member retention or infer actual provider logging from an AUTH declaration. [Evidence](review-artifacts/OPS03/a-installed-intake.json). Actual source-pinned readback next, same sole OPS03/A claim, B unavailable and NP00 saved. Zero AWS writes/provider calls/publication in this checkpoint.
