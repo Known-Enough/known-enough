@@ -10,6 +10,7 @@ import { createPartitionManagedDriver } from '../../packages/adapters/src/partit
 import { createPartitionedGroupRepository, partitionGroupKey } from '../../packages/adapters/src/partitioned-group-repository.ts';
 import { preparePartitionArchive, createPartitionArchiveRunner } from '../../packages/adapters/src/partition-archive.ts';
 import { partitionDirectoryKey } from '../../packages/adapters/src/partition-directory.ts';
+import { Groups } from '@deal-table/contracts';
 import { createCognitoIdentityResolver } from '../../apps/api/src/cognito-identity.ts';
 import { createMailtmClient } from '../live-qa/mailtm.mjs';
 import { partitionRecoveryStorage } from './partition-recovery.mjs';
@@ -34,6 +35,14 @@ export function behaviorReport(state, phase, result) {
     syntheticAccountsDisabled:count(state?.disabled),modelCalls:0 };
 }
 
+export function visibleGroup(page,groupId,expectedMembers){
+  if(!page||!Array.isArray(page.groups))return invalid('LIVE_GROUP_LIST_INVALID');
+  const groups=page.groups.map(item=>Groups.GroupSnapshot.parse(item));
+  const group=groups.find(item=>item.id===groupId);
+  if(expectedMembers===null){if(group)return invalid('LIVE_GROUP_VISIBILITY_LEAK');return null;}
+  if(!group||group.members.length!==expectedMembers)return invalid('LIVE_GROUP_MEMBERSHIP_CHANGED');
+  return group;
+}
 export async function jsonResponse(response) {
   if (!response.body) return {};
   const reader = response.body.getReader(); let length=0;const chunks=[];
@@ -108,13 +117,13 @@ async function main(phase){
         await role('KnownEnoughGithubPartitionMigration');for(const fixture of state.fixtures)await status(fixture,'APPROVED');
         const groups=await Promise.all(state.fixtures.map((fixture,index)=>request(fixture,'/groups','POST',{name:'OPS01 owned group '+index,idempotencyKey:'ops01-'+fixture.nonce})));
         for(let index=0;index<2;index++){state.fixtures[index].groupId=groups[index].group.id;}await local();
-        const [organizer,member]=state.fixtures;await request(member,'/groups/'+organizer.groupId,'GET',undefined,404);
+        const [organizer,member]=state.fixtures;visibleGroup(await request(member,'/groups'),organizer.groupId,null);
         const invite=await request(organizer,'/groups/'+organizer.groupId+'/invitations','POST',{email:member.mailbox.address,replace:false});
         const accepted=await request(member,'/groups/accept','POST',{token:invite.token});if(accepted.group?.members.length!==2)return invalid('LIVE_MEMBERSHIP_NOT_RETAINED');
-        const reload=await request(member,'/groups/'+organizer.groupId);if(reload.group?.members.length!==2)return invalid('LIVE_RELOAD_MEMBERSHIP_CHANGED');
-        await status(member,'DISABLED');await request(member,'/groups/'+organizer.groupId,'GET',undefined,403);await status(member,'APPROVED');
-        const current=await request(organizer,'/groups/'+organizer.groupId);const removed=current.group.members.find(item=>!item.isOrganizer);
-        await request(organizer,'/groups/'+organizer.groupId+'/remove','POST',{memberId:removed.id,version:current.group.version});await request(member,'/groups/'+organizer.groupId,'GET',undefined,404);await request(member,'/groups/accept','POST',{token:invite.token},404);
+        visibleGroup(await request(member,'/groups'),organizer.groupId,2);
+        await status(member,'DISABLED');await request(member,'/groups','GET',undefined,403);await status(member,'APPROVED');
+        const current=visibleGroup(await request(organizer,'/groups'),organizer.groupId,2);const removed=current.members.find(item=>!item.isOrganizer);
+        await request(organizer,'/groups/'+organizer.groupId+'/remove','POST',{memberId:removed.id,version:current.version});visibleGroup(await request(member,'/groups'),organizer.groupId,null);await request(member,'/groups/accept','POST',{token:invite.token},404);
         const driver=managed();state.archives=[];
         for(const fixture of state.fixtures){const key=partitionGroupKey(fixture.groupId);const header=await driver.groups.read(key);if(header?.kind!=='GROUP'||header.value.organizer!==fixture.subject)return invalid('OWN_GROUP_ARCHIVE_MISMATCH');
           const entries=[{key,row:header}];for(const invitation of header.value.invitations){const child=partitionDirectoryKey({type:'INVITATION',groupId:fixture.groupId,tokenHash:invitation.tokenHash,recipientHash:invitation.recipientHash,expiresAt:invitation.expiresAt});entries.push({key:child,row:await driver.groups.read(child)});}
@@ -125,7 +134,7 @@ async function main(phase){
         await role('KnownEnoughGithubGroupArchive');if(state.archives?.length!==2)return invalid('ARCHIVE_PLANS_MISSING');
         for(const fixture of state.fixtures){await signed(fixture,fixture.accessToken);const archive=state.archives.find(item=>item.nonce===fixture.nonce);const bytes=await readFile(join(directory,'archive-'+fixture.nonce+'-private.json'));const authority={kind:'ORGANIZER',subject:fixture.subject};
           const ports=managed().archivePorts({manifestBytes:bytes,expected:archive.expected,authority,recovery:partitionRecoveryStorage()});const make=()=>createPartitionArchiveRunner(ports,bytes,archive.expected,authority);await make().prepare();await make().archive();await make().archive();state.archived++;await local();
-          await request(fixture,'/groups/'+fixture.groupId,'GET',undefined,404);
+          visibleGroup(await request(fixture,'/groups'),fixture.groupId,null);
         }
       }else if(phase==='disable'){
         await role('KnownEnoughGithubPartitionMigration');for(const fixture of state.fixtures){if(fixture.registered&&fixture.accessToken){await status(fixture,'DISABLED');state.disabled++;await local();}}

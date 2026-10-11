@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ownFixture,behaviorReport,jsonResponse,callbackCode } from './partition-live-behavior.mjs';
+import { ownFixture,behaviorReport,jsonResponse,callbackCode,visibleGroup } from './partition-live-behavior.mjs';
 const runId='12345678-1234-1234-1234-123456789abc';
 const fixture={runId,nonce:runId,subject:null,password:'PRIVATE_PASSWORD_CANARY'.repeat(2),mailbox:{address:'keqa-owned@example.invalid',token:'PRIVATE_MAIL_TOKEN'}};
 test('a fixture cannot become owned through a supplied foreign run, subject, mailbox or malformed private record',()=>{
@@ -27,4 +27,13 @@ test('successful empty Cognito acknowledgements parse without inventing data; ex
 test('PKCE code comes from the actual matching callback URL, independent of route timing',()=>{
  assert.equal(callbackCode('https://example.invalid/?code=owned-code&state=owned-state','https://example.invalid','owned-state'),'owned-code');
  for(const url of ['https://other.invalid/?code=owned-code&state=owned-state','https://example.invalid/?code=owned-code&state=foreign-state','https://example.invalid/?error=invalid_scope&state=owned-state'])assert.throws(()=>callbackCode(url,'https://example.invalid','owned-state'),/PKCE_CALLBACK_INVALID/);
+});
+
+test('installed group-list checks require actual membership and reject stranger, removal or archived visibility',()=>{
+ const group={id:'owned-group',name:'Owned',version:1,isOrganizer:true,members:[{id:'member',displayName:'Owned',isOrganizer:true}],drafts:[],pendingInvitations:0,decisions:[]};
+ assert.equal(visibleGroup({groups:[group]},group.id,1).id,group.id);
+ assert.equal(visibleGroup({groups:[]},group.id,null),null);
+ assert.throws(()=>visibleGroup({groups:[group]},group.id,null),/LIVE_GROUP_VISIBILITY_LEAK/);
+ assert.throws(()=>visibleGroup({groups:[]},group.id,1),/LIVE_GROUP_MEMBERSHIP_CHANGED/);
+ assert.throws(()=>visibleGroup({groups:[group]},group.id,2),/LIVE_GROUP_MEMBERSHIP_CHANGED/);
 });
