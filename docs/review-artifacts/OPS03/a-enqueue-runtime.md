@@ -1,6 +1,6 @@
 # OPS03 request and automatic runtime integration
 
-Current priority: restore the operations API. The existing automatic QA pipeline overwrote it with the legacy one-file package in38162912629. Preservation guard and exact private-archive recovery are checked; actual restore needs renewed own AWS authentication. [Current recovery/usage evidence](a-primary-recovery.json). Earlier preparation checkpoints below retain their dated scope.
+Current priority: restore the operations API. The existing automatic QA pipeline overwrote it with the legacy one-file package in38162912629. Preservation guard and exact private-archive recovery are checked; actual restore needs renewed own AWS authentication. [Pinned recovery block](../../tasks/active/operations/OPS03/cloudshell-primary-recovery.md). [Current recovery/usage evidence](a-primary-recovery.json). Earlier preparation checkpoints below retain their dated scope.
 
 A continues the sole OPS03 claim. The signed decision command route now has an optional source-bound queue bridge: the server verifies the actual participant, admission and current owner retention, creates or recovers the current kernel reasoning job, and derives a deterministic opaque delivery ID. Repeated requests and lost acknowledgements reuse exact saved work instead of starting duplicate calls. HTTP exposes no worker processing, provider configuration, subject selection or operator capability. Missing private runtime configuration remains inactive.
 

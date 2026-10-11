@@ -10,7 +10,7 @@ Make AI jobs recover safely across worker restarts and retries, with current per
 
 **Status:** IN_PROGRESS / A. Authenticated request connection and the dedicated automatic background runner are being integrated; installed live qualification remains unfinished.
 
-**Next step:** Verify the dedicated runner package and actual provider logging through GitHub, install the new disabled runner with current setup credentials, then publish matching API/worker bindings and qualify current owned consent/retention, recovery, usage and cleanup. Standing A/B project authority applies; existing data, counters and technical safeguards remain intact. [Current integration evidence](../../../../review-artifacts/OPS03/a-enqueue-runtime.md).
+**Next step:** [Restore the primary operations API](cloudshell-primary-recovery.md) after the automatic QA overwrite. Then verify the dedicated runner package and actual provider logging through GitHub, install the new disabled runner with current setup credentials, then publish matching API/worker bindings and qualify current owned consent/retention, recovery, usage and cleanup. Standing A/B project authority applies; existing data, counters and technical safeguards remain intact. [Current integration evidence](../../../../review-artifacts/OPS03/a-enqueue-runtime.md).
 
 **Related work:** [ASSESS07](../../live-testing/ASSESS07/README.md), [ASSESS06](../../../historical/completed/assessments/ASSESS06/README.md).
 
