@@ -198,6 +198,29 @@
           "providerCalls": 0
         }
       }
+    },
+    {
+      "url": "https://github.com/Known-Enough/known-enough/actions/runs/38181935611",
+      "sourceSha": "f25f329337f90a18214fcd52856bb55926ccbe16",
+      "conclusion": "success",
+      "reports": {
+        "worker-smoke-schedule-report.json": {
+          "result": "EMPTY_WORKER_SCHEDULE_PASS",
+          "ruleEnableRequested": true,
+          "ruleDisabledReadback": true,
+          "paidDispatchReported": 0,
+          "matchingEmptySummaries": 1,
+          "sourceSha": "f25f329337f90a18214fcd52856bb55926ccbe16"
+        },
+        "worker-smoke-control-report.json": {
+          "result": "DISABLED_EMPTY_CONTROL_VERIFIED",
+          "ruleEnableRequested": false,
+          "ruleDisabledReadback": false,
+          "paidDispatchReported": 0,
+          "packageSource": "15c549c9e1bb475f4361ec16428351c8677efce5",
+          "sourceSha": "f25f329337f90a18214fcd52856bb55926ccbe16"
+        }
+      }
     }
   ],
   "remaining": [

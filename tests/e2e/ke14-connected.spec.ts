@@ -2,6 +2,8 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { expect, test, type BrowserContext } from '@playwright/test';
 import { signedScenarioApi } from '../evaluations/ke14-api.ts';
 
+// One worker owns this fixed-port server for both cases.
+test.describe.configure({ mode: 'default' });
 let server: ChildProcess;
 const url = 'http://127.0.0.1:5179/';
 test.beforeAll(async () => {

@@ -1,0 +1,297 @@
+name: Qualify owned synthetic scheduled model job
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        required: true
+        type: string
+      package_source:
+        required: true
+        type: string
+      worker_sha:
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: known-enough-lifecycle-installation
+  cancel-in-progress: false
+jobs:
+  proof:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && (github.actor_id == '143764700' || github.actor_id == '44531296')
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      EXPECTED_SOURCE: ${{ inputs.source_sha }}
+      PACKAGE_SOURCE: ${{ inputs.package_source }}
+      WORKER_SHA: ${{ inputs.worker_sha }}
+      AWS_MAX_ATTEMPTS: '1'
+      NODE_NO_WARNINGS: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Verify source and synthetic qualification boundaries
+        run: |
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node scripts/operations/verify.mjs > /dev/null
+          npm ci
+          npm ci --prefix scripts/live-qa
+          node --experimental-transform-types --test scripts/operations/jobs-owned-proof.test.mjs scripts/operations/partition-live-behavior.test.mjs scripts/operations/lifecycle-owned-behavior.test.mjs
+          npx playwright install --with-deps chromium
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPrimaryRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Preserve current private primary package
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/partition-backup.mjs > "$RUNNER_TEMP/owned-jobs-backup-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPartitionMigration
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Recover only matching private configuration without publication
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/partition-cutover.mjs recover > "$RUNNER_TEMP/owned-jobs-recover-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubQaRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Create and authenticate two owned synthetic personas
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/partition-live-behavior.mjs fixtures > "$RUNNER_TEMP/owned-jobs-fixtures-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPartitionMigration
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Execute owned job prepare
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/jobs-owned-proof.mjs prepare > "$RUNNER_TEMP/owned-jobs-prepare-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubRetentionPolicy
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Execute owned job policy
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/jobs-owned-proof.mjs policy > "$RUNNER_TEMP/owned-jobs-policy-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPartitionMigration
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Execute owned job consent
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/jobs-owned-proof.mjs consent > "$RUNNER_TEMP/owned-jobs-consent-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobOperations
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Execute owned job activate
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/jobs-owned-proof.mjs activate > "$RUNNER_TEMP/owned-jobs-activate-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobOperations
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Execute owned job enqueue
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/jobs-owned-proof.mjs enqueue > "$RUNNER_TEMP/owned-jobs-enqueue-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Verify exact installed worker and enable one scheduled owned test
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          python3 -B - <<'PYCODE'
+          import base64,json,os,re,subprocess
+          assert re.fullmatch('[a-f0-9]{64}',os.environ['WORKER_SHA'])
+          def aws(*args):
+              p=subprocess.run(['aws',*args,'--region','us-east-1','--output','json','--no-cli-pager'],capture_output=True,text=True,timeout=30)
+              if p.returncode: raise SystemExit('OWNED_SCHEDULE_ACCESS_UNVERIFIED')
+              return json.loads(p.stdout) if p.stdout.strip() else {}
+          c=aws('lambda','get-function-configuration','--function-name','known-enough-stage-model-jobs')
+          assert c['CodeSha256']==base64.b64encode(bytes.fromhex(os.environ['WORKER_SHA'])).decode()
+          assert c['State']=='Active' and c['LastUpdateStatus']=='Successful'
+          r=aws('events','describe-rule','--name','KnownEnoughModelJobs')
+          assert r['State']=='DISABLED'
+          from pathlib import Path
+          Path(os.environ['RUNNER_TEMP'],'owned-jobs-schedule-intent.json').write_text(json.dumps({'packageSource':os.environ['PACKAGE_SOURCE'],'workerSha':os.environ['WORKER_SHA']})+'\n')
+          aws('events','enable-rule','--name','KnownEnoughModelJobs')
+          PYCODE
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobOperations
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Observe actual provider result and cumulative usage
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/jobs-owned-proof.mjs observe > "$RUNNER_TEMP/owned-jobs-observe-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: always()
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Always disable and read back the schedule
+        if: always()
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          if test -f "$RUNNER_TEMP/owned-jobs-schedule-intent.json"; then
+            aws events disable-rule --name KnownEnoughModelJobs --region us-east-1 --no-cli-pager
+            aws events describe-rule --name KnownEnoughModelJobs --region us-east-1 --query State --output text --no-cli-pager > "$RUNNER_TEMP/owned-jobs-rule-cleanup.txt"
+            test "$(cat "$RUNNER_TEMP/owned-jobs-rule-cleanup.txt")" = DISABLED
+          fi
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: always()
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobOperations
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Always execute owned disable-control
+        if: always()
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          if test -f "$RUNNER_TEMP/partition-cutover-private/ops03-proof-private.json"; then
+            node --experimental-transform-types scripts/operations/jobs-owned-proof.mjs disable-control > "$RUNNER_TEMP/owned-jobs-disable-control-report.json" 2>&1
+          fi
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: always()
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubRetentionPolicy
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Always execute owned disable-policy
+        if: always()
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          if test -f "$RUNNER_TEMP/partition-cutover-private/ops03-proof-private.json"; then
+            node --experimental-transform-types scripts/operations/jobs-owned-proof.mjs disable-policy > "$RUNNER_TEMP/owned-jobs-disable-policy-report.json" 2>&1
+          fi
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: always()
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPartitionMigration
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Always disable owned registered accounts
+        if: always()
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          if test -f "$RUNNER_TEMP/partition-cutover-private/owned-fixtures-private.json"; then
+            node --experimental-transform-types scripts/operations/partition-live-behavior.mjs disable > "$RUNNER_TEMP/owned-jobs-accounts-disabled-report.json" 2>&1
+          fi
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: always()
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubQaRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Preserve private exact job and cleanup checkpoint
+        if: always()
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          if test -f "$RUNNER_TEMP/partition-cutover-private/ops03-proof-private.json"; then
+            node --experimental-transform-types scripts/operations/jobs-owned-proof.mjs preserve > "$RUNNER_TEMP/owned-jobs-private-checkpoint-report.json" 2>&1
+          fi
+      - name: Always self-delete owned users and remove mailboxes
+        if: always()
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          if test -f "$RUNNER_TEMP/partition-cutover-private/owned-fixtures-private.json"; then
+            node --experimental-transform-types scripts/operations/partition-live-behavior.mjs cleanup > "$RUNNER_TEMP/owned-jobs-fixtures-cleanup-report.json" 2>&1
+          fi
+      - name: Publish finite owned test and cleanup reports only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: operations-jobs-owned-proof
+          path: |
+            ${{ runner.temp }}/owned-jobs-*-report.json
+            ${{ runner.temp }}/owned-jobs-rule-cleanup.txt
+          if-no-files-found: warn
+          retention-days: 30
