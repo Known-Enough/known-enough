@@ -113,7 +113,7 @@ async function main(phase){
         await cognito('ConfirmSignUp',{ClientId:config.participantClientId,Username:fixture.mailbox.address,ConfirmationCode:code});state.confirmed++;await preserve();
         fixture.cleanupToken=await srp(config,fixture);await signed(fixture,fixture.cleanupToken);await preserve();
         fixture.accessToken=await pkce(config,fixture,browser);await signed(fixture,fixture.accessToken);state.signedLogin++;await preserve();
-        const registered=await request(fixture,'/account/register','POST',{displayName:'OPS01 owned test'});if(registered.account?.status!=='PENDING')return invalid('REGISTRATION_ADMISSION_CHANGED');fixture.registered=true;await preserve();await request(fixture,'/groups','GET',undefined,403);
+        const registered=await request(fixture,'/account/register','POST',{displayName:'OPS01 owned test'});if(registered.account?.status!=='PENDING')return invalid('REGISTRATION_ADMISSION_CHANGED');fixture.registered=true;fixture.observedRegistrationAt=new Date().toISOString();await preserve();await request(fixture,'/groups','GET',undefined,403);
       }}finally{await browser.close();}
     }else{
       if(!state||state.sourceSha!==sourceSha||state.fixtures.length!==2)return invalid('FIXTURE_STATE_INVALID');state.fixtures.forEach(item=>ownFixture(item,state.runId));

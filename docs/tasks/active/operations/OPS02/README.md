@@ -1,3 +1,5 @@
+Current OPS02: **IN_PROGRESS/A — owner setup and code deployed; owned live proof next**. [Exact-source publication38117305681](https://github.com/Known-Enough/known-enough/actions/runs/38117305681) SUCCESS, unchanged environment/migration, zero models/data changes. [Package and reports](../../../../review-artifacts/OPS02/a-owner-release-evidence.json). CloudShell owner setup and GitHub access readback are verified. Export/consent/erasure proof on two new synthetic accounts is being prepared; real30day automatic retention and request UI/scheduling remain unfinished. Same sole A claim; B unavailable/observer-only, NP00 saved.
+
 **Current status: IN_PROGRESS/A.** Existing lifecycle code, installed access readback, user-selected30day policy direction and new authenticated owner boundary/setup package are checked. [Current evidence and fixed next action](../../../../review-artifacts/OPS02/a-owner-interface.md). New owner URLs/read scope await administrator configuration; runtime/policy/stamps/UI/scheduling and real owned export/erasure proof remain. Earlier B coding entries below are historical.
 
 # OPS02 — Retention, export and authorized erasure

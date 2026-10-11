@@ -1,0 +1,23 @@
+{
+  "observedAt": "2026-10-11T06:19:50.919497+00:00",
+  "result": "SOURCE_CHECKED_LIVE_NOT_STARTED",
+  "deployedOwnerSource": "1ebfdcdabb99a9fa7dd506643633f946d4e22cf8",
+  "files": {
+    "scripts/operations/lifecycle-owned-behavior.mjs": "3d8c31cb0a9121828bdc45734dfe8c4e6ee14ed9646929ee7a10335b63243793",
+    "scripts/operations/lifecycle-owned-behavior.test.mjs": "b0b30e31adc605df16e44caea8aedcdc245961a9dc41b018a0659e7aa0acfcbf",
+    ".github/workflows/operations-lifecycle-behavior.yml": "8f3884125bd39c79b8d73ebbaca38af102bc49fa57576f170838c6792be57cad",
+    "scripts/operations/partition-live-behavior.mjs": "f18e856147018fd0244b26c38875e7371a41b972f50f0ad54f65616ecdba071b"
+  },
+  "checks": {
+    "native": 10,
+    "full": "EXIT_0",
+    "application": 1520,
+    "optionalSkips": 2,
+    "browser": 64,
+    "hostedPreview": 1
+  },
+  "proofScope": "TWO_NEW_OWNED_SYNTHETIC_IDENTITIES",
+  "realParticipants": 0,
+  "modelCalls": 0,
+  "realRetentionEnforcement": "NOT_IMPLEMENTED"
+}

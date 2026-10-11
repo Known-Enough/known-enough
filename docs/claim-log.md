@@ -1,3 +1,5 @@
+Current OPS02: **IN_PROGRESS/A — owner setup and code deployed; owned live proof next**. [Exact-source publication38117305681](https://github.com/Known-Enough/known-enough/actions/runs/38117305681) SUCCESS, unchanged environment/migration, zero models/data changes. [Package and reports](review-artifacts/OPS02/a-owner-release-evidence.json). CloudShell owner setup and GitHub access readback are verified. Export/consent/erasure proof on two new synthetic accounts is being prepared; real30day automatic retention and request UI/scheduling remain unfinished. Same sole A claim; B unavailable/observer-only, NP00 saved.
+
 ## Current sequential ownership — OPS01 A continuation
 
 User explicitly asks A to do OPS01 after the verified OPS00 closeout. A is the sole active OPS01 worker on the clean main intakef600326. B remains unavailable/observer-only; saved NP00 PAUSED/protected. Initial exact scope is the private read-only GitHub migration-plan workflow; actual primary cutover follows only after compatible routes/package/guards. Older no-successor statements below describe the prior OPS00 completion timestamp and are superseded by this explicit new claim.
