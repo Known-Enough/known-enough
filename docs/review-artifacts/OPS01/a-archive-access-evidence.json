@@ -10,7 +10,7 @@
   },
   "focused": 3,
   "full": "PASS",
-  "liveAccess": "ACTUAL_TWO_DIRECTORY_DENIALS",
+  "liveAccess": "ARCHIVE_DIRECTORY_ACCESS_PASS",
   "participantActions": 0,
   "signup": 0,
   "email": 0,
@@ -70,7 +70,7 @@
     "optionalSkipped": 2,
     "hostedPreview": 1,
     "browser": 64,
-    "cloudChanges": "NOT_APPLIED",
+    "cloudChanges": "USER_APPLIED_AND_GITHUB_VERIFIED",
     "changedStackResources": [
       "ArchiveRole"
     ],
@@ -80,5 +80,39 @@
     ],
     "noNewActionsOrResources": true,
     "localBootstrap": "EXPIRED_SESSION"
+  },
+  "administratorReceipt": {
+    "result": "ARCHIVE_DIRECTORY_POLICY_READBACK_PASS",
+    "role": "KnownEnoughGithubGroupArchive",
+    "dataChanges": 0
+  },
+  "actualRecheck": {
+    "runId": 38108948361,
+    "source": "a418012690ea7a7b5c75d94b077f1097d435686a",
+    "report": {
+      "sourceSha": "a418012690ea7a7b5c75d94b077f1097d435686a",
+      "account": "092954139775",
+      "region": "us-east-1",
+      "result": "ARCHIVE_DIRECTORY_ACCESS_PASS",
+      "requests": 3,
+      "mutations": 0,
+      "reports": [
+        {
+          "capability": "ownedSyntheticHeader",
+          "result": "READ_ALLOWED"
+        },
+        {
+          "capability": "ownedSyntheticInvitationDirectory",
+          "result": "READ_ALLOWED"
+        },
+        {
+          "capability": "ownedSyntheticDecisionDirectory",
+          "result": "READ_ALLOWED"
+        }
+      ],
+      "participantAction": "NOT_EXECUTED",
+      "email": "NOT_SENT",
+      "deployment": "UNCHANGED"
+    }
   }
 }
