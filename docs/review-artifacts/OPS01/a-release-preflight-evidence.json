@@ -2,7 +2,7 @@
   "recordedAt": "2026-10-10T23:11:14.107551+00:00",
   "baseSource": "9f28054eefae854925a5c9e96837b630f0fe6c08",
   "task": "OPS01 IN_PROGRESS/A",
-  "phase": "PREFLIGHT_CODE_CHECKED_AWAITING_REAL_INSPECTOR_RUN",
+  "phase": "ACTUAL_PRIMARY_CONFIGURATION_READBACK_VERIFIED",
   "hashes": {
     "scripts/operations/partition-release-preflight.mjs": "ed868623c4803c17558341266aab4e4b94a66d38670038940f9b0dfc6439948c",
     "scripts/operations/partition-release-preflight.test.mjs": "6ab14ee2f87b00bb83ae8ee89166ab9ddbdfbbf38794d849cf0c011f86685602",
@@ -23,5 +23,27 @@
   "publicSummary": "Fixed source/account/region, model/group/signup/OAuth/callback booleans and explicitly approximate table count; no secret/config dump.",
   "lambdaSourceChange": "NONE",
   "cloudWrites": 0,
-  "liveRun": null
+  "liveRun": {
+    "id": 38094169322,
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/38094169322",
+    "report": {
+      "schemaVersion": 1,
+      "sourceSha": "1ed56d6e182fde351b4ddede2093b82f12f32687",
+      "account": "092954139775",
+      "region": "us-east-1",
+      "result": "PARTITION_RELEASE_PREFLIGHT_READBACK",
+      "runtimeReady": true,
+      "models": "DISABLED",
+      "groupsEnabled": true,
+      "signupReady": true,
+      "participantOauthReady": true,
+      "displayOauthReady": true,
+      "approximateDecisionTableItems": 9,
+      "legacyCompatibilityRequired": true,
+      "activation": "NOT_EXECUTED",
+      "deployment": "NOT_EXECUTED",
+      "limitation": "Configuration readback only; not a signed login, live partition runtime or cutover proof."
+    },
+    "artifactHash": "2817dc3f7e0420763496fd38358a73e215a759c0c57ff59366e1e6b6d88787b3"
+  }
 }

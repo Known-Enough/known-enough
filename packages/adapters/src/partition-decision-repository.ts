@@ -121,7 +121,9 @@ function checkedWrite(items: TransactWriteItem[]) {
   for (const [index, key] of keys.entries()) {
     if (key.table === PARTITION_DECISION_TARGET.partitionArn) {
       if (items[index]!.Put && puts.length) continue;
-      if (!items[index]!.ConditionCheck || !/^(ACCOUNT|GROUP)#[A-Za-z0-9_-]{1,80}$/.test(key.pk) || key.sk !== 'STATE') fail('DECISION_INVALID');
+      const legacyDirectory = /^DECISION#[A-Za-z0-9_-]{1,80}$/.test(key.pk) && key.sk === 'GROUP'
+        && items[index]!.ConditionCheck?.ConditionExpression === 'attribute_not_exists(PK)';
+      if (!items[index]!.ConditionCheck || (!legacyDirectory && (!/^(ACCOUNT|GROUP)#[A-Za-z0-9_-]{1,80}$/.test(key.pk) || key.sk !== 'STATE'))) fail('DECISION_INVALID');
     } else if (key.table !== PARTITION_DECISION_TARGET.decisionArn || !/^ROOM#[A-Za-z0-9_-]{1,80}$/.test(key.pk)
       || !/^(STATE|GUARD|REPLAY#[a-f0-9]{64})$/.test(key.sk)) fail('DECISION_INVALID');
   }
@@ -152,15 +154,18 @@ export function createDynamoPartitionDecisionTransport(raw: { decisionArn: strin
   } };
 }
 export function createPartitionDecisionRepository(options: { decisionArn: string; partitionArn: string;
-  transport: PartitionDecisionTransport; groups: PartitionTransport; now?: () => number; timeoutMs?: number; maxRequests?: number }) {
+  transport: PartitionDecisionTransport; groups: PartitionTransport; now?: () => number; timeoutMs?: number; maxRequests?: number;
+  legacyPublicDecision?: (decisionId: string) => boolean }) {
   target(options);
   const limits = { ...(options.timeoutMs === undefined ? {} : { timeoutMs: options.timeoutMs }),
     ...(options.maxRequests === undefined ? {} : { maxRequests: options.maxRequests }) };
-  const transport = options.transport; partitionIO(limits); const session = createPartitionGroupSession(options.groups, { ...limits, ...(options.now ? { now: options.now } : {}) });
-  function conditions(fence: PartitionFence, creation = false, displaySubject?: string) {
-    if (fence.mutations.length < 2 || fence.mutations.length > (creation ? 21 : displaySubject ? 18 : 17)
+  const transport = options.transport; partitionIO(limits); const session = createPartitionGroupSession(options.groups, { ...limits,
+    ...(options.now ? { now: options.now } : {}), ...(options.legacyPublicDecision ? { legacyPublicDecision: options.legacyPublicDecision } : {}) });
+  function conditions(fence: PartitionFence, creation = false, display?: { subject: string; roomId: string }) {
+    if (fence.mutations.length < 2 || fence.mutations.length > (creation ? 21 : display ? 18 : 17)
       || (!creation && fence.mutations.some(item => item.next !== null || (item.expected < 1
-        && !(displaySubject && item.expected === 0 && item.key.PK === `ACCOUNT#${displaySubject}` && item.key.SK === 'STATE'))))) fail('DECISION_INVALID');
+        && !(display && item.expected === 0 && ((item.key.PK === `ACCOUNT#${display.subject}` && item.key.SK === 'STATE')
+          || (item.key.PK === `DECISION#${display.roomId}` && item.key.SK === 'GROUP'))))))) fail('DECISION_INVALID');
     const items = partitionDynamoWrites('KnownEnoughPartitions', structuredClone(fence.mutations));
     for (const item of items) { const action = item.ConditionCheck ?? item.Put; if (!action) fail('DECISION_INVALID'); action!.TableName = PARTITION_DECISION_TARGET.partitionArn; }
     if (!creation) checkedWrite(items); return items;
@@ -174,7 +179,7 @@ export function createPartitionDecisionRepository(options: { decisionArn: string
       const io = prepared?.io ?? partitionIO(limits); const fence = prepared?.fence ?? (principal?.kind === 'display'
         ? await session.displayFence(principal, decisionId, io) : await session.decisionFence(principal, decisionId, io));
       const guards = conditions(fence, prepared?.mutation === true || (create && prepared?.fence !== undefined),
-        principal?.kind === 'display' ? principal.subject : undefined);
+        principal?.kind === 'display' ? { subject: principal.subject, roomId: principal.roomId } : undefined);
       for (let attempt = 0; attempt < (create ? 1 : 6); attempt++) {
         let sdkFailure: unknown; let wrote = false; let loaded: unknown;
         async function send(command: Command) {

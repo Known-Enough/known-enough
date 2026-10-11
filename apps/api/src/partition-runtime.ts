@@ -67,6 +67,7 @@ export function createPartitionRuntime(options: PartitionRuntimeOptions) {
   return createPartitionParticipantApiHandler({ groups: driver.groups, decisions: driver.decisions,
     decisionArn: driver.decisionArn, partitionArn: driver.partitionArn,
     membershipDiscovery: driver.membershipDiscovery, authenticate, emailKey, clock, ids, allowedOrigins: [originValue], displayAccess: true,
+    legacyPublicDecision: driver.legacyPublicDecision,
     ...(draftArchitect ? { draftArchitect } : {}),
     registrationProfile: async (request, signal) => {
       let response: Response | undefined;

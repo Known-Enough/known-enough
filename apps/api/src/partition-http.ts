@@ -20,6 +20,8 @@ export interface PartitionParticipantApiOptions {
   draftArchitect?: PartitionDraftArchitect;
   /** Trusted composition only; enables GET public for an independently verified room-bound display. */
   displayAccess?: boolean;
+  /** Trusted release-derived classification; JWT and current data conditions still authorize public legacy reads. */
+  legacyPublicDecision?: (decisionId: string) => boolean;
   groups: PartitionTransport;
   decisions: PartitionDecisionTransport;
   decisionArn: string;
@@ -127,7 +129,8 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
       }).finally(() => { authenticating--; });
     } }) });
   const repositories = createPartitionDecisionRepository({ decisionArn: options.decisionArn, partitionArn: options.partitionArn,
-    groups: options.groups, transport: options.decisions });
+    groups: options.groups, transport: options.decisions,
+    ...(options.legacyPublicDecision ? { legacyPublicDecision: options.legacyPublicDecision } : {}) });
   const displayAccess = options.displayAccess === true;
   return (request: IncomingMessage, response: ServerResponse): void => {
     const incomingId = request.headers['x-request-id'];

@@ -325,3 +325,12 @@ it('keeps organizer and explicitly enabled operator archive authority independen
   await operator.runner().prepare(); await operator.runner().archive();
   expect(data.writes.at(-1)![3]!.ConditionCheck!.Key).toEqual(key);
 });
+
+
+it('release-derived legacy public classification never reopens migrated or future group-generated decisions', () => {
+  const f = fixture(); const driver = createPartitionManagedDriver(f.options);
+  expect(driver.legacyPublicDecision('decision')).toBe(false);
+  expect(driver.legacyPublicDecision('groupdecision-new')).toBe(false);
+  expect(driver.legacyPublicDecision('../foreign')).toBe(false);
+  expect(driver.legacyPublicDecision('legacy-public-room')).toBe(true);
+});

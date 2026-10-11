@@ -548,3 +548,30 @@ it('a display projection can sweep its copied record while backing storage stays
   expect(value).toEqual(snapshot); expect(f.current()).toEqual(before);
   expect(f.writes.flat().every(item => item.ConditionCheck)).toBe(true);
 });
+
+
+it('explicit legacy public eligibility preserves a room grant while atomically conditioning directory absence', async () => {
+  const f = await fixture(); await f.factory().forParticipant(actor()).createDecision(f.initial); f.writes.length = 0;
+  const directory = where(target.partitionArn, { PK: { S: 'DECISION#decision' }, SK: { S: 'GROUP' } });
+  f.cells.delete(directory);
+  const principal: TrustedPrincipal = { kind: 'display', subject: 'screen', roomId: 'decision' };
+  const app = new KnownEnoughApplication({ repository: f.factory({ legacyPublicDecision: selected => selected === 'decision' }).forDisplay(principal),
+    clock: { now: () => '2026-10-07T12:00:00Z' }, ids: { next: () => 'synthetic' } });
+  expect((await app.getPublicSnapshot(principal, 'decision')).viewerParticipantId).toBeNull();
+  expect(f.writes.at(-1)!.some(item => item.ConditionCheck?.Key?.PK?.S === 'DECISION#decision'
+    && item.ConditionCheck.ConditionExpression === 'attribute_not_exists(PK)')).toBe(true);
+  expect(f.writes.flat().every(item => item.ConditionCheck)).toBe(true);
+  await expect(new KnownEnoughApplication({ repository: f.factory().forDisplay(principal),
+    clock: { now: () => '2026-10-07T12:00:00Z' }, ids: { next: () => 'synthetic' } }).getPublicSnapshot(principal, 'decision')).rejects.toThrow('NOT_FOUND');
+});
+
+it('a new group directory at legacy display publication prevents the captured unbound snapshot from escaping', async () => {
+  const f = await fixture(); await f.factory().forParticipant(actor()).createDecision(f.initial); f.writes.length = 0;
+  const directory = where(target.partitionArn, { PK: { S: 'DECISION#decision' }, SK: { S: 'GROUP' } });
+  const saved = structuredClone(f.cells.get(directory)!); f.cells.delete(directory);
+  const principal: TrustedPrincipal = { kind: 'display', subject: 'screen', roomId: 'decision' };
+  const app = new KnownEnoughApplication({ repository: f.factory({ legacyPublicDecision: () => true }).forDisplay(principal),
+    clock: { now: () => '2026-10-07T12:00:00Z' }, ids: { next: () => 'synthetic' } });
+  f.beforeWrite(() => { f.cells.set(directory, saved); });
+  await expect(app.getPublicSnapshot(principal, 'decision')).rejects.toThrow('STALE_CONTEXT');
+});

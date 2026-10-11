@@ -1,0 +1,42 @@
+{
+  "recordedAt": "2026-10-11T02:54:41.890328+00:00",
+  "baseSource": "1ed56d6e182fde351b4ddede2093b82f12f32687",
+  "phase": "STANDBY_SELECTOR_BACKUP_VERIFIER_CODE_CHECKED",
+  "task": "OPS01 IN_PROGRESS/A",
+  "hashes": {
+    "apps/api/src/partition-release.ts": "feeb43a8b3fb260610d95a5d4f0ab4c4fb5af9d7618de2076236fdfaf71eb6d8",
+    "apps/api/src/partition-release.test.ts": "01cfda7b18975d7b1c66e3765d7193110ff12ccf57076a35ce11bfe7e2c3181f",
+    "apps/api/src/partition-http.ts": "a491c1130ac46dfef63d2dca0ea10ede1feb66b7d6e290d75246d46d808d9b27",
+    "apps/api/src/partition-runtime.ts": "921656ea22b9fc80eb683f26e41862f5798254e5d31b23162271a0611231fd98",
+    "packages/adapters/src/partition-managed.ts": "b2eb467cd52aa5bf62a77fca3ac2f9984f3ec8749bdfb08b75fae04c5869408e",
+    "packages/adapters/src/partition-managed.test.ts": "6dfc52b2fcd63b1c724db158c4b0e4a4d66e004d59fb98cee208c8997c955657",
+    "packages/adapters/src/partition-group-session.ts": "a853c5187cdf22bc891d93946a783af781c2d6e235ddc928cda450844eeadb39",
+    "packages/adapters/src/partition-decision-repository.ts": "18a8286923ef0fe8ca76bcddd7801381e7510ef0130e7b7b80a52a36a601a8b2",
+    "packages/adapters/src/partition-decision-repository.test.ts": "5477996488695a371bfed9ef017fc1e7fcdb59bbcfc5b548e9248a64ed8d1989",
+    "scripts/operations/partition-backup.mjs": "bfea057998389243809c5b001628c3638fc8898995b2e2a8fe8a921b5e763226",
+    "scripts/operations/partition-backup.test.mjs": "eb6d788cf93e7ee75c7acc363e01d2122185178c7fcac59255f607cc0df00e0b",
+    ".github/workflows/operations-partition-backup.yml": "22958f7bd9086abdf6dc26458d6447d38d906c92fb0ca0fee266b097c1e5624e"
+  },
+  "checks": {
+    "focused": 252,
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "boundaries": 430,
+    "full": "PASS",
+    "backupIntegrity": 4,
+    "application": 1507,
+    "optionalSkipped": 2,
+    "hostedPreview": 1,
+    "browser": 64,
+    "references": 7,
+    "planning": 15
+  },
+  "privateSourceSchema": "Independent migration/release anchors; immutable private inputs; absent/valid legacy data stays legacy; exact FROZEN pauses; exact ACTIVE selects native; native operation checks still verify full activation tuple.",
+  "legacyPublic": "Verified room-bound display + current account/directory-absence and STATE/GUARD publication; migrated/new group identifiers cannot fall through. No legacy private/commands/provisioning fallback.",
+  "diagnostic": "Finite SOURCE_FROZEN/SOURCE_UNAVAILABLE only, no raw errors/metadata/payload.",
+  "testDraftTypeCorrections": "Mock legacy HttpApiResult gained required headers and literal false, no product behavior changed.",
+  "deployed": "NO",
+  "dataFreeze": "NO",
+  "dataCopy": "NO",
+  "activation": "NO"
+}

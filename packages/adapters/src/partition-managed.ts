@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { DynamoDBClient, TransactGetItemsCommand, TransactWriteItemsCommand,
   type TransactWriteItem } from '@aws-sdk/client-dynamodb';
 import { KnownEnoughApplicationError, RepositoryCapacityError } from '@deal-table/application';
+import { Groups } from '@deal-table/contracts';
 import { loadPartitionMigration, type PartitionMigrationExpected } from './partition-migration.ts';
 import { MigrationControlSchema, MigrationJournalSchema } from './partition-migration-runner.ts';
 import { createDynamoPartitionTransport, partitionDynamoWrites, partitionIO, partitionCall,
@@ -58,6 +59,8 @@ export function createPartitionManagedDriver(options: PartitionManagedOptions): 
   archivePorts: (options: PartitionManagedArchiveOptions) => PartitionArchivePorts;
   lifecycle: (options: Omit<DynamoLifecycleOptions, 'activation' | 'verifiedTarget'>) => ReturnType<typeof createDynamoPartitionLifecycle>;
   decisionArn: string; partitionArn: string;
+  /** Classification only. Display JWT and fresh publication conditions still authorize every read. */
+  legacyPublicDecision: (decisionId: string) => boolean;
 } {
   const parsed = input.safeParse(options); if (!parsed.success) return invalid();
   const captured = parsed.data;
@@ -70,6 +73,10 @@ export function createPartitionManagedDriver(options: PartitionManagedOptions): 
   }
   catch { return invalid(); }
   if (schemaVersion !== 2 || plan.sourceSnapshot.version > Number.MAX_SAFE_INTEGER - 2) return invalid();
+  const sourceState = Groups.GroupState.parse(JSON.parse(plan.sourceSnapshot.payload.toString('utf8')));
+  const migratedDecisionIds = new Set(sourceState.groups.flatMap(group => group.decisions.map(value => value.id)));
+  const legacyPublicDecision = (decisionId: string) => /^[A-Za-z0-9_-]{1,80}$/.test(decisionId)
+    && !migratedDecisionIds.has(decisionId) && !decisionId.startsWith('groupdecision-');
   const target = { ...PARTITION_DECISION_TARGET };
   const sourceHash = createHash('sha256').update(plan.sourceSnapshot.payload).digest('hex');
   const journalKey = { PK: `PARTITION#${plan.planHash}`, SK: 'JOURNAL' };
@@ -241,5 +248,5 @@ export function createPartitionManagedDriver(options: PartitionManagedOptions): 
       },
     } });
   }
-  return { groups, decisions, membershipDiscovery, archivePorts, lifecycle, ...target };
+  return { groups, decisions, membershipDiscovery, archivePorts, lifecycle, legacyPublicDecision, ...target };
 }

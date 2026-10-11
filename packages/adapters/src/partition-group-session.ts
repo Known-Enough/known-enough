@@ -4,6 +4,7 @@ import { Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { KnownEnoughApplicationError, type TrustedPrincipal, type DecisionArchitectRequest } from '@deal-table/application';
 import { ArchivedGroupRow } from './partition-archive.ts';
 import { PartitionMembershipError } from './partition-membership.ts';
+import { partitionDirectoryKey } from './partition-directory.ts';
 import { genericCandidateCatalog } from './generic-candidates.ts';
 import { createPartitionedGroupRepository, checkPartitionRow, partitionAccountKey, partitionGroupKey,
   partitionIO, partitionCall, PartitionStorageError, type PartitionIOContext, type PartitionScope,
@@ -96,13 +97,16 @@ function publicRoster(state: Groups.GroupState, group: Groups.Group) {
 }
 export function createPartitionGroupSession(transport: PartitionTransport,
   options: { now?: () => number; timeoutMs?: number; maxRequests?: number; emailKey?: string; token?: () => string;
-    discovery?: PartitionGroupDiscovery; draftArchitect?: PartitionDraftArchitect } = {}) {
+    discovery?: PartitionGroupDiscovery; draftArchitect?: PartitionDraftArchitect;
+    legacyPublicDecision?: (decisionId: string) => boolean } = {}) {
   const limits = { ...(options.timeoutMs === undefined ? {} : { timeoutMs: options.timeoutMs }),
     ...(options.maxRequests === undefined ? {} : { maxRequests: options.maxRequests }) };
   partitionIO(limits); const clock = options.now ?? Date.now;
   const emailKey = options.emailKey; const tokenSource = options.token ?? (() => randomBytes(32).toString('base64url'));
   const discovery = options.discovery;
   const draftArchitect = options.draftArchitect; let generating = 0;
+  const legacyPublicDecision = options.legacyPublicDecision;
+  if (legacyPublicDecision !== undefined && typeof legacyPublicDecision !== 'function') throw new PartitionSessionError('SESSION_INVALID');
   if (discovery !== undefined && typeof discovery !== 'function') throw new PartitionSessionError('SESSION_INVALID');
   if (draftArchitect !== undefined && typeof draftArchitect !== 'function') throw new PartitionSessionError('SESSION_INVALID');
   if (emailKey !== undefined && (typeof emailKey !== 'string' || emailKey.length < 32 || emailKey.length > 4096)) throw new PartitionSessionError('SESSION_INVALID');
@@ -496,8 +500,23 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           || rawPrincipal.roomId !== rawDecisionId) return deny('FORBIDDEN');
         const who = rawPrincipal.subject; const decisionId = groupId(rawDecisionId); const io = supplied ?? partitionIO(limits);
         const directory = await repository.lookup({ type: 'DECISION', decisionId }, io);
+        const accountKey = partitionAccountKey(who);
+        if (directory === null && legacyPublicDecision?.(decisionId) === true) {
+          const directoryKey = partitionDirectoryKey({ type: 'DECISION', decisionId });
+          const rawAccount = await partitionCall(io, () => transport.read(accountKey, io));
+          const account = rawAccount === null ? null : checkPartitionRow(rawAccount, accountKey);
+          if (account !== null && (account.kind !== 'ACCOUNT' || account.value.status !== 'APPROVED')) return deny('FORBIDDEN');
+          const expected = account?.revision ?? 0;
+          return { mutations: [{ key: accountKey, expected, next: null }, { key: directoryKey, expected: 0, next: null }],
+            assertCurrent: async () => {
+              if (await repository.lookup({ type: 'DECISION', decisionId }, io) !== null) return deny('STALE_CONTEXT');
+              const latest = await partitionCall(io, () => transport.read(accountKey, io));
+              const current = latest === null ? null : checkPartitionRow(latest, accountKey);
+              if ((current?.revision ?? 0) !== expected) return deny('STALE_CONTEXT');
+            } };
+        }
         if (directory?.type !== 'DECISION') return deny('NOT_FOUND');
-        const accountKey = partitionAccountKey(who); const headerKey = partitionGroupKey(directory.groupId);
+        const headerKey = partitionGroupKey(directory.groupId);
         for (let attempt = 0; attempt < 6; attempt++) {
           const rawHeader = await partitionCall(io, () => transport.read(headerKey, io));
           if (rawHeader === null || ArchivedGroupRow.safeParse(rawHeader).success) return deny('NOT_FOUND');
