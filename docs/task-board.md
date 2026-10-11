@@ -1,3 +1,5 @@
+Current OPS03: **IN_PROGRESS/B — user-directed installed consent policy investigation**. Prior worker/API installation preserved; no duplicate test. Required fixture recovery/key dependency remains under investigation.
+
 Current OPS03: **BLOCKED / unclaimed — B checked managed phase released**. Worker/API connection and empty scheduled smoke passed. Own recovery metadata list returned AccessDenied; pending synthetic mailbox intent must be reconciled before fresh provider qualification. [Exact handoff and minimum prerequisite](review-artifacts/OPS03/b-blocked-handoff.md). No successor/new worker; NP00 preserved.
 
 Current OPS03: **IN_PROGRESS/B — user-directed continuation claimed after own-account/source/job intake**. Installed worker verification precedes connection/live proof; existing QA run38180045432 preserved. NP00 paused.
