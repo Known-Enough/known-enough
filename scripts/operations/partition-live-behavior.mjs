@@ -126,7 +126,7 @@ async function main(phase){
         const accepted=await request(member,'/groups/accept','POST',{token:invite.token});if(accepted.group?.members.length!==2)return invalid('LIVE_MEMBERSHIP_NOT_RETAINED');
         visibleGroup(await request(member,'/groups'),organizer.groupId,2);
         const staleDriver=managed();const staleRepo=createPartitionedGroupRepository(staleDriver.groups);
-        const staleAccount=await staleRepo.fence({accountSubjects:[member.subject],groupId:organizer.groupId},()=>{});
+        const staleAccount=await staleRepo.fence({accountSubjects:[organizer.subject,member.subject],groupId:organizer.groupId},()=>{});
         await status(member,'DISABLED');if(await staleDriver.groups.commit(staleAccount.mutations))return invalid('LIVE_STALE_ACCOUNT_COMMIT_ACCEPTED');state.staleCommitRejected=(state.staleCommitRejected??0)+1;
         await request(member,'/groups','GET',undefined,403);await status(member,'APPROVED');
         const current=visibleGroup(await request(organizer,'/groups'),organizer.groupId,2);const removed=current.members.find(item=>!item.isOrganizer);

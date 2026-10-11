@@ -3,7 +3,7 @@
   "recordedAt": "2026-10-11T04:09:24.691046+00:00",
   "installedSource": "b0735d07488fbc75ac13ef3d131a4f82b6a92575",
   "hashes": {
-    "scripts/operations/partition-live-behavior.mjs": "be7fe7c72b5d4be0fb5729e09f686cda312f50ab9c8157aa76ec909064abc57f",
+    "scripts/operations/partition-live-behavior.mjs": "c8be83f243b21a66d329b3ec884044282ed9d45b8fcb5669a75e3f4a56381105",
     "scripts/operations/partition-live-behavior.test.mjs": "ce0c3182f9e38f6a089702c9f7c1f0ac36ce2e2aa86497bb0fc5d6a0b5da0dc9",
     ".github/workflows/operations-partition-behavior.yml": "9369397c2ffdeac3e534a6e12a4bf5fa653e7fa4f48d5e04b443bc3b27d967ea",
     "scripts/live-qa/package.json": "430406df55102601fb853204f78d52d8612a404a1259567837b292c9726adcdc",
@@ -280,6 +280,103 @@
           "modelCalls": 0
         }
       }
+    },
+    {
+      "runId": 38111791560,
+      "source": "446233a572bb768c6498b91efb8850ad59c1bb99",
+      "actorId": 44531296,
+      "conclusion": "failure",
+      "reports": {
+        "partition-cleanup-behavior-report.json": {
+          "sourceSha": "446233a572bb768c6498b91efb8850ad59c1bb99",
+          "result": "LIVE_CLEANUP_PASS",
+          "phase": "cleanup",
+          "identities": 2,
+          "signup": 2,
+          "confirmed": 2,
+          "signedLogin": 2,
+          "apiChecks": 10,
+          "archived": 0,
+          "selfDeleted": 2,
+          "mailboxesRemoved": 2,
+          "syntheticAccountsDisabled": 2,
+          "staleCommitRejected": 0,
+          "largeDrafts": 0,
+          "archiveLostAckRecovered": 0,
+          "modelCalls": 0
+        },
+        "partition-behavior-behavior-report.json": {
+          "sourceSha": "446233a572bb768c6498b91efb8850ad59c1bb99",
+          "result": "BLOCKED",
+          "phase": "behavior",
+          "identities": 2,
+          "signup": 2,
+          "confirmed": 2,
+          "signedLogin": 2,
+          "apiChecks": 10,
+          "archived": 0,
+          "selfDeleted": 0,
+          "mailboxesRemoved": 0,
+          "syntheticAccountsDisabled": 0,
+          "staleCommitRejected": 0,
+          "largeDrafts": 0,
+          "archiveLostAckRecovered": 0,
+          "modelCalls": 0,
+          "code": "PARTITION_STALE"
+        },
+        "partition-disable-behavior-report.json": {
+          "sourceSha": "446233a572bb768c6498b91efb8850ad59c1bb99",
+          "result": "LIVE_DISABLE_PASS",
+          "phase": "disable",
+          "identities": 2,
+          "signup": 2,
+          "confirmed": 2,
+          "signedLogin": 2,
+          "apiChecks": 10,
+          "archived": 0,
+          "selfDeleted": 0,
+          "mailboxesRemoved": 0,
+          "syntheticAccountsDisabled": 2,
+          "staleCommitRejected": 0,
+          "largeDrafts": 0,
+          "archiveLostAckRecovered": 0,
+          "modelCalls": 0
+        },
+        "partition-recover-behavior-report.json": {
+          "sourceSha": "446233a572bb768c6498b91efb8850ad59c1bb99",
+          "result": "PARTITION_INSTALLED_PACKAGE_RECOVERED",
+          "deployment": "UNCHANGED",
+          "activation": "NOT_EXECUTED"
+        },
+        "partition-fixtures-behavior-report.json": {
+          "sourceSha": "446233a572bb768c6498b91efb8850ad59c1bb99",
+          "result": "LIVE_FIXTURES_PASS",
+          "phase": "fixtures",
+          "identities": 2,
+          "signup": 2,
+          "confirmed": 2,
+          "signedLogin": 2,
+          "apiChecks": 4,
+          "archived": 0,
+          "selfDeleted": 0,
+          "mailboxesRemoved": 0,
+          "syntheticAccountsDisabled": 0,
+          "staleCommitRejected": 0,
+          "largeDrafts": 0,
+          "archiveLostAckRecovered": 0,
+          "modelCalls": 0
+        },
+        "partition-backup-behavior-report.json": {
+          "sourceSha": "446233a572bb768c6498b91efb8850ad59c1bb99",
+          "account": "092954139775",
+          "region": "us-east-1",
+          "result": "PARTITION_PRIOR_CODE_BACKUP_VERIFIED",
+          "privateBackupBytes": 405731,
+          "codeUpdate": "NOT_EXECUTED",
+          "sourceFreeze": "NOT_EXECUTED",
+          "activation": "NOT_EXECUTED"
+        }
+      }
     }
   ],
   "callbackRepairChecks": "5 focused and final full1507 application/two optional skips/hosted1/browser64 exit0",
@@ -303,5 +400,7 @@
     "scope": "Separate public release/UI evidence; not claimed repaired by OPS01 group harness."
   },
   "remaining": "Real >300000-byte group reconstruction, stale account/member conditional-commit denial and archive lost-ack reconstruction; new bounded harness under checks.",
-  "stressPackageChecks": "7focused and full1507application/two optional skips/hosted1/browser64 exit0, serial bundled Chromium"
+  "stressPackageChecks": "7focused and full1507application/two optional skips/hosted1/browser64 exit0, serial bundled Chromium",
+  "stressDraftFailure": "PARTITION_STALE: test scope omitted organizer from current two-member group before stale-commit exercise; corrected scope includes both current members. Product guard preserved.",
+  "stressScopeCorrectionChecks": "7focused and final full1507application/two optional skips/hosted1/browser64 exit0"
 }
