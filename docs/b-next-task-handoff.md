@@ -1,3 +1,5 @@
+Current user-directed OPS03 continuation is BLOCKED/unclaimed at a checked B checkpoint. Do not repeat installation, signup or denied metadata reads unchanged. Exact own private recovery key or bounded metadata reader is required; [handoff](review-artifacts/OPS03/b-blocked-handoff.md). No successor is started under this request; preserve NP00 and the named OPS00 stash.
+
 # B handoff after ASSESS07 — 2026-10-06T17:17:44Z
 
 **A owns OPS00 — user-directed takeover, 2026-10-10:** [Exact transfer/scope](tasks/active/operations/OPS00/a-takeover-20261010.md). B is unavailable according to the human; current RUN191 transfers to A. If B resumes, preserve unpublished/local work and observe only; no code/test dispatch/claim or successor until reverse handoff. Do not reset either clone or assume B local fix discarded.
