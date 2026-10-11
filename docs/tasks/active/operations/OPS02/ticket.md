@@ -2,7 +2,7 @@
 
 **Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of OPS01, not deferred administrator installation. Complete retention/export/erasure code and tests now; defer administrator-dependent retention/resource/data operations and managed proof. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
 
-- Status: REVIEW / unclaimed; CODE_READY checked source/CI, B coding claim released. Mandatory runtime/retention/real-person policy/managed acceptance deferred.
+- Status: IN_PROGRESS / A — managed continuation after verified OPS01; prior B coding source preserved. Runtime integration and actual retention/export/consent/erasure proof next; real-person policy remains explicit.
 - Origin: FA16 in [assessment](../../../../full-assessment.md), tracked by ASSESS06.
 - Priority: follow the shared queue after ASSESS07 → ASSESS10 → OPS00, then OPS01 → OPS02 → OPS03; before broader enrollment/real-person/distributed claims respectively.
 - Worker/model: select at claim under current workflow; architectural changes use the required architecture checkpoint, never an automatic model switch.
@@ -76,3 +76,13 @@ Next eligible coding phase: OPS03 durable ID-only jobs/leases/retry/dead-letter 
 RUN144 final lifecycle reconciliation 2026-10-08T01:50:45.706756+00:00: finished[37714622935](https://github.com/Known-Enough/known-enough/actions/runs/37714622935) SUCCESS on releasecf8688bece7e9029928e385db5cae6a41f8adf2c, downloaded artifact verifies own-B actor/main/OPS02/schedule/source/summary. Detailed [monitor144](../../../../monitor-log.md#b-run144) preserves actual actions/tests/source/CI and exact local reporting errors. OPS02 CODE_READY/REVIEW unclaimed; OPS03 coding next, A NP00 saved untouched.
 
 Chat answer summary: OPS02 coding is CODE_READY and synced: 409 focused, 55 operations, 1,190 application, hosted preview and 62 browser checks pass; matching GitHub CI is verified. Managed retention/erasure installation and real-person policy/proof remain deferred. OPS03 coding is next; [run log](https://github.com/Known-Enough/known-enough/blob/main/docs/monitor-log.md#b-run144).
+
+
+## OPS02 managed continuation claimed by A — 2026-10-11T04:57:32.544383+00:00
+
+User explicitly directs A to take OPS02 after verified OPS01 completion978f568. Separate A main clone clean, fetched/pulled ff-only equal origin/main; own martelaxe identity verified. OPS01 claim released, B unavailable/no active claim observed in current repository; one OPS02/A active implementation, NP00 remains PAUSED/saved/protected. Exact variant/effort unavailable; no helper/chat/monitor. Initial bounded scope: new scripts/operations/lifecycle-installed-check.mjs and .test.mjs, .github/workflows/operations-lifecycle-check.yml; OPS02 own evidence/ticket/README/board/claim/A log/handoff. Inspect existing lifecycle/retention/owner/runtime and effective installed capabilities first, then record exact runtime/service/export/consent/executor/stamp/deployment/test scope before edits. Real-person policy is not inferred from operator authority; synthetic owned proof proceeds under standing project authority. No real participant deletion, model call or new deployment in this intake.
+
+
+## OPS02 checked installed-intake package — 2026-10-11T05:01:41.171597+00:00
+
+4focused readback/privacy guards and pinned full exit0,1507application/two optional skips/hosted1/browser64/refs7/planning15/lint/types/build PASS. Source inspection confirms lifecycle code is present but installed policy/stamps/owner runtime operation/sweeper not yet proved. User selected30days after last activity with deletion on request for real users; current synthetic-only source remains explicit until reviewed integration. [Evidence](../../../../review-artifacts/OPS02/a-installed-intake.md). Next actual read-only GitHub retention/executor/owner policy probe; no data write/deployment/provider action in this checked checkpoint. Same sole OPS02/A claim, B unavailable, NP00 preserved.

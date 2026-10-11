@@ -1,0 +1,7 @@
+# Known Enough data-retention direction
+
+User-selected default for real users: saved decision data lasts30days after the last activity; deletion is available on request. This choice was provided directly during A's OPS02 continuation. It is product direction, not proof that an installed runtime/sweeper already enforces it.
+
+For implementation, activity timestamps must come from accepted server-side creation/change events; do not invent old timestamps, mark existing unclassified data synthetic, or extend retention merely through a background monitor. Raw conversation text stays transient. Owner export/deletion use verified signed-in identity. Erasing shared group/decision content must respect every affected participant; operator authority does not replace their consent. An owner's deletion must preserve other owners' information while invalidating the erased owner's dependent state.
+
+Deleting app rows does not promise deletion from AWS backups, immutable recovery, deployment/test logs, Cognito identity/email or model providers. Exact observed configuration and any remaining limits will be disclosed by the OPS02 installed proof; those stores have separate controls. Earlier1day synthetic/1hour replay/7day journal coding proposals remain historical until a reviewed policy update and real managed verification. No real-person enrollment, automatic physical erasure, changed cloud setting or retrospective policy compliance is claimed by this document.

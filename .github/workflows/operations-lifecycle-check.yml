@@ -1,0 +1,81 @@
+name: Verify installed lifecycle retention and owner access
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact checked main source SHA
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: known-enough-lifecycle-installation
+  cancel-in-progress: false
+jobs:
+  service:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && (github.actor_id == '143764700' || github.actor_id == '44531296')
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          - phase: retention
+            role: KnownEnoughGithubRetentionPolicy
+          - phase: erasure
+            role: KnownEnoughGithubLifecycleExecutor
+          - phase: owner
+            role: KnownEnoughGithubStagingInspector
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Verify exact source and lifecycle policy boundaries
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_sha }}
+        run: |
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node scripts/operations/verify.mjs > /dev/null
+          npm ci
+          node --experimental-transform-types --test scripts/operations/lifecycle-installed-check.test.mjs
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/${{ matrix.role }}
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          role-session-name: lifecycle-${{ matrix.phase }}-${{ github.run_id }}
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+      - name: Read current lifecycle policy and only owned nonexistent keys; no owner or data changes
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_sha }}
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          NODE_NO_WARNINGS=1 node --experimental-transform-types scripts/operations/lifecycle-installed-check.mjs "${{ matrix.phase }}" \
+            > "$RUNNER_TEMP/lifecycle-installed-report.json" 2>&1
+      - name: Record access checks that could not start
+        if: always()
+        run: |
+          python3 -B - <<'PY'
+          import json, os
+          from pathlib import Path
+          target = Path(os.environ['RUNNER_TEMP']) / 'lifecycle-installed-report.json'
+          if not target.exists() or target.stat().st_size == 0:
+              target.write_text(json.dumps({'sourceSha': os.environ['GITHUB_SHA'], 'result': 'NOT_EXECUTED', 'codeUpdate': 'NOT_EXECUTED', 'sourceFreeze': 'NOT_EXECUTED'}) + '\n')
+          PY
+      - name: Publish only finite lifecycle capability status
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: operations-lifecycle-${{ matrix.phase }}
+          path: ${{ runner.temp }}/lifecycle-installed-report.json
+          if-no-files-found: warn
+          retention-days: 30

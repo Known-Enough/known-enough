@@ -1,0 +1,22 @@
+{
+  "task": "OPS02 IN_PROGRESS/A",
+  "recordedAt": "2026-10-11T05:01:41.171597+00:00",
+  "baseSource": "978f568689effb40a2de8d1e3e8591466e78121d",
+  "hashes": {
+    "scripts/operations/lifecycle-installed-check.mjs": "9c75966902d2a898fc5450e3fdd6b7027d995bb5772298696aeb62c992ae0a2d",
+    "scripts/operations/lifecycle-installed-check.test.mjs": "61c8f9ec2069be216bd68b94a30f543a5b1df7ea7eb69cae8b25554c0714972b",
+    ".github/workflows/operations-lifecycle-check.yml": "dd84bf87107fc0ae6314096d1b866a2f923bec6c87cdb1a283d722244e4e1cd2"
+  },
+  "focused": 4,
+  "full": "PASS",
+  "application": 1507,
+  "optionalSkipped": 2,
+  "hostedPreview": 1,
+  "browser": 64,
+  "references": 7,
+  "planning": 15,
+  "cloudWrites": 0,
+  "ownerOperation": "NOT_EXECUTED",
+  "realPersonRetentionDirection": "30days after last activity; deletion on request; not yet installed/enforced",
+  "next": "One own-account exact-source read-only GitHub run over retention/executor/runtime policy; then wire authenticated owner interfaces and scoped execution, preserving participant consent."
+}
