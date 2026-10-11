@@ -1958,3 +1958,8 @@ Own-A exact1ebfdcd [38117305681](https://github.com/Known-Enough/known-enough/ac
 ## OPS02 actual owned live export and erasure proof — 2026-10-11T06:24:57.448945+00:00
 
 Own-A main/source d6e9706 [38117710515](https://github.com/Known-Enough/known-enough/actions/runs/38117710515) SUCCESS; nine downloaded exact-source reports verified.2new signed/email-confirmed/SRP/PKCE people;2own exports;4foreign owner denials;2revoked execution denials;1owned group+1owned account erased,5fresh-driver advancement steps and identical completion repeats. Current user-visible status/list/export reflected erasure. Actual synthetic policy/stamps applied from observed registration times, exact policy conditionally restored DISABLED;2app disables/2Cognito self-deletions/2mailbox removals,0models/real participants. [Detailed proof and remaining scope](review-artifacts/OPS02/a-owner-live-proof.md). Retained opaque markers/identity/grants/progress/stamps/private recoveries intentional; no claim of provider/backup deletion or automatic real30day enforcement. Sole OPS02/A remains IN_PROGRESS; next request/plan UI, trusted activity/scheduling and shared-decision/interruption/cross-runner proof, B unavailable/observer-only and NP00 saved.
+
+
+## User priority change — 2026-10-11T06:27:38.911184+00:00
+
+User asks to move current OPS02 remainder to the end and explain OPS03. Saved clean8c7e8d3 contains passing source/deployment/owned live receipts. OPS02 claim released DEFERRED/unclaimed; preserve exact gaps, participant authority and protected NP00. Current operations queue advances to OPS03, then remaining OPS02 before final acceptance. No OPS03 worker/claim/implementation or external action started. Docs-only scheduling update; previous dated statuses remain history.

@@ -2,7 +2,7 @@
 
 **Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of OPS01, not deferred administrator installation. Complete retention/export/erasure code and tests now; defer administrator-dependent retention/resource/data operations and managed proof. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
 
-- Status: IN_PROGRESS / A — managed continuation after verified OPS01; prior B coding source preserved. Runtime integration and actual retention/export/consent/erasure proof next; real-person policy remains explicit.
+- Status: DEFERRED / unclaimed — user moves remaining work after OPS03; passing live evidence preserved, whole task not DONE.
 - Origin: FA16 in [assessment](../../../../full-assessment.md), tracked by ASSESS06.
 - Priority: follow the shared queue after ASSESS07 → ASSESS10 → OPS00, then OPS01 → OPS02 → OPS03; before broader enrollment/real-person/distributed claims respectively.
 - Worker/model: select at claim under current workflow; architectural changes use the required architecture checkpoint, never an automatic model switch.
@@ -150,3 +150,8 @@ Own-A exact1ebfdcd [38117305681](https://github.com/Known-Enough/known-enough/ac
 ## OPS02 actual owned live export and erasure proof — 2026-10-11T06:24:57.448945+00:00
 
 Own-A main/source d6e9706 [38117710515](https://github.com/Known-Enough/known-enough/actions/runs/38117710515) SUCCESS; nine downloaded exact-source reports verified.2new signed/email-confirmed/SRP/PKCE people;2own exports;4foreign owner denials;2revoked execution denials;1owned group+1owned account erased,5fresh-driver advancement steps and identical completion repeats. Current user-visible status/list/export reflected erasure. Actual synthetic policy/stamps applied from observed registration times, exact policy conditionally restored DISABLED;2app disables/2Cognito self-deletions/2mailbox removals,0models/real participants. [Detailed proof and remaining scope](../../../../review-artifacts/OPS02/a-owner-live-proof.md). Retained opaque markers/identity/grants/progress/stamps/private recoveries intentional; no claim of provider/backup deletion or automatic real30day enforcement. Sole OPS02/A remains IN_PROGRESS; next request/plan UI, trusted activity/scheduling and shared-decision/interruption/cross-runner proof, B unavailable/observer-only and NP00 saved.
+
+
+## User-directed deferral — 2026-10-11T06:27:38.911184+00:00
+
+A releases this checked claim on clean synchronized source8c7e8d3. Remaining work moves after OPS03; all passing source/publication/live receipts and unmet criteria remain. No claim of complete real-user retention, request UI or shared-decision/interruption proof. This is the user's priority choice, not a technical PASS or permission to remove retention/consent guards. Next OPS03 intake checks its actual dependencies; no new worker/deployment/test starts in this documentation update.
