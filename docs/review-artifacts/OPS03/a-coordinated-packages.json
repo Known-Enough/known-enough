@@ -1,0 +1,55 @@
+{
+  "observedAt": "2026-10-11T22:21:25.167023+00:00",
+  "run": "https://github.com/Known-Enough/known-enough/actions/runs/38180021249",
+  "conclusion": "SUCCESS",
+  "reports": {
+    "partition-upload-report.json": {
+      "sourceSha": "9a27a99f20b1462183e8843ca9960bd53feed57b",
+      "result": "PARTITION_PRIVATE_PACKAGE_UPLOADED",
+      "deployment": "NOT_EXECUTED",
+      "activation": "NOT_EXECUTED"
+    },
+    "partition-backup-report.json": {
+      "sourceSha": "9a27a99f20b1462183e8843ca9960bd53feed57b",
+      "account": "092954139775",
+      "region": "us-east-1",
+      "result": "PARTITION_PRIOR_CODE_BACKUP_VERIFIED",
+      "privateBackupBytes": 409192,
+      "priorCodeSha256": "2a0683f5413790ac74d5cc5a2b146ff4272a0795ea2c2d6b6c9957221ee7e278",
+      "codeUpdate": "NOT_EXECUTED",
+      "sourceFreeze": "NOT_EXECUTED",
+      "activation": "NOT_EXECUTED"
+    },
+    "model-job-logging-report.json": {
+      "sourceSha": "9a27a99f20b1462183e8843ca9960bd53feed57b",
+      "result": "PROVIDER_LOGGING_DISABLED",
+      "code": null,
+      "providerCalls": 0
+    },
+    "partition-prepare-report.json": {
+      "sourceSha": "9a27a99f20b1462183e8843ca9960bd53feed57b",
+      "result": "COORDINATED_JOBS_PACKAGES_PREPARED",
+      "apiSha256": "a24754eb4a196beaefe3195eda3fc4e47e0993a8888e0113b1a4cd4300381b63",
+      "priorApiSha256": "2a0683f5413790ac74d5cc5a2b146ff4272a0795ea2c2d6b6c9957221ee7e278",
+      "worker": {
+        "sourceSha": "9a27a99f20b1462183e8843ca9960bd53feed57b",
+        "result": "MODEL_JOB_RUNTIME_PREPARED",
+        "sha256": "a123823764f35df6abdc09a288d1c26962ed76f94b6956c7e77bf89ef6cc2214",
+        "bytes": 364717,
+        "workerKey": "a123823764f35df6abdc09a288d1c26962ed76f94b6956c7e77bf89ef6cc2214/model-worker.zip",
+        "schedule": "DISABLED",
+        "deployment": "NOT_EXECUTED",
+        "providerCalls": 0,
+        "artifactStorage": "VERIFIED"
+      },
+      "signingKey": "PRESERVED",
+      "migration": "UNCHANGED",
+      "modelFlags": "UNCHANGED_DISABLED",
+      "controlActivation": "NOT_EXECUTED",
+      "providerCalls": 0
+    }
+  },
+  "templateSha256": "840dd8ebff7d2f00286f26731d0302338a2b18a661543b1b3175e4c548b23aac",
+  "workerInstallation": "NOT_EXECUTED",
+  "liveQualification": "PENDING"
+}

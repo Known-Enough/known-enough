@@ -1,8 +1,8 @@
 # OPS03 dedicated worker installation
 
-Restore the primary operations API first; this disabled worker installation is the following setup step, not the urgent recovery command.
+The primary operations API is restored and independently checksum-verified. This installs the dedicated background worker; it stays disabled until matching bindings and live behavior are checked.
 
-[Preparation38163170759](https://github.com/Known-Enough/known-enough/actions/runs/38163170759) passed: private worker stored, actual model-content logging disabled. WSL setup login expired; existing GitHub roles cannot create the new Lambda/IAM/rule. Standing A/B authority already covers this installation, so no new authorization is requested.
+[Coordinated preparation38180021249](https://github.com/Known-Enough/known-enough/actions/runs/38180021249) passed: private worker stored, actual model-content logging disabled. WSL setup login expired; existing GitHub roles cannot create the new Lambda/IAM/rule. Standing A/B authority already covers this installation, so no new authorization is requested.
 
 Paste once in authenticated CloudShell. It creates only the new dedicated worker, execution/release roles, finite logs and DISABLED one-minute application schedule. Existing primary flags, tables, job control and usage stay unchanged. No AI call occurs. AWS keeps stack progress if CloudShell disconnects.
 
@@ -11,7 +11,7 @@ Paste once in authenticated CloudShell. It creates only the new dedicated worker
   set -euo pipefail
   umask 077
   test "$(aws sts get-caller-identity --region us-east-1 --query Account --output text --no-cli-pager)" = "092954139775"
-  source=a1aaddd4edef52a27ea73df748621670ab74549c
+  source=9a27a99f20b1462183e8843ca9960bd53feed57b
   folder="$HOME/.known-enough/model-job-runtime-$source"
   mkdir -p "$folder"
   curl --fail --silent --show-error \
@@ -25,9 +25,9 @@ Paste once in authenticated CloudShell. It creates only the new dedicated worker
   aws cloudformation create-stack --region us-east-1 \
     --stack-name KnownEnoughModelJobRuntime \
     --template-body "file://$folder/template.json" \
-    --parameters ParameterKey=WorkerKey,ParameterValue=5a2ac97237a58f462c0836b758b3b8f44a3aad3ef6a3430234063bae32f40eac/model-worker.zip \
+    --parameters ParameterKey=WorkerKey,ParameterValue=a123823764f35df6abdc09a288d1c26962ed76f94b6956c7e77bf89ef6cc2214/model-worker.zip \
     --capabilities CAPABILITY_NAMED_IAM \
-    --client-request-token OPS03-a1aaddd4-dedicated-runtime \
+    --client-request-token OPS03-9a27a99f-dedicated-runtime \
     --query StackId --output text --no-cli-pager
 )
 ```
