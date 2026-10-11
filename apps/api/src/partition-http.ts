@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { RequestNegotiation, NegotiationReceipt } from '@deal-table/contracts/durable-command';
+import { RequestNegotiation, NegotiationReceipt, BACKGROUND_NEGOTIATION_PROFILE } from '@deal-table/contracts/durable-command';
 import type { DurableEnqueueRequest } from './durable-enqueue.ts';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { Id, KnownEnough as KE } from '@deal-table/contracts';
@@ -46,10 +46,10 @@ function integer(value: number, maximum: number) {
 function errorBody(code: ErrorCode, requestId: string): Extract<KE.DecisionCommandResult, { ok: false }> {
   return { ok: false, requestId, error: { code, httpStatus: KE.DECISION_ERROR_HTTP_STATUS[code] } };
 }
-function send(response: ServerResponse, status: number, body: unknown) {
+function send(response: ServerResponse, status: number, body: unknown, background = false) {
   if (response.destroyed || response.writableEnded) return;
   response.statusCode = status;
-  response.setHeader('Content-Type', 'application/json; charset=utf-8');
+  response.setHeader('Content-Type', `application/json; charset=utf-8${background ? `; profile="${BACKGROUND_NEGOTIATION_PROFILE}"` : ''}`);
   response.setHeader('Cache-Control', 'no-store');
   response.setHeader('X-Content-Type-Options', 'nosniff');
   response.end(JSON.stringify(body));
@@ -310,7 +310,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         if (request.method === 'GET') {
           const snapshot = decision[2] === 'public' ? await application.getPublicSnapshot(principal, decision[1]!)
             : await application.getOwnerSnapshot(principal, decision[1]!);
-          send(response, 200, snapshot); return;
+          send(response, 200, snapshot, decision[2] === 'public' && requestNegotiation !== undefined); return;
         }
         // Preserve the existing pre-body scope check; execute rechecks and joins guards at the actual commit.
         await application.getPublicSnapshot(principal, decision[1]!);

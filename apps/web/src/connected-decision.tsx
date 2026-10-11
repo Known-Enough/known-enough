@@ -1,5 +1,6 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { KnownEnough as KE } from '@deal-table/contracts';
+import { backgroundRequest, submitBackgroundRequest, type BackgroundReceipt } from './background-negotiation';
 
 type Variable = KE.DecisionVariable | KE.PublicDecisionFrame['variables'][number];
 function valueText(value: KE.DecisionValue, variable?: Variable): string {
@@ -49,9 +50,10 @@ function preferenceText(preference: KE.PreferenceCriterion, variables: Variable[
   return `${variable?.label ?? preference.variableId}: ${valueText(preference.value, variable)} (preference cost ${preference.cost})`;
 }
 
-export function ConnectedDecision({ snapshot, owner, api, refresh }: {
+export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNegotiation = false, onQueued }: {
   snapshot: KE.PublicDecisionSnapshot; owner: KE.OwnerDecisionSnapshot | null;
   api: (path: string, init?: RequestInit) => Promise<Response>; refresh: () => Promise<void>;
+  backgroundNegotiation?: boolean; onQueued?: (receipt: BackgroundReceipt) => void;
 }) {
   const [text, setText] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
@@ -60,6 +62,8 @@ export function ConnectedDecision({ snapshot, owner, api, refresh }: {
   const [reviewedFrame, setReviewedFrame] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
+  const [awaitingJob, setAwaitingJob] = useState(false);
+  useEffect(() => { if (snapshot.status !== 'REASONING') setAwaitingJob(false); }, [snapshot.status, owner?.controlVersion]);
   const pending = useRef<{ type: string; body: unknown } | null>(null);
   const decisionId = snapshot.frame.decisionId;
   const frameReviewKey = `${snapshot.contextToken}:${snapshot.frame.frameVersion}`;
@@ -102,7 +106,16 @@ export function ConnectedDecision({ snapshot, owner, api, refresh }: {
   };
   const generate = async () => {
     setBusy(true); setNotice('');
-    try { await request(`/decisions/${decisionId}/reasoning`, { requestId: crypto.randomUUID() }); await refresh(); }
+    try {
+      if (backgroundNegotiation && owner) {
+        if (!pending.current) pending.current = { type: 'REQUEST_NEGOTIATION', body: backgroundRequest(snapshot, owner, crypto.randomUUID()) };
+        if (pending.current.type !== 'REQUEST_NEGOTIATION') throw new Error('action pending');
+        // Keep the same command after an uncertain acknowledgement; never manufacture a second job request.
+        const receipt = await submitBackgroundRequest(api, pending.current.body as ReturnType<typeof backgroundRequest>);
+        pending.current = null; setAwaitingJob(true); setNotice('Your request is saved. Results will appear automatically.');
+        if (onQueued) onQueued(receipt); else await refresh();
+      } else { await request(`/decisions/${decisionId}/reasoning`, { requestId: crypto.randomUUID() }); await refresh(); }
+    }
     catch { setNotice('Exploration is unavailable. Refresh and check confirmations, or try again.'); }
     finally { setBusy(false); }
   };
@@ -154,7 +167,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh }: {
         <p>{ruleText(permission.adjustment, variables)}</p><p>Expires {permission.expiresAt}. You can revoke permission for future use.</p>
         <button disabled={blocked} onClick={() => void command('REVOKE_NEGOTIATION', { permissionId: permission.permissionId, permissionVersion: permission.permissionVersion })}>Revoke this adjustment</button>
       </div>)}
-      <button disabled={blocked || !['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status)} onClick={() => void generate()}>Explore proposals</button>
+      <button disabled={blocked || awaitingJob || !['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status)} onClick={() => void generate()}>Explore proposals</button>
     </section>}
     {owner && owner.disclosurePermissions.length > 0 && <section className="ke-card"><h2>Your disclosure choices</h2>
       <p>Sharing a detail is separate from allowing an adjustment or approving a proposal. Declining to share does not by itself reject the proposal.</p>
@@ -186,7 +199,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh }: {
         {owner.ownApproval && <button disabled={blocked} onClick={() => void command('WITHDRAW_APPROVAL', { proposalId: proposal.proposalId,
           proposalVersion: proposal.facts.proposalVersion, publicHash: proposal.publicHash })}>Withdraw my approval</button>}</>}
     </section>}
-    {pending.current && <div><button disabled={busy} onClick={() => void command(pending.current!.type, {})}>Retry the same action</button>
+    {pending.current && <div><button disabled={busy} onClick={() => void (pending.current!.type === 'REQUEST_NEGOTIATION' ? generate() : command(pending.current!.type, {}))}>Retry the same action</button>
       <button disabled={busy} onClick={() => { pending.current = null; setReviewed(false); void refresh(); }}>Refresh and review current state</button></div>}
     {notice && <p role="status">{notice}</p>}
   </>;

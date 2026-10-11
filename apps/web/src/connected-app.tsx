@@ -10,6 +10,7 @@ import { decisionStatusText, privateReadinessText } from './decision-copy';
 import { GroupHome } from './group-home';
 import { EmailRegistration } from './email-registration-form';
 import { ConnectedDecision } from './connected-decision';
+import { backgroundNegotiationAvailable, pollBackgroundDecision, type BackgroundTarget } from './background-negotiation';
 
 const DECISION_ID = 'christmas-decision';
 let callbackCompletion: Promise<CognitoSession | null> | null = null;
@@ -21,23 +22,45 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
   const [objective, setObjective] = useState('Choose our synthetic Christmas trip together.');
   const loadEpoch = useRef(0);
   const decisionHeading = useRef<HTMLHeadingElement>(null);
+  const quietUpdate = useRef(false);
+  const [backgroundNegotiation, setBackgroundNegotiation] = useState(false);
+  const [backgroundTarget, setBackgroundTarget] = useState<BackgroundTarget | null>(null);
 
   const createRequest = useRef<{ requestId: string; idempotencyKey: string; scenario: string; objective: string } | null>(null);
   const [session, setSession] = useState<CognitoSession | null>(() => readCognitoSession());
   const [publicSnapshot, setPublicSnapshot] = useState<KnownEnough.PublicDecisionSnapshot | null>(null);
-  useEffect(() => { if (publicSnapshot) decisionHeading.current?.focus(); }, [publicSnapshot]);
+  useEffect(() => { if (quietUpdate.current) { quietUpdate.current = false; return; } if (publicSnapshot) decisionHeading.current?.focus(); }, [publicSnapshot]);
   const [ownerSnapshot, setOwnerSnapshot] = useState<KnownEnough.OwnerDecisionSnapshot | null>(null);
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
   const [inviteToken, setInviteToken] = useState<string | null>(() => readPendingCognitoInvitation());
   const [invitee, setInvitee] = useState('');
   const [replaceInvite, setReplaceInvite] = useState(false);
+  const currentSelection = useRef({ decisionId, token: session?.accessToken });
+  currentSelection.current = { decisionId, token: session?.accessToken };
   const [inviteLink, setInviteLink] = useState('');
   const expire = useCallback(() => {
     loadEpoch.current++;
+    setBackgroundTarget(null);
     clearCognitoSession(); setSession(null); setPublicSnapshot(null); setOwnerSnapshot(null);
     setStatus('Your session expired or access was denied. Sign in again.');
   }, []);
+  useEffect(() => {
+    if (!backgroundTarget || !session || session.kind !== 'participant') return;
+    const target = backgroundTarget; const token = session.accessToken; const controller = new AbortController(); let active = true;
+    void pollBackgroundDecision({ target, signal: controller.signal,
+      api: (path, init) => cognitoApiFetch(config, session, path, expire, init), accept: value => {
+        if (!active || currentSelection.current.decisionId !== target.decisionId || currentSelection.current.token !== token) return;
+        quietUpdate.current = true;
+        setPublicSnapshot(value.snapshot); setOwnerSnapshot(value.owner);
+      } }).then(result => {
+        if (!active) return;
+        setBackgroundTarget(null);
+        if (result === 'EXPIRED' || result === 'UNAVAILABLE') setStatus('Automatic checking stopped. Refresh the decision to check its latest result.');
+        else if (result === 'CONTEXT_CHANGED') setStatus('The decision changed. Refresh to review the current version.');
+      }).catch(() => { if (active) { setBackgroundTarget(null); setStatus('Automatic checking stopped. Refresh the decision to check its latest result.'); } });
+    return () => { active = false; controller.abort(); };
+  }, [backgroundTarget, session, config, expire]);
   useEffect(() => {
     if (!session) return;
     const timeout = window.setTimeout(expire, Math.max(0, session.expiresAt - Date.now() - 5000));
@@ -70,12 +93,14 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     if (!session) return;
     const url = cognitoLogoutUrl(config, session);
     loadEpoch.current++;
+    setBackgroundTarget(null);
     clearCognitoSession(); setSession(null); setOwnerSnapshot(null); setPublicSnapshot(null);
     window.location.assign(url);
   };
   const load = async (targetId = decisionId) => {
     if (!session) return;
     const epoch = ++loadEpoch.current;
+    setBackgroundTarget(null); setBackgroundNegotiation(false);
     setOwnerSnapshot(null); setPublicSnapshot(null);
     setBusy(true); setStatus('');
     try {
@@ -95,7 +120,14 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
           throw new Error('stale snapshot');
       }
       if (epoch === loadEpoch.current) { setDecisionId(targetId); setRoomInput(targetId);
-        setPublicSnapshot(ownerValue?.publicSnapshot ?? publicValue); setOwnerSnapshot(ownerValue); }
+        const selected = ownerValue?.publicSnapshot ?? publicValue;
+        const background = backgroundNegotiationAvailable(publicResponse);
+        setPublicSnapshot(selected); setOwnerSnapshot(ownerValue); setBackgroundNegotiation(background);
+        // A fresh signed read can resume result checking after a browser/device restart without submitting another job.
+        if (background && ownerValue && selected.status === 'REASONING') setBackgroundTarget({ decisionId: targetId,
+          contextToken: selected.contextToken, semanticVersion: selected.semanticVersion, ownerParticipantId: ownerValue.ownerParticipantId,
+          expiresAt: new Date(Date.now() + 180000).toISOString() });
+      }
     } catch { if (epoch === loadEpoch.current) setStatus('The shared decision is unavailable. Check your session or try again.'); }
     finally { if (epoch === loadEpoch.current) setBusy(false); }
   };
@@ -162,7 +194,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
       {session.kind === 'participant' && <GroupHome key={session.accessToken} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} openDecision={id => { setRoomInput(id); void load(id); }} />}
       <section className="ke-card"><p className="eyebrow">{session.kind === 'display' ? 'SHARED DISPLAY' : 'PARTICIPANT SESSION'}</p>
         <h2 ref={decisionHeading} tabIndex={-1}>Shared decision</h2><label htmlFor="connected-decision-id">Decision ID from your invitation</label>
-        <input id="connected-decision-id" value={roomInput} maxLength={80} disabled={busy} onChange={event => { setRoomInput(event.target.value); setOwnerSnapshot(null); setPublicSnapshot(null); loadEpoch.current++; }} />
+        <input id="connected-decision-id" value={roomInput} maxLength={80} disabled={busy} onChange={event => { setBackgroundTarget(null); setRoomInput(event.target.value); setOwnerSnapshot(null); setPublicSnapshot(null); loadEpoch.current++; }} />
         <button type="button" onClick={() => void load(roomInput)} disabled={busy || !/^[A-Za-z0-9_-]{1,80}$/.test(roomInput)}>Load shared decision</button>
         {publicSnapshot && <><h3>{publicSnapshot.frame.title}</h3><p>{publicSnapshot.frame.objective}</p>
           <p>Status: {decisionStatusText(publicSnapshot.status)}</p>
@@ -183,7 +215,12 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
         <button disabled={busy || !objective.trim()} onClick={() => void create()}>{createRequest.current ? 'Retry creating the same decision' : 'Create AI frame for review'}</button>
       </section>}
       {publicSnapshot && <ConnectedDecision key={`${session.accessToken}:${publicSnapshot.contextToken}:${publicSnapshot.currentProposal?.proposalId ?? ''}:${ownerSnapshot?.ownerVersion ?? ''}:${ownerSnapshot?.draft?.draftId ?? ''}`}
-        snapshot={publicSnapshot} owner={ownerSnapshot} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} refresh={() => load()} />}
+        snapshot={publicSnapshot} owner={ownerSnapshot} backgroundNegotiation={backgroundNegotiation}
+        onQueued={receipt => {
+          if (!ownerSnapshot || currentSelection.current.decisionId !== publicSnapshot.frame.decisionId || currentSelection.current.token !== session.accessToken) return;
+          setBackgroundTarget({ decisionId: publicSnapshot.frame.decisionId, contextToken: publicSnapshot.contextToken,
+            semanticVersion: publicSnapshot.semanticVersion, ownerParticipantId: ownerSnapshot.ownerParticipantId, expiresAt: receipt.expiresAt });
+        }} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} refresh={() => load()} />}
       <SimulatedSharedAssistant key={`${session.kind}:${session.accessToken}:${decisionId}`} snapshot={publicSnapshot}
         fetchPublic={async () => {
           const response = await cognitoApiFetch(config, session, `/decisions/${decisionId}/public`, expire);

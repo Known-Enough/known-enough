@@ -133,6 +133,10 @@ it('routes signed negotiation requests through only the captured server queue po
   });
   const a = await api(f, { requestNegotiation: enqueue });
   const replacement = vi.fn(); a.options.requestNegotiation = replacement;
+  const publicRead = await a.get('/decisions/decision/public');
+  expect(publicRead.headers.get('content-type')).toContain('profile="urn:known-enough:background-negotiation"');
+  expect(publicRead.headers.get('cache-control')).toBe('no-store');
+  expect(enqueue).not.toHaveBeenCalled();
   const result = await a.post('/decisions/decision/commands', queueCommand());
   expect(result.status).toBe(200); expect(await result.json()).toEqual({ ok: true, requestId: 'queue-owned', job: queuedReceipt });
   expect(result.headers.get('cache-control')).toBe('no-store'); expect(enqueue).toHaveBeenCalledOnce(); expect(replacement).not.toHaveBeenCalled();

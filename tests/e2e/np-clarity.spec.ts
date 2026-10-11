@@ -5,6 +5,8 @@ import { test, expect, type BrowserContext } from '@playwright/test';
 import { npApi } from '../evaluations/np-api.ts';
 import { clarificationTransport } from '../evaluations/assessment-model.ts';
 import { freshGroup } from '../evaluations/np-lifecycle.ts';
+// These cases own one fixed-port server; keep its setup and teardown in one worker.
+test.describe.configure({ mode: 'default' });
 let server: ChildProcess;
 const url = 'http://127.0.0.1:5183/';
 test.beforeAll(async () => {
