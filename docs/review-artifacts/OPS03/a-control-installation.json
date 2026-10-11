@@ -21,5 +21,77 @@
   ],
   "providerCalls": 0,
   "totalWrites": 0,
-  "runtimePublication": "NOT_EXECUTED"
+  "runtimePublication": "NOT_EXECUTED",
+  "installedProof": {
+    "observedAt": "2026-10-11T17:26:38.490307+00:00",
+    "sourceSha": "62c1f648c9bbcbb3a8279f817821c9130d4aae50",
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38159142296",
+    "result": "SUCCESS",
+    "reports": [
+      {
+        "sourceSha": "62c1f648c9bbcbb3a8279f817821c9130d4aae50",
+        "account": "092954139775",
+        "region": "us-east-1",
+        "result": "JOB_CONTROL_DISABLED_READBACK_PASS",
+        "writeRequested": true,
+        "writeAcknowledged": true,
+        "state": "DISABLED",
+        "sourceMatches": true,
+        "active": 0,
+        "slots": 0,
+        "totalsUnchangedDuringCheck": true,
+        "totalWrites": 0,
+        "providerCalls": 0,
+        "runtimePublication": "NOT_EXECUTED",
+        "nativeStoreRead": "PASS",
+        "nativeDeliveryCount": 0
+      },
+      {
+        "sourceSha": "62c1f648c9bbcbb3a8279f817821c9130d4aae50",
+        "account": "092954139775",
+        "region": "us-east-1",
+        "result": "JOB_READ_ACCESS_PASS",
+        "checks": [
+          {
+            "capability": "control",
+            "result": "READ_ALLOWED",
+            "state": "ABSENT"
+          },
+          {
+            "capability": "authority",
+            "result": "READ_ALLOWED",
+            "state": "STANDING_APPROVED",
+            "loggingDeclaration": "DISABLED",
+            "actualProviderLogging": "NOT_READ"
+          },
+          {
+            "capability": "totals",
+            "result": "READ_ALLOWED",
+            "state": "PRESENT_VALID",
+            "runs": 63,
+            "reservedTokens": 16024361,
+            "reservedCostMicros": 16024361,
+            "messages": 58
+          },
+          {
+            "capability": "retention",
+            "result": "READ_ALLOWED",
+            "state": "DISABLED",
+            "dataClass": "SYNTHETIC"
+          },
+          {
+            "capability": "migration",
+            "result": "READ_ALLOWED",
+            "state": "ACTIVE"
+          }
+        ],
+        "requests": 5,
+        "mutations": 0,
+        "providerCalls": 0,
+        "runtimePublication": "NOT_EXECUTED",
+        "allMemberRetention": "NOT_EXECUTED",
+        "actualProviderLogging": "NOT_READ"
+      }
+    ]
+  }
 }

@@ -1,3 +1,5 @@
+Current OPS03: **IN_PROGRESS/A — disabled job control installed; native database/delivery access PASS**. [Actual38159142296](https://github.com/Known-Enough/known-enough/actions/runs/38159142296): empty source-bound control created, native reads passed, cumulative TOTAL unchanged/no writes, zero provider calls. [State and next integration](../../../../review-artifacts/OPS03/a-installed-control.md). Next trusted request enqueue/private runtime/worker binding then owned provider/recovery/usage proof; AI jobs are not yet activated. OPS02 remains deferred; current retention/consent gates and saved NP00 preserved. B unavailable/observer-only, same A claim.
+
 Current OPS03: **IN_PROGRESS/A — installed job/control/usage/retention intake next**. Existing B durable-job code is checked; actual runtime and managed provider/recovery proof remain unverified. A sole active task, B unavailable/observer-only. OPS02 remainder stays DEFERRED/unclaimed; passed controls and owner live proof preserved, real retention/consent guards still required. NP00 saved/protected; no new worker, monitor or provider call.
 
 # OPS03 — Recoverable distributed model jobs
