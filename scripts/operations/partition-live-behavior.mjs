@@ -55,14 +55,19 @@ async function srp(config,fixture){
   return await new Promise((resolve,reject)=>{const timer=globalThis.setTimeout(()=>reject(new Error('SRP_TIMEOUT')),30000);user.authenticateUser(new AuthenticationDetails({Username:fixture.mailbox.address,Password:fixture.password}),{
     onSuccess:session=>{globalThis.clearTimeout(timer);resolve(session.getAccessToken().getJwtToken());},onFailure:()=>{globalThis.clearTimeout(timer);reject(new Error('SRP_LOGIN_FAILED'));}});});
 }
+export function callbackCode(raw,origin,state){
+  const url=new URL(raw);
+  if(url.origin!==origin||url.searchParams.get('state')!==state||!url.searchParams.get('code'))return invalid('PKCE_CALLBACK_INVALID');
+  return url.searchParams.get('code');
+}
 async function pkce(config,fixture,browser){
   const verifier=randomBytes(32).toString('base64url');const state=randomBytes(24).toString('hex');const redirect=config.allowedOrigin+'/';
   const authorize=new URL(config.cognitoDomain+'/oauth2/authorize');authorize.search=new globalThis.URLSearchParams({client_id:config.participantClientId,response_type:'code',scope:'openid email',redirect_uri:redirect,state,code_challenge_method:'S256',code_challenge:createHash('sha256').update(verifier).digest('base64url')}).toString();
-  const context=await browser.newContext();let code;let page;let step='AUTHORIZE';
+  const context=await browser.newContext();let page;let step='AUTHORIZE';
   try{
-    await context.route(config.allowedOrigin+'/**',async route=>{const url=new URL(route.request().url());if(url.searchParams.get('state')!==state||!url.searchParams.get('code')){await route.abort();return;}code=url.searchParams.get('code');await route.fulfill({status:200,contentType:'text/plain',body:'Owned test callback received.'});});
+    await context.route(config.allowedOrigin+'/**',async route=>{const url=new URL(route.request().url());if(url.searchParams.get('state')!==state||!url.searchParams.get('code')){await route.abort();return;}await route.fulfill({status:200,contentType:'text/plain',body:'Owned test callback received.'});});
     page=await context.newPage();await page.goto(authorize.href,{timeout:30000});step='LOGIN_FIELDS';await page.locator('input[name="username"]:visible').fill(fixture.mailbox.address);await page.locator('input[name="password"]:visible').fill(fixture.password);
-    step='SUBMIT';await page.locator('input[type="submit"]:visible,button[type="submit"]:visible').first().click();step='CALLBACK';await page.waitForURL(url=>url.origin===config.allowedOrigin,{timeout:30000});if(!code)return invalid('PKCE_CALLBACK_INVALID');
+    step='SUBMIT';await page.locator('input[type="submit"]:visible,button[type="submit"]:visible').first().click();step='CALLBACK';await page.waitForURL(url=>url.origin===config.allowedOrigin&&url.searchParams.get('state')===state&&(url.searchParams.has('code')||url.searchParams.has('error')),{timeout:30000});const code=callbackCode(page.url(),config.allowedOrigin,state);
     step='TOKEN_EXCHANGE';const response=await globalThis.fetch(config.cognitoDomain+'/oauth2/token',{method:'POST',redirect:'error',signal:globalThis.AbortSignal.timeout(10000),headers:{'content-type':'application/x-www-form-urlencoded'},body:new globalThis.URLSearchParams({grant_type:'authorization_code',client_id:config.participantClientId,code,redirect_uri:redirect,code_verifier:verifier})});
     const data=await jsonResponse(response);if(!response.ok||typeof data.access_token!=='string')return invalid('PKCE_EXCHANGE_FAILED');return data.access_token;
   }catch(error){if(page){try{const path=join(process.env.RUNNER_TEMP,'partition-cutover-private','signin-'+fixture.nonce+'-private.html');const html=await page.content();if(Buffer.byteLength(html)<500000){await writeFile(path,html,{mode:0o600});await aws('s3api','put-object','--bucket',bucket,'--key','ops01-owned/'+fixture.runId+'/signin-'+fixture.nonce+'-private.html','--body',path,'--server-side-encryption','AES256');}}catch{/* Diagnosis never overrides the login failure. */}}if(error.safeCode)throw error;return invalid('PKCE_'+step+'_FAILED');}finally{await context.close();}

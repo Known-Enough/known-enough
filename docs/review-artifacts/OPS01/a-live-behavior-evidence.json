@@ -3,14 +3,14 @@
   "recordedAt": "2026-10-11T04:09:24.691046+00:00",
   "installedSource": "b0735d07488fbc75ac13ef3d131a4f82b6a92575",
   "hashes": {
-    "scripts/operations/partition-live-behavior.mjs": "d5033ac76eaef80d838e2387e02ab80897cf543d69c64703bf5c67f1d6684024",
-    "scripts/operations/partition-live-behavior.test.mjs": "ca092faef18462a65ce75cf37db2faf4d2cfb0451010005af56cd0f238b93368",
+    "scripts/operations/partition-live-behavior.mjs": "0124d1e10e6e3c97e3f08c63da575717e3137a11e17e656037925097dce3cee6",
+    "scripts/operations/partition-live-behavior.test.mjs": "b86c63cb75b922b67814c70fe447ab0a0261b4e42406506d5a97b694e6cba3ea",
     ".github/workflows/operations-partition-behavior.yml": "9369397c2ffdeac3e534a6e12a4bf5fa653e7fa4f48d5e04b443bc3b27d967ea",
     "scripts/live-qa/package.json": "430406df55102601fb853204f78d52d8612a404a1259567837b292c9726adcdc",
     "scripts/live-qa/package-lock.json": "71779d06ad40ad54819018850f6dbd56377e6040987fefacee99e979dc53b95f"
   },
   "checks": {
-    "focused": 4,
+    "focused": 5,
     "application": 1507,
     "optionalSkipped": 2,
     "hostedPreview": 1,
@@ -21,9 +21,82 @@
     "dependencyAuditVulnerabilities": 0
   },
   "accessRecheck": 38108948361,
-  "liveBehavior": "NOT_EXECUTED",
+  "liveBehavior": "FAILED_PKCE_CALLBACK_INVALID",
   "signup": 0,
   "email": 0,
   "modelCalls": 0,
-  "next": "One exact-source own-account GitHub behavioral run; inspect actual results and cleanup before task completion."
+  "next": "One exact-source own-account GitHub behavioral run; inspect actual results and cleanup before task completion.",
+  "actualRuns": [
+    {
+      "runId": 38110689412,
+      "source": "29aeadecb7d3561bf76b59216f725b3d6dde0eb3",
+      "actorId": 44531296,
+      "conclusion": "failure",
+      "reports": {
+        "partition-cleanup-behavior-report.json": {
+          "sourceSha": "29aeadecb7d3561bf76b59216f725b3d6dde0eb3",
+          "result": "LIVE_CLEANUP_PASS",
+          "phase": "cleanup",
+          "identities": 2,
+          "signup": 1,
+          "confirmed": 1,
+          "signedLogin": 0,
+          "apiChecks": 0,
+          "archived": 0,
+          "selfDeleted": 1,
+          "mailboxesRemoved": 1,
+          "syntheticAccountsDisabled": 0,
+          "modelCalls": 0
+        },
+        "partition-disable-behavior-report.json": {
+          "sourceSha": "29aeadecb7d3561bf76b59216f725b3d6dde0eb3",
+          "result": "LIVE_DISABLE_PASS",
+          "phase": "disable",
+          "identities": 2,
+          "signup": 1,
+          "confirmed": 1,
+          "signedLogin": 0,
+          "apiChecks": 0,
+          "archived": 0,
+          "selfDeleted": 0,
+          "mailboxesRemoved": 0,
+          "syntheticAccountsDisabled": 0,
+          "modelCalls": 0
+        },
+        "partition-recover-behavior-report.json": {
+          "sourceSha": "29aeadecb7d3561bf76b59216f725b3d6dde0eb3",
+          "result": "PARTITION_INSTALLED_PACKAGE_RECOVERED",
+          "deployment": "UNCHANGED",
+          "activation": "NOT_EXECUTED"
+        },
+        "partition-fixtures-behavior-report.json": {
+          "sourceSha": "29aeadecb7d3561bf76b59216f725b3d6dde0eb3",
+          "result": "BLOCKED",
+          "phase": "fixtures",
+          "identities": 2,
+          "signup": 1,
+          "confirmed": 1,
+          "signedLogin": 0,
+          "apiChecks": 0,
+          "archived": 0,
+          "selfDeleted": 0,
+          "mailboxesRemoved": 0,
+          "syntheticAccountsDisabled": 0,
+          "modelCalls": 0,
+          "code": "PKCE_CALLBACK_INVALID"
+        },
+        "partition-backup-behavior-report.json": {
+          "sourceSha": "29aeadecb7d3561bf76b59216f725b3d6dde0eb3",
+          "account": "092954139775",
+          "region": "us-east-1",
+          "result": "PARTITION_PRIOR_CODE_BACKUP_VERIFIED",
+          "privateBackupBytes": 405731,
+          "codeUpdate": "NOT_EXECUTED",
+          "sourceFreeze": "NOT_EXECUTED",
+          "activation": "NOT_EXECUTED"
+        }
+      }
+    }
+  ],
+  "callbackRepairChecks": "5 focused and final full1507 application/two optional skips/hosted1/browser64 exit0"
 }

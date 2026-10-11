@@ -1847,3 +1847,10 @@ OPS01 exact serialization correction: native policy checks exposed PARTITION_SET
 ## OPS01 repaired archive access and real behavioral package — 2026-10-11T04:09:24.691046+00:00
 
 User archive policy readback acknowledged; actual own-A/main/source a418012 [38108948361](https://github.com/Known-Enough/known-enough/actions/runs/38108948361) passed three required reads,0mutations. Final new harness4 focused and full1507app/two optional skips/hosted1/browser64/refs7/planning15 PASS, nested SRP6.3.20 audit0. [Package and remaining proof](review-artifacts/OPS01/a-live-behavior.md). No new users/email/model calls yet. Next exact-source behavioral dispatch; same OPS01 sole A claim, B observer-only, saved NP00 preserved.
+
+
+## OPS01 actual callback failure and bounded retry — 2026-10-11T04:12:23.476678+00:00
+
+[Own-A/main run38110689412](https://github.com/Known-Enough/known-enough/actions/runs/38110689412), source29aeade: confirmed one owned primary signup/email, signature-verified SRP login, then PKCE_CALLBACK_INVALID before account registration/group actions. Always-run cleanup PASS: one created user self-deleted and one mailbox removed; second identity only a saved intent. No paid model/deployment. Exact sanitized reports in [behavior evidence](review-artifacts/OPS01/a-live-behavior-evidence.json). Root cause beyond callback capture not yet established. Same claimed harness fixes code extraction from actual origin/state-matching navigation URL, focused regression and full checks before retry. No new task, worker, IAM or admin request; saved NP00 protected.
+
+Corrected callback package final checks:5 focused and pinned full exit0,1507application/two optional skips/hosted1/browser64, references7/planning15/lint/types/build/boundaries PASS. Next exact-source retry; no live success inferred.

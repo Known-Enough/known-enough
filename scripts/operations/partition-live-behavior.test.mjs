@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ownFixture,behaviorReport,jsonResponse } from './partition-live-behavior.mjs';
+import { ownFixture,behaviorReport,jsonResponse,callbackCode } from './partition-live-behavior.mjs';
 const runId='12345678-1234-1234-1234-123456789abc';
 const fixture={runId,nonce:runId,subject:null,password:'PRIVATE_PASSWORD_CANARY'.repeat(2),mailbox:{address:'keqa-owned@example.invalid',token:'PRIVATE_MAIL_TOKEN'}};
 test('a fixture cannot become owned through a supplied foreign run, subject, mailbox or malformed private record',()=>{
@@ -21,4 +21,10 @@ test('successful empty Cognito acknowledgements parse without inventing data; ex
  assert.deepEqual(await jsonResponse(new globalThis.Response(null,{status:200})),{});
  assert.deepEqual(await jsonResponse(new globalThis.Response('{"owned":true}',{status:200})),{owned:true});
  await assert.rejects(jsonResponse(new globalThis.Response('x'.repeat(100001),{status:200})),/RESPONSE_LIMIT/);
+});
+
+// The navigation URL is available before a route callback necessarily completes.
+test('PKCE code comes from the actual matching callback URL, independent of route timing',()=>{
+ assert.equal(callbackCode('https://example.invalid/?code=owned-code&state=owned-state','https://example.invalid','owned-state'),'owned-code');
+ for(const url of ['https://other.invalid/?code=owned-code&state=owned-state','https://example.invalid/?code=owned-code&state=foreign-state','https://example.invalid/?error=invalid_scope&state=owned-state'])assert.throws(()=>callbackCode(url,'https://example.invalid','owned-state'),/PKCE_CALLBACK_INVALID/);
 });
