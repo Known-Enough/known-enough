@@ -2,7 +2,7 @@
 
 **Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of OPS00, not deferred administrator installation. Complete storage/archive/migration code and tests now; defer required resource/data migration installation and managed proof. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
 
-- Status: IN_PROGRESS / A — real code/storage cutover, durable resume and repaired archive-directory access PASS; executing owned primary signup/group/archive/cleanup acceptance.
+- Status: IN_PROGRESS / A — code/storage cutover, durable resume, repaired access and real primary signup/group/archive/cleanup PASS; final managed storage stress proof in progress.
 - Origin: FA15 in [assessment](../../../../full-assessment.md), tracked by ASSESS06.
 - Priority: follow the shared queue after ASSESS07 → ASSESS10 → OPS00, then OPS01 → OPS02 → OPS03; before broader enrollment/real-person/distributed claims respectively.
 - Worker/model: select at claim under current workflow; architectural changes use the required architecture checkpoint, never an automatic model switch.
@@ -661,3 +661,10 @@ Actual [retry38110906589](https://github.com/Known-Enough/known-enough/actions/r
 Same bounded OPS01/A harness correction, final focused/full checks before new retry; B observer-only and NP00 saved.
 
 Final installed-list harness check:6 focused and pinned full exit0,1507application/two optional skips/hosted1/browser64, references7/planning15/lint/types/build. First parallel draft browser check had3connection/timeout failures; unchanged-source serial bundled Chromium final64/64 PASS. Shared inspection38111066051 AWS PASS; broader public suite8/10 with stale pinned root hash and Participant sign-in selector failures, outside this group harness and not repaired/waived. Next exact-source group/archive retry.
+
+
+## OPS01 actual behavioral PASS and managed stress closeout — 2026-10-11T04:28:06.981635+00:00
+
+Actual [run38111349673](https://github.com/Known-Enough/known-enough/actions/runs/38111349673), exact83702d7/ownA/main/manual, SUCCESS: two primary signup/email/signed SRP/hosted-PKCE/register/pending-denial personas,17real API checks, concurrent independent group creation, stranger absence, invitation acceptance/reload, disabled-member403, removal and rejected invitation replay;2authorized archives with fresh-runner repeat;2synthetic account disables/2Cognito self-deletions/2mailbox removals,0models/0newdeployment. Basic live service/archive/privacy/cleanup acceptance now proven. Same harness adds required managed stress:32owned synthetic drafts >300000aggregate bytes, fresh reconstructed read, stale account and removed-member conditional commits rejected, and dropped successful archival acknowledgment followed by fresh-runner durable recovery. No browser/server fixture cross-import, participant data or AI call; all generated fixture content synthetic, physical children bounded. Final corrected checks and one exact-source stress run next; same OPS01/A claim remains until that evidence.
+
+Final corrected storage-stress package:7focused and pinned full exit0,1507application/two optional skips/hosted1/browser64, refs7/planning15/lint/types/build. No installed source change; next one exact-source owned stress verification through existing roles.

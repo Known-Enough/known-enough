@@ -10,7 +10,7 @@ import { createPartitionManagedDriver } from '../../packages/adapters/src/partit
 import { createPartitionedGroupRepository, partitionGroupKey } from '../../packages/adapters/src/partitioned-group-repository.ts';
 import { preparePartitionArchive, createPartitionArchiveRunner } from '../../packages/adapters/src/partition-archive.ts';
 import { partitionDirectoryKey } from '../../packages/adapters/src/partition-directory.ts';
-import { Groups } from '@deal-table/contracts';
+import { Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { createCognitoIdentityResolver } from '../../apps/api/src/cognito-identity.ts';
 import { createMailtmClient } from '../live-qa/mailtm.mjs';
 import { partitionRecoveryStorage } from './partition-recovery.mjs';
@@ -32,7 +32,7 @@ export function behaviorReport(state, phase, result) {
   return { result:safeResult,phase:safePhase,identities:count(state?.fixtures?.length),signup:count(state?.signup),
     confirmed:count(state?.confirmed),signedLogin:count(state?.signedLogin),apiChecks:count(state?.apiChecks),
     archived:count(state?.archived),selfDeleted:count(state?.selfDeleted),mailboxesRemoved:count(state?.mailboxesRemoved),
-    syntheticAccountsDisabled:count(state?.disabled),modelCalls:0 };
+    syntheticAccountsDisabled:count(state?.disabled),staleCommitRejected:count(state?.staleCommitRejected),largeDrafts:count(state?.largeDrafts),archiveLostAckRecovered:count(state?.archiveLostAckRecovered),modelCalls:0 };
 }
 
 export function visibleGroup(page,groupId,expectedMembers){
@@ -42,6 +42,10 @@ export function visibleGroup(page,groupId,expectedMembers){
   if(expectedMembers===null){if(group)return invalid('LIVE_GROUP_VISIBILITY_LEAK');return null;}
   if(!group||group.members.length!==expectedMembers)return invalid('LIVE_GROUP_MEMBERSHIP_CHANGED');
   return group;
+}
+export function largeOwnedDrafts(groupVersion){
+  return Array.from({length:32},(_,index)=>({id:'ops01-large-'+index,bodyHash:createHash('sha256').update('owned-large-'+index).digest('hex'),revision:1,groupVersion,
+    frame:KE.PublicDecisionFrame.parse({schemaVersion:KE.KE_SCHEMA_VERSION,decisionId:'ops01-large-'+index,frameVersion:1,semanticVersion:1,contextToken:'c'.repeat(64),title:'Owned storage check',objective:'x'.repeat(2000),description:'x'.repeat(4000),participants:[{id:'owned-persona',displayName:'Owned persona',requiredForApproval:true}],requiredParticipantIds:['owned-persona'],variables:[],rules:[]}),clarificationQuestions:Array.from({length:12},()=> 'q'.repeat(500)),createdDecisionId:null}));
 }
 export async function jsonResponse(response) {
   if (!response.body) return {};
@@ -121,19 +125,26 @@ async function main(phase){
         const invite=await request(organizer,'/groups/'+organizer.groupId+'/invitations','POST',{email:member.mailbox.address,replace:false});
         const accepted=await request(member,'/groups/accept','POST',{token:invite.token});if(accepted.group?.members.length!==2)return invalid('LIVE_MEMBERSHIP_NOT_RETAINED');
         visibleGroup(await request(member,'/groups'),organizer.groupId,2);
-        await status(member,'DISABLED');await request(member,'/groups','GET',undefined,403);await status(member,'APPROVED');
+        const staleDriver=managed();const staleRepo=createPartitionedGroupRepository(staleDriver.groups);
+        const staleAccount=await staleRepo.fence({accountSubjects:[member.subject],groupId:organizer.groupId},()=>{});
+        await status(member,'DISABLED');if(await staleDriver.groups.commit(staleAccount.mutations))return invalid('LIVE_STALE_ACCOUNT_COMMIT_ACCEPTED');state.staleCommitRejected=(state.staleCommitRejected??0)+1;
+        await request(member,'/groups','GET',undefined,403);await status(member,'APPROVED');
         const current=visibleGroup(await request(organizer,'/groups'),organizer.groupId,2);const removed=current.members.find(item=>!item.isOrganizer);
-        await request(organizer,'/groups/'+organizer.groupId+'/remove','POST',{memberId:removed.id,version:current.version});visibleGroup(await request(member,'/groups'),organizer.groupId,null);await request(member,'/groups/accept','POST',{token:invite.token},404);
+        const staleMember=await staleRepo.fence({accountSubjects:[organizer.subject,member.subject],groupId:organizer.groupId},()=>{});await request(organizer,'/groups/'+organizer.groupId+'/remove','POST',{memberId:removed.id,version:current.version});visibleGroup(await request(member,'/groups'),organizer.groupId,null);await request(member,'/groups/accept','POST',{token:invite.token},404);if(await staleDriver.groups.commit(staleMember.mutations))return invalid('LIVE_STALE_MEMBER_COMMIT_ACCEPTED');state.staleCommitRejected++;
+        const largeRepo=createPartitionedGroupRepository(managed().groups);await largeRepo.transaction({accountSubjects:[member.subject],groupId:member.groupId},snapshot=>{const group=snapshot.groups.find(item=>item.id===member.groupId);if(!group||group.organizer!==member.subject)return invalid('OWN_LARGE_GROUP_INVALID');group.drafts=largeOwnedDrafts(group.version);});state.largeDrafts=32;
+        const largeSnapshot=await createPartitionedGroupRepository(managed().groups).transaction({accountSubjects:[member.subject],groupId:member.groupId},snapshot=>snapshot.groups.find(item=>item.id===member.groupId));if(!largeSnapshot||largeSnapshot.drafts.length!==32||Buffer.byteLength(JSON.stringify(largeSnapshot))<=300000)return invalid('LIVE_LARGE_GROUP_NOT_RECONSTRUCTED');
         const driver=managed();state.archives=[];
         for(const fixture of state.fixtures){const key=partitionGroupKey(fixture.groupId);const header=await driver.groups.read(key);if(header?.kind!=='GROUP'||header.value.organizer!==fixture.subject)return invalid('OWN_GROUP_ARCHIVE_MISMATCH');
-          const entries=[{key,row:header}];for(const invitation of header.value.invitations){const child=partitionDirectoryKey({type:'INVITATION',groupId:fixture.groupId,tokenHash:invitation.tokenHash,recipientHash:invitation.recipientHash,expiresAt:invitation.expiresAt});entries.push({key:child,row:await driver.groups.read(child)});}
+          const entries=[{key,row:header}];for(const draftId of header.value.draftIds){const child={PK:key.PK,SK:'DRAFT#'+draftId};entries.push({key:child,row:await driver.groups.read(child)});}for(const invitation of header.value.invitations){const child=partitionDirectoryKey({type:'INVITATION',groupId:fixture.groupId,tokenHash:invitation.tokenHash,recipientHash:invitation.recipientHash,expiresAt:invitation.expiresAt});entries.push({key:child,row:await driver.groups.read(child)});}
           const plan=preparePartitionArchive(entries,fixture.groupId,sourceSha);const expected={sourceSha,groupId:fixture.groupId,sourceHeaderRevision:header.revision,sourceHash:plan.sourceHash,manifestHash:plan.manifestHash};
           await writeFile(join(directory,'archive-'+fixture.nonce+'-private.json'),plan.manifestBytes,{mode:0o600,flag:'wx'});state.archives.push({nonce:fixture.nonce,expected});
         }await local();
       }else if(phase==='archive'){
         await role('KnownEnoughGithubGroupArchive');if(state.archives?.length!==2)return invalid('ARCHIVE_PLANS_MISSING');
         for(const fixture of state.fixtures){await signed(fixture,fixture.accessToken);const archive=state.archives.find(item=>item.nonce===fixture.nonce);const bytes=await readFile(join(directory,'archive-'+fixture.nonce+'-private.json'));const authority={kind:'ORGANIZER',subject:fixture.subject};
-          const ports=managed().archivePorts({manifestBytes:bytes,expected:archive.expected,authority,recovery:partitionRecoveryStorage()});const make=()=>createPartitionArchiveRunner(ports,bytes,archive.expected,authority);await make().prepare();await make().archive();await make().archive();state.archived++;await local();
+          const ports=managed().archivePorts({manifestBytes:bytes,expected:archive.expected,authority,recovery:partitionRecoveryStorage()});const make=()=>createPartitionArchiveRunner(ports,bytes,archive.expected,authority);await make().prepare();let lost=false;const faultPorts={...ports,commit:async(request,context)=>{const committed=await ports.commit(request,context);if(committed){lost=true;throw new Error('OWN_ARCHIVE_ACK_DROPPED');}return committed;}};
+          try{await createPartitionArchiveRunner(faultPorts,bytes,archive.expected,authority).archive();return invalid('LIVE_ARCHIVE_LOST_ACK_NOT_EXERCISED');}catch(error){if(!lost||error.code!=='ARCHIVE_COMMIT_UNKNOWN')throw error;}
+          const reconstructed=await make().archive();if(reconstructed.state!=='ARCHIVED')return invalid('LIVE_ARCHIVE_LOST_ACK_NOT_RECOVERED');state.archiveLostAckRecovered=(state.archiveLostAckRecovered??0)+1;await make().archive();state.archived++;await local();
           visibleGroup(await request(fixture,'/groups'),fixture.groupId,null);
         }
       }else if(phase==='disable'){

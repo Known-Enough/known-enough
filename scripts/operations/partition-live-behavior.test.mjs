@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ownFixture,behaviorReport,jsonResponse,callbackCode,visibleGroup } from './partition-live-behavior.mjs';
+import { ownFixture,behaviorReport,jsonResponse,callbackCode,visibleGroup,largeOwnedDrafts } from './partition-live-behavior.mjs';
 const runId='12345678-1234-1234-1234-123456789abc';
 const fixture={runId,nonce:runId,subject:null,password:'PRIVATE_PASSWORD_CANARY'.repeat(2),mailbox:{address:'keqa-owned@example.invalid',token:'PRIVATE_MAIL_TOKEN'}};
 test('a fixture cannot become owned through a supplied foreign run, subject, mailbox or malformed private record',()=>{
@@ -36,4 +36,9 @@ test('installed group-list checks require actual membership and reject stranger,
  assert.throws(()=>visibleGroup({groups:[group]},group.id,null),/LIVE_GROUP_VISIBILITY_LEAK/);
  assert.throws(()=>visibleGroup({groups:[]},group.id,1),/LIVE_GROUP_MEMBERSHIP_CHANGED/);
  assert.throws(()=>visibleGroup({groups:[group]},group.id,2),/LIVE_GROUP_MEMBERSHIP_CHANGED/);
+});
+
+test('large owned storage fixture exceeds the old aggregate ceiling while each child remains bounded',()=>{
+ const drafts=largeOwnedDrafts(4);assert.equal(drafts.length,32);assert.ok(Buffer.byteLength(JSON.stringify(drafts))>300000);
+ assert.ok(drafts.every(draft=>Buffer.byteLength(JSON.stringify(draft))<352*1024&&draft.groupVersion===4&&draft.createdDecisionId===null));
 });
