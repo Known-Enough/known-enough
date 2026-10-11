@@ -525,6 +525,86 @@
           "realParticipants": 0
         }
       }
+    },
+    {
+      "url": "https://github.com/Known-Enough/known-enough/actions/runs/38184300709",
+      "sourceSha": "246a1d8552810e46efdc635ba956ed459bbd9ad2",
+      "conclusion": "failure",
+      "classification": "Fixture producer UNCLASSIFIED after first signed persona; exact raw cause unavailable. Second mailbox intent unknown. Guard-method correction/provider NOT_EXECUTED.",
+      "reports": {
+        "owned-jobs-backup-report.json": {
+          "sourceSha": "246a1d8552810e46efdc635ba956ed459bbd9ad2",
+          "account": "092954139775",
+          "region": "us-east-1",
+          "result": "PARTITION_PRIOR_CODE_BACKUP_VERIFIED",
+          "privateBackupBytes": 423127,
+          "priorCodeSha256": "ecc1b55427a9c2f3bf687d019300e47f689a155e75151f175843ab1a82a87979",
+          "codeUpdate": "NOT_EXECUTED",
+          "sourceFreeze": "NOT_EXECUTED",
+          "activation": "NOT_EXECUTED"
+        },
+        "owned-jobs-recover-report.json": {
+          "sourceSha": "246a1d8552810e46efdc635ba956ed459bbd9ad2",
+          "result": "PARTITION_INSTALLED_PACKAGE_RECOVERED",
+          "deployment": "UNCHANGED",
+          "activation": "NOT_EXECUTED"
+        },
+        "owned-jobs-accounts-disabled-report.json": {
+          "sourceSha": "246a1d8552810e46efdc635ba956ed459bbd9ad2",
+          "result": "LIVE_DISABLE_PASS",
+          "phase": "disable",
+          "identities": 2,
+          "signup": 1,
+          "confirmed": 1,
+          "signedLogin": 1,
+          "apiChecks": 2,
+          "archived": 0,
+          "selfDeleted": 0,
+          "mailboxesRemoved": 0,
+          "syntheticAccountsDisabled": 1,
+          "staleCommitRejected": 0,
+          "largeDrafts": 0,
+          "archiveLostAckRecovered": 0,
+          "modelCalls": 0
+        },
+        "owned-jobs-fixtures-report.json": {
+          "sourceSha": "246a1d8552810e46efdc635ba956ed459bbd9ad2",
+          "result": "BLOCKED",
+          "phase": "fixtures",
+          "identities": 2,
+          "signup": 1,
+          "confirmed": 1,
+          "signedLogin": 1,
+          "apiChecks": 2,
+          "archived": 0,
+          "selfDeleted": 0,
+          "mailboxesRemoved": 0,
+          "syntheticAccountsDisabled": 0,
+          "staleCommitRejected": 0,
+          "largeDrafts": 0,
+          "archiveLostAckRecovered": 0,
+          "modelCalls": 0,
+          "code": "UNCLASSIFIED"
+        },
+        "owned-jobs-fixtures-cleanup-report.json": {
+          "sourceSha": "246a1d8552810e46efdc635ba956ed459bbd9ad2",
+          "result": "LIVE_CLEANUP_PASS",
+          "phase": "cleanup",
+          "identities": 2,
+          "signup": 1,
+          "confirmed": 1,
+          "signedLogin": 1,
+          "apiChecks": 2,
+          "archived": 0,
+          "selfDeleted": 1,
+          "mailboxesRemoved": 1,
+          "syntheticAccountsDisabled": 1,
+          "staleCommitRejected": 0,
+          "largeDrafts": 0,
+          "archiveLostAckRecovered": 0,
+          "modelCalls": 0
+        }
+      }
     }
   ],
   "remaining": [

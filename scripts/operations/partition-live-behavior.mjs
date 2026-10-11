@@ -19,6 +19,12 @@ const execute = promisify(execFile); const api = 'https://u94iyvt6p9.execute-api
 const bucket = 'known-enough-qa-artifacts-092954139775';
 const invalid = code => { const error=new Error(code);error.safeCode=code;throw error; };
 const uuid = value => typeof value === 'string' && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(value);
+export function fixtureFailureCode(error){
+ const prior=error?.safeCode??error?.code;
+ if(typeof prior==='string'&&/^[A-Za-z0-9_]{1,120}$/.test(prior))return prior;
+ const mail=new Set(['MAILTM_REQUEST_FAILED','MAILTM_NO_PUBLIC_DOMAIN','MAILTM_INVALID_IDENTITY','MAILTM_OWNER_MISMATCH','MAILTM_INVALID_MESSAGES','MAILTM_MESSAGE_PAGE_LIMIT','MAILTM_INVALID_PATH','MAILTM_RESPONSE_LIMIT']);
+ return mail.has(error?.message)?error.message:'UNCLASSIFIED';
+}
 export function ownFixture(fixture, runId) {
   if (!fixture || fixture.runId !== runId || !uuid(runId) || !uuid(fixture.nonce) || !fixture.mailbox?.address?.startsWith('keqa-')
     || typeof fixture.password !== 'string' || fixture.password.length < 20 || (fixture.subject !== null && !uuid(fixture.subject))) return invalid('OWN_FIXTURE_INVALID');
@@ -154,6 +160,6 @@ async function main(phase){
       }
     }
     await local();console.log(JSON.stringify({sourceSha,...behaviorReport(state,phase,'LIVE_'+phase.toUpperCase()+'_PASS')}));
-  }catch(error){if(state)await local();const observed=error.safeCode??error.code;const code=typeof observed==='string'&&/^[A-Za-z0-9_]{1,120}$/.test(observed)?observed:'UNCLASSIFIED';console.error(JSON.stringify({sourceSha,...behaviorReport(state,phase,'BLOCKED'),code}));process.exitCode=1;}
+  }catch(error){if(state)await local();const code=fixtureFailureCode(error);console.error(JSON.stringify({sourceSha,...behaviorReport(state,phase,'BLOCKED'),code}));process.exitCode=1;}
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){try{await main(process.argv[2]);}catch{console.error(JSON.stringify({result:'LIVE_SETUP_NOT_VERIFIED'}));process.exitCode=1;}}

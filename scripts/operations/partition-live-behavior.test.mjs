@@ -42,3 +42,12 @@ test('large owned storage fixture exceeds the old aggregate ceiling while each c
  const drafts=largeOwnedDrafts(4);assert.equal(drafts.length,32);assert.ok(Buffer.byteLength(JSON.stringify(drafts))>300000);
  assert.ok(drafts.every(draft=>Buffer.byteLength(JSON.stringify(draft))<352*1024&&draft.groupVersion===4&&draft.createdDecisionId===null));
 });
+
+import { fixtureFailureCode } from './partition-live-behavior.mjs';
+test('fixture failures retain bounded mail-service codes without leaking arbitrary exception messages',()=>{
+ assert.equal(fixtureFailureCode(new Error('MAILTM_REQUEST_FAILED')),'MAILTM_REQUEST_FAILED');
+ assert.equal(fixtureFailureCode(new Error('MAILTM_NO_PUBLIC_DOMAIN')),'MAILTM_NO_PUBLIC_DOMAIN');
+ assert.equal(fixtureFailureCode(new Error('MAILTM_REQUEST_FAILED_PRIVATE_MARKER')),'UNCLASSIFIED');
+ assert.equal(fixtureFailureCode({safeCode:'COGNITO_SignUp_TooManyRequestsException',message:'private-marker'}),'COGNITO_SignUp_TooManyRequestsException');
+ assert.equal(fixtureFailureCode(new Error('private-marker')),'UNCLASSIFIED');
+});
