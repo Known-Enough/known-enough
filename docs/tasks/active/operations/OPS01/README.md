@@ -1,4 +1,4 @@
-**Current status: IN_PROGRESS/A** under the user's explicit OPS01 request after installed OPS00 access verification. First: validate the actual legacy data and migration plan through GitHub, then finish compatible runtime/cutover and managed acceptance. Saved NP00 remains protected; B unavailable. Earlier coding claims below are history.
+**Current status: DONE.** A completed installed OPS01 acceptance: real signup/group/archive/large-group/stale-commit/lost-ack/cleanup proof. [Final evidence](../../../../review-artifacts/OPS01/a-installed-closeout.md). Earlier coding/claim entries below are history; saved NP00 remains protected. OPS02 is next eligible managed work after a fresh claim.
 
 # OPS01 — Partition group state and archive safely
 

@@ -1,5 +1,7 @@
 # OPS01 checked coding and deferred managed closeout
 
+**Current installed status: OPS01 DONE.** [Actual installation, cutover, durable reconstruction, effective access, real group/archive/stress/privacy/cleanup evidence](a-installed-closeout.md) supersedes this older coding/deferred-cloud checkpoint. The body below preserves its original evidence and proposed sequence as history; no unexecuted historical proposal becomes PASS.
+
 The coding checkpoint is an inactive implementation. The authoritative [ticket](../../tasks/active/operations/OPS01/ticket.md), [board](../../task-board.md) and [claim history](../../claim-log.md) record final check results and the actual release. Mandatory managed proof keeps the whole task REVIEW; CODE_READY alone is not DONE. A NP00 remains paused with its exact saved source/private recovery preserved.
 
 ## Checked source interfaces
