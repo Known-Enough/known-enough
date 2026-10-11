@@ -102,6 +102,9 @@ jobs:
 
   primary-release:
     needs: [provenance, release]
+    concurrency:
+      group: known-enough-lifecycle-installation
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -120,6 +123,17 @@ jobs:
           name: live-qa-release-receipt
           path: /tmp/qa-release
       - run: npm ci
+      - name: Assume native storage read role before any primary code change
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPartitionMigration
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Verify current native storage mode; never replace its private package with QA code
+        run: node scripts/operations/primary-publication-mode.mjs '${{ needs.provenance.outputs.source }}' /tmp/qa-release/primary-storage-mode-private.json
       - name: Assume primary backend code-only role
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:

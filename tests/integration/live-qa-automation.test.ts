@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 // @ts-expect-error Node-only provenance is locally verified without a GitHub request.
 import { trustedSource } from '../../scripts/live-qa/provenance.mjs';
 // @ts-expect-error JavaScript deployment guards; no AWS service is invoked here.
-import { assertCleanLease, assertInstalledEnvelope, primaryCodeGuard } from '../../scripts/live-qa/release.mjs';
+import { assertCleanLease, assertInstalledEnvelope, primaryCodeGuard, primaryPublicationDisposition } from '../../scripts/live-qa/release.mjs';
 // @ts-expect-error JavaScript public receipt validation is exercised directly.
 import { validFiles } from '../../scripts/live-qa/public.mjs';
 // @ts-expect-error Sanitized comparison against an unchanged inspector interface.
@@ -24,4 +24,13 @@ describe('LIVE03 preparation, no GitHub dispatch/AWS operation',()=>{
  test('primary comparison does not accept arbitrary observed code or expose environment secrets',()=>{const receipt={sourceCommit:sha,primary:{backendSha256:'b'.repeat(64)}};const report=compareMetadata(receipt,{collection:{status:'passed'},lambda:{codeSha256Hex:'c'.repeat(64)}},{NP_GROUP_EMAIL_KEY:'SECRET'});expect(report.status).toBe('BLOCKED_OR_FAILED');expect(JSON.stringify(report)).not.toContain('SECRET');});
  test('all workflow actions are pinned and credential jobs are separate; final report runs after failures',()=>{const workflow=readFileSync('.github/workflows/live-qa-release-and-check.yml','utf8');const actions=[...workflow.matchAll(/uses: ([^\s]+)/g)].map(match=>match[1]);expect(actions.length).toBeGreaterThan(10);for(const action of actions)expect(action).toMatch(/@[a-f0-9]{40}$/);expect(workflow).toContain('cancel-in-progress: false');expect(workflow).toContain('role-duration-seconds: 3600');expect(workflow).not.toContain('continue-on-error: true');expect(workflow).not.toContain('pull_request_target:');expect(workflow).toContain('report:\n    if: always()');expect(workflow).toContain('LIVE_QA_ENABLED');expect(workflow).not.toMatch(/AWS_PROFILE|known-enough-staging-ro/);});
  test('optional primary publication role has no config, IAM, identity or data write authority',()=>{const base=JSON.parse(readFileSync('infra/live-qa/config.example.json','utf8'));const c={...base,sourceCommit:sha,mailDomain:'qa.example.org',hostedZoneId:'Z123456789',primaryRollout:true,primaryExpectedRevision:'a'.repeat(8)+'-'+('b'.repeat(4)+'-').repeat(3)+'c'.repeat(12)};const {core}=renderTemplates(c,{apiKey:'b'.repeat(64)+'/api.zip',brokerKey:'c'.repeat(64)+'/broker.zip'});const role=JSON.stringify(core.Resources.PrimaryReleaseRole.Properties.Policies);expect(role).toContain('known-enough-stage-api');expect(role).not.toMatch(/UpdateFunctionConfiguration|iam:|cognito-idp:|dynamodb:PutItem|dynamodb:UpdateItem|s3:PutObject/);expect(role).toContain('dynamodb:GetItem');expect(role).toContain('AUTH');expect(role).toContain('LEASE');});
+});
+
+test('automatic QA publication preserves private operations packages and refuses legacy code with native storage',()=>{
+ const names=['api.mjs','configuration-private.json','manifest-private.json','release-private.json','lifecycle-private.json'];
+ expect(primaryPublicationDisposition('OPERATIONS',names)).toBe('PRESERVE_OPERATIONS');
+ expect(primaryPublicationDisposition('LEGACY',names)).toBe('PRESERVE_OPERATIONS');
+ expect(()=>primaryPublicationDisposition('OPERATIONS',['api.mjs'])).toThrow('PRIMARY_OPERATIONS_PACKAGE_MISSING');
+ expect(primaryPublicationDisposition('LEGACY',['api.mjs'])).toBe('PUBLISH_LEGACY');
+ expect(()=>primaryPublicationDisposition('UNKNOWN',['api.mjs'])).toThrow();
 });

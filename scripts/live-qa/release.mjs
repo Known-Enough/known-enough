@@ -165,6 +165,14 @@ export function primaryCodeGuard(current) {
     if (current.State !== 'Active' || current.LastUpdateStatus !== 'Successful' || current.Handler !== 'api.handler' || current.Environment?.Variables?.KE14_MODEL_MODE !== 'DISABLED' || current.Environment?.Variables?.KE14_PAID_CALLS_APPROVED !== 'false' || current.Environment?.Variables?.NP_GROUPS_ENABLED !== 'true' || current.Environment?.Variables?.NP_GROUP_TABLE_NAME !== 'KnownEnoughGroupsStage')
         throw new Error('PRIMARY_INITIAL_SETUP_OR_NP00_HOLD');
 }
+export function primaryPublicationDisposition(mode, names) {
+    if (!['LEGACY', 'OPERATIONS'].includes(mode) || !Array.isArray(names)) throw new Error('PRIMARY_STORAGE_MODE_UNVERIFIED');
+    const protectedPackage = names.includes('configuration-private.json') && names.includes('manifest-private.json') && names.includes('release-private.json');
+    if (protectedPackage) return 'PRESERVE_OPERATIONS';
+    if (mode === 'OPERATIONS') throw new Error('PRIMARY_OPERATIONS_PACKAGE_MISSING');
+    if (names.length !== 1 || names[0] !== 'api.mjs') throw new Error('PRIMARY_ARCHIVE_UNVERIFIED');
+    return 'PUBLISH_LEGACY';
+}
 export async function publishPrimary(directory) {
     const expected = JSON.parse(readFileSync(directory + '/receipt.json', 'utf8'));
     const target = validateTarget(JSON.parse(readFileSync(directory + '/target.json', 'utf8')));
@@ -178,6 +186,18 @@ export async function publishPrimary(directory) {
     const current = aws('lambda', 'get-function-configuration', { FunctionName: name });
     primaryCodeGuard(current);
     const prior = Buffer.from(current.CodeSha256, 'base64').toString('hex');
+    const mode = JSON.parse(readFileSync(directory + '/primary-storage-mode-private.json', 'utf8'));
+    if (mode.sourceSha !== expected.sourceCommit) throw new Error('PRIMARY_STORAGE_MODE_UNVERIFIED');
+    const zip = directory + '/current-primary-private.zip';
+    const download = spawnSync('aws', ['s3api','get-object','--bucket',bucket,'--key',prior+'/api.zip',zip,'--region','us-east-1','--no-cli-pager'], { encoding:'utf8', timeout:20000 });
+    if (download.status !== 0 || digest(readFileSync(zip)) !== prior) throw new Error('PRIMARY_ARCHIVE_UNVERIFIED');
+    const inspection = spawnSync('python3', ['-c', 'import json,zipfile,sys; z=zipfile.ZipFile(sys.argv[1]); assert sum(x.file_size for x in z.infolist())<50000000; print(json.dumps(z.namelist()))',zip], { encoding:'utf8', timeout:10000 });
+    if (inspection.status !== 0) throw new Error('PRIMARY_ARCHIVE_UNVERIFIED');
+    if (primaryPublicationDisposition(mode.mode, JSON.parse(inspection.stdout)) === 'PRESERVE_OPERATIONS') {
+        const result = { status:'PRESERVED_OPERATIONS', sourceCommit:expected.sourceCommit, backendSha256:prior, matchesQaPackage:false, codeUpdate:'NOT_EXECUTED' };
+        writeFileSync(directory+'/primary-release.json',JSON.stringify(result)+'\n',{mode:0o600});
+        return result;
+    }
     const expectedSha = expected.artifacts.api.sha256;
     let revision = current.RevisionId;
     try {
@@ -186,7 +206,7 @@ export async function publishPrimary(directory) {
             revision = changed.RevisionId;
             revision = await ready(name, expectedSha);
         }
-        const result = { status: 'PASS', sourceCommit: expected.sourceCommit, backendSha256: expectedSha };
+        const result = { status: 'PASS', sourceCommit: expected.sourceCommit, backendSha256: expectedSha, priorBackendSha256: prior };
         writeFileSync(directory + '/primary-release.json', JSON.stringify(result) + '\n', { mode: 0o600 });
         return result;
     }

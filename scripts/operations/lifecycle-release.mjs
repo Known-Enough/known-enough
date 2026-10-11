@@ -85,7 +85,7 @@ async function main(action) {
   }
   verifyCodePublication(previous,published,candidate.sha256);
   await writeFile(join(directory,'published-private.json'),JSON.stringify(published),{mode:0o600});
-  return { sourceSha, result:'LIFECYCLE_OWNER_CODE_READBACK_PASS', environment:'UNCHANGED', migration:'UNCHANGED',
+  return { sourceSha, result:'LIFECYCLE_OWNER_CODE_READBACK_PASS', backendSha256:candidate.sha256, priorBackendSha256:Buffer.from(previous.CodeSha256,'base64').toString('hex'), environment:'UNCHANGED', migration:'UNCHANGED',
     modelCalls:0, dataChanges:0, managedOwnerProof:'PENDING' };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

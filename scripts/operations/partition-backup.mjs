@@ -57,7 +57,7 @@ async function main() {
   await writeFile(join(directory, 'previous-api.zip'), backup.bytes, { mode: 0o600, flag: 'wx' });
   await writeFile(join(directory, 'previous-lambda.json'), JSON.stringify(current), { mode: 0o600, flag: 'wx' });
   console.log(JSON.stringify({ sourceSha, account: '092954139775', region: 'us-east-1', result: 'PARTITION_PRIOR_CODE_BACKUP_VERIFIED',
-    privateBackupBytes: backup.bytes.length, codeUpdate: 'NOT_EXECUTED', sourceFreeze: 'NOT_EXECUTED', activation: 'NOT_EXECUTED' }));
+    privateBackupBytes: backup.bytes.length, priorCodeSha256: backup.key.split('/')[0], codeUpdate: 'NOT_EXECUTED', sourceFreeze: 'NOT_EXECUTED', activation: 'NOT_EXECUTED' }));
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try { await main(); }
