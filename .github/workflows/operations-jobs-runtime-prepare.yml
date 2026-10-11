@@ -34,6 +34,7 @@ jobs:
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
           node scripts/operations/verify.mjs > /dev/null
           npm ci
+          python3 -B scripts/operations/jobs-logging-readback.test.py
           node --experimental-transform-types --test scripts/operations/jobs-runtime-setup.test.mjs scripts/operations/jobs-runtime-package.test.mjs scripts/operations/jobs-package.test.mjs
           node --experimental-transform-types scripts/operations/jobs-runtime-package.mjs > "$RUNNER_TEMP/model-job-package-report.json"
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
@@ -80,19 +81,7 @@ jobs:
       - name: Read actual provider logging configuration; no model invocation
         run: |
           umask 077
-          python3 -B - <<'PY'
-          import json, os, subprocess
-          from pathlib import Path
-          command = ['aws','bedrock','get-model-invocation-logging-configuration','--region','us-east-1','--output','json','--no-cli-pager']
-          result = subprocess.run(command, capture_output=True, text=True)
-          disabled = False
-          if result.returncode == 0:
-              c = json.loads(result.stdout).get('loggingConfig', {})
-              disabled = all(c.get(key) in (False, None) for key in ['textDataDeliveryEnabled','imageDataDeliveryEnabled','embeddingDataDeliveryEnabled','videoDataDeliveryEnabled'])
-          report = {'sourceSha':os.environ['GITHUB_SHA'], 'result':'PROVIDER_LOGGING_DISABLED' if disabled else 'PROVIDER_LOGGING_UNVERIFIED_OR_ENABLED', 'providerCalls':0}
-          (Path(os.environ['RUNNER_TEMP']) / 'model-job-logging-report.json').write_text(json.dumps(report)+'\n')
-          if not disabled: raise SystemExit(report['result'])
-          PY
+          python3 -B scripts/operations/jobs-logging-readback.py
       - name: Publish finite reports and infrastructure template only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
