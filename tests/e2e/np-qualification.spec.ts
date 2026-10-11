@@ -3,6 +3,8 @@ import { test, expect, type BrowserContext } from '@playwright/test';
 import { npApi } from '../evaluations/np-api.ts';
 import { confirmFrameReview, exploreProposals } from '../live/qa/helpers.ts';
 import { freshGroup } from '../evaluations/np-lifecycle.ts';
+// Both tests share this fixed-port server; separate parallel workers can terminate a peer's server.
+test.describe.configure({ mode: 'default' });
 let server: ChildProcess;
 const url = 'http://127.0.0.1:5184/';
 test.beforeAll(async () => {

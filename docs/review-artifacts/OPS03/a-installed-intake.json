@@ -16,5 +16,58 @@
   },
   "awsWrites": 0,
   "providerCalls": 0,
-  "runtimePublication": "NOT_EXECUTED"
+  "runtimePublication": "NOT_EXECUTED",
+  "installedReadback": {
+    "sourceSha": "8e2aefb089ea10ca071e49d1fadc02b690bba1ec",
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38118431759",
+    "result": "SUCCESS",
+    "reports": [
+      {
+        "sourceSha": "8e2aefb089ea10ca071e49d1fadc02b690bba1ec",
+        "account": "092954139775",
+        "region": "us-east-1",
+        "result": "JOB_READ_ACCESS_PASS",
+        "checks": [
+          {
+            "capability": "control",
+            "result": "READ_ALLOWED",
+            "state": "ABSENT"
+          },
+          {
+            "capability": "authority",
+            "result": "READ_ALLOWED",
+            "state": "STANDING_APPROVED",
+            "loggingDeclaration": "DISABLED",
+            "actualProviderLogging": "NOT_READ"
+          },
+          {
+            "capability": "totals",
+            "result": "READ_ALLOWED",
+            "state": "PRESENT_VALID",
+            "runs": 63,
+            "reservedTokens": 16024361,
+            "reservedCostMicros": 16024361,
+            "messages": 58
+          },
+          {
+            "capability": "retention",
+            "result": "READ_ALLOWED",
+            "state": "DISABLED",
+            "dataClass": "SYNTHETIC"
+          },
+          {
+            "capability": "migration",
+            "result": "READ_ALLOWED",
+            "state": "ACTIVE"
+          }
+        ],
+        "requests": 5,
+        "mutations": 0,
+        "providerCalls": 0,
+        "runtimePublication": "NOT_EXECUTED",
+        "allMemberRetention": "NOT_EXECUTED",
+        "actualProviderLogging": "NOT_READ"
+      }
+    ]
+  }
 }

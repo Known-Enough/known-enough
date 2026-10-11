@@ -1,0 +1,25 @@
+{
+  "observedAt": "2026-10-11T17:19:04.058192+00:00",
+  "result": "SOURCE_CHECKED_CONTROL_INSTALL_PENDING",
+  "files": {
+    "scripts/operations/jobs-control.mjs": "d7f03f0713b65ee3260bfe87b183e4a5d9bc066f28bf9ef4e4de1bc45703888f",
+    "scripts/operations/jobs-control.test.mjs": "2fdcd36edc96f0ba0a092137fa2f07e8fbddad8f3d4db8c08be82ec98274614e",
+    ".github/workflows/operations-jobs-check.yml": "668c7ad273edfdd65ebaf6d4fd43c41ac4615d030c02e977205313ff05f74d26",
+    "tests/e2e/np-qualification.spec.ts": "879c313f3baa9762014c63758f9decba3e89b3aee2adcecfc4ecb7b25334ac85"
+  },
+  "checks": {
+    "native": 9,
+    "application": 1520,
+    "optionalSkips": 2,
+    "hosted": 1,
+    "browser": 64,
+    "full": "EXIT_0"
+  },
+  "preservedFailures": [
+    "Initial active-control fixture UUID had an invalid RFC variant; corrected fixture only",
+    "Two full checks63/64: fixed-port qualification server shared across parallel workers; file default mode fixes lifecycle without skipping failures"
+  ],
+  "providerCalls": 0,
+  "totalWrites": 0,
+  "runtimePublication": "NOT_EXECUTED"
+}
