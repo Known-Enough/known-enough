@@ -221,6 +221,158 @@
           "sourceSha": "f25f329337f90a18214fcd52856bb55926ccbe16"
         }
       }
+    },
+    {
+      "url": "https://github.com/Known-Enough/known-enough/actions/runs/38182965095",
+      "sourceSha": "20332c9a2b3bd1f022a7ecb7a2195bbf631edd76",
+      "conclusion": "failure",
+      "classification": "Harness selected migration role for required room transaction; use installed ModelJobOperations",
+      "reports": {
+        "owned-jobs-consent-report.json": {
+          "sourceSha": "20332c9a2b3bd1f022a7ecb7a2195bbf631edd76",
+          "phase": "consent",
+          "result": "OWNED_JOB_PHASE_BLOCKED",
+          "apiChecks": 9,
+          "signedFrameConfirmations": 2,
+          "signedPrivateConfirmations": 0,
+          "duplicateReceipts": 0,
+          "terminalSuccesses": 0,
+          "syntheticPublicAndOwnerDrafts": "DECLARED_SETUP_NOT_MODEL_QUALIFICATION",
+          "realParticipants": 0,
+          "code": "AccessDeniedException"
+        },
+        "owned-jobs-backup-report.json": {
+          "sourceSha": "20332c9a2b3bd1f022a7ecb7a2195bbf631edd76",
+          "account": "092954139775",
+          "region": "us-east-1",
+          "result": "PARTITION_PRIOR_CODE_BACKUP_VERIFIED",
+          "privateBackupBytes": 423127,
+          "priorCodeSha256": "ecc1b55427a9c2f3bf687d019300e47f689a155e75151f175843ab1a82a87979",
+          "codeUpdate": "NOT_EXECUTED",
+          "sourceFreeze": "NOT_EXECUTED",
+          "activation": "NOT_EXECUTED"
+        },
+        "owned-jobs-recover-report.json": {
+          "sourceSha": "20332c9a2b3bd1f022a7ecb7a2195bbf631edd76",
+          "result": "PARTITION_INSTALLED_PACKAGE_RECOVERED",
+          "deployment": "UNCHANGED",
+          "activation": "NOT_EXECUTED"
+        },
+        "owned-jobs-disable-control-report.json": {
+          "sourceSha": "20332c9a2b3bd1f022a7ecb7a2195bbf631edd76",
+          "phase": "disable-control",
+          "result": "OWNED_JOB_PHASE_PASS",
+          "apiChecks": 9,
+          "signedFrameConfirmations": 2,
+          "signedPrivateConfirmations": 0,
+          "duplicateReceipts": 0,
+          "terminalSuccesses": 0,
+          "syntheticPublicAndOwnerDrafts": "DECLARED_SETUP_NOT_MODEL_QUALIFICATION",
+          "realParticipants": 0
+        },
+        "owned-jobs-prepare-report.json": {
+          "sourceSha": "20332c9a2b3bd1f022a7ecb7a2195bbf631edd76",
+          "phase": "prepare",
+          "result": "OWNED_JOB_PHASE_PASS",
+          "apiChecks": 4,
+          "signedFrameConfirmations": 0,
+          "signedPrivateConfirmations": 0,
+          "duplicateReceipts": 0,
+          "terminalSuccesses": 0,
+          "syntheticPublicAndOwnerDrafts": "DECLARED_SETUP_NOT_MODEL_QUALIFICATION",
+          "realParticipants": 0
+        },
+        "owned-jobs-accounts-disabled-report.json": {
+          "sourceSha": "20332c9a2b3bd1f022a7ecb7a2195bbf631edd76",
+          "result": "LIVE_DISABLE_PASS",
+          "phase": "disable",
+          "identities": 2,
+          "signup": 2,
+          "confirmed": 2,
+          "signedLogin": 2,
+          "apiChecks": 4,
+          "archived": 0,
+          "selfDeleted": 0,
+          "mailboxesRemoved": 0,
+          "syntheticAccountsDisabled": 2,
+          "staleCommitRejected": 0,
+          "largeDrafts": 0,
+          "archiveLostAckRecovered": 0,
+          "modelCalls": 0
+        },
+        "owned-jobs-fixtures-report.json": {
+          "sourceSha": "20332c9a2b3bd1f022a7ecb7a2195bbf631edd76",
+          "result": "LIVE_FIXTURES_PASS",
+          "phase": "fixtures",
+          "identities": 2,
+          "signup": 2,
+          "confirmed": 2,
+          "signedLogin": 2,
+          "apiChecks": 4,
+          "archived": 0,
+          "selfDeleted": 0,
+          "mailboxesRemoved": 0,
+          "syntheticAccountsDisabled": 0,
+          "staleCommitRejected": 0,
+          "largeDrafts": 0,
+          "archiveLostAckRecovered": 0,
+          "modelCalls": 0
+        },
+        "owned-jobs-private-checkpoint-report.json": {
+          "sourceSha": "20332c9a2b3bd1f022a7ecb7a2195bbf631edd76",
+          "phase": "preserve",
+          "result": "OWNED_JOB_PHASE_PASS",
+          "apiChecks": 9,
+          "signedFrameConfirmations": 2,
+          "signedPrivateConfirmations": 0,
+          "duplicateReceipts": 0,
+          "terminalSuccesses": 0,
+          "syntheticPublicAndOwnerDrafts": "DECLARED_SETUP_NOT_MODEL_QUALIFICATION",
+          "realParticipants": 0
+        },
+        "owned-jobs-disable-policy-report.json": {
+          "sourceSha": "20332c9a2b3bd1f022a7ecb7a2195bbf631edd76",
+          "phase": "disable-policy",
+          "result": "OWNED_JOB_PHASE_PASS",
+          "apiChecks": 9,
+          "signedFrameConfirmations": 2,
+          "signedPrivateConfirmations": 0,
+          "duplicateReceipts": 0,
+          "terminalSuccesses": 0,
+          "syntheticPublicAndOwnerDrafts": "DECLARED_SETUP_NOT_MODEL_QUALIFICATION",
+          "realParticipants": 0
+        },
+        "owned-jobs-fixtures-cleanup-report.json": {
+          "sourceSha": "20332c9a2b3bd1f022a7ecb7a2195bbf631edd76",
+          "result": "LIVE_CLEANUP_PASS",
+          "phase": "cleanup",
+          "identities": 2,
+          "signup": 2,
+          "confirmed": 2,
+          "signedLogin": 2,
+          "apiChecks": 4,
+          "archived": 0,
+          "selfDeleted": 2,
+          "mailboxesRemoved": 2,
+          "syntheticAccountsDisabled": 2,
+          "staleCommitRejected": 0,
+          "largeDrafts": 0,
+          "archiveLostAckRecovered": 0,
+          "modelCalls": 0
+        },
+        "owned-jobs-policy-report.json": {
+          "sourceSha": "20332c9a2b3bd1f022a7ecb7a2195bbf631edd76",
+          "phase": "policy",
+          "result": "OWNED_JOB_PHASE_PASS",
+          "apiChecks": 4,
+          "signedFrameConfirmations": 0,
+          "signedPrivateConfirmations": 0,
+          "duplicateReceipts": 0,
+          "terminalSuccesses": 0,
+          "syntheticPublicAndOwnerDrafts": "DECLARED_SETUP_NOT_MODEL_QUALIFICATION",
+          "realParticipants": 0
+        }
+      }
     }
   ],
   "remaining": [

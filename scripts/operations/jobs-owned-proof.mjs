@@ -18,6 +18,7 @@ import { createCognitoIdentityResolver } from '../../apps/api/src/cognito-identi
 import { syntheticProofPolicy, ownedRegistrationStamp } from './lifecycle-owned-behavior.mjs';
 import { ownFixture, jsonResponse } from './partition-live-behavior.mjs';
 import { verifySource } from './verify.mjs';
+export const PROOF_ROLES=Object.freeze({preserve:'KnownEnoughGithubQaRelease',prepare:'KnownEnoughGithubPartitionMigration',policy:'KnownEnoughGithubRetentionPolicy',consent:'KnownEnoughGithubModelJobOperations',activate:'KnownEnoughGithubModelJobOperations',enqueue:'KnownEnoughGithubModelJobOperations',observe:'KnownEnoughGithubModelJobOperations','disable-control':'KnownEnoughGithubModelJobOperations','disable-policy':'KnownEnoughGithubRetentionPolicy'});
 const execute=promisify(execFile), table='KnownEnoughOperationsJournal';
 const key=PK=>({PK:{S:PK},SK:{S:'STATE'}}),controlKey=key('OPERATIONS#MODEL_JOBS'),policyKey=key('OPERATIONS#RETENTION');
 const fail=code=>{throw Object.assign(new Error(code),{safeCode:code});};
@@ -39,7 +40,7 @@ export function proofReport(sourceSha,phase,state,result,code){
 async function main(phase){
  const sourceSha=verifySource(process.env),packageSource=process.env.PACKAGE_SOURCE;
  if(!/^[a-f0-9]{40}$/.test(packageSource??''))return fail('PROOF_PACKAGE_SOURCE_INVALID');
- const roles={preserve:'KnownEnoughGithubQaRelease',prepare:'KnownEnoughGithubPartitionMigration',policy:'KnownEnoughGithubRetentionPolicy',consent:'KnownEnoughGithubPartitionMigration',activate:'KnownEnoughGithubModelJobOperations',enqueue:'KnownEnoughGithubModelJobOperations',observe:'KnownEnoughGithubModelJobOperations','disable-control':'KnownEnoughGithubModelJobOperations','disable-policy':'KnownEnoughGithubRetentionPolicy'};
+ const roles=PROOF_ROLES;
  if(!roles[phase])return fail('PROOF_PHASE_INVALID');
  const aws=async(service,op,...args)=>{const {stdout}=await execute('aws',[service,op,...args,'--region','us-east-1','--output','json','--no-cli-pager'],{timeout:20000,maxBuffer:131072});return stdout.trim()?JSON.parse(stdout):{};};
  const identity=await aws('sts','get-caller-identity');if(identity.Account!=='092954139775'||!identity.Arn?.startsWith('arn:aws:sts::092954139775:assumed-role/'+roles[phase]+'/'))return fail('PROOF_ROLE_INVALID');

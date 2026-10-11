@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ownedPublicDraft, enqueueRequest, proofReport } from './jobs-owned-proof.mjs';
+import { ownedPublicDraft, enqueueRequest, proofReport, PROOF_ROLES, awsFailure } from './jobs-owned-proof.mjs';
 import { RequestNegotiation } from '@deal-table/contracts/durable-command';
 const nonce='11111111-1111-4111-9111-111111111111';
 const group={members:['own-a','own-b'],version:2};
@@ -25,4 +25,16 @@ test('finite public report omits credentials, subjects, private drafts and unsaf
  const report=proofReport('a'.repeat(40),'observe',{accessToken:'synthetic-private-marker',subject:'private',apiChecks:4,terminalSuccesses:0},'OWNED_JOB_PHASE_BLOCKED','private error value');
  assert.equal(report.apiChecks,4);assert.equal(report.terminalSuccesses,0);assert.ok(!JSON.stringify(report).includes('synthetic-private-marker'));assert.ok(!('code' in report));
  assert.equal(proofReport('a'.repeat(40),'observe',null,'OWNED_JOB_PHASE_BLOCKED','AccessDeniedException').code,'AccessDeniedException');
+});
+
+test('phase uses installed room-writer role while resource setup remains migration-only',()=>{
+ assert.equal(PROOF_ROLES.prepare,'KnownEnoughGithubPartitionMigration');
+ assert.equal(PROOF_ROLES.consent,'KnownEnoughGithubModelJobOperations');
+ assert.equal(PROOF_ROLES.policy,'KnownEnoughGithubRetentionPolicy');
+ assert.equal(PROOF_ROLES.preserve,'KnownEnoughGithubQaRelease');
+ assert.ok(Object.isFrozen(PROOF_ROLES));
+});
+test('native wrapped AWS failures retain their exact sanitized cause',()=>{
+ assert.equal(awsFailure({cause:{cause:{name:'AccessDeniedException',message:'synthetic-private-marker'}}}),'AccessDeniedException');
+ assert.equal(awsFailure({name:'unclassified',message:'synthetic-private-marker'}),null);
 });
