@@ -8,9 +8,9 @@ Current OPS03: **IN_PROGRESS/A — installed job/control/usage/retention intake 
 
 Make AI jobs recover safely across worker restarts and retries, with current permissions and spending limits checked.
 
-**Status:** Coding phase eligible after OPS02's checked coding checkpoint; final administrator/managed completion deferred.
+**Status:** IN_PROGRESS / A. Authenticated request connection and the dedicated automatic background runner are being integrated; installed live qualification remains unfinished.
 
-**Next step:** After OPS02, claim the shared queue task and prepare the scoped implementation. Authorized cloud operations use the verified OPS00 GitHub path; routine work must not depend on per-task A-only CloudShell commands. Spending, migration/deletion and outside-envelope changes retain their specific authorization.
+**Next step:** Verify the dedicated runner package and actual provider logging through GitHub, install the new disabled runner with current setup credentials, then publish matching API/worker bindings and qualify current owned consent/retention, recovery, usage and cleanup. Standing A/B project authority applies; existing data, counters and technical safeguards remain intact. [Current integration evidence](../../../../review-artifacts/OPS03/a-enqueue-runtime.md).
 
 **Related work:** [ASSESS07](../../live-testing/ASSESS07/README.md), [ASSESS06](../../../historical/completed/assessments/ASSESS06/README.md).
 

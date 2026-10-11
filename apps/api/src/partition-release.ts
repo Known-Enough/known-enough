@@ -43,12 +43,13 @@ export function createPartitionReleaseHandler(options: {
   readSource: (signal: AbortSignal) => Promise<SourceSnapshot | null>;
   diagnostic?: (code: 'SOURCE_UNAVAILABLE' | 'SOURCE_FROZEN') => void;
   lifecycle?: PartitionRuntimeOptions['lifecycle'];
+  jobs?: PartitionRuntimeOptions['jobs'];
 }): (event: HttpApiEvent) => Promise<HttpApiResult> {
   if (!options || typeof options.legacy !== 'function' || typeof options.readSource !== 'function'
     || (options.diagnostic !== undefined && typeof options.diagnostic !== 'function')) return invalid();
   const config = Buffer.from(options.configurationBytes); const manifest = Buffer.from(options.manifestBytes);
   const release = structuredClone(options.release);
-  const native = createPartitionDeploymentHandler(config, manifest, release, undefined, options.lifecycle);
+  const native = createPartitionDeploymentHandler(config, manifest, release, undefined, options.lifecycle, options.jobs);
   const plan = loadPartitionMigration(manifest, { sourceSha: release.sourceSha, sourceRevision: release.sourceRevision,
     sourceHash: release.sourceHash, manifestHash: release.manifestHash });
   const binding: MarkerBinding = { planHash: plan.planHash, manifestHash: release.manifestHash,

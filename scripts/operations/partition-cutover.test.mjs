@@ -58,10 +58,10 @@ test('actual archive recovery accepts legacy/new private packages but refuses du
  const {join}=await import('node:path');const {execFile}=await import('node:child_process');const {promisify}=await import('node:util');
  const run=promisify(execFile);const folder=await mkdtemp(join(tmpdir(),'ops02-recovery-test-'));
  try {
-  for(const extra of ['none','lifecycle','foreign','duplicate']) {
-   await run('python3',['-c',"import pathlib,zipfile,sys; p=pathlib.Path(sys.argv[1]); z=zipfile.ZipFile(p/'test.zip','w'); names=['api.mjs','configuration-private.json','manifest-private.json','release-private.json']; names+=['lifecycle-private.json'] if sys.argv[2]=='lifecycle' else ['foreign.json'] if sys.argv[2]=='foreign' else ['manifest-private.json'] if sys.argv[2]=='duplicate' else []; [(z.writestr(n,b'PRIVATE_TEST_BYTES')) for n in names]; z.close(); (p/'out').mkdir(exist_ok=True)",folder,extra]);
+  for(const extra of ['none','lifecycle','jobs','jobs-alone','foreign','duplicate']) {
+   await run('python3',['-c',"import pathlib,zipfile,sys; p=pathlib.Path(sys.argv[1]); z=zipfile.ZipFile(p/'test.zip','w'); names=['api.mjs','configuration-private.json','manifest-private.json','release-private.json']; names+=['lifecycle-private.json','jobs-private.json'] if sys.argv[2]=='jobs' else ['jobs-private.json'] if sys.argv[2]=='jobs-alone' else ['lifecycle-private.json'] if sys.argv[2]=='lifecycle' else ['foreign.json'] if sys.argv[2]=='foreign' else ['manifest-private.json'] if sys.argv[2]=='duplicate' else []; [(z.writestr(n,b'PRIVATE_TEST_BYTES')) for n in names]; z.close(); (p/'out').mkdir(exist_ok=True)",folder,extra]);
    const operation=run('python3',['-c',recoveryArchiveScript,join(folder,'test.zip'),join(folder,'out')]);
-   if(['foreign','duplicate'].includes(extra))await assert.rejects(operation);else {await operation;assert.equal((await readFile(join(folder,'out','manifest-private.json'))).toString(),'PRIVATE_TEST_BYTES');}
+   if(['foreign','duplicate','jobs-alone'].includes(extra))await assert.rejects(operation);else {await operation;assert.equal((await readFile(join(folder,'out','manifest-private.json'))).toString(),'PRIVATE_TEST_BYTES');}
   }
  } finally {await rm(folder,{recursive:true,force:true});}
 });

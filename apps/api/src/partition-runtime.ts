@@ -3,6 +3,7 @@ import type { Clock, IdSource } from '@deal-table/application';
 import { createPartitionManagedDriver, type PartitionManagedOptions, type PartitionDraftArchitect } from '@deal-table/adapters/partition-request';
 import { createCognitoIdentityResolver, type CognitoIdentityOptions } from './cognito-identity.ts';
 import { createLifecycleOwnerHandler } from './partition-lifecycle-http.ts';
+import { createManagedDurableEnqueue } from './durable-enqueue.ts';
 import { createPartitionParticipantApiHandler } from './partition-http.ts';
 
 export interface PartitionRuntimeOptions {
@@ -18,6 +19,8 @@ export interface PartitionRuntimeOptions {
   draftArchitect?: PartitionDraftArchitect;
   /** Trusted private package only; never selected by request/environment/body identity. */
   lifecycle?: { sourceSha: string; signingKeyBase64: string };
+  /** Trusted deployment binding only; HTTP requests cannot select a queue source. */
+  jobs?: { sourceSha: string };
 }
 const invalid = (): never => { throw new Error('PARTITION_RUNTIME_INVALID'); };
 const MAX_PROFILE_BYTES = 65_536;
@@ -67,6 +70,9 @@ export function createPartitionRuntime(options: PartitionRuntimeOptions) {
     if (!/^[a-f0-9]{40}$/.test(value.sourceSha) || /^0+$/.test(value.sourceSha) || key.length !== 32 || key.toString('base64') !== value.signingKeyBase64) return invalid();
     lifecycle = { sourceSha: value.sourceSha, signingKey: key };
   }
+  if (options.jobs !== undefined && (!options.jobs || typeof options.jobs.sourceSha !== 'string')) return invalid();
+  const jobs = options.jobs ? { ...options.jobs } : undefined;
+  if (jobs && (!lifecycle || !/^[a-f0-9]{40}$/.test(jobs.sourceSha) || /^0+$/.test(jobs.sourceSha))) return invalid();
   const resolve = createCognitoIdentityResolver(identity);
   const driver = createPartitionManagedDriver(options.managed);
   const authenticate = async (request: IncomingMessage, signal: AbortSignal) => {
@@ -74,11 +80,15 @@ export function createPartitionRuntime(options: PartitionRuntimeOptions) {
     const principal = await resolve(request.headers.authorization);
     return signal.aborted ? null : principal;
   };
+  const service = lifecycle ? driver.lifecycle({ sourceSha: lifecycle.sourceSha, signingKey: lifecycle.signingKey }) : undefined;
+  const enqueue = jobs ? createManagedDurableEnqueue({ sourceSha: jobs.sourceSha, now: () => Date.parse(clock.now()),
+    assertRetained: principal => service!.assertRetained(principal) }) : undefined;
   const participant = createPartitionParticipantApiHandler({ groups: driver.groups, decisions: driver.decisions,
     decisionArn: driver.decisionArn, partitionArn: driver.partitionArn,
     membershipDiscovery: driver.membershipDiscovery, authenticate, emailKey, clock, ids, allowedOrigins: [originValue], displayAccess: true,
     legacyPublicDecision: driver.legacyPublicDecision,
     ...(draftArchitect ? { draftArchitect } : {}),
+    ...(enqueue ? { requestNegotiation: enqueue } : {}),
     registrationProfile: async (request, signal) => {
       let response: Response | undefined;
       try {
@@ -98,7 +108,6 @@ export function createPartitionRuntime(options: PartitionRuntimeOptions) {
       finally { if (response?.body && !response.body.locked) await response.body.cancel().catch(() => {}); }
     },
   });
-  if (!lifecycle) return participant;
-  const service = driver.lifecycle({ sourceSha: lifecycle.sourceSha, signingKey: lifecycle.signingKey });
+  if (!service) return participant;
   return createLifecycleOwnerHandler({ authenticate, owner: service, allowedOrigin: originValue, fallback: participant });
 }

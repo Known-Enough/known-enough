@@ -25,6 +25,10 @@ export function verifyOwnerPackageConfiguration(previous, packaged) {
     .some(field => !isDeepStrictEqual(current[field], packaged[field]))) return invalid();
   return true;
 }
+export function verifyOwnerOnlyPackage(names) {
+  if (names.includes('jobs-private.json')) throw new Error('COORDINATED_JOB_RELEASE_REQUIRED');
+  return true;
+}
 async function main(action) {
   const sourceSha = verifySource(process.env);
   if (!['prepare','publish'].includes(action)) return invalid();
@@ -41,6 +45,9 @@ async function main(action) {
     // Recover the exact installed activation anchors; never re-plan or migrate existing data.
     await execute(process.execPath, ['--experimental-transform-types','scripts/operations/partition-cutover.mjs','recover'],
       { timeout: 60000, maxBuffer: 16384 });
+    // Owner-only publication must not remove a previously installed queued-runtime binding.
+    try { await readFile(join(directory,'jobs-private.json')); verifyOwnerOnlyPackage(['jobs-private.json']); }
+    catch (error) { if (error.code !== 'ENOENT') throw error; }
     const configurationBytes = await readFile(join(directory,'configuration-private.json'));
     const manifestBytes = await readFile(join(directory,'manifest-private.json'));
     const release = JSON.parse(await readFile(join(directory,'release-private.json'),'utf8'));

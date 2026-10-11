@@ -15,7 +15,8 @@ import { partitionRecoveryStorage } from './partition-recovery.mjs';
 import { primaryBackupKey } from './partition-backup.mjs';
 import { verifySource } from './verify.mjs';
 import { loadLifecyclePackage } from './lifecycle-package.ts';
-export const recoveryArchiveScript = "import pathlib,zipfile,sys; z=zipfile.ZipFile(sys.argv[1]); p=pathlib.Path(sys.argv[2]); names=['api.mjs','configuration-private.json','manifest-private.json','release-private.json']; optional=['lifecycle-private.json'] if 'lifecycle-private.json' in z.namelist() else []; names+=optional; assert sorted(z.namelist())==sorted(names); assert all(z.getinfo(n).file_size <= (40000000 if n=='api.mjs' else 1048576) for n in names); [(p/n).write_bytes(z.read(n)) for n in names if n!='api.mjs']";
+import { loadJobsPackage } from './jobs-package.ts';
+export const recoveryArchiveScript = "import pathlib,zipfile,sys; z=zipfile.ZipFile(sys.argv[1]); p=pathlib.Path(sys.argv[2]); names=['api.mjs','configuration-private.json','manifest-private.json','release-private.json']; names += [n for n in ['lifecycle-private.json','jobs-private.json'] if n in z.namelist()]; assert 'jobs-private.json' not in names or 'lifecycle-private.json' in names; assert sorted(z.namelist())==sorted(names); assert all(z.getinfo(n).file_size <= (40000000 if n=='api.mjs' else 1048576) for n in names); [(p/n).write_bytes(z.read(n)) for n in names if n!='api.mjs']";
 const execute = promisify(execFile);
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const bucket = 'known-enough-qa-artifacts-092954139775';
@@ -141,7 +142,10 @@ async function main(action) {
     let lifecycle;
     try { lifecycle = loadLifecyclePackage(await readFile(join(directory, 'lifecycle-private.json'))); }
     catch (error) { if (error.code !== 'ENOENT') throw error; }
-    createPartitionDeploymentHandler(config, manifest, release, undefined, lifecycle);
+    let jobs;
+    try { jobs = loadJobsPackage(await readFile(join(directory, 'jobs-private.json'))); }
+    catch (error) { if (error.code !== 'ENOENT') throw error; }
+    createPartitionDeploymentHandler(config, manifest, release, undefined, lifecycle, jobs);
     const actual = nativeConfiguration(previous); const packaged = JSON.parse(config);
     for (const field of ['userPoolId','participantClientId','displayClientId','cognitoDomain','allowedOrigin','emailKey'])
       if (actual[field] !== packaged[field]) return invalid();

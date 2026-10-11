@@ -4,10 +4,12 @@ import { createPartitionRuntime, type PartitionRuntimeOptions } from './partitio
 import { createCognitoIdentityResolver } from './cognito-identity.ts';
 import { createPartitionManagedDriver } from '@deal-table/adapters/partition-request';
 import { createPartitionParticipantApiHandler } from './partition-http.ts';
+import { createManagedDurableEnqueue } from './durable-enqueue.ts';
 
-const mocks = vi.hoisted(() => ({ resolve: vi.fn(), listener: vi.fn(), discovery: vi.fn(), groups: {}, decisions: {}, lifecycle: vi.fn((config: { sourceSha: string; signingKey: Buffer }) => { void config; return { exportOwn: vi.fn(), loadOwnPlan: vi.fn(), consent: vi.fn(), status: vi.fn() }; }) }));
+const mocks = vi.hoisted(() => ({ resolve: vi.fn(), listener: vi.fn(), discovery: vi.fn(), groups: {}, decisions: {}, lifecycle: vi.fn((config: { sourceSha: string; signingKey: Buffer }) => { void config; return { exportOwn: vi.fn(), loadOwnPlan: vi.fn(), consent: vi.fn(), status: vi.fn(), assertRetained: vi.fn() }; }) }));
 vi.mock('./cognito-identity.ts', () => ({ createCognitoIdentityResolver: vi.fn(() => mocks.resolve) }));
 vi.mock('./partition-http.ts', () => ({ createPartitionParticipantApiHandler: vi.fn(() => mocks.listener) }));
+vi.mock('./durable-enqueue.ts', () => ({ createManagedDurableEnqueue: vi.fn(() => vi.fn()) }));
 vi.mock('@deal-table/adapters/partition-request', () => ({ createPartitionManagedDriver: vi.fn(() => ({
   groups: mocks.groups, decisions: mocks.decisions, membershipDiscovery: mocks.discovery,
   decisionArn: 'synthetic-decision-arn', partitionArn: 'synthetic-partition-arn', archivePorts: vi.fn(), lifecycle: mocks.lifecycle,
@@ -117,4 +119,26 @@ it('private source/key composition exposes only a listener and fails malformed l
  const before = vi.mocked(createPartitionManagedDriver).mock.calls.length;
  expect(() => createPartitionRuntime({ ...configuration(), lifecycle: { sourceSha: '0'.repeat(40), signingKeyBase64: 'bad' } })).toThrow('PARTITION_RUNTIME_INVALID');
  expect(vi.mocked(createPartitionManagedDriver).mock.calls.length).toBe(before);
+});
+
+
+it('the private jobs binding exposes only enqueue with the captured source and retained-owner gate', async () => {
+ const options=configuration();options.lifecycle={sourceSha:'a'.repeat(40),signingKeyBase64:Buffer.alloc(32,5).toString('base64')};options.jobs={sourceSha:'b'.repeat(40)};
+ const listener=createPartitionRuntime(options);expect(typeof listener).toBe('function');
+ const queueOptions=vi.mocked(createManagedDurableEnqueue).mock.calls.at(-1)![0];
+ options.jobs.sourceSha='c'.repeat(40);expect(queueOptions.sourceSha).toBe('b'.repeat(40));
+ const config=vi.mocked(createPartitionParticipantApiHandler).mock.calls.at(-1)![0];
+ expect(config.requestNegotiation).toBe(vi.mocked(createManagedDurableEnqueue).mock.results.at(-1)!.value);
+ const service=mocks.lifecycle.mock.results.at(-1)!.value;await queueOptions.assertRetained({kind:'participant',subject:'iris'});
+ expect(service.assertRetained).toHaveBeenCalledWith({kind:'participant',subject:'iris'});
+ expect(Object.keys(config)).not.toEqual(expect.arrayContaining(['process','invoke','provider','deliveries']));
+});
+it('missing lifecycle or invalid private job source is rejected before building transports',()=>{
+ for(const change of [{sourceSha:'0'.repeat(40)},{sourceSha:'short'}]){
+  const before=vi.mocked(createPartitionManagedDriver).mock.calls.length;
+  expect(()=>createPartitionRuntime({...configuration(),jobs:change})).toThrow('PARTITION_RUNTIME_INVALID');
+  expect(vi.mocked(createPartitionManagedDriver).mock.calls.length).toBe(before);
+ }
+ const options=configuration();options.jobs={sourceSha:'b'.repeat(40)};
+ expect(()=>createPartitionRuntime(options)).toThrow('PARTITION_RUNTIME_INVALID');
 });

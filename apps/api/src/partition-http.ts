@@ -1,4 +1,6 @@
 import { randomUUID } from 'node:crypto';
+import { RequestNegotiation, NegotiationReceipt } from '@deal-table/contracts/durable-command';
+import type { DurableEnqueueRequest } from './durable-enqueue.ts';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { Id, KnownEnough as KE } from '@deal-table/contracts';
 import { KnownEnoughApplication, KnownEnoughApplicationError, RepositoryCapacityError,
@@ -20,6 +22,8 @@ export interface PartitionParticipantApiOptions {
   draftArchitect?: PartitionDraftArchitect;
   /** Trusted composition only; enables GET public for an independently verified room-bound display. */
   displayAccess?: boolean;
+  /** Trusted enqueue-only port; processing/provider/admin capabilities never enter an HTTP body. */
+  requestNegotiation?: (request: DurableEnqueueRequest) => Promise<{ jobId: string; state: 'QUEUED'; expiresAt: string }>;
   /** Trusted release-derived classification; JWT and current data conditions still authorize public legacy reads. */
   legacyPublicDecision?: (decisionId: string) => boolean;
   groups: PartitionTransport;
@@ -132,6 +136,8 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
     groups: options.groups, transport: options.decisions,
     ...(options.legacyPublicDecision ? { legacyPublicDecision: options.legacyPublicDecision } : {}) });
   const displayAccess = options.displayAccess === true;
+  const requestNegotiation = options.requestNegotiation;
+  if (requestNegotiation !== undefined && typeof requestNegotiation !== 'function') throw new Error('PARTITION_HTTP_INVALID');
   return (request: IncomingMessage, response: ServerResponse): void => {
     const incomingId = request.headers['x-request-id'];
     let requestId = typeof incomingId === 'string' && Id.safeParse(incomingId).success ? incomingId : randomUUID();
@@ -299,7 +305,8 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         }
         if (!decision || (request.method === 'GET' ? decision[2] === 'commands' : request.method !== 'POST' || decision[2] !== 'commands')) return reject('NOT_FOUND');
         // Fresh request-specific repository; no shared principal, raw application or provisioning port escapes.
-        const application = new KnownEnoughApplication({ repository: repositories.forParticipant(principal), clock, ids });
+        const repository = repositories.forParticipant(principal);
+        const application = new KnownEnoughApplication({ repository, clock, ids });
         if (request.method === 'GET') {
           const snapshot = decision[2] === 'public' ? await application.getPublicSnapshot(principal, decision[1]!)
             : await application.getOwnerSnapshot(principal, decision[1]!);
@@ -312,6 +319,19 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
           const supplied = (raw as Record<string, unknown>).requestId;
           if (typeof supplied === 'string' && Id.safeParse(supplied).success) requestId = supplied;
+        }
+        if (raw && typeof raw === 'object' && 'type' in raw && raw.type === 'REQUEST_NEGOTIATION') {
+          const queued = RequestNegotiation.safeParse(raw);
+          if (!queued.success || queued.data.decisionId !== decision[1]) return reject('INVALID_COMMAND');
+          if (!requestNegotiation) return reject('RETRYABLE_SERVER_ERROR');
+          const result = await requestNegotiation({ principal, decisionId: decision[1]!, expected: queued.data.expected,
+            signal: controller.signal,
+            authorize: async () => { await application.getOwnerSnapshot(principal, decision[1]!); },
+            read: () => repository.transactionDecision(decision[1]!, record => record ? structuredClone(record) : null),
+            begin: () => application.startReasoning({ kind: 'service', subject: 'durable-negotiator', roomIds: [decision[1]!] }, decision[1]!) });
+          if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
+          const receipt = NegotiationReceipt.parse(result);
+          send(response, 200, { ok: true, requestId: queued.data.requestId, job: receipt }); return;
         }
         const command = KE.DecisionCommand.safeParse(raw);
         if (!command.success || command.data.decisionId !== decision[1]!) return reject('INVALID_COMMAND');

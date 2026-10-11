@@ -11,6 +11,7 @@ import { createPartitionDecisionRepository, PARTITION_DECISION_TARGET, type Part
 import type { PartitionTransport } from '@deal-table/adapters/partition-request';
 import { decodeDecisionStateItem } from '../../../packages/adapters/src/dynamodb-codec.ts';
 import { createPartitionParticipantApiHandler, type PartitionParticipantApiOptions } from './partition-http.ts';
+import type { DurableEnqueueRequest } from './durable-enqueue.ts';
 
 type Item = Record<string, AttributeValue>;
 const actor = (subject = 'iris'): TrustedPrincipal => ({ kind: 'participant', subject });
@@ -120,6 +121,38 @@ async function api(f: Awaited<ReturnType<typeof fixture>>, overrides: Partial<Pa
   return { base, options, get, post };
 }
 async function seed(f: Awaited<ReturnType<typeof fixture>>) { await f.factory().forParticipant(actor()).createDecision(f.initial); f.writes.length = 0; f.reads.length = 0; }
+
+const queuedReceipt = { jobId: '12345678-1234-4234-9234-123456789abc', state: 'QUEUED' as const, expiresAt: '2026-10-07T15:05:00Z' };
+function queueCommand() { return { schemaVersion: KE.KE_SCHEMA_VERSION, type: 'REQUEST_NEGOTIATION', requestId: 'queue-owned', decisionId: 'decision',
+  expected: { contextToken: 'a'.repeat(64), semanticVersion: 1, controlVersion: 1 } }; }
+it('routes signed negotiation requests through only the captured server queue port and projects a private-free receipt', async () => {
+  const f = await fixture(); await seed(f);
+  const enqueue = vi.fn(async (request: DurableEnqueueRequest) => {
+    await request.authorize(); const record = await request.read(); expect(record?.definition.decisionId).toBe('decision');
+    expect(request.principal).toEqual(actor()); expect(request.signal).toBeInstanceOf(AbortSignal); return queuedReceipt;
+  });
+  const a = await api(f, { requestNegotiation: enqueue });
+  const replacement = vi.fn(); a.options.requestNegotiation = replacement;
+  const result = await a.post('/decisions/decision/commands', queueCommand());
+  expect(result.status).toBe(200); expect(await result.json()).toEqual({ ok: true, requestId: 'queue-owned', job: queuedReceipt });
+  expect(result.headers.get('cache-control')).toBe('no-store'); expect(enqueue).toHaveBeenCalledOnce(); expect(replacement).not.toHaveBeenCalled();
+});
+it('rejects anonymous/display/foreign decision and body-selected identity/provider fields before invoking the queue port', async () => {
+  const f = await fixture(); await seed(f); const enqueue = vi.fn(async () => queuedReceipt); const a = await api(f, { requestNegotiation: enqueue });
+  expect((await a.post('/decisions/decision/commands', queueCommand(), 'outsider')).status).toBe(401);
+  expect((await a.post('/decisions/unknown/commands', { ...queueCommand(), decisionId: 'unknown' })).status).toBe(404);
+  for (const extra of [{ subject: 'another-owner' }, { sourceSha: 'c'.repeat(40) }, { provider: 'BEDROCK' }, { target: 'another-account' }])
+    expect((await a.post('/decisions/decision/commands', { ...queueCommand(), ...extra })).status).toBe(422);
+  const display = await api(f, { authenticate: async () => ({ kind: 'display', subject: 'display', roomId: 'decision' }), requestNegotiation: enqueue });
+  expect((await display.post('/decisions/decision/commands', queueCommand())).status).toBe(403); expect(enqueue).not.toHaveBeenCalled();
+});
+it('keeps unconfigured queues inactive and never spreads private fields from an invalid queue result', async () => {
+  const f = await fixture(); await seed(f); const absent = await api(f);
+  expect((await absent.post('/decisions/decision/commands', queueCommand())).status).toBe(503);
+  const invalid = await api(f, { requestNegotiation: async () => ({ ...queuedReceipt, privateContext: 'PRIVATE_QUEUE_CANARY' }) });
+  const result = await invalid.post('/decisions/decision/commands', queueCommand());
+  expect(result.status).toBe(503); expect(await result.text()).not.toContain('PRIVATE_QUEUE_CANARY');
+});
 function command(owner: KE.OwnerDecisionSnapshot, id = 'frame-iris'): KE.DecisionCommand {
   return { schemaVersion: KE.KE_SCHEMA_VERSION, type: 'CONFIRM_FRAME', requestId: id, decisionId: 'decision', idempotencyKey: id,
     expected: { contextToken: owner.publicSnapshot.contextToken, semanticVersion: owner.publicSnapshot.semanticVersion,

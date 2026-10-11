@@ -1,0 +1,677 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Known Enough dedicated source-bound model job runner; installed disabled.",
+  "Parameters": {
+    "WorkerKey": {
+      "Type": "String",
+      "AllowedPattern": "[a-f0-9]{64}/model-worker.zip"
+    }
+  },
+  "Resources": {
+    "WorkerLogs": {
+      "Type": "AWS::Logs::LogGroup",
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/known-enough-stage-model-jobs",
+        "RetentionInDays": 30
+      }
+    },
+    "WorkerRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "KnownEnoughModelJobRuntime",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "ExactModelJobRuntime",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "ActiveSourceRead",
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:GetItem"
+                  ],
+                  "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughGroupsStage",
+                  "Condition": {
+                    "ForAllValues:StringLike": {
+                      "dynamodb:LeadingKeys": [
+                        "NP#GROUPS"
+                      ]
+                    },
+                    "Null": {
+                      "dynamodb:LeadingKeys": "false"
+                    }
+                  }
+                },
+                {
+                  "Sid": "ActiveSourceCondition",
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:ConditionCheckItem"
+                  ],
+                  "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughGroupsStage",
+                  "Condition": {
+                    "ForAllValues:StringLike": {
+                      "dynamodb:LeadingKeys": [
+                        "NP#GROUPS"
+                      ]
+                    },
+                    "Null": {
+                      "dynamodb:LeadingKeys": "false"
+                    },
+                    "StringEqualsIfExists": {
+                      "dynamodb:ReturnValues": "NONE"
+                    },
+                    "ForAnyValue:StringEquals": {
+                      "dynamodb:EnclosingOperation": [
+                        "TransactWriteItems"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "Sid": "CopiedJournalRead",
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:GetItem"
+                  ],
+                  "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+                  "Condition": {
+                    "ForAllValues:StringLike": {
+                      "dynamodb:LeadingKeys": [
+                        "PARTITION#*"
+                      ]
+                    },
+                    "Null": {
+                      "dynamodb:LeadingKeys": "false"
+                    }
+                  }
+                },
+                {
+                  "Sid": "CopiedJournalCondition",
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:ConditionCheckItem"
+                  ],
+                  "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+                  "Condition": {
+                    "ForAllValues:StringLike": {
+                      "dynamodb:LeadingKeys": [
+                        "PARTITION#*"
+                      ]
+                    },
+                    "Null": {
+                      "dynamodb:LeadingKeys": "false"
+                    },
+                    "StringEqualsIfExists": {
+                      "dynamodb:ReturnValues": "NONE"
+                    },
+                    "ForAnyValue:StringEquals": {
+                      "dynamodb:EnclosingOperation": [
+                        "TransactWriteItems"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "Sid": "ActivationControlRead",
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:GetItem"
+                  ],
+                  "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions",
+                  "Condition": {
+                    "ForAllValues:StringLike": {
+                      "dynamodb:LeadingKeys": [
+                        "MIGRATION#CONTROL"
+                      ]
+                    },
+                    "Null": {
+                      "dynamodb:LeadingKeys": "false"
+                    }
+                  }
+                },
+                {
+                  "Sid": "ActivationControlCondition",
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:ConditionCheckItem"
+                  ],
+                  "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions",
+                  "Condition": {
+                    "ForAllValues:StringLike": {
+                      "dynamodb:LeadingKeys": [
+                        "MIGRATION#CONTROL"
+                      ]
+                    },
+                    "Null": {
+                      "dynamodb:LeadingKeys": "false"
+                    },
+                    "StringEqualsIfExists": {
+                      "dynamodb:ReturnValues": "NONE"
+                    },
+                    "ForAnyValue:StringEquals": {
+                      "dynamodb:EnclosingOperation": [
+                        "TransactWriteItems"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "Sid": "JobControlDeliveryRead",
+                  "Effect": "Allow",
+                  "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+                  "Action": [
+                    "dynamodb:GetItem"
+                  ],
+                  "Condition": {
+                    "ForAllValues:StringLike": {
+                      "dynamodb:LeadingKeys": [
+                        "MODELJOB#*",
+                        "OPERATIONS#MODEL_JOBS"
+                      ]
+                    },
+                    "Null": {
+                      "dynamodb:LeadingKeys": "false"
+                    }
+                  }
+                },
+                {
+                  "Sid": "JobLeaseAndDeliveryCAS",
+                  "Effect": "Allow",
+                  "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+                  "Action": [
+                    "dynamodb:PutItem",
+                    "dynamodb:ConditionCheckItem"
+                  ],
+                  "Condition": {
+                    "ForAllValues:StringLike": {
+                      "dynamodb:LeadingKeys": [
+                        "MODELJOB#*",
+                        "OPERATIONS#MODEL_JOBS"
+                      ]
+                    },
+                    "Null": {
+                      "dynamodb:LeadingKeys": "false"
+                    },
+                    "StringEqualsIfExists": {
+                      "dynamodb:ReturnValues": "NONE"
+                    },
+                    "ForAnyValue:StringEquals": {
+                      "dynamodb:EnclosingOperation": [
+                        "TransactWriteItems"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "Sid": "ExistingStandingBudgetRead",
+                  "Effect": "Allow",
+                  "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughQaControl",
+                  "Action": [
+                    "dynamodb:GetItem"
+                  ],
+                  "Condition": {
+                    "ForAllValues:StringLike": {
+                      "dynamodb:LeadingKeys": [
+                        "AUTH",
+                        "TOTAL"
+                      ]
+                    },
+                    "Null": {
+                      "dynamodb:LeadingKeys": "false"
+                    }
+                  }
+                },
+                {
+                  "Sid": "PreservedCumulativeReservationCAS",
+                  "Effect": "Allow",
+                  "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughQaControl",
+                  "Action": [
+                    "dynamodb:PutItem"
+                  ],
+                  "Condition": {
+                    "ForAllValues:StringLike": {
+                      "dynamodb:LeadingKeys": [
+                        "TOTAL"
+                      ]
+                    },
+                    "Null": {
+                      "dynamodb:LeadingKeys": "false"
+                    },
+                    "StringEqualsIfExists": {
+                      "dynamodb:ReturnValues": "NONE"
+                    },
+                    "ForAnyValue:StringEquals": {
+                      "dynamodb:EnclosingOperation": [
+                        "TransactWriteItems"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "Sid": "CurrentStandingAuthorityCondition",
+                  "Effect": "Allow",
+                  "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughQaControl",
+                  "Action": [
+                    "dynamodb:ConditionCheckItem"
+                  ],
+                  "Condition": {
+                    "ForAllValues:StringLike": {
+                      "dynamodb:LeadingKeys": [
+                        "AUTH"
+                      ]
+                    },
+                    "Null": {
+                      "dynamodb:LeadingKeys": "false"
+                    },
+                    "StringEqualsIfExists": {
+                      "dynamodb:ReturnValues": "NONE"
+                    },
+                    "ForAnyValue:StringEquals": {
+                      "dynamodb:EnclosingOperation": [
+                        "TransactWriteItems"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "Sid": "CurrentAllMemberAdmissionRead",
+                  "Effect": "Allow",
+                  "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions",
+                  "Action": [
+                    "dynamodb:GetItem"
+                  ],
+                  "Condition": {
+                    "ForAllValues:StringLike": {
+                      "dynamodb:LeadingKeys": [
+                        "ACCOUNT#*",
+                        "GROUP#*",
+                        "DECISION#*"
+                      ]
+                    },
+                    "Null": {
+                      "dynamodb:LeadingKeys": "false"
+                    }
+                  }
+                },
+                {
+                  "Sid": "CurrentAllMemberAdmissionConditions",
+                  "Effect": "Allow",
+                  "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions",
+                  "Action": [
+                    "dynamodb:ConditionCheckItem"
+                  ],
+                  "Condition": {
+                    "ForAllValues:StringLike": {
+                      "dynamodb:LeadingKeys": [
+                        "ACCOUNT#*",
+                        "GROUP#*",
+                        "DECISION#*"
+                      ]
+                    },
+                    "Null": {
+                      "dynamodb:LeadingKeys": "false"
+                    },
+                    "StringEqualsIfExists": {
+                      "dynamodb:ReturnValues": "NONE"
+                    },
+                    "ForAnyValue:StringEquals": {
+                      "dynamodb:EnclosingOperation": [
+                        "TransactWriteItems"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "Sid": "CurrentAllMemberRetentionRead",
+                  "Effect": "Allow",
+                  "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+                  "Action": [
+                    "dynamodb:GetItem"
+                  ],
+                  "Condition": {
+                    "ForAllValues:StringLike": {
+                      "dynamodb:LeadingKeys": [
+                        "OPERATIONS#RETENTION",
+                        "RETENTION#*"
+                      ]
+                    },
+                    "Null": {
+                      "dynamodb:LeadingKeys": "false"
+                    }
+                  }
+                },
+                {
+                  "Sid": "CurrentAllMemberRetentionConditions",
+                  "Effect": "Allow",
+                  "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+                  "Action": [
+                    "dynamodb:ConditionCheckItem"
+                  ],
+                  "Condition": {
+                    "ForAllValues:StringLike": {
+                      "dynamodb:LeadingKeys": [
+                        "OPERATIONS#RETENTION",
+                        "RETENTION#*"
+                      ]
+                    },
+                    "Null": {
+                      "dynamodb:LeadingKeys": "false"
+                    },
+                    "StringEqualsIfExists": {
+                      "dynamodb:ReturnValues": "NONE"
+                    },
+                    "ForAnyValue:StringEquals": {
+                      "dynamodb:EnclosingOperation": [
+                        "TransactWriteItems"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "Sid": "CurrentDecisionContextRead",
+                  "Effect": "Allow",
+                  "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughStage",
+                  "Action": [
+                    "dynamodb:GetItem"
+                  ],
+                  "Condition": {
+                    "ForAllValues:StringLike": {
+                      "dynamodb:LeadingKeys": [
+                        "ROOM#*"
+                      ]
+                    },
+                    "Null": {
+                      "dynamodb:LeadingKeys": "false"
+                    }
+                  }
+                },
+                {
+                  "Sid": "JoinedKernelStateAndGuardCAS",
+                  "Effect": "Allow",
+                  "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughStage",
+                  "Action": [
+                    "dynamodb:PutItem",
+                    "dynamodb:ConditionCheckItem"
+                  ],
+                  "Condition": {
+                    "ForAllValues:StringLike": {
+                      "dynamodb:LeadingKeys": [
+                        "ROOM#*"
+                      ]
+                    },
+                    "Null": {
+                      "dynamodb:LeadingKeys": "false"
+                    },
+                    "StringEqualsIfExists": {
+                      "dynamodb:ReturnValues": "NONE"
+                    },
+                    "ForAnyValue:StringEquals": {
+                      "dynamodb:EnclosingOperation": [
+                        "TransactWriteItems"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "Sid": "ExactExistingNovaLiteProvider",
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel"
+                  ],
+                  "Resource": "arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-lite-v1:0"
+                },
+                {
+                  "Sid": "NoPrivilegeExpansionOrResourceRemoval",
+                  "Effect": "Deny",
+                  "Action": [
+                    "iam:*",
+                    "sts:AssumeRole",
+                    "dynamodb:DeleteTable",
+                    "s3:DeleteObject",
+                    "s3:DeleteObjectVersion"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Sid": "VerifyActualProviderLogging",
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:GetModelInvocationLoggingConfiguration"
+                  ],
+                  "Resource": "*",
+                  "Condition": {
+                    "StringEquals": {
+                      "aws:RequestedRegion": "us-east-1"
+                    }
+                  }
+                },
+                {
+                  "Sid": "OnlyFiniteWorkerLogs",
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": "arn:aws:logs:us-east-1:092954139775:log-group:/aws/lambda/known-enough-stage-model-jobs:log-stream:*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Worker": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": "WorkerLogs",
+      "Properties": {
+        "FunctionName": "known-enough-stage-model-jobs",
+        "Runtime": "nodejs24.x",
+        "Handler": "worker.handler",
+        "MemorySize": 512,
+        "Timeout": 180,
+        "ReservedConcurrentExecutions": 1,
+        "Role": {
+          "Fn::GetAtt": [
+            "WorkerRole",
+            "Arn"
+          ]
+        },
+        "Code": {
+          "S3Bucket": "known-enough-qa-artifacts-092954139775",
+          "S3Key": {
+            "Ref": "WorkerKey"
+          }
+        }
+      }
+    },
+    "Tick": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "Name": "KnownEnoughModelJobs",
+        "ScheduleExpression": "rate(1 minute)",
+        "State": "DISABLED",
+        "Targets": [
+          {
+            "Id": "ModelJobs",
+            "Arn": {
+              "Fn::GetAtt": [
+                "Worker",
+                "Arn"
+              ]
+            },
+            "RetryPolicy": {
+              "MaximumEventAgeInSeconds": 60,
+              "MaximumRetryAttempts": 0
+            }
+          }
+        ]
+      }
+    },
+    "TickPermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "Worker"
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "events.amazonaws.com",
+        "SourceAccount": "092954139775",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "Tick",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "ReleaseBoundary": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "ManagedPolicyName": "KnownEnoughGithubModelJobReleaseBoundary",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "lambda:GetFunctionConfiguration",
+                "lambda:UpdateFunctionCode"
+              ],
+              "Resource": "arn:aws:lambda:us-east-1:092954139775:function:known-enough-stage-model-jobs"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:GetObject"
+              ],
+              "Resource": "arn:aws:s3:::known-enough-qa-artifacts-092954139775/*/model-worker.zip"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "events:DescribeRule",
+                "events:EnableRule",
+                "events:DisableRule"
+              ],
+              "Resource": "arn:aws:events:us-east-1:092954139775:rule/KnownEnoughModelJobs"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "logs:FilterLogEvents"
+              ],
+              "Resource": "arn:aws:logs:us-east-1:092954139775:log-group:/aws/lambda/known-enough-stage-model-jobs:*"
+            },
+            {
+              "Effect": "Deny",
+              "Action": [
+                "iam:*",
+                "sts:AssumeRole",
+                "dynamodb:DeleteTable",
+                "s3:DeleteObject",
+                "s3:DeleteObjectVersion"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
+      }
+    },
+    "ReleaseRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "KnownEnoughGithubModelJobRelease",
+        "MaxSessionDuration": 3600,
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Federated": "arn:aws:iam::092954139775:oidc-provider/token.actions.githubusercontent.com"
+              },
+              "Action": "sts:AssumeRoleWithWebIdentity",
+              "Condition": {
+                "StringEquals": {
+                  "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+                  "token.actions.githubusercontent.com:sub": "repo:Known-Enough@331386621/known-enough@1377587215:ref:refs/heads/main"
+                }
+              }
+            }
+          ]
+        },
+        "PermissionsBoundary": {
+          "Ref": "ReleaseBoundary"
+        },
+        "Policies": [
+          {
+            "PolicyName": "ExactModelJobRelease",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "lambda:GetFunctionConfiguration",
+                    "lambda:UpdateFunctionCode"
+                  ],
+                  "Resource": "arn:aws:lambda:us-east-1:092954139775:function:known-enough-stage-model-jobs"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:GetObject"
+                  ],
+                  "Resource": "arn:aws:s3:::known-enough-qa-artifacts-092954139775/*/model-worker.zip"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "events:DescribeRule",
+                    "events:EnableRule",
+                    "events:DisableRule"
+                  ],
+                  "Resource": "arn:aws:events:us-east-1:092954139775:rule/KnownEnoughModelJobs"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:FilterLogEvents"
+                  ],
+                  "Resource": "arn:aws:logs:us-east-1:092954139775:log-group:/aws/lambda/known-enough-stage-model-jobs:*"
+                },
+                {
+                  "Effect": "Deny",
+                  "Action": [
+                    "iam:*",
+                    "sts:AssumeRole",
+                    "dynamodb:DeleteTable",
+                    "s3:DeleteObject",
+                    "s3:DeleteObjectVersion"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

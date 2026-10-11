@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { publicationDisposition, verifyOwnerPackageConfiguration } from './lifecycle-release.mjs';
+import { publicationDisposition, verifyOwnerPackageConfiguration, verifyOwnerOnlyPackage } from './lifecycle-release.mjs';
 const digest='a'.repeat(64);
 function fixture(){return {FunctionArn:'arn:aws:lambda:us-east-1:092954139775:function:known-enough-stage-api',
  Role:'arn:aws:iam::092954139775:role/KnownEnoughStageApiRole',State:'Active',LastUpdateStatus:'Successful',Handler:'api.handler',
@@ -24,4 +24,9 @@ test('private package cannot silently drift email/identity/origin or enable a pa
  assert.equal(verifyOwnerPackageConfiguration(prior,config),true);
  for(const field of Object.keys(config))assert.throws(()=>verifyOwnerPackageConfiguration(prior,{...config,[field]:'changed'}));
  const paid=structuredClone(prior);paid.Environment.Variables.KE14_MODEL_MODE='BEDROCK';assert.throws(()=>verifyOwnerPackageConfiguration(paid,config));
+});
+
+test('owner-only publication cannot silently remove an installed queued-runtime binding', () => {
+ assert.equal(verifyOwnerOnlyPackage(['lifecycle-private.json']),true);
+ assert.throws(()=>verifyOwnerOnlyPackage(['lifecycle-private.json','jobs-private.json']),/COORDINATED_JOB_RELEASE_REQUIRED/);
 });

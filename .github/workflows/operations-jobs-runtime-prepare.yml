@@ -1,0 +1,106 @@
+name: Prepare dedicated automatic AI job runtime
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact checked main source SHA
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: known-enough-lifecycle-installation
+  cancel-in-progress: false
+jobs:
+  prepare:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && (github.actor_id == '143764700' || github.actor_id == '44531296')
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Verify source and actual private worker package
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_sha }}
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node scripts/operations/verify.mjs > /dev/null
+          npm ci
+          node --experimental-transform-types --test scripts/operations/jobs-runtime-setup.test.mjs scripts/operations/jobs-runtime-package.test.mjs scripts/operations/jobs-package.test.mjs
+          node --experimental-transform-types scripts/operations/jobs-runtime-package.mjs > "$RUNNER_TEMP/model-job-package-report.json"
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubQaRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          role-session-name: model-job-package-${{ github.run_id }}
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+      - name: Store verified private content-addressed worker; no installation
+        run: |
+          umask 077
+          python3 -B - <<'PY'
+          import hashlib, json, os, subprocess
+          from pathlib import Path
+          folder = Path(os.environ['RUNNER_TEMP'])
+          report = json.loads((folder / 'model-job-package-report.json').read_text())
+          package = folder / 'model-job-runtime-private/model-worker.zip'
+          assert hashlib.sha256(package.read_bytes()).hexdigest() == report['sha256']
+          identity = json.loads(subprocess.check_output(['aws','sts','get-caller-identity','--output','json','--no-cli-pager'], text=True))
+          assert identity['Account'] == '092954139775'
+          assert identity['Arn'].startswith('arn:aws:sts::092954139775:assumed-role/KnownEnoughGithubQaRelease/')
+          args = ['aws','s3api','put-object','--bucket','known-enough-qa-artifacts-092954139775','--key',report['workerKey'],
+                  '--body',str(package),'--server-side-encryption','AES256','--if-none-match','*','--no-cli-pager']
+          result = subprocess.run(args, capture_output=True, text=True)
+          if result.returncode:
+              if '(PreconditionFailed)' not in result.stderr:
+                  raise SystemExit('MODEL_JOB_ARTIFACT_UPLOAD_FAILED')
+              saved = folder / 'existing-worker-private.zip'
+              subprocess.run(['aws','s3api','get-object','--bucket','known-enough-qa-artifacts-092954139775','--key',report['workerKey'],str(saved),'--no-cli-pager'], check=True, stdout=subprocess.DEVNULL)
+              assert hashlib.sha256(saved.read_bytes()).hexdigest() == report['sha256']
+          report['artifactStorage'] = 'VERIFIED'
+          (folder / 'model-job-package-report.json').write_text(json.dumps(report)+'\n')
+          PY
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubStagingInspector
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          role-session-name: model-job-logging-${{ github.run_id }}
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+      - name: Read actual provider logging configuration; no model invocation
+        run: |
+          umask 077
+          python3 -B - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          command = ['aws','bedrock','get-model-invocation-logging-configuration','--region','us-east-1','--output','json','--no-cli-pager']
+          result = subprocess.run(command, capture_output=True, text=True)
+          disabled = False
+          if result.returncode == 0:
+              c = json.loads(result.stdout).get('loggingConfig', {})
+              disabled = all(c.get(key) in (False, None) for key in ['textDataDeliveryEnabled','imageDataDeliveryEnabled','embeddingDataDeliveryEnabled','videoDataDeliveryEnabled'])
+          report = {'sourceSha':os.environ['GITHUB_SHA'], 'result':'PROVIDER_LOGGING_DISABLED' if disabled else 'PROVIDER_LOGGING_UNVERIFIED_OR_ENABLED', 'providerCalls':0}
+          (Path(os.environ['RUNNER_TEMP']) / 'model-job-logging-report.json').write_text(json.dumps(report)+'\n')
+          if not disabled: raise SystemExit(report['result'])
+          PY
+      - name: Publish finite reports and infrastructure template only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: model-job-runtime-preparation
+          path: |
+            ${{ runner.temp }}/model-job-package-report.json
+            ${{ runner.temp }}/model-job-logging-report.json
+            ${{ runner.temp }}/model-job-runtime-private/runtime-template.json
+          if-no-files-found: warn
+          retention-days: 30

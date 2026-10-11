@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
 import { createPartitionReleaseHandler } from '../../apps/api/src/partition-release.ts';
 import { loadLifecyclePackage } from './lifecycle-package.ts';
+import { loadJobsPackage } from './jobs-package.ts';
 import { createKe13bLambdaHandler, readKe13bConfig, type HttpApiEvent, type HttpApiResult } from '../../apps/api/src/ke13b-lambda.ts';
 let selected: ((event: HttpApiEvent) => Promise<HttpApiResult>) | undefined;
 export async function handler(event: HttpApiEvent): Promise<HttpApiResult> {
@@ -22,8 +23,12 @@ export async function handler(event: HttpApiEvent): Promise<HttpApiResult> {
       let lifecycle;
       try { lifecycle = loadLifecyclePackage(readFileSync(join(directory, 'lifecycle-private.json'))); }
       catch (error) { if (!(error instanceof Error && 'code' in error && error.code === 'ENOENT')) throw error; }
+      let jobs;
+      try { jobs = loadJobsPackage(readFileSync(join(directory, 'jobs-private.json'))); }
+      catch (error) { if (!(error instanceof Error && 'code' in error && error.code === 'ENOENT')) throw error; }
       selected = createPartitionReleaseHandler({ configurationBytes,
         ...(lifecycle ? { lifecycle } : {}),
+        ...(jobs ? { jobs: { sourceSha: jobs.sourceSha } } : {}),
         manifestBytes: readFileSync(join(directory, 'manifest-private.json')),
         release: JSON.parse(readFileSync(join(directory, 'release-private.json'), 'utf8')),
         legacy: createKe13bLambdaHandler(config), readSource: async signal => {

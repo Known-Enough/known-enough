@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./lifecycle": "./src/lifecycle-owner.ts"
+    "./lifecycle": "./src/lifecycle-owner.ts",
+    "./durable-command": "./src/durable-command.ts"
   },
   "dependencies": {
     "zod": "4.6.5"
