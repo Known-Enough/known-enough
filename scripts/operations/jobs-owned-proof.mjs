@@ -10,8 +10,9 @@ import { Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { RequestNegotiation } from '@deal-table/contracts/durable-command';
 import { createPartitionManagedDriver } from '../../packages/adapters/src/partition-managed.ts';
 import { createPartitionedGroupRepository } from '../../packages/adapters/src/partitioned-group-repository.ts';
-import { createPartitionDecisionRepository } from '../../packages/adapters/src/partition-decision-repository.ts';
+import { createPartitionDecisionRepository, validatePartitionDecisionCommand } from '../../packages/adapters/src/partition-decision-repository.ts';
 import { partitionMemberId } from '../../packages/adapters/src/partition-group-session.ts';
+import { encodeGuardItem, decodeGuardItem } from '../../packages/adapters/src/dynamodb-codec.ts';
 import { ControlSchema, JobSchema, TotalsSchema } from '../../packages/adapters/src/durable-model-jobs.ts';
 import { RetentionPolicy } from '../../packages/adapters/src/partition-lifecycle.ts';
 import { createCognitoIdentityResolver } from '../../apps/api/src/cognito-identity.ts';
@@ -24,6 +25,30 @@ const key=PK=>({PK:{S:PK},SK:{S:'STATE'}}),controlKey=key('OPERATIONS#MODEL_JOBS
 const fail=code=>{throw Object.assign(new Error(code),{safeCode:code});};
 const envelope=(key,value)=>({...key,revision:{N:String(value.revision)},payload:{S:JSON.stringify(value)}});
 const cas=prior=>prior?{ConditionExpression:'#r = :r AND #p = :p',ExpressionAttributeNames:{'#r':'revision','#p':'payload'},ExpressionAttributeValues:{':r':prior.revision,':p':prior.payload}}:{ConditionExpression:'attribute_not_exists(PK)'};
+/** Test setup only: exact native guard-only update becomes its allowed conditional replacement.
+ * The production repository/worker, participant fences and installed grants are unchanged. */
+export function ownedDraftGuardPut(command,decisionId,tableArn){
+ if(!(command instanceof TransactWriteItemsCommand))return command;
+ validatePartitionDecisionCommand(command);
+ const copy=structuredClone(command.input),updates=copy.TransactItems.filter(item=>item.Update);
+ const writes=copy.TransactItems.filter(item=>item.Put||item.Update),state=writes.find(item=>item.Put)?.Put;
+ if(writes.length!==2||!state||state.TableName!==tableArn||state.Item?.PK?.S!=='ROOM#'+decisionId||state.Item?.SK?.S!=='STATE')return fail('OWN_DRAFT_SCOPE_INVALID');
+ if(updates.length!==1)return fail('OWN_DRAFT_GUARD_SHAPE_INVALID');
+ const u=updates[0].Update,n=u.ExpressionAttributeNames,v=u.ExpressionAttributeValues;
+ const names={'#version':'version','#incarnation':'incarnation','#ordinary':'ordinaryReceipts','#permission':'permissionHistoryReceipts','#safety':'safetyReserveReceipts','#total':'totalReceipts'};
+ const condition='#version = :oldVersion AND #incarnation = :incarnation AND #ordinary = :oldOrdinary AND #permission = :oldPermission AND #safety = :oldSafety AND #total = :oldTotal';
+ if(u.TableName!==tableArn||u.Key?.PK?.S!=='ROOM#'+decisionId||u.Key?.SK?.S!=='GUARD'
+  ||u.ConditionExpression!==condition||u.UpdateExpression!=='SET #version = :nextVersion, #ordinary = :nextOrdinary, #permission = :nextPermission, #safety = :nextSafety, #total = :nextTotal'
+  ||!isDeepStrictEqual(n,names)||Object.keys(v??{}).sort().join('|')!==[':nextVersion',':nextOrdinary',':nextPermission',':nextSafety',':nextTotal',':oldVersion',':incarnation',':oldOrdinary',':oldPermission',':oldSafety',':oldTotal'].sort().join('|')
+  ||Object.keys(u).sort().join('|')!==['TableName','Key','UpdateExpression','ConditionExpression','ExpressionAttributeNames','ExpressionAttributeValues'].sort().join('|'))return fail('OWN_DRAFT_GUARD_SHAPE_INVALID');
+ const integer=k=>{const value=v[k]?.N;if(!/^(0|[1-9][0-9]*)$/.test(value??'')||!Number.isSafeInteger(Number(value)))return fail('OWN_DRAFT_GUARD_VALUE_INVALID');return Number(value);};
+ if(integer(':nextVersion')!==integer(':oldVersion')+1||['Ordinary','Permission','Safety','Total'].some(name=>integer(':next'+name)!==integer(':old'+name)))return fail('OWN_DRAFT_GUARD_RECEIPTS_CHANGED');
+ const guard={version:integer(':nextVersion'),incarnation:v[':incarnation']?.S,ordinaryReceipts:integer(':nextOrdinary'),permissionHistoryReceipts:integer(':nextPermission'),safetyReserveReceipts:integer(':nextSafety'),totalReceipts:integer(':nextTotal')};
+ const Item=encodeGuardItem(decisionId,guard);decodeGuardItem(Item,decisionId);
+ const values=Object.fromEntries(Object.entries(v).filter(([key])=>!key.startsWith(':next')));
+ for(const item of copy.TransactItems)if(item.Update){delete item.Update;item.Put={TableName:tableArn,Item,ConditionExpression:condition+' AND #schemaVersion = :schemaVersion',ExpressionAttributeNames:{...names,'#schemaVersion':'schemaVersion'},ExpressionAttributeValues:{...values,':schemaVersion':Item.schemaVersion}};}
+ return new TransactWriteItemsCommand(copy);
+}
 export function ownedPublicDraft(group,accounts,nonce){
  const participants=group.members.map(subject=>{const account=accounts.find(a=>a.subject===subject);if(!account||account.status!=='APPROVED')return fail('OWN_DRAFT_ACCOUNT_INVALID');return {id:partitionMemberId(subject),displayName:account.displayName,requiredForApproval:true};});
  return Groups.GroupDraft.parse({id:'ops03-'+nonce,bodyHash:createHash('sha256').update(nonce).digest('hex'),revision:1,groupVersion:group.version,
@@ -82,7 +107,7 @@ async function main(phase){
    await transact(puts);if(!isDeepStrictEqual(await get(table,policyKey),state.policyIntent))return fail('PROOF_POLICY_UNKNOWN');
   }else if(phase==='consent'){
    for(const fixture of fixtures.fixtures)await command(fixture,'CONFIRM_FRAME',{frameVersion:1});state.signedFrameConfirmations=2;await save();
-   const driver=managed(),repository=createPartitionDecisionRepository({decisionArn:driver.decisionArn,partitionArn:driver.partitionArn,transport:driver.decisions,groups:driver.groups});
+   const driver=managed(),repository=createPartitionDecisionRepository({decisionArn:driver.decisionArn,partitionArn:driver.partitionArn,transport:{send:(command,io)=>driver.decisions.send(ownedDraftGuardPut(command,state.decisionId,driver.decisionArn),io)},groups:driver.groups});
    for(const fixture of fixtures.fixtures){const principal=await authenticate('Bearer '+fixture.accessToken);const owner=await request(fixture,'/decisions/'+state.decisionId+'/me');const draft=KE.AIConstraintDraft.parse({schemaVersion:KE.KE_SCHEMA_VERSION,draftId:'empty-'+fixture.nonce,draftVersion:1,decisionId:state.decisionId,ownerParticipantId:owner.ownerParticipantId,ownerVersion:owner.ownerVersion,semanticVersion:owner.publicSnapshot.frame.semanticVersion,contextToken:owner.publicSnapshot.frame.contextToken,sourceSummary:'Owned synthetic empty structured constraints fixture; no interpreter model claim.',proposedConstraints:[],unsupportedConditions:[],createdAt:new Date().toISOString()});
     const application=new KnownEnoughApplication({repository:repository.forParticipant(principal),clock:{now:()=>new Date().toISOString()},ids:{next:()=>randomUUID()}});
     await application.storeConstraintDraft({kind:'service',subject:'owned-fixture-setup',roomIds:[state.decisionId]},draft,{principal,controlVersion:owner.controlVersion,expiresAt:Date.now()+30000});
