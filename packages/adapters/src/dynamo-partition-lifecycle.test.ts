@@ -343,3 +343,23 @@ it('captures caller configuration and recovery bytes before asynchronous I/O', a
   const inspecting = service.status(plan.bytes, plan, principal()); plan.planHash = 'f'.repeat(64);
   expect((await inspecting).state).toBe('PREPARED');
 });
+
+
+it('operator publication preserves only sealed ID/hash recovery, is repeatable and never manufactures owner consent', async () => {
+ const f = await fixture(); const service = f.lifecycle(); const plan = await service.prepare({ kind: 'OWNER', subject, decisionId: 'decision' }, 'published-owner-plan');
+ await service.publishPlan(plan.bytes, plan); const writes = f.writes.length; await service.publishPlan(plan.bytes, plan); expect(f.writes.length).toBe(writes);
+ const stored = f.get(r.journal, 'LIFECYCLE#published-owner-plan', 'PLAN'); expect(JSON.stringify(stored)).not.toMatch(/iris-private-condition|omar-private-condition/);
+ const owned = await service.loadOwnPlan(plan.opId, principal()); expect(owned.bytes.equals(plan.bytes)).toBe(true); expect(owned.expected.planHash).toBe(plan.planHash);
+ await expect(service.loadOwnPlan(plan.opId, principal('omar'))).rejects.toThrow('LIFECYCLE_AUTHORITY_DENIED');
+ await expect(service.loadOwnPlan(plan.opId, null)).rejects.toThrow('LIFECYCLE_AUTHORITY_DENIED');
+ expect(f.get(r.journal, 'CONSENT#published-owner-plan', 'SUBJECT#iris')).toBeUndefined();
+ await expect(service.runner(plan.bytes, plan).advance()).rejects.toThrow('LIFECYCLE_AUTHORITY_DENIED');
+});
+
+it('lost plan-publication acknowledgement reconciles exact durable sealed bytes without a duplicate write', async () => {
+ const f = await fixture(); const service = f.lifecycle(); const plan = await service.prepare({ kind: 'OWNER', subject, decisionId: 'decision' }, 'lost-plan-publication');
+ let dropped = false; f.after(items => { if (!dropped && items.some(item => item.Put?.Item?.sealed?.S)) { dropped = true; throw new Error('OWN_LOST_ACK'); } });
+ expect(await service.publishPlan(plan.bytes, plan)).toEqual({ opId: plan.opId, planHash: plan.planHash }); expect(dropped).toBe(true);
+ expect(f.writes.filter(items => items.some(item => item.Put?.Item?.sealed?.S)).length).toBe(1);
+ expect((await service.loadOwnPlan(plan.opId, principal())).bytes.equals(plan.bytes)).toBe(true);
+});

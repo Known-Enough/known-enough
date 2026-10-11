@@ -41,7 +41,7 @@ function version(value: unknown): value is string {
  * Existing participant composition remains inactive until a separate deployment selects it.
  */
 export function createPartitionDeploymentHandler(configurationBytes: Buffer, manifestBytes: Buffer,
-  release: PartitionDeploymentBinding, draftArchitect?: PartitionRuntimeOptions['draftArchitect']) {
+  release: PartitionDeploymentBinding, draftArchitect?: PartitionRuntimeOptions['draftArchitect'], lifecycle?: PartitionRuntimeOptions['lifecycle']) {
   try {
     const anchor = record(release, ['sourceSha', 'configurationHash', 'manifestHash', 'manifestVersion', 'sourceRevision', 'sourceHash']);
     if (typeof anchor.sourceSha !== 'string' || !/^[a-f0-9]{40}$/.test(anchor.sourceSha) || /^0+$/.test(anchor.sourceSha)
@@ -84,7 +84,8 @@ export function createPartitionDeploymentHandler(configurationBytes: Buffer, man
         displayClientId: config.displayClientId as string },
       cognitoDomain: config.cognitoDomain, allowedOrigin: config.allowedOrigin, emailKey: config.emailKey,
       clock: { now: () => new Date().toISOString() }, ids: { next: () => randomUUID() },
-      ...(draftArchitect === undefined ? {} : { draftArchitect }) };
+      ...(draftArchitect === undefined ? {} : { draftArchitect }),
+      ...(lifecycle === undefined ? {} : { lifecycle: { sourceSha: lifecycle.sourceSha, signingKeyBase64: lifecycle.signingKeyBase64 } }) };
     return createPartitionLambdaHandler(options);
   } catch { return bad(); }
 }

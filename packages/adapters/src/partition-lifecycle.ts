@@ -15,16 +15,16 @@ const sha = z.string().regex(/^[a-f0-9]{40}$/).refine(value => !/^0+$/.test(valu
 const positive = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
 const utc = z.string().datetime();
 export const RetentionPolicy = z.strictObject({ schemaVersion: z.literal(1), kind: z.literal('RETENTION_POLICY'),
-  revision: positive, enabled: z.boolean(), dataClass: z.literal('SYNTHETIC'), rawConversationMs: z.literal(0),
+  revision: positive, enabled: z.boolean(), dataClass: z.enum(['SYNTHETIC', 'REAL']), rawConversationMs: z.literal(0),
   structuredMs: positive.max(366 * 86_400_000), replayMs: positive.max(366 * 86_400_000),
   journalMs: positive.max(366 * 86_400_000), backupMs: positive.max(366 * 86_400_000).nullable(),
-  providerMs: positive.max(366 * 86_400_000).nullable(), realPersonPolicy: z.literal('UNAPPROVED') });
+  providerMs: positive.max(366 * 86_400_000).nullable(), realPersonPolicy: z.enum(['UNAPPROVED', 'APPROVED']) }).refine(policy => policy.dataClass === 'REAL' ? policy.realPersonPolicy === 'APPROVED' : policy.realPersonPolicy === 'UNAPPROVED', 'Explicit matching data policy required');
 export type RetentionPolicy = z.infer<typeof RetentionPolicy>;
 export const RetentionStamp = z.strictObject({ schemaVersion: z.literal(1), kind: z.literal('RETENTION_STAMP'),
-  revision: positive, dataClass: z.literal('SYNTHETIC'), policyRevision: positive, createdAt: utc, lastActivityAt: utc });
+  revision: positive, dataClass: z.enum(['SYNTHETIC', 'REAL']), policyRevision: positive, createdAt: utc, lastActivityAt: utc });
 export function retentionDeadline(policy: RetentionPolicy, stamp: z.infer<typeof RetentionStamp>, category: 'STRUCTURED' | 'REPLAY' | 'JOURNAL' = 'STRUCTURED') {
   const p = RetentionPolicy.parse(policy); const s = RetentionStamp.parse(stamp);
-  if (!p.enabled || s.policyRevision !== p.revision || Date.parse(s.lastActivityAt) < Date.parse(s.createdAt)) fail('LIFECYCLE_POLICY_DENIED');
+  if (!p.enabled || s.dataClass !== p.dataClass || s.policyRevision !== p.revision || Date.parse(s.lastActivityAt) < Date.parse(s.createdAt)) fail('LIFECYCLE_POLICY_DENIED');
   const deadline = Date.parse(s.lastActivityAt) + (category === 'STRUCTURED' ? p.structuredMs : category === 'REPLAY' ? p.replayMs : p.journalMs);
   if (!Number.isSafeInteger(deadline)) fail('LIFECYCLE_INVALID');
   return deadline;

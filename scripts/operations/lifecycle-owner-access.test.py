@@ -6,16 +6,12 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-spec = importlib.util.spec_from_file_location('archive_repair', Path(__file__).with_name('archive-access-repair.py'))
+spec = importlib.util.spec_from_file_location('owner_repair', Path(__file__).with_name('lifecycle-owner-access.py'))
 r = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(r)
 DESIRED = json.loads((r.ROOT / 'infra/operations/access-setup.json').read_text())
-# Preserve the historical repair fixture when later independent owner profiles evolve.
-DESIRED['Resources']['OwnerRuntimePolicy']['Properties']['PolicyDocument']['Statement'] = [row for row in DESIRED['Resources']['OwnerRuntimePolicy']['Properties']['PolicyDocument']['Statement'] if row.get('Sid') != 'PublishedOwnerPlanAndProgressRead']
 ORIGINAL = copy.deepcopy(DESIRED)
-for row in ORIGINAL['Resources']['ArchiveRole']['Properties']['Policies'][0]['PolicyDocument']['Statement']:
-    if row.get('Sid') in r.SIDS:
-        row['Condition']['ForAllValues:StringLike']['dynamodb:LeadingKeys'] = r.OLD
+ORIGINAL['Resources'][r.RESOURCE]['Properties']['PolicyDocument']['Statement'] = [row for row in ORIGINAL['Resources'][r.RESOURCE]['Properties']['PolicyDocument']['Statement'] if row.get('Sid') != r.SID]
 SOURCE = 'a' * 40
 
 
@@ -30,18 +26,18 @@ class RepairTests(unittest.TestCase):
         context.start()
         self.addCleanup(context.stop)
 
-    def test_exact_patch_changes_only_two_read_condition_key_sets_and_preserves_boundary_trust_others(self):
+    def test_exact_patch_adds_only_plan_and_progress_reads_to_owner_runtime(self):
         updated = r.patched_template(ORIGINAL)
         self.assertEqual(updated, DESIRED)
         changed = [name for name in ORIGINAL['Resources'] if ORIGINAL['Resources'][name] != updated['Resources'][name]]
-        self.assertEqual(changed, ['ArchiveRole'])
-        before = ORIGINAL['Resources']['ArchiveRole']['Properties']
-        after = updated['Resources']['ArchiveRole']['Properties']
-        for field in ['AssumeRolePolicyDocument', 'PermissionsBoundary', 'RoleName', 'Path', 'MaxSessionDuration']:
-            self.assertEqual(before[field], after[field])
+        self.assertEqual(changed, [r.RESOURCE])
+        added = next(row for row in updated['Resources'][r.RESOURCE]['Properties']['PolicyDocument']['Statement'] if row.get('Sid') == r.SID)
+        self.assertEqual(added['Action'], ['dynamodb:GetItem'])
+        self.assertEqual(added['Resource'], r.TABLE)
+        self.assertEqual(added['Condition']['ForAllValues:StringLike']['dynamodb:LeadingKeys'], ['LIFECYCLE#*'])
 
-    def test_any_installed_template_or_other_policy_drift_fails_before_patch(self):
-        for resource in ['ArchiveRole', 'MigrationRole', 'ArchiveBoundary']:
+    def test_unrelated_role_or_policy_drift_stops_before_patch(self):
+        for resource in ['MigrationRole', r.RESOURCE, 'ArchiveBoundary']:
             changed = copy.deepcopy(ORIGINAL)
             changed['Resources'][resource]['DeletionPolicy'] = 'Delete'
             with self.assertRaises(r.RepairError):
@@ -49,7 +45,7 @@ class RepairTests(unittest.TestCase):
 
     def scenario(self, home, lost=None, wrong_preview=False):
         state = {'executed': False, 'created': False, 'calls': [], 'lossUsed': False}
-        path = home / '.known-enough' / ('ops01-archive-access-' + SOURCE) / 'state-private.json'
+        path = home / '.known-enough' / ('ops02-owner-access-' + SOURCE) / 'state-private.json'
         def git(args, **kwargs):
             return SOURCE + '\n' if args[1] == 'rev-parse' else ('https://github.com/Known-Enough/known-enough.git\n' if args[1] == 'remote' else '')
         def aws(service, operation, *args):
@@ -60,7 +56,7 @@ class RepairTests(unittest.TestCase):
                 return {'Stacks': [{'StackId': 'arn:aws:cloudformation:us-east-1:092954139775:stack/' + r.STACK + '/owned',
                                     'StackStatus': 'UPDATE_COMPLETE' if state['executed'] else 'CREATE_COMPLETE'}]}
             if operation == 'get-role':
-                return {'Role': {'Arn': 'arn:aws:iam::092954139775:role/' + r.ROLE, 'AssumeRolePolicyDocument': ORIGINAL['Resources']['ArchiveRole']['Properties']['AssumeRolePolicyDocument'], 'PermissionsBoundary': {'PermissionsBoundaryArn': 'arn:aws:iam::092954139775:policy/' + r.ROLE + 'Boundary'}}}
+                return {'Role': {'Arn': 'arn:aws:iam::092954139775:role/' + r.ROLE, 'AssumeRolePolicyDocument': {'Version': '2012-10-17', 'Statement': []}}}
             if operation == 'get-template':
                 return {'TemplateBody': DESIRED if '--change-set-name' in args or state['executed'] else ORIGINAL}
             if operation == 'create-change-set':
@@ -68,12 +64,12 @@ class RepairTests(unittest.TestCase):
                 state['created'] = True
             elif operation == 'describe-change-set':
                 self.assertTrue(state['created'])
-                return {'Status': 'CREATE_COMPLETE', 'Changes': [{'ResourceChange': {'LogicalResourceId': 'ArchiveBoundary' if wrong_preview else 'ArchiveRole', 'Action': 'Modify', 'Replacement': 'False'}}]}
+                return {'Status': 'CREATE_COMPLETE', 'Changes': [{'ResourceChange': {'LogicalResourceId': 'ArchiveBoundary' if wrong_preview else r.RESOURCE, 'Action': 'Modify', 'Replacement': 'False'}}]}
             elif operation == 'execute-change-set':
                 self.assertEqual(json.loads(path.read_text())['phase'], 'EXECUTE_INTENT')
                 state['executed'] = True
             elif operation == 'get-role-policy':
-                return {'PolicyDocument': (DESIRED if state['executed'] else ORIGINAL)['Resources']['ArchiveRole']['Properties']['Policies'][0]['PolicyDocument']}
+                return {'PolicyDocument': (DESIRED if state['executed'] else ORIGINAL)['Resources'][r.RESOURCE]['Properties']['PolicyDocument']}
             else:
                 self.fail(operation)
             if operation == lost and not state['lossUsed']:
@@ -87,8 +83,8 @@ class RepairTests(unittest.TestCase):
             home = Path(folder)
             state, git, aws = self.scenario(home)
             with patch.object(Path, 'home', return_value=home), patch.object(r.subprocess, 'check_output', side_effect=git), patch.object(r, 'aws', side_effect=aws):
-                self.assertEqual(r.run(SOURCE, True)['result'], 'ARCHIVE_DIRECTORY_POLICY_READBACK_PASS')
-                self.assertEqual(r.run(SOURCE, True)['result'], 'ARCHIVE_DIRECTORY_POLICY_READBACK_PASS')
+                self.assertEqual(r.run(SOURCE, True)['result'], 'LIFECYCLE_OWNER_READ_POLICY_PASS')
+                self.assertEqual(r.run(SOURCE, True)['result'], 'LIFECYCLE_OWNER_READ_POLICY_PASS')
             self.assertEqual(state['calls'].count(('cloudformation', 'create-change-set')), 1)
             self.assertEqual(state['calls'].count(('cloudformation', 'execute-change-set')), 1)
 
@@ -100,7 +96,7 @@ class RepairTests(unittest.TestCase):
                 with patch.object(Path, 'home', return_value=home), patch.object(r.subprocess, 'check_output', side_effect=git), patch.object(r, 'aws', side_effect=aws):
                     with self.assertRaises(r.RepairError):
                         r.run(SOURCE, True)
-                    self.assertEqual(r.run(SOURCE, True)['result'], 'ARCHIVE_DIRECTORY_POLICY_READBACK_PASS')
+                    self.assertEqual(r.run(SOURCE, True)['result'], 'LIFECYCLE_OWNER_READ_POLICY_PASS')
                 self.assertEqual(state['calls'].count(('cloudformation', 'create-change-set')), 1)
                 self.assertEqual(state['calls'].count(('cloudformation', 'execute-change-set')), 1)
 
@@ -130,7 +126,7 @@ class RepairTests(unittest.TestCase):
 
     def test_foreign_or_non_setup_login_stops_before_any_stack_or_iam_action(self):
         for identity in [{'Account': '999999999999', 'Arn': 'arn:aws:iam::999999999999:root'},
-                         {'Account': '092954139775', 'Arn': 'arn:aws:sts::092954139775:assumed-role/WORKER/session'}]:
+                         {'Account': '092954139775', 'Arn': 'arn:aws:sts::092954139775:assumed-role/KnownEnoughGithubLifecycleExecutor/session'}]:
             with tempfile.TemporaryDirectory() as folder:
                 home = Path(folder)
                 state, git, actual = self.scenario(home)

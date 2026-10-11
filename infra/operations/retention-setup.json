@@ -370,6 +370,27 @@
           }
         },
         {
+          "Sid": "PublishedOwnerPlanAndProgressRead",
+          "Effect": "Allow",
+          "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+          "Action": [
+            "dynamodb:GetItem"
+          ],
+          "Condition": {
+            "ForAllValues:StringLike": {
+              "dynamodb:LeadingKeys": [
+                "LIFECYCLE#*"
+              ]
+            },
+            "Null": {
+              "dynamodb:LeadingKeys": "false"
+            },
+            "StringEqualsIfExists": {
+              "dynamodb:ReturnValues": "NONE"
+            }
+          }
+        },
+        {
           "Sid": "VerifiedSelfConsentWrite",
           "Effect": "Allow",
           "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",

@@ -18,5 +18,80 @@
   "cloudWrites": 0,
   "ownerOperation": "NOT_EXECUTED",
   "realPersonRetentionDirection": "30days after last activity; deletion on request; not yet installed/enforced",
-  "next": "One own-account exact-source read-only GitHub run over retention/executor/runtime policy; then wire authenticated owner interfaces and scoped execution, preserving participant consent."
+  "next": "One own-account exact-source read-only GitHub run over retention/executor/runtime policy; then wire authenticated owner interfaces and scoped execution, preserving participant consent.",
+  "actualReadback": {
+    "runId": 38113466029,
+    "source": "49c52677fbe2cdb45175c3b1b44cc72891a12399",
+    "actorId": 44531296,
+    "conclusion": "success",
+    "reports": {
+      "operations-lifecycle-erasure": {
+        "sourceSha": "49c52677fbe2cdb45175c3b1b44cc72891a12399",
+        "account": "092954139775",
+        "region": "us-east-1",
+        "phase": "erasure",
+        "result": "LIFECYCLE_READ_ACCESS_PASS",
+        "policyState": "ABSENT",
+        "requests": 5,
+        "mutations": 0,
+        "checks": [
+          {
+            "capability": "retentionPolicy",
+            "result": "READ_ALLOWED"
+          },
+          {
+            "capability": "ownedTimestamp",
+            "result": "READ_ALLOWED"
+          },
+          {
+            "capability": "ownedConsent",
+            "result": "READ_ALLOWED"
+          },
+          {
+            "capability": "ownedProgress",
+            "result": "READ_ALLOWED"
+          },
+          {
+            "capability": "ownedMembershipInventory",
+            "result": "READ_ALLOWED"
+          }
+        ],
+        "participantAction": "NOT_EXECUTED",
+        "deployment": "UNCHANGED"
+      },
+      "operations-lifecycle-retention": {
+        "sourceSha": "49c52677fbe2cdb45175c3b1b44cc72891a12399",
+        "account": "092954139775",
+        "region": "us-east-1",
+        "phase": "retention",
+        "result": "LIFECYCLE_READ_ACCESS_PASS",
+        "policyState": "ABSENT",
+        "requests": 2,
+        "mutations": 0,
+        "checks": [
+          {
+            "capability": "retentionPolicy",
+            "result": "READ_ALLOWED"
+          },
+          {
+            "capability": "ownedTimestamp",
+            "result": "READ_ALLOWED"
+          }
+        ],
+        "participantAction": "NOT_EXECUTED",
+        "deployment": "UNCHANGED"
+      },
+      "operations-lifecycle-owner": {
+        "sourceSha": "49c52677fbe2cdb45175c3b1b44cc72891a12399",
+        "account": "092954139775",
+        "region": "us-east-1",
+        "phase": "owner",
+        "result": "OWNER_POLICY_CONFIGURATION_MATCH",
+        "mutations": 0,
+        "effectiveOwnerOperation": "NOT_EXECUTED",
+        "participantAction": "NOT_EXECUTED",
+        "deployment": "UNCHANGED"
+      }
+    }
+  }
 }

@@ -1,0 +1,7 @@
+# OPS02 one-time owner interface setup
+
+Run the checked pinned package from your own AWS CloudShell login in account092954139775/us-east-1. Standing project authority covers it; no new approval receipt is required. It changes only the existing managed OwnerRuntimePolicy to add GetItem on existing LIFECYCLE#* plan/progress records and adds three JWT-protected owner routes plus two OPTIONS using the current exact primary Lambda integration/authorizer. No Lambda code/env, Cognito, retention rows, participants, model grants or data deletion.
+
+The command validates source/clean checkout, exact current managed template/policy/target and reviewed one-resource non-replacing preview. Private progress survives CloudShell session loss under $HOME/.known-enough. Existing source/template/policy/route drift stops before that phase's writes. Retry only the same pinned command after a pending response; an unknown route creation is read back before any further creation, never blindly duplicated. CONFIGURATION_PASS establishes setup only; A continues the private key/package/policy/stamp/UI/executor/scheduling and live participant proof afterward.
+
+From a clean pinned checkout, run the7owner-access,6route and2combined guard tests, then `python3 -B scripts/operations/lifecycle-owner-setup.py --source <that exact SHA> --apply`. The chat supplies the verified pushed SHA and runnable clone block; no source placeholder should be pasted as a real command. OPS02 stays IN_PROGRESS and no real-person deletion is implied.

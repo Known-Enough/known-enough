@@ -203,6 +203,39 @@ export function createDynamoPartitionLifecycle(rawOptions: DynamoLifecycleOption
   const consentKey = (plan: LifecyclePlan, subject: string) => ({ PK: `CONSENT#${plan.opId}`, SK: `SUBJECT#${subject}` });
   const planKey = (plan: LifecyclePlan) => ({ PK: `LIFECYCLE#${plan.opId}`, SK: 'PLAN' });
   return {
+    /** Operator-only publication; stores only sealed IDs/hashes, before asking each owner for consent. */
+    async publishPlan(bytes: Buffer, expected: { planHash: string; opId: string }) {
+      const sealed = Buffer.from(bytes); const plan = captured(sealed, { ...expected });
+      const io = partitionIO(limits); await activation.read(io);
+      const policyRaw = await read(resources.journal, policyKey, io); if (!policyRaw) fail('LIFECYCLE_POLICY_DENIED');
+      const p = decode(policyRaw, policyKey, RetentionPolicy);
+      if (!p.enabled || p.revision !== plan.policyRevision) fail('LIFECYCLE_POLICY_DENIED');
+      const key = planKey(plan); const prior = await read(resources.journal, key, io);
+      if (prior) { if (prior.sealed?.S !== sealed.toString('utf8') || prior.planHash?.S !== expected.planHash) fail('LIFECYCLE_SOURCE_CHANGED'); return { opId: plan.opId, planHash: expected.planHash }; }
+      const value: Item = { ...attrs(key), sealed: { S: sealed.toString('utf8') }, planHash: { S: expected.planHash } };
+      let stored: Item | null;
+      try { await write([check(resources.journal, policyKey, policyRaw), put(resources.journal, key, null, value)], io); }
+      catch {
+        // Never reissue an uncertain publication: reconcile exact persisted bytes first.
+        try { stored = await read(resources.journal, key, io); } catch { return fail('LIFECYCLE_COMMIT_UNKNOWN'); }
+        if (stored?.sealed?.S === value.sealed!.S && stored?.planHash?.S === expected.planHash) return { opId: plan.opId, planHash: expected.planHash };
+        return fail('LIFECYCLE_COMMIT_UNKNOWN');
+      }
+      try { stored = await read(resources.journal, key, io); } catch { return fail('LIFECYCLE_COMMIT_UNKNOWN'); }
+      if (stored?.sealed?.S !== value.sealed!.S || stored?.planHash?.S !== expected.planHash) fail('LIFECYCLE_COMMIT_UNKNOWN');
+      return { opId: plan.opId, planHash: expected.planHash };
+    },
+    /** Only verified affected owners can load server-held source-bound bytes; never expose them publicly. */
+    async loadOwnPlan(opId: string, principal: TrustedPrincipal | null) {
+      const subject = lifecycleSubject(principal);
+      if (!/^[A-Za-z0-9_-]{1,80}$/.test(opId)) fail('LIFECYCLE_INVALID');
+      const io = partitionIO(limits); await activation.read(io);
+      const raw = await read(resources.journal, { PK: `LIFECYCLE#${opId}`, SK: 'PLAN' }, io);
+      if (!raw?.sealed?.S || !raw.planHash?.S || Buffer.byteLength(raw.sealed.S) > 300000) fail('LIFECYCLE_AUTHORITY_DENIED');
+      const bytes = Buffer.from(raw.sealed.S); const expected = { opId, planHash: raw.planHash.S }; const plan = captured(bytes, expected);
+      if (!plan.requiredSubjects.includes(subject)) fail('LIFECYCLE_AUTHORITY_DENIED');
+      return { bytes, expected };
+    },
     async prepare(rawScope: LifecyclePlan['scope'], opId: string) {
       const scope = structuredClone(rawScope);
       const io = partitionIO(limits); await activation.read(io); const p = await partitionCall(io, () => policy(io));

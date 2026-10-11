@@ -2,6 +2,7 @@ import type { IncomingMessage } from 'node:http';
 import type { Clock, IdSource } from '@deal-table/application';
 import { createPartitionManagedDriver, type PartitionManagedOptions, type PartitionDraftArchitect } from '@deal-table/adapters/partition-request';
 import { createCognitoIdentityResolver, type CognitoIdentityOptions } from './cognito-identity.ts';
+import { createLifecycleOwnerHandler } from './partition-lifecycle-http.ts';
 import { createPartitionParticipantApiHandler } from './partition-http.ts';
 
 export interface PartitionRuntimeOptions {
@@ -15,6 +16,8 @@ export interface PartitionRuntimeOptions {
   ids: IdSource;
   /** Trusted server model port; its output never supplies participant authority. */
   draftArchitect?: PartitionDraftArchitect;
+  /** Trusted private package only; never selected by request/environment/body identity. */
+  lifecycle?: { sourceSha: string; signingKeyBase64: string };
 }
 const invalid = (): never => { throw new Error('PARTITION_RUNTIME_INVALID'); };
 const MAX_PROFILE_BYTES = 65_536;
@@ -57,6 +60,13 @@ export function createPartitionRuntime(options: PartitionRuntimeOptions) {
   const originValue = origin.origin; const profileUrl = `${domain.origin}/oauth2/userInfo`; const emailKey = options.emailKey;
   const clock = { now: options.clock.now.bind(options.clock) }; const ids = { next: options.ids.next.bind(options.ids) };
   const draftArchitect = options.draftArchitect;
+  let lifecycle: { sourceSha: string; signingKey: Buffer } | undefined;
+  if (options.lifecycle !== undefined) {
+    const value = options.lifecycle; if (!value || typeof value.signingKeyBase64 !== 'string' || typeof value.sourceSha !== 'string') return invalid();
+    const key = Buffer.from(value.signingKeyBase64, 'base64');
+    if (!/^[a-f0-9]{40}$/.test(value.sourceSha) || /^0+$/.test(value.sourceSha) || key.length !== 32 || key.toString('base64') !== value.signingKeyBase64) return invalid();
+    lifecycle = { sourceSha: value.sourceSha, signingKey: key };
+  }
   const resolve = createCognitoIdentityResolver(identity);
   const driver = createPartitionManagedDriver(options.managed);
   const authenticate = async (request: IncomingMessage, signal: AbortSignal) => {
@@ -64,7 +74,7 @@ export function createPartitionRuntime(options: PartitionRuntimeOptions) {
     const principal = await resolve(request.headers.authorization);
     return signal.aborted ? null : principal;
   };
-  return createPartitionParticipantApiHandler({ groups: driver.groups, decisions: driver.decisions,
+  const participant = createPartitionParticipantApiHandler({ groups: driver.groups, decisions: driver.decisions,
     decisionArn: driver.decisionArn, partitionArn: driver.partitionArn,
     membershipDiscovery: driver.membershipDiscovery, authenticate, emailKey, clock, ids, allowedOrigins: [originValue], displayAccess: true,
     legacyPublicDecision: driver.legacyPublicDecision,
@@ -88,4 +98,7 @@ export function createPartitionRuntime(options: PartitionRuntimeOptions) {
       finally { if (response?.body && !response.body.locked) await response.body.cancel().catch(() => {}); }
     },
   });
+  if (!lifecycle) return participant;
+  const service = driver.lifecycle({ sourceSha: lifecycle.sourceSha, signingKey: lifecycle.signingKey });
+  return createLifecycleOwnerHandler({ authenticate, owner: service, allowedOrigin: originValue, fallback: participant });
 }

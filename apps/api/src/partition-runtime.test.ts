@@ -5,12 +5,12 @@ import { createCognitoIdentityResolver } from './cognito-identity.ts';
 import { createPartitionManagedDriver } from '@deal-table/adapters/partition-request';
 import { createPartitionParticipantApiHandler } from './partition-http.ts';
 
-const mocks = vi.hoisted(() => ({ resolve: vi.fn(), listener: vi.fn(), discovery: vi.fn(), groups: {}, decisions: {} }));
+const mocks = vi.hoisted(() => ({ resolve: vi.fn(), listener: vi.fn(), discovery: vi.fn(), groups: {}, decisions: {}, lifecycle: vi.fn((config: { sourceSha: string; signingKey: Buffer }) => { void config; return { exportOwn: vi.fn(), loadOwnPlan: vi.fn(), consent: vi.fn(), status: vi.fn() }; }) }));
 vi.mock('./cognito-identity.ts', () => ({ createCognitoIdentityResolver: vi.fn(() => mocks.resolve) }));
 vi.mock('./partition-http.ts', () => ({ createPartitionParticipantApiHandler: vi.fn(() => mocks.listener) }));
 vi.mock('@deal-table/adapters/partition-request', () => ({ createPartitionManagedDriver: vi.fn(() => ({
   groups: mocks.groups, decisions: mocks.decisions, membershipDiscovery: mocks.discovery,
-  decisionArn: 'synthetic-decision-arn', partitionArn: 'synthetic-partition-arn', archivePorts: vi.fn(),
+  decisionArn: 'synthetic-decision-arn', partitionArn: 'synthetic-partition-arn', archivePorts: vi.fn(), lifecycle: mocks.lifecycle,
 })) }));
 afterEach(() => { vi.clearAllMocks(); vi.unstubAllGlobals(); mocks.resolve.mockReset(); });
 function configuration(): PartitionRuntimeOptions {
@@ -106,4 +106,15 @@ it('cancels an unsettled profile stream and never publishes partial profile byte
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(value)); const pending = options.registrationProfile!(request(), controller.signal);
   await vi.waitFor(() => expect(value.body!.locked).toBe(true)); controller.abort();
   await expect(pending).resolves.toBeNull(); expect(cancel).toHaveBeenCalled(); expect(value.body!.locked).toBe(false);
+});
+
+it('private source/key composition exposes only a listener and fails malformed lifecycle configuration before storage construction', () => {
+ const options = configuration(); options.lifecycle = { sourceSha: 'a'.repeat(40), signingKeyBase64: Buffer.alloc(32, 5).toString('base64') };
+ const listener = createPartitionRuntime(options); expect(typeof listener).toBe('function');
+ expect(mocks.lifecycle).toHaveBeenCalledWith({ sourceSha: 'a'.repeat(40), signingKey: Buffer.alloc(32, 5) });
+ expect(listener).not.toHaveProperty('runner'); expect(listener).not.toHaveProperty('publishPlan');
+ options.lifecycle.sourceSha = 'b'.repeat(40); expect(mocks.lifecycle.mock.calls.at(-1)?.[0].sourceSha).toBe('a'.repeat(40));
+ const before = vi.mocked(createPartitionManagedDriver).mock.calls.length;
+ expect(() => createPartitionRuntime({ ...configuration(), lifecycle: { sourceSha: '0'.repeat(40), signingKeyBase64: 'bad' } })).toThrow('PARTITION_RUNTIME_INVALID');
+ expect(vi.mocked(createPartitionManagedDriver).mock.calls.length).toBe(before);
 });

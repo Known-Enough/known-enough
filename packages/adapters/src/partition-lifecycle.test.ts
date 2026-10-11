@@ -123,3 +123,13 @@ it('applies distinct bounded logical retention deadlines and never assumes backu
   expect(retentionDeadline(policy, stamp, 'JOURNAL')).toBe(Date.parse(stamp.lastActivityAt) + policy.journalMs);
   expect(policy.backupMs).toBeNull(); expect(policy.providerMs).toBeNull();
 });
+
+
+it('real-user retention requires explicit approved policy and matching provenance class; synthetic stamps never authorize real use', () => {
+  const real = RetentionPolicy.parse({ ...policy, dataClass: 'REAL', realPersonPolicy: 'APPROVED', structuredMs: 30 * 86400000 });
+  expect(retentionDeadline(real, { ...stamp, dataClass: 'REAL' })).toBe(Date.parse(stamp.lastActivityAt) + 30 * 86400000);
+  expect(() => RetentionPolicy.parse({ ...real, realPersonPolicy: 'UNAPPROVED' })).toThrow();
+  expect(() => RetentionPolicy.parse({ ...policy, realPersonPolicy: 'APPROVED' })).toThrow();
+  expect(() => retentionDeadline(real, stamp)).toThrow('LIFECYCLE_POLICY_DENIED');
+  expect(() => retentionDeadline(policy, { ...stamp, dataClass: 'REAL' })).toThrow('LIFECYCLE_POLICY_DENIED');
+});
