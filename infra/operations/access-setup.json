@@ -513,7 +513,9 @@
                       "dynamodb:LeadingKeys": [
                         "GROUP#*",
                         "ACCOUNT#*",
-                        "OPERATIONS#ARCHIVE"
+                        "OPERATIONS#ARCHIVE",
+                        "INVITATION#*",
+                        "DECISION#*"
                       ]
                     },
                     "Null": {
@@ -533,7 +535,9 @@
                       "dynamodb:LeadingKeys": [
                         "GROUP#*",
                         "ACCOUNT#*",
-                        "OPERATIONS#ARCHIVE"
+                        "OPERATIONS#ARCHIVE",
+                        "INVITATION#*",
+                        "DECISION#*"
                       ]
                     },
                     "Null": {

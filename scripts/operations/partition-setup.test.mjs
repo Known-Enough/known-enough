@@ -80,3 +80,15 @@ test('managed synthetic recovery verifies source and installs pinned dependencie
   assert.ok(workflow.includes('known-enough-operations-recovery'));
   assert.ok(!/aws (?:iam|cloudformation)|node .*partition.*(?:apply|activate)/.test(workflow));
 });
+
+test('archive reads and conditions retain required immutable invitation/decision references without granting their mutation or foreign access', () => {
+  const { archive } = partitionPermissionProfiles();
+  for (const pk of ['INVITATION#' + 'a'.repeat(64), 'DECISION#owned-synthetic']) {
+    for (const action of ['dynamodb:GetItem', 'dynamodb:BatchGetItem']) assert.equal(permitted(archive, action, r.target, pk), true);
+    assert.equal(permitted(archive, 'dynamodb:ConditionCheckItem', r.target, pk, 'TransactWriteItems'), true);
+    for (const action of ['dynamodb:PutItem', 'dynamodb:UpdateItem', 'dynamodb:DeleteItem'])
+      assert.equal(permitted(archive, action, r.target, pk, 'TransactWriteItems'), false);
+  }
+  assert.equal(permitted(archive, 'dynamodb:GetItem', r.target, 'FOREIGN#private'), false);
+  assert.equal(permitted(archive, 'dynamodb:ConditionCheckItem', r.target, 'INVITATION#owned', 'PutItem'), false);
+});

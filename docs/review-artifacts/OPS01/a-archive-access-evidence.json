@@ -1,6 +1,6 @@
 {
   "task": "OPS01 IN_PROGRESS/A",
-  "recordedAt": "2026-10-11T03:17:18.763295+00:00",
+  "recordedAt": "2026-10-11T03:26:38.605150+00:00",
   "baseSource": "b0735d07488fbc75ac13ef3d131a4f82b6a92575",
   "purpose": "Actual archive directory IAM coverage before owned signup or participant tests",
   "hashes": {
@@ -10,7 +10,7 @@
   },
   "focused": 3,
   "full": "PASS",
-  "liveAccess": "NOT_YET_VERIFIED",
+  "liveAccess": "ACTUAL_TWO_DIRECTORY_DENIALS",
   "participantActions": 0,
   "signup": 0,
   "email": 0,
@@ -21,5 +21,64 @@
   "browser": 64,
   "hostedPreview": 1,
   "references": 7,
-  "planning": 15
+  "planning": 15,
+  "actualProbe": {
+    "runId": 38107928637,
+    "source": "a39cd5c68a7191756b59f285da61f7822115d730",
+    "actorId": 44531296,
+    "report": {
+      "sourceSha": "a39cd5c68a7191756b59f285da61f7822115d730",
+      "account": "092954139775",
+      "region": "us-east-1",
+      "result": "ARCHIVE_DIRECTORY_ACCESS_INCOMPLETE",
+      "requests": 3,
+      "mutations": 0,
+      "reports": [
+        {
+          "capability": "ownedSyntheticHeader",
+          "result": "READ_ALLOWED"
+        },
+        {
+          "capability": "ownedSyntheticInvitationDirectory",
+          "result": "READ_FAILED",
+          "code": "AccessDeniedException"
+        },
+        {
+          "capability": "ownedSyntheticDecisionDirectory",
+          "result": "READ_FAILED",
+          "code": "AccessDeniedException"
+        }
+      ],
+      "participantAction": "NOT_EXECUTED",
+      "email": "NOT_SENT",
+      "deployment": "UNCHANGED"
+    }
+  },
+  "repair": {
+    "hashes": {
+      "scripts/operations/archive-access-repair.py": "306e62895615bb2f20c68934c59263df5eb4a8764f31092978e035c7bb0a7d76",
+      "scripts/operations/archive-access-repair.test.py": "fad591ab822235807a0e29f69327cfc43ea99fddbaa0eee5460f6cadb8a6500e",
+      "scripts/operations/partition-setup.mjs": "337f1666684bc52936be60225b837b3c22921b13b374834be65c7a39ae56b7fd",
+      "scripts/operations/partition-setup.test.mjs": "9f805dceea36c15ab5a17bd623ca68bcec08a49b039b1bbd426f00e585a57571",
+      "infra/operations/access-profiles.json": "d70cf70cb98982328f7438ffa5f46d1369db4d8575dd703b7d65f218c6533f99",
+      "infra/operations/access-setup.json": "db8488e41987e4394d493f1b01651cff01677a39a5a9088d937f2df56e612ca4",
+      "infra/operations/partition-setup.json": "919c3221a124f3e1a93d2a32dd3a071d09d404a75f18c679b6ff37998a058d67"
+    },
+    "pythonTests": 7,
+    "nativeTests": 26,
+    "fullApplication": 1507,
+    "optionalSkipped": 2,
+    "hostedPreview": 1,
+    "browser": 64,
+    "cloudChanges": "NOT_APPLIED",
+    "changedStackResources": [
+      "ArchiveRole"
+    ],
+    "newKeys": [
+      "INVITATION#*",
+      "DECISION#*"
+    ],
+    "noNewActionsOrResources": true,
+    "localBootstrap": "EXPIRED_SESSION"
+  }
 }
