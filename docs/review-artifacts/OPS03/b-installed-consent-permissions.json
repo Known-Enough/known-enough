@@ -1,0 +1,23 @@
+{
+  "observedAt": "2026-10-12T00:01:20.458391+00:00",
+  "githubRun": "https://github.com/Known-Enough/known-enough/actions/runs/38186318002",
+  "actor": "Battosai1806",
+  "report": {
+    "result": "CONSENT_POLICY_CONFIGURATION_MATCH",
+    "mutations": 0,
+    "signup": 0,
+    "providerCalls": 0,
+    "requests": 5,
+    "effectiveTransaction": "NOT_EXECUTED",
+    "inlineMatchesCheckedSource": true,
+    "boundaryMatchesCheckedSource": true,
+    "boundaryVersion": "v1",
+    "installedRoomActions": [
+      "dynamodb:PutItem",
+      "dynamodb:ConditionCheckItem"
+    ],
+    "originalGuardOperation": "dynamodb:UpdateItem",
+    "correctedGuardOperation": "dynamodb:PutItem",
+    "sourceSha": "70c7b15a340b39438205a747a3c4f1397fe8857e"
+  }
+}
