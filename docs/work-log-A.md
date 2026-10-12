@@ -2093,3 +2093,7 @@ Next bounded ASSESS11 repair must correlate actual failing client/domain/path an
 ## ZZ01 task prepared — 2026-10-12T16:55:32.818715+00:00
 
 User asks new ZZ batch and first task ZZ01: remove “Need an account? Sign up” competing provider entry, repair first-section layout and explain/hide shared-display access. Defined exact single-registration visual/auth/diagnostic criteria and current primary verification in docs/tasks/active/zz/ZZ01; reused ASSESS11/UX evidence. No image inspection available. Next eligible sequential intake, no active claim/worker/change/deployment/email initiated. Preserve PKCE/display privacy/email verification, no disabling self-signup shortcut or cross-origin app CSS claim. Documentation checks and verified main sync next.
+
+## ZZ02 queued — 2026-10-12T17:39:12.051964+00:00
+
+User requests automatic user-access queue after account creation, no manual Request access, and editable profile picture/description/user-facing name through top-right small drawer. Added next ZZ task with trusted event/idempotency/admin-review requirements, no self-approval, optional profile completion, safe own uploads/privacy/identity/version and actual primary proof. No implementation/claim/provider signup/image upload/cloud write/test/worker started. Preserved existing pending/approved accounts and all other task/state/DEBT01/NP00 scope. Documentation checks and main synchronization next.
