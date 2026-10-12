@@ -10,7 +10,7 @@ from pathlib import Path
 
 ACCOUNT = '092954139775'
 FUNCTION = 'known-enough-stage-model-jobs'
-OLD_HASH = 'f5b14ea99403432f4622e52e5d90ad153488802569639ed1aa148cfc9c4692b9'
+OLD_HASH = 'c46b2a7673297281a730105f3a352b2d98da18e2625472572f1e38d2e404fd3e'  # verified 2af publication; tests only
 
 
 def validate_candidate(report, source, package):
@@ -23,14 +23,16 @@ def validate_candidate(report, source, package):
     return sha
 
 
-def validate_installed(config, rule, new_hash):
+def validate_installed(config, rule, new_hash, prior_hash=OLD_HASH):
+    if not re.fullmatch(r'[a-f0-9]{64}', prior_hash):
+        raise RuntimeError('WORKER_BASELINE_REQUIRED')
     code = base64.b64decode(config.get('CodeSha256', ''), validate=True).hex()
     if (config.get('FunctionName') != FUNCTION or config.get('Role') != f'arn:aws:iam::{ACCOUNT}:role/KnownEnoughModelJobRuntime'
             or config.get('Runtime') != 'nodejs24.x' or config.get('Handler') != 'worker.handler'
             or config.get('Timeout') != 180 or config.get('MemorySize') != 512
             or config.get('Environment', {}).get('Variables', {}) != {} or config.get('State') != 'Active'
             or config.get('LastUpdateStatus') != 'Successful' or not config.get('RevisionId')
-            or code not in [OLD_HASH, new_hash] or rule.get('Name') != 'KnownEnoughModelJobs'
+            or code not in [prior_hash, new_hash] or rule.get('Name') != 'KnownEnoughModelJobs'
             or rule.get('Arn') != f'arn:aws:events:us-east-1:{ACCOUNT}:rule/KnownEnoughModelJobs'
             or rule.get('State') != 'DISABLED' or rule.get('ScheduleExpression') != 'rate(1 minute)'):
         raise RuntimeError('WORKER_INSTALLED_GUARD_FAILED')
@@ -62,7 +64,10 @@ def main():
         operation = 'installed-guard'
         config = aws('lambda', 'get-function-configuration', '--function-name', FUNCTION)
         rule = aws('events', 'describe-rule', '--name', 'KnownEnoughModelJobs')
-        prior_hash = validate_installed(config, rule, sha)
+        expected_prior = os.environ.get('PREVIOUS_WORKER_HASH', '')
+        report['actualWorkerSha256'] = base64.b64decode(config.get('CodeSha256', ''), validate=True).hex()
+        report['expectedPriorWorkerSha256'] = expected_prior if re.fullmatch(r'[a-f0-9]{64}', expected_prior) else 'NOT_SUPPLIED'
+        prior_hash = validate_installed(config, rule, sha, expected_prior)
         if prior_hash != sha:
             report['codeWriteRequested'] = True
             operation = 'lambda:UpdateFunctionCode'

@@ -10,6 +10,10 @@ on:
         description: Publish authenticated enqueue API and rebind only empty disabled control
         type: boolean
         default: false
+      previous_worker_sha256:
+        description: Independently verified installed worker hash from matching prior publication
+        required: true
+        type: string
       previous_job_source:
         description: Exact observed current disabled control source
         type: string
@@ -29,6 +33,7 @@ jobs:
     timeout-minutes: 15
     env:
       EXPECTED_SOURCE: ${{ inputs.source_sha }}
+      PREVIOUS_WORKER_HASH: ${{ inputs.previous_worker_sha256 }}
       NODE_NO_WARNINGS: '1'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683

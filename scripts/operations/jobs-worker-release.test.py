@@ -43,6 +43,13 @@ class ReleaseTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             m.validate_installed({**self.config,'CodeSha256':base64.b64encode(bytes.fromhex(original)).decode()},self.rule,self.sha)
 
+    def test_independently_declared_prior_is_required_and_exact(self):
+        different = 'd' * 64
+        config = {**self.config, 'CodeSha256': base64.b64encode(bytes.fromhex(different)).decode()}
+        self.assertEqual(m.validate_installed(config, self.rule, self.sha, different), different)
+        with self.assertRaises(RuntimeError): m.validate_installed(config, self.rule, self.sha, m.OLD_HASH)
+        with self.assertRaisesRegex(RuntimeError, 'WORKER_BASELINE_REQUIRED'): m.validate_installed(config, self.rule, self.sha, '')
+
     def test_foreign_code_is_never_overwritten(self):
         with self.assertRaises(RuntimeError):m.validate_installed({**self.config,'CodeSha256':base64.b64encode(b'c'*32).decode()},self.rule,self.sha)
 
@@ -64,7 +71,7 @@ class ReleaseTests(unittest.TestCase):
                 data={}
             else:raise AssertionError(op)
             return type('R',(),dict(returncode=0,stdout=json.dumps(data).encode(),stderr=b''))()
-        with tempfile.TemporaryDirectory() as d,patch.dict(os.environ,{'RUNNER_TEMP':d,'GITHUB_SHA':self.source}),patch.object(m.subprocess,'run',run):
+        with tempfile.TemporaryDirectory() as d,patch.dict(os.environ,{'RUNNER_TEMP':d,'GITHUB_SHA':self.source,'PREVIOUS_WORKER_HASH':m.OLD_HASH}),patch.object(m.subprocess,'run',run):
             Path(d,'partition-prepare-report.json').write_text(json.dumps(self.report));result=m.main()
             report=json.loads(Path(d,'partition-worker-publish-report.json').read_text())
         return result,report,calls

@@ -48,5 +48,26 @@
     "email": 0,
     "providerCalls": 0,
     "dataWrites": 0
+  },
+  "inspection": {
+    "runUrl": "https://github.com/Known-Enough/known-enough/actions/runs/38298272901",
+    "report": {
+      "result": "ZZ02_SETUP_METADATA_READ",
+      "configurationWrites": 0,
+      "dataWrites": 0,
+      "providerCalls": 0,
+      "signupDelivery": "NOT_EXECUTED",
+      "postConfirmation": "ABSENT",
+      "apiSha256": "da58b98f68f55615b9c41b5b7f6c41c27e061e180f6a27f2e147e0ffc1ca9738",
+      "profileRoutesPresent": 0
+    }
+  },
+  "failedPublication": {
+    "runUrl": "https://github.com/Known-Enough/known-enough/actions/runs/38298276270",
+    "result": "WORKER_INSTALLED_GUARD_FAILED",
+    "codeWriteRequested": false,
+    "apiPublication": "NOT_EXECUTED",
+    "priorAPIBackup": "VERIFIED",
+    "privateArtifactUpload": "VERIFIED"
   }
 }
