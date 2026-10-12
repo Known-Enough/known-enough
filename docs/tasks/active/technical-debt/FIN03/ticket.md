@@ -1,3 +1,5 @@
+**Latest MVP direction, 2026-10-12:** [MVP01](../../mvp/MVP01/README.md) reviews the essential current product and routes unresolved launch blockers to existing tasks. Minor housekeeping and the specific old DEBT01 mailbox are not final-acceptance prerequisites; list their known deferred status. This supersedes contrary blanket cleanup requirements below only for deferred minor debt. Required identity/consent/privacy/usage/data-lifecycle/recovery and actual user-journey evidence remain required.
+
 # FIN03 — Verify final basic completion
 
 **Coding-first scheduling — user direction, 2026-10-06:** Final basic acceptance remains LAST, after the deferred administrator/service completion and required fresh matching proof. B may finish available instructions/reporting preparation earlier; no local CODE_READY checkpoint replaces final managed acceptance. Follow [the current queue](../../../../coding-first-plan.md).
