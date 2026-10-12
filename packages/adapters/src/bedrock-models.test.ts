@@ -216,6 +216,25 @@ describe('Bedrock role adapters', () => {
     } satisfies Partial<Ke10EvaluationFailure>);
     expect(negotiationCalls).toBe(2);
   });
+  it('forces a closed negotiation envelope and exact bounded catalog indices', async () => {
+    const catalog = [[{ variableId: 'choice', value: { type: 'ENUM', optionId: 'option-a' } }], []];
+    let received: ConverseCommand | undefined;
+    const models = createBedrockModels({ transport: { send: async command => {
+      received = command;
+      return response({ candidateIndex: 0, permissionDependencies: [], questionIntents: [] }, 'ke_negotiation_output');
+    } }, jobs: new BoundedModelJobs(), enabled: () => true });
+    const result = await models.negotiation({ context: { publicSnapshot: { frame: {} }, definition: { variables: [], rules: [] },
+      confirmedConstraints: [], activeNegotiationPermissions: [] }, publicCandidates: catalog, attempt: 1, retryReason: null,
+      signal: new AbortController().signal, invocation: guard() } as unknown as DecisionNegotiationModelInput);
+    const schema = received!.input.toolConfig!.tools![0]!.toolSpec!.inputSchema!.json as {
+      additionalProperties: boolean; properties: Record<string, { items?: { additionalProperties: boolean } }>;
+    };
+    expect(schema.additionalProperties).toBe(false);
+    expect(schema.properties.candidateIndex).toEqual({ type: 'integer', enum: [0, 1] });
+    expect(schema.properties.permissionDependencies!.items!.additionalProperties).toBe(false);
+    expect(schema.properties.questionIntents!.items!.additionalProperties).toBe(false);
+    expect(result).toMatchObject({ values: catalog[0], permissionDependencies: [], questionIntents: [] });
+  });
   it('converts flat Nova output into a trusted-backend enum question rule', async () => {
     const catalogEntry = [{ variableId: 'destination', value: { type: 'ENUM', optionId: 'mazatlan' } }];
     const models = createBedrockModels({ transport: { send: async () => response({ candidateIndex: 0, permissionDependencies: [], questionIntents: [{

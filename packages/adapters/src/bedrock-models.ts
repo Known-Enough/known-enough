@@ -100,6 +100,7 @@ const integerSchema = { type: 'integer' };
 const stringArray = { type: 'array', items: stringSchema };
 const nonEmptyStringArray = { type: 'array', items: stringSchema, minItems: 1 };
 const objectSchema = (properties: Record<string, unknown>, required: string[]) => ({ type: 'object', properties, required });
+const strictObjectSchema = (properties: Record<string, unknown>, required: string[]) => ({ ...objectSchema(properties, required), additionalProperties: false });
 const objectArray = (itemSchema: Record<string, unknown>) => ({ type: 'array', items: itemSchema });
 const optionSchema = objectSchema({ id: stringSchema, label: stringSchema }, ['id', 'label']);
 const valueSchema = objectSchema({
@@ -146,14 +147,14 @@ const outputTools = {
   OWNER: { name: 'ke_owner_output', schema: { type: 'object', properties: {
     sourceSummary: stringSchema, proposedConstraints: objectArray(draftConditionSchema), unsupportedConditions: objectArray(unsupportedConditionSchema),
   }, required: ['sourceSummary', 'proposedConstraints', 'unsupportedConditions'] } },
-  NEGOTIATION: { name: 'ke_negotiation_output', schema: { type: 'object', properties: {
+  NEGOTIATION: { name: 'ke_negotiation_output', schema: strictObjectSchema({
     candidateIndex: integerSchema,
-    permissionDependencies: objectArray(objectSchema({ permissionId: stringSchema, permissionVersion: integerSchema,
+    permissionDependencies: objectArray(strictObjectSchema({ permissionId: stringSchema, permissionVersion: integerSchema,
       kind: { type: 'string', enum: ['NEGOTIATION'] }, expiresAt: stringSchema }, ['permissionId', 'permissionVersion', 'kind', 'expiresAt'])),
-    questionIntents: objectArray(objectSchema({ ownerParticipantId: stringSchema, constraintId: stringSchema,
+    questionIntents: objectArray(strictObjectSchema({ ownerParticipantId: stringSchema, constraintId: stringSchema,
       constraintVersion: integerSchema, adjustmentVariableId: stringSchema, adjustmentOptionIds: nonEmptyStringArray },
     ['ownerParticipantId', 'constraintId', 'constraintVersion', 'adjustmentVariableId', 'adjustmentOptionIds'])),
-  }, required: ['candidateIndex', 'permissionDependencies', 'questionIntents'] } },
+  }, ['candidateIndex', 'permissionDependencies', 'questionIntents']) },
 } satisfies Record<ModelJobKind, { name: string; schema: Record<string, unknown> }>;
 
 function normalizeToolOutput(kind: ModelJobKind, value: unknown, payload: unknown): unknown {
@@ -235,6 +236,13 @@ export function createBedrockModels(options: {
         variableIds: { type: 'array', minItems: variables.length, maxItems: variables.length,
           items: { type: 'string', enum: variables.map(variable => variable.id) } },
       }, outputTools.ARCHITECT.schema.required.map(field => field === 'variables' ? 'variableIds' : field)) };
+    }
+    if (kind === 'NEGOTIATION' && payload && typeof payload === 'object' && 'publicCandidates' in payload) {
+      const candidates = (payload as { publicCandidates: unknown[] }).publicCandidates;
+      if (!Array.isArray(candidates) || candidates.length < 1 || candidates.length > 64) throw new ModelRuntimeError('INVALID_INPUT');
+      tool = { name: tool.name, schema: strictObjectSchema({ ...outputTools.NEGOTIATION.schema.properties,
+        candidateIndex: { type: 'integer', enum: candidates.map((_, index) => index) },
+      }, outputTools.NEGOTIATION.schema.required) };
     }
     if (typeof text !== 'string' || Buffer.byteLength(text) + Buffer.byteLength(prompts[kind])
       + Buffer.byteLength(JSON.stringify(tool.schema)) > BEDROCK_CONFIGURATION.maxInputBytes)

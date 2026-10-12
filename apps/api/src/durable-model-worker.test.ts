@@ -1,3 +1,4 @@
+import { genericCandidates } from '@deal-table/adapters';
 import { BedrockRuntimeClient, ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { afterEach, expect, it, vi } from 'vitest';
@@ -119,4 +120,34 @@ it('unknown paid-call failure leaves reasoning and capacity quarantined; verifie
   await worker.reconcile({ jobId: f.reference.jobId }, 'synthetic verified managed proof');
   expect(f.parsed(r.decisions, 'ROOM#decision').record).toMatchObject({ status: 'READY', job: null }); expect(f.parsed(r.journal, 'OPERATIONS#MODEL_JOBS').slots).toHaveLength(0);
   expect(f.parsed(r.budget, 'TOTAL').reservedTokens).toBe(18_932); expect(model).toHaveBeenCalledTimes(1);
+});
+
+it('native Bedrock composition publishes a nonempty public ENUM catalog selection through the real kernel', async () => {
+  const f = await durableFixture(implementation => vi.spyOn(DynamoDBClient.prototype, 'send').mockImplementation(implementation as never));
+  const cell=f.get(r.decisions,'ROOM#decision');const wire=JSON.parse(cell.payload!.S!);
+  wire.record.definition.variables=[{id:'activity',label:'Activity',type:'ENUM',required:true,visibility:'PUBLIC',ownerParticipantId:null,options:[{id:'first',label:'First'},{id:'second',label:'Second'}]}];
+  cell.payload={S:JSON.stringify(wire)};
+  const provider=vi.spyOn(BedrockRuntimeClient.prototype,'send').mockImplementation(async command=>{
+    const input=(command as ConverseCommand).input;
+    return {$metadata:{},stopReason:'tool_use',output:{message:{role:'assistant',content:[{toolUse:{toolUseId:'synthetic-tool',name:input.toolConfig!.toolChoice!.tool!.name!,input:{candidateIndex:0,permissionDependencies:[],questionIntents:[]}}}]}},usage:{inputTokens:9,outputTokens:4,totalTokens:13}};
+  });
+  const options={verifiedTarget:{account:r.account,region:r.region},sourceSha:'a'.repeat(40),approval:{paidCallsApproved:true,invocationLoggingDisabled:true,retentionReviewed:true},publicCandidates:genericCandidates,now:f.now};
+  const worker=createManagedDurableNegotiationWorker(options);await worker.enqueue({kind:'participant',subject:'iris'},f.reference);
+  expect(await worker.process({jobId:f.reference.jobId})).toBe('APPLIED');expect(provider).toHaveBeenCalledTimes(1);
+  expect(f.parsed(r.decisions,'ROOM#decision').record.publicProposal.facts.values).toEqual([{variableId:'activity',value:{type:'ENUM',optionId:'first'}}]);
+});
+
+it.each(['OUTPUT_SHAPE', 'CANDIDATE_SCHEMA', 'CATALOG_MISMATCH'] as const)('reports only finite %s while preserving charged failure and cancellation', async stage => {
+  const f = await fixture(); const events: string[] = [];
+  f.model.mockImplementation(async () => ({ output: stage === 'OUTPUT_SHAPE'
+    ? { values: [], permissionDependencies: [], questionIntents: [], privateCanary: 'NEVER_LOG' }
+    : { values: stage === 'CANDIDATE_SCHEMA' ? 'NEVER_LOG' : [{ variableId: 'foreign', value: { type: 'BOOLEAN', value: true } }],
+      permissionDependencies: [], questionIntents: [] }, usage: { inputTokens: 5, outputTokens: 3 } }));
+  const worker = createDurableNegotiationWorker({ now: f.now, store: f.store(), load: f.load, model: f.model,
+    publicCandidates: () => [[]], reportInvalidOutput: value => { events.push(value); throw Error('NEVER_LOG_SINK'); } });
+  await worker.enqueue(f.reference); expect(await worker.process({ jobId: f.reference.jobId })).toBe('DEAD');
+  expect(events).toEqual([stage]); expect(JSON.stringify(events)).not.toContain('NEVER_LOG');
+  expect(f.parsed(r.journal, `MODELJOB#${f.reference.jobId}`)).toMatchObject({ reason: 'INVALID_OUTPUT', usage: { inputTokens: 5, outputTokens: 3 } });
+  expect(f.parsed(r.budget, 'TOTAL').reservedTokens).toBe(18_932);
+  expect(f.parsed(r.decisions, 'ROOM#decision').record).toMatchObject({ status: 'READY', job: null, candidate: null });
 });

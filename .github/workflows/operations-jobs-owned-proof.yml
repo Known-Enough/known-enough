@@ -162,7 +162,7 @@ jobs:
           umask 077
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
           python3 -B - <<'PYCODE'
-          import base64,json,os,re,subprocess
+          import base64,json,os,re,subprocess,time
           assert re.fullmatch('[a-f0-9]{64}',os.environ['WORKER_SHA'])
           def aws(*args):
               p=subprocess.run(['aws',*args,'--region','us-east-1','--output','json','--no-cli-pager'],capture_output=True,text=True,timeout=30)
@@ -174,7 +174,7 @@ jobs:
           r=aws('events','describe-rule','--name','KnownEnoughModelJobs')
           assert r['State']=='DISABLED'
           from pathlib import Path
-          Path(os.environ['RUNNER_TEMP'],'owned-jobs-schedule-intent.json').write_text(json.dumps({'packageSource':os.environ['PACKAGE_SOURCE'],'workerSha':os.environ['WORKER_SHA']})+'\n')
+          Path(os.environ['RUNNER_TEMP'],'owned-jobs-schedule-intent.json').write_text(json.dumps({'packageSource':os.environ['PACKAGE_SOURCE'],'workerSha':os.environ['WORKER_SHA'],'startMs':int(time.time()*1000)})+'\n')
           aws('events','enable-rule','--name','KnownEnoughModelJobs')
           PYCODE
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
@@ -199,6 +199,12 @@ jobs:
           allowed-account-ids: '092954139775'
           retry-max-attempts: 1
           unset-current-credentials: true
+      - name: Verify finite diagnostic allowlist
+        if: always()
+        run: python3 -B scripts/operations/jobs-output-diagnostics.test.py
+      - name: Read finite output rejection stages without publishing model content
+        if: always()
+        run: python3 -B scripts/operations/jobs-output-diagnostics.py
       - name: Always disable and read back the schedule
         if: always()
         run: |

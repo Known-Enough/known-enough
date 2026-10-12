@@ -38,6 +38,11 @@ class ReleaseTests(unittest.TestCase):
         for field in ['Name','Arn','State','ScheduleExpression']:
             with self.subTest(field=field),self.assertRaises(RuntimeError):m.validate_installed(self.config,{**self.rule,field:'wrong'},self.sha)
 
+    def test_original_installation_is_not_the_current_update_baseline(self):
+        original='a123cd7d57bc588cd01b8101ee9d34cb2bd656b9a2f291680b374b122aa8c6ec'
+        with self.assertRaises(RuntimeError):
+            m.validate_installed({**self.config,'CodeSha256':base64.b64encode(bytes.fromhex(original)).decode()},self.rule,self.sha)
+
     def test_foreign_code_is_never_overwritten(self):
         with self.assertRaises(RuntimeError):m.validate_installed({**self.config,'CodeSha256':base64.b64encode(b'c'*32).decode()},self.rule,self.sha)
 
