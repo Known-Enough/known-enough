@@ -1,6 +1,6 @@
 # ZZ02 — Automatic pending-user intake and editable profile drawer
 
-- Status: QUEUED / unclaimed; after ZZ01's checked checkpoint, no parallel writer.
+- Status: IN_PROGRESS / B; after ZZ01 checked/deployed phase release.
 - User direction: 2026-10-12T17:39:12.051964+00:00.
 - Purpose: remove the unnecessary manual Request access/display-name barrier while retaining controlled admission; add profile editing in a small top-right drawer.
 - Scope at claim: record exact trusted signup/confirmation/account-intake, queue/admin tool, account/profile storage/contracts/API, header/drawer/styles/tests and affected lifecycle/retention files before editing. Preserve active claims, A NP00 and existing state. Standing project authority applies; no new chat/monitor/model worker starts from this ticket.
@@ -32,3 +32,9 @@ Publish docs/review-artifacts/ZZ02/onboarding-profile.md and source-bound eviden
 ## Completion
 
 Completed signup automatically has a real pending queue record; no manual Request access/name gate. Authorized administrators can reliably accept users, while normal users cannot self-approve or use groups before approval. Top-right drawer edits/persists permitted own profile fields/picture, shows truthful access state and preserves verified identity/privacy. Existing users/data continue working, focused/full/current primary proof passes. Missing event delivery, administrative review, upload access or actual signup proof remains an explicit incomplete criterion, not hidden as cosmetic debt. This task does not claim other AI/production work finished.
+
+## ZZ02 B claim — 2026-10-12T18:51:15.302600+00:00
+
+IN_PROGRESS/B143764700/ownBattosai1806 after ZZ01 checked/deployed phase release; same worker, no helper. Source5cea6984c84f55a24b8cb37375f1b7faae447834, clean ff-only main and no live publication/test overlapping. Exact implementation scope: packages/contracts/src/groups.ts; packages/adapters/src/partition-group-session.ts/test, partition-request.ts, partition-lifecycle.ts/test, new owned-avatar.ts/test; apps/api/src/partition-http.ts/test, partition-runtime.ts, new signup-intake.ts/test; apps/web/src/group-home.tsx, connected-app.tsx, style.css, new profile-drawer.tsx; new profile/browser/intake tests and affected existing onboarding/clarity tests; scripts/zz trusted intake runtime/admin-review/setup package and exact necessary deployment workflow recorded before editing. Tracking/evidence/ZZ02ticket and own logs/board. No root/lock dependency, savedNP00/modeljob/decisionauthority edit.
+
+Plan: trusted Cognito PostConfirmation server integration queues verified subject PENDING through existing active partition session, idempotent/noapproval/noreset; no first-login-only effect. Own private Account profile holds bounded sanitized PNG plus name/bio behind owner-only endpoints; no external bucket/blob in shared decisions, no third-party URLs. Existing account tombstone/erasure removes these owned profile bytes; owner export explicitly includes only caller profile. Authentication login name remains immutable, no purported rename/handle uniqueness promise. New trigger attachment/runtime permissions require actual own installed access or minimal setup; configuration is not event execution. Normal UI drops manual Request access/name gate and shows null/setup-pending honestly until trusted delivery; drawer allows pending own edits without group rights. Admin review uses supported private own-account tooling, never public approval. Exact deployment/setup proof remains required before DONE.

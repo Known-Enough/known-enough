@@ -1,3 +1,5 @@
+Current ZZ02: **IN_PROGRESS/B — trusted automatic pending intake and private profile drawer, after ZZ01 checked phase.** No parallel claim; ZZ01 still has provider criteria open.
+
 Current ZZ01: **BLOCKED/unclaimed — unified app entry deployed and checked; provider-link/complete signup criteria remain.** Checked phase released; ZZ02 eligible next under explicit sequential user direction.
 
 Current MVP01: **DONE audit / B claim released — product NOT_READY.** [Review and exact existing-task handoffs](review-artifacts/MVP01/readiness-review.md). 243focused/11browser/current public entry and own-role controls PASS. OPS03 remains BLOCKED/unclaimed; next scoped primary AI/recovery correction, no successor claim.

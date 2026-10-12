@@ -1,3 +1,5 @@
+Current ZZ02: **IN_PROGRESS/B — trusted automatic pending intake and private profile drawer, after ZZ01 checked phase.** No parallel claim; ZZ01 still has provider criteria open.
+
 Current ZZ01: **BLOCKED/unclaimed — unified app entry deployed and checked; provider-link/complete signup criteria remain.** Checked phase released; ZZ02 eligible next under explicit sequential user direction.
 
 **ZZ navigation direction — 2026-10-12T17:42:55.221080+00:00: [ZZ03](tasks/active/zz/ZZ03/README.md) follows ZZ02. Approved home shows groups; pending home shows access status; selected group and decision are separate views with back navigation. Remove manual ID/templates/simulated assistant/fictional invitations from normal flow; retain profile drawer and actual admission/private authority. Queue ZZ01 -> ZZ02 -> ZZ03, no new claim or implementation started.**
