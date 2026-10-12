@@ -39,7 +39,7 @@ class ReleaseTests(unittest.TestCase):
             with self.subTest(field=field),self.assertRaises(RuntimeError):m.validate_installed(self.config,{**self.rule,field:'wrong'},self.sha)
 
     def test_original_installation_is_not_the_current_update_baseline(self):
-        original='a123cd7d57bc588cd01b8101ee9d34cb2bd656b9a2f291680b374b122aa8c6ec'
+        original='a123823764f35df6abdc09a288d1c26962ed76f94b6956c7e77bf89ef6cc2214'
         with self.assertRaises(RuntimeError):
             m.validate_installed({**self.config,'CodeSha256':base64.b64encode(bytes.fromhex(original)).decode()},self.rule,self.sha)
 

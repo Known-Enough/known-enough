@@ -235,6 +235,24 @@ describe('Bedrock role adapters', () => {
     expect(schema.properties.questionIntents!.items!.additionalProperties).toBe(false);
     expect(result).toMatchObject({ values: catalog[0], permissionDependencies: [], questionIntents: [] });
   });
+  it.each(['none', 'hard', 'negotiable'] as const)('bounds consent metadata from trusted %s constraints and active permissions', async kind => {
+    let received: ConverseCommand | undefined;
+    const models = createBedrockModels({ transport: { send: async command => {
+      received = command;
+      return response({ candidateIndex: 0, permissionDependencies: [], questionIntents: [] }, 'ke_negotiation_output');
+    } }, jobs: new BoundedModelJobs(), enabled: () => true });
+    await models.negotiation({ context: { publicSnapshot: { frame: {} }, definition: { variables: [], rules: [] },
+      confirmedConstraints: kind === 'none' ? [] : [{ kind: kind === 'hard' ? 'HARD' : 'NEGOTIABLE' }],
+      activeNegotiationPermissions: kind === 'negotiable' ? [{ permissionId: 'existing', permissionVersion: 1 }] : [] },
+      publicCandidates: [[]], attempt: 1, retryReason: null, signal: new AbortController().signal, invocation: guard(),
+    } as unknown as DecisionNegotiationModelInput);
+    const schema = received!.input.toolConfig!.tools![0]!.toolSpec!.inputSchema!.json as { properties: Record<string, { maxItems?: number }> };
+    expect(schema.properties.questionIntents!.maxItems).toBe(kind === 'negotiable' ? undefined : 0);
+    expect(schema.properties.permissionDependencies!.maxItems).toBe(kind === 'negotiable' ? undefined : 0);
+    const prompt = received!.input.system!.map(part => part.text).join(' ');
+    expect(prompt.includes('Return questionIntents exactly as []')).toBe(kind !== 'negotiable');
+    expect(prompt.includes('Return permissionDependencies exactly as []')).toBe(kind !== 'negotiable');
+  });
   it('converts flat Nova output into a trusted-backend enum question rule', async () => {
     const catalogEntry = [{ variableId: 'destination', value: { type: 'ENUM', optionId: 'mazatlan' } }];
     const models = createBedrockModels({ transport: { send: async () => response({ candidateIndex: 0, permissionDependencies: [], questionIntents: [{

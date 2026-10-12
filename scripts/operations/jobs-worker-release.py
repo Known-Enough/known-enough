@@ -10,7 +10,7 @@ from pathlib import Path
 
 ACCOUNT = '092954139775'
 FUNCTION = 'known-enough-stage-model-jobs'
-OLD_HASH = '1279bb931dda8703ccf46d710d5e6c03bb3f0fddfa397226b2442a7f63e467ba'
+OLD_HASH = 'f5b14ea99403432f4622e52e5d90ad153488802569639ed1aa148cfc9c4692b9'
 
 
 def validate_candidate(report, source, package):

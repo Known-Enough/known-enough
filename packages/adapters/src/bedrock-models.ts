@@ -228,6 +228,7 @@ export function createBedrockModels(options: {
     let text: string;
     try { text = JSON.stringify(payload); } catch { throw new ModelRuntimeError('INVALID_INPUT'); }
     let tool: { name: string; schema: Record<string, unknown> } = outputTools[kind];
+    let prompt = prompts[kind];
     if (kind === 'ARCHITECT' && payload && typeof payload === 'object' && 'publicVariables' in payload) {
       const variables = (payload as { publicVariables: KE.PublicDecisionVariable[] }).publicVariables;
       const { variables: omitted, ...properties } = outputTools.ARCHITECT.schema.properties;
@@ -240,17 +241,24 @@ export function createBedrockModels(options: {
     if (kind === 'NEGOTIATION' && payload && typeof payload === 'object' && 'publicCandidates' in payload) {
       const candidates = (payload as { publicCandidates: unknown[] }).publicCandidates;
       if (!Array.isArray(candidates) || candidates.length < 1 || candidates.length > 64) throw new ModelRuntimeError('INVALID_INPUT');
+      const context = payload as { confirmedConstraints?: { kind?: string }[]; activePermissions?: unknown[] };
+      const noQuestions = Array.isArray(context.confirmedConstraints) && !context.confirmedConstraints.some(constraint => constraint.kind === 'NEGOTIABLE');
+      const noDependencies = Array.isArray(context.activePermissions) && context.activePermissions.length === 0;
       tool = { name: tool.name, schema: strictObjectSchema({ ...outputTools.NEGOTIATION.schema.properties,
         candidateIndex: { type: 'integer', enum: candidates.map((_, index) => index) },
+        ...(noQuestions ? { questionIntents: { ...(outputTools.NEGOTIATION.schema.properties.questionIntents as Record<string, unknown>), maxItems: 0 } } : {}),
+        ...(noDependencies ? { permissionDependencies: { ...(outputTools.NEGOTIATION.schema.properties.permissionDependencies as Record<string, unknown>), maxItems: 0 } } : {}),
       }, outputTools.NEGOTIATION.schema.required) };
+      if (noQuestions) prompt += ' For this request there are no confirmed NEGOTIABLE constraints. Return questionIntents exactly as []; never invent a question, owner constraint or concession.';
+      if (noDependencies) prompt += ' For this request activePermissions is empty. Return permissionDependencies exactly as []; never invent a permission.';
     }
-    if (typeof text !== 'string' || Buffer.byteLength(text) + Buffer.byteLength(prompts[kind])
+    if (typeof text !== 'string' || Buffer.byteLength(text) + Buffer.byteLength(prompt)
       + Buffer.byteLength(JSON.stringify(tool.schema)) > BEDROCK_CONFIGURATION.maxInputBytes)
       throw new ModelRuntimeError('INVALID_INPUT');
     // A fresh request per job. The sole forced tool is a data envelope; it has no execution path.
     const request: ConverseCommandInput = {
       modelId: BEDROCK_CONFIGURATION.modelId,
-      system: [{ text: prompts[kind] }],
+      system: [{ text: prompt }],
       messages: [{ role: 'user', content: [{ text }] }],
       inferenceConfig: { maxTokens: BEDROCK_CONFIGURATION.maxTokens, temperature: BEDROCK_CONFIGURATION.temperature },
       toolConfig: {
