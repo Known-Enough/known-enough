@@ -1,6 +1,6 @@
 # ZZ01 — Single registration path and first-screen redesign
 
-- Status: READY / unclaimed.
+- Status: IN_PROGRESS / B.
 - User direction: 2026-10-12T16:55:32.818715+00:00; new batch ZZ, first task ZZ01.
 - Priority: next eligible product-usability intake after a genuinely active task reaches a checked release/handoff. Preserve one sequential claim, paused A NP00 and existing B work. No new worker/chat/monitor or implementation starts from this ticket.
 - Origin: two competing signup entry points, unclear Shared display sign-in, repeated registration instructions and a user-reported generic hosted-page signup failure. [Current issue evidence](../../../../review-artifacts/ASSESS11-manual-signup-20261012.json). The attached Windows image is unavailable; no screenshot/layout observation is claimed.
@@ -39,3 +39,7 @@ Publish docs/review-artifacts/ZZ01/entry-review.md and source-bound evidence wit
 Update ASSESS11/UX01/UX03 references for corrected boundaries; preserve old failure evidence. Log actual actions/errors and finish with a short chat summary. Minor DEBT01 remains deferred and does not block fresh independent tests. Final MVP readiness/other AI/lifecycle requirements remain separate; task completion does not claim the full product is ready.
 
 Follow-up [ZZ02](../ZZ02/README.md) owns automatic pending-user intake and signed-in profile drawer. Keep approval required; ZZ01 must not remove the admission gate or implement a competing profile/signup redesign. Coordinate header styles/auth boundaries through sequential handoff.
+
+## ZZ01 B claim — 2026-10-12T18:37:13.116764+00:00
+
+IN_PROGRESS/B own Battosai1806/143764700, clean ff-only source5aeced68533236b81e1b205d713b867f6cae342a, no queued/running GitHub jobs or active claim. User explicitly directs ZZ01→ZZ02→ZZ03; one sequential writer. Actual GPT-6 Codex variant/effort unexposed. Exact editable scope: apps/web/src/connected-app.tsx, email-registration-form.tsx, style.css, new auth-entry.tsx, tests/e2e/email-registration.spec.ts and new zz-entry.spec.ts; ZZ01 evidence/ticket, related ASSESS11/UX01/UX03 references, board/claim and B work-log/handoff/monitor. Auth/session/registration identity and provider APIs initially read-only. Current primary hosted GET confirms classicCss/signupLink true; official classic branding only permits template properties, managed-login signUp setting reserved/not implemented. Do not disable selfregistration or replace PKCE; hosted-link removal remains an explicit provider capability gap while useful app UI work proceeds. No paid/signup/email/AWSwrite performed. Next unified entry/state/secondary display, meaningful browser regressions/full checks, existing own deployment with no duplicate paid automatic qualification, source-matching public checks.

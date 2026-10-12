@@ -1,3 +1,5 @@
+Current ZZ01: **IN_PROGRESS/B — user-directed ZZ01→ZZ02→ZZ03, one writer.** Unified entry and provider capability investigation; OPS03 remains blocked, NP00/DEBT01 preserved.
+
 **ZZ navigation direction — 2026-10-12T17:42:55.221080+00:00: [ZZ03](tasks/active/zz/ZZ03/README.md) follows ZZ02. Approved home shows groups; pending home shows access status; selected group and decision are separate views with back navigation. Remove manual ID/templates/simulated assistant/fictional invitations from normal flow; retain profile drawer and actual admission/private authority. Queue ZZ01 -> ZZ02 -> ZZ03, no new claim or implementation started.**
 
 **ZZ onboarding/profile direction — 2026-10-12T17:39:12.051964+00:00: [ZZ02](tasks/active/zz/ZZ02/README.md) follows ZZ01. Automatically queue new accounts for administrator review, remove manual Request access/name gate, and add editable top-right profile drawer. Controlled admission and email verification remain; no auto-approval, automatic group membership or task execution is claimed. Keep one sequential task.**

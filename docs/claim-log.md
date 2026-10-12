@@ -1,3 +1,5 @@
+Current ZZ01: **IN_PROGRESS/B — user-directed ZZ01→ZZ02→ZZ03, one writer.** Unified entry and provider capability investigation; OPS03 remains blocked, NP00/DEBT01 preserved.
+
 Current MVP01: **DONE audit / B claim released — product NOT_READY.** [Review and exact existing-task handoffs](review-artifacts/MVP01/readiness-review.md). 243focused/11browser/current public entry and own-role controls PASS. OPS03 remains BLOCKED/unclaimed; next scoped primary AI/recovery correction, no successor claim.
 
 Current OPS03: **BLOCKED/unclaimed — B releases the fresh managed claim at checked external-dependency checkpoint; no worker/test/deployment remains running.** [Unblock package/evidence](review-artifacts/OPS03/b-fresh-live-blocked-handoff.md). A admin applies only the named operator policy/boundary repair when available; Mail.tm creation remains a separate provider dependency. No DONE, old-DEBT retry, successor claim or parallel implementation.
