@@ -85,5 +85,13 @@
     "assets/jsx-runtime-C8qzNuNr.js": "16cd613b5df605decfdf59cb786d9468694743d89b75147380ca38548e458e7d",
     "index.html": "b611a33b57210d1084839d1483aa22aac1e00f3162f4add072a735c7c5f170af"
   },
-  "primaryCandidatePublished": false
+  "primaryCandidatePublished": false,
+  "checkedSource": "b998d0d987baaa4dd846495b1040bdf04427dcf6",
+  "finishedReceipt": {
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38308817616",
+    "conclusion": "SUCCESS",
+    "result": "BLOCKED",
+    "observedAt": "2026-10-12T21:09:20.189Z",
+    "source": "b998d0d987baaa4dd846495b1040bdf04427dcf6"
+  }
 }
