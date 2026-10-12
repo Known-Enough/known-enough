@@ -1,3 +1,5 @@
+Current OPS03: **IN_PROGRESS/B — user-directed fresh-account qualification after DEBT01 deferral**. Own source/account/job intake verified, one live test; old mailbox UNKNOWN remains separate deferred debt.
+
 **Latest user direction — 2026-10-12T06:12:52.805354+00:00: old Mail.tm cleanup moved to [DEBT01](tasks/active/technical-debt/DEBT01/README.md), lowest priority, only when no other eligible work can progress. OPS03 is READY for a fresh B claim; this old mailbox does not block new independent live tests. Preserve its UNKNOWN evidence and normal cleanup/consent/usage safeguards for new runs. No new worker or execution is claimed. Earlier blocked snapshots below are historical.**
 
 Current OPS03: **BLOCKED/unclaimed — fixture acknowledgments now persist before auth; private support request available through S3console**.1554app/65browser checks PASS. Original mailbox HTTP401 cleanup evidence still required; no successor/live retry/worker reinstall.
