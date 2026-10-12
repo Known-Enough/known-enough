@@ -1,6 +1,6 @@
 # ZZ01 — Single registration path and first-screen redesign
 
-- Status: IN_PROGRESS / B.
+- Status: BLOCKED / unclaimed — app entry CODE_READY and primary deployed checks PASS; hosted-link and complete primary signup criteria open.
 - User direction: 2026-10-12T16:55:32.818715+00:00; new batch ZZ, first task ZZ01.
 - Priority: next eligible product-usability intake after a genuinely active task reaches a checked release/handoff. Preserve one sequential claim, paused A NP00 and existing B work. No new worker/chat/monitor or implementation starts from this ticket.
 - Origin: two competing signup entry points, unclear Shared display sign-in, repeated registration instructions and a user-reported generic hosted-page signup failure. [Current issue evidence](../../../../review-artifacts/ASSESS11-manual-signup-20261012.json). The attached Windows image is unavailable; no screenshot/layout observation is claimed.
@@ -51,3 +51,5 @@ ZZ01 regression scope amendment 2026-10-12T18:42:54.832236+00:00: add tests/e2e/
 ZZ01 logging correction 2026-10-12T18:43:50.804670+00:00: first started38292145712 FAILED at monitor receipt validation; submitted scheduled_at used six fractional digits/+00:00, outside existing strict UTC-Z/millisecond format (INVALID_SCHEDULED_TIME). No app/cloud/test action from that logging workflow. Normalized the SAME actual start to 2026-10-12T18:37:13.116Z, requested corrected started receipt; original failure and delayed public start visibility retained. No monitor code/policy/schedule change.
 
 ZZ01 checked application checkpoint:26focusedunit/6browser, full1562app/two skips/hosted1/browser67 PASS. Source hashes/before-after in docs/review-artifacts/ZZ01/entry-review.md and evidence.json. Own corrected started38292882761 SUCCESS/downloaded; original timestamp-format logging failure retained. Frontend-only publication follows exact-source sync; no actual primary signup/provider-link PASS or whole DONE.
+
+ZZ01 phase release 2026-10-12T18:50:02.966354+00:00: exactsource6afe primaryfrontend[38293204243](https://github.com/Known-Enough/known-enough/actions/runs/38293204243) SUCCESS/downloaded; all asset hashes and390/1280Create-first/oneform/displaysecondary/nooverflowPASS. Whole taskBLOCKED/notDONE for provider capability and complete signup proof, no routine reapproval required. CODE_READY app phase claim released; ZZ02 follows only now. No new signup/email/model/APIchange; full1562app/67browserPASS preserved.
