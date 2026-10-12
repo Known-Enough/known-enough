@@ -2097,3 +2097,7 @@ User asks new ZZ batch and first task ZZ01: remove “Need an account? Sign up�
 ## ZZ02 queued — 2026-10-12T17:39:12.051964+00:00
 
 User requests automatic user-access queue after account creation, no manual Request access, and editable profile picture/description/user-facing name through top-right small drawer. Added next ZZ task with trusted event/idempotency/admin-review requirements, no self-approval, optional profile completion, safe own uploads/privacy/identity/version and actual primary proof. No implementation/claim/provider signup/image upload/cloud write/test/worker started. Preserved existing pending/approved accounts and all other task/state/DEBT01/NP00 scope. Documentation checks and main synchronization next.
+
+## ZZ03 queued — 2026-10-12T17:42:55.221080+00:00
+
+User approved separate waiting/groups/group/decision views and removal of developer/demo clutter. Created docs/tasks/active/zz/ZZ03 after ZZ02 with actual group/decision/invitation/private-state navigation, guarded refresh/back/deep-link/current-job checks and simple responsive view criteria. Reuse existing source/FIN02/UX03/MVP findings, no second signup/profile implementation and no claim of fixing missing AI ports. Documentation-only task definition; no worker/monitor/message/deployment/signup/model/data change. Preserve standing authority, sequential claims, protected NP00 and deferred DEBT01.

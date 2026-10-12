@@ -1,0 +1,39 @@
+# ZZ03 — Simplify the signed-in app and its navigation
+
+- Status: QUEUED / unclaimed.
+- User-approved structure: 2026-10-12T17:42:55.221080+00:00.
+- Scheduling: after ZZ01 -> ZZ02 checked checkpoints, one sequential claim. Preserve any active project task/NP00; create no worker/chat/monitor from this ticket.
+- Goal: stop showing onboarding, groups, a decision, developer scenarios and simulated assistant at once. Organize the product by the user's current activity.
+- Scope at claim: inspect and record exact connected-app/group-home/group-decisions/connected-decision/session/navigation/styles and relevant browser tests; supporting APIs only for an actual demonstrated compatibility gap. Reuse current storage, identity, roster/consent and model jobs. No new product feature, arbitrary cloud setup or parallel implementation.
+
+## Views and behavior
+
+1. **Waiting for approval:** signed-in pending user sees clear access status and a short next-step explanation, plus the ZZ02 profile button. No Request access/name form after ZZ02 automatic intake, no unavailable group creation, manual decision load, template or assistant controls. Rejected/disabled/expired states have truthful recovery. Pending status comes from server state, not assumed from login. Only authorized administrators can change admission.
+2. **Your groups:** approved user's home shows their group list with Open group, one Create group action and any valid pending invitation to accept/decline. An approved new account starts with zero groups unless it actually joined one; use a helpful empty state rather than fabricated membership/demo data. Show concise loading/error/access state; refresh is a secondary action, not the main purpose of the screen.
+3. **Selected group:** show group name, members and its decisions, then Start a decision. Organizer-only invitation/membership controls belong here, ordinary members see permitted actions only. A pending recipient-bound invitation survives login/navigation until explicitly handled. Use clear Back to groups/breadcrumb navigation and scoped loading/error states.
+4. **Selected decision:** show its title/group, useful actual shared progress, shared frame, current user's private input/review, AI work/result and independent approvals as relevant to the current stage. Do not show every stage/form simultaneously. Distinguish shared from “Only you” content in plain language. Back to group returns to the correct group, while the job stays server-owned; revisit/reload resumes current reads without submitting another AI request. Current-context/owner/roster/version fences and exact proposal approval remain intact.
+5. **Header:** retain simple branding and the ZZ02 avatar/profile drawer, access/profile status and sign out. Remove prominent “Participant session” and other developer labels. Use concise privacy copy/details without suppressing required consent before private processing. Shared-display accounts have their own read-only view; no participant/profile/admin impersonation or create/approve controls.
+
+## Remove clutter from the normal product
+
+Remove manual Decision ID entry/Load shared decision, Optional fictional decision templates (Christmas/Purchase), global Create AI frame for review for those templates, Simulated Alexa+ and fictional-decision invitations from ordinary home/group/decision screens. Existing real group invitations remain in the selected group. If retaining demos for development, put them in a separate explicitly labeled demo route/build/access option; never enable them automatically for new users or imply simulated Alexa is live AI. Preserve required legacy deep-link/read/test compatibility deliberately; do not import server fixtures/backend code into production browser assets.
+
+A valid existing decision/invitation link can open the intended view without typing an identifier; the server still verifies access. Do not expose invite/auth tokens or private input in URLs, history, public logs or screenshots. Opaque group/decision identifiers alone grant no access. Choose a small routing/view approach compatible with current hosting redirects; no new framework dependency without demonstrated need. Reload/back/forward/deep links must work, with readable not-found/foreign-access recovery rather than an empty page.
+
+## Visual direction
+
+Match ZZ01/ZZ02 typography/colors/spacing. One primary action per view, readable headings, consistent cards/list rows and clear parent navigation. Desktop and phone layouts should not be a wall of repeated paragraphs/buttons. Use compact status/help and show details on demand. Keep keyboard focus/labels/contrast, touch targets, responsive single-column behavior, reduced motion and unsaved-edit recovery.
+
+Do not mount all old sections and merely hide them with CSS: inactive views must not fetch other groups/private snapshots or leave stale data/commands available. Cancel/ignore obsolete reads when switching group/decision/session. Clear inaccessible private snapshots after membership/account/session changes. Avoid unnecessary background focus jumps and duplicated announcements. Unsaved private input remains transient unless explicitly saved by the existing supported owner flow; do not add raw localStorage persistence as navigation convenience.
+
+## Dependencies and verification
+
+Reuse [ZZ01](../ZZ01/README.md) entry, [ZZ02](../ZZ02/README.md) admission/profile, [FIN02](../../technical-debt/FIN02/README.md) group isolation and [UX03](../../ui-ux/UX03/README.md) journey evidence. [MVP01](../../mvp/MVP01/README.md) identifies missing primary AI creation/interpretation; those remain OPS03 functional work. Do not claim those features fixed through navigation or send unsupported legacy requests silently. Show honest unavailable/error states until applicable source-bound functionality is installed, and verify the normal path after it is available.
+
+Meaningful focused/browser cases: pending/approved-zero-groups/member/organizer/outsider/display; create/join/open group; selected decision and Back; invitation and direct-link sign-in/reload; browser back/forward; active-job leave/revisit without duplicate charge; stale delayed response/changed membership/expired session; no demo/manual-ID sections or inactive requests; phone/desktop/keyboard/empty/loading/error states. Preserve privacy canaries and current server authority tests. Run focused and pinned npm run check for implementation; verify relevant changed flows on matching primary deployment using owned synthetic participants, with normal consent/usage/current-run cleanup. Mock success is not live signup/AI/product acceptance. DEBT01 remains deferred.
+
+## Completion
+
+Publish docs/review-artifacts/ZZ03/navigation-review.md and source-bound evidence with before/after phone/desktop screenshots, view/navigation map, actual request/identity/access/retained-legacy behavior, focused/full tests, matching live run links and remaining limits. Approved home contains groups and appropriate invitation/create actions; pending home contains only relevant status/profile. Group and decision open as distinct views with reliable back/reload behavior. Developer/demo controls are absent from normal flow. Profile/admission/identity/private progress and actual AI result recovery remain correct.
+
+Record exact code changes/errors/outcomes in task/board/own log/handoff, synchronize checked main and finish with a short chat summary. UI completion does not mark other AI/privacy/lifecycle acceptance DONE. Do not weaken server approval or hide a real broken dependency to declare the MVP ready.
