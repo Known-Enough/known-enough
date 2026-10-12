@@ -52,18 +52,11 @@ jobs:
           digest=hashlib.sha256(file.read_bytes()).hexdigest()
           key='ops01-owned/ops03-journal-grant-'+digest+'/grant.py'
           saved=Path(os.environ['RUNNER_TEMP'],'journal-grant-private-readback.py')
-          read=subprocess.run(['aws','s3api','get-object','--bucket','known-enough-qa-artifacts-092954139775','--key',key,str(saved),'--region','us-east-1','--no-cli-pager'],capture_output=True,text=True,timeout=30)
-          if read.returncode == 0:
-              assert hashlib.sha256(saved.read_bytes()).hexdigest()==digest
-              writes=0
-          else:
-              assert '(NoSuchKey)' in read.stderr
-              put=subprocess.run(['aws','s3api','put-object','--bucket','known-enough-qa-artifacts-092954139775','--key',key,'--body',str(file),'--server-side-encryption','AES256','--if-none-match','*','--region','us-east-1','--no-cli-pager'],capture_output=True,text=True,timeout=30)
-              if put.returncode:
-                  raise SystemExit('JOURNAL_GRANT_UPLOAD_UNVERIFIED')
-              check=subprocess.run(['aws','s3api','get-object','--bucket','known-enough-qa-artifacts-092954139775','--key',key,str(saved),'--region','us-east-1','--no-cli-pager'],capture_output=True,text=True,timeout=30)
-              assert check.returncode == 0 and hashlib.sha256(saved.read_bytes()).hexdigest()==digest
-              writes=1
+          put=subprocess.run(['aws','s3api','put-object','--bucket','known-enough-qa-artifacts-092954139775','--key',key,'--body',str(file),'--server-side-encryption','AES256','--if-none-match','*','--region','us-east-1','--no-cli-pager'],capture_output=True,text=True,timeout=30)
+          # Read back exactly once even on a lost upload acknowledgement; never retry an unchanged write.
+          check=subprocess.run(['aws','s3api','get-object','--bucket','known-enough-qa-artifacts-092954139775','--key',key,str(saved),'--region','us-east-1','--no-cli-pager'],capture_output=True,text=True,timeout=30)
+          assert check.returncode == 0 and hashlib.sha256(saved.read_bytes()).hexdigest()==digest
+          writes=0 if put.returncode and '(PreconditionFailed)' in put.stderr else (1 if put.returncode == 0 else 'ACK_UNKNOWN_READBACK_MATCHES')
           report={'result':'JOURNAL_GRANT_PACKAGE_READBACK_PASS','sourceSha':os.environ['GITHUB_SHA'],'scriptSha256':digest,'privateKey':key,'artifactWrites':writes,'iamWrites':0,'providerCalls':0}
           Path(os.environ['RUNNER_TEMP'],'journal-grant-package-report.json').write_text(json.dumps(report)+'\n')
           PY
