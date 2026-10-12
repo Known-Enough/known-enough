@@ -132,3 +132,19 @@ test('provider account links identify only the already authenticated inbox; neve
   expect(await createMailtmClient(fetcher,async()=>{}).code(mailbox)).toBe('123456');
   expect(fetcher.mock.calls.map(call=>call[0])).toEqual(['https://api.mail.tm/token','https://api.mail.tm/me','https://api.mail.tm/messages?page=1','https://api.mail.tm/messages/message-123']);
 });
+
+test('account creation acknowledgment is checkpointed before token401 without leaking provider details',async()=>{
+ const events:string[]=[];
+ const fetcher=vi.fn(async(url:string)=>{const path=new URL(url).pathname;events.push(path);return path==='/accounts'?response({id:mailbox.id,address:mailbox.address},201):response({message:mailbox.password},401);});
+ const client=createMailtmClient(fetcher,async()=>{});
+ let acknowledged:Record<string,unknown>|undefined;
+ const failure=await client.create({...mailbox,token:undefined},async(value:Record<string,unknown>)=>{acknowledged=value;events.push('checkpoint');}).catch((error:Error&{mailOperation:string;httpStatus:number})=>error);
+ expect(events).toEqual(['/accounts','checkpoint','/token']);expect(acknowledged).toMatchObject({id:mailbox.id,address:mailbox.address});
+ expect(failure).toMatchObject({message:'MAILTM_REQUEST_FAILED',mailOperation:'TOKEN',httpStatus:401});expect(JSON.stringify(failure)).not.toContain(mailbox.password);
+});
+test('checkpoint failure stops token acquisition and a foreign acknowledgment cannot enter a checkpoint',async()=>{
+ const fetcher=vi.fn().mockResolvedValue(response({id:mailbox.id,address:mailbox.address},201));
+ await expect(createMailtmClient(fetcher,async()=>{}).create(mailbox,async()=>{throw new Error('PRIVATE_SAVE_FAILED');})).rejects.toThrow('PRIVATE_SAVE_FAILED');expect(fetcher).toHaveBeenCalledTimes(1);
+ const observer=vi.fn();const wrong=vi.fn().mockResolvedValue(response({id:'foreign-account',address:mailbox.address},201));
+ await expect(createMailtmClient(wrong,async()=>{}).create(mailbox,observer)).rejects.toThrow('MAILTM_OWNER_MISMATCH');expect(observer).not.toHaveBeenCalled();expect(wrong).toHaveBeenCalledTimes(1);
+});

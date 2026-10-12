@@ -30,6 +30,21 @@ export function ownFixture(fixture, runId) {
     || typeof fixture.password !== 'string' || fixture.password.length < 20 || (fixture.subject !== null && !uuid(fixture.subject))) return invalid('OWN_FIXTURE_INVALID');
   return fixture;
 }
+export function mailFailureMetadata(error) {
+ const allowed=['TOKEN','ME','ACCOUNT_CREATE','ACCOUNT_DELETE','ACCOUNT_READ','DOMAINS','MESSAGES'];
+ if(!allowed.includes(error?.mailOperation))return {};
+ return {mailOperation:error.mailOperation,...(Number.isInteger(error.httpStatus)&&error.httpStatus>=100&&error.httpStatus<=599?{httpStatus:error.httpStatus}:{})};
+}
+export async function createOwnedMailbox(fixture,runId,mail,preserve) {
+ ownFixture(fixture,runId);
+ if(fixture.mailbox.runId!==runId||fixture.mailboxCreateIntent||fixture.mailbox.id||fixture.signupIntent||fixture.created)return invalid('MAILBOX_CREATION_ALREADY_ATTEMPTED');
+ fixture.mailboxCreateIntent=true;await preserve();
+ fixture.mailbox=await mail.create(fixture.mailbox,async acknowledged=>{
+  if(acknowledged.address!==fixture.mailbox.address||acknowledged.runId!==runId||typeof acknowledged.id!=='string'||!/^[a-zA-Z0-9-]{1,80}$/.test(acknowledged.id))return invalid('MAILBOX_CREATION_ACK_INVALID');
+  fixture.mailbox=acknowledged;fixture.mailboxCreateAck=true;await preserve();
+ });
+ await preserve();
+}
 export function behaviorReport(state, phase, result) {
   const count=value=>Number.isSafeInteger(value)&&value>=0&&value<=256?value:0;
   const phases=['fixtures','behavior','archive','disable','cleanup'];
@@ -113,7 +128,7 @@ async function main(phase){
       for(let index=0;index<2;index++)state.fixtures.push({runId:state.runId,nonce:randomUUID(),subject:null,password:randomBytes(20).toString('base64url')+'aA1!',mailbox:await mailbox.intent(state.runId),created:false});
       await local();await aws('s3api','put-object','--bucket',bucket,'--key','ops01-owned/'+state.runId+'/intent-private.json','--body',statePath,'--server-side-encryption','AES256','--if-none-match','*');
       const browser=await chromium.launch({headless:true});
-      try{for(const fixture of state.fixtures){ownFixture(fixture,state.runId);fixture.mailbox=await mailbox.create(fixture.mailbox);await preserve();fixture.signupIntent=true;await preserve();
+      try{for(const fixture of state.fixtures){await createOwnedMailbox(fixture,state.runId,mailbox,preserve);fixture.signupIntent=true;await preserve();
         const created=await cognito('SignUp',{ClientId:config.participantClientId,Username:fixture.mailbox.address,Password:fixture.password,UserAttributes:[{Name:'email',Value:fixture.mailbox.address}]});if(!uuid(created.UserSub))return invalid('SIGNUP_SUBJECT_INVALID');fixture.subject=created.UserSub;fixture.created=true;state.signup++;await preserve();
         let code;for(let count=0;count<3&&!code;count++)code=await mailbox.code(fixture.mailbox);if(!code)return invalid('VERIFICATION_MAIL_NOT_OBSERVED');
         await cognito('ConfirmSignUp',{ClientId:config.participantClientId,Username:fixture.mailbox.address,ConfirmationCode:code});state.confirmed++;await preserve();
@@ -160,6 +175,6 @@ async function main(phase){
       }
     }
     await local();console.log(JSON.stringify({sourceSha,...behaviorReport(state,phase,'LIVE_'+phase.toUpperCase()+'_PASS')}));
-  }catch(error){if(state)await local();const code=fixtureFailureCode(error);console.error(JSON.stringify({sourceSha,...behaviorReport(state,phase,'BLOCKED'),code}));process.exitCode=1;}
+  }catch(error){if(state)await local();const code=fixtureFailureCode(error);console.error(JSON.stringify({sourceSha,...behaviorReport(state,phase,'BLOCKED'),code,...mailFailureMetadata(error)}));process.exitCode=1;}
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){try{await main(process.argv[2]);}catch{console.error(JSON.stringify({result:'LIVE_SETUP_NOT_VERIFIED'}));process.exitCode=1;}}

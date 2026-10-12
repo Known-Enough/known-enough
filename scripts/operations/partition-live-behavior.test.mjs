@@ -51,3 +51,24 @@ test('fixture failures retain bounded mail-service codes without leaking arbitra
  assert.equal(fixtureFailureCode({safeCode:'COGNITO_SignUp_TooManyRequestsException',message:'private-marker'}),'COGNITO_SignUp_TooManyRequestsException');
  assert.equal(fixtureFailureCode(new Error('private-marker')),'UNCLASSIFIED');
 });
+
+import {createOwnedMailbox,mailFailureMetadata} from './partition-live-behavior.mjs';
+function pendingMailbox(){return {...fixture,mailbox:{runId,address:'keqa-owned@example.invalid',password:'PRIVATE_MAIL_PASSWORD'}};}
+test('creation intent and acknowledged identity persist before a failed token, without signup',async()=>{
+ const value=pendingMailbox(),events=[];const mail={create:async(m,observe)=>{events.push('create');await observe({...m,id:'owned-id'});events.push('token');throw new Error('MAILTM_REQUEST_FAILED');}};
+ await assert.rejects(createOwnedMailbox(value,runId,mail,async()=>events.push(value.mailbox.id?'saved-id':'saved-intent')),/MAILTM_REQUEST_FAILED/);
+ assert.deepEqual(events,['saved-intent','create','saved-id','token']);assert.equal(value.mailbox.id,'owned-id');assert.equal(value.mailboxCreateAck,true);assert.ok(!value.signupIntent);
+ await assert.rejects(createOwnedMailbox(value,runId,mail,async()=>{}),/MAILBOX_CREATION_ALREADY_ATTEMPTED/);
+});
+test('failed intent checkpoint prevents account creation; invalid acknowledgment is not persisted',async()=>{
+ const value=pendingMailbox();let calls=0;await assert.rejects(createOwnedMailbox(value,runId,{create:async()=>calls++},async()=>{throw new Error('SAVE_FAILED');}),/SAVE_FAILED/);assert.equal(calls,0);
+ const other=pendingMailbox();await assert.rejects(createOwnedMailbox(other,runId,{create:async(m,observe)=>observe({...m,address:'foreign@example.invalid',id:'foreign'})},async()=>{}),/MAILBOX_CREATION_ACK_INVALID/);assert.ok(!other.mailbox.id);
+});
+test('a provider failure before acknowledgment stays an unresolved intent',async()=>{
+ const value=pendingMailbox();await assert.rejects(createOwnedMailbox(value,runId,{create:async()=>{throw new Error('MAILTM_REQUEST_FAILED');}},async()=>{}));assert.equal(value.mailboxCreateIntent,true);assert.ok(!value.mailboxCreateAck);assert.ok(!value.mailbox.id);
+});
+test('finite mail failure metadata never contains a path, address or provider text',()=>{
+ assert.deepEqual(mailFailureMetadata({mailOperation:'TOKEN',httpStatus:401,message:'PRIVATE_TOKEN'}),{mailOperation:'TOKEN',httpStatus:401});
+ assert.deepEqual(mailFailureMetadata({mailOperation:'https://private.example',httpStatus:401}),{});
+ assert.deepEqual(mailFailureMetadata({mailOperation:'TOKEN',httpStatus:'PRIVATE_STATUS'}),{mailOperation:'TOKEN'});
+});

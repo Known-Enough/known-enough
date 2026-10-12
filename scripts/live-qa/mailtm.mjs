@@ -9,12 +9,18 @@ export function createMailtmClient(fetcher = globalThis.fetch, pause = ms => new
         if (!/^\/(?:domains|accounts|token|me|messages)(?:\/[a-zA-Z0-9-]{1,80})?(?:\?page=[1-3])?$/.test(path))
             throw new Error('MAILTM_INVALID_PATH');
         await pause(2100);
+        let httpStatus;
+        const mailOperation = path === '/token' ? 'TOKEN' : path === '/me' ? 'ME'
+            : path === '/accounts' ? 'ACCOUNT_CREATE' : path.startsWith('/accounts/')
+                ? method === 'DELETE' ? 'ACCOUNT_DELETE' : 'ACCOUNT_READ'
+                : path.startsWith('/domains') ? 'DOMAINS' : 'MESSAGES';
         try {
             const response = await fetcher(ORIGIN + path, {
                 method, redirect: 'error', signal: globalThis.AbortSignal.timeout(8000),
                 headers: { Accept: 'application/ld+json', ...(body ? { 'Content-Type': 'application/json' } : {}), ...(token ? { Authorization: 'Bearer ' + token } : {}) },
                 ...(body ? { body: JSON.stringify(body) } : {})
             });
+            httpStatus = response.status;
             if (missing && response.status === 404)
                 return null;
             if (conflict && [409, 422].includes(response.status))
@@ -43,7 +49,11 @@ export function createMailtmClient(fetcher = globalThis.fetch, pause = ms => new
             return JSON.parse(Buffer.concat(chunks).toString('utf8'));
         }
         catch {
-            throw new Error('MAILTM_REQUEST_FAILED');
+            const error = new Error('MAILTM_REQUEST_FAILED');
+            error.mailOperation = mailOperation;
+            if (Number.isInteger(httpStatus) && httpStatus >= 100 && httpStatus <= 599)
+                error.httpStatus = httpStatus;
+            throw error;
         }
     }
     async function domain() {
@@ -76,12 +86,14 @@ export function createMailtmClient(fetcher = globalThis.fetch, pause = ms => new
             const own = await identity(mailbox);
             return { ...mailbox, id: own.id, token: own.token };
         },
-        async create(mailbox) {
+        async create(mailbox, onCreated = async () => {}) {
             requireRunId(mailbox.runId);
             const created = await request('/accounts', { method: 'POST', body: { address: mailbox.address, password: mailbox.password }, conflict: true });
-            if (created && (created.address !== mailbox.address || !idValid(created.id)))
+            if (created && (created.address !== mailbox.address || !idValid(created.id) || (mailbox.id && mailbox.id !== created.id)))
                 throw new Error('MAILTM_OWNER_MISMATCH');
-            const own = await identity(mailbox);
+            const acknowledged = created ? { ...mailbox, id: created.id } : mailbox;
+            if (created) await onCreated(acknowledged);
+            const own = await identity(acknowledged);
             if (created && created.id !== own.id)
                 throw new Error('MAILTM_OWNER_MISMATCH');
             return { ...mailbox, id: own.id, token: own.token };
