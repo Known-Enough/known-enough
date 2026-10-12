@@ -37,3 +37,10 @@ test('provider and logging grants are narrow and storage cannot write participan
   const budgetWrite = allows.find(s => String(s.Resource).endsWith('KnownEnoughQaControl') && s.Action.includes('dynamodb:PutItem'));
   assert.deepEqual(budgetWrite.Condition['ForAllValues:StringLike']['dynamodb:LeadingKeys'], ['TOTAL']);
 });
+
+test('terminal cleanup permission belongs to the operator and never the scheduled worker',()=>{
+ const template=jobRuntimeTemplate();
+ const statements=template.Resources.WorkerRole.Properties.Policies[0].PolicyDocument.Statement;
+ assert.ok(!statements.some(s=>s.Action.includes('dynamodb:DeleteItem')));
+ assert.ok(!JSON.stringify(template).includes('OwnTerminalModelJournalCleanup'));
+});

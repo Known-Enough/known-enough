@@ -1,0 +1,76 @@
+name: Publish the exact bounded A journal permission repair package
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: known-enough-lifecycle-installation
+  cancel-in-progress: false
+jobs:
+  package:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && github.actor_id == '143764700'
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      AWS_MAX_ATTEMPTS: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify checked bounded package before own credentials
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
+          python3 -B scripts/operations/jobs-journal-permission-grant.test.py
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubQaRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Store only the checked script; never execute an IAM setup write
+        run: |
+          umask 077
+          python3 -B - <<'PY'
+          import hashlib,json,os,re,subprocess
+          from pathlib import Path
+          identity=subprocess.run(['aws','sts','get-caller-identity','--output','json','--no-cli-pager'],capture_output=True,text=True,timeout=20)
+          assert identity.returncode == 0
+          value=json.loads(identity.stdout)
+          assert value['Account']=='092954139775' and value['Arn'].startswith('arn:aws:sts::092954139775:assumed-role/KnownEnoughGithubQaRelease/')
+          file=Path('scripts/operations/jobs-journal-permission-grant.py')
+          digest=hashlib.sha256(file.read_bytes()).hexdigest()
+          key='ops01-owned/ops03-journal-grant-'+digest+'/grant.py'
+          saved=Path(os.environ['RUNNER_TEMP'],'journal-grant-private-readback.py')
+          read=subprocess.run(['aws','s3api','get-object','--bucket','known-enough-qa-artifacts-092954139775','--key',key,str(saved),'--region','us-east-1','--no-cli-pager'],capture_output=True,text=True,timeout=30)
+          if read.returncode == 0:
+              assert hashlib.sha256(saved.read_bytes()).hexdigest()==digest
+              writes=0
+          else:
+              assert '(NoSuchKey)' in read.stderr
+              put=subprocess.run(['aws','s3api','put-object','--bucket','known-enough-qa-artifacts-092954139775','--key',key,'--body',str(file),'--server-side-encryption','AES256','--if-none-match','*','--region','us-east-1','--no-cli-pager'],capture_output=True,text=True,timeout=30)
+              if put.returncode:
+                  raise SystemExit('JOURNAL_GRANT_UPLOAD_UNVERIFIED')
+              check=subprocess.run(['aws','s3api','get-object','--bucket','known-enough-qa-artifacts-092954139775','--key',key,str(saved),'--region','us-east-1','--no-cli-pager'],capture_output=True,text=True,timeout=30)
+              assert check.returncode == 0 and hashlib.sha256(saved.read_bytes()).hexdigest()==digest
+              writes=1
+          report={'result':'JOURNAL_GRANT_PACKAGE_READBACK_PASS','sourceSha':os.environ['GITHUB_SHA'],'scriptSha256':digest,'privateKey':key,'artifactWrites':writes,'iamWrites':0,'providerCalls':0}
+          Path(os.environ['RUNNER_TEMP'],'journal-grant-package-report.json').write_text(json.dumps(report)+'\n')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: operations-jobs-journal-grant-package
+          path: ${{ runner.temp }}/journal-grant-package-report.json
+          if-no-files-found: warn
+          retention-days: 30

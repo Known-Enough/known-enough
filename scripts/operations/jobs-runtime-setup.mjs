@@ -1,4 +1,4 @@
-import { accessProfiles, ACCESS_TRUST } from './access-setup.mjs';
+import { accessProfiles, ACCESS_TRUST, TERMINAL_JOB_CLEANUP_SID } from './access-setup.mjs';
 export const JOB_RUNTIME_STACK = 'KnownEnoughModelJobRuntime';
 const account = '092954139775', region = 'us-east-1';
 const functionArn = `arn:aws:lambda:${region}:${account}:function:known-enough-stage-model-jobs`;
@@ -7,6 +7,7 @@ const deny = { Effect: 'Deny', Action: ['iam:*', 'sts:AssumeRole', 'dynamodb:Del
 /** New isolated application runner; existing storage, primary flags, counters and roles are not replaced. */
 export function jobRuntimeTemplate() {
   const worker = accessProfiles().jobs;
+  worker.Statement = worker.Statement.filter(statement => statement.Sid !== TERMINAL_JOB_CLEANUP_SID);
   worker.Statement.push({ Sid: 'VerifyActualProviderLogging', Effect: 'Allow', Action: ['bedrock:GetModelInvocationLoggingConfiguration'], Resource: '*',
     Condition: { StringEquals: { 'aws:RequestedRegion': region } } });
   worker.Statement.push({ Sid: 'OnlyFiniteWorkerLogs', Effect: 'Allow', Action: ['logs:CreateLogStream', 'logs:PutLogEvents'],

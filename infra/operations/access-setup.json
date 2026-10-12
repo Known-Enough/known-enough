@@ -1362,6 +1362,32 @@
               ]
             },
             {
+              "Sid": "OwnTerminalModelJournalCleanup",
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:DeleteItem"
+              ],
+              "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+              "Condition": {
+                "ForAllValues:StringLike": {
+                  "dynamodb:LeadingKeys": [
+                    "MODELJOB#*"
+                  ]
+                },
+                "Null": {
+                  "dynamodb:LeadingKeys": "false"
+                },
+                "StringEqualsIfExists": {
+                  "dynamodb:ReturnValues": "NONE"
+                },
+                "ForAnyValue:StringEquals": {
+                  "dynamodb:EnclosingOperation": [
+                    "TransactWriteItems"
+                  ]
+                }
+              }
+            },
+            {
               "Sid": "NoPrivilegeExpansionOrResourceRemoval",
               "Effect": "Deny",
               "Action": [
@@ -1808,6 +1834,32 @@
                     "bedrock:InvokeModel"
                   ],
                   "Resource": "arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-lite-v1:0"
+                },
+                {
+                  "Sid": "OwnTerminalModelJournalCleanup",
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:DeleteItem"
+                  ],
+                  "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughOperationsJournal",
+                  "Condition": {
+                    "ForAllValues:StringLike": {
+                      "dynamodb:LeadingKeys": [
+                        "MODELJOB#*"
+                      ]
+                    },
+                    "Null": {
+                      "dynamodb:LeadingKeys": "false"
+                    },
+                    "StringEqualsIfExists": {
+                      "dynamodb:ReturnValues": "NONE"
+                    },
+                    "ForAnyValue:StringEquals": {
+                      "dynamodb:EnclosingOperation": [
+                        "TransactWriteItems"
+                      ]
+                    }
+                  }
                 },
                 {
                   "Sid": "NoPrivilegeExpansionOrResourceRemoval",

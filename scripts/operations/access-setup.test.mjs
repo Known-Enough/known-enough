@@ -77,3 +77,14 @@ test('inspector addition only reads these five roles/boundaries and the exact ne
   assert.deepEqual(logging.Action, ['bedrock:GetModelInvocationLoggingConfiguration']);
   assert.deepEqual(logging.Condition, { StringEquals: { 'aws:RequestedRegion': 'us-east-1' } });
 });
+
+test('only own job operator can delete model journal keys inside a transaction; boundary retains the same narrow ceiling',()=>{
+ const profiles=accessProfiles(),template=accessTemplate();
+ const grant=profiles.jobs.Statement.find(s=>s.Sid==='OwnTerminalModelJournalCleanup');
+ assert.deepEqual(grant.Action,['dynamodb:DeleteItem']);assert.ok(grant.Resource.endsWith(':table/KnownEnoughOperationsJournal'));
+ assert.deepEqual(grant.Condition['ForAllValues:StringLike']['dynamodb:LeadingKeys'],['MODELJOB#*']);
+ assert.deepEqual(grant.Condition['ForAnyValue:StringEquals']['dynamodb:EnclosingOperation'],['TransactWriteItems']);
+ const boundary=template.Resources.JobsBoundary.Properties.PolicyDocument;
+ assert.deepEqual(boundary.Statement.filter(s=>s.Action.includes('dynamodb:DeleteItem')),[grant]);
+ for(const [name,profile] of Object.entries(profiles))if(name!=='jobs')assert.ok(!profile.Statement.some(s=>s.Action.includes('dynamodb:DeleteItem')&&[s.Resource].flat().some(r=>r.endsWith(':table/KnownEnoughOperationsJournal'))&&s.Condition?.['ForAllValues:StringLike']?.['dynamodb:LeadingKeys']?.includes('MODELJOB#*')));
+});

@@ -27,6 +27,13 @@ export function attachableProfile(profile) {
   }
   return value;
 }
+export const TERMINAL_JOB_CLEANUP_SID = 'OwnTerminalModelJournalCleanup';
+export function terminalJobCleanupStatement() {
+  return { Sid: TERMINAL_JOB_CLEANUP_SID, Effect: 'Allow', Action: ['dynamodb:DeleteItem'], Resource: r.journal,
+    Condition: { 'ForAllValues:StringLike': { 'dynamodb:LeadingKeys': ['MODELJOB#*'] },
+      Null: { 'dynamodb:LeadingKeys': 'false' }, StringEqualsIfExists: { 'dynamodb:ReturnValues': 'NONE' },
+      'ForAnyValue:StringEquals': { 'dynamodb:EnclosingOperation': ['TransactWriteItems'] } } };
+}
 export function accessProfiles() {
   const partitions = partitionPermissionProfiles(); const lifecycle = retentionPermissionProfiles();
   const policies = { migration: partitions.migration, archive: partitions.archive,
@@ -35,6 +42,7 @@ export function accessProfiles() {
   // The real job provider is Nova Lite; no Bedrock administration or unrelated model grant.
   result.jobs.Statement.push({ Sid: 'ExactExistingNovaLiteProvider', Effect: 'Allow', Action: ['bedrock:InvokeModel'],
     Resource: `arn:aws:bedrock:${r.region}::foundation-model/amazon.nova-lite-v1:0` });
+  result.jobs.Statement.push(terminalJobCleanupStatement());
   for (const policy of Object.values(result)) policy.Statement.push(structuredClone(deny));
   result.ownerRuntime = attachableProfile(lifecycle.ownerService);
   // The installed exact participant policy already carries these six activation statements.
@@ -45,12 +53,15 @@ export function accessProfiles() {
 }
 function boundary(policy) {
   // Resource ceiling plus the exact inline key/transaction profile. No worker can edit either document.
-  const resources = [...new Set(policy.Statement.filter(s => s.Effect === 'Allow').flatMap(s => [s.Resource].flat()))];
-  const actions = [...new Set(policy.Statement.filter(s => s.Effect === 'Allow').flatMap(s => s.Action))];
+  // Preserve the old service ceilings. Cleanup gets its own key/transaction ceiling, never a broad DeleteItem action.
+  const cleanup = policy.Statement.find(s => s.Sid === TERMINAL_JOB_CLEANUP_SID);
+  const base = policy.Statement.filter(s => s.Sid !== TERMINAL_JOB_CLEANUP_SID);
+  const resources = [...new Set(base.filter(s => s.Effect === 'Allow').flatMap(s => [s.Resource].flat()))];
+  const actions = [...new Set(base.filter(s => s.Effect === 'Allow').flatMap(s => s.Action))];
   const services = [...new Set(actions.map(action => action.split(':')[0]))];
   return { Version: '2012-10-17', Statement: [...services.map(service => ({ Effect: 'Allow',
     Action: actions.filter(action => action.startsWith(`${service}:`)),
-    Resource: resources.filter(resource => resource.startsWith(`arn:aws:${service}:`)) })), structuredClone(deny)] };
+    Resource: resources.filter(resource => resource.startsWith(`arn:aws:${service}:`)) })), ...(cleanup ? [structuredClone(cleanup)] : []), structuredClone(deny)] };
 }
 export function accessTemplate() {
   const profiles = accessProfiles(); const Resources = {};
