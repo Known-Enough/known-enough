@@ -10,7 +10,7 @@ on:
         type: string
       delivery_mode:
         type: choice
-        options: [scheduled, native-race]
+        options: [scheduled, native-race, native-stale-private, native-stale-admission, native-stale-retention, native-source-mismatch]
         default: scheduled
       worker_sha:
         required: true
@@ -173,7 +173,7 @@ jobs:
           retry-max-attempts: 1
           unset-current-credentials: true
       - name: Verify exact installed worker and enable one scheduled owned test
-        if: inputs.delivery_mode != 'native-race'
+        if: inputs.delivery_mode == 'scheduled'
         run: |
           umask 077
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
@@ -201,6 +201,45 @@ jobs:
           allowed-account-ids: '092954139775'
           retry-max-attempts: 1
           unset-current-credentials: true
+      - name: Withdraw owned synthetic admission before native dispatch
+        if: inputs.delivery_mode == 'native-stale-admission'
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/partition-live-behavior.mjs disable > "$RUNNER_TEMP/owned-jobs-precall-admission-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: inputs.delivery_mode == 'native-stale-retention'
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubRetentionPolicy
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Disable the owned synthetic retention policy before native dispatch
+        if: inputs.delivery_mode == 'native-stale-retention'
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/jobs-owned-proof.mjs disable-policy > "$RUNNER_TEMP/owned-jobs-precall-retention-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: startsWith(inputs.delivery_mode, 'native-stale-') || inputs.delivery_mode == 'native-source-mismatch'
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobOperations
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Verify native stale context denies dispatch and preserves exact totals
+        if: startsWith(inputs.delivery_mode, 'native-stale-') || inputs.delivery_mode == 'native-source-mismatch'
+        env:
+          GUARD_MODE: ${{ inputs.delivery_mode }}
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          git diff --exit-code "$PACKAGE_SOURCE" -- apps packages
+          node --experimental-transform-types scripts/operations/jobs-owned-proof.mjs native-guard > "$RUNNER_TEMP/owned-jobs-native-guard-report.json" 2>&1
       - name: Race two independent native workers and restart terminal delivery
         if: inputs.delivery_mode == 'native-race'
         run: |
@@ -209,6 +248,7 @@ jobs:
           git diff --exit-code "$PACKAGE_SOURCE" -- apps packages
           node --experimental-transform-types scripts/operations/jobs-owned-proof.mjs native-race > "$RUNNER_TEMP/owned-jobs-native-race-report.json" 2>&1
       - name: Observe actual provider result and cumulative usage
+        if: inputs.delivery_mode == 'scheduled' || inputs.delivery_mode == 'native-race'
         run: |
           umask 077
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"

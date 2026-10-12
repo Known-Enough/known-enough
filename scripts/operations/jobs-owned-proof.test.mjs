@@ -123,3 +123,34 @@ test('a foreign race error, no applied result or terminal re-execution never bec
  count=0;
  await assert.rejects(nativeWorkerRace(()=>({process:async()=>++count===1||count===3?'APPLIED':'SKIPPED'}),{}),/PROOF_TERMINAL_REDELIVERY_CHANGED/);
 });
+
+import { preCallGuardResult, disabledPolicyPlan } from './jobs-owned-proof.mjs';
+import { syntheticProofPolicy } from './lifecycle-owned-behavior.mjs';
+test('negative managed proof rejects any dispatch, charge, usage or undrained delivery',()=>{
+ const totals={runs:65,reservedTokens:100,reservedCostMicros:200,messages:60};
+ const job={phase:'DEAD',reason:'STALE',attempts:0,reservedTokens:0,reservedCostMicros:0,usage:null};
+ const empty={active:[],slots:[]};assert.equal(preCallGuardResult(job,totals,totals,empty).totalsUnchanged,true);
+ for(const changed of [{...job,phase:'READY'},{...job,reason:'PROVIDER_UNCONFIRMED'},{...job,attempts:1},{...job,reservedTokens:1},{...job,reservedCostMicros:1},{...job,usage:{inputTokens:0,outputTokens:0}}])
+  assert.throws(()=>preCallGuardResult(changed,totals,totals,empty),/PROOF_GUARD_DISPATCHED_OR_NOT_DEAD/);
+ assert.throws(()=>preCallGuardResult(job,totals,{...totals,reservedTokens:101},empty),/PROOF_GUARD_TOTAL_CHANGED/);
+ assert.throws(()=>preCallGuardResult(job,totals,totals,{active:['owned'],slots:[]}),/PROOF_GUARD_OUTBOX_NOT_EMPTY/);
+ assert.throws(()=>preCallGuardResult(job,totals,totals,{active:[],slots:[{}]}),/PROOF_GUARD_OUTBOX_NOT_EMPTY/);
+});
+test('policy cleanup reconciles only its exact saved disable intent without another write',()=>{
+ const policy=syntheticProofPolicy(null),prior={PK:{S:'OPERATIONS#RETENTION'},SK:{S:'STATE'},revision:{N:String(policy.revision)},payload:{S:JSON.stringify(policy)}};
+ const first=disabledPolicyPlan(prior,prior);assert.equal(first.writeRequired,true);
+ assert.equal(JSON.parse(first.item.payload.S).enabled,false);
+ assert.equal(JSON.parse(first.item.payload.S).revision,policy.revision+1);
+ assert.deepEqual(disabledPolicyPlan(first.item,prior,first.item),{item:first.item,writeRequired:false});
+ const foreign={...first.item,payload:{S:JSON.stringify({...JSON.parse(first.item.payload.S),revision:policy.revision+2})}};
+ assert.throws(()=>disabledPolicyPlan(foreign,prior,first.item),/PROOF_POLICY_CLEANUP_CONFLICT/);
+});
+
+import { ownedRevisionDraft } from './jobs-owned-proof.mjs';
+test('new unconfirmed input after confirmation uses current owner/context with an erased prior draft',()=>{
+ const owner={draft:null,draftVersion:null,ownerParticipantId:'actual-owner',ownerVersion:2,publicSnapshot:{frame:{decisionId:'actual-decision',semanticVersion:3,contextToken:'c'.repeat(64)}}};
+ const draft=ownedRevisionDraft(owner,{nonce},0);
+ assert.equal(draft.draftVersion,1);assert.equal(draft.ownerVersion,2);assert.equal(draft.semanticVersion,3);
+ assert.equal(draft.ownerParticipantId,'actual-owner');assert.equal(draft.decisionId,'actual-decision');assert.deepEqual(draft.proposedConstraints,[]);
+ assert.throws(()=>ownedRevisionDraft({...owner,ownerVersion:-1},{nonce},0));
+});

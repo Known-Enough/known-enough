@@ -21,7 +21,7 @@ import { ownFixture, jsonResponse } from './partition-live-behavior.mjs';
 import { verifySource } from './verify.mjs';
 import { createManagedDurableNegotiationWorker } from '../../apps/api/src/durable-model-worker.ts';
 import { genericCandidates } from '../../packages/adapters/src/generic-candidates.ts';
-export const PROOF_ROLES=Object.freeze({preserve:'KnownEnoughGithubQaRelease',prepare:'KnownEnoughGithubPartitionMigration',policy:'KnownEnoughGithubRetentionPolicy',consent:'KnownEnoughGithubModelJobOperations',activate:'KnownEnoughGithubModelJobOperations',enqueue:'KnownEnoughGithubModelJobOperations',observe:'KnownEnoughGithubModelJobOperations','native-race':'KnownEnoughGithubModelJobOperations','disable-control':'KnownEnoughGithubModelJobOperations','disable-policy':'KnownEnoughGithubRetentionPolicy'});
+export const PROOF_ROLES=Object.freeze({preserve:'KnownEnoughGithubQaRelease',prepare:'KnownEnoughGithubPartitionMigration',policy:'KnownEnoughGithubRetentionPolicy',consent:'KnownEnoughGithubModelJobOperations',activate:'KnownEnoughGithubModelJobOperations',enqueue:'KnownEnoughGithubModelJobOperations',observe:'KnownEnoughGithubModelJobOperations','native-race':'KnownEnoughGithubModelJobOperations','native-guard':'KnownEnoughGithubModelJobOperations','disable-control':'KnownEnoughGithubModelJobOperations','disable-policy':'KnownEnoughGithubRetentionPolicy'});
 const execute=promisify(execFile), table='KnownEnoughOperationsJournal';
 const key=PK=>({PK:{S:PK},SK:{S:'STATE'}}),controlKey=key('OPERATIONS#MODEL_JOBS'),policyKey=key('OPERATIONS#RETENTION');
 const fail=code=>{throw Object.assign(new Error(code),{safeCode:code});};
@@ -62,6 +62,24 @@ export function ownedPublicDraft(group,accounts,nonce){
  variables:[{id:'activity',label:'Activity',type:'ENUM',required:true,visibility:'PUBLIC',options:[{id:'first',label:'First'},{id:'second',label:'Second'}]}],rules:[]},clarificationQuestions:[],createdDecisionId:null});
 }
 export function enqueueRequest(decisionId,owner){return RequestNegotiation.parse({schemaVersion:KE.KE_SCHEMA_VERSION,type:'REQUEST_NEGOTIATION',requestId:randomUUID(),decisionId,expected:{contextToken:owner.publicSnapshot.frame.contextToken,semanticVersion:owner.publicSnapshot.frame.semanticVersion,controlVersion:owner.controlVersion}});}
+export function ownedRevisionDraft(owner, fixture, now) {
+ return KE.AIConstraintDraft.parse({schemaVersion:KE.KE_SCHEMA_VERSION,draftId:'revision-'+fixture.nonce,draftVersion:(owner.draftVersion??0)+1,
+  decisionId:owner.publicSnapshot.frame.decisionId,ownerParticipantId:owner.ownerParticipantId,ownerVersion:owner.ownerVersion,
+  semanticVersion:owner.publicSnapshot.frame.semanticVersion,contextToken:owner.publicSnapshot.frame.contextToken,
+  sourceSummary:'Owned synthetic unconfirmed input revision; no interpreter model claim.',proposedConstraints:[],unsupportedConditions:[],createdAt:new Date(now).toISOString()});
+}
+export function preCallGuardResult(job, before, after, control) {
+ if(job.phase!=='DEAD'||!['STALE','DISABLED'].includes(job.reason)||job.attempts!==0||job.reservedTokens!==0||job.reservedCostMicros!==0||job.usage!==null)return fail('PROOF_GUARD_DISPATCHED_OR_NOT_DEAD');
+ if(!isDeepStrictEqual(TotalsSchema.parse(before),TotalsSchema.parse(after)))return fail('PROOF_GUARD_TOTAL_CHANGED');
+ if(control.active.length||control.slots.length)return fail('PROOF_GUARD_OUTBOX_NOT_EMPTY');
+ return {phase:job.phase,reason:job.reason,attempts:0,reservedTokens:0,reservedCostMicros:0,usage:null,totalsUnchanged:true,emptyOutbox:true};
+}
+export function disabledPolicyPlan(prior, enabledIntent, disabledIntent) {
+ if(disabledIntent&&isDeepStrictEqual(prior,disabledIntent))return {item:disabledIntent,writeRequired:false};
+ if(!isDeepStrictEqual(prior,enabledIntent))return fail('PROOF_POLICY_CLEANUP_CONFLICT');
+ const policy=RetentionPolicy.parse(JSON.parse(prior.payload.S));
+ return {item:envelope(policyKey,RetentionPolicy.parse({...policy,revision:policy.revision+1,enabled:false})),writeRequired:true};
+}
 export function exactJobReservation(before, after, job) {
  const expected=TotalsSchema.parse({...TotalsSchema.parse(before),reservedTokens:before.reservedTokens+job.reservedTokens,reservedCostMicros:before.reservedCostMicros+job.reservedCostMicros});
  if(!isDeepStrictEqual(TotalsSchema.parse(after),expected))return fail('PROOF_USAGE_NOT_EXACT');
@@ -162,6 +180,34 @@ async function main(phase){
   }else if(phase==='enqueue'){
    const fixture=fixtures.fixtures[0],owner=await request(fixture,'/decisions/'+state.decisionId+'/me');const body=enqueueRequest(state.decisionId,owner);
    state.enqueueBody=body;await save();const first=await request(fixture,'/decisions/'+state.decisionId+'/commands','POST',body);state.jobId=first.job?.jobId;await save();const second=await request(fixture,'/decisions/'+state.decisionId+'/commands','POST',body);if(!state.jobId||second.job?.jobId!==state.jobId)return fail('PROOF_DUPLICATE_JOB_MISMATCH');state.duplicateReceipts=2;await save();
+  }else if(phase==='native-guard'){
+   const mode=process.env.GUARD_MODE;
+   if(!['native-stale-private','native-stale-admission','native-stale-retention','native-source-mismatch'].includes(mode)||!state.jobId||state.signedPrivateConfirmations!==2)return fail('PROOF_GUARD_SETUP_INVALID');
+   const before=TotalsSchema.parse(JSON.parse((await get('KnownEnoughQaControl',key('TOTAL'))).payload.S));
+   if(!isDeepStrictEqual(before,state.totalsBefore))return fail('PROOF_GUARD_BASELINE_CHANGED');
+   const make=source=>createManagedDurableNegotiationWorker({verifiedTarget:{account:'092954139775',region:'us-east-1'},sourceSha:source,
+    approval:{paidCallsApproved:true,invocationLoggingDisabled:true,retentionReviewed:true},publicCandidates:genericCandidates});
+   if(mode==='native-stale-private'){
+    const fixture=fixtures.fixtures[0],principal=await authenticate('Bearer '+fixture.accessToken),owner=await request(fixture,'/decisions/'+state.decisionId+'/me');
+    const driver=managed(),repository=createPartitionDecisionRepository({decisionArn:driver.decisionArn,partitionArn:driver.partitionArn,transport:{send:(cmd,io)=>driver.decisions.send(ownedDraftGuardPut(cmd,state.decisionId,driver.decisionArn),io)},groups:scopedGetGroups(driver.groups)});
+    const draft=ownedRevisionDraft(owner,fixture,Date.now());
+    const app=new KnownEnoughApplication({repository:repository.forParticipant(principal),clock:{now:()=>new Date().toISOString()},ids:{next:()=>randomUUID()}});
+    await app.storeConstraintDraft({kind:'service',subject:'owned-fixture-revision',roomIds:[state.decisionId]},draft,{principal,controlVersion:owner.controlVersion,expiresAt:Date.now()+30000});
+    state.privateRevisionStored=true;await save();
+   }
+   if(mode==='native-source-mismatch'){
+    let rejected=false;try{await make('f'.repeat(40)).process({jobId:state.jobId});}catch(error){if(!(error instanceof DurableJobError)||error.code!=='STALE')throw error;rejected=true;}
+    if(!rejected)return fail('PROOF_FOREIGN_SOURCE_NOT_REJECTED');
+    state.foreignSourceRejected=true;const prior=await get(table,controlKey),control=ControlSchema.parse(JSON.parse(prior.payload.S));
+    const next=envelope(controlKey,ControlSchema.parse({...control,revision:control.revision+1,enabled:false}));state.controlIntent=next;await save();
+    await transact([{Put:{TableName:table,Item:next,...cas(prior)}}]);if(!isDeepStrictEqual(await get(table,controlKey),next))return fail('PROOF_CONTROL_UNKNOWN');
+   }
+   const outcome=await make(packageSource).process({jobId:state.jobId});if(outcome!=='DEAD')return fail('PROOF_GUARD_NOT_DEAD');
+   const job=JobSchema.parse(JSON.parse((await get(table,key('MODELJOB#'+state.jobId))).payload.S));
+   const after=TotalsSchema.parse(JSON.parse((await get('KnownEnoughQaControl',key('TOTAL'))).payload.S)),control=ControlSchema.parse(JSON.parse((await get(table,controlKey)).payload.S));
+   state.nativeGuard={mode,...preCallGuardResult(job,before,after,control),...(state.foreignSourceRejected?{foreignSourceRejected:true}:{}),...(state.privateRevisionStored?{privateRevisionStored:true}:{})};await save();
+   if(await make(packageSource).process({jobId:state.jobId})!=='SKIPPED')return fail('PROOF_GUARD_TERMINAL_REDELIVERY_CHANGED');
+   state.nativeGuard.terminalRestart='SKIPPED';await save();
   }else if(phase==='native-race'){
    if(!state.jobId||state.signedPrivateConfirmations!==2)return fail('PROOF_NATIVE_RACE_NOT_CONSENTED');
    const logging=JSON.parse(await readFile(join(process.env.RUNNER_TEMP,'model-job-logging-report.json'),'utf8'));
@@ -185,9 +231,9 @@ async function main(phase){
    const snapshot=KE.PublicDecisionSnapshot.parse(await request(fixtures.fixtures[0],'/decisions/'+state.decisionId+'/public'));if(snapshot.status!=='PROPOSED'||!snapshot.currentProposal)return fail('PROOF_RESULT_NOT_PUBLISHED');state.terminalSuccesses=1;
    state.totalsAfter=TotalsSchema.parse(JSON.parse((await get('KnownEnoughQaControl',key('TOTAL'))).payload.S));exactJobReservation(state.totalsBefore,state.totalsAfter,job);await save();
   }else if(phase==='disable-policy'){
-   if(state.policyIntent){const prior=await get(table,policyKey);if(!isDeepStrictEqual(prior,state.policyIntent))return fail('PROOF_POLICY_CLEANUP_CONFLICT');const policy=RetentionPolicy.parse(JSON.parse(prior.payload.S));const next=envelope(policyKey,RetentionPolicy.parse({...policy,revision:policy.revision+1,enabled:false}));await transact([{Put:{TableName:table,Item:next,...cas(prior)}}]);if(!isDeepStrictEqual(await get(table,policyKey),next))return fail('PROOF_POLICY_DISABLE_UNKNOWN');}
+   if(state.policyIntent){const prior=await get(table,policyKey),plan=disabledPolicyPlan(prior,state.policyIntent,state.policyDisabledIntent);state.policyDisabledIntent=plan.item;await save();if(plan.writeRequired)await transact([{Put:{TableName:table,Item:plan.item,...cas(prior)}}]);if(!isDeepStrictEqual(await get(table,policyKey),plan.item))return fail('PROOF_POLICY_DISABLE_UNKNOWN');}
   }
-  const report={...proofReport(sourceSha,phase,state,'OWNED_JOB_PHASE_PASS'),...(phase==='observe'?{actualJob:state.actualJob,totalsBefore:state.totalsBefore,totalsAfter:state.totalsAfter}:{}),...(state.nativeRace?{nativeRace:state.nativeRace}:{})};console.log(JSON.stringify(report));
+  const report={...proofReport(sourceSha,phase,state,'OWNED_JOB_PHASE_PASS'),...(phase==='observe'?{actualJob:state.actualJob,totalsBefore:state.totalsBefore,totalsAfter:state.totalsAfter}:{}),...(state.nativeRace?{nativeRace:state.nativeRace}:{}),...(state.nativeGuard?{nativeGuard:state.nativeGuard}:{})};console.log(JSON.stringify(report));
  }catch(error){await save();const code=error.safeCode??awsFailure(error)??'OWNED_JOB_UNVERIFIED';console.log(JSON.stringify({...proofReport(sourceSha,phase,state,'OWNED_JOB_PHASE_BLOCKED',code),...awsDeniedDetails(error),...(state.actualJob?{actualJob:state.actualJob}:{})}));process.exitCode=1;}
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
