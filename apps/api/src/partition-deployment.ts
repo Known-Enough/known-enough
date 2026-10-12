@@ -40,7 +40,7 @@ function version(value: unknown): value is string {
  * A verified operator packages private inputs and the independent release record.
  * Existing participant composition remains inactive until a separate deployment selects it.
  */
-export function createPartitionDeploymentHandler(configurationBytes: Buffer, manifestBytes: Buffer,
+export function partitionDeploymentOptions(configurationBytes: Buffer, manifestBytes: Buffer,
   release: PartitionDeploymentBinding, draftArchitect?: PartitionRuntimeOptions['draftArchitect'], lifecycle?: PartitionRuntimeOptions['lifecycle'], jobs?: PartitionRuntimeOptions['jobs']) {
   try {
     const anchor = record(release, ['sourceSha', 'configurationHash', 'manifestHash', 'manifestVersion', 'sourceRevision', 'sourceHash']);
@@ -87,6 +87,12 @@ export function createPartitionDeploymentHandler(configurationBytes: Buffer, man
       ...(draftArchitect === undefined ? {} : { draftArchitect }),
       ...(jobs === undefined ? {} : { jobs: { sourceSha: jobs.sourceSha } }),
       ...(lifecycle === undefined ? {} : { lifecycle: { sourceSha: lifecycle.sourceSha, signingKeyBase64: lifecycle.signingKeyBase64 } }) };
-    return createPartitionLambdaHandler(options);
+    return options;
   } catch { return bad(); }
+}
+
+export function createPartitionDeploymentHandler(configurationBytes: Buffer, manifestBytes: Buffer,
+  release: PartitionDeploymentBinding, draftArchitect?: PartitionRuntimeOptions['draftArchitect'], lifecycle?: PartitionRuntimeOptions['lifecycle'], jobs?: PartitionRuntimeOptions['jobs']) {
+  try { return createPartitionLambdaHandler(partitionDeploymentOptions(configurationBytes, manifestBytes, release, draftArchitect, lifecycle, jobs)); }
+  catch { return bad(); }
 }

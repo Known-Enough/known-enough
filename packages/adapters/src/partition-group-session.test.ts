@@ -982,3 +982,34 @@ it('display room identity is checked before storage and registered pending accou
     value: { subject: 'screen', emailHash: 'a'.repeat(64), displayName: 'Screen', status: 'PENDING', version: 1 } });
   await expect(fence.assertCurrent()).rejects.toThrow('STALE_CONTEXT');
 });
+
+it('pending owners persist private profile with CAS; foreign/display/status edits are denied and public groups exclude bio', async () => {
+  const f = fixture(); const own = f.get('ACCOUNT#iris/STATE');
+  own.value.status = 'PENDING';
+  const session = f.session();
+  const before = await session.ownProfile(participant());
+  const result = await session.updateProfile(participant(), { version: before.version, displayName: '<script>my name</script>', description: 'ZZ_PRIVATE_BIO_CANARY' });
+  expect(result).toMatchObject({ status: 'PENDING', description: 'ZZ_PRIVATE_BIO_CANARY' });
+  expect(await f.session().ownProfile(participant())).toEqual(result);
+  expect((await f.session().ownProfile(participant('omar'))).description).toBe('');
+  await expect(session.updateProfile(participant(), { version: before.version, displayName: 'stale', description: '' })).rejects.toThrow('STALE_CONTEXT');
+  await expect(session.updateProfile(participant(), { version: result.version, displayName: 'bad', description: '', status: 'APPROVED' })).rejects.toThrow('INVALID_COMMAND');
+  await expect(session.ownProfile({ kind: 'display', subject: 'iris', roomId: 'decision' })).rejects.toThrow('FORBIDDEN');
+  f.get('ACCOUNT#iris/STATE').value.status = 'APPROVED';
+  expect(JSON.stringify(await session.snapshot(participant(), 'garden'))).not.toContain('ZZ_PRIVATE_BIO_CANARY');
+  f.get('ACCOUNT#iris/STATE').value.status = 'DISABLED'; await expect(session.ownProfile(participant())).rejects.toThrow('FORBIDDEN');
+});
+
+it('trusted confirmation registration persists before login, duplicate delivery preserves status and erased identities do not resurrect', async () => {
+  const f = fixture('i'.repeat(64)), session = f.session();
+  const who = { kind: 'participant' as const, subject: 'confirmed-new' };
+  const verified = { subject: who.subject, email: 'confirmed-new@example.invalid', verified: true, username: 'new-login' };
+  expect(await session.register(who, verified, { displayName: 'New member' })).toMatchObject({ status: 'PENDING', version: 1 });
+  await expect(session.create(who, { name: 'no auto membership', idempotencyKey: 'create' })).rejects.toThrow('FORBIDDEN');
+  const row = f.get('ACCOUNT#confirmed-new/STATE');
+  row.value.status = 'APPROVED'; row.value.version = 2;
+  expect(await session.register(who, verified, { displayName: 'should not reset' })).toMatchObject({ status: 'APPROVED', version: 2, displayName: 'New member' });
+  const stored = f.get('ACCOUNT#confirmed-new/STATE'); stored.value.status = 'DISABLED'; stored.value.emailHash = '0'.repeat(64); stored.value.displayName = 'Erased account'; delete stored.value.profile;
+  await expect(session.register(who, verified, { displayName: 'resurrection' })).rejects.toThrow('FORBIDDEN');
+  expect(f.get('ACCOUNT#confirmed-new/STATE').value).toMatchObject({ status: 'DISABLED', displayName: 'Erased account' });
+});

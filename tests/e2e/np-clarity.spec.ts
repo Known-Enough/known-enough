@@ -38,7 +38,7 @@ test('mobile keyboard entry, pending/disabled copy and private questions preserv
     await entry.screenshot({ path: '/tmp/np03-mobile-signin.png', fullPage: true });
     const pending = await browser.newContext({ viewport: { width: 390, height: 844 } }); contexts.push(pending); await connect(pending, api, 'newbie');
     await api.call('newbie', '/account/register', { displayName: 'New Person' }); const pendingPage = await pending.newPage(); await pendingPage.goto(url);
-    await expect(pendingPage.getByText('Access request pending.', { exact: false })).toBeVisible();
+    await expect(pendingPage.getByText('Your account is waiting for approval.', { exact: false })).toBeVisible();
     await expect(pendingPage.getByRole('button', { name: 'Create group', exact: true })).toHaveCount(0);
     const h = await freshGroup(api); await h.ready(); await h.generate();
     const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' }); contexts.push(mobile); await connect(mobile, api, 'iris');

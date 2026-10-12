@@ -1054,3 +1054,16 @@ it('participant-only default cannot be changed into a display endpoint through l
   expect((await a.get('/decisions/decision/public')).status).toBe(403);
   expect(f.writes).toEqual([]); expect(f.reads).toEqual([]);
 });
+
+it('profile HTTP is signed owner-only, permits pending metadata without group admission and rejects forged status/version', async () => {
+  const f = await fixture(); f.change('ACCOUNT#iris', value => { value.status = 'PENDING'; });
+  const a = await api(f); const initial = await a.get('/account/profile'); expect(initial.status).toBe(200);
+  const profile = (await initial.json()).profile;
+  const changed = await a.post('/account/profile', { version: profile.version, displayName: '<img src=x onerror=alert(1)>', description: 'ZZ_HTTP_PRIVATE_BIO' });
+  expect(changed.status).toBe(200); const stored = (await changed.json()).profile;
+  expect(stored).toMatchObject({ status: 'PENDING', description: 'ZZ_HTTP_PRIVATE_BIO' });
+  expect((await a.post('/account/profile', { version: profile.version, displayName: 'stale', description: '' })).status).toBe(409);
+  expect((await a.post('/account/profile', { version: stored.version, displayName: 'bad', description: '', subject: 'omar', status: 'APPROVED' })).status).toBe(422);
+  const image = await a.post('/account/profile/image', { version: stored.version, bytesBase64: Buffer.from('<svg/>').toString('base64') }); expect(image.status).toBe(422);
+  expect((await a.post('/groups', { name: 'no admission', idempotencyKey: 'no-admission' })).status).toBe(403);
+});

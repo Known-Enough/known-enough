@@ -162,3 +162,13 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 .ke-entry summary { cursor: pointer; padding: 8px 0; }
 .ke-entry :focus-visible { outline: 3px solid #336dd1; outline-offset: 3px; }
 @media (max-width: 480px) { .ke-entry { padding: 24px 16px; } .ke-entry-surface { padding: 24px 20px; } }
+
+.ke-profile-trigger { min-width: 44px; min-height: 44px; width: 44px; padding: 4px; border-radius: 50%; }
+.ke-profile-trigger img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+.ke-profile-drawer { position: fixed; inset: 0 0 0 auto; margin: 0; height: 100dvh; max-height: 100dvh; width: min(400px, 100vw); max-width: 100vw; padding: 0; border: 0; color: inherit; background: #fff; box-sizing: border-box; }
+.ke-profile-drawer::backdrop { background: #172f3d70; }
+.ke-profile-content { padding: 24px; display: grid; gap: 16px; overflow-wrap: anywhere; }
+.ke-profile-content form { display: grid; gap: 12px; }
+.ke-profile-content input, .ke-profile-content textarea { width: 100%; min-width: 0; box-sizing: border-box; }
+.ke-profile-content button { min-height: 44px; }
+.ke-profile-image { width: 96px; height: 96px; object-fit: cover; border-radius: 50%; }

@@ -8,7 +8,7 @@ export function GroupHome({ api, openDecision }: { api: (path: string, init?: Re
   const [account, setAccount] = useState<ReturnType<typeof Groups.AccountSnapshot.parse> | null>(null);
   const [groups, setGroups] = useState<Groups.GroupSnapshot[]>([]);
   const groupRequest = useRef<{ name: string; idempotencyKey: string } | null>(null);
-  const [name, setName] = useState(''); const [groupName, setGroupName] = useState('');
+  const [groupName, setGroupName] = useState('');
   const [email, setEmail] = useState(''); const [link, setLink] = useState(''); const [replace, setReplace] = useState(false);
   const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false);
   const [token, setToken] = useState(() => {
@@ -83,12 +83,11 @@ export function GroupHome({ api, openDecision }: { api: (path: string, init?: Re
     finally { setBusy(false); }
   }
   return <section className="ke-card" aria-busy={busy}><h2>Your account and groups</h2>
-    <p>Account access and group membership are separate. After verifying your email, request access here; then create a group or accept an invitation.</p>
+    <p>Email confirmation queues your account for review. After approval, create a group or accept an invitation.</p>
     <button className="secondary" disabled={busy} onClick={() => { void load().catch(() => setNotice('Refresh failed. Sign in again if needed.')); }}>Refresh account and groups</button>
     <fieldset disabled={busy || checking} style={{border: 0, padding: 0, minWidth: 0}} aria-label="Account and group actions">
-    {available && !checking && !account && <><label htmlFor="group-display-name">Your display name</label><input id="group-display-name" value={name} maxLength={80} onChange={event => setName(event.target.value)} />
-      <button disabled={busy || !name.trim()} onClick={() => void action('/account/register', { displayName: name })}>Request access</button></>}
-    {account?.status === 'PENDING' && <p>Access request pending. The operator must approve it before you create or join groups.</p>}
+    {available && !checking && !account && <p>Your account setup is still being completed. Refresh shortly, or contact the operator if it remains unavailable.</p>}
+    {account?.status === 'PENDING' && <p>Your account is waiting for approval. You can edit your profile while the administrator reviews access.</p>}
     {account?.status === 'REJECTED' && <p>Your access request was declined. Contact the operator outside this app.</p>}
     {account?.status === 'DISABLED' && <p>Your access is disabled. Group and decision actions are unavailable.</p>}
     {account?.status === 'APPROVED' && <>

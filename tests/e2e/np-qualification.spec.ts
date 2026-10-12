@@ -31,8 +31,10 @@ test('four new independent browser owners create a garden decision from blank en
     for (const who of people) {
       const context = await browser.newContext(); contexts.push(context); await connect(context, api, who);
       const page = await context.newPage(); pages.push(page); await page.goto(url);
-      await page.getByLabel('Your display name').fill(who); await page.getByRole('button', { name: 'Request access', exact: true }).click();
-      await expect(page.getByText('Access request pending.', { exact: false })).toBeVisible();
+      await api.call(who, '/account/register', { displayName: who });
+      await page.getByRole('button', { name: 'Refresh account and groups' }).click();
+      await expect(page.getByRole('button', { name: 'Request access', exact: true })).toHaveCount(0);
+      await expect(page.getByText('Your account is waiting for approval.', { exact: false })).toBeVisible();
       await api.approve(who); await page.getByRole('button', { name: 'Refresh account and groups' }).click();
       await expect(page.getByRole('button', { name: 'Create group', exact: true })).toBeVisible();
     }

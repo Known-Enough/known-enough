@@ -1,3 +1,4 @@
+import { Groups } from '@deal-table/contracts';
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { z } from 'zod';
 import type { KnownEnoughRecord, TrustedPrincipal } from '@deal-table/application';
@@ -243,7 +244,7 @@ export function ownerLifecycleExport(raw: LifecycleInventory, principal: Trusted
     return [{ decisionId: record.decisionId, own, retired: retired ? { participantId: retired.participantId, refusedRequests: retired.refusedRequests,
       negotiationPermissions: retired.negotiationPermissions, disclosurePermissions: retired.disclosurePermissions } : null }];
   });
-  return structuredClone({ schemaVersion: 1, account: { displayName: account.value.displayName, status: account.value.status, version: account.value.version },
+  return structuredClone({ schemaVersion: 1, account: { displayName: account.value.displayName, status: account.value.status, version: account.value.version, ...(account.value.profile ? { profile: Groups.PrivateProfile.parse(account.value.profile) } : {}) },
     decisions, limits: { rawConversations: 'NOT_STORED', sharedDerivedHistory: 'NOT_OWNER_EXPORT', identifierClaims: 'RETAINED',
       backups: 'SEPARATE_MANAGED_POLICY', providers: 'SEPARATE_PROVIDER_POLICY', logs: 'SEPARATE_LOG_POLICY' } });
 }

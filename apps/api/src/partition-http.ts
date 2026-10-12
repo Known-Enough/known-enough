@@ -190,6 +190,15 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         const draft = /^\/groups\/([A-Za-z0-9_-]{1,80})\/drafts(?:\/([A-Za-z0-9_-]{1,80})(\/create)?)?$/.exec(url.pathname);
         const decision = /^\/decisions\/([A-Za-z0-9_-]{1,80})\/(public|me|commands)$/.exec(url.pathname);
         const roster = /^\/groups\/([A-Za-z0-9_-]{1,80})\/decisions\/([A-Za-z0-9_-]{1,80})\/(review|revise)$/.exec(url.pathname);
+        if (url.pathname === '/account/profile' || url.pathname === '/account/profile/image') {
+          if (request.method === 'GET' && url.pathname === '/account/profile') {
+            send(response, 200, { profile: await session.ownProfile(principal) }); return;
+          }
+          if (request.method !== 'POST') return reject('NOT_FOUND');
+          await session.ownProfile(principal); // authorize before reading profile/image bytes
+          const raw = await body(request, maximum, bodyMs, controller);
+          send(response, 200, { profile: await session.updateProfile(principal, raw, url.pathname.endsWith('/image')) }); return;
+        }
         if (request.method === 'GET' && url.pathname === '/account') {
           send(response, 200, { account: await session.status(principal) }); return;
         }

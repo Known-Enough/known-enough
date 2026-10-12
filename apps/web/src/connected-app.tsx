@@ -9,6 +9,7 @@ import { SimulatedSharedAssistant } from './simulated-shared-assistant';
 import { decisionStatusText, privateReadinessText } from './decision-copy';
 import { GroupHome } from './group-home';
 import { AuthEntry } from './auth-entry';
+import { ProfileDrawer } from './profile-drawer';
 import { ConnectedDecision } from './connected-decision';
 import { backgroundNegotiationAvailable, pollBackgroundDecision, type BackgroundTarget } from './background-negotiation';
 
@@ -190,7 +191,8 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
   if (!session) return <AuthEntry config={config} signIn={signIn} notice={status} />;
   return <main className="ke-home">
     <header className="masthead ke-masthead"><div><p className="eyebrow">KNOWN ENOUGH</p><h1>Decide together</h1></div>
-      {session && <button className="secondary" type="button" onClick={signOut}>Sign out</button>}</header>
+      {session.kind === 'participant' ? <ProfileDrawer key={session.accessToken} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} signOut={signOut} />
+        : <button className="secondary" type="button" onClick={signOut}>Sign out</button>}</header>
     <p className="ke-privacy">Known Enough and its AI process your private inputs. Other people see only the shared choices, proposal and disclosures you authorize. An outcome may still reveal something about people’s needs. Use fictional, non-sensitive data in this preview.</p>
     {session && <>
       {session.kind === 'participant' && <GroupHome key={session.accessToken} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} openDecision={id => { setRoomInput(id); void load(id); }} />}

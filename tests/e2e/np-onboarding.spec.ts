@@ -31,9 +31,11 @@ test('new users request access, operator admits, organizer invites a new recipie
     return context.newPage();
   }
   try {
+    // Local fixture simulates completed trusted intake; actual provider delivery is a separate live criterion.
+    await api.call('iris', '/account/register', { displayName: 'Iris' });
     const host = await pageFor('iris'); await host.goto(url);
-    await host.getByLabel('Your display name').fill('Iris'); await host.getByRole('button', { name: 'Request access', exact: true }).click();
-    await expect(host.getByText('Access request pending.', { exact: false })).toBeVisible();
+    await expect(host.getByRole('button', { name: 'Request access', exact: true })).toHaveCount(0);
+    await expect(host.getByText('Your account is waiting for approval.', { exact: false })).toBeVisible();
     await api.approve('iris'); await host.getByRole('button', { name: 'Refresh account and groups' }).click();
     let release!: () => void; let markStarted!: () => void;
     const held = new Promise<void>(resolve => { release = resolve; });
@@ -50,9 +52,10 @@ test('new users request access, operator admits, organizer invites a new recipie
     await expect(host.getByRole('heading', { name: 'Garden club', exact: true })).toBeVisible();
     await host.getByLabel('Recipient email').fill('omar@example.invalid'); await host.getByRole('button', { name: 'Create invitation link' }).click();
     const link = await host.getByLabel('Invitation link', { exact: true }).inputValue();
+    await api.call('omar', '/account/register', { displayName: 'Omar' });
     const guest = await pageFor('omar'); await guest.goto(link.replace('http://127.0.0.1:5181', 'http://127.0.0.1:5181'));
-    await guest.getByLabel('Your display name').fill('Omar'); await guest.getByRole('button', { name: 'Request access', exact: true }).click();
-    await expect(guest.getByText('Access request pending.', { exact: false })).toBeVisible();
+    await expect(guest.getByRole('button', { name: 'Request access', exact: true })).toHaveCount(0);
+    await expect(guest.getByText('Your account is waiting for approval.', { exact: false })).toBeVisible();
     await api.approve('omar'); await guest.getByRole('button', { name: 'Refresh account and groups' }).click();
     await guest.getByRole('button', { name: 'Accept group invitation', exact: true }).click();
     await expect(guest.getByRole('heading', { name: 'Garden club', exact: true })).toBeVisible();

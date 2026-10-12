@@ -3,8 +3,16 @@ import { PublicDecisionFrame } from './known-enough.ts';
 const id = z.string().regex(/^[A-Za-z0-9_-]{1,80}$/);
 const text = z.string().trim().min(1).max(80);
 export const AccountStatus = z.enum(['PENDING', 'APPROVED', 'REJECTED', 'DISABLED']);
+/** Owner-private only. Shared account/group/decision projections do not include these bytes. */
+export const OwnedAvatar = z.object({ id, mimeType: z.literal('image/png'), width: z.number().int().min(1).max(128), height: z.number().int().min(1).max(128),
+  bytesBase64: z.string().min(1).max(21848).regex(/^[A-Za-z0-9+/]+={0,2}$/), sha256: z.string().regex(/^[a-f0-9]{64}$/) }).strict();
+export const PrivateProfile = z.object({ description: z.string().max(280), image: OwnedAvatar.nullable(), loginUsername: z.string().max(128).nullable() }).strict();
+export const ProfilePatch = z.object({ version: z.number().int().positive(), displayName: text, description: z.string().max(280) }).strict();
+export const AvatarPatch = z.object({ version: z.number().int().positive(), bytesBase64: z.string().min(1).max(21848).nullable() }).strict();
+export const OwnProfile = z.object({ status: AccountStatus, displayName: text, version: z.number().int().positive(),
+  description: z.string().max(280), image: OwnedAvatar.nullable(), loginUsername: z.string().max(128).nullable() }).strict();
 export const Account = z.object({ subject: id, emailHash: z.string().regex(/^[a-f0-9]{64}$/), displayName: text,
-  status: AccountStatus, version: z.number().int().positive() }).strict();
+  status: AccountStatus, version: z.number().int().positive(), profile: PrivateProfile.optional() }).strict();
 export const GroupDraft = z.object({ id, bodyHash: z.string().regex(/^[a-f0-9]{64}$/),
   revision: z.number().int().positive(), groupVersion: z.number().int().positive(),
   frame: PublicDecisionFrame, clarificationQuestions: z.array(z.string().min(1).max(500)).max(12),

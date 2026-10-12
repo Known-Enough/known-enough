@@ -176,7 +176,7 @@ export function cognitoLogoutUrl(config: CognitoBrowserConfig, session: CognitoS
 export async function cognitoApiFetch(config: CognitoBrowserConfig, session: CognitoSession, path: string,
   onUnauthorized: () => void, init?: RequestInit, fetcher: typeof fetch = fetch): Promise<Response> {
   if (!path.startsWith('/') || path.startsWith('//') || path.includes('..')
-    || (path !== '/decisions' && !path.startsWith('/decisions/') && path !== '/account' && path !== '/account/register' && path !== '/groups' && !path.startsWith('/groups/'))) throw new Error('Invalid API path');
+    || (path !== '/decisions' && !path.startsWith('/decisions/') && path !== '/account' && path !== '/account/register' && path !== '/account/profile' && path !== '/account/profile/image' && path !== '/groups' && !path.startsWith('/groups/'))) throw new Error('Invalid API path');
   if (!Number.isFinite(session.expiresAt) || session.expiresAt <= Date.now() + 5000) { onUnauthorized(); throw new Error('Session expired'); }
   const headers = new Headers(init?.headers);
   headers.set('authorization', `Bearer ${session.accessToken}`);

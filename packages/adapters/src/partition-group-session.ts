@@ -1,3 +1,4 @@
+import { sanitizeOwnedAvatar } from './owned-avatar.ts';
 import { createHash, createHmac, randomBytes } from 'node:crypto';
 import { z } from 'zod';
 import { Groups, KnownEnough as KE } from '@deal-table/contracts';
@@ -18,7 +19,7 @@ const label = z.string().max(160).refine(value => [...value].every(character => 
 const email = z.string().max(512).transform(value => value.trim().toLowerCase()).pipe(z.string().max(254).regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/));
 const create = z.strictObject({ name: label, idempotencyKey: id });
 const registration = z.strictObject({ displayName: label });
-const profile = z.strictObject({ subject: id, email, verified: z.literal(true) });
+const profile = z.strictObject({ subject: id, email, verified: z.literal(true), username: z.string().min(1).max(128).optional() });
 const invite = z.strictObject({ email, replace: z.boolean() });
 const accept = z.strictObject({ token: z.string().regex(/^[A-Za-z0-9_-]{32,80}$/) });
 const draftGeneration = z.strictObject({ objective: z.string().max(2000).trim().min(1), idempotencyKey: id });
@@ -214,7 +215,8 @@ export function createPartitionGroupSession(transport: PartitionTransport,
               const owner = await repository.lookup({ type: 'EMAIL', emailHash: hash }, io);
               if (owner?.type !== 'EMAIL' || owner.subject !== who) return deny('FORBIDDEN');
             } else {
-              account = { subject: who, emailHash: hash, displayName: request.data.displayName, status: 'PENDING', version: 1 };
+              account = { subject: who, emailHash: hash, displayName: request.data.displayName, status: 'PENDING', version: 1,
+                ...(verified.data.username ? { profile: { description: '', image: null, loginUsername: verified.data.username } } : {}) };
               state.accounts.push(account);
             }
             return Groups.AccountSnapshot.parse({ status: account.status, displayName: account.displayName, version: account.version });
@@ -223,6 +225,37 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           if (error instanceof PartitionStorageError && error.code === 'PARTITION_IDENTITY_CONFLICT') return deny('FORBIDDEN');
           throw error;
         }
+      });
+    },
+    ownProfile(principal: TrustedPrincipal | null) {
+      return safe(async () => {
+        const who = participant(principal);
+        return repository.transaction({ accountSubjects: [who] }, state => {
+          const account = state.accounts.find(value => value.subject === who);
+          if (!account || account.status === 'DISABLED') return deny('FORBIDDEN');
+          return Groups.OwnProfile.parse({ status: account.status, displayName: account.displayName, version: account.version,
+            description: account.profile?.description ?? '', image: account.profile?.image ?? null, loginUsername: account.profile?.loginUsername ?? null });
+        }, partitionIO(limits));
+      });
+    },
+    updateProfile(principal: TrustedPrincipal | null, raw: unknown, avatar = false) {
+      return safe(async () => {
+        const who = participant(principal);
+        const parsed = avatar ? Groups.AvatarPatch.safeParse(raw) : Groups.ProfilePatch.safeParse(raw);
+        if (!parsed.success) return deny('INVALID_COMMAND');
+        // Parse pixels only after fresh ownership/admission and exact current version are established.
+        return repository.transaction({ accountSubjects: [who] }, state => {
+          const account = state.accounts.find(value => value.subject === who);
+          if (!account || account.status === 'DISABLED') return deny('FORBIDDEN');
+          if (account.version !== parsed.data.version) return deny('STALE_CONTEXT');
+          const next = account.profile ?? { description: '', image: null, loginUsername: null };
+          if ('bytesBase64' in parsed.data) {
+            try { next.image = parsed.data.bytesBase64 === null ? null : sanitizeOwnedAvatar(parsed.data.bytesBase64); }
+            catch { return deny('INVALID_COMMAND'); }
+          } else { account.displayName = parsed.data.displayName; next.description = parsed.data.description; }
+          account.profile = next; account.version++;
+          return Groups.OwnProfile.parse({ status: account.status, displayName: account.displayName, version: account.version, ...next });
+        }, partitionIO(limits));
       });
     },
     status(principal: TrustedPrincipal | null) {
