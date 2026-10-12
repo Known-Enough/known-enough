@@ -1,3 +1,5 @@
+Current OPS03: **IN_PROGRESS/B — explicit reverse handoff after A reported scoped S3 grant installed**. Verify effective recovery access, original mailbox cleanup, then corrected live qualification. One writer; NP00 preserved.
+
 Current OPS03: **BLOCKED/unclaimed — installed consent policy and effective corrected guard permissions PASS; full provider qualification awaits own mailbox checkpoint cleanup**. AWS setup owner must supply exact own checkpoint key or B scoped metadata listing. No successor claimed.
 
 Current OPS03: **IN_PROGRESS/B — user-directed installed consent policy investigation**. Prior worker/API installation preserved; no duplicate test. Required fixture recovery/key dependency remains under investigation.

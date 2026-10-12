@@ -71,6 +71,11 @@ export function createMailtmClient(fetcher = globalThis.fetch, pause = ms => new
                 runId, address: `keqa-${randomBytes(16).toString('hex')}@${await domain()}`, password: randomBytes(32).toString('base64url'), createdAt: Date.now()
             };
         },
+        async recoverExistingIntent(mailbox) {
+            requireRunId(mailbox.runId);
+            const own = await identity(mailbox);
+            return { ...mailbox, id: own.id, token: own.token };
+        },
         async create(mailbox) {
             requireRunId(mailbox.runId);
             const created = await request('/accounts', { method: 'POST', body: { address: mailbox.address, password: mailbox.password }, conflict: true });
