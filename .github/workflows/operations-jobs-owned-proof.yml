@@ -201,6 +201,15 @@ jobs:
           allowed-account-ids: '092954139775'
           retry-max-attempts: 1
           unset-current-credentials: true
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: inputs.delivery_mode == 'native-stale-admission'
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPartitionMigration
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
       - name: Withdraw owned synthetic admission before native dispatch
         if: inputs.delivery_mode == 'native-stale-admission'
         run: |
@@ -295,6 +304,16 @@ jobs:
           if test -f "$RUNNER_TEMP/partition-cutover-private/ops03-proof-private.json"; then
             node --experimental-transform-types scripts/operations/jobs-owned-proof.mjs disable-control > "$RUNNER_TEMP/owned-jobs-disable-control-report.json" 2>&1
           fi
+      - name: Always drain only owned never-dispatched work after disabling control
+        if: always()
+        env:
+          OWNED_SOURCE: ${{ github.sha }}
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          if test -f "$RUNNER_TEMP/partition-cutover-private/ops03-proof-private.json"; then
+            node --experimental-transform-types scripts/operations/jobs-precall-drain.mjs inline
+          fi
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         if: always()
         with:
@@ -363,5 +382,6 @@ jobs:
             ${{ runner.temp }}/owned-jobs-*-report.json
             ${{ runner.temp }}/owned-jobs-rule-cleanup.txt
             ${{ runner.temp }}/model-job-logging-report.json
+            ${{ runner.temp }}/precall-drain-inline-report.json
           if-no-files-found: warn
           retention-days: 30

@@ -1,0 +1,73 @@
+name: Inspect scoped terminal job journal cleanup capability
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: known-enough-lifecycle-installation
+  cancel-in-progress: false
+jobs:
+  inspect:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && github.actor_id == '143764700'
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      AWS_MAX_ATTEMPTS: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Verify checked source and zero-mutation probe bounds
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
+          python3 -B scripts/operations/jobs-journal-access.test.py
+          node --input-type=module - <<'JS'
+          import { accessTemplate } from './scripts/operations/access-setup.mjs';
+          import { writeFileSync } from 'node:fs';
+          const r = accessTemplate().Resources;
+          writeFileSync(process.env.RUNNER_TEMP + '/journal-policy-expected-private.json', JSON.stringify({inline:r.JobsRole.Properties.Policies[0].PolicyDocument,boundary:r.JobsBoundary.Properties.PolicyDocument}), {mode:0o600});
+          JS
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubStagingInspector
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Compare actual inline policy and boundary with checked permissions
+        env:
+          JOURNAL_PHASE: metadata
+        run: python3 -B scripts/operations/jobs-journal-access.py
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobOperations
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Probe exact DeleteItem permission with an impossible condition
+        env:
+          JOURNAL_PHASE: probe
+        run: python3 -B scripts/operations/jobs-journal-access.py
+      - name: Publish only finite capability results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: operations-jobs-journal-access
+          path: ${{ runner.temp }}/jobs-journal-*-report.json
+          if-no-files-found: warn
+          retention-days: 30
