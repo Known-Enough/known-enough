@@ -73,3 +73,26 @@ test('synthetic setup refuses any new receipt, foreign room, altered CAS or guar
 });
 
 test('synthetic guard adapter cannot write another room state or partition record',async()=>{const {record,table,command}=await nativeDraftCommand();const copy=new TransactWriteItemsCommand(structuredClone(command.input));copy.input.TransactItems[0].Put.Item.PK.S='ROOM#foreign';assert.throws(()=>ownedDraftGuardPut(copy,record.decisionId,table),/OWN_DRAFT_SCOPE_INVALID/);});
+
+import {scopedGetGroups,awsDeniedDetails} from './jobs-owned-proof.mjs';
+import {createPartitionedGroupRepository} from '../../packages/adapters/src/partitioned-group-repository.ts';
+test('consent scope uses repository bounded single-read fallback and preserves full final fences',async()=>{
+ const {data}=await lifecycleFixture();const rows=new Map(data.entries.map(e=>[e.key.PK+'/'+e.key.SK,e.row]));const reads=[];let batchCalls=0;
+ const transport={read:async(key,io)=>{assert.ok(io.signal);reads.push(key);return rows.get(key.PK+'/'+key.SK)??null;},readMany:async()=>{batchCalls++;throw new Error('BATCH_DENIED');},commit:async(mutations)=>mutations.every(m=>m.expected===(rows.get(m.key.PK+'/'+m.key.SK)?.revision??0))};
+ const selected=scopedGetGroups(transport);assert.ok(!('readMany' in selected));
+ const repo=createPartitionedGroupRepository(selected);let accountCount=0;const fence=await repo.fence({accountSubjects:['iris','omar'],groupId:'garden'},snapshot=>{accountCount=snapshot.accounts.length;});
+ assert.equal(accountCount,2);assert.equal(batchCalls,0);assert.ok(reads.some(k=>k.PK==='ACCOUNT#iris'));assert.ok(reads.some(k=>k.PK==='GROUP#garden'));
+ assert.equal(await selected.commit(fence.mutations),true);
+ const row=rows.get('ACCOUNT#iris/STATE');row.revision++;assert.equal(await selected.commit(fence.mutations),false);
+});
+test('AWS denial metadata retains only fixed action, never role/subject/resource/raw text',()=>{
+ const result=awsDeniedDetails({cause:{name:'AccessDeniedException',message:'private-role not authorized to perform: dynamodb:BatchGetItem on private-resource'}});
+ assert.deepEqual(result,{deniedAction:'dynamodb:BatchGetItem'});assert.ok(!JSON.stringify(result).includes('private'));
+ assert.deepEqual(awsDeniedDetails({name:'AccessDeniedException',message:'private body only'}),{});
+});
+
+test('single-read fallback preserves request limits instead of treating many reads as one batch',async()=>{
+ const {data}=await lifecycleFixture();const rows=new Map(data.entries.map(e=>[e.key.PK+'/'+e.key.SK,e.row]));let calls=0;
+ const groups=scopedGetGroups({read:async key=>{calls++;return rows.get(key.PK+'/'+key.SK)??null;},commit:async()=>true});
+ const repo=createPartitionedGroupRepository(groups,{maxRequests:1});await assert.rejects(repo.fence({accountSubjects:['iris','omar'],groupId:'garden'},()=>{}),/PARTITION_REQUEST_LIMIT/);assert.ok(calls<=1);
+});

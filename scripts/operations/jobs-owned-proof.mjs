@@ -49,6 +49,10 @@ export function ownedDraftGuardPut(command,decisionId,tableArn){
  for(const item of copy.TransactItems)if(item.Update){delete item.Update;item.Put={TableName:tableArn,Item,ConditionExpression:condition+' AND #schemaVersion = :schemaVersion',ExpressionAttributeNames:{...names,'#schemaVersion':'schemaVersion'},ExpressionAttributeValues:{...values,':schemaVersion':Item.schemaVersion}};}
  return new TransactWriteItemsCommand(copy);
 }
+export function scopedGetGroups(groups){
+ if(typeof groups?.read!=='function'||typeof groups?.commit!=='function')return fail('OWN_GROUP_TRANSPORT_INVALID');
+ return {read:groups.read.bind(groups),commit:groups.commit.bind(groups)};
+}
 export function ownedPublicDraft(group,accounts,nonce){
  const participants=group.members.map(subject=>{const account=accounts.find(a=>a.subject===subject);if(!account||account.status!=='APPROVED')return fail('OWN_DRAFT_ACCOUNT_INVALID');return {id:partitionMemberId(subject),displayName:account.displayName,requiredForApproval:true};});
  return Groups.GroupDraft.parse({id:'ops03-'+nonce,bodyHash:createHash('sha256').update(nonce).digest('hex'),revision:1,groupVersion:group.version,
@@ -56,6 +60,13 @@ export function ownedPublicDraft(group,accounts,nonce){
  variables:[{id:'activity',label:'Activity',type:'ENUM',required:true,visibility:'PUBLIC',options:[{id:'first',label:'First'},{id:'second',label:'Second'}]}],rules:[]},clarificationQuestions:[],createdDecisionId:null});
 }
 export function enqueueRequest(decisionId,owner){return RequestNegotiation.parse({schemaVersion:KE.KE_SCHEMA_VERSION,type:'REQUEST_NEGOTIATION',requestId:randomUUID(),decisionId,expected:{contextToken:owner.publicSnapshot.frame.contextToken,semanticVersion:owner.publicSnapshot.frame.semanticVersion,controlVersion:owner.controlVersion}});}
+export function awsDeniedDetails(error){
+ for(let depth=0;error&&depth<8;depth++,error=error.cause){
+  if(error.name!=='AccessDeniedException'||typeof error.message!=='string')continue;
+  const action=error.message.match(/perform:\s*(dynamodb:(?:BatchGetItem|GetItem|PutItem|UpdateItem|ConditionCheckItem|TransactWriteItems))\b/)?.[1];
+  if(action)return {deniedAction:action};
+ }return {};
+}
 export function awsFailure(error){for(let depth=0;error&&depth<8;depth++,error=error.cause)if(['AccessDeniedException','AccessDenied','ExpiredToken','ResourceNotFoundException','TransactionCanceledException'].includes(error.name))return error.name;return null;}
 export function proofReport(sourceSha,phase,state,result,code){
  const count=k=>Number.isSafeInteger(state?.[k])&&state[k]>=0&&state[k]<=1000?state[k]:0;
@@ -107,7 +118,7 @@ async function main(phase){
    await transact(puts);if(!isDeepStrictEqual(await get(table,policyKey),state.policyIntent))return fail('PROOF_POLICY_UNKNOWN');
   }else if(phase==='consent'){
    for(const fixture of fixtures.fixtures)await command(fixture,'CONFIRM_FRAME',{frameVersion:1});state.signedFrameConfirmations=2;await save();
-   const driver=managed(),repository=createPartitionDecisionRepository({decisionArn:driver.decisionArn,partitionArn:driver.partitionArn,transport:{send:(command,io)=>driver.decisions.send(ownedDraftGuardPut(command,state.decisionId,driver.decisionArn),io)},groups:driver.groups});
+   const driver=managed(),repository=createPartitionDecisionRepository({decisionArn:driver.decisionArn,partitionArn:driver.partitionArn,transport:{send:(command,io)=>driver.decisions.send(ownedDraftGuardPut(command,state.decisionId,driver.decisionArn),io)},groups:scopedGetGroups(driver.groups)});
    for(const fixture of fixtures.fixtures){const principal=await authenticate('Bearer '+fixture.accessToken);const owner=await request(fixture,'/decisions/'+state.decisionId+'/me');const draft=KE.AIConstraintDraft.parse({schemaVersion:KE.KE_SCHEMA_VERSION,draftId:'empty-'+fixture.nonce,draftVersion:1,decisionId:state.decisionId,ownerParticipantId:owner.ownerParticipantId,ownerVersion:owner.ownerVersion,semanticVersion:owner.publicSnapshot.frame.semanticVersion,contextToken:owner.publicSnapshot.frame.contextToken,sourceSummary:'Owned synthetic empty structured constraints fixture; no interpreter model claim.',proposedConstraints:[],unsupportedConditions:[],createdAt:new Date().toISOString()});
     const application=new KnownEnoughApplication({repository:repository.forParticipant(principal),clock:{now:()=>new Date().toISOString()},ids:{next:()=>randomUUID()}});
     await application.storeConstraintDraft({kind:'service',subject:'owned-fixture-setup',roomIds:[state.decisionId]},draft,{principal,controlVersion:owner.controlVersion,expiresAt:Date.now()+30000});
@@ -143,7 +154,7 @@ async function main(phase){
    if(state.policyIntent){const prior=await get(table,policyKey);if(!isDeepStrictEqual(prior,state.policyIntent))return fail('PROOF_POLICY_CLEANUP_CONFLICT');const policy=RetentionPolicy.parse(JSON.parse(prior.payload.S));const next=envelope(policyKey,RetentionPolicy.parse({...policy,revision:policy.revision+1,enabled:false}));await transact([{Put:{TableName:table,Item:next,...cas(prior)}}]);if(!isDeepStrictEqual(await get(table,policyKey),next))return fail('PROOF_POLICY_DISABLE_UNKNOWN');}
   }
   const report={...proofReport(sourceSha,phase,state,'OWNED_JOB_PHASE_PASS'),...(phase==='observe'?{actualJob:state.actualJob,totalsBefore:state.totalsBefore,totalsAfter:state.totalsAfter}:{})};console.log(JSON.stringify(report));
- }catch(error){await save();const code=error.safeCode??awsFailure(error)??'OWNED_JOB_UNVERIFIED';console.log(JSON.stringify({...proofReport(sourceSha,phase,state,'OWNED_JOB_PHASE_BLOCKED',code),...(state.actualJob?{actualJob:state.actualJob}:{})}));process.exitCode=1;}
+ }catch(error){await save();const code=error.safeCode??awsFailure(error)??'OWNED_JOB_UNVERIFIED';console.log(JSON.stringify({...proofReport(sourceSha,phase,state,'OWNED_JOB_PHASE_BLOCKED',code),...awsDeniedDetails(error),...(state.actualJob?{actualJob:state.actualJob}:{})}));process.exitCode=1;}
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  try{await main(process.argv[2]);}catch(error){console.log(JSON.stringify(proofReport(process.env.GITHUB_SHA,process.argv[2],null,'OWNED_JOB_PHASE_BLOCKED',error.safeCode??'OWNED_JOB_SETUP_UNVERIFIED')));process.exitCode=1;}
