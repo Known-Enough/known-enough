@@ -1,0 +1,58 @@
+{
+  "recordedAt": "2026-10-12T16:46:47.451465+00:00",
+  "task": "ASSESS11",
+  "relatedUiTask": "UX01/UX03",
+  "sourceBaseline": "431fd24",
+  "observation": "USER_REPORTED_CURRENT_PRIMARY_SIGNUP_FAILURE",
+  "reportedError": "An error was encountered with the requested page.",
+  "confirmedPath": "Separate hosted login page -> Sign up",
+  "entryClientKind": "UNKNOWN",
+  "userRequestTime": "UNKNOWN",
+  "httpStatus": "UNKNOWN",
+  "providerErrorCode": "UNKNOWN",
+  "requestId": "UNKNOWN",
+  "attachmentAvailable": false,
+  "reportedUsabilityProblem": "Sign in versus Shared display sign-in is unclear to a newcomer.",
+  "agentReadOnlyProbe": {
+    "observedAt": "2026-10-12T16:45:37.489633+00:00",
+    "method": "Unauthenticated hosted page GETs only",
+    "signupSubmissions": 0,
+    "emailSent": false,
+    "observations": [
+      {
+        "page": "authorize/login",
+        "status": 200,
+        "finalPath": "/login",
+        "genericPageError": false
+      },
+      {
+        "page": "signup",
+        "status": 200,
+        "finalPath": "/signup",
+        "genericPageError": false,
+        "signupFormPresent": true
+      },
+      {
+        "page": "shared-display-login",
+        "status": 200,
+        "genericPageError": false,
+        "signupLinkPresent": true
+      },
+      {
+        "page": "shared-display-signup",
+        "status": 200,
+        "genericPageError": false
+      }
+    ],
+    "signupLinkPresent": true
+  },
+  "cause": "NOT_ESTABLISHED",
+  "loggingCodeInspection": {
+    "inAppRegistration": "Browser console and rendered finite Reference code/time/status/request ID where available",
+    "returnedLoginCallback": "Browser console and rendered finite error/time/status where available",
+    "hostedPageThatDoesNotReturnToApp": "Not captured by those app handlers; no centralized record verified"
+  },
+  "signupSubmissionsByAgent": 0,
+  "emailSentByAgent": false,
+  "requiredNext": "Identify exact failing client/path and request using sanitized diagnostics; fix functional signup and first-use clarity; current user failure is not disproved by fresh unauthenticated page GET success."
+}
