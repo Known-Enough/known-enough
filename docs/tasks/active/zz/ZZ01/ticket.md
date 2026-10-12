@@ -1,0 +1,39 @@
+# ZZ01 — Single registration path and first-screen redesign
+
+- Status: READY / unclaimed.
+- User direction: 2026-10-12T16:55:32.818715+00:00; new batch ZZ, first task ZZ01.
+- Priority: next eligible product-usability intake after a genuinely active task reaches a checked release/handoff. Preserve one sequential claim, paused A NP00 and existing B work. No new worker/chat/monitor or implementation starts from this ticket.
+- Origin: two competing signup entry points, unclear Shared display sign-in, repeated registration instructions and a user-reported generic hosted-page signup failure. [Current issue evidence](../../../../review-artifacts/ASSESS11-manual-signup-20261012.json). The attached Windows image is unavailable; no screenshot/layout observation is claimed.
+- Existing owners: ASSESS11 owns functional signup diagnosis; UX01/UX03 cover broad review; MVP01 identifies readiness limits. ZZ01 owns this specific first-screen/navigation/hosted-link correction. Link results back without duplicating fixes or marking those whole tasks DONE.
+
+## Required user experience
+
+1. On the first screen show Known Enough branding, one short purpose statement and two unmistakable actions: **Create account** for new users, **Sign in** for existing users. Avoid repeated “already registered,” “need an account,” separate explanatory cards and contradictory signup instructions. Example purpose: “Create a group, share your needs privately, and decide together.” Do not imply unverified functionality/production readiness.
+2. Create account opens ONE form asking for username, email and password; keep the current policy accurately explained, email verification and a clear back/cancel action. After successful verification show a concise confirmation and Sign in action. Preserve pending group invitations across these steps. No simultaneous duplicate forms/buttons or unexplained transition to another signup page.
+3. Sign in keeps the existing verified participant authentication/PKCE flow and returns to the intended app/invitation. Remove the competing **Need an account? Sign up** link on the separate provider page using a supported configuration/branding/customization approach. The app stylesheet cannot control another origin. Inspect actual provider mode/settings and supported customization first; do not promise a CSS fix before that check, manipulate cross-origin pages, or replace authenticated flows casually. If removal requires a bounded provider change, prepare/apply/verify its exact scope through available own project access. Report actual missing access if any, not another generic “AWS setup needed.”
+4. Do NOT disable pool self-registration as a shortcut: the main app’s registration also uses that capability. Do not remove email verification, loosen owner identity, switch participant/display clients, change password policy, or invent email fields in a provider form that still cannot verify them. Functional/signup root cause is diagnosed rather than inferred from appearance or password length.
+5. Shared display access is absent from the primary button row. Put it behind clearly labeled secondary/advanced access with plain explanation: “For a shared screen such as a TV. Shows shared progress only; cannot enter private needs or approve proposals.” Preserve existing display authentication and server-enforced read-only access. Ordinary users should not have to choose an unexplained account type.
+
+## Concrete visual direction
+
+Use existing brand tokens/assets with one consistent type scale, one accent and restrained borders/shadows. A centered entry surface around420–480px wide on desktop should have a clear title (around28–32px), readable body text (at least16px), consistent16–24px gaps, aligned fields and44px-or-larger touch targets. On phone use a single column with comfortable side padding and no horizontal overflow; avoid nested cards, cramped labels, large blocks of technical copy and competing primary buttons.
+
+Create account is the primary action; Sign in is clearly secondary (or an equally understandable two-state switch after inspection). Show one active form/state, inline field help, visible progress while submitting, useful error recovery and a success state. Keep keyboard focus, labels, contrast, browser autofill and reduced-motion behavior. Preserve required privacy/consent information in concise readable copy with details available; do not hide necessary disclosures merely to shorten the page. Do not add ornamental assets or a new UI framework just for this task.
+
+## Diagnosis and observability
+
+Trace entry -> hosted login -> competing signup -> registration/verification -> return-to-app with exact current domain/client/callback/source. Record which of participant or display entry was actually tested. Inspect the real failed request before attributing the generic error; a successful unauthenticated GET or mock registration is not a successful user signup.
+
+Registration-form/callback finite browser diagnostics exist, but failures staying on the hosted page are not captured by those handlers. Record how supported provider/browser diagnostics identify those failures; verify sanitized code, stage, time, HTTP status/request ID where available and a clear user recovery step. Do not log passwords, verification codes, token-bearing URLs, raw provider/private responses or invite tokens. Do not promise central collection where only browser-console logging exists. If central instrumentation needs more scope, log a precise follow-up and implement only essential bounded diagnostics here.
+
+## Implementation and verification
+
+At claim pull clean main, verify own account/shared claims/running jobs and record actual model plus exact editable files. Likely code includes connected-app, email registration/session components, existing CSS and relevant browser/auth tests; inspect before changing. Provider/workflow scope is recorded separately before any change. Standing project authority applies; no unrelated IAM/resource recreation or redesign of all logged-in screens.
+
+Reuse unaffected source/results. Add meaningful focused regressions for the unified entry/registration state, invitation preservation, callback recovery, participant/display separation, primary keyboard/mobile layout and removal of the competing provider signup link. Run focused checks and pinned npm run check for executable changes. Prepare a matching deployment and verify the actual primary site at desktop/phone viewports: new-user form -> email code -> verified sign-in -> appropriate app state, and existing-user sign-in. Use separate owned synthetic credentials with current consent/usage/cleanup, and inspect running jobs before dispatch. Public screenshots contain no real credentials/addresses/invites/private input. Do not use isolated QA or a scripted response to mark primary hosted behavior PASS.
+
+## Completion
+
+Publish docs/review-artifacts/ZZ01/entry-review.md and source-bound evidence with before/after screenshots, actual implemented behavior, functional/signup route outcomes, provider solution/change/readback, focused/full checks, exact deployment/run links and remaining limits. Final experience has one usable registration path, no competing provider signup link, an understandable secondary display option and a coherent first-screen layout. A provider removal/access or actual primary signup failure means those criteria remain open even if local visual changes are CODE_READY.
+
+Update ASSESS11/UX01/UX03 references for corrected boundaries; preserve old failure evidence. Log actual actions/errors and finish with a short chat summary. Minor DEBT01 remains deferred and does not block fresh independent tests. Final MVP readiness/other AI/lifecycle requirements remain separate; task completion does not claim the full product is ready.

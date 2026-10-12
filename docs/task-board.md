@@ -1,3 +1,5 @@
+**ZZ product-usability batch — 2026-10-12T16:55:32.818715+00:00: [ZZ01](tasks/active/zz/ZZ01/README.md) is the first new task: remove competing hosted signup navigation, unify registration and redesign the opening section/display access. READY/unclaimed for next eligible intake after any genuinely active claim checkpoints/releases; one sequential task. No new worker or provider/UI change applied by this task definition. Preserve OPS03/MVP evidence and DEBT01 deferral.**
+
 Current MVP01: **DONE audit / B claim released — product NOT_READY.** [Review and exact existing-task handoffs](review-artifacts/MVP01/readiness-review.md). 243focused/11browser/current public entry and own-role controls PASS. OPS03 remains BLOCKED/unclaimed; next scoped primary AI/recovery correction, no successor claim.
 
 Current OPS03: **BLOCKED/unclaimed — fresh scheduled model, native race/restart-instance and stale-private tests passed; A admin journal DeleteItem repair and Mail.tm ACCOUNT_CREATE availability remain.** [Exact evidence and A CloudShell block](review-artifacts/OPS03/b-fresh-live-blocked-handoff.md). No old DEBT01 gate or successor claim; whole OPS03 is not DONE.
