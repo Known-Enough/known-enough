@@ -1,3 +1,5 @@
+Current MVP01: **IN_PROGRESS/B — user-directed readiness audit; OPS03 remains BLOCKED/unclaimed, not DONE.** Source afee00c; own intake clean/no active GitHub jobs. One documentation audit, no successor implementation or duplicate test.
+
 Current OPS03: **BLOCKED/unclaimed — fresh scheduled model, native race/restart-instance and stale-private tests passed; A admin journal DeleteItem repair and Mail.tm ACCOUNT_CREATE availability remain.** [Exact evidence and A CloudShell block](review-artifacts/OPS03/b-fresh-live-blocked-handoff.md). No old DEBT01 gate or successor claim; whole OPS03 is not DONE.
 
 Current OPS03: **IN_PROGRESS/B — user-directed fresh-account qualification after DEBT01 deferral**. Own source/account/job intake verified, one live test; old mailbox UNKNOWN remains separate deferred debt.
