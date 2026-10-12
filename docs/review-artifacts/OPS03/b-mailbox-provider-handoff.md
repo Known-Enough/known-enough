@@ -1,0 +1,15 @@
+# OPS03 original mailbox provider dependency
+
+AWS access is repaired: B actual bounded list and source/key-verified GetObject passed in [38198415402](https://github.com/Known-Enough/known-enough/actions/runs/38198415402). No new IAM grant or worker installation is needed for this blocker.
+
+The original failed own-B run is38184300709, source246a1d8552810e46efdc635ba956ed459bbd9ad2. Its private checkpoint is bucket `known-enough-qa-artifacts-092954139775`, key `ops01-owned/1ea949f1-4fc2-4bc5-981c-371819e8d57b/state-private.json`. It contains two synthetic fixtures: one known deleted user/removed mailbox and one pending mailbox intent with no returned account ID. Treat this object as private; it contains credentials and signed tokens. The pending synthetic address must never be published in project logs/chat.
+
+[Actual original-mailbox recovery38198897701](https://github.com/Known-Enough/known-enough/actions/runs/38198897701) on checked e4daf6f used the original saved address/password and fixed public Mail.tm endpoint. Token acquisition returned401. No ownership lookup, deletion, S3 mutation, recreation, new signup or provider/model call followed. `MAILTM_REQUEST_FAILED` at `mailbox:POST-token`, HTTP401 is the exact sanitized error. Original account existence remains UNKNOWN.
+
+A must arrange one of these account-specific resolutions through the Mail.tm service operator: authoritative confirmation that this exact pending synthetic address never existed or is now deleted; or restore authentication/ownership of the exact existing mailbox so B can match `/me` and delete it. A must use its own authorized access and private handling; no B human credentials are requested. Do not create the address to test existence, waive cleanup, guess passwords, or repeat the same token request without a changed condition. B has sent no external message and claims no provider-admin access. AWS permission repairs cannot supply Mail.tm ownership evidence.
+
+Record the UTC time, exact account-specific sanitized operator result/reference and what changed in this same OPS03 handoff. Keep addresses, passwords and tokens private. A bare401, elapsed time, generic support answer, or operator permission boolean is not confirmed absence/deletion.
+
+After this dependency changes, B resumes its same scoped recovery and validates the actual evidence before one fresh corrected owned qualification. Installed package15c549c9e1bb475f4361ec16428351c8677efce5/worker1279bb931dda8703ccf46d710d5e6c03bb3f0fddfa397226b2442a7f63e467ba, disabled control/schedule, cumulative TOTAL and standing AUTH remain preserved. Real provider/result/usage/recovery/races/retention/legacy proof stays pending. OPS03 is BLOCKED/unclaimed, not DONE.
+
+[Mail.tm accounts API](https://docs.mail.tm/api/accounts) documents matching bearer-token account lookup, `/me`, and deletion204. [Error documentation](https://docs.mail.tm/getting-started/error-handling) describes401 authorization failure and404 missing resources. This does not turn a failed token request into an existence lookup.

@@ -1,0 +1,19 @@
+{
+  "observedAt": "2026-10-12T03:17:06.103241+00:00",
+  "startedAt": "2026-10-12T03:13:19Z",
+  "finishedAt": "2026-10-12T03:13:46Z",
+  "githubRun": "https://github.com/Known-Enough/known-enough/actions/runs/38198897701",
+  "actor": "Battosai1806",
+  "report": {
+    "result": "ORIGINAL_MAILBOX_CLEANUP_BLOCKED",
+    "signup": 0,
+    "providerCalls": 0,
+    "operation": "mailbox:POST-token",
+    "code": "MAILTM_REQUEST_FAILED",
+    "httpStatus": 401,
+    "sourceSha": "e4daf6f6d04a25dcbf30f82b94d37ef5892ae60f",
+    "originalSource": "246a1d8552810e46efdc635ba956ed459bbd9ad2"
+  },
+  "classification": "EXTERNAL_MAIL_PROVIDER_AUTHENTICATION",
+  "remainingEvidence": "Ownership-restoring provider access or authoritative absence/deletion confirmation for the original pending synthetic mailbox; no absence inferred from401."
+}
