@@ -1,3 +1,5 @@
+**Current status: READY / unclaimed.** User moved the original mailbox cleanup to [DEBT01](../../technical-debt/DEBT01/README.md). B can freshly claim OPS03 and continue live qualification using new independent synthetic fixtures; preserve current-run cleanup, participant consent and cumulative usage. Do not repeat installation or the old mailbox login. Earlier statuses below are historical.
+
 # OPS03 — Recoverable distributed model jobs
 
 **Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of OPS02, not deferred administrator installation. Complete durable job/lease/retry code and tests now; defer missing queues/permissions/runtime installation and managed proof. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.

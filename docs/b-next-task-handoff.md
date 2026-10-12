@@ -1,3 +1,5 @@
+**Latest user direction — 2026-10-12T06:12:52.805354+00:00: old Mail.tm cleanup moved to [DEBT01](tasks/active/technical-debt/DEBT01/README.md), lowest priority, only when no other eligible work can progress. OPS03 is READY for a fresh B claim; this old mailbox does not block new independent live tests. Preserve its UNKNOWN evidence and normal cleanup/consent/usage safeguards for new runs. No new worker or execution is claimed. Earlier blocked snapshots below are historical.**
+
 Current user-directed OPS03 continuation is BLOCKED/unclaimed at a checked B checkpoint. Do not repeat installation, signup or denied metadata reads unchanged. Exact own private recovery key or bounded metadata reader is required; [handoff](review-artifacts/OPS03/b-blocked-handoff.md). No successor is started under this request; preserve NP00 and the named OPS00 stash.
 
 # B handoff after ASSESS07 — 2026-10-06T17:17:44Z

@@ -1,8 +1,10 @@
+**Current direction 2026-10-12T06:12:52.805354+00:00: the old mailbox cleanup is [DEBT01](../../technical-debt/DEBT01/README.md), deferred last and no longer a prerequisite for this task. Prior cleanup-dependent restrictions below are historical for that specific fixture; do not turn its unknown outcome into PASS.**
+
 # OPS03 — Recoverable distributed model jobs
 
 **Coding-first scheduling — user direction, 2026-10-06:** The coding phase follows the checked coding checkpoint of OPS02, not deferred administrator installation. Complete durable job/lease/retry code and tests now; defer missing queues/permissions/runtime installation and managed proof. Follow [the current two-phase queue](../../../../coding-first-plan.md); record CODE_READY and release a checked claim if mandatory cloud proof remains, without calling the whole task DONE. Older administrator-first scheduling dependencies below are superseded; original technical acceptance remains. No new worker or active claim is created by this update.
 
-- Status: BLOCKED / unclaimed — interim fixture durability checked; private S3 support request available without terminal. Original Mail.tm cleanup and required live proof pending.
+- Status: READY / unclaimed — old mailbox cleanup deferred to DEBT01 by user direction; resume required live proof with fresh independent fixtures.
 - Origin: FA16 in [assessment](../../../../full-assessment.md), tracked by ASSESS06.
 - Priority: follow the shared queue after ASSESS07 → ASSESS10 → OPS00, then OPS01 → OPS02 → OPS03; before broader enrollment/real-person/distributed claims respectively.
 - Worker/model: select at claim under current workflow; architectural changes use the required architecture checkpoint, never an automatic model switch.
