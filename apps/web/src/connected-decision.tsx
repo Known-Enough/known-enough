@@ -50,12 +50,14 @@ function preferenceText(preference: KE.PreferenceCriterion, variables: Variable[
   return `${variable?.label ?? preference.variableId}: ${valueText(preference.value, variable)} (preference cost ${preference.cost})`;
 }
 
-export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNegotiation = false, onQueued }: {
+export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNegotiation = false, onQueued, onDirtyChange, staged = false }: {
   snapshot: KE.PublicDecisionSnapshot; owner: KE.OwnerDecisionSnapshot | null;
   api: (path: string, init?: RequestInit) => Promise<Response>; refresh: () => Promise<void>;
-  backgroundNegotiation?: boolean; onQueued?: (receipt: BackgroundReceipt) => void;
+  backgroundNegotiation?: boolean; onQueued?: (receipt: BackgroundReceipt) => void; onDirtyChange?: (dirty: boolean) => void; staged?: boolean;
 }) {
   const [text, setText] = useState('');
+  const [editingNeeds, setEditingNeeds] = useState(false);
+  useEffect(() => { onDirtyChange?.(!!text.trim()); }, [text, onDirtyChange]);
   const [selected, setSelected] = useState<string[]>([]);
   const [empty, setEmpty] = useState(false);
   const [reviewed, setReviewed] = useState(false);
@@ -137,8 +139,9 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
         onChange={event => setReviewedFrame(event.target.checked ? frameReviewKey : null)} />I reviewed this frame version, its options and public rules.</label>
         <button disabled={blocked || reviewedFrame !== frameReviewKey} onClick={() => void command('CONFIRM_FRAME', { frameVersion: snapshot.frame.frameVersion })}>Confirm shared frame</button></>}
     </section>
-    {owner && <section className="ke-card"><h2>Your private conditions</h2>
+    {owner && (!staged || allConfirmed) && <section className="ke-card"><h2>Your private conditions</h2>
       <p>Known Enough and its authorized AI process these inputs. Other participants receive only shared facts and disclosures you authorize. Outcomes may imply information. Use synthetic data here.</p>
+      {(!staged || allConfirmed && (owner.ownInputReadiness !== 'READY' || !!draft || editingNeeds)) && <>
       <label htmlFor="connected-owner-text">Explain your limits and preferences privately</label>
       <textarea id="connected-owner-text" value={text} onChange={event => setText(event.target.value)} maxLength={4000} disabled={blocked || !allConfirmed} />
       <button disabled={blocked || !allConfirmed || !text.trim()} onClick={() => void interpret()}>Interpret my conditions</button>
@@ -157,6 +160,8 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
           draftId: draft.draftId, draftVersion: draft.draftVersion, constraintIds: selected })}>Confirm selected conditions</button>
         <p>Only selected conditions become authoritative. Replacing confirmed conditions requires everyone to reconfirm the revised frame.</p>
       </div>}
+      </>}
+      {staged && allConfirmed && owner.ownInputReadiness === 'READY' && !draft && !editingNeeds && <button className="secondary" onClick={() => setEditingNeeds(true)}>Change my private needs</button>}
       {owner.pendingQuestions.filter(question => question.status === 'PENDING').map(question => <div key={question.questionId}><h3>Private negotiation question</h3>
         <p>Would this alternative work, provided all your confirmed hard limits still pass?</p><p>{ruleText(question.adjustment, variables)}</p>
         <p>Expires {question.expiresAt}. Permission for this adjustment does not disclose your conditions or approve a final proposal.</p>
@@ -167,7 +172,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
         <p>{ruleText(permission.adjustment, variables)}</p><p>Expires {permission.expiresAt}. You can revoke permission for future use.</p>
         <button disabled={blocked} onClick={() => void command('REVOKE_NEGOTIATION', { permissionId: permission.permissionId, permissionVersion: permission.permissionVersion })}>Revoke this adjustment</button>
       </div>)}
-      <button disabled={blocked || awaitingJob || !['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status)} onClick={() => void generate()}>Explore proposals</button>
+      {(!staged || ['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status)) && <button disabled={blocked || awaitingJob || !['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status)} onClick={() => void generate()}>Explore proposals</button>}
     </section>}
     {owner && owner.disclosurePermissions.length > 0 && <section className="ke-card"><h2>Your disclosure choices</h2>
       <p>Sharing a detail is separate from allowing an adjustment or approving a proposal. Declining to share does not by itself reject the proposal.</p>

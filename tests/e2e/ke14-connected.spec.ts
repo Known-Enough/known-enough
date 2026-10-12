@@ -45,7 +45,7 @@ test('three connected owners create, confirm private inputs, negotiate and appro
       pages.push(await context.newPage());
     }
     const [maya, leo, nina] = pages;
-    await maya!.goto(url);
+    await maya!.goto(url + '?demo=legacy');
     await maya!.getByLabel('Scenario', { exact: true }).selectOption('SHARED_PURCHASE');
     await maya!.getByRole('button', { name: 'Create AI frame for review' }).click();
     await expect(maya!.getByRole('heading', { name: 'Shared frame', exact: true }), JSON.stringify(statuses)).toBeVisible();
@@ -56,7 +56,7 @@ test('three connected owners create, confirm private inputs, negotiate and appro
       const { token } = await response.json();
       await api.call(person, `/decisions/${decisionId}/invitations/redeem`, { requestId: `browser-redeem-${person}`, token });
     }
-    await leo!.goto(`${url}?decision=${decisionId}`); await nina!.goto(`${url}?decision=${decisionId}`);
+    await leo!.goto(`${url}?demo=legacy&decision=${decisionId}`); await nina!.goto(`${url}?demo=legacy&decision=${decisionId}`);
     for (const page of [leo!, nina!]) await page.getByRole('button', { name: 'Load shared decision' }).click();
     for (const page of pages) {
       await page.getByRole('button', { name: 'Load shared decision' }).click();
@@ -133,7 +133,7 @@ test('an unknown connected command result retries the identical envelope and rec
       await route.fulfill({ status: response.status, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: text });
     });
     const page = await context.newPage();
-    await page.goto(`${url}?decision=${id}`);
+    await page.goto(`${url}?demo=legacy&decision=${id}`);
     await page.getByRole('button', { name: 'Load shared decision' }).click();
     await page.getByLabel('I reviewed this frame version, its options and public rules.').check();
     await page.getByRole('button', { name: 'Confirm shared frame' }).click();

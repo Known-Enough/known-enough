@@ -42,19 +42,19 @@ test('mobile keyboard entry, pending/disabled copy and private questions preserv
     await expect(pendingPage.getByRole('button', { name: 'Create group', exact: true })).toHaveCount(0);
     const h = await freshGroup(api); await h.ready(); await h.generate();
     const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' }); contexts.push(mobile); await connect(mobile, api, 'iris');
-    const page = await mobile.newPage(); await page.goto(url); await page.getByRole('button', { name: 'Open decision', exact: true }).click();
+    const page = await mobile.newPage(); await page.goto(url + '?decision=' + h.decisionId);
     await expect(page.getByRole('heading', { name: 'Private negotiation question' })).toBeVisible();
     await expect(page.getByText('Permission for this adjustment does not disclose your conditions or approve a final proposal.', { exact: false })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     expect(await page.locator('body').innerText()).not.toMatch(/NP_PRIVATE_RAW_CANARY|schema|contextToken|semanticVersion|controlVersion|owner route/);
     await page.screenshot({ path: '/tmp/np03-mobile-private.png', fullPage: true });
-    const other = await browser.newContext(); contexts.push(other); await connect(other, api, 'omar'); const otherPage = await other.newPage(); await otherPage.goto(url); await otherPage.getByRole('button', { name: 'Open decision', exact: true }).click();
+    const other = await browser.newContext(); contexts.push(other); await connect(other, api, 'omar'); const otherPage = await other.newPage(); await otherPage.goto(url + '?decision=' + h.decisionId);
     await expect(otherPage.getByRole('heading', { name: 'Shared frame', exact: true })).toBeVisible();
     await expect(otherPage.getByRole('heading', { name: 'Private negotiation question' })).toHaveCount(0);
     await page.getByRole('button', { name: 'Decline this adjustment' }).click();
     await expect(page.getByRole('heading', { name: 'Private negotiation question' })).toHaveCount(0);
     expect(await otherPage.locator('body').innerText()).not.toContain('NP_PRIVATE_RAW_CANARY');
-    await api.disable('iris'); await page.getByRole('button', { name: 'Refresh account and groups' }).click();
+    await api.disable('iris'); await page.getByRole('button', { name: 'Refresh decision' }).click();
     await expect(page.getByText('Your access is disabled.', { exact: false })).toBeVisible();
   } finally { await Promise.all(contexts.map(context => context.close())); await api.close(); }
 });
@@ -73,7 +73,7 @@ test('only the owner sees an exact disclosure preview; declining keeps proposal 
       status: 'PENDING', expiresAt: new Date(Date.now() + 600000).toISOString(), kind: 'EXACT_TEXT', text, textHash: createHash('sha256').update(text).digest('hex') });
     for (const who of ['iris', 'omar']) {
       const context = await browser.newContext(); contexts.push(context); await connect(context, api, who); const page = await context.newPage();
-      await page.goto(url); await page.getByRole('button', { name: 'Open decision', exact: true }).click();
+      await page.goto(url + '?decision=' + h.decisionId);
       if (who === 'iris') {
         await expect(page.getByRole('heading', { name: 'Review this exact disclosure' })).toBeVisible();
         await expect(page.getByText(text, { exact: true })).toBeVisible();
@@ -94,8 +94,9 @@ test('public draft takes keyboard focus; malformed responses show a safe retry m
   try {
     await connect(context, api, 'iris'); await api.call('iris', '/account/register', { displayName: 'Iris' }); await api.approve('iris');
     await api.groups.create({ kind: 'participant', subject: 'iris' }, { name: 'Small club', idempotencyKey: 'small' });
-    const page = await context.newPage(); await page.goto(url);
-    await page.getByLabel('What should this group decide?').fill('Choose a gallery meetup.'); await page.getByRole('button', { name: 'Draft a new decision', exact: true }).click();
+    const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: 'Open group', exact: true }).click();
+    await page.getByRole('button', { name: 'Start a decision' }).click();
+  await page.getByLabel('What should this group decide?').fill('Choose a gallery meetup.'); await page.getByRole('button', { name: 'Draft a new decision', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Review the public draft' })).toBeFocused();
     await page.getByRole('checkbox', { name: 'I reviewed this public draft and the required approvers' }).check();
     await page.getByLabel('Decision title', { exact: true }).fill('Changed title');
@@ -112,8 +113,9 @@ test('delayed draft save clears premature review before creation can proceed', a
   try {
     await connect(context, api, 'iris'); await api.call('iris', '/account/register', { displayName: 'Iris' }); await api.approve('iris');
     await api.groups.create({ kind: 'participant', subject: 'iris' }, { name: 'Small club', idempotencyKey: 'small' });
-    const page = await context.newPage(); await page.goto(url);
-    await page.getByLabel('What should this group decide?').fill('Choose a fictional gallery meetup.');
+    const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: 'Open group', exact: true }).click();
+    await page.getByRole('button', { name: 'Start a decision' }).click();
+  await page.getByLabel('What should this group decide?').fill('Choose a fictional gallery meetup.');
     await page.getByRole('button', { name: 'Draft a new decision', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Review the public draft' })).toBeVisible();
     const reviewed = page.getByRole('checkbox', { name: 'I reviewed this public draft and the required approvers' });
@@ -144,8 +146,9 @@ test('unanswered public questions survive saving and explicit answers create a r
   try {
     await connect(context, api, 'iris'); await api.call('iris', '/account/register', { displayName: 'Iris' }); await api.approve('iris');
     await api.groups.create({ kind: 'participant', subject: 'iris' }, { name: 'Small club', idempotencyKey: 'small' });
-    const page = await context.newPage(); await page.goto(url);
-    await page.getByLabel('What should this group decide?').fill('Choose a gallery meetup.');
+    const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: 'Open group', exact: true }).click();
+    await page.getByRole('button', { name: 'Start a decision' }).click();
+  await page.getByLabel('What should this group decide?').fill('Choose a gallery meetup.');
     await page.getByRole('button', { name: 'Draft a new decision', exact: true }).click();
     const question = page.getByText('Should this meetup be indoors or outdoors?', { exact: true });
     await expect(question).toBeVisible();
@@ -168,7 +171,8 @@ test('failed account refresh clears prior approved groups and recipient links', 
   try {
     await connect(context,api,'iris');await api.call('iris','/account/register',{displayName:'Iris'});await api.approve('iris');
     await api.groups.create({kind:'participant',subject:'iris'},{name:'Fictional club',idempotencyKey:'club'});
-    const page=await context.newPage();await page.goto(url);await expect(page.getByText('Access approved for Iris.',{exact:false})).toBeVisible();
+    const page=await context.newPage();await page.goto(url);await expect(page.getByText('Access approved',{exact:true})).toBeVisible();
+    await page.getByRole('button',{name:'Open group',exact:true}).click();await page.getByText('Invite someone',{exact:true}).click();
     await page.getByLabel('Recipient email', {exact:true}).fill('fictional-recipient@example.invalid');
     await page.getByRole('button',{name:'Create invitation link',exact:true}).click();await expect(page.getByLabel('Invitation link',{exact:true})).toBeVisible();
     await page.route('https://api.example.test/account',route=>route.fulfill({status:500,body:'PRIVATE_FAILURE',headers:{'access-control-allow-origin':'*'}}));
@@ -181,7 +185,7 @@ test('a late approved refresh cannot overwrite a newer disabled account', async 
   const api=await npApi();const context=await browser.newContext();
   try{
     await connect(context,api,'iris');await api.call('iris','/account/register',{displayName:'Iris'});await api.approve('iris');
-    const page=await context.newPage();await page.goto(url);await expect(page.getByText('Access approved for Iris.',{exact:false})).toBeVisible();
+    const page=await context.newPage();await page.goto(url);await expect(page.getByText('Access approved',{exact:true})).toBeVisible();
     let release!:()=>void;let entered!:()=>void;const started=new Promise<void>(resolve=>{entered=resolve;});const wait=new Promise<void>(resolve=>{release=resolve;});let requests=0;
     await page.route('https://api.example.test/account',async route=>{
       const response=await api.call('iris','/account');const body=await response.text();
@@ -205,7 +209,7 @@ test('shared load helper awaits a held signed owner read before returning', asyn
   let finished=false;const statuses:string[]=[];
   const loading=loadSharedDecision(page,'https://api.example.test',h.decisionId,status=>statuses.push(status)).then(()=>{finished=true;});
   await expect.poll(()=>reached).toBe(true);
-  await expect(page.getByRole('button',{name:'Load shared decision',exact:true})).toBeDisabled();expect(finished).toBe(false);
+  await expect(page.getByRole('button',{name:'Refresh decision',exact:true})).toBeDisabled();expect(finished).toBe(false);
   release();await loading;expect(finished).toBe(true);expect(statuses).toContain('HTTP_OK');
   await expect(page.getByLabel('I reviewed this frame version, its options and public rules.')).toBeVisible();
  } finally {release();await context.close();await api.close();}

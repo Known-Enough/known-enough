@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { ruleText, variableText } from './connected-decision';
 class UserFlowError extends Error {}
-export function GroupDecisions({ group, api, reload, openDecision }: { group: Groups.GroupSnapshot;
-  api: (path: string, init?: RequestInit) => Promise<Response>; reload: () => Promise<void>; openDecision: (id: string) => void }) {
+export function GroupDecisions({ group, api, reload, openDecision, startCollapsed = false }: { group: Groups.GroupSnapshot;
+  api: (path: string, init?: RequestInit) => Promise<Response>; reload: () => Promise<void>; openDecision: (id: string) => void; startCollapsed?: boolean }) {
+  const [starting, setStarting] = useState(!startCollapsed);
   const [objective, setObjective] = useState(''); const [draft, setDraft] = useState<Groups.GroupDraft | null>(null);
   const draftHeading = useRef<HTMLHeadingElement>(null);
   useEffect(() => { draftHeading.current?.focus(); }, [draft?.id, draft?.revision]);
@@ -41,7 +42,7 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
   }
   return <section aria-busy={busy}><h4>Decisions for {group.name}</h4>
     {group.decisions.map(decision => <div key={decision.id}>{decision.current
-      ? <button disabled={busy} onClick={() => openDecision(decision.id)}>Open decision</button>
+      ? <button className={startCollapsed ? "secondary" : undefined} disabled={busy} onClick={() => openDecision(decision.id)}>Open decision</button>
       : <><p>Membership changed. This decision is paused so old confirmations cannot apply to a new group.</p>
         {group.isOrganizer && <button disabled={busy} onClick={() => void action(async () => {
           const result = await request(`decisions/${decision.id}/review`);
@@ -49,7 +50,8 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
             groupVersion: result.groupVersion as number, participants: result.participants as { id: string; displayName: string }[] }); setReviewed(false);
         })}>Review changed roster</button>}</>}
     </div>)}
-    {group.isOrganizer && <>
+    {group.isOrganizer && !starting && <button onClick={() => setStarting(true)}>Start a decision</button>}
+    {group.isOrganizer && starting && <>
       <label htmlFor={`group-objective-${group.id}`}>What should this group decide?</label>
       <textarea id={`group-objective-${group.id}`} value={objective} maxLength={2000} disabled={busy || !!pending.current}
         onChange={event => { setObjective(event.target.value); setReviewed(false); }} />

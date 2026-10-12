@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { GroupDecisions } from './group-decisions';
 import { Groups } from '@deal-table/contracts';
-export function GroupHome({ api, openDecision }: { api: (path: string, init?: RequestInit) => Promise<Response>;
-  openDecision: (id: string) => void }) {
+export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onBack }: { api: (path: string, init?: RequestInit) => Promise<Response>;
+  openDecision: (id: string) => void; selectedGroupId?: string; onOpenGroup: (id: string) => void; onBack: () => void }) {
   const [available, setAvailable] = useState(false);
   const [checking, setChecking] = useState(true);
   const [account, setAccount] = useState<ReturnType<typeof Groups.AccountSnapshot.parse> | null>(null);
   const [groups, setGroups] = useState<Groups.GroupSnapshot[]>([]);
   const groupRequest = useRef<{ name: string; idempotencyKey: string } | null>(null);
   const [groupName, setGroupName] = useState('');
+  const [creating, setCreating] = useState(false);
   const [email, setEmail] = useState(''); const [link, setLink] = useState(''); const [replace, setReplace] = useState(false);
   const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false);
   const [token, setToken] = useState(() => {
@@ -49,10 +50,10 @@ export function GroupHome({ api, openDecision }: { api: (path: string, init?: Re
       const next = result.account ? Groups.AccountSnapshot.parse(result.account) : null;
       let nextGroups: Groups.GroupSnapshot[] = [];
       if (next?.status === 'APPROVED') {
-        const response = await api('/groups', {signal: controller.signal});
+        const response = await api(selectedGroupId ? '/groups/' + selectedGroupId : '/groups', {signal: controller.signal});
         if (!response.ok) throw new Error('Groups unavailable');
-        const result = await response.json() as { groups: unknown[] };
-        nextGroups = result.groups.map(group => Groups.GroupSnapshot.parse(group));
+        const result = await response.json() as { groups?: unknown[]; group?: unknown };
+        nextGroups = selectedGroupId ? [Groups.GroupSnapshot.parse(result.group)] : (result.groups ?? []).map(group => Groups.GroupSnapshot.parse(group));
       }
       if (!current()) return;
       setAvailable(true); setAccount(next); setGroups(nextGroups); setNotice('');
@@ -68,7 +69,7 @@ export function GroupHome({ api, openDecision }: { api: (path: string, init?: Re
     void load().catch(() => {if (mounted.current) setNotice('Groups are unavailable. Try refreshing or signing in again.');});
     return () => {mounted.current = false; ++loadEpoch.current; loadAbort.current?.abort();};
   }, []); // The component is keyed to the authenticated session.
-  async function action(path: string, body: unknown, after?: (result: Record<string, unknown>) => void) {
+  async function action(path: string, body: unknown, after?: (result: Record<string, unknown>) => boolean | void) {
     setBusy(true); setNotice('');
     try {
       const response = await api(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
@@ -78,12 +79,12 @@ export function GroupHome({ api, openDecision }: { api: (path: string, init?: Re
           : response.status === 403 ? 'Account approval or organizer access is required.'
           : 'This action could not be completed. Check access, the recipient and link expiry.'); return;
       }
-      const result = await response.json() as Record<string, unknown>; after?.(result); await load(true);
+      const result = await response.json() as Record<string, unknown>; if (!mounted.current) return; if (after?.(result) !== true) await load(true);
     } catch { setNotice('The result is unknown. Refresh before retrying; replace a lost invitation link explicitly.'); }
     finally { setBusy(false); }
   }
-  return <section className="ke-card" aria-busy={busy}><h2>Your account and groups</h2>
-    <p>Email confirmation queues your account for review. After approval, create a group or accept an invitation.</p>
+  return <section className="ke-card" aria-busy={busy}><h2>{account?.status === 'APPROVED' ? selectedGroupId ? groups[0]?.name ?? 'Your group' : 'Your groups' : 'Account access'}</h2>
+    {selectedGroupId && <button className="secondary" disabled={busy} onClick={onBack}>Back to groups</button>}
     <button className="secondary" disabled={busy} onClick={() => { void load().catch(() => setNotice('Refresh failed. Sign in again if needed.')); }}>Refresh account and groups</button>
     <fieldset disabled={busy || checking} style={{border: 0, padding: 0, minWidth: 0}} aria-label="Account and group actions">
     {available && !checking && !account && <p>Your account setup is still being completed. Refresh shortly, or contact the operator if it remains unavailable.</p>}
@@ -91,23 +92,32 @@ export function GroupHome({ api, openDecision }: { api: (path: string, init?: Re
     {account?.status === 'REJECTED' && <p>Your access request was declined. Contact the operator outside this app.</p>}
     {account?.status === 'DISABLED' && <p>Your access is disabled. Group and decision actions are unavailable.</p>}
     {account?.status === 'APPROVED' && <>
-      <p>Access approved for {account.displayName}. Create a group or accept an invitation, then describe what your group should decide.</p>
+      {!selectedGroupId && <>
+      <p>Access approved</p>
+      {!groups.length && <p>No groups yet. Create a group or accept an invitation to get started.</p>}
+      <>{!creating && <button disabled={busy} onClick={() => setCreating(true)}>Create group</button>}{creating && <>
       <label htmlFor="new-group-name">New group name</label><input id="new-group-name" value={groupName} maxLength={80} disabled={!!groupRequest.current} onChange={event => setGroupName(event.target.value)} />
-      <button disabled={busy || !groupName.trim()} onClick={() => { groupRequest.current ??= { name: groupName, idempotencyKey: crypto.randomUUID() }; void action('/groups', groupRequest.current, () => { groupRequest.current = null; setGroupName(''); }); }}>Create group</button>
-      {token && <><p>A group invitation is waiting. Accept it only if you want to join; it does not confirm a decision or approve a proposal.</p>
-        <button disabled={busy} onClick={() => void action('/groups/accept', { token }, () => { setToken(''); sessionStorage.removeItem('ke-group-invite'); })}>Accept group invitation</button>
-        <button className="secondary" onClick={() => { setToken(''); sessionStorage.removeItem('ke-group-invite'); }}>Discard group invitation</button></>}
-      {groups.map(group => <article key={group.id}><h3>{group.name}</h3><details><summary>Group members and membership changes</summary><ul>{group.members.map(member => <li key={member.id}>{member.displayName}{member.isOrganizer ? ' (organizer)' : ''}
+      <button disabled={busy || !groupName.trim()} onClick={() => { groupRequest.current ??= { name: groupName, idempotencyKey: crypto.randomUUID() }; void action('/groups', groupRequest.current, result => {
+        const group = Groups.GroupSnapshot.parse(result.group); groupRequest.current = null; setGroupName(''); onOpenGroup(group.id); return true;
+      }); }}>Create group</button></>}</>
+      {token && <><p>A group invitation is waiting. Accepting joins the group; it does not confirm a decision or approve a proposal.</p>
+        <button disabled={busy} onClick={() => void action('/groups/accept', { token }, result => { const group = Groups.GroupSnapshot.parse(result.group); setToken(''); sessionStorage.removeItem('ke-group-invite'); onOpenGroup(group.id); return true; })}>Accept group invitation</button>
+        <button className="secondary" onClick={() => { setToken(''); sessionStorage.removeItem('ke-group-invite'); }}>Decline group invitation</button></>}
+      {groups.map(group => <article key={group.id}><h3>{group.name}</h3><button disabled={busy} onClick={() => onOpenGroup(group.id)}>Open group</button></article>)}
+      </>}
+      {selectedGroupId && <>
+      {groups.map(group => <article key={group.id}><details><summary>Group members and membership changes</summary><ul>{group.members.map(member => <li key={member.id}>{member.displayName}{member.isOrganizer ? ' (organizer)' : ''}
         {group.isOrganizer && !member.isOrganizer && <button className="secondary" disabled={busy} onClick={() => void action(`/groups/${group.id}/remove`, { memberId: member.id, version: group.version })}>Remove {member.displayName}</button>}</li>)}</ul>
         <p>{group.pendingInvitations} pending invitation links. Joining or removing a member requires linked decisions to be reviewed with a new roster.</p>
-        </details><GroupDecisions group={group} api={api} reload={load} openDecision={openDecision} />
-        {group.isOrganizer && <><label htmlFor={`group-email-${group.id}`}>Recipient email</label><input id={`group-email-${group.id}`} type="email" value={email} maxLength={254} onChange={event => setEmail(event.target.value)} />
+        </details><GroupDecisions group={group} api={api} reload={load} openDecision={openDecision} startCollapsed />
+        {group.isOrganizer && <details><summary>Invite someone</summary><label htmlFor={`group-email-${group.id}`}>Recipient email</label><input id={`group-email-${group.id}`} type="email" value={email} maxLength={254} onChange={event => setEmail(event.target.value)} />
           <label><input type="checkbox" checked={replace} onChange={event => setReplace(event.target.checked)} /> Replace a lost link (the previous link stops working)</label>
           <button disabled={busy || !email.trim()} onClick={() => void action(`/groups/${group.id}/invitations`, { email, replace }, result => {
             if (typeof result.token !== 'string' || !/^[A-Za-z0-9_-]{32,80}$/.test(result.token)) throw new Error('Invalid link');
             setLink(`${window.location.origin}${window.location.pathname}#groupInvite=${result.token}`); setEmail(''); setReplace(false);
-          })}>Create invitation link</button></>}
+          })}>Create invitation link</button></details>}
       </article>)}
+      </>}
     </>}
     {link && <><p>Copy this recipient-bound link privately. It expires after 24 hours. No email has been sent. Share the link yourself only with the intended recipient.</p><label htmlFor="group-copy-link">Invitation link</label>
       <input id="group-copy-link" readOnly value={link} onFocus={event => event.currentTarget.select()} /><button className="secondary" onClick={() => setLink('')}>Hide invitation link</button></>}

@@ -16,3 +16,16 @@ it('real JWT verifier gates registration/groups, denies mock identity and old di
     expect((await api.call('host', '/decisions/unknown/public')).status).toBe(403);
   } finally { await api.close(); }
 });
+
+it('selected group read uses current approved membership and exposes no private account metadata', async () => {
+  const api = await npApi();
+  try {
+    for (const who of ['owner', 'outsider']) { await api.call(who, '/account/register', { displayName: who }); await api.approve(who); }
+    const created = await api.call('owner', '/groups', { name: 'Selected group', idempotencyKey: 'one' });
+    const group = (await created.json()).group;
+    const read = await api.call('owner', `/groups/${group.id}`); expect(read.status).toBe(200);
+    expect(await read.text()).not.toMatch(/emailHash|subject|profile|description|bytesBase64/);
+    expect((await api.call('outsider', `/groups/${group.id}`)).status).toBe(404);
+    await api.disable('owner'); expect((await api.call('owner', `/groups/${group.id}`)).status).toBe(403);
+  } finally { await api.close(); }
+});

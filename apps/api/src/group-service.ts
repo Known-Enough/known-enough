@@ -83,6 +83,14 @@ export class GroupService {
     return this.repository.transaction(state => { this.account(state, who);
       return state.groups.filter(group => group.members.includes(who)).map(group => this.snapshot(state, group, who)); });
   }
+  async getGroup(principal: TrustedPrincipal | null, rawId: string) {
+    const who = subject(principal), id = Id.parse(rawId);
+    return this.repository.transaction(state => {
+      this.account(state, who); const group = state.groups.find(value => value.id === id);
+      if (!group || !group.members.includes(who)) return fail('NOT_FOUND');
+      return this.snapshot(state, group, who);
+    });
+  }
   async create(principal: TrustedPrincipal | null, raw: unknown) {
     const who = subject(principal); const body = fields(raw, ['name', 'idempotencyKey']);
     const name = label(body.name); const key = Id.parse(body.idempotencyKey);

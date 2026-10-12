@@ -48,9 +48,7 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 
         });
         const page = await context.newPage(); pages.set(role, page);
         await page.goto(`${url}?decision=${group.decisionId}`);
-        if (role === 'organizer') await expect(page.getByRole('button', { name: 'Create invitation link' })).toBeVisible();
-        else await expect(page.getByRole('button', { name: 'Create invitation link' })).toHaveCount(0);
-        await page.getByRole('button', { name: 'Load shared decision' }).click();
+        await expect(page.getByRole('button', { name: 'Create invitation link' })).toHaveCount(0);
         if (role === 'outsider') {
           await expect(page.getByText('The shared decision is unavailable. Check your session or try again.', { exact: true })).toBeVisible();
           await expect(page.getByRole('heading', { name: 'Shared frame', exact: true })).toHaveCount(0);
@@ -59,7 +57,7 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 
           await expect(page.getByRole('heading', { name: 'Shared frame', exact: true })).toBeVisible();
           await expect(page.getByText('Status: A private adjustment question needs an answer.', { exact: true })).toBeVisible();
           await expect(page.getByRole('heading', { name: 'Private negotiation question', exact: true })).toHaveCount(role === 'organizer' ? 1 : 0);
-          await expect(page.getByRole('heading', { name: 'Your private profile', exact: true })).toHaveCount(role === 'display' ? 0 : 1);
+          await expect(page.getByRole('heading', { name: 'Your private conditions', exact: true })).toHaveCount(role === 'display' ? 0 : 1);
           if (role === 'display') {
             await expect(page.getByLabel('Explain your limits and preferences privately')).toHaveCount(0);
             await expect(page.getByRole('button', { name: 'Approve this exact proposal' })).toHaveCount(0);
@@ -79,9 +77,9 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 
         headers: { authorization: `Bearer ${api.bearer('display', { display: true, decisionId: 'another-decision' })}` } });
       expect(wrongRoom.status).toBe(403);
       await api.disable('omar'); const member = pages.get('member')!;
-      await member.getByRole('button', { name: 'Load shared decision' }).click();
-      await expect(member.getByText('The shared decision is unavailable. Check your session or try again.', { exact: true })).toBeVisible();
-      await expect(member.getByRole('heading', { name: 'Your private profile', exact: true })).toHaveCount(0);
+      await member.getByRole('button', { name: 'Refresh decision' }).click();
+      await expect(member.getByText('Your access is disabled.', { exact: false })).toBeVisible();
+      await expect(member.getByRole('heading', { name: 'Your private conditions', exact: true })).toHaveCount(0);
       await expect(member.getByRole('heading', { name: 'Shared frame', exact: true })).toHaveCount(0);
       await member.getByRole('button', { name: 'Refresh account and groups' }).click();
       await expect(member.getByText('Your access is disabled.', { exact: false })).toBeVisible();

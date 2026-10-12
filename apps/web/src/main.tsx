@@ -9,8 +9,9 @@ const render = (component: React.ReactNode) => createRoot(root).render(<StrictMo
 let configured;
 try { configured = parseCognitoConfig(import.meta.env); } catch { configured = null; }
 if (configured) {
-  const { ConnectedApp } = await import('./connected-app');
-  render(<ConnectedApp config={configured} />);
+  if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('demo') === 'legacy') {
+    const { ConnectedDemo } = await import('./connected-demo'); render(<ConnectedDemo config={configured} />);
+  } else { const { ConnectedApp } = await import('./connected-app'); render(<ConnectedApp config={configured} />); }
 } else if (import.meta.env.DEV) {
   const { App } = await import('./App');
   render(<App />);

@@ -50,6 +50,7 @@ test('new users request access, operator admits, organizer invites a new recipie
     finally { release(); }
     await creation; await host.unroute('https://api.example.test/groups');
     await expect(host.getByRole('heading', { name: 'Garden club', exact: true })).toBeVisible();
+    await host.getByText('Invite someone', { exact: true }).click();
     await host.getByLabel('Recipient email').fill('omar@example.invalid'); await host.getByRole('button', { name: 'Create invitation link' }).click();
     const link = await host.getByLabel('Invitation link', { exact: true }).inputValue();
     await api.call('omar', '/account/register', { displayName: 'Omar' });
@@ -64,6 +65,7 @@ test('new users request access, operator admits, organizer invites a new recipie
     await host.getByRole('button', { name: 'Refresh account and groups' }).click();
     await host.getByText('Group members and membership changes', { exact: true }).click();
     await expect(host.getByRole('button', { name: 'Remove Omar' })).toBeVisible();
+    await host.getByRole('button', { name: 'Start a decision' }).click();
     await host.getByLabel('What should this group decide?').fill('Choose a gallery meetup venue and time.');
     await host.getByRole('button', { name: 'Draft a new decision', exact: true }).click();
     await expect(host.getByRole('heading', { name: 'Review the public draft' })).toBeVisible();
@@ -78,7 +80,7 @@ test('new users request access, operator admits, organizer invites a new recipie
     await expect(host.getByRole('heading', { name: 'Garden club gallery meetup', exact: true })).toBeVisible();
     await guest.reload(); await guest.getByRole('button', { name: 'Open decision', exact: true }).click();
     await expect(guest.getByRole('heading', { name: 'Shared frame', exact: true })).toBeVisible();
-    await api.disable('omar'); await guest.getByRole('button', { name: 'Refresh account and groups' }).click();
+    await api.disable('omar'); await guest.getByRole('button', { name: 'Refresh decision' }).click();
     await expect(guest.getByText('Your access is disabled.', { exact: false })).toBeVisible();
   } finally { await Promise.all(contexts.map(context => context.close())); await api.close(); }
 });

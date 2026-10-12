@@ -6,7 +6,7 @@ for (const width of [390, 1280]) {
     await page.goto('/#groupInvite=' + 'q'.repeat(43));
     await expect(page.getByRole('heading', { name: 'Decide together.' })).toBeVisible();
     expect(page.url()).not.toContain('groupInvite');
-    await page.screenshot({ path: `docs/review-artifacts/ZZ01/after-${width}.png`, fullPage: true });
+    await page.screenshot({ path: `/tmp/zz-entry-regression-${width}.png`, fullPage: true });
     await expect(page.getByRole('button', { name: 'Create account', exact: true })).toHaveCount(1);
     await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toHaveCount(1);
     await expect(page.getByRole('button', { name: 'Shared display sign-in' })).toBeHidden();

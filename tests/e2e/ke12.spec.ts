@@ -48,7 +48,7 @@ test('connected simulated Alexa+ refreshes public state and clears stale answers
     if (route.request().method() === 'OPTIONS') await route.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' } });
     else await route.fulfill({ status: failPublic ? 503 : 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(current) });
   });
-  await page.goto(url);
+  await page.goto(url + "?demo=legacy");
   await expect(page.getByText('SIMULATED ALEXA+ · SHARED ASSISTANT')).toBeVisible();
   await page.getByLabel('Your question').fill('What is the proposal status?');
   await page.getByRole('button', { name: 'Ask simulated Alexa+' }).click();

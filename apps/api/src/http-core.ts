@@ -476,6 +476,10 @@ function createKnownEnoughApiHandler(
           if (path === '/groups' && request.method === 'GET') {
             sendJson(response, 200, { groups: await options.groups.list(principal) }); return;
           }
+          const selectedGroup = /^\/groups\/([A-Za-z0-9_-]{1,80})$/.exec(path);
+          if (selectedGroup && request.method === 'GET') {
+            sendJson(response, 200, { group: await options.groups.getGroup(principal, selectedGroup[1]!) }); return;
+          }
           if (path === '/groups' && request.method === 'POST') {
             sendJson(response, 200, { group: await options.groups.create(principal, await readJson(request, maxBodyBytes)) }); return;
           }

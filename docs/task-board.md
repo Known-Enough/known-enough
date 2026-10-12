@@ -1,3 +1,5 @@
+Current ZZ03: **BLOCKED/unclaimed — navigation CODE_READY; primary proof awaits actual ZZ02 automatic intake/profile setup.** [Evidence and next step](review-artifacts/ZZ03/navigation-review.md). One sequential batch checkpoint, no successor/duplicate cloud run; ZZ01 and ZZ02 retain their exact live gaps.
+
 Current ZZ03: **IN_PROGRESS/B — scoped group/decision navigation after ZZ01 and ZZ02 checked phase releases.** Frontend deployment depends on actual ZZ02 intake/profile setup; no concurrent claim.
 
 Current ZZ02: **BLOCKED/unclaimed — source/full checks and API/worker publication PASS; hook/profile routes missing, own lambda:GetPolicy AccessDenied.** [Exact admin setup](review-artifacts/ZZ02/onboarding-profile.md). Frontend withheld to preserve intake; ZZ03 checked-phase continuation eligible, no successor claimed yet.

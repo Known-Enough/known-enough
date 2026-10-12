@@ -77,6 +77,7 @@ export async function exploreProposals(page: Page, reasoningUrl: string, record:
 
 /** Read a new group only after its committed server snapshot is rendered. */
 export async function createGroup(page: Page, name: string) {
+  if (!await page.getByLabel('New group name').isVisible()) await page.getByRole('button', { name: 'Create group', exact: true }).click();
   await page.getByLabel('New group name').fill(name);
   await page.getByRole('button', { name: 'Create group', exact: true }).click();
   await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
@@ -85,10 +86,11 @@ export async function createGroup(page: Page, name: string) {
 /** Observe existing reads and await committed load; never retry or retain response contents. */
 export async function loadSharedDecision(page: Page, apiUrl: string, id: string, record: (status: string) => void = () => {}) {
   const publicUrl=apiUrl+`/decisions/${id}/public`, ownerUrl=apiUrl+`/decisions/${id}/me`;
-  await page.getByLabel('Decision ID from your invitation').fill(id);
-  const button=page.getByRole('button',{name:'Load shared decision',exact:true});
+  const legacy = new URL(page.url()).searchParams.get('demo') === 'legacy';
+  if (legacy) await page.getByLabel('Decision ID from your invitation').fill(id);
+  const button=page.getByRole('button',{name:legacy?'Load shared decision':'Refresh decision',exact:true});
   await trackOperation(page,publicUrl,()=>trackOperation(page,ownerUrl,async()=>{
-    const [response]=await Promise.all([page.waitForResponse(r=>r.request().method()==='GET' && r.url()===publicUrl,{timeout:45000}),button.click()]);
+    const [response]=await Promise.all([page.waitForResponse(r=>r.request().method()==='GET' && r.url()===publicUrl,{timeout:45000}),legacy ? button.click() : new URL(page.url()).searchParams.get('decision') === id ? button.click() : page.goto(new URL('?decision='+encodeURIComponent(id),page.url()).href)]);
     await expect(button).toBeEnabled();
     expect(response.ok()).toBe(true);
     await expect(page.getByText('The shared decision is unavailable. Check your session or try again.',{exact:true})).toHaveCount(0);
