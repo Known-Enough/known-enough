@@ -1,0 +1,60 @@
+name: ZZ primary frontend publication
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: known-enough-primary-frontend
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && (github.actor_id == '143764700' || github.actor_id == '44531296')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AWS_MAX_ATTEMPTS: 1
+      AWS_RETRY_MODE: standard
+      EXPECTED_SOURCE: ${{ inputs.source_sha }}
+      VITE_COGNITO_REGION: us-east-1
+      VITE_COGNITO_USER_POOL_ID: us-east-1_V9OMjd0zx
+      VITE_COGNITO_DOMAIN: https://known-enough-092954139775.auth.us-east-1.amazoncognito.com
+      VITE_COGNITO_PARTICIPANT_CLIENT_ID: 3accf7paalvon2m8ue8okfi853
+      VITE_COGNITO_DISPLAY_CLIENT_ID: 481ru24906sv26f30i569gq8g0
+      VITE_API_BASE_URL: https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Source and public build checks before credentials
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
+          python3 -B scripts/zz/frontend-release.test.py
+          npm ci
+          npm run build
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughAmplifyMainDeploy
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          role-duration-seconds: 900
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Publish only primary frontend and verify completion
+        run: python3 -B scripts/zz/frontend-release.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: zz-frontend-release
+          path: ${{ runner.temp }}/zz-frontend-release.json
+          if-no-files-found: warn
+          retention-days: 30

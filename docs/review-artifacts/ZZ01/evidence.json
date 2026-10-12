@@ -1,0 +1,40 @@
+{
+  "utc": "2026-10-12T18:46:35.611405+00:00",
+  "baseline": "5aeced68533236b81e1b205d713b867f6cae342a",
+  "status": "CODE_READY; whole ZZ01 incomplete",
+  "sourceSha256": {
+    "apps/web/src/auth-entry.tsx": "fa646631ef194a086cc85a09e17220f7ec48ed8abd129c55e20ae0cc7c55703e",
+    "apps/web/src/connected-app.tsx": "67322b5bdf4f3bd1f8ca123f20cc872ef1486dbf13a437989f8e523b133d4e28",
+    "apps/web/src/email-registration-form.tsx": "5a7862bfe8ccf9c848d3a1409328bee2a409ade84a47c24528fea7eaeecd87bb",
+    "apps/web/src/style.css": "9d0ebb88f0e0b6369251b0e4e15668813f214b0bab5e3ab5457d64dc168864a3",
+    "tests/e2e/zz-entry.spec.ts": "c9e6dc9f3d303e7d8723674bcf9862f33ac9076a9757e26cd387725f8b797454",
+    "tests/e2e/email-registration.spec.ts": "4309525bfef62f57525a8bd13572755ebc90d8f066d8518d512836b33963918d",
+    "tests/e2e/np-clarity.spec.ts": "6680b84b9ef3cf8d0e0c735c6ca92a26c2fdea0fcd0b2034452cac6e1e8646e5",
+    ".github/workflows/zz-frontend-release.yml": "128e9c67dd058d851209c4b6821191e3bfd3096a0f0b1ef71cfca3e6181cdfa8",
+    "scripts/zz/frontend-release.py": "11bbb3a301f716fa0b66a68fe495bca07c33e91add860bb13a49bcc905352c95",
+    "scripts/zz/frontend-release.test.py": "1ca58de9862e6458b4aa41f74edd82b918e1b1729a790df8aa125c7a7b4f9229"
+  },
+  "checks": {
+    "focusedUnit": 26,
+    "focusedBrowser": 6,
+    "fullApplication": 1562,
+    "optionalSkips": 2,
+    "fullBrowser": 67,
+    "hosted": 1,
+    "publisherPrivacy": 2
+  },
+  "provider": {
+    "mode": "CLASSIC observed via live page CSS",
+    "signupLink": true,
+    "removal": "NOT_IMPLEMENTED_SUPPORTED_CAPABILITY",
+    "signupPost": "NOT_EXECUTED",
+    "failedUserRequestCause": "UNKNOWN"
+  },
+  "publication": "NOT_EXECUTED at this source checkpoint",
+  "usage": {
+    "providerCalls": 0,
+    "signup": 0,
+    "emailSent": 0,
+    "IAMWrites": 0
+  }
+}

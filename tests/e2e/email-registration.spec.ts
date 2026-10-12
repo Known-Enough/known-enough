@@ -11,7 +11,7 @@ test('configured signup UI sends email, confirms code and retains real hosted PK
     await route.fulfill({ contentType: 'application/x-amz-json-1.1', body: JSON.stringify(action.endsWith('.SignUp') ? { UserConfirmed: false, CodeDeliveryDetails: { DeliveryMedium: 'EMAIL' } } : {}) });
   });
   await page.goto('/');const signIn = page.getByRole('button', { name: 'Sign in', exact: true });await expect(signIn).toBeVisible();await expect(page.getByRole('button', { name: 'Sign in or register', exact: true })).toHaveCount(0);
-  await page.keyboard.press('Tab');await expect(signIn).toBeFocused();
+  await page.keyboard.press('Tab');await expect(page.getByRole('button', { name: 'Create account', exact: true })).toBeFocused();
   await openSignupForm(page);
   await page.getByLabel('Username', { exact: true }).fill('fictional-user');await page.getByLabel('Email', { exact: true }).fill('synthetic@example.invalid');
   await page.getByLabel('Password', { exact: true }).fill(password);const diagnostics:string[][]=[];
@@ -19,7 +19,7 @@ test('configured signup UI sends email, confirms code and retains real hosted PK
   expect(diagnostics.at(-1)).toEqual(['HTTP_OK','COGNITO_ACCEPTED']);expect(requests[0]!.body.UserAttributes).toEqual([{ Name: 'email', Value: 'synthetic@example.invalid' }]);
   expect(await page.evaluate(() => JSON.stringify({ local: { ...localStorage }, session: { ...sessionStorage } }))).not.toContain(password);
   await page.getByLabel('Verification code').fill('123456');await page.getByRole('button', { name: 'Verify email', exact: true }).click();
-  await expect(page.getByText('Email verified. Sign in to continue and request access.', { exact: true })).toBeVisible();
+  await expect(page.getByText('Email verified. You can now sign in.', { exact: true })).toBeVisible();
   expect(requests[1]!.body).toEqual({ ClientId: 'localparticipant', Username: 'fictional-user', ConfirmationCode: '123456' });
   expect(await page.evaluate(() => sessionStorage.getItem('known-enough-cognito-session'))).toBeNull();
   let challenge = '';await page.route('https://localtest.auth.us-east-1.amazoncognito.com/**', async route => {

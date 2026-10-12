@@ -8,7 +8,7 @@ import {
 import { SimulatedSharedAssistant } from './simulated-shared-assistant';
 import { decisionStatusText, privateReadinessText } from './decision-copy';
 import { GroupHome } from './group-home';
-import { EmailRegistration } from './email-registration-form';
+import { AuthEntry } from './auth-entry';
 import { ConnectedDecision } from './connected-decision';
 import { backgroundNegotiationAvailable, pollBackgroundDecision, type BackgroundTarget } from './background-negotiation';
 
@@ -83,7 +83,11 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     return () => { active = false; };
   }, [config]);
   const groupInvite = new URLSearchParams(window.location.hash.slice(1)).get('groupInvite');
-  if (groupInvite && /^[A-Za-z0-9_-]{32,80}$/.test(groupInvite)) sessionStorage.setItem('ke-group-invite', JSON.stringify({ token: groupInvite, at: Date.now() }));
+  if (groupInvite && /^[A-Za-z0-9_-]{32,80}$/.test(groupInvite)) {
+    sessionStorage.setItem('ke-group-invite', JSON.stringify({ token: groupInvite, at: Date.now() }));
+    const fragment = new URLSearchParams(window.location.hash.slice(1)); fragment.delete('groupInvite');
+    window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search + (fragment.size ? '#' + fragment.toString() : ''));
+  }
   const signIn = async (kind: CognitoSession['kind']) => {
     setStatus('');
     try { window.location.assign(await beginCognitoSignIn(config, kind)); }
@@ -183,14 +187,12 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     } catch { setStatus('The result is unknown. Retry without replacement first; replace only if the previous link cannot be recovered.'); }
     finally { setBusy(false); }
   };
+  if (!session) return <AuthEntry config={config} signIn={signIn} notice={status} />;
   return <main className="ke-home">
     <header className="masthead ke-masthead"><div><p className="eyebrow">KNOWN ENOUGH</p><h1>Decide together</h1></div>
       {session && <button className="secondary" type="button" onClick={signOut}>Sign out</button>}</header>
     <p className="ke-privacy">Known Enough and its AI process your private inputs. Other people see only the shared choices, proposal and disclosures you authorize. An outcome may still reveal something about people’s needs. Use fictional, non-sensitive data in this preview.</p>
-    {!session ? <section className="ke-card ke-auth-card"><h2>Sign in to the shared decision</h2>
-      <p>Already registered and verified? Sign in to continue.</p><p>To join, create an account and verify your email, then sign in. Your group invitation stays in this tab.</p>
-      <div className="ke-private-actions"><button type="button" onClick={() => void signIn('participant')}>Sign in</button>
-        <button type="button" className="secondary" onClick={() => void signIn('display')}>Shared display sign-in</button></div><EmailRegistration config={config} /><details><summary>Shared display and other sign-up options</summary><p>A shared display uses a separate account and can only read public information. If the provider page offers Sign up, return here for email registration and its verification steps.</p></details></section> : <>
+    {session && <>
       {session.kind === 'participant' && <GroupHome key={session.accessToken} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} openDecision={id => { setRoomInput(id); void load(id); }} />}
       <section className="ke-card"><p className="eyebrow">{session.kind === 'display' ? 'SHARED DISPLAY' : 'PARTICIPANT SESSION'}</p>
         <h2 ref={decisionHeading} tabIndex={-1}>Shared decision</h2><label htmlFor="connected-decision-id">Decision ID from your invitation</label>

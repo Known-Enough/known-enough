@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CognitoBrowserConfig } from './cognito-session';
 import { asRegistrationFailure, confirmEmailRegistration, MIN_REGISTRATION_PASSWORD_LENGTH,
   requestEmailRegistration, type RegistrationCode, type RegistrationDiagnostic } from './email-registration';
@@ -21,8 +21,10 @@ function recoveryText(code: RegistrationCode): string {
   }
 }
 
-export function EmailRegistration({ config }: { config: CognitoBrowserConfig }) {
-  const [stage, setStage] = useState<'closed' | 'details' | 'verify' | 'complete'>('closed');
+export function EmailRegistration({ config, startOpen = false, onClose, onSignIn }: { config: CognitoBrowserConfig; startOpen?: boolean; onClose?: () => void; onSignIn?: () => void }) {
+  const [stage, setStage] = useState<'closed' | 'details' | 'verify' | 'complete'>(startOpen ? 'details' : 'closed');
+  const heading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => { if (stage !== 'closed') heading.current?.focus(); }, [stage]);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -41,7 +43,7 @@ export function EmailRegistration({ config }: { config: CognitoBrowserConfig }) 
       } else if (stage === 'verify') {
         await confirmEmailRegistration(config, username, code);
         setCode(''); setUsername(''); setStage('complete');
-        setMessage('Email verified. Sign in to continue and request access.');
+        setMessage('Email verified. You can now sign in.');
       }
     } catch (error) {
       const observed = asRegistrationFailure(error, stage === 'verify' ? 'confirmation' : 'signup').diagnostic;
@@ -52,7 +54,7 @@ export function EmailRegistration({ config }: { config: CognitoBrowserConfig }) 
   }
   if (stage === 'closed') return <button type="button" className="secondary" onClick={() => setStage('details')}>Create account</button>;
   return <section className="ke-registration" aria-label="Email registration">
-    <h3>{stage === 'details' ? 'Create your account' : stage === 'verify' ? 'Verify your email' : 'Account created'}</h3>
+    <h2 ref={heading} tabIndex={-1}>{stage === 'details' ? 'Create your account' : stage === 'verify' ? 'Verify your email' : 'Account created'}</h2>
     {stage !== 'complete' && <form onSubmit={event => { event.preventDefault(); void submit(); }}>
       <fieldset disabled={busy}>
         {stage === 'details' ? <>
@@ -67,7 +69,8 @@ export function EmailRegistration({ config }: { config: CognitoBrowserConfig }) 
     {stage === 'details' && diagnostic && ['ACCOUNT_EXISTS_OR_PENDING', 'NETWORK_RESULT_UNKNOWN', 'DELIVERY_UNCONFIRMED'].includes(diagnostic.code) && username.trim()
       && <button type="button" className="secondary" onClick={() => { setUsername(username.trim()); setPassword(''); setEmail(''); setDiagnostic(null); setMessage('Enter the code sent to your email.'); setStage('verify'); }}>I have a verification code</button>}
     {stage === 'verify' && <button type="button" className="secondary" onClick={() => { setCode(''); setDiagnostic(null); setMessage(''); setStage('details'); }}>Back to account details</button>}
-    <button type="button" className="secondary" disabled={busy} onClick={() => { setPassword(''); setEmail(''); setUsername(''); setCode(''); setDiagnostic(null); setMessage(''); setStage('closed'); }}>{stage === 'details' ? 'Cancel account creation' : 'Close registration'}</button>
+    <button type="button" className="secondary" disabled={busy} onClick={() => { setPassword(''); setEmail(''); setUsername(''); setCode(''); setDiagnostic(null); setMessage(''); setStage('closed'); onClose?.(); }}>{stage === 'details' ? 'Cancel account creation' : 'Close registration'}</button>
+    {stage === 'complete' && onSignIn && <button type="button" onClick={onSignIn}>Sign in</button>}
     {message && <p role="status">{message}</p>}
     {diagnostic && <p className="ke-help">Reference: {diagnostic.code} at {diagnostic.observedAt}
       {diagnostic.httpStatus ? ` (HTTP ${diagnostic.httpStatus})` : ''}{diagnostic.requestId ? ` (request ${diagnostic.requestId})` : ''}.</p>}

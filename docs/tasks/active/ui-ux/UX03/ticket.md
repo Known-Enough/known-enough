@@ -34,3 +34,5 @@ IN_PROGRESS/B source2630c9f verified; one ownB deployment37557946340 IN_PROGRESS
 ## UX03 checked available verification — 2026-10-07T02:07:15.251778+00:00
 
 REVIEW/CODE_READY Bclaimreleased; source2630c9f deployment37557946340SUCCESS; exactsource/B qualification37557999023FAIL QA01/othersBLOCKED,privacyCLEANPASS,zeroAI/mailusage. Published phone/desktop form/focus/cancel/nooverflow/min8helpPASS no submission. Safe evidence docs/review-artifacts/UX03/release-checkpoint.md and basic-start.md. Final liveacceptance remains BLOCKED, not wholeDONE. Next OPS00 codingphase, preserve A NP00 saved.
+
+ZZ01 app entry correction 2026-10-12: [source-bound entry checkpoint](../../../../review-artifacts/ZZ01/entry-review.md) unifies registration/secondary display and preserves PKCE/verification; functional primary signup and hosted-link provider constraint remain incomplete. Original manual user failure evidence preserved, whole parent task not DONE.
