@@ -5,6 +5,11 @@ on:
       source_sha:
         required: true
         type: string
+      apply_setup:
+        type: boolean
+        default: false
+      api_sha256:
+        type: string
 permissions:
   contents: read
 jobs:
@@ -32,8 +37,16 @@ jobs:
           allowed-account-ids: '092954139775'
           retry-max-attempts: 1
           unset-current-credentials: true
-      - name: Fixed metadata only no writes
-        run: python3 -B scripts/zz/post-confirmation-setup.py
+      - name: Fixed metadata and explicitly requested guarded setup
+        env:
+          APPLY_SETUP: ${{ inputs.apply_setup }}
+          CHECKED_API_HASH: ${{ inputs.api_sha256 }}
+        run: |
+          if [ "$APPLY_SETUP" = true ]; then
+            python3 -B scripts/zz/post-confirmation-setup.py --apply --api-sha256 "$CHECKED_API_HASH"
+          else
+            python3 -B scripts/zz/post-confirmation-setup.py
+          fi
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
