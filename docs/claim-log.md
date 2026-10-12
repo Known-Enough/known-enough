@@ -1,3 +1,5 @@
+Current ZZ02: **BLOCKED/unclaimed — source/full checks and API/worker publication PASS; hook/profile routes missing, own lambda:GetPolicy AccessDenied.** [Exact admin setup](review-artifacts/ZZ02/onboarding-profile.md). Frontend withheld to preserve intake; ZZ03 checked-phase continuation eligible, no successor claimed yet.
+
 Current ZZ02: **IN_PROGRESS/B — trusted automatic pending intake and private profile drawer, after ZZ01 checked phase.** No parallel claim; ZZ01 still has provider criteria open.
 
 Current ZZ01: **BLOCKED/unclaimed — unified app entry deployed and checked; provider-link/complete signup criteria remain.** Checked phase released; ZZ02 eligible next under explicit sequential user direction.

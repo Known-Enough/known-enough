@@ -1,7 +1,7 @@
 {
   "utc": "2026-10-12T19:31:51.745378+00:00",
   "baseline": "87d7b75039fe59da360bfd43c211e63017b156c1",
-  "status": "CODE_READY; actual installation/primary proof incomplete",
+  "status": "BLOCKED/unclaimed; CODE_READY and coordinated backend publication PASS, frontend withheld for real intake setup",
   "sha256": {
     "apps/api/src/partition-deployment.ts": "1c4d300b7c502214fe263d7a59493945b315ae164cadf2e033037d793b539b32",
     "apps/api/src/partition-http.test.ts": "362c9a6430fd8241e0c8f65c69eab199204fd512bef72cd43788258e552541b6",
@@ -42,7 +42,90 @@
   },
   "providerEvent": "NOT_EXECUTED",
   "adminReview": "NOT_EXECUTED",
-  "publication": "NOT_EXECUTED at checkpoint",
+  "publication": {
+    "runUrl": "https://github.com/Known-Enough/known-enough/actions/runs/38298975642",
+    "sourceSha": "0f05fe1fceb3eb2b8d3e17e23035ff5cb1bd702d",
+    "reports": {
+      "partition-backup-report.json": {
+        "sourceSha": "0f05fe1fceb3eb2b8d3e17e23035ff5cb1bd702d",
+        "account": "092954139775",
+        "region": "us-east-1",
+        "result": "PARTITION_PRIOR_CODE_BACKUP_VERIFIED",
+        "privateBackupBytes": 423599,
+        "priorCodeSha256": "da58b98f68f55615b9c41b5b7f6c41c27e061e180f6a27f2e147e0ffc1ca9738",
+        "codeUpdate": "NOT_EXECUTED",
+        "sourceFreeze": "NOT_EXECUTED",
+        "activation": "NOT_EXECUTED"
+      },
+      "partition-prepare-report.json": {
+        "sourceSha": "0f05fe1fceb3eb2b8d3e17e23035ff5cb1bd702d",
+        "result": "COORDINATED_JOBS_PACKAGES_PREPARED",
+        "apiSha256": "a5873e96fd2cc87eec2569ef8c7eb19989caea4edc228d734f7c1ae1590d1df1",
+        "priorApiSha256": "da58b98f68f55615b9c41b5b7f6c41c27e061e180f6a27f2e147e0ffc1ca9738",
+        "worker": {
+          "sourceSha": "0f05fe1fceb3eb2b8d3e17e23035ff5cb1bd702d",
+          "result": "MODEL_JOB_RUNTIME_PREPARED",
+          "sha256": "e79469d943ddb5c1625e1f898b80333a75a0c2581ef0c69ab2d111f2c642b045",
+          "bytes": 365571,
+          "workerKey": "e79469d943ddb5c1625e1f898b80333a75a0c2581ef0c69ab2d111f2c642b045/model-worker.zip",
+          "schedule": "DISABLED",
+          "deployment": "NOT_EXECUTED",
+          "providerCalls": 0,
+          "artifactStorage": "VERIFIED"
+        },
+        "signingKey": "PRESERVED",
+        "migration": "UNCHANGED",
+        "modelFlags": "UNCHANGED_DISABLED",
+        "controlActivation": "NOT_EXECUTED",
+        "providerCalls": 0
+      },
+      "partition-job-source-report.json": {
+        "sourceSha": "0f05fe1fceb3eb2b8d3e17e23035ff5cb1bd702d",
+        "result": "JOB_SOURCE_DISABLED_READBACK_PASS",
+        "writeRequested": true,
+        "state": "DISABLED",
+        "active": 0,
+        "slots": 0,
+        "totalWrites": 0,
+        "totalsUnchangedDuringCheck": true,
+        "providerCalls": 0
+      },
+      "partition-publish-report.json": {
+        "sourceSha": "0f05fe1fceb3eb2b8d3e17e23035ff5cb1bd702d",
+        "result": "LIFECYCLE_OWNER_CODE_READBACK_PASS",
+        "backendSha256": "a5873e96fd2cc87eec2569ef8c7eb19989caea4edc228d734f7c1ae1590d1df1",
+        "priorBackendSha256": "da58b98f68f55615b9c41b5b7f6c41c27e061e180f6a27f2e147e0ffc1ca9738",
+        "environment": "UNCHANGED",
+        "migration": "UNCHANGED",
+        "modelCalls": 0,
+        "dataChanges": 0,
+        "managedOwnerProof": "PENDING"
+      },
+      "partition-worker-publish-report.json": {
+        "result": "WORKER_CODE_DISABLED_READBACK_PASS",
+        "providerCalls": 0,
+        "activation": "NOT_EXECUTED",
+        "codeWriteRequested": true,
+        "actualWorkerSha256": "c46b2a7673297281a730105f3a352b2d98da18e2625472572f1e38d2e404fd3e",
+        "expectedPriorWorkerSha256": "c46b2a7673297281a730105f3a352b2d98da18e2625472572f1e38d2e404fd3e",
+        "workerSha256": "e79469d943ddb5c1625e1f898b80333a75a0c2581ef0c69ab2d111f2c642b045",
+        "sourceSha": "0f05fe1fceb3eb2b8d3e17e23035ff5cb1bd702d",
+        "schedule": "DISABLED"
+      },
+      "partition-upload-report.json": {
+        "sourceSha": "0f05fe1fceb3eb2b8d3e17e23035ff5cb1bd702d",
+        "result": "PARTITION_PRIVATE_PACKAGE_UPLOADED",
+        "deployment": "NOT_EXECUTED",
+        "activation": "NOT_EXECUTED"
+      },
+      "model-job-logging-report.json": {
+        "sourceSha": "0f05fe1fceb3eb2b8d3e17e23035ff5cb1bd702d",
+        "result": "PROVIDER_LOGGING_DISABLED",
+        "code": null,
+        "providerCalls": 0
+      }
+    }
+  },
   "usage": {
     "signup": 0,
     "email": 0,
@@ -69,5 +152,22 @@
     "apiPublication": "NOT_EXECUTED",
     "priorAPIBackup": "VERIFIED",
     "privateArtifactUpload": "VERIFIED"
+  },
+  "setupDenial": {
+    "runUrl": "https://github.com/Known-Enough/known-enough/actions/runs/38300396977",
+    "report": {
+      "result": "ZZ02_SETUP_NOT_VERIFIED",
+      "configurationWrites": 0,
+      "dataWrites": 0,
+      "providerCalls": 0,
+      "signupDelivery": "NOT_EXECUTED",
+      "postConfirmation": "ABSENT",
+      "apiSha256": "a5873e96fd2cc87eec2569ef8c7eb19989caea4edc228d734f7c1ae1590d1df1",
+      "profileRoutesPresent": 0,
+      "operation": "lambda:GetPolicy",
+      "code": "AccessDeniedException"
+    },
+    "role": "KnownEnoughGithubStagingInspector",
+    "actor": "Battosai1806"
   }
 }
