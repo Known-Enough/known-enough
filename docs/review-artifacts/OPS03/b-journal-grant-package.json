@@ -1,0 +1,16 @@
+{
+  "utc": "2026-10-12T09:07:56.564300+00:00",
+  "sourceSha": "cb6bc9e557070eb2e49e31bd50a824f19dcbd2fd",
+  "runUrl": "https://github.com/Known-Enough/known-enough/actions/runs/38227395634",
+  "reports": {
+    "journal-grant-package-report.json": {
+      "result": "JOURNAL_GRANT_PACKAGE_READBACK_PASS",
+      "sourceSha": "cb6bc9e557070eb2e49e31bd50a824f19dcbd2fd",
+      "scriptSha256": "0b97136bb478a9c8becbaadb52046735a5e585672e8d886e8de63068774e0902",
+      "privateKey": "ops01-owned/ops03-journal-grant-0b97136bb478a9c8becbaadb52046735a5e585672e8d886e8de63068774e0902/grant.py",
+      "artifactWrites": 1,
+      "iamWrites": 0,
+      "providerCalls": 0
+    }
+  }
+}
