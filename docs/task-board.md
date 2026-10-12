@@ -1,3 +1,5 @@
+Current ZZ03: **IN_PROGRESS/B — scoped group/decision navigation after ZZ01 and ZZ02 checked phase releases.** Frontend deployment depends on actual ZZ02 intake/profile setup; no concurrent claim.
+
 Current ZZ02: **BLOCKED/unclaimed — source/full checks and API/worker publication PASS; hook/profile routes missing, own lambda:GetPolicy AccessDenied.** [Exact admin setup](review-artifacts/ZZ02/onboarding-profile.md). Frontend withheld to preserve intake; ZZ03 checked-phase continuation eligible, no successor claimed yet.
 
 Current ZZ02: **IN_PROGRESS/B — trusted automatic pending intake and private profile drawer, after ZZ01 checked phase.** No parallel claim; ZZ01 still has provider criteria open.

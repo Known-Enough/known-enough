@@ -1,6 +1,6 @@
 # ZZ03 — Simplify the signed-in app and its navigation
 
-- Status: QUEUED / unclaimed.
+- Status: IN_PROGRESS / B — sequential checked-phase continuation.
 - User-approved structure: 2026-10-12T17:42:55.221080+00:00.
 - Scheduling: after ZZ01 -> ZZ02 checked checkpoints, one sequential claim. Preserve any active project task/NP00; create no worker/chat/monitor from this ticket.
 - Goal: stop showing onboarding, groups, a decision, developer scenarios and simulated assistant at once. Organize the product by the user's current activity.
@@ -37,3 +37,7 @@ Meaningful focused/browser cases: pending/approved-zero-groups/member/organizer/
 Publish docs/review-artifacts/ZZ03/navigation-review.md and source-bound evidence with before/after phone/desktop screenshots, view/navigation map, actual request/identity/access/retained-legacy behavior, focused/full tests, matching live run links and remaining limits. Approved home contains groups and appropriate invitation/create actions; pending home contains only relevant status/profile. Group and decision open as distinct views with reliable back/reload behavior. Developer/demo controls are absent from normal flow. Profile/admission/identity/private progress and actual AI result recovery remain correct.
 
 Record exact code changes/errors/outcomes in task/board/own log/handoff, synchronize checked main and finish with a short chat summary. UI completion does not mark other AI/privacy/lifecycle acceptance DONE. Do not weaken server approval or hide a real broken dependency to declare the MVP ready.
+
+## ZZ03 B claim — 2026-10-12T20:00:01.464294+00:00
+
+IN_PROGRESS/B143764700/ownBattosai1806 after ZZ02 checked/deployed-backend blockedphase release. User directs sequential ZZ01→ZZ02→ZZ03, same worker/no helper. Exact scope: apps/web/src/connected-app.tsx, group-home.tsx, group-decisions.tsx, connected-decision.tsx, style.css, new navigation.ts/test and DEV-only connected-demo.tsx/group-home-demo.tsx; main.tsx for explicit DEV demo selection only; focused navigation browser tests and affected existing group/legacy tests/helpers; ZZ03 evidence/ticket and own tracking. No server/runtime/modeljob/schema/IAM change or private localStorage persistence. Approvedhomegroups; pendingonlyrealstate; selectedgroup/decision distinct unmounted views; query-ID deep links/back/forward/intendedroute restoration and epoch/cancellation; demos/manual IDs/assistant absent normal primary build. Preserve actual owner/context/roster/approval guards. Frontend remains withheld under genuine ZZ02 missing hook/routes so normal intake is not regressed; local/source availability is not actual primary journey/AI proof. Next implement scoped navigation/stage views, full checks and exact dependency handoff.
