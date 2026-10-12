@@ -1,0 +1,83 @@
+{
+  "utc": "2026-10-12T07:25:50.859839+00:00",
+  "sourceSha": "2af293eea1cc0d0a0b8af43899d1b99d56bb0bd3",
+  "runUrl": "https://github.com/Known-Enough/known-enough/actions/runs/38217366365",
+  "reports": {
+    "partition-backup-report.json": {
+      "sourceSha": "2af293eea1cc0d0a0b8af43899d1b99d56bb0bd3",
+      "account": "092954139775",
+      "region": "us-east-1",
+      "result": "PARTITION_PRIOR_CODE_BACKUP_VERIFIED",
+      "privateBackupBytes": 423385,
+      "priorCodeSha256": "ab536bc98998fd0155c8df0e0dea6b93b1c3ce8f4e4ff27195d82b185b7a30a7",
+      "codeUpdate": "NOT_EXECUTED",
+      "sourceFreeze": "NOT_EXECUTED",
+      "activation": "NOT_EXECUTED"
+    },
+    "partition-prepare-report.json": {
+      "sourceSha": "2af293eea1cc0d0a0b8af43899d1b99d56bb0bd3",
+      "result": "COORDINATED_JOBS_PACKAGES_PREPARED",
+      "apiSha256": "da58b98f68f55615b9c41b5b7f6c41c27e061e180f6a27f2e147e0ffc1ca9738",
+      "priorApiSha256": "ab536bc98998fd0155c8df0e0dea6b93b1c3ce8f4e4ff27195d82b185b7a30a7",
+      "worker": {
+        "sourceSha": "2af293eea1cc0d0a0b8af43899d1b99d56bb0bd3",
+        "result": "MODEL_JOB_RUNTIME_PREPARED",
+        "sha256": "c46b2a7673297281a730105f3a352b2d98da18e2625472572f1e38d2e404fd3e",
+        "bytes": 365256,
+        "workerKey": "c46b2a7673297281a730105f3a352b2d98da18e2625472572f1e38d2e404fd3e/model-worker.zip",
+        "schedule": "DISABLED",
+        "deployment": "NOT_EXECUTED",
+        "providerCalls": 0,
+        "artifactStorage": "VERIFIED"
+      },
+      "signingKey": "PRESERVED",
+      "migration": "UNCHANGED",
+      "modelFlags": "UNCHANGED_DISABLED",
+      "controlActivation": "NOT_EXECUTED",
+      "providerCalls": 0
+    },
+    "partition-job-source-report.json": {
+      "sourceSha": "2af293eea1cc0d0a0b8af43899d1b99d56bb0bd3",
+      "result": "JOB_SOURCE_DISABLED_READBACK_PASS",
+      "writeRequested": true,
+      "state": "DISABLED",
+      "active": 0,
+      "slots": 0,
+      "totalWrites": 0,
+      "totalsUnchangedDuringCheck": true,
+      "providerCalls": 0
+    },
+    "partition-publish-report.json": {
+      "sourceSha": "2af293eea1cc0d0a0b8af43899d1b99d56bb0bd3",
+      "result": "LIFECYCLE_OWNER_CODE_READBACK_PASS",
+      "backendSha256": "da58b98f68f55615b9c41b5b7f6c41c27e061e180f6a27f2e147e0ffc1ca9738",
+      "priorBackendSha256": "ab536bc98998fd0155c8df0e0dea6b93b1c3ce8f4e4ff27195d82b185b7a30a7",
+      "environment": "UNCHANGED",
+      "migration": "UNCHANGED",
+      "modelCalls": 0,
+      "dataChanges": 0,
+      "managedOwnerProof": "PENDING"
+    },
+    "partition-worker-publish-report.json": {
+      "result": "WORKER_CODE_DISABLED_READBACK_PASS",
+      "providerCalls": 0,
+      "activation": "NOT_EXECUTED",
+      "codeWriteRequested": true,
+      "workerSha256": "c46b2a7673297281a730105f3a352b2d98da18e2625472572f1e38d2e404fd3e",
+      "sourceSha": "2af293eea1cc0d0a0b8af43899d1b99d56bb0bd3",
+      "schedule": "DISABLED"
+    },
+    "partition-upload-report.json": {
+      "sourceSha": "2af293eea1cc0d0a0b8af43899d1b99d56bb0bd3",
+      "result": "PARTITION_PRIVATE_PACKAGE_UPLOADED",
+      "deployment": "NOT_EXECUTED",
+      "activation": "NOT_EXECUTED"
+    },
+    "model-job-logging-report.json": {
+      "sourceSha": "2af293eea1cc0d0a0b8af43899d1b99d56bb0bd3",
+      "result": "PROVIDER_LOGGING_DISABLED",
+      "code": null,
+      "providerCalls": 0
+    }
+  }
+}

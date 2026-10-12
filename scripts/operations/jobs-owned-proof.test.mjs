@@ -96,3 +96,30 @@ test('single-read fallback preserves request limits instead of treating many rea
  const groups=scopedGetGroups({read:async key=>{calls++;return rows.get(key.PK+'/'+key.SK)??null;},commit:async()=>true});
  const repo=createPartitionedGroupRepository(groups,{maxRequests:1});await assert.rejects(repo.fence({accountSubjects:['iris','omar'],groupId:'garden'},()=>{}),/PARTITION_REQUEST_LIMIT/);assert.ok(calls<=1);
 });
+
+import { exactJobReservation, nativeWorkerRace } from './jobs-owned-proof.mjs';
+import { DurableJobError } from '../../packages/adapters/src/durable-model-jobs.ts';
+test('exact reservation rejects both under-accounting and an unexpected extra reservation or counter change',()=>{
+ const before={runs:65,reservedTokens:100,reservedCostMicros:200,messages:60};const job={reservedTokens:18432,reservedCostMicros:10000};
+ const after={...before,reservedTokens:18532,reservedCostMicros:10200};exactJobReservation(before,after,job);
+ for(const changed of [{...after,reservedTokens:18531},{...after,reservedTokens:18533},{...after,reservedCostMicros:10201},{...after,runs:66},{...after,messages:61}])
+  assert.throws(()=>exactJobReservation(before,changed,job),/PROOF_USAGE_NOT_EXACT/);
+});
+test('native race launches both deliveries before completion and reconstructs a third terminal worker',async()=>{
+ let count=0,release;const gate=new Promise(resolve=>{release=resolve;});
+ const result=await nativeWorkerRace(()=>{
+  const index=++count;return {process:async()=>{
+   if(index===1){await gate;return 'APPLIED';}
+   if(index===2){release();throw new DurableJobError('CONFLICT');}
+   return 'SKIPPED';
+  }};
+ },{jobId:'owned-id'});
+ assert.equal(count,3);assert.deepEqual(result,{workers:2,outcomes:['APPLIED','CONFLICT'],terminalRestart:'SKIPPED'});
+});
+test('a foreign race error, no applied result or terminal re-execution never becomes a managed pass',async()=>{
+ let count=0;
+ await assert.rejects(nativeWorkerRace(()=>({process:async()=>{if(++count===1)return 'APPLIED';throw Error('private error');}}),{}),/PROOF_NATIVE_RACE_FAILED/);
+ await assert.rejects(nativeWorkerRace(()=>({process:async()=> 'SKIPPED'}),{}),/PROOF_NATIVE_RACE_NO_RESULT/);
+ count=0;
+ await assert.rejects(nativeWorkerRace(()=>({process:async()=>++count===1||count===3?'APPLIED':'SKIPPED'}),{}),/PROOF_TERMINAL_REDELIVERY_CHANGED/);
+});

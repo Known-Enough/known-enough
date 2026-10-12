@@ -13,13 +13,15 @@ import { createPartitionedGroupRepository } from '../../packages/adapters/src/pa
 import { createPartitionDecisionRepository, validatePartitionDecisionCommand } from '../../packages/adapters/src/partition-decision-repository.ts';
 import { partitionMemberId } from '../../packages/adapters/src/partition-group-session.ts';
 import { encodeGuardItem, decodeGuardItem } from '../../packages/adapters/src/dynamodb-codec.ts';
-import { ControlSchema, JobSchema, TotalsSchema } from '../../packages/adapters/src/durable-model-jobs.ts';
+import { ControlSchema, JobSchema, TotalsSchema, DurableJobError } from '../../packages/adapters/src/durable-model-jobs.ts';
 import { RetentionPolicy } from '../../packages/adapters/src/partition-lifecycle.ts';
 import { createCognitoIdentityResolver } from '../../apps/api/src/cognito-identity.ts';
 import { syntheticProofPolicy, ownedRegistrationStamp } from './lifecycle-owned-behavior.mjs';
 import { ownFixture, jsonResponse } from './partition-live-behavior.mjs';
 import { verifySource } from './verify.mjs';
-export const PROOF_ROLES=Object.freeze({preserve:'KnownEnoughGithubQaRelease',prepare:'KnownEnoughGithubPartitionMigration',policy:'KnownEnoughGithubRetentionPolicy',consent:'KnownEnoughGithubModelJobOperations',activate:'KnownEnoughGithubModelJobOperations',enqueue:'KnownEnoughGithubModelJobOperations',observe:'KnownEnoughGithubModelJobOperations','disable-control':'KnownEnoughGithubModelJobOperations','disable-policy':'KnownEnoughGithubRetentionPolicy'});
+import { createManagedDurableNegotiationWorker } from '../../apps/api/src/durable-model-worker.ts';
+import { genericCandidates } from '../../packages/adapters/src/generic-candidates.ts';
+export const PROOF_ROLES=Object.freeze({preserve:'KnownEnoughGithubQaRelease',prepare:'KnownEnoughGithubPartitionMigration',policy:'KnownEnoughGithubRetentionPolicy',consent:'KnownEnoughGithubModelJobOperations',activate:'KnownEnoughGithubModelJobOperations',enqueue:'KnownEnoughGithubModelJobOperations',observe:'KnownEnoughGithubModelJobOperations','native-race':'KnownEnoughGithubModelJobOperations','disable-control':'KnownEnoughGithubModelJobOperations','disable-policy':'KnownEnoughGithubRetentionPolicy'});
 const execute=promisify(execFile), table='KnownEnoughOperationsJournal';
 const key=PK=>({PK:{S:PK},SK:{S:'STATE'}}),controlKey=key('OPERATIONS#MODEL_JOBS'),policyKey=key('OPERATIONS#RETENTION');
 const fail=code=>{throw Object.assign(new Error(code),{safeCode:code});};
@@ -60,6 +62,23 @@ export function ownedPublicDraft(group,accounts,nonce){
  variables:[{id:'activity',label:'Activity',type:'ENUM',required:true,visibility:'PUBLIC',options:[{id:'first',label:'First'},{id:'second',label:'Second'}]}],rules:[]},clarificationQuestions:[],createdDecisionId:null});
 }
 export function enqueueRequest(decisionId,owner){return RequestNegotiation.parse({schemaVersion:KE.KE_SCHEMA_VERSION,type:'REQUEST_NEGOTIATION',requestId:randomUUID(),decisionId,expected:{contextToken:owner.publicSnapshot.frame.contextToken,semanticVersion:owner.publicSnapshot.frame.semanticVersion,controlVersion:owner.controlVersion}});}
+export function exactJobReservation(before, after, job) {
+ const expected=TotalsSchema.parse({...TotalsSchema.parse(before),reservedTokens:before.reservedTokens+job.reservedTokens,reservedCostMicros:before.reservedCostMicros+job.reservedCostMicros});
+ if(!isDeepStrictEqual(TotalsSchema.parse(after),expected))return fail('PROOF_USAGE_NOT_EXACT');
+}
+export async function nativeWorkerRace(createWorker, delivery) {
+ const workers=[createWorker(),createWorker()];
+ const results=await Promise.allSettled(workers.map(worker=>worker.process(delivery)));
+ const outcomes=results.map(result=>{
+  if(result.status==='fulfilled'&&['APPLIED','SKIPPED'].includes(result.value))return result.value;
+  if(result.status==='rejected'&&result.reason instanceof DurableJobError&&result.reason.code==='CONFLICT')return 'CONFLICT';
+  throw Object.assign(new Error('PROOF_NATIVE_RACE_FAILED'),{safeCode:'PROOF_NATIVE_RACE_FAILED',cause:result.status==='rejected'?result.reason:undefined});
+ });
+ if(!outcomes.includes('APPLIED'))return fail('PROOF_NATIVE_RACE_NO_RESULT');
+ const restart=await createWorker().process(delivery);
+ if(restart!=='SKIPPED')return fail('PROOF_TERMINAL_REDELIVERY_CHANGED');
+ return {workers:2,outcomes,terminalRestart:restart};
+}
 export function awsDeniedDetails(error){
  for(let depth=0;error&&depth<8;depth++,error=error.cause){
   if(error.name!=='AccessDeniedException'||typeof error.message!=='string')continue;
@@ -143,17 +162,32 @@ async function main(phase){
   }else if(phase==='enqueue'){
    const fixture=fixtures.fixtures[0],owner=await request(fixture,'/decisions/'+state.decisionId+'/me');const body=enqueueRequest(state.decisionId,owner);
    state.enqueueBody=body;await save();const first=await request(fixture,'/decisions/'+state.decisionId+'/commands','POST',body);state.jobId=first.job?.jobId;await save();const second=await request(fixture,'/decisions/'+state.decisionId+'/commands','POST',body);if(!state.jobId||second.job?.jobId!==state.jobId)return fail('PROOF_DUPLICATE_JOB_MISMATCH');state.duplicateReceipts=2;await save();
+  }else if(phase==='native-race'){
+   if(!state.jobId||state.signedPrivateConfirmations!==2)return fail('PROOF_NATIVE_RACE_NOT_CONSENTED');
+   const logging=JSON.parse(await readFile(join(process.env.RUNNER_TEMP,'model-job-logging-report.json'),'utf8'));
+   if(logging.sourceSha!==sourceSha||logging.result!=='PROVIDER_LOGGING_DISABLED')return fail('PROOF_ACTUAL_LOGGING_UNVERIFIED');
+   const before=TotalsSchema.parse(JSON.parse((await get('KnownEnoughQaControl',key('TOTAL'))).payload.S));
+   if(!isDeepStrictEqual(before,state.totalsBefore))return fail('PROOF_NATIVE_RACE_BASELINE_CHANGED');
+   const make=()=>createManagedDurableNegotiationWorker({verifiedTarget:{account:'092954139775',region:'us-east-1'},sourceSha:packageSource,
+    approval:{paidCallsApproved:true,invocationLoggingDisabled:true,retentionReviewed:true},publicCandidates:genericCandidates});
+   state.nativeRace=await nativeWorkerRace(make,{jobId:state.jobId});await save();
+   const job=JobSchema.parse(JSON.parse((await get(table,key('MODELJOB#'+state.jobId))).payload.S));
+   if(job.phase!=='SUCCEEDED'||job.attempts!==1||!job.usage)return fail('PROOF_NATIVE_RACE_NOT_SINGLE_CALL');
+   const after=TotalsSchema.parse(JSON.parse((await get('KnownEnoughQaControl',key('TOTAL'))).payload.S));exactJobReservation(before,after,job);
+   const control=ControlSchema.parse(JSON.parse((await get(table,controlKey)).payload.S));
+   if(control.active.length||control.slots.length)return fail('PROOF_NATIVE_RACE_OUTBOX_NOT_EMPTY');
+   state.nativeRace.singlePaidAttempt=1;state.nativeRace.exactReservation=true;state.nativeRace.emptyOutbox=true;await save();
   }else if(phase==='observe'){
    if(!state.jobId)return fail('PROOF_JOB_MISSING');let job;
    for(let attempt=0;attempt<18;attempt++){const item=await get(table,key('MODELJOB#'+state.jobId));job=JobSchema.parse(JSON.parse(item.payload.S));if(['SUCCEEDED','DEAD'].includes(job.phase))break;await new Promise(r=>globalThis.setTimeout(r,10000));}
    state.actualJob={phase:job.phase,reason:job.reason,attempts:job.attempts,usage:job.usage,reservedTokens:job.reservedTokens,reservedCostMicros:job.reservedCostMicros};await save();
    if(job.phase!=='SUCCEEDED'||!job.usage||job.attempts!==1)return fail('PROOF_JOB_'+job.phase+'_'+(job.reason??'UNRESOLVED'));
-   const snapshot=await request(fixtures.fixtures[0],'/decisions/'+state.decisionId+'/public');if(snapshot.status!=='PROPOSED'||!snapshot.currentProposal)return fail('PROOF_RESULT_NOT_PUBLISHED');state.terminalSuccesses=1;
-   state.totalsAfter=TotalsSchema.parse(JSON.parse((await get('KnownEnoughQaControl',key('TOTAL'))).payload.S));if(state.totalsAfter.reservedTokens<state.totalsBefore.reservedTokens+job.reservedTokens||state.totalsAfter.reservedCostMicros<state.totalsBefore.reservedCostMicros+job.reservedCostMicros)return fail('PROOF_USAGE_NOT_PRESERVED');await save();
+   const snapshot=KE.PublicDecisionSnapshot.parse(await request(fixtures.fixtures[0],'/decisions/'+state.decisionId+'/public'));if(snapshot.status!=='PROPOSED'||!snapshot.currentProposal)return fail('PROOF_RESULT_NOT_PUBLISHED');state.terminalSuccesses=1;
+   state.totalsAfter=TotalsSchema.parse(JSON.parse((await get('KnownEnoughQaControl',key('TOTAL'))).payload.S));exactJobReservation(state.totalsBefore,state.totalsAfter,job);await save();
   }else if(phase==='disable-policy'){
    if(state.policyIntent){const prior=await get(table,policyKey);if(!isDeepStrictEqual(prior,state.policyIntent))return fail('PROOF_POLICY_CLEANUP_CONFLICT');const policy=RetentionPolicy.parse(JSON.parse(prior.payload.S));const next=envelope(policyKey,RetentionPolicy.parse({...policy,revision:policy.revision+1,enabled:false}));await transact([{Put:{TableName:table,Item:next,...cas(prior)}}]);if(!isDeepStrictEqual(await get(table,policyKey),next))return fail('PROOF_POLICY_DISABLE_UNKNOWN');}
   }
-  const report={...proofReport(sourceSha,phase,state,'OWNED_JOB_PHASE_PASS'),...(phase==='observe'?{actualJob:state.actualJob,totalsBefore:state.totalsBefore,totalsAfter:state.totalsAfter}:{})};console.log(JSON.stringify(report));
+  const report={...proofReport(sourceSha,phase,state,'OWNED_JOB_PHASE_PASS'),...(phase==='observe'?{actualJob:state.actualJob,totalsBefore:state.totalsBefore,totalsAfter:state.totalsAfter}:{}),...(state.nativeRace?{nativeRace:state.nativeRace}:{})};console.log(JSON.stringify(report));
  }catch(error){await save();const code=error.safeCode??awsFailure(error)??'OWNED_JOB_UNVERIFIED';console.log(JSON.stringify({...proofReport(sourceSha,phase,state,'OWNED_JOB_PHASE_BLOCKED',code),...awsDeniedDetails(error),...(state.actualJob?{actualJob:state.actualJob}:{})}));process.exitCode=1;}
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
