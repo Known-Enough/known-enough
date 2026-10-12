@@ -1,3 +1,7 @@
+Latest interim checkpoint 2026-10-12T05:12:28.342294+00:00: independent fixture durability fixed and checked on462b228:18operations/11Mail.tm/3request tests and full1554app/65browser PASS. Original mailbox cleanup remains unresolved. A terminal is unnecessary for obtaining the support request: [own-B38206808310](https://github.com/Known-Enough/known-enough/actions/runs/38206808310) actually stored/read back password-free private request at bucket `known-enough-qa-artifacts-092954139775`, key `ops01-owned/1ea949f1-4fc2-4bc5-981c-371819e8d57b/mailtm-support-request-private.txt`. No email or Mail.tm call was made.
+
+A may open its own AWS S3console, select that exact object and Download following [AWS instructions](https://docs.aws.amazon.com/AmazonS3/latest/userguide/download-objects.html), then send only the request contents from its own email to [Mail.tm's official support contact](https://docs.mail.tm/about), support@mail.tm. The request includes the private synthetic address and historical error/window, no passwords/tokens. Do not download/share the full state checkpoint or create a public/shared link. Keep full support reply private; return sanitized account-specific outcome, UTC and case reference for B verification.
+
 # OPS03 original mailbox provider dependency
 
 AWS access is repaired: B actual bounded list and source/key-verified GetObject passed in [38198415402](https://github.com/Known-Enough/known-enough/actions/runs/38198415402). No new IAM grant or worker installation is needed for this blocker.

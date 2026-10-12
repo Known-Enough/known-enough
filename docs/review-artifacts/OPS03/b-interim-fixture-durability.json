@@ -1,0 +1,27 @@
+{
+  "observedAt": "2026-10-12T05:12:28.342294+00:00",
+  "sourceSha": "462b228e3af84466fa94ded06dc2a4d6beb1a258",
+  "focusedOperations": 18,
+  "mailIntegration": 11,
+  "requestPython": 3,
+  "fullApplication": 1554,
+  "existingOptionalSkips": 2,
+  "hosted": 1,
+  "browser": 65,
+  "githubRun": "https://github.com/Known-Enough/known-enough/actions/runs/38206808310",
+  "report": {
+    "result": "PRIVATE_PROVIDER_REQUEST_AVAILABLE",
+    "emailSent": false,
+    "mailboxRequests": 0,
+    "signup": 0,
+    "providerCalls": 0,
+    "putRequests": 1,
+    "privateRequestKey": "ops01-owned/1ea949f1-4fc2-4bc5-981c-371819e8d57b/mailtm-support-request-private.txt",
+    "originalSource": "246a1d8552810e46efdc635ba956ed459bbd9ad2",
+    "putAcknowledgment": "ACKNOWLEDGED",
+    "readbackMatches": true,
+    "sourceSha": "462b228e3af84466fa94ded06dc2a4d6beb1a258",
+    "observedAt": "2026-10-12T05:10:51.538305+00:00"
+  },
+  "wholeTaskDone": false
+}

@@ -1,3 +1,5 @@
+Current OPS03: **BLOCKED/unclaimed — fixture acknowledgments now persist before auth; private support request available through S3console**.1554app/65browser checks PASS. Original mailbox HTTP401 cleanup evidence still required; no successor/live retry/worker reinstall.
+
 Current OPS03: **IN_PROGRESS/B — useful fixture durability work while A terminal is unavailable**. Preserve original pending mailbox HTTP401 dependency; no retry/new fixture/live qualification. One scoped writer; NP00 preserved.
 
 Current OPS03: **BLOCKED/unclaimed — A grant effective for B; original mailbox token recovery HTTP401**. Mail.tm operator must confirm original pending mailbox absence/deletion or restore ownership for cleanup before corrected qualification. No AWS repair/reinstall or successor requested.
