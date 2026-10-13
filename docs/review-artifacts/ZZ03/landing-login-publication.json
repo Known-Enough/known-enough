@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-13T21:13:42Z",
+  "task": "ZZ03",
+  "scope": "Signed-out landing/login presentation polish",
+  "sourceSha": "43019478c468eb1a0aff8ab6986dcb6d14c64e81",
+  "githubRun": {
+    "name": "ZZ primary frontend publication",
+    "runId": "38468826330",
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/38468826330",
+    "actor": "martelaxe",
+    "actorId": 44531296,
+    "event": "workflow_dispatch",
+    "branch": "main",
+    "conclusion": "SUCCESS",
+    "amplifyJobId": "79"
+  },
+  "localChecks": {
+    "node": "24.21.0",
+    "npm": "11.19.0",
+    "typecheck": "PASS",
+    "productionBuild": "PASS",
+    "bundleBoundary": "PASS",
+    "referenceChecksums": "7/7 PASS",
+    "planningConsistency": "PASS (15 planning checks)",
+    "diffCheck": "PASS",
+    "regressionChecks": "SKIPPED by run_checks=false",
+    "applicationBrowserApiProviderTests": "NOT_RUN per user-directed manual review"
+  },
+  "runtimeReadback": {
+    "result": "ZZ02_SETUP_READBACK_PASS",
+    "apiSha256": "a5873e96fd2cc87eec2569ef8c7eb19989caea4edc228d734f7c1ae1590d1df1",
+    "postConfirmation": "MATCH",
+    "profileRoutesPresent": 5,
+    "managedRoutesPresent": 6,
+    "groupReadRoutes": [
+      "GET /groups",
+      "GET /groups/{groupId}/drafts/{draftId}",
+      "GET /groups/{groupId}/decisions/{decisionId}/review",
+      "GET /groups/{groupId}"
+    ],
+    "configurationWrites": 0,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "signupDelivery": "NOT_EXECUTED",
+    "apiPublication": "NOT_EXECUTED"
+  },
+  "publication": {
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "url": "https://main.d143q5ravxp5av.amplifyapp.com/",
+    "publicStaticReadback": "All seven files returned HTTP 200 and matched release-manifest SHA-256 values.",
+    "files": [
+      {
+        "path": "/assets/app-chrome-_Yr_3I5Y.js",
+        "httpStatus": 200,
+        "sha256": "fe041eff4f3f87fc7064c2432c6e057a050cad59876086faa2600a12fe590edd",
+        "manifestMatch": true
+      },
+      {
+        "path": "/assets/connected-app-DDpquaPx.js",
+        "httpStatus": 200,
+        "sha256": "2cb47f23492e088fb75a92f735d03b8948db84170a20bd1d2a33806e325a1b81",
+        "manifestMatch": true
+      },
+      {
+        "path": "/assets/index-7pd-zUcC.css",
+        "httpStatus": 200,
+        "sha256": "3f0e2bc67a0710d6c53a65ed77ae523386ee75d83e21fa84803fdb71951a26db",
+        "manifestMatch": true
+      },
+      {
+        "path": "/assets/index-QGjsymT9.js",
+        "httpStatus": 200,
+        "sha256": "2a0ca88860a85df160386da01fc4be8be46140661be27269b69b811d744d67f2",
+        "manifestMatch": true
+      },
+      {
+        "path": "/cover.png",
+        "httpStatus": 200,
+        "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151",
+        "manifestMatch": true
+      },
+      {
+        "path": "/",
+        "httpStatus": 200,
+        "sha256": "7cc78df2e5b7ed6761b132326bb0452728fde6ff47a527911995219d7289cd4f",
+        "manifestMatch": true
+      },
+      {
+        "path": "/logo.png",
+        "httpStatus": 200,
+        "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb",
+        "manifestMatch": true
+      }
+    ]
+  },
+  "landingPresentation": {
+    "brand": "Existing logo remains in the left-aligned shared container.",
+    "hero": "Centered on transparent page background; no pale-green rectangle.",
+    "signedOutAccountIcon": "HIDDEN",
+    "authActions": ["UserRoundPlus", "LogIn"],
+    "privacyNotice": "Compact collapsible details below the auth card.",
+    "coverImage": "Not used as hero art because cover.png is a duplicate complete logo lockup.",
+    "userVisualReview": "PENDING_USER",
+    "responsiveAndAuthenticatedReview": "PENDING_USER",
+    "wholeZZ03Acceptance": "INCOMPLETE"
+  }
+}
