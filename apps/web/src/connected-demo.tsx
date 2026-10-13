@@ -10,6 +10,7 @@ import { decisionStatusText, privateReadinessText } from './decision-copy';
 import { GroupHomeDemo } from './group-home-demo';
 import { AuthEntry } from './auth-entry';
 import { ProfileDrawer } from './profile-drawer';
+import { LoadingSkeleton } from './app-chrome';
 import { ConnectedDecision } from './connected-decision';
 import { backgroundNegotiationAvailable, pollBackgroundDecision, type BackgroundTarget } from './background-negotiation';
 
@@ -253,6 +254,7 @@ export function ConnectedDemo({ config }: { config: CognitoBrowserConfig }) {
           <button type="button" className="secondary" onClick={() => setInviteLink('')}>Hide link</button></>}
       </section>}
     </>}
-    {(busy || status) && <p role="status" className="local-note">{busy ? 'Checking or saving the decision…' : status}</p>}
+    {busy && <LoadingSkeleton kind="inline" label="Checking or saving the decision" />}
+    {!busy && status && <p role="status" className="local-note">{status}</p>}
   </main>;
 }

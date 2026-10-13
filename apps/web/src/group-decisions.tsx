@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { ruleText, variableText } from './connected-decision';
-import { PageIcon } from './app-chrome';
+import { LoadingSkeleton, PageIcon } from './app-chrome';
 class UserFlowError extends Error {}
 export function GroupDecisions({ group, api, reload, openDecision, startCollapsed = false }: { group: Groups.GroupSnapshot;
   api: (path: string, init?: RequestInit) => Promise<Response>; reload: () => Promise<void>; openDecision: (id: string) => void; startCollapsed?: boolean }) {
@@ -126,6 +126,7 @@ export function GroupDecisions({ group, api, reload, openDecision, startCollapse
         const snapshot = KE.PublicDecisionSnapshot.parse(result.snapshot); setRoster(null); setReviewed(false); await reload(); openDecision(snapshot.frame.decisionId);
       })}>Start a new review with this roster</button>
     </div>}
-    {(busy || notice) && <p role="status">{busy ? 'Preparing or saving your decision…' : notice}</p>}
+    {busy && <LoadingSkeleton kind="inline" label="Preparing or saving your decision" />}
+    {!busy && notice && <p role="status">{notice}</p>}
   </section>;
 }

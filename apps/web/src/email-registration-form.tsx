@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CognitoBrowserConfig } from './cognito-session';
+import { LoadingSkeleton } from './app-chrome';
 import { asRegistrationFailure, confirmEmailRegistration, MIN_REGISTRATION_PASSWORD_LENGTH,
   requestEmailRegistration, type RegistrationCode, type RegistrationDiagnostic } from './email-registration';
 
@@ -56,14 +57,15 @@ export function EmailRegistration({ config, startOpen = false, onClose, onSignIn
   return <section className="ke-registration" aria-label="Email registration">
     <h2 ref={heading} tabIndex={-1}>{stage === 'details' ? 'Create your account' : stage === 'verify' ? 'Verify your email' : 'Account created'}</h2>
     {stage !== 'complete' && <form onSubmit={event => { event.preventDefault(); void submit(); }}>
-      <fieldset disabled={busy}>
+      <fieldset disabled={busy} aria-busy={busy}>
         {stage === 'details' ? <>
           <label htmlFor="register-username">Username</label><input id="register-username" value={username} required maxLength={128} autoComplete="username" onChange={event => setUsername(event.target.value)} />
           <label htmlFor="register-email">Email</label><input id="register-email" type="email" value={email} required maxLength={320} autoComplete="email" onChange={event => setEmail(event.target.value)} />
           <label htmlFor="register-password">Password</label><input id="register-password" type="password" value={password} required minLength={MIN_REGISTRATION_PASSWORD_LENGTH} maxLength={256} autoComplete="new-password" onChange={event => setPassword(event.target.value)} />
           <p>Use at least eight characters, including uppercase, lowercase, a number and a symbol.</p>
         </> : <><label htmlFor="register-code">Verification code</label><input id="register-code" value={code} required pattern="[0-9]{6}" maxLength={6} inputMode="numeric" autoComplete="one-time-code" onChange={event => setCode(event.target.value)} /></>}
-        <button type="submit">{busy ? 'Please wait…' : stage === 'details' ? 'Create account' : 'Verify email'}</button>
+        <button type="submit">{stage === 'details' ? 'Create account' : 'Verify email'}</button>
+        {busy && <LoadingSkeleton kind="inline" label={stage === 'details' ? 'Creating your account' : 'Verifying your email'} />}
       </fieldset>
     </form>}
     {stage === 'details' && diagnostic && ['ACCOUNT_EXISTS_OR_PENDING', 'NETWORK_RESULT_UNKNOWN', 'DELIVERY_UNCONFIRMED'].includes(diagnostic.code) && username.trim()

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { GroupDecisions } from './group-decisions';
 import { Groups } from '@deal-table/contracts';
-import { GroupIcon, PageIcon } from './app-chrome';
+import { GroupIcon, LoadingSkeleton, PageIcon } from './app-chrome';
 type LoadFailure = { title: string; description: string; reference: string | null };
 export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onBack }: { api: (path: string, init?: RequestInit) => Promise<Response>;
   openDecision: (id: string) => void; selectedGroupId?: string; onOpenGroup: (id: string) => void; onBack: () => void }) {
@@ -104,7 +104,8 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
     } catch { setNotice('The result is unknown. Refresh before retrying; replace a lost invitation link explicitly.'); }
     finally { setBusy(false); }
   }
-  if (checking) return <section className="ke-card ke-state-card" aria-busy="true" role="status"><span className="ke-state-icon"><GroupIcon /></span><h2>{selectedGroupId ? 'Opening your group…' : 'Loading your groups…'}</h2><p>Getting the latest account and group information.</p></section>;
+  if (checking && !available) return <LoadingSkeleton kind={selectedGroupId ? 'group' : 'groups'} label={selectedGroupId ? 'Opening your group' : 'Loading your groups'}
+    className={selectedGroupId ? 'ke-group-route-loading' : 'ke-card ke-group-home'} />;
   if (loadFailure) return <section className="ke-card ke-state-card ke-error-card" role="alert">
     <span className="ke-state-icon ke-warning-icon"><svg aria-hidden="true" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m14 6-11 19a2 2 0 0 0 2 3h22a2 2 0 0 0 2-3L18 6a2.3 2.3 0 0 0-4 0Z" /><path d="M16 13v6m0 4v1" strokeLinecap="round" /></svg></span>
     <h2>{loadFailure.title}</h2><p>{loadFailure.description}</p>
@@ -112,7 +113,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       <button type="button" className="secondary" onClick={() => { if (selectedGroupId) onBack(); else void load(); }}>Back to groups</button></div>
     {loadFailure.reference && <small>Reference: {loadFailure.reference}</small>}
   </section>;
-  return <section className={selectedGroupId ? 'ke-group-page' : 'ke-card ke-group-home' + (account?.status === 'APPROVED' && !groups.length ? ' ke-group-home-empty' : '')} aria-busy={busy}>
+  return <section className={(selectedGroupId ? 'ke-group-page' : 'ke-card ke-group-home' + (account?.status === 'APPROVED' && !groups.length ? ' ke-group-home-empty' : '')) + ' ke-load-reveal'} aria-busy={busy || checking}>
     {!selectedGroupId && <div className="ke-section-heading"><h2>{account?.status === 'APPROVED' ? 'Your groups' : 'Account access'}</h2>
       <button type="button" className="secondary ke-refresh-button" disabled={busy} onClick={() => void load()}>Refresh account and groups</button></div>}
     <fieldset className={selectedGroupId ? 'ke-group-detail-controls' : undefined} disabled={busy || checking}
@@ -199,6 +200,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       })}
     </>}
     </fieldset>
-    {(checking || busy || notice) && <p role="status">{checking ? 'Checking your account…' : busy ? 'Saving or checking the group…' : notice}</p>}
+    {(checking || busy) && <LoadingSkeleton kind="inline" label={checking ? 'Refreshing account and groups' : 'Updating the group'} />}
+    {!checking && !busy && notice && <p role="status">{notice}</p>}
   </section>;
 }

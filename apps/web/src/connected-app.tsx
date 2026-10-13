@@ -4,7 +4,7 @@ import { beginCognitoSignIn, clearCognitoSession, cognitoApiFetch, cognitoLogout
   CognitoSignInFailure, type CognitoBrowserConfig, type CognitoSession } from './cognito-session';
 import { AuthEntry } from './auth-entry';
 import { ProfileDrawer } from './profile-drawer';
-import { Brand, PrivacyBar, ThemeToggle, WelcomeHeading } from './app-chrome';
+import { Brand, LoadingSkeleton, PrivacyBar, ThemeToggle, WelcomeHeading } from './app-chrome';
 import { GroupHome } from './group-home';
 import { ConnectedDecision } from './connected-decision';
 import { decisionStatusText } from './decision-copy';
@@ -14,6 +14,10 @@ let callbackCompletion: ReturnType<typeof finishCognitoSignIn> | null = null;
 export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
   const [session, setSession] = useState<CognitoSession | null>(() => readCognitoSession());
   const [view, setView] = useState<AppView>(() => readAppView(window.location.search));
+  const [callbackPending, setCallbackPending] = useState(() => {
+    const query = new URLSearchParams(window.location.search);
+    return query.has('code') || query.has('error') || query.has('state');
+  });
   const [invitationEpoch, setInvitationEpoch] = useState(0);
   const [snapshot, setSnapshot] = useState<KE.PublicDecisionSnapshot | null>(null), [owner, setOwner] = useState<KE.OwnerDecisionSnapshot | null>(null);
   const [status, setStatus] = useState(''), [busy, setBusy] = useState(false), [background, setBackground] = useState(false);
@@ -50,9 +54,10 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
   useEffect(() => { if (!session) return; const timeout = window.setTimeout(expire, Math.max(0, session.expiresAt - Date.now() - 5000)); return () => window.clearTimeout(timeout); }, [session, expire]);
   useEffect(() => {
     let active = true; callbackCompletion ??= finishCognitoSignIn(config);
-    void callbackCompletion.then(result => { if (!active || !result) return; setSession(result); const wanted = takeIntendedView(); if (wanted) move(wanted, true); })
+    void callbackCompletion.then(result => { if (!active) return; setCallbackPending(false); if (!result) return; setSession(result); const wanted = takeIntendedView(); if (wanted) move(wanted, true); })
       .catch(error => {
         if (!active) return; const code = error instanceof CognitoSignInFailure ? error.code : 'HOSTED_ERROR';
+        setCallbackPending(false);
         const observedAt = error instanceof CognitoSignInFailure ? error.observedAt : new Date().toISOString();
         console.info('Known Enough sign-in diagnostic', { environment: config.userPoolId, step: 'callback', code, observedAt });
         setStatus(`Sign-in could not be completed. Start again. Reference: ${code} at ${observedAt}.`);
@@ -103,7 +108,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
       .catch(() => { if (active) { setTarget(null); setStatus('Automatic checking stopped. Refresh this decision for its latest result.'); } });
     return () => { active = false; controller.abort(); };
   }, [target, session, config, expire]);
-  if (!session) return <AuthEntry config={config} signIn={signIn} notice={status} />;
+  if (!session) return <AuthEntry config={config} signIn={signIn} notice={status} callbackPending={callbackPending} />;
   return <main className={view.kind === 'group' ? 'ke-home ke-group-route' : 'ke-home'}>
     <header className="ke-masthead"><Brand /><div className="ke-header-actions">
       <ThemeToggle />
@@ -116,14 +121,15 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     {view.kind === 'invalid' ? <section className="ke-card"><h2>This link is unavailable</h2><button onClick={() => move({ kind: 'groups' }, true)}>Back to groups</button></section>
       : view.kind === 'decision' ? <>
         <button className="secondary" onClick={() => move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' })}>{view.groupId ? 'Back to group' : 'Back to groups'}</button>
-        <section className="ke-card" aria-busy={busy}><h2>{snapshot?.frame.title ?? 'Your decision'}</h2>
+        <section className={`ke-card${snapshot ? ' ke-load-reveal' : ''}`} aria-busy={busy || (!snapshot && !status)}><h2>{snapshot?.frame.title ?? 'Your decision'}</h2>
           {snapshot && <p role="status">Status: {decisionStatusText(snapshot.status)}</p>}
           <button className="secondary" disabled={busy} onClick={() => { if (dirty.current && !window.confirm('Refresh and discard unsaved input?')) return; dirty.current = false; void load(); }}>Refresh decision</button>
-          {(busy || status) && <p role="status">{busy ? 'Loading current decision…' : status}</p>}
+          {!snapshot && !status && <LoadingSkeleton kind="decision" label="Loading current decision" />}
+          {!snapshot && status && <p role="status">{status}</p>}
         </section>
-        {snapshot && <ConnectedDecision key={`${session.accessToken}:${snapshot.contextToken}:${snapshot.currentProposal?.proposalId ?? ''}:${owner?.ownerVersion ?? ''}:${owner?.draft?.draftId ?? ''}`}
+        {snapshot && <div className="ke-load-reveal"><ConnectedDecision key={`${session.accessToken}:${snapshot.contextToken}:${snapshot.currentProposal?.proposalId ?? ''}:${owner?.ownerVersion ?? ''}:${owner?.draft?.draftId ?? ''}`}
           snapshot={snapshot} owner={owner} backgroundNegotiation={background} staged api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} refresh={async () => { dirty.current = false; await load(); }}
-          onDirtyChange={value => { dirty.current = value; }} onQueued={receipt => { if (!owner) return; setTarget({ decisionId: snapshot.frame.decisionId, contextToken: snapshot.contextToken, semanticVersion: snapshot.semanticVersion, ownerParticipantId: owner.ownerParticipantId, expiresAt: receipt.expiresAt }); }} />}
+          onDirtyChange={value => { dirty.current = value; }} onQueued={receipt => { if (!owner) return; setTarget({ decisionId: snapshot.frame.decisionId, contextToken: snapshot.contextToken, semanticVersion: snapshot.semanticVersion, ownerParticipantId: owner.ownerParticipantId, expiresAt: receipt.expiresAt }); }} /></div>}
       </> : session.kind === 'display' ? <section className="ke-card"><h2>Shared screen</h2><p>Open a shared decision link from your group to show its progress. This screen cannot enter private needs or approve proposals.</p></section>
         : <GroupHome key={`${session.accessToken}:${view.kind === 'group' ? view.groupId : 'home'}:${invitationEpoch}`} {...(view.kind === 'group' ? { selectedGroupId: view.groupId } : {})}
           api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} onOpenGroup={id => move({ kind: 'group', groupId: id })} onBack={() => move({ kind: 'groups' })}

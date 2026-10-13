@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 type Theme = 'light' | 'dark';
 const themeKey = 'ke-appearance';
@@ -64,6 +64,34 @@ export function ThemeToggle() {
 
 export function Brand() {
   return <span className="ke-brand"><img src="/logo.png" alt="" width="38" height="38" decoding="async" /><span>Known Enough</span></span>;
+}
+
+type LoadingKind = 'auth' | 'groups' | 'group' | 'decision' | 'profile' | 'example' | 'inline';
+function SkeletonBar({ shape = '' }: { shape?: string }) {
+  return <span className={`ke-skeleton-bar${shape ? ` ${shape}` : ''}`} />;
+}
+
+export function LoadingSkeleton({ label, kind, className = '' }: { label: string; kind: LoadingKind; className?: string }) {
+  const identity = () => <><SkeletonBar shape="is-avatar" /><span className="ke-skeleton-identity"><SkeletonBar shape="is-copy" /><SkeletonBar shape="is-copy is-short" /></span></>;
+  const panel = (type: 'members' | 'decisions' | 'invitations') => <div className={`ke-skeleton-subpanel ke-skeleton-${type}`}>
+    <div className="ke-skeleton-panel-heading"><SkeletonBar shape="is-subheading" /><SkeletonBar shape="is-badge" /></div>
+    {type === 'members' && <><div className="ke-skeleton-person">{identity()}</div><div className="ke-skeleton-person">{identity()}</div></>}
+    {type === 'decisions' && <><SkeletonBar shape="is-copy" /><SkeletonBar shape="is-copy is-short" /><SkeletonBar shape="is-button" /></>}
+    {type === 'invitations' && <><SkeletonBar shape="is-input" /><SkeletonBar shape="is-copy is-medium" /><SkeletonBar shape="is-button is-wide" /></>}
+  </div>;
+  let visual: ReactNode;
+  switch (kind) {
+    case 'auth': visual = <><SkeletonBar shape="is-heading" /><SkeletonBar shape="is-copy is-medium" /><SkeletonBar shape="is-copy" /><div className="ke-skeleton-auth-actions"><SkeletonBar shape="is-button is-wide" /><SkeletonBar shape="is-button is-wide" /></div></>; break;
+    case 'groups': visual = <><div className="ke-skeleton-section-heading"><SkeletonBar shape="is-subheading" /><SkeletonBar shape="is-button" /></div><div className="ke-skeleton-group-grid">{[0, 1].map(item => <div className="ke-skeleton-group-tile" key={item}><SkeletonBar shape="is-avatar" /><SkeletonBar shape="is-subheading is-medium" /><SkeletonBar shape="is-copy is-short" /><SkeletonBar shape="is-button" /></div>)}</div></>; break;
+    case 'group': visual = <><div className="ke-skeleton-group-overview"><div><SkeletonBar shape="is-eyebrow" /><SkeletonBar shape="is-heading is-medium" /><div className="ke-skeleton-summary"><SkeletonBar shape="is-copy is-short" /><SkeletonBar shape="is-copy is-short" /><SkeletonBar shape="is-copy is-short" /></div></div><div className="ke-skeleton-group-actions"><SkeletonBar shape="is-button is-wide" /><SkeletonBar shape="is-button is-wide" /></div></div><div className="ke-skeleton-group-panels">{panel('members')}{panel('decisions')}{panel('invitations')}</div></>; break;
+    case 'decision': visual = <><div className="ke-skeleton-decision-heading"><SkeletonBar shape="is-heading is-medium" /><SkeletonBar shape="is-copy" /></div><div className="ke-skeleton-decision-card"><SkeletonBar shape="is-subheading" /><SkeletonBar shape="is-copy" /><SkeletonBar shape="is-copy is-medium" /><SkeletonBar shape="is-copy is-short" /></div><div className="ke-skeleton-decision-card"><SkeletonBar shape="is-subheading is-medium" /><SkeletonBar shape="is-input" /><SkeletonBar shape="is-copy is-short" /></div></>; break;
+    case 'profile': visual = <><SkeletonBar shape="is-subheading is-medium" /><SkeletonBar shape="is-copy" /><SkeletonBar shape="is-input" /><SkeletonBar shape="is-copy is-short" /><SkeletonBar shape="is-input" /><SkeletonBar shape="is-button is-wide" /></>; break;
+    case 'example': visual = <><div className="ke-skeleton-section-heading"><SkeletonBar shape="is-subheading is-medium" /><SkeletonBar shape="is-badge" /></div><div className="ke-skeleton-example-people">{[0, 1, 2].map(item => <div className="ke-skeleton-person" key={item}>{identity()}</div>)}</div><div className="ke-skeleton-decision-card"><SkeletonBar shape="is-heading is-medium" /><SkeletonBar shape="is-copy" /><SkeletonBar shape="is-copy is-medium" /><SkeletonBar shape="is-copy is-short" /></div></>; break;
+    case 'inline': visual = <SkeletonBar shape="is-progress" />; break;
+  }
+  return <div className={`ke-loading ke-loading-${kind}${className ? ` ${className}` : ''}`} role="status" aria-label={label}>
+    <div className="ke-loading-visual" aria-hidden="true">{visual}</div>
+  </div>;
 }
 
 export function ProfileIcon() {

@@ -1,5 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { KnownEnoughHome } from './known-enough-home';
+import { LoadingSkeleton } from './app-chrome';
 import { PublicScreen, isPublicMockScenario } from './public-screen';
 import type { LocalIdentity } from './local-api-client';
 import {
@@ -29,7 +30,7 @@ export function App() {
   const params = new URLSearchParams(window.location.search);
   const local = params.get('local');
   const localIdentity: LocalIdentity | null = local === 'maya' || local === 'leo' || local === 'nina' || local === 'display' ? local : null;
-  if (params.get('view') === 'owner') return <Suspense fallback={<main><p role="status" className="state-card">Loading private owner demo…</p></main>}><OwnerScreen initialScenario={params.get('owner')} localIdentity={localIdentity === 'display' ? null : localIdentity} /></Suspense>;
+  if (params.get('view') === 'owner') return <Suspense fallback={<main className="owner-page"><header className="masthead"><div><p className="eyebrow">KNOWN ENOUGH · PRIVATE DEMO</p><h1>Private owner screen</h1></div></header><LoadingSkeleton kind="example" label="Loading private owner demo" className="state-card" /></main>}><OwnerScreen initialScenario={params.get('owner')} localIdentity={localIdentity === 'display' ? null : localIdentity} /></Suspense>;
   if (params.has('legacy') || params.has('public') || params.has('local')) {
     const requested = params.get('public');
     return <PublicScreen initialScenario={isPublicMockScenario(requested) ? requested : 'collecting'} local={localIdentity === 'display'} />;

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Groups } from '@deal-table/contracts';
-import { ProfileIcon } from './app-chrome';
+import { LoadingSkeleton, ProfileIcon } from './app-chrome';
 type Profile = ReturnType<typeof Groups.OwnProfile.parse>;
 export function ProfileDrawer({ api, signOut }: { api: (path: string, init?: RequestInit) => Promise<Response>; signOut: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null), trigger = useRef<HTMLButtonElement>(null), heading = useRef<HTMLHeadingElement>(null);
@@ -58,6 +58,7 @@ export function ProfileDrawer({ api, signOut }: { api: (path: string, init?: Req
       <div className="ke-profile-content" aria-busy={busy}>
         <button type="button" className="secondary" disabled={busy} onClick={close}>Close profile</button>
         <h2 id="profile-title" ref={heading} tabIndex={-1}>Your profile</h2>
+        {!profile && busy && <LoadingSkeleton kind="profile" label="Loading your profile details" />}
         {profile && <>
           {profile.image && <img className="ke-profile-image" alt="Your profile picture" src={'data:image/png;base64,' + profile.image.bytesBase64} />}
           <p>{profile.status === 'PENDING' ? 'Your account is waiting for approval.' : profile.status === 'APPROVED' ? 'Access approved' : 'Your access request was declined.'}</p>
@@ -75,7 +76,8 @@ export function ProfileDrawer({ api, signOut }: { api: (path: string, init?: Req
             {profile.image && <button type="button" className="secondary" disabled={busy} onClick={() => void update('/account/profile/image', { version: profile.version, bytesBase64: null })}>Remove picture</button>}
           </>}
         </>}
-        {(busy || notice) && <p role="status">{busy ? 'Loading or saving your profile…' : notice}</p>}
+        {profile && busy && <LoadingSkeleton kind="inline" label="Saving your profile" />}
+        {!busy && notice && <p role="status">{notice}</p>}
         <button type="button" className="secondary" disabled={busy} onClick={signOut}>Sign out</button>
       </div>
     </dialog>

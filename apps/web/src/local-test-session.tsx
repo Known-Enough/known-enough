@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { KnownEnough } from '@deal-table/contracts';
+import { LoadingSkeleton } from './app-chrome';
 
 export interface LocalTestSession {
   accountId: string;
@@ -99,7 +100,8 @@ export function LocalTestSignIn({ onSignedIn, hasInvite = false }: { onSignedIn:
         <select id="local-test-account" value={accountId} onChange={event => setAccountId(event.target.value)}>
           {LOCAL_TEST_ACCOUNTS.map(account => <option key={account.id} value={account.id}>{account.label}</option>)}
         </select>
-        <button type="submit" disabled={loading}>{loading ? 'Starting…' : 'Start local test session'}</button>
+        <button type="submit" disabled={loading}>Start local test session</button>
+        {loading && <LoadingSkeleton kind="inline" label="Starting local test session" />}
       </form>
       {error && <p role="alert" className="ke-error">{error}</p>}
       <p className="ke-help">Sessions last 15 minutes and stay in this browser tab. Each test user gets a separate session.</p>
@@ -130,7 +132,7 @@ export function LocalTestDisplay({
     <section className="ke-card" aria-labelledby="shared-display-heading">
       <h2 id="shared-display-heading">Shared view · read only</h2>
       {error && <p role="alert" className="ke-error">{error}</p>}
-      {!snapshot && !error && <p role="status">Loading shared view…</p>}
+      {!snapshot && !error && <LoadingSkeleton kind="example" label="Loading shared view" />}
       {snapshot && <>
         <h3>{snapshot.frame.title}</h3>
         <p>{snapshot.frame.objective}</p>

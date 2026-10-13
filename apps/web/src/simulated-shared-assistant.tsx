@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { KnownEnough } from '@deal-table/contracts';
 import { answerPublicTurn, publicAssistantContext, publicAssistantStateKey, type PublicAssistantMemory } from './public-assistant';
+import { LoadingSkeleton } from './app-chrome';
 
 type Props = {
   snapshot: KnownEnough.PublicDecisionSnapshot | null;
@@ -62,7 +63,8 @@ export function SimulatedSharedAssistant({ snapshot, fetchPublic, onFreshSnapsho
     <form onSubmit={event => void ask(event)}>
       <label htmlFor="ke-assistant-question">Your question</label>
       <input id="ke-assistant-question" value={question} onChange={event => setQuestion(event.target.value)} maxLength={500} placeholder="What is the proposal status?" autoComplete="off" />
-      <button type="submit" disabled={busy || !question.trim()}>{busy ? 'Checking public view…' : 'Ask simulated Alexa+'}</button>
+      <button type="submit" disabled={busy || !question.trim()}>Ask simulated Alexa+</button>
+      {busy && <LoadingSkeleton kind="inline" label="Checking the public view" />}
     </form>
     <p className="ke-help">Questions are not saved in assistant memory. Recheck the current public view before relying on an answer.</p>
   </section>;

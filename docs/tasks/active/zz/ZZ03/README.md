@@ -1,6 +1,6 @@
 # ZZ03 — Separate home, groups and decisions
 
-**Status:** IN_PROGRESS / unclaimed — bounded signed-out landing/login polish published from main 43019478c468eb1a0aff8ab6986dcb6d14c64e81. Preserve existing registration/sign-in behavior and responsive theme controls; manual visual review and protected-flow acceptance remain pending.
+**Status:** IN_PROGRESS / A — loading-experience continuation claimed from clean main `80b0e5c07250c01808ab8e6af04700d0d9c1d762`; exact scope and constraints are recorded in the ticket. Preserve the published navigation, landing, group, and theme work; broader acceptance remains pending.
 
 Replace the long signed-in page with clear views: waiting for approval, Your groups, a selected group and a selected decision. Keep the ZZ02 profile drawer in the header. Remove manual decision-ID entry, fictional templates, simulated Alexa and fictional invitations from the normal product flow.
 
@@ -9,6 +9,14 @@ Each view shows one next action, useful status and clear back navigation. Reuse 
 [Ticket](ticket.md) · [ZZ batch](../README.md) · [Task board](../../../../task-board.md)
 
 [Checked navigation review and exact dependency](../../../../review-artifacts/ZZ03/navigation-review.md). [Group-details publication and byte readback](../../../../review-artifacts/ZZ03/group-details-publication.json). [Supplied-brand publication and byte readback](../../../../review-artifacts/ZZ03/brand-assets-publication.json). [Dark/light publication evidence](../../../../review-artifacts/ZZ03/theme-publication.json). [Surgical group icon polish publication](../../../../review-artifacts/ZZ03/group-icon-polish-publication.json). [Landing/login publication](../../../../review-artifacts/ZZ03/landing-login-publication.json). Local checks do not prove actual primary signup/profile/AI acceptance.
+
+### A loading experience continuation — 2026-10-13T21:21:58Z
+
+A claims the user's cross-page loading polish from clean synchronized `main` `80b0e5c07250c01808ab8e6af04700d0d9c1d762`. B remains unavailable/observer-only; this is the sole active implementation task. Scope: `apps/web/src/app-chrome.tsx`, `auth-entry.tsx`, `email-registration-form.tsx`, `connected-app.tsx`, `group-home.tsx`, `group-home-demo.tsx`, `group-decisions.tsx`, `profile-drawer.tsx`, `public-screen.tsx`, `owner-screen.tsx`, `local-test-session.tsx`, `connected-demo.tsx`, `simulated-shared-assistant.tsx`, `App.tsx`, `style.css`, and bounded ZZ03/A tracking records. Replace plain loading messages with reusable layout-matched skeletons; keep chrome visible, avoid blank-frame/refresh flashes, add subtle muted-green shimmer, preserve dark mode and reduced-motion behavior. Cover auth callback/registration, groups/group details, decisions, invitation actions, profile, and existing public/local demo reads. Preserve request/API/privacy/authorization semantics and existing cards/layouts. No dependency or unrelated refactor. Run pinned static typecheck/build plus docs/reference checks; do not run app/browser/API/provider suites or probes under the manual-review direction. Publish exact synchronized main source and verify deployment bytes; user visual and authenticated review remains theirs.
+
+### Loading experience implementation checkpoint — 2026-10-13T21:29:02Z
+
+Added shared layout-matched skeletons for authentication, group list/details, decision, profile, and existing public/local example reads. Auth callback and registration now show progress without replacing the page shell or form. Group and local-preview refreshes retain loaded content and show an inline shimmer; connected decision refresh still clears snapshots before loading. Loading/reveal uses muted green, dark-mode tokens, and a static reduced-motion variant. Invitation work preserves its form and shows an inline status shimmer. Pinned Node24.21.0/npm11.19.0 `npm run lint`, `npm run typecheck`, `npm run build` plus bundle boundary, `npm run check:references` (7/7), `npm run check:planning` (15/15), and `git diff --check` pass. No application/browser/API/provider suite or probe was run under the manual-review direction. No dependency, API/auth/permission, data or privacy-rule change. Exact-source push and primary frontend publication/readback are next; user visual/accessibility/authenticated review remains pending.
 
 ### Surgical icon polish implementation checkpoint — 2026-10-13T21:02:30Z
 

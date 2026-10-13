@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { GroupDecisions } from './group-decisions';
 import { Groups } from '@deal-table/contracts';
+import { LoadingSkeleton } from './app-chrome';
 export function GroupHomeDemo({ api, openDecision }: { api: (path: string, init?: RequestInit) => Promise<Response>;
   openDecision: (id: string) => void }) {
   const [available, setAvailable] = useState(false);
@@ -112,6 +113,7 @@ export function GroupHomeDemo({ api, openDecision }: { api: (path: string, init?
     {link && <><p>Copy this recipient-bound link privately. It expires after 24 hours. No email has been sent. Share the link yourself only with the intended recipient.</p><label htmlFor="group-copy-link">Invitation link</label>
       <input id="group-copy-link" readOnly value={link} onFocus={event => event.currentTarget.select()} /><button className="secondary" onClick={() => setLink('')}>Hide invitation link</button></>}
     </fieldset>
-    {(checking || busy || notice) && <p role="status">{checking ? 'Checking your account…' : busy ? 'Saving or checking the group…' : notice}</p>}
+    {(checking || busy) && <LoadingSkeleton kind="inline" label={checking ? 'Checking your account and groups' : 'Updating the group'} />}
+    {!checking && !busy && notice && <p role="status">{notice}</p>}
   </section>;
 }
