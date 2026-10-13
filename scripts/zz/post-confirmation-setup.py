@@ -130,6 +130,7 @@ def main():
         if items.get('NextToken'):
             raise RuntimeError('ROUTE_PAGE_NOT_COMPLETE')
         routes = items['Items']
+        report['groupReadRoutes'] = [route['RouteKey'] for route in routes if route.get('RouteKey', '').startswith('GET /groups')]
         report['profileRoutesPresent'] = sum(route.get('RouteKey') in ROUTES for route in routes)
         report['managedRoutesPresent'] = sum(route.get('RouteKey') in managed_routes for route in routes)
         if not args.apply:

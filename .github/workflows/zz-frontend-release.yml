@@ -9,6 +9,10 @@ on:
         description: Hide shared-screen entry on the verified live frontend without unpublished dashboard changes
         type: boolean
         default: false
+      run_checks:
+        description: Run regression tests; false preserves source/build guards for user-directed publication
+        type: boolean
+        default: true
 permissions:
   contents: read
 concurrency:
@@ -40,13 +44,18 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version-file: .nvmrc
-      - name: Source and public build checks before credentials
+      - name: Verify exact source before credentials
         run: |
           test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
+      - name: Regression checks
+        if: inputs.run_checks
+        run: |
           python3 -B scripts/zz/frontend-release.test.py
           python3 -B scripts/zz/entry-only-build.test.py
           python3 -B scripts/zz/post-confirmation-setup.test.py
           python3 -B scripts/zz/install-application-config.test.py
+      - name: Build public frontend
+        run: |
           npm ci
           npm run build
       - name: Prepare only the verified live entry change

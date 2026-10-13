@@ -10,6 +10,10 @@ on:
         default: false
       api_sha256:
         type: string
+      run_checks:
+        description: Run regression tests; false permits user-directed diagnosis without tests
+        type: boolean
+        default: true
 permissions:
   contents: read
 concurrency:
@@ -27,11 +31,14 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
-      - name: Exact source and no-write checks
+      - name: Verify exact source
         env:
           EXPECTED_SOURCE: ${{ inputs.source_sha }}
         run: |
           test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
+      - name: Regression checks
+        if: inputs.run_checks
+        run: |
           python3 -B scripts/zz/post-confirmation-setup.test.py
           python3 -B scripts/zz/install-application-config.test.py
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
