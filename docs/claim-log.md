@@ -1,4 +1,4 @@
-Latest A intake: **ZZ03 loading experience IN_PROGRESS/A** from clean synchronized main `80b0e5c07250c01808ab8e6af04700d0d9c1d762`, 2026-10-13T21:21:58Z. Exact bounded source/docs scope and release/check plan: [ZZ03 ticket](tasks/active/zz/ZZ03/ticket.md). B remains unavailable/observer-only, no second task/worker. Preserve existing ZZ01/ZZ02 evidence and whole ZZ03 open acceptance.
+Latest A checkpoint: **ZZ03 loading experience published; bounded claim released** from exact source `492baa1ae588cc13644dcecbb858ef4545e493c8`, 2026-10-13T21:31Z. [Run38471054424](https://github.com/Known-Enough/known-enough/actions/runs/38471054424) succeeded; all seven static hashes match. [Receipt](review-artifacts/ZZ03/loading-experience-publication.json). Whole ZZ03/user visual and authenticated acceptance remain open; no successor claim started.
 
 Previous ZZ03 checkpoint: **BLOCKED/unclaimed — navigation CODE_READY; primary proof awaits actual ZZ02 automatic intake/profile setup.** [Evidence and next step](review-artifacts/ZZ03/navigation-review.md). One sequential batch checkpoint, no successor/duplicate cloud run; ZZ01 and ZZ02 retain their exact live gaps.
 

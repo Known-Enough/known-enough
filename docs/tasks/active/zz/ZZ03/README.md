@@ -1,6 +1,6 @@
 # ZZ03 — Separate home, groups and decisions
 
-**Status:** IN_PROGRESS / A — loading-experience continuation claimed from clean main `80b0e5c07250c01808ab8e6af04700d0d9c1d762`; exact scope and constraints are recorded in the ticket. Preserve the published navigation, landing, group, and theme work; broader acceptance remains pending.
+**Status:** IN_PROGRESS / unclaimed — the bounded loading-experience continuation is published from main `492baa1ae588cc13644dcecbb858ef4545e493c8`; exact-source static-byte readback passed. User visual/accessibility/authenticated review and broader ZZ03 acceptance remain pending.
 
 Replace the long signed-in page with clear views: waiting for approval, Your groups, a selected group and a selected decision. Keep the ZZ02 profile drawer in the header. Remove manual decision-ID entry, fictional templates, simulated Alexa and fictional invitations from the normal product flow.
 
@@ -8,7 +8,7 @@ Each view shows one next action, useful status and clear back navigation. Reuse 
 
 [Ticket](ticket.md) · [ZZ batch](../README.md) · [Task board](../../../../task-board.md)
 
-[Checked navigation review and exact dependency](../../../../review-artifacts/ZZ03/navigation-review.md). [Group-details publication and byte readback](../../../../review-artifacts/ZZ03/group-details-publication.json). [Supplied-brand publication and byte readback](../../../../review-artifacts/ZZ03/brand-assets-publication.json). [Dark/light publication evidence](../../../../review-artifacts/ZZ03/theme-publication.json). [Surgical group icon polish publication](../../../../review-artifacts/ZZ03/group-icon-polish-publication.json). [Landing/login publication](../../../../review-artifacts/ZZ03/landing-login-publication.json). Local checks do not prove actual primary signup/profile/AI acceptance.
+[Checked navigation review and exact dependency](../../../../review-artifacts/ZZ03/navigation-review.md). [Group-details publication and byte readback](../../../../review-artifacts/ZZ03/group-details-publication.json). [Supplied-brand publication and byte readback](../../../../review-artifacts/ZZ03/brand-assets-publication.json). [Dark/light publication evidence](../../../../review-artifacts/ZZ03/theme-publication.json). [Surgical group icon polish publication](../../../../review-artifacts/ZZ03/group-icon-polish-publication.json). [Landing/login publication](../../../../review-artifacts/ZZ03/landing-login-publication.json). [Loading-experience publication](../../../../review-artifacts/ZZ03/loading-experience-publication.json). Local checks do not prove actual primary signup/profile/AI acceptance.
 
 ### A loading experience continuation — 2026-10-13T21:21:58Z
 
@@ -16,7 +16,11 @@ A claims the user's cross-page loading polish from clean synchronized `main` `80
 
 ### Loading experience implementation checkpoint — 2026-10-13T21:29:02Z
 
-Added shared layout-matched skeletons for authentication, group list/details, decision, profile, and existing public/local example reads. Auth callback and registration now show progress without replacing the page shell or form. Group and local-preview refreshes retain loaded content and show an inline shimmer; connected decision refresh still clears snapshots before loading. Loading/reveal uses muted green, dark-mode tokens, and a static reduced-motion variant. Invitation work preserves its form and shows an inline status shimmer. Pinned Node24.21.0/npm11.19.0 `npm run lint`, `npm run typecheck`, `npm run build` plus bundle boundary, `npm run check:references` (7/7), `npm run check:planning` (15/15), and `git diff --check` pass. No application/browser/API/provider suite or probe was run under the manual-review direction. No dependency, API/auth/permission, data or privacy-rule change. Exact-source push and primary frontend publication/readback are next; user visual/accessibility/authenticated review remains pending.
+Added shared layout-matched skeletons for authentication, group list/details, decision, profile, and existing public/local example reads. Auth callback and registration now show progress without replacing the page shell or form. Group and local-preview refreshes retain loaded content and show an inline shimmer; connected decision refresh still clears snapshots before loading. Loading/reveal uses muted green, dark-mode tokens, and a static reduced-motion variant. Invitation work preserves its form and shows an inline status shimmer. Pinned Node24.21.0/npm11.19.0 `npm run lint`, `npm run typecheck`, `npm run build` plus bundle boundary, `npm run check:references` (7/7), `npm run check:planning` (15/15), and `git diff --check` pass. No application/browser/API/provider suite or probe was run under the manual-review direction. No dependency, API/auth/permission, data or privacy-rule change.
+
+### Loading experience published and bounded claim released — 2026-10-13T21:31:16Z
+
+Exact source `492baa1ae588cc13644dcecbb858ef4545e493c8` published successfully by own-A [38471054424](https://github.com/Known-Enough/known-enough/actions/runs/38471054424), Amplify job80. The release artifact confirms source match and `FRONTEND_PUBLICATION_PASS`; all seven public files returned HTTP200 and matched manifest SHA-256. Runtime readback `ZZ02_SETUP_READBACK_PASS`, PostConfirmation MATCH, profile5/5, managed routes6/6, config/data writes0; API publication, signup/email and provider calls NOT_EXECUTED. Regression checks skipped with `run_checks=false`; pinned lint/boundaries, typecheck, production build/bundle boundary, refs7/7, planning15/15 and diff checks passed. Application/browser/API/provider suites/probes were not run per manual-review direction. [Receipt](../../../../review-artifacts/ZZ03/loading-experience-publication.json). This bounded A claim is released; user visual, responsive, reduced-motion/accessibility and authenticated review and whole ZZ03 acceptance remain pending.
 
 ### Surgical icon polish implementation checkpoint — 2026-10-13T21:02:30Z
 
