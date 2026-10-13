@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Groups } from '@deal-table/contracts';
+import { ProfileIcon } from './app-chrome';
 type Profile = ReturnType<typeof Groups.OwnProfile.parse>;
 export function ProfileDrawer({ api, signOut }: { api: (path: string, init?: RequestInit) => Promise<Response>; signOut: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null), trigger = useRef<HTMLButtonElement>(null), heading = useRef<HTMLHeadingElement>(null);
@@ -50,7 +51,7 @@ export function ProfileDrawer({ api, signOut }: { api: (path: string, init?: Req
   }
   return <>
     <button ref={trigger} type="button" className="ke-profile-trigger secondary" aria-label="Open your profile" onClick={() => setOpen(true)}>
-      {profile?.image ? <img alt="" src={'data:image/png;base64,' + profile.image.bytesBase64} /> : <span aria-hidden="true">{profile?.displayName.slice(0, 1) ?? '●'}</span>}
+      {profile?.image ? <img alt="" src={'data:image/png;base64,' + profile.image.bytesBase64} /> : profile ? <span aria-hidden="true">{profile.displayName.slice(0, 1)}</span> : <ProfileIcon />}
     </button>
     <dialog ref={dialog} className="ke-profile-drawer" aria-labelledby="profile-title" onCancel={event => { event.preventDefault(); close(); }}
       onClick={event => { if (event.target === dialog.current) close(); }}>

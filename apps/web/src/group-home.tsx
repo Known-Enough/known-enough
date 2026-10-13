@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { GroupDecisions } from './group-decisions';
 import { Groups } from '@deal-table/contracts';
+import { GroupIcon } from './app-chrome';
+type LoadFailure = { title: string; description: string; reference: string | null };
 export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onBack }: { api: (path: string, init?: RequestInit) => Promise<Response>;
   openDecision: (id: string) => void; selectedGroupId?: string; onOpenGroup: (id: string) => void; onBack: () => void }) {
   const [available, setAvailable] = useState(false);
@@ -12,6 +14,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
   const [creating, setCreating] = useState(false);
   const [email, setEmail] = useState(''); const [link, setLink] = useState(''); const [replace, setReplace] = useState(false);
   const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false);
+  const [loadFailure, setLoadFailure] = useState<LoadFailure | null>(null);
   const [token, setToken] = useState(() => {
     const fragment = new URLSearchParams(window.location.hash.slice(1));
     const value = fragment.get('groupInvite');
@@ -42,18 +45,29 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
     const epoch = ++loadEpoch.current; loadAbort.current?.abort();
     const controller = new AbortController(); loadAbort.current = controller;
     const current = () => mounted.current && epoch === loadEpoch.current;
-    setChecking(true); if (!preserveLink) setLink('');
+    setChecking(true); setLoadFailure(null); if (!preserveLink) setLink('');
+    let stage: 'account' | 'groups' | 'group' = 'account';
+    let httpStatus: number | null = null, reference: string | null = null;
+    const observe = (response: Response) => {
+      httpStatus = response.status;
+      const id = response.headers.get('apigw-requestid') ?? response.headers.get('x-amzn-requestid');
+      reference = id && /^[A-Za-z0-9_-]{8,80}$/.test(id) ? id : null;
+    };
     try {
       const response = await api('/account', {signal: controller.signal});
+      observe(response);
       if (!response.ok) throw new Error('Account unavailable');
       const result = await response.json() as { account: unknown };
       const next = result.account ? Groups.AccountSnapshot.parse(result.account) : null;
       let nextGroups: Groups.GroupSnapshot[] = [];
       if (next?.status === 'APPROVED') {
+        stage = selectedGroupId ? 'group' : 'groups'; httpStatus = null; reference = null;
         const response = await api(selectedGroupId ? '/groups/' + selectedGroupId : '/groups', {signal: controller.signal});
+        observe(response);
         if (!response.ok) throw new Error('Groups unavailable');
         const result = await response.json() as { groups?: unknown[]; group?: unknown };
-        nextGroups = selectedGroupId ? [Groups.GroupSnapshot.parse(result.group)] : (result.groups ?? []).map(group => Groups.GroupSnapshot.parse(group));
+        if (!selectedGroupId && !Array.isArray(result.groups)) throw new Error('Invalid groups response');
+        nextGroups = selectedGroupId ? [Groups.GroupSnapshot.parse(result.group)] : result.groups!.map(group => Groups.GroupSnapshot.parse(group));
       }
       if (!current()) return;
       setAvailable(true); setAccount(next); setGroups(nextGroups); setNotice('');
@@ -61,12 +75,19 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
     } catch {
       if (!current()) return;
       setAvailable(false); setAccount(null); setGroups([]); setLink(''); setEmail(''); setReplace(false);
-      throw new Error('Groups are unavailable. Refresh or sign in again.');
+      const missingGroup = stage === 'group' && (httpStatus === 403 || httpStatus === 404);
+      setLoadFailure({ title: missingGroup ? 'This group is unavailable' : stage === 'account' ? 'We couldn’t load your account' : stage === 'group' ? 'We couldn’t open this group' : 'We couldn’t load your groups',
+        description: missingGroup ? 'The link may no longer be available to your account. Go back to your groups to continue.'
+          : httpStatus === 401 ? 'Your session has expired. Sign in again to continue.'
+          : httpStatus === null ? 'We couldn’t reach the service. Check your connection and try again.'
+          : 'The service couldn’t load this view right now. Try again, or return to your groups.', reference });
+      console.info('Known Enough group loading diagnostic', { stage, httpStatus,
+        reason: httpStatus === null ? 'CONNECTION_OR_TIMEOUT' : httpStatus >= 400 ? 'HTTP_ERROR' : 'RESPONSE_FORMAT', ...(reference ? { reference } : {}) });
     } finally {if (current()) setChecking(false);}
   }
   useEffect(() => {
     mounted.current = true;
-    void load().catch(() => {if (mounted.current) setNotice('Groups are unavailable. Try refreshing or signing in again.');});
+    void load();
     return () => {mounted.current = false; ++loadEpoch.current; loadAbort.current?.abort();};
   }, []); // The component is keyed to the authenticated session.
   async function action(path: string, body: unknown, after?: (result: Record<string, unknown>) => boolean | void) {
@@ -83,9 +104,17 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
     } catch { setNotice('The result is unknown. Refresh before retrying; replace a lost invitation link explicitly.'); }
     finally { setBusy(false); }
   }
-  return <section className="ke-card" aria-busy={busy}><h2>{account?.status === 'APPROVED' ? selectedGroupId ? groups[0]?.name ?? 'Your group' : 'Your groups' : 'Account access'}</h2>
+  if (checking) return <section className="ke-card ke-state-card" aria-busy="true" role="status"><span className="ke-state-icon"><GroupIcon /></span><h2>{selectedGroupId ? 'Opening your group…' : 'Loading your groups…'}</h2><p>Getting the latest account and group information.</p></section>;
+  if (loadFailure) return <section className="ke-card ke-state-card ke-error-card" role="alert">
+    <span className="ke-state-icon ke-warning-icon"><svg aria-hidden="true" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m14 6-11 19a2 2 0 0 0 2 3h22a2 2 0 0 0 2-3L18 6a2.3 2.3 0 0 0-4 0Z" /><path d="M16 13v6m0 4v1" strokeLinecap="round" /></svg></span>
+    <h2>{loadFailure.title}</h2><p>{loadFailure.description}</p>
+    <div className="ke-state-actions"><button type="button" onClick={() => void load()}>Try again</button>
+      <button type="button" className="secondary" onClick={() => { if (selectedGroupId) onBack(); else void load(); }}>Back to groups</button></div>
+    {loadFailure.reference && <small>Reference: {loadFailure.reference}</small>}
+  </section>;
+  return <section className={'ke-card ke-group-home' + (!selectedGroupId && account?.status === 'APPROVED' && !groups.length ? ' ke-group-home-empty' : '')} aria-busy={busy}><div className="ke-section-heading"><h2>{account?.status === 'APPROVED' ? selectedGroupId ? groups[0]?.name ?? 'Your group' : 'Your groups' : 'Account access'}</h2>
     {selectedGroupId && <button className="secondary" disabled={busy} onClick={onBack}>Back to groups</button>}
-    <button className="secondary" disabled={busy} onClick={() => { void load().catch(() => setNotice('Refresh failed. Sign in again if needed.')); }}>Refresh account and groups</button>
+    <button className="secondary ke-refresh-button" disabled={busy} onClick={() => void load()}>Refresh account and groups</button></div>
     <fieldset disabled={busy || checking} style={{border: 0, padding: 0, minWidth: 0}} aria-label="Account and group actions">
     {available && !checking && !account && <p>Your account setup is still being completed. Refresh shortly, or contact the operator if it remains unavailable.</p>}
     {account?.status === 'PENDING' && <p>Your account is waiting for approval. You can edit your profile while the administrator reviews access.</p>}
@@ -93,8 +122,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
     {account?.status === 'DISABLED' && <p>Your access is disabled. Group and decision actions are unavailable.</p>}
     {account?.status === 'APPROVED' && <>
       {!selectedGroupId && <>
-      <p>Access approved</p>
-      {!groups.length && <p>No groups yet. Create a group or accept an invitation to get started.</p>}
+      {!groups.length && <div className="ke-empty-state"><span className="ke-state-icon"><GroupIcon /></span><h3>No groups yet</h3><p>Start a group with the people you want to decide with, or accept an invitation.</p></div>}
       <>{!creating && <button disabled={busy} onClick={() => setCreating(true)}>Create group</button>}{creating && <>
       <label htmlFor="new-group-name">New group name</label><input id="new-group-name" value={groupName} maxLength={80} disabled={!!groupRequest.current} onChange={event => setGroupName(event.target.value)} />
       <button disabled={busy || !groupName.trim()} onClick={() => { groupRequest.current ??= { name: groupName, idempotencyKey: crypto.randomUUID() }; void action('/groups', groupRequest.current, result => {
@@ -103,7 +131,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       {token && <><p>A group invitation is waiting. Accepting joins the group; it does not confirm a decision or approve a proposal.</p>
         <button disabled={busy} onClick={() => void action('/groups/accept', { token }, result => { const group = Groups.GroupSnapshot.parse(result.group); setToken(''); sessionStorage.removeItem('ke-group-invite'); onOpenGroup(group.id); return true; })}>Accept group invitation</button>
         <button className="secondary" onClick={() => { setToken(''); sessionStorage.removeItem('ke-group-invite'); }}>Decline group invitation</button></>}
-      {groups.map(group => <article key={group.id}><h3>{group.name}</h3><button disabled={busy} onClick={() => onOpenGroup(group.id)}>Open group</button></article>)}
+      <div className="ke-group-grid">{groups.map(group => <article key={group.id} className="ke-group-tile"><span className="ke-group-tile-icon"><GroupIcon /></span><h3>{group.name}</h3><p>{group.members.length} {group.members.length === 1 ? 'member' : 'members'}</p><button disabled={busy} onClick={() => onOpenGroup(group.id)}>Open group</button></article>)}</div>
       </>}
       {selectedGroupId && <>
       {groups.map(group => <article key={group.id}><details><summary>Group members and membership changes</summary><ul>{group.members.map(member => <li key={member.id}>{member.displayName}{member.isOrganizer ? ' (organizer)' : ''}

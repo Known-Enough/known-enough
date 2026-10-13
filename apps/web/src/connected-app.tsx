@@ -4,6 +4,7 @@ import { beginCognitoSignIn, clearCognitoSession, cognitoApiFetch, cognitoLogout
   CognitoSignInFailure, type CognitoBrowserConfig, type CognitoSession } from './cognito-session';
 import { AuthEntry } from './auth-entry';
 import { ProfileDrawer } from './profile-drawer';
+import { Brand, PrivacyBar, WelcomeHeading } from './app-chrome';
 import { GroupHome } from './group-home';
 import { ConnectedDecision } from './connected-decision';
 import { decisionStatusText } from './decision-copy';
@@ -104,10 +105,11 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
   }, [target, session, config, expire]);
   if (!session) return <AuthEntry config={config} signIn={signIn} notice={status} />;
   return <main className="ke-home">
-    <header className="masthead ke-masthead"><div><p className="eyebrow">KNOWN ENOUGH</p><h1>Decide together</h1></div>
+    <header className="ke-masthead"><Brand />
       {session.kind === 'participant' ? <ProfileDrawer key={session.accessToken} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} signOut={signOut} /> : <button type="button" className="secondary" onClick={signOut}>Sign out</button>}
     </header>
-    <details className="ke-privacy-details"><summary>Privacy and preview limits</summary><p>Known Enough and its authorized AI process private inputs. Other people see shared choices and disclosures you authorize. Outcomes may imply private needs. Use fictional, non-sensitive data here.</p></details>
+    <WelcomeHeading />
+    <PrivacyBar />
     {view.kind !== 'decision' && status && <p role="status">{status}</p>}
     {view.kind === 'invalid' ? <section className="ke-card"><h2>This link is unavailable</h2><button onClick={() => move({ kind: 'groups' }, true)}>Back to groups</button></section>
       : view.kind === 'decision' ? <>
