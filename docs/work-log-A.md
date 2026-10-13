@@ -2207,3 +2207,7 @@ Pinned Node24.21.0/npm11.19.0 typecheck/build/bundle boundary/reference7/7/diff 
 The bounded A theme claim is released. User manual viewport/theme persistence/authenticated group review remains pending, as does whole ZZ03/ZZ02 protected acceptance.
 
 Documentation closeout at2026-10-13T20:57:58Z: npm run check:planning PASS (15 planning checks), publication receipt JSON parse PASS, README receipt link exists, reference checksums7/7 PASS and git diff --check PASS. This closes the bounded documentation checkpoint only; no application test or user manual review was performed.
+
+## A ZZ03 surgical group-page icon polish — 2026-10-13T20:59:41Z
+
+The dark/light theme continuation is complete and released at source f4da33772155c11357e9cbf0112794f7f5bed674; final docs sync 0be1b3613c93861e6f41ba25d9fba783bb1cee64 is clean/equal origin/main. A claims one focused continuation from that source for icons, section heading alignment and muted-text contrast in existing group-details surfaces. Scope: apps/web/src/app-chrome.tsx, group-home.tsx, group-decisions.tsx, style.css, ZZ03/A tracking/evidence. Repository has no Lucide package; reuse current inline SVG helper style and introduce no dependency. Preserve current cards/layout/typography/responsive behavior and all membership/decision/invitation/privacy handlers. Use pinned static typecheck/build and docs checks, no app/browser/API/provider suites/probes; publish exact main via existing workflow run_checks=false. Manual review remains the user's.

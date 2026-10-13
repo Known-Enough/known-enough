@@ -1,6 +1,6 @@
 # ZZ03 — Simplify the signed-in app and its navigation
 
-- Status: READY / unclaimed — dark/light theme and prior group-details/brand-asset continuations are published; user manual visual/authenticated review and the remaining protected ZZ03 journeys remain incomplete.
+- Status: IN_PROGRESS / A — focused group-details icon/alignment polish claimed on main 0be1b3613c93861e6f41ba25d9fba783bb1cee64; existing theme and layout remain published. User visual/authenticated review and remaining protected ZZ03 journeys remain incomplete.
 - User-approved structure: 2026-10-12T17:42:55.221080+00:00.
 - Scheduling: after ZZ01 -> ZZ02 checked checkpoints, one sequential claim. Preserve any active project task/NP00; create no worker/chat/monitor from this ticket.
 - Goal: stop showing onboarding, groups, a decision, developer scenarios and simulated assistant at once. Organize the product by the user's current activity.
@@ -123,3 +123,7 @@ Pinned Node24.21.0/npm11.19.0 typecheck, production build including bundle bound
 The bounded theme continuation is released; responsive viewport and authenticated group/theme review remain with the user. Whole ZZ03 protected navigation/decision/AI acceptance and ZZ02 signup/profile acceptance remain incomplete; no whole-task DONE is claimed.
 
 Documentation closeout: the task/planning consistency checker passed all15 planning checks; the publication receipt JSON and README evidence link resolve. No app/browser/API/provider suite was run.
+
+## A ZZ03 surgical group-page icon polish — 2026-10-13T20:59:41Z
+
+A claims one surgical group-details visual continuation on clean synchronized main 0be1b3613c93861e6f41ba25d9fba783bb1cee64 in /home/martelaxe/known-enough-group-ui. Exact code scope: apps/web/src/app-chrome.tsx, group-home.tsx, group-decisions.tsx and style.css; ZZ03 and own A tracking/evidence. The repository contains no Lucide dependency, so extend the existing inline SVG helpers with small Lucide-style outline glyphs; add no dependency. Add Users, ListChecks, Mail, ShieldCheck and UsersRound to the existing Members, Decisions, Invitations, Privacy and Group Overview headings; pale-green icon tiles; ArrowLeft, RefreshCw, Plus and Link inside the named existing buttons. Tune heading alignment, button icon spacing and muted-text contrast only. Preserve the current card layout, typography, responsive behavior, all handlers and privacy/authorization behavior. No data/API/backend/config/AI/email/IAM changes. Pinned Node/npm typecheck/build and source/docs consistency only, no app/browser/API/provider suites or probes under the existing manual-review direction; publish the exact main source and verify release/config/assets. User manual viewport/authenticated acceptance remains pending.
