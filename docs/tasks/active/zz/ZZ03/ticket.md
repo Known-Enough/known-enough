@@ -1,6 +1,6 @@
 # ZZ03 — Simplify the signed-in app and its navigation
 
-- Status: IN_PROGRESS / A — focused dark/light theme continuation claimed on `main` `b0b25cb542463f79761b5bc29ff0a9112155d0ee`; prior group-details and brand-asset publication remain complete. User manual visual/authenticated review and remaining protected ZZ03 journeys remain incomplete.
+- Status: READY / unclaimed — dark/light theme and prior group-details/brand-asset continuations are published; user manual visual/authenticated review and the remaining protected ZZ03 journeys remain incomplete.
 - User-approved structure: 2026-10-12T17:42:55.221080+00:00.
 - Scheduling: after ZZ01 -> ZZ02 checked checkpoints, one sequential claim. Preserve any active project task/NP00; create no worker/chat/monitor from this ticket.
 - Goal: stop showing onboarding, groups, a decision, developer scenarios and simulated assistant at once. Organize the product by the user's current activity.
@@ -113,3 +113,13 @@ A claims one focused, user-directed dark/light appearance continuation on clean 
 ### Dark/light implementation checkpoint — 2026-10-13T20:53:29Z
 
 The shared toggle is now in the signed-out and signed-in headers. It follows `prefers-color-scheme` until a choice is made, stores only `light`/`dark` in local storage, syncs across tabs, and updates the browser theme-color metadata. The dark palette covers group cards, decision and invitation controls, profile drawer, welcome/auth surfaces and existing status states; the supplied logo sits on a light mark backing in dark mode. No app behavior or private data storage changed. Pinned Node24.21.0/npm11.19.0 `npm run typecheck`, `npm run build` including browser bundle-boundary scan, `npm run check:references` (7/7), and `git diff --check` PASS. No application, browser, API or provider test suite/probe ran. Exact-source frontend publication/readback remains next; user manual visual/authenticated review is pending.
+
+## A ZZ03 dark/light theme published and released — 2026-10-13T20:57:58Z
+
+The shared signed-in/signed-out header now has an accessible dark-mode toggle. With no explicit selection, the app follows the operating-system appearance (light fallback); a selection stores only light or dark in browser local storage and is shared across app views/tabs. Dark colors cover current group/decision/invitation/profile/auth surfaces, with adjusted controls, status colors and logo contrast. Existing group, decision, invitation, profile, authentication and privacy behavior is unchanged.
+
+Pinned Node24.21.0/npm11.19.0 typecheck, production build including bundle boundary, reference checksums7/7 and diff checks PASS. No application/browser/API/provider tests/probes ran; the release workflow regression step was skipped with run_checks=false. Own-A exact-source [38466501985](https://github.com/Known-Enough/known-enough/actions/runs/38466501985) SUCCESS on main source f4da33772155c11357e9cbf0112794f7f5bed674, actor martelaxe/44531296, Amplify job77. Runtime configuration readback PASS, API hash unchanged, PostConfirmation MATCH, profile routes5/5, managed routes6/6, group GET present, configuration/data/provider writes0. API publication, signup delivery and provider calls NOT_EXECUTED. Public root plus six assets returned HTTP200 and all seven SHA-256 hashes matched the release manifest. [Sanitized receipt](../../../../review-artifacts/ZZ03/theme-publication.json).
+
+The bounded theme continuation is released; responsive viewport and authenticated group/theme review remain with the user. Whole ZZ03 protected navigation/decision/AI acceptance and ZZ02 signup/profile acceptance remain incomplete; no whole-task DONE is claimed.
+
+Documentation closeout: the task/planning consistency checker passed all15 planning checks; the publication receipt JSON and README evidence link resolve. No app/browser/API/provider suite was run.
