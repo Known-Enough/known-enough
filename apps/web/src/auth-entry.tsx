@@ -17,10 +17,6 @@ export function AuthEntry({ config, signIn, notice }: { config: CognitoBrowserCo
           <button ref={create} type="button" onClick={() => setRegistering(true)}>Create account</button>
           <button type="button" className="secondary" onClick={() => void signIn('participant')}>Sign in</button>
         </div>}
-      {!registering && <details className="ke-entry-display"><summary>Shared screen access</summary>
-        <p>For a shared screen such as a TV. Shows shared progress only; cannot enter private needs or approve proposals.</p>
-        <button type="button" className="secondary" onClick={() => void signIn('display')}>Shared display sign-in</button>
-      </details>}
       <details className="ke-entry-privacy"><summary>Privacy and preview limits</summary>
         <p>Known Enough and its authorized AI process private inputs. Other people see shared choices and disclosures you authorize.
           Outcomes may still reveal something about your needs. Use fictional, non-sensitive data in this preview.</p>

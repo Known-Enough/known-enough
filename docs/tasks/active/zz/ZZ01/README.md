@@ -1,3 +1,5 @@
+**Latest user direction, 2026-10-13:** hide shared-screen access entirely from the normal entry screen. This supersedes the earlier explained secondary entry option; preserve authenticated display behavior elsewhere.
+
 # ZZ01 — Simplify signup and redesign the first screen
 
 **Status:** BLOCKED / unclaimed; app entry checked and deployed. First task in the ZZ batch; preserve any genuinely active claim before intake.
