@@ -1,6 +1,6 @@
 # ZZ03 — Separate home, groups and decisions
 
-**Status:** IN_PROGRESS / A — focused profile drawer refinement claimed 2026-10-13T22:12:08Z from clean main `3cd2052ad9ce51cd05ae8920b137ac91e975a5b1`; implementation and focused checks are complete, exact-source publication is next. The previously published Groups dashboard continuation remains released; this focused drawer pass preserves the broader ZZ03 acceptance status.
+**Status:** Bounded profile drawer refinement published and released from exact main source `ce2e5a8b04d856bb9dc0cf30ee33d44b5f1008d9` at 2026-10-13T22:26:14Z ([receipt](../../../../review-artifacts/ZZ03/profile-drawer-publication.json)). Whole ZZ03 acceptance and real-account review remain incomplete.
 
 Replace the long signed-in page with clear views: waiting for approval, Your groups, a selected group and a selected decision. Keep the ZZ02 profile drawer in the header. Remove manual decision-ID entry, fictional templates, simulated Alexa and fictional invitations from the normal product flow.
 

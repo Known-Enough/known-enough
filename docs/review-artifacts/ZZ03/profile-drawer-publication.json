@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-13T22:26:33Z",
+  "task": "ZZ03",
+  "scope": "Focused profile right drawer refinement",
+  "sourceSha": "ce2e5a8b04d856bb9dc0cf30ee33d44b5f1008d9",
+  "commitUrl": "https://github.com/Known-Enough/known-enough/commit/ce2e5a8b04d856bb9dc0cf30ee33d44b5f1008d9",
+  "workflow": {
+    "name": "ZZ primary frontend publication",
+    "runId": "38477688649",
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/38477688649",
+    "actor": "martelaxe",
+    "event": "workflow_dispatch",
+    "branch": "main",
+    "conclusion": "SUCCESS",
+    "entryOnly": false,
+    "runChecks": false,
+    "amplifyJobId": "82"
+  },
+  "localChecks": {
+    "node": "24.21.0",
+    "npm": "11.19.0",
+    "lintAndBoundaries": "PASS (496 import references)",
+    "typecheck": "PASS",
+    "unitTests": "1572 PASS, 2 skipped",
+    "productionBuildAndBundleBoundary": "PASS",
+    "hostedPreviewBuildAndBoundary": "PASS",
+    "hostedPreviewTest": "1/1 PASS",
+    "referenceChecksums": "7/7 PASS",
+    "planningConsistency": "15/15 PASS",
+    "changedMarkdownLinks": "493 local links across 6 documents PASS",
+    "focusedProfileBrowserTests": "2/2 PASS at 390px and 1280px; photo upload, close controls, trigger-focus restoration, private description and save behavior covered",
+    "syntheticVisualReview": "PASS at 390px dark and 440px light; fixed header/footer and scrollable center content",
+    "fullBrowserSuite": "61/72 passed; 11 failures outside profile drawer in stale/loading/account-refresh/auth/onboarding/qualification and zz-entry focus scenarios",
+    "workflowRegressionChecks": "SKIPPED by run_checks=false",
+    "apiProviderSignupEmail": "NOT_EXECUTED"
+  },
+  "runtimeReadback": {
+    "result": "ZZ02_SETUP_READBACK_PASS",
+    "configurationSha256": "f6f32c6bd2cb66bebd8e4d40c35b1f198426172f1f8f372eaab35c472327da6b",
+    "apiSha256": "a5873e96fd2cc87eec2569ef8c7eb19989caea4edc228d734f7c1ae1590d1df1",
+    "postConfirmation": "MATCH",
+    "profileRoutesPresent": 5,
+    "managedRoutesPresent": 6,
+    "configurationWrites": 0,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "signupDelivery": "NOT_EXECUTED",
+    "apiPublication": "NOT_EXECUTED"
+  },
+  "publication": {
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "url": "https://main.d143q5ravxp5av.amplifyapp.com/",
+    "staticReadback": "All seven release-manifest files returned HTTP 200 and matched workflow artifact SHA-256 values.",
+    "files": [
+      { "path": "/assets/app-chrome-ZK3dnkul.js", "httpStatus": 200, "sha256": "79890e5bab64b8f96ec8045d439dca5f5335650353900028de5ffd05029aa3c7", "manifestMatch": true },
+      { "path": "/assets/connected-app-L97SMtpX.js", "httpStatus": 200, "sha256": "dd2ece8cf34820c82e4e1af7492e702f61d0aa0cbc0508e95dad2afb3bf9039f", "manifestMatch": true },
+      { "path": "/assets/index-C0bmhQ8y.js", "httpStatus": 200, "sha256": "8b07fea09d5cfe648d71476162d0735bc517cbce97b6b42dc87e57c026edd9c3", "manifestMatch": true },
+      { "path": "/assets/index-C_qyhzdB.css", "httpStatus": 200, "sha256": "81cf71a3fb6209b284765c84e2fe16012ac9a6bbe77e7a5913cef9022c57ffb7", "manifestMatch": true },
+      { "path": "/cover.png", "httpStatus": 200, "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151", "manifestMatch": true },
+      { "path": "/", "httpStatus": 200, "sha256": "86af0c554f2c7fcdb80a74c84e774b9170137f8e822380b5881b535bb10c885f", "manifestMatch": true },
+      { "path": "/logo.png", "httpStatus": 200, "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb", "manifestMatch": true }
+    ]
+  },
+  "manualReview": {
+    "realAuthenticatedAccountReview": "PENDING_USER",
+    "wholeZZ03Acceptance": "INCOMPLETE"
+  }
+}
