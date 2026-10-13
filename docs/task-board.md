@@ -1,3 +1,5 @@
+Current A task: **ZZ02 setup and prepared UI publication continuation**, including the user-requested fix for repeated CloudShell setup. [Automatic release configuration and one installation](../infra/zz/automatic-configuration.md): code prepared/tested, dedicated GitHub role not yet installed/used. Local administrator login expired; preserve accounts/groups and separate remaining live/product obligations. One active task.
+
 Latest user-facing entry change: **shared-screen access hidden and verified live** in [38447069409](https://github.com/Known-Enough/known-enough/actions/runs/38447069409). A bounded follow-up released; whole ZZ provider/setup criteria remain open. Public frontend is verified6afe + entry-only patch, not unpublished ZZ02/03 dashboard. [Evidence](review-artifacts/ZZ01/shared-screen-hidden.json). Prior active snapshots below are historical.
 
 Current A task: **ZZ01 bounded follow-up — hide shared-screen access from normal entry**. B checked phases remain released/blocked. Publish only verified live entry composition; preserve unpublished ZZ02/ZZ03 backend dependencies.

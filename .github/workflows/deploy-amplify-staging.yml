@@ -19,12 +19,14 @@ on:
       - '.nvmrc'
       - 'scripts/check-bundle.mjs'
       - '.github/workflows/deploy-amplify-staging.yml'
+      - 'scripts/zz/**'
+      - 'infra/zz/application-config.json'
       - 'infra/permissions/ke13-amplify-github-deploy.json'
   workflow_dispatch:
 
 concurrency:
-  group: known-enough-amplify-main
-  cancel-in-progress: true
+  group: known-enough-primary-frontend
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -34,7 +36,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: github.ref == 'refs/heads/main'
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && (github.actor_id == '143764700' || github.actor_id == '44531296')
     env:
       AWS_REGION: us-east-1
       AMPLIFY_APP_ID: d143q5ravxp5av
@@ -45,6 +47,8 @@ jobs:
       VITE_COGNITO_PARTICIPANT_CLIENT_ID: 3accf7paalvon2m8ue8okfi853
       VITE_COGNITO_DISPLAY_CLIENT_ID: 481ru24906sv26f30i569gq8g0
       VITE_API_BASE_URL: https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com
+      AWS_MAX_ATTEMPTS: '1'
+      EXPECTED_SOURCE: ${{ github.sha }}
     steps:
       - name: Check out main
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -60,8 +64,22 @@ jobs:
           npm ci
           npm run build
           test -s apps/web/dist/index.html
-          cd apps/web/dist
-          zip -qr "$GITHUB_WORKSPACE/amplify-build.zip" .
+          python3 -B scripts/zz/frontend-release.test.py
+          python3 -B scripts/zz/post-confirmation-setup.test.py
+          python3 -B scripts/zz/install-application-config.test.py
+
+      - name: Get application configuration access
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubApplicationConfig
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          role-duration-seconds: 900
+          retry-max-attempts: 1
+          unset-current-credentials: true
+
+      - name: Reconcile and verify application configuration before publication
+        run: python3 -B scripts/zz/post-confirmation-setup.py --apply --backup-to-s3
 
       - name: Get short-lived AWS credentials
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
@@ -71,40 +89,18 @@ jobs:
           role-session-name: known-enough-main-${{ github.run_id }}
           role-duration-seconds: 900
           mask-aws-account-id: true
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
 
       - name: Upload and publish the build
-        shell: bash
-        run: |
-          set -euo pipefail
-          response="$(aws amplify create-deployment \
-            --app-id "$AMPLIFY_APP_ID" \
-            --branch-name "$AMPLIFY_BRANCH" \
-            --region "$AWS_REGION" \
-            --output json --no-cli-pager)"
-          job_id="$(jq -r '.jobId' <<< "$response")"
-          upload_url="$(jq -r '.zipUploadUrl' <<< "$response")"
-          test -n "$job_id"
-          test -n "$upload_url"
-          curl --fail --silent --show-error --upload-file "$GITHUB_WORKSPACE/amplify-build.zip" "$upload_url"
-          aws amplify start-deployment \
-            --app-id "$AMPLIFY_APP_ID" \
-            --branch-name "$AMPLIFY_BRANCH" \
-            --job-id "$job_id" \
-            --region "$AWS_REGION" \
-            --no-cli-pager >/dev/null
-          echo "Started Amplify deployment job $job_id"
-          for attempt in $(seq 1 60); do
-            status="$(aws amplify get-job \
-              --app-id "$AMPLIFY_APP_ID" \
-              --branch-name "$AMPLIFY_BRANCH" \
-              --job-id "$job_id" \
-              --region "$AWS_REGION" \
-              --query 'job.summary.status' --output text --no-cli-pager)"
-            case "$status" in
-              SUCCEED|SUCCEEDED) echo "Amplify deployment succeeded"; exit 0 ;;
-              FAILED|CANCELLED) echo "Amplify deployment ended with $status"; exit 1 ;;
-            esac
-            sleep 10
-          done
-          echo "Amplify deployment did not finish within 10 minutes"
-          exit 1
+        run: python3 -B scripts/zz/frontend-release.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: application-publication
+          path: |
+            ${{ runner.temp }}/zz02-setup-report.json
+            ${{ runner.temp }}/zz-frontend-release.json
+          if-no-files-found: warn
+          retention-days: 30

@@ -12,9 +12,12 @@ on:
         type: string
 permissions:
   contents: read
+concurrency:
+  group: known-enough-primary-frontend
+  cancel-in-progress: false
 jobs:
   inspect:
-    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && github.actor_id == '143764700'
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && (github.actor_id == '143764700' || github.actor_id == '44531296')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -30,9 +33,10 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
           python3 -B scripts/zz/post-confirmation-setup.test.py
+          python3 -B scripts/zz/install-application-config.test.py
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
-          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubStagingInspector
+          role-to-assume: ${{ inputs.apply_setup && 'arn:aws:iam::092954139775:role/KnownEnoughGithubApplicationConfig' || 'arn:aws:iam::092954139775:role/KnownEnoughGithubStagingInspector' }}
           aws-region: us-east-1
           allowed-account-ids: '092954139775'
           retry-max-attempts: 1
@@ -43,7 +47,11 @@ jobs:
           CHECKED_API_HASH: ${{ inputs.api_sha256 }}
         run: |
           if [ "$APPLY_SETUP" = true ]; then
-            python3 -B scripts/zz/post-confirmation-setup.py --apply --api-sha256 "$CHECKED_API_HASH"
+            if [ -n "$CHECKED_API_HASH" ]; then
+              python3 -B scripts/zz/post-confirmation-setup.py --apply --backup-to-s3 --api-sha256 "$CHECKED_API_HASH"
+            else
+              python3 -B scripts/zz/post-confirmation-setup.py --apply --backup-to-s3
+            fi
           else
             python3 -B scripts/zz/post-confirmation-setup.py
           fi

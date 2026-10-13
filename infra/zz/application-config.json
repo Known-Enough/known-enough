@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "account": "092954139775",
+  "region": "us-east-1",
+  "pool": "us-east-1_V9OMjd0zx",
+  "api": "u94iyvt6p9",
+  "function": "known-enough-stage-api",
+  "runtimeSource": "0f05fe1fceb3eb2b8d3e17e23035ff5cb1bd702d",
+  "apiSha256": "a5873e96fd2cc87eec2569ef8c7eb19989caea4edc228d734f7c1ae1590d1df1",
+  "routes": [
+    "GET /account/profile",
+    "POST /account/profile",
+    "POST /account/profile/image",
+    "OPTIONS /account/profile",
+    "OPTIONS /account/profile/image"
+  ]
+}

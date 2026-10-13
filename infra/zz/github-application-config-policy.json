@@ -1,0 +1,49 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadExistingRuntime",
+      "Effect": "Allow",
+      "Action": ["lambda:GetFunctionConfiguration", "lambda:GetPolicy"],
+      "Resource": "arn:aws:lambda:us-east-1:092954139775:function:known-enough-stage-api"
+    },
+    {
+      "Sid": "BindOnlyCognitoToExistingRuntime",
+      "Effect": "Allow",
+      "Action": "lambda:AddPermission",
+      "Resource": "arn:aws:lambda:us-east-1:092954139775:function:known-enough-stage-api",
+      "Condition": {"StringEquals": {"lambda:Principal": "cognito-idp.amazonaws.com"}}
+    },
+    {
+      "Sid": "ExistingPoolConfiguration",
+      "Effect": "Allow",
+      "Action": ["cognito-idp:DescribeUserPool", "cognito-idp:UpdateUserPool"],
+      "Resource": "arn:aws:cognito-idp:us-east-1:092954139775:userpool/us-east-1_V9OMjd0zx"
+    },
+    {
+      "Sid": "ReadExistingApi",
+      "Effect": "Allow",
+      "Action": "apigateway:GET",
+      "Resource": "arn:aws:apigateway:us-east-1::/apis/u94iyvt6p9/*"
+    },
+    {
+      "Sid": "AddApplicationRoutes",
+      "Effect": "Allow",
+      "Action": "apigateway:POST",
+      "Resource": "arn:aws:apigateway:us-east-1::/apis/u94iyvt6p9/routes",
+      "Condition": {"ForAllValues:StringEquals": {"apigateway:Request/RouteAuthorizationType": ["JWT", "NONE"]}}
+    },
+    {
+      "Sid": "PrivateConfigurationBackups",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject"],
+      "Resource": "arn:aws:s3:::known-enough-qa-artifacts-092954139775/application-config/*"
+    },
+    {
+      "Sid": "NoCredentialOrApplicationDataAuthority",
+      "Effect": "Deny",
+      "Action": ["iam:*", "sts:AssumeRole", "sts:GetSessionToken", "sts:GetFederationToken", "dynamodb:*", "bedrock:*", "lambda:InvokeFunction", "s3:DeleteObject", "s3:DeleteObjectVersion"],
+      "Resource": "*"
+    }
+  ]
+}

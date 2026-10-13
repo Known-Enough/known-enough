@@ -45,6 +45,8 @@ jobs:
           test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
           python3 -B scripts/zz/frontend-release.test.py
           python3 -B scripts/zz/entry-only-build.test.py
+          python3 -B scripts/zz/post-confirmation-setup.test.py
+          python3 -B scripts/zz/install-application-config.test.py
           npm ci
           npm run build
       - name: Prepare only the verified live entry change
@@ -52,6 +54,19 @@ jobs:
         run: |
           npx playwright install --with-deps chromium
           python3 -B scripts/zz/entry-only-build.py
+      - name: Application configuration access
+        if: ${{ !inputs.entry_only }}
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubApplicationConfig
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          role-duration-seconds: 900
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Reconcile and verify declared application configuration before publication
+        if: ${{ !inputs.entry_only }}
+        run: python3 -B scripts/zz/post-confirmation-setup.py --apply --backup-to-s3
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
           role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughAmplifyMainDeploy
@@ -75,5 +90,6 @@ jobs:
           path: |
             ${{ runner.temp }}/zz-frontend-release.json
             ${{ runner.temp }}/zz-entry-only-build.json
+            ${{ runner.temp }}/zz02-setup-report.json
           if-no-files-found: warn
           retention-days: 30
