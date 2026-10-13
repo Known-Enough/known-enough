@@ -31,7 +31,7 @@ def configuration():
         raise RuntimeError('APPLICATION_RUNTIME_INVALID')
     routes = value.get('routes', [])
     if not routes or len(set(routes)) != len(routes) or len(routes) > 100 or any(
-        not re.fullmatch(r'(GET|POST|PUT|PATCH|DELETE|OPTIONS) /[A-Za-z0-9_/-]+', route) for route in routes
+        not re.fullmatch(r'(GET|POST|PUT|PATCH|DELETE|OPTIONS) /(?:[A-Za-z0-9_-]+|\{[A-Za-z][A-Za-z0-9_]*\})(?:/(?:[A-Za-z0-9_-]+|\{[A-Za-z][A-Za-z0-9_]*\}))*', route) for route in routes
     ):
         raise RuntimeError('APPLICATION_ROUTES_INVALID')
     return value

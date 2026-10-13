@@ -8,6 +8,7 @@
   "runtimeSource": "0f05fe1fceb3eb2b8d3e17e23035ff5cb1bd702d",
   "apiSha256": "a5873e96fd2cc87eec2569ef8c7eb19989caea4edc228d734f7c1ae1590d1df1",
   "routes": [
+    "GET /groups/{groupId}",
     "GET /account/profile",
     "POST /account/profile",
     "POST /account/profile/image",
