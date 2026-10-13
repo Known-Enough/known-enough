@@ -1,0 +1,17 @@
+{
+  "observedAt": "2026-10-13T19:28:26Z",
+  "sourceSha": "e98c71103a658d4148f6e7447f354c66e45eea53",
+  "githubRun": "https://github.com/Known-Enough/known-enough/actions/runs/38454962409",
+  "githubConclusion": "SUCCESS",
+  "actor": "martelaxe",
+  "configurationWrites": 0,
+  "dataWrites": 0,
+  "providerCalls": 0,
+  "runtimeHashMatchesManifest": true,
+  "postConfirmation": "ABSENT",
+  "profileRoutesPresent": 0,
+  "smsRoleConfigured": false,
+  "configurationRoleInstallation": "NOT_EXECUTED_BY_A",
+  "fullFrontendPublication": "NOT_EXECUTED",
+  "signupDelivery": "NOT_EXECUTED"
+}
