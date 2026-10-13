@@ -4,7 +4,7 @@ import { beginCognitoSignIn, clearCognitoSession, cognitoApiFetch, cognitoLogout
   CognitoSignInFailure, type CognitoBrowserConfig, type CognitoSession } from './cognito-session';
 import { AuthEntry } from './auth-entry';
 import { ProfileDrawer } from './profile-drawer';
-import { Brand, PrivacyBar, WelcomeHeading } from './app-chrome';
+import { Brand, PrivacyBar, ThemeToggle, WelcomeHeading } from './app-chrome';
 import { GroupHome } from './group-home';
 import { ConnectedDecision } from './connected-decision';
 import { decisionStatusText } from './decision-copy';
@@ -105,8 +105,10 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
   }, [target, session, config, expire]);
   if (!session) return <AuthEntry config={config} signIn={signIn} notice={status} />;
   return <main className={view.kind === 'group' ? 'ke-home ke-group-route' : 'ke-home'}>
-    <header className="ke-masthead"><Brand />
+    <header className="ke-masthead"><Brand /><div className="ke-header-actions">
+      <ThemeToggle />
       {session.kind === 'participant' ? <ProfileDrawer key={session.accessToken} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} signOut={signOut} /> : <button type="button" className="secondary" onClick={signOut}>Sign out</button>}
+    </div>
     </header>
     <WelcomeHeading />
     <PrivacyBar />
