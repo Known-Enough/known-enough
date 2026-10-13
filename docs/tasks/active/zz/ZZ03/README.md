@@ -1,6 +1,6 @@
 # ZZ03 — Separate home, groups and decisions
 
-**Status:** READY / unclaimed — group-details redesign and supplied-brand polish are published; user manual visual/authenticated review and protected signup/profile/navigation/decision/AI acceptance remain incomplete.
+**Status:** IN_PROGRESS / A — adding the requested persistent light/dark appearance on synchronized `main` `b0b25cb542463f79761b5bc29ff0a9112155d0ee`; prior group-details redesign and supplied-brand polish are published. Manual visual/authenticated review and protected signup/profile/navigation/decision/AI acceptance remain incomplete.
 
 Replace the long signed-in page with clear views: waiting for approval, Your groups, a selected group and a selected decision. Keep the ZZ02 profile drawer in the header. Remove manual decision-ID entry, fictional templates, simulated Alexa and fictional invitations from the normal product flow.
 
