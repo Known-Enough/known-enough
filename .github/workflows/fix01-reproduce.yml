@@ -22,6 +22,7 @@ jobs:
       EXPECTED_SOURCE: ${{ inputs.source_sha }}
       AWS_MAX_ATTEMPTS: '1'
       NODE_NO_WARNINGS: '1'
+      FIX01_CONFIRMED_TRIGGER_RECOVERY: 'true'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:

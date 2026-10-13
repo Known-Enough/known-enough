@@ -72,3 +72,10 @@ test('finite mail failure metadata never contains a path, address or provider te
  assert.deepEqual(mailFailureMetadata({mailOperation:'https://private.example',httpStatus:401}),{});
  assert.deepEqual(mailFailureMetadata({mailOperation:'TOKEN',httpStatus:'PRIVATE_STATUS'}),{mailOperation:'TOKEN'});
 });
+
+import { recoverableConfirmedTriggerFailure } from './partition-live-behavior.mjs';
+test('FIX01 recovery is explicit and only a post-confirmation Lambda failure, never an email/auth bypass',()=>{
+ assert.equal(recoverableConfirmedTriggerFailure({safeCode:'COGNITO_ConfirmSignUp_InvalidLambdaResponseException'},'true'),true);
+ for(const code of ['COGNITO_ConfirmSignUp_CodeMismatchException','COGNITO_ConfirmSignUp_NotAuthorizedException','COGNITO_ConfirmSignUp_UNCLASSIFIED','COGNITO_SignUp_UnexpectedLambdaException']) assert.equal(recoverableConfirmedTriggerFailure({safeCode:code},'true'),false);
+ assert.equal(recoverableConfirmedTriggerFailure({safeCode:'COGNITO_ConfirmSignUp_InvalidLambdaResponseException'},undefined),false);
+});

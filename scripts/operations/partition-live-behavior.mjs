@@ -19,6 +19,9 @@ const execute = promisify(execFile); const api = 'https://u94iyvt6p9.execute-api
 const bucket = 'known-enough-qa-artifacts-092954139775';
 const invalid = code => { const error=new Error(code);error.safeCode=code;throw error; };
 const uuid = value => typeof value === 'string' && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(value);
+export function recoverableConfirmedTriggerFailure(error, enabled) {
+ return enabled==='true'&&['UnexpectedLambdaException','InvalidLambdaResponseException','UserLambdaValidationException'].some(name=>error?.safeCode==='COGNITO_ConfirmSignUp_'+name);
+}
 export function fixtureFailureCode(error){
  const prior=error?.safeCode??error?.code;
  if(typeof prior==='string'&&/^[A-Za-z0-9_]{1,120}$/.test(prior))return prior;
@@ -53,7 +56,7 @@ export function behaviorReport(state, phase, result) {
   return { result:safeResult,phase:safePhase,identities:count(state?.fixtures?.length),signup:count(state?.signup),
     confirmed:count(state?.confirmed),signedLogin:count(state?.signedLogin),apiChecks:count(state?.apiChecks),
     archived:count(state?.archived),selfDeleted:count(state?.selfDeleted),mailboxesRemoved:count(state?.mailboxesRemoved),
-    syntheticAccountsDisabled:count(state?.disabled),staleCommitRejected:count(state?.staleCommitRejected),largeDrafts:count(state?.largeDrafts),archiveLostAckRecovered:count(state?.archiveLostAckRecovered),modelCalls:0 };
+    syntheticAccountsDisabled:count(state?.disabled),staleCommitRejected:count(state?.staleCommitRejected),largeDrafts:count(state?.largeDrafts),archiveLostAckRecovered:count(state?.archiveLostAckRecovered),modelCalls:0,...(state?.confirmationTriggerFailure?{confirmationTriggerFailure:fixtureFailureCode({safeCode:state.confirmationTriggerFailure}),confirmedTriggerRecovered:count(state.confirmedTriggerRecovered)}:{}) };
 }
 
 export function visibleGroup(page,groupId,expectedMembers){
@@ -79,7 +82,7 @@ async function cognito(operation, body) {
   if(!['SignUp','ConfirmSignUp','InitiateAuth','RespondToAuthChallenge','DeleteUser','GetUser'].includes(operation))return invalid('AUTH_OPERATION_INVALID');
   const response=await globalThis.fetch('https://cognito-idp.us-east-1.amazonaws.com/',{method:'POST',redirect:'error',signal:globalThis.AbortSignal.timeout(10000),
     headers:{'content-type':'application/x-amz-json-1.1','x-amz-target':'AWSCognitoIdentityProviderService.'+operation},body:JSON.stringify(body)});
-  const data=await jsonResponse(response);if(!response.ok){const name=String(data.__type??'').split('#').at(-1);const allowed=['InvalidParameterException','NotAuthorizedException','UserNotConfirmedException','CodeMismatchException','UsernameExistsException','UserNotFoundException','TooManyRequestsException'];return invalid('COGNITO_'+operation+'_'+(allowed.includes(name)?name:'UNCLASSIFIED'));}return data;
+  const data=await jsonResponse(response);if(!response.ok){const name=String(data.__type??'').split('#').at(-1);const allowed=['InvalidParameterException','NotAuthorizedException','UserNotConfirmedException','CodeMismatchException','UsernameExistsException','UserNotFoundException','TooManyRequestsException','UnexpectedLambdaException','InvalidLambdaResponseException','UserLambdaValidationException'];return invalid('COGNITO_'+operation+'_'+(allowed.includes(name)?name:'UNCLASSIFIED'));}return data;
 }
 async function srp(config,fixture){
   const require=createRequire(new URL('../live-qa/package.json',import.meta.url));const {CognitoUserPool,CognitoUser,AuthenticationDetails}=require('amazon-cognito-identity-js');
@@ -131,10 +134,13 @@ async function main(phase){
       try{for(const fixture of state.fixtures){await createOwnedMailbox(fixture,state.runId,mailbox,preserve);fixture.signupIntent=true;await preserve();
         const created=await cognito('SignUp',{ClientId:config.participantClientId,Username:fixture.mailbox.address,Password:fixture.password,UserAttributes:[{Name:'email',Value:fixture.mailbox.address}]});if(!uuid(created.UserSub))return invalid('SIGNUP_SUBJECT_INVALID');fixture.subject=created.UserSub;fixture.created=true;state.signup++;await preserve();
         let code;for(let count=0;count<3&&!code;count++)code=await mailbox.code(fixture.mailbox);if(!code)return invalid('VERIFICATION_MAIL_NOT_OBSERVED');
-        await cognito('ConfirmSignUp',{ClientId:config.participantClientId,Username:fixture.mailbox.address,ConfirmationCode:code});state.confirmed++;await preserve();
+        let triggerFailure=false;
+        try{await cognito('ConfirmSignUp',{ClientId:config.participantClientId,Username:fixture.mailbox.address,ConfirmationCode:code});state.confirmed++;}
+        catch(error){if(!recoverableConfirmedTriggerFailure(error,process.env.FIX01_CONFIRMED_TRIGGER_RECOVERY))throw error;triggerFailure=true;state.confirmationTriggerFailure=error.safeCode;}
+        await preserve();
         fixture.cleanupToken=await srp(config,fixture);await signed(fixture,fixture.cleanupToken);await preserve();
         fixture.accessToken=await pkce(config,fixture,browser);await signed(fixture,fixture.accessToken);state.signedLogin++;await preserve();
-        const registered=await request(fixture,'/account/register','POST',{displayName:'OPS01 owned test'});if(registered.account?.status!=='PENDING')return invalid('REGISTRATION_ADMISSION_CHANGED');fixture.registered=true;fixture.observedRegistrationAt=new Date().toISOString();await preserve();await request(fixture,'/groups','GET',undefined,403);
+        const registered=await request(fixture,'/account/register','POST',{displayName:'OPS01 owned test'});if(registered.account?.status!=='PENDING')return invalid('REGISTRATION_ADMISSION_CHANGED');fixture.registered=true;if(triggerFailure){state.confirmed++;state.confirmedTriggerRecovered=(state.confirmedTriggerRecovered??0)+1;}fixture.observedRegistrationAt=new Date().toISOString();await preserve();await request(fixture,'/groups','GET',undefined,403);
       }}finally{await browser.close();}
     }else{
       if(!state||state.sourceSha!==sourceSha||state.fixtures.length!==2)return invalid('FIXTURE_STATE_INVALID');state.fixtures.forEach(item=>ownFixture(item,state.runId));
