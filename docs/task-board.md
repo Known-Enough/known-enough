@@ -1,18 +1,18 @@
-Current A task: **ZZ03 group-details redesign — IN_PROGRESS/A on synchronized `037d1aa89cd20c7e86adb4d389172dd9deded9da`**. User asks for a compact premium group overview and separate Members, Decisions and Invitations cards. Scope is only `connected-app.tsx`, `group-home.tsx`, `group-decisions.tsx`, `style.css` plus A tracking/evidence. Preserve existing authorization, membership, invitation, decision and privacy behavior. User tests manually; no app/browser/API/provider suites or probes. Use pinned compilation/build and exact-source primary publication with configuration readback. Protected signup/profile/navigation/decision/AI acceptance remains unverified.
+Latest A checkpoint: **group-details redesign published and byte-verified** at [38463342776](https://github.com/Known-Enough/known-enough/actions/runs/38463342776) from `320ec64f75a00eed38f4fffacac1d84b74e76b8e`; bounded A claim released. Responsive card styles are implemented, while manual viewport/authenticated review remains with the user. No automated app/browser/API/provider suites ran. Protected signup/profile/navigation/decision/AI acceptance remains unverified; no successor claim or second worker started.
 
-Latest completed A checkpoint: **minimal main screen, header/avatar/privacy bar and separate empty/error/loading states published** in [38461454840](https://github.com/Known-Enough/known-enough/actions/runs/38461454840). That bounded ZZ03 continuation is released. Preserve sole-A takeover, paused NP00/private work and one writer.
+Previous A checkpoint: **minimal main screen, header/avatar/privacy bar and separate empty/error/loading states published** in [38461454840](https://github.com/Known-Enough/known-enough/actions/runs/38461454840). That bounded ZZ03 continuation is released. Preserve sole-A takeover, paused NP00/private work and one writer.
 
 Latest user-facing entry change: **shared-screen access hidden and verified live** in [38447069409](https://github.com/Known-Enough/known-enough/actions/runs/38447069409). A bounded follow-up released; whole ZZ provider/setup criteria remain open. Public frontend is verified6afe + entry-only patch, not unpublished ZZ02/03 dashboard. [Evidence](review-artifacts/ZZ01/shared-screen-hidden.json). Prior active snapshots below are historical.
 
 Previous A task (released): **ZZ01 bounded follow-up — hide shared-screen access from normal entry**. B checked phases remain released/blocked. Publish only verified live entry composition; preserve ZZ02/ZZ03 backend dependencies.
 
-Whole ZZ03 protected acceptance remains **incomplete**; [navigation review](review-artifacts/ZZ03/navigation-review.md) records source checks and its prior live gaps. The currently active claim is the bounded A visual continuation above; it does not change signup/profile/AI status.
+Whole ZZ03 protected acceptance remains **incomplete**; [navigation review](review-artifacts/ZZ03/navigation-review.md) records source checks and [group-details publication evidence](review-artifacts/ZZ03/group-details-publication.json) records exact deployed bytes. No active A task remains after the visual claim release; it does not change signup/profile/AI status.
 
 Historical B snapshot: **IN_PROGRESS/B — scoped group/decision navigation after ZZ01 and ZZ02 checked phase releases.** Its checked phase was later released; current task state is described above.
 
-Current ZZ02: **BLOCKED/unclaimed — source/full checks and API/worker publication PASS; hook/profile routes missing, own lambda:GetPolicy AccessDenied.** [Exact admin setup](review-artifacts/ZZ02/onboarding-profile.md). Frontend withheld to preserve intake; ZZ03 checked-phase continuation eligible, no successor claimed yet.
+Current ZZ02: **READY/unclaimed — configuration and full frontend published; manual signup/profile persistence acceptance incomplete.** The latest exact-source readback confirms post-confirmation MATCH and profile routes5/5 with zero configuration/data/provider writes; see [ZZ03 publication receipt](review-artifacts/ZZ03/group-details-publication.json). This does not verify a fresh signup or profile journey.
 
-Current ZZ02: **IN_PROGRESS/B — trusted automatic pending intake and private profile drawer, after ZZ01 checked phase.** No parallel claim; ZZ01 still has provider criteria open.
+Historical ZZ02 snapshot: **IN_PROGRESS/B — trusted automatic pending intake and private profile drawer, after ZZ01 checked phase.** That code phase was completed and configuration was later published; actual account/profile acceptance remains unverified.
 
 Current ZZ01: **BLOCKED/unclaimed — unified app entry deployed and checked; provider-link/complete signup criteria remain.** Checked phase released; ZZ02 eligible next under explicit sequential user direction.
 
