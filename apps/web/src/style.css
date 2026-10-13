@@ -331,6 +331,27 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 .ke-home .ke-theme-toggle, .ke-entry .ke-theme-toggle { display: inline-grid; place-items: center; width: 44px; min-width: 44px; min-height: 44px; padding: 0; }
 .ke-theme-toggle svg { width: 21px; height: 21px; }
 
+/* The signed-out entry keeps the brand and auth actions on one calm canvas. */
+.ke-entry .ke-hero { max-width: none; margin: 32px 0 24px; padding: 0; border-radius: 0; background: transparent; text-align: center; }
+.ke-entry .ke-hero h1 { margin-bottom: 10px; }
+.ke-entry .ke-hero p { max-width: 620px; margin: 0 auto; }
+.ke-entry .ke-entry-surface { max-width: 500px; margin: 0 auto; padding: 32px; }
+.ke-entry .ke-entry-actions button { justify-content: center; }
+.ke-entry-privacy { max-width: 500px; margin: 12px auto 0; line-height: 1.5; }
+.ke-entry-privacy .ke-privacy-bar { margin: 0; border-color: #e0e6de; background: transparent; box-shadow: none; font-size: 12px; }
+.ke-entry-privacy .ke-privacy-bar summary { gap: 10px; padding: 8px 12px; font-size: 12px; }
+.ke-entry-privacy .ke-privacy-label { gap: 8px; }
+.ke-entry-privacy .ke-heading-icon { width: 24px; height: 24px; border-radius: 7px; }
+.ke-entry-privacy .ke-heading-icon svg { width: 16px; height: 16px; }
+.ke-entry-privacy .ke-privacy-bar p { padding: 0 12px 10px; line-height: 1.55; }
+@media (max-width: 650px) {
+  .ke-entry .ke-hero { margin: 28px 0 20px; }
+  .ke-entry .ke-entry-surface { padding: 28px 24px; }
+  .ke-entry-privacy { margin-top: 10px; }
+}
+:root[data-theme="dark"] .ke-entry .ke-hero { background: transparent; }
+:root[data-theme="dark"] .ke-entry-privacy .ke-privacy-bar { background: transparent; }
+
 :root[data-theme="dark"] {
   color-scheme: dark;
   color: #e7eee9;
