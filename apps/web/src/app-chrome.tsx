@@ -1,8 +1,5 @@
 export function Brand() {
-  return <span className="ke-brand"><svg aria-hidden="true" viewBox="0 0 32 32" fill="none">
-    <rect width="32" height="32" rx="10" fill="currentColor" />
-    <path d="M9 10v12m14-12-9 6 9 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg><span>Known Enough</span></span>;
+  return <span className="ke-brand"><img src="/logo.png" alt="" width="38" height="38" decoding="async" /><span>Known Enough</span></span>;
 }
 
 export function ProfileIcon() {
