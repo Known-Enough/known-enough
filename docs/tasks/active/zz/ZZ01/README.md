@@ -1,3 +1,5 @@
+**Shared-screen hiding follow-up complete:** option removed and actual primary phone/desktop views verified. [Evidence](../../../../review-artifacts/ZZ01/shared-screen-hidden.json). Whole ZZ01 signup/provider criteria remain open; newer dashboard changes were not published in this scoped release.
+
 **Latest user direction, 2026-10-13:** hide shared-screen access entirely from the normal entry screen. This supersedes the earlier explained secondary entry option; preserve authenticated display behavior elsewhere.
 
 # ZZ01 — Simplify signup and redesign the first screen
