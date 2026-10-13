@@ -9,12 +9,41 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
   const [checking, setChecking] = useState(true);
   const [account, setAccount] = useState<ReturnType<typeof Groups.AccountSnapshot.parse> | null>(null);
   const [groups, setGroups] = useState<Groups.GroupSnapshot[]>([]);
+  const [activeMenuGroupId, setActiveMenuGroupId] = useState<string | null>(null);
+  const [quickViewGroupId, setQuickViewGroupId] = useState<string | null>(null);
+  const menuTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const menuActionRef = useRef<HTMLButtonElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const quickViewRef = useRef<HTMLElement | null>(null);
   const groupRequest = useRef<{ name: string; idempotencyKey: string } | null>(null);
   const [groupName, setGroupName] = useState('');
   const [creating, setCreating] = useState(false);
   const [email, setEmail] = useState(''); const [link, setLink] = useState(''); const [replace, setReplace] = useState(false);
   const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false);
   const [loadFailure, setLoadFailure] = useState<LoadFailure | null>(null);
+  useEffect(() => { if (activeMenuGroupId) menuActionRef.current?.focus(); }, [activeMenuGroupId]);
+  useEffect(() => { if (quickViewGroupId) quickViewRef.current?.focus(); }, [quickViewGroupId]);
+  useEffect(() => {
+    if (!activeMenuGroupId && !quickViewGroupId) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      setActiveMenuGroupId(null); setQuickViewGroupId(null);
+      menuTriggerRef.current?.focus();
+    };
+    const onPointerDown = (event: PointerEvent) => {
+      if (!(event.target instanceof Node)) return;
+      const target = event.target;
+      if (menuRef.current?.contains(target) || quickViewRef.current?.contains(target) || menuTriggerRef.current?.contains(target)) return;
+      setActiveMenuGroupId(null); setQuickViewGroupId(null);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('pointerdown', onPointerDown);
+    };
+  }, [activeMenuGroupId, quickViewGroupId]);
   const [token, setToken] = useState(() => {
     const fragment = new URLSearchParams(window.location.hash.slice(1));
     const value = fragment.get('groupInvite');
@@ -104,6 +133,16 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
     } catch { setNotice('The result is unknown. Refresh before retrying; replace a lost invitation link explicitly.'); }
     finally { setBusy(false); }
   }
+  function openGroupMenu(groupId: string, trigger: HTMLButtonElement) {
+    menuTriggerRef.current = trigger;
+    setQuickViewGroupId(null);
+    setActiveMenuGroupId(groupId);
+  }
+  function toggleGroupMenu(groupId: string, trigger: HTMLButtonElement) {
+    menuTriggerRef.current = trigger;
+    setQuickViewGroupId(null);
+    setActiveMenuGroupId(current => current === groupId ? null : groupId);
+  }
   if (checking && !available) return <LoadingSkeleton kind={selectedGroupId ? 'group' : 'groups'} label={selectedGroupId ? 'Opening your group' : 'Loading your groups'}
     className={selectedGroupId ? 'ke-group-route-loading' : 'ke-group-home'} />;
   if (loadFailure) return <section className="ke-card ke-state-card ke-error-card" role="alert">
@@ -116,7 +155,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
   return <section className={(selectedGroupId ? 'ke-group-page' : 'ke-group-home') + ' ke-load-reveal'} aria-busy={busy || checking}>
     {!selectedGroupId && <div className="ke-section-heading ke-groups-heading">
       <div className="ke-section-title"><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="UsersRound" /></span>
-        <div><h2>{account?.status === 'APPROVED' ? 'Your groups' : 'Account access'}</h2>
+        <div><h2>{account?.status === 'APPROVED' ? 'Decision groups' : 'Account access'}</h2>
           {account?.status === 'APPROVED' && <p>Your shared decision spaces, all in one place.</p>}</div></div>
       <div className="ke-section-actions">
         {account?.status === 'APPROVED' && <button type="button" className={`ke-create-group-action${creating ? ' secondary' : ''}`} disabled={busy || checking}
@@ -141,11 +180,62 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       {token && <><p>A group invitation is waiting. Accepting joins the group; it does not confirm a decision or approve a proposal.</p>
         <button disabled={busy} onClick={() => void action('/groups/accept', { token }, result => { const group = Groups.GroupSnapshot.parse(result.group); setToken(''); sessionStorage.removeItem('ke-group-invite'); onOpenGroup(group.id); return true; })}>Accept group invitation</button>
         <button className="secondary" onClick={() => { setToken(''); sessionStorage.removeItem('ke-group-invite'); }}>Decline group invitation</button></>}
-      <div className="ke-group-grid">{groups.map(group => <article key={group.id} className="ke-group-tile">
-        <div className="ke-group-tile-top"><span className="ke-group-tile-icon"><GroupIcon /></span><span className="ke-group-tile-label">Group</span></div>
-        <h3>{group.name}</h3><p><PageIcon name="UsersRound" /><span>{group.members.length} {group.members.length === 1 ? 'member' : 'members'}</span></p>
-        <button type="button" className="secondary ke-group-open-button" disabled={busy} onClick={() => onOpenGroup(group.id)}><span>Open group</span><PageIcon name="ArrowRight" /></button>
-      </article>)}</div>
+      {!!groups.length && <ul className="ke-group-list" aria-label="Decision groups">{groups.map(group => {
+        const organizer = group.members.find(member => member.isOrganizer);
+        const decisionCount = Array.isArray(group.decisions) ? group.decisions.length : null;
+        const menuOpen = activeMenuGroupId === group.id;
+        const quickViewOpen = quickViewGroupId === group.id;
+        const menuId = `group-actions-${group.id}`;
+        const quickViewId = `group-quick-view-${group.id}`;
+        return <li key={group.id} className="ke-group-row">
+          <button type="button" className="secondary ke-group-row-open" aria-label={`Open group ${group.name}`} disabled={busy}
+            onClick={() => onOpenGroup(group.id)}>
+            <span className="ke-group-row-icon"><GroupIcon /></span>
+            <span className="ke-group-row-copy"><span className="ke-group-row-name">{group.name}</span>
+              <span className="ke-group-row-meta"><span>{group.members.length} {group.members.length === 1 ? 'member' : 'members'}</span>
+                {decisionCount !== null && <><span className="ke-group-row-separator" aria-hidden="true">·</span><span>{decisionCount} {decisionCount === 1 ? 'decision' : 'decisions'}</span></>}</span>
+            </span>
+            <PageIcon name="ChevronRight" />
+          </button>
+          <div className="ke-group-row-actions">
+          <button type="button" className="secondary ke-group-menu-trigger" aria-label={`Actions for ${group.name}`} aria-haspopup="menu"
+              aria-expanded={menuOpen} aria-controls={menuOpen ? menuId : undefined} disabled={busy}
+              onClick={event => { event.stopPropagation(); toggleGroupMenu(group.id, event.currentTarget); }}
+              onKeyDown={event => { if (event.key === 'ArrowDown') { event.preventDefault(); openGroupMenu(group.id, event.currentTarget); } }}>
+              <PageIcon name="Ellipsis" />
+            </button>
+            {menuOpen && <div id={menuId} className="ke-group-actions-menu" role="menu" aria-label={`${group.name} actions`} ref={menuRef}
+              onKeyDown={event => {
+                if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+                event.preventDefault();
+                const items = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'));
+                const activeIndex = items.indexOf(document.activeElement as HTMLButtonElement);
+                const nextIndex = event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1
+                  : (activeIndex + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+                if (items.length) items[nextIndex]?.focus();
+              }}
+              onBlur={event => {
+                const next = event.relatedTarget;
+                if (next instanceof Node && (event.currentTarget.contains(next) || menuTriggerRef.current?.contains(next))) return;
+                setActiveMenuGroupId(null);
+              }}>
+              <button type="button" className="secondary ke-group-menu-item" role="menuitem" aria-haspopup="dialog" ref={menuActionRef}
+                onClick={event => { event.stopPropagation(); setActiveMenuGroupId(null); setQuickViewGroupId(group.id); }}>Quick view</button>
+            </div>}
+            {quickViewOpen && <section id={quickViewId} className="ke-group-quick-view" role="dialog" aria-labelledby={`${quickViewId}-heading`}
+              aria-describedby={`${quickViewId}-details`} tabIndex={-1} ref={quickViewRef}>
+              <header><div><p>Quick view</p><h3 id={`${quickViewId}-heading`}>{group.name}</h3></div>
+                <button type="button" className="secondary ke-group-quick-view-close" aria-label={`Close ${group.name} quick view`}
+                  onClick={event => { event.stopPropagation(); setQuickViewGroupId(null); menuTriggerRef.current?.focus(); }}><PageIcon name="X" /></button></header>
+              <dl id={`${quickViewId}-details`}>
+                {organizer && <div><dt>Organizer</dt><dd>{organizer.displayName}</dd></div>}
+                <div><dt>Members</dt><dd>{group.members.length} {group.members.length === 1 ? 'member' : 'members'}</dd></div>
+                {decisionCount !== null && <div><dt>Decisions</dt><dd>{decisionCount} {decisionCount === 1 ? 'decision' : 'decisions'}</dd></div>}
+              </dl>
+            </section>}
+          </div>
+        </li>;
+      })}</ul>}
       </>}
       {selectedGroupId && groups.map(group => {
         const organizer = group.members.find(member => member.isOrganizer);

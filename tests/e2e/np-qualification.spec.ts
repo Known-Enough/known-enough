@@ -39,7 +39,7 @@ test('four new independent browser owners create a garden decision from blank en
       await expect(page.getByRole('button', { name: 'Create group', exact: true })).toBeVisible();
     }
     const host = pages[0]!; await host.getByRole('button', { name: 'Create group', exact: true }).click(); await host.getByLabel('New group name').fill('Fresh garden club'); await host.getByRole('button', { name: 'Create group', exact: true }).click();
-    await host.getByText('Invite someone', { exact: true }).click();
+    await expect(host.getByRole('heading', { name: 'Invitations', exact: true })).toBeVisible();
     for (let i = 1; i < people.length; i++) {
       if (i > 1) await host.getByRole('button', { name: 'Hide invitation link' }).click();
       await host.getByLabel('Recipient email').fill(`${people[i]}@example.invalid`); await host.getByRole('button', { name: 'Create invitation link' }).click();

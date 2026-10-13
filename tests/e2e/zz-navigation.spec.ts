@@ -27,13 +27,45 @@ for (const width of [390, 1280]) {
         await route.fulfill({ status: response.status, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: await response.text() });
       });
       const page = await context.newPage(); await page.goto(url);
-      await expect(page.getByRole('heading', { name: 'Your groups', exact: true })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Decision groups', exact: true })).toBeVisible();
       await expect(page.getByRole('textbox', { name: 'Decision ID from your invitation' })).toHaveCount(0);
       await expect(page.getByText('Optional fictional decision templates')).toHaveCount(0);
       await expect(page.getByText('SIMULATED ALEXA+', { exact: false })).toHaveCount(0);
       expect(paths.some(path => path.startsWith('/decisions/'))).toBe(false);
       await page.screenshot({ path: `docs/review-artifacts/ZZ03/after-home-${width}.png`, fullPage: true });
-      await page.getByRole('button', { name: 'Open group', exact: true }).click();
+      const groupsUrl = page.url();
+      const groupOpener = page.getByRole('button', { name: 'Open group Gallery club', exact: true });
+      const groupMenu = page.getByRole('button', { name: 'Actions for Gallery club', exact: true });
+      for (const dark of [false, true]) {
+        const themeToggle = page.getByRole('button', { name: 'Dark mode' });
+        const currentDark = (await themeToggle.getAttribute('aria-pressed')) === 'true';
+        if (currentDark !== dark) await themeToggle.click();
+        await groupMenu.click();
+        const menu = page.getByRole('menu', { name: 'Gallery club actions' });
+        await expect(menu).toBeVisible();
+        await expect(menu.getByRole('menuitem', { name: 'Quick view', exact: true })).toBeFocused();
+        expect(page.url()).toBe(groupsUrl);
+        expect(paths.some(path => path === `/groups/${group.groupId}`)).toBe(false);
+        await menu.getByRole('menuitem', { name: 'Quick view', exact: true }).click();
+        const quickView = page.getByRole('dialog', { name: 'Gallery club' });
+        await expect(quickView).toBeVisible();
+        await expect(quickView.getByText('iris', { exact: true })).toBeVisible();
+        await expect(quickView.getByText('4 members', { exact: true })).toBeVisible();
+        await expect(quickView.getByText('1 decision', { exact: true })).toBeVisible();
+        await page.screenshot({ path: `/tmp/zz03-group-quickview-${width}-${dark ? 'dark' : 'light'}.png` });
+        expect(page.url()).toBe(groupsUrl);
+        expect(paths.some(path => path === `/groups/${group.groupId}`)).toBe(false);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+        await page.keyboard.press('Escape');
+        await expect(quickView).toHaveCount(0);
+        await expect(groupMenu).toBeFocused();
+        await groupMenu.press('ArrowDown');
+        await expect(menu.getByRole('menuitem', { name: 'Quick view', exact: true })).toBeFocused();
+        await page.keyboard.press('Escape');
+        await expect(menu).toHaveCount(0);
+        await expect(groupMenu).toBeFocused();
+      }
+      await groupOpener.click();
       await expect(page.getByRole('button', { name: 'Start a decision' })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Back to groups', exact: true })).toBeVisible();
       await page.screenshot({ path: `docs/review-artifacts/ZZ03/after-group-${width}.png`, fullPage: true });
@@ -81,6 +113,6 @@ test('pending home has only access state; approved new user has zero real groups
     await api.approve('new-user'); await page.getByRole('button', { name: 'Refresh account and groups' }).click();
     await expect(page.getByText('No groups yet.', { exact: false })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Create group', exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Open group', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /^Open group / })).toHaveCount(0);
   } finally { await context.close(); await api.close(); }
 });
