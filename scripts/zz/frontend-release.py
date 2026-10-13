@@ -25,7 +25,7 @@ def public_manifest(directory):
         if not path.is_file():
             continue
         relative = str(path.relative_to(directory))
-        if relative != 'index.html' and not re.fullmatch(r'assets/[A-Za-z0-9_-]+\.(js|css)', relative):
+        if relative not in ('index.html', 'logo.png', 'cover.png') and not re.fullmatch(r'assets/[A-Za-z0-9_-]+\.(js|css)', relative):
             raise RuntimeError('PUBLIC_BUILD_INVALID')
         rows.append({'path': '/' if relative == 'index.html' else '/' + relative,
                      'sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
