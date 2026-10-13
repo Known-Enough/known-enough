@@ -1,3 +1,5 @@
+Current FIX01: **IN_PROGRESS/B — verified user-directed primary draft repair, sole implementation.** Current UI/runtime diagnosis first; no live PASS or cloud change inferred.
+
 Latest A checkpoint — 2026-10-13T22:41:45Z: **ZZ03 focused dark-mode visual polish published and bounded claim released** from exact source `7b59a0dce1fcb962b0eee9672cf1aa9baf88bf3e`; [run38479296548](https://github.com/Known-Enough/known-enough/actions/runs/38479296548) succeeded and all seven public files matched artifact hashes. Dark/light desktop/mobile review passed. Full E2E was60/72 with12 unrelated-flow failures. Whole ZZ03 and real-account review remain open. [Receipt](review-artifacts/ZZ03/dark-mode-visual-polish-publication.json).
 
 Next unclaimed task: **[FIX01](tasks/active/fix/FIX01/ticket.md) READY, intended worker B** per the 2026-10-13T21:55:30Z handoff. No B implementation, test or deployment is claimed. [FIX batch](tasks/active/fix/README.md).

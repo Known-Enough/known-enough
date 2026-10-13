@@ -1,6 +1,6 @@
 # FIX01 — Repair decision creation and misleading access errors
 
-**Status:** READY / unclaimed. **Priority:** P0. **Intended worker:** B / Octavio / own `Battosai1806` identity. Exactly one implementation task.
+**Status:** IN_PROGRESS / B. **Priority:** P0. **Intended worker:** B / Octavio / own `Battosai1806` identity. Exactly one implementation task.
 
 ## User problem
 
@@ -50,3 +50,7 @@ Preserve primary private configuration, migration state, source-bound runtime pa
 A created this task from synchronized main `64fc3418114492a2cf1113697bd539ee1612819d`, checked the current UI error mapping and missing architect composition, and recorded the bounded B handoff. Latest repository evidence releases A's ZZ03 loading-polish claim. No implementation, live reproduction, AWS change, test, deployment or B start occurred during task preparation. B must verify its own fresh intake.
 
 [FIX batch](../README.md) · [Task guide](../../../README.md) · [Board](../../../../task-board.md)
+
+## FIX01 B claim — 2026-10-13T23:19:33.313357+00:00
+
+IN_PROGRESS/B ownBattosai1806/143764700, clean ff-only main02b313a9644c9a326b963ad482f8e72bbe205393; latest A claim released, no queued/running jobs observed. User explicitly starts FIX01 under task-specific exception; sole implementation/no helper/new worker/chat/schedule. Initial exact scope: apps/web/src/group-decisions.tsx and new safe draft error/recovery module/tests; apps/api/src/partition-release.ts/test, partition-deployment.ts/test, partition-runtime.ts/test and partition-http.ts/test; packages/adapters/src/partition-group-session.ts/test and existing bounded model/job adapters as specifically amended after inspection; scripts/operations/partition-entry.ts, jobs-package.ts plus exact-source existing publication/inspection fixtures as needed; new scripts/fix01 diagnostics/live proof and .github/workflows/fix01-* workflows, bounded test files and FIX01/report/taskboard/claims/B logs/handoff/monitor. Preserve current UI/styles/assets, private config/migration/signing/source, disabled controls/cumulative usage, saved NP00/DEBT01. No broad cloud/contract/role change inferred; record actual needed runtime/adapters before editing. First reproduce actual primary group/draft response with own synthetic organizer, separately prove group creation; inspect current API/worker/source/JWT/routes/log access. Confirm cause before connection changes, use existing bounded model infrastructure, source/current-identity/output/retry/recovery guards. Actual model identity/effort unexposed.
