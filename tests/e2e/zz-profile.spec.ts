@@ -4,7 +4,7 @@ for (const width of [390, 1280]) {
   test(`pending own profile drawer saves text safely and reloads at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
     await page.addInitScript(() => sessionStorage.setItem('known-enough-cognito-session', JSON.stringify({ accessToken: 'synthetic.profile.test', kind: 'participant', expiresAt: Date.now() + 900000 })));
-    let profile = { status: 'PENDING', displayName: 'New member', version: 1, description: '', image: null, loginUsername: 'synthetic-login' };
+    let profile: { status: 'PENDING'; displayName: string; version: number; description: string; image: null | { id: string; mimeType: 'image/png'; width: number; height: number; bytesBase64: string; sha256: string }; loginUsername: string | null } = { status: 'PENDING', displayName: 'New member', version: 1, description: '', image: null, loginUsername: 'synthetic-login' };
     const paths: string[] = [];
     await page.route('https://local-api.example.invalid/**', async route => {
       const request = route.request(), path = new URL(request.url()).pathname; paths.push(path);
@@ -13,6 +13,10 @@ for (const width of [390, 1280]) {
       if (path === '/account/profile') {
         if (request.method() === 'POST') { const patch = request.postDataJSON(); expect(patch.version).toBe(profile.version); expect(Object.keys(patch).sort()).toEqual(['description', 'displayName', 'version']); profile = { ...profile, ...patch, version: profile.version + 1 }; }
         body = { profile };
+      } else if (path === '/account/profile/image') {
+        const patch = request.postDataJSON(); expect(patch.version).toBe(profile.version); expect(Object.keys(patch).sort()).toEqual(['bytesBase64', 'version']);
+        profile = { ...profile, version: profile.version + 1, image: patch.bytesBase64 ? { id: 'synthetic-avatar', mimeType: 'image/png', width: 1, height: 1, bytesBase64: patch.bytesBase64, sha256: 'a'.repeat(64) } : null };
+        body = { profile };
       } else if (path !== '/account') { await route.fulfill({ status: 404, body: '{}' }); return; }
       await route.fulfill({ contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) });
     });
@@ -20,6 +24,16 @@ for (const width of [390, 1280]) {
     await expect(page.getByText('Your account is waiting for approval.', { exact: false })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Request access', exact: true })).toHaveCount(0);
     expect(paths).not.toContain('/account/profile'); // closed drawer does not read private data
+    await page.getByRole('button', { name: 'Open your profile' }).click();
+    await expect(page.getByRole('heading', { name: 'Your profile', exact: true })).toBeFocused();
+    await expect(page.getByRole('button', { name: 'Change photo' })).toBeVisible();
+    const photoPicker = page.waitForEvent('filechooser');
+    await page.getByRole('button', { name: 'Change photo' }).click();
+    const chooser = await photoPicker;
+    await chooser.setFiles({ name: 'avatar.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/pOQAAAAASUVORK5CYII=', 'base64') });
+    await expect(page.locator('.ke-profile-avatar img')).toHaveCount(1);
+    await page.getByRole('button', { name: 'Close profile' }).click();
+    await expect(page.getByRole('button', { name: 'Open your profile' })).toBeFocused();
     await page.getByRole('button', { name: 'Open your profile' }).click();
     await expect(page.getByRole('heading', { name: 'Your profile', exact: true })).toBeFocused();
     await page.getByRole('button', { name: 'Edit profile' }).click();
@@ -31,6 +45,12 @@ for (const width of [390, 1280]) {
     await page.keyboard.press('Escape');
     await expect(page.getByRole('button', { name: 'Open your profile' })).toBeFocused();
     await expect(page.getByText('ZZ_PRIVATE_PROFILE_CANARY', { exact: true })).toBeHidden();
+    if (width > 480) {
+      await page.getByRole('button', { name: 'Open your profile' }).click();
+      await expect(page.getByRole('heading', { name: 'Your profile', exact: true })).toBeFocused();
+      await page.mouse.click(10, 300);
+      await expect(page.getByRole('button', { name: 'Open your profile' })).toBeFocused();
+    }
     await page.reload(); await page.getByRole('button', { name: 'Open your profile' }).click();
     await expect(page.getByText('ZZ_PRIVATE_PROFILE_CANARY', { exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Edit profile' }).click();
