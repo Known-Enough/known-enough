@@ -1,6 +1,6 @@
 # ZZ03 — Separate home, groups and decisions
 
-**Status:** BLOCKED / unclaimed; navigation CODE_READY, matching primary live proof awaits ZZ02 setup.
+**Status:** BLOCKED / unclaimed; navigation published and individual-group route connected. Protected real-user journey proof awaits ZZ02/manual findings; setup dependency resolved.
 
 Replace the long signed-in page with clear views: waiting for approval, Your groups, a selected group and a selected decision. Keep the ZZ02 profile drawer in the header. Remove manual decision-ID entry, fictional templates, simulated Alexa and fictional invitations from the normal product flow.
 

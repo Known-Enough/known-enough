@@ -1,6 +1,6 @@
 # ZZ03 — Simplify the signed-in app and its navigation
 
-- Status: BLOCKED / unclaimed — navigation CODE_READY; actual primary intake/profile setup and live journey proof missing.
+- Status: BLOCKED / unclaimed — full navigation published and group-detail route connected; protected live journey proof awaits ZZ02/manual findings. Setup dependency is resolved.
 - User-approved structure: 2026-10-12T17:42:55.221080+00:00.
 - Scheduling: after ZZ01 -> ZZ02 checked checkpoints, one sequential claim. Preserve any active project task/NP00; create no worker/chat/monitor from this ticket.
 - Goal: stop showing onboarding, groups, a decision, developer scenarios and simulated assistant at once. Organize the product by the user's current activity.
@@ -57,3 +57,5 @@ Final ZZ03 checks 2026-10-12T21:08:45.537932+00:00: pinned full npm run check EX
 ZZ03 source synchronization/report closeout 2026-10-12T21:10:05.015930+00:00: checked implementation b998d0d987baaa4dd846495b1040bdf04427dcf6 committed/pushed explicitlyoriginmain/fetched equal; clean source. Finished [38308817616](https://github.com/Known-Enough/known-enough/actions/runs/38308817616) SUCCESS, exactsourceb998/ownB, finite report downloaded and resultBLOCKED verified (reporting PASS is not task/live PASS). Final fullEXIT0/1572app/72browser/hosted1 and exactcandidatebuild/demoboundary preserved. This final documentation receipt will synchronize separately withskipci after links/hash/JSON/reference/whitespace checks; no implementation/live/provider/test retry. All ZZ checked changes are pushed in requestedorder; required live gaps remain, no wholeDONE.
 
 Chat summary: Implemented and pushed checked changes for ZZ01, ZZ02 and ZZ03 in order. Final checks passed: 1572 unit and 72 browser tests. Live completion remains blocked by AWS lambda:GetPolicy access/setup and ZZ01 hosted signup requirements. A must run the checked setup; then fresh live verification and remaining frontend publication can finish. Tickets remain BLOCKED.
+
+2026-10-13: full navigation published in38456462325; missing selected-group route diagnosed and connected in38458891498. [Deployment receipt](../../../../review-artifacts/ZZ03/group-route-publication.json). User paused automated tests and will check manually; protected navigation/private decision/AI journey acceptance is not inferred from publication. No new claim.

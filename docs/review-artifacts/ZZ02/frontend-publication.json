@@ -1,0 +1,122 @@
+{
+  "sourceSha": "71709d5e88034d60ca0e1a67ebee630aca8c171a",
+  "publicationRun": "https://github.com/Known-Enough/known-enough/actions/runs/38456462325",
+  "readbackRun": "https://github.com/Known-Enough/known-enough/actions/runs/38456881428",
+  "frontend": {
+    "sourceSha": "71709d5e88034d60ca0e1a67ebee630aca8c171a",
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "providerCalls": 0,
+    "signup": 0,
+    "apiPublication": "NOT_EXECUTED",
+    "files": [
+      {
+        "path": "/assets/connected-app-EPETnexj.js",
+        "sha256": "728bcd36fc2f077ce638e5332a094c5a7a27f6dba3b65f7543c7d4e3aab6d331"
+      },
+      {
+        "path": "/assets/index-C9XWN4Up.css",
+        "sha256": "71d7a3a19a0b6754b0789649ee5d4966f16bcfe5625dbd746de6e41180ccad7c"
+      },
+      {
+        "path": "/assets/index-CbmBkgJg.js",
+        "sha256": "2e06e2ad89ac886b2232bedd06836bf26195e481b40cb41c2a0f9b58c6579fee"
+      },
+      {
+        "path": "/assets/jsx-runtime-C8qzNuNr.js",
+        "sha256": "16cd613b5df605decfdf59cb786d9468694743d89b75147380ca38548e458e7d"
+      },
+      {
+        "path": "/",
+        "sha256": "1be9406f59d2401c6a10969a6a245e1e5eb28c343d02376c1e36660a91dcde17"
+      }
+    ],
+    "amplifyJobId": "72"
+  },
+  "configurationAfter": {
+    "result": "ZZ02_SETUP_READBACK_PASS",
+    "configurationWrites": 0,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "signupDelivery": "NOT_EXECUTED",
+    "configurationSha256": "6f7c82c50feab8f45569573d495acde9284f31c26878f68ba340bc9a4a583cce",
+    "postConfirmation": "MATCH",
+    "smsRoleConfigured": false,
+    "apiSha256": "a5873e96fd2cc87eec2569ef8c7eb19989caea4edc228d734f7c1ae1590d1df1",
+    "profileRoutesPresent": 5,
+    "managedRoutesPresent": 5
+  },
+  "publicWebsiteChecksBeforeUserPausedTesting": {
+    "observedAt": "2026-10-13T19:41:51.999Z",
+    "sourceSha": "71709d5e88034d60ca0e1a67ebee630aca8c171a",
+    "url": "https://main.d143q5ravxp5av.amplifyapp.com/",
+    "amplifyJobId": "72",
+    "fileChecks": [
+      {
+        "path": "/assets/connected-app-EPETnexj.js",
+        "result": "PASS"
+      },
+      {
+        "path": "/assets/index-C9XWN4Up.css",
+        "result": "PASS"
+      },
+      {
+        "path": "/assets/index-CbmBkgJg.js",
+        "result": "PASS"
+      },
+      {
+        "path": "/assets/jsx-runtime-C8qzNuNr.js",
+        "result": "PASS"
+      },
+      {
+        "path": "/",
+        "result": "PASS"
+      }
+    ],
+    "viewChecks": [
+      {
+        "width": 390,
+        "result": "PASS",
+        "singleAccountEntry": true,
+        "registrationFieldsVisible": true,
+        "noSharedScreenEntry": true,
+        "noOverflow": true,
+        "pageErrors": 0
+      },
+      {
+        "width": 1280,
+        "result": "PASS",
+        "singleAccountEntry": true,
+        "registrationFieldsVisible": true,
+        "noSharedScreenEntry": true,
+        "noOverflow": true,
+        "pageErrors": 0
+      }
+    ],
+    "publicApiChecks": [
+      {
+        "path": "/account/profile",
+        "preflightStatus": 204,
+        "anonymousStatus": 401,
+        "result": "PASS"
+      },
+      {
+        "path": "/account/profile/image",
+        "preflightStatus": 204,
+        "anonymousStatus": 404,
+        "result": "PASS"
+      }
+    ],
+    "signupSubmissions": 0,
+    "emailOrModelCalls": 0,
+    "signedInProfilePersistence": "NOT_EXECUTED",
+    "loginCheck": {
+      "result": "PASS",
+      "loginProviderFormRendered": true,
+      "credentialsSubmitted": 0,
+      "signupSubmissions": 0,
+      "providerHostname": "known-enough-092954139775.auth.us-east-1.amazoncognito.com"
+    }
+  },
+  "freshSignupAndPrivateProfilePersistence": "NOT_EXECUTED",
+  "groupOpeningIssue": "Separate installed route omission confirmed by 38458428983; repair publication in progress."
+}

@@ -1,3 +1,7 @@
+## Installed and published continuation — 2026-10-13
+
+A supplied the role installation receipt and own-A GitHub executed configuration and full frontend publication in [38456462325](https://github.com/Known-Enough/known-enough/actions/runs/38456462325). [38456881428](https://github.com/Known-Enough/known-enough/actions/runs/38456881428) verifies binding MATCH/routes5 with zero repeat writes. [Matching publication evidence](frontend-publication.json) preserves the actual public asset/browser/login observations made before the user paused testing. Fresh signup/admin/profile persistence is still NOT_EXECUTED. The later manually reported selected-group failure is traced to a separate missing GET /groups/{groupId} route; [Repair publication38458891498](https://github.com/Known-Enough/known-enough/actions/runs/38458891498) succeeded, with no tests as requested. Earlier missing-access/withheld-publication notes below are historical.
+
 # Current deployment continuation — 2026-10-13
 The manual configuration recipe below is historical. The current A continuation prepares [automatic application configuration](../../../infra/zz/automatic-configuration.md): install the dedicated GitHub role once, then existing normal release workflows install/read back the connections before publishing the UI. Original recipe/hash/source evidence is preserved below; do not apply its old checksum to the changed helper on current main. Actual role installation/GitHub execution/signup/profile proof remains unverified.
 

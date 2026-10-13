@@ -1,0 +1,66 @@
+{
+  "observedAt": "2026-10-13T20:02:00.252923+00:00",
+  "sourceSha": "8a39ab2e4b9c4580c4f193d0c8857e993653e4aa",
+  "publicationRun": "https://github.com/Known-Enough/known-enough/actions/runs/38458891498",
+  "conclusion": "SUCCESS",
+  "routeAdded": "GET /groups/{groupId}",
+  "routeAuthorization": "JWT",
+  "configurationWrites": 1,
+  "dataWrites": 0,
+  "providerCalls": 0,
+  "regressionStep": "SKIPPED; user explicitly tests manually",
+  "applicationTests": "NOT_EXECUTED after user pause",
+  "cloudshellNeeded": false,
+  "apiCodePublication": "NOT_EXECUTED",
+  "frontend": {
+    "sourceSha": "8a39ab2e4b9c4580c4f193d0c8857e993653e4aa",
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "providerCalls": 0,
+    "signup": 0,
+    "apiPublication": "NOT_EXECUTED",
+    "files": [
+      {
+        "path": "/assets/connected-app-EPETnexj.js",
+        "sha256": "728bcd36fc2f077ce638e5332a094c5a7a27f6dba3b65f7543c7d4e3aab6d331"
+      },
+      {
+        "path": "/assets/index-C9XWN4Up.css",
+        "sha256": "71d7a3a19a0b6754b0789649ee5d4966f16bcfe5625dbd746de6e41180ccad7c"
+      },
+      {
+        "path": "/assets/index-CbmBkgJg.js",
+        "sha256": "2e06e2ad89ac886b2232bedd06836bf26195e481b40cb41c2a0f9b58c6579fee"
+      },
+      {
+        "path": "/assets/jsx-runtime-C8qzNuNr.js",
+        "sha256": "16cd613b5df605decfdf59cb786d9468694743d89b75147380ca38548e458e7d"
+      },
+      {
+        "path": "/",
+        "sha256": "1be9406f59d2401c6a10969a6a245e1e5eb28c343d02376c1e36660a91dcde17"
+      }
+    ],
+    "amplifyJobId": "73"
+  },
+  "note": "Setup report route lists/counts are pre-write observations; the guarded installer freshly reread and matched the newly created route before publication.",
+  "readbackRun": "https://github.com/Known-Enough/known-enough/actions/runs/38459572910",
+  "configurationAfter": {
+    "result": "ZZ02_SETUP_METADATA_READ",
+    "configurationWrites": 0,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "signupDelivery": "NOT_EXECUTED",
+    "configurationSha256": "f6f32c6bd2cb66bebd8e4d40c35b1f198426172f1f8f372eaab35c472327da6b",
+    "postConfirmation": "MATCH",
+    "smsRoleConfigured": false,
+    "apiSha256": "a5873e96fd2cc87eec2569ef8c7eb19989caea4edc228d734f7c1ae1590d1df1",
+    "groupReadRoutes": [
+      "GET /groups",
+      "GET /groups/{groupId}/drafts/{draftId}",
+      "GET /groups/{groupId}/decisions/{decisionId}/review",
+      "GET /groups/{groupId}"
+    ],
+    "profileRoutesPresent": 5,
+    "managedRoutesPresent": 6
+  }
+}

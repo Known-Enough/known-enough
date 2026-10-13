@@ -1,3 +1,5 @@
+Current checkpoint, 2026-10-13: dedicated role installed and exercised successfully by GitHub; signup/profile connections and full frontend published. User-directed run_checks=false is available in the existing inspection/publication workflows while the user tests manually. The reported individual-group route omission is repaired through the same role, without another CloudShell installation. Earlier preparation/installation wording below is historical.
+
 # Automatic application configuration
 
 The existing database is not the blocker. The publishing roles deploy code and web assets, but the current release process left new API routes and the signup-confirmation connection to manual administrator scripts. ZZ02's backend is already published; its automatic intake/profile connections are not verified installed. Repeated CloudShell commands came from that incomplete release process.
