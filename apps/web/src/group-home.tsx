@@ -112,10 +112,11 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       <button type="button" className="secondary" onClick={() => { if (selectedGroupId) onBack(); else void load(); }}>Back to groups</button></div>
     {loadFailure.reference && <small>Reference: {loadFailure.reference}</small>}
   </section>;
-  return <section className={'ke-card ke-group-home' + (!selectedGroupId && account?.status === 'APPROVED' && !groups.length ? ' ke-group-home-empty' : '')} aria-busy={busy}><div className="ke-section-heading"><h2>{account?.status === 'APPROVED' ? selectedGroupId ? groups[0]?.name ?? 'Your group' : 'Your groups' : 'Account access'}</h2>
-    {selectedGroupId && <button className="secondary" disabled={busy} onClick={onBack}>Back to groups</button>}
-    <button className="secondary ke-refresh-button" disabled={busy} onClick={() => void load()}>Refresh account and groups</button></div>
-    <fieldset disabled={busy || checking} style={{border: 0, padding: 0, minWidth: 0}} aria-label="Account and group actions">
+  return <section className={selectedGroupId ? 'ke-group-page' : 'ke-card ke-group-home' + (account?.status === 'APPROVED' && !groups.length ? ' ke-group-home-empty' : '')} aria-busy={busy}>
+    {!selectedGroupId && <div className="ke-section-heading"><h2>{account?.status === 'APPROVED' ? 'Your groups' : 'Account access'}</h2>
+      <button type="button" className="secondary ke-refresh-button" disabled={busy} onClick={() => void load()}>Refresh account and groups</button></div>}
+    <fieldset className={selectedGroupId ? 'ke-group-detail-controls' : undefined} disabled={busy || checking}
+      style={{border: 0, padding: 0, minWidth: 0}} aria-label={selectedGroupId ? 'Group details and actions' : 'Account and group actions'}>
     {available && !checking && !account && <p>Your account setup is still being completed. Refresh shortly, or contact the operator if it remains unavailable.</p>}
     {account?.status === 'PENDING' && <p>Your account is waiting for approval. You can edit your profile while the administrator reviews access.</p>}
     {account?.status === 'REJECTED' && <p>Your access request was declined. Contact the operator outside this app.</p>}
@@ -133,22 +134,70 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
         <button className="secondary" onClick={() => { setToken(''); sessionStorage.removeItem('ke-group-invite'); }}>Decline group invitation</button></>}
       <div className="ke-group-grid">{groups.map(group => <article key={group.id} className="ke-group-tile"><span className="ke-group-tile-icon"><GroupIcon /></span><h3>{group.name}</h3><p>{group.members.length} {group.members.length === 1 ? 'member' : 'members'}</p><button disabled={busy} onClick={() => onOpenGroup(group.id)}>Open group</button></article>)}</div>
       </>}
-      {selectedGroupId && <>
-      {groups.map(group => <article key={group.id}><details><summary>Group members and membership changes</summary><ul>{group.members.map(member => <li key={member.id}>{member.displayName}{member.isOrganizer ? ' (organizer)' : ''}
-        {group.isOrganizer && !member.isOrganizer && <button className="secondary" disabled={busy} onClick={() => void action(`/groups/${group.id}/remove`, { memberId: member.id, version: group.version })}>Remove {member.displayName}</button>}</li>)}</ul>
-        <p>{group.pendingInvitations} pending invitation links. Joining or removing a member requires linked decisions to be reviewed with a new roster.</p>
-        </details><GroupDecisions group={group} api={api} reload={load} openDecision={openDecision} startCollapsed />
-        {group.isOrganizer && <details><summary>Invite someone</summary><label htmlFor={`group-email-${group.id}`}>Recipient email</label><input id={`group-email-${group.id}`} type="email" value={email} maxLength={254} onChange={event => setEmail(event.target.value)} />
-          <label><input type="checkbox" checked={replace} onChange={event => setReplace(event.target.checked)} /> Replace a lost link (the previous link stops working)</label>
-          <button disabled={busy || !email.trim()} onClick={() => void action(`/groups/${group.id}/invitations`, { email, replace }, result => {
-            if (typeof result.token !== 'string' || !/^[A-Za-z0-9_-]{32,80}$/.test(result.token)) throw new Error('Invalid link');
-            setLink(`${window.location.origin}${window.location.pathname}#groupInvite=${result.token}`); setEmail(''); setReplace(false);
-          })}>Create invitation link</button></details>}
-      </article>)}
-      </>}
+      {selectedGroupId && groups.map(group => {
+        const organizer = group.members.find(member => member.isOrganizer);
+        return <div className="ke-group-detail-stack" key={group.id}>
+          <section className="ke-card ke-group-overview" aria-label="Group overview">
+            <div className="ke-group-overview-copy">
+              <p className="ke-eyebrow">GROUP OVERVIEW</p>
+              <h2>{group.name}</h2>
+              <div className="ke-group-summary">
+                <div><span>Organizer</span><strong>{organizer?.displayName ?? 'Group organizer'}</strong></div>
+                <div><span>Members</span><strong>{group.members.length} {group.members.length === 1 ? 'member' : 'members'}</strong></div>
+                <div><span>Pending invitations</span><strong>{group.pendingInvitations}</strong></div>
+              </div>
+            </div>
+            <nav className="ke-group-overview-actions" aria-label="Group navigation">
+              <button type="button" className="secondary" onClick={onBack}>Back to groups</button>
+              <button type="button" className="ke-refresh-button" onClick={() => void load()}>Refresh group</button>
+            </nav>
+          </section>
+
+          <div className="ke-group-panels">
+            <section className="ke-card ke-group-panel ke-members-panel" aria-labelledby={`members-heading-${group.id}`}>
+              <header className="ke-panel-heading">
+                <div><h2 id={`members-heading-${group.id}`}>Members</h2><p className="ke-panel-subtitle">Manage members and membership changes.</p></div>
+                <span className="ke-count-badge" aria-label={`${group.members.length} members`}>{group.members.length}</span>
+              </header>
+              <ul className="ke-member-list">{group.members.map(member => <li key={member.id}>
+                <div className="ke-member-identity"><span className="ke-member-avatar" aria-hidden="true">{member.displayName.slice(0, 1).toUpperCase()}</span>
+                  <span className="ke-member-name">{member.displayName}{member.isOrganizer && <span className="ke-member-role">Organizer</span>}</span>
+                </div>
+                {group.isOrganizer && !member.isOrganizer && <button type="button" className="secondary ke-remove-member" disabled={busy}
+                  onClick={() => void action(`/groups/${group.id}/remove`, { memberId: member.id, version: group.version })}>Remove {member.displayName}</button>}
+              </li>)}</ul>
+              <details className="ke-membership-note"><summary>About membership changes</summary>
+                <p>Joining or removing a member requires linked decisions to be reviewed with a new roster.</p>
+              </details>
+            </section>
+
+            <GroupDecisions group={group} api={api} reload={load} openDecision={openDecision} startCollapsed />
+
+            {group.isOrganizer && <section className="ke-card ke-group-panel ke-invitations-panel" aria-labelledby={`invitations-heading-${group.id}`}>
+              <header className="ke-panel-heading"><div><h2 id={`invitations-heading-${group.id}`}>Invitations</h2>
+                <p className="ke-panel-subtitle">Send a private invitation link to join this group.</p></div></header>
+              <div className="ke-invitation-form">
+                <div className="ke-invitation-email"><label htmlFor={`group-email-${group.id}`}>Recipient email</label>
+                  <input id={`group-email-${group.id}`} type="email" autoComplete="email" inputMode="email" value={email} maxLength={254}
+                    onChange={event => setEmail(event.target.value)} /></div>
+                <label className="ke-invitation-replace"><input type="checkbox" checked={replace} onChange={event => setReplace(event.target.checked)} />
+                  <span>Replace a lost link <small>(the previous link stops working)</small></span></label>
+                <button type="button" className="ke-invitation-submit" disabled={busy || !email.trim()} onClick={() => void action(`/groups/${group.id}/invitations`, { email, replace }, result => {
+                  if (typeof result.token !== 'string' || !/^[A-Za-z0-9_-]{32,80}$/.test(result.token)) throw new Error('Invalid link');
+                  setLink(`${window.location.origin}${window.location.pathname}#groupInvite=${result.token}`); setEmail(''); setReplace(false);
+                })}>Create invitation link</button>
+              </div>
+              {link && <div className="ke-invitation-result" role="status">
+                <p>Copy this recipient-bound link privately. It expires after 24 hours. No email has been sent; share it only with the intended recipient.</p>
+                <label htmlFor={`group-copy-link-${group.id}`}>Invitation link</label>
+                <input id={`group-copy-link-${group.id}`} readOnly value={link} onFocus={event => event.currentTarget.select()} />
+                <button type="button" className="secondary" onClick={() => setLink('')}>Hide invitation link</button>
+              </div>}
+            </section>}
+          </div>
+        </div>;
+      })}
     </>}
-    {link && <><p>Copy this recipient-bound link privately. It expires after 24 hours. No email has been sent. Share the link yourself only with the intended recipient.</p><label htmlFor="group-copy-link">Invitation link</label>
-      <input id="group-copy-link" readOnly value={link} onFocus={event => event.currentTarget.select()} /><button className="secondary" onClick={() => setLink('')}>Hide invitation link</button></>}
     </fieldset>
     {(checking || busy || notice) && <p role="status">{checking ? 'Checking your account…' : busy ? 'Saving or checking the group…' : notice}</p>}
   </section>;

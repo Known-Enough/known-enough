@@ -40,18 +40,29 @@ export function GroupDecisions({ group, api, reload, openDecision, startCollapse
   function changeFrame(frame: KE.PublicDecisionFrame) {
     if (draft) setDraft({ ...draft, frame }); setReviewed(false); setDirty(true);
   }
-  return <section aria-busy={busy}><h4>Decisions for {group.name}</h4>
-    {group.decisions.map(decision => <div key={decision.id}>{decision.current
-      ? <button className={startCollapsed ? "secondary" : undefined} disabled={busy} onClick={() => openDecision(decision.id)}>Open decision</button>
-      : <><p>Membership changed. This decision is paused so old confirmations cannot apply to a new group.</p>
-        {group.isOrganizer && <button disabled={busy} onClick={() => void action(async () => {
+  return <section className="ke-card ke-group-panel ke-decisions-panel" aria-busy={busy} aria-labelledby={`decisions-heading-${group.id}`}>
+    <header className="ke-panel-heading"><div><h2 id={`decisions-heading-${group.id}`}>Decisions</h2>
+      <p className="ke-panel-subtitle">Shared choices and progress for this group.</p></div>
+      {group.isOrganizer && !starting && (group.decisions.length > 0 || group.drafts.length > 0)
+        && <button type="button" className="ke-start-decision" onClick={() => setStarting(true)}>Start a decision</button>}</header>
+    {!group.decisions.length && !(group.isOrganizer && group.drafts.length) && !starting && <div className="ke-decision-empty">
+      <span className="ke-decision-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M7 3.75h7l4.25 4.5v11A1.75 1.75 0 0 1 16.5 21h-9A1.75 1.75 0 0 1 5.75 19.25v-13A2.5 2.5 0 0 1 8.25 3.75ZM14 4v5h4M9 13h6M9 16.5h4" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
+      <h3>No decisions yet</h3><p>When your group is ready, start a decision to explore choices together.</p>
+      {group.isOrganizer && <button type="button" className="ke-start-decision" onClick={() => setStarting(true)}>Start a decision</button>}
+    </div>}
+    <div className="ke-decision-list">{group.decisions.map(decision => <article className="ke-decision-row" key={decision.id}>
+      <div><h3>{decision.current ? 'Current decision' : 'Roster review needed'}</h3>
+        {!decision.current && <p>Membership changed. This decision is paused so old confirmations cannot apply to a new group.</p>}
+      </div>
+      {decision.current
+        ? <button type="button" className="secondary" disabled={busy} onClick={() => openDecision(decision.id)}>Open decision</button>
+        : group.isOrganizer && <button type="button" disabled={busy} onClick={() => void action(async () => {
           const result = await request(`decisions/${decision.id}/review`);
           setDraft(null); setDirty(false); setRoster({ id: decision.id, frame: KE.PublicDecisionFrame.parse(result.frame), controlVersion: result.controlVersion as number,
             groupVersion: result.groupVersion as number, participants: result.participants as { id: string; displayName: string }[] }); setReviewed(false);
-        })}>Review changed roster</button>}</>}
-    </div>)}
-    {group.isOrganizer && !starting && <button onClick={() => setStarting(true)}>Start a decision</button>}
-    {group.isOrganizer && starting && <>
+        })}>Review changed roster</button>}
+    </article>)}</div>
+    {group.isOrganizer && starting && <div className="ke-decision-composer">
       <label htmlFor={`group-objective-${group.id}`}>What should this group decide?</label>
       <textarea id={`group-objective-${group.id}`} value={objective} maxLength={2000} disabled={busy || !!pending.current}
         onChange={event => { setObjective(event.target.value); setReviewed(false); }} />
@@ -63,7 +74,7 @@ export function GroupDecisions({ group, api, reload, openDecision, startCollapse
       {group.drafts.map(item => <p key={item.id}>{item.current ? <button disabled={busy} onClick={() => void action(async () => {
         const result = await request(`drafts/${item.id}`); setDraft(Groups.GroupDraft.parse(result.draft)); setDirty(false); setRoster(null); setReviewed(false);
       })}>{item.created ? 'Review saved decision draft' : 'Review draft'}: {item.title}</button> : 'An earlier draft needs a new request because group membership changed.'}</p>)}
-    </>}
+    </div>}
     {draft && <div className="local-note"><h4 tabIndex={-1} ref={draftHeading}>Review the public draft</h4>
       <label htmlFor={`draft-title-${group.id}`}>Decision title</label><input id={`draft-title-${group.id}`} value={draft.frame.title} maxLength={160} disabled={busy || !!draft.createdDecisionId} onChange={event => changeFrame({ ...draft.frame, title: event.target.value })} />
       <p>{draft.frame.objective}</p><p>{draft.frame.description}</p>

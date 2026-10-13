@@ -104,7 +104,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     return () => { active = false; controller.abort(); };
   }, [target, session, config, expire]);
   if (!session) return <AuthEntry config={config} signIn={signIn} notice={status} />;
-  return <main className="ke-home">
+  return <main className={view.kind === 'group' ? 'ke-home ke-group-route' : 'ke-home'}>
     <header className="ke-masthead"><Brand />
       {session.kind === 'participant' ? <ProfileDrawer key={session.accessToken} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} signOut={signOut} /> : <button type="button" className="secondary" onClick={signOut}>Sign out</button>}
     </header>
