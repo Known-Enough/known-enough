@@ -72,8 +72,24 @@ export function ProfileIcon() {
   </svg>;
 }
 
+const pageIconShapes = {
+  Users: <><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="10" cy="7" r="4" /><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></>,
+  ListChecks: <><path d="M11 5h10M11 12h10M11 19h10" /><path d="m3 4 2 2 4-4m-6 10 2 2 4-4m-6 10 2 2 4-4" /></>,
+  Mail: <><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></>,
+  ShieldCheck: <><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z" /><path d="m9 12 2 2 4-4" /></>,
+  UsersRound: <><path d="M18 21a8 8 0 0 0-16 0" /><circle cx="10" cy="8" r="5" /><path d="M23 21a8 8 0 0 0-6-7.3M16 3.13a5 5 0 0 1 0 9.75" /></>,
+  ArrowLeft: <><path d="M19 12H5" /><path d="m12 19-7-7 7-7" /></>,
+  RefreshCw: <><path d="M20 7v5h-5M4 17v-5h5" /><path d="M5.64 5.64A9 9 0 0 1 20 12M4 12a9 9 0 0 0 14.36 6.36" /></>,
+  Plus: <><path d="M12 5v14M5 12h14" /></>,
+  Link: <><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></>
+} as const;
+
+export function PageIcon({ name }: { name: keyof typeof pageIconShapes }) {
+  return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{pageIconShapes[name]}</svg>;
+}
+
 export function PrivacyBar() {
-  return <details className="ke-privacy-bar"><summary><span>Privacy and preview limits</span></summary>
+  return <details className="ke-privacy-bar"><summary><span className="ke-privacy-label"><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="ShieldCheck" /></span><span>Privacy and preview limits</span></span></summary>
     <p>Known Enough and its authorized AI process your private inputs. Other people see only shared choices, proposals and disclosures you authorize.
       An outcome may still reveal something about people’s needs. Use fictional, non-sensitive data in this preview.</p>
   </details>;

@@ -1,4 +1,4 @@
-Latest A checkpoint: **surgical group-page icon polish claimed** on clean synchronized main 0be1b3613c93861e6f41ba25d9fba783bb1cee64. Adding small section/action glyphs and modest spacing/contrast refinements inside the current layout; no new icon dependency (repository currently uses local inline SVG helpers). Exact scope and preserved behavior are in [ZZ03](tasks/active/zz/ZZ03/ticket.md).
+Latest A checkpoint: **surgical group-page icon polish is implemented and statically checked; exact-source publication is next** from the claimed clean synchronized main 0be1b3613c93861e6f41ba25d9fba783bb1cee64. Small section/action glyphs and modest spacing/contrast refinements fit inside the existing layout; no icon dependency was added. Pinned typecheck/build and bundle boundary passed; manual visual review remains with the user. Exact scope and preserved behavior are in [ZZ03](tasks/active/zz/ZZ03/ticket.md).
 
 Previous A checkpoint: **minimal main screen, header/avatar/privacy bar and separate empty/error/loading states published** in [38461454840](https://github.com/Known-Enough/known-enough/actions/runs/38461454840). That bounded ZZ03 continuation is released. Preserve sole-A takeover, paused NP00/private work and one writer.
 
@@ -6,7 +6,7 @@ Latest user-facing entry change: **shared-screen access hidden and verified live
 
 Previous A task (released): **ZZ01 bounded follow-up — hide shared-screen access from normal entry**. B checked phases remain released/blocked. Publish only verified live entry composition; preserve ZZ02/ZZ03 backend dependencies.
 
-Whole ZZ03 protected acceptance remains **incomplete**; [navigation review](review-artifacts/ZZ03/navigation-review.md) records source checks and [group-details publication evidence](review-artifacts/ZZ03/group-details-publication.json) records exact deployed bytes. No active A task remains after the visual claim release; it does not change signup/profile/AI status.
+Whole ZZ03 protected acceptance remains **incomplete**; [navigation review](review-artifacts/ZZ03/navigation-review.md) records source checks and [group-details publication evidence](review-artifacts/ZZ03/group-details-publication.json) records exact deployed bytes. The active A continuation is limited to the surgical group-page icon polish; it does not change signup/profile/AI status.
 
 Historical B snapshot: **IN_PROGRESS/B — scoped group/decision navigation after ZZ01 and ZZ02 checked phase releases.** Its checked phase was later released; current task state is described above.
 

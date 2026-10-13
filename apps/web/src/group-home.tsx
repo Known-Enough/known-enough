@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { GroupDecisions } from './group-decisions';
 import { Groups } from '@deal-table/contracts';
-import { GroupIcon } from './app-chrome';
+import { GroupIcon, PageIcon } from './app-chrome';
 type LoadFailure = { title: string; description: string; reference: string | null };
 export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onBack }: { api: (path: string, init?: RequestInit) => Promise<Response>;
   openDecision: (id: string) => void; selectedGroupId?: string; onOpenGroup: (id: string) => void; onBack: () => void }) {
@@ -139,7 +139,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
         return <div className="ke-group-detail-stack" key={group.id}>
           <section className="ke-card ke-group-overview" aria-label="Group overview">
             <div className="ke-group-overview-copy">
-              <p className="ke-eyebrow">GROUP OVERVIEW</p>
+              <p className="ke-eyebrow"><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="UsersRound" /></span><span>GROUP OVERVIEW</span></p>
               <h2>{group.name}</h2>
               <div className="ke-group-summary">
                 <div><span>Organizer</span><strong>{organizer?.displayName ?? 'Group organizer'}</strong></div>
@@ -148,15 +148,15 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
               </div>
             </div>
             <nav className="ke-group-overview-actions" aria-label="Group navigation">
-              <button type="button" className="secondary" onClick={onBack}>Back to groups</button>
-              <button type="button" className="ke-refresh-button" onClick={() => void load()}>Refresh group</button>
+              <button type="button" className="secondary ke-icon-action" onClick={onBack}><PageIcon name="ArrowLeft" />Back to groups</button>
+              <button type="button" className="ke-refresh-button ke-icon-action" onClick={() => void load()}><PageIcon name="RefreshCw" />Refresh group</button>
             </nav>
           </section>
 
           <div className="ke-group-panels">
             <section className="ke-card ke-group-panel ke-members-panel" aria-labelledby={`members-heading-${group.id}`}>
               <header className="ke-panel-heading">
-                <div><h2 id={`members-heading-${group.id}`}>Members</h2><p className="ke-panel-subtitle">Manage members and membership changes.</p></div>
+                <div><h2 id={`members-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="Users" /></span><span>Members</span></h2><p className="ke-panel-subtitle">Manage members and membership changes.</p></div>
                 <span className="ke-count-badge" aria-label={`${group.members.length} members`}>{group.members.length}</span>
               </header>
               <ul className="ke-member-list">{group.members.map(member => <li key={member.id}>
@@ -174,7 +174,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
             <GroupDecisions group={group} api={api} reload={load} openDecision={openDecision} startCollapsed />
 
             {group.isOrganizer && <section className="ke-card ke-group-panel ke-invitations-panel" aria-labelledby={`invitations-heading-${group.id}`}>
-              <header className="ke-panel-heading"><div><h2 id={`invitations-heading-${group.id}`}>Invitations</h2>
+              <header className="ke-panel-heading"><div><h2 id={`invitations-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="Mail" /></span><span>Invitations</span></h2>
                 <p className="ke-panel-subtitle">Send a private invitation link to join this group.</p></div></header>
               <div className="ke-invitation-form">
                 <div className="ke-invitation-email"><label htmlFor={`group-email-${group.id}`}>Recipient email</label>
@@ -182,10 +182,10 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
                     onChange={event => setEmail(event.target.value)} /></div>
                 <label className="ke-invitation-replace"><input type="checkbox" checked={replace} onChange={event => setReplace(event.target.checked)} />
                   <span>Replace a lost link <small>(the previous link stops working)</small></span></label>
-                <button type="button" className="ke-invitation-submit" disabled={busy || !email.trim()} onClick={() => void action(`/groups/${group.id}/invitations`, { email, replace }, result => {
+                <button type="button" className="ke-invitation-submit ke-icon-action" disabled={busy || !email.trim()} onClick={() => void action(`/groups/${group.id}/invitations`, { email, replace }, result => {
                   if (typeof result.token !== 'string' || !/^[A-Za-z0-9_-]{32,80}$/.test(result.token)) throw new Error('Invalid link');
                   setLink(`${window.location.origin}${window.location.pathname}#groupInvite=${result.token}`); setEmail(''); setReplace(false);
-                })}>Create invitation link</button>
+                })}><PageIcon name="Link" />Create invitation link</button>
               </div>
               {link && <div className="ke-invitation-result" role="status">
                 <p>Copy this recipient-bound link privately. It expires after 24 hours. No email has been sent; share it only with the intended recipient.</p>

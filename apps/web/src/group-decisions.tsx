@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { ruleText, variableText } from './connected-decision';
+import { PageIcon } from './app-chrome';
 class UserFlowError extends Error {}
 export function GroupDecisions({ group, api, reload, openDecision, startCollapsed = false }: { group: Groups.GroupSnapshot;
   api: (path: string, init?: RequestInit) => Promise<Response>; reload: () => Promise<void>; openDecision: (id: string) => void; startCollapsed?: boolean }) {
@@ -41,14 +42,14 @@ export function GroupDecisions({ group, api, reload, openDecision, startCollapse
     if (draft) setDraft({ ...draft, frame }); setReviewed(false); setDirty(true);
   }
   return <section className="ke-card ke-group-panel ke-decisions-panel" aria-busy={busy} aria-labelledby={`decisions-heading-${group.id}`}>
-    <header className="ke-panel-heading"><div><h2 id={`decisions-heading-${group.id}`}>Decisions</h2>
+    <header className="ke-panel-heading"><div><h2 id={`decisions-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="ListChecks" /></span><span>Decisions</span></h2>
       <p className="ke-panel-subtitle">Shared choices and progress for this group.</p></div>
       {group.isOrganizer && !starting && (group.decisions.length > 0 || group.drafts.length > 0)
-        && <button type="button" className="ke-start-decision" onClick={() => setStarting(true)}>Start a decision</button>}</header>
+        && <button type="button" className="ke-start-decision ke-icon-action" onClick={() => setStarting(true)}><PageIcon name="Plus" />Start a decision</button>}</header>
     {!group.decisions.length && !(group.isOrganizer && group.drafts.length) && !starting && <div className="ke-decision-empty">
       <span className="ke-decision-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M7 3.75h7l4.25 4.5v11A1.75 1.75 0 0 1 16.5 21h-9A1.75 1.75 0 0 1 5.75 19.25v-13A2.5 2.5 0 0 1 8.25 3.75ZM14 4v5h4M9 13h6M9 16.5h4" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
       <h3>No decisions yet</h3><p>When your group is ready, start a decision to explore choices together.</p>
-      {group.isOrganizer && <button type="button" className="ke-start-decision" onClick={() => setStarting(true)}>Start a decision</button>}
+      {group.isOrganizer && <button type="button" className="ke-start-decision ke-icon-action" onClick={() => setStarting(true)}><PageIcon name="Plus" />Start a decision</button>}
     </div>}
     <div className="ke-decision-list">{group.decisions.map(decision => <article className="ke-decision-row" key={decision.id}>
       <div><h3>{decision.current ? 'Current decision' : 'Roster review needed'}</h3>
