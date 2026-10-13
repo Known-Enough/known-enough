@@ -36,9 +36,20 @@ jobs:
           retry-max-attempts: 1
           unset-current-credentials: true
       - run: python3 -B scripts/fix01/inspect.py
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPrimaryRelease
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Check the other installed own release role for only the failed request window
+        run: python3 -B scripts/fix01/inspect.py --logs-only
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: fix01-inspection
-          path: ${{ runner.temp }}/fix01-inspect.json
+          path: |
+            ${{ runner.temp }}/fix01-inspect.json
+            ${{ runner.temp }}/fix01-api-log-probe.json
           if-no-files-found: error
