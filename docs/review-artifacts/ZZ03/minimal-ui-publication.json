@@ -1,0 +1,55 @@
+{
+  "observedAt": "2026-10-13T20:20:29Z",
+  "sourceSha": "3f4d1645db243a146e9522b3154a77100aedfe8e",
+  "githubRun": "https://github.com/Known-Enough/known-enough/actions/runs/38461454840",
+  "githubConclusion": "SUCCESS",
+  "amplifyJobId": "74",
+  "files": [
+    {
+      "path": "/assets/connected-app-Bb-ybmzB.js",
+      "sha256": "735353cd90ab492e866bdb2024cfd188721c95903d2f6bcb3cd828bfcb0e70e1"
+    },
+    {
+      "path": "/assets/index-C2b3P4Rp.css",
+      "sha256": "cb2dea955b70dd6ac8f72868d899dd6bffcb7515e13c89e879cded73b248cf91"
+    },
+    {
+      "path": "/assets/index-CzbVx5Ah.js",
+      "sha256": "64ff5512d065f84262a9c96acba6befce7667dd194fa247d56456e2d78bd1642"
+    },
+    {
+      "path": "/assets/jsx-runtime-C8qzNuNr.js",
+      "sha256": "16cd613b5df605decfdf59cb786d9468694743d89b75147380ca38548e458e7d"
+    },
+    {
+      "path": "/",
+      "sha256": "2f788fa6adc9c160115f1dceb03a0f62115b64a6cec3a368734b03611f0c2409"
+    }
+  ],
+  "configurationReadback": {
+    "result": "ZZ02_SETUP_READBACK_PASS",
+    "configurationWrites": 0,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "signupDelivery": "NOT_EXECUTED",
+    "configurationSha256": "f6f32c6bd2cb66bebd8e4d40c35b1f198426172f1f8f372eaab35c472327da6b",
+    "postConfirmation": "MATCH",
+    "smsRoleConfigured": false,
+    "apiSha256": "a5873e96fd2cc87eec2569ef8c7eb19989caea4edc228d734f7c1ae1590d1df1",
+    "groupReadRoutes": [
+      "GET /groups",
+      "GET /groups/{groupId}/drafts/{draftId}",
+      "GET /groups/{groupId}/decisions/{decisionId}/review",
+      "GET /groups/{groupId}"
+    ],
+    "profileRoutesPresent": 5,
+    "managedRoutesPresent": 6
+  },
+  "staticCompilation": "PASS",
+  "productionBuild": "PASS",
+  "regressionStep": "SKIPPED by run_checks=false",
+  "applicationBrowserProviderTests": "NOT_EXECUTED; user tests manually",
+  "dependenciesAdded": 0,
+  "dataChanges": 0,
+  "manualVisualAndAuthenticatedJourneys": "NOT_VERIFIED"
+}
