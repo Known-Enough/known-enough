@@ -1,12 +1,14 @@
 # ZZ03 — Separate home, groups and decisions
 
-**Status:** IN_PROGRESS / A — focused Groups dashboard refinement claimed from clean synchronized main `64fc3418114492a2cf1113697bd539ee1612819d` on 2026-10-13T21:43:45Z. Continued after clean fast-forward to `5fc115cfe1e160e00482b24f3f4fbe8618f204ff` to reconcile the incoming FIX01 handoff while preserving this already-active single-writer claim. Exact scope and checks are in the ticket; preserve published work and whole ZZ03 acceptance requirements.
+**Status:** Bounded Groups dashboard visual refinement published and released from exact main source `239e06fecaa111cd3ef73358d58162e16c38e43d`. Whole ZZ03 acceptance and real-account review remain incomplete.
 
 Replace the long signed-in page with clear views: waiting for approval, Your groups, a selected group and a selected decision. Keep the ZZ02 profile drawer in the header. Remove manual decision-ID entry, fictional templates, simulated Alexa and fictional invitations from the normal product flow.
 
 Each view shows one next action, useful status and clear back navigation. Reuse existing authorized group/decision behavior; reorganizing screens does not make unfinished AI features work.
 
 [Ticket](ticket.md) · [ZZ batch](../README.md) · [Task board](../../../../task-board.md)
+
+[Dashboard publication receipt](../../../../review-artifacts/ZZ03/groups-dashboard-publication.json)
 
 [Checked navigation review and exact dependency](../../../../review-artifacts/ZZ03/navigation-review.md). [Group-details publication and byte readback](../../../../review-artifacts/ZZ03/group-details-publication.json). [Supplied-brand publication and byte readback](../../../../review-artifacts/ZZ03/brand-assets-publication.json). [Dark/light publication evidence](../../../../review-artifacts/ZZ03/theme-publication.json). [Surgical group icon polish publication](../../../../review-artifacts/ZZ03/group-icon-polish-publication.json). [Landing/login publication](../../../../review-artifacts/ZZ03/landing-login-publication.json). [Loading-experience publication](../../../../review-artifacts/ZZ03/loading-experience-publication.json). Local checks do not prove actual primary signup/profile/AI acceptance.
 

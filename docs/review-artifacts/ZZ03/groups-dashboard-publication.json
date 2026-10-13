@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-13T22:03:03Z",
+  "task": "ZZ03",
+  "scope": "Groups dashboard visual refinement",
+  "sourceSha": "239e06fecaa111cd3ef73358d58162e16c38e43d",
+  "commitUrl": "https://github.com/Known-Enough/known-enough/commit/239e06fecaa111cd3ef73358d58162e16c38e43d",
+  "workflow": {
+    "name": "ZZ primary frontend publication",
+    "runId": "38474931541",
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/38474931541",
+    "actor": "martelaxe",
+    "actorId": 44531296,
+    "event": "workflow_dispatch",
+    "branch": "main",
+    "conclusion": "SUCCESS",
+    "entryOnly": false,
+    "runChecks": false,
+    "amplifyJobId": "81"
+  },
+  "localChecks": {
+    "node": "24.21.0",
+    "npm": "11.19.0",
+    "lintAndBoundaries": "PASS (496 import references)",
+    "typecheck": "PASS",
+    "unitTests": "1572 PASS, 2 skipped",
+    "productionBuildAndBundleBoundary": "PASS",
+    "hostedPreviewBuildAndBoundary": "PASS",
+    "hostedPreviewTest": "1/1 PASS",
+    "referenceChecksums": "7/7 PASS",
+    "planningConsistency": "15/15 PASS",
+    "changedMarkdownLinks": "492 local links across 6 documents PASS",
+    "focusedResponsiveBrowserCheck": "3/3 PASS at 390px, 820px and 1280px; grid tracks 1/2/3; no horizontal overflow; group and decision navigation preserved",
+    "fullBrowserSuite": "60/72 passed; 12 failed on legacy selectors/copy and multi-context timeouts; current Groups navigation scenarios passed",
+    "workflowRegressionChecks": "SKIPPED by run_checks=false",
+    "apiProviderSignupEmail": "NOT_EXECUTED"
+  },
+  "runtimeReadback": {
+    "result": "ZZ02_SETUP_READBACK_PASS",
+    "configurationSha256": "f6f32c6bd2cb66bebd8e4d40c35b1f198426172f1f8f372eaab35c472327da6b",
+    "apiSha256": "a5873e96fd2cc87eec2569ef8c7eb19989caea4edc228d734f7c1ae1590d1df1",
+    "postConfirmation": "MATCH",
+    "profileRoutesPresent": 5,
+    "managedRoutesPresent": 6,
+    "configurationWrites": 0,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "signupDelivery": "NOT_EXECUTED",
+    "apiPublication": "NOT_EXECUTED"
+  },
+  "publication": {
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "url": "https://main.d143q5ravxp5av.amplifyapp.com/",
+    "staticReadback": "All seven release-manifest files returned HTTP 200 and matched the workflow artifact SHA-256 values.",
+    "files": [
+      { "path": "/assets/app-chrome-BI4RvAb6.js", "httpStatus": 200, "sha256": "ab8c5756d9a7389f16e90fd34a2a9c1aee38c7a415cc2c41041a022d41bf18c8", "manifestMatch": true },
+      { "path": "/assets/connected-app-CsY1WNln.js", "httpStatus": 200, "sha256": "aa8f57afd63469073ba4c169e1afc0393e1c081a2c554e3649ea3279b432a0cc", "manifestMatch": true },
+      { "path": "/assets/index-BD176-Y5.css", "httpStatus": 200, "sha256": "bf855a8984249bcbd71f52c6b01eb2a4aef18a9e2cb4dcd3ddc7ecf9874d863a", "manifestMatch": true },
+      { "path": "/assets/index-D68BjLj7.js", "httpStatus": 200, "sha256": "2fd31dec1c58384a63ceb9d9a38bfd3383cba39f327a40edd1712b621459eb84", "manifestMatch": true },
+      { "path": "/cover.png", "httpStatus": 200, "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151", "manifestMatch": true },
+      { "path": "/", "httpStatus": 200, "sha256": "ef600d916e0ce0e4f96cc23ea389be2111330d4e8255bfadd849622aab1b9a49", "manifestMatch": true },
+      { "path": "/logo.png", "httpStatus": 200, "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb", "manifestMatch": true }
+    ]
+  },
+  "dashboard": {
+    "contentWidth": "approximately 1100px in a centered container",
+    "responsiveGroupColumns": { "390px": 1, "820px": 2, "1280px": 3 },
+    "theme": "Light and dark screenshots inspected at mobile and desktop sizes.",
+    "behavior": "Create flow, refresh, account and organizer gates, group and decision navigation preserved."
+  },
+  "manualReview": {
+    "syntheticVisualReview": "PASS for captured dashboard views",
+    "realAuthenticatedAccountReview": "PENDING_USER",
+    "wholeZZ03Acceptance": "INCOMPLETE"
+  }
+}
