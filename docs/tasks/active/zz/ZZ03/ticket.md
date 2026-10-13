@@ -1,6 +1,6 @@
 # ZZ03 — Simplify the signed-in app and its navigation
 
-- Status: IN_PROGRESS / A — focused group-details icon/alignment polish claimed on main 0be1b3613c93861e6f41ba25d9fba783bb1cee64; existing theme and layout remain published. User visual/authenticated review and remaining protected ZZ03 journeys remain incomplete.
+- Status: IN_PROGRESS / unclaimed — bounded group-details icon/alignment polish is published from main 2d9ff85299bbdf26a4fd422756feaac6fec70b23; existing theme and layout remain published. User visual/authenticated review and remaining protected ZZ03 journeys remain incomplete.
 - User-approved structure: 2026-10-12T17:42:55.221080+00:00.
 - Scheduling: after ZZ01 -> ZZ02 checked checkpoints, one sequential claim. Preserve any active project task/NP00; create no worker/chat/monitor from this ticket.
 - Goal: stop showing onboarding, groups, a decision, developer scenarios and simulated assistant at once. Organize the product by the user's current activity.
@@ -131,3 +131,7 @@ A claims one surgical group-details visual continuation on clean synchronized ma
 ### Implementation checkpoint — 2026-10-13T21:02:30Z
 
 Added the nine requested 18px inline SVG outlines, pale-green section-heading tiles, consistent icon alignment inside named actions, a 42px subtitle text alignment offset, a slightly darker muted group-page palette and matching dark-theme icon tiles. Existing cards, layout, typography, responsive structure, business handlers and privacy boundaries are unchanged. Pinned Node24.21.0/npm11.19.0 `npm run typecheck` PASS; production `npm run build` and bundle boundary PASS; `git diff --check` PASS. No application/browser/API/provider suite/probe, or backend/identity/permission/data/configuration/dependency change. Static documentation consistency and exact-source publication/readback remain next; claim stays IN_PROGRESS pending release.
+
+### Bounded icon polish publication/release — 2026-10-13T21:05:48Z
+
+Published exact source `2d9ff85299bbdf26a4fd422756feaac6fec70b23` via own-A [38467754472](https://github.com/Known-Enough/known-enough/actions/runs/38467754472), SUCCESS, Amplify job78. Configuration readback PASS and configuration/data writes0; API publication/signup/provider calls NOT_EXECUTED. Exact primary static verification: root, logo, cover, CSS and JS files each returned HTTP200 and matched SHA-256 in the release manifest. Pinned typecheck/build/bundle boundary/reference7/7/planning15/diff checks PASS. Regression checks skipped by run_checks=false; no app/browser/API/provider suite/probe. [Sanitized publication receipt](../../../../review-artifacts/ZZ03/group-icon-polish-publication.json). This bounded A continuation is released. User visual/authenticated review and whole ZZ03 protected acceptance remain incomplete; ticket is not DONE.
