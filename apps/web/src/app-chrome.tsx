@@ -110,6 +110,7 @@ const pageIconShapes = {
   UsersRound: <><path d="M18 21a8 8 0 0 0-16 0" /><circle cx="10" cy="8" r="5" /><path d="M23 21a8 8 0 0 0-6-7.3M16 3.13a5 5 0 0 1 0 9.75" /></>,
   ArrowLeft: <><path d="M19 12H5" /><path d="m12 19-7-7 7-7" /></>,
   RefreshCw: <><path d="M20 7v5h-5M4 17v-5h5" /><path d="M5.64 5.64A9 9 0 0 1 20 12M4 12a9 9 0 0 0 14.36 6.36" /></>,
+  ArrowRight: <><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></>,
   Plus: <><path d="M12 5v14M5 12h14" /></>,
   Link: <><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></>
 } as const;

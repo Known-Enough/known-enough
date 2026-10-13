@@ -1,6 +1,6 @@
 # ZZ03 — Separate home, groups and decisions
 
-**Status:** IN_PROGRESS / unclaimed — the bounded loading-experience continuation is published from main `492baa1ae588cc13644dcecbb858ef4545e493c8`; exact-source static-byte readback passed. User visual/accessibility/authenticated review and broader ZZ03 acceptance remain pending.
+**Status:** IN_PROGRESS / A — focused Groups dashboard refinement claimed from clean synchronized main `64fc3418114492a2cf1113697bd539ee1612819d` on 2026-10-13T21:43:45Z. Continued after clean fast-forward to `5fc115cfe1e160e00482b24f3f4fbe8618f204ff` to reconcile the incoming FIX01 handoff while preserving this already-active single-writer claim. Exact scope and checks are in the ticket; preserve published work and whole ZZ03 acceptance requirements.
 
 Replace the long signed-in page with clear views: waiting for approval, Your groups, a selected group and a selected decision. Keep the ZZ02 profile drawer in the header. Remove manual decision-ID entry, fictional templates, simulated Alexa and fictional invitations from the normal product flow.
 
@@ -9,6 +9,8 @@ Each view shows one next action, useful status and clear back navigation. Reuse 
 [Ticket](ticket.md) · [ZZ batch](../README.md) · [Task board](../../../../task-board.md)
 
 [Checked navigation review and exact dependency](../../../../review-artifacts/ZZ03/navigation-review.md). [Group-details publication and byte readback](../../../../review-artifacts/ZZ03/group-details-publication.json). [Supplied-brand publication and byte readback](../../../../review-artifacts/ZZ03/brand-assets-publication.json). [Dark/light publication evidence](../../../../review-artifacts/ZZ03/theme-publication.json). [Surgical group icon polish publication](../../../../review-artifacts/ZZ03/group-icon-polish-publication.json). [Landing/login publication](../../../../review-artifacts/ZZ03/landing-login-publication.json). [Loading-experience publication](../../../../review-artifacts/ZZ03/loading-experience-publication.json). Local checks do not prove actual primary signup/profile/AI acceptance.
+
+Current dashboard visual captures: [390px light](../../../../review-artifacts/ZZ03/groups-dashboard-light-390.png), [820px light](../../../../review-artifacts/ZZ03/groups-dashboard-light-820.png), [1280px light](../../../../review-artifacts/ZZ03/groups-dashboard-light-1280.png), [390px dark](../../../../review-artifacts/ZZ03/groups-dashboard-dark-390.png), [1280px dark](../../../../review-artifacts/ZZ03/groups-dashboard-dark-1280.png). These are synthetic fixture views and do not replace real-account or whole-task review.
 
 ### A loading experience continuation — 2026-10-13T21:21:58Z
 

@@ -105,7 +105,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
     finally { setBusy(false); }
   }
   if (checking && !available) return <LoadingSkeleton kind={selectedGroupId ? 'group' : 'groups'} label={selectedGroupId ? 'Opening your group' : 'Loading your groups'}
-    className={selectedGroupId ? 'ke-group-route-loading' : 'ke-card ke-group-home'} />;
+    className={selectedGroupId ? 'ke-group-route-loading' : 'ke-group-home'} />;
   if (loadFailure) return <section className="ke-card ke-state-card ke-error-card" role="alert">
     <span className="ke-state-icon ke-warning-icon"><svg aria-hidden="true" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m14 6-11 19a2 2 0 0 0 2 3h22a2 2 0 0 0 2-3L18 6a2.3 2.3 0 0 0-4 0Z" /><path d="M16 13v6m0 4v1" strokeLinecap="round" /></svg></span>
     <h2>{loadFailure.title}</h2><p>{loadFailure.description}</p>
@@ -113,9 +113,17 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       <button type="button" className="secondary" onClick={() => { if (selectedGroupId) onBack(); else void load(); }}>Back to groups</button></div>
     {loadFailure.reference && <small>Reference: {loadFailure.reference}</small>}
   </section>;
-  return <section className={(selectedGroupId ? 'ke-group-page' : 'ke-card ke-group-home' + (account?.status === 'APPROVED' && !groups.length ? ' ke-group-home-empty' : '')) + ' ke-load-reveal'} aria-busy={busy || checking}>
-    {!selectedGroupId && <div className="ke-section-heading"><h2>{account?.status === 'APPROVED' ? 'Your groups' : 'Account access'}</h2>
-      <button type="button" className="secondary ke-refresh-button" disabled={busy} onClick={() => void load()}>Refresh account and groups</button></div>}
+  return <section className={(selectedGroupId ? 'ke-group-page' : 'ke-group-home') + ' ke-load-reveal'} aria-busy={busy || checking}>
+    {!selectedGroupId && <div className="ke-section-heading ke-groups-heading">
+      <div className="ke-section-title"><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="UsersRound" /></span>
+        <div><h2>{account?.status === 'APPROVED' ? 'Your groups' : 'Account access'}</h2>
+          {account?.status === 'APPROVED' && <p>Your shared decision spaces, all in one place.</p>}</div></div>
+      <div className="ke-section-actions">
+        {account?.status === 'APPROVED' && <button type="button" className={`ke-create-group-action${creating ? ' secondary' : ''}`} disabled={busy || checking}
+          onClick={() => setCreating(value => !value)}>{creating ? <span>Cancel</span> : <><PageIcon name="Plus" /><span>Create group</span></>}</button>}
+        <button type="button" className="secondary ke-refresh-button ke-refresh-icon" aria-label="Refresh account and groups" title="Refresh groups" disabled={busy} onClick={() => void load()}><PageIcon name="RefreshCw" /></button>
+      </div>
+    </div>}
     <fieldset className={selectedGroupId ? 'ke-group-detail-controls' : undefined} disabled={busy || checking}
       style={{border: 0, padding: 0, minWidth: 0}} aria-label={selectedGroupId ? 'Group details and actions' : 'Account and group actions'}>
     {available && !checking && !account && <p>Your account setup is still being completed. Refresh shortly, or contact the operator if it remains unavailable.</p>}
@@ -124,16 +132,20 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
     {account?.status === 'DISABLED' && <p>Your access is disabled. Group and decision actions are unavailable.</p>}
     {account?.status === 'APPROVED' && <>
       {!selectedGroupId && <>
-      {!groups.length && <div className="ke-empty-state"><span className="ke-state-icon"><GroupIcon /></span><h3>No groups yet</h3><p>Start a group with the people you want to decide with, or accept an invitation.</p></div>}
-      <>{!creating && <button disabled={busy} onClick={() => setCreating(true)}>Create group</button>}{creating && <>
-      <label htmlFor="new-group-name">New group name</label><input id="new-group-name" value={groupName} maxLength={80} disabled={!!groupRequest.current} onChange={event => setGroupName(event.target.value)} />
-      <button disabled={busy || !groupName.trim()} onClick={() => { groupRequest.current ??= { name: groupName, idempotencyKey: crypto.randomUUID() }; void action('/groups', groupRequest.current, result => {
+      {creating && <div className="ke-create-group-form"><div><label htmlFor="new-group-name">New group name</label>
+        <input id="new-group-name" value={groupName} maxLength={80} disabled={!!groupRequest.current} onChange={event => setGroupName(event.target.value)} /></div>
+        <button disabled={busy || !groupName.trim()} onClick={() => { groupRequest.current ??= { name: groupName, idempotencyKey: crypto.randomUUID() }; void action('/groups', groupRequest.current, result => {
         const group = Groups.GroupSnapshot.parse(result.group); groupRequest.current = null; setGroupName(''); onOpenGroup(group.id); return true;
-      }); }}>Create group</button></>}</>
+      }); }}>Create group</button></div>}
+      {!groups.length && <div className="ke-empty-state"><span className="ke-state-icon"><GroupIcon /></span><h3>No groups yet.</h3><p>Start a group with the people you want to decide with, or accept an invitation.</p></div>}
       {token && <><p>A group invitation is waiting. Accepting joins the group; it does not confirm a decision or approve a proposal.</p>
         <button disabled={busy} onClick={() => void action('/groups/accept', { token }, result => { const group = Groups.GroupSnapshot.parse(result.group); setToken(''); sessionStorage.removeItem('ke-group-invite'); onOpenGroup(group.id); return true; })}>Accept group invitation</button>
         <button className="secondary" onClick={() => { setToken(''); sessionStorage.removeItem('ke-group-invite'); }}>Decline group invitation</button></>}
-      <div className="ke-group-grid">{groups.map(group => <article key={group.id} className="ke-group-tile"><span className="ke-group-tile-icon"><GroupIcon /></span><h3>{group.name}</h3><p>{group.members.length} {group.members.length === 1 ? 'member' : 'members'}</p><button disabled={busy} onClick={() => onOpenGroup(group.id)}>Open group</button></article>)}</div>
+      <div className="ke-group-grid">{groups.map(group => <article key={group.id} className="ke-group-tile">
+        <div className="ke-group-tile-top"><span className="ke-group-tile-icon"><GroupIcon /></span><span className="ke-group-tile-label">Group</span></div>
+        <h3>{group.name}</h3><p><PageIcon name="UsersRound" /><span>{group.members.length} {group.members.length === 1 ? 'member' : 'members'}</span></p>
+        <button type="button" className="secondary ke-group-open-button" disabled={busy} onClick={() => onOpenGroup(group.id)}><span>Open group</span><PageIcon name="ArrowRight" /></button>
+      </article>)}</div>
       </>}
       {selectedGroupId && groups.map(group => {
         const organizer = group.members.find(member => member.isOrganizer);
