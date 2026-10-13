@@ -1,3 +1,5 @@
+**Current user-directed priority: [FIX batch](active/fix/README.md), starting with [FIX01](active/fix/FIX01/ticket.md).** READY/unclaimed for B's verified intake: repair decision creation, honest errors and debugging visibility. Relevant FIX01 tests/deployment are authorized; no B execution is claimed. The current board/claim log govern one sequential task; older queue snapshots below are historical where superseded.
+
 **OPS00 access completed under A takeover:** [Installed envelope and two real GitHub proofs](../review-artifacts/OPS00/access-installed-proof.md). A claim released; actual OPS01–03 services/cutover, final-order saved NP00 closeout and release acceptance remain. New B session/monitor activity unavailable; no new worker or successor started. The current board and verified claim log control the next intake.
 
 ## Current B queue handoff — 2026-10-06T17:17:44Z

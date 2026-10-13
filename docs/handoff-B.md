@@ -1,3 +1,9 @@
+## Current B handoff — FIX01, 2026-10-13T21:55:30Z
+
+Pull main ff-only with your own account, inspect genuine claims/running jobs, then claim exactly [FIX01](tasks/active/fix/FIX01/ticket.md). The user explicitly requests B to fix decision drafting inside a group; relevant tests and exact-source deployment are authorized under standing project authority. A's preparation is complete with no active implementation; earlier observer-only/manual-test instructions yield for FIX01. Keep your existing persistent chat/idle-only monitor, one task and saved NP00.
+
+Confirm the actual primary response before fixing the likely missing native architect port. Reuse OPS03 source-bound model infrastructure, preserve idempotency/participant consent and the new ZZ UI, correct misleading access errors, and verify your own debugging access. Main API log access is not yet established; workflow/worker logs are separate. Log actual cause, checks, deployment/usage/cleanup, chat summary and precise blockers; no new credential-sharing, monitor or duplicate OPS03 claim. Task preparation is not evidence you have started. Older dated handoffs below are historical where superseded.
+
 Current A OPS00: [private deployment initializer](review-artifacts/OPS00/a-partition-deployment.md) checked,51new tests/full1482app/64browser PASS. GitHub storage inspection and participant permission remain verified. Next: runnable migration job/role, protected package/entry and route compatibility; no data copied or live app switch. Sole A claim/B observer-only.
 
 Current A OPS00: GitHub storage inspection is verified; [inactive Lambda request adapter](review-artifacts/OPS00/a-partition-lambda.md) passed24new tests and full1431app/64browser checks. Next: private source-bound initializer/migration package and route compatibility before live selection. No deployment/migration/activation yet; A sole claim/B observer-only.
