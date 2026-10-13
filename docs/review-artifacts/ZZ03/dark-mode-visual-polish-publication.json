@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-13T22:41:24Z",
+  "task": "ZZ03",
+  "scope": "Surgical dark-mode visual polish",
+  "sourceSha": "7b59a0dce1fcb962b0eee9672cf1aa9baf88bf3e",
+  "commitUrl": "https://github.com/Known-Enough/known-enough/commit/7b59a0dce1fcb962b0eee9672cf1aa9baf88bf3e",
+  "workflow": {
+    "name": "ZZ primary frontend publication",
+    "runId": "38479296548",
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/38479296548",
+    "actor": "martelaxe",
+    "event": "workflow_dispatch",
+    "branch": "main",
+    "conclusion": "SUCCESS",
+    "entryOnly": false,
+    "runChecks": false,
+    "amplifyJobId": "83"
+  },
+  "localChecks": {
+    "node": "24.21.0",
+    "npm": "11.19.0",
+    "lintAndBoundaries": "PASS (496 import references)",
+    "typecheck": "PASS",
+    "unitTests": "1572 PASS, 2 skipped",
+    "productionBuildAndBundleBoundary": "PASS",
+    "hostedPreviewBuildAndBoundary": "PASS",
+    "hostedPreviewTest": "1/1 PASS",
+    "referenceChecksums": "7/7 PASS",
+    "planningConsistency": "15/15 PASS",
+    "changedMarkdownLinks": "502 local links across 6 documents PASS",
+    "syntheticVisualReview": "1/1 PASS at 1280px and 390px in light and dark; no mobile overflow; transparent dark hero; distinct dark surfaces; dark empty-state height 221.375px vs light 241.375px; settled decision hover #377e5f; disabled invitation contrast verified",
+    "fullBrowserSuite": "60/72 passed; 12 failures in existing unrelated entry/loading/status/account-refresh/multi-context flows",
+    "workflowRegressionChecks": "SKIPPED by run_checks=false",
+    "apiProviderSignupEmail": "NOT_EXECUTED"
+  },
+  "runtimeReadback": {
+    "result": "ZZ02_SETUP_READBACK_PASS",
+    "configurationSha256": "f6f32c6bd2cb66bebd8e4d40c35b1f198426172f1f8f372eaab35c472327da6b",
+    "apiSha256": "a5873e96fd2cc87eec2569ef8c7eb19989caea4edc228d734f7c1ae1590d1df1",
+    "postConfirmation": "MATCH",
+    "profileRoutesPresent": 5,
+    "managedRoutesPresent": 6,
+    "configurationWrites": 0,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "signupDelivery": "NOT_EXECUTED",
+    "apiPublication": "NOT_EXECUTED"
+  },
+  "publication": {
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "url": "https://main.d143q5ravxp5av.amplifyapp.com/",
+    "staticReadback": "All seven release-manifest files returned HTTP 200 and matched workflow artifact SHA-256 values.",
+    "files": [
+      {
+        "path": "/assets/app-chrome-ZK3dnkul.js",
+        "httpStatus": 200,
+        "sha256": "79890e5bab64b8f96ec8045d439dca5f5335650353900028de5ffd05029aa3c7",
+        "manifestMatch": true
+      },
+      {
+        "path": "/assets/connected-app-L97SMtpX.js",
+        "httpStatus": 200,
+        "sha256": "dd2ece8cf34820c82e4e1af7492e702f61d0aa0cbc0508e95dad2afb3bf9039f",
+        "manifestMatch": true
+      },
+      {
+        "path": "/assets/index-C05cnVLm.css",
+        "httpStatus": 200,
+        "sha256": "638e489889966b18f25f3c896c0ba9aef755494ce56b0c858cdc2e54c014aedc",
+        "manifestMatch": true
+      },
+      {
+        "path": "/assets/index-DM6Dnmlg.js",
+        "httpStatus": 200,
+        "sha256": "8b07fea09d5cfe648d71476162d0735bc517cbce97b6b42dc87e57c026edd9c3",
+        "manifestMatch": true
+      },
+      {
+        "path": "/cover.png",
+        "httpStatus": 200,
+        "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151",
+        "manifestMatch": true
+      },
+      {
+        "path": "/",
+        "httpStatus": 200,
+        "sha256": "80f837ca6ddc7c19f99abcc4ca33d0a4409f04bfe6449eef27583c6e6f3758c6",
+        "manifestMatch": true
+      },
+      {
+        "path": "/logo.png",
+        "httpStatus": 200,
+        "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb",
+        "manifestMatch": true
+      }
+    ]
+  },
+  "manualReview": {
+    "realAuthenticatedAccountReview": "PENDING_USER",
+    "wholeZZ03Acceptance": "INCOMPLETE"
+  }
+}

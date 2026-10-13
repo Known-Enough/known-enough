@@ -1,6 +1,6 @@
 # ZZ03 — Separate home, groups and decisions
 
-**Status:** IN_PROGRESS / A — focused dark-mode visual polish implementation complete and awaiting exact-source publication. Dark/light synthetic desktop/mobile review passed; pinned static, unit and hosted-preview checks passed. The full parallel browser suite was60/72 with12 existing unrelated-flow failures. Details: [ticket](ticket.md). Whole ZZ03 acceptance and real-account review remain incomplete.
+**Status:** Bounded dark-mode visual polish published from exact main source `7b59a0dce1fcb962b0eee9672cf1aa9baf88bf3e` at 2026-10-13T22:41:45Z ([receipt](../../../../review-artifacts/ZZ03/dark-mode-visual-polish-publication.json)). Dark/light synthetic desktop/mobile review passed. The full parallel browser suite was60/72 with12 existing unrelated-flow failures. Whole ZZ03 acceptance and real-account review remain incomplete.
 
 Replace the long signed-in page with clear views: waiting for approval, Your groups, a selected group and a selected decision. Keep the ZZ02 profile drawer in the header. Remove manual decision-ID entry, fictional templates, simulated Alexa and fictional invitations from the normal product flow.
 
