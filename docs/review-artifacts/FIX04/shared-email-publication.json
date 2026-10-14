@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "phase": "PUBLISHED_PENDING_LIVE_READBACK",
+  "sourceSha": "4fc702b3018a7e2933486ee4289efd3d7fe2971a",
+  "run": "https://github.com/Known-Enough/known-enough/actions/runs/38611447684",
+  "apiSha256": "83d794ac6cd4fe204f30a320c4e34537b683b76da3aedb6a106f9077dff6f663",
+  "workerSha256": "f15b5164be54248e2514f0a354bc07fcabcc03695ec9bf81ab93d16448ea7bf5",
+  "selectedEmail": "PRIVATE_CONFIGURED",
+  "configurationStorage": "CHECKED_PRIVATE_NATIVE_PACKAGE",
+  "modelCalls": 0,
+  "humanAccountChanges": 0,
+  "fullCheck": {
+    "unitPassed": 1617,
+    "optionalSkipped": 2,
+    "browserPassed": 83,
+    "hostedPassed": 1
+  },
+  "historicalDeniedSettingRun": "https://github.com/Known-Enough/known-enough/actions/runs/38609932203",
+  "priorCodeOnlyRun": "https://github.com/Known-Enough/known-enough/actions/runs/38609729955"
+}
