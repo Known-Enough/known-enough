@@ -1,6 +1,7 @@
 import { partitionPermissionProfiles, PARTITION_RESOURCES as r } from './partition-setup.mjs';
 import { retentionPermissionProfiles } from './retention-setup.mjs';
 import { jobPermissionProfiles } from './jobs-setup.mjs';
+import { operatorReadPolicy } from './operator-read-policy.mjs';
 
 export const ACCESS_STACK = 'KnownEnoughOperationsAccess';
 export const ACCESS_ROLES = Object.freeze({ migration: 'KnownEnoughGithubPartitionMigration',
@@ -44,6 +45,7 @@ export function accessProfiles() {
     Resource: `arn:aws:bedrock:${r.region}::foundation-model/amazon.nova-lite-v1:0` });
   result.jobs.Statement.push(terminalJobCleanupStatement());
   for (const policy of Object.values(result)) policy.Statement.push(structuredClone(deny));
+  result.migration.Statement.push(...operatorReadPolicy().Statement);
   result.ownerRuntime = attachableProfile(lifecycle.ownerService);
   // The installed exact participant policy already carries these six activation statements.
   result.ownerRuntime.Statement = result.ownerRuntime.Statement.filter(s => !activation.test(s.Sid));
@@ -55,13 +57,14 @@ function boundary(policy) {
   // Resource ceiling plus the exact inline key/transaction profile. No worker can edit either document.
   // Preserve the old service ceilings. Cleanup gets its own key/transaction ceiling, never a broad DeleteItem action.
   const cleanup = policy.Statement.find(s => s.Sid === TERMINAL_JOB_CLEANUP_SID);
-  const base = policy.Statement.filter(s => s.Sid !== TERMINAL_JOB_CLEANUP_SID);
+  const operatorReads = policy.Statement.filter(s => s.Sid?.startsWith('FIX04'));
+  const base = policy.Statement.filter(s => s.Sid !== TERMINAL_JOB_CLEANUP_SID && !s.Sid?.startsWith('FIX04'));
   const resources = [...new Set(base.filter(s => s.Effect === 'Allow').flatMap(s => [s.Resource].flat()))];
   const actions = [...new Set(base.filter(s => s.Effect === 'Allow').flatMap(s => s.Action))];
   const services = [...new Set(actions.map(action => action.split(':')[0]))];
   return { Version: '2012-10-17', Statement: [...services.map(service => ({ Effect: 'Allow',
     Action: actions.filter(action => action.startsWith(`${service}:`)),
-    Resource: resources.filter(resource => resource.startsWith(`arn:aws:${service}:`)) })), ...(cleanup ? [structuredClone(cleanup)] : []), structuredClone(deny)] };
+    Resource: resources.filter(resource => resource.startsWith(`arn:aws:${service}:`)) })), ...(cleanup ? [structuredClone(cleanup)] : []), structuredClone(deny), ...structuredClone(operatorReads)] };
 }
 export function accessTemplate() {
   const profiles = accessProfiles(); const Resources = {};

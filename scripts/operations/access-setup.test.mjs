@@ -88,3 +88,10 @@ test('only own job operator can delete model journal keys inside a transaction; 
  assert.deepEqual(boundary.Statement.filter(s=>s.Action.includes('dynamodb:DeleteItem')),[grant]);
  for(const [name,profile] of Object.entries(profiles))if(name!=='jobs')assert.ok(!profile.Statement.some(s=>s.Action.includes('dynamodb:DeleteItem')&&[s.Resource].flat().some(r=>r.endsWith(':table/KnownEnoughOperationsJournal'))&&s.Condition?.['ForAllValues:StringLike']?.['dynamodb:LeadingKeys']?.includes('MODELJOB#*')));
 });
+test('FIX04 keeps key-only discovery and exact provider/source reads in both migration layers without broadening other roles', async () => {
+ const {operatorReadPolicy}=await import('./operator-read-policy.mjs');const reads=operatorReadPolicy().Statement;const profiles=accessProfiles();const template=accessTemplate();
+ assert.deepEqual(profiles.migration.Statement.filter(item=>item.Sid?.startsWith('FIX04')),reads);
+ assert.deepEqual(template.Resources.MigrationBoundary.Properties.PolicyDocument.Statement.filter(item=>item.Sid?.startsWith('FIX04')),reads);
+ for(const name of ['archive','erasure','retention','jobs'])assert.ok(!profiles[name].Statement.some(item=>item.Sid?.startsWith('FIX04')));
+ const scan=reads[0];assert.deepEqual(scan.Action,['dynamodb:Scan']);assert.deepEqual(scan.Condition['ForAllValues:StringEquals']['dynamodb:Attributes'],['PK','SK']);assert.equal(scan.Condition.StringEquals['dynamodb:Select'],'SPECIFIC_ATTRIBUTES');assert.ok(!JSON.stringify(reads).includes('bedrock:'));assert.ok(!JSON.stringify(reads).includes('cognito-idp:AdminUpdate'));
+});

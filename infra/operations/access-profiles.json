@@ -191,6 +191,45 @@
           "s3:DeleteObjectVersion"
         ],
         "Resource": "*"
+      },
+      {
+        "Sid": "FIX04KeyOnlyAccountCatalog",
+        "Effect": "Allow",
+        "Action": [
+          "dynamodb:Scan"
+        ],
+        "Resource": "arn:aws:dynamodb:us-east-1:092954139775:table/KnownEnoughPartitions",
+        "Condition": {
+          "StringEquals": {
+            "dynamodb:Select": "SPECIFIC_ATTRIBUTES"
+          },
+          "ForAllValues:StringEquals": {
+            "dynamodb:Attributes": [
+              "PK",
+              "SK"
+            ]
+          },
+          "Null": {
+            "dynamodb:Attributes": "false"
+          }
+        }
+      },
+      {
+        "Sid": "FIX04TrustedProviderIdentity",
+        "Effect": "Allow",
+        "Action": [
+          "cognito-idp:AdminGetUser",
+          "cognito-idp:ListUsers"
+        ],
+        "Resource": "arn:aws:cognito-idp:us-east-1:092954139775:userpool/us-east-1_V9OMjd0zx"
+      },
+      {
+        "Sid": "FIX04PinnedSourceRead",
+        "Effect": "Allow",
+        "Action": [
+          "lambda:GetFunction"
+        ],
+        "Resource": "arn:aws:lambda:us-east-1:092954139775:function:known-enough-stage-api"
       }
     ]
   },
