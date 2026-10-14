@@ -39,6 +39,16 @@ class EnableChecks(unittest.TestCase):
    def change(records):
     row=records['OPERATIONS#MODEL_JOBS'];state=json.loads(row['payload']['S']);state[field]=value;row['payload']['S']=json.dumps(state)
    result,writes,_=self.exercise(change);self.assertEqual(result['result'],'BLOCKED');self.assertEqual(writes,[])
+ def test_actual_logging_guard_uses_verified_inspector_and_never_a_model_call(self):
+  operations=[]
+  def run(argv,**_):
+   service,operation=argv[1:3];operations.append(service+':'+operation)
+   value={'Account':'092954139775','Arn':'arn:aws:sts::092954139775:assumed-role/KnownEnoughGithubStagingInspector/test'} if service=='sts' else {}
+   return type('Response',(),{'returncode':0,'stderr':'','stdout':json.dumps(value)})()
+  with tempfile.TemporaryDirectory() as folder,patch.dict(os.environ,{'EXPECTED_SOURCE':SOURCE,'RUNNER_TEMP':folder}),patch.object(sys,'argv',['enable.py','logging']),patch('subprocess.run',run),contextlib.redirect_stdout(io.StringIO()):
+   runpy.run_path('scripts/fix01/enable.py',run_name='__main__')
+   report=json.loads(pathlib.Path(folder,'fix01-logging-guard.json').read_text())
+  self.assertEqual(report['result'],'GUARD_PASS');self.assertEqual(operations,['sts:get-caller-identity','bedrock:get-model-invocation-logging-configuration'])
  def test_retention_enabled_stops_without_write(self):
   def change(records):records['OPERATIONS#RETENTION']['payload']['S']=json.dumps({'enabled':True})
   result,writes,_=self.exercise(change);self.assertEqual(result['error'],'PRIVATE_RETENTION_GATE_CHANGED_STOP');self.assertEqual(writes,[])

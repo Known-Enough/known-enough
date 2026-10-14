@@ -137,7 +137,7 @@ def main():
             report['result'] = 'ZZ02_SETUP_METADATA_READ'
             return report
         checked_hash = args.api_sha256 or config['apiSha256']
-        if not re.fullmatch(r'[a-f0-9]{64}', checked_hash) or checked_hash != config['apiSha256'] or report['apiSha256'] != checked_hash:
+        if not re.fullmatch(r'[a-f0-9]{64}', checked_hash) or checked_hash == '0' * 64 or report['apiSha256'] != checked_hash:
             raise RuntimeError('CHECKED_RUNTIME_HASH_REQUIRED')
         if function.get('State') != 'Active' or function.get('LastUpdateStatus') != 'Successful':
             raise RuntimeError('RUNTIME_UPDATE_NOT_COMPLETE')

@@ -10,7 +10,7 @@ def call(service,op,*argv):
  return json.loads(r.stdout or '{}')
 def item(table,pk):return call('dynamodb','get-item','--table-name',table,'--key',json.dumps({'PK':{'S':pk},'SK':{'S':'STATE'}}),'--consistent-read').get('Item')
 try:
- role={'api':'KnownEnoughGithubPrimaryRelease','worker':'KnownEnoughGithubModelJobRelease','logging':'KnownEnoughGithubQaRelease','enable':'KnownEnoughGithubModelJobOperations','disable':'KnownEnoughGithubModelJobOperations'}[args.phase]
+ role={'api':'KnownEnoughGithubPrimaryRelease','worker':'KnownEnoughGithubModelJobRelease','logging':'KnownEnoughGithubStagingInspector','enable':'KnownEnoughGithubModelJobOperations','disable':'KnownEnoughGithubModelJobOperations'}[args.phase]
  identity=call('sts','get-caller-identity')
  if identity['Account']!=A or not identity['Arn'].startswith('arn:aws:sts::'+A+':assumed-role/'+role+'/'):raise ValueError('OWN_ROLE_TARGET_INVALID')
  if args.phase in ['api','worker']:

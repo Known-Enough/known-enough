@@ -142,6 +142,20 @@ class SetupExecution(unittest.TestCase):
         self.assertEqual(self.execute()['code'], 'PROFILE_ROUTE_DRIFT')
         self.assertNotIn(('s3api', 'put-object'), self.calls)
 
+    def test_explicit_current_hash_preserves_fixed_target_and_overrides_old_package_pin(self):
+        self.hash = 'b' * 64
+        report = self.execute(['--apply', '--backup-to-s3', '--api-sha256', self.hash])
+        self.assertEqual(report['result'], 'ZZ02_SETUP_READBACK_PASS')
+        self.assertNotEqual(self.hash, self.config['apiSha256'])
+        self.assertEqual(report['apiSha256'], self.hash)
+
+    def test_explicit_hash_mismatch_stops_before_any_write(self):
+        self.hash = 'b' * 64
+        report = self.execute(['--apply', '--backup-to-s3', '--api-sha256', 'c' * 64])
+        self.assertEqual(report['code'], 'CHECKED_RUNTIME_HASH_REQUIRED')
+        self.assertEqual(report['configurationWrites'], 0)
+        self.assertNotIn(('s3api', 'put-object'), self.calls)
+
     def test_lost_ack_readback_does_not_repeat_writes(self):
         self.lost_ack = True
         report = self.execute()
