@@ -1,5 +1,7 @@
 # FIX04 — Find pending requests and approve selected users
 
+The latest private [test-email exception](shared-test-email.md) permits separate PENDING accounts for the selected testing address; each exact username still needs approval. If this tool was installed before the new server publication, repeat the frozen setup block below to refresh its checked source/API hash. This refresh makes no AWS write.
+
 Status: DONE under user-directed A takeover. Own-A live list, selected approval, idempotence, signup recovery and cleanup passed in [38603820489](https://github.com/Known-Enough/known-enough/actions/runs/38603820489). Use the updated frozen tool source below; no real user was approved during proof. B own execution is not claimed.
 
 Use A's own CloudShell session in AWS account `092954139775`. Keep command output in the private terminal; do not paste usernames, emails, account records, tokens, configuration or private files into chat or GitHub. The tool reports only the username/display name/PENDING status/eligibility and observation time; request dates are not stored and appear as `null` (unavailable). A listing observes all pages, rather than an immutable global snapshot.
@@ -33,16 +35,16 @@ set -euo pipefail
 umask 077
 mkdir -p "$HOME/.known-enough/fix04-setup"
 curl --fail --silent --show-error --proto '=https' --tlsv1.2 \
-  'https://raw.githubusercontent.com/Known-Enough/known-enough/239dfedbcda5d8974d7aa1ae45c855f101a2c114/scripts/fix04/bootstrap.py' \
+  'https://raw.githubusercontent.com/Known-Enough/known-enough/df3e651cf96e09f4e2452e4398e60c1fa0b9140b/scripts/fix04/bootstrap.py' \
   -o "$HOME/.known-enough/fix04-setup/bootstrap.py"
 printf '%s  %s\n' '0f68cd163f854efd4daab2d698ac4f8ed13444dfe406a6d143494e1ea32715f0' \
   "$HOME/.known-enough/fix04-setup/bootstrap.py" | sha256sum --check --status
 python3 -B "$HOME/.known-enough/fix04-setup/bootstrap.py" \
-  --source-sha 239dfedbcda5d8974d7aa1ae45c855f101a2c114 \
-  --archive-sha256 617358c41c02b69560cc647675467cff8d4add7396e02a6d14a37246b1ea5f5e
+  --source-sha df3e651cf96e09f4e2452e4398e60c1fa0b9140b \
+  --archive-sha256 4061a2f32258a2443df11923b157ccbc2c5c6a86580def597c8f8516efea827f
 ```
 
-Expected result: `FIX04_TOOL_SOURCE_VERIFIED`, or `FIX04_TOOL_ALREADY_MATCHED` on a verified repeat. Linux x86_64 and arm64 are supported. Source checksum is independently frozen at `239dfedbcda5d8974d7aa1ae45c855f101a2c114`; cached or edited source is rejected. The exact setup downloaded Node/npm/dependencies and verified all frozen source files in a private local Linux test; a second invocation returned ALREADY_MATCHED with zero AWS/provider requests. This proves installation, not AWS access or a real approval.
+Expected result: `FIX04_TOOL_SOURCE_VERIFIED`, or `FIX04_TOOL_ALREADY_MATCHED` on a verified repeat. Linux x86_64 and arm64 are supported. Source checksum is independently frozen at `df3e651cf96e09f4e2452e4398e60c1fa0b9140b`; cached or edited source is rejected. The exact setup downloaded Node/npm/dependencies and verified all frozen source files in a private local Linux test; a second invocation returned ALREADY_MATCHED with zero AWS/provider requests. This proves installation, not AWS access or a real approval.
 
 ## The two routine commands
 
@@ -71,7 +73,7 @@ Approval resolves the exact provider username to its immutable subject, checks c
 
 Expected list result is `PENDING_LIST_COMPLETE`, with a private `pending` array; empty array means zero observed pending requests. Expected approval result is `APPROVALS_COMPLETE`, with per-user APPROVED or ALREADY_APPROVED. `APPROVALS_PARTIAL` reports rejected/failed/skipped selections and returns nonzero. Do not infer rollback of earlier successes.
 
-Private audit files are under `$HOME/.known-enough/access-users/private/`, mode 0600 beneath a mode-0700 directory. They contain UTC, source/API hash, operation and bounded outcome counts, without account identifiers. A cached verified API ZIP is private; temporary extracted configuration is removed after each command. Never upload that folder. The primary native API is pinned to hash `73e0bc7d5e75f04e73a5a916d3107fae337a3a3e935a9eb110e7c72b4c252339`; deployment drift fails closed and requires a checked source update.
+Private audit files are under `$HOME/.known-enough/access-users/private/`, mode 0600 beneath a mode-0700 directory. They contain UTC, source/API hash, operation and bounded outcome counts, without account identifiers. A cached verified API ZIP is private; temporary extracted configuration is removed after each command. Never upload that folder. The primary native API is pinned to hash `83d794ac6cd4fe204f30a320c4e34537b683b76da3aedb6a106f9077dff6f663`; deployment drift fails closed and requires a checked source update.
 
 ## If a command fails
 
@@ -79,7 +81,7 @@ AccessDeniedException means the current AWS identity lacks the printed operation
 
 ## Completed proof and future B use
 
-Own-A proof38603820489 already passed with operator/source pin239dfed. B must pull current main and verify its own effective access on future use; do not duplicate a passing signup proof merely to repeat this installation. The existing `fix04-proof.yml` workflow remains available for required regression verification. It completes a read-only global preflight before creating two fresh owned pending fixtures, executes these actual list/approve CLI commands privately, approves one fixture, leaves the other pending, verifies zero automatic memberships and idempotence, then disables/deletes owned accounts and mailboxes. Public reports contain only counts/statuses. Own-A list/selected approval/live signup/conflict proof and cleanup passed; FIX04 is DONE under the explicit takeover. B execution remains unclaimed.
+Own-A proof38611720048 passed with the current operator/source pindf3e651, including exact selected-email private configuration readback. B must pull current main and verify its own effective access on future use; do not duplicate a passing signup proof merely to repeat this installation. The existing `fix04-proof.yml` workflow remains available for required regression verification. It completes a read-only global preflight before creating two fresh owned pending fixtures, executes these actual list/approve CLI commands privately, approves one fixture, leaves the other pending, verifies zero automatic memberships and idempotence, then disables/deletes owned accounts and mailboxes. Public reports contain only counts/statuses. Own-A list/selected approval/live signup/conflict proof and cleanup passed; FIX04 is DONE under the explicit takeover. B execution remains unclaimed.
 
 [Ticket](ticket.md) · [Evidence](../../../../review-artifacts/FIX04/access-commands.md)
 

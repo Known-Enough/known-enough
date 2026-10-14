@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "phase": "PUBLISHED_PENDING_LIVE_READBACK",
+  "phase": "PUBLISHED_AND_PRIVATE_READBACK_VERIFIED",
   "sourceSha": "4fc702b3018a7e2933486ee4289efd3d7fe2971a",
   "run": "https://github.com/Known-Enough/known-enough/actions/runs/38611447684",
   "apiSha256": "83d794ac6cd4fe204f30a320c4e34537b683b76da3aedb6a106f9077dff6f663",
@@ -16,5 +16,24 @@
     "hostedPassed": 1
   },
   "historicalDeniedSettingRun": "https://github.com/Known-Enough/known-enough/actions/runs/38609932203",
-  "priorCodeOnlyRun": "https://github.com/Known-Enough/known-enough/actions/runs/38609729955"
+  "priorCodeOnlyRun": "https://github.com/Known-Enough/known-enough/actions/runs/38609729955",
+  "proofRun": "https://github.com/Known-Enough/known-enough/actions/runs/38611720048",
+  "proofSource": "df3e651cf96e09f4e2452e4398e60c1fa0b9140b",
+  "observedAt": "2026-10-14T18:06:54.628164+00:00",
+  "privateSelectedEmailReadback": "PASS",
+  "sharedEmailSeparateAccountSourceTests": "PASS",
+  "humanSelectedEmailSignup": "NOT_EXECUTED",
+  "ordinarySignupSelectedApprovalAndConflict": "LIVE_PASS",
+  "cleanup": {
+    "nativeSyntheticAccountsDisabled": 2,
+    "cognitoUsersSelfDeleted": 3,
+    "mailboxesRemoved": 2
+  },
+  "signupEmailRequests": 3,
+  "operatorTool": {
+    "sourceSha": "df3e651cf96e09f4e2452e4398e60c1fa0b9140b",
+    "tarSha256": "4061a2f32258a2443df11923b157ccbc2c5c6a86580def597c8f8516efea827f",
+    "installation": "SOURCE_VERIFIED_THEN_ALREADY_MATCHED",
+    "awsWrites": 0
+  }
 }
