@@ -5,7 +5,7 @@ import { Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { KnownEnoughApplicationError, type TrustedPrincipal, type DecisionArchitectRequest } from '@deal-table/application';
 import { ArchivedGroupRow } from './partition-archive.ts';
 import { PartitionMembershipError } from './partition-membership.ts';
-import { partitionDirectoryKey } from './partition-directory.ts';
+import { partitionDirectoryKey, sharedTestEmailHashes, accountEmailLookup } from './partition-directory.ts';
 import { genericCandidateCatalog } from './generic-candidates.ts';
 import { createPartitionedGroupRepository, checkPartitionRow, partitionAccountKey, partitionGroupKey,
   partitionIO, partitionCall, PartitionStorageError, type PartitionIOContext, type PartitionScope,
@@ -111,12 +111,13 @@ function publicRoster(state: Groups.GroupState, group: Groups.Group) {
   });
 }
 export function createPartitionGroupSession(transport: PartitionTransport,
-  options: { now?: () => number; timeoutMs?: number; maxRequests?: number; emailKey?: string; token?: () => string;
+  options: { now?: () => number; timeoutMs?: number; maxRequests?: number; emailKey?: string; sharedTestEmailHashes?: readonly string[]; token?: () => string;
     discovery?: PartitionGroupDiscovery; draftArchitect?: PartitionDraftArchitect;
     legacyPublicDecision?: (decisionId: string) => boolean } = {}) {
   const limits = { ...(options.timeoutMs === undefined ? {} : { timeoutMs: options.timeoutMs }),
     ...(options.maxRequests === undefined ? {} : { maxRequests: options.maxRequests }) };
   partitionIO(limits); const clock = options.now ?? Date.now;
+  const sharedEmails = new Set(sharedTestEmailHashes(options.sharedTestEmailHashes));
   const emailKey = options.emailKey; const tokenSource = options.token ?? (() => randomBytes(32).toString('base64url'));
   const discovery = options.discovery;
   const draftArchitect = options.draftArchitect; let generating = 0;
@@ -226,10 +227,11 @@ export function createPartitionGroupSession(transport: PartitionTransport,
             let account = state.accounts.find(value => value.subject === who);
             if (account) {
               if (account.emailHash !== hash) return deny('FORBIDDEN');
-              const owner = await repository.lookup({ type: 'EMAIL', emailHash: hash }, io);
-              if (owner?.type !== 'EMAIL' || owner.subject !== who) return deny('FORBIDDEN');
+              const owner = await repository.lookup(accountEmailLookup(account), io);
+              if (!owner || !['EMAIL', 'SHARED_EMAIL'].includes(owner.type) || !('subject' in owner) || owner.subject !== who) return deny('FORBIDDEN');
             } else {
               account = { subject: who, emailHash: hash, displayName: request.data.displayName, status: 'PENDING', version: 1,
+                ...(sharedEmails.has(hash) ? { sharedTestEmail: true as const } : {}),
                 ...(verified.data.username ? { profile: { description: '', image: null, loginUsername: verified.data.username } } : {}) };
               state.accounts.push(account);
             }
@@ -316,7 +318,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
         if (await repository.lookup({ type: 'INVITATION', tokenHash }, io)) throw new PartitionSessionError('SESSION_INVALID');
         return selected(who, key, io, resolved => repository.transaction(resolved, state => {
           const group = current(state, who, key, true); const time = now();
-          if (group.members.some(subject => state.accounts.find(account => account.subject === subject)?.emailHash === recipientHash)) return deny('INVALID_COMMAND');
+          if (!sharedEmails.has(recipientHash) && group.members.some(subject => state.accounts.find(account => account.subject === subject)?.emailHash === recipientHash)) return deny('INVALID_COMMAND');
           if (expiresAt <= time) return deny('STALE_CONTEXT');
           if (!request.data.replace && group.invitations.some(value => value.recipientHash === recipientHash && !value.acceptedBy && value.expiresAt > time)) return deny('STALE_CONTEXT');
           group.invitations = group.invitations.filter(value => value.recipientHash !== recipientHash && value.expiresAt > time);

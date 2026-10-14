@@ -1,6 +1,6 @@
 import { createHmac } from 'node:crypto';
 import { checkPartitionRow,partitionAccountKey,type PartitionTransport,type PartitionRow } from './partitioned-group-repository.ts';
-import { partitionDirectoryKey } from './partition-directory.ts';
+import { partitionDirectoryKey, accountEmailLookup } from './partition-directory.ts';
 export type OperatorIdentity={subject:string;username:string;email:string;verified:boolean;enabled:boolean};
 export type OperatorCode='INVALID_ARGUMENT'|'TARGET_MISMATCH'|'UNKNOWN_USERNAME'|'MISSING_IDENTITY'|'AMBIGUOUS_IDENTITY'|'IDENTITY_MISMATCH'|'UNVERIFIED_EMAIL'|'INACTIVE_PROVIDER'|'NOT_PENDING'|'STALE_ACCOUNT'|'CAPACITY'|'UNCONFIRMED_APPROVAL';
 export class AccountOperatorError extends Error{constructor(readonly code:OperatorCode){super(code);this.name='AccountOperatorError';}}
@@ -28,9 +28,9 @@ export function createPartitionAccountOperator(ports:AccountOperatorPorts){
   if(!identity)return fail('MISSING_IDENTITY');
   if(identity.subject!==row.value.subject||digest(identity.email)!==row.value.emailHash)return fail('IDENTITY_MISMATCH');
   username(identity.username);subject(identity.subject);
-  const key=partitionDirectoryKey({type:'EMAIL',emailHash:row.value.emailHash}),raw=await ports.groups.read(key);
+  const key=partitionDirectoryKey(accountEmailLookup(row.value)),raw=await ports.groups.read(key);
   const directory=raw===null?null:checkPartitionRow(raw,key);
-  if(directory?.kind!=='DIRECTORY'||directory.value.type!=='EMAIL'||directory.value.subject!==identity.subject)return fail('IDENTITY_MISMATCH');
+  if(directory?.kind!=='DIRECTORY'||!['EMAIL','SHARED_EMAIL'].includes(directory.value.type)||!('subject' in directory.value)||directory.value.subject!==identity.subject)return fail('IDENTITY_MISMATCH');
   return {identity,directory};
  }
  return {

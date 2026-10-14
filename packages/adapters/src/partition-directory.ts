@@ -5,6 +5,7 @@ const hash = z.string().regex(/^[a-f0-9]{64}$/);
 /** Private immutable lookup facts, never participant authorization or public snapshots. */
 export const PartitionDirectoryClaim = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('EMAIL'), emailHash: hash, subject: id }),
+  z.strictObject({ type: z.literal('SHARED_EMAIL'), emailHash: hash, subject: id }),
   z.strictObject({ type: z.literal('INVITATION'), tokenHash: hash, groupId: id, recipientHash: hash,
     expiresAt: z.number().int().positive().max(Number.MAX_SAFE_INTEGER) }),
   z.strictObject({ type: z.literal('DECISION'), decisionId: id, groupId: id }),
@@ -12,6 +13,7 @@ export const PartitionDirectoryClaim = z.discriminatedUnion('type', [
 export type PartitionDirectoryClaim = z.infer<typeof PartitionDirectoryClaim>;
 export const PartitionDirectoryLookup = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('EMAIL'), emailHash: hash }),
+  z.strictObject({ type: z.literal('SHARED_EMAIL'), emailHash: hash, subject: id }),
   z.strictObject({ type: z.literal('INVITATION'), tokenHash: hash }),
   z.strictObject({ type: z.literal('DECISION'), decisionId: id }),
 ]);
@@ -21,12 +23,23 @@ export const PartitionDirectoryRow = z.strictObject({ schemaVersion: z.literal(1
 export function partitionDirectoryKey(raw: PartitionDirectoryClaim | PartitionDirectoryLookup): { PK: string; SK: string } {
   const full = PartitionDirectoryClaim.safeParse(raw);
   const claim = full.success ? full.data : PartitionDirectoryLookup.parse(raw);
-  return claim.type === 'EMAIL' ? { PK: `EMAIL#${claim.emailHash}`, SK: 'CLAIM' }
+  return claim.type === 'SHARED_EMAIL' ? { PK: `EMAIL#${claim.emailHash}#${claim.subject}`, SK: 'CLAIM' }
+    : claim.type === 'EMAIL' ? { PK: `EMAIL#${claim.emailHash}`, SK: 'CLAIM' }
     : claim.type === 'INVITATION' ? { PK: `INVITATION#${claim.tokenHash}`, SK: 'TARGET' }
     : { PK: `DECISION#${claim.decisionId}`, SK: 'GROUP' };
 }
 export function isPartitionDirectoryKey(key: { PK: string; SK: string }): boolean {
-  return (/^EMAIL#[a-f0-9]{64}$/.test(key.PK) && key.SK === 'CLAIM')
+  return (/^EMAIL#[a-f0-9]{64}(?:#[A-Za-z0-9_-]{1,80})?$/.test(key.PK) && key.SK === 'CLAIM')
     || (/^INVITATION#[a-f0-9]{64}$/.test(key.PK) && key.SK === 'TARGET')
     || (/^DECISION#[A-Za-z0-9_-]{1,80}$/.test(key.PK) && key.SK === 'GROUP');
+}
+
+/** Only trusted server configuration can grant this exception; no per-email account count. */
+export function sharedTestEmailHashes(raw: unknown = []): readonly string[] {
+  return Object.freeze(z.array(hash).max(16).refine(values => new Set(values).size === values.length).parse(raw));
+}
+export function accountEmailLookup(account: { emailHash: string; subject: string; sharedTestEmail?: true | undefined }): PartitionDirectoryLookup {
+  return account.sharedTestEmail === true
+    ? { type: 'SHARED_EMAIL', emailHash: account.emailHash, subject: account.subject }
+    : { type: 'EMAIL', emailHash: account.emailHash };
 }

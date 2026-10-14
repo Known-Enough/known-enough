@@ -17,6 +17,7 @@ export interface PartitionParticipantApiOptions {
   /** Trusted server lookup from authenticated credentials; never a caller-provided profile. */
   registrationProfile?: (request: IncomingMessage, signal: AbortSignal) => Promise<{ subject: string; email: string; verified: boolean; username?: string } | null>;
   emailKey?: string;
+  sharedTestEmailHashes?: readonly string[];
   invitationToken?: () => string;
   /** Server-configured, source-bound private membership discovery; candidates still require fresh admission. */
   membershipDiscovery?: PartitionGroupDiscovery;
@@ -115,7 +116,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
   if (discovery !== undefined && typeof discovery !== 'function') throw new Error('PARTITION_HTTP_INVALID');
   if (draftArchitect !== undefined && typeof draftArchitect !== 'function') throw new Error('PARTITION_HTTP_INVALID');
   let active = 0; let authenticating = 0;
-  const session = createPartitionGroupSession(options.groups, { now: () => Date.parse(clock.now()),
+  const session = createPartitionGroupSession(options.groups, { ...(options.sharedTestEmailHashes === undefined ? {} : { sharedTestEmailHashes: options.sharedTestEmailHashes }), now: () => Date.parse(clock.now()),
     ...(options.emailKey === undefined ? {} : { emailKey: options.emailKey }),
     ...(options.invitationToken === undefined ? {} : { token: options.invitationToken }),
     ...(draftArchitect === undefined ? {} : { draftArchitect: (subject, input, io, scope) => {

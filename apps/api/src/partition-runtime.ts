@@ -15,6 +15,7 @@ export interface PartitionRuntimeOptions {
   cognitoDomain: string;
   allowedOrigin: string;
   emailKey: string;
+  sharedTestEmailHashes?: readonly string[];
   clock: Clock;
   ids: IdSource;
   /** Trusted server model port; its output never supplies participant authority. */
@@ -87,7 +88,7 @@ export function createPartitionRuntime(options: PartitionRuntimeOptions) {
     assertRetained: principal => service!.assertRetained(principal) }) : undefined;
   const participant = createPartitionParticipantApiHandler({ groups: driver.groups, decisions: driver.decisions,
     decisionArn: driver.decisionArn, partitionArn: driver.partitionArn,
-    membershipDiscovery: driver.membershipDiscovery, authenticate, emailKey, clock, ids, allowedOrigins: [originValue], displayAccess: true,
+    membershipDiscovery: driver.membershipDiscovery, authenticate, emailKey, ...(options.sharedTestEmailHashes === undefined ? {} : { sharedTestEmailHashes: options.sharedTestEmailHashes }), clock, ids, allowedOrigins: [originValue], displayAccess: true,
     legacyPublicDecision: driver.legacyPublicDecision,
     ...(draftArchitect ? { draftArchitect } : jobs ? { draftArchitect: createManagedPartitionDraftRuntime({ sourceSha: jobs.sourceSha, prepareGroupCommit: driver.prepareGroupCommit }) } : {}),
     ...(enqueue ? { requestNegotiation: enqueue } : {}),

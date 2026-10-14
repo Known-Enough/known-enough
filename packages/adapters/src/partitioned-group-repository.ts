@@ -215,7 +215,7 @@ export function createPartitionedGroupRepository(transport: PartitionTransport,
       if (!equal(prior?.value, row.value) && row.kind !== 'ACCOUNT') groupChanged = true;
       if (prior?.kind === 'DRAFT' && row.kind === 'DRAFT'
         && prior.value.createdDecisionId && prior.value.createdDecisionId !== row.value.createdDecisionId) fail('PARTITION_INVALID');
-      if (prior?.kind === 'ACCOUNT' && row.kind === 'ACCOUNT' && prior.value.emailHash !== row.value.emailHash) fail('PARTITION_IDENTITY_CONFLICT');
+      if (prior?.kind === 'ACCOUNT' && row.kind === 'ACCOUNT' && (prior.value.emailHash !== row.value.emailHash || prior.value.sharedTestEmail !== row.value.sharedTestEmail)) fail('PARTITION_IDENTITY_CONFLICT');
       if (prior?.kind === 'GROUP' && row.kind === 'GROUP') {
         for (const invitation of row.value.invitations) {
           const old = prior.value.invitations.find(item => item.tokenHash === invitation.tokenHash);
@@ -270,7 +270,7 @@ export function createPartitionedGroupRepository(transport: PartitionTransport,
       if (!mutation.next) continue;
       const prior = snapshot.rows.get(encodedKey(mutation.key))?.row;
       const row = mutation.next;
-      if (row.kind === 'ACCOUNT' && !prior) claims.push({ type: 'EMAIL', subject: row.value.subject, emailHash: row.value.emailHash });
+      if (row.kind === 'ACCOUNT' && !prior) claims.push({ type: row.value.sharedTestEmail === true ? 'SHARED_EMAIL' : 'EMAIL', subject: row.value.subject, emailHash: row.value.emailHash });
       if (row.kind === 'BINDING' && !prior) claims.push({ type: 'DECISION', decisionId: row.value.id, groupId: scope.groupId! });
       if (row.kind === 'GROUP') {
         for (const invitation of row.value.invitations) {

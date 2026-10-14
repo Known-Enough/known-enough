@@ -18,7 +18,9 @@ export const SharedAvatar = z.object({ mimeType: z.literal('image/png'), width: 
 /** Deliberately excludes all account, approval, authentication and asset identifiers. */
 export const GroupMemberProfile = z.object({ displayName: text, description: z.string().max(280), image: SharedAvatar.nullable() }).strict();
 export const Account = z.object({ subject: id, emailHash: z.string().regex(/^[a-f0-9]{64}$/), displayName: text,
-  status: AccountStatus, version: z.number().int().positive(), profile: PrivateProfile.optional() }).strict();
+  status: AccountStatus, version: z.number().int().positive(), profile: PrivateProfile.optional(),
+  /** Private, immutable subject-specific ownership for a server-allowlisted test email. */
+  sharedTestEmail: z.literal(true).optional() }).strict();
 export const GroupDraft = z.object({ id, bodyHash: z.string().regex(/^[a-f0-9]{64}$/),
   revision: z.number().int().positive(), groupVersion: z.number().int().positive(),
   frame: PublicDecisionFrame, clarificationQuestions: z.array(z.string().min(1).max(500)).max(12),

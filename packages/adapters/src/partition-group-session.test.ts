@@ -1029,3 +1029,61 @@ it('trusted confirmation registration persists before login, duplicate delivery 
   await expect(session.register(who, verified, { displayName: 'resurrection' })).rejects.toThrow('FORBIDDEN');
   expect(f.get('ACCOUNT#confirmed-new/STATE').value).toMatchObject({ status: 'DISABLED', displayName: 'Erased account' });
 });
+
+it('lets only the configured verified test email register independent usernames without a per-email cap', async () => {
+  const f = fixture(syntheticKey), address = 'iris@example.invalid';
+  const digest = createHmac('sha256', syntheticKey).update(address).digest('hex');
+  const original = structuredClone(f.get('ACCOUNT#iris/STATE'));
+  const originalClaim = structuredClone(f.get(`EMAIL#${digest}/CLAIM`));
+  const configured = [digest]; const session = f.session({ sharedTestEmailHashes: configured });
+  configured.length = 0; // Captured configuration cannot be changed by its caller afterwards.
+  for (let index = 0; index < 12; index++) {
+    const subject = `test-${index}`;
+    expect(await session.register(participant(subject), { subject, email: ' IRIS@example.invalid ', verified: true, username: subject },
+      { displayName: subject })).toEqual({ status: 'PENDING', displayName: subject, version: 1 });
+    expect(f.get(`ACCOUNT#${subject}/STATE`).value).toMatchObject({ sharedTestEmail: true, status: 'PENDING', subject });
+    expect(f.get(`EMAIL#${digest}#${subject}/CLAIM`).value).toEqual({ type: 'SHARED_EMAIL', emailHash: digest, subject });
+    await expect(session.snapshot(participant(subject), 'garden')).rejects.toThrow('FORBIDDEN');
+  }
+  expect(f.get('ACCOUNT#iris/STATE')).toEqual(original);
+  expect(f.get(`EMAIL#${digest}/CLAIM`)).toEqual(originalClaim);
+  expect(await f.session().register(participant('test-0'), { subject: 'test-0', email: address, verified: true },
+    { displayName: 'Ignored' })).toEqual({ status: 'PENDING', displayName: 'test-0', version: 1 });
+  await expect(f.session().register(participant('not-allowed'), { subject: 'not-allowed', email: address, verified: true },
+    { displayName: 'Blocked' })).rejects.toThrow('FORBIDDEN');
+  await expect(session.register(participant('other'), { subject: 'other', email: 'omar@example.invalid', verified: true },
+    { displayName: 'Other' })).rejects.toThrow('FORBIDDEN');
+  await expect(session.register(participant('spoof'), { subject: 'spoof', email: address, verified: false },
+    { displayName: 'Spoof' })).rejects.toThrow('FORBIDDEN');
+  await expect(f.session().register(participant('body'), { subject: 'body', email: address, verified: true },
+    { displayName: 'Body', sharedTestEmail: true })).rejects.toThrow('INVALID_COMMAND');
+});
+
+it('keeps shared-email ownership immutable and invitations bound to one individually approved account', async () => {
+  const f = fixture(syntheticKey), address = 'iris@example.invalid';
+  const digest = createHmac('sha256', syntheticKey).update(address).digest('hex');
+  const session = f.session({ sharedTestEmailHashes: [digest], token: () => 'z'.repeat(43) });
+  for (const who of ['duplicate', 'another']) {
+    await session.register(participant(who), { subject: who, email: address, verified: true }, { displayName: who });
+    f.get(`ACCOUNT#${who}/STATE`).value.status = 'APPROVED';
+  }
+  const repository = createPartitionedGroupRepository(f.transport);
+  await expect(repository.transaction({ accountSubjects: ['duplicate'] }, state => {
+    delete state.accounts[0]!.sharedTestEmail;
+  })).rejects.toThrow('PARTITION_IDENTITY_CONFLICT');
+  const invited = await session.invite(participant('iris'), 'garden', { email: address, replace: false });
+  await session.accept(participant('duplicate'), { token: invited.token });
+  await expect(session.accept(participant('another'), { token: invited.token })).rejects.toThrow('NOT_FOUND');
+  const view = await session.snapshot(participant('duplicate'), 'garden');
+  expect(view.members.map(value => value.id)).toContain(partitionMemberId('duplicate'));
+  expect(view.members.map(value => value.id)).not.toContain(partitionMemberId('another'));
+  expect(JSON.stringify(view)).not.toMatch(/sharedTestEmail|emailHash|SHARED_EMAIL|subject/);
+});
+
+it('rejects malformed shared-email server configuration before accessing storage', () => {
+  const f = fixture(syntheticKey);
+  for (const value of [['bad'], ['a'.repeat(64), 'a'.repeat(64)], Array(17).fill('a'.repeat(64))]) {
+    expect(() => f.session({ sharedTestEmailHashes: value })).toThrow();
+  }
+  expect(f.reads).toEqual([]);
+});

@@ -5,6 +5,9 @@ on:
       source_sha:
         type: string
         required: true
+      shared_email_check:
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -116,6 +119,83 @@ jobs:
           if test -f "$RUNNER_TEMP/partition-cutover-private/owned-fixtures-private.json"; then
             node --experimental-transform-types scripts/fix04/signup-proof.mjs
           fi
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: inputs.shared_email_check
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPrimaryRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Temporarily allow only this run's owned synthetic email for live exception proof
+        if: inputs.shared_email_check
+        run: |
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          export EXPECTED_API_SHA256="$(node --experimental-transform-types --input-type=module -e "import {API_HASH} from './scripts/fix04/runtime.mjs'; console.log(API_HASH)")"
+          python3 -B scripts/fix04/shared-email-config.py fixture > "$RUNNER_TEMP/fix04-shared-email-config-report.json"
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: inputs.shared_email_check
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubQaRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Confirm a separate same-email synthetic username through the real provider and API
+        if: inputs.shared_email_check
+        run: node --experimental-transform-types scripts/fix04/shared-email-proof.mjs create
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: inputs.shared_email_check
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPartitionMigration
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Approve only the new shared-email username and verify independent admission
+        if: inputs.shared_email_check
+        run: node --experimental-transform-types scripts/fix04/shared-email-proof.mjs approve
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: always() && inputs.shared_email_check
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPartitionMigration
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Always disable only this run's additional native shared-email account
+        if: always() && inputs.shared_email_check
+        run: node --experimental-transform-types scripts/fix04/shared-email-proof.mjs disable
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: always() && inputs.shared_email_check
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubQaRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Always self-delete the additional owned shared-email username
+        if: always() && inputs.shared_email_check
+        run: node --experimental-transform-types scripts/fix04/shared-email-proof.mjs delete
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: always() && inputs.shared_email_check
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPrimaryRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Always restore the exact permanent email exception after the synthetic proof
+        if: always() && inputs.shared_email_check
+        run: |
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          python3 -B scripts/fix04/shared-email-config.py restore > "$RUNNER_TEMP/fix04-shared-email-restore-report.json"
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         if: always()
         with:

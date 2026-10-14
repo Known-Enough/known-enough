@@ -11,7 +11,7 @@ function fixture(){
  const ports={target:{account:'092954139775',region:'us-east-1'},emailKey,groups,catalog:async function*(){yield ['first'];yield ['second'];},byUsername:async(name:string)=>identities.get(name)??null,bySubject:async(subject:string)=>[...identities.values()].filter(value=>value.subject===subject)};
  return {ports,rows,writes,identities,operator:createPartitionAccountOperator(ports),race:()=>{race=true;}};
 }
-const account=(f:ReturnType<typeof fixture>,name:string)=>f.rows.get('ACCOUNT#'+name+'/STATE') as {revision:number;value:{status:string;version:number;profile:{description:string;loginUsername:string|null}}};
+const account=(f:ReturnType<typeof fixture>,name:string)=>f.rows.get('ACCOUNT#'+name+'/STATE') as {revision:number;value:{emailHash:string;sharedTestEmail?:true;status:string;version:number;profile:{description:string;loginUsername:string|null}}};
 describe('native admission operator',()=>{
  it('completes all catalog pages, projects only selection fields and performs no transaction for listing',async()=>{const f=fixture();const result=await f.operator.listPending();expect(result.pending.map(item=>item.username)).toEqual(['first','second']);expect(result.accountKeysObserved).toBe(2);expect(JSON.stringify(result)).not.toMatch(/PRIVATE_BIO_CANARY|emailHash|subject|image/);expect(result.pending[0]!.requestedAt).toBeNull();expect(f.writes).toEqual([]);});
  it('reports zero pending clearly and does not silently turn incomplete iteration into success',async()=>{const f=fixture();account(f,'first').value.status='DISABLED';account(f,'second').value.status='APPROVED';expect((await f.operator.listPending()).pending).toEqual([]);const broken=createPartitionAccountOperator({...f.ports,catalog:async function*(){yield ['first'];throw new Error('PRIVATE_FAILURE');}});await expect(broken.listPending()).rejects.toThrow('PRIVATE_FAILURE');});
@@ -25,4 +25,18 @@ describe('native admission operator',()=>{
 });
 it('an operational failure after one success preserves per-user outcomes and stops unchanged retries',async()=>{
  const f=fixture();const ports={...f.ports,byUsername:async(name:string)=>{if(name==='second')throw new Error('PRIVATE_PROVIDER_CANARY');return f.ports.byUsername(name);}};const operator=createPartitionAccountOperator(ports);const result=await approveSelected(operator,['first','second','third']);expect(result.outcomes.map(item=>item.result)).toEqual(['APPROVED','OPERATION_UNAVAILABLE','SKIPPED_DEPENDENCY']);expect(JSON.stringify(result)).not.toContain('PRIVATE_PROVIDER_CANARY');expect(f.writes).toHaveLength(1);
+});
+
+it('lists and approves shared-email accounts individually using their own immutable ownership claim', async () => {
+ const f=fixture(); const first=account(f,'first'), second=account(f,'second');
+ second.value.emailHash=first.value.emailHash; second.value.sharedTestEmail=true;
+ f.identities.get('second')!.email=f.identities.get('first')!.email;
+ const key=`EMAIL#${first.value.emailHash}#second/CLAIM`;
+ f.rows.set(key,{schemaVersion:1,revision:1,kind:'DIRECTORY',value:{type:'SHARED_EMAIL',emailHash:first.value.emailHash,subject:'second'}});
+ expect((await f.operator.listPending()).pending.map(value=>value.username)).toEqual(['first','second']);
+ expect(await f.operator.approve('second')).toMatchObject({result:'APPROVED',dataWrites:1});
+ expect(account(f,'first').value.status).toBe('PENDING');
+ expect(f.writes[0]!.some(value=>value.key.PK===`EMAIL#${first.value.emailHash}#second`&&value.next===null)).toBe(true);
+ expect(await f.operator.approve('second')).toMatchObject({result:'ALREADY_APPROVED',dataWrites:0});
+ f.rows.delete(key); await expect(f.operator.approve('second')).rejects.toThrow('IDENTITY_MISMATCH');
 });

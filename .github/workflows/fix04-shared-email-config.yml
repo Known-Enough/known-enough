@@ -1,0 +1,49 @@
+name: Configure exact private test-email account exception
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        required: true
+        type: string
+      api_sha256:
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: known-enough-lifecycle-installation
+  cancel-in-progress: false
+jobs:
+  configure:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && github.actor_id == '44531296'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      EXPECTED_SOURCE: ${{ inputs.source_sha }}
+      EXPECTED_API_SHA256: ${{ inputs.api_sha256 }}
+      AWS_MAX_ATTEMPTS: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Check exact source and guarded configuration helper
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
+          python3 -B scripts/fix04/shared-email-config.test.py
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPrimaryRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Set private exception with fresh revision and full environment preservation
+        env:
+          PRIVATE_TEST_EMAIL: ${{ secrets.KE_SHARED_TEST_EMAIL }}
+        run: |
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          python3 -B scripts/fix04/shared-email-config.py
