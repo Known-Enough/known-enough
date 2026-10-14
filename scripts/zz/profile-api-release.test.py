@@ -122,6 +122,24 @@ class ProfileApiReleaseTests(unittest.TestCase):
             release.route_readback(routes, release.PROFILE_ROUTE, auth='JWT', target='integrations/existing',
                                    authorizer='existing-jwt', scopes=['groups:read'])
 
+    def test_reports_each_lambda_identity_mismatch_without_writing(self) -> None:
+        cases = [
+            ('Runtime', 'nodejs22.x', 'LAMBDA_RUNTIME_MISMATCH'),
+            ('Handler', 'index.handler', 'LAMBDA_HANDLER_MISMATCH'),
+            ('FunctionArn', 'foreign', 'LAMBDA_FUNCTION_TARGET_MISMATCH'),
+            ('Role', 'foreign', 'LAMBDA_EXECUTION_ROLE_MISMATCH'),
+        ]
+        for field, value, error in cases:
+            with self.subTest(field=field), \
+                 patch.dict(os.environ, {'EXPECTED_SOURCE': 'a' * 40, 'RUNNER_TEMP': str(self.root)}), \
+                 patch.object(release, 'expected_source', return_value='a' * 40), \
+                 patch.object(release, 'work_dir', return_value=self.root), \
+                 patch.object(release, 'lambda_config', return_value={**self.prior, field: value}), \
+                 patch.object(release, 'run') as command:
+                with self.assertRaisesRegex(release.ReleaseError, error):
+                    release.publish()
+                command.assert_not_called()
+
     def test_lambda_archives_are_stable_across_build_times(self) -> None:
         source = self.root / 'bundle.mjs'
         source.write_bytes(b'fixed bundle content')

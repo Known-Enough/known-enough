@@ -197,10 +197,10 @@ def publish() -> None:
     prior = lambda_config()
     require(prior.get('State') == 'Active' and prior.get('LastUpdateStatus') == 'Successful',
             'LAMBDA_NOT_READY')
-    require(prior.get('Runtime') == 'nodejs24.x' and prior.get('Handler') == 'ke13b-lambda.handler',
-            'LAMBDA_TARGET_MISMATCH')
-    require(prior.get('FunctionArn') == FUNCTION_ARN and prior.get('Role') == ROLE_ARN,
-            'LAMBDA_TARGET_MISMATCH')
+    require(prior.get('Runtime') == 'nodejs24.x', 'LAMBDA_RUNTIME_MISMATCH')
+    require(prior.get('Handler') == 'ke13b-lambda.handler', 'LAMBDA_HANDLER_MISMATCH')
+    require(prior.get('FunctionArn') == FUNCTION_ARN, 'LAMBDA_FUNCTION_TARGET_MISMATCH')
+    require(prior.get('Role') == ROLE_ARN, 'LAMBDA_EXECUTION_ROLE_MISMATCH')
     require(prior.get('GroupsEnabled') == 'true', 'GROUPS_RUNTIME_NOT_ENABLED')
     require(isinstance(prior.get('RevisionId'), str) and isinstance(prior.get('CodeSha256'), str),
             'LAMBDA_REVISION_MISSING')
