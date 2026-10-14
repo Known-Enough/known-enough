@@ -1,3 +1,9 @@
+## FIX04 resume: access receipt and missing verified account — 2026-10-14T16:32:14Z
+
+A supplied exact `FIX04_OPERATOR_POLICY_READBACK_PASS`, two confirmed writes, originalscopepreserved, boundarySHAc409c4c, no data/email writes. A then actually installed9144tool and listed45nativeaccountkeys with0pending. A verified a newly created user's provider CONFIRMED/emailverifiedtrue but nativeaccountabsent, matching the setup-still-completing UI. Personal identifiers omitted. [Full receipt/updated scope](tasks/active/fix/FIX04/ticket.md).
+
+At genuine idle intake, claim only FIX04, verify your own repaired access and investigate the missing automatic pending registration. Trace finite private callback/identity/ownership/transaction evidence; don't guess root cause, fabricate records, recreate human accounts, autoapprove or reinstate Request access. Provide checked native recovery for eligible confirmed accounts plus idempotent intake regression/live proof, preserving identity uniqueness and disabled/rejected records. Current SRP token vs trusted userInfo compatibility must be verified before using `/account/register`. Then run owned list/approval/idempotence/cleanup proof. No unchanged administrator rerun or new worker/monitor; no B execution claimed by this handoff.
+
 ## FIX01 published checkpoint — 2026-10-14T06:50:25.720737+00:00
 
 BLOCKED/unclaimed, notDONE. Code pushed; API/worker670 and recovery routes38521803725 verified; frontendd4c/38524232345/Amplify88 verified all7livepublicfile hashes. Initial combined check1588unit/78browserPASS, subsequent helper timeout outcomes recorded, fulltraced78PASS/setup10/activation4/grant2.
