@@ -1,3 +1,5 @@
+Current FIX03 IN_PROGRESS/B, afterFIX02DONE/live38539768756; FIX04 follows; FIX01 exactIAMgrant stillblocked.
+
 Current queue: FIX02 DONE/livePASS38539768756; FIX03 next, thenFIX04; FIX01 blocked exactAPI modelgrant. No activeclaim untilFIX03intake.
 
 Current B queue: FIX02 IN_PROGRESS/B; FIX03 thenFIX04 sequential after checked closeout or concrete block. User explicitly authorizes moving past dead ends. FIX01 remains blocked only by exact API model grant.

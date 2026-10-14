@@ -1,6 +1,6 @@
 # FIX03 — Branded in-app sign-in with Cognito authentication
 
-**Status:** READY / unclaimed. **Priority:** P1. **Intended worker:** B / own `Battosai1806`. Queue: FIX01 → FIX02 → FIX03, one task at a time.
+**Status:** IN_PROGRESS / B. **Priority:** P1. **Intended worker:** B / own `Battosai1806`. Queue: FIX01 → FIX02 → FIX03, one task at a time.
 
 ## User request and current behavior
 
@@ -42,3 +42,6 @@ A created FIX03 from clean synchronized main `89298a3`, inspected the current re
 ## User clarification — 2026-10-14T01:42:59Z
 
 No signup option on the sign-in screen. Account creation remains exclusively on the main welcome page; Back is the route to that page. This clarifies the queued FIX03 scope without starting implementation or changing the queue.
+
+
+FIX03 claim 2026-10-14T09:21:56.038256+00:00: ownB afterFIX02DONE33ed639 clean/fetched source, no real activeotherprojecttask. ExactlyFIX03 IN_PROGRESS/B; actualscope apps/web/src/cognito-direct.ts + branded sign-in form and tests; auth-entry/connected-app/cognito-session integration/tests; app web/package.json/root lockfile + strictboundary allowlist for established vendorSDK amazon-cognito-identity-js pinnedsame6.3.20 asprojectfixture; scripts/fix03 metadata/normalownedprimary proof/workflows; task/evidence/board/claims/Blogs. Existing nativeAPI source670/profilebindings preserved; normalparticipant directSRP alreadyexecuted in currentownedfixture cleanup, notnew customcrypto/passwordgrant. Verify pool/client/claims/scopes via bounded ownInspector metadata and real provider/API proof. ExplicitnoSignup onSignIn, Back tosinglewelcomeCreateaccount, currentpasswordrules unchanged; no admission/memberapproval outsideownedfixture. CallbackPKCE retained forcompatible oldsessions, normalinapp route mustnotredirect. AWSprimaryauthdocs support USER_SRP_AUTH; localSDK usedfixtures6.3.20 establishedversion; nosecret/clientAWSkeys/browserfixtures. No parallelclaim/rootreset/modelcalls.
