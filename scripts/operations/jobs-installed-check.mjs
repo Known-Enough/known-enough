@@ -17,7 +17,7 @@ export function classifyJobRead(id,item,sourceSha){
   if(id==='control'){
    const control=ControlSchema.parse(payload);
    if(item.revision?.N!==String(control.revision)||JSON.stringify(control)!==item.payload.S)throw Error();
-   return {state:control.enabled?'ENABLED':'DISABLED',sourceMatches:control.sourceSha===sourceSha,active:control.active.length,slots:control.slots.length};
+   return {state:control.enabled?'ENABLED':'DISABLED',controlSource:control.sourceSha,sourceMatches:control.sourceSha===sourceSha,active:control.active.length,slots:control.slots.length};
   }
   if(id==='authority'){
    const auth=validateAuthorization(payload);if(auth.mode!=='standing'||auth.approved!==true)throw Error();

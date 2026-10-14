@@ -17,7 +17,7 @@ test('denials and foreign items remain failures without exposing SDK diagnostics
 });
 test('control inspection exposes bounded counts, source equality and state without job IDs',()=>{
  const control={schemaVersion:1,revision:1,enabled:false,sourceSha:source,active:[],slots:[]};
- assert.deepEqual(classifyJobRead('control',envelope(control),source),{state:'DISABLED',sourceMatches:true,active:0,slots:0});
+ assert.deepEqual(classifyJobRead('control',envelope(control),source),{state:'DISABLED',controlSource:source,sourceMatches:true,active:0,slots:0});
  const foreign={...control,sourceSha:'b'.repeat(40)};assert.equal(classifyJobRead('control',envelope(foreign),source).sourceMatches,false);
  assert.equal(classifyJobRead('control',{...envelope(control),revision:{N:'2'}},source).state,'INVALID');
 });
