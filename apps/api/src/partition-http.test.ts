@@ -198,6 +198,19 @@ it('returns a sanitized unknown creation result without retry and allows explici
   const location = `${target.partitionArn}/GROUP#${value.id}/STATE`; expect(f.cells.get(location)?.revision?.N).toBe('1');
 });
 
+it('returns an actionable private-safe email conflict instead of authorizing a different subject', async () => {
+  const f = await fixture(syntheticEmailKey);
+  const first = await api(f, { authenticate: async () => actor('first-new'),
+    registrationProfile: async () => ({ subject: 'first-new', email: 'shared@example.invalid', verified: true }) });
+  expect((await first.post('/account/register', { displayName: 'New member' })).status).toBe(200);
+  const second = await api(f, { authenticate: async () => actor('second-new'),
+    registrationProfile: async () => ({ subject: 'second-new', email: 'shared@example.invalid', verified: true }) });
+  const response = await second.post('/account/register', { displayName: 'New member' });
+  expect(response.status).toBe(409);
+  expect(await response.json()).toMatchObject({ ok: false, error: { code: 'FORBIDDEN', httpStatus: 409 }, registrationFailure: 'EMAIL_ALREADY_LINKED' });
+  expect((await (await second.get('/account')).json()).account).toBeNull();
+});
+
 it('registers only the trusted verified subject profile and never upgrades pending admission on replay', async () => {
   const f = await fixture(syntheticEmailKey); const a = await api(f, { authenticate: async () => actor('new'),
     registrationProfile: async () => ({ subject: 'new', email: ' NEW@example.invalid ', verified: true }) });

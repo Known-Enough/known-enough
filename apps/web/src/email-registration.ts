@@ -4,6 +4,7 @@ export const MIN_REGISTRATION_PASSWORD_LENGTH = 8;
 export type RegistrationStep = 'signup' | 'confirmation';
 export type RegistrationCode =
   | 'INVALID_DETAILS' | 'INVALID_CODE' | 'PASSWORD_REJECTED' | 'ACCOUNT_EXISTS_OR_PENDING'
+  | 'EMAIL_ALREADY_LINKED' | 'ACCOUNT_SETUP_UNAVAILABLE'
   | 'SIGNUP_UNAVAILABLE' | 'ATTRIBUTES_REJECTED' | 'CODE_REJECTED' | 'CODE_EXPIRED'
   | 'RATE_LIMITED' | 'NETWORK_RESULT_UNKNOWN' | 'DELIVERY_UNCONFIRMED'
   | 'PROVIDER_UNAVAILABLE' | 'PROVIDER_REJECTED' | 'UNEXPECTED_RESPONSE';
@@ -49,6 +50,10 @@ async function rejectedCode(response: Response, step: RegistrationStep): Promise
   }
   switch (providerCode(raw)) {
     case 'UsernameExistsException': return 'ACCOUNT_EXISTS_OR_PENDING';
+    case 'AliasExistsException': return 'EMAIL_ALREADY_LINKED';
+    case 'UserLambdaValidationException':
+    case 'UnexpectedLambdaException':
+    case 'InvalidLambdaResponseException': return 'ACCOUNT_SETUP_UNAVAILABLE';
     case 'InvalidPasswordException': return 'PASSWORD_REJECTED';
     case 'InvalidParameterException': return 'ATTRIBUTES_REJECTED';
     case 'NotAuthorizedException': return step === 'signup' ? 'SIGNUP_UNAVAILABLE' : 'CODE_REJECTED';

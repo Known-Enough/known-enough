@@ -1,5 +1,6 @@
 import { expect, it, vi } from 'vitest';
 import { createSignupIntake, isSignupIntakeEvent } from './signup-intake.ts';
+import { PartitionRegistrationConflict } from '@deal-table/adapters/partition-request';
 const event = () => ({ version: '1', region: 'us-east-1', userPoolId: 'us-east-1_fixture', userName: 'synthetic-login',
   callerContext: { clientId: 'participant' }, triggerSource: 'PostConfirmation_ConfirmSignUp',
   request: { userAttributes: { sub: 'subject-one', email: 'synthetic@example.invalid', email_verified: 'true' } }, response: {} });
@@ -25,4 +26,17 @@ it('versioned Cognito confirmation selects intake while HTTP envelopes and brows
   expect(isSignupIntakeEvent({ ...event(), version: '2.0', requestContext: {} })).toBe(false);
   expect(isSignupIntakeEvent({ version: '2.0', body: JSON.stringify(event()) })).toBe(false);
   expect(isSignupIntakeEvent({ ...event(), version: undefined })).toBe(false);
+});
+
+it('returns successful email confirmation for an admission email conflict without linking or approving another account', async () => {
+  const register = vi.fn().mockRejectedValue(new PartitionRegistrationConflict());
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  try {
+    const intake = createSignupIntake({ userPoolId: 'us-east-1_fixture', participantClientId: 'participant', session: { register } });
+    const value = event(); expect(await intake(value)).toBe(value);
+    expect(register).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledWith(JSON.stringify({ event: 'signup-intake', result: 'EMAIL_ALREADY_LINKED' }));
+    register.mockRejectedValue(new Error('PRIVATE_STORAGE_ERROR'));
+    await expect(intake(value)).rejects.toThrow('PRIVATE_STORAGE_ERROR');
+  } finally { warn.mockRestore(); }
 });

@@ -54,6 +54,9 @@ export class PartitionDraftFailure extends KnownEnoughApplicationError {
     super(category === 'INVALID_MODEL_OUTPUT' ? 'NEEDS_CLARIFICATION' : 'RETRYABLE_SERVER_ERROR');
   }
 }
+export class PartitionRegistrationConflict extends KnownEnoughApplicationError {
+  constructor() { super('FORBIDDEN'); this.name = 'PartitionRegistrationConflict'; }
+}
 export class PartitionSessionError extends Error {
   constructor(readonly code: 'SESSION_INVALID' | 'SESSION_STORAGE_UNAVAILABLE' | 'SESSION_TIMEOUT'
     | 'SESSION_REQUEST_LIMIT' | 'SESSION_CAPACITY', options?: ErrorOptions) { super(code, options); this.name = 'PartitionSessionError'; }
@@ -233,7 +236,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
             return Groups.AccountSnapshot.parse({ status: account.status, displayName: account.displayName, version: account.version });
           }, io);
         } catch (error) {
-          if (error instanceof PartitionStorageError && error.code === 'PARTITION_IDENTITY_CONFLICT') return deny('FORBIDDEN');
+          if (error instanceof PartitionStorageError && error.code === 'PARTITION_IDENTITY_CONFLICT') throw new PartitionRegistrationConflict();
           throw error;
         }
       });

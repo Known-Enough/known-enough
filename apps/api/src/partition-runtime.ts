@@ -99,14 +99,40 @@ export function createPartitionRuntime(options: PartitionRuntimeOptions) {
         const authorization = request.headers.authorization;
         if (principal?.kind !== 'participant' || typeof authorization !== 'string') return null;
         const boundedSignal = AbortSignal.any([signal, AbortSignal.timeout(5000)]);
-        response = await fetch(profileUrl, { headers: { authorization }, redirect: 'error', credentials: 'omit', signal: boundedSignal });
-        if (!response.ok || response.headers.get('content-type')?.split(';')[0]?.trim().toLowerCase() !== 'application/json') return null;
+        const accessToken = authorization.replace(/^Bearer /, '');
+        let direct = false;
+        // authenticate() verified issuer, client, signature and token use already.
+        // Scope chooses a provider lookup, never the identity or approval state.
+        try {
+          const claims = JSON.parse(Buffer.from(accessToken.split('.')[1] ?? '', 'base64url').toString('utf8')) as { scope?: unknown };
+          direct = typeof claims.scope === 'string' && claims.scope.split(' ').includes('aws.cognito.signin.user.admin');
+        } catch { /* The hosted provider lookup independently validates the token. */ }
+        response = direct
+          ? await fetch('https://cognito-idp.us-east-1.amazonaws.com/', { method: 'POST',
+            headers: { 'content-type': 'application/x-amz-json-1.1', 'x-amz-target': 'AWSCognitoIdentityProviderService.GetUser' },
+            body: JSON.stringify({ AccessToken: accessToken }), redirect: 'error', credentials: 'omit', signal: boundedSignal })
+          : await fetch(profileUrl, { headers: { authorization }, redirect: 'error', credentials: 'omit', signal: boundedSignal });
+        const mime = response.headers.get('content-type')?.split(';')[0]?.trim().toLowerCase();
+        if (!response.ok || (mime !== 'application/json' && !(direct && mime === 'application/x-amz-json-1.1'))) return null;
         const value: unknown = JSON.parse(await profileBytes(response, boundedSignal));
         if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
-        const profile = value as Record<string, unknown>;
+        let profile = value as Record<string, unknown>;
+        let username: string | undefined;
+        if (direct) {
+          if (!Array.isArray(profile.UserAttributes) || profile.UserAttributes.length > 100
+            || typeof profile.Username !== 'string' || profile.Username.length < 1 || profile.Username.length > 128) return null;
+          username = profile.Username;
+          const attributes: Record<string, unknown> = Object.create(null) as Record<string, unknown>;
+          for (const attribute of profile.UserAttributes) {
+            if (!attribute || typeof attribute !== 'object' || typeof attribute.Name !== 'string' || typeof attribute.Value !== 'string'
+              || Object.hasOwn(attributes, attribute.Name)) return null;
+            attributes[attribute.Name] = attribute.Value;
+          }
+          profile = attributes;
+        }
         if (profile.sub !== principal.subject || typeof profile.email !== 'string' || profile.email.length > 320
           || !(profile.email_verified === true || profile.email_verified === 'true')) return null;
-        return { subject: principal.subject, email: profile.email, verified: true };
+        return { subject: principal.subject, email: profile.email, verified: true, ...(username ? { username } : {}) };
       } catch { return null; }
       finally { if (response?.body && !response.body.locked) await response.body.cancel().catch(() => {}); }
     },

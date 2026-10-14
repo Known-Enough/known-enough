@@ -6,7 +6,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { Id, KnownEnough as KE } from '@deal-table/contracts';
 import { KnownEnoughApplication, KnownEnoughApplicationError, RepositoryCapacityError,
   type Clock, type IdSource, type TrustedPrincipal } from '@deal-table/application';
-import { createPartitionGroupSession, createPartitionDecisionRepository, PartitionSessionError, PartitionDraftFailure, partitionIO,
+import { createPartitionGroupSession, createPartitionDecisionRepository, PartitionSessionError, PartitionDraftFailure, PartitionRegistrationConflict, partitionIO,
   type PartitionTransport, type PartitionDecisionTransport, type PartitionGroupDiscovery, type PartitionDraftArchitect } from '@deal-table/adapters/partition-request';
 
 type ErrorCode = Extract<KE.DecisionCommandResult, { ok: false }>['error']['code'];
@@ -15,7 +15,7 @@ export interface PartitionParticipantApiOptions {
   draftRequest?: (request: DraftRecoveryRequest) => Promise<unknown>;
   authenticate: (request: IncomingMessage, signal: AbortSignal) => Promise<TrustedPrincipal | null>;
   /** Trusted server lookup from authenticated credentials; never a caller-provided profile. */
-  registrationProfile?: (request: IncomingMessage, signal: AbortSignal) => Promise<{ subject: string; email: string; verified: boolean } | null>;
+  registrationProfile?: (request: IncomingMessage, signal: AbortSignal) => Promise<{ subject: string; email: string; verified: boolean; username?: string } | null>;
   emailKey?: string;
   invitationToken?: () => string;
   /** Server-configured, source-bound private membership discovery; candidates still require fresh admission. */
@@ -227,7 +227,8 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
           try { profile = await bounded(pending, authMs, controller); }
           catch (error) { if (controller.signal.aborted) throw error; return reject('FORBIDDEN'); }
           if (!profile || profile.subject !== principal.subject || profile.verified !== true || typeof profile.email !== 'string') return reject('FORBIDDEN');
-          const verifiedProfile = { subject: principal.subject, email: profile.email, verified: true };
+          const verifiedProfile = { subject: principal.subject, email: profile.email, verified: true,
+            ...(typeof profile.username === 'string' ? { username: profile.username } : {}) };
           const raw = await body(request, maximum, bodyMs, controller);
           if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
           send(response, 200, { account: await session.register(principal, verifiedProfile, raw) }); return;
@@ -370,6 +371,10 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         const result = await application.execute(principal, command.data);
         send(response, result.ok ? 200 : result.error.httpStatus, result);
       } catch (error) {
+        if (error instanceof PartitionRegistrationConflict) {
+          send(response, 409, { ok: false, requestId, error: { code: 'FORBIDDEN', httpStatus: 409 }, registrationFailure: 'EMAIL_ALREADY_LINKED' });
+          return;
+        }
         const code = error instanceof RepositoryCapacityError || (error instanceof PartitionSessionError && error.code === 'SESSION_CAPACITY') ? 'CAPACITY_EXCEEDED'
           : error instanceof KnownEnoughApplicationError ? error.code : 'RETRYABLE_SERVER_ERROR';
         const result = errorBody(code, requestId); send(response, result.error.httpStatus, error instanceof PartitionDraftFailure ? { ...result, draftFailure: error.category } : result);

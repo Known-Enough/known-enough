@@ -14,6 +14,48 @@ test.beforeAll(async () => {
   throw new Error('ZZ browser server unavailable');
 });
 test.afterAll(() => server?.kill());
+test('missing verified intake recovers automatically into pending access without manual name/request controls', async ({ browser }) => {
+  const context = await browser.newContext(); let registrations = 0;
+  try {
+    await context.addInitScript(() => sessionStorage.setItem('known-enough-cognito-session', JSON.stringify({
+      accessToken: 'header.payload.signature', kind: 'participant', method: 'SRP', expiresAt: Date.now() + 900000 })));
+    await context.route('https://api.example.test/**', async route => {
+      const path = new URL(route.request().url()).pathname;
+      if (route.request().method() === 'OPTIONS') { await route.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*',
+        'access-control-allow-headers': 'authorization,content-type', 'access-control-allow-methods': 'GET,POST,OPTIONS' } }); return; }
+      if (path === '/account/register') {
+        registrations++; expect(route.request().postDataJSON()).toEqual({ displayName: 'New member' });
+        await route.fulfill({ json: { account: { status: 'PENDING', displayName: 'New member', version: 1 } }, headers: { 'access-control-allow-origin': '*' } }); return;
+      }
+      await route.fulfill({ json: { account: null }, headers: { 'access-control-allow-origin': '*' } });
+    });
+    const page = await context.newPage(); await page.goto(url);
+    await expect(page.getByText('Your account is waiting for approval.', { exact: false })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Request access', exact: true })).toHaveCount(0);
+    await expect(page.getByText('Your account setup is still being completed.', { exact: false })).toHaveCount(0);
+    expect(registrations).toBe(1);
+  } finally { await context.close(); }
+});
+test('duplicate email explains original-account recovery instead of an endless setup state', async ({ browser }) => {
+  const context = await browser.newContext();
+  try {
+    await context.addInitScript(() => sessionStorage.setItem('known-enough-cognito-session', JSON.stringify({
+      accessToken: 'header.payload.signature', kind: 'participant', expiresAt: Date.now() + 900000 })));
+    await context.route('https://api.example.test/**', async route => {
+      const register = new URL(route.request().url()).pathname === '/account/register';
+      if (route.request().method() === 'OPTIONS') { await route.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*',
+        'access-control-allow-headers': 'authorization,content-type', 'access-control-allow-methods': 'GET,POST,OPTIONS' } }); return; }
+      await route.fulfill({ status: register ? 409 : 200, json: register ? { ok: false,
+        error: { code: 'FORBIDDEN', httpStatus: 409 }, registrationFailure: 'EMAIL_ALREADY_LINKED' } : { account: null },
+        headers: { 'access-control-allow-origin': '*' } });
+    });
+    const page = await context.newPage(); await page.goto(url);
+    await expect(page.getByRole('heading', { name: 'This email already has an account' })).toBeVisible();
+    await expect(page.getByText('Sign out and sign in with your original username', { exact: false })).toBeVisible();
+    await expect(page.getByText('Your account setup is still being completed.', { exact: false })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Create group', exact: true })).toHaveCount(0);
+  } finally { await context.close(); }
+});
 for (const width of [390, 1280]) {
   test(`normal groups, selected group and decision restore with no inactive reads or AI requests at ${width}px`, async ({ browser }) => {
     const api = await npApi(), group = await freshGroup(api); await group.ready(); await group.generate();

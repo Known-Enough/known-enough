@@ -80,6 +80,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
     setChecking(true); setLoadFailure(null); if (!preserveLink) setLink('');
     let stage: 'account' | 'groups' | 'group' = 'account';
     let httpStatus: number | null = null, reference: string | null = null;
+    let emailConflict = false;
     const observe = (response: Response) => {
       httpStatus = response.status;
       const id = response.headers.get('apigw-requestid') ?? response.headers.get('x-amzn-requestid');
@@ -89,7 +90,22 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       const response = await api('/account', {signal: controller.signal});
       observe(response);
       if (!response.ok) throw new Error('Account unavailable');
-      const result = await response.json() as { account: unknown };
+      let result = await response.json() as { account: unknown };
+      if (!result.account) {
+        if (!current()) return;
+        // Recover missed intake with the current verified server identity. The server
+        // enforces email ownership and only creates a pending account, never approval.
+        const registration = await api('/account/register', { method: 'POST', signal: controller.signal,
+          headers: { 'content-type': 'application/json' }, body: JSON.stringify({ displayName: 'New member' }) });
+        observe(registration);
+        const value = await registration.json() as { account: unknown; registrationFailure?: unknown };
+        if (!registration.ok) {
+          emailConflict = registration.status === 409 && value.registrationFailure === 'EMAIL_ALREADY_LINKED';
+          throw new Error('Account registration unavailable');
+        }
+        if (!value.account) throw new Error('Account registration unavailable');
+        result = value;
+      }
       const next = result.account ? Groups.AccountSnapshot.parse(result.account) : null;
       let nextGroups: Groups.GroupSnapshot[] = [];
       if (next?.status === 'APPROVED') {
@@ -108,8 +124,9 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       if (!current()) return;
       setAvailable(false); setAccount(null); setGroups([]); setLink(''); setEmail(''); setReplace(false);
       const missingGroup = stage === 'group' && (httpStatus === 403 || httpStatus === 404);
-      setLoadFailure({ title: missingGroup ? 'This group is unavailable' : stage === 'account' ? 'We couldn’t load your account' : stage === 'group' ? 'We couldn’t open this group' : 'We couldn’t load your groups',
-        description: missingGroup ? 'The link may no longer be available to your account. Go back to your groups to continue.'
+      setLoadFailure({ title: emailConflict ? 'This email already has an account' : missingGroup ? 'This group is unavailable' : stage === 'account' ? 'We couldn’t load your account' : stage === 'group' ? 'We couldn’t open this group' : 'We couldn’t load your groups',
+        description: emailConflict ? 'Sign out and sign in with your original username, or use Forgot password on the sign-in screen. To create a separate account, use a different email address.'
+          : missingGroup ? 'The link may no longer be available to your account. Go back to your groups to continue.'
           : httpStatus === 401 ? 'Your session has expired. Sign in again to continue.'
           : httpStatus === null ? 'We couldn’t reach the service. Check your connection and try again.'
           : 'The service couldn’t load this view right now. Try again, or return to your groups.', reference });

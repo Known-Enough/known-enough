@@ -5,6 +5,14 @@ const config: CognitoBrowserConfig = { region: 'us-east-1', userPoolId: 'us-east
   domain: 'https://test.auth.us-east-1.amazoncognito.com', participantClientId: 'participant', displayClientId: 'display', apiBaseUrl: 'https://api.example.invalid' };
 const details = { username: 'fictional-user', email: 'synthetic@example.invalid', password: 'Qa7!FictionalPassword' };
 describe('email registration with real service request contract, no AWS calls', () => {
+  test('distinguishes account-setup callbacks and linked email from invalid verification codes', async () => {
+    for (const name of ['UserLambdaValidationException', 'UnexpectedLambdaException', 'InvalidLambdaResponseException']) {
+      await expect(confirmEmailRegistration(config, details.username, '123456', async () => Response.json({ __type: name,
+        message: 'PRIVATE_EMAIL_TOKEN' }, { status: 400 }))).rejects.toMatchObject({ diagnostic: { code: 'ACCOUNT_SETUP_UNAVAILABLE' } });
+    }
+    await expect(confirmEmailRegistration(config, details.username, '123456', async () => Response.json({ __type: 'AliasExistsException' },
+      { status: 400 }))).rejects.toMatchObject({ diagnostic: { code: 'EMAIL_ALREADY_LINKED' } });
+  });
   test('includes email on public participant signup, without credentials or session tokens', async () => {
     const fetcher = vi.fn(async () => new Response(JSON.stringify({ UserConfirmed: false, CodeDeliveryDetails: { DeliveryMedium: 'EMAIL' } })));
     await requestEmailRegistration(config, details, fetcher);

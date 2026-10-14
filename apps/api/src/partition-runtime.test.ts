@@ -31,6 +31,32 @@ const signal = () => new AbortController().signal;
 const response = (value: unknown) => new Response(JSON.stringify(value), { headers: { 'content-type': 'application/json' } });
 const valid = { sub: 'iris', email: 'iris@example.invalid', email_verified: true };
 
+const directToken = 'header.' + Buffer.from(JSON.stringify({ scope: 'aws.cognito.signin.user.admin' })).toString('base64url') + '.signature';
+const directProfile = () => ({ Username: 'synthetic-login', UserAttributes: [
+  { Name: 'sub', Value: 'iris' }, { Name: 'email', Value: 'iris@example.invalid' }, { Name: 'email_verified', Value: 'true' }] });
+it('recovers direct SRP registrations through token-authorized GetUser instead of hosted userInfo', async () => {
+  const { options } = capture(); mocks.resolve.mockResolvedValue({ kind: 'participant', subject: 'iris' });
+  const fetcher = vi.fn().mockResolvedValue(new Response(JSON.stringify(directProfile()), { headers: { 'content-type': 'application/x-amz-json-1.1' } }));
+  vi.stubGlobal('fetch', fetcher);
+  await expect(options.registrationProfile!(request('Bearer ' + directToken), signal())).resolves.toEqual({
+    subject: 'iris', email: 'iris@example.invalid', verified: true, username: 'synthetic-login' });
+  expect(fetcher).toHaveBeenCalledTimes(1);
+  expect(fetcher.mock.calls[0]![0]).toBe('https://cognito-idp.us-east-1.amazonaws.com/');
+  expect(JSON.parse(fetcher.mock.calls[0]![1].body)).toEqual({ AccessToken: directToken });
+});
+it('requires current verified identity and rejects duplicate/unverified or mismatched GetUser attributes', async () => {
+  const { options } = capture(); const fetcher = vi.fn(); vi.stubGlobal('fetch', fetcher);
+  mocks.resolve.mockResolvedValue(null);
+  await expect(options.registrationProfile!(request('Bearer ' + directToken), signal())).resolves.toBeNull(); expect(fetcher).not.toHaveBeenCalled();
+  mocks.resolve.mockResolvedValue({ kind: 'participant', subject: 'iris' });
+  for (const field of [{ Name: 'sub', Value: 'other' }, { Name: 'email_verified', Value: 'false' }]) {
+    const value = directProfile(); value.UserAttributes = value.UserAttributes.map(old => old.Name === field.Name ? field : old);
+    fetcher.mockResolvedValue(response(value)); await expect(options.registrationProfile!(request('Bearer ' + directToken), signal())).resolves.toBeNull();
+  }
+  const value = directProfile(); value.UserAttributes.push({ Name: 'sub', Value: 'other' });
+  fetcher.mockResolvedValue(response(value)); await expect(options.registrationProfile!(request('Bearer ' + directToken), signal())).resolves.toBeNull();
+});
+
 it.each([
   ['mode', 'LEGACY'], ['allowedOrigin', 'http://synthetic.example.invalid'], ['allowedOrigin', 'https://synthetic.example.invalid/path'],
   ['allowedOrigin', 'https://secret@synthetic.example.invalid'], ['cognitoDomain', 'https://evil.example.invalid'],

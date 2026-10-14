@@ -9,6 +9,8 @@ function recoveryText(code: RegistrationCode): string {
     case 'INVALID_DETAILS': return 'Check your username and email, and use a password of at least eight characters with uppercase, lowercase, a number and a symbol.';
     case 'PASSWORD_REJECTED': return 'This site rejected the password under its current policy. Try a different password or contact the app operator.';
     case 'ACCOUNT_EXISTS_OR_PENDING': return 'An account may already exist or await verification. If you have a code, enter it below; otherwise try signing in.';
+    case 'EMAIL_ALREADY_LINKED': return 'This email already has an account. Sign in with your original username, or use Forgot password on the sign-in screen.';
+    case 'ACCOUNT_SETUP_UNAVAILABLE': return 'Account setup could not finish. Sign in to check whether your email was verified and recover your access request.';
     case 'SIGNUP_UNAVAILABLE': return 'Email registration is unavailable on this site. Contact the app operator.';
     case 'ATTRIBUTES_REJECTED': return 'Your details or this site’s registration settings were rejected. Contact the app operator with the reference below.';
     case 'NETWORK_RESULT_UNKNOWN':
@@ -73,6 +75,8 @@ export function EmailRegistration({ config, startOpen = false, onClose, onSignIn
     {stage === 'verify' && <button type="button" className="secondary" onClick={() => { setCode(''); setDiagnostic(null); setMessage(''); setStage('details'); }}>Back to account details</button>}
     <button type="button" className="secondary" disabled={busy} onClick={() => { setPassword(''); setEmail(''); setUsername(''); setCode(''); setDiagnostic(null); setMessage(''); setStage('closed'); onClose?.(); }}>{stage === 'details' ? 'Cancel account creation' : 'Close registration'}</button>
     {stage === 'complete' && onSignIn && <button type="button" onClick={onSignIn}>Sign in</button>}
+    {stage !== 'complete' && onSignIn && diagnostic && ['ACCOUNT_SETUP_UNAVAILABLE', 'EMAIL_ALREADY_LINKED'].includes(diagnostic.code)
+      && <button type="button" onClick={onSignIn}>Sign in</button>}
     {message && <p role="status">{message}</p>}
     {diagnostic && <p className="ke-help">Reference: {diagnostic.code} at {diagnostic.observedAt}
       {diagnostic.httpStatus ? ` (HTTP ${diagnostic.httpStatus})` : ''}{diagnostic.requestId ? ` (request ${diagnostic.requestId})` : ''}.</p>}

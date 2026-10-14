@@ -6,6 +6,7 @@ export function isSignupIntakeEvent(event: unknown): boolean {
     && (value.triggerSource === 'PostConfirmation_ConfirmSignUp' || value.triggerSource === 'PostConfirmation_ConfirmForgotPassword');
 }
 import type { createPartitionGroupSession } from '@deal-table/adapters/partition-request';
+import { PartitionRegistrationConflict } from '@deal-table/adapters/partition-request';
 /** Server trigger only: deploy with Cognito service permission bound to this pool/account, never behind public HTTP. */
 export function createSignupIntake(options: { userPoolId: string; participantClientId: string;
   session: Pick<ReturnType<typeof createPartitionGroupSession>, 'register'> }) {
@@ -21,8 +22,16 @@ export function createSignupIntake(options: { userPoolId: string; participantCli
       || value.userName.length < 1 || value.userName.length > 128 || !attrs || attrs.email_verified !== 'true'
       || typeof attrs.sub !== 'string' || !/^[A-Za-z0-9_-]{1,80}$/.test(attrs.sub)
       || typeof attrs.email !== 'string') throw new Error('SIGNUP_EVENT_INVALID');
-    await register({ kind: 'participant', subject: attrs.sub },
-      { subject: attrs.sub, email: attrs.email, verified: true, username: value.userName }, { displayName: 'New member' });
+    try {
+      await register({ kind: 'participant', subject: attrs.sub },
+        { subject: attrs.sub, email: attrs.email, verified: true, username: value.userName }, { displayName: 'New member' });
+    } catch (error) {
+      // Verification and application admission are separate. Never steal the original
+      // account or report a failed email verification because its email is already linked.
+      // Authenticated registration recovery returns the conflict to the signed-in owner.
+      if (!(error instanceof PartitionRegistrationConflict)) throw error;
+      console.warn(JSON.stringify({ event: 'signup-intake', result: 'EMAIL_ALREADY_LINKED' }));
+    }
     return event;
   };
 }
