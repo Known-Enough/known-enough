@@ -1,0 +1,155 @@
+name: FIX03 owned primary branded SRP sign-in and recovery
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: known-enough-lifecycle-installation
+  cancel-in-progress: false
+jobs:
+  reproduce:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && github.actor_id == '143764700'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      EXPECTED_SOURCE: ${{ inputs.source_sha }}
+      AWS_MAX_ATTEMPTS: '1'
+      NODE_NO_WARNINGS: '1'
+      FIX01_CONFIRMED_TRIGGER_RECOVERY: 'false'
+      FIX03_BRANDED_CONFIRMATION: 'true'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Verify source and synthetic qualification boundaries
+        run: |
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node scripts/operations/verify.mjs > /dev/null
+          npm ci
+          npm ci --prefix scripts/live-qa
+          node --experimental-transform-types --test scripts/operations/jobs-owned-proof.test.mjs scripts/operations/partition-live-behavior.test.mjs scripts/operations/lifecycle-owned-behavior.test.mjs
+          npx playwright install --with-deps chromium
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPrimaryRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Preserve current private primary package
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/partition-backup.mjs > "$RUNNER_TEMP/fix03-backup-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPartitionMigration
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Recover only matching private configuration without publication
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/partition-cutover.mjs recover > "$RUNNER_TEMP/fix03-recover-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubQaRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Create and authenticate two owned synthetic personas
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/partition-live-behavior.mjs fixtures > "$RUNNER_TEMP/fix03-fixtures-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: always()
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPartitionMigration
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Prove owned in-app SRP sign-in, admission, reload, sign-out and real password reset
+        if: always()
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          if test -f "$RUNNER_TEMP/partition-cutover-private/owned-fixtures-private.json"; then
+            node --experimental-transform-types scripts/fix03/prove.mjs
+          fi
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: always()
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubGroupArchive
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Archive only the fresh owned proof group and its public draft/decision bindings
+        if: always()
+        run: |
+          if test -f "$RUNNER_TEMP/partition-cutover-private/owned-fixtures-private.json"; then
+            node --experimental-transform-types scripts/fix02/prove.mjs archive
+          fi
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: always()
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPartitionMigration
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Always disable owned registered accounts
+        if: always()
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          if test -f "$RUNNER_TEMP/partition-cutover-private/owned-fixtures-private.json"; then
+            node --experimental-transform-types scripts/operations/partition-live-behavior.mjs disable > "$RUNNER_TEMP/fix03-accounts-disabled-report.json" 2>&1
+          fi
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: always()
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubQaRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Always self-delete owned users and remove mailboxes
+        if: always()
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          if test -f "$RUNNER_TEMP/partition-cutover-private/owned-fixtures-private.json"; then
+            node --experimental-transform-types scripts/operations/partition-live-behavior.mjs cleanup > "$RUNNER_TEMP/fix03-fixtures-cleanup-report.json" 2>&1
+          fi
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: fix03-proof
+          path: |
+            ${{ runner.temp }}/fix03-*-report.json
+            ${{ runner.temp }}/fix02-archive-report.json
+          if-no-files-found: warn

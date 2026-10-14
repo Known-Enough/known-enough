@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@deal-table/contracts": "0.1.0",
+    "amazon-cognito-identity-js": "6.3.20",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },

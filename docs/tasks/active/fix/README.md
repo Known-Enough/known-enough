@@ -4,11 +4,11 @@ Fix problems encountered in the published application, with real evidence and cl
 
 | Task | Outcome | Status |
 | --- | --- | --- |
-| [FIX01](FIX01/README.md) | An approved organizer can create and review a new decision draft inside a group; failures explain the actual problem. | IN_PROGRESS / B; preserve current claim |
-| [FIX02](FIX02/README.md) | Save and view profile descriptions/photos through the compatible installed API, including permitted group-member profiles. | READY / unclaimed; queued for B after FIX01 |
-| [FIX03](FIX03/README.md) | Sign in inside the app's own styled screen, with Cognito authentication behind the scenes. | READY / unclaimed; queued for B after FIX02 |
+| [FIX01](FIX01/README.md) | An approved organizer can create and review a new decision draft inside a group; failures explain the actual problem. | BLOCKED / claim released; exact API-role model grant required |
+| [FIX02](FIX02/README.md) | Save and view profile descriptions/photos through the compatible installed API, including permitted group-member profiles. | DONE / B; live profile/privacy/cleanup passed |
+| [FIX03](FIX03/README.md) | Sign in inside the app's own styled screen, with Cognito authentication behind the scenes. | IN_PROGRESS / B; branded sign-in live proof pending |
 | [FIX04](FIX04/README.md) | One command lists pending access requests; another approves explicitly selected users. | READY / unclaimed; queued for B after FIX03 |
 
-Keep FIX01's current claim; then FIX02 → FIX03 → FIX04 at eligible sequential intakes. No new worker, automation, deployment or test has been started by task preparation.
+User directs sequential FIX02 → FIX03 → FIX04, proceeding past a concrete external dead end. FIX01 is preserved at its checked missing-access checkpoint; FIX02 passed; FIX03 is the sole implementation claim. No new worker, automation, deployment or test has been started by task preparation.
 
 [Task guide](../../README.md) · [Task board](../../../task-board.md)

@@ -135,7 +135,7 @@ async function main(phase){
         const created=await cognito('SignUp',{ClientId:config.participantClientId,Username:fixture.mailbox.address,Password:fixture.password,UserAttributes:[{Name:'email',Value:fixture.mailbox.address}]});if(!uuid(created.UserSub))return invalid('SIGNUP_SUBJECT_INVALID');fixture.subject=created.UserSub;fixture.created=true;state.signup++;await preserve();
         let code;for(let count=0;count<3&&!code;count++)code=await mailbox.code(fixture.mailbox);if(!code)return invalid('VERIFICATION_MAIL_NOT_OBSERVED');
         let triggerFailure=false;
-        try{await cognito('ConfirmSignUp',{ClientId:config.participantClientId,Username:fixture.mailbox.address,ConfirmationCode:code});state.confirmed++;}
+        try{if(process.env.FIX03_BRANDED_CONFIRMATION==='true'){const {confirmBrandedFixture}=await import('../fix03/confirm.mjs');await confirmBrandedFixture(config,fixture,browser);}else await cognito('ConfirmSignUp',{ClientId:config.participantClientId,Username:fixture.mailbox.address,ConfirmationCode:code});state.confirmed++;}
         catch(error){if(!recoverableConfirmedTriggerFailure(error,process.env.FIX01_CONFIRMED_TRIGGER_RECOVERY))throw error;triggerFailure=true;state.confirmationTriggerFailure=error.safeCode;}
         await preserve();
         fixture.cleanupToken=await srp(config,fixture);await signed(fixture,fixture.cleanupToken);await preserve();

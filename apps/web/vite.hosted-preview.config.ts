@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   define: {
+    global: 'globalThis',
     'import.meta.env.VITE_HOSTED_PREVIEW': JSON.stringify('true'),
   },
   resolve: {

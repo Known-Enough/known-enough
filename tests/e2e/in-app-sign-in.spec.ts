@@ -1,0 +1,24 @@
+import { test,expect } from '@playwright/test';
+test.use({baseURL:'http://127.0.0.1:5175'});
+const endpoint='https://cognito-idp.us-east-1.amazonaws.com/**';
+test('branded login stays on the app, has no signup, clears secrets and safely handles wrong credentials and back',async({page})=>{
+ let calls=0;const logs:string[]=[];page.on('console',message=>logs.push(message.text()));
+ await page.route(endpoint,async route=>{calls++;await route.fulfill({status:400,contentType:'application/x-amz-json-1.1',body:JSON.stringify({__type:'NotAuthorizedException',message:'PRIVATE_PROVIDER_ERROR'})});});
+ await page.goto('/');await page.getByRole('button',{name:'Sign in',exact:true}).click();await expect(page.getByRole('heading',{name:'Sign in',exact:true})).toBeFocused();await expect(page.getByRole('button',{name:'Create account',exact:true})).toHaveCount(0);
+ await page.getByLabel('Username',{exact:true}).fill('synthetic-username');await page.getByLabel('Password',{exact:true}).fill('PRIVATE_PASSWORD');await page.getByRole('button',{name:'Show password'}).click();await expect(page.getByLabel('Password',{exact:true})).toHaveAttribute('type','text');await page.getByRole('button',{name:'Sign in',exact:true}).click();
+ await expect(page.getByRole('status')).toContainText('Sign-in details were not accepted');expect(calls).toBe(1);await expect(page.getByLabel('Password',{exact:true})).toHaveValue('');expect(page.url()).toContain('127.0.0.1');
+ expect(await page.evaluate(()=>JSON.stringify({local:{...localStorage},session:{...sessionStorage}}))).not.toMatch(/PRIVATE_PASSWORD|synthetic-username|PRIVATE_PROVIDER_ERROR/);expect(logs.join(' ')).not.toMatch(/PRIVATE_PASSWORD|synthetic-username|PRIVATE_PROVIDER_ERROR/);
+ await page.getByRole('button',{name:'Back',exact:true}).click();await expect(page.getByRole('button',{name:'Create account',exact:true})).toBeVisible();
+});
+test('verification, resend and password reset use in-app screens without persisting codes or signing in automatically',async({page})=>{
+ const actions:string[]=[];await page.route(endpoint,async route=>{actions.push(route.request().headers()['x-amz-target']!);await route.fulfill({contentType:'application/x-amz-json-1.1',body:'{}'});});
+ await page.goto('/');await page.getByRole('button',{name:'Sign in',exact:true}).click();await page.getByRole('button',{name:'Enter verification code'}).click();await page.getByLabel('Username',{exact:true}).fill('synthetic-user');await page.getByRole('button',{name:'Resend code'}).click();await expect(page.getByRole('status')).toContainText('new code');await page.getByLabel('Verification code').fill('PRIVATE_CODE');await page.getByRole('button',{name:'Continue',exact:true}).click();await expect(page.getByRole('status')).toContainText('Email verified');
+ await page.getByRole('button',{name:'Forgot password?'}).click();await page.getByRole('button',{name:'Send recovery code'}).click();await expect(page.getByLabel('New password')).toBeVisible();await page.getByLabel('Verification code').fill('PRIVATE_CODE');await page.getByLabel('New password').fill('PrivateReset1!');await page.getByRole('button',{name:'Reset password',exact:true}).click();await expect(page.getByRole('status')).toContainText('Sign in with your new password');
+ expect(actions.map(action=>action.split('.').at(-1))).toEqual(['ResendConfirmationCode','ConfirmSignUp','ForgotPassword','ConfirmForgotPassword']);expect(await page.evaluate(()=>JSON.stringify({...sessionStorage,...localStorage}))).not.toMatch(/PRIVATE_CODE|PrivateReset1/);
+});
+test('back cancels a pending login and mobile themes keep one accessible welcome entry',async({page})=>{
+ await page.setViewportSize({width:390,height:844});let respond:()=>void=()=>{};let observed:()=>void=()=>{};const seen=new Promise<void>(resolve=>{observed=resolve;});let calls=0;
+ await page.route(endpoint,async route=>{calls++;observed();await new Promise<void>(resolve=>{respond=resolve;});await route.fulfill({status:400,contentType:'application/x-amz-json-1.1',body:'{"__type":"NotAuthorizedException"}'});});
+ await page.goto('/');await page.getByRole('button',{name:'Sign in',exact:true}).click();await page.getByLabel('Username',{exact:true}).fill('synthetic');await page.getByLabel('Password',{exact:true}).fill('Synthetic1!');await page.getByRole('button',{name:'Sign in',exact:true}).click();await seen;await expect(page.getByRole('button',{name:'Please wait…'})).toBeDisabled();await page.getByRole('button',{name:'Back',exact:true}).click();respond();await expect(page.getByRole('button',{name:'Create account',exact:true})).toBeVisible();expect(calls).toBe(1);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);await page.emulateMedia({colorScheme:'dark'});await expect(page.getByRole('button',{name:'Create account',exact:true})).toHaveCount(1);
+});

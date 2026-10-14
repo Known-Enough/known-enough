@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createDirectCognito } from './cognito-direct';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Groups, KnownEnough as KE } from '@deal-table/contracts';
-import { beginCognitoSignIn, clearCognitoSession, cognitoApiFetch, cognitoLogoutUrl, finishCognitoSignIn, readCognitoSession,
+import { clearCognitoSession, cognitoApiFetch, cognitoLogoutUrl, finishCognitoSignIn, readCognitoSession,
   CognitoSignInFailure, type CognitoBrowserConfig, type CognitoSession } from './cognito-session';
 import { AuthEntry } from './auth-entry';
 import { ProfileDrawer } from './profile-drawer';
@@ -12,6 +13,7 @@ import { backgroundNegotiationAvailable, pollBackgroundDecision, type Background
 import { readAppView, appViewSearch, saveIntendedView, takeIntendedView, type AppView } from './navigation';
 let callbackCompletion: ReturnType<typeof finishCognitoSignIn> | null = null;
 export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
+  const direct = useMemo(()=>createDirectCognito(config),[config]);
   const [session, setSession] = useState<CognitoSession | null>(() => readCognitoSession());
   const [view, setView] = useState<AppView>(() => readAppView(window.location.search));
   const [callbackPending, setCallbackPending] = useState(() => {
@@ -48,10 +50,11 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     capture(); window.addEventListener('hashchange', capture); return () => window.removeEventListener('hashchange', capture);
   }, [session]);
   const expire = useCallback(() => {
-    epoch.current++; abort.current?.abort(); dirty.current = false; clearCognitoSession(); setSession(null); setSnapshot(null); setOwner(null); setTarget(null);
+    direct.signOut(); epoch.current++; abort.current?.abort(); dirty.current = false; clearCognitoSession(); setSession(null); setSnapshot(null); setOwner(null); setTarget(null);
     setStatus('Your session expired. Sign in again to continue.');
-  }, []);
+  }, [direct]);
   useEffect(() => { if (!session) return; const timeout = window.setTimeout(expire, Math.max(0, session.expiresAt - Date.now() - 5000)); return () => window.clearTimeout(timeout); }, [session, expire]);
+  useEffect(()=>{if(!session||session.method!=='SRP'||!direct.canRefresh())return;let active=true;const timer=window.setTimeout(()=>{void direct.refresh().then(value=>{if(active){sessionStorage.setItem('known-enough-cognito-session',JSON.stringify(value));setSession(value);}}).catch(()=>{if(active)expire();});},Math.max(0,session.expiresAt-Date.now()-60000));return()=>{active=false;window.clearTimeout(timer);};},[session,direct,expire]);
   useEffect(() => {
     let active = true; callbackCompletion ??= finishCognitoSignIn(config);
     void callbackCompletion.then(result => { if (!active) return; setCallbackPending(false); if (!result) return; setSession(result); const wanted = takeIntendedView(); if (wanted) move(wanted, true); })
@@ -64,8 +67,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
       });
     return () => { active = false; };
   }, [config]);
-  const signIn = async (kind: CognitoSession['kind']) => { try { saveIntendedView(view); window.location.assign(await beginCognitoSignIn(config, kind)); } catch { setStatus('Sign-in is unavailable. Check the app configuration.'); } };
-  const signOut = () => { if (!session) return; const url = cognitoLogoutUrl(config, session); expire(); window.location.assign(url); };
+  const signOut = () => { if (!session) return; direct.signOut(); const legacy=session.method!=='SRP'; const url=legacy?cognitoLogoutUrl(config,session):null; expire(); if(url)window.location.assign(url); };
   async function load() {
     if (!session || view.kind !== 'decision') return;
     const id = view.decisionId, token = session.accessToken, current = ++epoch.current;
@@ -108,7 +110,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
       .catch(() => { if (active) { setTarget(null); setStatus('Automatic checking stopped. Refresh this decision for its latest result.'); } });
     return () => { active = false; controller.abort(); };
   }, [target, session, config, expire]);
-  if (!session) return <AuthEntry config={config} signIn={signIn} notice={status} callbackPending={callbackPending} />;
+  if (!session) return <AuthEntry config={config} direct={direct} onSession={value=>{sessionStorage.setItem('known-enough-cognito-session',JSON.stringify(value));setSession(value);setStatus('');const wanted=takeIntendedView();if(wanted)move(wanted,true);}} notice={status} callbackPending={callbackPending} />;
   return <main className={view.kind === 'group' ? 'ke-home ke-group-route' : view.kind === 'groups' ? 'ke-home ke-groups-dashboard' : 'ke-home'}>
     <header className="ke-masthead"><Brand /><div className="ke-header-actions">
       <ThemeToggle />

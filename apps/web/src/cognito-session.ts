@@ -11,6 +11,7 @@ export interface CognitoSession {
   accessToken: string;
   expiresAt: number;
   kind: 'participant' | 'display';
+  method?: 'SRP' | 'PKCE';
 }
 export type CognitoSignInCode = 'HOSTED_ACCESS_DENIED' | 'HOSTED_CONFIGURATION_REJECTED'
   | 'HOSTED_UNAVAILABLE' | 'HOSTED_ERROR' | 'CALLBACK_INCOMPLETE'

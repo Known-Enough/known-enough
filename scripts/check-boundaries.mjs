@@ -12,7 +12,7 @@ const areas = [
   'apps/workers',
 ];
 const strictDependencies = {
-  'apps/web': ['@deal-table/contracts', 'react', 'react-dom', 'vite'],
+  'apps/web': ['@deal-table/contracts', 'react', 'react-dom', 'vite', 'amazon-cognito-identity-js'],
   'packages/contracts': ['zod'],
   'packages/domain': ['@deal-table/contracts'],
   'packages/application': ['@deal-table/contracts', '@deal-table/domain'],

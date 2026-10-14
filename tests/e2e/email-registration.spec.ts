@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
 test.use({ baseURL: 'http://127.0.0.1:5175' });
 const endpoint = 'https://cognito-idp.us-east-1.amazonaws.com/';
 const password = 'Abcdef1!';
-test('configured signup UI sends email, confirms code and retains real hosted PKCE sign-in (mock service)', async ({ page }) => {
+test('configured signup UI sends email, confirms code and opens branded sign-in without a duplicate signup (mock service)', async ({ page }) => {
   const requests: { action: string; body: Record<string, unknown> }[] = [];
   await page.route(endpoint, async route => {
     const action = route.request().headers()['x-amz-target']!;requests.push({ action, body: route.request().postDataJSON() as Record<string, unknown> });
@@ -22,9 +22,7 @@ test('configured signup UI sends email, confirms code and retains real hosted PK
   await expect(page.getByText('Email verified. You can now sign in.', { exact: true })).toBeVisible();
   expect(requests[1]!.body).toEqual({ ClientId: 'localparticipant', Username: 'fictional-user', ConfirmationCode: '123456' });
   expect(await page.evaluate(() => sessionStorage.getItem('known-enough-cognito-session'))).toBeNull();
-  let challenge = '';await page.route('https://localtest.auth.us-east-1.amazoncognito.com/**', async route => {
-    challenge = new URL(route.request().url()).searchParams.get('code_challenge_method') ?? '';await route.fulfill({ body: '<h1>Hosted sign in</h1>', contentType: 'text/html' });
-  });await signIn.click();await expect.poll(() => challenge).toBe('S256');
+  await signIn.click();await expect(page.getByRole('heading',{name:'Sign in',exact:true})).toBeVisible();await expect(page.getByLabel('Username',{exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Create account',exact:true})).toHaveCount(0);
 });
 test('signup service failure stays on the form and never exposes private diagnostics (mock service)', async ({ page }) => {
   const consoleMessages: string[] = [];
