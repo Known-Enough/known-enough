@@ -915,3 +915,7 @@ Pinned Node24.21.0/npm11.19.0 `npm run check`: references7/7, planning15, lint/b
 ## Profile menu readability follow-up — 2026-10-14T01:31:44Z
 
 Fixed the reported light-mode profile/account dropdown contrast in `apps/web/src/style.css`; explicit theme-scoped rules prevent global page button styles from turning menu rows into dark-green buttons with unreadable labels. Both light and dark menu item colors/icons and compact sizing are explicit. The full pinned check passed through builds and hosted-preview; six profile E2E cases passed, while seven unrelated known E2E failures remain. Main was fast-forwarded to `2e71635` before this edit. Commit/push and exact-source frontend publication/readback remain; profile API integration and overall ZZ03 acceptance remain incomplete.
+
+## Profile menu contrast correction published — 2026-10-14T01:35:07Z
+
+Source `89298a39f68e2cbdd9167abf3d0f9f681593d6fc` is pushed to `main` and matches `origin/main`. Exact-source [frontend run 38496361104](https://github.com/Known-Enough/known-enough/actions/runs/38496361104) succeeded/Amplify87; regression checks and build passed, configuration readback passed with writes0, and all7 public assets matched their manifest hashes on independent HTTP readback. [Receipt](review-artifacts/ZZ03/account-menu-contrast-publication.json). This resolves the reported menu readability issue. Profile API integration and whole ZZ03 remain incomplete.
