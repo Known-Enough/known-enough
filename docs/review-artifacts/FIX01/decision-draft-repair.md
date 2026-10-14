@@ -1,5 +1,11 @@
 # FIX01 decision drafting repair
 
+## Current checkpoint — 2026-10-14
+
+The decision repair is published and verified by a real owned primary flow: draft/create/reload and invited second-member visibility pass. Requirements and recovery actions are explicit in the wizard, and expired follow-up release preserves the saved draft/answer. All original stuck slots are recovered from authenticated completion evidence, with reservations and participant drafts preserved. Runtime/frontend source `6b6aa79070689caf17568fb59ee5dc3d677effe4`; live [38642585751](https://github.com/Known-Enough/known-enough/actions/runs/38642585751) records one acknowledged model call (12,873 input/420 output tokens). Two synthetic users/mailboxes and the terminal model journal are cleaned. Only the owned synthetic group archive still reports `ARCHIVE_INVALID`; its exact stage is being diagnosed. Whole FIX01 remains IN_PROGRESS/B, not DONE. [Current evidence](queue-repair-checkpoint.json), [live flow and cleanup receipts](queue-repair-live-proof.json).
+
+## Historical checkpoints
+
 Status BLOCKED/unclaimed; checked code/API/worker/frontend pushed and published. Required live AI acceptance waits for the exact administrator model grant; A ownership hold is resolved.
 
 Primary baseline [38485807729](https://github.com/Known-Enough/known-enough/actions/runs/38485807729): group creation 200; draft POST 503 at 2026-10-13T23:44:24.881Z, unclassified/reference unavailable. Missing installed architect composition and versioned Cognito confirmation selector defects confirmed in source; the particular baseline 503 cannot be fully attributed without API logs. Both own inspector/release log-window attempts deny logs:FilterLogEvents / AccessDeniedException on the primary API log group. Workflow logs and safe new HTTP diagnostics remain the available debugging path; API log access is not claimed.

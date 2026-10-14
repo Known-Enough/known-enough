@@ -35,7 +35,7 @@
     "browserSession": "NOT_OBSERVED",
     "authentication": "NOT_ATTEMPTED"
   },
-  "nextAction": "Run cleanup_original=true in existing proof workflow on checked next source; actual original completed test only, no new signup/model.",
+  "nextAction": "Finish full check and run stage/structural-only diagnostics in the existing cleanup path; no signup/model replay.",
   "additionalProductTest": "NOT_REQUESTED",
   "priorAdministratorAttempt": {
     "result": "BLOCKED",
@@ -95,8 +95,7 @@
   "ownedUsersDeleted": 2,
   "ownedMailboxesRemoved": 2,
   "remainingCleanup": [
-    "terminal journal DeleteItem denied",
-    "archive helper missing invitation directory; fixed locally"
+    "owned original group archive validation failure; stage and finite structural diagnostics added locally"
   ],
   "administratorCleanupGrant": {
     "result": "OPS03_TERMINAL_POLICY_READBACK_PASS",
@@ -125,5 +124,26 @@
     "focusedArchiveAndFixturePassed": 17,
     "focusedOriginalCleanupPassed": 2,
     "failedFirstFull": "one existing archive-recovery test exceeded 5s; isolated11PASS and final complete PASS; no assertion/timeout changes"
+  },
+  "originalCleanupRun": "https://github.com/Known-Enough/known-enough/actions/runs/38644617013",
+  "originalTerminalCleanup": {
+    "result": "ORIGINAL_TERMINAL_JOB_CLEANUP_PASS",
+    "journalDeletes": 1,
+    "totalWrites": 0,
+    "providerCalls": 0
+  },
+  "originalFixtureRecovery": {
+    "result": "OWNED_PRIVATE_CHECKPOINT_LOCATED",
+    "candidateCount": 1,
+    "knownDeletedUsers": 2,
+    "knownRemovedMailboxes": 2,
+    "unconfirmedMailboxIntents": 0,
+    "mutations": 0,
+    "providerCalls": 0
+  },
+  "originalGroupArchive": {
+    "result": "BLOCKED",
+    "code": "ARCHIVE_INVALID",
+    "source": "c60cd81f61f377874213e68d381a8741e05887fe"
   }
 }

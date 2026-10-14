@@ -10,7 +10,7 @@ import { randomUUID } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { ownFixture } from '../operations/partition-live-behavior.mjs';
-import { ownedArchiveEntries,archiveFailureCode } from './owned-archive.mjs';
+import { ownedArchiveEntries,archiveFailureCode,archiveInputChecks } from './owned-archive.mjs';
 const directory=join(process.env.RUNNER_TEMP,'partition-cutover-private');
 const report={source:process.env.EXPECTED_SOURCE,utc:new Date().toISOString(),result:'NOT_EXECUTED',groupCreate:'NOT_EXECUTED',draft:'NOT_EXECUTED',providerCalls:'NOT_VERIFIED',unauthorized:'NOT_EXECUTED',reload:'NOT_EXECUTED'};
 let browser;
@@ -34,12 +34,21 @@ try {
  if(process.argv[2]==='archive'||original) {
   if(!fixture.groupId){report.result='NO_OWN_GROUP_TO_ARCHIVE';}
   else {
+   report.archiveStage='READ_OWNED_ROWS';
    const {header,entries}=await ownedArchiveEntries(managed.groups,fixture.groupId,fixture.subject,state.fixtures.map(owned=>owned.subject));
+   report.archiveInput=archiveInputChecks(header,entries);
+   report.archiveStage='COMPILE_PLAN';
    const plan=preparePartitionArchive(entries,fixture.groupId,process.env.EXPECTED_SOURCE);
    const expected={sourceSha:process.env.EXPECTED_SOURCE,groupId:fixture.groupId,sourceHeaderRevision:header.revision,sourceHash:plan.sourceHash,manifestHash:plan.manifestHash};
    const authority=original?{kind:'OPERATOR',actorId:143764700}:{kind:'ORGANIZER',subject:fixture.subject};
+   if(original){
+    const result=await promisify(execFile)('aws',['dynamodb','get-item','--table-name','KnownEnoughPartitions','--key',JSON.stringify({PK:{S:'OPERATIONS#ARCHIVE'},SK:{S:'STATE'}}),'--consistent-read','--region','us-east-1','--output','json','--no-cli-pager'],{timeout:20000});
+    const item=JSON.parse(result.stdout).Item;const policy=item?JSON.parse(item.payload.S):null;
+    report.operatorPolicy={present:policy!==null,enabled:policy?.enabled===true,actorAllowed:Array.isArray(policy?.actors)&&policy.actors.includes(143764700)};
+   }
+   report.archiveStage='BUILD_PORTS';
    const runner=createPartitionArchiveRunner(managed.archivePorts({manifestBytes:plan.manifestBytes,expected,authority,recovery:partitionRecoveryStorage()}),plan.manifestBytes,expected,authority);
-   await runner.prepare();const result=await runner.archive();if(result.state!=='ARCHIVED')throw new Error('OWN_ARCHIVE_NOT_CONFIRMED');report.result='OWN_PROOF_GROUP_ARCHIVED';report.archivedGroups=1;
+   report.archiveStage='PREPARE_ARCHIVE';await runner.prepare();report.archiveStage='COMMIT_ARCHIVE';const result=await runner.archive();if(result.state!=='ARCHIVED')throw new Error('OWN_ARCHIVE_NOT_CONFIRMED');report.result='OWN_PROOF_GROUP_ARCHIVED';report.archivedGroups=1;
   }
  } else {
  for(const owned of state.fixtures){ownFixture(owned,state.runId);const signed=await createCognitoIdentityResolver(config)('Bearer '+owned.accessToken);if(signed?.kind!=='participant'||signed.subject!==owned.subject)throw new Error('OWN_SIGNED_IDENTITY_MISMATCH');}

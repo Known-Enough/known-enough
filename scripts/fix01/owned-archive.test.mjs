@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { partitionSeedRows } from '../../packages/adapters/src/partitioned-group-repository.ts';
 import { partitionDirectoryKey } from '../../packages/adapters/src/partition-directory.ts';
 import { preparePartitionArchive } from '../../packages/adapters/src/partition-archive.ts';
-import { ownedArchiveEntries,archiveFailureCode } from './owned-archive.mjs';
+import { ownedArchiveEntries,archiveFailureCode,archiveInputChecks } from './owned-archive.mjs';
 const hash=value=>createHash('sha256').update(value).digest('hex');
 function storage(acceptedBy='member') {
  const group={id:'owned-group',name:'Owned garden',organizer:'organizer',version:2,members:['organizer','member'],drafts:[],decisions:[{id:'owned-decision',version:1}],invitations:[{tokenHash:hash('invitation'),recipientHash:hash('member'),expiresAt:1,acceptedBy}]};
@@ -35,4 +35,11 @@ test('missing immutable invitation record fails archive validation rather than o
 test('archive diagnostics retain only finite codes without arbitrary messages',()=>{
  assert.equal(archiveFailureCode({code:'ARCHIVE_STORAGE_UNAVAILABLE',message:'private'}),'ARCHIVE_STORAGE_UNAVAILABLE');
  assert.equal(archiveFailureCode({code:'private',message:'private'}),undefined);
+});
+test('archive input diagnostics expose structural booleans and count without contents',async()=>{
+ const s=storage();const {header,entries}=await ownedArchiveEntries(s.groups,'owned-group','organizer',['organizer','member']);
+ header.value.name='PRIVATE_GROUP_MARKER';
+ const checks=archiveInputChecks(header,entries);assert.ok(!JSON.stringify(checks).includes('PRIVATE'));assert.equal(checks.groupValid,true);assert.equal(checks.directoriesMatch,true);
+ for(const [key,value] of Object.entries(checks))assert.equal(typeof value,key==='entries'?'number':'boolean');
+ entries.splice(entries.findIndex(e=>e.key.PK.startsWith('INVITATION#')),1);assert.equal(archiveInputChecks(header,entries).directoriesMatch,false);
 });
