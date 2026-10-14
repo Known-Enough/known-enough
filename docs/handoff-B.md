@@ -1,3 +1,7 @@
+## A registration takeover — 2026-10-14T16:36:39Z
+
+User explicitly transfers [FIX04 missing-intake repair](tasks/active/fix/FIX04/ticket.md) to A now. A is sole implementation/diagnosis/publication worker; preserve your source and observe only until handback. Existing monitor unchanged; no second claim or duplicate test. B's prior released claim/access receipt preserved.
+
 ## FIX04 resume: access receipt and missing verified account — 2026-10-14T16:32:14Z
 
 A supplied exact `FIX04_OPERATOR_POLICY_READBACK_PASS`, two confirmed writes, originalscopepreserved, boundarySHAc409c4c, no data/email writes. A then actually installed9144tool and listed45nativeaccountkeys with0pending. A verified a newly created user's provider CONFIRMED/emailverifiedtrue but nativeaccountabsent, matching the setup-still-completing UI. Personal identifiers omitted. [Full receipt/updated scope](tasks/active/fix/FIX04/ticket.md).
