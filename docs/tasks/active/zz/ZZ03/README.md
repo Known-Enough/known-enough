@@ -1,6 +1,6 @@
 # ZZ03 — Separate home, groups and decisions
 
-**Status:** Bounded dark-mode visual polish published from exact main source `7b59a0dce1fcb962b0eee9672cf1aa9baf88bf3e` at 2026-10-13T22:41:45Z ([receipt](../../../../review-artifacts/ZZ03/dark-mode-visual-polish-publication.json)). Dark/light synthetic desktop/mobile review passed. The full parallel browser suite was60/72 with12 existing unrelated-flow failures. Whole ZZ03 acceptance and real-account review remain incomplete.
+**Status:** Bounded decision-groups list and Quick view published from exact main source `da985df6ee931f55bbee23619ecde88f70dc4539` at 2026-10-13T23:57:53Z ([receipt](../../../../review-artifacts/ZZ03/decision-groups-list-publication.json)). The exact-source frontend workflow succeeded; all seven public manifest files returned HTTP200 and matched their SHA256 hashes. Synthetic light/dark desktop/mobile review passed. The full E2E suite was65/72 with seven failures outside the changed group dashboard flows. Whole ZZ03 acceptance and real-account review remain incomplete.
 
 Replace the long signed-in page with clear views: waiting for approval, Your groups, a selected group and a selected decision. Keep the ZZ02 profile drawer in the header. Remove manual decision-ID entry, fictional templates, simulated Alexa and fictional invitations from the normal product flow.
 
@@ -9,6 +9,10 @@ Each view shows one next action, useful status and clear back navigation. Reuse 
 [Ticket](ticket.md) · [ZZ batch](../README.md) · [Task board](../../../../task-board.md)
 
 [Dashboard publication receipt](../../../../review-artifacts/ZZ03/groups-dashboard-publication.json)
+
+[Decision-groups list and Quick view publication receipt](../../../../review-artifacts/ZZ03/decision-groups-list-publication.json)
+
+Current synthetic Quick view captures: [1280px light](../../../../review-artifacts/ZZ03/decision-groups-quickview-1280-light.png), [1280px dark](../../../../review-artifacts/ZZ03/decision-groups-quickview-1280-dark.png), [390px light](../../../../review-artifacts/ZZ03/decision-groups-quickview-390-light.png), [390px dark](../../../../review-artifacts/ZZ03/decision-groups-quickview-390-dark.png).
 
 [Checked navigation review and exact dependency](../../../../review-artifacts/ZZ03/navigation-review.md). [Group-details publication and byte readback](../../../../review-artifacts/ZZ03/group-details-publication.json). [Supplied-brand publication and byte readback](../../../../review-artifacts/ZZ03/brand-assets-publication.json). [Dark/light publication evidence](../../../../review-artifacts/ZZ03/theme-publication.json). [Surgical group icon polish publication](../../../../review-artifacts/ZZ03/group-icon-polish-publication.json). [Landing/login publication](../../../../review-artifacts/ZZ03/landing-login-publication.json). [Loading-experience publication](../../../../review-artifacts/ZZ03/loading-experience-publication.json). Local checks do not prove actual primary signup/profile/AI acceptance.
 
