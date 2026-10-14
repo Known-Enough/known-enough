@@ -35,7 +35,7 @@
     "browserSession": "NOT_OBSERVED",
     "authentication": "NOT_ATTEMPTED"
   },
-  "nextAction": "Finish full check and run stage/structural-only diagnostics in the existing cleanup path; no signup/model replay.",
+  "nextAction": "Freeze checked source and run cleanup-only diagnostic38646071704 successor on the original saved test checkpoint; no signup/model/runtime publication.",
   "additionalProductTest": "NOT_REQUESTED",
   "priorAdministratorAttempt": {
     "result": "BLOCKED",
@@ -145,5 +145,29 @@
     "result": "BLOCKED",
     "code": "ARCHIVE_INVALID",
     "source": "c60cd81f61f377874213e68d381a8741e05887fe"
+  },
+  "archiveDiagnosticRun": "https://github.com/Known-Enough/known-enough/actions/runs/38646071704",
+  "archiveDiagnostic": {
+    "result": "BLOCKED",
+    "archiveStage": "COMPILE_PLAN",
+    "entries": 5,
+    "rowsValid": true,
+    "keysValid": true,
+    "groupValid": true,
+    "childrenComplete": true,
+    "draftVersionsValid": true,
+    "directoriesMatch": true,
+    "operatorPolicy": "NOT_OBSERVED"
+  },
+  "latestSourceChecks": {
+    "fullCheck": "PASS",
+    "unitPassed": 1622,
+    "optionalSkips": 2,
+    "browserPassed": 86,
+    "browserWorkers": 2,
+    "hostedPassed": 1,
+    "archivePrivacyFocusedPassed": 6,
+    "mobileLifecycleRepeatedPasses": 3,
+    "failedPreviousFull": "mobile browser context teardown timeout; all assertions retained; final complete PASS after early context release"
   }
 }

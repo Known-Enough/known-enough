@@ -41,3 +41,17 @@ export function archiveInputChecks(header,entries) {
   draftVersionsValid:drafts.every(d=>d.groupVersion<=metadata.version&&(!d.createdDecisionId||decisionIds.includes(d.createdDecisionId))),
   directoriesMatch:claims.every(claim=>{const key=partitionDirectoryKey(claim);const row=entries.find(e=>isDeepStrictEqual(e.key,key))?.row;return isDeepStrictEqual(row,{schemaVersion:1,revision:1,kind:'DIRECTORY',value:claim});})};
 }
+
+export function archiveExceptionMetadata(error) {
+ const result={};
+ if(['TypeError','RangeError','ReferenceError','SyntaxError','ZodError'].includes(error?.name))result.exceptionName=error.name;
+ const code=typeof error?.stderr==='string'?/\(([A-Za-z0-9]+)\)/.exec(error.stderr)?.[1]:undefined;
+ if(['AccessDeniedException','ResourceNotFoundException','ValidationException','UnrecognizedClientException','InvalidSignatureException'].includes(code))result.awsCode=code;
+ const frames=[];
+ for(const line of String(error?.stack??'').split('\n').slice(1)){
+  const m=/(?:^|\/)(prove\.mjs|partition-archive\.ts|partitioned-group-repository\.ts|partition-directory\.ts):(\d{1,5}):(\d{1,5})\b/.exec(line);
+  if(m&&frames.length<4)frames.push({file:m[1],line:Number(m[2]),column:Number(m[3])});
+ }
+ if(frames.length)result.sourceFrames=frames;
+ return result;
+}

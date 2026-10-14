@@ -36,10 +36,12 @@ test('mobile keyboard entry, pending/disabled copy and private questions preserv
     await expect(entry.getByText('Known Enough and its authorized AI process your private inputs.', { exact: false })).toBeVisible();
     expect(await entry.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await entry.screenshot({ path: '/tmp/np03-mobile-signin.png', fullPage: true });
+    await login.close();
     const pending = await browser.newContext({ viewport: { width: 390, height: 844 } }); contexts.push(pending); await connect(pending, api, 'newbie');
     await api.call('newbie', '/account/register', { displayName: 'New Person' }); const pendingPage = await pending.newPage(); await pendingPage.goto(url);
     await expect(pendingPage.getByText('Your account is waiting for approval.', { exact: false })).toBeVisible();
     await expect(pendingPage.getByRole('button', { name: 'Create group', exact: true })).toHaveCount(0);
+    await pending.close();
     const h = await freshGroup(api); await h.ready(); await h.generate();
     const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' }); contexts.push(mobile); await connect(mobile, api, 'iris');
     const page = await mobile.newPage(); await page.goto(url + '?decision=' + h.decisionId);

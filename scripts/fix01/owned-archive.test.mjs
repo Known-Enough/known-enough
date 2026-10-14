@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { partitionSeedRows } from '../../packages/adapters/src/partitioned-group-repository.ts';
 import { partitionDirectoryKey } from '../../packages/adapters/src/partition-directory.ts';
 import { preparePartitionArchive } from '../../packages/adapters/src/partition-archive.ts';
-import { ownedArchiveEntries,archiveFailureCode,archiveInputChecks } from './owned-archive.mjs';
+import { ownedArchiveEntries,archiveFailureCode,archiveInputChecks,archiveExceptionMetadata } from './owned-archive.mjs';
 const hash=value=>createHash('sha256').update(value).digest('hex');
 function storage(acceptedBy='member') {
  const group={id:'owned-group',name:'Owned garden',organizer:'organizer',version:2,members:['organizer','member'],drafts:[],decisions:[{id:'owned-decision',version:1}],invitations:[{tokenHash:hash('invitation'),recipientHash:hash('member'),expiresAt:1,acceptedBy}]};
@@ -42,4 +42,9 @@ test('archive input diagnostics expose structural booleans and count without con
  const checks=archiveInputChecks(header,entries);assert.ok(!JSON.stringify(checks).includes('PRIVATE'));assert.equal(checks.groupValid,true);assert.equal(checks.directoriesMatch,true);
  for(const [key,value] of Object.entries(checks))assert.equal(typeof value,key==='entries'?'number':'boolean');
  entries.splice(entries.findIndex(e=>e.key.PK.startsWith('INVITATION#')),1);assert.equal(archiveInputChecks(header,entries).directoriesMatch,false);
+});
+test('exception diagnostics strip private paths/messages and retain only fixed source positions and AWS codes',()=>{
+ const result=archiveExceptionMetadata({name:'TypeError',stderr:'An error occurred (AccessDeniedException): PRIVATE_SUBJECT',stack:'TypeError: PRIVATE_MESSAGE /prove.mjs:2:3\n at owned (/PRIVATE_HOME/scripts/fix01/prove.mjs:44:12)\n at foreign (/PRIVATE_HOME/secret.ts:9:4)'});
+ assert.deepEqual(result,{exceptionName:'TypeError',awsCode:'AccessDeniedException',sourceFrames:[{file:'prove.mjs',line:44,column:12}]});assert.ok(!JSON.stringify(result).includes('PRIVATE'));
+ assert.deepEqual(archiveExceptionMetadata({name:'PRIVATE',stderr:'(PRIVATE)'}),{});
 });
