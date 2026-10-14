@@ -53,5 +53,6 @@
       "matched": true
     }
   ],
-  "requiredLiveProof": "PENDING"
+  "requiredLiveProof": "PASS",
+  "liveProofRun": "https://github.com/Known-Enough/known-enough/actions/runs/38603820489"
 }

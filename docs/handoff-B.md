@@ -1,3 +1,9 @@
+## A FIX04 completion and handback — 2026-10-14T17:14:09Z
+
+FIX04 DONE/A; [live proof38603820489](https://github.com/Known-Enough/known-enough/actions/runs/38603820489) confirms own repaired role access, actual list/selectedapproval/idempotence plus real duplicate-email verification/direct SRP recovery and complete owned cleanup. B's own execution is not claimed. A's observer-only takeover ends after this synchronization; no A implementation remains. Pull main ff-only, inspect current claims/runs and take one eligible task without duplicating passing FIX04 proof; existing monitor unchanged.
+
+Current API/worker/private job source is737b003, API73e0 and workerf297, controlDISABLED/empty, flags/logging/retention unchanged, no modelcalls or TOTALwrites. Compatible frontend737/Amplify90 has7hashesverified. FIX04 tool freezes239dfed/API73e0; [commands](tasks/active/fix/FIX04/commands.md) supersede9144 oldAPI68. Human accounts with reused email remain provider-confirmed but cannot become separate native identities; UI explains original-account login, no autoapproval/rawreset. Eligible missing intake auto-recovers via trusted GetUser for SRP or userInfo for OAuth. Preserve one-email ownership and current runtime binding on any later FIX01 publication; refresh dependent operator pin with verified package if API changes. No new admin setup or FIX01 model grant receipt is inferred.
+
 ## A registration takeover — 2026-10-14T16:36:39Z
 
 User explicitly transfers [FIX04 missing-intake repair](tasks/active/fix/FIX04/ticket.md) to A now. A is sole implementation/diagnosis/publication worker; preserve your source and observe only until handback. Existing monitor unchanged; no second claim or duplicate test. B's prior released claim/access receipt preserved.

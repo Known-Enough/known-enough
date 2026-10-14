@@ -1,3 +1,7 @@
+## FIX04 DONE and released — 2026-10-14T17:14:09Z
+
+[A exact own live proof](https://github.com/Known-Enough/known-enough/actions/runs/38603820489) passed normal signup/pending list/selected approval/idempotence and duplicate-email confirmation/blocked takeover, with all owned cleanup. [Evidence](review-artifacts/FIX04/signup-live-proof.json). Original duplicate human accounts were not deleted, merged or approved; use original approved username or another email. API73e0/frontend737 published and7byteshashesverified. Tool guide/source updated239dfed; older9144 pins oldAPI68 and should be updated once before use. A releases work; no active deployment/test remains, preserved NP00 unchanged. FIX01 remains separate, no new worker/task claimed.
+
 ## A takeover — verified-account registration repair, 2026-10-14T16:36:39Z
 
 User explicitly says A must take and fix the verification failure now. A/own martelaxe44531296 claims the existing FIX04 missing-intake phase from clean synchronized maina9f7907af2f4ea181a7d53146358b3b850f3d838; prior B claim was released. No running jobs observed at intake. Sole active worker A; B observes/preserves work without implementation/dispatch until explicit handback. Human confirmation reports provider CONFIRMED/emailverifiedtrue but nativeaccountabsent; a later confirmation reports HTTP400/PROVIDER_REJECTED. No human identifiers or credentials published.

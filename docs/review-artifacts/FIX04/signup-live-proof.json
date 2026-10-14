@@ -1,0 +1,120 @@
+{
+  "observedAt": "2026-10-14T17:14:09Z",
+  "actor": "martelaxe",
+  "actorId": 44531296,
+  "source": "239dfedbcda5d8974d7aa1ae45c855f101a2c114",
+  "apiSource": "737b00343f3c4201060a1985225357d5f37591d8",
+  "apiSha256": "73e0bc7d5e75f04e73a5a916d3107fae337a3a3e935a9eb110e7c72b4c252339",
+  "run": "https://github.com/Known-Enough/known-enough/actions/runs/38603820489",
+  "result": "FIX04_OWN_A_LIVE_PASS",
+  "effectiveBExecution": "NOT_EXECUTED",
+  "modelCalls": 0,
+  "signupEmailRequests": 3,
+  "providerUsersSelfDeleted": 3,
+  "ownedMailboxesRemoved": 2,
+  "realUsersApproved": 0,
+  "reports": {
+    "fix04-accounts-disabled-report.json": {
+      "sourceSha": "239dfedbcda5d8974d7aa1ae45c855f101a2c114",
+      "result": "LIVE_DISABLE_PASS",
+      "phase": "disable",
+      "identities": 2,
+      "signup": 2,
+      "confirmed": 2,
+      "signedLogin": 2,
+      "apiChecks": 4,
+      "archived": 0,
+      "selfDeleted": 0,
+      "mailboxesRemoved": 0,
+      "syntheticAccountsDisabled": 2,
+      "staleCommitRejected": 0,
+      "largeDrafts": 0,
+      "archiveLostAckRecovered": 0,
+      "modelCalls": 0
+    },
+    "fix04-fixtures-cleanup-report.json": {
+      "sourceSha": "239dfedbcda5d8974d7aa1ae45c855f101a2c114",
+      "result": "LIVE_CLEANUP_PASS",
+      "phase": "cleanup",
+      "identities": 2,
+      "signup": 2,
+      "confirmed": 2,
+      "signedLogin": 2,
+      "apiChecks": 4,
+      "archived": 0,
+      "selfDeleted": 2,
+      "mailboxesRemoved": 2,
+      "syntheticAccountsDisabled": 2,
+      "staleCommitRejected": 0,
+      "largeDrafts": 0,
+      "archiveLostAckRecovered": 0,
+      "modelCalls": 0
+    },
+    "fix04-signup-proof-report.json": {
+      "source": "239dfedbcda5d8974d7aa1ae45c855f101a2c114",
+      "result": "SIGNUP_RECOVERY_LIVE_PASS",
+      "stage": "SAFE_EMAIL_CONFLICT",
+      "checks": [
+        {
+          "operation": "SRP_GETUSER_REGISTRATION_REPLAY",
+          "result": "PASS",
+          "admission": "UNCHANGED_APPROVED"
+        },
+        {
+          "operation": "DUPLICATE_EMAIL_CONFIRMATION",
+          "result": "PASS",
+          "callbackError": false
+        },
+        {
+          "operation": "DUPLICATE_CONFLICT_NO_APPROVAL_NO_ORIGINAL_CHANGE",
+          "result": "PASS",
+          "status": 409
+        }
+      ],
+      "signupEmailRequests": 1,
+      "selfDeleted": 1,
+      "modelCalls": 0
+    },
+    "fix04-fixtures-report.json": {
+      "sourceSha": "239dfedbcda5d8974d7aa1ae45c855f101a2c114",
+      "result": "LIVE_FIXTURES_PASS",
+      "phase": "fixtures",
+      "identities": 2,
+      "signup": 2,
+      "confirmed": 2,
+      "signedLogin": 2,
+      "apiChecks": 4,
+      "archived": 0,
+      "selfDeleted": 0,
+      "mailboxesRemoved": 0,
+      "syntheticAccountsDisabled": 0,
+      "staleCommitRejected": 0,
+      "largeDrafts": 0,
+      "archiveLostAckRecovered": 0,
+      "modelCalls": 0
+    },
+    "fix04-proof-report.json": {
+      "utc": "2026-10-14T17:08:27.814Z",
+      "source": "239dfedbcda5d8974d7aa1ae45c855f101a2c114",
+      "result": "NATIVE_ACCESS_COMMANDS_LIVE_PASS",
+      "stage": "IDEMPOTENT_APPROVE",
+      "checks": [
+        {
+          "operation": "ALL_PAGE_PENDING_LIST",
+          "result": "PASS",
+          "pending": 2,
+          "accountKeysObserved": 47
+        },
+        {
+          "operation": "ONE_APPROVED_OTHER_PENDING_NO_MEMBERSHIP",
+          "result": "PASS"
+        },
+        {
+          "operation": "ALREADY_APPROVED_ZERO_MUTATIONS",
+          "result": "PASS"
+        }
+      ],
+      "modelCalls": 0
+    }
+  }
+}

@@ -1,3 +1,7 @@
+## FIX04 A released after real proof — 2026-10-14T17:14:09Z
+
+FIX04 DONE/A under explicit takeover; [38603820489](https://github.com/Known-Enough/known-enough/actions/runs/38603820489) own actor44531296 verified actual signup/list/selectedapproval/replay/safe duplicate email/normalcleanup PASS. Source239dfed/API737b003/73e0 frontend737 exact7hashmatch;2normal+1duplicate owned providerusers deleted/2mailboxesremoved,0human approval/0models. Matching pinned full1612/83 PASS. A releases implementation; B may fresh intake without concurrent A task, existing automation unchanged. B execution is not inferred. [Evidence](review-artifacts/FIX04/signup-live-proof.json).
+
 ## A takeover — verified-account registration repair, 2026-10-14T16:36:39Z
 
 User explicitly says A must take and fix the verification failure now. A/own martelaxe44531296 claims the existing FIX04 missing-intake phase from clean synchronized maina9f7907af2f4ea181a7d53146358b3b850f3d838; prior B claim was released. No running jobs observed at intake. Sole active worker A; B observes/preserves work without implementation/dispatch until explicit handback. Human confirmation reports provider CONFIRMED/emailverifiedtrue but nativeaccountabsent; a later confirmation reports HTTP400/PROVIDER_REJECTED. No human identifiers or credentials published.

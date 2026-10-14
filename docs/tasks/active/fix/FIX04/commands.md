@@ -1,12 +1,12 @@
 # FIX04 — Find pending requests and approve selected users
 
-Status: code/source checked and pushed; B's required live proof is BLOCKED by installed IAM reads. A may use the tool in his own existing same-account administrator CloudShell. No real user has been approved as a test.
+Status: DONE under user-directed A takeover. Own-A live list, selected approval, idempotence, signup recovery and cleanup passed in [38603820489](https://github.com/Known-Enough/known-enough/actions/runs/38603820489). Use the updated frozen tool source below; no real user was approved during proof. B own execution is not claimed.
 
 Use A's own CloudShell session in AWS account `092954139775`. Keep command output in the private terminal; do not paste usernames, emails, account records, tokens, configuration or private files into chat or GitHub. The tool reports only the username/display name/PENDING status/eligibility and observation time; request dates are not stored and appear as `null` (unavailable). A listing observes all pages, rather than an immutable global snapshot.
 
-## A's next action: grant the exact installed B operator reads
+## Administrator setup receipt — already applied
 
-Run this complete block once from A's existing administrator CloudShell. Standing project authority covers this repair. B cannot perform it because the installed role and boundary both deny IAM writes. No credentials are copied and existing CloudShell credential-provider variables are preserved.
+A already supplied FIX04_OPERATOR_POLICY_READBACK_PASS and actual own-role live proof now passes. The original setup block below is retained for recovery/history; it is not a next action. Standing project authority covers this repair. B cannot perform it because the installed role and boundary both deny IAM writes. No credentials are copied and existing CloudShell credential-provider variables are preserved.
 
 ```bash
 set -euo pipefail
@@ -33,16 +33,16 @@ set -euo pipefail
 umask 077
 mkdir -p "$HOME/.known-enough/fix04-setup"
 curl --fail --silent --show-error --proto '=https' --tlsv1.2 \
-  'https://raw.githubusercontent.com/Known-Enough/known-enough/9144a8707db17c68237c4b4d2ee97e06e3aeb6f9/scripts/fix04/bootstrap.py' \
+  'https://raw.githubusercontent.com/Known-Enough/known-enough/239dfedbcda5d8974d7aa1ae45c855f101a2c114/scripts/fix04/bootstrap.py' \
   -o "$HOME/.known-enough/fix04-setup/bootstrap.py"
 printf '%s  %s\n' '0f68cd163f854efd4daab2d698ac4f8ed13444dfe406a6d143494e1ea32715f0' \
   "$HOME/.known-enough/fix04-setup/bootstrap.py" | sha256sum --check --status
 python3 -B "$HOME/.known-enough/fix04-setup/bootstrap.py" \
-  --source-sha 9144a8707db17c68237c4b4d2ee97e06e3aeb6f9 \
-  --archive-sha256 5d6b9579c55230de49f67da4f1f3ffaefcdd5ebfdbbce9a4ba2f68eaf2657de7
+  --source-sha 239dfedbcda5d8974d7aa1ae45c855f101a2c114 \
+  --archive-sha256 617358c41c02b69560cc647675467cff8d4add7396e02a6d14a37246b1ea5f5e
 ```
 
-Expected result: `FIX04_TOOL_SOURCE_VERIFIED`, or `FIX04_TOOL_ALREADY_MATCHED` on a verified repeat. Linux x86_64 and arm64 are supported. Source checksum is independently frozen at `9144a8707db17c68237c4b4d2ee97e06e3aeb6f9`; cached or edited source is rejected. The exact setup downloaded Node/npm/dependencies and verified all frozen source files in a private local Linux test; a second invocation returned ALREADY_MATCHED with zero AWS/provider requests. This proves installation, not AWS access or a real approval.
+Expected result: `FIX04_TOOL_SOURCE_VERIFIED`, or `FIX04_TOOL_ALREADY_MATCHED` on a verified repeat. Linux x86_64 and arm64 are supported. Source checksum is independently frozen at `239dfedbcda5d8974d7aa1ae45c855f101a2c114`; cached or edited source is rejected. The exact setup downloaded Node/npm/dependencies and verified all frozen source files in a private local Linux test; a second invocation returned ALREADY_MATCHED with zero AWS/provider requests. This proves installation, not AWS access or a real approval.
 
 ## The two routine commands
 
@@ -71,14 +71,20 @@ Approval resolves the exact provider username to its immutable subject, checks c
 
 Expected list result is `PENDING_LIST_COMPLETE`, with a private `pending` array; empty array means zero observed pending requests. Expected approval result is `APPROVALS_COMPLETE`, with per-user APPROVED or ALREADY_APPROVED. `APPROVALS_PARTIAL` reports rejected/failed/skipped selections and returns nonzero. Do not infer rollback of earlier successes.
 
-Private audit files are under `$HOME/.known-enough/access-users/private/`, mode 0600 beneath a mode-0700 directory. They contain UTC, source/API hash, operation and bounded outcome counts, without account identifiers. A cached verified API ZIP is private; temporary extracted configuration is removed after each command. Never upload that folder. The primary native API is pinned to hash `68f76664f24911c3833108ff904b29116fd3a619189080f6f2a78ace73bf4ea7`; deployment drift fails closed and requires a checked source update.
+Private audit files are under `$HOME/.known-enough/access-users/private/`, mode 0600 beneath a mode-0700 directory. They contain UTC, source/API hash, operation and bounded outcome counts, without account identifiers. A cached verified API ZIP is private; temporary extracted configuration is removed after each command. Never upload that folder. The primary native API is pinned to hash `73e0bc7d5e75f04e73a5a916d3107fae337a3a3e935a9eb110e7c72b4c252339`; deployment drift fails closed and requires a checked source update.
 
 ## If a command fails
 
 AccessDeniedException means the current AWS identity lacks the printed operation; use the repaired installed role or A's own administrator session. A configuration readback must be followed by effective access proof. Do not repeat the same test before the installed permissions change. WRONG_ACCOUNT means select the existing project account, without borrowing credentials. IDENTITY_MISMATCH/MISSING_IDENTITY means reconcile the trusted provider/native mapping; do not fabricate an account or approve by display name. UNVERIFIED_EMAIL/INACTIVE_PROVIDER/NOT_PENDING require resolving that account state, not forcing approval. STALE_ACCOUNT/UNCONFIRMED_APPROVAL require fresh private inspection before another selection; no write is automatically repeated. Source/cache/hash or shared-boundary errors require B's checked package update; do not disable the guard or overwrite other work. A failed admin repair reports confirmed IAM writes and unknown acknowledgments in its private backup's execution journal; send only sanitized status/errors to B.
 
-## B's next step after A's readback
+## Completed proof and future B use
 
-Verify updated operator capabilities once, inspect running jobs, freeze current main source, and run only the existing `fix04-proof.yml` workflow. It completes a read-only global preflight before creating two fresh owned pending fixtures, executes these actual list/approve CLI commands privately, approves one fixture, leaves the other pending, verifies zero automatic memberships and idempotence, then disables/deletes owned accounts and mailboxes. Public reports contain only counts/statuses. Mark FIX04 DONE only after that required live evidence and cleanup pass. No workflow dispatch, fresh fixture or real approval was performed while access remains denied.
+Own-A proof38603820489 already passed with operator/source pin239dfed. B must pull current main and verify its own effective access on future use; do not duplicate a passing signup proof merely to repeat this installation. The existing `fix04-proof.yml` workflow remains available for required regression verification. It completes a read-only global preflight before creating two fresh owned pending fixtures, executes these actual list/approve CLI commands privately, approves one fixture, leaves the other pending, verifies zero automatic memberships and idempotence, then disables/deletes owned accounts and mailboxes. Public reports contain only counts/statuses. Own-A list/selected approval/live signup/conflict proof and cleanup passed; FIX04 is DONE under the explicit takeover. B execution remains unclaimed.
 
 [Ticket](ticket.md) · [Evidence](../../../../review-artifacts/FIX04/access-commands.md)
+
+## Email conflicts and missed signup intake
+
+The app supports one account per verified email. A new username using an already-linked email cannot take over that account or enter the pending queue as a second identity. Verification now completes and the signed-in app explains how to use the original account or a different email. Confirmed users missing an eligible app record recover automatically into PENDING through a trusted server lookup; rejected/disabled or email-conflicting identities are not automatically approved or reset.
+
+An empty pending list is a valid result when only already-linked usernames were created. Do not fabricate state or retry an old verification code to force registration. Source9144 tools pinned the prior API68 and stop after this server update: run the current setup block once, then the same list/approve commands.
