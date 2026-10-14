@@ -63,3 +63,13 @@ python3 -B scripts/cloudshell-commands/04-recover-disk-space.py
 ```
 
 Expected last result: `LOCAL_SPACE_RECOVERY_COMPLETE`; then run step2 above. This recovery helper has been prepared and manually reviewed, not executed or tested in A's chat at the user's direction. Actual CloudShell recovery awaits the user's result.
+
+## Enable real decision drafting when FIX01 is blocked
+
+[05-enable-decision-drafting.py](05-enable-decision-drafting.py) combines the two remaining configuration changes for the currently published native runtime: grant the API its exact Nova Lite invoke permission and enable public decision drafting. Run from your existing administrator CloudShell in account092954139775.
+
+```bash
+python3 -B scripts/cloudshell-commands/05-enable-decision-drafting.py --apply
+```
+
+It checks the exact current API/worker hashes and source, keeps the private worker schedule and retention disabled, preserves usage totals, saves a private pre-change backup, refuses a different existing named policy, uses a conditional control update and reads configuration back. It does not call AI, sign up a user or run tests. Expected final result is `DECISION_DRAFTING_SETUP_READBACK_PASS`; actual decision creation still requires your manual check. Prepared for API83d794ac/workerf15b5164/jobsource4fc702b; changed runtime or active jobs stop before setup.

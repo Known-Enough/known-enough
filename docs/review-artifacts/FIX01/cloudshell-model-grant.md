@@ -1,5 +1,7 @@
 # FIX01 exact administrator grant
 
+**Latest manual completion path:** [combined current CloudShell setup](../../../scripts/cloudshell-commands/05-enable-decision-drafting.py) grants the same exact model permission and enables public drafting on the currently published source4fc702b/API83d794ac/workerf15b5164. It invokes no model or tests. The single-grant block below remains historical/separate setup and does not enable drafting by itself.
+
 Run this once in A’s own AWS CloudShell in account `092954139775`, using A’s existing IAM administrator access. No B credentials or role expansion is needed. The installed API role’s five policies were read in [38521238916](https://github.com/Known-Enough/known-enough/actions/runs/38521238916): none grants the existing Nova Lite model. B’s own repair [38521528053](https://github.com/Known-Enough/known-enough/actions/runs/38521528053) failed `iam:get-role/AccessDenied` before any write.
 
 The block checks the account, preserves any different named policy, saves a private backup, grants only one model operation and reads it back. It changes no worker, boundary, data, queue control or usage counter. It retains CloudShell’s credential provider.
