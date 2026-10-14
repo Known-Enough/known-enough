@@ -50,16 +50,17 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
   }
   useEffect(() => {
     if (!group.isOrganizer) { setCheckingRequest(false); return; } let active = true; const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 15000);
     void (async () => {
       try { const response = await api(`/groups/${group.id}/draft-requests`, { signal: controller.signal }); const body = await response.json();
         if (!response.ok) throw new UserFlowError(draftFailureMessage(response.status, body));
         if (!Array.isArray(body.requests) || body.requests.length > 64 || body.requests.some((value: unknown) => !value || typeof value !== 'object' || !('key' in value) || typeof value.key !== 'string' || !/^[A-Za-z0-9_-]{1,80}$/.test(value.key))) throw new Error('Request recovery unavailable');
         if (!active) return; setRequestLookupAvailable(true); const key = readDraftRequest(group.id) ?? body.requests[0]?.key ?? null;
         if (key) { saveDraftRequest(group.id,key); setPendingKey(key); pending.current = { idempotencyKey: key }; await recoverRequest(key); }
-      } catch (error) { if (active) setNotice(error instanceof UserFlowError ? error.message : 'We couldn’t check your previous AI request. Refresh this group before starting again.'); }
-      finally { if (active) setCheckingRequest(false); }
+      } catch (error) { if (active) setNotice(error instanceof UserFlowError ? error.message : 'We couldn’t finish checking your previous AI request. Use the request check below to try again.'); }
+      finally { window.clearTimeout(timeout); if (active) setCheckingRequest(false); }
     })();
-    return () => { active = false; controller.abort(); ++recoveryEpoch.current; };
+    return () => { active = false; window.clearTimeout(timeout); controller.abort(); ++recoveryEpoch.current; };
   }, [group.id,group.isOrganizer,recoveryGeneration]);
   const [roster, setRoster] = useState<{ id: string; frame: KE.PublicDecisionFrame; controlVersion: number; groupVersion: number;
     participants: { id: string; displayName: string }[] } | null>(null);
@@ -94,14 +95,22 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
   function changeFrame(frame: KE.PublicDecisionFrame) {
     if (draft) setDraft({ ...draft, frame }); setReviewed(false); setDirty(true);
   }
+  async function saveDraft() {
+    if (!draft) return;
+    const result = await request(`drafts/${draft.id}`, { revision: draft.revision, title: draft.frame.title, objective: draft.frame.objective, variables: draft.frame.variables, rules: draft.frame.rules });
+    const saved = Groups.GroupDraft.parse(result.draft); setDraft(saved); setStep(saved.clarificationQuestions.length ? 'questions' : 'review'); setDirty(false); setRoster(null); setReviewed(false); await reload();
+  }
   const question = draft?.clarificationQuestions[questionIndex];
-  const readiness = busy ? 'Please wait while we prepare your decision.'
-    : pendingKey ? 'Check or close your previous AI request before continuing.'
-    : checkingRequest ? 'Checking for a saved AI request…'
-    : !requestLookupAvailable ? 'Refresh this group so we can check your saved requests.'
-    : draft?.clarificationQuestions.length ? 'Answer the AI’s follow-up questions first.'
+  const requestRequirement = busy ? 'Please wait while we prepare or save your decision.'
+    : pendingKey ? 'Check your previous request below. Recover its result or close it when the server confirms it is safe.'
+    : checkingRequest ? 'Checking for unresolved AI requests. Please wait before continuing.'
+    : !requestLookupAvailable ? 'We could not check your previous requests. Choose “Check saved requests again” to continue; your answer will be kept.' : '';
+  const questionRequirement = requestRequirement || (dirty ? 'Save your wording changes below before sending these answers to AI.'
+    : answeredObjective.length > 2000 ? 'Your idea, questions and answers exceed 2,000 characters. Shorten your answers or go back and shorten your idea.'
+    : draft?.clarificationQuestions.some((_question, index) => !answers[index]?.trim()) ? 'Enter an answer for every follow-up question. Use Back to reach any unanswered earlier question.' : '');
+  const readiness = requestRequirement || (draft?.clarificationQuestions.length ? 'Answer the AI’s follow-up questions first.'
     : dirty ? 'Save your changes before creating the decision.'
-    : !reviewed ? 'Tick the review confirmation below to enable Create decision.' : '';
+    : !reviewed ? 'Tick the review confirmation below to enable Create decision.' : '');
   function closeWizard() {
     if (busyGuard.current) return;
     dialog.current?.close(); setStarting(false); launcher.current?.focus();
@@ -164,6 +173,9 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
           <span>{index < ['describe','questions','review'].indexOf(step) ? <PageIcon name="Check" /> : index + 1}</span>{['Your idea','Follow-up','Review'][index]}</li>)}</ol>
         <div className="ke-wizard-body" aria-busy={busy}>
           <p className="ke-wizard-privacy"><PageIcon name="ShieldCheck" />These details are shared with your group and processed by AI. Keep personal limits for your private conversation later.</p>
+          {requestRequirement && step !== 'review' && <p className="ke-wizard-help" role="status">{requestRequirement}</p>}
+          {!requestLookupAvailable && !checkingRequest && !pendingKey && <button type="button" className="secondary" disabled={busy}
+            onClick={() => { setNotice(''); setCheckingRequest(true); setRecoveryGeneration(value => value + 1); }}>Check saved requests again</button>}
           {pendingKey && <div className="ke-wizard-recovery">
             <h3>Let’s check your previous request.</h3><p>{requestState?.state === 'PENDING' ? 'AI is still working on it. Check its status rather than starting again.'
               : requestState?.state === 'UNKNOWN' ? 'We haven’t confirmed what happened. Check again; if it stays uncertain, contact the operator with the error reference.'
@@ -175,6 +187,7 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
           </div>}
           {step === 'describe' && <div className="ke-wizard-step">
             <div className="ke-wizard-ai-note"><strong>Start with the big picture.</strong><p>What is your group choosing, and which options are you considering? A few sentences are enough to begin.</p></div>
+            <p className="ke-wizard-help">Required: enter a shared idea, up to 2,000 characters, and finish the saved-request check. This guide uses AI to prepare the choices. You can edit its draft before creating the decision; it does not offer fully manual creation.</p>
             <label htmlFor={`group-objective-${group.id}`}>Tell me what you want to decide</label>
             <textarea id={`group-objective-${group.id}`} value={objective} maxLength={2000} placeholder="For example: Help us choose a restaurant for Friday. We’re considering Green Bowl, Pizza Corner and Taco House."
               disabled={busy || !!pendingKey || checkingRequest || !requestLookupAvailable} onChange={event => { setObjective(event.target.value); setReviewed(false); }} />
@@ -183,18 +196,19 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
             <div className="ke-wizard-actions"><button type="button" className="ke-icon-action" disabled={busy || checkingRequest || !requestLookupAvailable || !objective.trim() || !!pendingKey}
               onClick={() => void action(() => draftObjective(objective))}>Continue with AI<PageIcon name="ArrowRight" /></button>
               {draft && !pendingKey && <button type="button" className="secondary" disabled={busy} onClick={() => setStep(draft.clarificationQuestions.length ? 'questions' : 'review')}>Continue the saved draft</button>}</div>
-            {checkingRequest ? <p className="ke-wizard-help" role="status">Checking your saved requests…</p>
-              : !requestLookupAvailable ? <p className="ke-wizard-help">Close this guide and refresh the group before continuing.</p>
-              : !objective.trim() && <p className="ke-wizard-help">Tell us what your group wants to decide to continue.</p>}
+            {!objective.trim() && <p className="ke-wizard-help">Tell us what your group wants to decide to continue.</p>}
           </div>}
           {step === 'questions' && draft && <div className="ke-wizard-step">
             <div className="ke-wizard-ai-note"><strong>The AI needs a little more context.</strong><p>Your answers help turn your idea into clear choices everyone can review.</p></div>
+            <p className="ke-wizard-help">Required: answer every question with shared details (up to 200 characters per answer). Your idea, questions and answers together must fit within 2,000 characters. Save any wording edits and finish the saved-request check before asking AI to update the draft.</p>
             <p className="ke-wizard-question-count">Question {questionIndex + 1} of {draft.clarificationQuestions.length}</p>
             <label className="ke-wizard-question" htmlFor={`public-answer-${group.id}-${questionIndex}`}>{question}</label>
             <textarea id={`public-answer-${group.id}-${questionIndex}`} value={answers[questionIndex] ?? ''} maxLength={200}
               placeholder="Add a shared detail here…" disabled={busy || !!pendingKey} onChange={event => setAnswers({ ...answers, [questionIndex]: event.target.value })} />
             <small>{(answers[questionIndex] ?? '').length}/200 characters · shared with the group</small>
-            {answeredObjective.length > 2000 && <p className="ke-wizard-help" role="status">Your idea and answers are too long. Shorten the answers, or go back and describe a simpler decision.</p>}
+            <small>{answeredObjective.length}/2,000 total characters including the idea and questions</small>
+            {questionRequirement && !requestRequirement && <p className="ke-wizard-help" role="status">{questionRequirement}</p>}
+            {dirty && <button type="button" disabled={busy || !!pendingKey} onClick={() => void action(saveDraft)}>Save changes</button>}
             <div className="ke-wizard-actions"><button type="button" className="secondary" disabled={busy || !!pendingKey} onClick={() => questionIndex ? setQuestionIndex(questionIndex - 1) : setStep('describe')}>Back</button>
               {questionIndex < draft.clarificationQuestions.length - 1
                 ? <button type="button" disabled={busy || !!pendingKey || !answers[questionIndex]?.trim()} onClick={() => setQuestionIndex(questionIndex + 1)}>Next question</button>
@@ -205,6 +219,7 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
           </div>}
           {step === 'review' && draft && <div className="ke-wizard-step">
             <div className="ke-wizard-ai-note"><strong>Here’s what your group will review.</strong><p>Check the choices below. Creating the decision starts your group’s review; everyone still confirms their own needs and approvals.</p></div>
+            <p className="ke-wizard-help">Required: resolve all follow-up questions, save any wording changes, and tick the review confirmation for this saved draft. The saved-request check must finish before Create decision is enabled.</p>
             <article className="ke-wizard-preview"><h3>{draft.frame.title}</h3><p>{draft.frame.objective}</p><p className="ke-wizard-description">{draft.frame.description}</p>
               <h4>Choices to explore</h4><ul>{draft.frame.variables.map(variable => <li key={variable.id}>{variableText(variable, draft.frame)}</li>)}</ul>
               {!!draft.frame.rules.length && <><h4>Shared rules</h4><ul>{draft.frame.rules.map(rule => <li key={rule.id}>{ruleText(rule, draft.frame.variables)}</li>)}</ul></>}
@@ -218,10 +233,7 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
                   <input value={option.label} maxLength={120} disabled={busy || !!pendingKey} onChange={event => changeFrame({ ...draft.frame, variables: draft.frame.variables.map((item, vi) => vi === index && (item.type === 'ENUM' || item.type === 'ENUM_SET') ? { ...item, options: item.options.map((value, oi) => oi === at ? { ...value, label: event.target.value } : value) } : item) })} /></label>)}
               </div>)}
             </details>}
-            {dirty && <div className="ke-wizard-save"><p>You changed the wording. Save it first, then confirm your review.</p><button type="button" disabled={busy || !!pendingKey} onClick={() => void action(async () => {
-              const result = await request(`drafts/${draft.id}`, { revision: draft.revision, title: draft.frame.title, objective: draft.frame.objective, variables: draft.frame.variables, rules: draft.frame.rules });
-              const saved = Groups.GroupDraft.parse(result.draft); setDraft(saved); setStep(saved.clarificationQuestions.length ? 'questions' : 'review'); setDirty(false); setRoster(null); setReviewed(false); await reload();
-            })}>Save changes</button></div>}
+            {dirty && <div className="ke-wizard-save"><p>You changed the wording. Save it first, then confirm your review.</p><button type="button" disabled={busy || !!pendingKey} onClick={() => void action(saveDraft)}>Save changes</button></div>}
             {!draft.createdDecisionId && <label className="ke-wizard-confirm"><input type="checkbox" checked={reviewed} disabled={busy || dirty || !!pendingKey} onChange={event => setReviewed(event.target.checked)} />
               <span>I’ve reviewed these shared choices and who needs to approve.</span></label>}
             {!draft.createdDecisionId && readiness && <p className="ke-wizard-help" role="status">{readiness}</p>}

@@ -96,13 +96,14 @@ test('public draft takes keyboard focus; malformed responses show a safe retry m
     await api.groups.create({ kind: 'participant', subject: 'iris' }, { name: 'Small club', idempotencyKey: 'small' });
     const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: /^Open group / }).first().click();
     await page.getByRole('button', { name: 'Start a decision' }).click();
-  await page.getByLabel('What should this group decide?').fill('Choose a gallery meetup.'); await page.getByRole('button', { name: 'Draft a new decision', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Review the public draft' })).toBeFocused();
-    await page.getByRole('checkbox', { name: 'I reviewed this public draft and the required approvers' }).check();
-    await page.getByLabel('Decision title', { exact: true }).fill('Changed title');
-    await expect(page.getByRole('checkbox', { name: 'I reviewed this public draft and the required approvers' })).not.toBeChecked();
+  await page.getByLabel('Tell me what you want to decide').fill('Choose a gallery meetup.'); await page.getByRole('button', { name: 'Continue with AI', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Your decision, ready to review.' })).toBeFocused();
+    await page.getByRole('checkbox', { name: 'I’ve reviewed these shared choices and who needs to approve.' }).check();
+    await page.getByText('Adjust the wording', { exact: true }).click(); await page.getByLabel('Decision title', { exact: true }).fill('Changed title');
+    await expect(page.getByRole('checkbox', { name: 'I’ve reviewed these shared choices and who needs to approve.' })).not.toBeChecked();
     await page.route('https://api.example.test/groups/**/drafts', route => route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: 'PRIVATE_PROVIDER_PAYLOAD invalid json' }));
-    await page.getByRole('button', { name: 'Draft a new decision', exact: true }).click();
+    await page.getByRole('button', { name: 'Back to my idea', exact: true }).click();
+    await page.getByRole('button', { name: 'Continue with AI', exact: true }).click();
     await expect(page.getByText('The action could not be completed. Refresh its current state before trying again.', { exact: false })).toBeVisible();
     expect(await page.locator('body').innerText()).not.toContain('PRIVATE_PROVIDER_PAYLOAD');
   } finally { await context.close(); await api.close(); }
@@ -115,13 +116,13 @@ test('delayed draft save clears premature review before creation can proceed', a
     await api.groups.create({ kind: 'participant', subject: 'iris' }, { name: 'Small club', idempotencyKey: 'small' });
     const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: /^Open group / }).first().click();
     await page.getByRole('button', { name: 'Start a decision' }).click();
-  await page.getByLabel('What should this group decide?').fill('Choose a fictional gallery meetup.');
-    await page.getByRole('button', { name: 'Draft a new decision', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Review the public draft' })).toBeVisible();
-    const reviewed = page.getByRole('checkbox', { name: 'I reviewed this public draft and the required approvers' });
-    const create = page.getByRole('button', { name: 'Create decision for group review' });
-    const unsaved = page.getByText('Save these edits before creating the decision.', { exact: true });
-    await reviewed.check(); await page.getByLabel('Decision title', { exact: true }).fill('Edited gallery meetup');
+  await page.getByLabel('Tell me what you want to decide').fill('Choose a fictional gallery meetup.');
+    await page.getByRole('button', { name: 'Continue with AI', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Your decision, ready to review.' })).toBeVisible();
+    const reviewed = page.getByRole('checkbox', { name: 'I’ve reviewed these shared choices and who needs to approve.' });
+    const create = page.getByRole('button', { name: 'Create decision' });
+    const unsaved = page.getByText('You changed the wording. Save it first, then confirm your review.', { exact: true });
+    await reviewed.check(); await page.getByText('Adjust the wording', { exact: true }).click(); await page.getByLabel('Decision title', { exact: true }).fill('Edited gallery meetup');
     await expect(unsaved).toBeVisible(); await expect(reviewed).not.toBeChecked(); await expect(create).toBeDisabled();
     let markSaveStarted!: () => void; let releaseSave!: () => void;
     const saveStarted = new Promise<void>(resolve => { markSaveStarted = resolve; });
@@ -130,13 +131,12 @@ test('delayed draft save clears premature review before creation can proceed', a
       if (route.request().method() === 'POST') { markSaveStarted(); await saveGate; }
       await route.fallback();
     });
-    await page.getByRole('button', { name: 'Save draft edits' }).click();
+    await page.getByRole('button', { name: 'Save changes' }).click();
     await saveStarted;
-    await reviewed.check(); // The old live harness did this while the save response was pending.
-    try { expect(await reviewed.isChecked()).toBe(true); } finally { releaseSave(); }
+    try { await expect(reviewed).toBeDisabled(); await expect(create).toBeDisabled(); } finally { releaseSave(); }
     await expect(reviewed).not.toBeChecked(); await expect(create).toBeDisabled();
     await expect(unsaved).toHaveCount(0); // The saved revision has now replaced the dirty draft.
-    await expect(page.getByRole('heading', { name: 'Review the public draft' }).locator('xpath=ancestor::section[@aria-busy][1]')).toHaveAttribute('aria-busy', 'false');
+    await expect(page.getByRole('dialog')).toHaveAttribute('open', '');
     await reviewed.check(); await expect(create).toBeEnabled();
   } finally { await context.close(); await api.close(); }
 });
@@ -148,19 +148,17 @@ test('unanswered public questions survive saving and explicit answers create a r
     await api.groups.create({ kind: 'participant', subject: 'iris' }, { name: 'Small club', idempotencyKey: 'small' });
     const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: /^Open group / }).first().click();
     await page.getByRole('button', { name: 'Start a decision' }).click();
-  await page.getByLabel('What should this group decide?').fill('Choose a gallery meetup.');
-    await page.getByRole('button', { name: 'Draft a new decision', exact: true }).click();
+  await page.getByLabel('Tell me what you want to decide').fill('Choose a gallery meetup.');
+    await page.getByRole('button', { name: 'Continue with AI', exact: true }).click();
     const question = page.getByText('Should this meetup be indoors or outdoors?', { exact: true });
     await expect(question).toBeVisible();
-    const create = page.getByRole('button', { name: 'Create decision for group review', exact: true });
-    await expect(create).toBeDisabled();
-    await page.getByRole('button', { name: 'Save draft edits', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Review the public draft' })).toBeFocused();
-    await expect(question).toBeVisible(); await expect(create).toBeDisabled();
-    await page.getByLabel('Public answer 1', { exact: true }).fill('Indoors only.');
-    await page.getByRole('button', { name: 'Use public answers to draft again', exact: true }).click();
+    const create = page.getByRole('button', { name: 'Create decision', exact: true });
+    await expect(create).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Let AI update the draft', exact: true })).toBeDisabled();
+    await page.getByLabel('Should this meetup be indoors or outdoors?', { exact: true }).fill('Indoors only.');
+    await page.getByRole('button', { name: 'Let AI update the draft', exact: true }).click();
     await expect(question).toHaveCount(0); await expect(create).toBeDisabled();
-    await page.getByRole('checkbox', { name: 'I reviewed this public draft and the required approvers' }).check();
+    await page.getByRole('checkbox', { name: 'I’ve reviewed these shared choices and who needs to approve.' }).check();
     await expect(create).toBeEnabled(); await create.click();
     await expect(page.getByRole('heading', { name: 'Shared frame', exact: true })).toBeVisible();
   } finally { await context.close(); await api.close(); }
@@ -213,4 +211,45 @@ test('shared load helper awaits a held signed owner read before returning', asyn
   release();await loading;expect(finished).toBe(true);expect(statuses).toContain('HTTP_OK');
   await expect(page.getByLabel('I reviewed this frame version, its options and public rules.')).toBeVisible();
  } finally {release();await context.close();await api.close();}
+});
+
+for (const lookupFailure of [false, true]) test(`follow-up answer proceeds after ${lookupFailure ? 'failed saved-request check is retried without losing input' : 'a successful saved-request check'}`, async ({ browser }) => {
+  const api = await npApi(clarificationTransport()), context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  let failedCheck = false, draftCalls = 0; const objectives: string[] = [];
+  try {
+    await connect(context, api, 'iris'); await api.call('iris', '/account/register', { displayName: 'Iris' }); await api.approve('iris');
+    await api.groups.create({ kind: 'participant', subject: 'iris' }, { name: 'Small club', idempotencyKey: 'small' });
+    await context.route('https://api.example.test/groups/*/draft-requests', async route => {
+      if (route.request().method() === 'GET' && draftCalls > 0 && lookupFailure && !failedCheck) {
+        failedCheck = true; await route.fulfill({ status: 503, json: { error: { code: 'RETRYABLE_SERVER_ERROR' } }, headers: { 'access-control-allow-origin': '*' } }); return;
+      }
+      await route.fallback();
+    });
+    await context.route('https://api.example.test/groups/*/drafts', async route => {
+      if (route.request().method() === 'POST') { draftCalls++; objectives.push(route.request().postDataJSON().objective); }
+      await route.fallback();
+    });
+    const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: /^Open group / }).first().click();
+    await page.getByRole('button', { name: 'Start a decision', exact: true }).click();
+    await page.getByLabel('Tell me what you want to decide').fill('Choose a gallery meetup.');
+    await page.getByRole('button', { name: 'Continue with AI', exact: true }).click();
+    const answer = page.getByLabel('Should this meetup be indoors or outdoors?', { exact: true });
+    const proceed = page.getByRole('button', { name: 'Let AI update the draft', exact: true });
+    await expect(answer).toBeVisible(); await expect(proceed).toBeDisabled();
+    await answer.fill('Indoors only.');
+    if (lookupFailure) {
+      await expect(proceed).toBeDisabled();
+      await expect(page.getByText('We could not check your previous requests.', { exact: false })).toBeVisible();
+      await page.getByRole('button', { name: 'Check saved requests again', exact: true }).click();
+      await expect(answer).toHaveValue('Indoors only.');
+    }
+    await expect(proceed).toBeEnabled(); expect(draftCalls).toBe(1);
+    await proceed.click(); await expect(page.getByRole('heading', { name: 'Your decision, ready to review.' })).toBeVisible();
+    expect(draftCalls).toBe(2); expect(objectives[1]).toContain('Answer: Indoors only.');
+    const create = page.getByRole('button', { name: 'Create decision', exact: true }); await expect(create).toBeDisabled();
+    await expect(page.getByText('Required: resolve all follow-up questions', { exact: false })).toBeVisible();
+    await page.getByRole('checkbox', { name: 'I’ve reviewed these shared choices and who needs to approve.' }).check();
+    await expect(create).toBeEnabled(); await create.click(); await expect(page.getByRole('heading', { name: 'Shared frame', exact: true })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  } finally { await context.close(); await api.close(); }
 });

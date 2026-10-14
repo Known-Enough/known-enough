@@ -17,15 +17,15 @@ for(const unknown of [false,true]) test(`draft503 gives honest cause and reload 
   else status=404;
   await route.fulfill({status,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify(body)});
  });
- await page.goto('/?group=garden');const start=page.getByRole('button',{name:'Start a decision',exact:true});await expect(start).toBeEnabled();expect(inventoryReady).toBe(true);await start.click();
- await page.getByLabel('What should this group decide?').fill('PUBLIC_TRANSIENT_OBJECTIVE');await page.getByRole('button',{name:'Draft a new decision',exact:true}).click();
+ await page.goto('/?group=garden');const start=page.getByRole('button',{name:'Start a decision',exact:true});await expect(start).toBeEnabled();await expect.poll(()=>inventoryReady).toBe(true);await start.click();
+ await page.getByLabel('Tell me what you want to decide').fill('PUBLIC_TRANSIENT_OBJECTIVE');await page.getByRole('button',{name:'Continue with AI',exact:true}).click();
  await expect(page.getByText(unknown?'The outcome is not confirmed. Recover this same request before starting another.':'AI drafting is unavailable on this server. Recover the request before trying again later.',{exact:true})).toBeVisible();
  expect(await page.locator('body').innerText()).not.toMatch(/PRIVATE_SERVER_ERROR_CANARY|Check your account and organizer access/);
  expect(await page.evaluate(()=>sessionStorage.getItem('ke-draft-request:garden'))).toBe(key);
  expect(await page.evaluate(()=>JSON.stringify({...sessionStorage,...localStorage}))).not.toContain('PUBLIC_TRANSIENT_OBJECTIVE');
- await page.reload();await expect(page.getByRole('button',{name:'Recover draft request',exact:true})).toBeVisible();expect(drafts).toBe(1);
- const release=page.getByRole('button',{name:'Release this draft request for editing',exact:true});
- if(unknown){await expect(release).toBeDisabled();await expect(page.getByText('The provider outcome is still unknown.',{exact:false})).toBeVisible();expect(releases).toBe(0);}
- else{await expect(release).toBeEnabled();await release.click();await expect(page.getByText('The original request is closed.',{exact:false})).toBeVisible();expect(await page.evaluate(()=>sessionStorage.getItem('ke-draft-request:garden'))).toBeNull();expect(releases).toBe(1);}
+ await page.reload();await page.getByRole('button',{name:'Continue your draft',exact:true}).click();await expect(page.getByRole('button',{name:'Check progress',exact:true})).toBeVisible();expect(drafts).toBe(1);
+ const release=page.getByRole('button',{name:'Close request and start again',exact:true});
+ if(unknown){await expect(release).toHaveCount(0);await expect(page.getByText('We haven’t confirmed what happened.',{exact:false})).toBeVisible();expect(releases).toBe(0);}
+ else{await expect(release).toBeEnabled();await release.click();await expect(page.getByText('The previous request is closed.',{exact:false})).toBeVisible();expect(await page.evaluate(()=>sessionStorage.getItem('ke-draft-request:garden'))).toBeNull();expect(releases).toBe(1);}
  expect(drafts).toBe(1);
 });
