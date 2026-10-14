@@ -1,13 +1,15 @@
 import { mkdir,chmod,readFile,writeFile,lstat,rm } from 'node:fs/promises';
 import { homedir } from 'node:os';
-import { join } from 'node:path';
+import { join,basename } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { createHash,randomUUID } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { approveSelected } from '../../packages/adapters/src/partition-account-operator.ts';
 import { aws,verifyIdentity,operatorFromVerifiedPackage,sanitizeError,API_HASH } from './runtime.mjs';
 const execute=promisify(execFile),root=join(homedir(),'.known-enough','access-users','private');let invocation,privateReady=false;
-const audit={utc:new Date().toISOString(),result:'NOT_EXECUTED',operation:'UNKNOWN',selected:0,approved:0,noops:0,failures:0,providerWrites:0,groupWrites:0};
+const codeFolder=basename(fileURLToPath(new URL('../../',import.meta.url)));const source=codeFolder.match(/^source-([a-f0-9]{40})$/)?.[1]??(/^[a-f0-9]{40}$/.test(process.env.EXPECTED_SOURCE??'')?process.env.EXPECTED_SOURCE:'UNKNOWN');
+const audit={source,nativeApiSha256:API_HASH,utc:new Date().toISOString(),result:'NOT_EXECUTED',operation:'UNKNOWN',selected:0,approved:0,noops:0,failures:0,providerWrites:0,groupWrites:0};
 try{
  const [action,...args]=process.argv.slice(2);const names=[];
  if(action==='list'){if(args.join('|')!=='--pending')throw new Error('INVALID_ARGUMENT');audit.operation='LIST_PENDING';}
