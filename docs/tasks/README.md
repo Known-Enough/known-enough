@@ -1,3 +1,5 @@
+New frontend batch: [FF — focused UI polish](active/ff/README.md), starting with [FF01 registration and sign-in](active/ff/FF01/README.md). READY/unclaimed for B after the current claim; no parallel work.
+
 **FIX04 added:** [List/approve access requests](active/fix/FIX04/ticket.md) is READY/unclaimed for B after FIX03. Queue FIX01 → FIX02 → FIX03 → FIX04; no current claim interrupted or real account approved.
 
 **FIX03 added:** [In-app sign-in](active/fix/FIX03/ticket.md) is READY/unclaimed for B after FIX02. Current FIX queue is FIX01 → FIX02 → FIX03; preserve the active FIX01 claim. Cognito remains the authenticator; no new worker or execution claimed.
