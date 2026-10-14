@@ -1,6 +1,6 @@
 # FIX02 — Publish compatible profile API and verify descriptions/photos
 
-**Status:** READY / unclaimed. **Priority:** P1. **Intended worker:** B / Octavio / own `Battosai1806` identity. Queue after FIX01; do not interrupt its active claim.
+**Status:** IN_PROGRESS / B. **Priority:** P1. **Intended worker:** B / Octavio / own `Battosai1806` identity. Queue after FIX01; do not interrupt its active claim.
 
 ## Problem and evidence
 
@@ -40,3 +40,9 @@ Expected scope: existing profile/group web components and focused tests; native 
 A created this queued B task from clean synchronized main `9e098c8`, the current publication receipt and checked route/package sources. FIX01 remains IN_PROGRESS/B. No new implementation, test, cloud write, deployment, automation or B FIX02 execution occurred during task creation.
 
 [FIX batch](../README.md) · [Task guide](../../../README.md) · [Board](../../../../task-board.md)
+
+
+FIX02 claim 2026-10-14T08:36:10.509595+00:00: latest user directs sequential FIX02→FIX03→FIX04, complete or preserve/release concrete dead end then continue. Own B clean main40c4097, fetchedremoteequal, no active GitHubjobs observed. FIX01 staysBLOCKED/unclaimed exactAPI modelgrant (not prerequisite for non-AI profile/auth/operator work). Claim exactly FIX02/B, scope scripts/fix02 native routes/ownedprofileproof + .github/workflows/fix02-*; existing native/profile/operations package guards and tests only if demonstrated needed; task/evidence/board/claims/Blogs/monitor. InstalledAPI68f766/native api.handler from source670 already contains merged memberProfile code. Initial next step verify routes and separately reproduce description/avatar/memberreads with normalowned synthetic accounts, source-preserving compatible publication, no modelcalls/newworker/reinstall. Saved NP00/DEBT/oldclaims retained. No parallel task.
+
+
+FIX02 checked implementation 2026-10-14T08:49UTC: scripts/fix02/setup.py/test and .github/workflows/fix02-routes.yml connect exact JWT member GET and same-integration NONE OPTIONS using independently verified current API68f766. Existing compatible native670 package already includes memberProfile implementation; preserve api.handler/private manifests/jobs/lifecycle and FIX01 changes, no legacy one-file replacement or duplicateworker publication. Existing incompatible legacy publisher remains failclosed on native handler. Owned normal proof uses current backup/recover, two fresh verified personas, ownerUI description/photo save+replace+reload, pending/unrelated/member/removed reads and strict projection/readonlypeerUI, photo removal, nativearchive/disable/self-delete/mailboxcleanup; publicreports onlycategories/status/counts, no biography/image/token/address/opaqueactualgroupIDs. Setup mock2PASS/fake foreignroute0writes/lost ACK no duplicate route; AST/YAML/node syntaxPASS. Initial pinned check/lint stopped on unqualified sessionStorage in injected browser function; corrected to globalThis, changed-source full check FULL_EXIT0/unit1588/hosted1/browser78PASS with retained-failure traces. Post-check proof edits add private pending/unrelated coverage/status time and safe static stage fields only; syntax/lint rerun beforepublish. No models or fresh cloud fixtures yet. Started receipt delayed until localchecks (reporting gap) and first dispatch used an incorrectly hardcoded full source hash; preservefailed/inaccurate receipt and correct using actual git-resolved source, no fabricated correctsource. Next configured-route readback and normalownedliveproof.

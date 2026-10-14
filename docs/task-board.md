@@ -1,3 +1,5 @@
+Current B queue: FIX02 IN_PROGRESS/B; FIX03 thenFIX04 sequential after checked closeout or concrete block. User explicitly authorizes moving past dead ends. FIX01 remains blocked only by exact API model grant.
+
 Current FIX01 2026-10-14T06:50:25.720737+00:00: **BLOCKED / unclaimed**, native API/worker and recovery routes plus primary frontend published; static/unit1588 and tracedbrowser78PASS. Exact missing API-role Nova Lite grant needs A own AWS administrator; [command](review-artifacts/FIX01/cloudshell-model-grant.md). B IAM repairdenied,0writes. Actual paid primary proof/usage/cleanup remainsNOT_EXECUTED; no whole-task DONE or successor claim. Earlier A ownership blocker is resolved by user handoff and A release.
 
 Current FIX01 2026-10-14T06:15:48.137228+00:00: **IN_PROGRESS/B**, user-directed completion overrides the earlier writer hold; A latest published-source handoff ends profile implementation. Native combined-source verification/publication/live proof next; FIX02–04 remain queued.
