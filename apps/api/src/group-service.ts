@@ -91,6 +91,19 @@ export class GroupService {
       return this.snapshot(state, group, who);
     });
   }
+  async memberProfile(principal: TrustedPrincipal | null, rawGroupId: string, rawMemberId: string) {
+    const who = subject(principal), groupId = Id.parse(rawGroupId), selectedMemberId = Id.parse(rawMemberId);
+    return this.repository.transaction(state => {
+      const group = this.group(state, who, groupId);
+      const target = group.members.find(value => memberId(value) === selectedMemberId);
+      if (!target) return fail('NOT_FOUND');
+      const account = state.accounts.find(value => value.subject === target);
+      if (!account || account.status !== 'APPROVED') return fail('NOT_FOUND');
+      const image = account.profile?.image;
+      return Groups.GroupMemberProfile.parse({ displayName: account.displayName, description: account.profile?.description ?? '',
+        image: image ? { mimeType: image.mimeType, width: image.width, height: image.height, bytesBase64: image.bytesBase64 } : null });
+    });
+  }
   async create(principal: TrustedPrincipal | null, raw: unknown) {
     const who = subject(principal); const body = fields(raw, ['name', 'idempotencyKey']);
     const name = label(body.name); const key = Id.parse(body.idempotencyKey);

@@ -1,3 +1,9 @@
+**FIX04 added:** [List/approve access requests](active/fix/FIX04/ticket.md) is READY/unclaimed for B after FIX03. Queue FIX01 → FIX02 → FIX03 → FIX04; no current claim interrupted or real account approved.
+
+**FIX03 added:** [In-app sign-in](active/fix/FIX03/ticket.md) is READY/unclaimed for B after FIX02. Current FIX queue is FIX01 → FIX02 → FIX03; preserve the active FIX01 claim. Cognito remains the authenticator; no new worker or execution claimed.
+
+**FIX queue update:** FIX01 is IN_PROGRESS/B; [FIX02](active/fix/FIX02/ticket.md) is READY/unclaimed for B's next eligible intake after FIX01. It completes compatible profile API integration and description/photo/member-viewing proof. [Batch](active/fix/README.md). One task at a time; no FIX02 start inferred.
+
 **Current user-directed priority: [FIX batch](active/fix/README.md), starting with [FIX01](active/fix/FIX01/ticket.md).** READY/unclaimed for B's verified intake: repair decision creation, honest errors and debugging visibility. Relevant FIX01 tests/deployment are authorized; no B execution is claimed. The current board/claim log govern one sequential task; older queue snapshots below are historical where superseded.
 
 **OPS00 access completed under A takeover:** [Installed envelope and two real GitHub proofs](../review-artifacts/OPS00/access-installed-proof.md). A claim released; actual OPS01–03 services/cutover, final-order saved NP00 closeout and release acceptance remain. New B session/monitor activity unavailable; no new worker or successor started. The current board and verified claim log control the next intake.

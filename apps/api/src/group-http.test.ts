@@ -29,3 +29,35 @@ it('selected group read uses current approved membership and exposes no private 
     await api.disable('owner'); expect((await api.call('owner', `/groups/${group.id}`)).status).toBe(403);
   } finally { await api.close(); }
 });
+
+it('shared participant profile is group-scoped and returns only display name, bio and avatar pixels', async () => {
+  const api = await npApi();
+  try {
+    for (const who of ['owner', 'guest', 'outsider']) {
+      await api.call(who, '/account/register', { displayName: who }); await api.approve(who);
+    }
+    const created = await api.call('owner', '/groups', { name: 'Shared profile club', idempotencyKey: 'profile-club' });
+    const group = (await created.json()).group;
+    await api.repository.transaction(state => {
+      const owner = state.accounts.find(account => account.subject === 'owner')!;
+      owner.displayName = 'Owner name';
+      owner.profile = { description: 'A short bio for the group.', loginUsername: 'private-login', image: {
+        id: 'private-avatar-id', mimeType: 'image/png', width: 1, height: 1, bytesBase64: 'YQ==', sha256: 'a'.repeat(64) } };
+    });
+    const invite = await api.call('owner', `/groups/${group.id}/invitations`, { email: 'guest@example.invalid', replace: false });
+    const token = (await invite.json()).token;
+    expect((await api.call('guest', '/groups/accept', { token })).status).toBe(200);
+    const snapshot = await api.call('guest', `/groups/${group.id}`); const members = (await snapshot.json()).group.members;
+    const memberId = members.find((member: { displayName: string }) => member.displayName === 'Owner name').id;
+    const shared = await api.call('guest', `/groups/${group.id}/members/${memberId}/profile`);
+    expect(shared.status).toBe(200);
+    const value = (await shared.json()).profile;
+    expect(value).toEqual({ displayName: 'Owner name', description: 'A short bio for the group.', image: {
+      mimeType: 'image/png', width: 1, height: 1, bytesBase64: 'YQ==' } });
+    expect(Object.keys(value).sort()).toEqual(['description', 'displayName', 'image']);
+    expect(Object.keys(value.image).sort()).toEqual(['bytesBase64', 'height', 'mimeType', 'width']);
+    expect(JSON.stringify(value)).not.toMatch(/subject|email|login|status|version|private-avatar-id|sha256/);
+    expect((await api.call('outsider', `/groups/${group.id}/members/${memberId}/profile`)).status).toBe(404);
+    expect((await api.call('guest', `/groups/elsewhere/members/${memberId}/profile`)).status).toBe(404);
+  } finally { await api.close(); }
+});

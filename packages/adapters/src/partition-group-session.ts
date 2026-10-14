@@ -360,6 +360,23 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           state => snapshot(state, current(state, who, key), who), io));
       });
     },
+    memberProfile(principal: TrustedPrincipal | null, rawGroupId: string, rawMemberId: string) {
+      return safe(async () => {
+        const who = participant(principal), selectedId = groupId(rawGroupId), targetId = id.safeParse(rawMemberId);
+        if (!targetId.success) return deny('NOT_FOUND');
+        const io = partitionIO(limits);
+        return selected(who, selectedId, io, resolved => repository.transaction(resolved, state => {
+          const group = current(state, who, selectedId);
+          const target = group.members.find(value => partitionMemberId(value) === targetId.data);
+          if (!target) return deny('NOT_FOUND');
+          const account = state.accounts.find(value => value.subject === target);
+          if (account?.status !== 'APPROVED') return deny('NOT_FOUND');
+          const image = account.profile?.image;
+          return Groups.GroupMemberProfile.parse({ displayName: account.displayName, description: account.profile?.description ?? '',
+            image: image ? { mimeType: image.mimeType, width: image.width, height: image.height, bytesBase64: image.bytesBase64 } : null });
+        }, io));
+      });
+    },
     generateDraft(principal: TrustedPrincipal | null, rawId: string, raw: unknown, supplied?: PartitionIOContext) {
       return safe(async () => {
         const who = participant(principal); const key = groupId(rawId); const request = draftGeneration.safeParse(raw);

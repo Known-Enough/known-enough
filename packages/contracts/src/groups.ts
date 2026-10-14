@@ -3,14 +3,20 @@ import { PublicDecisionFrame } from './known-enough.ts';
 const id = z.string().regex(/^[A-Za-z0-9_-]{1,80}$/);
 const text = z.string().trim().min(1).max(80);
 export const AccountStatus = z.enum(['PENDING', 'APPROVED', 'REJECTED', 'DISABLED']);
-/** Owner-private only. Shared account/group/decision projections do not include these bytes. */
+/** Owner-managed PNG record; group reads project only the rendered image fields and never its asset id/hash. */
 export const OwnedAvatar = z.object({ id, mimeType: z.literal('image/png'), width: z.number().int().min(1).max(128), height: z.number().int().min(1).max(128),
   bytesBase64: z.string().min(1).max(21848).regex(/^[A-Za-z0-9+/]+={0,2}$/), sha256: z.string().regex(/^[a-f0-9]{64}$/) }).strict();
+/** Stored profile record; loginUsername is owner-private, while bio/avatar are exposed only through same-group reads. */
 export const PrivateProfile = z.object({ description: z.string().max(280), image: OwnedAvatar.nullable(), loginUsername: z.string().max(128).nullable() }).strict();
 export const ProfilePatch = z.object({ version: z.number().int().positive(), displayName: text, description: z.string().max(280) }).strict();
 export const AvatarPatch = z.object({ version: z.number().int().positive(), bytesBase64: z.string().min(1).max(21848).nullable() }).strict();
 export const OwnProfile = z.object({ status: AccountStatus, displayName: text, version: z.number().int().positive(),
   description: z.string().max(280), image: OwnedAvatar.nullable(), loginUsername: z.string().max(128).nullable() }).strict();
+/** Fields shared only after the caller is admitted to the same current group as the profile owner. */
+export const SharedAvatar = z.object({ mimeType: z.literal('image/png'), width: z.number().int().min(1).max(128), height: z.number().int().min(1).max(128),
+  bytesBase64: z.string().min(1).max(21848).regex(/^[A-Za-z0-9+/]+={0,2}$/) }).strict();
+/** Deliberately excludes all account, approval, authentication and asset identifiers. */
+export const GroupMemberProfile = z.object({ displayName: text, description: z.string().max(280), image: SharedAvatar.nullable() }).strict();
 export const Account = z.object({ subject: id, emailHash: z.string().regex(/^[a-f0-9]{64}$/), displayName: text,
   status: AccountStatus, version: z.number().int().positive(), profile: PrivateProfile.optional() }).strict();
 export const GroupDraft = z.object({ id, bodyHash: z.string().regex(/^[a-f0-9]{64}$/),

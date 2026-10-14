@@ -473,6 +473,10 @@ function createKnownEnoughApiHandler(
             sendJson(response, 200, { account }); return;
           }
           await options.groups.requireApproved(principal);
+          const memberProfile = /^\/groups\/([A-Za-z0-9_-]{1,80})\/members\/([A-Za-z0-9_-]{1,80})\/profile$/.exec(path);
+          if (memberProfile && request.method === 'GET') {
+            sendJson(response, 200, { profile: await options.groups.memberProfile(principal, memberProfile[1]!, memberProfile[2]!) }); return;
+          }
           if (path === '/groups' && request.method === 'GET') {
             sendJson(response, 200, { groups: await options.groups.list(principal) }); return;
           }

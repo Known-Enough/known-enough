@@ -188,6 +188,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
         const url = URL.parse(request.url ?? '/', 'http://local.invalid');
         if (!url || url.hash || (url.search && (url.pathname !== '/groups' || request.method !== 'GET'))) return reject('INVALID_COMMAND');
+        const memberProfile = /^\/groups\/([A-Za-z0-9_-]{1,80})\/members\/([A-Za-z0-9_-]{1,80})\/profile$/.exec(url.pathname);
         const group = /^\/groups\/([A-Za-z0-9_-]{1,80})(\/(?:remove|invite|invitations))?$/.exec(url.pathname);
         const draft = /^\/groups\/([A-Za-z0-9_-]{1,80})\/drafts(?:\/([A-Za-z0-9_-]{1,80})(\/create)?)?$/.exec(url.pathname);
         const decision = /^\/decisions\/([A-Za-z0-9_-]{1,80})\/(public|me|commands)$/.exec(url.pathname);
@@ -213,6 +214,9 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
           const page = await session.list(principal, { ...(limit === null ? {} : { limit: Number(limit) }),
             ...(cursor === null ? {} : { cursor }) }, { ...io, signal: AbortSignal.any([io.signal, controller.signal]) });
           send(response, 200, page); return;
+        }
+        if (request.method === 'GET' && memberProfile) {
+          send(response, 200, { profile: await session.memberProfile(principal, memberProfile[1]!, memberProfile[2]!) }); return;
         }
         if (request.method === 'POST' && url.pathname === '/account/register') {
           if (!registrationProfile) return reject('FORBIDDEN');

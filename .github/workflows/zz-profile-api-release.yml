@@ -1,0 +1,63 @@
+name: ZZ shared profile API publication
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact locally checked main source SHA
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: known-enough-primary-frontend
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && github.actor_id == '44531296'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      EXPECTED_SOURCE: ${{ inputs.source_sha }}
+      AWS_REGION: us-east-1
+      AWS_MAX_ATTEMPTS: '1'
+      NODE_NO_WARNINGS: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Verify exact source and compile API before credentials
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
+          npm ci
+          npm run check:references
+          npm run lint
+          npm run typecheck
+          npm test -- apps/api/src/group-http.test.ts apps/api/src/group-service.test.ts apps/api/src/partition-http.test.ts packages/adapters/src/partition-group-session.test.ts
+          python3 -B scripts/zz/profile-api-release.test.py
+          python3 -B scripts/zz/profile-api-release.py prepare
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPrimaryRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          role-session-name: profile-api-${{ github.run_id }}
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Publish only the verified participant profile route and API code
+        run: python3 -B scripts/zz/profile-api-release.py publish
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: zz-profile-api-release
+          path: ${{ runner.temp }}/zz-profile-api-release.json
+          if-no-files-found: warn
+          retention-days: 30

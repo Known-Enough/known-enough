@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { Groups } from '@deal-table/contracts';
 import { LoadingSkeleton, PageIcon, ProfileIcon } from './app-chrome';
 
-type Profile = ReturnType<typeof Groups.OwnProfile.parse>;
+type OwnerProfile = ReturnType<typeof Groups.OwnProfile.parse>;
+type ProfileImage = { mimeType: 'image/png'; width: number; height: number; bytesBase64: string };
+type ProfileView = { displayName: string; description: string; image: ProfileImage | null; version: number | null };
+export type ProfileTarget = { kind: 'owner' } | { kind: 'member'; groupId: string; memberId: string };
+type Api = (path: string, init?: RequestInit) => Promise<Response>;
 
 function initials(name: string) {
   const words = name.trim().split(/\s+/).filter(Boolean);
@@ -11,153 +15,155 @@ function initials(name: string) {
   if (words.length > 1) return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
   return (first || 'KE').slice(0, 2).toUpperCase();
 }
-
-function statusLabel(status: Profile['status']) {
-  if (status === 'PENDING') return 'Pending approval';
-  if (status === 'APPROVED') return 'Approved';
-  return 'Access declined';
+function ownerView(profile: OwnerProfile): ProfileView {
+  const { displayName, description, image, version } = profile;
+  return { displayName, description, version, image: image ? { mimeType: image.mimeType, width: image.width, height: image.height, bytesBase64: image.bytesBase64 } : null };
 }
 
-export function ProfileDrawer({ api, signOut }: { api: (path: string, init?: RequestInit) => Promise<Response>; signOut: () => void }) {
-  const dialog = useRef<HTMLDialogElement>(null);
-  const trigger = useRef<HTMLButtonElement>(null);
-  const heading = useRef<HTMLHeadingElement>(null);
-  const pictureInput = useRef<HTMLInputElement>(null);
-  const [open, setOpen] = useState(false), [profile, setProfile] = useState<Profile | null>(null), [editing, setEditing] = useState(false);
+export function ProfileModal({ api, open, target, onClose, restoreFocus, onOwnerProfile }: {
+  api: Api; open: boolean; target: ProfileTarget | null; onClose: () => void; restoreFocus?: () => void;
+  onOwnerProfile?: (profile: ProfileView) => void;
+}) {
+  const dialog = useRef<HTMLDialogElement>(null), heading = useRef<HTMLHeadingElement>(null), pictureInput = useRef<HTMLInputElement>(null);
+  const apiRef = useRef(api); apiRef.current = api;
+  const [profile, setProfile] = useState<ProfileView | null>(null), [editing, setEditing] = useState(false);
   const [name, setName] = useState(''), [description, setDescription] = useState(''), [busy, setBusy] = useState(false), [saving, setSaving] = useState(false), [notice, setNotice] = useState('');
   const generation = useRef(0);
-  const dirty = editing && (name !== profile?.displayName || description !== profile?.description);
+  const owner = target?.kind === 'owner';
+  const dirty = owner && editing && (name !== profile?.displayName || description !== profile?.description);
+  const key = target?.kind === 'owner' ? 'owner' : target ? `member:${target.groupId}:${target.memberId}` : '';
+  const groupId = target?.kind === 'member' ? target.groupId : '';
+  const memberId = target?.kind === 'member' ? target.memberId : '';
 
   function close() {
     if (saving || (dirty && !window.confirm('Discard your unsaved profile changes?'))) return;
     generation.current++;
-    setOpen(false);
     setEditing(false);
-    trigger.current?.focus();
+    dialog.current?.close();
+    onClose();
+    restoreFocus?.();
   }
 
   useEffect(() => {
-    if (!open) { dialog.current?.close(); return; }
-    dialog.current?.showModal();
-    heading.current?.focus();
+    const element = dialog.current;
+    if (!open || !target) { element?.close(); return; }
+    element?.showModal(); heading.current?.focus();
     const epoch = ++generation.current, controller = new AbortController();
-    setBusy(true);
-    setNotice('');
-    setProfile(null);
-    void api('/account/profile', { signal: controller.signal }).then(async response => {
+    setBusy(true); setNotice(''); setProfile(null); setEditing(false);
+    const path = owner ? '/account/profile' : `/groups/${encodeURIComponent(groupId)}/members/${encodeURIComponent(memberId)}/profile`;
+    void apiRef.current(path, { signal: controller.signal }).then(async response => {
       if (!response.ok) throw new Error('unavailable');
-      const result = Groups.OwnProfile.parse((await response.json()).profile);
-      if (generation.current === epoch) setProfile(result);
+      const body = await response.json() as { profile: unknown };
+      const next = owner ? ownerView(Groups.OwnProfile.parse(body.profile)) : (() => {
+        const value = Groups.GroupMemberProfile.parse(body.profile);
+        return { displayName: value.displayName, description: value.description, image: value.image, version: null };
+      })();
+      if (generation.current === epoch) { setProfile(next); if (owner) onOwnerProfile?.(next); }
     }).catch(() => {
-      if (generation.current === epoch) setNotice('Your profile is unavailable. Close this panel and try again.');
-    }).finally(() => {
-      if (generation.current === epoch) setBusy(false);
-    });
+      if (generation.current === epoch) setNotice(owner ? 'Your profile is unavailable. Try again.' : 'This profile is unavailable.');
+    }).finally(() => { if (generation.current === epoch) setBusy(false); });
     return () => { controller.abort(); generation.current++; };
-  }, [open]);
+  }, [open, key, owner, groupId, memberId]);
 
-  async function update(path: string, body: unknown) {
+  async function update(path: string, body: unknown, keepEditing = false) {
+    if (!owner || !profile || profile.version === null) return;
     const epoch = generation.current;
-    setBusy(true);
-    setSaving(true);
-    setNotice('');
+    setBusy(true); setSaving(true); setNotice('');
     try {
-      const response = await api(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+      const response = await apiRef.current(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
       if (!response.ok) throw new Error(response.status === 409 ? 'changed' : response.status === 422 ? 'invalid' : response.status === 403 ? 'denied' : 'unavailable');
-      const next = Groups.OwnProfile.parse((await response.json()).profile);
+      const next = ownerView(Groups.OwnProfile.parse((await response.json()).profile));
       if (generation.current !== epoch) return;
-      setProfile(next);
-      setEditing(false);
-      setNotice('Profile saved.');
+      setProfile(next); onOwnerProfile?.(next); setEditing(keepEditing); setNotice('Saved.');
     } catch (error) {
       if (generation.current === epoch) setNotice(error instanceof Error && error.message === 'changed'
         ? 'Your profile changed in another session. Close and reopen it before saving.'
-        : error instanceof Error && error.message === 'invalid' ? 'Check the name and description, or choose an RGB/RGBA PNG up to 128 × 128 pixels and 16 KB.'
-        : error instanceof Error && error.message === 'denied' ? 'Your access changed. Close this panel and refresh your account.'
+        : error instanceof Error && error.message === 'invalid' ? 'Check the name and bio, or choose an RGB/RGBA PNG up to 128 × 128 pixels and 16 KB.'
+        : error instanceof Error && error.message === 'denied' ? 'Your access changed. Refresh your account before editing.'
         : 'The save result is uncertain. Close and reopen your profile before retrying.');
-    } finally {
-      if (generation.current === epoch) { setBusy(false); setSaving(false); }
-    }
+    } finally { if (generation.current === epoch) { setBusy(false); setSaving(false); } }
   }
 
   async function upload(file: File | undefined) {
-    if (!file || !profile || busy) return;
+    if (!file || !owner || !profile || profile.version === null || busy) return;
     if (file.type !== 'image/png' || file.size > 16384) { setNotice('Choose a PNG up to 128 × 128 pixels and 16 KB.'); return; }
     const epoch = generation.current;
     try {
       const bytes = new Uint8Array(await file.arrayBuffer());
-      if (generation.current === epoch) await update('/account/profile/image', { version: profile.version, bytesBase64: btoa(String.fromCharCode(...bytes)) });
-    } catch {
-      if (generation.current === epoch) setNotice('The picture could not be read. Choose another PNG.');
-    }
+      if (generation.current === epoch) await update('/account/profile/image', { version: profile.version, bytesBase64: btoa(String.fromCharCode(...bytes)) }, true);
+    } catch { if (generation.current === epoch) setNotice('The picture could not be read. Choose another PNG.'); }
   }
 
-  return <>
-    <button ref={trigger} type="button" className="ke-profile-trigger secondary" aria-label="Open your profile" onClick={() => setOpen(true)}>
-      {profile?.image ? <img alt="" src={'data:image/png;base64,' + profile.image.bytesBase64} /> : profile ? <span aria-hidden="true">{initials(profile.displayName)}</span> : <ProfileIcon />}
-    </button>
-    <dialog ref={dialog} className="ke-profile-drawer" aria-labelledby="profile-title" onCancel={event => { event.preventDefault(); close(); }}
-      onClick={event => { if (event.target === dialog.current) close(); }}>
-      <div className="ke-profile-shell">
-        <header className="ke-profile-header">
-          <h2 id="profile-title" ref={heading} tabIndex={-1}>Your profile</h2>
-          <button type="button" className="secondary ke-profile-close" aria-label="Close profile" title="Close profile" disabled={saving} onClick={close}><PageIcon name="X" /></button>
-        </header>
-        <div className="ke-profile-main" aria-busy={busy}>
-          {!profile && busy && <LoadingSkeleton kind="profile" label="Loading your profile details" />}
-          {profile && <>
-            <section className="ke-profile-summary" aria-label="Profile summary">
-              <div className="ke-profile-avatar" aria-hidden="true">
-                {profile.image ? <img alt="" src={'data:image/png;base64,' + profile.image.bytesBase64} /> : <span>{initials(profile.displayName)}</span>}
-              </div>
-              <div className="ke-profile-summary-copy">
-                <h3>{profile.displayName}</h3>
-                <span className={`ke-profile-status is-${profile.status.toLowerCase()}`}><PageIcon name="ShieldCheck" />{statusLabel(profile.status)}</span>
-              </div>
-            </section>
-
-            {editing ? <form className="ke-profile-edit-form" onSubmit={event => { event.preventDefault(); void update('/account/profile', { version: profile.version, displayName: name, description }); }}>
-              <section className="ke-profile-section">
-                <h3><PageIcon name="UserRound" />Edit profile</h3>
-                <label htmlFor="profile-name">Display name</label>
-                <input id="profile-name" value={name} maxLength={80} required disabled={busy} onChange={event => setName(event.target.value)} />
-                <label htmlFor="profile-description">Description <span>· only you</span></label>
-                <textarea id="profile-description" value={description} maxLength={280} disabled={busy} onChange={event => setDescription(event.target.value)} />
-                <p className="ke-profile-helper">Your name is visible to group members. Your description and picture are private to this profile.</p>
-                <div className="ke-profile-form-actions">
-                  <button disabled={busy || !name.trim()}><PageIcon name="Check" />Save profile</button>
-                  <button type="button" className="secondary" disabled={busy} onClick={() => setEditing(false)}>Cancel edits</button>
-                </div>
-              </section>
-            </form> : <>
-              <section className="ke-profile-section" aria-labelledby="profile-account-heading">
-                <h3 id="profile-account-heading"><PageIcon name="UserRound" />Account details</h3>
-                <dl className="ke-profile-details">
-                  <div><dt>Sign-in username</dt><dd>{profile.loginUsername ?? 'Managed by your sign-in provider'}</dd></div>
-                </dl>
-                <p className="ke-profile-helper">Your username is managed by your sign-in provider and can’t be changed here.</p>
-              </section>
-              <section className="ke-profile-section" aria-labelledby="profile-description-heading">
-                <h3 id="profile-description-heading"><PageIcon name="FileText" />Description</h3>
-                <p className="ke-profile-description">{profile.description || 'No description added yet.'}</p>
-                <p className="ke-profile-helper">Visible only to you.</p>
-              </section>
-              <section className="ke-profile-section ke-profile-photo-section" aria-label="Profile photo">
-                <button type="button" className="secondary ke-profile-change-photo" aria-describedby="profile-picture-help" disabled={busy} onClick={() => pictureInput.current?.click()}><PageIcon name="Camera" />Change photo</button>
-                <input ref={pictureInput} id="profile-picture" className="ke-profile-file-input" type="file" accept="image/png" disabled={busy} aria-describedby="profile-picture-help" onChange={event => { void upload(event.target.files?.[0]); event.target.value = ''; }} />
-                <p id="profile-picture-help" className="ke-profile-helper">PNG only · RGB/RGBA · 128 × 128 px maximum · 16 KB maximum. Your photo is private to this profile.</p>
-                {profile.image && <button type="button" className="secondary ke-profile-remove-photo" disabled={busy} onClick={() => void update('/account/profile/image', { version: profile.version, bytesBase64: null })}>Remove picture</button>}
-              </section>
-              <button type="button" className="ke-profile-edit-button" disabled={busy} onClick={() => { setName(profile.displayName); setDescription(profile.description); setEditing(true); }}><PageIcon name="Pencil" />Edit profile</button>
-            </>}
+  return <dialog ref={dialog} className="ke-profile-modal" aria-labelledby="profile-title" onCancel={event => { event.preventDefault(); close(); }}
+    onClick={event => { if (event.target === dialog.current) close(); }}>
+    <div className="ke-profile-shell">
+      <header className="ke-profile-header"><h2 id="profile-title" ref={heading} tabIndex={-1}>Profile</h2>
+        <button type="button" className="secondary ke-profile-close" aria-label="Close profile" title="Close profile" disabled={saving} onClick={close}><PageIcon name="X" /></button>
+      </header>
+      <div className="ke-profile-main" aria-busy={busy}>
+        {!profile && busy && <LoadingSkeleton kind="profile" label="Loading profile" />}
+        {profile && <>
+          <section className="ke-profile-summary" aria-label="Profile summary">
+            <div className="ke-profile-avatar" aria-hidden="true">{profile.image
+              ? <img alt="" src={`data:image/png;base64,${profile.image.bytesBase64}`} />
+              : <span>{initials(profile.displayName)}</span>}</div>
+            <div className="ke-profile-summary-copy"><h3>{profile.displayName}</h3></div>
+          </section>
+          {editing && owner ? <form className="ke-profile-edit-form" onSubmit={event => {
+            event.preventDefault(); void update('/account/profile', { version: profile.version, displayName: name, description });
+          }}>
+            <label htmlFor="profile-name">Display name</label>
+            <input id="profile-name" value={name} maxLength={80} required disabled={busy} onChange={event => setName(event.target.value)} />
+            <label htmlFor="profile-description">Bio</label>
+            <textarea id="profile-description" value={description} maxLength={280} disabled={busy} onChange={event => setDescription(event.target.value)} />
+            <div className="ke-profile-photo-editor">
+              <button type="button" className="secondary ke-profile-change-photo" aria-describedby="profile-picture-help" disabled={busy} onClick={() => pictureInput.current?.click()}><PageIcon name="Camera" />Change photo</button>
+              <input ref={pictureInput} id="profile-picture" className="ke-profile-file-input" type="file" accept="image/png" disabled={busy} aria-describedby="profile-picture-help" onChange={event => { void upload(event.target.files?.[0]); event.target.value = ''; }} />
+              {profile.image && <button type="button" className="secondary ke-profile-remove-photo" disabled={busy} onClick={() => void update('/account/profile/image', { version: profile.version, bytesBase64: null }, true)}>Remove photo</button>}
+              <p id="profile-picture-help" className="ke-profile-helper">PNG · RGB/RGBA · up to 128 × 128 px · 16 KB max</p>
+            </div>
+            <div className="ke-profile-form-actions"><button type="submit" disabled={busy || !name.trim()}><PageIcon name="Check" />Save</button>
+              <button type="button" className="secondary" disabled={busy} onClick={() => setEditing(false)}>Cancel</button></div>
+          </form> : <>
+            <p className="ke-profile-bio">{profile.description || 'No bio yet.'}</p>
+            {owner && <button type="button" className="ke-profile-edit-button" disabled={busy} onClick={() => {
+              setName(profile.displayName); setDescription(profile.description); setEditing(true);
+            }}><PageIcon name="Pencil" />Edit profile</button>}
           </>}
-          {profile && busy && <LoadingSkeleton kind="inline" label="Saving your profile" />}
-          {!busy && notice && <p className="ke-profile-notice" role="status" aria-live="polite">{notice}</p>}
-        </div>
-        <footer className="ke-profile-footer">
-          <button type="button" className="secondary ke-profile-signout" disabled={busy} onClick={signOut}><PageIcon name="LogOut" />Sign out</button>
-        </footer>
+        </>}
+        {!busy && notice && <p className="ke-profile-notice" role="status" aria-live="polite">{notice}</p>}
       </div>
-    </dialog>
-  </>;
+    </div>
+  </dialog>;
+}
+
+export function ProfileDrawer({ api, signOut }: { api: Api; signOut: () => void }) {
+  const root = useRef<HTMLDivElement>(null), trigger = useRef<HTMLButtonElement>(null), profileAction = useRef<HTMLButtonElement>(null), signOutAction = useRef<HTMLButtonElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false), [profileOpen, setProfileOpen] = useState(false), [avatar, setAvatar] = useState<ProfileView | null>(null);
+  useEffect(() => {
+    if (!menuOpen) return;
+    profileAction.current?.focus();
+    const keydown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { event.preventDefault(); setMenuOpen(false); trigger.current?.focus(); return; }
+      if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+      event.preventDefault();
+      const items = [profileAction.current, signOutAction.current].filter((item): item is HTMLButtonElement => !!item);
+      const current = items.indexOf(document.activeElement as HTMLButtonElement);
+      items[(current + (event.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length]?.focus();
+    };
+    const pointer = (event: PointerEvent) => { if (event.target instanceof Node && !root.current?.contains(event.target)) setMenuOpen(false); };
+    document.addEventListener('keydown', keydown); document.addEventListener('pointerdown', pointer);
+    return () => { document.removeEventListener('keydown', keydown); document.removeEventListener('pointerdown', pointer); };
+  }, [menuOpen]);
+  function openOwnProfile() { setMenuOpen(false); setProfileOpen(true); }
+  return <div ref={root} className="ke-account-menu">
+    <button ref={trigger} type="button" className="ke-profile-trigger secondary" aria-label="Open account menu" aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(value => !value)}>
+      {avatar?.image ? <img alt="" src={`data:image/png;base64,${avatar.image.bytesBase64}`} /> : avatar ? <span aria-hidden="true">{initials(avatar.displayName)}</span> : <ProfileIcon />}
+    </button>
+    {menuOpen && <div className="ke-account-dropdown" role="menu" aria-label="Account menu">
+      <button ref={profileAction} type="button" role="menuitem" onClick={openOwnProfile}><PageIcon name="UserRound" />Your profile</button>
+      <button ref={signOutAction} type="button" role="menuitem" onClick={() => { setMenuOpen(false); signOut(); }}><PageIcon name="LogOut" />Sign out</button>
+    </div>}
+    <ProfileModal api={api} open={profileOpen} target={profileOpen ? { kind: 'owner' } : null} onClose={() => setProfileOpen(false)} restoreFocus={() => trigger.current?.focus()} onOwnerProfile={setAvatar} />
+  </div>;
 }

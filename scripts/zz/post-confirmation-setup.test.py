@@ -115,7 +115,7 @@ class SetupExecution(unittest.TestCase):
     def test_complete_setup_then_repeat_is_write_free(self):
         report = self.execute()
         self.assertEqual(report['result'], 'ZZ02_SETUP_READBACK_PASS')
-        self.assertEqual(report['configurationWrites'], 7)
+        self.assertEqual(report['configurationWrites'], 2 + len(self.config['routes']))
         self.assertEqual(self.pool['LambdaConfig']['PreSignUp'], 'preserved-hook')
         backup_index = self.calls.index(('s3api', 'head-object'))
         self.assertLess(backup_index, self.calls.index(('lambda', 'add-permission')))
@@ -147,7 +147,7 @@ class SetupExecution(unittest.TestCase):
         report = self.execute()
         self.assertEqual(report['result'], 'ZZ02_SETUP_READBACK_PASS')
         self.assertEqual(self.calls.count(('lambda', 'add-permission')), 1)
-        self.assertEqual(self.calls.count(('apigatewayv2', 'create-route')), 5)
+        self.assertEqual(self.calls.count(('apigatewayv2', 'create-route')), len(self.config['routes']))
 
     def test_ci_requires_durable_backup_but_inspection_is_read_only(self):
         self.assertEqual(self.execute(['--apply'])['code'], 'DURABLE_CONFIGURATION_BACKUP_REQUIRED')

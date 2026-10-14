@@ -1000,6 +1000,22 @@ it('pending owners persist private profile with CAS; foreign/display/status edit
   f.get('ACCOUNT#iris/STATE').value.status = 'DISABLED'; await expect(session.ownProfile(participant())).rejects.toThrow('FORBIDDEN');
 });
 
+it('shares a strict member profile only through a current approved same-group membership read', async () => {
+  const f = fixture();
+  f.get('ACCOUNT#iris/STATE').value.profile = { description: 'A short member bio', loginUsername: 'private-login', image: {
+    id: 'private-avatar-id', mimeType: 'image/png', width: 1, height: 1, bytesBase64: 'YQ==', sha256: 'a'.repeat(64) } };
+  const session = f.session();
+  const profile = await session.memberProfile(participant('omar'), 'garden', partitionMemberId('iris'));
+  expect(profile).toEqual({ displayName: 'IRIS', description: 'A short member bio', image: {
+    mimeType: 'image/png', width: 1, height: 1, bytesBase64: 'YQ==' } });
+  expect(JSON.stringify(profile)).not.toMatch(/subject|email|loginUsername|private-login|status|version|private-avatar-id|sha256/);
+  await expect(session.memberProfile(participant('luca'), 'garden', partitionMemberId('iris'))).rejects.toThrow('NOT_FOUND');
+  await expect(session.memberProfile(participant('omar'), 'garden', partitionMemberId('luca'))).rejects.toThrow('NOT_FOUND');
+  await expect(session.memberProfile(participant('omar'), 'other', partitionMemberId('iris'))).rejects.toThrow('NOT_FOUND');
+  f.get('GROUP#garden/STATE').value.members = ['iris'];
+  await expect(f.session().memberProfile(participant('omar'), 'garden', partitionMemberId('iris'))).rejects.toThrow('NOT_FOUND');
+});
+
 it('trusted confirmation registration persists before login, duplicate delivery preserves status and erased identities do not resurrect', async () => {
   const f = fixture('i'.repeat(64)), session = f.session();
   const who = { kind: 'participant' as const, subject: 'confirmed-new' };

@@ -6,6 +6,22 @@ FIX01 BLOCKED/unclaimed; B stops implementation after preserving checked source.
 
 Remote A89cb claims active ZZ03 profile work overlapping API/session files; A API run38494254833 failed LAMBDA_TARGET_MISMATCH. No release observed; do not infer idle or overwrite A's profile source. User clarification pending. A must finish/safely pause its publication and explicitly release/transfer claim. Then preserve both histories, integrate A source, rerun combined checks, inspect actual source/control/provider policies, publish matching native API/worker/routes/frontend, verify public-only enablement/private gate and execute fresh normal primary draft/review/create/reload/deny/usage/cleanup proof. Current claim/status/log changes and implementation remain local; no push claimed. No new task, worker, automation, model call or worker reinstall. Existing API logs denied FilterLogEvents under own inspector/release; exact minimal grant helper prepared but not executed.
 
+## FIX03 signup clarification — 2026-10-14T01:42:59Z
+
+User requires no Sign up/Create account option or “Need an account?” prompt inside the sign-in screen. Keep registration exclusively on the main welcome page, reachable through Back; add an explicit browser check in [FIX03](tasks/active/fix/FIX03/ticket.md). Existing registration/verification/password recovery and FIX01 → FIX02 → FIX03 → FIX04 queue remain. Documentation clarification only, no implementation/start.
+
+## Queued FIX04 — 2026-10-14T01:41:31Z
+
+After your FIX01 → FIX02 → FIX03 sequence, claim exactly [FIX04](tasks/active/fix/FIX04/ticket.md). Deliver two complete copy-paste commands: list all PENDING application accounts with trusted username mapping/pagination, then approve explicit usernames with conditional native updates/readback. Inspect the legacy aggregate CLI, but target the current partitions and preserve profiles/groups. Reuse installed operator access, keep identity output private and normal participant access restricted; no blanket approval or shared credentials. Test owned synthetic users, provide `commands.md` and both actual blocks in chat, and report exact outcomes/setup gaps. Existing chat/schedule unchanged; task is queued, not started.
+
+## Queued FIX03 — 2026-10-14T01:36:01Z
+
+Keep your current FIX01 task, then FIX02; take [FIX03](tasks/active/fix/FIX03/ticket.md) at the next eligible intake afterward. Build a normal participant sign-in form inside our current CSS/theme, keeping Cognito behind the scenes. Verify actual client flows/token scopes and trusted verified-email/session integration, preserve account approval and existing group/invitation navigation, and include useful verification/reset/expiry/sign-out behavior. Relevant tests and exact-source publication are authorized. No hosted redirect as the ordinary password login, no custom crypto or browser secrets. Log tests, deployed/live proof and exact blockers. Existing chat/monitor unchanged; this task is queued, not started.
+
+## Queued FIX02 handoff — 2026-10-14T01:28:42Z
+
+Continue your current FIX01 claim first. At the next eligible intake, claim exactly [FIX02](tasks/active/fix/FIX02/ticket.md): finish profile description/photo persistence and permitted member viewing through the installed native operations API. A's UI is published; the legacy profile-only backend release stopped at handler mismatch without code/route writes. Do not change the handler to force that ZIP through. Reuse your latest FIX01 package/source binding, verify actual routes and own-profile vs member-view errors separately, publish compatibly, and run relevant local/live checks. Standing authority applies; no new chat/monitor or concurrent A implementation. Log exact results/blockers and matching chat summary; this is a queued task, not evidence you started.
+
 ## Current B handoff — FIX01, 2026-10-13T21:55:30Z
 
 Pull main ff-only with your own account, inspect genuine claims/running jobs, then claim exactly [FIX01](tasks/active/fix/FIX01/ticket.md). The user explicitly requests B to fix decision drafting inside a group; relevant tests and exact-source deployment are authorized under standing project authority. A's preparation is complete with no active implementation; earlier observer-only/manual-test instructions yield for FIX01. Keep your existing persistent chat/idle-only monitor, one task and saved NP00.
