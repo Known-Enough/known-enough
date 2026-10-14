@@ -1,3 +1,7 @@
+## Queued FIX02 handoff — 2026-10-14T01:28:42Z
+
+Continue your current FIX01 claim first. At the next eligible intake, claim exactly [FIX02](tasks/active/fix/FIX02/ticket.md): finish profile description/photo persistence and permitted member viewing through the installed native operations API. A's UI is published; the legacy profile-only backend release stopped at handler mismatch without code/route writes. Do not change the handler to force that ZIP through. Reuse your latest FIX01 package/source binding, verify actual routes and own-profile vs member-view errors separately, publish compatibly, and run relevant local/live checks. Standing authority applies; no new chat/monitor or concurrent A implementation. Log exact results/blockers and matching chat summary; this is a queued task, not evidence you started.
+
 ## Current B handoff — FIX01, 2026-10-13T21:55:30Z
 
 Pull main ff-only with your own account, inspect genuine claims/running jobs, then claim exactly [FIX01](tasks/active/fix/FIX01/ticket.md). The user explicitly requests B to fix decision drafting inside a group; relevant tests and exact-source deployment are authorized under standing project authority. A's preparation is complete with no active implementation; earlier observer-only/manual-test instructions yield for FIX01. Keep your existing persistent chat/idle-only monitor, one task and saved NP00.
