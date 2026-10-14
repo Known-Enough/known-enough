@@ -1,0 +1,38 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { partitionSeedRows } from '../../packages/adapters/src/partitioned-group-repository.ts';
+import { partitionDirectoryKey } from '../../packages/adapters/src/partition-directory.ts';
+import { preparePartitionArchive } from '../../packages/adapters/src/partition-archive.ts';
+import { ownedArchiveEntries,archiveFailureCode } from './owned-archive.mjs';
+const hash=value=>createHash('sha256').update(value).digest('hex');
+function storage(acceptedBy='member') {
+ const group={id:'owned-group',name:'Owned garden',organizer:'organizer',version:2,members:['organizer','member'],drafts:[],decisions:[{id:'owned-decision',version:1}],invitations:[{tokenHash:hash('invitation'),recipientHash:hash('member'),expiresAt:1,acceptedBy}]};
+ const accounts=group.members.map(subject=>({subject,emailHash:hash(subject),displayName:subject,status:'APPROVED',version:1}));
+ const items=new Map();const key=k=>k.PK+'/'+k.SK;
+ for(const row of partitionSeedRows({accounts,groups:[group]},{groupId:group.id,accountSubjects:group.members}))if(row.next.kind!=='ACCOUNT')items.set(key(row.key),row.next);
+ for(const value of [{type:'DECISION',groupId:group.id,decisionId:'owned-decision'},{type:'INVITATION',groupId:group.id,...group.invitations[0]}]){
+  delete value.acceptedBy;items.set(key(partitionDirectoryKey(value)),{schemaVersion:1,revision:1,kind:'DIRECTORY',value});
+ }
+ const reads=[];return {items,key,reads,groups:{read:async k=>{reads.push(k);return structuredClone(items.get(key(k)));}}};
+}
+test('owned second-member decision cleanup includes invitation and decision directories in a valid archive',async()=>{
+ const s=storage();const {entries}=await ownedArchiveEntries(s.groups,'owned-group','organizer',['organizer','member']);
+ const plan=preparePartitionArchive(entries,'owned-group','a'.repeat(40));
+ assert.equal(plan.entries.length,4);assert.ok(plan.entries.some(item=>item.key.PK.startsWith('INVITATION#')));
+ assert.ok(plan.entries.some(item=>item.key.PK.startsWith('DECISION#')));
+});
+test('foreign or unaccepted invitation prevents cleanup before reading child rows',async()=>{
+ for(const recipient of ['foreign',null]){
+  const s=storage(recipient);await assert.rejects(ownedArchiveEntries(s.groups,'owned-group','organizer',['organizer','member']),/OWN_EMPTY_GROUP_REQUIRED/);assert.equal(s.reads.length,1);
+ }
+});
+test('missing immutable invitation record fails archive validation rather than omitting the claim',async()=>{
+ const s=storage();for(const k of s.items.keys())if(k.startsWith('INVITATION#'))s.items.delete(k);
+ const {entries}=await ownedArchiveEntries(s.groups,'owned-group','organizer',['organizer','member']);
+ assert.throws(()=>preparePartitionArchive(entries,'owned-group','a'.repeat(40)),/ARCHIVE_INVALID/);
+});
+test('archive diagnostics retain only finite codes without arbitrary messages',()=>{
+ assert.equal(archiveFailureCode({code:'ARCHIVE_STORAGE_UNAVAILABLE',message:'private'}),'ARCHIVE_STORAGE_UNAVAILABLE');
+ assert.equal(archiveFailureCode({code:'private',message:'private'}),undefined);
+});

@@ -5,6 +5,10 @@ on:
       source_sha:
         type: string
         required: true
+      cleanup_original:
+        description: Recover and clean only the already completed owned proof38642585751; no signup or model call
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -37,7 +41,9 @@ jobs:
           node scripts/operations/verify.mjs > /dev/null
           npm ci
           npm ci --prefix scripts/live-qa
-          node --experimental-transform-types --test scripts/operations/jobs-owned-proof.test.mjs scripts/operations/partition-live-behavior.test.mjs scripts/operations/lifecycle-owned-behavior.test.mjs
+          python3 -B scripts/fix01/original-usage.test.py
+          python3 -B scripts/operations/jobs-fixture-recovery.test.py
+          node --experimental-transform-types --test scripts/operations/jobs-owned-proof.test.mjs scripts/operations/partition-live-behavior.test.mjs scripts/operations/lifecycle-owned-behavior.test.mjs scripts/fix01/owned-archive.test.mjs
           npx playwright install --with-deps chromium
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
@@ -74,10 +80,14 @@ jobs:
           retry-max-attempts: 1
           unset-current-credentials: true
       - name: Create and authenticate two owned synthetic personas
+        if: ${{ !inputs.cleanup_original }}
         run: |
           umask 077
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
           node --experimental-transform-types scripts/operations/partition-live-behavior.mjs fixtures > "$RUNNER_TEMP/fix01-fixtures-report.json" 2>&1
+      - name: Recover only the fixed completed owned proof private checkpoint
+        if: inputs.cleanup_original
+        run: python3 -B scripts/fix01/original-fixture.py
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         if: always()
         with:
@@ -87,6 +97,7 @@ jobs:
           retry-max-attempts: 1
           unset-current-credentials: true
       - name: Read cumulative usage before the fresh primary request
+        if: ${{ !inputs.cleanup_original }}
         run: python3 -B scripts/fix01/usage.py --before
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         if: always()
@@ -98,7 +109,7 @@ jobs:
           retry-max-attempts: 1
           unset-current-credentials: true
       - name: Prove normal primary draft creation with two owned verified accounts
-        if: always()
+        if: ${{ always() && !inputs.cleanup_original }}
         run: |
           umask 077
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
@@ -117,7 +128,11 @@ jobs:
         if: always()
         run: |
           if test -f "$RUNNER_TEMP/partition-cutover-private/owned-fixtures-private.json"; then
-            python3 -B scripts/fix01/usage.py
+            if [ '${{ inputs.cleanup_original }}' = true ]; then
+              python3 -B scripts/fix01/original-usage.py
+            else
+              python3 -B scripts/fix01/usage.py
+            fi
           fi
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         if: always()
@@ -132,7 +147,11 @@ jobs:
         if: always()
         run: |
           if test -f "$RUNNER_TEMP/partition-cutover-private/owned-fixtures-private.json"; then
-            node --experimental-transform-types scripts/fix01/prove.mjs archive
+            if [ '${{ inputs.cleanup_original }}' = true ]; then
+              node --experimental-transform-types scripts/fix01/prove.mjs archive-original
+            else
+              node --experimental-transform-types scripts/fix01/prove.mjs archive
+            fi
           fi
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         if: always()
@@ -144,7 +163,7 @@ jobs:
           retry-max-attempts: 1
           unset-current-credentials: true
       - name: Always disable owned registered accounts
-        if: always()
+        if: ${{ always() && !inputs.cleanup_original }}
         run: |
           umask 077
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
@@ -161,7 +180,7 @@ jobs:
           retry-max-attempts: 1
           unset-current-credentials: true
       - name: Always self-delete owned users and remove mailboxes
-        if: always()
+        if: ${{ always() && !inputs.cleanup_original }}
         run: |
           umask 077
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
@@ -172,5 +191,7 @@ jobs:
         if: always()
         with:
           name: fix01-proof
-          path: ${{ runner.temp }}/fix01-*-report.json
+          path: |
+            ${{ runner.temp }}/fix01-*-report.json
+            ${{ runner.temp }}/owned-fixture-recovery-report.json
           if-no-files-found: warn

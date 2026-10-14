@@ -4,11 +4,13 @@ import { chromium } from '@playwright/test';
 import { createPartitionManagedDriver } from '../../packages/adapters/src/partition-managed.ts';
 import { partitionRecoveryStorage } from '../operations/partition-recovery.mjs';
 import { preparePartitionArchive,createPartitionArchiveRunner } from '../../packages/adapters/src/partition-archive.ts';
-import { createPartitionedGroupRepository,partitionGroupKey } from '../../packages/adapters/src/partitioned-group-repository.ts';
+import { createPartitionedGroupRepository } from '../../packages/adapters/src/partitioned-group-repository.ts';
 import { createCognitoIdentityResolver } from '../../apps/api/src/cognito-identity.ts';
-import { partitionDirectoryKey } from '../../packages/adapters/src/partition-directory.ts';
 import { randomUUID } from 'node:crypto';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { ownFixture } from '../operations/partition-live-behavior.mjs';
+import { ownedArchiveEntries,archiveFailureCode } from './owned-archive.mjs';
 const directory=join(process.env.RUNNER_TEMP,'partition-cutover-private');
 const report={source:process.env.EXPECTED_SOURCE,utc:new Date().toISOString(),result:'NOT_EXECUTED',groupCreate:'NOT_EXECUTED',draft:'NOT_EXECUTED',providerCalls:'NOT_VERIFIED',unauthorized:'NOT_EXECUTED',reload:'NOT_EXECUTED'};
 let browser;
@@ -16,23 +18,26 @@ try {
  const config=JSON.parse(await readFile(join(directory,'configuration-private.json'),'utf8'));
  const release=JSON.parse(await readFile(join(directory,'release-private.json'),'utf8'));
  const state=JSON.parse(await readFile(join(directory,'owned-fixtures-private.json'),'utf8'));
- if(state.sourceSha!==process.env.EXPECTED_SOURCE||config.account!=='092954139775'||config.region!=='us-east-1'||config.allowedOrigin!=='https://main.d143q5ravxp5av.amplifyapp.com')throw new Error('OWN_TARGET_MISMATCH');
- const fixture=state.fixtures.find(item=>item.accessToken&&item.created&&!item.deleted);ownFixture(fixture,state.runId);
- const identity=await createCognitoIdentityResolver(config)('Bearer '+fixture.accessToken);
- if(identity?.kind!=='participant'||identity.subject!==fixture.subject)throw new Error('OWN_SIGNED_IDENTITY_MISMATCH');
+ const original=process.argv[2]==='archive-original';
+ if(state.sourceSha!==(original?'6b6aa79070689caf17568fb59ee5dc3d677effe4':process.env.EXPECTED_SOURCE)||config.account!=='092954139775'||config.region!=='us-east-1'||config.allowedOrigin!=='https://main.d143q5ravxp5av.amplifyapp.com')throw new Error('OWN_TARGET_MISMATCH');
+ const fixture=state.fixtures.find(item=>original?item.groupId:item.accessToken&&item.created&&!item.deleted);ownFixture(fixture,state.runId);
+ if(original){
+  if(state.sourceSha!=='6b6aa79070689caf17568fb59ee5dc3d677effe4'||state.fixtures.length!==2||state.fixtures.some(f=>!f.deleted||!f.mailboxRemoved)||process.env.GITHUB_ACTOR_ID!=='143764700')throw new Error('OWN_TARGET_MISMATCH');
+  const result=await promisify(execFile)('aws',['sts','get-caller-identity','--region','us-east-1','--output','json','--no-cli-pager'],{timeout:20000});const identity=JSON.parse(result.stdout);
+  if(identity.Account!=='092954139775'||!identity.Arn.startsWith('arn:aws:sts::092954139775:assumed-role/KnownEnoughGithubGroupArchive/'))throw new Error('OWN_TARGET_MISMATCH');
+ }else{
+  const identity=await createCognitoIdentityResolver(config)('Bearer '+fixture.accessToken);
+  if(identity?.kind!=='participant'||identity.subject!==fixture.subject)throw new Error('OWN_SIGNED_IDENTITY_MISMATCH');
+ }
  const manifest=await readFile(join(directory,'manifest-private.json'));
  const managed=createPartitionManagedDriver({manifestBytes:manifest,expected:{sourceSha:release.sourceSha,sourceRevision:release.sourceRevision,sourceHash:release.sourceHash,manifestHash:release.manifestHash},manifestVersion:release.manifestVersion,verifiedTarget:{account:'092954139775',region:'us-east-1'},cursorKey:Buffer.from(config.cursorKeyBase64,'base64')});
- if(process.argv[2]==='archive') {
+ if(process.argv[2]==='archive'||original) {
   if(!fixture.groupId){report.result='NO_OWN_GROUP_TO_ARCHIVE';}
   else {
-   const key=partitionGroupKey(fixture.groupId),header=await managed.groups.read(key);
-   if(header?.kind!=='GROUP'||header.value.organizer!==fixture.subject||header.value.invitations.some(invite=>!state.fixtures.some(owned=>owned.subject===invite.acceptedBy))||header.value.members.some(subject=>!state.fixtures.some(owned=>owned.subject===subject))||header.value.draftIds.length>1||header.value.decisionIds.length>1)throw new Error('OWN_EMPTY_GROUP_REQUIRED');
-   const entries=[{key,row:header}];
-   for(const id of header.value.draftIds){const child={PK:key.PK,SK:'DRAFT#'+id};entries.push({key:child,row:await managed.groups.read(child)});}
-   for(const id of header.value.decisionIds){const child={PK:key.PK,SK:'BINDING#'+id};entries.push({key:child,row:await managed.groups.read(child)});const directory=partitionDirectoryKey({type:'DECISION',groupId:fixture.groupId,decisionId:id});entries.push({key:directory,row:await managed.groups.read(directory)});}
+   const {header,entries}=await ownedArchiveEntries(managed.groups,fixture.groupId,fixture.subject,state.fixtures.map(owned=>owned.subject));
    const plan=preparePartitionArchive(entries,fixture.groupId,process.env.EXPECTED_SOURCE);
    const expected={sourceSha:process.env.EXPECTED_SOURCE,groupId:fixture.groupId,sourceHeaderRevision:header.revision,sourceHash:plan.sourceHash,manifestHash:plan.manifestHash};
-   const authority={kind:'ORGANIZER',subject:fixture.subject};
+   const authority=original?{kind:'OPERATOR',actorId:143764700}:{kind:'ORGANIZER',subject:fixture.subject};
    const runner=createPartitionArchiveRunner(managed.archivePorts({manifestBytes:plan.manifestBytes,expected,authority,recovery:partitionRecoveryStorage()}),plan.manifestBytes,expected,authority);
    await runner.prepare();const result=await runner.archive();if(result.state!=='ARCHIVED')throw new Error('OWN_ARCHIVE_NOT_CONFIRMED');report.result='OWN_PROOF_GROUP_ARCHIVED';report.archivedGroups=1;
   }
@@ -85,9 +90,10 @@ try {
  await context.close();
  }
 } catch(error) {
+ if(process.argv[2]?.startsWith('archive')&&archiveFailureCode(error))report.archiveCode=archiveFailureCode(error);
  report.result='BLOCKED';report.error=['PRIMARY_DRAFT_FAILED','PUBLIC_CLARIFICATION_REQUIRED','PRIMARY_DECISION_CREATE_FAILED','PRIMARY_DECISION_RELOAD_FAILED','MISLEADING_ACCESS_COPY','OWN_SECOND_ACCOUNT_REQUIRED','UNAUTHORIZED_DRAFT_NOT_DENIED','UNAUTHENTICATED_RECOVERY_NOT_DENIED','OWN_TARGET_MISMATCH','OWN_SIGNED_IDENTITY_MISMATCH','OWN_PENDING_ACCOUNT_REQUIRED','OWN_GROUP_CREATE_FAILED','OWN_EMPTY_GROUP_REQUIRED','OWN_ARCHIVE_NOT_CONFIRMED','OWN_MEMBER_VISIBILITY_FAILED'].includes(error.message)?error.message:'OWN_REPRODUCTION_UNAVAILABLE';
 } finally {
- await browser?.close();await writeFile(join(process.env.RUNNER_TEMP,process.argv[2]==='archive'?'fix01-archive-report.json':'fix01-proof-report.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
+ await browser?.close();await writeFile(join(process.env.RUNNER_TEMP,process.argv[2]?.startsWith('archive')?'fix01-archive-report.json':'fix01-proof-report.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
 }
 
 if(report.result==='BLOCKED')process.exitCode=1;

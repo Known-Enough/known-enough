@@ -1,0 +1,110 @@
+{
+  "source": "6b6aa79070689caf17568fb59ee5dc3d677effe4",
+  "run": "https://github.com/Known-Enough/known-enough/actions/runs/38642585751",
+  "overallRun": "FAILED_CLEANUP",
+  "decisionFlow": "PRIMARY_PUBLIC_DRAFT_DECISION_PASS",
+  "reports": {
+    "fix01-proof-report.json": {
+      "source": "6b6aa79070689caf17568fb59ee5dc3d677effe4",
+      "utc": "2026-10-14T21:46:37.860Z",
+      "result": "PRIMARY_PUBLIC_DRAFT_DECISION_PASS",
+      "groupCreate": {
+        "status": 200
+      },
+      "draft": {
+        "status": 200,
+        "code": "UNCLASSIFIED",
+        "reference": "UNAVAILABLE",
+        "observedAt": "2026-10-14T21:46:47.483Z"
+      },
+      "providerCalls": "NOT_VERIFIED",
+      "unauthorized": {
+        "status": 404
+      },
+      "reload": "PASS",
+      "unauthenticated": 401,
+      "memberJoin": "PASS",
+      "decisionCreate": {
+        "status": 200
+      },
+      "memberVisibility": "PASS"
+    },
+    "fix01-usage-report.json": {
+      "utc": "2026-10-14T21:46:52.690018+00:00",
+      "source": "6b6aa79070689caf17568fb59ee5dc3d677effe4",
+      "result": "BLOCKED",
+      "providerCalls": 1,
+      "journalDeletes": 0,
+      "totalWrites": 0,
+      "totals": {
+        "runs": 65,
+        "reservedTokens": 17741140,
+        "reservedCostMicros": 17597796,
+        "messages": 60
+      },
+      "jobPhase": "SUCCEEDED",
+      "reason": null,
+      "usage": {
+        "inputTokens": 12873,
+        "outputTokens": 420
+      },
+      "reservedTokens": 18432,
+      "reservedCostMicros": 10000,
+      "usageDelta": {
+        "runs": 0,
+        "reservedTokens": 18432,
+        "reservedCostMicros": 10000,
+        "messages": 0
+      },
+      "cleanupError": "dynamodb:transact-write-items/AccessDeniedException",
+      "error": "OWN_TERMINAL_JOURNAL_CLEANUP_NOT_VERIFIED"
+    },
+    "fix01-fixtures-cleanup-report.json": {
+      "sourceSha": "6b6aa79070689caf17568fb59ee5dc3d677effe4",
+      "result": "LIVE_CLEANUP_PASS",
+      "phase": "cleanup",
+      "identities": 2,
+      "signup": 2,
+      "confirmed": 2,
+      "signedLogin": 2,
+      "apiChecks": 4,
+      "archived": 0,
+      "selfDeleted": 2,
+      "mailboxesRemoved": 2,
+      "syntheticAccountsDisabled": 2,
+      "staleCommitRejected": 0,
+      "largeDrafts": 0,
+      "archiveLostAckRecovered": 0,
+      "modelCalls": 0
+    },
+    "fix01-accounts-disabled-report.json": {
+      "sourceSha": "6b6aa79070689caf17568fb59ee5dc3d677effe4",
+      "result": "LIVE_DISABLE_PASS",
+      "phase": "disable",
+      "identities": 2,
+      "signup": 2,
+      "confirmed": 2,
+      "signedLogin": 2,
+      "apiChecks": 4,
+      "archived": 0,
+      "selfDeleted": 0,
+      "mailboxesRemoved": 0,
+      "syntheticAccountsDisabled": 2,
+      "staleCommitRejected": 0,
+      "largeDrafts": 0,
+      "archiveLostAckRecovered": 0,
+      "modelCalls": 0
+    },
+    "fix01-archive-report.json": {
+      "source": "6b6aa79070689caf17568fb59ee5dc3d677effe4",
+      "utc": "2026-10-14T21:46:58.694Z",
+      "result": "BLOCKED",
+      "groupCreate": "NOT_EXECUTED",
+      "draft": "NOT_EXECUTED",
+      "providerCalls": "NOT_VERIFIED",
+      "unauthorized": "NOT_EXECUTED",
+      "reload": "NOT_EXECUTED",
+      "error": "OWN_REPRODUCTION_UNAVAILABLE"
+    }
+  }
+}

@@ -9,8 +9,8 @@
   "privateUpload": "PARTITION_PRIVATE_PACKAGE_UPLOADED",
   "preparedApiSha256": "d9731f6427b26a00368cca7a6b7c644807211b42206d90bbd585836eaf244241",
   "preparedWorkerSha256": "12033b6fd0dd992a47cecdae5534ea6477352de2cab53a69c92e0c86c288c612",
-  "backendPublication": "NOT_EXECUTED",
-  "activation": "NOT_EXECUTED",
+  "backendPublication": "LIFECYCLE_OWNER_CODE_READBACK_PASS",
+  "activation": "CONTROL_READBACK_PASS",
   "providerCalls": 0,
   "queueRecovery": "INDEPENDENT_READBACK_PASS",
   "administratorReply": {
@@ -35,7 +35,7 @@
     "browserSession": "NOT_OBSERVED",
     "authentication": "NOT_ATTEMPTED"
   },
-  "nextAction": "Publish once from the next checked documentation checkpoint source, preserving immutable prepared artifact and existing runtime guards.",
+  "nextAction": "Run cleanup_original=true in existing proof workflow on checked next source; actual original completed test only, no new signup/model.",
   "additionalProductTest": "NOT_REQUESTED",
   "priorAdministratorAttempt": {
     "result": "BLOCKED",
@@ -61,5 +61,69 @@
     "code": "TRANSFER_STORAGE_FAILED",
     "awsError": "PreconditionFailed",
     "reason": "Immutable API artifact from prior preparation already exists; no overwrite attempted."
+  },
+  "publicationRun": "https://github.com/Known-Enough/known-enough/actions/runs/38642293045",
+  "publishedSource": "6b6aa79070689caf17568fb59ee5dc3d677effe4",
+  "publishedApiSha256": "046174a6ce41a952ccc35ca1db87ed6d67d5145bc109dbfe8297a5fff2b3a232",
+  "publishedWorkerSha256": "fadef40e12846307f5dbd93923441c8efa35e729f0a18b6271d2d044e4d436f8",
+  "sourceTransition": "JOB_SOURCE_DISABLED_READBACK_PASS",
+  "providerLogging": "PROVIDER_LOGGING_DISABLED",
+  "activationRun": "https://github.com/Known-Enough/known-enough/actions/runs/38642465807",
+  "activationDetails": {
+    "enabled": true,
+    "privateRetention": "DISABLED",
+    "privateWorkerSchedule": "DISABLED",
+    "totals": "UNCHANGED",
+    "controlWrites": 1,
+    "dataWrites": 0,
+    "providerCalls": 0
+  },
+  "frontendRun": "https://github.com/Known-Enough/known-enough/actions/runs/38642465300",
+  "frontend": "FRONTEND_PUBLICATION_PASS",
+  "amplifyJobId": "94",
+  "independentLiveFileHashesMatched": 7,
+  "proofRun": "https://github.com/Known-Enough/known-enough/actions/runs/38642585751",
+  "decisionFlow": "PRIMARY_PUBLIC_DRAFT_DECISION_PASS",
+  "ownedUsage": {
+    "providerCalls": 1,
+    "phase": "SUCCEEDED",
+    "inputTokens": 12873,
+    "outputTokens": 420,
+    "reservedTokens": 18432,
+    "reservedCostMicros": 10000
+  },
+  "ownedUsersDeleted": 2,
+  "ownedMailboxesRemoved": 2,
+  "remainingCleanup": [
+    "terminal journal DeleteItem denied",
+    "archive helper missing invitation directory; fixed locally"
+  ],
+  "administratorCleanupGrant": {
+    "result": "OPS03_TERMINAL_POLICY_READBACK_PASS",
+    "utc": "2026-10-14T21:52:58.026714+00:00",
+    "iamWriteRequests": 1,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "inlineHash": "7c899b8f9733705018a372a8047380302ff3ba6e3d7ad44f10d996ea7fc76c97",
+    "boundaryHash": "d976ee6ce028015b6afa1e1a14cc12556804b04f11ddf0227085b69410bb9679",
+    "effectiveBAccess": "NOT_EXECUTED"
+  },
+  "effectiveCleanupAccess": {
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38644431988",
+    "result": "JOURNAL_DELETE_ALLOWED_CONDITION_REJECTED",
+    "mutations": 0,
+    "providerCalls": 0,
+    "inlineMatchesCheckedSource": true,
+    "boundaryMatchesCheckedSource": true
+  },
+  "cleanupSourceChecks": {
+    "fullCheck": "PASS",
+    "unitPassed": 1622,
+    "optionalSkips": 2,
+    "browserPassed": 86,
+    "hostedPassed": 1,
+    "focusedArchiveAndFixturePassed": 17,
+    "focusedOriginalCleanupPassed": 2,
+    "failedFirstFull": "one existing archive-recovery test exceeded 5s; isolated11PASS and final complete PASS; no assertion/timeout changes"
   }
 }
