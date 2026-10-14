@@ -158,3 +158,10 @@ test('a just-delivered owned code with second precision survives a rounded send 
  expect(mailtmMessageStatus(message,{...mailbox,createdAt:cutoff})).toBe('MAIL_CODE_READY');
  expect(mailtmMessageStatus({...message,createdAt:'2026-10-01T00:00:59Z'},{...mailbox,createdAt:cutoff})).toBe('MAIL_OLD_MESSAGE');
 });
+
+test('reset intent accepts only one owned fresh six-digit code without relaxing the normal verification reader',()=>{
+ const reset={...message,text:'Your password reset code is 123456.'};
+ expect(mailtmVerificationCode(reset,mailbox)).toBeNull();
+ expect(mailtmVerificationCode(reset,mailbox,'RESET')).toBe('123456');
+ for(const change of [{text:'123456 and 654321'},{text:'1234567'},{accountId:'other'},{from:{address:'attacker@example.org'}},{createdAt:'2025-01-01T00:00:00Z'}])expect(mailtmVerificationCode({...reset,...change},mailbox,'RESET')).toBeNull();
+});
