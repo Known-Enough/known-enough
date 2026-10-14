@@ -2392,3 +2392,5 @@ FIX01 wizard published — 2026-10-14T19:16:24.556776+00:00: **bounded UI contin
 
 
 2026-10-14 — Prepared FF01 for B at user request: compact premium registration/sign-in screens, accessible password toggles, contextual verification, existing registration link and preserved authentication/recovery/privacy. Added FF batch and board/index links. Documentation only; no code, tests, deployment, AWS action or B dispatch. Current implementation claim unchanged.
+
+2026-10-14 — Created FF02 for B from user screenshot: private-conditions interpretation unavailable; diagnose actual failure and clarify prerequisite/error states, preserve private text and independent consent. Backend cause unknown. Documentation only; no tests, code, AWS/provider action or B dispatch. Existing claim/schedule unchanged.
