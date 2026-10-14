@@ -1,0 +1,58 @@
+{
+  "observedAt": "2026-10-14T20:28:41.628684+00:00",
+  "sourceSha": "e22991e0c2aa3b8f9f2fc1f6378675578b0c8f4a",
+  "run": "https://github.com/Known-Enough/known-enough/actions/runs/38632111551",
+  "queue": {
+    "result": "JOB_QUEUE_READ_PASS",
+    "requests": 5,
+    "mutations": 0,
+    "providerCalls": 0,
+    "controlSource": "4fc702b3018a7e2933486ee4289efd3d7fe2971a",
+    "enabled": true,
+    "active": 3,
+    "slots": 2,
+    "slotsExpired": 2,
+    "jobs": [
+      {
+        "kind": "ARCHITECT",
+        "phase": "DEAD",
+        "reason": "PROVIDER_UNCONFIRMED",
+        "attempts": 1,
+        "failures": 0,
+        "expired": true,
+        "leaseExpired": null,
+        "reservedTokens": 18432,
+        "reservedCostMicros": 10000,
+        "usageRecorded": false
+      },
+      {
+        "kind": "ARCHITECT",
+        "phase": "DEAD",
+        "reason": "PROVIDER_UNCONFIRMED",
+        "attempts": 1,
+        "failures": 0,
+        "expired": true,
+        "leaseExpired": null,
+        "reservedTokens": 18432,
+        "reservedCostMicros": 10000,
+        "usageRecorded": false
+      },
+      {
+        "kind": "ARCHITECT",
+        "phase": "READY",
+        "reason": null,
+        "attempts": 0,
+        "failures": 0,
+        "expired": true,
+        "leaseExpired": null,
+        "reservedTokens": 0,
+        "reservedCostMicros": 0,
+        "usageRecorded": false
+      }
+    ]
+  },
+  "mutations": 0,
+  "providerCalls": 0,
+  "requestIdentityCorrelation": "NOT_PERFORMED",
+  "repair": "NOT_EXECUTED"
+}
