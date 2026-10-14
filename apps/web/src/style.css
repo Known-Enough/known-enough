@@ -169,6 +169,9 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 .ke-account-dropdown button:hover { background: #f1f5f0; }
 .ke-account-dropdown button:focus-visible { outline: 2px solid #7ba98b; outline-offset: 1px; }
 .ke-account-dropdown svg { width: 17px; height: 17px; color: #47705a; }
+.ke-home .ke-account-dropdown button, .ke-entry .ke-account-dropdown button { min-height: 40px; padding: 8px 10px; border-color: transparent; color: #173c30; background: transparent; font-size: 13px; }
+.ke-home .ke-account-dropdown button:hover, .ke-entry .ke-account-dropdown button:hover { color: #173c30; background: #f1f5f0; }
+.ke-home .ke-account-dropdown button svg, .ke-entry .ke-account-dropdown button svg { color: #315f48; }
 .ke-profile-trigger { display: inline-grid; place-items: center; flex: none; width: 44px; min-width: 44px; height: 44px; min-height: 44px; padding: 4px; border-radius: 50%; }
 .ke-profile-trigger img { display: block; width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
 .ke-profile-modal { position: fixed; inset: 0; width: min(460px, calc(100vw - 32px)); max-width: 460px; max-height: min(720px, calc(100dvh - 32px)); margin: auto; padding: 0; overflow: hidden; border: 1px solid #dce5dd; border-radius: 20px; box-sizing: border-box; color: #173c30; background: #fff; box-shadow: 0 24px 80px #102c1f30; }
@@ -643,8 +646,9 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 :root[data-theme="dark"] .ke-decision-empty-icon { width: 44px; height: 44px; margin-bottom: 9px; color: var(--ke-dark-green-text); background: var(--ke-dark-soft); border: 1px solid var(--ke-dark-border); }
 :root[data-theme="dark"] .ke-decision-empty p { margin-bottom: 13px; }
 :root[data-theme="dark"] .ke-account-dropdown { color: var(--ke-dark-text); background: var(--ke-dark-raised); border-color: var(--ke-dark-border); box-shadow: 0 14px 38px #0006; }
-:root[data-theme="dark"] .ke-account-dropdown button:hover { background: var(--ke-dark-hover-surface); }
-:root[data-theme="dark"] .ke-account-dropdown svg { color: var(--ke-dark-green-text); }
+:root[data-theme="dark"] .ke-home .ke-account-dropdown button, :root[data-theme="dark"] .ke-entry .ke-account-dropdown button { color: var(--ke-dark-text); background: transparent; border-color: transparent; }
+:root[data-theme="dark"] .ke-home .ke-account-dropdown button:hover, :root[data-theme="dark"] .ke-entry .ke-account-dropdown button:hover { color: #f2f7f3; background: var(--ke-dark-hover-surface); }
+:root[data-theme="dark"] .ke-home .ke-account-dropdown button svg, :root[data-theme="dark"] .ke-entry .ke-account-dropdown button svg { color: var(--ke-dark-green-text); }
 :root[data-theme="dark"] .ke-profile-modal { color: var(--ke-dark-text); background: var(--ke-dark-surface); border-color: var(--ke-dark-border); box-shadow: 0 24px 80px #0008; }
 :root[data-theme="dark"] .ke-profile-modal::backdrop { background: #0009; }
 :root[data-theme="dark"] .ke-profile-header,
