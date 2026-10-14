@@ -1,3 +1,4 @@
+import { configureSharedEmailPackage } from '../fix04/shared-email-package.mjs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -24,10 +25,16 @@ export async function prepareJobsApi(sourceSha, runnerTemp) {
   await execute(process.execPath, ['--experimental-transform-types','scripts/operations/partition-cutover.mjs','recover'], { timeout: 60000, maxBuffer: 16384 });
   const folder = join(runnerTemp, 'partition-cutover-private');
   const previous = JSON.parse(await readFile(join(runnerTemp,'partition-backup-private/previous-lambda.json'),'utf8'));
-  const config = await readFile(join(folder,'configuration-private.json'));
+  let config = await readFile(join(folder,'configuration-private.json'));
   const manifest = await readFile(join(folder,'manifest-private.json'));
-  const release = JSON.parse(await readFile(join(folder,'release-private.json'),'utf8'));
+  let release = JSON.parse(await readFile(join(folder,'release-private.json'),'utf8'));
   verifyOwnerPackageConfiguration(previous, JSON.parse(config));
+  if (process.env.KE_SHARED_TEST_EMAIL) {
+    await configureSharedEmailPackage(folder, process.env.KE_SHARED_TEST_EMAIL);
+    config = await readFile(join(folder, 'configuration-private.json'));
+    release = JSON.parse(await readFile(join(folder, 'release-private.json'), 'utf8'));
+  }
+  const selectedEmailConfigured = Boolean(process.env.KE_SHARED_TEST_EMAIL);
   const bytes = coordinatedPrivatePackages(sourceSha, await readFile(join(folder,'lifecycle-private.json')));
   createPartitionDeploymentHandler(config, manifest, release, undefined, loadLifecyclePackage(bytes.lifecycle), loadJobsPackage(bytes.jobs));
   await writeFile(join(folder,'lifecycle-private.json'),bytes.lifecycle,{mode:0o600});
@@ -41,6 +48,7 @@ export async function prepareJobsApi(sourceSha, runnerTemp) {
   await writeFile(candidatePath,JSON.stringify({...candidate,sourceSha,sha256}),{mode:0o600});
   const worker = await prepareJobRuntime(sourceSha,join(runnerTemp,'model-job-runtime-private'));
   return {sourceSha,result:'COORDINATED_JOBS_PACKAGES_PREPARED',apiSha256:sha256,priorApiSha256:Buffer.from(previous.CodeSha256,'base64').toString('hex'),worker,
+    sharedTestEmail: selectedEmailConfigured ? 'PRIVATE_SELECTED_EMAIL_CONFIGURED' : 'PRESERVED',
     signingKey:'PRESERVED',migration:'UNCHANGED',modelFlags:'UNCHANGED_DISABLED',controlActivation:'NOT_EXECUTED',providerCalls:0};
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

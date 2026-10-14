@@ -34,11 +34,10 @@ export async function handler(event: HttpApiEvent): Promise<unknown> {
       const release = JSON.parse(readFileSync(join(directory, 'release-private.json'), 'utf8'));
       const manifestBytes = readFileSync(join(directory, 'manifest-private.json'));
       const trusted = partitionDeploymentOptions(configurationBytes, manifestBytes, release);
-      const sharedTestEmailHashes = JSON.parse(process.env.KE_SHARED_TEST_EMAIL_HASHES ?? '[]');
       const driver = createPartitionManagedDriver(trusted.managed);
       intake = createSignupIntake({ userPoolId: trusted.identity.userPoolId, participantClientId: trusted.identity.participantClientId,
-        session: createPartitionGroupSession(driver.groups, { emailKey: trusted.emailKey, sharedTestEmailHashes }) });
-      selected = createPartitionReleaseHandler({ configurationBytes, sharedTestEmailHashes,
+        session: createPartitionGroupSession(driver.groups, { emailKey: trusted.emailKey, ...(trusted.sharedTestEmailHashes ? { sharedTestEmailHashes: trusted.sharedTestEmailHashes } : {}) }) });
+      selected = createPartitionReleaseHandler({ configurationBytes,
         ...(lifecycle ? { lifecycle } : {}),
         ...(jobs ? { jobs: { sourceSha: jobs.sourceSha } } : {}),
         manifestBytes, release,

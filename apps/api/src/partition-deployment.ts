@@ -1,3 +1,4 @@
+import { sharedTestEmailHashes } from '@deal-table/adapters/partition-request';
 import { createHash, randomUUID } from 'node:crypto';
 import { createPartitionLambdaHandler } from './partition-lambda.ts';
 import type { PartitionRuntimeOptions } from './partition-runtime.ts';
@@ -41,7 +42,7 @@ function version(value: unknown): value is string {
  * Existing participant composition remains inactive until a separate deployment selects it.
  */
 export function partitionDeploymentOptions(configurationBytes: Buffer, manifestBytes: Buffer,
-  release: PartitionDeploymentBinding, draftArchitect?: PartitionRuntimeOptions['draftArchitect'], lifecycle?: PartitionRuntimeOptions['lifecycle'], jobs?: PartitionRuntimeOptions['jobs'], sharedTestEmailHashes?: readonly string[]) {
+  release: PartitionDeploymentBinding, draftArchitect?: PartitionRuntimeOptions['draftArchitect'], lifecycle?: PartitionRuntimeOptions['lifecycle'], jobs?: PartitionRuntimeOptions['jobs']) {
   try {
     const anchor = record(release, ['sourceSha', 'configurationHash', 'manifestHash', 'manifestVersion', 'sourceRevision', 'sourceHash']);
     if (typeof anchor.sourceSha !== 'string' || !/^[a-f0-9]{40}$/.test(anchor.sourceSha) || /^0+$/.test(anchor.sourceSha)
@@ -51,8 +52,11 @@ export function partitionDeploymentOptions(configurationBytes: Buffer, manifestB
       || (draftArchitect !== undefined && typeof draftArchitect !== 'function')) return bad();
     const configBytes = bytes(configurationBytes, 16_384); const manifest = bytes(manifestBytes, 1024 * 1024);
     if (digest(configBytes) !== anchor.configurationHash || digest(manifest) !== anchor.manifestHash) return bad();
-    const config = record(json(configBytes), ['schemaVersion', 'account', 'region', 'userPoolId', 'participantClientId',
-      'displayClientId', 'cognitoDomain', 'allowedOrigin', 'emailKey', 'cursorKeyBase64']);
+    const rawConfig = json(configBytes);
+    const hasSharedEmails = rawConfig !== null && typeof rawConfig === 'object' && Object.hasOwn(rawConfig, 'sharedTestEmailHashes');
+    const config = record(rawConfig, ['schemaVersion', 'account', 'region', 'userPoolId', 'participantClientId',
+      'displayClientId', 'cognitoDomain', 'allowedOrigin', 'emailKey', 'cursorKeyBase64', ...(hasSharedEmails ? ['sharedTestEmailHashes'] : [])]);
+    const sharedEmails = sharedTestEmailHashes(config.sharedTestEmailHashes);
     const snapshot = record(json(manifest), ['schemaVersion', 'sourceSha', 'account', 'region', 'sourceTable', 'sourceKey',
       'targetTable', 'sourceRevision', 'sourceHash', 'sourcePayloadBase64']);
     const sourceKey = record(snapshot.sourceKey, ['PK', 'SK']);
@@ -83,7 +87,7 @@ export function partitionDeploymentOptions(configurationBytes: Buffer, manifestB
       identity: { userPoolId: config.userPoolId, participantClientId: config.participantClientId as string,
         displayClientId: config.displayClientId as string },
       cognitoDomain: config.cognitoDomain, allowedOrigin: config.allowedOrigin, emailKey: config.emailKey,
-      ...(sharedTestEmailHashes === undefined ? {} : { sharedTestEmailHashes }),
+      ...(hasSharedEmails ? { sharedTestEmailHashes: sharedEmails } : {}),
       clock: { now: () => new Date().toISOString() }, ids: { next: () => randomUUID() },
       ...(draftArchitect === undefined ? {} : { draftArchitect }),
       ...(jobs === undefined ? {} : { jobs: { sourceSha: jobs.sourceSha } }),
@@ -93,7 +97,7 @@ export function partitionDeploymentOptions(configurationBytes: Buffer, manifestB
 }
 
 export function createPartitionDeploymentHandler(configurationBytes: Buffer, manifestBytes: Buffer,
-  release: PartitionDeploymentBinding, draftArchitect?: PartitionRuntimeOptions['draftArchitect'], lifecycle?: PartitionRuntimeOptions['lifecycle'], jobs?: PartitionRuntimeOptions['jobs'], sharedTestEmailHashes?: readonly string[]) {
-  try { return createPartitionLambdaHandler(partitionDeploymentOptions(configurationBytes, manifestBytes, release, draftArchitect, lifecycle, jobs, sharedTestEmailHashes)); }
+  release: PartitionDeploymentBinding, draftArchitect?: PartitionRuntimeOptions['draftArchitect'], lifecycle?: PartitionRuntimeOptions['lifecycle'], jobs?: PartitionRuntimeOptions['jobs']) {
+  try { return createPartitionLambdaHandler(partitionDeploymentOptions(configurationBytes, manifestBytes, release, draftArchitect, lifecycle, jobs)); }
   catch { return bad(); }
 }

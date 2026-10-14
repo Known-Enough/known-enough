@@ -109,3 +109,15 @@ it('the real composition validates group-state semantics after byte binding, wit
     expect(fetcher).not.toHaveBeenCalled();
   } finally { fetcher.mockRestore(); }
 });
+
+it('captures only strictly validated shared-test hashes covered by the independent private configuration anchor', () => {
+  const f = fixture(), config = encode({ ...f.config, sharedTestEmailHashes: ['e'.repeat(64)] });
+  createPartitionDeploymentHandler(config, f.manifestBytes, { ...f.release, configurationHash: digest(config) });
+  expect(vi.mocked(createPartitionLambdaHandler).mock.calls[0]![0].sharedTestEmailHashes).toEqual(['e'.repeat(64)]);
+  vi.clearAllMocks();
+  rejects(config, f.manifestBytes, f.release);
+  for (const hashes of [['invalid'], ['e'.repeat(64), 'e'.repeat(64)], Array(17).fill('e'.repeat(64)), true]) {
+    const bad = encode({ ...f.config, sharedTestEmailHashes: hashes });
+    rejects(bad, f.manifestBytes, { ...f.release, configurationHash: digest(bad) });
+  }
+});

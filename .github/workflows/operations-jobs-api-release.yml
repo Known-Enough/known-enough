@@ -48,7 +48,7 @@ jobs:
           node scripts/operations/verify.mjs > /dev/null
           npm ci
           python3 -B scripts/operations/jobs-worker-release.test.py
-          node --experimental-transform-types --test scripts/operations/partition-transfer.test.mjs scripts/operations/partition-backup.test.mjs scripts/operations/partition-cutover.test.mjs scripts/operations/lifecycle-release.test.mjs scripts/operations/lifecycle-package.test.mjs scripts/operations/jobs-api-release.test.mjs scripts/operations/jobs-source-transition.test.mjs scripts/operations/jobs-runtime-package.test.mjs
+          node --experimental-transform-types --test scripts/operations/partition-transfer.test.mjs scripts/operations/partition-backup.test.mjs scripts/operations/partition-cutover.test.mjs scripts/operations/lifecycle-release.test.mjs scripts/operations/lifecycle-package.test.mjs scripts/operations/jobs-api-release.test.mjs scripts/operations/jobs-source-transition.test.mjs scripts/operations/jobs-runtime-package.test.mjs scripts/fix04/shared-email-package.test.mjs
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
           role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPrimaryRelease
@@ -73,6 +73,8 @@ jobs:
           retry-max-attempts: 1
           unset-current-credentials: true
       - name: Execute bounded private prepare and publish only finite status
+        env:
+          KE_SHARED_TEST_EMAIL: ${{ secrets.KE_SHARED_TEST_EMAIL }}
         run: |
           umask 077
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"

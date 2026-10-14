@@ -9,3 +9,5 @@ export { createPartitionManagedDriver } from './partition-managed.ts';
 export type { PartitionManagedOptions, PartitionManagedArchiveOptions } from './partition-managed.ts';
 
 export type { PublicDraftAtomicItem } from './public-draft-ports.ts';
+
+export { sharedTestEmailHashes } from './partition-directory.ts';
