@@ -1,0 +1,65 @@
+{
+  "checkedAt": "2026-10-14T21:38:37Z",
+  "task": "FIX01",
+  "status": "IN_PROGRESS",
+  "checkedImplementationSource": "7e432dceb493d43916f32846bcbaeb16a5f6f004",
+  "preparedPackageSource": "40e06cb46867453e084eb8b4df3ee41b1259f909",
+  "packagePreparationRun": "https://github.com/Known-Enough/known-enough/actions/runs/38641360684",
+  "packagePreparation": "COORDINATED_JOBS_PACKAGES_PREPARED",
+  "privateUpload": "PARTITION_PRIVATE_PACKAGE_UPLOADED",
+  "preparedApiSha256": "d9731f6427b26a00368cca7a6b7c644807211b42206d90bbd585836eaf244241",
+  "preparedWorkerSha256": "12033b6fd0dd992a47cecdae5534ea6477352de2cab53a69c92e0c86c288c612",
+  "backendPublication": "NOT_EXECUTED",
+  "activation": "NOT_EXECUTED",
+  "providerCalls": 0,
+  "queueRecovery": "INDEPENDENT_READBACK_PASS",
+  "administratorReply": {
+    "result": "PUBLIC_QUEUE_RECOVERY_PASS",
+    "uncertainRetired": 2,
+    "expiredRetired": 1,
+    "active": 0,
+    "slots": 0,
+    "state": "DISABLED",
+    "totalsUnchanged": true,
+    "totalWrites": 0,
+    "providerCalls": 0,
+    "transactionWrites": 1,
+    "draftWrites": 0,
+    "source": "7e432dceb493d43916f32846bcbaeb16a5f6f004",
+    "completionEvents": 12,
+    "privateBackup": "QUEUE_PRIVATE_BACKUP_PASS"
+  },
+  "independentComputerUseCheck": {
+    "result": "BLOCKED_BEFORE_JAVASCRIPT_EXECUTION",
+    "error": "sandboxCwd is not a local file URI: file:///home/battousai/projects/known-enough",
+    "browserSession": "NOT_OBSERVED",
+    "authentication": "NOT_ATTEMPTED"
+  },
+  "nextAction": "Publish once from the next checked documentation checkpoint source, preserving immutable prepared artifact and existing runtime guards.",
+  "additionalProductTest": "NOT_REQUESTED",
+  "priorAdministratorAttempt": {
+    "result": "BLOCKED",
+    "executed": false,
+    "scriptOutput": null
+  },
+  "recoveryReadbackRun": "https://github.com/Known-Enough/known-enough/actions/runs/38641915950",
+  "recoveryReadback": {
+    "state": "DISABLED",
+    "active": 0,
+    "slots": 0,
+    "controlSource": "4fc702b3018a7e2933486ee4289efd3d7fe2971a",
+    "runs": 65,
+    "reservedTokens": 17722708,
+    "reservedCostMicros": 17587796,
+    "messages": 60,
+    "mutations": 0,
+    "providerCalls": 0
+  },
+  "publicationAttempt": {
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38642095352",
+    "result": "BLOCKED_BEFORE_RUNTIME_PUBLICATION",
+    "code": "TRANSFER_STORAGE_FAILED",
+    "awsError": "PreconditionFailed",
+    "reason": "Immutable API artifact from prior preparation already exists; no overwrite attempted."
+  }
+}
