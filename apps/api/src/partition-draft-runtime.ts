@@ -8,6 +8,7 @@ import type { PartitionFence, PartitionIOContext } from '@deal-table/adapters/pa
 import { stableDeliveryId } from './durable-enqueue.ts';
 /** Public architecture only. No decision/private snapshots or caller-selected provider capabilities. */
 export function createPartitionDraftRuntime(options: {
+  diagnostic?: (value: { providerDispatched: boolean; providerAcknowledged: boolean; phase: string; reason: string | null }) => void;
   sourceSha: string; now?: () => number; transport: ConverseTransport;
   store: (commit: PublicDraftCommit) => DurableJobStore<PublicDraftFence, PublicDraftEffect>;
   authority: () => Promise<JobPin>;
@@ -27,17 +28,18 @@ export function createPartitionDraftRuntime(options: {
     let before;
     try { before = await store.read(id); } catch { throw new PartitionDraftFailure('AI_UNAVAILABLE'); }
     if (!before.control.enabled || before.control.sourceSha !== options.sourceSha) throw new PartitionDraftFailure('AI_UNAVAILABLE');
+    if (!before.job && before.control.slots.length >= 2) throw new PartitionDraftFailure('AI_AT_CAPACITY');
     let ref: JobReference = before.job?.reference ?? { jobId: id, kind: 'ARCHITECT', subject,
       decisionId: scope.groupId, reasoningJobId: request.draftId, authorityHash: scope.bodyHash,
       sourceSha: options.sourceSha, expiresAt: now() + 300000, requestKey: scope.requestKey };
     if (ref.kind !== 'ARCHITECT' || ref.subject !== subject || ref.decisionId !== scope.groupId
       || ref.reasoningJobId !== request.draftId || ref.authorityHash !== scope.bodyHash || ref.requestKey !== scope.requestKey || ref.sourceSha !== options.sourceSha) throw new PartitionDraftFailure('REQUEST_UNKNOWN');
-    let usage: { inputTokens: number; outputTokens: number } | null = null; let providerFailed = false;
+    let usage: { inputTokens: number; outputTokens: number } | null = null; let providerFailed = false; let providerAcknowledged = false; let providerDispatched = false;
     const capture = async (output?: unknown): Promise<PublicDraftFence> => {
       const native = await scope.fence(output); const fence: PublicDraftFence = { kind: 'PUBLIC_DRAFT', reference: structuredClone(ref) };
       captures.set(fence, native); return fence;
     };
-    const engine = new DurableModelJobs({ kind: 'ARCHITECT', store, now,
+    const engine = new DurableModelJobs({ kind: 'ARCHITECT', store, now, bounds: { leaseMs: 25000, timeoutMs: 18000 },
       execution: {
         reload: async reference => {
           if (reference.kind !== 'ARCHITECT' || reference.subject !== subject || reference.decisionId !== scope.groupId
@@ -45,8 +47,13 @@ export function createPartitionDraftRuntime(options: {
           ref = structuredClone(reference); return { context: structuredClone(request), fence: await capture() };
         },
         invoke: async (input, signal) => {
-          const models = createBedrockModels({ transport: options.transport, enabled: () => !signal.aborted && !io.signal.aborted,
-            diagnostic: value => { if (value.kind === 'ARCHITECT' && value.stage.startsWith('PROVIDER')) providerFailed = true; },
+          const models = createBedrockModels({ transport: { send: async (command, options_) => {
+              providerDispatched = true; const response = await options.transport.send(command, options_); providerAcknowledged = true;
+              const inputTokens = response.usage?.inputTokens, outputTokens = response.usage?.outputTokens;
+              if (typeof inputTokens === 'number' && typeof outputTokens === 'number' && [inputTokens, outputTokens].every(value => Number.isSafeInteger(value) && value >= 0 && value <= 1000000)) usage = { inputTokens, outputTokens };
+              return response;
+            } }, enabled: () => !signal.aborted && !io.signal.aborted,
+            diagnostic: value => { if (value.kind === 'ARCHITECT' && value.stage.startsWith('PROVIDER')) { providerFailed = true; if (value.stage !== 'PROVIDER') providerAcknowledged = true; } },
             usage: value => { if (value.kind !== 'ARCHITECT') throw new DurableJobError('INVALID_OUTPUT'); usage = { inputTokens: value.inputTokens, outputTokens: value.outputTokens }; },
             jobs: { run: async (kind, invocation, task) => {
               if (kind !== 'ARCHITECT' || io.signal.aborted) throw new DurableJobError('DISABLED');
@@ -57,8 +64,8 @@ export function createPartitionDraftRuntime(options: {
           const architect = new DecisionArchitect(models.architect, randomUUID, now, () => !signal.aborted && !io.signal.aborted);
           let output: unknown;
           try { output = await architect.draft(subject, input); }
-          catch (error) { if (!usage) throw error; output = null; } // Acknowledged invalid output is quiescent; usage stays charged.
-          if (!usage) throw new DurableJobError('INVALID_OUTPUT');
+          catch (error) { if (!usage) { if (!providerDispatched || providerAcknowledged) throw new DurableJobError('PROVIDER_REJECTED'); throw error; } output = null; } // Acknowledged invalid output is quiescent; usage stays charged.
+          if (!usage) throw new DurableJobError(providerAcknowledged ? 'PROVIDER_REJECTED' : 'INVALID_OUTPUT');
           return { output, usage };
         },
         prepare: async (_reference, _input, output) => {
@@ -69,16 +76,17 @@ export function createPartitionDraftRuntime(options: {
     try { await engine.enqueue(ref); await engine.process({ jobId: id }); }
     catch { /* Read the single durable outcome; never repeat an ambiguous provider dispatch. */ }
     const after = await store.read(id);
+    if (after.job?.phase !== 'SUCCEEDED') { try { options.diagnostic?.({ providerDispatched, providerAcknowledged, phase: after.job?.phase ?? 'MISSING', reason: after.job?.reason ?? null }); } catch { /* Diagnostics cannot change dispatch or disposition. */ } }
     if (after.job?.phase === 'SUCCEEDED') return undefined; // The same atomic transaction saved the strictly checked native draft.
     if (after.job?.phase === 'DEAD') throw new PartitionDraftFailure(after.job.reason === 'INVALID_OUTPUT' ? 'INVALID_MODEL_OUTPUT'
-      : after.job.reason === 'PROVIDER_UNCONFIRMED' ? providerFailed ? 'PROVIDER_FAILED' : 'REQUEST_UNKNOWN' : 'AI_UNAVAILABLE');
+      : after.job.reason === 'PROVIDER_UNCONFIRMED' ? providerFailed ? 'PROVIDER_FAILED' : 'REQUEST_UNKNOWN' : providerFailed && providerAcknowledged ? 'PROVIDER_FAILED' : 'AI_UNAVAILABLE');
     throw new PartitionDraftFailure('REQUEST_PENDING');
   };
 }
 export function createManagedPartitionDraftRuntime(options: {
   sourceSha: string; prepareGroupCommit: Parameters<typeof createPartitionDraftRuntime>[0]['prepareGroupCommit'];
 }): PartitionDraftArchitect {
-  return createPartitionDraftRuntime({ ...options, ...createManagedPublicDraftPorts(options.sourceSha) });
+  return createPartitionDraftRuntime({ ...options, ...createManagedPublicDraftPorts(options.sourceSha), diagnostic: value => console.warn(JSON.stringify({ event: 'FIX01_PUBLIC_DRAFT_FAILURE', ...value })) });
 }
 /** Same identity-bound key on reload, independent of a browser's raw objective or model output. */
 export function publicDraftId(groupId: string, subject: string, key: string) {

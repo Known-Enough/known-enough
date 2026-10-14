@@ -253,3 +253,25 @@ for (const lookupFailure of [false, true]) test(`follow-up answer proceeds after
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   } finally { await context.close(); await api.close(); }
 });
+
+test('an expired follow-up request closes without losing the saved draft or typed answer, then creates after explicit review', async ({browser}) => {
+ const api=await npApi(clarificationTransport()),context=await browser.newContext();let submissions=0,key='';
+ try {
+  await connect(context,api,'iris');await api.call('iris','/account/register',{displayName:'Iris'});await api.approve('iris');await api.groups.create({kind:'participant',subject:'iris'},{name:'Recovery club',idempotencyKey:'recovery'});
+  await context.route('https://api.example.test/groups/*/drafts',async route=>{
+   if(route.request().method()==='POST'&&++submissions===2){key=route.request().postDataJSON().idempotencyKey;await route.fulfill({status:503,json:{error:{code:'RETRYABLE_SERVER_ERROR'},draftFailure:'REQUEST_PENDING'},headers:{'access-control-allow-origin':'*'}});return;}await route.fallback();
+  });
+  await context.route('https://api.example.test/groups/*/draft-requests/**',async route=>{
+   if(!new URL(route.request().url()).pathname.includes(key)||!key){await route.fallback();return;}
+   const releasing=route.request().method()==='POST';if(releasing)expect(route.request().postDataJSON()).toEqual({revision:3});
+   await route.fulfill({json:{draftRequest:{state:releasing?'CANCELLED':'FAILED',progress:releasing?'STOPPED':'EXPIRED',canRelease:true,revision:releasing?4:3}},headers:{'access-control-allow-origin':'*'}});
+  });
+  const page=await context.newPage();await page.goto(url);await page.getByRole('button',{name:/^Open group /}).first().click();await page.getByRole('button',{name:'Start a decision',exact:true}).click();
+  await page.getByLabel('Tell me what you want to decide').fill('Choose a gallery meetup.');await page.getByRole('button',{name:'Continue with AI',exact:true}).click();
+  const answer=page.getByLabel('Should this meetup be indoors or outdoors?',{exact:true});await answer.fill('Indoors only.');await page.getByRole('button',{name:'Let AI update the draft',exact:true}).click();
+  await page.getByRole('button',{name:'Check progress',exact:true}).click();await expect(page.getByText('This request expired before AI started. Close it to return to your saved draft.',{exact:true})).toBeVisible();await expect(answer).toBeDisabled();
+  await page.getByRole('button',{name:'Close unfinished request',exact:true}).click();await expect(answer).toHaveValue('Indoors only.');await expect(answer).toBeEditable();
+  await page.getByRole('button',{name:'Let AI update the draft',exact:true}).click();await expect(page.getByRole('heading',{name:'Your decision, ready to review.'})).toBeVisible();
+  const create=page.getByRole('button',{name:'Create decision',exact:true});await expect(create).toBeDisabled();await page.getByRole('checkbox',{name:'I’ve reviewed these shared choices and who needs to approve.'}).check();await create.click();await expect(page.getByRole('heading',{name:'Shared frame',exact:true})).toBeVisible();expect(submissions).toBe(3);
+ }finally{await context.close();await api.close();}
+});

@@ -55,7 +55,7 @@ const equal = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b
 const encodedKey = (key: PartitionKey) => `${key.PK}/${key.SK}`;
 function ioContext(options: { timeoutMs?: number; maxRequests?: number } = {}): PartitionIOContext {
   const timeoutMs = options.timeoutMs ?? 20_000; const maxRequests = options.maxRequests ?? 64;
-  if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 20_000
+  if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 27_000
     || !Number.isSafeInteger(maxRequests) || maxRequests < 1 || maxRequests > 64) fail('PARTITION_INVALID');
   let requests = 0;
   const controller = new globalThis.AbortController();

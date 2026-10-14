@@ -24,8 +24,8 @@ for(const unknown of [false,true]) test(`draft503 gives honest cause and reload 
  expect(await page.evaluate(()=>sessionStorage.getItem('ke-draft-request:garden'))).toBe(key);
  expect(await page.evaluate(()=>JSON.stringify({...sessionStorage,...localStorage}))).not.toContain('PUBLIC_TRANSIENT_OBJECTIVE');
  await page.reload();await page.getByRole('button',{name:'Continue your draft',exact:true}).click();await expect(page.getByRole('button',{name:'Check progress',exact:true})).toBeVisible();expect(drafts).toBe(1);
- const release=page.getByRole('button',{name:'Close request and start again',exact:true});
- if(unknown){await expect(release).toHaveCount(0);await expect(page.getByText('We haven’t confirmed what happened.',{exact:false})).toBeVisible();expect(releases).toBe(0);}
+ const release=page.getByRole('button',{name:'Close unfinished request',exact:true});
+ if(unknown){await expect(release).toHaveCount(0);await expect(page.getByText('The previous AI result could not be confirmed.',{exact:false})).toBeVisible();expect(releases).toBe(0);}
  else{await expect(release).toBeEnabled();await release.click();await expect(page.getByText('The previous request is closed.',{exact:false})).toBeVisible();expect(await page.evaluate(()=>sessionStorage.getItem('ke-draft-request:garden'))).toBeNull();expect(releases).toBe(1);}
  expect(drafts).toBe(1);
 });

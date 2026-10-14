@@ -50,7 +50,7 @@ const deny = (code: 'FORBIDDEN' | 'NOT_FOUND' | 'INVALID_COMMAND' | 'STALE_CONTE
 };
 export const partitionMemberId = (subject: string) => `member-${createHash('sha256').update(subject).digest('hex').slice(0, 32)}`;
 export class PartitionDraftFailure extends KnownEnoughApplicationError {
-  constructor(readonly category: 'AI_UNAVAILABLE' | 'INVALID_MODEL_OUTPUT' | 'REQUEST_PENDING' | 'REQUEST_UNKNOWN' | 'PROVIDER_FAILED') {
+  constructor(readonly category: 'AI_UNAVAILABLE' | 'AI_AT_CAPACITY' | 'INVALID_MODEL_OUTPUT' | 'REQUEST_PENDING' | 'REQUEST_UNKNOWN' | 'PROVIDER_FAILED') {
     super(category === 'INVALID_MODEL_OUTPUT' ? 'NEEDS_CLARIFICATION' : 'RETRYABLE_SERVER_ERROR');
   }
 }

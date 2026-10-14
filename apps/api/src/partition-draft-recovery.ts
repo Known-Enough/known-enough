@@ -12,7 +12,7 @@ export interface DraftRecoveryRequest {
   inspect(key?: string): Promise<{ saved: Groups.GroupDraft | null; fence: PartitionFence }>;
 }
 export interface DraftRequestStatus { state: 'SAVED' | 'NOT_SUBMITTED' | 'PENDING' | 'UNKNOWN' | 'FAILED' | 'CANCELLED';
-  canRelease: boolean; revision: number; draft?: Groups.GroupDraft }
+  canRelease: boolean; revision: number; progress?: 'NOT_STARTED' | 'IN_PROGRESS' | 'EXPIRED' | 'NEEDS_RECOVERY' | 'STOPPED'; draft?: Groups.GroupDraft }
 const fail = (code: Extract<KE.DecisionCommandResult, { ok: false }>['error']['code']): never => { throw new KnownEnoughApplicationError(code); };
 /** Nonces/status only. No model invocation or approval. Release is one owned CAS, never a blind clear. */
 export function createDraftRequestRecovery(options: {
@@ -43,9 +43,12 @@ export function createDraftRequestRecovery(options: {
       || job.reference.reasoningJobId !== draftId || job.reference.requestKey !== request.key || job.reference.sourceSha !== options.sourceSha)) throw new PartitionDraftFailure('REQUEST_UNKNOWN');
     const quiescent = job?.phase === 'DEAD' && job.reason !== 'PROVIDER_UNCONFIRMED';
     const preCall = !job || (['READY', 'LEASED'].includes(job.phase) && job.attempts === 0 && job.reservedTokens === 0);
-    const status = (): DraftRequestStatus => ({ state: !job ? 'NOT_SUBMITTED' : quiescent ? job.reason === 'CANCELLED' ? 'CANCELLED' : 'FAILED'
+    const expiredPreCall = Boolean(job && preCall && job.reference.expiresAt <= now());
+    const status = (): DraftRequestStatus => ({ state: !job ? 'NOT_SUBMITTED' : expiredPreCall ? 'FAILED' : quiescent ? job.reason === 'CANCELLED' ? 'CANCELLED' : 'FAILED'
       : job.phase === 'CALLING' && (job.lease?.until ?? 0) <= now() || job.reason === 'PROVIDER_UNCONFIRMED' || job.phase === 'SUCCEEDED' ? 'UNKNOWN' : 'PENDING',
-      canRelease: Boolean(preCall || quiescent), revision: job?.revision ?? 0 });
+      canRelease: Boolean(preCall || quiescent), revision: job?.revision ?? 0, ...(job ? { progress: expiredPreCall ? 'EXPIRED' as const : quiescent ? 'STOPPED' as const
+        : job.reason === 'PROVIDER_UNCONFIRMED' || job.phase === 'SUCCEEDED' || job.phase === 'CALLING' && (job.lease?.until ?? 0) <= now() ? 'NEEDS_RECOVERY' as const
+        : preCall ? 'NOT_STARTED' as const : 'IN_PROGRESS' as const } : {}) });
     if (request.releaseRevision === undefined) { await inspected.fence.assertCurrent(); return { draftRequest: status() }; }
     if (request.releaseRevision !== (job?.revision ?? 0)) return fail('STALE_CONTEXT');
     if (quiescent) return { draftRequest: status() };

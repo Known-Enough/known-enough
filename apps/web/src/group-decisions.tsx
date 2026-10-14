@@ -31,7 +31,7 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
   const [pendingKey,setPendingKey] = useState<string | null>(() => group.isOrganizer ? readDraftRequest(group.id) : null);
   const [checkingRequest,setCheckingRequest] = useState(group.isOrganizer);
   const [requestLookupAvailable,setRequestLookupAvailable] = useState(false);
-  const [requestState,setRequestState] = useState<{ state: string; canRelease: boolean; revision: number } | null>(null);
+  const [requestState,setRequestState] = useState<{ state: string; canRelease: boolean; revision: number; progress?: string } | null>(null);
   const recoveryEpoch = useRef(0);
   const [recoveryGeneration,setRecoveryGeneration] = useState(0);
   const finishRequest = () => { pending.current = null; saveDraftRequest(group.id,null); setPendingKey(null); setRequestState(null); setCheckingRequest(true); setRequestLookupAvailable(false); setRecoveryGeneration(value => value + 1); };
@@ -41,12 +41,14 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
     if (epoch !== recoveryEpoch.current) return;
     const state = result.draftRequest;
     if (!state || typeof state !== 'object' || !('state' in state) || !('canRelease' in state) || !('revision' in state)
-      || !['SAVED','NOT_SUBMITTED','PENDING','UNKNOWN','FAILED','CANCELLED'].includes(String(state.state)) || typeof state.canRelease !== 'boolean' || !Number.isSafeInteger(state.revision)) throw new Error('Invalid request status');
-    setRequestState({ state: String(state.state), canRelease: state.canRelease, revision: Number(state.revision) });
+      || !['SAVED','NOT_SUBMITTED','PENDING','UNKNOWN','FAILED','CANCELLED'].includes(String(state.state)) || typeof state.canRelease !== 'boolean' || !Number.isSafeInteger(state.revision)
+      || ('progress' in state && !['NOT_STARTED','IN_PROGRESS','EXPIRED','NEEDS_RECOVERY','STOPPED'].includes(String(state.progress)))) throw new Error('Invalid request status');
+    setRequestState({ state: String(state.state), canRelease: state.canRelease, revision: Number(state.revision), ...('progress' in state ? { progress: String(state.progress) } : {}) });
     if (state.state === 'SAVED' && 'draft' in state) { const saved = Groups.GroupDraft.parse(state.draft); setDraft(saved); setObjective(saved.frame.objective); setQuestionIndex(0); setStep(saved.clarificationQuestions.length ? 'questions' : 'review'); setDirty(false); setReviewed(false); finishRequest(); setNotice('The saved draft was recovered without another AI call.'); await reload(); }
-    else setNotice(state.state === 'UNKNOWN' ? 'We haven’t confirmed the AI result yet. Keep this request and check again; contact the operator if it stays uncertain.'
-      : state.state === 'PENDING' ? 'AI is still working on this request. Check progress again shortly.'
-      : 'This request has stopped. Choose “Close request and start again” to continue.');
+    else setNotice('progress' in state && state.progress === 'EXPIRED' ? 'This request expired before AI started. Close the unfinished request to return to your saved draft.'
+      : state.state === 'UNKNOWN' ? 'We haven’t confirmed the AI result yet. Keep this request and check again; contact the operator if it stays uncertain.'
+      : state.state === 'PENDING' ? state.canRelease ? 'AI has not started this request. Check progress or close it to return to your draft.' : 'The request has not finished. Check progress; if it stays unresolved, contact the operator.'
+      : 'This request has stopped. Choose “Close unfinished request” to continue.');
   }
   useEffect(() => {
     if (!group.isOrganizer) { setCheckingRequest(false); return; } let active = true; const controller = new AbortController();
@@ -102,7 +104,7 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
   }
   const question = draft?.clarificationQuestions[questionIndex];
   const requestRequirement = busy ? 'Please wait while we prepare or save your decision.'
-    : pendingKey ? 'Check your previous request below. Recover its result or close it when the server confirms it is safe.'
+    : pendingKey ? 'Resolve the unfinished request below before editing or submitting again. Closing a request keeps your saved draft.'
     : checkingRequest ? 'Checking for unresolved AI requests. Please wait before continuing.'
     : !requestLookupAvailable ? 'We could not check your previous requests. Choose “Check saved requests again” to continue; your answer will be kept.' : '';
   const questionRequirement = requestRequirement || (dirty ? 'Save your wording changes below before sending these answers to AI.'
@@ -129,8 +131,8 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
     const result = await request(`draft-requests/${pendingKey}/release`, { revision: requestState.revision });
     const value = result.draftRequest as { state?: unknown; canRelease?: unknown } | undefined;
     if (!value || !value.canRelease || !['CANCELLED','FAILED','SAVED'].includes(String(value.state))) throw new Error('Release not confirmed');
-    finishRequest(); setDraft(null); setDirty(false); setStep('describe');
-    setNotice('The previous request is closed. You can continue with a new draft.');
+    finishRequest(); setStep(draft ? draft.clarificationQuestions.length ? 'questions' : 'review' : 'describe');
+    setNotice('The previous request is closed. Your saved draft and any answers in this window are kept. You can continue editing.');
   }
   return <section className="ke-card ke-group-panel ke-decisions-panel" aria-busy={busy} aria-labelledby={`decisions-heading-${group.id}`}>
     <header className="ke-panel-heading"><div><h2 id={`decisions-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="ListChecks" /></span><span>Decisions</span></h2>
@@ -177,11 +179,13 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
           {!requestLookupAvailable && !checkingRequest && !pendingKey && <button type="button" className="secondary" disabled={busy}
             onClick={() => { setNotice(''); setCheckingRequest(true); setRecoveryGeneration(value => value + 1); }}>Check saved requests again</button>}
           {pendingKey && <div className="ke-wizard-recovery">
-            <h3>Let’s check your previous request.</h3><p>{requestState?.state === 'PENDING' ? 'AI is still working on it. Check its status rather than starting again.'
-              : requestState?.state === 'UNKNOWN' ? 'We haven’t confirmed what happened. Check again; if it stays uncertain, contact the operator with the error reference.'
+            <h3>Let’s check your previous request.</h3><p>{requestState?.progress === 'EXPIRED' ? 'This request expired before AI started. Close it to return to your saved draft.'
+              : requestState?.state === 'PENDING' ? requestState.canRelease ? 'AI has not started this request. You can check progress or close it to return to your draft.'
+                : 'This request has not finished. Check progress; contact the operator if it stays unresolved.'
+              : requestState?.state === 'UNKNOWN' ? 'The previous AI result could not be confirmed. This needs service recovery if checking again does not resolve it. Your saved draft is kept.'
               : 'We’ll recover a saved result, or safely close the previous request before starting a new one.'}</p>
             <div className="ke-wizard-actions"><button type="button" className="secondary" disabled={busy || checkingRequest} onClick={() => void action(() => recoverRequest())}>Check progress</button>
-              {requestState?.canRelease && <button type="button" className="secondary" disabled={busy} onClick={() => void action(releaseRequest)}>Close request and start again</button>}
+              {requestState?.canRelease && <button type="button" className="secondary" disabled={busy} onClick={() => void action(releaseRequest)}>Close unfinished request</button>}
               {pending.current?.objective && <button type="button" className="secondary" disabled={busy || checkingRequest || !requestLookupAvailable} onClick={() => { const retry = pending.current?.objective; if (retry) void action(() => draftObjective(retry)); }}>Retry this same request</button>}
             </div>
           </div>}

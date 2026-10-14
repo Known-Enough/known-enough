@@ -26,7 +26,7 @@ try {
   if(!fixture.groupId){report.result='NO_OWN_GROUP_TO_ARCHIVE';}
   else {
    const key=partitionGroupKey(fixture.groupId),header=await managed.groups.read(key);
-   if(header?.kind!=='GROUP'||header.value.organizer!==fixture.subject||header.value.invitations.length||header.value.draftIds.length>1||header.value.decisionIds.length>1)throw new Error('OWN_EMPTY_GROUP_REQUIRED');
+   if(header?.kind!=='GROUP'||header.value.organizer!==fixture.subject||header.value.invitations.some(invite=>!state.fixtures.some(owned=>owned.subject===invite.acceptedBy))||header.value.members.some(subject=>!state.fixtures.some(owned=>owned.subject===subject))||header.value.draftIds.length>1||header.value.decisionIds.length>1)throw new Error('OWN_EMPTY_GROUP_REQUIRED');
    const entries=[{key,row:header}];
    for(const id of header.value.draftIds){const child={PK:key.PK,SK:'DRAFT#'+id};entries.push({key:child,row:await managed.groups.read(child)});}
    for(const id of header.value.decisionIds){const child={PK:key.PK,SK:'BINDING#'+id};entries.push({key:child,row:await managed.groups.read(child)});const directory=partitionDirectoryKey({type:'DECISION',groupId:fixture.groupId,decisionId:id});entries.push({key:directory,row:await managed.groups.read(directory)});}
@@ -55,31 +55,37 @@ try {
  const denied=await globalThis.fetch('https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com/groups/'+fixture.groupId+'/drafts',{method:'POST',headers:{authorization:'Bearer '+outsider.accessToken,'content-type':'application/json'},body:JSON.stringify({objective:'Synthetic unauthorized objective',idempotencyKey:randomUUID()})});
  if(![403,404].includes(denied.status))throw new Error('UNAUTHORIZED_DRAFT_NOT_DENIED');report.unauthorized={status:denied.status};
  const unauth=await globalThis.fetch('https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com/groups/'+fixture.groupId+'/draft-requests');if(unauth.status!==401)throw new Error('UNAUTHENTICATED_RECOVERY_NOT_DENIED');report.unauthenticated=401;
+ const signedRequest=async(person,path,body)=>{const response=await globalThis.fetch('https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com'+path,{method:body===undefined?'GET':'POST',headers:{authorization:'Bearer '+person.accessToken,'content-type':'application/json'},...(body===undefined?{}:{body:JSON.stringify(body)})});const value=await response.json();if(response.status!==200)throw new Error('OWN_MEMBER_VISIBILITY_FAILED');return value;};
+ const invitation=await signedRequest(fixture,'/groups/'+fixture.groupId+'/invitations',{email:outsider.mailbox.address,replace:false});
+ const accepted=await signedRequest(outsider,'/groups/accept',{token:invitation.token});if(accepted.group?.members.length!==2||accepted.group?.isOrganizer!==false)throw new Error('OWN_MEMBER_VISIBILITY_FAILED');report.memberJoin='PASS';
+
  await page.getByRole('button',{name:'Start a decision',exact:true}).click();
- await page.getByLabel('What should this group decide?').fill('Choose a synthetic garden workday. There are two public choices: activity is planting or watering; time is morning or afternoon. All named group members must approve. There are no extra public constraints, real availability, private needs, or unresolved public questions. Generate these two enum choices for review.');
+ await page.getByLabel('Tell me what you want to decide').fill('Choose a synthetic garden workday. There are two public choices: activity is planting or watering; time is morning or afternoon. All named group members must approve. There are no extra public constraints, real availability, private needs, or unresolved public questions. Generate these two enum choices for review.');
  const draft=page.waitForResponse(r=>new URL(r.url()).pathname===`/groups/${fixture.groupId}/drafts`&&r.request().method()==='POST',{timeout:25000});
- await page.getByRole('button',{name:'Draft a new decision',exact:true}).click();const draftResponse=await draft;
+ await page.getByRole('button',{name:'Continue with AI',exact:true}).click();const draftResponse=await draft;
  const body=await draftResponse.json().catch(()=>({}));fixture.draftRequestKey=draftResponse.request().postDataJSON().idempotencyKey;await writeFile(join(directory,'owned-fixtures-private.json'),JSON.stringify(state),{mode:0o600});
  const code=typeof body.error?.code==='string'&&/^[A-Z_]{1,80}$/.test(body.error.code)?body.error.code:'UNCLASSIFIED';
  report.draft={status:draftResponse.status(),code,reference:typeof body.requestId==='string'&&/^[A-Za-z0-9_-]{1,80}$/.test(body.requestId)?body.requestId:'UNAVAILABLE',observedAt:new Date().toISOString()};
  if(draftResponse.status()!==200||!body.draft?.id)throw new Error('PRIMARY_DRAFT_FAILED');
  fixture.draftId=body.draft.id;await writeFile(join(directory,'owned-fixtures-private.json'),JSON.stringify(state),{mode:0o600});
  if(body.draft.clarificationQuestions?.length)throw new Error('PUBLIC_CLARIFICATION_REQUIRED');
- await page.getByRole('heading',{name:'Review the public draft',exact:true}).waitFor();
- await page.getByLabel('I reviewed this public draft and the required approvers').check();
+ await page.getByRole('heading',{name:'Your decision, ready to review.',exact:true}).waitFor();
+ await page.getByLabel('I’ve reviewed these shared choices and who needs to approve.').check();
  const created=page.waitForResponse(r=>new URL(r.url()).pathname===`/groups/${fixture.groupId}/drafts/${fixture.draftId}/create`&&r.request().method()==='POST');
- await page.getByRole('button',{name:'Create decision for group review',exact:true}).click();const createdResponse=await created;const createdBody=await createdResponse.json();
+ await page.getByRole('button',{name:'Create decision',exact:true}).click();const createdResponse=await created;const createdBody=await createdResponse.json();
  if(createdResponse.status()!==200||!createdBody.snapshot?.frame?.decisionId)throw new Error('PRIMARY_DECISION_CREATE_FAILED');
  fixture.decisionId=createdBody.snapshot.frame.decisionId;await writeFile(join(directory,'owned-fixtures-private.json'),JSON.stringify(state),{mode:0o600});report.decisionCreate={status:200};
  await page.reload();await page.waitForLoadState('networkidle');
  const restored=await globalThis.fetch('https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com/groups/'+fixture.groupId,{headers:{authorization:'Bearer '+fixture.accessToken}});const restoredBody=await restored.json();
  if(restored.status!==200||!restoredBody.group?.decisions?.some(item=>item.id===fixture.decisionId&&item.current))throw new Error('PRIMARY_DECISION_RELOAD_FAILED');
  if(await page.locator('body').innerText().then(text=>text.includes('Check your account and organizer access')))throw new Error('MISLEADING_ACCESS_COPY');
+ const memberContext=await browser.newContext();await memberContext.addInitScript(session=>globalThis.sessionStorage.setItem('known-enough-cognito-session',JSON.stringify(session)),{accessToken:outsider.accessToken,kind:'participant',expiresAt:Date.now()+300000});
+ const memberPage=await memberContext.newPage();await memberPage.goto(config.allowedOrigin+'/?group='+fixture.groupId,{waitUntil:'domcontentloaded'});await memberPage.getByRole('button',{name:'Open decision',exact:true}).click();await memberPage.getByRole('heading',{name:'Shared frame',exact:true}).waitFor();report.memberVisibility='PASS';await memberContext.close();
  report.reload='PASS';report.result='PRIMARY_PUBLIC_DRAFT_DECISION_PASS';
  await context.close();
  }
 } catch(error) {
- report.result='BLOCKED';report.error=['PRIMARY_DRAFT_FAILED','PUBLIC_CLARIFICATION_REQUIRED','PRIMARY_DECISION_CREATE_FAILED','PRIMARY_DECISION_RELOAD_FAILED','MISLEADING_ACCESS_COPY','OWN_SECOND_ACCOUNT_REQUIRED','UNAUTHORIZED_DRAFT_NOT_DENIED','UNAUTHENTICATED_RECOVERY_NOT_DENIED','OWN_TARGET_MISMATCH','OWN_SIGNED_IDENTITY_MISMATCH','OWN_PENDING_ACCOUNT_REQUIRED','OWN_GROUP_CREATE_FAILED','OWN_EMPTY_GROUP_REQUIRED','OWN_ARCHIVE_NOT_CONFIRMED'].includes(error.message)?error.message:'OWN_REPRODUCTION_UNAVAILABLE';
+ report.result='BLOCKED';report.error=['PRIMARY_DRAFT_FAILED','PUBLIC_CLARIFICATION_REQUIRED','PRIMARY_DECISION_CREATE_FAILED','PRIMARY_DECISION_RELOAD_FAILED','MISLEADING_ACCESS_COPY','OWN_SECOND_ACCOUNT_REQUIRED','UNAUTHORIZED_DRAFT_NOT_DENIED','UNAUTHENTICATED_RECOVERY_NOT_DENIED','OWN_TARGET_MISMATCH','OWN_SIGNED_IDENTITY_MISMATCH','OWN_PENDING_ACCOUNT_REQUIRED','OWN_GROUP_CREATE_FAILED','OWN_EMPTY_GROUP_REQUIRED','OWN_ARCHIVE_NOT_CONFIRMED','OWN_MEMBER_VISIBILITY_FAILED'].includes(error.message)?error.message:'OWN_REPRODUCTION_UNAVAILABLE';
 } finally {
  await browser?.close();await writeFile(join(process.env.RUNNER_TEMP,process.argv[2]==='archive'?'fix01-archive-report.json':'fix01-proof-report.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
 }

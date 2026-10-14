@@ -5,6 +5,15 @@ on:
       source_sha:
         type: string
         required: true
+      recover_queue:
+        type: boolean
+        default: false
+      previous_job_source:
+        type: string
+        default: 4fc702b3018a7e2933486ee4289efd3d7fe2971a
+      queue_api_sha256:
+        type: string
+        default: 83d794ac6cd4fe204f30a320c4e34537b683b76da3aedb6a106f9077dff6f663
 permissions:
   contents: read
 concurrency:
@@ -22,6 +31,8 @@ jobs:
       AWS_MAX_ATTEMPTS: '1'
       AWS_RETRY_MODE: standard
       EXPECTED_SOURCE: ${{ inputs.source_sha }}
+      PREVIOUS_JOB_SOURCE: ${{ inputs.previous_job_source }}
+      API_SHA256: ${{ inputs.queue_api_sha256 }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -36,6 +47,45 @@ jobs:
           retry-max-attempts: 1
           unset-current-credentials: true
       - run: python3 -B scripts/fix01/inspect.py
+      - name: Test provider completion coverage and one-CAS recovery guards
+        run: python3 -B scripts/fix01/queue-recovery.test.py
+      - id: queue-events
+        name: Read only fixed API model completion receipts
+        continue-on-error: ${{ !inputs.recover_queue }}
+        run: python3 -B scripts/fix01/queue-recovery.py events
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: steps.queue-events.outcome == 'success'
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobOperations
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Prepare exact expired public queue recovery without writes
+        if: steps.queue-events.outcome == 'success'
+        run: python3 -B scripts/fix01/queue-recovery.py prepare
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: inputs.recover_queue && steps.queue-events.outcome == 'success'
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubQaRelease
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Preserve and verify private immutable queue recovery backup
+        if: inputs.recover_queue && steps.queue-events.outcome == 'success'
+        run: python3 -B scripts/fix01/queue-recovery.py backup
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: inputs.recover_queue && steps.queue-events.outcome == 'success'
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobOperations
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Reconcile only proved complete public attempts and expired pre-call jobs
+        if: inputs.recover_queue && steps.queue-events.outcome == 'success'
+        run: python3 -B scripts/fix01/queue-recovery.py apply
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
           role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPrimaryRelease
@@ -52,4 +102,5 @@ jobs:
           path: |
             ${{ runner.temp }}/fix01-inspect.json
             ${{ runner.temp }}/fix01-api-log-probe.json
+            ${{ runner.temp }}/fix01-queue-*-report.json
           if-no-files-found: error

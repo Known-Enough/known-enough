@@ -1,0 +1,12 @@
+{
+  "sourceSha": "666d7f112245083aff2aa203ffbbdbd663f86571",
+  "run": "https://github.com/Known-Enough/known-enough/actions/runs/38521196882",
+  "completedAt": "2026-10-14T06:16:20Z",
+  "control": "DISABLED_EMPTY",
+  "totals": {
+    "runs": 65,
+    "messages": 60,
+    "reservedTokens": 17501524,
+    "reservedCostMicros": 17467796
+  }
+}

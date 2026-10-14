@@ -13,6 +13,7 @@ export function draftFailureMessage(status: number, body: unknown): string {
   const category = value?.draftFailure;
   if (status === 401) return 'Your session expired. Sign in again to continue.';
   if (status === 403) return 'Only the current approved group organizer can do this. Refresh your access and group.';
+  if (category === 'AI_AT_CAPACITY') return 'All AI processing slots are occupied. No new AI call started. Close this unfinished request to return to your saved draft; try again after service recovery.';
   if (category === 'AI_UNAVAILABLE') return 'AI drafting is unavailable on this server. Recover the request before trying again later.';
   if (category === 'INVALID_MODEL_OUTPUT') return 'AI returned an unsupported draft. No draft was saved. Recover this request before editing or starting another.';
   if (category === 'PROVIDER_FAILED') return 'The AI provider could not complete this request. Recover its status before trying again.';

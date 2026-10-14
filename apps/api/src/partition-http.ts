@@ -261,7 +261,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         }
         if (draft && (request.method === 'GET' || request.method === 'POST')) {
           if (draft[3] && request.method !== 'POST') return reject('NOT_FOUND');
-          const io = partitionIO(); const context = { ...io, signal: AbortSignal.any([io.signal, controller.signal]) };
+          const io = partitionIO(!draft[2] && request.method === 'POST' ? { timeoutMs: 27000 } : {}); const context = { ...io, signal: AbortSignal.any([io.signal, controller.signal]) };
           if (!draft[2]) {
             if (request.method !== 'POST') return reject('NOT_FOUND');
             await session.roster(principal, draft[1]!, context);

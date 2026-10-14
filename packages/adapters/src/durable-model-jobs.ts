@@ -37,7 +37,7 @@ export interface DurableJobStore<Fence, Effect> {
   deliveries(): Promise<{ jobId: string }[]>;
 }
 export class DurableJobError extends Error {
-  constructor(readonly code: 'INVALID' | 'CONFLICT' | 'CAPACITY' | 'STALE' | 'DISABLED' | 'BUDGET' | 'RETRYABLE' | 'INVALID_OUTPUT') {
+  constructor(readonly code: 'INVALID' | 'CONFLICT' | 'CAPACITY' | 'STALE' | 'DISABLED' | 'BUDGET' | 'RETRYABLE' | 'INVALID_OUTPUT' | 'PROVIDER_REJECTED') {
     super(`MODEL_JOB_${code}`); this.name = 'DurableJobError';
   }
 }
@@ -200,7 +200,7 @@ export class DurableModelJobs<Context, Fence, Effect> {
       if (!prior.job || prior.job.lease?.token !== token) return 'SKIPPED';
       const failed = structuredClone(prior); if (observedUsage) failed.job!.usage = observedUsage;
       if (called || prior.job.phase === 'CALLING') {
-        this.finish(failed, 'DEAD', !called || responded ? failure === 'INVALID_OUTPUT' ? 'INVALID_OUTPUT' : 'STALE' : 'PROVIDER_UNCONFIRMED');
+        this.finish(failed, 'DEAD', !called || responded || failure === 'PROVIDER_REJECTED' ? failure === 'INVALID_OUTPUT' ? 'INVALID_OUTPUT' : 'STALE' : 'PROVIDER_UNCONFIRMED');
       } else if (failure === 'RETRYABLE' && prior.job.failures < 2 && prior.control.enabled && prior.job.reference.expiresAt > this.now()) {
         failed.job!.phase = 'READY'; failed.job!.lease = null; failed.job!.failures++;
         failed.job!.availableAt = Math.min(safeSum(this.now(), 500 * 2 ** prior.job.failures), prior.job.reference.expiresAt);
