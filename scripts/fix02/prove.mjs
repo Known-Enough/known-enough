@@ -1,5 +1,6 @@
 import { readFile,writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { randomUUID } from 'node:crypto';
 import { deflateSync } from 'node:zlib';
 import { chromium } from '@playwright/test';
 import { createPartitionManagedDriver } from '../../packages/adapters/src/partition-managed.ts';
@@ -28,7 +29,7 @@ try{
  report.stage='OWNER_SAVE';await dialog.getByRole('button',{name:'Save',exact:true}).click();await dialog.getByText('Saved.',{exact:true}).waitFor();let profile=(await api(owner,'/account/profile')).profile;if(profile.description!=='Synthetic profile persistence check.')throw new Error('DESCRIPTION_NOT_SAVED');
  await dialog.getByRole('button',{name:'Edit profile',exact:true}).click();for(const color of [22,99]){report.stage='OWNER_PHOTO';const uploaded=page.waitForResponse(r=>new URL(r.url()).pathname==='/account/profile/image'&&r.request().method()==='POST');await dialog.locator('#profile-picture').setInputFiles({name:'synthetic.png',mimeType:'image/png',buffer:png(color)});if((await uploaded).status()!==200)throw new Error('IMAGE_SAVE_FAILED');await dialog.getByText('Saved.',{exact:true}).waitFor();const fresh=(await api(owner,'/account/profile')).profile;if(!fresh.image||fresh.image.bytesBase64===profile.image?.bytesBase64)throw new Error('IMAGE_NOT_CHANGED');profile=fresh;}
  await page.reload();profile=(await api(owner,'/account/profile')).profile;if(!profile.image||profile.description!=='Synthetic profile persistence check.')throw new Error('PROFILE_RELOAD_FAILED');report.checks.push({operation:'PROFILE_RELOAD',result:'PASS'});
- const group=(await api(owner,'/groups',{name:'FIX02 synthetic profile group'})).group;owner.groupId=group.id;await save();const ownerId=group.members.find(item=>item.isOrganizer).id;
+ owner.groupCreateKey=randomUUID();await save();const group=(await api(owner,'/groups',{name:'FIX02 synthetic profile group',idempotencyKey:owner.groupCreateKey})).group;owner.groupId=group.id;await save();const ownerId=group.members.find(item=>item.isOrganizer).id;
  await api(member,`/groups/${group.id}/members/${ownerId}/profile`,undefined,403);await approve(member);await api(member,`/groups/${group.id}/members/${ownerId}/profile`,undefined,404);
  const invite=await api(owner,`/groups/${group.id}/invitations`,{email:member.mailbox.address,replace:false});await api(member,'/groups/accept',{token:invite.token});const shared=(await api(member,`/groups/${group.id}/members/${ownerId}/profile`)).profile;
  if(Object.keys(shared).sort().join('|')!=='description|displayName|image'||shared.description!==profile.description||!shared.image||Object.keys(shared.image).sort().join('|')!=='bytesBase64|height|mimeType|width')throw new Error('SHARED_PROFILE_PROJECTION_INVALID');
