@@ -238,7 +238,7 @@ test('a stale command refreshes but never replays against a latest version', asy
   });
   await page.goto('/?view=owner');
   await page.getByRole('button', { name: 'Allow scoped exception' }).click();
-  await expect(page.getByRole('status')).toContainText(/stale.*refreshed/i);
+  await expect(page.getByRole('status').filter({ hasText: /stale.*refreshed/i })).toContainText(/stale.*refreshed/i);
   await expect(page.getByRole('heading', { name: 'Your inputs' })).toBeVisible();
   expect(calls).toBe(1);
 });
@@ -260,13 +260,13 @@ for (const view of ['public', 'owner']) {
     await page.clock.install({ time: new Date('2026-10-01T12:00:00Z') });
     await page.clock.pauseAt(new Date('2026-10-01T12:00:01Z'));
     await page.goto(`${prefix}${view === 'owner' ? 'review' : 'collecting'}`);
-    await expect(page.getByRole('status')).toContainText(/loading/i);
+    await expect(page.getByRole('status', { name: /loading|opening/i })).toBeVisible();
     // Lazy-module/Suspense callbacks also use the paused clock. Advance in
     // steps shorter than mock latency until the mounted screen is loading.
     await expect.poll(async () => {
       await page.clock.runFor(50);
-      return page.getByRole('status').textContent();
-    }).toBe(view === 'owner' ? 'Loading private local example…' : 'Loading shared local example…');
+      return page.getByRole('status', { name: view === 'owner' ? 'Loading private local example' : 'Loading shared local example', exact: true }).count();
+    }).toBe(1);
     await page.clock.runFor(1000);
     await expect(page.getByRole('heading', { name: view === 'owner' ? /your inputs/i : 'Around the table' })).toBeVisible();
   });

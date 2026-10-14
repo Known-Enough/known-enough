@@ -32,10 +32,10 @@ test('four new independent browser owners create a garden decision from blank en
       const context = await browser.newContext(); contexts.push(context); await connect(context, api, who);
       const page = await context.newPage(); pages.push(page); await page.goto(url);
       await api.call(who, '/account/register', { displayName: who });
-      await page.getByRole('button', { name: 'Refresh account and groups' }).click();
+      await page.getByRole('button', { name: /^Refresh (?:account and groups|group)$/ }).click();
       await expect(page.getByRole('button', { name: 'Request access', exact: true })).toHaveCount(0);
       await expect(page.getByText('Your account is waiting for approval.', { exact: false })).toBeVisible();
-      await api.approve(who); await page.getByRole('button', { name: 'Refresh account and groups' }).click();
+      await api.approve(who); await page.getByRole('button', { name: /^Refresh (?:account and groups|group)$/ }).click();
       await expect(page.getByRole('button', { name: 'Create group', exact: true })).toBeVisible();
     }
     const host = pages[0]!; await host.getByRole('button', { name: 'Create group', exact: true }).click(); await host.getByLabel('New group name').fill('Fresh garden club'); await host.getByRole('button', { name: 'Create group', exact: true }).click();

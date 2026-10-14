@@ -1,3 +1,9 @@
+## FIX01 checked local checkpoint — 2026-10-14T01:14:57.933842+00:00
+
+FIX01 BLOCKED/unclaimed; B stops implementation after preserving checked source. Local metadata commit868d411 and unpushed application checkpoint retain native public architecture, atomic usage/frame commit, versioned signup intake fix, honest error/recovery UI and guarded publication/live proof helpers. Full pinned check passes1583unit/74browser, hosted1/type/lint/build/reference; these are local tests, no deployed FIX01 acceptance.
+
+Remote A89cb claims active ZZ03 profile work overlapping API/session files; A API run38494254833 failed LAMBDA_TARGET_MISMATCH. No release observed; do not infer idle or overwrite A's profile source. User clarification pending. A must finish/safely pause its publication and explicitly release/transfer claim. Then preserve both histories, integrate A source, rerun combined checks, inspect actual source/control/provider policies, publish matching native API/worker/routes/frontend, verify public-only enablement/private gate and execute fresh normal primary draft/review/create/reload/deny/usage/cleanup proof. Current claim/status/log changes and implementation remain local; no push claimed. No new task, worker, automation, model call or worker reinstall. Existing API logs denied FilterLogEvents under own inspector/release; exact minimal grant helper prepared but not executed.
+
 ## Current B handoff — FIX01, 2026-10-13T21:55:30Z
 
 Pull main ff-only with your own account, inspect genuine claims/running jobs, then claim exactly [FIX01](tasks/active/fix/FIX01/ticket.md). The user explicitly requests B to fix decision drafting inside a group; relevant tests and exact-source deployment are authorized under standing project authority. A's preparation is complete with no active implementation; earlier observer-only/manual-test instructions yield for FIX01. Keep your existing persistent chat/idle-only monitor, one task and saved NP00.

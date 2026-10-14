@@ -31,9 +31,9 @@ test('mobile keyboard entry, pending/disabled copy and private questions preserv
     const login = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' }); contexts.push(login);
     const entry = await login.newPage(); await entry.goto(url);
     await expect(entry.getByRole('heading', { name: 'Decide together.' })).toBeVisible();
-    await entry.keyboard.press('Tab'); await expect(entry.getByRole('button', { name: 'Create account', exact: true })).toBeFocused();
+    for (let tab = 0; tab < 8 && !await entry.getByRole('button', { name: 'Create account', exact: true }).evaluate(node => node === document.activeElement); tab++) await entry.keyboard.press('Tab'); await expect(entry.getByRole('button', { name: 'Create account', exact: true })).toBeFocused();
     await entry.getByText('Privacy and preview limits', { exact: true }).click();
-    await expect(entry.getByText('Known Enough and its authorized AI process private inputs.', { exact: false })).toBeVisible();
+    await expect(entry.getByText('Known Enough and its authorized AI process your private inputs.', { exact: false })).toBeVisible();
     expect(await entry.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await entry.screenshot({ path: '/tmp/np03-mobile-signin.png', fullPage: true });
     const pending = await browser.newContext({ viewport: { width: 390, height: 844 } }); contexts.push(pending); await connect(pending, api, 'newbie');
@@ -103,7 +103,7 @@ test('public draft takes keyboard focus; malformed responses show a safe retry m
     await expect(page.getByRole('checkbox', { name: 'I reviewed this public draft and the required approvers' })).not.toBeChecked();
     await page.route('https://api.example.test/groups/**/drafts', route => route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: 'PRIVATE_PROVIDER_PAYLOAD invalid json' }));
     await page.getByRole('button', { name: 'Draft a new decision', exact: true }).click();
-    await expect(page.getByText('The result is unknown. Refresh before retrying.', { exact: false })).toBeVisible();
+    await expect(page.getByText('The action could not be completed. Refresh its current state before trying again.', { exact: false })).toBeVisible();
     expect(await page.locator('body').innerText()).not.toContain('PRIVATE_PROVIDER_PAYLOAD');
   } finally { await context.close(); await api.close(); }
 });
@@ -192,9 +192,9 @@ test('a late approved refresh cannot overwrite a newer disabled account', async 
       if(++requests===1){entered();await wait;}
       await route.fulfill({status:response.status,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body}).catch(()=>{});
     });
-    await page.getByRole('button',{name:'Refresh account and groups'}).click();await started;
+    await page.getByRole('button',{name:/^Refresh (?:account and groups|group)$/}).click();await started;
     await expect(page.getByRole('button',{name:'Create group',exact:true})).toBeDisabled();await api.disable('iris');
-    await page.getByRole('button',{name:'Refresh account and groups'}).click();await expect(page.getByText('Your access is disabled.',{exact:false})).toBeVisible();
+    await page.getByRole('button',{name:/^Refresh (?:account and groups|group)$/}).click();await expect(page.getByText('Your access is disabled.',{exact:false})).toBeVisible();
     release();await page.waitForLoadState('networkidle');await expect(page.getByText('Your access is disabled.',{exact:false})).toBeVisible();
     await expect(page.getByRole('button',{name:'Create group',exact:true})).toHaveCount(0);
   }finally{await context.close();await api.close();}

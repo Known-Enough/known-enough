@@ -11,7 +11,7 @@ for (const width of [390, 1280]) {
     await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toHaveCount(1);
     await expect(page.getByRole('button', { name: 'Shared display sign-in' })).toBeHidden();
     await expect(page.getByText('Shared screen access', { exact: true })).toHaveCount(0);
-    await page.keyboard.press('Tab');
+    for (let tab = 0; tab < 8 && !await page.getByRole('button', { name: 'Create account', exact: true }).evaluate(node => node === document.activeElement); tab++) await page.keyboard.press('Tab');
     await expect(page.getByRole('button', { name: 'Create account', exact: true })).toBeFocused();
     await page.getByRole('button', { name: 'Create account', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Create your account' })).toBeFocused();

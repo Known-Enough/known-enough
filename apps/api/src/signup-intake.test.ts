@@ -1,6 +1,6 @@
 import { expect, it, vi } from 'vitest';
-import { createSignupIntake } from './signup-intake.ts';
-const event = () => ({ region: 'us-east-1', userPoolId: 'us-east-1_fixture', userName: 'synthetic-login',
+import { createSignupIntake, isSignupIntakeEvent } from './signup-intake.ts';
+const event = () => ({ version: '1', region: 'us-east-1', userPoolId: 'us-east-1_fixture', userName: 'synthetic-login',
   callerContext: { clientId: 'participant' }, triggerSource: 'PostConfirmation_ConfirmSignUp',
   request: { userAttributes: { sub: 'subject-one', email: 'synthetic@example.invalid', email_verified: 'true' } }, response: {} });
 it('confirmed signup uses authoritative event identity, defaults a non-identifying name, returns the event and never approves', async () => {
@@ -18,4 +18,11 @@ it('unverified, wrong pool/client and browser event shapes cannot request approv
   }
   const forgotten = { ...event(), triggerSource: 'PostConfirmation_ConfirmForgotPassword' }; expect(await intake(forgotten)).toBe(forgotten);
   expect(register).not.toHaveBeenCalled();
+});
+
+it('versioned Cognito confirmation selects intake while HTTP envelopes and browser bodies cannot', () => {
+  expect(isSignupIntakeEvent(event())).toBe(true);
+  expect(isSignupIntakeEvent({ ...event(), version: '2.0', requestContext: {} })).toBe(false);
+  expect(isSignupIntakeEvent({ version: '2.0', body: JSON.stringify(event()) })).toBe(false);
+  expect(isSignupIntakeEvent({ ...event(), version: undefined })).toBe(false);
 });

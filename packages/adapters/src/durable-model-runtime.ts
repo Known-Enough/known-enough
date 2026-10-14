@@ -23,3 +23,5 @@ export function createDurableBedrockNegotiation(options: { transport?: ConverseT
     const output = await models.negotiation(input); if (!usage) throw new DurableJobError('INVALID_OUTPUT'); return { output, usage };
   };
 }
+
+export { createManagedPublicDraftPorts, type PublicDraftAtomicItem } from './public-draft-ports.ts';

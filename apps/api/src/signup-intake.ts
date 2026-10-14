@@ -1,10 +1,17 @@
+/** Cognito includes version="1". HTTP API events are version="2.0" with requestContext. */
+export function isSignupIntakeEvent(event: unknown): boolean {
+  if (!event || typeof event !== 'object' || Array.isArray(event)) return false;
+  const value = event as Record<string, unknown>;
+  return value.version === '1' && !('requestContext' in value)
+    && (value.triggerSource === 'PostConfirmation_ConfirmSignUp' || value.triggerSource === 'PostConfirmation_ConfirmForgotPassword');
+}
 import type { createPartitionGroupSession } from '@deal-table/adapters/partition-request';
 /** Server trigger only: deploy with Cognito service permission bound to this pool/account, never behind public HTTP. */
 export function createSignupIntake(options: { userPoolId: string; participantClientId: string;
   session: Pick<ReturnType<typeof createPartitionGroupSession>, 'register'> }) {
   const pool = options.userPoolId, client = options.participantClientId, register = options.session.register.bind(options.session);
   return async (event: unknown) => {
-    if (!event || typeof event !== 'object' || Array.isArray(event)) throw new Error('SIGNUP_EVENT_INVALID');
+    if (!isSignupIntakeEvent(event)) throw new Error('SIGNUP_EVENT_INVALID');
     const value = event as Record<string, unknown>;
     const context = value.callerContext as Record<string, unknown> | undefined;
     if (value.userPoolId !== pool || value.region !== 'us-east-1' || context?.clientId !== client) throw new Error('SIGNUP_EVENT_INVALID');

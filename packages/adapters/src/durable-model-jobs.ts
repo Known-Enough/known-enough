@@ -8,16 +8,16 @@ const hash = z.string().regex(/^[a-f0-9]{64}$/);
 const uuid = z.string().uuid();
 export const DeliverySchema = z.strictObject({ jobId: uuid });
 // Inputs/outputs/closures never enter a persisted record. Only reconstructable server operations qualify.
-export const JobReferenceSchema = z.strictObject({ jobId: uuid, kind: z.literal('NEGOTIATION'),
+export const JobReferenceSchema = z.strictObject({ jobId: uuid, kind: z.enum(['NEGOTIATION', 'ARCHITECT']),
   subject: id, decisionId: id, reasoningJobId: id, authorityHash: hash,
-  sourceSha: z.string().regex(/^[a-f0-9]{40}$/), expiresAt: integer });
+  sourceSha: z.string().regex(/^[a-f0-9]{40}$/), expiresAt: integer, requestKey: id.optional() }).refine(value => value.kind === 'ARCHITECT' ? Boolean(value.requestKey) : value.requestKey === undefined);
 const lease = z.strictObject({ token: uuid, until: integer });
 const usage = z.strictObject({ inputTokens: integer, outputTokens: integer });
 export const JobSchema = z.strictObject({ schemaVersion: z.literal(1), revision: integer.min(1),
   reference: JobReferenceSchema, phase: z.enum(['READY', 'LEASED', 'CALLING', 'SUCCEEDED', 'DEAD']),
   lease: lease.nullable(), attempts: integer.max(2), failures: integer.max(3), availableAt: integer,
   reservedTokens: integer, reservedCostMicros: integer, usage: usage.nullable(), recoveryProofHash: hash.nullable(),
-  reason: z.enum(['EXPIRED', 'STALE', 'RETRY_LIMIT', 'PROVIDER_UNCONFIRMED', 'INVALID_OUTPUT', 'BUDGET', 'DISABLED']).nullable(),
+  reason: z.enum(['EXPIRED', 'STALE', 'RETRY_LIMIT', 'PROVIDER_UNCONFIRMED', 'INVALID_OUTPUT', 'BUDGET', 'DISABLED', 'CANCELLED']).nullable(),
 });
 export type JobReference = z.infer<typeof JobReferenceSchema>;
 export type DurableJob = z.infer<typeof JobSchema>;
@@ -69,7 +69,7 @@ export interface DurableExecution<Context, Fence, Effect> {
 /** Explicit server-only inactive worker, independent of the installed transient closure runner. */
 export class DurableModelJobs<Context, Fence, Effect> {
   private readonly bounds: { leaseMs: number; timeoutMs: number; maxTokens: number; maxCostMicros: number };
-  constructor(private readonly options: { store: DurableJobStore<Fence, Effect>; now: () => number;
+  constructor(private readonly options: { kind?: 'NEGOTIATION' | 'ARCHITECT'; store: DurableJobStore<Fence, Effect>; now: () => number;
     reconcile?: (reference: JobReference, evidence: unknown) => Promise<{ providerStopped: true; proofHash: string; usage: z.infer<typeof usage> | null }>;
     execution: DurableExecution<Context, Fence, Effect>; bounds?: Partial<DurableModelJobs<Context, Fence, Effect>['bounds']> }) {
     this.bounds = { leaseMs: 10_000, timeoutMs: 8_000, maxTokens: 18_432, maxCostMicros: 10_000, ...options.bounds };
@@ -94,7 +94,7 @@ export class DurableModelJobs<Context, Fence, Effect> {
     if (!await this.options.store.commit(prior, next, fence, effect)) fail('CONFLICT');
   }
   async enqueue(raw: JobReference): Promise<{ jobId: string }> {
-    const parsed = JobReferenceSchema.safeParse(raw); if (!parsed.success) return fail('INVALID'); const ref = parsed.data;
+    const parsed = JobReferenceSchema.safeParse(raw); if (!parsed.success) return fail('INVALID'); const ref = parsed.data; if (ref.kind !== (this.options.kind ?? 'NEGOTIATION')) return fail('INVALID');
     const prior = await this.read(ref.jobId);
     if (prior.job) { if (!isDeepStrictEqual(prior.job.reference, ref)) fail('INVALID'); return { jobId: ref.jobId }; }
     if (!prior.control.enabled || ref.sourceSha !== prior.control.sourceSha) fail('DISABLED');
@@ -113,7 +113,7 @@ export class DurableModelJobs<Context, Fence, Effect> {
     const delivery = DeliverySchema.safeParse(raw); if (!delivery.success) return fail('INVALID');
     if (!this.options.reconcile) return fail('DISABLED');
     const prior = await this.read(delivery.data.jobId);
-    if (!prior.job || prior.job.phase !== 'DEAD' || prior.job.reason !== 'PROVIDER_UNCONFIRMED') return fail('STALE');
+    if (!prior.job || prior.job.reference.kind !== (this.options.kind ?? 'NEGOTIATION') || prior.job.phase !== 'DEAD' || prior.job.reason !== 'PROVIDER_UNCONFIRMED') return fail('STALE');
     const proof = z.strictObject({ providerStopped: z.literal(true), proofHash: hash, usage: usage.nullable() }).safeParse(await this.bounded(() => this.options.reconcile!(prior.job!.reference, evidence), this.now() + this.bounds.leaseMs));
     if (!proof.success || (proof.data.usage && safeSum(proof.data.usage.inputTokens, proof.data.usage.outputTokens) > prior.job.reservedTokens)) return fail('INVALID');
     const next = structuredClone(prior); next.job!.recoveryProofHash = proof.data.proofHash; next.job!.usage = proof.data.usage;
@@ -141,7 +141,7 @@ export class DurableModelJobs<Context, Fence, Effect> {
   async process(raw: unknown): Promise<'APPLIED' | 'SKIPPED' | 'RETRY' | 'DEAD'> {
     const delivery = DeliverySchema.safeParse(raw); if (!delivery.success) return fail('INVALID');
     const id = delivery.data.jobId; let prior = await this.read(id); const job = prior.job;
-    if (!job || ['SUCCEEDED', 'DEAD'].includes(job.phase)) return 'SKIPPED';
+    if (!job || job.reference.kind !== (this.options.kind ?? 'NEGOTIATION') || ['SUCCEEDED', 'DEAD'].includes(job.phase)) return 'SKIPPED';
     const now = this.now();
     if (job.lease && job.lease.until > now) return 'SKIPPED';
     const next = structuredClone(prior);

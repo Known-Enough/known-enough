@@ -1,0 +1,40 @@
+name: FIX01 guarded primary recovery routes
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha: {type: string, required: true}
+      api_sha256: {type: string, required: true}
+      apply: {type: boolean, default: false}
+permissions: {contents: read}
+concurrency: {group: known-enough-lifecycle-installation, cancel-in-progress: false}
+jobs:
+  setup:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && github.actor_id == '143764700'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {contents: read, id-token: write}
+    env:
+      EXPECTED_SOURCE: ${{ inputs.source_sha }}
+      API_SHA256: ${{ inputs.api_sha256 }}
+      APPLY: ${{ inputs.apply }}
+      AWS_MAX_ATTEMPTS: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - run: test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubApplicationConfig
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - run: |
+          if [ "$APPLY" = true ]; then
+            python3 -B scripts/fix01/setup.py --api-sha256 "$API_SHA256" --apply
+          else
+            python3 -B scripts/fix01/setup.py --api-sha256 "$API_SHA256"
+          fi
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with: {name: fix01-routes, path: '${{ runner.temp }}/fix01-routes-report.json', if-no-files-found: warn}

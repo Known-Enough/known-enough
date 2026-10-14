@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { ruleText, variableText } from './connected-decision';
+import { readDraftRequest,saveDraftRequest,draftFailureMessage } from './draft-request-state';
 import { LoadingSkeleton, PageIcon } from './app-chrome';
 class UserFlowError extends Error {}
 export function GroupDecisions({ group, api, reload, openDecision, startCollapsed = false }: { group: Groups.GroupSnapshot;
   api: (path: string, init?: RequestInit) => Promise<Response>; reload: () => Promise<void>; openDecision: (id: string) => void; startCollapsed?: boolean }) {
-  const [starting, setStarting] = useState(!startCollapsed);
+  const [starting, setStarting] = useState(!startCollapsed || Boolean(group.isOrganizer && readDraftRequest(group.id)));
   const [objective, setObjective] = useState(''); const [draft, setDraft] = useState<Groups.GroupDraft | null>(null);
   const draftHeading = useRef<HTMLHeadingElement>(null);
   useEffect(() => { draftHeading.current?.focus(); }, [draft?.id, draft?.revision]);
@@ -13,17 +14,48 @@ export function GroupDecisions({ group, api, reload, openDecision, startCollapse
   useEffect(() => setAnswers({}), [draft?.id]);
   const [dirty, setDirty] = useState(false);
   const [reviewed, setReviewed] = useState(false); const [busy, setBusy] = useState(false); const [notice, setNotice] = useState('');
-  const pending = useRef<{ objective: string; idempotencyKey: string } | null>(null);
+  const pending = useRef<{ objective?: string; idempotencyKey: string } | null>(null);
+  const [pendingKey,setPendingKey] = useState<string | null>(() => group.isOrganizer ? readDraftRequest(group.id) : null);
+  const [checkingRequest,setCheckingRequest] = useState(group.isOrganizer);
+  const [requestLookupAvailable,setRequestLookupAvailable] = useState(false);
+  const [requestState,setRequestState] = useState<{ state: string; canRelease: boolean; revision: number } | null>(null);
+  const recoveryEpoch = useRef(0);
+  const [recoveryGeneration,setRecoveryGeneration] = useState(0);
+  const finishRequest = () => { pending.current = null; saveDraftRequest(group.id,null); setPendingKey(null); setRequestState(null); setCheckingRequest(true); setRequestLookupAvailable(false); setRecoveryGeneration(value => value + 1); };
+  async function recoverRequest(key = pendingKey) {
+    if (!key) return; const epoch = ++recoveryEpoch.current;
+    const result = await request('draft-requests/' + key);
+    if (epoch !== recoveryEpoch.current) return;
+    const state = result.draftRequest;
+    if (!state || typeof state !== 'object' || !('state' in state) || !('canRelease' in state) || !('revision' in state)
+      || !['SAVED','NOT_SUBMITTED','PENDING','UNKNOWN','FAILED','CANCELLED'].includes(String(state.state)) || typeof state.canRelease !== 'boolean' || !Number.isSafeInteger(state.revision)) throw new Error('Invalid request status');
+    setRequestState({ state: String(state.state), canRelease: state.canRelease, revision: Number(state.revision) });
+    if (state.state === 'SAVED' && 'draft' in state) { setDraft(Groups.GroupDraft.parse(state.draft)); setDirty(false); setReviewed(false); finishRequest(); setStarting(true); setNotice('The saved draft was recovered without another AI call.'); await reload(); }
+    else setNotice(state.state === 'UNKNOWN' ? 'The provider outcome is still unknown. Keep this request; the operator must verify it before another call.'
+      : state.state === 'PENDING' ? 'This same request is processing. Recover its status again shortly.'
+      : 'This request is not processing. Release it safely before editing or starting another request.');
+  }
+  useEffect(() => {
+    if (!group.isOrganizer) { setCheckingRequest(false); return; } let active = true; const controller = new AbortController();
+    void (async () => {
+      try { const response = await api(`/groups/${group.id}/draft-requests`, { signal: controller.signal }); const body = await response.json();
+        if (!response.ok || !Array.isArray(body.requests) || body.requests.length > 64 || body.requests.some((value: unknown) => !value || typeof value !== 'object' || !('key' in value) || typeof value.key !== 'string' || !/^[A-Za-z0-9_-]{1,80}$/.test(value.key))) throw new Error('Request recovery unavailable');
+        if (!active) return; setRequestLookupAvailable(true); const key = readDraftRequest(group.id) ?? body.requests[0]?.key ?? null;
+        if (key) { saveDraftRequest(group.id,key); setPendingKey(key); pending.current = { idempotencyKey: key }; setStarting(true); await recoverRequest(key); }
+      } catch { if (active) setNotice('Draft request recovery is unavailable. Refresh the group before starting a request.'); }
+      finally { if (active) setCheckingRequest(false); }
+    })();
+    return () => { active = false; controller.abort(); ++recoveryEpoch.current; };
+  }, [group.id,group.isOrganizer,recoveryGeneration]);
   const [roster, setRoster] = useState<{ id: string; frame: KE.PublicDecisionFrame; controlVersion: number; groupVersion: number;
     participants: { id: string; displayName: string }[] } | null>(null);
   async function request(path: string, body?: unknown) {
     const response = await api(`/groups/${group.id}/${path}`, body === undefined ? undefined : {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
-    if (!response.ok) throw new UserFlowError(response.status === 507 ? 'This pilot has reached its capacity. Ask the operator about capacity; retrying will not free space.'
-      : response.status === 409 ? 'The group or draft changed. Refresh and review the current terms.'
-      : response.status === 422 ? 'This draft needs supported public choices or clarification before it can continue.'
-      : 'This action is unavailable. Check your account and organizer access.');
-    return response.json() as Promise<Record<string, unknown>>;
+    let result: unknown; try { result = await response.json(); } catch { throw new UserFlowError(draftFailureMessage(response.status,null)); }
+    if (!response.ok) throw new UserFlowError(draftFailureMessage(response.status,result));
+    if (!result || typeof result !== 'object' || Array.isArray(result)) throw new Error('Invalid response');
+    return result as Record<string, unknown>;
   }
   async function action(work: () => Promise<void>) {
     setBusy(true); setNotice('');
@@ -31,10 +63,11 @@ export function GroupDecisions({ group, api, reload, openDecision, startCollapse
     finally { setBusy(false); }
   }
   async function draftObjective(value: string) {
-    pending.current ??= { objective: value, idempotencyKey: crypto.randomUUID() };
+    if (!pending.current) { const key = crypto.randomUUID(); pending.current = { objective: value, idempotencyKey: key }; saveDraftRequest(group.id,key); setPendingKey(key); }
+    if (!pending.current.objective) { await recoverRequest(pending.current.idempotencyKey); return; }
     const result = await request('drafts', pending.current);
     setDraft(Groups.GroupDraft.parse(result.draft)); setDirty(false); setRoster(null);
-    pending.current = null; setReviewed(false); await reload();
+    finishRequest(); setReviewed(false); await reload();
   }
   const answeredObjective = draft ? [draft.frame.objective, 'Public clarification answers:',
     ...draft.clarificationQuestions.map((question, index) => question + ' Answer: ' + (answers[index] ?? '').trim())].join('\n') : '';
@@ -45,11 +78,11 @@ export function GroupDecisions({ group, api, reload, openDecision, startCollapse
     <header className="ke-panel-heading"><div><h2 id={`decisions-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="ListChecks" /></span><span>Decisions</span></h2>
       <p className="ke-panel-subtitle">Shared choices and progress for this group.</p></div>
       {group.isOrganizer && !starting && (group.decisions.length > 0 || group.drafts.length > 0)
-        && <button type="button" className="ke-start-decision ke-icon-action" onClick={() => setStarting(true)}><PageIcon name="Plus" />Start a decision</button>}</header>
+        && <button type="button" className="ke-start-decision ke-icon-action" disabled={checkingRequest || !requestLookupAvailable} onClick={() => setStarting(true)}><PageIcon name="Plus" />Start a decision</button>}</header>
     {!group.decisions.length && !(group.isOrganizer && group.drafts.length) && !starting && <div className="ke-decision-empty">
       <span className="ke-decision-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M7 3.75h7l4.25 4.5v11A1.75 1.75 0 0 1 16.5 21h-9A1.75 1.75 0 0 1 5.75 19.25v-13A2.5 2.5 0 0 1 8.25 3.75ZM14 4v5h4M9 13h6M9 16.5h4" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
       <h3>No decisions yet</h3><p>When your group is ready, start a decision to explore choices together.</p>
-      {group.isOrganizer && <button type="button" className="ke-start-decision ke-icon-action" onClick={() => setStarting(true)}><PageIcon name="Plus" />Start a decision</button>}
+      {group.isOrganizer && <button type="button" className="ke-start-decision ke-icon-action" disabled={checkingRequest || !requestLookupAvailable} onClick={() => setStarting(true)}><PageIcon name="Plus" />Start a decision</button>}
     </div>}
     <div className="ke-decision-list">{group.decisions.map(decision => <article className="ke-decision-row" key={decision.id}>
       <div><h3>{decision.current ? 'Current decision' : 'Roster review needed'}</h3>
@@ -65,13 +98,21 @@ export function GroupDecisions({ group, api, reload, openDecision, startCollapse
     </article>)}</div>
     {group.isOrganizer && starting && <div className="ke-decision-composer">
       <label htmlFor={`group-objective-${group.id}`}>What should this group decide?</label>
-      <textarea id={`group-objective-${group.id}`} value={objective} maxLength={2000} disabled={busy || !!pending.current}
+      <textarea id={`group-objective-${group.id}`} value={objective} maxLength={2000} disabled={busy || Boolean(pendingKey) || checkingRequest || !requestLookupAvailable}
         onChange={event => { setObjective(event.target.value); setReviewed(false); }} />
       <p>This objective is shared. Describe the public choices; add your private limits later in your own conversation.</p>
-      <button disabled={busy || !objective.trim()} onClick={() => void action(async () => {
+      <button disabled={busy || checkingRequest || !requestLookupAvailable || !objective.trim() || Boolean(pendingKey && !pending.current?.objective)} onClick={() => void action(async () => {
         await draftObjective(objective);
-      })}>{pending.current ? 'Retry the same draft request' : 'Draft a new decision'}</button>
-      {pending.current && !busy && <button className="secondary" onClick={() => { pending.current = null; setNotice('Refresh saved drafts before starting a different request.'); }}>Release this draft request for editing</button>}
+      })}>{pendingKey ? 'Retry the same draft request' : 'Draft a new decision'}</button>
+      {pendingKey && !busy && <>
+        <button className="secondary" onClick={() => void action(() => recoverRequest())}>Recover draft request</button>
+        <button className="secondary" disabled={!requestState?.canRelease} onClick={() => void action(async () => {
+          const result = await request(`draft-requests/${pendingKey}/release`, { revision: requestState!.revision });
+          const value = result.draftRequest as { state?: unknown; canRelease?: unknown } | undefined;
+          if (!value || !value.canRelease || !['CANCELLED','FAILED','SAVED'].includes(String(value.state))) throw new Error('Release not confirmed');
+          finishRequest(); setObjective(''); setNotice('The original request is closed. You can enter a new public objective.');
+        })}>Release this draft request for editing</button>
+      </>}
       {group.drafts.map(item => <p key={item.id}>{item.current ? <button disabled={busy} onClick={() => void action(async () => {
         const result = await request(`drafts/${item.id}`); setDraft(Groups.GroupDraft.parse(result.draft)); setDirty(false); setRoster(null); setReviewed(false);
       })}>{item.created ? 'Review saved decision draft' : 'Review draft'}: {item.title}</button> : 'An earlier draft needs a new request because group membership changed.'}</p>)}

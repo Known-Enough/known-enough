@@ -55,6 +55,7 @@ function activationRejected(error: unknown, size: number) {
 }
 
 export function createPartitionManagedDriver(options: PartitionManagedOptions): {
+  prepareGroupCommit: (mutations: Parameters<PartitionTransport['commit']>[0], context: PartitionIOContext) => Promise<TransactWriteItem[]>;
   groups: PartitionTransport; decisions: PartitionDecisionTransport; membershipDiscovery: PartitionGroupDiscovery;
   archivePorts: (options: PartitionManagedArchiveOptions) => PartitionArchivePorts;
   lifecycle: (options: Omit<DynamoLifecycleOptions, 'activation' | 'verifiedTarget'>) => ReturnType<typeof createDynamoPartitionLifecycle>;
@@ -248,5 +249,9 @@ export function createPartitionManagedDriver(options: PartitionManagedOptions): 
       },
     } });
   }
-  return { groups, decisions, membershipDiscovery, archivePorts, lifecycle, legacyPublicDecision, ...target };
+  return { prepareGroupCommit: async (mutations, io) => {
+    const items = partitionDynamoWrites('KnownEnoughPartitions', structuredClone(mutations));
+    for (const item of items) (item.ConditionCheck ?? item.Put)!.TableName = target.partitionArn;
+    return joined(items, io);
+  }, groups, decisions, membershipDiscovery, archivePorts, lifecycle, legacyPublicDecision, ...target };
 }

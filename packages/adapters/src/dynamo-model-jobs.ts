@@ -1,3 +1,4 @@
+import { isDeepStrictEqual } from 'node:util';
 import { z } from 'zod';
 import { MigrationControlSchema, MigrationJournalSchema } from './partition-migration-runner.ts';
 import { checkPartitionRow } from './partitioned-group-repository.ts';
@@ -22,6 +23,9 @@ const pinSchema = z.strictObject({ table: z.enum([JOB_TARGET.journal, JOB_TARGET
   payload: z.string().min(2).max(360_000) });
 export type JobPin = z.infer<typeof pinSchema>;
 export interface JobFence { reference: JobReference; pins: JobPin[]; guard: GuardRecord }
+export interface PublicDraftFence { kind: 'PUBLIC_DRAFT'; reference: JobReference }
+export interface PublicDraftEffect { kind: 'PUBLIC_DRAFT'; fence: PublicDraftFence }
+export interface PublicDraftCommit { (fence: PublicDraftFence, effect?: PublicDraftEffect): Promise<{ items: TransactWriteItem[]; authority: JobPin }> }
 export interface JobEffect { writes: { key: { PK: string; SK: string }; payload: string | null }[] }
 const controlKey = { PK: 'OPERATIONS#MODEL_JOBS', SK: 'STATE' }, totalKey = { PK: 'TOTAL', SK: 'STATE' };
 const jobKey = (jobId: string) => ({ PK: `MODELJOB#${z.string().uuid().parse(jobId)}`, SK: 'STATE' });
@@ -37,7 +41,7 @@ const pinIdentity = (pin: Pick<JobPin, 'table' | 'key'>) => `${pin.table}/${pin.
 /** Trusted reload snapshots only; bounded physical allowlist, exact source/identity/consent pins. */
 export function checkedJobFence(raw: JobFence): JobFence {
   const parsed = z.strictObject({ reference: JobSchema.shape.reference, pins: z.array(pinSchema).min(8).max(64), guard: z.unknown() }).safeParse(raw);
-  if (!parsed.success) return fail('INVALID'); const fence = parsed.data, ref = fence.reference;
+  if (!parsed.success) return fail('INVALID'); const fence = parsed.data, ref = fence.reference; if (ref.kind !== 'NEGOTIATION') return fail('INVALID');
   if (new Set(fence.pins.map(pinIdentity)).size !== fence.pins.length) fail('INVALID');
   const has = (table: JobPin['table'], PK: string, SK: string) => fence.pins.some(pin => pin.table === table && pin.key.PK === PK && pin.key.SK === SK);
   if (!has(JOB_TARGET.source, 'NP#GROUPS', 'STATE') || !has(JOB_TARGET.partitions, 'MIGRATION#CONTROL', 'STATE')
@@ -101,7 +105,10 @@ function decode<T>(raw: unknown, key: { PK: string; SK: string }, schema: z.ZodT
   catch { return fail('INVALID'); }
 }
 /** No seed/reset path. Exact initialized control, existing TOTAL and verified target are mandatory. */
-export function createDynamoModelJobStore(options: { verifiedTarget: { account: string; region: string }; sourceSha: string }): DurableJobStore<JobFence, JobEffect> {
+type JobStoreOptions = { verifiedTarget: { account: string; region: string }; sourceSha: string };
+export function createDynamoModelJobStore(options: JobStoreOptions & { publicDraftCommit: PublicDraftCommit }): DurableJobStore<PublicDraftFence, PublicDraftEffect>;
+export function createDynamoModelJobStore(options: JobStoreOptions): DurableJobStore<JobFence, JobEffect>;
+export function createDynamoModelJobStore(options: JobStoreOptions & { publicDraftCommit?: PublicDraftCommit }): DurableJobStore<JobFence | PublicDraftFence, JobEffect | PublicDraftEffect> {
   if (!z.strictObject({ account: z.literal(JOB_TARGET.account), region: z.literal(JOB_TARGET.region) }).safeParse(options.verifiedTarget).success || !/^[a-f0-9]{40}$/.test(options.sourceSha)) return fail('INVALID');
   const sourceSha = options.sourceSha;
   const client = new DynamoDBClient({ region: JOB_TARGET.region, maxAttempts: 1, endpoint: 'https://dynamodb.us-east-1.amazonaws.com' });
@@ -160,7 +167,27 @@ export function createDynamoModelJobStore(options: { verifiedTarget: { account: 
         prior.job ? pin(JOB_TARGET.journal, jobKey(observed.jobId), prior.job, prior.job.revision) : null),
       put(JOB_TARGET.journal, controlKey, checkedControl, checkedControl.revision, pin(JOB_TARGET.journal, controlKey, prior.control, prior.control.revision)),
       put(JOB_TARGET.budget, totalKey, checkedTotal, observed.totalRevision + 1, pin(JOB_TARGET.budget, totalKey, prior.totals, observed.totalRevision, 'version'))];
-      if (rawFence) {
+      if (rawFence && checkedJob.reference.kind === 'ARCHITECT') {
+        if (!options.publicDraftCommit || !('kind' in rawFence) || rawFence.kind !== 'PUBLIC_DRAFT'
+          || !isDeepStrictEqual(rawFence.reference, checkedJob.reference)) return fail('INVALID');
+        if (rawEffect && (!('kind' in rawEffect) || rawEffect.kind !== 'PUBLIC_DRAFT' || !isDeepStrictEqual(rawEffect.fence.reference, checkedJob.reference))) return fail('INVALID');
+        const prepared = await options.publicDraftCommit(rawFence, rawEffect as PublicDraftEffect | undefined);
+        const authority = pinSchema.parse(prepared.authority);
+        if (authority.table !== JOB_TARGET.budget || authority.key.PK !== 'AUTH' || authority.key.SK !== 'STATE'
+          || authority.attribute !== 'version' || authority.revision === null) return fail('INVALID');
+        const auth = standingSchema.parse(JSON.parse(authority.payload));
+        if (checkedJob.attempts > auth.maxAttemptsPerRun || checkedJob.reservedTokens > auth.maxTokensPerRun
+          || checkedJob.reservedCostMicros > auth.maxCostMicrosPerRun
+          || (checkedJob.attempts > (prior.job?.attempts ?? 0) && checkedJob.reservedCostMicros - (prior.job?.reservedCostMicros ?? 0) < auth.attemptCostMicros)) return fail('BUDGET');
+        if (!prepared.items.length || prepared.items.some(item => {
+          const operation = item.ConditionCheck ?? item.Put; const key = item.ConditionCheck?.Key ?? item.Put?.Item;
+          return !operation || !key || ![JOB_TARGET.partitions, JOB_TARGET.source, JOB_TARGET.journal].includes(operation.TableName as never)
+            || item.Put && (operation.TableName !== JOB_TARGET.partitions || !/^GROUP#[A-Za-z0-9_-]{1,80}$/.test(key.PK?.S ?? '') || !/^(STATE|DRAFT#[A-Za-z0-9_-]{1,80})$/.test(key.SK?.S ?? ''));
+        })) return fail('INVALID');
+        if (checkedJob.phase === 'SUCCEEDED' && !rawEffect) return fail('INVALID');
+        items.push({ ConditionCheck: condition(authority) }, ...prepared.items);
+      } else if (rawFence) {
+        if ('kind' in rawFence) return fail('INVALID');
         const fence = checkedJobFence(rawFence);
         const auth = standingSchema.parse(JSON.parse(fence.pins.find(pin => pin.table === JOB_TARGET.budget)!.payload));
         if (checkedJob.attempts > auth.maxAttemptsPerRun || checkedJob.reservedTokens > auth.maxTokensPerRun || checkedJob.reservedCostMicros > auth.maxCostMicrosPerRun

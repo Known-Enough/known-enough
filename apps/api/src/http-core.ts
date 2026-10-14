@@ -476,6 +476,12 @@ function createKnownEnoughApiHandler(
           if (path === '/groups' && request.method === 'GET') {
             sendJson(response, 200, { groups: await options.groups.list(principal) }); return;
           }
+          const transientDraftRequests = /^\/groups\/([A-Za-z0-9_-]{1,80})\/draft-requests$/.exec(path);
+          if (transientDraftRequests && request.method === 'GET') {
+            const group = await options.groups.getGroup(principal, transientDraftRequests[1]!);
+            if (!group.isOrganizer) throw new KnownEnoughApplicationError('FORBIDDEN');
+            sendJson(response, 200, { requests: [] }); return; // Retained transient/injected composition has no native durable queue.
+          }
           const selectedGroup = /^\/groups\/([A-Za-z0-9_-]{1,80})$/.exec(path);
           if (selectedGroup && request.method === 'GET') {
             sendJson(response, 200, { group: await options.groups.getGroup(principal, selectedGroup[1]!) }); return;

@@ -740,7 +740,7 @@ it('denies invalid commands, roles, non-organizers, missing providers and unappr
   expect(f.reads).toEqual([]);
   await expect(session.generateDraft(participant('omar'), 'garden', generate)).rejects.toThrow('FORBIDDEN');
   await expect(session.generateDraft({ kind: 'service', subject: 'iris', roomIds: [] }, 'garden', generate)).rejects.toThrow('FORBIDDEN');
-  await expect(f.session().generateDraft(participant(), 'garden', generate)).rejects.toThrow('SESSION_INVALID');
+  await expect(f.session().generateDraft(participant(), 'garden', generate)).rejects.toHaveProperty('category', 'AI_UNAVAILABLE');
   f.get('ACCOUNT#omar/STATE').value.status = 'DISABLED';
   await expect(session.generateDraft(participant(), 'garden', generate)).rejects.toThrow('FORBIDDEN'); expect(calls).toBe(0);
   expect(f.commits.every(values => values.every(value => value.next === null))).toBe(true);

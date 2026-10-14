@@ -56,7 +56,7 @@ export function behaviorReport(state, phase, result) {
   return { result:safeResult,phase:safePhase,identities:count(state?.fixtures?.length),signup:count(state?.signup),
     confirmed:count(state?.confirmed),signedLogin:count(state?.signedLogin),apiChecks:count(state?.apiChecks),
     archived:count(state?.archived),selfDeleted:count(state?.selfDeleted),mailboxesRemoved:count(state?.mailboxesRemoved),
-    syntheticAccountsDisabled:count(state?.disabled),staleCommitRejected:count(state?.staleCommitRejected),largeDrafts:count(state?.largeDrafts),archiveLostAckRecovered:count(state?.archiveLostAckRecovered),modelCalls:0,...(state?.confirmationTriggerFailure?{confirmationTriggerFailure:fixtureFailureCode({safeCode:state.confirmationTriggerFailure}),confirmedTriggerRecovered:count(state.confirmedTriggerRecovered)}:{}) };
+    syntheticAccountsDisabled:count(state?.disabled),staleCommitRejected:count(state?.staleCommitRejected),largeDrafts:count(state?.largeDrafts),archiveLostAckRecovered:count(state?.archiveLostAckRecovered),modelCalls:0,...(state?.confirmationTriggerFailure?{confirmationTriggerFailure:recoverableConfirmedTriggerFailure({safeCode:state.confirmationTriggerFailure},'true')?state.confirmationTriggerFailure:'UNCLASSIFIED',confirmedTriggerRecovered:count(state.confirmedTriggerRecovered)}:{}) };
 }
 
 export function visibleGroup(page,groupId,expectedMembers){

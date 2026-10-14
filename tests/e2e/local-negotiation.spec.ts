@@ -37,7 +37,7 @@ test.describe('G01 real local UI/API negotiation', () => {
     await page.getByRole('button', { name: label, exact: true }).click();
     expect(CommandResult.parse(await (await response).json()).ok).toBe(true);
     await expect(page.getByRole('heading', { name: 'Your inputs', exact: true })).toBeVisible();
-    await expect(page.getByRole('status')).toContainText('Command applied');
+    await expect(page.getByRole('status').filter({ hasText: 'Command applied' })).toContainText('Command applied');
   }
   async function fillInitial(page: Page, member: string) {
     const inputs = page.getByRole('region', { name: 'Your inputs', exact: true });
@@ -183,7 +183,7 @@ test.describe('G01 real local UI/API negotiation', () => {
       return route.fulfill({ status: 502, contentType: 'application/json', body: failure === 'json' ? '{' : '{}' });
     });
     await page.getByRole('button', { name: 'Submit input draft' }).click();
-    await expect(page.getByRole('status')).toContainText('outcome is unknown');
+    await expect(page.getByRole('status').filter({ hasText: 'outcome is unknown' })).toContainText('outcome is unknown');
     const appliedRevision = (await ownerView(request, 'maya')).ownerRevision;
     await expect(page.getByRole('button', { name: 'Submit input draft' })).toBeDisabled();
     await clickApplied(page, 'Retry unchanged request');

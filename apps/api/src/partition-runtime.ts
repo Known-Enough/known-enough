@@ -1,3 +1,5 @@
+import { createManagedDraftRequestRecovery } from './partition-draft-recovery.ts';
+import { createManagedPartitionDraftRuntime } from './partition-draft-runtime.ts';
 import type { IncomingMessage } from 'node:http';
 import type { Clock, IdSource } from '@deal-table/application';
 import { createPartitionManagedDriver, type PartitionManagedOptions, type PartitionDraftArchitect } from '@deal-table/adapters/partition-request';
@@ -87,8 +89,9 @@ export function createPartitionRuntime(options: PartitionRuntimeOptions) {
     decisionArn: driver.decisionArn, partitionArn: driver.partitionArn,
     membershipDiscovery: driver.membershipDiscovery, authenticate, emailKey, clock, ids, allowedOrigins: [originValue], displayAccess: true,
     legacyPublicDecision: driver.legacyPublicDecision,
-    ...(draftArchitect ? { draftArchitect } : {}),
+    ...(draftArchitect ? { draftArchitect } : jobs ? { draftArchitect: createManagedPartitionDraftRuntime({ sourceSha: jobs.sourceSha, prepareGroupCommit: driver.prepareGroupCommit }) } : {}),
     ...(enqueue ? { requestNegotiation: enqueue } : {}),
+    ...(jobs ? { draftRequest: createManagedDraftRequestRecovery({ sourceSha: jobs.sourceSha, prepareGroupCommit: driver.prepareGroupCommit }) } : {}),
     registrationProfile: async (request, signal) => {
       let response: Response | undefined;
       try {

@@ -36,7 +36,7 @@ test('new users request access, operator admits, organizer invites a new recipie
     const host = await pageFor('iris'); await host.goto(url);
     await expect(host.getByRole('button', { name: 'Request access', exact: true })).toHaveCount(0);
     await expect(host.getByText('Your account is waiting for approval.', { exact: false })).toBeVisible();
-    await api.approve('iris'); await host.getByRole('button', { name: 'Refresh account and groups' }).click();
+    await api.approve('iris'); await host.getByRole('button', { name: /^Refresh (?:account and groups|group)$/ }).click();
     let release!: () => void; let markStarted!: () => void;
     const held = new Promise<void>(resolve => { release = resolve; });
     const started = new Promise<void>(resolve => { markStarted = resolve; });
@@ -57,7 +57,7 @@ test('new users request access, operator admits, organizer invites a new recipie
     const guest = await pageFor('omar'); await guest.goto(link.replace('http://127.0.0.1:5181', 'http://127.0.0.1:5181'));
     await expect(guest.getByRole('button', { name: 'Request access', exact: true })).toHaveCount(0);
     await expect(guest.getByText('Your account is waiting for approval.', { exact: false })).toBeVisible();
-    await api.approve('omar'); await guest.getByRole('button', { name: 'Refresh account and groups' }).click();
+    await api.approve('omar'); await guest.getByRole('button', { name: /^Refresh (?:account and groups|group)$/ }).click();
     await guest.getByRole('button', { name: 'Accept group invitation', exact: true }).click();
     await expect(guest.getByRole('heading', { name: 'Garden club', exact: true })).toBeVisible();
     await expect(guest.getByRole('button', { name: 'Create invitation link' })).toHaveCount(0);

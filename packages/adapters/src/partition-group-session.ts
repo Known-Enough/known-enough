@@ -37,12 +37,23 @@ const discoveryPage = z.strictObject({ groups: z.array(Groups.GroupSnapshot.pick
 /** Trusted discovery only; returned summaries never authorize a group or supply its public fields. */
 export type PartitionGroupDiscovery = (request: { subject: string; limit: number; cursor?: string }, context: PartitionIOContext) => Promise<unknown>;
 /** Captured trusted server port; only public roster fields enter its request and output is revalidated. */
-export type PartitionDraftArchitect = (subject: string, request: DecisionArchitectRequest, context: PartitionIOContext) => Promise<unknown>;
+export interface PartitionDraftScope {
+  groupId: string; groupVersion: number; bodyHash: string; requestKey: string;
+  /** Current organizer/roster conditions; output is strictly validated before conditional writes. */
+  fence(output?: unknown): Promise<PartitionFence>;
+  readSaved(): Promise<Groups.GroupDraft | null>;
+}
+export type PartitionDraftArchitect = (subject: string, request: DecisionArchitectRequest, context: PartitionIOContext, scope?: PartitionDraftScope) => Promise<unknown>;
 type Invitation = { tokenHash: string; recipientHash: string; expiresAt: number };
 const deny = (code: 'FORBIDDEN' | 'NOT_FOUND' | 'INVALID_COMMAND' | 'STALE_CONTEXT'): never => {
   throw new KnownEnoughApplicationError(code);
 };
 export const partitionMemberId = (subject: string) => `member-${createHash('sha256').update(subject).digest('hex').slice(0, 32)}`;
+export class PartitionDraftFailure extends KnownEnoughApplicationError {
+  constructor(readonly category: 'AI_UNAVAILABLE' | 'INVALID_MODEL_OUTPUT' | 'REQUEST_PENDING' | 'REQUEST_UNKNOWN' | 'PROVIDER_FAILED') {
+    super(category === 'INVALID_MODEL_OUTPUT' ? 'NEEDS_CLARIFICATION' : 'RETRYABLE_SERVER_ERROR');
+  }
+}
 export class PartitionSessionError extends Error {
   constructor(readonly code: 'SESSION_INVALID' | 'SESSION_STORAGE_UNAVAILABLE' | 'SESSION_TIMEOUT'
     | 'SESSION_REQUEST_LIMIT' | 'SESSION_CAPACITY', options?: ErrorOptions) { super(code, options); this.name = 'PartitionSessionError'; }
@@ -364,18 +375,9 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           return { groupVersion: group.version, participants, bodyHash, existing: existing ?? null };
         }, io));
         if (before.existing) return Groups.GroupDraft.parse(before.existing);
-        if (!draftArchitect) throw new PartitionSessionError('SESSION_INVALID');
-        const rawOutput = await partitionCall(io, () => {
-          if (generating >= 8) throw new PartitionSessionError('SESSION_CAPACITY');
-          generating++;
-          return Promise.resolve().then(() => {
-            if (io.signal.aborted) throw new PartitionSessionError('SESSION_TIMEOUT');
-            return draftArchitect(who, { draftId, revision: 1, objective: request.data.objective,
-              participants: before.participants.map(({ id, displayName }) => ({ id, displayName })), allowedOptions: [], generateOptions: true }, io);
-          }).finally(() => { generating--; });
-        });
+        const validate = (rawValue: unknown) => {
         let serialized: string | undefined;
-        try { serialized = typeof rawOutput === 'string' ? rawOutput : JSON.stringify(rawOutput); }
+        try { serialized = typeof rawValue === 'string' ? rawValue : JSON.stringify(rawValue); }
         catch { throw new PartitionSessionError('SESSION_INVALID'); }
         if (serialized === undefined || Buffer.byteLength(serialized, 'utf8') > 256 * 1024) throw new PartitionSessionError('SESSION_INVALID');
         let output: z.infer<typeof architectureOutput>;
@@ -390,8 +392,39 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           || (output.status === 'NEEDS_CLARIFICATION') !== (output.clarificationQuestions.length > 0)) throw new PartitionSessionError('SESSION_INVALID');
         const questions = [...output.clarificationQuestions]; const catalog = genericCandidateCatalog(output.frame);
         if (catalog.clarificationQuestion && !questions.includes(catalog.clarificationQuestion)) questions.push(catalog.clarificationQuestion);
-        const draft = Groups.GroupDraft.parse({ id: draftId, bodyHash: before.bodyHash, revision: 1, groupVersion: before.groupVersion,
+        return Groups.GroupDraft.parse({ id: draftId, bodyHash: before.bodyHash, revision: 1, groupVersion: before.groupVersion,
           frame: output.frame, clarificationQuestions: questions.slice(0, 12), createdDecisionId: null });
+        };
+        const readSaved = () => selected(who, key, io, resolved => repository.transaction(resolved, state => {
+          const group = current(state, who, key, true);
+          if (group.version !== before.groupVersion) return deny('STALE_CONTEXT');
+          const existing = group.drafts.find(value => value.id === draftId);
+          if (existing && (existing.bodyHash !== before.bodyHash || existing.groupVersion !== before.groupVersion)) return deny('STALE_CONTEXT');
+          return existing ? Groups.GroupDraft.parse(existing) : null;
+        }, io));
+        let preparedOutput = false;
+        const scope: PartitionDraftScope = { groupId: key, groupVersion: before.groupVersion, bodyHash: before.bodyHash, requestKey: request.data.idempotencyKey, readSaved,
+          fence: output => selected(who, key, io, resolved => repository.fence(resolved, state => {
+            const group = current(state, who, key, true);
+            if (group.version !== before.groupVersion || JSON.stringify(publicRoster(state, group)) !== JSON.stringify(before.participants)) return deny('STALE_CONTEXT');
+            if (output !== undefined) {
+              const candidate = validate(output); preparedOutput = true; const existing = group.drafts.find(value => value.id === draftId);
+              if (existing && existing.bodyHash !== before.bodyHash) return deny('STALE_CONTEXT');
+              if (!existing) { if (group.drafts.length >= 64) throw new PartitionSessionError('SESSION_CAPACITY'); group.drafts.push(candidate); }
+            }
+          }, io)) };
+        if (!draftArchitect) throw new PartitionDraftFailure('AI_UNAVAILABLE');
+        const rawOutput = await partitionCall(io, () => {
+          if (generating >= 8) throw new PartitionSessionError('SESSION_CAPACITY');
+          generating++;
+          return Promise.resolve().then(() => {
+            if (io.signal.aborted) throw new PartitionSessionError('SESSION_TIMEOUT');
+            return draftArchitect(who, { draftId, revision: 1, objective: request.data.objective,
+              participants: before.participants.map(({ id, displayName }) => ({ id, displayName })), allowedOptions: [], generateOptions: true }, io, scope);
+          }).finally(() => { generating--; });
+        });
+        if (preparedOutput) { const saved = await readSaved(); if (saved) return saved; }
+        const draft = validate(rawOutput);
         return selected(who, key, io, resolved => repository.transaction(resolved, state => {
           const group = current(state, who, key, true);
           if (group.version !== before.groupVersion || JSON.stringify(publicRoster(state, group)) !== JSON.stringify(before.participants)) return deny('STALE_CONTEXT');
@@ -403,6 +436,19 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           if (group.drafts.length >= 64) throw new PartitionSessionError('SESSION_CAPACITY');
           group.drafts.push(draft); return Groups.GroupDraft.parse(draft);
         }, io));
+      });
+    },
+    inspectDraftRequest(principal: TrustedPrincipal | null, rawId: string, requestKey?: string, supplied?: PartitionIOContext) {
+      return safe(async () => {
+        const who = participant(principal), key = groupId(rawId); if (requestKey !== undefined) groupId(requestKey);
+        const io = supplied ?? partitionIO(limits); let saved: Groups.GroupDraft | null = null;
+        const draftId = requestKey === undefined ? null : 'draft-' + createHash('sha256').update(JSON.stringify([key, who, requestKey])).digest('hex').slice(0, 40);
+        const fence = await selected(who, key, io, resolved => repository.fence(resolved, state => {
+          const group = current(state, who, key, true);
+          const existing = draftId ? group.drafts.find(value => value.id === draftId) : undefined;
+          if (existing) { if (existing.groupVersion !== group.version) return deny('STALE_CONTEXT'); saved = Groups.GroupDraft.parse(existing); }
+        }, io));
+        return { draftId, saved, fence };
       });
     },
     readDraft(principal: TrustedPrincipal | null, rawId: string, rawDraftId: string, supplied?: PartitionIOContext) {

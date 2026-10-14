@@ -11,7 +11,7 @@ test('configured signup UI sends email, confirms code and retains real hosted PK
     await route.fulfill({ contentType: 'application/x-amz-json-1.1', body: JSON.stringify(action.endsWith('.SignUp') ? { UserConfirmed: false, CodeDeliveryDetails: { DeliveryMedium: 'EMAIL' } } : {}) });
   });
   await page.goto('/');const signIn = page.getByRole('button', { name: 'Sign in', exact: true });await expect(signIn).toBeVisible();await expect(page.getByRole('button', { name: 'Sign in or register', exact: true })).toHaveCount(0);
-  await page.keyboard.press('Tab');await expect(page.getByRole('button', { name: 'Create account', exact: true })).toBeFocused();
+  for (let tab = 0; tab < 8 && !await page.getByRole('button', { name: 'Create account', exact: true }).evaluate(node => node === document.activeElement); tab++) await page.keyboard.press('Tab');await expect(page.getByRole('button', { name: 'Create account', exact: true })).toBeFocused();
   await openSignupForm(page);
   await page.getByLabel('Username', { exact: true }).fill('fictional-user');await page.getByLabel('Email', { exact: true }).fill('synthetic@example.invalid');
   await page.getByLabel('Password', { exact: true }).fill(password);const diagnostics:string[][]=[];

@@ -1,3 +1,4 @@
+import type { DraftRecoveryRequest } from './partition-draft-recovery.ts';
 import { randomUUID } from 'node:crypto';
 import { RequestNegotiation, NegotiationReceipt, BACKGROUND_NEGOTIATION_PROFILE } from '@deal-table/contracts/durable-command';
 import type { DurableEnqueueRequest } from './durable-enqueue.ts';
@@ -5,12 +6,13 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { Id, KnownEnough as KE } from '@deal-table/contracts';
 import { KnownEnoughApplication, KnownEnoughApplicationError, RepositoryCapacityError,
   type Clock, type IdSource, type TrustedPrincipal } from '@deal-table/application';
-import { createPartitionGroupSession, createPartitionDecisionRepository, PartitionSessionError, partitionIO,
+import { createPartitionGroupSession, createPartitionDecisionRepository, PartitionSessionError, PartitionDraftFailure, partitionIO,
   type PartitionTransport, type PartitionDecisionTransport, type PartitionGroupDiscovery, type PartitionDraftArchitect } from '@deal-table/adapters/partition-request';
 
 type ErrorCode = Extract<KE.DecisionCommandResult, { ok: false }>['error']['code'];
 export interface PartitionParticipantApiOptions {
   /** Trusted server resolver: verify access tokens; never map caller-selected identity headers. */
+  draftRequest?: (request: DraftRecoveryRequest) => Promise<unknown>;
   authenticate: (request: IncomingMessage, signal: AbortSignal) => Promise<TrustedPrincipal | null>;
   /** Trusted server lookup from authenticated credentials; never a caller-provided profile. */
   registrationProfile?: (request: IncomingMessage, signal: AbortSignal) => Promise<{ subject: string; email: string; verified: boolean } | null>;
@@ -116,12 +118,12 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
   const session = createPartitionGroupSession(options.groups, { now: () => Date.parse(clock.now()),
     ...(options.emailKey === undefined ? {} : { emailKey: options.emailKey }),
     ...(options.invitationToken === undefined ? {} : { token: options.invitationToken }),
-    ...(draftArchitect === undefined ? {} : { draftArchitect: (subject, input, io) => {
+    ...(draftArchitect === undefined ? {} : { draftArchitect: (subject, input, io, scope) => {
       if (authenticating >= concurrency) return reject('RETRYABLE_SERVER_ERROR');
       authenticating++;
       return Promise.resolve().then(() => {
         if (io.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
-        return draftArchitect(subject, input, io);
+        return draftArchitect(subject, input, io, scope);
       }).finally(() => { authenticating--; });
     } }),
     ...(discovery === undefined ? {} : { discovery: (raw, io) => {
@@ -235,6 +237,21 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
           const raw = await body(request, maximum, bodyMs, controller);
           if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
           send(response, 200, { group: await session.create(principal, raw) }); return;
+        }
+        const draftRequest = /^\/groups\/([A-Za-z0-9_-]{1,80})\/draft-requests(?:\/([A-Za-z0-9_-]{1,80})(\/release)?)?$/.exec(url.pathname);
+        if (draftRequest && (request.method === 'GET' || request.method === 'POST')) {
+          if (Boolean(draftRequest[3]) !== (request.method === 'POST')) return reject('NOT_FOUND');
+          const recoveryIO = partitionIO(); const context = { ...recoveryIO, signal: AbortSignal.any([recoveryIO.signal, controller.signal]) };
+          await session.inspectDraftRequest(principal, draftRequest[1]!, draftRequest[2], context);
+          if (!options.draftRequest) { if (draftArchitect && !draftRequest[2] && request.method === 'GET') { send(response, 200, { requests: [] }); return; } throw new PartitionDraftFailure('AI_UNAVAILABLE'); }
+          let revision: number | undefined;
+          if (request.method === 'POST') { const raw = await body(request, 1024, bodyMs, controller);
+            if (!raw || typeof raw !== 'object' || Array.isArray(raw) || Object.keys(raw).join('|') !== 'revision' || !Number.isSafeInteger((raw as { revision?: unknown }).revision) || Number((raw as { revision: unknown }).revision) < 0) return reject('INVALID_COMMAND');
+            revision = Number((raw as { revision: unknown }).revision);
+          }
+          send(response, 200, await options.draftRequest({ principal, groupId: draftRequest[1]!, ...(draftRequest[2] ? { key: draftRequest[2] } : {}),
+            ...(revision !== undefined ? { releaseRevision: revision } : {}), io: context,
+            inspect: key => session.inspectDraftRequest(principal, draftRequest[1]!, key, context) })); return;
         }
         if (draft && (request.method === 'GET' || request.method === 'POST')) {
           if (draft[3] && request.method !== 'POST') return reject('NOT_FOUND');
@@ -351,7 +368,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
       } catch (error) {
         const code = error instanceof RepositoryCapacityError || (error instanceof PartitionSessionError && error.code === 'SESSION_CAPACITY') ? 'CAPACITY_EXCEEDED'
           : error instanceof KnownEnoughApplicationError ? error.code : 'RETRYABLE_SERVER_ERROR';
-        const result = errorBody(code, requestId); send(response, result.error.httpStatus, result);
+        const result = errorBody(code, requestId); send(response, result.error.httpStatus, error instanceof PartitionDraftFailure ? { ...result, draftFailure: error.category } : result);
       } finally {
         active--; request.off('aborted', closed); response.off('close', closed); request.resume();
       }

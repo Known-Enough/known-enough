@@ -1,6 +1,6 @@
 import { createPartitionManagedDriver, createPartitionGroupSession } from '@deal-table/adapters/partition-request';
 import { partitionDeploymentOptions } from '../../apps/api/src/partition-deployment.ts';
-import { createSignupIntake } from '../../apps/api/src/signup-intake.ts';
+import { createSignupIntake, isSignupIntakeEvent } from '../../apps/api/src/signup-intake.ts';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,7 +12,7 @@ import { createKe13bLambdaHandler, readKe13bConfig, type HttpApiEvent, type Http
 let intake: ReturnType<typeof createSignupIntake> | undefined;
 let selected: ((event: HttpApiEvent) => Promise<HttpApiResult>) | undefined;
 export async function handler(event: HttpApiEvent): Promise<unknown> {
-  const trigger = event && typeof event === 'object' && !('version' in event) && 'triggerSource' in event;
+  const trigger = isSignupIntakeEvent(event);
   try {
     if (!selected) {
       const directory = dirname(fileURLToPath(import.meta.url));
