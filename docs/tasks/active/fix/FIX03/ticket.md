@@ -1,0 +1,39 @@
+# FIX03 — Branded in-app sign-in with Cognito authentication
+
+**Status:** READY / unclaimed. **Priority:** P1. **Intended worker:** B / own `Battosai1806`. Queue: FIX01 → FIX02 → FIX03, one task at a time.
+
+## User request and current behavior
+
+The user wants a normal sign-in screen following the app's CSS instead of the separate Cognito page. Keep Cognito authentication behind the scenes; this is a functional in-app login, not a cosmetic imitation or a weaker account system.
+
+Current [AuthEntry](../../../../../apps/web/src/auth-entry.tsx) calls the participant sign-in callback. [Connected app](../../../../../apps/web/src/connected-app.tsx) redirects to the URL built by [Cognito session](../../../../../apps/web/src/cognito-session.ts), using the hosted authorization-code/PKCE flow. Registration is already inside the app. The [operations fixture](../../../../../scripts/operations/partition-live-behavior.mjs) uses direct SRP for limited fixture operations, but uses hosted PKCE for the actual application session: its direct login is not proof of compatible app access or verified-email intake.
+
+## Intake, scope and authority
+
+After FIX02's safe handoff, pull main ff-only, inspect current claims/running jobs and record exactly one bounded FIX03 claim. Reuse the existing B chat/idle-only schedule. Relevant local/live tests, exact-source publication and necessary narrow project configuration changes are authorized under [standing authority](../../../../project-automation-authority.md); the earlier manual-test pause does not block this fix. Preserve existing FIX01/FIX02 backend work, saved NP00, participant privacy/consent and source/target guards. No implementation, deployment or B FIX03 start is claimed by task creation.
+
+Expected scope: auth entry/form, Cognito session and connected-app integration, registration-to-sign-in handoff, existing shared CSS/chrome, focused auth/browser tests and current auth/configuration/release workflows only where demonstrated necessary. Declare actual files before editing. No profile/group redesign or unrelated dependencies.
+
+## Plan
+
+1. **Check the actual authentication contract first.** Verify participant public-client ID, enabled authentication flows, username/email aliases, token claims/scopes and the API's trusted verified-email lookup. Select a documented supported Cognito direct-auth flow, using an established supported SDK if needed; do not implement custom cryptography or assume an OAuth password grant exists. No AWS keys or client secret in the browser. Reuse existing dependencies where suitable and justify any required new package.
+2. **Build one clear in-app login.** Sign in opens a form in the existing entry card with the appropriate username/email label, password, show/hide control, loading state and clear submit/back actions. Use current brand, green/off-white palette, cards, typography, theme tokens and mobile spacing. Keep keyboard focus, labels, autocomplete/password-manager support and accessible status/error announcements. Preserve the one existing Create account path; no duplicated hosted signup links or shared-screen controls on normal entry.
+3. **Integrate the real session.** Authenticate against Cognito, complete required challenges using supported flows and normalize the returned session for the existing API adapter. Verify issuer, client/token use, expiry and permissions through the trusted server contract. Direct-auth tokens may differ from hosted OAuth tokens: preserve verified-email registration/admission lookup without pretending scopes exist, accepting browser-supplied identity, substituting an ID token for an access token or weakening JWT checks. Use the compatible operations runtime if a narrowly scoped server integration is necessary.
+4. **Keep recovery and continuity understandable.** Support existing account verification/resend, password recovery/reset and required challenge states through styled in-app screens for the flows enabled in the actual pool. Do not silently fail or redirect the normal username/password path back to Cognito. Preserve intended group/invitation navigation after login, session expiry, supported refresh behavior and sign-out. Clear credentials promptly; never save or log passwords, verification codes, tokens or complete authentication responses. Retain compatible old callback handling only where still needed during migration.
+5. **Publish without weakening admission.** Signing in must not approve an account, create group membership or bypass participant consent. Keep current password rules and existing synthetic/real-person boundaries. If app-client configuration must change, preserve unrelated settings from a complete snapshot, use installed narrow configuration access and verify readback. Prepare a concrete minimal setup package only if actual missing access prevents authorized work; avoid a new CloudShell requirement by default.
+
+## Checks and completion
+
+- Focused auth and browser tests cover successful login, incorrect credentials with safe non-enumerating errors, unverified/pending/approved accounts, enabled challenges, verification/reset, expiry/refresh/sign-out, duplicate submit, network failure and preserved invitation navigation. Verify existing registration/profile/group behavior and no secret leakage.
+- Verify keyboard/focus/password-manager behavior, mobile layout and dark/light styling using the existing UI components. Do not replace the requested branded screen with a restyled hosted redirect.
+- Run pinned focused checks and `npm run check` for executable changes. Preserve/report existing failures rather than weakening assertions. Publish the checked exact source through existing compatible workflows; verify matching deployed bytes/configuration.
+- With B's own synthetic accounts on the primary site, sign in without visiting Cognito's hosted page, reach the correct account/groups state, refresh/reopen the session as supported, follow a pending invitation, and sign out. Demonstrate the enabled verification/reset paths and rejected invalid credentials. Record actual tests, usage and cleanup; local mocks or a pretty form alone do not satisfy DONE.
+- Save UTC/source, observed client/auth contract, implementation rationale, changed files, checks, deployment links, live journey and remaining gaps in `docs/review-artifacts/FIX03/in-app-sign-in.md` during implementation. Update ticket, batch/board, claims and B work-log/handoff/monitor receipts at natural checkpoints with the same concise summary as the chat answer. Mark DONE only after functional live proof; otherwise report the exact blocker and next action.
+
+Primary site: `https://main.d143q5ravxp5av.amplifyapp.com/`. Verify current pool/client/API metadata rather than assuming old identifiers or installed permissions. No new database, authentication provider, worker, chat or monitor is required by this task definition.
+
+## Preparation — 2026-10-14
+
+A created FIX03 from clean synchronized main `89298a3`, inspected the current redirect/session and fixture paths, and queued it for B after FIX02. No application change, test dispatch, AWS mutation or B execution occurred during this documentation action.
+
+[FIX batch](../README.md) · [Task guide](../../../README.md) · [Board](../../../../task-board.md)

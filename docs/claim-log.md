@@ -1,3 +1,7 @@
+## FIX03 preparation — 2026-10-14T01:36:01Z
+
+User requests [FIX03](tasks/active/fix/FIX03/ticket.md) for the branded in-app sign-in. READY/unclaimed, queued for B after FIX02; current FIX01 claim preserved. A performs documentation only, with no implementation claim, new worker, cloud action or test/deployment. B must record its own fresh sequential intake before starting.
+
 ## FIX02 preparation and profile handoff — 2026-10-14T01:28:42Z
 
 User explicitly requests [FIX02](tasks/active/fix/FIX02/ticket.md) for B. READY/unclaimed, queued after current IN_PROGRESS/B FIX01; no interruption or new B claim. A's ZZ03 profile frontend publication is preserved and its failed backend attempt is handed off to FIX02, with no continuing A profile implementation. Existing A profile phase ends at this published/blocked checkpoint; it is not whole-task DONE. No executable change, cloud write or new run in this documentation action. B records its own future fresh intake/claim and preserves FIX01's runtime changes.

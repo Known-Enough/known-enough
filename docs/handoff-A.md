@@ -1,3 +1,7 @@
+## FIX03 documentation handoff — 2026-10-14T01:36:01Z
+
+Created [FIX03](tasks/active/fix/FIX03/ticket.md) for B after FIX02, preserving current FIX01 and published UI/profile changes. Source inspection confirms hosted PKCE redirect and separate fixture-only SRP; functional in-app login needs a verified token/server-email contract, not CSS alone. A makes no application/auth/configuration changes here. READY/unclaimed, existing B chat/schedule and one-task rule preserved.
+
 ## Profile backend handoff to queued FIX02 — 2026-10-14T01:28:42Z
 
 User requests [FIX02](tasks/active/fix/FIX02/ticket.md) for B after current FIX01. Preserve [profile publication receipt](review-artifacts/ZZ03/profile-modal-publication.json), frontend75baad6/run38494657209 and failed API38494669869. A ends its profile phase at the published UI/blocked backend checkpoint; no continuing implementation/deployment or whole ZZ03 DONE. B will verify actual member route and description/photo operations, integrate through its latest compatible native package and publish/test one task at a time. No new AWS action or B start occurred during task preparation.

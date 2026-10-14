@@ -6,7 +6,8 @@ Fix problems encountered in the published application, with real evidence and cl
 | --- | --- | --- |
 | [FIX01](FIX01/README.md) | An approved organizer can create and review a new decision draft inside a group; failures explain the actual problem. | IN_PROGRESS / B; preserve current claim |
 | [FIX02](FIX02/README.md) | Save and view profile descriptions/photos through the compatible installed API, including permitted group-member profiles. | READY / unclaimed; queued for B after FIX01 |
+| [FIX03](FIX03/README.md) | Sign in inside the app's own styled screen, with Cognito authentication behind the scenes. | READY / unclaimed; queued for B after FIX02 |
 
-Keep FIX01's current claim; FIX02 follows it at B's next eligible intake. No new worker, automation, deployment or test has been started by task preparation.
+Keep FIX01's current claim; then FIX02 → FIX03 at eligible sequential intakes. No new worker, automation, deployment or test has been started by task preparation.
 
 [Task guide](../../README.md) · [Task board](../../../task-board.md)
