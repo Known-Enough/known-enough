@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   reproduce:
-    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && github.actor_id == '143764700'
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && (github.actor_id == '143764700' || github.actor_id == '44531296')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -98,6 +98,23 @@ jobs:
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
           if test -f "$RUNNER_TEMP/partition-cutover-private/owned-fixtures-private.json"; then
             node --experimental-transform-types scripts/fix04/prove.mjs
+          fi
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: always()
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubQaRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Verify direct-auth recovery and duplicate-email confirmation without sharing account authority
+        if: always()
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          if test -f "$RUNNER_TEMP/partition-cutover-private/owned-fixtures-private.json"; then
+            node --experimental-transform-types scripts/fix04/signup-proof.mjs
           fi
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         if: always()
