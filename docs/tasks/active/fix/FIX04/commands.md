@@ -1,5 +1,7 @@
 # FIX04 — Find pending requests and approve selected users
 
+Current copy/paste commands and small shell wrappers are grouped in [scripts/cloudshell-commands](../../../../../scripts/cloudshell-commands/README.md).
+
 The latest private [test-email exception](shared-test-email.md) permits separate PENDING accounts for the selected testing address; each exact username still needs approval. If this tool was installed before the new server publication, repeat the frozen setup block below to refresh its checked source/API hash. This refresh makes no AWS write.
 
 Status: DONE under user-directed A takeover. Own-A live list, selected approval, idempotence, signup recovery and cleanup passed in [38603820489](https://github.com/Known-Enough/known-enough/actions/runs/38603820489). Use the updated frozen tool source below; no real user was approved during proof. B own execution is not claimed.
@@ -87,6 +89,6 @@ Own-A proof38611720048 passed with the current operator/source pindf3e651, inclu
 
 ## Email conflicts and missed signup intake
 
-The app supports one account per verified email. A new username using an already-linked email cannot take over that account or enter the pending queue as a second identity. Verification now completes and the signed-in app explains how to use the original account or a different email. Confirmed users missing an eligible app record recover automatically into PENDING through a trusted server lookup; rejected/disabled or email-conflicting identities are not automatically approved or reset.
+Ordinary emails support one account per verified email. The privately selected testing email is exempt: new usernames create separate PENDING accounts. No new username takes over an existing account; ordinary already-linked emails cannot enter the pending queue as a second identity. Verification now completes and the signed-in app explains how to use the original account or a different email. Confirmed users missing an eligible app record recover automatically into PENDING through a trusted server lookup; rejected/disabled or email-conflicting identities are not automatically approved or reset.
 
 An empty pending list is a valid result when only already-linked usernames were created. Do not fabricate state or retry an old verification code to force registration. Source9144 tools pinned the prior API68 and stop after this server update: run the current setup block once, then the same list/approve commands.
