@@ -53,3 +53,13 @@ Approval grants app access to those usernames only. It creates no groups or grou
 [Full operator guide](../../docs/tasks/active/fix/FIX04/commands.md) includes exact existing administrator setup, error meanings and private audit locations. That older permission repair is already applied; it is a historical/recovery command, not a routine setup step. [Selected-email behavior](../../docs/tasks/active/fix/FIX04/shared-test-email.md) explains separate accounts and approval.
 
 This folder contains current account-management commands. Existing operations installers and their state-specific recovery instructions stay in their original task folders; do not rerun those installations to manage users.
+
+## If CloudShell reports “no space left on device”
+
+The update did not finish, so the old wrapper can also report `CHECKED_NATIVE_API_REQUIRED`. Run [04-recover-disk-space.py](04-recover-disk-space.py) with Python, then repeat the normal list command. The helper removes npm download cache, reproducible account-tool dependencies and obsolete public source downloads only. It uses `/tmp` for the new npm download cache, preserves private AWS snapshots/journals/audits and rollback ZIPs, backs up changed or truncated public source files before repairing them from the checksum-pinned archive, and updates the tool. It never invokes AWS or runs application tests.
+
+```bash
+python3 -B scripts/cloudshell-commands/04-recover-disk-space.py
+```
+
+Expected last result: `LOCAL_SPACE_RECOVERY_COMPLETE`; then run step2 above. This recovery helper has been prepared and manually reviewed, not executed or tested in A's chat at the user's direction. Actual CloudShell recovery awaits the user's result.
