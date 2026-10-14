@@ -7,8 +7,8 @@ Fix problems encountered in the published application, with real evidence and cl
 | [FIX01](FIX01/README.md) | An approved organizer can create and review a new decision draft inside a group; failures explain the actual problem. | BLOCKED / claim released; exact API-role model grant required |
 | [FIX02](FIX02/README.md) | Save and view profile descriptions/photos through the compatible installed API, including permitted group-member profiles. | DONE / B; live profile/privacy/cleanup passed |
 | [FIX03](FIX03/README.md) | Sign in inside the app's own styled screen, with Cognito authentication behind the scenes. | DONE / B; live branded authentication/recovery/cleanup passed |
-| [FIX04](FIX04/README.md) | One command lists pending access requests; another approves explicitly selected users. | READY / unclaimed; queued for B after FIX03 |
+| [FIX04](FIX04/README.md) | One command lists pending access requests; another approves explicitly selected users. | IN_PROGRESS / B; native operator commands and effective-access checks |
 
-User directs sequential FIX02 → FIX03 → FIX04, proceeding past a concrete external dead end. FIX01 is preserved at its checked missing-access checkpoint; FIX02 passed; FIX03 passed and is released; FIX04 is next. No new worker, automation, deployment or test has been started by task preparation.
+User directs sequential FIX02 → FIX03 → FIX04, proceeding past a concrete external dead end. FIX01 is preserved at its checked missing-access checkpoint; FIX02 passed; FIX03 passed and is released; FIX04 is the sole implementation claim. No new worker, automation, deployment or test has been started by task preparation.
 
 [Task guide](../../README.md) · [Task board](../../../task-board.md)

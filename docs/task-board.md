@@ -1,3 +1,5 @@
+Current 2026-10-14T10:09:01.761169+00:00: FIX02 DONE/live38539768756; FIX03 DONE/live38546645713; FIX04 IN_PROGRESS/B only; FIX01 preserved missing exact API model grant. Older queue summaries below are history.
+
 Current FIX03 IN_PROGRESS/B, afterFIX02DONE/live38539768756; FIX04 follows; FIX01 exactIAMgrant stillblocked.
 
 Current queue: FIX02 DONE/livePASS38539768756; FIX03 next, thenFIX04; FIX01 blocked exactAPI modelgrant. No activeclaim untilFIX03intake.

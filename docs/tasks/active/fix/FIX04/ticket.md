@@ -1,6 +1,6 @@
 # FIX04 — Simple commands to list pending requests and approve users
 
-**Status:** READY / unclaimed. **Priority:** P1. **Intended worker:** B / own `Battosai1806`. Queue after FIX03; preserve current FIX01 and other genuine active work. Exactly one task.
+**Status:** IN_PROGRESS / B. **Priority:** P1. **Intended worker:** B / own `Battosai1806`. Queue after FIX03; preserve current FIX01 and other genuine active work. Exactly one task.
 
 ## Requested outcome
 
@@ -51,3 +51,6 @@ If verified accounts fail to enter the queue because intake is broken, capture t
 A created this queued B task from clean synchronized main `e8c24f1`, inspected the legacy CLI and native account state, and preserved FIX01 → FIX02 → FIX03 order. No application change, live listing of people, approval, cloud mutation, test dispatch or B FIX04 execution occurred during task creation.
 
 [FIX batch](../README.md) · [Task guide](../../../README.md) · [Board](../../../../task-board.md)
+
+
+FIX04 claim 2026-10-14T10:09:01.761169+00:00: ownB/Battosai1806/143764700 afterFIX03DONE/live38546645713 and cleanff-onlymain1b396f7c5a58ea8d5e236371aec7a9836d9f240d, ownGitHubverified, no activeprojectimplementation/deployment/testjobs observed. ExactlyFIX04 IN_PROGRESS/B. Boundedfiles packages/adapters/src/partition-account-operator.ts + meaningfultests; scripts/fix04 operatorCLI/privatebootstrap/permissionprobe and focusedtests; .github/workflows/fix04-access.yml/owned-proof onlyasrequired; FIX04commands/evidence/ticket, board/batch/claims/Blogs. No APIbehavior/newdatabase/directorymigration requiredif nativekey-onlycatalog cancovercurrentaccountSTATErecords: currentnativehasEMAILdirectory/subject-keyedaccounts but no globalaccess-requestindex. AvoidretiredaggregateandrawpayloadScan; boundedpaged PK/SK-only catalogmetadata is onlydiscoveryfallback, canonicalaccount/EMAILdirectory reads andsameinstallednativefencedtransaction enforceidentity/admission/preservation. Publicresults staticcounts/categories; accountnames/provideridentities/privateconfig stayoperatorprivatefolder/terminal, neverGitHubreports. Freshproviderlookup verifiesimmutableSubject/currentverifiedemail; exactselectedtargets only, no realuserapproval duringtests, noAWSgrants/password/groupchanges. PreferowninstalledMigrationrole; verifyactualkey-onlyScan/providerreadcapabilitybeforecreatingtestfixtures. Standingauthoritycoversroutine narrowrepairs; no borrowAcreds/newworker/chat/monitor. Claim is preparation, notliveoperatorPASS.
