@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "470a0edc2473ad8244959bfddef9007a13e38774",
+  "run": "https://github.com/Known-Enough/known-enough/actions/runs/38621876502",
+  "observedAt": "2026-10-14T19:16:24.556776+00:00",
+  "result": "FRONTEND_PUBLICATION_PASS",
+  "amplifyJobId": "91",
+  "apiSha256": "83d794ac6cd4fe204f30a320c4e34537b683b76da3aedb6a106f9077dff6f663",
+  "backendPublication": "NOT_EXECUTED",
+  "configurationWrites": 0,
+  "dataWrites": 0,
+  "modelCalls": 0,
+  "signup": 0,
+  "checks": {
+    "productionBuild": "PASS",
+    "workflowRegressionChecks": "SKIPPED_USER_DIRECTION",
+    "automatedTests": "NOT_RUN",
+    "browserTests": "NOT_RUN",
+    "manualDecisionCreation": "AWAITING_USER"
+  },
+  "change": "Native modal: idea, real AI follow-up questions one at a time, review/save/explicit confirmation/create; explains disabled gates and preserves saved-request recovery."
+}
