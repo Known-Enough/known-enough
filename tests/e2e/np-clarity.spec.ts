@@ -94,7 +94,7 @@ test('public draft takes keyboard focus; malformed responses show a safe retry m
   try {
     await connect(context, api, 'iris'); await api.call('iris', '/account/register', { displayName: 'Iris' }); await api.approve('iris');
     await api.groups.create({ kind: 'participant', subject: 'iris' }, { name: 'Small club', idempotencyKey: 'small' });
-    const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: 'Open group', exact: true }).click();
+    const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: /^Open group / }).first().click();
     await page.getByRole('button', { name: 'Start a decision' }).click();
   await page.getByLabel('What should this group decide?').fill('Choose a gallery meetup.'); await page.getByRole('button', { name: 'Draft a new decision', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Review the public draft' })).toBeFocused();
@@ -113,7 +113,7 @@ test('delayed draft save clears premature review before creation can proceed', a
   try {
     await connect(context, api, 'iris'); await api.call('iris', '/account/register', { displayName: 'Iris' }); await api.approve('iris');
     await api.groups.create({ kind: 'participant', subject: 'iris' }, { name: 'Small club', idempotencyKey: 'small' });
-    const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: 'Open group', exact: true }).click();
+    const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: /^Open group / }).first().click();
     await page.getByRole('button', { name: 'Start a decision' }).click();
   await page.getByLabel('What should this group decide?').fill('Choose a fictional gallery meetup.');
     await page.getByRole('button', { name: 'Draft a new decision', exact: true }).click();
@@ -146,7 +146,7 @@ test('unanswered public questions survive saving and explicit answers create a r
   try {
     await connect(context, api, 'iris'); await api.call('iris', '/account/register', { displayName: 'Iris' }); await api.approve('iris');
     await api.groups.create({ kind: 'participant', subject: 'iris' }, { name: 'Small club', idempotencyKey: 'small' });
-    const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: 'Open group', exact: true }).click();
+    const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: /^Open group / }).first().click();
     await page.getByRole('button', { name: 'Start a decision' }).click();
   await page.getByLabel('What should this group decide?').fill('Choose a gallery meetup.');
     await page.getByRole('button', { name: 'Draft a new decision', exact: true }).click();
@@ -171,12 +171,12 @@ test('failed account refresh clears prior approved groups and recipient links', 
   try {
     await connect(context,api,'iris');await api.call('iris','/account/register',{displayName:'Iris'});await api.approve('iris');
     await api.groups.create({kind:'participant',subject:'iris'},{name:'Fictional club',idempotencyKey:'club'});
-    const page=await context.newPage();await page.goto(url);await expect(page.getByText('Access approved',{exact:true})).toBeVisible();
-    await page.getByRole('button',{name:'Open group',exact:true}).click();await page.getByText('Invite someone',{exact:true}).click();
+    const page=await context.newPage();await page.goto(url);await expect(page.getByRole('heading',{name:'Decision groups',exact:true})).toBeVisible();
+    await page.getByRole('button',{name:/^Open group /}).first().click();await expect(page.getByRole('heading',{name:'Invitations',exact:true})).toBeVisible();
     await page.getByLabel('Recipient email', {exact:true}).fill('fictional-recipient@example.invalid');
     await page.getByRole('button',{name:'Create invitation link',exact:true}).click();await expect(page.getByLabel('Invitation link',{exact:true})).toBeVisible();
     await page.route('https://api.example.test/account',route=>route.fulfill({status:500,body:'PRIVATE_FAILURE',headers:{'access-control-allow-origin':'*'}}));
-    await page.getByRole('button',{name:'Refresh account and groups'}).click();await expect(page.getByText('Refresh failed. Sign in again if needed.')).toBeVisible();
+    await page.getByRole('button',{name:'Refresh group'}).click();await expect(page.getByRole('heading',{name:'We couldn’t load your account',exact:true})).toBeVisible();
     await expect(page.getByRole('button',{name:'Create group',exact:true})).toHaveCount(0);await expect(page.getByRole('heading',{name:'Fictional club',exact:true})).toHaveCount(0);
     await expect(page.getByLabel('Invitation link',{exact:true})).toHaveCount(0);expect(await page.locator('body').innerText()).not.toMatch(/PRIVATE_FAILURE|fictional-recipient/);
   }finally{await context.close();await api.close();}
@@ -185,7 +185,7 @@ test('a late approved refresh cannot overwrite a newer disabled account', async 
   const api=await npApi();const context=await browser.newContext();
   try{
     await connect(context,api,'iris');await api.call('iris','/account/register',{displayName:'Iris'});await api.approve('iris');
-    const page=await context.newPage();await page.goto(url);await expect(page.getByText('Access approved',{exact:true})).toBeVisible();
+    const page=await context.newPage();await page.goto(url);await expect(page.getByRole('heading',{name:'Decision groups',exact:true})).toBeVisible();
     let release!:()=>void;let entered!:()=>void;const started=new Promise<void>(resolve=>{entered=resolve;});const wait=new Promise<void>(resolve=>{release=resolve;});let requests=0;
     await page.route('https://api.example.test/account',async route=>{
       const response=await api.call('iris','/account');const body=await response.text();

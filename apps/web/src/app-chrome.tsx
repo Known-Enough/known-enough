@@ -82,7 +82,7 @@ export function LoadingSkeleton({ label, kind, className = '' }: { label: string
   let visual: ReactNode;
   switch (kind) {
     case 'auth': visual = <><SkeletonBar shape="is-heading" /><SkeletonBar shape="is-copy is-medium" /><SkeletonBar shape="is-copy" /><div className="ke-skeleton-auth-actions"><SkeletonBar shape="is-button is-wide" /><SkeletonBar shape="is-button is-wide" /></div></>; break;
-    case 'groups': visual = <><div className="ke-skeleton-section-heading"><SkeletonBar shape="is-subheading" /><SkeletonBar shape="is-button" /></div><div className="ke-skeleton-group-grid">{[0, 1].map(item => <div className="ke-skeleton-group-tile" key={item}><SkeletonBar shape="is-avatar" /><SkeletonBar shape="is-subheading is-medium" /><SkeletonBar shape="is-copy is-short" /><SkeletonBar shape="is-button" /></div>)}</div></>; break;
+    case 'groups': visual = <><div className="ke-skeleton-section-heading"><SkeletonBar shape="is-subheading" /><SkeletonBar shape="is-button" /></div><div className="ke-skeleton-group-list">{[0, 1, 2].map(item => <div className="ke-skeleton-group-row" key={item}><SkeletonBar shape="is-avatar" /><span><SkeletonBar shape="is-subheading is-medium" /><SkeletonBar shape="is-copy is-short" /></span><SkeletonBar shape="is-menu-trigger" /></div>)}</div></>; break;
     case 'group': visual = <><div className="ke-skeleton-group-overview"><div><SkeletonBar shape="is-eyebrow" /><SkeletonBar shape="is-heading is-medium" /><div className="ke-skeleton-summary"><SkeletonBar shape="is-copy is-short" /><SkeletonBar shape="is-copy is-short" /><SkeletonBar shape="is-copy is-short" /></div></div><div className="ke-skeleton-group-actions"><SkeletonBar shape="is-button is-wide" /><SkeletonBar shape="is-button is-wide" /></div></div><div className="ke-skeleton-group-panels">{panel('members')}{panel('decisions')}{panel('invitations')}</div></>; break;
     case 'decision': visual = <><div className="ke-skeleton-decision-heading"><SkeletonBar shape="is-heading is-medium" /><SkeletonBar shape="is-copy" /></div><div className="ke-skeleton-decision-card"><SkeletonBar shape="is-subheading" /><SkeletonBar shape="is-copy" /><SkeletonBar shape="is-copy is-medium" /><SkeletonBar shape="is-copy is-short" /></div><div className="ke-skeleton-decision-card"><SkeletonBar shape="is-subheading is-medium" /><SkeletonBar shape="is-input" /><SkeletonBar shape="is-copy is-short" /></div></>; break;
     case 'profile': visual = <><SkeletonBar shape="is-subheading is-medium" /><SkeletonBar shape="is-copy" /><SkeletonBar shape="is-input" /><SkeletonBar shape="is-copy is-short" /><SkeletonBar shape="is-input" /><SkeletonBar shape="is-button is-wide" /></>; break;
@@ -111,6 +111,8 @@ const pageIconShapes = {
   ArrowLeft: <><path d="M19 12H5" /><path d="m12 19-7-7 7-7" /></>,
   RefreshCw: <><path d="M20 7v5h-5M4 17v-5h5" /><path d="M5.64 5.64A9 9 0 0 1 20 12M4 12a9 9 0 0 0 14.36 6.36" /></>,
   ArrowRight: <><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></>,
+  ChevronRight: <><path d="m9 18 6-6-6-6" /></>,
+  Ellipsis: <><circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /></>,
   Plus: <><path d="M12 5v14M5 12h14" /></>,
   Link: <><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></>,
   X: <><path d="m18 6-12 12M6 6l12 12" /></>,

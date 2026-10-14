@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-13T23:58:36Z",
+  "task": "ZZ03",
+  "scope": "Compact decision-groups dashboard list, row navigation, and Quick view",
+  "sourceSha": "da985df6ee931f55bbee23619ecde88f70dc4539",
+  "commitUrl": "https://github.com/Known-Enough/known-enough/commit/da985df6ee931f55bbee23619ecde88f70dc4539",
+  "workflow": {
+    "name": "ZZ primary frontend publication",
+    "runId": "38487303630",
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/38487303630",
+    "actor": "martelaxe",
+    "event": "workflow_dispatch",
+    "branch": "main",
+    "conclusion": "SUCCESS",
+    "entryOnly": false,
+    "runChecks": false,
+    "amplifyJobId": "84"
+  },
+  "localChecks": {
+    "node": "24.21.0",
+    "npm": "11.19.0",
+    "lintAndBoundaries": "PASS (496 import references)",
+    "typecheck": "PASS",
+    "unitTests": "1572 PASS, 2 skipped",
+    "productionBuildAndBundleBoundary": "PASS",
+    "hostedPreviewBuildAndBoundary": "PASS",
+    "hostedPreviewTest": "1/1 PASS",
+    "referenceChecksums": "7/7 PASS",
+    "planningConsistency": "15/15 PASS",
+    "syntheticVisualReview": "PASS at 390px and 1280px in light and dark; row navigation, menu isolation, Quick view content, keyboard entry, Escape and focus restoration verified; no horizontal overflow. Four synthetic captures are included.",
+    "fullBrowserSuite": "65/72 passed; seven failures outside the changed group dashboard flows: stale-command status selector, public/owner loading-announcer text selectors, signup entry keyboard focus, mobile entry keyboard focus, and zz-entry keyboard focus at 390px and 1280px",
+    "workflowRegressionChecks": "SKIPPED by run_checks=false; full local npm run check was run",
+    "apiProviderSignupEmail": "NOT_EXECUTED"
+  },
+  "runtimeReadback": {
+    "result": "ZZ02_SETUP_READBACK_PASS",
+    "configurationSha256": "f6f32c6bd2cb66bebd8e4d40c35b1f198426172f1f8f372eaab35c472327da6b",
+    "apiSha256": "a5873e96fd2cc87eec2569ef8c7eb19989caea4edc228d734f7c1ae1590d1df1",
+    "postConfirmation": "MATCH",
+    "profileRoutesPresent": 5,
+    "managedRoutesPresent": 6,
+    "configurationWrites": 0,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "signupDelivery": "NOT_EXECUTED",
+    "apiPublication": "NOT_EXECUTED"
+  },
+  "publication": {
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "url": "https://main.d143q5ravxp5av.amplifyapp.com/",
+    "staticReadback": "All seven release-manifest files returned HTTP 200 and independently matched their release-artifact SHA-256 values.",
+    "files": [
+      {
+        "path": "/assets/app-chrome-BDh8Xbj0.js",
+        "httpStatus": 200,
+        "sha256": "35a8a17db63f60e3ff173e729c1cacf2bf10d340546a70b13143c33af70744ff",
+        "manifestMatch": true
+      },
+      {
+        "path": "/assets/connected-app-CWu7N1Yt.js",
+        "httpStatus": 200,
+        "sha256": "d2c750af10f232dc534a2bd0ec791639e09c76fabe17d36b47542bb860bccd24",
+        "manifestMatch": true
+      },
+      {
+        "path": "/assets/index-DGhF8YE1.js",
+        "httpStatus": 200,
+        "sha256": "eb02d936955ef917c7f7211895f1de0b18940995afe6d16c84c662a503d23fb5",
+        "manifestMatch": true
+      },
+      {
+        "path": "/assets/index-DabB8EoN.css",
+        "httpStatus": 200,
+        "sha256": "00f7d37b5dfd5bc6010ef6a808c00e8b2322cdc2b78e34aa247c3774664a401f",
+        "manifestMatch": true
+      },
+      {
+        "path": "/cover.png",
+        "httpStatus": 200,
+        "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151",
+        "manifestMatch": true
+      },
+      {
+        "path": "/",
+        "httpStatus": 200,
+        "sha256": "ed2a8d293a6e7b9cc9d0a147569fb3b1fd92d4911b6533d8e552ce38e3f111f7",
+        "manifestMatch": true
+      },
+      {
+        "path": "/logo.png",
+        "httpStatus": 200,
+        "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb",
+        "manifestMatch": true
+      }
+    ]
+  },
+  "manualReview": {
+    "realAuthenticatedAccountReview": "PENDING_USER",
+    "wholeZZ03Acceptance": "INCOMPLETE"
+  },
+  "visualCaptures": [
+    {
+      "path": "docs/review-artifacts/ZZ03/decision-groups-quickview-390-light.png",
+      "viewport": "390px",
+      "theme": "light",
+      "content": "Quick view"
+    },
+    {
+      "path": "docs/review-artifacts/ZZ03/decision-groups-quickview-390-dark.png",
+      "viewport": "390px",
+      "theme": "dark",
+      "content": "Quick view"
+    },
+    {
+      "path": "docs/review-artifacts/ZZ03/decision-groups-quickview-1280-light.png",
+      "viewport": "1280px",
+      "theme": "light",
+      "content": "Quick view"
+    },
+    {
+      "path": "docs/review-artifacts/ZZ03/decision-groups-quickview-1280-dark.png",
+      "viewport": "1280px",
+      "theme": "dark",
+      "content": "Quick view"
+    }
+  ]
+}
