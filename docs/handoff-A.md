@@ -1,3 +1,7 @@
+## FIX04 documentation handoff — 2026-10-14T01:41:31Z
+
+Added [FIX04](tasks/active/fix/FIX04/ticket.md) for B after FIX03. Existing legacy aggregate operator commands are not verified for the active partitioned runtime; task requires complete paginated native pending-user listing and exact username approvals with private output and safe readback. No real account data queried/approved, executable change or concurrent A implementation here. Preserve current B claim and queue.
+
 ## FIX03 documentation handoff — 2026-10-14T01:36:01Z
 
 Created [FIX03](tasks/active/fix/FIX03/ticket.md) for B after FIX02, preserving current FIX01 and published UI/profile changes. Source inspection confirms hosted PKCE redirect and separate fixture-only SRP; functional in-app login needs a verified token/server-email contract, not CSS alone. A makes no application/auth/configuration changes here. READY/unclaimed, existing B chat/schedule and one-task rule preserved.

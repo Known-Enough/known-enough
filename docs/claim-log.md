@@ -1,3 +1,7 @@
+## FIX04 preparation — 2026-10-14T01:41:31Z
+
+User requests [FIX04](tasks/active/fix/FIX04/ticket.md): complete pending-user listing and explicit username approval commands. READY/unclaimed for B after FIX03; current FIX01 preserved. A documents only; no implementation claim, actual people listing/approval, cloud write, new worker or live run. B records its own future fresh sequential claim before execution.
+
 ## FIX03 preparation — 2026-10-14T01:36:01Z
 
 User requests [FIX03](tasks/active/fix/FIX03/ticket.md) for the branded in-app sign-in. READY/unclaimed, queued for B after FIX02; current FIX01 claim preserved. A performs documentation only, with no implementation claim, new worker, cloud action or test/deployment. B must record its own fresh sequential intake before starting.

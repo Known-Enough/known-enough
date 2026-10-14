@@ -1,3 +1,7 @@
+## Queued FIX04 — 2026-10-14T01:41:31Z
+
+After your FIX01 → FIX02 → FIX03 sequence, claim exactly [FIX04](tasks/active/fix/FIX04/ticket.md). Deliver two complete copy-paste commands: list all PENDING application accounts with trusted username mapping/pagination, then approve explicit usernames with conditional native updates/readback. Inspect the legacy aggregate CLI, but target the current partitions and preserve profiles/groups. Reuse installed operator access, keep identity output private and normal participant access restricted; no blanket approval or shared credentials. Test owned synthetic users, provide `commands.md` and both actual blocks in chat, and report exact outcomes/setup gaps. Existing chat/schedule unchanged; task is queued, not started.
+
 ## Queued FIX03 — 2026-10-14T01:36:01Z
 
 Keep your current FIX01 task, then FIX02; take [FIX03](tasks/active/fix/FIX03/ticket.md) at the next eligible intake afterward. Build a normal participant sign-in form inside our current CSS/theme, keeping Cognito behind the scenes. Verify actual client flows/token scopes and trusted verified-email/session integration, preserve account approval and existing group/invitation navigation, and include useful verification/reset/expiry/sign-out behavior. Relevant tests and exact-source publication are authorized. No hosted redirect as the ordinary password login, no custom crypto or browser secrets. Log tests, deployed/live proof and exact blockers. Existing chat/monitor unchanged; this task is queued, not started.
