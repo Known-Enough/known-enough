@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-14T01:21:22Z",
+  "task": "ZZ03",
+  "scope": "Compact shared profile modal and participant profile viewing",
+  "sourceSha": "75baad6506ea6920644858c2ee1cec990089ef8b",
+  "commitUrl": "https://github.com/Known-Enough/known-enough/commit/75baad6506ea6920644858c2ee1cec990089ef8b",
+  "frontendWorkflow": {
+    "name": "Deploy Known Enough staging to AWS Amplify",
+    "runId": "38494657209",
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/38494657209",
+    "event": "push",
+    "branch": "main",
+    "conclusion": "SUCCESS",
+    "amplifyJobId": "85"
+  },
+  "checks": {
+    "focusedSetupTests": "8/8 PASS; route counts derive from the checked application manifest",
+    "profileReleaseGuardTests": "5/5 PASS",
+    "profileApiCompileAndFocusedApiTests": "PASS in API publication workflow before preflight",
+    "fullPinnedCheck": "69/76 E2E passed; all six profile cases passed. Seven failures were outside this task: stale-command status, loading-announcer selectors, signup mock registration, mobile clarity keyboard flow, and signed-out entry focus at 390px/1280px.",
+    "apiProviderSignupEmail": "NOT_EXECUTED"
+  },
+  "runtimeReadback": {
+    "result": "ZZ02_SETUP_READBACK_PASS",
+    "configurationSha256": "f6f32c6bd2cb66bebd8e4d40c35b1f198426172f1f8f372eaab35c472327da6b",
+    "apiSha256": "a5873e96fd2cc87eec2569ef8c7eb19989caea4edc228d734f7c1ae1590d1df1",
+    "postConfirmation": "MATCH",
+    "profileRoutesPresent": 5,
+    "managedRoutesPresent": 6,
+    "configurationWrites": 0,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "signupDelivery": "NOT_EXECUTED"
+  },
+  "frontendPublication": {
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "url": "https://main.d143q5ravxp5av.amplifyapp.com/",
+    "independentReadback": "All seven release-manifest files returned HTTP 200 with matching SHA-256.",
+    "files": [
+      { "path": "/assets/app-chrome-BDh8Xbj0.js", "httpStatus": 200, "sha256": "35a8a17db63f60e3ff173e729c1cacf2bf10d340546a70b13143c33af70744ff", "manifestMatch": true },
+      { "path": "/assets/connected-app-DC7jSWbf.js", "httpStatus": 200, "sha256": "0c85cfa127fbcd5c03d8c0e691587851721ba8d6cbfacea451c2a126705c7205", "manifestMatch": true },
+      { "path": "/assets/index-DkJzXlRN.js", "httpStatus": 200, "sha256": "0636d6442832e95d42cdd87a65fbdb55b457843d4a57ac2ad97bb205a664d484", "manifestMatch": true },
+      { "path": "/assets/index-hswJGDyx.css", "httpStatus": 200, "sha256": "9fe74d7b6fd8d0b5401fb92fadbf4da2e44a92c0cd93b16ce98225e4f11dcee4", "manifestMatch": true },
+      { "path": "/cover.png", "httpStatus": 200, "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151", "manifestMatch": true },
+      { "path": "/", "httpStatus": 200, "sha256": "13d607cc76eb5f5652039186b68bd1e9a9dfef61e1702714eae87928f65c5a0d", "manifestMatch": true },
+      { "path": "/logo.png", "httpStatus": 200, "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb", "manifestMatch": true }
+    ]
+  },
+  "apiPublication": {
+    "runId": "38494669869",
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/38494669869",
+    "result": "BLOCKED_AT_FAIL_CLOSED_PREFLIGHT",
+    "failureCode": "LAMBDA_HANDLER_MISMATCH",
+    "lambdaCodeWrites": 0,
+    "apiGatewayRouteWrites": 0,
+    "providerCalls": 0,
+    "accountTests": "NOT_EXECUTED",
+    "nextStep": "Integrate the profile route into the operations-managed runtime's exact-source package. Do not replace its entry point or private package with the legacy one-file artifact."
+  },
+  "automaticQaWorkflow": {
+    "runId": "38494731769",
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/38494731769",
+    "result": "BLOCKED_BEFORE_RELEASE_CREDENTIALS",
+    "fullCheck": "69/76 E2E passed; same seven unrelated failures",
+    "artifactBuild": "NOT_EXECUTED",
+    "awsRoleAssumed": false,
+    "qaDeployment": "NOT_EXECUTED"
+  },
+  "manualReview": {
+    "realAuthenticatedParticipantProfileReview": "PENDING_USER",
+    "wholeZZ03Acceptance": "INCOMPLETE"
+  }
+}
