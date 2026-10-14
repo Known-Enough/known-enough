@@ -148,3 +148,13 @@ test('checkpoint failure stops token acquisition and a foreign acknowledgment ca
  const observer=vi.fn();const wrong=vi.fn().mockResolvedValue(response({id:'foreign-account',address:mailbox.address},201));
  await expect(createMailtmClient(wrong,async()=>{}).create(mailbox,observer)).rejects.toThrow('MAILTM_OWNER_MISMATCH');expect(observer).not.toHaveBeenCalled();expect(wrong).toHaveBeenCalledTimes(1);
 });
+
+// Mail.tm timestamps can have second precision; callers must preserve the original owned
+// mailbox floor while rounding a new send-intent cutoff to the provider precision.
+test('a just-delivered owned code with second precision survives a rounded send cutoff, while older mail stays excluded',()=>{
+ const request=Date.parse('2026-10-01T00:01:00.900Z');
+ expect(mailtmMessageStatus(message,{...mailbox,createdAt:request})).toBe('MAIL_OLD_MESSAGE');
+ const cutoff=Math.max(mailbox.createdAt,Math.floor(request/1000)*1000);
+ expect(mailtmMessageStatus(message,{...mailbox,createdAt:cutoff})).toBe('MAIL_CODE_READY');
+ expect(mailtmMessageStatus({...message,createdAt:'2026-10-01T00:00:59Z'},{...mailbox,createdAt:cutoff})).toBe('MAIL_OLD_MESSAGE');
+});

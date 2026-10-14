@@ -24,6 +24,7 @@ jobs:
       NODE_NO_WARNINGS: '1'
       FIX01_CONFIRMED_TRIGGER_RECOVERY: 'false'
       FIX03_BRANDED_CONFIRMATION: 'true'
+      FIX03_FRONTEND_SOURCE: 3629f1b9279d68d4d8a0094ca850a8c8cd96a8ae
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -36,6 +37,13 @@ jobs:
         run: |
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
           node scripts/operations/verify.mjs > /dev/null
+          git diff --quiet "$FIX03_FRONTEND_SOURCE" HEAD -- apps/web package-lock.json packages/contracts scripts/check-boundaries.mjs
+          python3 - <<'PY'
+          import hashlib, urllib.request
+          expected = '4cab5d020ba72aa6a2c08cb39ed0388ad07043ee670aab42929072aed8dfc764'
+          with urllib.request.urlopen('https://main.d143q5ravxp5av.amplifyapp.com/assets/connected-app-CCDH4qc-.js', timeout=20) as response:
+              assert response.status == 200 and hashlib.sha256(response.read()).hexdigest() == expected, 'FIX03_PUBLIC_BYTES_MISMATCH'
+          PY
           npm ci
           npm ci --prefix scripts/live-qa
           node --experimental-transform-types --test scripts/operations/jobs-owned-proof.test.mjs scripts/operations/partition-live-behavior.test.mjs scripts/operations/lifecycle-owned-behavior.test.mjs
