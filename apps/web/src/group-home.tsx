@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { GroupDecisions } from './group-decisions';
 import { Groups } from '@deal-table/contracts';
 import { GroupIcon, LoadingSkeleton, PageIcon } from './app-chrome';
+import { ProfileModal, type ProfileTarget } from './profile-drawer';
 type LoadFailure = { title: string; description: string; reference: string | null };
 export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onBack }: { api: (path: string, init?: RequestInit) => Promise<Response>;
   openDecision: (id: string) => void; selectedGroupId?: string; onOpenGroup: (id: string) => void; onBack: () => void }) {
@@ -9,6 +10,8 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
   const [checking, setChecking] = useState(true);
   const [account, setAccount] = useState<ReturnType<typeof Groups.AccountSnapshot.parse> | null>(null);
   const [groups, setGroups] = useState<Groups.GroupSnapshot[]>([]);
+  const [profileTarget, setProfileTarget] = useState<ProfileTarget | null>(null);
+  const profileTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [activeMenuGroupId, setActiveMenuGroupId] = useState<string | null>(null);
   const [quickViewGroupId, setQuickViewGroupId] = useState<string | null>(null);
   const menuTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -263,9 +266,11 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
                 <span className="ke-count-badge" aria-label={`${group.members.length} members`}>{group.members.length}</span>
               </header>
               <ul className="ke-member-list">{group.members.map(member => <li key={member.id}>
-                <div className="ke-member-identity"><span className="ke-member-avatar" aria-hidden="true">{member.displayName.slice(0, 1).toUpperCase()}</span>
+                <button type="button" className="ke-member-profile-trigger" aria-label={`View ${member.displayName}'s profile`}
+                  onClick={event => { profileTriggerRef.current = event.currentTarget; setProfileTarget({ kind: 'member', groupId: group.id, memberId: member.id }); }}>
+                  <span className="ke-member-avatar" aria-hidden="true">{member.displayName.slice(0, 1).toUpperCase()}</span>
                   <span className="ke-member-name">{member.displayName}{member.isOrganizer && <span className="ke-member-role">Organizer</span>}</span>
-                </div>
+                </button>
                 {group.isOrganizer && !member.isOrganizer && <button type="button" className="secondary ke-remove-member" disabled={busy}
                   onClick={() => void action(`/groups/${group.id}/remove`, { memberId: member.id, version: group.version })}>Remove {member.displayName}</button>}
               </li>)}</ul>
@@ -302,6 +307,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       })}
     </>}
     </fieldset>
+    {profileTarget && <ProfileModal api={api} open target={profileTarget} onClose={() => setProfileTarget(null)} restoreFocus={() => profileTriggerRef.current?.focus()} />}
     {(checking || busy) && <LoadingSkeleton kind="inline" label={checking ? 'Refreshing account and groups' : 'Updating the group'} />}
     {!checking && !busy && notice && <p role="status">{notice}</p>}
   </section>;

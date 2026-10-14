@@ -1067,3 +1067,19 @@ it('profile HTTP is signed owner-only, permits pending metadata without group ad
   const image = await a.post('/account/profile/image', { version: stored.version, bytesBase64: Buffer.from('<svg/>').toString('base64') }); expect(image.status).toBe(422);
   expect((await a.post('/groups', { name: 'no admission', idempotencyKey: 'no-admission' })).status).toBe(403);
 });
+
+it('serves a private-safe group member profile only to a current approved member of that group', async () => {
+  const f = await fixture(syntheticEmailKey);
+  f.change('ACCOUNT#iris', value => { value.profile = { description: 'A short group bio', loginUsername: 'private-login', image: {
+    id: 'private-avatar-id', mimeType: 'image/png', width: 1, height: 1, bytesBase64: 'YQ==', sha256: 'a'.repeat(64) } }; });
+  const a = await api(f); const path = `/groups/garden/members/${partitionMemberId('iris')}/profile`;
+  const response = await a.get(path, 'omar'); expect(response.status).toBe(200);
+  const profile = (await response.json()).profile;
+  expect(profile).toEqual({ displayName: 'IRIS', description: 'A short group bio', image: {
+    mimeType: 'image/png', width: 1, height: 1, bytesBase64: 'YQ==' } });
+  expect(JSON.stringify(profile)).not.toMatch(/subject|email|loginUsername|private-login|status|version|private-avatar-id|sha256/);
+  expect((await a.get(path, 'luca')).status).toBe(404);
+  expect((await a.get(`/groups/garden/members/${partitionMemberId('luca')}/profile`, 'omar')).status).toBe(404);
+  f.change('GROUP#garden', value => { value.members = ['iris']; });
+  expect((await a.get(path, 'omar')).status).toBe(404);
+});

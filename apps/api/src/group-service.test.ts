@@ -72,4 +72,35 @@ describe('NP01 admission and recipient-bound groups', () => {
     await expect(service.create(principal('host'), { ...body, name: 'Changed' })).rejects.toMatchObject({ code: 'STALE_CONTEXT' });
     await expect(service.register(principal('other'), { email: 'host@example.invalid', verified: true }, { displayName: 'Other' })).rejects.toMatchObject({ code: 'FORBIDDEN' });
   });
+  it('shares only a current group member profile projection with approved members of that group', async () => {
+    const { service, repository, register } = setup();
+    await register('host'); await register('guest'); await register('outsider');
+    await repository.transaction(state => {
+      const host = state.accounts.find(account => account.subject === 'host')!;
+      host.profile = { description: 'A little about the host', loginUsername: 'private-login', image: {
+        id: 'private-avatar-id', mimeType: 'image/png', width: 1, height: 1, bytesBase64: 'YQ==', sha256: 'a'.repeat(64) } };
+    });
+    const group = await service.create(principal('host'), { name: 'Club', idempotencyKey: 'club' });
+    const invite = await service.invite(principal('host'), group.id, { email: 'guest@example.invalid', replace: false });
+    await service.accept(principal('guest'), { token: invite.token });
+    const hostId = group.members.find(member => member.displayName === 'host')!.id;
+    const profile = await service.memberProfile(principal('guest'), group.id, hostId);
+    expect(profile).toEqual({ displayName: 'host', description: 'A little about the host', image: {
+      mimeType: 'image/png', width: 1, height: 1, bytesBase64: 'YQ==' } });
+    expect(JSON.stringify(profile)).not.toMatch(/subject|email|loginUsername|private-login|status|version|private-avatar-id|sha256/);
+    await expect(service.memberProfile(principal('outsider'), group.id, hostId)).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await expect(service.memberProfile(principal('guest'), group.id, 'member-' + 'f'.repeat(32))).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await service.remove(principal('host'), group.id, { memberId: memberId('guest'), version: 2 });
+    await expect(service.memberProfile(principal('guest'), group.id, hostId)).rejects.toMatchObject({ code: 'NOT_FOUND' });
+  });
+  it('does not reveal a group member profile after that account is disabled', async () => {
+    const { service, repository, register } = setup();
+    await register('host'); await register('guest');
+    const group = await service.create(principal('host'), { name: 'Club', idempotencyKey: 'disabled-profile' });
+    const invite = await service.invite(principal('host'), group.id, { email: 'guest@example.invalid', replace: false });
+    await service.accept(principal('guest'), { token: invite.token });
+    const hostId = group.members.find(member => member.displayName === 'host')!.id;
+    await operateAccount(repository, 'disable', 'host', 2);
+    await expect(service.memberProfile(principal('guest'), group.id, hostId)).rejects.toMatchObject({ code: 'NOT_FOUND' });
+  });
 });
