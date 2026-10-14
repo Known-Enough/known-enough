@@ -30,7 +30,9 @@ def validate(config, rule, package):
         'schedule': rule.get('ScheduleExpression') == 'rate(1 minute)' and rule.get('State') == 'DISABLED',
     }
     return {'result': 'INSTALLED_WORKER_READBACK_PASS' if all(checks.values()) else 'INSTALLED_WORKER_MISMATCH',
-            'checks': checks, 'workerSha256': EXPECTED_SHA, 'packageSource': '9a27a99f20b1462183e8843ca9960bd53feed57b',
+            'checks': checks, 'workerSha256': EXPECTED_SHA,
+            'installedCodeSha256': base64.b64decode(config.get('CodeSha256', '')).hex() if re.fullmatch(r'[A-Za-z0-9+/]{43}=', config.get('CodeSha256', '')) else 'UNKNOWN',
+            'artifactSha256': hashlib.sha256(package).hexdigest(), 'packageSource': '9a27a99f20b1462183e8843ca9960bd53feed57b',
             'mutations': 0, 'providerCalls': 0, 'effectiveRuntimePermissions': 'NOT_EXECUTED',
             'reservedConcurrency': 'NOT_READ', 'targetBinding': 'NOT_READ'}
 
