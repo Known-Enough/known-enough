@@ -57,7 +57,7 @@ class RetentionTest(unittest.TestCase):
             elif args[1:3] == ['s3api', 'get-object']:
                 key = args[args.index('--key') + 1]
                 Path(args[args.index('--key') + 2]).write_bytes(objects[key] if mode != 'backup_tamper' else b'private-tamper')
-                result = {'VersionId': 'private-version', 'ServerSideEncryption': 'AES256'}
+                result = {'VersionId': 'private-version', 'ServerSideEncryption': 'AES256', 'ETag': '"checked-object"'}
             elif args[1:3] == ['dynamodb', 'transact-write-items']:
                 items = json.loads(args[args.index('--transact-items') + 1])
                 self.assertEqual(len(items), 1)

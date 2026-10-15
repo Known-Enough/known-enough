@@ -1,5 +1,7 @@
 # FF01 — Registration and sign-in polish
 
-Make account creation and sign-in feel like one polished, minimal Known Enough experience. Keep all current authentication, verification and recovery behavior.
+Status: PUBLISHED; manual acceptance pending.
 
-Status: READY / unclaimed. Intended worker: B, after the current active task. See [requirements](ticket.md). No implementation or publication is claimed.
+Auth styling published in38761806414/Amplify95 and included in final38762440602. No tests. Check registration/sign-in on mobile and both themes; password toggles, Back/Create one, contextual email verification and password reset remain available.
+
+See [ticket](ticket.md) and [batch](../README.md). A coding claim released; no B dispatch or whole-task DONE inferred.

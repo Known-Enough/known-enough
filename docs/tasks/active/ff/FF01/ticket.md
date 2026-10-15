@@ -41,3 +41,6 @@ FF01 implementation checkpoint: compact auth forms/password toggle/contextual ve
 
 2026-10-15 FF01/A publication complete: source7fc3786, GitHub38761806414 SUCCESS/Amplify95. Tests not run at user direction; manual acceptance pending. A releases implementation claim and continues FF02.
 Manual check: sign out, open Create account and Sign in; check narrow/mobile layout, both themes, password eye buttons, Back/Create one, discreet existing-account verification and password reset.
+
+
+2026-10-15 A handoff — PUBLISHED; manual acceptance pending. Auth styling published in38761806414/Amplify95 and included in final38762440602. No tests. Check registration/sign-in on mobile and both themes; password toggles, Back/Create one, contextual email verification and password reset remain available. A implementation claim released; user manual acceptance remains. [Receipt](../../../../review-artifacts/FF/a-publication-20261015.json).
