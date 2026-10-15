@@ -1,0 +1,10 @@
+{
+  "evidence": "User-provided CloudShell result, not an agent product test",
+  "result": "FIX01_PROCESSING_STAMP_POLICY_READBACK_PASS",
+  "iamWriteRequests": 1,
+  "writeAcknowledgmentUncertain": false,
+  "dataWrites": 0,
+  "providerCalls": 0,
+  "effectiveAccess": "NOT_EXECUTED",
+  "utc": "2026-10-15T17:43:10.299671+00:00"
+}

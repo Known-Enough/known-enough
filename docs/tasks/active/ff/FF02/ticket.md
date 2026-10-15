@@ -1,6 +1,6 @@
 # FF02 — Fix unavailable private-conditions interpretation
 
-Status: CODE PUBLISHED / BLOCKED on administrator timestamp permission
+Status: CODE PUBLISHED / permission installed; user manual acceptance pending
 Intended worker: B, sequentially after the existing active claim and FF01; do not interrupt current work or create another monitor.
 
 ## User report
@@ -35,3 +35,5 @@ User-directed FIX01 continuation 2026-10-15T06:08:44.323908+00:00: overlapping r
 
 
 2026-10-15 A handoff — CODE PUBLISHED / BLOCKED on installed permission. Native owner route/explicit prerequisites published with APIc1ec4a07/worker35f7dd0f/source3da3ded in38762272284; final frontend38762440602. Synthetic policy activation38762780192 succeeded after encrypted conditional-create backup readback; participant processing checkbox still required, raw conversation retention0 and real-person policy UNAPPROVED. Own38762492720 verifies required stamp permission absent. Run [the exact administrator command](cloudshell-command.md); code publication is not functional acceptance. No tests or model calls. A implementation claim released; user manual acceptance remains. [Receipt](../../../../review-artifacts/FF/a-publication-20261015.json).
+
+2026-10-15 user CloudShell receipt17:43:10Z: named timestamp permission installed and read back,1IAMwrite/0data/0provider. Installed capability blocker removed; no further setup command required. Effective private interpretation remains untested by A at user direction.

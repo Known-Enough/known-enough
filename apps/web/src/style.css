@@ -881,3 +881,20 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 
 /* Keep account recovery next to the password it recovers. */
 .ke-auth-forgot { display: flex; justify-content: flex-end; margin: -4px 0 0; }
+
+/* A shared starting point and an explicit alternative to clarification loops. */
+.ke-wizard-steps li > span.ke-wizard-step-label { display: inline; width: auto; height: auto; min-width: 0; border: 0; border-radius: 0; background: transparent; color: inherit; flex: 1; }
+.ke-wizard-starting-point { border: 1px solid var(--wizard-border); border-radius: 14px; padding: 18px; background: var(--wizard-note); }
+.ke-wizard-starting-point h3 { margin: 8px 0; font-size: 18px; }
+.ke-wizard-starting-point h4 { margin: 14px 0 6px; }
+.ke-wizard-starting-point p, .ke-wizard-starting-point ul { margin: 8px 0; }
+.ke-wizard-starting-point small { display: block; line-height: 1.6; color: var(--wizard-muted); }
+.ke-wizard-help-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.ke-wizard-help-options button { font-size: 13px; }
+.ke-wizard-history, .ke-wizard-limits { font-size: 13px; color: var(--wizard-muted); line-height: 1.6; }
+.ke-wizard-history summary, .ke-wizard-limits summary { cursor: pointer; padding: 4px 0; }
+.ke-wizard-history dl { margin: 10px 0 0; }
+.ke-wizard-history dl > div { padding: 10px 0; border-top: 1px solid var(--wizard-border); }
+.ke-wizard-history dt { font-weight: 600; }
+.ke-wizard-history dd { margin: 5px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 550px) { .ke-wizard-help-options { display: grid; } .ke-wizard-starting-point { padding: 14px; } }
