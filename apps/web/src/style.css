@@ -878,3 +878,6 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 .ke-wizard-recovery .ke-wizard-actions { gap: 10px; flex-wrap: wrap; }
 .ke-wizard-counter { display: block; line-height: 1.6; color: var(--wizard-muted); }
 .ke-wizard-steps li { column-gap: 10px; }
+
+/* Keep account recovery next to the password it recovers. */
+.ke-auth-forgot { display: flex; justify-content: flex-end; margin: -4px 0 0; }

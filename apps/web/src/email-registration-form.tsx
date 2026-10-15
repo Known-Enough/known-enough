@@ -58,7 +58,7 @@ export function EmailRegistration({ config, startOpen = false, onClose, onSignIn
     }
     finally { submitting.current = false; setBusy(false); }
   }
-  if (stage === 'closed') return <button type="button" className="secondary ke-auth-link" onClick={() => setStage('details')}>Create account</button>;
+  if (stage === 'closed') return <button type="button" className="secondary ke-auth-link" disabled={busy} onClick={() => setStage('details')}>Create account</button>;
   return <section className="ke-registration ke-auth-form" aria-label="Email registration">
     <h2 ref={heading} tabIndex={-1}>{stage === 'details' ? 'Create your account' : stage === 'verify' ? 'Verify your email' : 'Account created'}</h2>
     <p className="ke-auth-intro">{stage === 'details' ? 'A little space for better decisions, together.' : stage === 'verify' ? 'Check your inbox and enter the six-digit code.' : 'Your email is verified. Sign in to continue.'}</p>
@@ -75,12 +75,12 @@ export function EmailRegistration({ config, startOpen = false, onClose, onSignIn
       </fieldset>
     </form>}
     {stage === 'details' && diagnostic && ['ACCOUNT_EXISTS_OR_PENDING', 'NETWORK_RESULT_UNKNOWN', 'DELIVERY_UNCONFIRMED'].includes(diagnostic.code) && username.trim()
-      && <button type="button" className="secondary ke-auth-link" onClick={() => { setUsername(username.trim()); setPassword(''); setEmail(''); setDiagnostic(null); setMessage('Enter the code sent to your email.'); setStage('verify'); }}>I have a verification code</button>}
-    {stage === 'verify' && <button type="button" className="secondary ke-auth-link" onClick={() => { setCode(''); setDiagnostic(null); setMessage(''); setStage('details'); }}>Back to account details</button>}
+      && <button type="button" className="secondary ke-auth-link" disabled={busy} onClick={() => { setUsername(username.trim()); setPassword(''); setEmail(''); setDiagnostic(null); setMessage('Enter the code sent to your email.'); setStage('verify'); }}>I have a verification code</button>}
+    {stage === 'verify' && <button type="button" className="secondary ke-auth-link" disabled={busy} onClick={() => { setCode(''); setDiagnostic(null); setMessage(''); setStage('details'); }}>Back to account details</button>}
     <button type="button" className="secondary ke-auth-link" disabled={busy} onClick={() => { setPassword(''); setEmail(''); setUsername(''); setCode(''); setDiagnostic(null); setMessage(''); setStage('closed'); if (stage === 'details' && onSignIn) onSignIn(); else onClose?.(); }}>{stage === 'details' && onSignIn ? 'Back to sign in' : 'Close registration'}</button>
-    {stage === 'complete' && onSignIn && <button type="button" onClick={onSignIn}>Sign in</button>}
+    {stage === 'complete' && onSignIn && <button type="button" disabled={busy} onClick={onSignIn}>Sign in</button>}
     {stage !== 'complete' && onSignIn && diagnostic && ['ACCOUNT_SETUP_UNAVAILABLE', 'EMAIL_ALREADY_LINKED'].includes(diagnostic.code)
-      && <button type="button" onClick={onSignIn}>Sign in</button>}
+      && <button type="button" disabled={busy} onClick={onSignIn}>Sign in</button>}
     {message && <p role="status">{message}</p>}
     {diagnostic && <p className="ke-help">Reference: {diagnostic.code} at {diagnostic.observedAt}
       {diagnostic.httpStatus ? ` (HTTP ${diagnostic.httpStatus})` : ''}{diagnostic.requestId ? ` (request ${diagnostic.requestId})` : ''}.</p>}
