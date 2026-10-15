@@ -187,7 +187,7 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
           {!requestLookupAvailable && !checkingRequest && !pendingKey && <button type="button" className="secondary" disabled={busy}
             onClick={() => { setNotice(''); setCheckingRequest(true); setRecoveryGeneration(value => value + 1); }}>Check saved requests again</button>}
           {pendingKey && <div className="ke-wizard-recovery">
-            <h3>Let’s check your previous request.</h3><p>{requestState?.progress === 'EXPIRED' ? 'This request expired before AI started. Close it to return to your saved draft.'
+            <h3>{requestState?.state === 'FAILED' ? 'This attempt did not produce a new draft.' : requestState?.state === 'UNKNOWN' ? 'Your request needs a result check.' : 'Let’s check your previous request.'}</h3><p>{requestState?.progress === 'EXPIRED' ? 'This request expired before AI started. Close it to return to your saved draft.'
               : requestState?.state === 'PENDING' ? requestState.canRelease ? 'AI has not started this request. You can check progress or close it to return to your draft.'
                 : 'This request has not finished. Check progress; contact the operator if it stays unresolved.'
               : requestState?.state === 'UNKNOWN' ? 'The previous AI result could not be confirmed. This needs service recovery if checking again does not resolve it. Your saved draft is kept.'
@@ -220,7 +220,7 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
             <textarea id={`public-answer-${group.id}-${questionIndex}`} value={answers[questionIndex] ?? ''} maxLength={500}
               placeholder="Add a shared detail here…" disabled={busy || !!pendingKey} onChange={event => { if (question) answersByQuestion.current[question] = event.target.value; setAnswers({ ...answers, [questionIndex]: event.target.value }); }} />
             {question && answersByQuestion.current[question] && <small>Your earlier answer is kept. Edit it only if the remaining detail needs to change.</small>}
-            <small>{(answers[questionIndex] ?? '').length} / 500 characters · shared with the group</small>
+            <small className="ke-wizard-counter">{(answers[questionIndex] ?? '').length} / 500 characters · shared with the group</small>
             {questionRequirement && !requestRequirement && <p className="ke-wizard-help" role="status">{questionRequirement}</p>}
             {dirty && <button type="button" disabled={busy || !!pendingKey} onClick={() => void action(saveDraft)}>Save changes</button>}
             <div className="ke-wizard-actions"><button type="button" className="secondary" disabled={busy || !!pendingKey} onClick={() => questionIndex ? setQuestionIndex(questionIndex - 1) : setStep('describe')}>Back</button>

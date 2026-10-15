@@ -6,6 +6,10 @@ on:
         description: Exact checked main source SHA
         required: true
         type: string
+      run_checks:
+        description: Run regression suites; false retains source, package and runtime guards for manual acceptance
+        type: boolean
+        default: true
       publish_api:
         description: Publish authenticated enqueue API and rebind only empty disabled control
         type: boolean
@@ -47,8 +51,10 @@ jobs:
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
           node scripts/operations/verify.mjs > /dev/null
           npm ci
-          python3 -B scripts/operations/jobs-worker-release.test.py
-          node --experimental-transform-types --test scripts/operations/partition-transfer.test.mjs scripts/operations/partition-backup.test.mjs scripts/operations/partition-cutover.test.mjs scripts/operations/lifecycle-release.test.mjs scripts/operations/lifecycle-package.test.mjs scripts/operations/jobs-api-release.test.mjs scripts/operations/jobs-source-transition.test.mjs scripts/operations/jobs-runtime-package.test.mjs scripts/fix04/shared-email-package.test.mjs
+          if [ "${{ inputs.run_checks }}" = true ]; then
+            python3 -B scripts/operations/jobs-worker-release.test.py
+            node --experimental-transform-types --test scripts/operations/partition-transfer.test.mjs scripts/operations/partition-backup.test.mjs scripts/operations/partition-cutover.test.mjs scripts/operations/lifecycle-release.test.mjs scripts/operations/lifecycle-package.test.mjs scripts/operations/jobs-api-release.test.mjs scripts/operations/jobs-source-transition.test.mjs scripts/operations/jobs-runtime-package.test.mjs scripts/fix04/shared-email-package.test.mjs
+          fi
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
           role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPrimaryRelease
