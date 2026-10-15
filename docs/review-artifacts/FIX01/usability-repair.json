@@ -1,6 +1,6 @@
 {
   "utc": "2026-10-15T07:03:22.424510+00:00",
-  "result": "LOCAL_CHECKS_PASS_PUBLICATION_PENDING",
+  "result": "CODE_READY_BLOCKED_ON_INSTALLED_CAPABILITY",
   "checkedBase": "33d9130bd3b797e89b09b5ba05f9fd00323b6322",
   "sourceFiles": [
     {
@@ -246,5 +246,12 @@
   "newLiveSignupCalls": 0,
   "missingCapability": "API transactional PutItem on RETENTION#*; named narrow administrator command prepared; installed readback pending",
   "originalSyntheticArchive": "SEPARATELY_PENDING",
-  "humanEarlierDecisionVisibility": "PASS; does not establish acceptance of this continuation"
+  "humanEarlierDecisionVisibility": "PASS; does not establish acceptance of this continuation",
+  "implementationCommit": "fa6e1d2f1f288a6990c1edf0598dd62b8b4a12c5",
+  "currentPolicyReadback": "usability-policy-readback.json",
+  "erroneousDispatch": {
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38696282464",
+    "result": "CANCELLED",
+    "reason": "Incorrect expected-source input; source guard precedes AWS credentials/read; corrected run succeeded"
+  }
 }

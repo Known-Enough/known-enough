@@ -1,0 +1,57 @@
+{
+  "run": "https://github.com/Known-Enough/known-enough/actions/runs/38696306564",
+  "workflowConclusion": "success",
+  "readback": {
+    "utc": "2026-10-15T07:04:21.402976+00:00",
+    "source": "fa6e1d2f1f288a6990c1edf0598dd62b8b4a12c5",
+    "role": "KnownEnoughStageApiRole",
+    "writes": 0,
+    "providerCalls": 0,
+    "denials": [],
+    "documents": [
+      {
+        "policy": "FIX01PublicDraftNovaLite",
+        "sha256": "343e2c6ea85e7617a10b1f7eaa056efe71cb148b6dc36cf01fa57fe5e3f1764a",
+        "novaLiteInvoke": [
+          {
+            "effect": "Allow",
+            "conditional": false
+          }
+        ]
+      },
+      {
+        "policy": "KnownEnoughLifecycleOwner",
+        "sha256": "b2f6161413b5703cf7d5f1e6aee19ce16324dc6f515c9a7811b7ab0c2b911690",
+        "novaLiteInvoke": []
+      },
+      {
+        "policy": "KnownEnoughPartitionParticipant",
+        "sha256": "a5c483ca534d34c864543dcebe47cb27657090143a9968932c7a1a645bc70abd",
+        "novaLiteInvoke": []
+      },
+      {
+        "policy": "KnownEnoughStageApiRuntime",
+        "sha256": "f1aea0576f9fa6e54f07eecc1e2afc0544566fc27c35e175d076fb9209858907",
+        "novaLiteInvoke": []
+      },
+      {
+        "policy": "KnownEnoughStageGroups",
+        "sha256": "bd67265fe81e7e927ad531c2f8c464de84d0f027f1647d72de1057e3ad293115",
+        "novaLiteInvoke": []
+      },
+      {
+        "policy": "KnownEnoughRuntimeModelJobs",
+        "sha256": "8b279e744ac6a8f8fb66007d37efed1471b9f4e28f4d02026d49265e21e22ad3",
+        "novaLiteInvoke": []
+      }
+    ],
+    "boundaryPresent": false,
+    "result": "POLICY_READBACK_PASS",
+    "effectiveAccess": "NOT_EXECUTED"
+  },
+  "requiredPolicy": "FIX01VerifiedSyntheticProcessingStamp",
+  "expectedPolicySha256": "cd6c91a13a121d2114142011d12b06e6b35e5a0ba5c76cb066758fb853274332",
+  "requiredPolicyPresent": false,
+  "result": "REQUIRED_CAPABILITY_ABSENT",
+  "effectiveNewWrite": "NOT_EXECUTED"
+}

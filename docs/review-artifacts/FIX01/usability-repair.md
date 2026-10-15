@@ -1,6 +1,6 @@
 # Decision usability continuation
 
-Status: implementation checked locally; matching publication and real private-interpretation proof remain pending the [API timestamp capability](owner-processing-access-command.md). The earlier human result—decision completes and A can see it—is preserved. It does not establish acceptance of the three subsequent reports. Original synthetic-group archive setup remains separate and incomplete.
+Status: CODE_READY / BLOCKED, implementation committed as `fa6e1d2f1f288a6990c1edf0598dd62b8b4a12c5`. Matching publication and real private-interpretation proof remain pending the [API timestamp capability](owner-processing-access-command.md). The exact-source [independent readback](https://github.com/Known-Enough/known-enough/actions/runs/38696306564) succeeded and confirms the required named policy is absent; [finite receipt](usability-policy-readback.json). B releases the implementation claim at this checked checkpoint until the installed capability changes; no successor is dispatched. The earlier human result—decision completes and A can see it—is preserved. It does not establish acceptance of the three subsequent reports. Original synthetic-group archive setup remains separate and incomplete.
 
 ## Repeated options and clarification
 
