@@ -1,0 +1,111 @@
+{
+  "result": "ARCHITECT_LITERAL_REPAIR_PUBLISHED_MANUAL_ACCEPTANCE_PENDING",
+  "source": "af212995811141dd0038eda251f08b73ee65ef02",
+  "utc": "2026-10-15T19:15:48.918914+00:00",
+  "observation": {
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38791222248",
+    "stages": [
+      "ARCHITECT_SCHEMA_VARIABLES",
+      "ARCHITECT_SCHEMA_RULES"
+    ],
+    "exactRejectedField": "NOT_RETAINED",
+    "httpReferenceCorrelation": "UNAVAILABLE_NOT_LOGGED",
+    "windowComplete": false,
+    "awsWrites": 0,
+    "modelCalls": 0
+  },
+  "changes": [
+    "Architect literal text protocol compiled from referenced variable type and exact units",
+    "Consistent producer prompt without conflicting backend schema or owner fields",
+    "Generated finite domains and all public rule operators preserve strict existing decision validation",
+    "Finite diagnostic stages for invalid rule fields, references, values and duplicates"
+  ],
+  "checks": {
+    "typescriptCompilation": "COMPLETED",
+    "browserBuild": "COMPLETED",
+    "tests": "NOT_EXECUTED_USER_REQUEST",
+    "modelCalls": 0,
+    "signupCalls": 0
+  },
+  "runtime": {
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38792166599",
+    "api": {
+      "sourceSha": "af212995811141dd0038eda251f08b73ee65ef02",
+      "result": "LIFECYCLE_OWNER_CODE_READBACK_PASS",
+      "backendSha256": "1c867d5001eca7b13e20459e0676560a7dd5744f661fc9b322348411b9696b35",
+      "priorBackendSha256": "121be021f2a1db1326ab5253f40fbb6c4df07c31fd40af482dfe76f6369ab6cb",
+      "environment": "UNCHANGED",
+      "migration": "UNCHANGED",
+      "modelCalls": 0,
+      "dataChanges": 0,
+      "managedOwnerProof": "PENDING"
+    },
+    "worker": {
+      "result": "WORKER_CODE_DISABLED_READBACK_PASS",
+      "providerCalls": 0,
+      "activation": "NOT_EXECUTED",
+      "codeWriteRequested": true,
+      "actualWorkerSha256": "3de9b30b9e0c991cd6f43af357488c199704bfcb03643dec316e70759fc93c0b",
+      "expectedPriorWorkerSha256": "3de9b30b9e0c991cd6f43af357488c199704bfcb03643dec316e70759fc93c0b",
+      "workerSha256": "43e9122261a2f0b6e1c2142b365c78a1f77b7016a46dc0b1f1f9a407b92cc3f2",
+      "sourceSha": "af212995811141dd0038eda251f08b73ee65ef02",
+      "schedule": "DISABLED"
+    },
+    "sourceTransition": {
+      "sourceSha": "af212995811141dd0038eda251f08b73ee65ef02",
+      "result": "JOB_SOURCE_DISABLED_READBACK_PASS",
+      "writeRequested": true,
+      "state": "DISABLED",
+      "active": 0,
+      "slots": 0,
+      "totalWrites": 0,
+      "totalsUnchangedDuringCheck": true,
+      "providerCalls": 0
+    }
+  },
+  "control": {
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38792310374",
+    "readback": {
+      "utc": "2026-10-15T19:15:05.780580+00:00",
+      "source": "af212995811141dd0038eda251f08b73ee65ef02",
+      "phase": "enable",
+      "controlWrites": 1,
+      "dataWrites": 0,
+      "providerCalls": 0,
+      "controlSource": "af212995811141dd0038eda251f08b73ee65ef02",
+      "priorEnabled": false,
+      "privateRetention": "ENABLED_SYNTHETIC_CONSENT_REQUIRED",
+      "enabled": true,
+      "totals": "UNCHANGED",
+      "result": "CONTROL_READBACK_PASS"
+    },
+    "syntheticPolicy": {
+      "source": "af212995811141dd0038eda251f08b73ee65ef02",
+      "phase": "apply",
+      "policyWrites": 0,
+      "backupWrites": 0,
+      "accountWrites": 0,
+      "stampWrites": 0,
+      "totalWrites": 0,
+      "providerCalls": 0,
+      "result": "SYNTHETIC_PROCESSING_APPLY_PASS",
+      "rawConversationMs": 0,
+      "realPersonPolicy": "UNAPPROVED",
+      "participantConsent": "REQUIRED_IN_APP",
+      "utc": "2026-10-15T19:15:19.161327+00:00"
+    }
+  },
+  "frontend": "UNCHANGED_SOURCE56a7a9a_AMPLIFY101_NO_UI_CONTRACT_CHANGE",
+  "manualNext": "Refresh, close the failed request and submit the same dinner description once. Review the two date choices and three restaurant choices before creating. No success claimed before user acceptance.",
+  "preserved": [
+    "FF04 deletion markers and denied old links",
+    "Private packages/data/migration",
+    "Usage counters and unknown-outcome protection",
+    "Explicit participant consent and independent approval",
+    "Existing disabled worker schedule"
+  ],
+  "limitations": [
+    "Historical raw model output was not retained; the exact malformed field is unknown",
+    "No live provider replay or test of the new protocol was performed"
+  ]
+}
