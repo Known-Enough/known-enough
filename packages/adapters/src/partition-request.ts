@@ -11,3 +11,6 @@ export type { PartitionManagedOptions, PartitionManagedArchiveOptions } from './
 export type { PublicDraftAtomicItem } from './public-draft-ports.ts';
 
 export { sharedTestEmailHashes } from './partition-directory.ts';
+
+/** Native transaction constructor, server-only; does not expose a configured AWS client. */
+export { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';

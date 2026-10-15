@@ -76,7 +76,10 @@ export function genericCandidateCatalog(frame: KE.PublicDecisionFrame): GenericC
     if (!variable.required) unique.push(null);
     return unique;
   });
-  if (domains.some(values => values === null) || domains.reduce((count, values) => count * (values?.length ?? LIMIT + 1), 1) > LIMIT) return clarify();
+  const unbounded = domains.findIndex(values => values === null);
+  if (unbounded >= 0) return clarify(`Set a finite list or tighter limits for “${frame.variables[unbounded]!.label.slice(0, 120)}”. Each public choice needs a bounded domain, and the complete decision must have at most ${LIMIT} combinations.`);
+  const combinations = domains.reduce((count, values) => count * values!.length, 1);
+  if (combinations > LIMIT) return clarify(`These choices produce ${combinations} combinations (${domains.map(values => values!.length).join(' × ')}); the current limit is ${LIMIT}. Which one choice should we narrow? Keep your other options as they are.`);
   let candidates: KE.CandidateProposal['values'][] = [[]];
   for (let index = 0; index < domains.length; index++) candidates = candidates.flatMap(values => domains[index]!.map(value => value === null ? [...values] : [...values, { variableId: frame.variables[index]!.id, value }]));
   const definition = { ...frame, variables: frame.variables.map(variable => ({ ...variable, ownerParticipantId: null })) };

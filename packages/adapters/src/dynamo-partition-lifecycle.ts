@@ -202,6 +202,18 @@ export function createDynamoPartitionLifecycle(rawOptions: DynamoLifecycleOption
   const journalKey = (plan: LifecyclePlan) => ({ PK: `LIFECYCLE#${plan.opId}`, SK: 'JOURNAL' });
   const consentKey = (plan: LifecyclePlan, subject: string) => ({ PK: `CONSENT#${plan.opId}`, SK: `SUBJECT#${subject}` });
   const planKey = (plan: LifecyclePlan) => ({ PK: `LIFECYCLE#${plan.opId}`, SK: 'PLAN' });
+  async function retainedGate(principal: TrustedPrincipal | null) {
+      const subject = lifecycleSubject(principal); const io = partitionIO(limits); await activation.read(io);
+      const p = await read(resources.journal, policyKey, io); if (!p) fail('LIFECYCLE_POLICY_DENIED');
+      const key = { PK: `RETENTION#${subject}`, SK: 'STAMP' }; const raw = await read(resources.journal, key, io);
+      const stamp = decode(raw, key, RetentionStamp); const deadline = retentionDeadline(decode(p, policyKey, RetentionPolicy), stamp);
+      const accountKey = { PK: `ACCOUNT#${subject}`, SK: 'STATE' }; const account = await read(resources.partitions, accountKey, io);
+      if (!account) fail('LIFECYCLE_AUTHORITY_DENIED'); const parsed = row(account, accountKey);
+      if (parsed.kind !== 'ACCOUNT' || parsed.value.status !== 'APPROVED') fail('LIFECYCLE_AUTHORITY_DENIED');
+      if (clock() < Date.parse(stamp.lastActivityAt) || clock() >= deadline) fail('LIFECYCLE_EXPIRED');
+      await barrier([{ table: resources.journal, key, raw: raw! }, { table: resources.partitions, key: accountKey, raw: account }], p, io);
+      if (clock() >= deadline) fail('LIFECYCLE_EXPIRED'); return { receipt: { subject, policyRevision: stamp.policyRevision, expiresAt: new Date(deadline).toISOString() }, conditions: [check(resources.journal, policyKey, p), check(resources.journal, key, raw!)] };
+    }
   return {
     /** Operator-only publication; stores only sealed IDs/hashes, before asking each owner for consent. */
     async publishPlan(bytes: Buffer, expected: { planHash: string; opId: string }) {
@@ -253,19 +265,28 @@ export function createDynamoPartitionLifecycle(rawOptions: DynamoLifecycleOption
       const policyRaw = await read(resources.journal, policyKey, io); if (!policyRaw) fail('LIFECYCLE_POLICY_DENIED');
       await barrier(snapshot.refs, policyRaw, io); return { bytes, planHash: lifecycleHash(plan), opId: plan.opId };
     },
-    /** ID-only logical-use gate for future distributed jobs; absent/unapproved/expired stamps deny use. */
-    async assertRetained(principal: TrustedPrincipal | null) {
+    /** Current owner explicitly requests synthetic pilot processing; server time is the activity provenance. */
+    async acknowledgeSyntheticProcessing(principal: TrustedPrincipal | null) {
       const subject = lifecycleSubject(principal); const io = partitionIO(limits); await activation.read(io);
       const p = await read(resources.journal, policyKey, io); if (!p) fail('LIFECYCLE_POLICY_DENIED');
-      const key = { PK: `RETENTION#${subject}`, SK: 'STAMP' }; const raw = await read(resources.journal, key, io);
-      const stamp = decode(raw, key, RetentionStamp); const deadline = retentionDeadline(decode(p, policyKey, RetentionPolicy), stamp);
-      const accountKey = { PK: `ACCOUNT#${subject}`, SK: 'STATE' }; const account = await read(resources.partitions, accountKey, io);
-      if (!account) fail('LIFECYCLE_AUTHORITY_DENIED'); const parsed = row(account, accountKey);
-      if (parsed.kind !== 'ACCOUNT' || parsed.value.status !== 'APPROVED') fail('LIFECYCLE_AUTHORITY_DENIED');
-      if (clock() < Date.parse(stamp.lastActivityAt) || clock() >= deadline) fail('LIFECYCLE_EXPIRED');
-      await barrier([{ table: resources.journal, key, raw: raw! }, { table: resources.partitions, key: accountKey, raw: account }], p, io);
-      if (clock() >= deadline) fail('LIFECYCLE_EXPIRED'); return { subject, policyRevision: stamp.policyRevision, expiresAt: new Date(deadline).toISOString() };
+      const policy = decode(p, policyKey, RetentionPolicy);
+      if (!policy.enabled || policy.dataClass !== 'SYNTHETIC' || policy.realPersonPolicy !== 'UNAPPROVED') fail('LIFECYCLE_POLICY_DENIED');
+      const accountKey = { PK: `ACCOUNT#${subject}`, SK: 'STATE' }; const accountRaw = await read(resources.partitions, accountKey, io);
+      if (!accountRaw) fail('LIFECYCLE_AUTHORITY_DENIED'); const account = row(accountRaw, accountKey);
+      if (account.kind !== 'ACCOUNT' || account.value.subject !== subject || account.value.status !== 'APPROVED') fail('LIFECYCLE_AUTHORITY_DENIED');
+      const key = { PK: `RETENTION#${subject}`, SK: 'STAMP' }; const prior = await read(resources.journal, key, io);
+      const old = prior ? decode(prior, key, RetentionStamp) : null; const now = clock();
+      if (old && (old.dataClass !== 'SYNTHETIC' || Date.parse(old.lastActivityAt) > now)) fail('LIFECYCLE_POLICY_DENIED');
+      if (old && old.policyRevision === policy.revision && now < retentionDeadline(policy, old)) {
+        await barrier([{ table: resources.partitions, key: accountKey, raw: accountRaw }, { table: resources.journal, key, raw: prior! }], p, io); return;
+      }
+      const stamp = RetentionStamp.parse({ schemaVersion: 1, kind: 'RETENTION_STAMP', revision: (old?.revision ?? 0) + 1,
+        dataClass: 'SYNTHETIC', policyRevision: policy.revision, createdAt: old?.createdAt ?? new Date(now).toISOString(), lastActivityAt: new Date(now).toISOString() });
+      await write([check(resources.partitions, accountKey, accountRaw), check(resources.journal, policyKey, p), put(resources.journal, key, prior, item(key, stamp))], io);
     },
+    /** ID-only logical-use gate for future distributed jobs; absent/unapproved/expired stamps deny use. */
+    async assertRetained(principal: TrustedPrincipal | null) { return (await retainedGate(principal)).receipt; },
+    async retentionConditions(principal: TrustedPrincipal | null) { return (await retainedGate(principal)).conditions; },
     async exportOwn(principal: TrustedPrincipal | null) {
       const subject = lifecycleSubject(principal); const io = partitionIO(limits); await activation.read(io);
       const p = await read(resources.journal, policyKey, io); if (!p) fail('LIFECYCLE_POLICY_DENIED');

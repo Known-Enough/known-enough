@@ -1,7 +1,10 @@
+import { createPartitionOwnerRuntime } from './partition-owner-runtime.ts';
+import { partitionIO } from '@deal-table/adapters/partition-request';
+import { JOB_TARGET, type JobSnapshot, type PublicDraftCommit, type DurableJobStore, type PublicDraftFence, type PublicDraftEffect } from '@deal-table/adapters/durable-model-runtime';
 import { createServer, request as httpRequest, type Server } from 'node:http';
 import { createHash, createHmac } from 'node:crypto';
 import { afterEach, expect, it, vi } from 'vitest';
-import { TransactGetItemsCommand, type TransactWriteItem, type AttributeValue } from '@aws-sdk/client-dynamodb';
+import { TransactGetItemsCommand, TransactWriteItemsCommand, type TransactWriteItem, type AttributeValue } from '@aws-sdk/client-dynamodb';
 import { Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { KnownEnoughApplication, type TrustedPrincipal, type DecisionArchitectRequest, type DecisionArchitectureDraft } from '@deal-table/application';
 import { InMemoryRoomRepository } from '@deal-table/adapters';
@@ -1095,4 +1098,89 @@ it('serves a private-safe group member profile only to a current approved member
   expect((await a.get(`/groups/garden/members/${partitionMemberId('luca')}/profile`, 'omar')).status).toBe(404);
   f.change('GROUP#garden', value => { value.members = ['iris']; });
   expect((await a.get(path, 'omar')).status).toBe(404);
+});
+
+async function ownerRuntimeFixture(options: { invalid?: boolean; uncertain?: boolean; loseAck?: boolean; revoke?: boolean; unconfirmed?: boolean } = {}) {
+  const f = await fixture(); await seed(f);
+  const app = new KnownEnoughApplication({ repository: f.factory().forParticipant(actor()), clock: { now: () => '2026-10-07T15:00:00Z' }, ids: { next: () => 'owner-test' } });
+  for (const who of options.unconfirmed ? [] : ['iris', 'omar']) {
+    const application = new KnownEnoughApplication({ repository: f.factory().forParticipant(actor(who)), clock: { now: () => '2026-10-07T15:00:00Z' }, ids: { next: () => 'owner-test' } });
+    const own = await application.getOwnerSnapshot(actor(who), 'decision');
+    expect((await application.execute(actor(who), command(own, 'confirm-' + who))).ok).toBe(true);
+  }
+  const source = 'a'.repeat(40); let calls = 0, lost = false;
+  let state: JobSnapshot = { job: null, control: { schemaVersion: 1, revision: 1, enabled: true, sourceSha: source, active: [], slots: [] }, totals: { runs: 5, messages: 4, reservedTokens: 100, reservedCostMicros: 200 } };
+  const makeStore = (prepare: PublicDraftCommit): DurableJobStore<PublicDraftFence, PublicDraftEffect> => ({
+    read: async () => structuredClone(state), deliveries: async () => [],
+    commit: async (prior, next, fence, effect) => {
+      if (JSON.stringify(prior) !== JSON.stringify(state)) return false;
+      if (fence) { const prepared = await prepare(fence, effect); await f.transport.send(new TransactWriteItemsCommand({ TransactItems: prepared.items }), partitionIO()); }
+      state = structuredClone(next);
+      if (next.job?.phase === 'SUCCEEDED' && options.loseAck && !lost) { lost = true; throw new Error('lost ack'); }
+      return true;
+    },
+  });
+  const runtime = createPartitionOwnerRuntime({ ...target, sourceSha: source, groups: f.groups, decisions: f.transport,
+    clock: { now: () => '2026-10-07T15:00:00Z' }, ids: { next: () => 'owner-test' },
+    retentionConditions: async () => [], acknowledgeSyntheticProcessing: async () => {}, assertRetained: async () => {}, prepareDecisionCommit: async transaction => structuredClone(transaction.input.TransactItems!),
+    store: makeStore, authority: async () => ({ table: JOB_TARGET.budget, key: { PK: 'AUTH', SK: 'STATE' }, attribute: 'version', revision: 1, payload: '{}' }),
+    transport: { send: async command => {
+      calls++; expect(JSON.stringify(command)).toContain('PRIVATE_OWNER_INPUT_CANARY'); expect(JSON.stringify(command)).not.toContain('emailHash');
+      if (options.revoke) f.change('ACCOUNT#iris', account => { account.status = 'DISABLED'; });
+      if (options.uncertain) throw new Error('PRIVATE_PROVIDER_CANARY');
+      return { $metadata: {}, metrics: { latencyMs: 1 }, stopReason: 'tool_use', usage: { inputTokens: 20, outputTokens: 30, totalTokens: 50 },
+        output: { message: { role: 'assistant', content: [{ toolUse: { toolUseId: 'owner-tool', name: 'ke_owner_output', input: options.invalid ? { unknown: 'PRIVATE_OUTPUT_CANARY' } : {
+          sourceSummary: 'PRIVATE_OUTPUT_CANARY', proposedConstraints: [], unsupportedConditions: [] } } }] } } };
+    } },
+  });
+  const input = { principal: actor(), decisionId: 'decision', requestId: 'owned-owner-request', acceptedSynthetic: true, messages: [{ role: 'owner', text: 'PRIVATE_OWNER_INPUT_CANARY' }] };
+  return { f, app, runtime, input, calls: () => calls, state: () => state };
+}
+it('native owner interpretation saves only its strict owner draft atomically with usage, including lost acknowledgment recovery without another call', async () => {
+  const h = await ownerRuntimeFixture({ loseAck: true }); const a = await api(h.f, { ownerInterpretation: h.runtime });
+  const first = await a.post('/decisions/decision/owner-conversation/draft', { requestId: h.input.requestId, processingConsent: 'SYNTHETIC_TEST', messages: h.input.messages });
+  expect(first.status).toBe(200); const value = await first.json(); expect(value.interpretation.state).toBe('SAVED');
+  expect(h.state().job).toMatchObject({ phase: 'SUCCEEDED', usage: { inputTokens: 20, outputTokens: 30 } });
+  expect(h.state().totals).toEqual({ runs: 5, messages: 4, reservedTokens: 18532, reservedCostMicros: 10200 });
+  const again = await a.post('/decisions/decision/owner-conversation/draft', { requestId: h.input.requestId, processingConsent: 'SYNTHETIC_TEST', messages: h.input.messages });
+  expect((await again.json()).draft).toEqual(value.draft); expect(h.calls()).toBe(1);
+  const check = await a.get('/decisions/decision/owner-conversation/requests/' + h.input.requestId); expect((await check.json()).interpretation.state).toBe('SAVED');
+  expect(JSON.stringify(h.state())).not.toMatch(/PRIVATE_/); expect(JSON.stringify(h.f.current())).not.toMatch(/PRIVATE_OWNER_INPUT_CANARY|PRIVATE_OUTPUT_CANARY/);
+  const other = await a.get('/decisions/decision/me', 'omar'); expect(await other.text()).not.toContain(value.draft.draftId);
+  expect((await a.post('/decisions/decision/owner-conversation/draft', { requestId: h.input.requestId, processingConsent: 'SYNTHETIC_TEST', messages: [{ role: 'owner', text: 'Changed body' }] })).status).toBe(409); expect(h.calls()).toBe(1);
+});
+it('native owner input requires independent frame confirmations and rejects spoofed or oversized input before dispatch', async () => {
+  const h = await ownerRuntimeFixture({ unconfirmed: true }); const a = await api(h.f, { ownerInterpretation: h.runtime });
+  const valid = { requestId: h.input.requestId, processingConsent: 'SYNTHETIC_TEST', messages: h.input.messages };
+  const blocked = await a.post('/decisions/decision/owner-conversation/draft', valid); expect((await blocked.json()).interpretationFailure).toBe('FRAME_NOT_CONFIRMED');
+  expect((await a.post('/decisions/decision/owner-conversation/draft', { ...valid, subject: 'omar' })).status).toBe(422);
+  expect((await a.post('/decisions/decision/owner-conversation/draft', { ...valid, messages: [{ role: 'owner', text: 'x'.repeat(2001) }] })).status).toBe(422);
+  expect(h.calls()).toBe(0); expect(h.state().totals.reservedTokens).toBe(100);
+});
+it.each(['invalid', 'uncertain', 'revoke'] as const)('native owner %s output never becomes saved authority and cannot be replayed', async kind => {
+  const h = await ownerRuntimeFixture({ [kind]: true });
+  try { await h.runtime({ ...h.input, io: partitionIO({ timeoutMs: 27000 }) }); } catch { /* Admission revocation fails closed. */ }
+  expect(h.calls()).toBe(1); expect(h.state().totals.reservedTokens).toBe(18532);
+  expect(Object.values(h.f.current().owners).every(owner => owner.draft === null)).toBe(true);
+  if (kind !== 'revoke') {
+    expect(h.state().job).toMatchObject({ phase: 'DEAD', reason: kind === 'uncertain' ? 'PROVIDER_UNCONFIRMED' : 'INVALID_OUTPUT' });
+    const result = await h.runtime({ ...h.input, io: partitionIO({ timeoutMs: 27000 }) }); expect(result.state).toBe(kind === 'uncertain' ? 'UNKNOWN' : 'FAILED'); expect(h.calls()).toBe(1);
+  }
+  expect(JSON.stringify(h.state())).not.toMatch(/PRIVATE_/);
+});
+
+it('an owned not-yet-submitted interpretation closes with a fenced tombstone that prevents a late model dispatch', async () => {
+  const h = await ownerRuntimeFixture(); const a = await api(h.f, { ownerInterpretation: h.runtime });
+  const status = await a.get('/decisions/decision/owner-conversation/requests/' + h.input.requestId);
+  expect((await status.json()).interpretation).toEqual({ state: 'NOT_SUBMITTED', canRelease: true, revision: 0 });
+  const closed = await a.post('/decisions/decision/owner-conversation/requests/' + h.input.requestId + '/close', { revision: 0 });
+  expect((await closed.json()).interpretation.state).toBe('FAILED'); expect(h.state().job).toMatchObject({ phase: 'DEAD', reason: 'CANCELLED', attempts: 0, usage: null });
+  expect(h.state().totals.reservedTokens).toBe(100); expect(h.state().control.active).toEqual([]);
+  await expect(h.runtime({ ...h.input, io: partitionIO() })).rejects.toThrow('STALE_CONTEXT'); expect(h.calls()).toBe(0);
+});
+it('closing an uncertain owner provider outcome is refused and keeps its reservation and slot', async () => {
+  const h = await ownerRuntimeFixture({ uncertain: true }); await h.runtime({ ...h.input, io: partitionIO() });
+  const before = structuredClone(h.state()); const a = await api(h.f, { ownerInterpretation: h.runtime });
+  const result = await a.post('/decisions/decision/owner-conversation/requests/' + h.input.requestId + '/close', { revision: h.state().job!.revision });
+  expect((await result.json()).interpretationFailure).toBe('REQUEST_UNKNOWN'); expect(h.state()).toEqual(before); expect(h.calls()).toBe(1);
 });

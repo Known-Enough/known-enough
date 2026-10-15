@@ -1,3 +1,4 @@
+import { createManagedPartitionOwnerRuntime } from './partition-owner-runtime.ts';
 import { createManagedDraftRequestRecovery } from './partition-draft-recovery.ts';
 import { createManagedPartitionDraftRuntime } from './partition-draft-runtime.ts';
 import type { IncomingMessage } from 'node:http';
@@ -92,6 +93,9 @@ export function createPartitionRuntime(options: PartitionRuntimeOptions) {
     legacyPublicDecision: driver.legacyPublicDecision,
     ...(draftArchitect ? { draftArchitect } : jobs ? { draftArchitect: createManagedPartitionDraftRuntime({ sourceSha: jobs.sourceSha, prepareGroupCommit: driver.prepareGroupCommit }) } : {}),
     ...(enqueue ? { requestNegotiation: enqueue } : {}),
+    ...(jobs && service ? { ownerInterpretation: createManagedPartitionOwnerRuntime({ sourceSha: jobs.sourceSha, groups: driver.groups, decisions: driver.decisions,
+      decisionArn: driver.decisionArn, partitionArn: driver.partitionArn, clock, ids, prepareDecisionCommit: driver.prepareDecisionCommit,
+      assertRetained: principal => service.assertRetained(principal), acknowledgeSyntheticProcessing: principal => service.acknowledgeSyntheticProcessing(principal), retentionConditions: principal => service.retentionConditions(principal) }) } : {}),
     ...(jobs ? { draftRequest: createManagedDraftRequestRecovery({ sourceSha: jobs.sourceSha, prepareGroupCommit: driver.prepareGroupCommit }) } : {}),
     registrationProfile: async (request, signal) => {
       let response: Response | undefined;

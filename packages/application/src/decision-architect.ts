@@ -7,6 +7,10 @@ export interface DecisionArchitectParticipant {
   displayName: string;
 }
 
+export interface PublicDraftFollowUp {
+  previousFrame: KETypes.PublicDecisionFrame;
+  answers: { question: string; answer: string }[];
+}
 export interface DecisionArchitectRequest {
   draftId: string;
   revision: number;
@@ -17,6 +21,7 @@ export interface DecisionArchitectRequest {
   publicVariables?: readonly KETypes.PublicDecisionVariable[];
   /** Explicit general-draft mode: propose new bounded public option labels for participant review. */
   generateOptions?: boolean;
+  followUp?: PublicDraftFollowUp;
 }
 
 export interface DecisionArchitectModelInput {
@@ -26,6 +31,7 @@ export interface DecisionArchitectModelInput {
   publicVariables?: readonly KETypes.PublicDecisionVariable[];
   /** Explicit general-draft mode: propose new bounded public option labels for participant review. */
   generateOptions?: boolean;
+  followUp?: PublicDraftFollowUp;
 }
 
 /** A model port is injected by the caller. Raw output is always treated as untrusted. */
@@ -160,6 +166,10 @@ export class DecisionArchitect {
       || request.participants.length < 1 || request.participants.length > 20
       || !Array.isArray(request.allowedOptions) || request.allowedOptions.length > MAX_OPTIONS) fail('INVALID_COMMAND');
 
+    if (request.followUp && (!KE.PublicDecisionFrame.safeParse(request.followUp.previousFrame).success
+      || !Array.isArray(request.followUp.answers) || request.followUp.answers.length > 36
+      || request.followUp.answers.some(item => typeof item.question !== 'string' || !item.question || item.question.length > 500
+        || typeof item.answer !== 'string' || !item.answer.trim() || item.answer.length > 500))) fail('INVALID_COMMAND');
     const participants = request.participants.map(person => ({ id: person?.id, displayName: person?.displayName }));
     const participantIds = participants.map(person => person.id);
     if (participants.some(person => !Id.safeParse(person.id).success || typeof person.displayName !== 'string'
@@ -202,6 +212,7 @@ export class DecisionArchitect {
           objective: request.objective.trim(),
           participants: participants as DecisionArchitectParticipant[],
           allowedOptions,
+          ...(request.followUp ? { followUp: structuredClone(request.followUp) } : {}),
           ...(request.generateOptions === true ? { generateOptions: true } : {}),
           ...(publicVariables ? { publicVariables: structuredClone(publicVariables) } : {}),
         }, invocation);

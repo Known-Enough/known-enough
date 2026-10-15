@@ -1,0 +1,250 @@
+{
+  "utc": "2026-10-15T07:03:22.424510+00:00",
+  "result": "LOCAL_CHECKS_PASS_PUBLICATION_PENDING",
+  "checkedBase": "33d9130bd3b797e89b09b5ba05f9fd00323b6322",
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/fix01-control.yml",
+      "sha256": "aa495dd99531a92db368b0ef82e34d25a3e34f54f06b544b2654584df058700e"
+    },
+    {
+      "path": ".github/workflows/fix01-proof.yml",
+      "sha256": "28c8fd6c21b316e5a12098107b1d97ddb1f7e0274c3be7df96ee7c185dd56ec2"
+    },
+    {
+      "path": "apps/api/src/group-decisions.ts",
+      "sha256": "efc06de8daddea6864b7e6fc998d593130c429831da81f7e127b69c2c5a8adf9"
+    },
+    {
+      "path": "apps/api/src/http-core.ts",
+      "sha256": "37570d41cdff1bf3237f3761317e7818a4ace213562b13e6f737db37fb0f06d1"
+    },
+    {
+      "path": "apps/api/src/partition-draft-runtime.test.ts",
+      "sha256": "cc655f206b23bfe7ba22a8519ec4f59fbc462da327f136b8673d2949182b9079"
+    },
+    {
+      "path": "apps/api/src/partition-draft-runtime.ts",
+      "sha256": "ce51f2a3be47358ad3d72b9ee1c5152ad3510242954ee4344426402e1bc629d2"
+    },
+    {
+      "path": "apps/api/src/partition-http.test.ts",
+      "sha256": "a478af71d3f8a3a6b00fa19b902b9b16e1465b72f26c1ca6a3bc9c0bc3339e8a"
+    },
+    {
+      "path": "apps/api/src/partition-http.ts",
+      "sha256": "dfe847aad9f1741e805f3e19c9f94ef7341bf9fa5a6067f9b5a107440ea0da4a"
+    },
+    {
+      "path": "apps/api/src/partition-owner-runtime.ts",
+      "sha256": "8e259408eb32ec7c538be6815992b2997c63773524bbdab68590e04ecd930d63"
+    },
+    {
+      "path": "apps/api/src/partition-runtime.test.ts",
+      "sha256": "b265d68fecd585018e1dc550ace3d297151fdf18e661210ad8372565100f4c34"
+    },
+    {
+      "path": "apps/api/src/partition-runtime.ts",
+      "sha256": "0c70eff23ac067ecabe44467de5301d41cc62d9978c1548d99277ac3ee31a030"
+    },
+    {
+      "path": "apps/web/src/connected-app.tsx",
+      "sha256": "5f94a83abb4bccaafb43ee9698c0566e6fff7ba9f4f1161c3a0003cbcb48d07a"
+    },
+    {
+      "path": "apps/web/src/connected-decision.tsx",
+      "sha256": "9423519e2f8de6a291973838cdea97c6be5bcde3cee764650fd6abe47a7868e1"
+    },
+    {
+      "path": "apps/web/src/draft-request-state.ts",
+      "sha256": "db98cb3a6c9d23ea08364f95e88b2a1c1d452fce316634767ba231da65aa39ee"
+    },
+    {
+      "path": "apps/web/src/group-decisions.tsx",
+      "sha256": "f04c1ce72d1b7b239bcfcd8299eaeb8e8ea56484c139335de35d651b88c14405"
+    },
+    {
+      "path": "infra/operations/access-profiles.json",
+      "sha256": "5155056dad751e09cf455c6ed7c914c6e9e860687635bb128c6cc07d93ff773f"
+    },
+    {
+      "path": "infra/operations/access-setup.json",
+      "sha256": "92fa229cd3b072d6e6a0c570823eb948f4e6c349828ad5cbee5ae33c8f07c8c8"
+    },
+    {
+      "path": "infra/operations/retention-setup.json",
+      "sha256": "9286bc75d2a50a24f5e7be83b8c9e4a76befdc2677406e722af33f780e5fc7c9"
+    },
+    {
+      "path": "packages/adapters/src/bedrock-models.ts",
+      "sha256": "e79907798f59b2a679bef9a02a517c0aaf998c9a489018c4b65dfb0ca5246687"
+    },
+    {
+      "path": "packages/adapters/src/durable-model-jobs.ts",
+      "sha256": "756f2146c92c3a0a4093ed59a8b112d9a864c7a7ede788e1c3841503fef4fdb1"
+    },
+    {
+      "path": "packages/adapters/src/dynamo-model-jobs.test.ts",
+      "sha256": "98a07e2398e674ca280f92fe9975d78ea134d4bfbb7e629f52b027e9081ea025"
+    },
+    {
+      "path": "packages/adapters/src/dynamo-model-jobs.ts",
+      "sha256": "ae66d2836f29421694c32dec1343f28c222af7266ddf2fc0c0f52790b4955bf6"
+    },
+    {
+      "path": "packages/adapters/src/dynamo-partition-lifecycle.test.ts",
+      "sha256": "bac93c58f4d760b61c418dbf43a8e540e9ee89fabc74e1d244371666dbbfa8c9"
+    },
+    {
+      "path": "packages/adapters/src/dynamo-partition-lifecycle.ts",
+      "sha256": "9e9c8dcfe115c7be6487f679102249b7e9cf468cf63fec36a8fa1e409f0e9585"
+    },
+    {
+      "path": "packages/adapters/src/generic-candidates.ts",
+      "sha256": "fd3c649a377c7cc8582d65e31edf4faa312d1529126c951f6cd01f0a9d2ee81b"
+    },
+    {
+      "path": "packages/adapters/src/partition-group-session.test.ts",
+      "sha256": "f94895dd199d0930a3946b1d41fbb75027392572a24a8e856973ee04a4056cfc"
+    },
+    {
+      "path": "packages/adapters/src/partition-group-session.ts",
+      "sha256": "c930e854b5563683a7699e42befd4e17d99ba6b55cbb52a46a324044f54609ab"
+    },
+    {
+      "path": "packages/adapters/src/partition-managed.ts",
+      "sha256": "16fa0df40aaa5724c03081d39b4b7681308437043bdd300b93cde149fc03047f"
+    },
+    {
+      "path": "packages/adapters/src/partition-request.ts",
+      "sha256": "b963461916a6f0257085a6c60f19f6e791c16ccda81d152f6d52dc7beda8353a"
+    },
+    {
+      "path": "packages/application/src/decision-architect.ts",
+      "sha256": "67c3eaddb6b3b43251f68d7d5bc0bc85a9fee7e5f9f14955b302f349d498c5ce"
+    },
+    {
+      "path": "packages/application/src/owner-conversation.ts",
+      "sha256": "6c247bd32ac6c036e0849db818f535e88f6539ce771525a0c8b3c2dd013efbda"
+    },
+    {
+      "path": "packages/contracts/src/groups.ts",
+      "sha256": "3999e4895bcd610229550cac05fcd7914dd7fcb412ea3d3722feddac83d6f0e7"
+    },
+    {
+      "path": "scripts/fix01/enable.py",
+      "sha256": "bc341304ea005173166b105123ffba8fc9fb25093a702da3892c67d4d4429152"
+    },
+    {
+      "path": "scripts/fix01/enable.test.py",
+      "sha256": "853282a12344b5363eaf64e0a4a1332c2e4382cb5be13bd2dd3b3a4598e712cf"
+    },
+    {
+      "path": "scripts/fix01/original-usage.py",
+      "sha256": "13048218346ba439004d52194754e05c282b6e0b00d281ea281ad2da2e3570b6"
+    },
+    {
+      "path": "scripts/fix01/original-usage.test.py",
+      "sha256": "cd3a915839ed0d8d33f19bb63c47fd979d9dca1932da42b3e0e28395246a8cbe"
+    },
+    {
+      "path": "scripts/fix01/permissions.py",
+      "sha256": "594f38be3bb27cff5a734593d1aa0d8a5327ebd160d266e07d36c6aa600dc055"
+    },
+    {
+      "path": "scripts/fix01/prove.mjs",
+      "sha256": "3881c1d284e64479d6b887ffedcfc248fe95fdaa0ac6c5fb1f53a82a0850c0d7"
+    },
+    {
+      "path": "scripts/fix01/retention.py",
+      "sha256": "913eb26accb04b122a80ba45ed661f9632fcb5a3eb2a4541233c257a9d2b8e07"
+    },
+    {
+      "path": "scripts/fix01/retention.test.py",
+      "sha256": "cf2d8a1d6479a778c2a7d6def49a92f428b2252c05f44c3972d447c11f376efa"
+    },
+    {
+      "path": "scripts/fix01/usage.py",
+      "sha256": "3915597c390ac74d8c6e445cd6bd26dbca9c0e527117aae7c633892a333aa600"
+    },
+    {
+      "path": "scripts/fix01/usage.test.py",
+      "sha256": "85f57cf71181c6acf3ce89dcaf111b67d36f15bb0d22fb8e5df6a86b3ba3bac1"
+    },
+    {
+      "path": "scripts/operations/retention-setup.mjs",
+      "sha256": "9fb8e53b367e3b4867cc2d622026fc18403bbd87ee508eab829210692b901ea7"
+    },
+    {
+      "path": "tests/e2e/ke14-connected.spec.ts",
+      "sha256": "553ed1a41b6678e00d5f1d905386502ff53e62ffffed3b37c0bc31420c1468b4"
+    },
+    {
+      "path": "tests/e2e/np-clarity.spec.ts",
+      "sha256": "fd2389b27ffbe514736176c862a5addf44f46394b4ab4c0db6459d37ae83cbeb"
+    },
+    {
+      "path": "tests/e2e/np-qualification.spec.ts",
+      "sha256": "f1c94bce638b4ce27a067b401d5fbf259ea2925ab46e3a38ea534b13c10fb00a"
+    },
+    {
+      "path": "tests/e2e/ops03-background.spec.ts",
+      "sha256": "eae88212df8ce806ab6244ce040a8edf1e0548802652eacd5bf0594ed3bd3820"
+    },
+    {
+      "path": "tests/evaluations/assessment-model.ts",
+      "sha256": "b5b05623c7d0a99f726c75c833846faf4e1e5d77fd26b540df18db8fe085f156"
+    }
+  ],
+  "manifestSha256": "f3174f262073b0526a870013138be56b68cb5d11a53efb2ac7a5a3f546bdd193",
+  "checks": {
+    "completePinnedCheck": {
+      "exitCode": 0,
+      "unitPassed": 1640,
+      "unitOptionalSkipped": 2,
+      "browserPassed": 92,
+      "hostedPreviewPassed": 1,
+      "referenceChecks": 7,
+      "planningChecks": 15,
+      "boundaryReferences": 553,
+      "lint": "PASS",
+      "typecheck": "PASS",
+      "build": "PASS",
+      "log": "/tmp/fix01-usability/full-check/final-verified.log"
+    },
+    "focusedClarityBrowserPassed": 17,
+    "operationalNodePassed": 25,
+    "enablePythonPassed": 6,
+    "retentionPythonPassed": 5,
+    "terminalCleanupPythonPassed": 4,
+    "originalCleanupPythonPassed": 3,
+    "latestProofHelperLintAndSyntax": "PASS",
+    "workflowYaml": "PASS",
+    "timeoutOrAssertionRelaxations": 0
+  },
+  "priorFailures": [
+    "Default unit concurrency exceeded existing 5-second tests; isolated suites passed; final complete run used VITEST_MAX_WORKERS=4.",
+    "An earlier browser run exceeded 30 seconds during four-person context teardown; finished contexts now close after their original assertions.",
+    "An earlier polling test used a hidden button as a refresh-completion marker; it now awaits the enabled Refresh decision control."
+  ],
+  "readOnlyEvidence": [
+    {
+      "run": "https://github.com/Known-Enough/known-enough/actions/runs/38690112752",
+      "result": "RUNTIME_CONTROL_READBACK_PASS",
+      "writes": 0,
+      "providerCalls": 0
+    },
+    {
+      "run": "https://github.com/Known-Enough/known-enough/actions/runs/38690529209",
+      "result": "API_POLICY_READBACK_PASS",
+      "writes": 0,
+      "providerCalls": 0
+    }
+  ],
+  "publication": "NOT_EXECUTED",
+  "newLiveModelCalls": 0,
+  "newLiveSignupCalls": 0,
+  "missingCapability": "API transactional PutItem on RETENTION#*; named narrow administrator command prepared; installed readback pending",
+  "originalSyntheticArchive": "SEPARATELY_PENDING",
+  "humanEarlierDecisionVisibility": "PASS; does not establish acceptance of this continuation"
+}

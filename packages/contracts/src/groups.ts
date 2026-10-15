@@ -24,7 +24,8 @@ export const Account = z.object({ subject: id, emailHash: z.string().regex(/^[a-
 export const GroupDraft = z.object({ id, bodyHash: z.string().regex(/^[a-f0-9]{64}$/),
   revision: z.number().int().positive(), groupVersion: z.number().int().positive(),
   frame: PublicDecisionFrame, clarificationQuestions: z.array(z.string().min(1).max(500)).max(12),
-  createdDecisionId: id.nullable() }).strict();
+  createdDecisionId: id.nullable(),
+  publicClarifications: z.array(z.object({ question: z.string().min(1).max(500), answer: z.string().trim().min(1).max(500) }).strict()).max(36).optional() }).strict();
 export type GroupDraft = z.infer<typeof GroupDraft>;
 export const Group = z.object({ id, name: text, organizer: id, version: z.number().int().positive(),
   drafts: z.array(GroupDraft).max(64).default([]),

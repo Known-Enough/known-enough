@@ -47,6 +47,8 @@ const prompts: Record<ModelJobKind, string> = {
     + 'When publicVariables is supplied, select every supplied variable ID exactly once in variableIds instead of returning variables. '
     + 'The server copies those exact public definitions; do not add variables, reinterpret units/options or select values. '
     + 'A draft may leave decision variable values unselected. Ask clarification questions only for unresolved public frame scope. '
+    + 'The engine can check at most 64 complete public combinations. Keep the product of public variable domain sizes at or below 64 (include one omitted value for each optional variable). ENUM has one value per option; ENUM_SET has 2^optionCount subsets. Use ENUM when choosing one option, and do not add speculative variables beyond the stated decision. Numeric/date/time domains need explicit IN/EQ or tight finite bounds. '
+    + 'Follow-up answers are cumulative public context: retain already supplied choices and bounds; do not ask for those details again. If a domain is still too large, identify that choice and its required bound in one concrete question. '
     + 'For an unsupported public objective with no finite verifiable domain, return a concise draft with one public clarification question asking for a finite supported scope. Do not invent proxy variables or rules for subjective happiness, external predictions or unlimited alternatives. For open scope return empty variables and rules; for supplied publicVariables retain exact variableIds. Keep description concise and do not elaborate hypothetical plans. '
     + 'Private budgets, dates, preferences and accessibility needs to collect later belong in participantInformationRequirements; '
     + 'their absence alone does not prevent drafting the public frame. Never invent their values. '
@@ -322,7 +324,7 @@ export function createBedrockModels(options: {
           throw new ModelRuntimeError('INVALID_INPUT');
       }
       return invoke('ARCHITECT', {
-        objective: input.objective, participants: input.participants.map(person => ({ id: person.id, displayName: person.displayName })),
+        objective: input.objective, ...(input.followUp ? { followUp: structuredClone(input.followUp) } : {}), participants: input.participants.map(person => ({ id: person.id, displayName: person.displayName })),
         allowedOptions: input.allowedOptions,
         ...(input.generateOptions === true ? { generateOptions: true } : {}),
         ...(publicVariables ? { publicVariables } : {}),

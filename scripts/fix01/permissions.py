@@ -1,5 +1,5 @@
 """Read installed API role policies; no simulation, secrets, model calls or writes."""
-import datetime,fnmatch,json,os,pathlib,re,subprocess
+import datetime,fnmatch,hashlib,json,os,pathlib,re,subprocess
 ACCOUNT='092954139775';ROLE='KnownEnoughStageApiRole';RESOURCE='arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-lite-v1:0'
 report={'utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'source':os.environ['EXPECTED_SOURCE'],'role':ROLE,'writes':0,'providerCalls':0,'denials':[],'documents':[]}
 def call(service,operation,*args):
@@ -14,7 +14,7 @@ def document(name,value):
   if isinstance(actions,str):actions=[actions]
   if isinstance(resources,str):resources=[resources]
   if any(fnmatch.fnmatchcase('bedrock:InvokeModel',action) for action in actions) and any(fnmatch.fnmatchcase(RESOURCE,resource) for resource in resources):statuses.append({'effect':statement.get('Effect'),'conditional':bool(statement.get('Condition'))})
- report['documents'].append({'policy':name,'novaLiteInvoke':statuses})
+ report['documents'].append({'policy':name,'sha256':hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',',':')).encode()).hexdigest(),'novaLiteInvoke':statuses})
 try:
  identity=call('sts','get-caller-identity')
  if not identity or identity['Account']!=ACCOUNT or not identity['Arn'].startswith('arn:aws:sts::'+ACCOUNT+':assumed-role/KnownEnoughGithubStagingInspector/'):raise ValueError('OWN_ROLE_TARGET_INVALID')

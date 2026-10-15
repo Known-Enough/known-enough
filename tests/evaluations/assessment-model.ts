@@ -6,9 +6,9 @@ export function clarificationTransport(): ConverseTransport {
   return { send: async (command, options) => {
     const result = await provider.send(command, options);
     if (command.input.toolConfig?.tools?.[0]?.toolSpec?.name !== 'ke_architect_output') return result;
-    const input = JSON.parse(command.input.messages![0]!.content![0]!.text!) as { objective: string };
+    const input = JSON.parse(command.input.messages![0]!.content![0]!.text!) as { objective: string; followUp?: { answers: unknown[] } };
     const tool = result.output!.message!.content![0]!.toolUse!;
-    tool.input = { ...(tool.input as object), clarificationQuestions: input.objective.includes('Public clarification answers:') ? [] : ['Should this meetup be indoors or outdoors?'] };
+    tool.input = { ...(tool.input as object), clarificationQuestions: (input.objective.includes('Public clarification answers:') || !!input.followUp?.answers.length) ? [] : ['Should this meetup be indoors or outdoors?'] };
     return result;
   } };
 }

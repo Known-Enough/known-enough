@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { DecisionArchitect } from '@deal-table/application';
+import { DecisionArchitect, type ModelFailureDiagnostic } from '@deal-table/application';
 import { createBedrockModels, type ConverseTransport } from '@deal-table/adapters';
 import { DurableModelJobs, DurableJobError, createManagedPublicDraftPorts,
   type PublicDraftAtomicItem, type DurableJobStore, type JobReference, type JobPin, type PublicDraftCommit, type PublicDraftFence, type PublicDraftEffect } from '@deal-table/adapters/durable-model-runtime';
@@ -8,7 +8,7 @@ import type { PartitionFence, PartitionIOContext } from '@deal-table/adapters/pa
 import { stableDeliveryId } from './durable-enqueue.ts';
 /** Public architecture only. No decision/private snapshots or caller-selected provider capabilities. */
 export function createPartitionDraftRuntime(options: {
-  diagnostic?: (value: { providerDispatched: boolean; providerAcknowledged: boolean; phase: string; reason: string | null }) => void;
+  diagnostic?: (value: { providerDispatched: boolean; providerAcknowledged: boolean; phase: string; reason: string | null; rejectionStage?: ModelFailureDiagnostic['stage'] }) => void;
   sourceSha: string; now?: () => number; transport: ConverseTransport;
   store: (commit: PublicDraftCommit) => DurableJobStore<PublicDraftFence, PublicDraftEffect>;
   authority: () => Promise<JobPin>;
@@ -34,7 +34,7 @@ export function createPartitionDraftRuntime(options: {
       sourceSha: options.sourceSha, expiresAt: now() + 300000, requestKey: scope.requestKey };
     if (ref.kind !== 'ARCHITECT' || ref.subject !== subject || ref.decisionId !== scope.groupId
       || ref.reasoningJobId !== request.draftId || ref.authorityHash !== scope.bodyHash || ref.requestKey !== scope.requestKey || ref.sourceSha !== options.sourceSha) throw new PartitionDraftFailure('REQUEST_UNKNOWN');
-    let usage: { inputTokens: number; outputTokens: number } | null = null; let providerFailed = false; let providerAcknowledged = false; let providerDispatched = false;
+    let usage: { inputTokens: number; outputTokens: number } | null = null; let providerFailed = false; let providerAcknowledged = false; let providerDispatched = false; let rejectionStage: ModelFailureDiagnostic['stage'] | undefined;
     const capture = async (output?: unknown): Promise<PublicDraftFence> => {
       const native = await scope.fence(output); const fence: PublicDraftFence = { kind: 'PUBLIC_DRAFT', reference: structuredClone(ref) };
       captures.set(fence, native); return fence;
@@ -53,7 +53,7 @@ export function createPartitionDraftRuntime(options: {
               if (typeof inputTokens === 'number' && typeof outputTokens === 'number' && [inputTokens, outputTokens].every(value => Number.isSafeInteger(value) && value >= 0 && value <= 1000000)) usage = { inputTokens, outputTokens };
               return response;
             } }, enabled: () => !signal.aborted && !io.signal.aborted,
-            diagnostic: value => { if (value.kind === 'ARCHITECT' && value.stage.startsWith('PROVIDER')) { providerFailed = true; if (value.stage !== 'PROVIDER') providerAcknowledged = true; } },
+            diagnostic: value => { if (value.kind === 'ARCHITECT') rejectionStage = value.stage; if (value.kind === 'ARCHITECT' && value.stage.startsWith('PROVIDER')) { providerFailed = true; if (value.stage !== 'PROVIDER') providerAcknowledged = true; } },
             usage: value => { if (value.kind !== 'ARCHITECT') throw new DurableJobError('INVALID_OUTPUT'); usage = { inputTokens: value.inputTokens, outputTokens: value.outputTokens }; },
             jobs: { run: async (kind, invocation, task) => {
               if (kind !== 'ARCHITECT' || io.signal.aborted) throw new DurableJobError('DISABLED');
@@ -61,7 +61,7 @@ export function createPartitionDraftRuntime(options: {
               const result = await task(AbortSignal.any([signal, io.signal]));
               await invocation.assertCurrent(); return result;
             } } });
-          const architect = new DecisionArchitect(models.architect, randomUUID, now, () => !signal.aborted && !io.signal.aborted);
+          const architect = new DecisionArchitect(models.architect, randomUUID, now, () => !signal.aborted && !io.signal.aborted, value => { rejectionStage = value.stage; });
           let output: unknown;
           try { output = await architect.draft(subject, input); }
           catch (error) { if (!usage) { if (!providerDispatched || providerAcknowledged) throw new DurableJobError('PROVIDER_REJECTED'); throw error; } output = null; } // Acknowledged invalid output is quiescent; usage stays charged.
@@ -76,7 +76,7 @@ export function createPartitionDraftRuntime(options: {
     try { await engine.enqueue(ref); await engine.process({ jobId: id }); }
     catch { /* Read the single durable outcome; never repeat an ambiguous provider dispatch. */ }
     const after = await store.read(id);
-    if (after.job?.phase !== 'SUCCEEDED') { try { options.diagnostic?.({ providerDispatched, providerAcknowledged, phase: after.job?.phase ?? 'MISSING', reason: after.job?.reason ?? null }); } catch { /* Diagnostics cannot change dispatch or disposition. */ } }
+    if (after.job?.phase !== 'SUCCEEDED') { try { options.diagnostic?.({ providerDispatched, providerAcknowledged, phase: after.job?.phase ?? 'MISSING', reason: after.job?.reason ?? null, ...(rejectionStage ? { rejectionStage } : {}) }); } catch { /* Diagnostics cannot change dispatch or disposition. */ } }
     if (after.job?.phase === 'SUCCEEDED') return undefined; // The same atomic transaction saved the strictly checked native draft.
     if (after.job?.phase === 'DEAD') throw new PartitionDraftFailure(after.job.reason === 'INVALID_OUTPUT' ? 'INVALID_MODEL_OUTPUT'
       : after.job.reason === 'PROVIDER_UNCONFIRMED' ? providerFailed ? 'PROVIDER_FAILED' : 'REQUEST_UNKNOWN' : providerFailed && providerAcknowledged ? 'PROVIDER_FAILED' : 'AI_UNAVAILABLE');

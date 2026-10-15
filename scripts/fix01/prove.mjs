@@ -75,8 +75,11 @@ try {
 
  await page.getByRole('button',{name:'Start a decision',exact:true}).click();
  await page.getByLabel('Tell me what you want to decide').fill('Choose a synthetic garden workday. There are two public choices: activity is planting or watering; time is morning or afternoon. All named group members must approve. There are no extra public constraints, real availability, private needs, or unresolved public questions. Generate these two enum choices for review.');
+ const publicRequestUrl='https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com/groups/'+fixture.groupId+'/drafts';
+ const trackPublic=async route=>{try{if(route.request().method()==='POST'){const key=route.request().postDataJSON().idempotencyKey;if(typeof key!=='string'||!/^[A-Za-z0-9_-]{1,80}$/.test(key))throw new Error('OWN_NONCE_INVALID');fixture.draftRequestKey=key;await writeFile(join(directory,'owned-fixtures-private.json'),JSON.stringify(state),{mode:0o600});}await route.continue();}catch{report.requestTracking='PUBLIC_NONCE_SAVE_ABORTED_BEFORE_DISPATCH';await route.abort('failed');}};
+ await page.route(publicRequestUrl,trackPublic);
  const draft=page.waitForResponse(r=>new URL(r.url()).pathname===`/groups/${fixture.groupId}/drafts`&&r.request().method()==='POST',{timeout:25000});
- await page.getByRole('button',{name:'Continue with AI',exact:true}).click();const draftResponse=await draft;
+ await page.getByRole('button',{name:'Continue with AI',exact:true}).click();const draftResponse=await draft;await page.unroute(publicRequestUrl,trackPublic);
  const body=await draftResponse.json().catch(()=>({}));fixture.draftRequestKey=draftResponse.request().postDataJSON().idempotencyKey;await writeFile(join(directory,'owned-fixtures-private.json'),JSON.stringify(state),{mode:0o600});
  const code=typeof body.error?.code==='string'&&/^[A-Z_]{1,80}$/.test(body.error.code)?body.error.code:'UNCLASSIFIED';
  report.draft={status:draftResponse.status(),code,reference:typeof body.requestId==='string'&&/^[A-Za-z0-9_-]{1,80}$/.test(body.requestId)?body.requestId:'UNAVAILABLE',observedAt:new Date().toISOString()};
@@ -94,14 +97,42 @@ try {
  if(restored.status!==200||!restoredBody.group?.decisions?.some(item=>item.id===fixture.decisionId&&item.current))throw new Error('PRIMARY_DECISION_RELOAD_FAILED');
  if(await page.locator('body').innerText().then(text=>text.includes('Check your account and organizer access')))throw new Error('MISLEADING_ACCESS_COPY');
  const memberContext=await browser.newContext();await memberContext.addInitScript(session=>globalThis.sessionStorage.setItem('known-enough-cognito-session',JSON.stringify(session)),{accessToken:outsider.accessToken,kind:'participant',expiresAt:Date.now()+300000});
- const memberPage=await memberContext.newPage();await memberPage.goto(config.allowedOrigin+'/?group='+fixture.groupId,{waitUntil:'domcontentloaded'});await memberPage.getByRole('button',{name:'Open decision',exact:true}).click();await memberPage.getByRole('heading',{name:'Shared frame',exact:true}).waitFor();report.memberVisibility='PASS';await memberContext.close();
- report.reload='PASS';report.result='PRIMARY_PUBLIC_DRAFT_DECISION_PASS';
+ const memberPage=await memberContext.newPage();await memberPage.goto(config.allowedOrigin+'/?group='+fixture.groupId,{waitUntil:'domcontentloaded'});await memberPage.getByRole('button',{name:'Open decision',exact:true}).click();await memberPage.getByRole('heading',{name:'Shared frame',exact:true}).waitFor();report.memberVisibility='PASS';
+ await page.getByLabel('I reviewed this frame version, its options and public rules.').check();
+ await page.getByRole('button',{name:'Confirm shared frame',exact:true}).click();
+ await page.getByRole('button',{name:'Confirm shared frame',exact:true}).waitFor({state:'detached'});
+ // The other participant must independently review the fresh version.
+ await memberPage.getByRole('button',{name:'Refresh decision',exact:true}).click();
+ await memberPage.getByLabel('I reviewed this frame version, its options and public rules.').check();
+ await memberPage.getByRole('button',{name:'Confirm shared frame',exact:true}).click();
+ await memberPage.getByRole('button',{name:'Confirm shared frame',exact:true}).waitFor({state:'detached'});
+ await page.getByRole('button',{name:'Refresh decision',exact:true}).click();
+ await page.getByRole('heading',{name:'Your private conditions',exact:true}).waitFor();report.frameConfirmation='PASS';
+ const variable=body.draft.frame.variables.find(value=>value.type==='ENUM'&&value.required&&value.options.length);
+ if(!variable)throw new Error('OWN_PRIVATE_SCOPE_NOT_SUPPORTED');
+ const privateText='My hard limit: for '+variable.label+' I can accept only '+variable.options[0].label+'.';
+ await page.getByLabel('Explain your limits and preferences privately').fill(privateText);
+ await page.getByLabel('These are synthetic test conditions. I agree to their processing by Known Enough and its AI.').check();
+ const interpretation=page.waitForResponse(r=>new URL(r.url()).pathname===`/decisions/${fixture.decisionId}/owner-conversation/draft`&&r.request().method()==='POST',{timeout:28000});
+ const ownerRequestUrl='https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com/decisions/'+fixture.decisionId+'/owner-conversation/draft';
+ const trackOwner=async route=>{try{if(route.request().method()==='POST'){const key=route.request().postDataJSON().requestId;if(typeof key!=='string'||!/^[A-Za-z0-9_-]{1,80}$/.test(key))throw new Error('OWN_NONCE_INVALID');fixture.ownerRequestKey=key;await writeFile(join(directory,'owned-fixtures-private.json'),JSON.stringify(state),{mode:0o600});}await route.continue();}catch{report.requestTracking='OWNER_NONCE_SAVE_ABORTED_BEFORE_DISPATCH';await route.abort('failed');}};
+ await page.route(ownerRequestUrl,trackOwner);await page.getByRole('button',{name:'Interpret my conditions',exact:true}).click();const interpreted=await interpretation;await page.unroute(ownerRequestUrl,trackOwner);
+ fixture.ownerRequestKey=interpreted.request().postDataJSON().requestId;await writeFile(join(directory,'owned-fixtures-private.json'),JSON.stringify(state),{mode:0o600});
+ const interpretedBody=await interpreted.json();report.privateInterpretation={status:interpreted.status(),state:['SAVED','FAILED','PENDING','UNKNOWN','NOT_SUBMITTED'].includes(interpretedBody.interpretation?.state)?interpretedBody.interpretation.state:'NOT_OBSERVED',failure:['AI_UNAVAILABLE','AI_AT_CAPACITY','PROCESSING_NOT_READY','FRAME_NOT_CONFIRMED','REQUEST_UNKNOWN'].includes(interpretedBody.interpretationFailure)?interpretedBody.interpretationFailure:'NONE'};if(interpreted.status()!==200||interpretedBody.interpretation?.state!=='SAVED'||!interpretedBody.draft?.proposedConstraints?.some(condition=>condition.kind==='HARD'))throw new Error('OWN_PRIVATE_INTERPRETATION_FAILED');
+ await page.getByRole('heading',{name:'Review the interpretation',exact:true}).waitFor();
+ const ownerSnapshot=await signedRequest(fixture,'/decisions/'+fixture.decisionId+'/me');
+ const otherSnapshot=await signedRequest(outsider,'/decisions/'+fixture.decisionId+'/me');
+ const sharedSnapshot=await signedRequest(outsider,'/decisions/'+fixture.decisionId+'/public');
+ if(ownerSnapshot.draft?.draftId!==interpretedBody.draft.draftId||otherSnapshot.draft||JSON.stringify(sharedSnapshot).includes(interpretedBody.draft.draftId)||JSON.stringify(sharedSnapshot).includes(privateText))throw new Error('OWN_PRIVATE_INTERPRETATION_FAILED');
+ report.privateInterpretation={status:200,savedOwnerDraft:true,otherMemberExcluded:true,explicitConfirmationStillRequired:true};
+ report.result='PRIMARY_DRAFT_CONFIRM_AND_PRIVATE_INTERPRETATION_PASS';await memberContext.close();
+ report.reload='PASS';report.result='PRIMARY_DRAFT_CONFIRM_AND_PRIVATE_INTERPRETATION_PASS';
  await context.close();
  }
 } catch(error) {
  if(process.argv[2]?.startsWith('archive'))Object.assign(report,archiveExceptionMetadata(error));
  if(process.argv[2]?.startsWith('archive')&&archiveFailureCode(error))report.archiveCode=archiveFailureCode(error);
- report.result='BLOCKED';report.error=['PRIMARY_DRAFT_FAILED','PUBLIC_CLARIFICATION_REQUIRED','PRIMARY_DECISION_CREATE_FAILED','PRIMARY_DECISION_RELOAD_FAILED','MISLEADING_ACCESS_COPY','OWN_SECOND_ACCOUNT_REQUIRED','UNAUTHORIZED_DRAFT_NOT_DENIED','UNAUTHENTICATED_RECOVERY_NOT_DENIED','OWN_TARGET_MISMATCH','OWN_SIGNED_IDENTITY_MISMATCH','OWN_PENDING_ACCOUNT_REQUIRED','OWN_GROUP_CREATE_FAILED','OWN_EMPTY_GROUP_REQUIRED','OWN_ARCHIVE_NOT_CONFIRMED','OWN_MEMBER_VISIBILITY_FAILED'].includes(error.message)?error.message:'OWN_REPRODUCTION_UNAVAILABLE';
+ report.result='BLOCKED';report.error=['PRIMARY_DRAFT_FAILED','PUBLIC_CLARIFICATION_REQUIRED','PRIMARY_DECISION_CREATE_FAILED','PRIMARY_DECISION_RELOAD_FAILED','MISLEADING_ACCESS_COPY','OWN_SECOND_ACCOUNT_REQUIRED','UNAUTHORIZED_DRAFT_NOT_DENIED','UNAUTHENTICATED_RECOVERY_NOT_DENIED','OWN_TARGET_MISMATCH','OWN_SIGNED_IDENTITY_MISMATCH','OWN_PENDING_ACCOUNT_REQUIRED','OWN_GROUP_CREATE_FAILED','OWN_EMPTY_GROUP_REQUIRED','OWN_ARCHIVE_NOT_CONFIRMED','OWN_MEMBER_VISIBILITY_FAILED','OWN_PRIVATE_SCOPE_NOT_SUPPORTED','OWN_PRIVATE_INTERPRETATION_FAILED'].includes(error.message)?error.message:'OWN_REPRODUCTION_UNAVAILABLE';
 } finally {
  await browser?.close();await writeFile(join(process.env.RUNNER_TEMP,process.argv[2]?.startsWith('archive')?'fix01-archive-report.json':'fix01-proof-report.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
 }

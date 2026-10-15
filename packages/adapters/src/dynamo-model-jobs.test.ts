@@ -95,25 +95,29 @@ it('native per-store request bounds stop repeated recovery reads without provide
   const f = await workerFixture(), store = f.store(); for (let n = 0; n < 64; n++) await store.deliveries();
   await expect(store.deliveries()).rejects.toThrow('MODEL_JOB_CAPACITY'); expect(f.invoke).not.toHaveBeenCalled(); expect(f.writes).toHaveLength(0);
 });
-it('public draft, source/admission fence and usage commit together; lost acknowledgment never duplicates the call', async () => {
+it.each(['ARCHITECT', 'OWNER'] as const)('%s source/admission fence, output and usage commit together; lost acknowledgment never duplicates the call', async kind => {
   const f = await durableFixture(implementation => vi.spyOn(DynamoDBClient.prototype, 'send').mockImplementation(implementation as never));
-  const reference = { ...f.reference,kind:'ARCHITECT' as const,requestKey:'public-request',decisionId:'garden',reasoningJobId:'draft-public' };
+  const reference = { ...f.reference,kind,requestKey:'public-request',decisionId:kind === 'OWNER' ? 'decision' : 'garden',reasoningJobId:'draft-public' };
   const authority = f.fence().pins.find(pin => pin.table === r.budget)!;
+  const outputTable = kind === 'OWNER' ? r.decisions : r.partitions;
+  const outputPK = kind === 'OWNER' ? 'ROOM#decision' : 'GROUP#garden';
+  const outputSK = kind === 'OWNER' ? 'STATE' : 'DRAFT#draft-public';
+  const fenceKind = kind === 'OWNER' ? 'OWNER_DRAFT' as const : 'PUBLIC_DRAFT' as const;
   const invoke = vi.fn(async () => ({output:'public output',usage:{inputTokens:3,outputTokens:5}}));
-  const make = () => new DurableModelJobs({kind:'ARCHITECT',now:f.now,
+  const make = () => new DurableModelJobs({kind,now:f.now,
     store:createDynamoModelJobStore({verifiedTarget:{account:r.account,region:r.region},sourceSha:reference.sourceSha,publicDraftCommit:async (_fence,effect) => ({authority,
-      items:effect?[{Put:{TableName:r.partitions,Item:{PK:{S:'GROUP#garden'},SK:{S:'DRAFT#draft-public'},revision:{N:'1'},payload:{S:'public output'}},ConditionExpression:'attribute_not_exists(PK)'}}]
+      items:effect?[{Put:{TableName:outputTable,Item:{PK:{S:outputPK},SK:{S:outputSK},revision:{N:'1'},payload:{S:'public output'}},...(kind === 'OWNER' ? { ConditionExpression: '#p = :p', ExpressionAttributeNames: { '#p': 'payload' }, ExpressionAttributeValues: { ':p': f.get(r.decisions, 'ROOM#decision').payload! } } : { ConditionExpression: 'attribute_not_exists(PK)' })}}]
         :[{ConditionCheck:{TableName:r.partitions,Key:{PK:{S:'GROUP#garden'},SK:{S:'STATE'}},ConditionExpression:'#p = :p',ExpressionAttributeNames:{'#p':'payload'},ExpressionAttributeValues:{':p':f.get(r.partitions,'GROUP#garden').payload!}}}]
-    })}),execution:{reload:async () => ({context:null,fence:{kind:'PUBLIC_DRAFT' as const,reference}}),invoke,
-      prepare:async () => ({kind:'PUBLIC_DRAFT' as const,fence:{kind:'PUBLIC_DRAFT' as const,reference}})} });
+    })}),execution:{reload:async () => ({context:null,fence:{kind:fenceKind,reference}}),invoke,
+      prepare:async () => ({kind:fenceKind,fence:{kind:fenceKind,reference}})} });
   await make().enqueue(reference);
-  f.before(items => {if(items.some(item => item.Put?.Item?.SK?.S === 'DRAFT#draft-public')) f.loseAck();});
+  f.before(items => {if(items.some(item => item.Put?.TableName === outputTable && item.Put?.Item?.PK?.S === outputPK && item.Put?.Item?.SK?.S === outputSK)) f.loseAck();});
   expect(await make().process({jobId:reference.jobId})).toBe('APPLIED');
   expect(await make().process({jobId:reference.jobId})).toBe('SKIPPED');
   expect(invoke).toHaveBeenCalledTimes(1);
-  const atomic=f.writes.find(items => items.some(item => item.Put?.Item?.SK?.S === 'DRAFT#draft-public'))!;
+  const atomic=f.writes.find(items => items.some(item => item.Put?.TableName === outputTable && item.Put?.Item?.PK?.S === outputPK && item.Put?.Item?.SK?.S === outputSK))!;
   expect(atomic.some(item => item.Put?.Item?.PK?.S === 'TOTAL')).toBe(true);
   expect(atomic.some(item => item.ConditionCheck?.Key?.PK?.S === 'AUTH')).toBe(true);
   expect(atomic.some(item => item.Put?.Item?.PK?.S === `MODELJOB#${reference.jobId}` && JSON.parse(item.Put.Item.payload!.S!).phase === 'SUCCEEDED')).toBe(true);
-  expect(f.get(r.partitions,'GROUP#garden','DRAFT#draft-public').payload!.S).toBe('public output');
+  expect(f.get(outputTable, outputPK, outputSK).payload!.S).toBe('public output');
 });

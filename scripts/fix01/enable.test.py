@@ -5,7 +5,7 @@ import contextlib,io,json,os,pathlib,runpy,tempfile,unittest
 from unittest.mock import patch
 SOURCE='a'*40
 class EnableChecks(unittest.TestCase):
- def exercise(self,alter=None,lost=False):
+ def exercise(self,alter=None,lost=False,owner=False,phase="enable",control_source=None):
   state={'schemaVersion':1,'revision':3,'enabled':False,'sourceSha':SOURCE,'active':[],'slots':[]}
   standing={'mode':'standing','approved':True,'retentionReviewed':True,'invocationLoggingDisabled':True}
   policy={'revision':2,'enabled':False}
@@ -24,11 +24,11 @@ class EnableChecks(unittest.TestCase):
    else:raise AssertionError(operation)
    return type('Response',(),{'returncode':code,'stderr':stderr,'stdout':json.dumps(value)})()
   with tempfile.TemporaryDirectory() as folder:
-   for phase in ['api','worker','logging']:pathlib.Path(folder,'fix01-'+phase+'-guard.json').write_text(json.dumps({'source':SOURCE,'result':'GUARD_PASS'}))
-   with patch.dict(os.environ,{'EXPECTED_SOURCE':SOURCE,'RUNNER_TEMP':folder}),patch.object(sys,'argv',['enable.py','enable']),patch('subprocess.run',run),contextlib.redirect_stdout(io.StringIO()):
+   for guard_phase in ['api','worker','logging']:pathlib.Path(folder,'fix01-'+guard_phase+'-guard.json').write_text(json.dumps({'source':SOURCE,'result':'GUARD_PASS'}))
+   with patch.dict(os.environ,{'EXPECTED_SOURCE':SOURCE,'RUNNER_TEMP':folder,'OWNER_INTERPRETATION':'true' if owner else 'false'}),patch.object(sys,'argv',['enable.py',phase]+(['--control-source',control_source] if control_source else [])),patch('subprocess.run',run),contextlib.redirect_stdout(io.StringIO()):
     try:runpy.run_path('scripts/fix01/enable.py',run_name='__main__')
     except SystemExit:pass
-   result=json.loads(pathlib.Path(folder,'fix01-enable-guard.json').read_text())
+   result=json.loads(pathlib.Path(folder,'fix01-'+phase+'-guard.json').read_text())
   return result,writes,records
  def test_lost_ack_readback_changes_only_enable_preserves_usage_and_private_gate(self):
   result,writes,records=self.exercise(lost=True);self.assertEqual(result['result'],'CONTROL_READBACK_PASS');self.assertEqual(len(writes),1)
@@ -52,4 +52,20 @@ class EnableChecks(unittest.TestCase):
  def test_retention_enabled_stops_without_write(self):
   def change(records):records['OPERATIONS#RETENTION']['payload']['S']=json.dumps({'enabled':True})
   result,writes,_=self.exercise(change);self.assertEqual(result['error'],'PRIVATE_RETENTION_GATE_CHANGED_STOP');self.assertEqual(writes,[])
+ def test_enabled_synthetic_policy_requires_explicit_matching_owner_mode(self):
+  policy={'schemaVersion':1,'kind':'RETENTION_POLICY','revision':2,'enabled':True,'dataClass':'SYNTHETIC','rawConversationMs':0,'structuredMs':86400000,'replayMs':3600000,'journalMs':604800000,'backupMs':None,'providerMs':None,'realPersonPolicy':'UNAPPROVED'}
+  def change(records):records['OPERATIONS#RETENTION']['payload']['S']=json.dumps(policy,separators=(',',':'))
+  result,writes,_=self.exercise(change,owner=True);self.assertEqual(result['result'],'CONTROL_READBACK_PASS');self.assertEqual(len(writes),1)
+  self.assertEqual(result['privateRetention'],'ENABLED_SYNTHETIC_CONSENT_REQUIRED')
+  result,writes,_=self.exercise(change);self.assertEqual(result['result'],'BLOCKED');self.assertEqual(writes,[])
+  policy['dataClass']='REAL';policy['realPersonPolicy']='APPROVED'
+  result,writes,_=self.exercise(change,owner=True);self.assertEqual(result['result'],'BLOCKED');self.assertEqual(writes,[])
+ def test_checked_new_source_can_disable_only_the_explicit_installed_source_without_rebinding_or_reset(self):
+  def change(records):
+   row=records['OPERATIONS#MODEL_JOBS'];state=json.loads(row['payload']['S']);state.update(sourceSha='b'*40,enabled=True);row['payload']['S']=json.dumps(state)
+  result,writes,records=self.exercise(change,phase='disable',control_source='b'*40)
+  self.assertEqual(result['result'],'CONTROL_READBACK_PASS');self.assertEqual(len(writes),1)
+  state=json.loads(records['OPERATIONS#MODEL_JOBS']['payload']['S']);self.assertFalse(state['enabled']);self.assertEqual(state['sourceSha'],'b'*40)
+  for phase,source in [('disable','c'*40),('enable','b'*40)]:
+   result,writes,_=self.exercise(change,phase=phase,control_source=source);self.assertEqual(result['result'],'BLOCKED');self.assertEqual(writes,[])
 if __name__=='__main__':unittest.main()

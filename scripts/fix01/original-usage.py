@@ -22,7 +22,7 @@ try:
     jobid=str(uuid.UUID(bytes=hashlib.sha256(json.dumps([SOURCE,f['groupId'],draft],separators=(',',':')).encode()).digest()[:16],version=4));pk='MODELJOB#'+jobid
     total=get('KnownEnoughQaControl','TOTAL');control=get('KnownEnoughOperationsJournal','OPERATIONS#MODEL_JOBS');job=get('KnownEnoughOperationsJournal',pk)
     c=json.loads(control['payload']['S'])
-    if c['sourceSha']!=SOURCE or jobid in c['active'] or any(s['jobId']==jobid for s in c['slots']):raise RuntimeError('ORIGINAL_JOB_NOT_QUIESCENT')
+    if (job is not None and c['sourceSha']!=SOURCE) or jobid in c['active'] or any(s['jobId']==jobid for s in c['slots']):raise RuntimeError('ORIGINAL_JOB_NOT_QUIESCENT')
     if job:
         j=json.loads(job['payload']['S']);r=j['reference']
         if j['phase']!='SUCCEEDED' or j['reason'] is not None or j['attempts']!=1 or not isinstance(j['usage'],dict) or r['kind']!='ARCHITECT' or r['sourceSha']!=SOURCE or r['subject']!=f['subject'] or r['decisionId']!=f['groupId'] or r['requestKey']!=f['draftRequestKey']:raise RuntimeError('ORIGINAL_JOB_OUTCOME_INVALID')

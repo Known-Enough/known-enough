@@ -1087,3 +1087,21 @@ it('rejects malformed shared-email server configuration before accessing storage
   }
   expect(f.reads).toEqual([]);
 });
+
+it('keeps public follow-up choices and answers as bounded structured context without growing the original objective', async () => {
+  const f = fixture(); const calls: DecisionArchitectRequest[] = [];
+  const session = f.session({ draftArchitect: async (_subject, input) => {
+    calls.push(structuredClone(input)); const output = architecture(input);
+    return { ...output, clarificationQuestions: calls.length === 1 ? ['Choose a finite set of activities'] : [], status: calls.length === 1 ? 'NEEDS_CLARIFICATION' : 'DEFINING' };
+  } });
+  const original = await session.generateDraft(participant(), 'garden', generate);
+  const answer = 'Use planting or watering. ' + 'A'.repeat(250);
+  const next = await session.generateDraft(participant(), 'garden', { objective: original.frame.objective, idempotencyKey: 'public-followup',
+    followUp: { draftId: original.id, revision: original.revision, answers: [answer] } });
+  expect(calls[1]?.objective).toBe(original.frame.objective);
+  expect(calls[1]?.followUp).toEqual({ previousFrame: original.frame, answers: [{ question: original.clarificationQuestions[0], answer }] });
+  expect(next.publicClarifications).toEqual(calls[1]?.followUp?.answers); expect(next.clarificationQuestions).toEqual([]);
+  await expect(session.generateDraft(participant(), 'garden', { objective: original.frame.objective, idempotencyKey: 'stale-public-followup',
+    followUp: { draftId: original.id, revision: original.revision + 1, answers: [answer] } })).rejects.toThrow('STALE_CONTEXT');
+  expect(calls).toHaveLength(2);
+});

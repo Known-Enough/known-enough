@@ -23,8 +23,8 @@ const pinSchema = z.strictObject({ table: z.enum([JOB_TARGET.journal, JOB_TARGET
   payload: z.string().min(2).max(360_000) });
 export type JobPin = z.infer<typeof pinSchema>;
 export interface JobFence { reference: JobReference; pins: JobPin[]; guard: GuardRecord }
-export interface PublicDraftFence { kind: 'PUBLIC_DRAFT'; reference: JobReference }
-export interface PublicDraftEffect { kind: 'PUBLIC_DRAFT'; fence: PublicDraftFence }
+export interface PublicDraftFence { kind: 'PUBLIC_DRAFT' | 'OWNER_DRAFT'; reference: JobReference }
+export interface PublicDraftEffect { kind: 'PUBLIC_DRAFT' | 'OWNER_DRAFT'; fence: PublicDraftFence }
 export interface PublicDraftCommit { (fence: PublicDraftFence, effect?: PublicDraftEffect): Promise<{ items: TransactWriteItem[]; authority: JobPin }> }
 export interface JobEffect { writes: { key: { PK: string; SK: string }; payload: string | null }[] }
 const controlKey = { PK: 'OPERATIONS#MODEL_JOBS', SK: 'STATE' }, totalKey = { PK: 'TOTAL', SK: 'STATE' };
@@ -167,10 +167,10 @@ export function createDynamoModelJobStore(options: JobStoreOptions & { publicDra
         prior.job ? pin(JOB_TARGET.journal, jobKey(observed.jobId), prior.job, prior.job.revision) : null),
       put(JOB_TARGET.journal, controlKey, checkedControl, checkedControl.revision, pin(JOB_TARGET.journal, controlKey, prior.control, prior.control.revision)),
       put(JOB_TARGET.budget, totalKey, checkedTotal, observed.totalRevision + 1, pin(JOB_TARGET.budget, totalKey, prior.totals, observed.totalRevision, 'version'))];
-      if (rawFence && checkedJob.reference.kind === 'ARCHITECT') {
-        if (!options.publicDraftCommit || !('kind' in rawFence) || rawFence.kind !== 'PUBLIC_DRAFT'
+      if (rawFence && checkedJob.reference.kind !== 'NEGOTIATION') {
+        if (!options.publicDraftCommit || !('kind' in rawFence) || rawFence.kind !== (checkedJob.reference.kind === 'OWNER' ? 'OWNER_DRAFT' : 'PUBLIC_DRAFT')
           || !isDeepStrictEqual(rawFence.reference, checkedJob.reference)) return fail('INVALID');
-        if (rawEffect && (!('kind' in rawEffect) || rawEffect.kind !== 'PUBLIC_DRAFT' || !isDeepStrictEqual(rawEffect.fence.reference, checkedJob.reference))) return fail('INVALID');
+        if (rawEffect && (!('kind' in rawEffect) || rawEffect.kind !== rawFence.kind || !isDeepStrictEqual(rawEffect.fence.reference, checkedJob.reference))) return fail('INVALID');
         const prepared = await options.publicDraftCommit(rawFence, rawEffect as PublicDraftEffect | undefined);
         const authority = pinSchema.parse(prepared.authority);
         if (authority.table !== JOB_TARGET.budget || authority.key.PK !== 'AUTH' || authority.key.SK !== 'STATE'
@@ -180,9 +180,11 @@ export function createDynamoModelJobStore(options: JobStoreOptions & { publicDra
           || checkedJob.reservedCostMicros > auth.maxCostMicrosPerRun
           || (checkedJob.attempts > (prior.job?.attempts ?? 0) && checkedJob.reservedCostMicros - (prior.job?.reservedCostMicros ?? 0) < auth.attemptCostMicros)) return fail('BUDGET');
         if (!prepared.items.length || prepared.items.some(item => {
-          const operation = item.ConditionCheck ?? item.Put; const key = item.ConditionCheck?.Key ?? item.Put?.Item;
-          return !operation || !key || ![JOB_TARGET.partitions, JOB_TARGET.source, JOB_TARGET.journal].includes(operation.TableName as never)
-            || item.Put && (operation.TableName !== JOB_TARGET.partitions || !/^GROUP#[A-Za-z0-9_-]{1,80}$/.test(key.PK?.S ?? '') || !/^(STATE|DRAFT#[A-Za-z0-9_-]{1,80})$/.test(key.SK?.S ?? ''));
+          const operation = item.ConditionCheck ?? item.Put ?? (checkedJob.reference.kind === 'OWNER' ? item.Update : undefined); const key = item.ConditionCheck?.Key ?? item.Put?.Item ?? (checkedJob.reference.kind === 'OWNER' ? item.Update?.Key : undefined);
+          return !operation || !key || Boolean((item.Put || item.Update) && (!rawEffect || checkedJob.phase !== 'SUCCEEDED')) || Boolean(item.Delete) || Boolean(item.Update && (checkedJob.reference.kind !== 'OWNER' || operation.TableName !== JOB_TARGET.decisions || key.PK?.S !== `ROOM#${checkedJob.reference.decisionId}` || key.SK?.S !== 'GUARD')) || ![JOB_TARGET.partitions, JOB_TARGET.source, JOB_TARGET.journal, ...(checkedJob.reference.kind === 'OWNER' ? [JOB_TARGET.decisions] : [])].includes(operation.TableName as never)
+            || item.Put && (checkedJob.reference.kind === 'OWNER'
+              ? operation.TableName !== JOB_TARGET.decisions || key.PK?.S !== `ROOM#${checkedJob.reference.decisionId}` || !['STATE', 'GUARD'].includes(key.SK?.S ?? '')
+              : operation.TableName !== JOB_TARGET.partitions || !/^GROUP#[A-Za-z0-9_-]{1,80}$/.test(key.PK?.S ?? '') || !/^(STATE|DRAFT#[A-Za-z0-9_-]{1,80})$/.test(key.SK?.S ?? ''));
         })) return fail('INVALID');
         if (checkedJob.phase === 'SUCCEEDED' && !rawEffect) return fail('INVALID');
         items.push({ ConditionCheck: condition(authority) }, ...prepared.items);

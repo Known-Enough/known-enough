@@ -363,3 +363,25 @@ it('lost plan-publication acknowledgement reconciles exact durable sealed bytes 
  expect(f.writes.filter(items => items.some(item => item.Put?.Item?.sealed?.S)).length).toBe(1);
  expect((await service.loadOwnPlan(plan.opId, principal())).bytes.equals(plan.bytes)).toBe(true);
 });
+
+it('explicit synthetic processing records only the current admitted owner with server time and keeps a valid stamp idempotent', async () => {
+  const f = await fixture(); const location = where(r.journal, attrs('RETENTION#iris', 'STAMP')); f.cells.delete(location);
+  const service = f.lifecycle(); await service.acknowledgeSyntheticProcessing(principal());
+  const first = f.parsed(r.journal, 'RETENTION#iris', 'STAMP'); expect(first).toMatchObject({ kind: 'RETENTION_STAMP', dataClass: 'SYNTHETIC', revision: 1, policyRevision: policy.revision,
+    createdAt: new Date(now).toISOString(), lastActivityAt: new Date(now).toISOString() });
+  await service.acknowledgeSyntheticProcessing(principal()); expect(f.parsed(r.journal, 'RETENTION#iris', 'STAMP')).toEqual(first);
+  const puts = f.writes.flat().filter(item => item.Put?.Item?.PK?.S === 'RETENTION#iris'); expect(puts).toHaveLength(1);
+  const conditions = await service.retentionConditions(principal()); expect(conditions).toHaveLength(2);
+  expect(conditions.every(item => item.ConditionCheck && !item.Put)).toBe(true);
+  expect(conditions.map(item => item.ConditionCheck!.Key!.PK!.S)).toEqual(['OPERATIONS#RETENTION', 'RETENTION#iris']);
+});
+it('synthetic processing refuses disabled/real policies, foreign service identities and revoked admission without writing a stamp', async () => {
+  for (const change of ['disabled-policy', 'real-policy', 'disabled-account', 'service'] as const) {
+    const f = await fixture(); f.cells.delete(where(r.journal, attrs('RETENTION#iris', 'STAMP')));
+    if (change === 'disabled-policy') f.setRow(r.journal, 'OPERATIONS#RETENTION', 'STATE', { ...policy, enabled: false });
+    if (change === 'real-policy') f.setRow(r.journal, 'OPERATIONS#RETENTION', 'STATE', { ...policy, dataClass: 'REAL', realPersonPolicy: 'APPROVED' });
+    if (change === 'disabled-account') { const account = f.parsed(r.partitions, 'ACCOUNT#iris'); account.value.status = 'DISABLED'; account.revision++; f.setRow(r.partitions, 'ACCOUNT#iris', 'STATE', account); }
+    await expect(f.lifecycle().acknowledgeSyntheticProcessing(change === 'service' ? { kind: 'service', subject: 'iris', roomIds: [] } : principal())).rejects.toThrow();
+    expect(f.cells.has(where(r.journal, attrs('RETENTION#iris', 'STAMP')))).toBe(false);
+  }
+});

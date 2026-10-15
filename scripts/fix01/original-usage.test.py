@@ -6,13 +6,15 @@ from pathlib import Path
 from unittest.mock import patch
 SOURCE='6b6aa79070689caf17568fb59ee5dc3d677effe4'
 class Tests(unittest.TestCase):
- def execute(self,phase='SUCCEEDED',lost=False,foreign=False,active=False):
+ def execute(self,phase='SUCCEEDED',lost=False,foreign=False,active=False,absent=False,rebound=False):
   f={'runId':'owned-run','subject':'owned','groupId':'garden','draftRequestKey':'nonce','deleted':True,'mailboxRemoved':True}
   state={'sourceSha':SOURCE,'runId':'owned-run','fixtures':[f,{**f,'subject':'member','groupId':None}]}
   draft='draft-'+hashlib.sha256(json.dumps(['garden','owned','nonce'],separators=(',',':')).encode()).hexdigest()[:40]
   jobid=str(uuid.UUID(bytes=hashlib.sha256(json.dumps([SOURCE,'garden',draft],separators=(',',':')).encode()).digest()[:16],version=4));pk='MODELJOB#'+jobid
   def row(value):return {'revision':{'N':'1'},'payload':{'S':json.dumps(value)}}
   records={'TOTAL':row({'reservedTokens':18432,'reservedCostMicros':10000}),'OPERATIONS#MODEL_JOBS':row({'sourceSha':SOURCE,'active':[jobid] if active else [],'slots':[]}),pk:row({'phase':phase,'reason':None if phase=='SUCCEEDED' else 'PROVIDER_UNCONFIRMED','attempts':1,'usage':{'inputTokens':12,'outputTokens':3},'reference':{'kind':'ARCHITECT','sourceSha':SOURCE,'subject':'owned','decisionId':'garden','requestKey':'nonce'}})}
+  if absent:del records[pk]
+  if rebound:records['OPERATIONS#MODEL_JOBS']=row({'sourceSha':'c'*40,'active':[jobid] if active else [],'slots':[]})
   prior=copy.deepcopy(records['TOTAL']);writes=[]
   def aws(args,**kwargs):
    service,operation=args[1:3];value={}
@@ -37,5 +39,9 @@ class Tests(unittest.TestCase):
    self.assertEqual(len(writes[0]),2);self.assertIn('ConditionCheck',writes[0][1])
  def test_unknown_active_or_foreign_original_is_never_deleted(self):
   for kwargs in [{'phase':'DEAD'},{'active':True},{'foreign':True}]:
+   report,writes=self.execute(**kwargs);self.assertEqual(report['result'],'BLOCKED');self.assertEqual(writes,[])
+ def test_absent_original_is_read_only_after_a_later_source_rebind_but_existing_or_active_old_jobs_remain_protected(self):
+  report,writes=self.execute(absent=True,rebound=True);self.assertEqual(report['result'],'ORIGINAL_TERMINAL_JOB_CLEANUP_PASS');self.assertEqual(writes,[])
+  for kwargs in [{'rebound':True},{'absent':True,'rebound':True,'active':True}]:
    report,writes=self.execute(**kwargs);self.assertEqual(report['result'],'BLOCKED');self.assertEqual(writes,[])
 if __name__=='__main__':unittest.main()

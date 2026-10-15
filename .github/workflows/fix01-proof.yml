@@ -42,6 +42,7 @@ jobs:
           npm ci
           npm ci --prefix scripts/live-qa
           python3 -B scripts/fix01/original-usage.test.py
+          python3 -B scripts/fix01/usage.test.py
           python3 -B scripts/operations/jobs-fixture-recovery.test.py
           node --experimental-transform-types --test scripts/operations/jobs-owned-proof.test.mjs scripts/operations/partition-live-behavior.test.mjs scripts/operations/lifecycle-owned-behavior.test.mjs scripts/fix01/owned-archive.test.mjs
           npx playwright install --with-deps chromium

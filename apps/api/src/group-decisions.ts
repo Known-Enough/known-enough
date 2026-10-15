@@ -16,11 +16,26 @@ export class GroupDecisionService {
     architect: DecisionArchitect; now: () => number; isEnabled: () => boolean }) {}
   async draft(principal: TrustedPrincipal | null, groupId: string, raw: unknown): Promise<Groups.GroupDraft> {
     const roster = await this.options.groups.roster(principal, groupId);
-    const body = fields(raw, ['objective', 'idempotencyKey']);
+    const hasFollowUp = raw && typeof raw === 'object' && Object.hasOwn(raw, 'followUp');
+    const body = fields(raw, ['objective', 'idempotencyKey', ...(hasFollowUp ? ['followUp'] : [])]);
+    let followUp: { draftId: string; revision: number; answers: string[] } | undefined;
+    let previous: Groups.GroupDraft | undefined;
+    let publicClarifications: { question: string; answer: string }[] = [];
+    if (hasFollowUp) {
+      const value = fields(body.followUp, ['draftId', 'revision', 'answers']);
+      if (!Id.safeParse(value.draftId).success || !Number.isSafeInteger(value.revision) || !Array.isArray(value.answers)
+        || value.answers.some(answer => typeof answer !== 'string' || !answer.trim() || answer.length > 500)) return fail('INVALID_COMMAND');
+      followUp = value as typeof followUp;
+      previous = await this.read(principal, groupId, followUp!.draftId);
+      if (previous.revision !== followUp!.revision || previous.createdDecisionId || previous.frame.objective !== String(body.objective).trim()
+        || previous.clarificationQuestions.length !== followUp!.answers.length) return fail('STALE_CONTEXT');
+      publicClarifications = [...(previous.publicClarifications ?? []), ...previous.clarificationQuestions.map((question, index) => ({ question, answer: followUp!.answers[index]!.trim() }))];
+      if (publicClarifications.length > 36) return fail('INVALID_COMMAND');
+    }
     if (typeof body.objective !== 'string' || !body.objective.trim() || body.objective.length > 2000 || !Id.safeParse(body.idempotencyKey).success) return fail('INVALID_COMMAND');
     const objective = body.objective.trim();
     const id = `draft-${hash([groupId, principal!.subject, body.idempotencyKey]).slice(0, 40)}`;
-    const bodyHash = hash([objective, roster.version]);
+    const bodyHash = hash([objective, roster.version, ...(followUp ? [followUp] : [])]);
     const prior = await this.options.groups.repository.transaction(state => {
       const group = this.options.groups.currentGroup(state, principal, groupId, true);
       const existing = group.drafts.find(item => item.id === id);
@@ -32,16 +47,16 @@ export class GroupDecisionService {
     if (prior) return prior;
     const output = await this.options.architect.draft(principal!.subject, { draftId: id, revision: 1, objective,
       participants: roster.members.map(member => ({ id: member.participantId, displayName: member.displayName })),
-      allowedOptions: [], generateOptions: true });
+      allowedOptions: [], generateOptions: true, ...(previous ? { followUp: { previousFrame: previous.frame, answers: publicClarifications } } : {}) });
     const questions = [...output.clarificationQuestions];
     const catalog = genericCandidateCatalog(output.frame);
     if (catalog.clarificationQuestion) questions.push(catalog.clarificationQuestion);
     const draft = Groups.GroupDraft.parse({ id, bodyHash, revision: 1, groupVersion: roster.version,
-      frame: output.frame, clarificationQuestions: questions.slice(0, 12), createdDecisionId: null });
+      frame: output.frame, clarificationQuestions: questions.slice(0, 12), createdDecisionId: null, ...(publicClarifications.length ? { publicClarifications } : {}) });
     if (!this.options.isEnabled()) return fail('STALE_CONTEXT');
     return this.options.groups.repository.transaction(state => {
       const group = this.options.groups.currentGroup(state, principal, groupId, true);
-      if (group.version !== roster.version || !this.options.isEnabled()) return fail('STALE_CONTEXT');
+      if (group.version !== roster.version || !this.options.isEnabled() || previous && group.drafts.find(draft => draft.id === previous!.id)?.revision !== previous.revision) return fail('STALE_CONTEXT');
       const existing = group.drafts.find(item => item.id === id);
       if (existing) { if (existing.bodyHash !== bodyHash) return fail('STALE_CONTEXT'); return structuredClone(existing); }
       if (group.drafts.length >= 64) throw new GroupCapacityError();

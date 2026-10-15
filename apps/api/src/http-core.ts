@@ -641,7 +641,8 @@ function createKnownEnoughApiHandler(
           responseId = bodyId;
           if (body === null || typeof body !== 'object' || Array.isArray(body)
             || !Id.safeParse(bodyId).success
-            || Object.keys(body).sort().join('|') !== ['messages', 'requestId'].sort().join('|')) {
+            || Object.keys(body).sort().join('|') !== ['messages', 'requestId', ...('processingConsent' in body ? ['processingConsent'] : [])].sort().join('|')
+            || 'processingConsent' in body && body.processingConsent !== 'SYNTHETIC_TEST') {
             sendJson(response, 422, decisionErrorBody('INVALID_COMMAND', bodyId));
             return;
           }

@@ -55,6 +55,7 @@ function activationRejected(error: unknown, size: number) {
 }
 
 export function createPartitionManagedDriver(options: PartitionManagedOptions): {
+  prepareDecisionCommit: (command: TransactWriteItemsCommand, context: PartitionIOContext) => Promise<TransactWriteItem[]>;
   prepareGroupCommit: (mutations: Parameters<PartitionTransport['commit']>[0], context: PartitionIOContext) => Promise<TransactWriteItem[]>;
   groups: PartitionTransport; decisions: PartitionDecisionTransport; membershipDiscovery: PartitionGroupDiscovery;
   archivePorts: (options: PartitionManagedArchiveOptions) => PartitionArchivePorts;
@@ -249,7 +250,10 @@ export function createPartitionManagedDriver(options: PartitionManagedOptions): 
       },
     } });
   }
-  return { prepareGroupCommit: async (mutations, io) => {
+  return { prepareDecisionCommit: async (command, io) => {
+    const copy = new TransactWriteItemsCommand(structuredClone(command.input)); validatePartitionDecisionCommand(copy);
+    return joined(copy.input.TransactItems!, io);
+  }, prepareGroupCommit: async (mutations, io) => {
     const items = partitionDynamoWrites('KnownEnoughPartitions', structuredClone(mutations));
     for (const item of items) (item.ConditionCheck ?? item.Put)!.TableName = target.partitionArn;
     return joined(items, io);

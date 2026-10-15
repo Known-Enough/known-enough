@@ -1,3 +1,4 @@
+import { PartitionOwnerFailure, type OwnerInterpretation } from './partition-owner-runtime.ts';
 import type { DraftRecoveryRequest } from './partition-draft-recovery.ts';
 import { randomUUID } from 'node:crypto';
 import { RequestNegotiation, NegotiationReceipt, BACKGROUND_NEGOTIATION_PROFILE } from '@deal-table/contracts/durable-command';
@@ -11,6 +12,7 @@ import { createPartitionGroupSession, createPartitionDecisionRepository, Partiti
 
 type ErrorCode = Extract<KE.DecisionCommandResult, { ok: false }>['error']['code'];
 export interface PartitionParticipantApiOptions {
+  ownerInterpretation?: OwnerInterpretation;
   /** Trusted server resolver: verify access tokens; never map caller-selected identity headers. */
   draftRequest?: (request: DraftRecoveryRequest) => Promise<unknown>;
   authenticate: (request: IncomingMessage, signal: AbortSignal) => Promise<TrustedPrincipal | null>;
@@ -192,6 +194,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         const memberProfile = /^\/groups\/([A-Za-z0-9_-]{1,80})\/members\/([A-Za-z0-9_-]{1,80})\/profile$/.exec(url.pathname);
         const group = /^\/groups\/([A-Za-z0-9_-]{1,80})(\/(?:remove|invite|invitations))?$/.exec(url.pathname);
         const draft = /^\/groups\/([A-Za-z0-9_-]{1,80})\/drafts(?:\/([A-Za-z0-9_-]{1,80})(\/create)?)?$/.exec(url.pathname);
+        const ownerConversation = /^\/decisions\/([A-Za-z0-9_-]{1,80})\/owner-conversation\/(draft|requests\/([A-Za-z0-9_-]{1,80})(\/close)?)$/.exec(url.pathname);
         const decision = /^\/decisions\/([A-Za-z0-9_-]{1,80})\/(public|me|commands)$/.exec(url.pathname);
         const roster = /^\/groups\/([A-Za-z0-9_-]{1,80})\/decisions\/([A-Za-z0-9_-]{1,80})\/(review|revise)$/.exec(url.pathname);
         if (url.pathname === '/account/profile' || url.pathname === '/account/profile/image') {
@@ -335,6 +338,37 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
           else if (group[2] === '/invite') send(response, 200, { invitation: await session.invite(principal, group[1]!, raw) });
           else send(response, 200, { group: await session.remove(principal, group[1]!, raw) }); return;
         }
+        if (ownerConversation) {
+          if (!options.ownerInterpretation || (ownerConversation[2] === 'draft' || ownerConversation[4] ? request.method !== 'POST' : request.method !== 'GET')) return reject('NOT_FOUND');
+          const io = partitionIO({ timeoutMs: 27000 }); const context = { ...io, signal: AbortSignal.any([io.signal, controller.signal]) };
+          const application = new KnownEnoughApplication({ repository: repositories.forParticipant(principal, context), clock, ids });
+          await application.getOwnerSnapshot(principal, ownerConversation[1]!);
+          let messages: unknown; let closeRevision: number | undefined;
+          if (ownerConversation[2] === 'draft') {
+            const raw = await body(request, maximum, bodyMs, controller);
+            if (!raw || typeof raw !== 'object' || Array.isArray(raw) || Object.keys(raw).sort().join('|') !== 'messages|processingConsent|requestId') return reject('INVALID_COMMAND');
+            const value = raw as Record<string, unknown>;
+            if (value.processingConsent !== 'SYNTHETIC_TEST' || !Id.safeParse(value.requestId).success || !Array.isArray(value.messages) || value.messages.length < 1 || value.messages.length > 12) return reject('INVALID_COMMAND');
+            let total = 0;
+            for (const message of value.messages) {
+              if (!message || typeof message !== 'object' || Object.keys(message).sort().join('|') !== 'role|text'
+                || !['owner', 'assistant'].includes(message.role) || typeof message.text !== 'string' || !message.text.trim() || message.text.length > 2000) return reject('INVALID_COMMAND');
+              total += message.text.length;
+            }
+            if (total > 8000 || value.messages.at(-1)?.role !== 'owner') return reject('INVALID_COMMAND');
+            requestId = value.requestId as string; messages = value.messages;
+          } else {
+            requestId = ownerConversation[3]!;
+            if (ownerConversation[4]) {
+              const raw = await body(request, maximum, bodyMs, controller);
+              if (!raw || typeof raw !== 'object' || Array.isArray(raw) || Object.keys(raw).join('|') !== 'revision'
+                || !('revision' in raw) || !Number.isSafeInteger(raw.revision) || Number(raw.revision) < 0) return reject('INVALID_COMMAND');
+              closeRevision = Number(raw.revision);
+            }
+          }
+          const result = await options.ownerInterpretation({ principal, decisionId: ownerConversation[1]!, requestId, ...(messages === undefined ? {} : { messages, acceptedSynthetic: true }), ...(closeRevision === undefined ? {} : { closeRevision }), io: context });
+          send(response, 200, { requestId, interpretation: result, ...(result.state === 'SAVED' ? { draft: result.draft } : {}) }); return;
+        }
         if (!decision || (request.method === 'GET' ? decision[2] === 'commands' : request.method !== 'POST' || decision[2] !== 'commands')) return reject('NOT_FOUND');
         // Fresh request-specific repository; no shared principal, raw application or provisioning port escapes.
         const repository = repositories.forParticipant(principal);
@@ -378,7 +412,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         }
         const code = error instanceof RepositoryCapacityError || (error instanceof PartitionSessionError && error.code === 'SESSION_CAPACITY') ? 'CAPACITY_EXCEEDED'
           : error instanceof KnownEnoughApplicationError ? error.code : 'RETRYABLE_SERVER_ERROR';
-        const result = errorBody(code, requestId); send(response, result.error.httpStatus, error instanceof PartitionDraftFailure ? { ...result, draftFailure: error.category } : result);
+        const result = errorBody(code, requestId); send(response, result.error.httpStatus, error instanceof PartitionDraftFailure ? { ...result, draftFailure: error.category } : error instanceof PartitionOwnerFailure ? { ...result, interpretationFailure: error.category } : result);
       } finally {
         active--; request.off('aborted', closed); response.off('close', closed); request.resume();
       }

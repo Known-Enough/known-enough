@@ -18,6 +18,7 @@ export function retentionPermissionProfiles() {
     ownerService: [...activation, ...read,
       statement('ConsentRead', r.journal, ['GetItem'], ['CONSENT#*']),
       statement('PublishedOwnerPlanAndProgressRead', r.journal, ['GetItem'], ['LIFECYCLE#*']),
+      statement('VerifiedSyntheticProcessingStamp', r.journal, ['PutItem'], ['RETENTION#*'], true),
       statement('VerifiedSelfConsentWrite', r.journal, ['PutItem', 'ConditionCheckItem'], ['CONSENT#*'], true)],
     erasureExecutor: [...activation, ...read,
       statement('ExactPlanJournalConsentRead', r.journal, ['GetItem'], ['LIFECYCLE#*', 'CONSENT#*']),

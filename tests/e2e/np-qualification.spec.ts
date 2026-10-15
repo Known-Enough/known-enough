@@ -93,7 +93,9 @@ test('four new independent browser owners create a garden decision from blank en
     const needs = ['first option flexible NP_PRIVATE_RAW_CANARY', 'second required NP_PRIVATE_RAW_CANARY', 'time afternoon required NP_PRIVATE_RAW_CANARY', 'second preferred NP_PRIVATE_RAW_CANARY'];
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i]!; await page.getByRole('button', { name: 'Refresh decision' }).click();
-      await page.getByLabel('Explain your limits and preferences privately').fill(needs[i]!); await page.getByRole('button', { name: 'Interpret my conditions' }).click();
+      await page.getByLabel('Explain your limits and preferences privately').fill(needs[i]!); await expect(page.getByRole('button', { name: 'Interpret my conditions' })).toBeDisabled();
+      await page.getByLabel('These are synthetic test conditions. I agree to their processing by Known Enough and its AI.').check();
+      await page.getByRole('button', { name: 'Interpret my conditions' }).click();
       await expect(page.getByRole('heading', { name: 'Review the interpretation' })).toBeVisible();
       for (const checkbox of await page.locator('label').filter({ hasText: /^(hard|negotiable|preference):/ }).getByRole('checkbox').all()) await checkbox.check();
       await page.getByRole('button', { name: 'Confirm selected conditions' }).click();
@@ -126,7 +128,9 @@ test('four new independent browser owners create a garden decision from blank en
     expect(view.frame.variables.map((item: { id: string }) => item.id)).toEqual(['activity', 'slot']);
     expect(view.currentProposal.facts.values).toEqual([{ variableId: 'activity', value: { type: 'ENUM', optionId: 'watering' } }, { variableId: 'slot', value: { type: 'ENUM', optionId: 'afternoon' } }]);
     expect(JSON.stringify(view)).not.toMatch(/NP_PRIVATE_RAW_CANARY|permissionId|constraintId|requestIdentity|refusedRequests/);
-    for (const page of pages) { await page.reload(); await expect(page.getByRole('heading', { name: 'Shared frame', exact: true })).toBeVisible(); await expect(page.getByText('Everyone approved this exact outcome.', { exact: false })).toBeVisible(); }
+    for (const page of pages) { await page.reload(); await expect(page.getByRole('heading', { name: 'Shared frame', exact: true })).toBeVisible(); await expect(page.getByText('Everyone approved this exact outcome.', { exact: false })).toBeVisible();
+      const finished = page.context(); await finished.close(); const index = contexts.indexOf(finished); if (index >= 0) contexts.splice(index, 1);
+    }
   } finally { await Promise.all(contexts.map(context => context.close())); await api.close(); }
 });
 test('a lost committed response retries the exact command once; expired browser session reconnects without losing server state', async ({ browser }) => {

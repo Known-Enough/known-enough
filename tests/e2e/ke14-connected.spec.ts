@@ -72,6 +72,8 @@ test('three connected owners create, confirm private inputs, negotiate and appro
     for (const page of pages) {
       await page.getByRole('button', { name: 'Load shared decision' }).click();
       await page.getByLabel('Explain your limits and preferences privately').fill('Synthetic fixture limits. KE14_RAW_MESSAGE_CANARY');
+      await expect(page.getByRole('button', { name: 'Interpret my conditions' })).toBeDisabled();
+      await page.getByLabel('These are synthetic test conditions. I agree to their processing by Known Enough and its AI.').check();
       await page.getByRole('button', { name: 'Interpret my conditions' }).click();
       await expect(page.getByRole('heading', { name: 'Review the interpretation' })).toBeVisible();
       for (const checkbox of await page.locator('label').filter({ hasText: /^(hard|negotiable):/ }).getByRole('checkbox').all()) await checkbox.check();

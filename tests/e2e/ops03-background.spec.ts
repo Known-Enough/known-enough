@@ -52,6 +52,7 @@ test('queued negotiation retries the same unknown request and resumes read-only 
   await page.reload();
   await page.getByRole('button', { name: 'Refresh decision' }).click();
   await expect(page.getByRole('button', { name: 'Explore proposals' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Refresh decision', exact: true })).toBeEnabled();
   const readsBefore = reads; state = 'PROPOSED';
   await expect(page.getByRole('heading', { name: 'Current hypothetical proposal' })).toBeVisible({ timeout: 10000 });
   expect(reads).toBeGreaterThan(readsBefore);

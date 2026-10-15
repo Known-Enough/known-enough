@@ -89,6 +89,13 @@ export class OwnerConversationArchitect {
   }) {}
 
   async draft(principal: TrustedPrincipal | null, input: { decisionId: string; messages: unknown }): Promise<KE.AIConstraintDraft> {
+    const { draft, guard } = await this.prepare(principal, input);
+    await this.options.application.storeConstraintDraft({ kind: 'service', subject: 'owner-conversation-interpreter', roomIds: [input.decisionId] }, draft, guard);
+    return draft;
+  }
+
+  /** Strict extraction without persistence, for a server-owned atomic output transaction. */
+  async prepare(principal: TrustedPrincipal | null, input: { decisionId: string; messages: unknown }): Promise<{ draft: KE.AIConstraintDraft; guard: ModelCommitGuard }> {
     const messages = parseMessages(input.messages);
     const owner = await this.options.application.getOwnerSnapshot(principal, input.decisionId);
     const required = owner.publicSnapshot.frame.requiredParticipantIds;
@@ -148,9 +155,6 @@ export class OwnerConversationArchitect {
       })),
       createdAt: new Date(createdAt).toISOString(),
     });
-    await this.options.application.storeConstraintDraft({
-      kind: 'service', subject: 'owner-conversation-interpreter', roomIds: [input.decisionId],
-    }, draft, commitGuard);
-    return draft;
+    return { draft, guard: commitGuard };
   }
 }

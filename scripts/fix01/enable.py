@@ -1,6 +1,6 @@
 """Source-bound model control for public drafts. Preserves private retention and schedule."""
-import argparse,base64,datetime,json,os,pathlib,re,subprocess
-p=argparse.ArgumentParser();p.add_argument('phase',choices=['api','worker','logging','enable','disable']);p.add_argument('--api-sha256');p.add_argument('--worker-sha256');args=p.parse_args()
+import argparse,base64,datetime,json,os,pathlib,re,runpy,subprocess
+p=argparse.ArgumentParser();p.add_argument('phase',choices=['api','worker','logging','enable','disable']);p.add_argument('--api-sha256');p.add_argument('--worker-sha256');p.add_argument('--control-source');args=p.parse_args()
 A='092954139775';SOURCE=os.environ['EXPECTED_SOURCE'];ROOT=pathlib.Path(os.environ['RUNNER_TEMP'])
 report={'utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'source':SOURCE,'phase':args.phase,'controlWrites':0,'dataWrites':0,'providerCalls':0}
 def call(service,op,*argv):
@@ -35,10 +35,17 @@ try:
   current=item('KnownEnoughOperationsJournal','OPERATIONS#MODEL_JOBS');auth=item('KnownEnoughQaControl','AUTH');retention=item('KnownEnoughOperationsJournal','OPERATIONS#RETENTION');totals=item('KnownEnoughQaControl','TOTAL')
   if not current or not auth or not totals or not retention:raise ValueError('CURRENT_CONTROLS_MISSING')
   state=json.loads(current['payload']['S']);standing=json.loads(auth['payload']['S']);policy=json.loads(retention['payload']['S'])
-  if state.get('sourceSha')!=SOURCE or state.get('active')!=[] or state.get('slots')!=[]:raise ValueError('SOURCE_OR_ACTIVE_JOBS_STOP')
-  if policy.get('enabled') is not False:raise ValueError('PRIVATE_RETENTION_GATE_CHANGED_STOP')
+  control_source=args.control_source or SOURCE
+  if not re.fullmatch('[a-f0-9]{40}',control_source) or (args.phase=='enable' and control_source!=SOURCE):raise ValueError('CONTROL_SOURCE_INVALID')
+  if state.get('sourceSha')!=control_source or state.get('active')!=[] or state.get('slots')!=[]:raise ValueError('SOURCE_OR_ACTIVE_JOBS_STOP')
+  synthetic_enabled=False
+  if policy.get('enabled') is not False:
+   if os.environ.get('OWNER_INTERPRETATION')=='true':
+    try:synthetic_enabled=runpy.run_path(str(pathlib.Path(__file__).with_name('retention.py')))['candidate'](retention)==retention
+    except (ValueError,KeyError,TypeError):synthetic_enabled=False
+   if not synthetic_enabled:raise ValueError('PRIVATE_RETENTION_GATE_CHANGED_STOP')
   if standing.get('mode')!='standing' or any(standing.get(name) is not True for name in ['approved','retentionReviewed','invocationLoggingDisabled']):raise ValueError('STANDING_AUTHORITY_NOT_VERIFIED')
-  desired=args.phase=='enable';report['priorEnabled']=state.get('enabled');report['privateRetention']='DISABLED'
+  desired=args.phase=='enable';report['controlSource']=control_source;report['priorEnabled']=state.get('enabled');report['privateRetention']='ENABLED_SYNTHETIC_CONSENT_REQUIRED' if synthetic_enabled else 'DISABLED'
   if state.get('enabled')!=desired:
    new={**state,'revision':state['revision']+1,'enabled':desired}
    transaction=[{'Put':{'TableName':'KnownEnoughOperationsJournal','Item':{**current,'revision':{'N':str(new['revision'])},'payload':{'S':json.dumps(new,separators=(',',':'))}},'ConditionExpression':'#r = :r AND #p = :p','ExpressionAttributeNames':{'#r':'revision','#p':'payload'},'ExpressionAttributeValues':{':r':current['revision'],':p':current['payload']}}}]

@@ -217,7 +217,7 @@ test('shared load helper awaits a held signed owner read before returning', asyn
 
 for (const lookupFailure of [false, true]) test(`follow-up answer proceeds after ${lookupFailure ? 'failed saved-request check is retried without losing input' : 'a successful saved-request check'}`, async ({ browser }) => {
   const api = await npApi(clarificationTransport()), context = await browser.newContext({ viewport: { width: 390, height: 844 } });
-  let failedCheck = false, draftCalls = 0; const objectives: string[] = [];
+  let failedCheck = false, draftCalls = 0; const objectives: string[] = []; const followUps: { answers: string[] }[] = [];
   try {
     await connect(context, api, 'iris'); await api.call('iris', '/account/register', { displayName: 'Iris' }); await api.approve('iris');
     await api.groups.create({ kind: 'participant', subject: 'iris' }, { name: 'Small club', idempotencyKey: 'small' });
@@ -228,7 +228,7 @@ for (const lookupFailure of [false, true]) test(`follow-up answer proceeds after
       await route.fallback();
     });
     await context.route('https://api.example.test/groups/*/drafts', async route => {
-      if (route.request().method() === 'POST') { draftCalls++; objectives.push(route.request().postDataJSON().objective); }
+      if (route.request().method() === 'POST') { draftCalls++; objectives.push(route.request().postDataJSON().objective); if (route.request().postDataJSON().followUp) followUps.push(route.request().postDataJSON().followUp); }
       await route.fallback();
     });
     const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: /^Open group / }).first().click();
@@ -247,7 +247,7 @@ for (const lookupFailure of [false, true]) test(`follow-up answer proceeds after
     }
     await expect(proceed).toBeEnabled(); expect(draftCalls).toBe(1);
     await proceed.click(); await expect(page.getByRole('heading', { name: 'Your decision, ready to review.' })).toBeVisible();
-    expect(draftCalls).toBe(2); expect(objectives[1]).toContain('Answer: Indoors only.');
+    expect(draftCalls).toBe(2); expect(objectives[1]).toBe(objectives[0]); expect(followUps[0]?.answers).toEqual(['Indoors only.']);
     const create = page.getByRole('button', { name: 'Create decision', exact: true }); await expect(create).toBeDisabled();
     await expect(page.getByText('Required: resolve all follow-up questions', { exact: false })).toBeVisible();
     await page.getByRole('checkbox', { name: 'I’ve reviewed these shared choices and who needs to approve.' }).check();
@@ -271,9 +271,121 @@ test('an expired follow-up request closes without losing the saved draft or type
   const page=await context.newPage();await page.goto(url);await page.getByRole('button',{name:/^Open group /}).first().click();await page.getByRole('button',{name:'Start a decision',exact:true}).click();
   await page.getByLabel('Tell me what you want to decide').fill('Choose a gallery meetup.');await page.getByRole('button',{name:'Continue with AI',exact:true}).click();
   const answer=page.getByLabel('Should this meetup be indoors or outdoors?',{exact:true});await answer.fill('Indoors only.');await page.getByRole('button',{name:'Let AI update the draft',exact:true}).click();
-  await page.getByRole('button',{name:'Check progress',exact:true}).click();await expect(page.getByText('This request expired before AI started. Close it to return to your saved draft.',{exact:true})).toBeVisible();await expect(answer).toBeDisabled();
+  await page.getByRole('button',{name:'Check progress',exact:true}).click();await expect(page.getByText('This request expired before AI started. Close it to return to your saved draft.',{exact:true})).toBeVisible();await expect(answer).toHaveCount(0);
   await page.getByRole('button',{name:'Close unfinished request',exact:true}).click();await expect(answer).toHaveValue('Indoors only.');await expect(answer).toBeEditable();
   await page.getByRole('button',{name:'Let AI update the draft',exact:true}).click();await expect(page.getByRole('heading',{name:'Your decision, ready to review.'})).toBeVisible();
   const create=page.getByRole('button',{name:'Create decision',exact:true});await expect(create).toBeDisabled();await page.getByRole('checkbox',{name:'I’ve reviewed these shared choices and who needs to approve.'}).check();await create.click();await expect(page.getByRole('heading',{name:'Shared frame',exact:true})).toBeVisible();expect(submissions).toBe(3);
  }finally{await context.close();await api.close();}
+});
+
+for (const recovery of ['Retry the same action', 'Refresh and review current state']) test(`frame confirmation recovers a lost acknowledgment using ${recovery} without a page reload`, async ({ browser }) => {
+  const api = await npApi(), context = await browser.newContext();
+  try {
+    const h = await freshGroup(api); await connect(context, api, 'iris'); const page = await context.newPage();
+    let commands = 0, navigations = 0;
+    page.on('framenavigated', frame => { if (frame === page.mainFrame()) navigations++; });
+    await context.route(`https://api.example.test/decisions/${h.decisionId}/commands`, async route => {
+      commands++; if (commands !== 1) { await route.fallback(); return; }
+      const response = await api.call('iris', `/decisions/${h.decisionId}/commands`, route.request().postDataJSON()); expect(response.status).toBe(200); await route.abort('failed');
+    });
+    await page.goto(url + '?decision=' + h.decisionId);
+    await page.getByLabel('I reviewed this frame version, its options and public rules.').check();
+    await page.getByRole('button', { name: 'Confirm shared frame', exact: true }).click();
+    await expect(page.getByRole('button', { name: recovery, exact: true })).toBeVisible();
+    await page.getByRole('button', { name: recovery, exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Confirm shared frame', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Retry the same action', exact: true })).toHaveCount(0);
+    expect((await h.publicView()).frameConfirmations).toHaveLength(1);
+    expect(commands).toBe(recovery === 'Retry the same action' ? 2 : 1); expect(navigations).toBe(1);
+  } finally { await context.close(); await api.close(); }
+});
+
+test('private interpretation retains text on unavailable service and recovers a lost saved response with no second AI submission', async ({ browser }) => {
+  const api = await npApi(), context = await browser.newContext();
+  try {
+    const h = await freshGroup(api); await h.confirmFrames(); await connect(context, api, 'iris');
+    let posts = 0;
+    await context.route(`https://api.example.test/decisions/${h.decisionId}/owner-conversation/draft`, async route => {
+      posts++;
+      if (posts === 1) { await route.fulfill({ status: 503, json: { interpretationFailure: 'AI_UNAVAILABLE', requestId: 'test-unavailable' }, headers: { 'access-control-allow-origin': '*' } }); return; }
+      const response = await api.call('iris', `/decisions/${h.decisionId}/owner-conversation/draft`, route.request().postDataJSON()); expect(response.status).toBe(200); await route.abort('failed');
+    });
+    await context.route(`https://api.example.test/decisions/${h.decisionId}/owner-conversation/requests/*`, async route => {
+      const draft = (await h.owner('iris')).draft;
+      await route.fulfill({ status: 200, json: { interpretation: { state: 'SAVED', draft }, draft }, headers: { 'access-control-allow-origin': '*' } });
+    });
+    const page = await context.newPage(); await page.goto(url + '?decision=' + h.decisionId);
+    const text = 'first option, flexible if all hard rules hold, NP_PRIVATE_RAW_CANARY';
+    const input = page.getByLabel('Explain your limits and preferences privately'); await input.fill(text);
+    await page.getByLabel('These are synthetic test conditions. I agree to their processing by Known Enough and its AI.').check();
+    await page.getByRole('button', { name: 'Interpret my conditions', exact: true }).click();
+    await expect(page.getByText('Private interpretation is not available on this server yet.', { exact: false })).toBeVisible(); await expect(input).toHaveValue(text);
+    await page.getByRole('button', { name: 'Interpret my conditions', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Interpret my conditions', exact: true })).toBeDisabled(); await expect(input).toHaveValue(text);
+    await page.getByRole('button', { name: 'Check interpretation result', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Review the interpretation', exact: true })).toBeVisible(); await expect(input).toHaveValue('');
+    expect(posts).toBe(2); expect(JSON.stringify(await h.publicView())).not.toContain('NP_PRIVATE_RAW_CANARY'); expect((await h.owner('omar')).draft).toBeNull();
+    expect(await page.evaluate(() => Object.values(sessionStorage).some(value => value.includes('NP_PRIVATE_RAW_CANARY')))).toBe(false);
+  } finally { await context.close(); await api.close(); }
+});
+
+test('a concurrent confirmation loads the latest frame and requires a fresh review instead of trapping the confirm control', async ({ browser }) => {
+  const api = await npApi(), context = await browser.newContext();
+  try {
+    const h = await freshGroup(api); await connect(context, api, 'iris'); const page = await context.newPage();
+    await page.goto(url + '?decision=' + h.decisionId);
+    const review = page.getByLabel('I reviewed this frame version, its options and public rules.'); await review.check();
+    await h.command('omar', 'CONFIRM_FRAME', { frameVersion: (await h.publicView()).frame.frameVersion });
+    await page.getByRole('button', { name: 'Confirm shared frame', exact: true }).click();
+    await expect(page.getByText('The decision changed while you were reviewing it.', { exact: false })).toBeVisible();
+    await expect(review).not.toBeChecked(); await expect(page.getByRole('button', { name: 'Confirm shared frame', exact: true })).toBeDisabled();
+    await review.check(); await page.getByRole('button', { name: 'Confirm shared frame', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Confirm shared frame', exact: true })).toHaveCount(0); expect((await h.publicView()).frameConfirmations).toHaveLength(2);
+  } finally { await context.close(); await api.close(); }
+});
+
+test('a lost draft response opens the recovered saved review without repeating AI or showing a false failure', async ({ browser }) => {
+  const api = await npApi(), context = await browser.newContext();
+  try {
+    await connect(context, api, 'iris'); await api.call('iris', '/account/register', { displayName: 'Iris' }); await api.approve('iris');
+    await api.groups.create({ kind: 'participant', subject: 'iris' }, { name: 'Recovery club', idempotencyKey: 'saved-recovery' });
+    let posts = 0; let saved: unknown;
+    await context.route('https://api.example.test/groups/*/drafts', async route => {
+      if (route.request().method() !== 'POST') { await route.fallback(); return; }
+      posts++; const response = await api.call('iris', new URL(route.request().url()).pathname, route.request().postDataJSON());
+      expect(response.status).toBe(200); saved = (await response.json()).draft; await route.abort('failed');
+    });
+    await context.route('https://api.example.test/groups/*/draft-requests/*', route => route.fulfill({ status: 200,
+      json: { draftRequest: { state: 'SAVED', revision: 0, canRelease: true, draft: saved } }, headers: { 'access-control-allow-origin': '*' } }));
+    const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: /^Open group / }).first().click();
+    await page.getByRole('button', { name: 'Start a decision', exact: true }).click();
+    await page.getByLabel('Tell me what you want to decide').fill('Choose a gallery meetup.'); await page.getByRole('button', { name: 'Continue with AI', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Your decision, ready to review.', exact: true })).toBeVisible();
+    await expect(page.getByText('The saved draft was recovered without another AI call.', { exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Create decision', exact: true })).toBeDisabled(); expect(posts).toBe(1);
+    await expect(page.getByText('The result is unknown. Refresh before retrying.', { exact: true })).toHaveCount(0);
+  } finally { await context.close(); await api.close(); }
+});
+
+test('a private request that never started closes safely and restores the typed conditions', async ({ browser }) => {
+  const api = await npApi(), context = await browser.newContext();
+  try {
+    const h = await freshGroup(api); await h.confirmFrames(); await connect(context, api, 'iris'); let posts = 0;
+    await context.route(`https://api.example.test/decisions/${h.decisionId}/owner-conversation/draft`, async route => { posts++; await route.abort('failed'); });
+    await context.route(`https://api.example.test/decisions/${h.decisionId}/owner-conversation/requests/*`, route => route.fulfill({ status: 200,
+      json: { interpretation: { state: 'NOT_SUBMITTED', canRelease: true, revision: 0 } }, headers: { 'access-control-allow-origin': '*' } }));
+    await context.route(`https://api.example.test/decisions/${h.decisionId}/owner-conversation/requests/*/close`, route => {
+      expect(route.request().postDataJSON()).toEqual({ revision: 0 }); return route.fulfill({ status: 200,
+        json: { interpretation: { state: 'FAILED', canRelease: true, revision: 1 } }, headers: { 'access-control-allow-origin': '*' } });
+    });
+    const page = await context.newPage(); await page.goto(url + '?decision=' + h.decisionId);
+    const input = page.getByLabel('Explain your limits and preferences privately'); await input.fill('Synthetic hard limit: first option only.');
+    await page.getByLabel('These are synthetic test conditions. I agree to their processing by Known Enough and its AI.').check();
+    await page.getByRole('button', { name: 'Interpret my conditions', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Close interpretation request', exact: true })).toHaveCount(0);
+    await page.getByRole('button', { name: 'Check interpretation result', exact: true }).click();
+    await page.getByRole('button', { name: 'Close interpretation request', exact: true }).click();
+    await expect(input).toHaveValue('Synthetic hard limit: first option only.'); await expect(input).toBeEditable();
+    await expect(page.getByRole('button', { name: 'Interpret my conditions', exact: true })).toBeEnabled(); expect(posts).toBe(1);
+  } finally { await context.close(); await api.close(); }
 });

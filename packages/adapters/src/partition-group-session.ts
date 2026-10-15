@@ -22,7 +22,8 @@ const registration = z.strictObject({ displayName: label });
 const profile = z.strictObject({ subject: id, email, verified: z.literal(true), username: z.string().min(1).max(128).optional() });
 const invite = z.strictObject({ email, replace: z.boolean() });
 const accept = z.strictObject({ token: z.string().regex(/^[A-Za-z0-9_-]{32,80}$/) });
-const draftGeneration = z.strictObject({ objective: z.string().max(2000).trim().min(1), idempotencyKey: id });
+const draftGeneration = z.strictObject({ objective: z.string().max(2000).trim().min(1), idempotencyKey: id,
+  followUp: z.strictObject({ draftId: id, revision: z.number().int().positive(), answers: z.array(z.string().trim().min(1).max(500)).min(1).max(12) }).optional() });
 const draftCreation = z.strictObject({ revision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER) });
 const architectureOutput = z.strictObject({ draftId: id, revision: z.literal(1), status: z.enum(['DEFINING', 'NEEDS_CLARIFICATION']),
   frame: KE.PublicDecisionFrame, clarificationQuestions: Groups.GroupDraft.shape.clarificationQuestions,
@@ -390,11 +391,17 @@ export function createPartitionGroupSession(transport: PartitionTransport,
         const draftId = `draft-${createHash('sha256').update(JSON.stringify([key, who, request.data.idempotencyKey])).digest('hex').slice(0, 40)}`;
         const before = await selected(who, key, io, resolved => repository.transaction(resolved, state => {
           const group = current(state, who, key, true); const participants = publicRoster(state, group);
-          const bodyHash = createHash('sha256').update(JSON.stringify([request.data.objective, group.version])).digest('hex');
+          const followUp = request.data.followUp;
+          const previous = followUp ? currentDraft(state, who, key, followUp.draftId) : null;
+          if (previous && (previous.createdDecisionId || previous.revision !== followUp!.revision
+            || previous.frame.objective !== request.data.objective || previous.clarificationQuestions.length !== followUp!.answers.length)) return deny('STALE_CONTEXT');
+          const publicClarifications = previous ? [...(previous.publicClarifications ?? []), ...previous.clarificationQuestions.map((question, index) => ({ question, answer: followUp!.answers[index]! }))] : [];
+          if (publicClarifications.length > 36) return deny('INVALID_COMMAND');
+          const bodyHash = createHash('sha256').update(JSON.stringify([request.data.objective, group.version, ...(followUp ? [followUp] : [])])).digest('hex');
           const existing = group.drafts.find(value => value.id === draftId);
           if (existing && (existing.bodyHash !== bodyHash || existing.groupVersion !== group.version)) return deny('STALE_CONTEXT');
           if (!existing && group.drafts.length >= 64) throw new PartitionSessionError('SESSION_CAPACITY');
-          return { groupVersion: group.version, participants, bodyHash, existing: existing ?? null };
+          return { groupVersion: group.version, participants, bodyHash, existing: existing ?? null, previous, publicClarifications };
         }, io));
         if (before.existing) return Groups.GroupDraft.parse(before.existing);
         const validate = (rawValue: unknown) => {
@@ -415,7 +422,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
         const questions = [...output.clarificationQuestions]; const catalog = genericCandidateCatalog(output.frame);
         if (catalog.clarificationQuestion && !questions.includes(catalog.clarificationQuestion)) questions.push(catalog.clarificationQuestion);
         return Groups.GroupDraft.parse({ id: draftId, bodyHash: before.bodyHash, revision: 1, groupVersion: before.groupVersion,
-          frame: output.frame, clarificationQuestions: questions.slice(0, 12), createdDecisionId: null });
+          frame: output.frame, clarificationQuestions: questions.slice(0, 12), createdDecisionId: null, ...(before.publicClarifications.length ? { publicClarifications: before.publicClarifications } : {}) });
         };
         const readSaved = () => selected(who, key, io, resolved => repository.transaction(resolved, state => {
           const group = current(state, who, key, true);
@@ -428,6 +435,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
         const scope: PartitionDraftScope = { groupId: key, groupVersion: before.groupVersion, bodyHash: before.bodyHash, requestKey: request.data.idempotencyKey, readSaved,
           fence: output => selected(who, key, io, resolved => repository.fence(resolved, state => {
             const group = current(state, who, key, true);
+            if (before.previous && currentDraft(state, who, key, before.previous.id).revision !== before.previous.revision) return deny('STALE_CONTEXT');
             if (group.version !== before.groupVersion || JSON.stringify(publicRoster(state, group)) !== JSON.stringify(before.participants)) return deny('STALE_CONTEXT');
             if (output !== undefined) {
               const candidate = validate(output); preparedOutput = true; const existing = group.drafts.find(value => value.id === draftId);
@@ -442,13 +450,14 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           return Promise.resolve().then(() => {
             if (io.signal.aborted) throw new PartitionSessionError('SESSION_TIMEOUT');
             return draftArchitect(who, { draftId, revision: 1, objective: request.data.objective,
-              participants: before.participants.map(({ id, displayName }) => ({ id, displayName })), allowedOptions: [], generateOptions: true }, io, scope);
+              participants: before.participants.map(({ id, displayName }) => ({ id, displayName })), allowedOptions: [], generateOptions: true, ...(before.previous ? { followUp: { previousFrame: before.previous.frame, answers: before.publicClarifications } } : {}) }, io, scope);
           }).finally(() => { generating--; });
         });
         if (preparedOutput) { const saved = await readSaved(); if (saved) return saved; }
         const draft = validate(rawOutput);
         return selected(who, key, io, resolved => repository.transaction(resolved, state => {
           const group = current(state, who, key, true);
+          if (before.previous && currentDraft(state, who, key, before.previous.id).revision !== before.previous.revision) return deny('STALE_CONTEXT');
           if (group.version !== before.groupVersion || JSON.stringify(publicRoster(state, group)) !== JSON.stringify(before.participants)) return deny('STALE_CONTEXT');
           const existing = group.drafts.find(value => value.id === draftId);
           if (existing) {

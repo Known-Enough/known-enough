@@ -9,6 +9,7 @@ import { createManagedDurableEnqueue } from './durable-enqueue.ts';
 const mocks = vi.hoisted(() => ({ resolve: vi.fn(), listener: vi.fn(), discovery: vi.fn(), groups: {}, decisions: {}, lifecycle: vi.fn((config: { sourceSha: string; signingKey: Buffer }) => { void config; return { exportOwn: vi.fn(), loadOwnPlan: vi.fn(), consent: vi.fn(), status: vi.fn(), assertRetained: vi.fn() }; }) }));
 vi.mock('./cognito-identity.ts', () => ({ createCognitoIdentityResolver: vi.fn(() => mocks.resolve) }));
 vi.mock('./partition-http.ts', () => ({ createPartitionParticipantApiHandler: vi.fn(() => mocks.listener) }));
+vi.mock('./partition-owner-runtime.ts', () => ({ createManagedPartitionOwnerRuntime: vi.fn(() => vi.fn()) }));
 vi.mock('./durable-enqueue.ts', () => ({ createManagedDurableEnqueue: vi.fn(() => vi.fn()) }));
 vi.mock('@deal-table/adapters/partition-request', () => ({ createPartitionManagedDriver: vi.fn(() => ({
   groups: mocks.groups, decisions: mocks.decisions, membershipDiscovery: mocks.discovery,

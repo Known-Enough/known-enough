@@ -68,11 +68,11 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     return () => { active = false; };
   }, [config]);
   const signOut = () => { if (!session) return; direct.signOut(); const legacy=session.method!=='SRP'; const url=legacy?cognitoLogoutUrl(config,session):null; expire(); if(url)window.location.assign(url); };
-  async function load() {
+  async function load(preserve = true) {
     if (!session || view.kind !== 'decision') return;
     const id = view.decisionId, token = session.accessToken, current = ++epoch.current;
     abort.current?.abort(); const controller = new AbortController(); abort.current = controller;
-    setTarget(null); setBusy(true); setStatus(''); setSnapshot(null); setOwner(null);
+    setTarget(null); setBusy(true); setStatus(''); if (!preserve) { setSnapshot(null); setOwner(null); }
     try {
       const pub = await cognitoApiFetch(config, session, `/decisions/${id}/public`, expire, { signal: controller.signal });
       if (!pub.ok) throw Object.assign(new Error('unavailable'), { status: pub.status }); const value = KE.PublicDecisionSnapshot.parse(await pub.json());
@@ -81,10 +81,10 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
       if (session.kind === 'participant') {
         const response = await cognitoApiFetch(config, session, `/decisions/${id}/me`, expire, { signal: controller.signal });
         if (!response.ok) throw Object.assign(new Error('unavailable'), { status: response.status }); privateValue = KE.OwnerDecisionSnapshot.parse(await response.json());
-        if (privateValue.publicSnapshot.frame.decisionId !== id || privateValue.publicSnapshot.contextToken !== value.contextToken || privateValue.publicSnapshot.semanticVersion !== value.semanticVersion || privateValue.publicSnapshot.publicRevision !== value.publicRevision) throw new Error('changed');
+        if (privateValue.publicSnapshot.frame.decisionId !== id) throw new Error('wrong decision');
       }
       if (epoch.current !== current || selection.current.id !== id || selection.current.token !== token) return;
-      setSnapshot(value); setOwner(privateValue); const available = backgroundNegotiationAvailable(pub); setBackground(available);
+      setSnapshot(privateValue?.publicSnapshot ?? value); setOwner(privateValue); const available = backgroundNegotiationAvailable(pub); setBackground(available);
       if (available && privateValue && value.status === 'REASONING') setTarget({ decisionId: id, contextToken: value.contextToken,
         semanticVersion: value.semanticVersion, ownerParticipantId: privateValue.ownerParticipantId, expiresAt: new Date(Date.now() + 120000).toISOString() });
     } catch (error) { if (epoch.current === current) {
@@ -95,10 +95,10 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
           if (epoch.current === current && value.status !== 'APPROVED') { saveIntendedView(view); dirty.current = false; move({ kind: 'groups' }, true); }
         } catch { /* Keep private snapshots cleared without inventing an account state. */ }
       }
-    } }
+    } throw error; }
     finally { if (epoch.current === current) setBusy(false); }
   }
-  useEffect(() => { let cancelled = false; if (view.kind === 'decision' && session) void Promise.resolve().then(() => { if (!cancelled) void load(); }); else { epoch.current++; abort.current?.abort(); setTarget(null); setSnapshot(null); setOwner(null); setBusy(false); }
+  useEffect(() => { let cancelled = false; if (view.kind === 'decision' && session) void Promise.resolve().then(() => { if (!cancelled) void load(false).catch(() => {}); }); else { epoch.current++; abort.current?.abort(); setTarget(null); setSnapshot(null); setOwner(null); setBusy(false); }
     return () => { cancelled = true; epoch.current++; abort.current?.abort(); };
   }, [view, session]);
   useEffect(() => {
@@ -125,11 +125,11 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
         <button className="secondary" onClick={() => move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' })}>{view.groupId ? 'Back to group' : 'Back to groups'}</button>
         <section className={`ke-card${snapshot ? ' ke-load-reveal' : ''}`} aria-busy={busy || (!snapshot && !status)}><h2>{snapshot?.frame.title ?? 'Your decision'}</h2>
           {snapshot && <p role="status">Status: {decisionStatusText(snapshot.status)}</p>}
-          <button className="secondary" disabled={busy} onClick={() => { if (dirty.current && !window.confirm('Refresh and discard unsaved input?')) return; dirty.current = false; void load(); }}>Refresh decision</button>
+          <button className="secondary" disabled={busy} onClick={() => { if (dirty.current && !window.confirm('Refresh and discard unsaved input?')) return; dirty.current = false; void load().catch(() => {}); }}>Refresh decision</button>
           {!snapshot && !status && <LoadingSkeleton kind="decision" label="Loading current decision" />}
           {!snapshot && status && <p role="status">{status}</p>}
         </section>
-        {snapshot && <div className="ke-load-reveal"><ConnectedDecision key={`${session.accessToken}:${snapshot.contextToken}:${snapshot.currentProposal?.proposalId ?? ''}:${owner?.ownerVersion ?? ''}:${owner?.draft?.draftId ?? ''}`}
+        {snapshot && <div className="ke-load-reveal"><ConnectedDecision key={`${session.accessToken}:${snapshot.contextToken}`}
           snapshot={snapshot} owner={owner} backgroundNegotiation={background} staged api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} refresh={async () => { dirty.current = false; await load(); }}
           onDirtyChange={value => { dirty.current = value; }} onQueued={receipt => { if (!owner) return; setTarget({ decisionId: snapshot.frame.decisionId, contextToken: snapshot.contextToken, semanticVersion: snapshot.semanticVersion, ownerParticipantId: owner.ownerParticipantId, expiresAt: receipt.expiresAt }); }} /></div>}
       </> : session.kind === 'display' ? <section className="ke-card"><h2>Shared screen</h2><p>Open a shared decision link from your group to show its progress. This screen cannot enter private needs or approve proposals.</p></section>
