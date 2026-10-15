@@ -30,3 +30,6 @@ The error reports an output-contract rejection, but the exact field/schema/seman
 Record the root cause, source changes, exact disposition for both reported requests if observable, publication status and a short manual retest guide. Distinguish source checks from actual live acceptance; do not mark done solely because an error label changed. Link FIX01 evidence where reused.
 
 Task creation is documentation only. No tests, provider calls, recovery, AWS changes, deployment or worker dispatch by A. B follows its applicable session instructions and logs actual checks and blockers. Existing claim and schedule unchanged.
+
+
+User-directed FIX01 continuation 2026-10-15T06:08:44.323908+00:00: overlapping report is being addressed inside the single active FIX01/B claim; no separate FF worker. Current findings and checks are recorded in [FIX01](../../fix/FIX01/ticket.md). Original two FF03 reference outcomes are not independently correlated; new source diagnostics add finite rejection stage only, no user/model content. No FF DONE or live success inferred from local code.
