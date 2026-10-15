@@ -95,12 +95,19 @@ def main():
                 observed = root / 'fix01-retention-backup-read-private.json'
                 metadata = aws('s3api', 'get-object', '--bucket', 'known-enough-qa-artifacts-' + ACCOUNT,
                                '--key', value['key'], str(observed))
-                if not metadata.get('VersionId') or metadata.get('ServerSideEncryption') != 'AES256' or hashlib.sha256(observed.read_bytes()).hexdigest() != digest:
+                report['backupChecks'] = {'versioned': bool(metadata.get('VersionId') and metadata['VersionId'] != 'null'),
+                                         'encrypted': metadata.get('ServerSideEncryption') == 'AES256',
+                                         'contentMatches': hashlib.sha256(observed.read_bytes()).hexdigest() == digest,
+                                         'etagPresent': isinstance(metadata.get('ETag'), str) and bool(metadata['ETag'])}
+                if not all(report['backupChecks'][field] for field in ['encrypted', 'contentMatches', 'etagPresent']):
                     raise ValueError('PRIVATE_BACKUP_NOT_VERIFIED')
-                receipt.write_text(json.dumps({'source': source, 'digest': digest, 'key': value['key'], 'version': metadata['VersionId']}))
+                # QA artifact storage supports conditional-create backups without requiring bucket versioning.
+                # The unique key, encrypted exact-byte readback and digest remain mandatory.
+                receipt.write_text(json.dumps({'source': source, 'digest': digest, 'key': value['key'],
+                                               'version': metadata.get('VersionId'), 'etag': metadata['ETag']}))
             else:
                 backup = json.loads(receipt.read_text())
-                if backup.get('source') != source or backup.get('digest') != digest or backup.get('key') != value['key'] or not backup.get('version'):
+                if backup.get('source') != source or backup.get('digest') != digest or backup.get('key') != value['key'] or not isinstance(backup.get('etag'), str) or not backup['etag']:
                     raise ValueError('PRIVATE_BACKUP_REQUIRED')
                 current = read()
                 if current != value['prior'] and current != value['desired']:

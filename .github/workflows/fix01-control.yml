@@ -3,6 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       source_sha: {type: string, required: true}
+      runtime_source: {type: string, required: false, default: '', description: Exact installed runtime source when publishing only control tooling}
       api_sha256: {type: string, required: true}
       worker_sha256: {type: string, required: true}
       run_checks: {type: boolean, default: true}
@@ -18,7 +19,7 @@ jobs:
     timeout-minutes: 5
     permissions: {contents: read, id-token: write}
     env:
-      EXPECTED_SOURCE: ${{ inputs.source_sha }}
+      EXPECTED_SOURCE: ${{ inputs.runtime_source || inputs.source_sha }}
       API_SHA256: ${{ inputs.api_sha256 }}
       WORKER_SHA256: ${{ inputs.worker_sha256 }}
       ENABLE: ${{ inputs.enable }}
@@ -28,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with: {persist-credentials: false}
-      - run: test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
+      - run: test "$(git rev-parse HEAD)" = "${{ inputs.source_sha }}"
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
           role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPrimaryRelease
