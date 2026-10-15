@@ -1,6 +1,6 @@
 # FF03 — Unsupported AI follow-up draft and confusing recovery UI
 
-Status: IN_PROGRESS / A omitted-group correction; latest manual attempt FAILED on source1cff7b5; no tests/AI calls
+Status: OMITTED-GROUP CORRECTION PUBLISHED / new manual acceptance pending; A claim released; no tests/AI calls
 Scheduling: preserve the current active claim and one implementation writer. This overlaps FIX01's public-draft lifecycle: B should correlate these reports with the current FIX01 repair first, without starting a parallel claim. If FIX01 resolves the same defect, link its actual evidence here instead of duplicating work; otherwise take this bounded follow-up sequentially.
 
 ## Observed report
@@ -78,3 +78,5 @@ Publication 2026-10-15T20:52:30.990518+00:00: source`1cff7b5db4c5a394295b584974c
 Reference `1332f809-32ee-41bc-806c-c860a8b28214`, matching [readback38805921701](https://github.com/Known-Enough/known-enough/actions/runs/38805921701), confirms source1cff7b5 completed an acknowledged provider tool response but rejected missing collections at `ARCHITECT_WIRE_SCHEMA`. The bounded first twelve issues include `rules.RANGE`, other operator groups, and unused variable groups such as NUMBER/MONEY/DATETIME. This is a newly introduced overly strict envelope requirement; publication did not prove functional success. [Sanitized exact evidence](../../../../review-artifacts/FF/unused-groups-exact-reference.json).
 
 Make type/operator collections optional with deterministic empty interpretation when absent; keep both root collection objects required, reject explicit null/non-array/unknown groups, and retain all required subtype fields/options, complete definition/candidate/privacy checks. Change no decision facts or saved data; no paid retry. The legacy error wording pasted by the user also comes from an older loaded screen, but this does not explain away the confirmed new backend rejection. No tests or AI calls; compatible runtime publication and manual acceptance remain.
+
+Correction publication 2026-10-15T21:01:15.933133+00:00: source`4288829b425852658f61003befebfd3b0c30193f`, [native runtime38806235725](https://github.com/Known-Enough/known-enough/actions/runs/38806235725) SUCCESS/API`01c44130`/worker`0100ee83`, [enable38806363325](https://github.com/Known-Enough/known-enough/actions/runs/38806363325) SUCCESS/current source/TOTAL unchanged/individual consent required. Frontend source1cff7b5/Amplify102 unchanged. [Receipt](../../../../review-artifacts/FF/unused-groups-correction-publication.json). Type/lint/schema build completed; no tests/model calls. A claim released; new manual acceptance pending.

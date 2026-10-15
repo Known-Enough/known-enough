@@ -49,3 +49,5 @@ With the supplied dinner example, look for both 2026-10-23 and 2026-10-24 displa
 ## Generic contract repair (source1cff7b5 / Amplify102)
 
 Use the original dinner example with the two October dates and three fictional restaurant options, then try another shared choice (for example, a trip or purchase). The result should retain concrete alternatives for review without requiring the organizer to choose anyone’s private preference. Check an update to the saved draft too. Missing required AI fields must be rejected safely and logged with a reference; they must not create guessed choices or discard an earlier saved draft. Publication and static compilation succeeded; these manual checks have not been performed by A.
+
+Latest backend correction: source4288829 accepts absent unused type/operator collections while retaining required fields inside actual choices/rules. The prior source1cff7b5 manually failed on that overstrict collection requirement. Refresh the loaded frontend before the next attempt. A has published the correction without testing or another AI call; the next manual result remains unknown.

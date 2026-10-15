@@ -1,0 +1,100 @@
+{
+  "result": "UNUSED_GROUP_CORRECTION_PUBLISHED_MANUAL_ACCEPTANCE_PENDING",
+  "utc": "2026-10-15T21:01:15.933133+00:00",
+  "source": "4288829b425852658f61003befebfd3b0c30193f",
+  "observation": {
+    "reference": "1332f809-32ee-41bc-806c-c860a8b28214",
+    "deployedSource": "1cff7b5db4c5a394295b584974cf05b5ec919f22",
+    "readback": "https://github.com/Known-Enough/known-enough/actions/runs/38805921701",
+    "stage": "ARCHITECT_WIRE_SCHEMA",
+    "issue": "Missing variable/operator collections were incorrectly required",
+    "rawContentRetained": false,
+    "fullFieldList": "BOUNDED_TO_FIRST_TWELVE_ISSUES"
+  },
+  "change": "Unused type/operator collections are optional; absent means no entries. Root objects, supplied collection types, subtype fields/options and semantic/privacy checks remain strict. No invented choices or automatic paid retry.",
+  "checks": {
+    "typescriptCompilation": "COMPLETED",
+    "changedSourceLint": "COMPLETED",
+    "toolSchemaBuild": "COMPLETED",
+    "tests": "NOT_EXECUTED_USER_DIRECTION",
+    "modelCalls": 0,
+    "signupCalls": 0
+  },
+  "disableRun": "https://github.com/Known-Enough/known-enough/actions/runs/38806143663",
+  "runtime": {
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38806235725",
+    "api": {
+      "sourceSha": "4288829b425852658f61003befebfd3b0c30193f",
+      "result": "LIFECYCLE_OWNER_CODE_READBACK_PASS",
+      "backendSha256": "01c4413075a9b972ed04a9d2d163379259b5857ad65470136b1fa555a5214c0a",
+      "priorBackendSha256": "e17e2b25c483dab3d9e3c1c884c6799225efd25128a0542e457a81181af1192a",
+      "environment": "UNCHANGED",
+      "migration": "UNCHANGED",
+      "modelCalls": 0,
+      "dataChanges": 0,
+      "managedOwnerProof": "PENDING"
+    },
+    "worker": {
+      "result": "WORKER_CODE_DISABLED_READBACK_PASS",
+      "providerCalls": 0,
+      "activation": "NOT_EXECUTED",
+      "codeWriteRequested": true,
+      "actualWorkerSha256": "5cc192b800c8168a921962379f025a01a71cf36518b3f55cb79b6565c2afd7ff",
+      "expectedPriorWorkerSha256": "5cc192b800c8168a921962379f025a01a71cf36518b3f55cb79b6565c2afd7ff",
+      "workerSha256": "0100ee8362eb49855ed07c5ecc02c139a13db0cb26e8b1422082b3bc02a1a0ea",
+      "sourceSha": "4288829b425852658f61003befebfd3b0c30193f",
+      "schedule": "DISABLED"
+    },
+    "sourceTransition": {
+      "sourceSha": "4288829b425852658f61003befebfd3b0c30193f",
+      "result": "JOB_SOURCE_DISABLED_READBACK_PASS",
+      "writeRequested": true,
+      "state": "DISABLED",
+      "active": 0,
+      "slots": 0,
+      "totalWrites": 0,
+      "totalsUnchangedDuringCheck": true,
+      "providerCalls": 0
+    }
+  },
+  "enable": {
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38806363325",
+    "utc": "2026-10-15T20:59:52.104757+00:00",
+    "source": "4288829b425852658f61003befebfd3b0c30193f",
+    "phase": "enable",
+    "controlWrites": 1,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "controlSource": "4288829b425852658f61003befebfd3b0c30193f",
+    "priorEnabled": false,
+    "privateRetention": "ENABLED_SYNTHETIC_CONSENT_REQUIRED",
+    "enabled": true,
+    "totals": "UNCHANGED",
+    "result": "CONTROL_READBACK_PASS",
+    "processingPolicy": {
+      "source": "4288829b425852658f61003befebfd3b0c30193f",
+      "phase": "apply",
+      "policyWrites": 0,
+      "backupWrites": 0,
+      "accountWrites": 0,
+      "stampWrites": 0,
+      "totalWrites": 0,
+      "providerCalls": 0,
+      "result": "SYNTHETIC_PROCESSING_APPLY_PASS",
+      "rawConversationMs": 0,
+      "realPersonPolicy": "UNAPPROVED",
+      "participantConsent": "REQUIRED_IN_APP",
+      "utc": "2026-10-15T21:00:09.371409+00:00"
+    }
+  },
+  "frontend": {
+    "source": "1cff7b5db4c5a394295b584974cf05b5ec919f22",
+    "amplifyJobId": "102",
+    "unchanged": true,
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38805152558",
+    "note": "User pasted legacy wording; refresh loaded page. The confirmed backend rejection was on the new runtime, not explained by stale UI."
+  },
+  "artifactDownload": "TRANSIENT_HTTP_503_RECOVERED_ON_ONE_READ_ONLY_RETRY",
+  "newCloudShellSetup": "NOT_REQUIRED",
+  "functionalAcceptance": "PENDING_USER_MANUAL_ATTEMPT"
+}

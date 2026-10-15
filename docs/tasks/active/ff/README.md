@@ -5,7 +5,7 @@
 | [FF01](FF01/README.md) | Compact account screens, password visibility and contextual recovery. | PUBLISHED; user manual acceptance pending |
 | [FF02](FF02/README.md) | Owner-only interpretation with explicit participant prerequisites/consent. | PUBLISHED; required permission now installed; user manual acceptance pending |
 | [FF04](FF04/README.md) | Organizer-confirmed deletion of saved drafts and decisions, with old-link/replay protection. | PUBLISHED/source56a7a9a/Amplify101; manual acceptance pending |
-| [FF03](FF03/README.md) | Generic incomplete-idea guide, concrete public questions and safer recovery. | Generic repair PUBLISHED/source1cff7b5/Amplify102; user manual acceptance pending |
+| [FF03](FF03/README.md) | Generic incomplete-idea guide, concrete public questions and safer recovery. | Unused-group correction PUBLISHED/API source4288829; frontend102; manual acceptance pending |
 
 [Latest guide publication](../../../review-artifacts/FF/generic-guide-publication.json), [earlier FF receipts](../../../review-artifacts/FF/a-publication-20261015.json), [generic behavior reference](FF03/gold-standard.md), [manual checklist](manual-checklist.md).
 
@@ -24,3 +24,5 @@ Latest FF03 literal protocol published/sourceaf21299/API1c867d50/worker43e91222,
 Latest FF03 logging: [guide](../../../debugging-decision-drafts.md), [receipt](../../../review-artifacts/FF/detailed-logging-publication.json). Sourcedf940b8/APIc59a9849/worker00275cda published; no tests/AI probes. Exact-reference38803481971 subsequently verified live correlation and missing-options detail; successful draft generation still needs user manual acceptance. A logging claim released.
 
 Latest generic FF03 repair: [receipt](../../../review-artifacts/FF/generic-resilience-publication.json), source1cff7b5/APIe17e2b25/worker5cc192b8/frontendAmplify102. Required fields derive from every supported variable/operator contract; strict compilation, safe diagnostics and confirmed-failure closure preserve drafts/answers/unknown outcomes. All three publication/control runs succeeded, no tests/model probes or new CloudShell setup. A claim released, manual acceptance pending.
+
+Latest omitted-group correction: [receipt](../../../review-artifacts/FF/unused-groups-correction-publication.json), source4288829/API01c44130/worker0100ee83, runtime38806235725/enable38806363325 SUCCESS. Source1cff7b5 had a confirmed new manual failure because it required omitted unused collections. Those collections are now optional; actual entry fields remain strict. Frontend1cff7b5/Amplify102 unchanged. A claim released, new manual acceptance pending; no tests/model calls or CloudShell setup.
