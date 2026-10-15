@@ -351,7 +351,9 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           } else {
             if (!group.members.includes(who)) {
               if (group.members.length >= 16 || group.version >= Number.MAX_SAFE_INTEGER) throw new PartitionSessionError('SESSION_CAPACITY');
-              group.members.push(who); group.version++;
+              const priorVersion = group.version; group.members.push(who); group.version++;
+              // Joining the group does not enroll this person in any decision or mutate its consent.
+              for (const binding of group.decisions) if (!binding.deleted && binding.version === priorVersion) binding.version = group.version;
             }
             invitation.acceptedBy = who;
           }

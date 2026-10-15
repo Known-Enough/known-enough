@@ -150,7 +150,10 @@ export class GroupService {
         return this.snapshot(state, group, who);
       }
       if (group.members.length >= 16) throw new GroupCapacityError();
-      if (!group.members.includes(who)) { group.members.push(who); group.version++; }
+      if (!group.members.includes(who)) {
+        const priorVersion = group.version; group.members.push(who); group.version++;
+        for (const binding of group.decisions) if (!binding.deleted && binding.version === priorVersion) binding.version = group.version;
+      }
       invitation.acceptedBy = who;
       return this.snapshot(state, group, who);
     });

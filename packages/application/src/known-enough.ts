@@ -1013,8 +1013,40 @@ export class KnownEnoughApplication {
         && decision.memberships.some(item => item.subject === principal.subject && item.active
           && decision.definition.participants.some(person => person.id === item.participantId));
       if (!isAuthorizedService && !isCurrentCreator) fail('FORBIDDEN');
-      if (decision.status === 'CLOSED') fail('FORBIDDEN');
       if (decision.controlVersion !== input.expectedControlVersion) fail('STALE_CONTEXT');
+      const shared = (definition: KETypes.DecisionDefinition) => {
+        const frame = publicFrame(definition);
+        return stable({ title: frame.title, objective: frame.objective, description: frame.description, variables: frame.variables, rules: frame.rules });
+      };
+      const rosterOnly = parsed.data.decisionId === decision.decisionId && shared(parsed.data) === shared(decision.definition);
+      if (rosterOnly && ['AGREED', 'CLOSED'].includes(decision.status)) return; // Recorded membership/outcome is immutable.
+      const additionOnly = rosterOnly && decision.definition.participants.every(person => parsed.data.participants.some(next => next.id === person.id))
+        && decision.memberships.every(member => input.memberships.some(next => next.subject === member.subject && next.participantId === member.participantId && next.active === member.active));
+      if (additionOnly) {
+        const additions = parsed.data.participants.filter(person => !decision.definition.participants.some(previous => previous.id === person.id));
+        const identities = input.memberships.map(member => member.participantId);
+        if (new Set(identities).size !== identities.length || new Set(input.memberships.map(member => member.subject)).size !== input.memberships.length
+          || input.memberships.length !== parsed.data.participants.length || input.memberships.some(member => !member.active || !Id.safeParse(member.subject).success
+            || !parsed.data.participants.some(person => person.id === member.participantId))) fail('INVALID_COMMAND');
+        if (!additions.length) return;
+        const definition = KE.DecisionDefinition.parse({ ...decision.definition,
+          participants: [...decision.definition.participants, ...additions.map(person => ({ ...person, requiredForApproval: true }))],
+          requiredParticipantIds: [...decision.definition.requiredParticipantIds, ...additions.map(person => person.id)] });
+        retireCurrentProposal(decision); // Previous outcome approvals never apply to a different roster/proposal.
+        for (const owner of decision.owners) {
+          owner.pendingQuestions = owner.pendingQuestions.map(question => question.status === 'PENDING' ? { ...question, status: 'SUPERSEDED' as const } : question);
+          owner.negotiationPermissions = owner.negotiationPermissions.map(permission => permission.status === 'ACTIVE' ? { ...permission, status: 'SUPERSEDED' as const, permissionVersion: permission.permissionVersion + 1 } : permission);
+          owner.disclosurePermissions = owner.disclosurePermissions.map(permission => ['PENDING', 'ACTIVE'].includes(permission.status) ? { ...permission, status: 'SUPERSEDED' as const, permissionVersion: permission.permissionVersion + 1 } : permission);
+        }
+        // Preserve semantic context, confirmations, drafts and confirmed constraints verbatim. New owners start empty.
+        decision.definition = definition;
+        decision.memberships = structuredClone(input.memberships) as DecisionMembership[];
+        decision.owners.push(...additions.map(person => emptyOwner(person.id)));
+        decision.status = readinessStatus(decision);
+        decision.publicRevision += 1; decision.controlVersion += 1;
+        return;
+      }
+      if (decision.status === 'CLOSED') fail('FORBIDDEN');
       if (parsed.data.decisionId !== decision.decisionId
         || parsed.data.frameVersion !== decision.definition.frameVersion + 1
         || parsed.data.semanticVersion !== decision.definition.semanticVersion + 1) fail('INVALID_COMMAND');

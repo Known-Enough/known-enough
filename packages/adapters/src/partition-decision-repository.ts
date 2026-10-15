@@ -261,10 +261,22 @@ export function createPartitionDecisionRepository(options: { decisionArn: string
                 // Snapshot reads may sweep expired permissions; they cannot revise frame or membership.
                 if (JSON.stringify(record.definition) !== JSON.stringify(prior.definition)
                   || JSON.stringify(record.memberships) !== JSON.stringify(prior.memberships)) fail('DECISION_INVALID');
-              } else if (record.definition.frameVersion !== prior.definition.frameVersion + 1
-                || record.definition.semanticVersion !== prior.definition.semanticVersion + 1
-                || JSON.stringify(record.memberships) !== JSON.stringify(memberships)
-                || JSON.stringify(record.definition.participants) !== JSON.stringify(participants)) fail('DECISION_INVALID');
+              } else {
+                const finishedUnchanged = ['AGREED', 'CLOSED'].includes(prior.status) && JSON.stringify(record) === JSON.stringify(prior);
+                const shared = (value: typeof record.definition) => { const { participants: people, requiredParticipantIds: required, ...rest } = value; void people; void required; return JSON.stringify(rest); };
+                const additionsOnly = record.definition.frameVersion === prior.definition.frameVersion
+                  && record.definition.semanticVersion === prior.definition.semanticVersion
+                  && shared(record.definition) === shared(prior.definition)
+                  && prior.definition.participants.every(person => record.definition.participants.some(next => JSON.stringify(next) === JSON.stringify(person)))
+                  && record.definition.participants.length === participants.length
+                  && record.definition.participants.every(person => participants.some(next => next.id === person.id))
+                  && JSON.stringify(record.memberships) === JSON.stringify(memberships);
+                const semanticRevision = record.definition.frameVersion === prior.definition.frameVersion + 1
+                  && record.definition.semanticVersion === prior.definition.semanticVersion + 1
+                  && JSON.stringify(record.memberships) === JSON.stringify(memberships)
+                  && JSON.stringify(record.definition.participants) === JSON.stringify(participants);
+                if (!finishedUnchanged && !additionsOnly && !semanticRevision) fail('DECISION_INVALID');
+              }
               return result;
             }), { io, fence: prepared.fence, mutation: expectedGroupVersion !== undefined });
           }),

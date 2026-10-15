@@ -1,6 +1,6 @@
 # FF08 — Joining without restarting decisions
 
-Status: READY / unclaimed. Intended worker: B after FF07, sequentially.
+Status: CODE_READY / B; claim released. Publication/manual acceptance pending.
 
 ## User report and agreed behavior
 
@@ -27,3 +27,13 @@ Code changes only under the user's current direction: no automated/live tests, m
 ## User manual walkthrough
 
 Create a decision and save private answers. Invite someone: nothing resets while pending. Accept and include the person in that ongoing decision: original participants retain answers and confirmations; the newcomer can provide their own input, with no extra review requirement for others. Complete another decision, then invite/include a new group member: the finished decision stays finished. Check that changed proposed outcomes still require normal final approval and no private answers are exposed.
+
+## B implementation checkpoint
+
+Source tracing found that invitation creation does not change group.version; acceptance increments it, making every older decision binding fail STALE_CONTEXT. Both native and transient acceptance now advance only previously-current decision bindings alongside that group-version change. They never edit decision membership, owner inputs or outcomes. Bindings already stale (including removal-related records) stay stale for explicit organizer recovery.
+
+The organizer's existing review/revise path is now available as “Update decision participants” for current decisions too. The application recognizes an unchanged public subject/options/rules plus an addition-only roster: it retains the old semantic/frame/context versions, frame confirmations and entire existing owner input records, appending empty owners only for genuinely new identities. Existing private variables are preserved, not rebuilt from the public projection. Previous in-progress proposal/approvals/jobs are retired and solveEpoch advances, so old results cannot settle a new roster; disclosure/adjustment permissions are superseded without broadening their audience or replaying refusals. New members must confirm and supply their own input. Native repository validation admits this exact addition branch while retaining the captured group/decision CAS and current identity fences. AGREED/CLOSED membership-only updates preserve the exact record and recorded outcome; substantive edits/removals retain the existing semantic revision behavior. No bulk migration.
+
+Old records made stale solely by earlier additions can use the explicit organizer update once; no existing participant reconfirmation is requested for that additive branch. Unknown model journal entries/capacity are not reset or replayed. User-reported live behavior remains unreproduced under the no-tests direction.
+
+Node24.21.0/npm11.19.0 typecheck, production build/bundle boundary, lint/import boundaries580 and whitespace PASS. No automated/live tests, AI, setup or deployment. Publish matching API/worker code together before manual checks. Manual walkthrough: save original participants' answers; send invitation (no change), accept into group (original decisions still open), explicitly include in ongoing decision (original answers/confirmations preserved; newcomer answers empty), and verify changed proposal requires new approval. Repeat against a finished decision and verify outcome/approvals/roster unchanged. Check removal still invalidates old access and no private data appears publicly.

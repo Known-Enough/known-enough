@@ -2689,3 +2689,6 @@ FF06 CODE_READY/B — compact overview and focused dialogs, owner-only summary/p
 
 
 FF07 CODE_READY/B — authenticated member avatars, browser photo normalization within existing128px/16KB PNG limit, scoped theme contrast, accessible logo navigation and propagated draft/pending guards. Static type/build/lint/boundaries580/whitespace PASS; no tests/AI/setup/deployment. Claim released; FF08 next. Manual steps in FF07 ticket.
+
+
+FF08 CODE_READY/B — group joining preserves current binding access without auto-enrollment; explicit additive inclusion preserves owners/confirmations, new owners start empty, unfinished proposals retire and finished records remain unchanged. Removal/material revisions and atomic fences retained. Static type/build/lint/boundaries580/whitespace PASS; no tests/AI/setup/deployment. Claim released; FF09 next. Manual walkthrough and old-record behavior in FF08 ticket.

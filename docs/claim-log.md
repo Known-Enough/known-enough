@@ -2824,3 +2824,9 @@ FF07 claimed/B after synchronized FF06 6761bff. Scope existing profile/member/av
 
 
 FF07 CODE_READY/B — authenticated member avatars, browser photo normalization within existing128px/16KB PNG limit, scoped theme contrast, accessible logo navigation and propagated draft/pending guards. Static type/build/lint/boundaries580/whitespace PASS; no tests/AI/setup/deployment. Claim released; FF08 next. Manual steps in FF07 ticket.
+
+
+FF08 claimed/B after FF07 synchronized. Scope invitation acceptance and binding-version transitions in native/transient group services; application roster-only addition branch and native repository fence validation; roster UI and FF08/B records. Source proves group.version changes stale all bindings and reviseDecision currently replaces owners/clears confirmations. No claimed live reproduction. Preserve removal/material reset semantics, finished outcome, private constraints, CAS/jobs/consent. No tests/AI/cloud/deployment.
+
+
+FF08 CODE_READY/B — group joining preserves current binding access without auto-enrollment; explicit additive inclusion preserves owners/confirmations, new owners start empty, unfinished proposals retire and finished records remain unchanged. Removal/material revisions and atomic fences retained. Static type/build/lint/boundaries580/whitespace PASS; no tests/AI/setup/deployment. Claim released; FF09 next. Manual walkthrough and old-record behavior in FF08 ticket.

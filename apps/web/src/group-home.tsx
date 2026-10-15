@@ -300,7 +300,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
                   onClick={() => void action(`/groups/${group.id}/remove`, { memberId: member.id, version: group.version })}>Remove {member.displayName}</button>}
               </li>)}</ul>
               <details className="ke-membership-note"><summary>About membership changes</summary>
-                <p>Joining or removing a member requires linked decisions to be reviewed with a new roster.</p>
+                <p>Joining the group leaves existing decisions unchanged. The organizer can include new people in an ongoing decision without resetting earlier answers. Finished decisions keep their outcome. Removing members still requires the existing decision review.</p>
               </details>
             </section>
 

@@ -1,3 +1,5 @@
+FF08 B checkpoint: CODE_READY; publication/manual acceptance pending. [Ticket](tasks/active/ff/FF08/ticket.md).
+
 FF07 B checkpoint: CODE_READY; publication/manual acceptance pending. [Ticket](tasks/active/ff/FF07/ticket.md).
 
 FF06 B checkpoint: CODE_READY; code/static checks only, publication/manual acceptance pending. See [ticket](tasks/active/ff/FF06/ticket.md). Direct user request continues FF07→FF08→FF09 sequentially.
