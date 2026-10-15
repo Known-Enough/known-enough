@@ -9,7 +9,7 @@ import { stableDeliveryId } from './durable-enqueue.ts';
 import { publicDraftId } from './partition-draft-runtime.ts';
 export interface DraftRecoveryRequest {
   principal: TrustedPrincipal; groupId: string; key?: string; releaseRevision?: number; io: PartitionIOContext;
-  inspect(key?: string): Promise<{ saved: Groups.GroupDraft | null; fence: PartitionFence }>;
+  inspect(key?: string): Promise<{ saved: Groups.GroupDraft | null; fence: PartitionFence; deleted?: boolean }>;
 }
 export interface DraftRequestStatus { state: 'SAVED' | 'NOT_SUBMITTED' | 'PENDING' | 'UNKNOWN' | 'FAILED' | 'CANCELLED';
   canRelease: boolean; revision: number; progress?: 'NOT_STARTED' | 'IN_PROGRESS' | 'EXPIRED' | 'NEEDS_RECOVERY' | 'STOPPED'; draft?: Groups.GroupDraft }
@@ -34,6 +34,7 @@ export function createDraftRequestRecovery(options: {
       }
       await inspected.fence.assertCurrent(); return { requests };
     }
+    if (inspected.deleted) { await inspected.fence.assertCurrent(); return { draftRequest: { state: 'CANCELLED', canRelease: true, revision: 0 } }; }
     if (inspected.saved) { await inspected.fence.assertCurrent(); return { draftRequest: { state: 'SAVED', canRelease: true, revision: 0, draft: inspected.saved } }; }
     const draftId = publicDraftId(request.groupId, principal.subject, request.key);
     const id = stableDeliveryId(options.sourceSha, request.groupId, draftId);

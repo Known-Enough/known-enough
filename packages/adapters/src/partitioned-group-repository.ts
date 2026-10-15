@@ -213,6 +213,8 @@ export function createPartitionedGroupRepository(transport: PartitionTransport,
     for (const [key, { row }] of next) {
       const prior = snapshot.rows.get(key)?.row;
       if (!equal(prior?.value, row.value) && row.kind !== 'ACCOUNT') groupChanged = true;
+      if ((prior?.kind === 'DRAFT' && row.kind === 'DRAFT' || prior?.kind === 'BINDING' && row.kind === 'BINDING')
+        && prior.value.deleted && !row.value.deleted) fail('PARTITION_INVALID');
       if (prior?.kind === 'DRAFT' && row.kind === 'DRAFT'
         && prior.value.createdDecisionId && prior.value.createdDecisionId !== row.value.createdDecisionId) fail('PARTITION_INVALID');
       if (prior?.kind === 'ACCOUNT' && row.kind === 'ACCOUNT' && (prior.value.emailHash !== row.value.emailHash || prior.value.sharedTestEmail !== row.value.sharedTestEmail)) fail('PARTITION_IDENTITY_CONFLICT');

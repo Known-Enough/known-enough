@@ -47,9 +47,9 @@ export class GroupService {
       isOrganizer: group.organizer === who,
       members: group.members.map(value => ({ id: memberId(value),
         displayName: state.accounts.find(item => item.subject === value)!.displayName, isOrganizer: value === group.organizer })),
-      drafts: group.drafts.map(item => ({ id: item.id, title: item.frame.title, created: !!item.createdDecisionId, needsClarification: item.clarificationQuestions.length > 0, current: item.groupVersion === group.version })),
+      drafts: group.drafts.filter(item => !item.deleted).map(item => ({ id: item.id, title: item.frame.title, created: !!item.createdDecisionId, needsClarification: item.clarificationQuestions.length > 0, current: item.groupVersion === group.version })),
       pendingInvitations: group.invitations.filter(item => !item.acceptedBy && item.expiresAt > this.options.now()).length,
-      decisions: group.decisions.map(item => ({ id: item.id, current: item.version === group.version })) });
+      decisions: group.decisions.filter(item => !item.deleted).map(item => ({ id: item.id, current: item.version === group.version })) });
   }
   async register(principal: TrustedPrincipal | null, profile: { email: string; verified: boolean }, raw: unknown) {
     const who = subject(principal);
@@ -155,6 +155,25 @@ export class GroupService {
       return this.snapshot(state, group, who);
     });
   }
+  async removeItem(principal: TrustedPrincipal | null, id: string, raw: unknown) {
+    const who = subject(principal); const parsed = Groups.GroupItemRemoval.safeParse(raw);
+    if (!parsed.success) return fail('INVALID_COMMAND');
+    const request = parsed.data;
+    return this.repository.transaction(state => {
+      const group = this.currentGroup(state, principal, id, true);
+      if (request.version !== group.version) return fail('STALE_CONTEXT');
+      if (request.kind === 'DRAFT') {
+        const draft = group.drafts.find(value => value.id === request.id) ?? fail('NOT_FOUND');
+        if (draft.createdDecisionId) return fail('STALE_CONTEXT');
+        draft.deleted = true;
+      } else {
+        const binding = group.decisions.find(value => value.id === request.id) ?? fail('NOT_FOUND');
+        binding.deleted = true;
+        for (const draft of group.drafts) if (draft.createdDecisionId === binding.id) draft.deleted = true;
+      }
+      return this.snapshot(state, group, who);
+    });
+  }
   async remove(principal: TrustedPrincipal | null, id: string, raw: unknown) {
     const who = subject(principal); const body = fields(raw, ['memberId', 'version']);
     return this.repository.transaction(state => {
@@ -175,6 +194,7 @@ export class GroupService {
         const account = state.accounts.find(item => item.subject === principal.subject);
         if (account && account.status !== 'APPROVED') return fail('FORBIDDEN');
         const group = state.groups.find(item => item.decisions.some(decision => decision.id === decisionId));
+        if (group?.decisions.find(item => item.id === decisionId)?.deleted) return fail('NOT_FOUND');
         if (group && group.decisions.find(item => item.id === decisionId)!.version !== group.version) return fail('STALE_CONTEXT');
         return;
       }
@@ -182,6 +202,7 @@ export class GroupService {
       this.account(state, who);
       const group = state.groups.find(item => item.decisions.some(decision => decision.id === decisionId));
       if (!group) return; // legacy membership is still checked by the decision boundary
+      if (group.decisions.find(item => item.id === decisionId)?.deleted) return fail('NOT_FOUND');
       this.group(state, who, group.id);
       if (group.decisions.find(item => item.id === decisionId)!.version !== group.version) return fail('STALE_CONTEXT');
     });
@@ -203,7 +224,7 @@ export class GroupService {
       const group = this.group(state, who, groupId); if (group.organizer !== who) return fail('FORBIDDEN');
       if (group.version !== version) return fail('STALE_CONTEXT');
       const prior = group.decisions.find(item => item.id === decisionId);
-      if (prior) { if (prior.version !== version) return fail('STALE_CONTEXT'); return; }
+      if (prior) { if (prior.deleted) return fail('NOT_FOUND'); if (prior.version !== version) return fail('STALE_CONTEXT'); return; }
       if (group.decisions.length >= 64) throw new GroupCapacityError();
       group.decisions.push({ id: Id.parse(decisionId), version });
     });

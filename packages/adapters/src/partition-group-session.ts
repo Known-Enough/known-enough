@@ -99,7 +99,7 @@ function current(state: Groups.GroupState, who: string, selected: string, organi
 function currentDraft(state: Groups.GroupState, who: string, selected: string, draftId: string): Groups.GroupDraft {
   const group = current(state, who, selected, true);
   const draft = group.drafts.find(value => value.id === draftId);
-  if (!draft) return deny('NOT_FOUND');
+  if (!draft || draft.deleted) return deny('NOT_FOUND');
   if (draft.groupVersion !== group.version) return deny('STALE_CONTEXT');
   if (!Number.isSafeInteger(draft.revision)) throw new PartitionSessionError('SESSION_INVALID');
   return draft;
@@ -172,10 +172,10 @@ export function createPartitionGroupSession(transport: PartitionTransport,
     return Groups.GroupSnapshot.parse({ id: group.id, name: group.name, version: group.version, isOrganizer: group.organizer === who,
       members: group.members.map(subject => ({ id: partitionMemberId(subject),
         displayName: state.accounts.find(account => account.subject === subject)!.displayName, isOrganizer: subject === group.organizer })),
-      drafts: group.drafts.map(draft => ({ id: draft.id, title: draft.frame.title, needsClarification: !!draft.clarificationQuestions.length,
+      drafts: group.drafts.filter(draft => !draft.deleted).map(draft => ({ id: draft.id, title: draft.frame.title, needsClarification: !!draft.clarificationQuestions.length,
         current: draft.groupVersion === group.version, created: !!draft.createdDecisionId })),
       pendingInvitations: group.invitations.filter(invitation => !invitation.acceptedBy && invitation.expiresAt > time).length,
-      decisions: group.decisions.map(binding => ({ id: binding.id, current: binding.version === group.version })) });
+      decisions: group.decisions.filter(binding => !binding.deleted).map(binding => ({ id: binding.id, current: binding.version === group.version })) });
   }
   return {
     list(principal: TrustedPrincipal | null, raw: unknown = {}, supplied?: PartitionIOContext) {
@@ -399,6 +399,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           if (publicClarifications.length > 36) return deny('INVALID_COMMAND');
           const bodyHash = createHash('sha256').update(JSON.stringify([request.data.objective, group.version, ...(followUp ? [followUp] : [])])).digest('hex');
           const existing = group.drafts.find(value => value.id === draftId);
+          if (existing?.deleted) return deny('NOT_FOUND');
           if (existing && (existing.bodyHash !== bodyHash || existing.groupVersion !== group.version)) return deny('STALE_CONTEXT');
           if (!existing && group.drafts.length >= 64) throw new PartitionSessionError('SESSION_CAPACITY');
           return { groupVersion: group.version, participants, bodyHash, existing: existing ?? null, previous, publicClarifications };
@@ -428,6 +429,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           const group = current(state, who, key, true);
           if (group.version !== before.groupVersion) return deny('STALE_CONTEXT');
           const existing = group.drafts.find(value => value.id === draftId);
+          if (existing?.deleted) return deny('NOT_FOUND');
           if (existing && (existing.bodyHash !== before.bodyHash || existing.groupVersion !== before.groupVersion)) return deny('STALE_CONTEXT');
           return existing ? Groups.GroupDraft.parse(existing) : null;
         }, io));
@@ -439,6 +441,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
             if (group.version !== before.groupVersion || JSON.stringify(publicRoster(state, group)) !== JSON.stringify(before.participants)) return deny('STALE_CONTEXT');
             if (output !== undefined) {
               const candidate = validate(output); preparedOutput = true; const existing = group.drafts.find(value => value.id === draftId);
+              if (existing?.deleted) return deny('NOT_FOUND');
               if (existing && existing.bodyHash !== before.bodyHash) return deny('STALE_CONTEXT');
               if (!existing) { if (group.drafts.length >= 64) throw new PartitionSessionError('SESSION_CAPACITY'); group.drafts.push(candidate); }
             }
@@ -461,6 +464,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           if (group.version !== before.groupVersion || JSON.stringify(publicRoster(state, group)) !== JSON.stringify(before.participants)) return deny('STALE_CONTEXT');
           const existing = group.drafts.find(value => value.id === draftId);
           if (existing) {
+            if (existing.deleted) return deny('NOT_FOUND');
             if (existing.bodyHash !== before.bodyHash || existing.groupVersion !== before.groupVersion) return deny('STALE_CONTEXT');
             return Groups.GroupDraft.parse(existing);
           }
@@ -472,14 +476,15 @@ export function createPartitionGroupSession(transport: PartitionTransport,
     inspectDraftRequest(principal: TrustedPrincipal | null, rawId: string, requestKey?: string, supplied?: PartitionIOContext) {
       return safe(async () => {
         const who = participant(principal), key = groupId(rawId); if (requestKey !== undefined) groupId(requestKey);
-        const io = supplied ?? partitionIO(limits); let saved: Groups.GroupDraft | null = null;
+        const io = supplied ?? partitionIO(limits); let saved: Groups.GroupDraft | null = null; let deleted = false;
         const draftId = requestKey === undefined ? null : 'draft-' + createHash('sha256').update(JSON.stringify([key, who, requestKey])).digest('hex').slice(0, 40);
         const fence = await selected(who, key, io, resolved => repository.fence(resolved, state => {
           const group = current(state, who, key, true);
           const existing = draftId ? group.drafts.find(value => value.id === draftId) : undefined;
-          if (existing) { if (existing.groupVersion !== group.version) return deny('STALE_CONTEXT'); saved = Groups.GroupDraft.parse(existing); }
+          if (existing?.deleted) deleted = true;
+          else if (existing) { if (existing.groupVersion !== group.version) return deny('STALE_CONTEXT'); saved = Groups.GroupDraft.parse(existing); }
         }, io));
-        return { draftId, saved, fence };
+        return { draftId, saved, fence, deleted };
       });
     },
     readDraft(principal: TrustedPrincipal | null, rawId: string, rawDraftId: string, supplied?: PartitionIOContext) {
@@ -533,7 +538,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
               throw new PartitionSessionError('SESSION_INVALID');
             const decisionId = `groupdecision-${createHash('sha256').update(JSON.stringify([key, draftId])).digest('hex').slice(0, 40)}`;
             const created = draft.createdDecisionId !== null;
-            if (created && (draft.createdDecisionId !== decisionId || !group.decisions.some(binding => binding.id === decisionId && binding.version === group.version))) return deny('STALE_CONTEXT');
+            if (created && (draft.createdDecisionId !== decisionId || !group.decisions.some(binding => binding.id === decisionId && !binding.deleted && binding.version === group.version))) return deny('STALE_CONTEXT');
             if (!created) {
               if (group.decisions.some(binding => binding.id === decisionId)) return deny('STALE_CONTEXT');
               if (group.decisions.length >= 64) throw new PartitionSessionError('SESSION_CAPACITY');
@@ -547,6 +552,30 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           return { ...structuredClone(result), fence: { mutations: structuredClone(fence.mutations),
             assertCurrent: () => safe(() => fence.assertCurrent()) } };
         });
+      });
+    },
+    /** Retain replay-bearing rows, but revoke all app access. Group/header CAS also fences in-flight work. */
+    removeItem(principal: TrustedPrincipal | null, rawId: string, raw: unknown) {
+      return safe(async () => {
+        const who = participant(principal); const key = groupId(rawId); const request = Groups.GroupItemRemoval.safeParse(raw);
+        if (!request.success) return deny('INVALID_COMMAND');
+        const io = partitionIO(limits);
+        return selected(who, key, io, resolved => repository.transaction(resolved, state => {
+          const group = current(state, who, key, true);
+          if (group.version !== request.data.version) return deny('STALE_CONTEXT');
+          if (request.data.kind === 'DRAFT') {
+            const draft = group.drafts.find(value => value.id === request.data.id);
+            if (!draft) return deny('NOT_FOUND');
+            if (draft.createdDecisionId) return deny('STALE_CONTEXT');
+            draft.deleted = true;
+          } else {
+            const binding = group.decisions.find(value => value.id === request.data.id);
+            if (!binding) return deny('NOT_FOUND');
+            binding.deleted = true;
+            for (const draft of group.drafts) if (draft.createdDecisionId === binding.id) draft.deleted = true;
+          }
+          return snapshot(state, group, who);
+        }, io));
       });
     },
     /** Private organizer roster for decision construction; never a public HTTP snapshot. */
@@ -592,7 +621,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
         const fence = await selected(who, key, io, resolved => repository.fence(resolved, state => {
           const group = current(state, who, key, true);
           const binding = group.decisions.find(value => value.id === decisionId);
-          if (!binding) return deny('NOT_FOUND');
+          if (!binding || binding.deleted) return deny('NOT_FOUND');
           if (expectedGroupVersion !== undefined && group.version !== expectedGroupVersion) return deny('STALE_CONTEXT');
           version = group.version;
           members = publicRoster(state, group).map(person => ({ subject: group.members.find(subject => partitionMemberId(subject) === person.id)!,
@@ -639,7 +668,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
             const fence = await repository.fence({ groupId: directory.groupId, accountSubjects: [...header.value.members] }, state => {
               const group = state.groups.find(value => value.id === directory.groupId);
               const binding = group?.decisions.find(value => value.id === decisionId);
-              if (!group || !binding) return deny('NOT_FOUND');
+              if (!group || !binding || binding.deleted) return deny('NOT_FOUND');
               if (binding.version !== group.version) return deny('STALE_CONTEXT');
             }, io);
             const expected = account?.revision ?? 0;
@@ -668,7 +697,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
         const fence = await selected(who, directory.groupId, io, resolved => repository.fence(resolved, state => {
           const group = current(state, who, directory.groupId);
           const binding = group.decisions.find(binding => binding.id === decisionId);
-          if (!binding) return deny('NOT_FOUND');
+          if (!binding || binding.deleted) return deny('NOT_FOUND');
           if (binding.version !== group.version) return deny('STALE_CONTEXT');
         }, io));
         return { mutations: structuredClone(fence.mutations), assertCurrent: () => safe(() => fence.assertCurrent()) };

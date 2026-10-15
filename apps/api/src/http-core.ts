@@ -524,7 +524,8 @@ function createKnownEnoughApiHandler(
             const body = await readJson(request, maxBodyBytes);
             const result = groupRoute[2] === 'invitations'
               ? await options.groups.invite(principal, groupRoute[1]!, body)
-              : { group: await options.groups.remove(principal, groupRoute[1]!, body) };
+              : { group: await (body && typeof body === 'object' && Object.hasOwn(body, 'kind')
+                ? options.groups.removeItem(principal, groupRoute[1]!, body) : options.groups.remove(principal, groupRoute[1]!, body)) };
             sendJson(response, 200, result); return;
           }
           const decision = /^\/decisions\/([A-Za-z0-9_-]{1,80})\//.exec(path);

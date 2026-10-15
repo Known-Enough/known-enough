@@ -24,6 +24,13 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
   const [aiWorking, setAiWorking] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
   const launcher = useRef<HTMLButtonElement>(null);
+  const deleteDialog = useRef<HTMLDialogElement>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ kind: 'DRAFT' | 'DECISION'; id: string; title: string } | null>(null);
+  useEffect(() => {
+    const element = deleteDialog.current;
+    if (deleteTarget && group.isOrganizer) { if (element && !element.open) element.showModal(); }
+    else element?.close();
+  }, [deleteTarget, group.isOrganizer]);
   const busyGuard = useRef(false);
   const objectiveInput = useRef<HTMLTextAreaElement>(null);
   const descriptionHelp = useRef<HTMLDetailsElement>(null);
@@ -176,6 +183,21 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
     setDraft(saved); setObjective(saved.frame.objective); setQuestionIndex(0); setStep(saved.clarificationQuestions.length ? 'questions' : 'review');
     setDirty(false); setRoster(null); setReviewed(false); setStarting(true);
   }
+  async function deleteItem() {
+    if (!deleteTarget || !group.isOrganizer) return;
+    const selected = deleteTarget;
+    const result = await request('remove', { kind: selected.kind, id: selected.id, version: group.version });
+    const updated = Groups.GroupSnapshot.parse(result.group);
+    if (updated.id !== group.id || (selected.kind === 'DRAFT' ? updated.drafts : updated.decisions).some(item => item.id === selected.id)) throw new Error('Deletion not confirmed');
+    if (selected.kind === 'DECISION' && roster?.id === selected.id) setRoster(null);
+    if (draft && (draft.id === selected.id || draft.createdDecisionId === selected.id)) {
+      setDraft(null); setObjective(''); setAnswers({}); answersByQuestion.current = {};
+      setDirty(false); setReviewed(false); setStep('describe'); setStarting(false);
+    }
+    setDeleteTarget(null);
+    setNotice(selected.kind === 'DRAFT' ? 'Draft deleted.' : 'Decision deleted for everyone in this group.');
+    await reload();
+  }
   async function releaseRequest() {
     if (!pendingKey || !requestState?.canRelease) return;
     const result = await request(`draft-requests/${pendingKey}/release`, { revision: requestState.revision });
@@ -199,21 +221,40 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
       <div><h3>{decision.current ? 'Current decision' : 'Roster review needed'}</h3>
         {!decision.current && <p>Membership changed. Everyone needs to review the updated group.</p>}
       </div>
-      {decision.current
+      <div className="ke-decision-row-actions">{decision.current
         ? <button type="button" className="secondary" disabled={busy} onClick={() => openDecision(decision.id)}>Open decision</button>
         : group.isOrganizer && <button type="button" disabled={busy} onClick={() => void action(async () => {
           const result = await request(`decisions/${decision.id}/review`);
           setDraft(null); setDirty(false); setRoster({ id: decision.id, frame: KE.PublicDecisionFrame.parse(result.frame), controlVersion: result.controlVersion as number,
             groupVersion: result.groupVersion as number, participants: result.participants as { id: string; displayName: string }[] }); setReviewed(false);
         })}>Review changed roster</button>}
+        {group.isOrganizer && <button type="button" className="secondary ke-delete-action" disabled={busy}
+          onClick={() => setDeleteTarget({ kind: 'DECISION', id: decision.id, title: 'this decision' })}>Delete decision</button>}
+      </div>
     </article>)}</div>
     {group.isOrganizer && group.drafts.some(item => !item.created) && <div className="ke-wizard-saved-list">
       <h3>Your saved drafts</h3>{group.drafts.filter(item => !item.created).map(item => <div className="ke-decision-row" key={item.id}>
-        <span>{item.title}</span>{item.current
+        <span>{item.title}</span><div className="ke-decision-row-actions">{item.current
           ? <button type="button" className="secondary" disabled={busy || !!pendingKey} onClick={() => void action(() => loadDraft(item.id))}>Continue draft</button>
           : <small>The group changed. Start a new draft for the current members.</small>}
+          <button type="button" className="secondary ke-delete-action" disabled={busy}
+            onClick={() => setDeleteTarget({ kind: 'DRAFT', id: item.id, title: item.title })}>Delete draft</button>
+        </div>
       </div>)}
     </div>}
+    {group.isOrganizer && <dialog ref={deleteDialog} className="ke-delete-dialog" aria-labelledby={`delete-title-${group.id}`}
+      aria-describedby={`delete-description-${group.id}`} onCancel={event => { event.preventDefault(); if (!busyGuard.current) setDeleteTarget(null); }}>
+      <h2 id={`delete-title-${group.id}`}>Delete {deleteTarget?.kind === 'DRAFT' ? 'draft' : 'decision'}?</h2>
+      <p id={`delete-description-${group.id}`}>{deleteTarget?.kind === 'DRAFT'
+        ? `Delete “${deleteTarget.title}”? It will disappear from your saved drafts and cannot be reopened.`
+        : 'This decision will be removed for everyone in the group. Existing links will stop working.'}</p>
+      <p className="ke-delete-note">This cannot be undone. Historical system records are retained.</p>
+      <div className="ke-wizard-actions">
+        <button type="button" className="secondary" autoFocus disabled={busy} onClick={() => setDeleteTarget(null)}>Keep {deleteTarget?.kind === 'DRAFT' ? 'draft' : 'decision'}</button>
+        <button type="button" className="ke-delete-confirm" disabled={busy || !deleteTarget} onClick={() => void action(deleteItem)}>{busy ? 'Deleting…' : deleteTarget?.kind === 'DRAFT' ? 'Delete draft' : 'Delete decision'}</button>
+      </div>
+      {notice && <p role="status">{notice}</p>}
+    </dialog>}
     {group.isOrganizer && <dialog ref={dialog} className="ke-decision-wizard" aria-labelledby={`decision-wizard-title-${group.id}`}
       onCancel={event => { event.preventDefault(); closeWizard(); }} onClick={event => { if (event.target === dialog.current) closeWizard(); }}>
       <div className="ke-wizard-shell">

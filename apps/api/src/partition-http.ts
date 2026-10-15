@@ -336,7 +336,8 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
           if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
           if (group[2] === '/invitations') send(response, 200, await session.invite(principal, group[1]!, raw));
           else if (group[2] === '/invite') send(response, 200, { invitation: await session.invite(principal, group[1]!, raw) });
-          else send(response, 200, { group: await session.remove(principal, group[1]!, raw) }); return;
+          else send(response, 200, { group: await (raw && typeof raw === 'object' && Object.hasOwn(raw, 'kind')
+            ? session.removeItem(principal, group[1]!, raw) : session.remove(principal, group[1]!, raw)) }); return;
         }
         if (ownerConversation) {
           if (!options.ownerInterpretation || (ownerConversation[2] === 'draft' || ownerConversation[4] ? request.method !== 'POST' : request.method !== 'GET')) return reject('NOT_FOUND');

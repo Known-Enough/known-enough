@@ -4,6 +4,7 @@
 | --- | --- | --- |
 | [FF01](FF01/README.md) | Compact account screens, password visibility and contextual recovery. | PUBLISHED; user manual acceptance pending |
 | [FF02](FF02/README.md) | Owner-only interpretation with explicit participant prerequisites/consent. | PUBLISHED; required permission now installed; user manual acceptance pending |
+| [FF04](FF04/README.md) | Organizer-confirmed deletion of saved drafts and decisions, with old-link/replay protection. | IN_PROGRESS/A |
 | [FF03](FF03/README.md) | Generic incomplete-idea guide, concrete public questions and safer recovery. | Updated PUBLISHED/source32f3e11/Amplify98; user manual acceptance pending |
 
 [Latest guide publication](../../../review-artifacts/FF/generic-guide-publication.json), [earlier FF receipts](../../../review-artifacts/FF/a-publication-20261015.json), [generic behavior reference](FF03/gold-standard.md), [manual checklist](manual-checklist.md).

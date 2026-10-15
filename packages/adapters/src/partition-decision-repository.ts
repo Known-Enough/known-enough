@@ -79,13 +79,13 @@ function checkedWrite(items: TransactWriteItem[]) {
     const header = rows.find(row => row.kind === 'GROUP'); const draft = rows.find(row => row.kind === 'DRAFT');
     const binding = rows.find(row => row.kind === 'BINDING'); const directory = rows.find(row => row.kind === 'DIRECTORY');
     if (header?.kind !== 'GROUP' || binding?.kind !== 'BINDING'
-      || binding.value.version !== header.value.version || !header.value.decisionIds.includes(binding.value.id)) fail('DECISION_INVALID');
+      || binding.value.deleted || binding.value.version !== header.value.version || !header.value.decisionIds.includes(binding.value.id)) fail('DECISION_INVALID');
     if (puts.length === 4 && (draft?.kind !== 'DRAFT' || directory?.kind !== 'DIRECTORY'
       || directory.value.type !== 'DECISION' || binding.revision !== 1 || directory.revision !== 1
       || header.revision < 2 || draft.revision < 2
       || directory.value.groupId !== header.value.id || directory.value.decisionId !== binding.value.id
       || draft.value.createdDecisionId !== binding.value.id || draft.value.groupVersion !== header.value.version
-      || binding.value.version !== header.value.version || !header.value.decisionIds.includes(binding.value.id)
+      || binding.value.deleted || binding.value.version !== header.value.version || !header.value.decisionIds.includes(binding.value.id)
       || !header.value.draftIds.includes(draft.value.id))) fail('DECISION_INVALID');
     if (puts.length === 2 && (header.revision < 2 || binding.revision < 2)) fail('DECISION_INVALID');
     for (const item of puts) {

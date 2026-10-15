@@ -39,6 +39,7 @@ export class GroupDecisionService {
     const prior = await this.options.groups.repository.transaction(state => {
       const group = this.options.groups.currentGroup(state, principal, groupId, true);
       const existing = group.drafts.find(item => item.id === id);
+      if (existing?.deleted) return fail('NOT_FOUND');
       if (existing && existing.bodyHash !== bodyHash) return fail('STALE_CONTEXT');
       if (group.version !== roster.version) return fail('STALE_CONTEXT');
       if (!existing && group.drafts.length >= 64) throw new GroupCapacityError();
@@ -56,9 +57,9 @@ export class GroupDecisionService {
     if (!this.options.isEnabled()) return fail('STALE_CONTEXT');
     return this.options.groups.repository.transaction(state => {
       const group = this.options.groups.currentGroup(state, principal, groupId, true);
-      if (group.version !== roster.version || !this.options.isEnabled() || previous && group.drafts.find(draft => draft.id === previous!.id)?.revision !== previous.revision) return fail('STALE_CONTEXT');
+      if (group.version !== roster.version || !this.options.isEnabled() || previous && !group.drafts.some(draft => draft.id === previous!.id && !draft.deleted && draft.revision === previous.revision)) return fail('STALE_CONTEXT');
       const existing = group.drafts.find(item => item.id === id);
-      if (existing) { if (existing.bodyHash !== bodyHash) return fail('STALE_CONTEXT'); return structuredClone(existing); }
+      if (existing) { if (existing.deleted) return fail('NOT_FOUND'); if (existing.bodyHash !== bodyHash) return fail('STALE_CONTEXT'); return structuredClone(existing); }
       if (group.drafts.length >= 64) throw new GroupCapacityError();
       group.drafts.push(draft); return structuredClone(draft);
     });
@@ -67,6 +68,7 @@ export class GroupDecisionService {
     return this.options.groups.repository.transaction(state => {
       const group = this.options.groups.currentGroup(state, principal, groupId, true);
       const draft = group.drafts.find(item => item.id === draftId) ?? fail('NOT_FOUND');
+      if (draft.deleted) return fail('NOT_FOUND');
       if (draft.groupVersion !== group.version) return fail('STALE_CONTEXT');
       return structuredClone(draft);
     });
@@ -76,6 +78,7 @@ export class GroupDecisionService {
     return this.options.groups.repository.transaction(state => {
       const group = this.options.groups.currentGroup(state, principal, groupId, true);
       const draft = group.drafts.find(item => item.id === draftId) ?? fail('NOT_FOUND');
+      if (draft.deleted) return fail('NOT_FOUND');
       if (draft.createdDecisionId || body.revision !== draft.revision || draft.groupVersion !== group.version) return fail('STALE_CONTEXT');
       const result = KE.PublicDecisionFrame.safeParse({ ...draft.frame, title: body.title, objective: body.objective, variables: body.variables, rules: body.rules });
       if (!result.success || result.data.variables.some(item => item.visibility !== 'PUBLIC') || result.data.rules.some(item => item.visibility !== 'PUBLIC')) return fail('INVALID_COMMAND');
@@ -94,6 +97,7 @@ export class GroupDecisionService {
     const reserved = await this.options.groups.repository.transaction(state => {
       const group = this.options.groups.currentGroup(state, principal, groupId, true);
       const draft = group.drafts.find(item => item.id === draftId) ?? fail('NOT_FOUND');
+      if (draft.deleted) return fail('NOT_FOUND');
       if (body.revision !== draft.revision || draft.groupVersion !== group.version) return fail('STALE_CONTEXT');
       if (draft.clarificationQuestions.length || !genericCandidates(draft.frame).length) return fail('NEEDS_CLARIFICATION');
       if (!this.options.isEnabled()) return fail('STALE_CONTEXT');
@@ -112,6 +116,8 @@ export class GroupDecisionService {
     const bodyHash = hash([groupId, reserved.draft.id, reserved.draft.revision, reserved.draft.groupVersion, reserved.draft.frame]);
     const creationFence = await this.options.groups.repository.fence(state => {
       const group = this.options.groups.currentGroup(state, principal, groupId, true);
+      if (!group.decisions.some(item => item.id === reserved.decisionId && !item.deleted)
+        || !group.drafts.some(item => item.id === draftId && !item.deleted)) return fail('NOT_FOUND');
       if (group.version !== reserved.draft.groupVersion || group.members.length !== reserved.members.length
         || reserved.members.some(member => !group.members.includes(member.subject)
           || state.accounts.find(account => account.subject === member.subject)?.status !== 'APPROVED')) return fail('STALE_CONTEXT');
@@ -131,7 +137,7 @@ export class GroupDecisionService {
     const reviewFence = await this.options.groups.repository.fence(state => {
       const group = this.options.groups.currentGroup(state, principal, groupId, true);
       if (group.version !== roster.version) return fail('STALE_CONTEXT');
-      if (!group.decisions.some(item => item.id === decisionId)) return fail('NOT_FOUND');
+      if (!group.decisions.some(item => item.id === decisionId && !item.deleted)) return fail('NOT_FOUND');
     });
     const owner = await withAdmissionFence(decisionId, reviewFence,
       () => this.options.application.getOwnerSnapshot(principal, decisionId));
@@ -151,7 +157,7 @@ export class GroupDecisionService {
       if (group.version !== preview.groupVersion || roster.version !== preview.groupVersion) return fail('STALE_CONTEXT');
       if (roster.members.some(member => !group.members.includes(member.subject)
         || state.accounts.find(account => account.subject === member.subject)?.status !== 'APPROVED')) return fail('STALE_CONTEXT');
-      const binding = group.decisions.find(item => item.id === decisionId) ?? fail('NOT_FOUND'); binding.version = group.version;
+      const binding = group.decisions.find(item => item.id === decisionId) ?? fail('NOT_FOUND'); if (binding.deleted) return fail('NOT_FOUND'); binding.version = group.version;
     });
     await withAdmissionFence(decisionId, revisionFence, () => this.options.application.reviseDecision(principal, {
       decisionId, expectedControlVersion: preview.controlVersion, definition,

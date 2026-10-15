@@ -77,7 +77,7 @@ export function checkedJobFence(raw: JobFence): JobFence {
       const bindingPin = fence.pins.find(entry => entry.table === JOB_TARGET.partitions && entry.key.PK === pin.key.PK && entry.key.SK === `BINDING#${ref.decisionId}`);
       const binding = bindingPin ? checkPartitionRow(JSON.parse(bindingPin.payload), bindingPin.key) : null;
       return directory.kind === 'DIRECTORY' && directory.value.type === 'DECISION' && directory.value.groupId === pin.key.PK.slice(6)
-        && binding?.kind === 'BINDING' && row.kind === 'GROUP' && binding.value.version === row.value.version && row.kind === 'GROUP' && row.value.decisionIds.includes(ref.decisionId) && row.value.members.includes(ref.subject)
+        && binding?.kind === 'BINDING' && !binding.value.deleted && row.kind === 'GROUP' && binding.value.version === row.value.version && row.kind === 'GROUP' && row.value.decisionIds.includes(ref.decisionId) && row.value.members.includes(ref.subject)
         && record.memberships.filter(member => member.active).every(member => row.value.members.includes(member.subject))
         && has(JOB_TARGET.partitions, pin.key.PK, `BINDING#${ref.decisionId}`); })) return fail('STALE');
     const marker = JSON.parse(fence.pins.find(pin => pin.table === JOB_TARGET.source)!.payload);

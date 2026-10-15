@@ -25,11 +25,15 @@ export const GroupDraft = z.object({ id, bodyHash: z.string().regex(/^[a-f0-9]{6
   revision: z.number().int().positive(), groupVersion: z.number().int().positive(),
   frame: PublicDecisionFrame, clarificationQuestions: z.array(z.string().min(1).max(500)).max(12),
   createdDecisionId: id.nullable(),
+  /** Retained removal marker prevents saved-request replay from restoring a deleted draft. */
+  deleted: z.literal(true).optional(),
   publicClarifications: z.array(z.object({ question: z.string().min(1).max(500), answer: z.string().trim().min(1).max(500) }).strict()).max(36).optional() }).strict();
+/** Uses the existing authenticated group/remove endpoint; identity is never body-selected. */
+export const GroupItemRemoval = z.object({ kind: z.enum(['DRAFT', 'DECISION']), id, version: z.number().int().positive().max(Number.MAX_SAFE_INTEGER) }).strict();
 export type GroupDraft = z.infer<typeof GroupDraft>;
 export const Group = z.object({ id, name: text, organizer: id, version: z.number().int().positive(),
   drafts: z.array(GroupDraft).max(64).default([]),
-  members: z.array(id).min(1).max(16), decisions: z.array(z.object({ id, version: z.number().int().positive() }).strict()).max(64),
+  members: z.array(id).min(1).max(16), decisions: z.array(z.object({ id, version: z.number().int().positive(), deleted: z.literal(true).optional() }).strict()).max(64),
   invitations: z.array(z.object({ tokenHash: z.string().regex(/^[a-f0-9]{64}$/), recipientHash: z.string().regex(/^[a-f0-9]{64}$/),
     expiresAt: z.number().int().positive(), acceptedBy: id.nullable() }).strict()).max(64) }).strict();
 export const GroupState = z.object({ accounts: z.array(Account).max(256), groups: z.array(Group).max(32) }).strict();
