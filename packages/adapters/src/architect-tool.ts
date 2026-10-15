@@ -31,7 +31,7 @@ export function decodeArchitectOutput(value: unknown, selected: boolean): unknow
   if (!parsed.success) throw new ArchitectWireError(modelValidationIssues(parsed.error.issues, value));
   const output = parsed.data as Record<string, unknown>;
   const flatten = (groups: unknown, definitions: readonly { tag: string }[], discriminator: string) => {
-    const values = groups as Record<string, Record<string, unknown>[]>;
+    const values = groups as Record<string, Record<string, unknown>[] | undefined>;
     return definitions.flatMap(group => (values[group.tag] ?? []).map(item => ({ ...item,
       [discriminator]: group.tag, visibility: 'PUBLIC', ...(discriminator === 'type' ? { ownerParticipantId: null } : {}) })));
   };

@@ -1,0 +1,733 @@
+{
+  "source": "0b25620da46fbd0cb8c873ff5d3d7882ca02bb04",
+  "awsWrites": 0,
+  "providerCalls": 0,
+  "events": [
+    {
+      "timestamp": 1792097726089,
+      "event": "FIX01_PUBLIC_DRAFT_DIAGNOSTIC",
+      "requestId": "1332f809-32ee-41bc-806c-c860a8b28214",
+      "sourceSha": "1cff7b5db4c5a394295b584974cf05b5ec919f22",
+      "phase": "REQUEST_STARTED",
+      "providerDispatched": false,
+      "providerAcknowledged": false,
+      "elapsedMs": 0
+    },
+    {
+      "timestamp": 1792097726621,
+      "event": "FIX01_PUBLIC_DRAFT_DIAGNOSTIC",
+      "requestId": "1332f809-32ee-41bc-806c-c860a8b28214",
+      "sourceSha": "1cff7b5db4c5a394295b584974cf05b5ec919f22",
+      "phase": "PROVIDER_DISPATCHED",
+      "providerDispatched": true,
+      "providerAcknowledged": false,
+      "elapsedMs": 533
+    },
+    {
+      "timestamp": 1792097729649,
+      "event": "FIX01_PUBLIC_DRAFT_DIAGNOSTIC",
+      "requestId": "1332f809-32ee-41bc-806c-c860a8b28214",
+      "sourceSha": "1cff7b5db4c5a394295b584974cf05b5ec919f22",
+      "phase": "PROVIDER_COMPLETED",
+      "providerDispatched": true,
+      "providerAcknowledged": true,
+      "elapsedMs": 3561,
+      "stopReason": "tool_use",
+      "usage": {
+        "inputTokens": 5706,
+        "outputTokens": 360
+      }
+    },
+    {
+      "timestamp": 1792097729680,
+      "event": "FIX01_PUBLIC_DRAFT_DIAGNOSTIC",
+      "requestId": "1332f809-32ee-41bc-806c-c860a8b28214",
+      "sourceSha": "1cff7b5db4c5a394295b584974cf05b5ec919f22",
+      "phase": "MODEL_VALIDATION_FAILURE",
+      "stage": "ARCHITECT_WIRE_SCHEMA",
+      "providerDispatched": true,
+      "providerAcknowledged": true,
+      "elapsedMs": 3592,
+      "stopReason": "tool_use",
+      "usage": {
+        "inputTokens": 5706,
+        "outputTokens": 360
+      },
+      "diagnostics": [
+        {
+          "stage": "ARCHITECT_WIRE_SCHEMA",
+          "validation": [
+            {
+              "path": [
+                "rules",
+                "RANGE"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "SUM_EQUALS"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "ALL_DIFFERENT"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "MUTUALLY_EXCLUSIVE"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "IMPLIES"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "NUMBER"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "MONEY"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "PERCENTAGE"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "DATETIME"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "DURATION"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "BOOLEAN"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "ENUM_SET"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "timestamp": 1792097729680,
+      "event": "FIX01_PUBLIC_DRAFT_DIAGNOSTIC",
+      "requestId": "1332f809-32ee-41bc-806c-c860a8b28214",
+      "sourceSha": "1cff7b5db4c5a394295b584974cf05b5ec919f22",
+      "phase": "MODEL_VALIDATION_FAILURE",
+      "stage": "ARCHITECT_WIRE_SCHEMA",
+      "providerDispatched": true,
+      "providerAcknowledged": true,
+      "elapsedMs": 3592,
+      "stopReason": "tool_use",
+      "usage": {
+        "inputTokens": 5706,
+        "outputTokens": 360
+      },
+      "diagnostics": [
+        {
+          "stage": "ARCHITECT_WIRE_SCHEMA",
+          "validation": [
+            {
+              "path": [
+                "rules",
+                "RANGE"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "SUM_EQUALS"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "ALL_DIFFERENT"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "MUTUALLY_EXCLUSIVE"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "IMPLIES"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "NUMBER"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "MONEY"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "PERCENTAGE"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "DATETIME"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "DURATION"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "BOOLEAN"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "ENUM_SET"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            }
+          ]
+        },
+        {
+          "stage": "ARCHITECT_CALL",
+          "validation": []
+        }
+      ]
+    },
+    {
+      "timestamp": 1792097729861,
+      "event": "FIX01_PUBLIC_DRAFT_FAILURE",
+      "requestId": "1332f809-32ee-41bc-806c-c860a8b28214",
+      "sourceSha": "1cff7b5db4c5a394295b584974cf05b5ec919f22",
+      "phase": "DEAD",
+      "reason": "INVALID_OUTPUT",
+      "stage": "ARCHITECT_WIRE_SCHEMA",
+      "providerDispatched": true,
+      "providerAcknowledged": true,
+      "elapsedMs": 3773,
+      "stopReason": "tool_use",
+      "usage": {
+        "inputTokens": 5706,
+        "outputTokens": 360
+      },
+      "diagnostics": [
+        {
+          "stage": "ARCHITECT_WIRE_SCHEMA",
+          "validation": [
+            {
+              "path": [
+                "rules",
+                "RANGE"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "SUM_EQUALS"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "ALL_DIFFERENT"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "MUTUALLY_EXCLUSIVE"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "IMPLIES"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "NUMBER"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "MONEY"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "PERCENTAGE"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "DATETIME"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "DURATION"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "BOOLEAN"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "ENUM_SET"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            }
+          ]
+        },
+        {
+          "stage": "ARCHITECT_CALL",
+          "validation": []
+        }
+      ]
+    },
+    {
+      "timestamp": 1792097729880,
+      "event": "FIX01_PUBLIC_DRAFT_DIAGNOSTIC",
+      "requestId": "1332f809-32ee-41bc-806c-c860a8b28214",
+      "sourceSha": "1cff7b5db4c5a394295b584974cf05b5ec919f22",
+      "phase": "REQUEST_FINISHED",
+      "reason": "FAILED",
+      "stage": "ARCHITECT_WIRE_SCHEMA",
+      "providerDispatched": true,
+      "providerAcknowledged": true,
+      "elapsedMs": 3791,
+      "stopReason": "tool_use",
+      "usage": {
+        "inputTokens": 5706,
+        "outputTokens": 360
+      },
+      "diagnostics": [
+        {
+          "stage": "ARCHITECT_WIRE_SCHEMA",
+          "validation": [
+            {
+              "path": [
+                "rules",
+                "RANGE"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "SUM_EQUALS"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "ALL_DIFFERENT"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "MUTUALLY_EXCLUSIVE"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "IMPLIES"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "NUMBER"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "MONEY"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "PERCENTAGE"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "DATETIME"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "DURATION"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "BOOLEAN"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "ENUM_SET"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            }
+          ]
+        },
+        {
+          "stage": "ARCHITECT_CALL",
+          "validation": []
+        }
+      ]
+    },
+    {
+      "timestamp": 1792097729880,
+      "event": "PUBLIC_DRAFT_HTTP_RESULT",
+      "requestId": "1332f809-32ee-41bc-806c-c860a8b28214",
+      "elapsedMs": 3958,
+      "result": "FAILED",
+      "code": "NEEDS_CLARIFICATION",
+      "status": 422
+    }
+  ],
+  "failures": [
+    {
+      "timestamp": 1792097729861,
+      "event": "FIX01_PUBLIC_DRAFT_FAILURE",
+      "requestId": "1332f809-32ee-41bc-806c-c860a8b28214",
+      "sourceSha": "1cff7b5db4c5a394295b584974cf05b5ec919f22",
+      "phase": "DEAD",
+      "reason": "INVALID_OUTPUT",
+      "stage": "ARCHITECT_WIRE_SCHEMA",
+      "providerDispatched": true,
+      "providerAcknowledged": true,
+      "elapsedMs": 3773,
+      "stopReason": "tool_use",
+      "usage": {
+        "inputTokens": 5706,
+        "outputTokens": 360
+      },
+      "diagnostics": [
+        {
+          "stage": "ARCHITECT_WIRE_SCHEMA",
+          "validation": [
+            {
+              "path": [
+                "rules",
+                "RANGE"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "SUM_EQUALS"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "ALL_DIFFERENT"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "MUTUALLY_EXCLUSIVE"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "rules",
+                "IMPLIES"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "NUMBER"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "MONEY"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "PERCENTAGE"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "DATETIME"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "DURATION"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "BOOLEAN"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            },
+            {
+              "path": [
+                "variables",
+                "ENUM_SET"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            }
+          ]
+        },
+        {
+          "stage": "ARCHITECT_CALL",
+          "validation": []
+        }
+      ]
+    }
+  ],
+  "windowStart": 1792090572053,
+  "windowEnd": 1792097772053,
+  "result": "DRAFT_DIAGNOSTICS_READ",
+  "windowComplete": true,
+  "requestReferenceCorrelation": "EXACT_REFERENCE_MATCH",
+  "readbackRun": "https://github.com/Known-Enough/known-enough/actions/runs/38805921701"
+}

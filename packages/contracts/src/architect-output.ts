@@ -22,8 +22,10 @@ export const RuleGroups = KE.ValidationRule.options.map(definition => {
   return { tag: definition.shape.operator.value, schema: z.strictObject(fields) };
 });
 
-const variableGroups = z.strictObject(Object.fromEntries(VariableGroups.map(group => [group.tag, z.array(group.schema).max(KE.MAX_DECISION_VARIABLES)])));
-const ruleGroups = z.strictObject(Object.fromEntries(RuleGroups.map(group => [group.tag, z.array(group.schema).max(KE.MAX_DECISION_RULES)])));
+// Omitted type/operator collections mean no entries. Fields inside a supplied
+// entry remain required; explicit null/non-array collections are still invalid.
+const variableGroups = z.strictObject(Object.fromEntries(VariableGroups.map(group => [group.tag, z.array(group.schema).max(KE.MAX_DECISION_VARIABLES).optional()])));
+const ruleGroups = z.strictObject(Object.fromEntries(RuleGroups.map(group => [group.tag, z.array(group.schema).max(KE.MAX_DECISION_RULES).optional()])));
 const common = {
   title: KE.PublicDecisionFrame.shape.title,
   description: KE.PublicDecisionFrame.shape.description,

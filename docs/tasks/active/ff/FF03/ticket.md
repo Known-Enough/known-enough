@@ -1,6 +1,6 @@
 # FF03 — Unsupported AI follow-up draft and confusing recovery UI
 
-Status: GENERIC REPAIR PUBLISHED / manual acceptance pending; A claim released; no tests/AI calls
+Status: IN_PROGRESS / A omitted-group correction; latest manual attempt FAILED on source1cff7b5; no tests/AI calls
 Scheduling: preserve the current active claim and one implementation writer. This overlaps FIX01's public-draft lifecycle: B should correlate these reports with the current FIX01 repair first, without starting a parallel claim. If FIX01 resolves the same defect, link its actual evidence here instead of duplicating work; otherwise take this bounded follow-up sequentially.
 
 ## Observed report
@@ -72,3 +72,9 @@ The repair derives transport fields from all existing public variable and rule b
 The wizard automatically closes only server-confirmed FAILED/releasable attempts after a revision-guarded release readback. It preserves the saved draft, answers and error reference; UNKNOWN/PENDING outcomes keep their key. There is no automatic paid retry. Native API/worker and frontend publication required; builds/static compilation only, tests/model probes explicitly omitted by user direction. This is a generic structural repair, not proof that every possible AI answer or scenario succeeds.
 
 Publication 2026-10-15T20:52:30.990518+00:00: source`1cff7b5db4c5a394295b584974cf05b5ec919f22`, native runtime [38804973564](https://github.com/Known-Enough/known-enough/actions/runs/38804973564) SUCCESS/API`e17e2b25`/worker`5cc192b8`; matching control [38805152646](https://github.com/Known-Enough/known-enough/actions/runs/38805152646) SUCCESS/enabled/TOTAL unchanged/individual consent required; frontend [38805152558](https://github.com/Known-Enough/known-enough/actions/runs/38805152558) SUCCESS/Amplify102/nine files verified. Existing app configuration matched with zero configuration writes. [Detailed receipt](../../../../review-artifacts/FF/generic-resilience-publication.json). TypeScript compilation, browser build, changed-source lint and schema artifact generation completed; tests and AI/signup probes omitted by user direction. A bounded claim released. Manual functional acceptance remains pending; no guarantee that all arbitrary model answers succeed. No new CloudShell setup.
+
+## New exact failure — 2026-10-15
+
+Reference `1332f809-32ee-41bc-806c-c860a8b28214`, matching [readback38805921701](https://github.com/Known-Enough/known-enough/actions/runs/38805921701), confirms source1cff7b5 completed an acknowledged provider tool response but rejected missing collections at `ARCHITECT_WIRE_SCHEMA`. The bounded first twelve issues include `rules.RANGE`, other operator groups, and unused variable groups such as NUMBER/MONEY/DATETIME. This is a newly introduced overly strict envelope requirement; publication did not prove functional success. [Sanitized exact evidence](../../../../review-artifacts/FF/unused-groups-exact-reference.json).
+
+Make type/operator collections optional with deterministic empty interpretation when absent; keep both root collection objects required, reject explicit null/non-array/unknown groups, and retain all required subtype fields/options, complete definition/candidate/privacy checks. Change no decision facts or saved data; no paid retry. The legacy error wording pasted by the user also comes from an older loaded screen, but this does not explain away the confirmed new backend rejection. No tests or AI calls; compatible runtime publication and manual acceptance remain.
