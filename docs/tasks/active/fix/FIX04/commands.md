@@ -37,16 +37,16 @@ set -euo pipefail
 umask 077
 mkdir -p "$HOME/.known-enough/fix04-setup"
 curl --fail --silent --show-error --proto '=https' --tlsv1.2 \
-  'https://raw.githubusercontent.com/Known-Enough/known-enough/df3e651cf96e09f4e2452e4398e60c1fa0b9140b/scripts/fix04/bootstrap.py' \
+  'https://raw.githubusercontent.com/Known-Enough/known-enough/61f781d96a7dad7e182bf5dd9ae6bdea7d65b4e6/scripts/fix04/bootstrap.py' \
   -o "$HOME/.known-enough/fix04-setup/bootstrap.py"
 printf '%s  %s\n' '0f68cd163f854efd4daab2d698ac4f8ed13444dfe406a6d143494e1ea32715f0' \
   "$HOME/.known-enough/fix04-setup/bootstrap.py" | sha256sum --check --status
 python3 -B "$HOME/.known-enough/fix04-setup/bootstrap.py" \
-  --source-sha df3e651cf96e09f4e2452e4398e60c1fa0b9140b \
-  --archive-sha256 4061a2f32258a2443df11923b157ccbc2c5c6a86580def597c8f8516efea827f
+  --source-sha 61f781d96a7dad7e182bf5dd9ae6bdea7d65b4e6 \
+  --archive-sha256 c4a193f44a6e6797cba4125485905b99c727e564c53551687b18a0ab39c9de87
 ```
 
-Expected result: `FIX04_TOOL_SOURCE_VERIFIED`, or `FIX04_TOOL_ALREADY_MATCHED` on a verified repeat. Linux x86_64 and arm64 are supported. Source checksum is independently frozen at `df3e651cf96e09f4e2452e4398e60c1fa0b9140b`; cached or edited source is rejected. The exact setup downloaded Node/npm/dependencies and verified all frozen source files in a private local Linux test; a second invocation returned ALREADY_MATCHED with zero AWS/provider requests. This proves installation, not AWS access or a real approval.
+Expected result: `FIX04_TOOL_SOURCE_VERIFIED` or `FIX04_TOOL_ALREADY_MATCHED`. Current pin matches the recorded FF05 API release. The refreshed setup/approval has not been executed or tested by A; user verification remains pending. Earlier installation/live proof below is historical and does not verify this new source.
 
 ## The two routine commands
 
@@ -75,7 +75,7 @@ Approval resolves the exact provider username to its immutable subject, checks c
 
 Expected list result is `PENDING_LIST_COMPLETE`, with a private `pending` array; empty array means zero observed pending requests. Expected approval result is `APPROVALS_COMPLETE`, with per-user APPROVED or ALREADY_APPROVED. `APPROVALS_PARTIAL` reports rejected/failed/skipped selections and returns nonzero. Do not infer rollback of earlier successes.
 
-Private audit files are under `$HOME/.known-enough/access-users/private/`, mode 0600 beneath a mode-0700 directory. They contain UTC, source/API hash, operation and bounded outcome counts, without account identifiers. A cached verified API ZIP is private; temporary extracted configuration is removed after each command. Never upload that folder. The primary native API is pinned to hash `83d794ac6cd4fe204f30a320c4e34537b683b76da3aedb6a106f9077dff6f663`; deployment drift fails closed and requires a checked source update.
+Private audit files are under `$HOME/.known-enough/access-users/private/`, mode 0600 beneath a mode-0700 directory. They contain UTC, source/API hash, operation and bounded outcome counts, without account identifiers. A cached verified API ZIP is private; temporary extracted configuration is removed after each command. Never upload that folder. The primary native API is pinned to hash `01767852a8fd86330b1b6f6c48e823a913e354a529dcb45c4d0fb6f81898dde8`; deployment drift fails closed and requires a checked source update.
 
 ## If a command fails
 

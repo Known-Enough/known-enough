@@ -81,3 +81,9 @@ It checks the exact current API/worker hashes and source, keeps the private work
 For the exact currently published API and complete download/checksum block, use [FF02 CloudShell command](../../docs/tasks/active/ff/FF02/cloudshell-command.md). Synthetic policy is enabled with in-app consent required; only the named timestamp permission remains missing in actual readback38762492720. No other installer is needed for this change.
 
 Update 2026-10-15T17:43:10Z: the user successfully applied the FF02 timestamp permission. [Actual supplied receipt](../../docs/review-artifacts/FF/processing-stamp-user-receipt.json). No repeat installation is required for the later generic-guide deployment; the old hash-pinned command is historical and will reject changed API bytes by design. Private interpretation still requires explicit participant review and processing consent.
+
+## Approve all eligible pending accounts (explicit user request)
+
+After refreshing the tool, run `python3 -B scripts/cloudshell-commands/07-approve-all-pending.py` from this repository. This is an approval action, not a test: it takes a complete pending snapshot, selects eligible users, rechecks each through the existing exact-username operator and stops on the first failure. Ineligible users and users who join the queue later are not approved. Groups and memberships are unchanged.
+
+2026-10-15 repair: the former tool pinned an older API and returned `CHECKED_NATIVE_API_REQUIRED` after FF05 publication. Current setup/recovery pins source61f781d and API01767852 from the exact publication receipt. No new IAM setup is needed. Do not bypass the native package check or infer all such errors mean low disk space. No tests or real approvals were run by A for this update.
