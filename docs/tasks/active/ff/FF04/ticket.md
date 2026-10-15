@@ -1,6 +1,6 @@
 # FF04 — Delete saved drafts and decisions
 
-Status: IN_PROGRESS / A
+Status: PUBLISHED / user manual acceptance pending; A implementation claim released
 
 User requests an option to delete drafts and decisions. Add organizer-only confirmed removal to the existing group UI and authenticated remove endpoint. Use retained deletion markers so stale links, saved-request replay and background commits cannot restore deleted items. Hide deleted items from group snapshots and deny participant/display access to deleted decisions. This is removal from the app, not certified erasure of historical records. Preserve other group decisions, admission, private data and accounting. No tests or AI calls in this chat; user performs manual acceptance. Build/type compilation and compatible publication are authorized.
 
@@ -13,3 +13,5 @@ Organizer buttons and explicit keep/delete confirmation use existing authenticat
 Stored history and existing 64-record capacity bounds remain; this feature does not implement retention erasure or recover capacity. After actual deletions, rollback packages must understand the optional deleted marker; do not restore an older parser or remove markers to regain access.
 
 Manual check after publication: open a group you organize; cancel a draft deletion once, then confirm it; refresh and confirm it stays absent. Delete a decision, refresh, and check its old link no longer opens. A regular member should have no delete action. Other decisions should remain accessible. No automated tests run by A.
+
+Publication completed/source `56a7a9aa56c06cf2c254184d82860e1f05c4c597`: runtime [38790328604](https://github.com/Known-Enough/known-enough/actions/runs/38790328604) PASS/API121be021/worker3de9b30b, control [38790532607](https://github.com/Known-Enough/known-enough/actions/runs/38790532607) enabled/synthetic policy unchanged/consent required, frontend [38790532741](https://github.com/Known-Enough/known-enough/actions/runs/38790532741) PASS/Amplify101. No tests, model/signup calls or item deletions by A. [Receipt](../../../../review-artifacts/FF/deletion-publication.json). User manual acceptance pending, claim released. No new CloudShell step.

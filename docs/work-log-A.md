@@ -1,3 +1,5 @@
+2026-10-15 FF04/A publication — Runtime38790328604 SUCCESS/API121be021/worker3de9b30b, source56a7a9a; control38790532607 SUCCESS/enabled/synthetic policy unchanged/consent required, frontend38790532741 SUCCESS/Amplify101. Browser build/type compilation only, tests NOT_EXECUTED/user direction, no AI/signup or actual item deletions. Logical removal retains history/capacity; markers cannot be reset. A claim released; manual acceptance pending and unrelated FF03 format rejection remains open. [Receipt](review-artifacts/FF/deletion-publication.json).
+
 2026-10-15 FF04/A — User-directed draft/decision deletion implemented in existing group remove route, backward-compatible optional deletion markers, organizer confirmation UI and strict read/replay/participant/display/job admission denial. Native rows/IDs retained, other roster bindings untouched. Browser build and TypeScript compilation completed, tests/model/signup calls NOT_EXECUTED by user direction. No live item deleted by agent. Publication pending; separate FF03 model-format report remains unresolved.
 
 ## FIX04 deployed/live closeout — 2026-10-14T17:14:09Z

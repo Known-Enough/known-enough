@@ -1,0 +1,166 @@
+{
+  "result": "DELETION_PUBLISHED_MANUAL_ACCEPTANCE_PENDING",
+  "observedAt": "2026-10-15T19:03:52.754893+00:00",
+  "source": "56a7a9aa56c06cf2c254184d82860e1f05c4c597",
+  "website": "https://main.d143q5ravxp5av.amplifyapp.com/",
+  "changes": [
+    "Organizer-only saved-draft and decision delete buttons with explicit confirmation",
+    "Existing authenticated group/remove route; no new AWS permissions or routes",
+    "Deleted records excluded from group snapshots and denied by draft/decision/display/job boundaries",
+    "Retained IDs and irreversible deletion markers block replay and stale restoration"
+  ],
+  "checks": {
+    "browserBuild": "COMPLETED",
+    "typescriptCompiler": "COMPLETED",
+    "tests": "NOT_EXECUTED_USER_REQUEST",
+    "modelCalls": 0,
+    "signupCalls": 0,
+    "itemsDeletedByAgent": 0
+  },
+  "runtime": {
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38790328604",
+    "api": {
+      "sourceSha": "56a7a9aa56c06cf2c254184d82860e1f05c4c597",
+      "result": "LIFECYCLE_OWNER_CODE_READBACK_PASS",
+      "backendSha256": "121be021f2a1db1326ab5253f40fbb6c4df07c31fd40af482dfe76f6369ab6cb",
+      "priorBackendSha256": "40bbf2c027b955e87388162207ca64799dc194d5a829e1ae8259e3c63073a28c",
+      "environment": "UNCHANGED",
+      "migration": "UNCHANGED",
+      "modelCalls": 0,
+      "dataChanges": 0,
+      "managedOwnerProof": "PENDING"
+    },
+    "worker": {
+      "result": "WORKER_CODE_DISABLED_READBACK_PASS",
+      "providerCalls": 0,
+      "activation": "NOT_EXECUTED",
+      "codeWriteRequested": true,
+      "actualWorkerSha256": "a04f547d43000bd8a7ad0f93a6e9aa3646927dee913257d5de13378ac38e4673",
+      "expectedPriorWorkerSha256": "a04f547d43000bd8a7ad0f93a6e9aa3646927dee913257d5de13378ac38e4673",
+      "workerSha256": "3de9b30b9e0c991cd6f43af357488c199704bfcb03643dec316e70759fc93c0b",
+      "sourceSha": "56a7a9aa56c06cf2c254184d82860e1f05c4c597",
+      "schedule": "DISABLED"
+    },
+    "sourceTransition": {
+      "sourceSha": "56a7a9aa56c06cf2c254184d82860e1f05c4c597",
+      "result": "JOB_SOURCE_DISABLED_READBACK_PASS",
+      "writeRequested": true,
+      "state": "DISABLED",
+      "active": 0,
+      "slots": 0,
+      "totalWrites": 0,
+      "totalsUnchangedDuringCheck": true,
+      "providerCalls": 0
+    }
+  },
+  "control": {
+    "disableRun": "https://github.com/Known-Enough/known-enough/actions/runs/38790209857",
+    "enableRun": "https://github.com/Known-Enough/known-enough/actions/runs/38790532607",
+    "readback": {
+      "utc": "2026-10-15T19:02:19.519194+00:00",
+      "source": "56a7a9aa56c06cf2c254184d82860e1f05c4c597",
+      "phase": "enable",
+      "controlWrites": 1,
+      "dataWrites": 0,
+      "providerCalls": 0,
+      "controlSource": "56a7a9aa56c06cf2c254184d82860e1f05c4c597",
+      "priorEnabled": false,
+      "privateRetention": "ENABLED_SYNTHETIC_CONSENT_REQUIRED",
+      "enabled": true,
+      "totals": "UNCHANGED",
+      "result": "CONTROL_READBACK_PASS"
+    },
+    "syntheticPolicy": {
+      "source": "56a7a9aa56c06cf2c254184d82860e1f05c4c597",
+      "phase": "apply",
+      "policyWrites": 0,
+      "backupWrites": 0,
+      "accountWrites": 0,
+      "stampWrites": 0,
+      "totalWrites": 0,
+      "providerCalls": 0,
+      "result": "SYNTHETIC_PROCESSING_APPLY_PASS",
+      "rawConversationMs": 0,
+      "realPersonPolicy": "UNAPPROVED",
+      "participantConsent": "REQUIRED_IN_APP",
+      "utc": "2026-10-15T19:02:34.465506+00:00"
+    }
+  },
+  "frontend": {
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38790532741",
+    "publication": {
+      "sourceSha": "56a7a9aa56c06cf2c254184d82860e1f05c4c597",
+      "result": "FRONTEND_PUBLICATION_PASS",
+      "providerCalls": 0,
+      "signup": 0,
+      "apiPublication": "NOT_EXECUTED",
+      "files": [
+        {
+          "path": "/assets/app-chrome-B_qlJFew.js",
+          "sha256": "81e16d96770b6510d70f6dbe6b1a3292f4707c86fb54a74d00d903796be18716"
+        },
+        {
+          "path": "/assets/cognito-session-DaLlFB3t.js",
+          "sha256": "c060cf9628ff1bb8b40b0a7448e6919a61f48b8bdfb0fa520ecdc19fc8184901"
+        },
+        {
+          "path": "/assets/connected-app-DEkUTejz.js",
+          "sha256": "b6b0a21e38a2423d764b09b56f95e63e1b1131171e37dd550a584db19fe47840"
+        },
+        {
+          "path": "/assets/decision-guide-CbO9QFWU.js",
+          "sha256": "fcc39ad2490bd95df906940a1d4f5fa979d026b59fb3da6a4d4a821d6742a4a0"
+        },
+        {
+          "path": "/assets/index-By4NT7dl.css",
+          "sha256": "577a2ac5a8d4728bfa6615ce397c11ef97a708a98e42c0f0a43875aa7c7799af"
+        },
+        {
+          "path": "/assets/index-DxlykG5X.js",
+          "sha256": "f87daa5c9061c077e146fe438db99ae6f9b8b61646c91ec608040a78d7ef4bdd"
+        },
+        {
+          "path": "/cover.png",
+          "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151"
+        },
+        {
+          "path": "/",
+          "sha256": "9149728edebffe56ece32cb6cf022b70bda79c3a862f8ec2b5194deaeef0eb63"
+        },
+        {
+          "path": "/logo.png",
+          "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb"
+        }
+      ],
+      "amplifyJobId": "101"
+    },
+    "configuration": {
+      "result": "ZZ02_SETUP_READBACK_PASS",
+      "configurationWrites": 0,
+      "dataWrites": 0,
+      "providerCalls": 0,
+      "signupDelivery": "NOT_EXECUTED",
+      "configurationSha256": "f6f32c6bd2cb66bebd8e4d40c35b1f198426172f1f8f372eaab35c472327da6b",
+      "postConfirmation": "MATCH",
+      "smsRoleConfigured": false,
+      "apiSha256": "121be021f2a1db1326ab5253f40fbb6c4df07c31fd40af482dfe76f6369ab6cb",
+      "groupReadRoutes": [
+        "GET /groups/{groupId}/draft-requests",
+        "GET /groups",
+        "GET /groups/{groupId}/draft-requests/{requestKey}",
+        "GET /groups/{groupId}/drafts/{draftId}",
+        "GET /groups/{groupId}/decisions/{decisionId}/review",
+        "GET /groups/{groupId}/members/{memberId}/profile",
+        "GET /groups/{groupId}"
+      ],
+      "profileRoutesPresent": 5,
+      "managedRoutesPresent": 6
+    }
+  },
+  "limitations": [
+    "Logical removal from the app; historical records and existing capacity bounds remain",
+    "After any deletion, rollback must preserve deletion-aware schemas and authorization",
+    "Unrelated FF03 AI format rejection remains unresolved; no model replay or probe performed"
+  ],
+  "manualNext": "Refresh a group you organize. Cancel a draft deletion once, then confirm it and refresh. Delete a decision and confirm its old link no longer opens; other decisions remain usable."
+}

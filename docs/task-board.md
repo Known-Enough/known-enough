@@ -1,3 +1,5 @@
+Latest user-directed checkpoint — FF04 deletion PUBLISHED/source56a7a9a/frontendAmplify101. [Task](tasks/active/ff/FF04/ticket.md), [receipt](review-artifacts/FF/deletion-publication.json). A claim released; user manual acceptance pending. No tests or model calls; FF03 output-format report remains open.
+
 Current user-directed priority — FF04 IN_PROGRESS/A: [delete saved drafts and decisions](tasks/active/ff/FF04/ticket.md). No tests, user manual acceptance; one writer. FF03 output-format report remains open.
 
 2026-10-15 FF03/A question-boundary handoff — PUBLISHED/source1508146/runtime38785052427 SUCCESS/API40bbf2c0/worker a04f547d and frontend38785325862 SUCCESS/Amplify100. Structured question purpose/target, private-need exclusion and supplied-alternative rules/visible dates; candidate validation remains. Existing drafts use explicit Rebuild shared choices with AI, no automatic replay. Build/type compilation completed; no tests/model/signup calls. [Receipt](review-artifacts/FF/question-boundary-publication.json). A claim released/manual acceptance pending, no new IAM/CloudShell or B dispatch/schedule.
