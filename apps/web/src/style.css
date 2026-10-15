@@ -831,3 +831,45 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 
 .ke-wizard-steps li[data-complete="true"] > span { background: var(--wizard-note); color: var(--wizard-text); }
 .ke-wizard-steps svg { width: 14px; height: 14px; }
+
+/* FF01: compact authentication; shared controls, unchanged auth flow. */
+.ke-entry-auth .ke-hero { margin: 22px 0 24px; }
+.ke-entry-auth .ke-hero h1 { font-size: clamp(30px, 5vw, 40px); line-height: 1.15; }
+.ke-entry-auth .ke-hero p { font-size: 15px; }
+.ke-entry-auth .ke-entry-surface { max-width: 500px; padding: 28px 32px; }
+.ke-entry .ke-auth-form { display: grid; gap: 12px; }
+.ke-entry .ke-auth-form h2 { margin: 0; font-size: 24px; }
+.ke-auth-intro { color: #657269; font-size: 14px; line-height: 1.55; margin: 0 0 8px; }
+.ke-entry .ke-auth-form form, .ke-entry .ke-auth-form fieldset { margin: 0; display: grid; gap: 10px; }
+.ke-entry .ke-auth-form label { margin: 4px 0 -4px; font-size: 13px; font-weight: 600; }
+.ke-entry .ke-auth-form input { width: 100%; min-width: 0; height: 46px; padding: 11px 13px; border: 1px solid #cdd8ce; border-radius: 11px; font-size: 16px; background: #fcfdfa; color: #173c30; transition: border-color .15s, box-shadow .15s; }
+.ke-entry .ke-auth-form input:focus-visible { outline: 2px solid #27634c; outline-offset: 2px; border-color: #27634c; box-shadow: 0 0 0 4px #27634c12; }
+.ke-auth-input { position: relative; width: 100%; }
+.ke-auth-field-icon { position: absolute; left: 13px; top: 14px; width: 18px; height: 18px; color: #6b8071; pointer-events: none; }
+.ke-entry .ke-auth-input input { padding-left: 40px; }
+.ke-entry .ke-auth-password input { padding-right: 51px; }
+.ke-entry .ke-auth-form .ke-password-toggle { position: absolute; top: 1px; right: 2px; display: grid; place-items: center; width: 44px; min-height: 44px; padding: 10px; margin: 0; border: 0; background: transparent; color: #526b5d; box-shadow: none; border-radius: 9px; }
+.ke-password-toggle svg { width: 20px; height: 20px; }
+.ke-entry .ke-auth-form .ke-password-toggle:hover { background: #173c300a; }
+.ke-auth-help { margin: -3px 0 3px; color: #657269; font-size: 12px; line-height: 1.5; }
+.ke-entry .ke-auth-form button[type="submit"] { width: 100%; min-height: 46px; margin-top: 6px; border-radius: 11px; background: #173c30; color: #fff; }
+.ke-entry .ke-auth-form .ke-auth-link { display: inline; min-height: 0; width: auto; padding: 4px 0; margin: 0; border: 0; background: transparent; color: #295b45; box-shadow: none; font-size: 13px; font-weight: 500; text-align: left; text-decoration: underline; text-underline-offset: 3px; border-radius: 3px; }
+.ke-entry .ke-auth-form .ke-auth-link:hover { color: #173c30; background: transparent; }
+.ke-auth-links { display: grid; gap: 12px; font-size: 13px; }
+.ke-auth-links p { margin: 0; }
+.ke-auth-recovery { color: #657269; font-size: 12px; }
+.ke-auth-recovery summary { cursor: pointer; padding: 3px 0; }
+.ke-auth-recovery p { margin: 7px 0 3px; }
+.ke-entry .ke-auth-form .ke-auth-back { justify-self: center; }
+.ke-auth-form [role="status"] { margin: 2px 0 0; padding: 11px 13px; border-radius: 9px; background: #f0f4ed; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.ke-auth-form .ke-help { overflow-wrap: anywhere; font-size: 11px; }
+.ke-entry .ke-auth-form input:autofill { box-shadow: 0 0 0 1000px #fcfdfa inset; color: #173c30; }
+.ke-entry .ke-auth-form input:-webkit-autofill { -webkit-box-shadow: 0 0 0 1000px #fcfdfa inset; -webkit-text-fill-color: #173c30; }
+:root[data-theme="dark"] .ke-auth-intro, :root[data-theme="dark"] .ke-auth-help, :root[data-theme="dark"] .ke-auth-recovery { color: var(--ke-dark-muted); }
+:root[data-theme="dark"] .ke-entry .ke-auth-form .ke-auth-link, :root[data-theme="dark"] .ke-entry .ke-auth-form .ke-password-toggle { color: #b1d8c0; background: transparent; border: 0; }
+:root[data-theme="dark"] .ke-entry .ke-auth-form .ke-auth-link:hover { color: #e1f3e8; }
+:root[data-theme="dark"] .ke-auth-form [role="status"] { background: #25362b; }
+:root[data-theme="dark"] .ke-entry .ke-auth-form input:autofill { box-shadow: 0 0 0 1000px #131c17 inset; color: #e7eee9; }
+:root[data-theme="dark"] .ke-entry .ke-auth-form input:-webkit-autofill { -webkit-box-shadow: 0 0 0 1000px #131c17 inset; -webkit-text-fill-color: #e7eee9; }
+@media (max-width: 550px) { .ke-entry-auth .ke-entry-surface { padding: 24px 20px; } }
+@media (prefers-reduced-motion: reduce) { .ke-entry .ke-auth-form input { transition: none; } }

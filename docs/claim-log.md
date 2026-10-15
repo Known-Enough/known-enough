@@ -1,3 +1,5 @@
+A FF01 takeover — 2026-10-15: user explicitly requests sequential FF01 → FF02 → FF03 implementation/publication without tests, user manual acceptance. B latest FIX01 claim released at CODE_READY/BLOCKED; preserve pushed repair. FF01 IN_PROGRESS/A only, scope auth frontend/CSS and FF records. No B worker or schedule changes.
+
 ## FIX04 A released after real proof — 2026-10-14T17:14:09Z
 
 FIX04 DONE/A under explicit takeover; [38603820489](https://github.com/Known-Enough/known-enough/actions/runs/38603820489) own actor44531296 verified actual signup/list/selectedapproval/replay/safe duplicate email/normalcleanup PASS. Source239dfed/API737b003/73e0 frontend737 exact7hashmatch;2normal+1duplicate owned providerusers deleted/2mailboxesremoved,0human approval/0models. Matching pinned full1612/83 PASS. A releases implementation; B may fresh intake without concurrent A task, existing automation unchanged. B execution is not inferred. [Evidence](review-artifacts/FIX04/signup-live-proof.json).

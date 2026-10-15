@@ -2396,3 +2396,5 @@ FIX01 wizard published — 2026-10-14T19:16:24.556776+00:00: **bounded UI contin
 2026-10-14 — Created FF02 for B from user screenshot: private-conditions interpretation unavailable; diagnose actual failure and clarify prerequisite/error states, preserve private text and independent consent. Backend cause unknown. Documentation only; no tests, code, AWS/provider action or B dispatch. Existing claim/schedule unchanged.
 
 2026-10-14 — Created FF03 from two user-reported unsupported AI draft references: investigate exact output rejection, correct safe request disposition and clarify follow-up/recovery states and stepper. Coordinate overlapping FIX01 rather than duplicate implementation. Documentation only; no tests, calls, deployment, recovery or dispatch.
+
+2026-10-15 — FF01/A: compact matching auth cards, shared accessible SVG password toggle, contextual verification/recovery and subtle navigation links. Preserve direct Cognito and all password/email rules; registration synchronous submit guard added. Build completed; no tests run by user instruction. Frontend publication pending.

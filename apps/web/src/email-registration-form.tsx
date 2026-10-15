@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CognitoBrowserConfig } from './cognito-session';
 import { LoadingSkeleton } from './app-chrome';
+import { PasswordField } from './password-field';
 import { asRegistrationFailure, confirmEmailRegistration, MIN_REGISTRATION_PASSWORD_LENGTH,
   requestEmailRegistration, type RegistrationCode, type RegistrationDiagnostic } from './email-registration';
 
@@ -31,12 +32,14 @@ export function EmailRegistration({ config, startOpen = false, onClose, onSignIn
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const submitting = useRef(false);
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [diagnostic, setDiagnostic] = useState<RegistrationDiagnostic | null>(null);
   async function submit() {
-    if (busy) return;
+    if (submitting.current) return;
+    submitting.current = true;
     setBusy(true); setMessage(''); setDiagnostic(null);
     try {
       if (stage === 'details') {
@@ -53,27 +56,28 @@ export function EmailRegistration({ config, startOpen = false, onClose, onSignIn
       setDiagnostic(observed); setMessage(recoveryText(observed.code));
       console.info('Known Enough registration diagnostic', { environment: config.userPoolId, ...observed });
     }
-    finally { setBusy(false); }
+    finally { submitting.current = false; setBusy(false); }
   }
-  if (stage === 'closed') return <button type="button" className="secondary" onClick={() => setStage('details')}>Create account</button>;
-  return <section className="ke-registration" aria-label="Email registration">
+  if (stage === 'closed') return <button type="button" className="secondary ke-auth-link" onClick={() => setStage('details')}>Create account</button>;
+  return <section className="ke-registration ke-auth-form" aria-label="Email registration">
     <h2 ref={heading} tabIndex={-1}>{stage === 'details' ? 'Create your account' : stage === 'verify' ? 'Verify your email' : 'Account created'}</h2>
+    <p className="ke-auth-intro">{stage === 'details' ? 'A little space for better decisions, together.' : stage === 'verify' ? 'Check your inbox and enter the six-digit code.' : 'Your email is verified. Sign in to continue.'}</p>
     {stage !== 'complete' && <form onSubmit={event => { event.preventDefault(); void submit(); }}>
       <fieldset disabled={busy} aria-busy={busy}>
         {stage === 'details' ? <>
           <label htmlFor="register-username">Username</label><input id="register-username" value={username} required maxLength={128} autoComplete="username" onChange={event => setUsername(event.target.value)} />
           <label htmlFor="register-email">Email</label><input id="register-email" type="email" value={email} required maxLength={320} autoComplete="email" onChange={event => setEmail(event.target.value)} />
-          <label htmlFor="register-password">Password</label><input id="register-password" type="password" value={password} required minLength={MIN_REGISTRATION_PASSWORD_LENGTH} maxLength={256} autoComplete="new-password" onChange={event => setPassword(event.target.value)} />
-          <p>Use at least eight characters, including uppercase, lowercase, a number and a symbol.</p>
+          <label htmlFor="register-password">Password</label><PasswordField id="register-password" value={password} minLength={MIN_REGISTRATION_PASSWORD_LENGTH} maxLength={256} autoComplete="new-password" disabled={busy} onChange={setPassword} describedBy="register-password-help" />
+          <p id="register-password-help" className="ke-auth-help">8+ characters, with uppercase, lowercase, a number and a symbol.</p>
         </> : <><label htmlFor="register-code">Verification code</label><input id="register-code" value={code} required pattern="[0-9]{6}" maxLength={6} inputMode="numeric" autoComplete="one-time-code" onChange={event => setCode(event.target.value)} /></>}
         <button type="submit">{stage === 'details' ? 'Create account' : 'Verify email'}</button>
         {busy && <LoadingSkeleton kind="inline" label={stage === 'details' ? 'Creating your account' : 'Verifying your email'} />}
       </fieldset>
     </form>}
     {stage === 'details' && diagnostic && ['ACCOUNT_EXISTS_OR_PENDING', 'NETWORK_RESULT_UNKNOWN', 'DELIVERY_UNCONFIRMED'].includes(diagnostic.code) && username.trim()
-      && <button type="button" className="secondary" onClick={() => { setUsername(username.trim()); setPassword(''); setEmail(''); setDiagnostic(null); setMessage('Enter the code sent to your email.'); setStage('verify'); }}>I have a verification code</button>}
-    {stage === 'verify' && <button type="button" className="secondary" onClick={() => { setCode(''); setDiagnostic(null); setMessage(''); setStage('details'); }}>Back to account details</button>}
-    <button type="button" className="secondary" disabled={busy} onClick={() => { setPassword(''); setEmail(''); setUsername(''); setCode(''); setDiagnostic(null); setMessage(''); setStage('closed'); onClose?.(); }}>{stage === 'details' ? 'Cancel account creation' : 'Close registration'}</button>
+      && <button type="button" className="secondary ke-auth-link" onClick={() => { setUsername(username.trim()); setPassword(''); setEmail(''); setDiagnostic(null); setMessage('Enter the code sent to your email.'); setStage('verify'); }}>I have a verification code</button>}
+    {stage === 'verify' && <button type="button" className="secondary ke-auth-link" onClick={() => { setCode(''); setDiagnostic(null); setMessage(''); setStage('details'); }}>Back to account details</button>}
+    <button type="button" className="secondary ke-auth-link" disabled={busy} onClick={() => { setPassword(''); setEmail(''); setUsername(''); setCode(''); setDiagnostic(null); setMessage(''); setStage('closed'); if (stage === 'details' && onSignIn) onSignIn(); else onClose?.(); }}>{stage === 'details' && onSignIn ? 'Back to sign in' : 'Close registration'}</button>
     {stage === 'complete' && onSignIn && <button type="button" onClick={onSignIn}>Sign in</button>}
     {stage !== 'complete' && onSignIn && diagnostic && ['ACCOUNT_SETUP_UNAVAILABLE', 'EMAIL_ALREADY_LINKED'].includes(diagnostic.code)
       && <button type="button" onClick={onSignIn}>Sign in</button>}
