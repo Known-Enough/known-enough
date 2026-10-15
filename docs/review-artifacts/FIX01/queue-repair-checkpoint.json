@@ -35,7 +35,7 @@
     "browserSession": "NOT_OBSERVED",
     "authentication": "NOT_ATTEMPTED"
   },
-  "nextAction": "Freeze checked source and run cleanup-only diagnostic38646071704 successor on the original saved test checkpoint; no signup/model/runtime publication.",
+  "nextAction": "Correct empty successful CLI JSON lookup, verify native operator-control absence using own checked cleanup run, then prepare conditional administrator initialization if absent.",
   "additionalProductTest": "NOT_REQUESTED",
   "priorAdministratorAttempt": {
     "result": "BLOCKED",
@@ -160,14 +160,31 @@
     "operatorPolicy": "NOT_OBSERVED"
   },
   "latestSourceChecks": {
+    "checkedAt": "2026-10-15T01:43:40.984006+00:00",
     "fullCheck": "PASS",
-    "unitPassed": 1622,
+    "unitPassed": 1629,
     "optionalSkips": 2,
     "browserPassed": 86,
     "browserWorkers": 2,
     "hostedPassed": 1,
-    "archivePrivacyFocusedPassed": 6,
-    "mobileLifecycleRepeatedPasses": 3,
-    "failedPreviousFull": "mobile browser context teardown timeout; all assertions retained; final complete PASS after early context release"
+    "archivePrivacyFocusedPassed": 7,
+    "archiveRecoveryFocusedPassed": 18,
+    "timers": "unchanged; eight independent tamper cases now independently reported"
+  },
+  "humanRetest": {
+    "result": "PASS",
+    "decisionCompletes": true,
+    "memberASeesDecision": true,
+    "evidence": "User reply: It completes and A can see it",
+    "reportedAt": "2026-10-15T01:29:29.724727+00:00"
+  },
+  "latestArchiveDiagnostic": {
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38648358389",
+    "stage": "READ_OPERATOR_POLICY",
+    "exceptionName": "SyntaxError",
+    "sourceFile": "prove.mjs",
+    "line": 47,
+    "dataWrites": 0,
+    "providerCalls": 0
   }
 }

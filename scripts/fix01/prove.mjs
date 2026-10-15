@@ -3,14 +3,14 @@ import { join } from 'node:path';
 import { chromium } from '@playwright/test';
 import { createPartitionManagedDriver } from '../../packages/adapters/src/partition-managed.ts';
 import { partitionRecoveryStorage } from '../operations/partition-recovery.mjs';
-import { preparePartitionArchive,createPartitionArchiveRunner,ArchiveOperatorPolicy } from '../../packages/adapters/src/partition-archive.ts';
+import { preparePartitionArchive,createPartitionArchiveRunner } from '../../packages/adapters/src/partition-archive.ts';
 import { createPartitionedGroupRepository } from '../../packages/adapters/src/partitioned-group-repository.ts';
 import { createCognitoIdentityResolver } from '../../apps/api/src/cognito-identity.ts';
 import { randomUUID } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { ownFixture } from '../operations/partition-live-behavior.mjs';
-import { ownedArchiveEntries,archiveFailureCode,archiveInputChecks,archiveExceptionMetadata } from './owned-archive.mjs';
+import { ownedArchiveEntries,archiveFailureCode,archiveInputChecks,archiveExceptionMetadata,archivePolicyOutput } from './owned-archive.mjs';
 const directory=join(process.env.RUNNER_TEMP,'partition-cutover-private');
 const report={source:process.env.EXPECTED_SOURCE,utc:new Date().toISOString(),result:'NOT_EXECUTED',groupCreate:'NOT_EXECUTED',draft:'NOT_EXECUTED',providerCalls:'NOT_VERIFIED',unauthorized:'NOT_EXECUTED',reload:'NOT_EXECUTED'};
 let browser;
@@ -44,10 +44,7 @@ try {
    if(original){
     report.archiveStage='READ_OPERATOR_POLICY';
     const result=await promisify(execFile)('aws',['dynamodb','get-item','--table-name','KnownEnoughPartitions','--key',JSON.stringify({PK:{S:'OPERATIONS#ARCHIVE'},SK:{S:'STATE'}}),'--consistent-read','--region','us-east-1','--output','json','--no-cli-pager'],{timeout:20000});
-    const item=JSON.parse(result.stdout).Item;
-    report.operatorPolicy={present:item!==undefined,payloadText:typeof item?.payload?.S==='string',revisionText:typeof item?.revision?.N==='string',keysMatch:item?.PK?.S==='OPERATIONS#ARCHIVE'&&item?.SK?.S==='STATE',noExtraFields:item!==undefined&&Object.keys(item).every(k=>['PK','SK','revision','payload'].includes(k))};
-    const policy=item?JSON.parse(item.payload.S):null;const parsed=ArchiveOperatorPolicy.safeParse(policy);
-    report.operatorPolicy={...report.operatorPolicy,schemaValid:parsed.success,revisionMatches:parsed.success&&String(parsed.data.revision)===item.revision?.N,canonicalMatches:parsed.success&&JSON.stringify(parsed.data)===item.payload.S,enabled:policy?.enabled===true,actorAllowed:Array.isArray(policy?.actors)&&policy.actors.includes(143764700)};
+    report.operatorPolicy=archivePolicyOutput(result.stdout);
    }
    report.archiveStage='BUILD_PORTS';
    const runner=createPartitionArchiveRunner(managed.archivePorts({manifestBytes:plan.manifestBytes,expected,authority,recovery:partitionRecoveryStorage()}),plan.manifestBytes,expected,authority);

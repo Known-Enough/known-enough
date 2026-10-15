@@ -2,6 +2,7 @@ import { partitionGroupKey,PartitionRowSchema,partitionDynamoWrites } from '../.
 import { partitionDirectoryKey } from '../../packages/adapters/src/partition-directory.ts';
 import { Groups } from '@deal-table/contracts';
 import { isDeepStrictEqual } from 'node:util';
+import { ArchiveOperatorPolicy } from '../../packages/adapters/src/partition-archive.ts';
 
 export async function ownedArchiveEntries(groups, groupId, organizer, subjects) {
  const key=partitionGroupKey(groupId),header=await groups.read(key);
@@ -54,4 +55,15 @@ export function archiveExceptionMetadata(error) {
  }
  if(frames.length)result.sourceFrames=frames;
  return result;
+}
+
+export function archivePolicyOutput(stdout) {
+ const item=JSON.parse(stdout.trim()||'{}').Item;
+ const policy=typeof item?.payload?.S==='string'?JSON.parse(item.payload.S):null;
+ const parsed=ArchiveOperatorPolicy.safeParse(policy);
+ return {present:item!==undefined&&item!==null,payloadText:typeof item?.payload?.S==='string',revisionText:typeof item?.revision?.N==='string',
+  keysMatch:item?.PK?.S==='OPERATIONS#ARCHIVE'&&item?.SK?.S==='STATE',noExtraFields:item!==undefined&&item!==null&&Object.keys(item).every(k=>['PK','SK','revision','payload'].includes(k)),
+  schemaValid:parsed.success,revisionMatches:parsed.success&&String(parsed.data.revision)===item.revision?.N,
+  canonicalMatches:parsed.success&&JSON.stringify(parsed.data)===item.payload.S,enabled:policy?.enabled===true,
+  actorAllowed:Array.isArray(policy?.actors)&&policy.actors.includes(143764700)};
 }

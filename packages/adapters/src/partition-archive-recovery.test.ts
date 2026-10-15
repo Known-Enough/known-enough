@@ -112,8 +112,7 @@ it('rejects changed physical bytes or versions and a missing chunk before return
   }
 });
 
-it('rejects independently rehashed root source/order/length/versions/schema/extra fields with fixed recovery errors', async () => {
-  for (const defect of ['source', 'order', 'length', 'versions', 'schema', 'extra', 'uncanonical', 'missing']) {
+it.each(['source', 'order', 'length', 'versions', 'schema', 'extra', 'uncanonical', 'missing'])('rejects independently rehashed root %s with fixed recovery errors', async defect => {
     const data = fixture(); const saved = await data.save(); const original = data.objects.get(saved.versionId.slice(6, 70))!;
     const root = JSON.parse(original.bytes.toString());
     if (defect === 'source') root.sourceSha = 'b'.repeat(40);
@@ -126,7 +125,6 @@ it('rejects independently rehashed root source/order/length/versions/schema/extr
     const bytes = Buffer.from((defect === 'uncanonical' ? ' ' : '') + JSON.stringify(root)); const rootHash = hash(bytes.toString());
     data.objects.set(rootHash, { bytes, versionId: original.versionId });
     await expect(data.read(`arch1:${rootHash}:${original.versionId}`)).rejects.toThrow('MIGRATION_STORAGE_UNAVAILABLE');
-  }
 });
 
 it('rejects changed logical input/hash/binding and malformed composite versions without any physical I/O', async () => {

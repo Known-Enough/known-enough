@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { partitionSeedRows } from '../../packages/adapters/src/partitioned-group-repository.ts';
 import { partitionDirectoryKey } from '../../packages/adapters/src/partition-directory.ts';
 import { preparePartitionArchive } from '../../packages/adapters/src/partition-archive.ts';
-import { ownedArchiveEntries,archiveFailureCode,archiveInputChecks,archiveExceptionMetadata } from './owned-archive.mjs';
+import { ownedArchiveEntries,archiveFailureCode,archiveInputChecks,archiveExceptionMetadata,archivePolicyOutput } from './owned-archive.mjs';
 const hash=value=>createHash('sha256').update(value).digest('hex');
 function storage(acceptedBy='member') {
  const group={id:'owned-group',name:'Owned garden',organizer:'organizer',version:2,members:['organizer','member'],drafts:[],decisions:[{id:'owned-decision',version:1}],invitations:[{tokenHash:hash('invitation'),recipientHash:hash('member'),expiresAt:1,acceptedBy}]};
@@ -47,4 +47,13 @@ test('exception diagnostics strip private paths/messages and retain only fixed s
  const result=archiveExceptionMetadata({name:'TypeError',stderr:'An error occurred (AccessDeniedException): PRIVATE_SUBJECT',stack:'TypeError: PRIVATE_MESSAGE /prove.mjs:2:3\n at owned (/PRIVATE_HOME/scripts/fix01/prove.mjs:44:12)\n at foreign (/PRIVATE_HOME/secret.ts:9:4)'});
  assert.deepEqual(result,{exceptionName:'TypeError',awsCode:'AccessDeniedException',sourceFrames:[{file:'prove.mjs',line:44,column:12}]});assert.ok(!JSON.stringify(result).includes('PRIVATE'));
  assert.deepEqual(archiveExceptionMetadata({name:'PRIVATE',stderr:'(PRIVATE)'}),{});
+});
+test('empty successful policy lookup is absent, while malformed and noncanonical records stay invalid',()=>{
+ for(const response of ['','\n','{}'])assert.equal(archivePolicyOutput(response).present,false);
+ const policy={schemaVersion:1,revision:1,kind:'ARCHIVE_POLICY',enabled:true,actors:[143764700]};
+ const item={PK:{S:'OPERATIONS#ARCHIVE'},SK:{S:'STATE'},revision:{N:'1'},payload:{S:JSON.stringify(policy)}};
+ const flags=archivePolicyOutput(JSON.stringify({Item:item}));assert.ok(Object.values(flags).every(Boolean));
+ const reordered={kind:policy.kind,...policy};item.payload.S=JSON.stringify(reordered);assert.equal(archivePolicyOutput(JSON.stringify({Item:item})).canonicalMatches,false);
+ item.payload={};assert.equal(archivePolicyOutput(JSON.stringify({Item:item})).schemaValid,false);
+ assert.throws(()=>archivePolicyOutput('not json'),SyntaxError);
 });
