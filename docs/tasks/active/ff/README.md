@@ -2,6 +2,7 @@
 
 | Task | Purpose | Current status |
 | --- | --- | --- |
+| [FF07](FF07/README.md) | Member photos/profile viewing, resized uploads, light-mode names and brand navigation. | READY for B after FF06; code only |
 | [FF06](FF06/README.md) | Compact decision overview, guided modals, short titles and editable group/decision names. | READY for B; code only, no tests/setup/deployment |
 | [FF05](FF05/README.md) | Guided private-answer modal with direct option selection and optional AI notes. | PUBLISHED/sourcea3e665f/Amplify103; manual acceptance pending |
 | [FF01](FF01/README.md) | Compact account screens, password visibility and contextual recovery. | PUBLISHED; user manual acceptance pending |
