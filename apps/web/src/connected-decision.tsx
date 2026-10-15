@@ -150,7 +150,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
     finally { interpretationGuard.current = false; setBusy(false); }
   };
   const interpret = async () => {
-    if (!text.trim() || !syntheticProcessing || interpretationRequest || interpretationGuard.current) return;
+    if (!allConfirmed || !confirmed || !text.trim() || !syntheticProcessing || interpretationRequest || interpretationGuard.current) return;
     interpretationGuard.current = true; setBusy(true); setNotice('');
     const requestId = crypto.randomUUID(); sessionStorage.setItem(interpretationKey, requestId); setInterpretationRequest(requestId);
     try {
@@ -198,7 +198,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
       <ul aria-label="Shared frame options and types">{snapshot.frame.variables.map(variable => <li key={variable.id}>{variableText(variable, snapshot.frame)}</li>)}</ul>
       <h3>Public decision rules</h3>
       {snapshot.frame.rules.length ? <ul aria-label="Public decision rules">{snapshot.frame.rules.map(rule => <li key={rule.id}>{ruleText(rule, snapshot.frame.variables)}</li>)}</ul> : <p>No public decision rules were declared.</p>}
-      <p>{snapshot.frameConfirmations.length} of {snapshot.frame.requiredParticipantIds.length} required frame confirmations.</p>
+      <p>{snapshot.frame.requiredParticipantIds.filter(id => snapshot.frameConfirmations.some(item => item.participantId === id)).length} of {snapshot.frame.requiredParticipantIds.length} required frame confirmations.</p>
       {owner && confirmed && <p>Your confirmation of this shared frame is saved.</p>}
       {!allConfirmed && <p>Waiting for {snapshot.frame.participants.filter(person => snapshot.frame.requiredParticipantIds.includes(person.id) && !snapshot.frameConfirmations.some(item => item.participantId === person.id)).map(person => person.displayName).join(', ')} to confirm the current shared frame. Each person must review it from their own account before private interpretation can begin.</p>}
       {owner && !confirmed && <><label><input type="checkbox" disabled={blocked} checked={reviewedFrame === frameReviewKey}
@@ -209,10 +209,11 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
       <p>Known Enough and its authorized AI process these inputs. Other participants receive only shared facts and disclosures you authorize. Outcomes may imply information. Use synthetic data here.</p>
       {(!staged || allConfirmed && (owner.ownInputReadiness !== 'READY' || !!draft || editingNeeds)) && <>
       <label htmlFor="connected-owner-text">Explain your limits and preferences privately</label>
-      <textarea id="connected-owner-text" value={text} onChange={event => setText(event.target.value)} maxLength={2000} disabled={blocked || !allConfirmed} />
+      <textarea id="connected-owner-text" value={text} onChange={event => setText(event.target.value)} maxLength={2000} disabled={blocked || !allConfirmed || !confirmed} />
       <small>{text.length} / 2,000 characters · visible only to you and authorized AI processing</small>
-      <label><input type="checkbox" checked={syntheticProcessing} disabled={blocked || !allConfirmed} onChange={event => setSyntheticProcessing(event.target.checked)} />These are synthetic test conditions. I agree to their processing by Known Enough and its AI.</label>
-      <button disabled={blocked || !allConfirmed || !text.trim() || !syntheticProcessing} onClick={() => void interpret()}>Interpret my conditions</button>
+      <label><input type="checkbox" checked={syntheticProcessing} disabled={blocked || !allConfirmed || !confirmed} onChange={event => setSyntheticProcessing(event.target.checked)} />These are synthetic test conditions. I agree to their processing by Known Enough and its AI.</label>
+      <p className="ke-help" id="owner-interpretation-requirements">{!allConfirmed ? 'Waiting for the shared frame confirmations listed above.' : !confirmed ? 'Review and confirm the shared frame above before adding your conditions.' : !syntheticProcessing ? 'Confirm that you are using fictional test conditions before continuing.' : !text.trim() ? 'Add your limits and preferences above, then ask AI to interpret them.' : 'AI will suggest private conditions for you to review. Nothing is confirmed automatically.'}</p>
+      <button aria-describedby="owner-interpretation-requirements" disabled={blocked || !allConfirmed || !confirmed || !text.trim() || !syntheticProcessing} onClick={() => void interpret()}>Interpret my conditions</button>
       {!allConfirmed && <p>Everyone must confirm the current frame first.</p>}
       {owner.ownInputReadiness === 'NEEDS_CLARIFICATION' && <p>An unresolved condition is blocking exploration. Clarify it in your private conversation before continuing.</p>}
       <ul>{owner.confirmedConstraints.filter(item => item.status === 'ACTIVE').map(item => <li key={`${item.constraintId}:${item.constraintVersion}`}>

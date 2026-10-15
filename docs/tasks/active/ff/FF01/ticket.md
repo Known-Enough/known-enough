@@ -38,3 +38,6 @@ No code, test, deployment, AWS configuration or worker dispatch was performed wh
 2026-10-15 user-directed takeover: IN_PROGRESS/A, auth presentation only; no tests, user manual acceptance after build/publication. Preserve existing auth functionality.
 
 FF01 implementation checkpoint: compact auth forms/password toggle/contextual verification and recovery links implemented. Build completed, tests intentionally not run. Publication and user manual review pending.
+
+2026-10-15 FF01/A publication complete: source7fc3786, GitHub38761806414 SUCCESS/Amplify95. Tests not run at user direction; manual acceptance pending. A releases implementation claim and continues FF02.
+Manual check: sign out, open Create account and Sign in; check narrow/mobile layout, both themes, password eye buttons, Back/Create one, discreet existing-account verification and password reset.

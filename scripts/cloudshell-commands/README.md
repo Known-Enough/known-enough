@@ -73,3 +73,7 @@ python3 -B scripts/cloudshell-commands/05-enable-decision-drafting.py --apply
 ```
 
 It checks the exact current API/worker hashes and source, keeps the private worker schedule and retention disabled, preserves usage totals, saves a private pre-change backup, refuses a different existing named policy, uses a conditional control update and reads configuration back. It does not call AI, sign up a user or run tests. Expected final result is `DECISION_DRAFTING_SETUP_READBACK_PASS`; actual decision creation still requires your manual check. Prepared for API83d794ac/workerf15b5164/jobsource4fc702b; changed runtime or active jobs stop before setup.
+
+## Private interpretation timestamp permission (FF02)
+
+[06-private-interpretation-access.py](06-private-interpretation-access.py) preserves the reviewed narrow administrator setup from the [FIX01 command](../../docs/review-artifacts/FIX01/owner-processing-access-command.md). It installs only transactional PutItem for RETENTION#* on the operations journal for the API service. It changes no users, model permissions, retention policy, usage or worker schedule and invokes no models/tests. Use the exact installed API hash from the matching publication receipt via `--api-sha256`; default is the earlier checked API046174a6. Current-runtime mismatch or a conflicting named policy stops the helper. Successful permission installation still needs synthetic-policy activation and participant consent; code readiness is not live acceptance.
