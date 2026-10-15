@@ -1,6 +1,6 @@
 # FF06 — Simple decision overview, guided modals and editable names
 
-Status: READY / unclaimed. Requested for B; task creation does not mean B has started.
+Status: CODE_READY / B; implementation claim released. Publication and manual acceptance pending.
 
 ## First read
 
@@ -27,3 +27,11 @@ Work sequentially after verified claim/intake. Record changed files, previous-lo
 ## Manual acceptance for the user
 
 Open a decision: immediately understand its subject, your own saved answers, everyone’s progress and what to do next. Continue opens the relevant modal; closing returns to the compact overview. Rename a group and a decision, reopen them and see the saved names without broken links or lost data. Private answers remain private. New decisions have distinct useful short names.
+
+## B implementation checkpoint
+
+Compact overview now shows a short description, owner-only saved conditions, public progress and next-step buttons. Shared review and proposals/disclosures use a native focused dialog; private answers retain the existing modal and recovery state. Public progress adds only participant ID/answers-saved boolean. New draft names use three words from the public idea, editable before creation. Organizer rename dialogs persist cosmetic group/binding labels with previous-name and version checks, separately from semantic frame content; existing confirmations and proposal hashes are untouched. Native and transient handlers implement POST `/groups/{groupId}/name`. Existing records are read without bulk rewrite; old names remain as fallbacks.
+
+Static typecheck, production build/bundle boundary, lint/import boundaries (576 references), and whitespace checks passed using Node24.21.0/npm11.19.0. No tests, model calls, cloud setup or deployment. Publication must include matching API/worker readers for the optional binding title and public progress schema, plus JWT POST and NONE OPTIONS `/groups/{groupId}/name` routes; installed route support is unverified. No infrastructure was changed.
+
+Manual walkthrough: open a decision, inspect your private summary and public progress, open/close each applicable step, confirm shared choices explicitly, then save answers and review a proposal. Rename a group and decision, reopen and verify labels persist while existing answers, links and confirmations remain. Check a second account sees progress only. This is CODE_READY, not live acceptance.

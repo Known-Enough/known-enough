@@ -346,7 +346,7 @@ export class DecisionArchitect {
         frameVersion: 1,
         semanticVersion: 1,
         contextToken: await token(Id.parse(this.id())),
-        title: output.title,
+        title: request.objective.trim().split(/\s+/).slice(0, 3).join(' ').slice(0, 80),
         objective: request.objective.trim(),
         description: output.description,
         participants: participants.map(person => ({ ...person, requiredForApproval: true })),

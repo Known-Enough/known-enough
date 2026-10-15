@@ -1,3 +1,4 @@
+import { RenameAction } from './rename-action';
 import { useEffect, useRef, useState } from 'react';
 import { Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { ruleText, variableText, valueText } from './connected-decision';
@@ -237,7 +238,7 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
         : <p>Your group organizer can start a decision.</p>}
     </div>}
     <div className="ke-decision-list">{group.decisions.map(decision => <article className="ke-decision-row" key={decision.id}>
-      <div><h3>{decision.current ? 'Current decision' : 'Roster review needed'}</h3>
+      <div><h3>{decision.title ?? 'Untitled decision'}</h3>
         {!decision.current && <p>Membership changed. Everyone needs to review the updated group.</p>}
       </div>
       <div className="ke-decision-row-actions">{decision.current
@@ -247,6 +248,7 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
           setDraft(null); setDirty(false); setRoster({ id: decision.id, frame: KE.PublicDecisionFrame.parse(result.frame), controlVersion: result.controlVersion as number,
             groupVersion: result.groupVersion as number, participants: result.participants as { id: string; displayName: string }[] }); setReviewed(false);
         })}>Review changed roster</button>}
+        {group.isOrganizer && <RenameAction name={decision.title ?? 'Untitled decision'} save={async name => { await request('name', { version: group.version, name, previousName: decision.title ?? 'Untitled decision', decisionId: decision.id }); await reload(); }} />}
         {group.isOrganizer && <button type="button" className="secondary ke-delete-action" disabled={busy}
           onClick={() => setDeleteTarget({ kind: 'DECISION', id: decision.id, title: 'this decision' })}>Delete decision</button>}
       </div>

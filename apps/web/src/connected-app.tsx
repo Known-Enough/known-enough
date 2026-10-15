@@ -22,6 +22,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
   });
   const [invitationEpoch, setInvitationEpoch] = useState(0);
   const [snapshot, setSnapshot] = useState<KE.PublicDecisionSnapshot | null>(null), [owner, setOwner] = useState<KE.OwnerDecisionSnapshot | null>(null);
+  const [decisionTitle, setDecisionTitle] = useState<{ id: string; title: string } | null>(null);
   const [status, setStatus] = useState(''), [busy, setBusy] = useState(false), [background, setBackground] = useState(false);
   const [target, setTarget] = useState<BackgroundTarget | null>(null);
   const epoch = useRef(0), abort = useRef<AbortController | null>(null), dirty = useRef(false);
@@ -83,7 +84,14 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
         if (!response.ok) throw Object.assign(new Error('unavailable'), { status: response.status }); privateValue = KE.OwnerDecisionSnapshot.parse(await response.json());
         if (privateValue.publicSnapshot.frame.decisionId !== id) throw new Error('wrong decision');
       }
+      let label: string | undefined;
+      if (view.kind === 'decision' && view.groupId && session.kind === 'participant') {
+        try { const response = await cognitoApiFetch(config, session, `/groups/${view.groupId}`, expire, { signal: controller.signal });
+          if (response.ok) label = Groups.GroupSnapshot.parse((await response.json()).group).decisions.find(item => item.id === id)?.title;
+        } catch { /* A cosmetic label must not prevent decision recovery. */ }
+      }
       if (epoch.current !== current || selection.current.id !== id || selection.current.token !== token) return;
+      setDecisionTitle({ id, title: label ?? value.frame.title });
       setSnapshot(privateValue?.publicSnapshot ?? value); setOwner(privateValue); const available = backgroundNegotiationAvailable(pub); setBackground(available);
       if (available && privateValue && value.status === 'REASONING') setTarget({ decisionId: id, contextToken: value.contextToken,
         semanticVersion: value.semanticVersion, ownerParticipantId: privateValue.ownerParticipantId, expiresAt: new Date(Date.now() + 120000).toISOString() });
@@ -123,7 +131,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     {view.kind === 'invalid' ? <section className="ke-card"><h2>This link is unavailable</h2><button onClick={() => move({ kind: 'groups' }, true)}>Back to groups</button></section>
       : view.kind === 'decision' ? <>
         <button className="secondary" onClick={() => move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' })}>{view.groupId ? 'Back to group' : 'Back to groups'}</button>
-        <section className={`ke-card${snapshot ? ' ke-load-reveal' : ''}`} aria-busy={busy || (!snapshot && !status)}><h2>{snapshot?.frame.title ?? 'Your decision'}</h2>
+        <section className={`ke-card${snapshot ? ' ke-load-reveal' : ''}`} aria-busy={busy || (!snapshot && !status)}><h2>{snapshot ? decisionTitle?.id === snapshot.frame.decisionId ? decisionTitle.title : snapshot.frame.title : 'Your decision'}</h2>
           {snapshot && <p role="status">Status: {decisionStatusText(snapshot.status)}</p>}
           <button className="secondary" disabled={busy} onClick={() => { if (dirty.current && !window.confirm('Refresh and discard unsaved input?')) return; dirty.current = false; void load().catch(() => {}); }}>Refresh decision</button>
           {!snapshot && !status && <LoadingSkeleton kind="decision" label="Loading current decision" />}

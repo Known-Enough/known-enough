@@ -519,10 +519,10 @@ function createKnownEnoughApiHandler(
               sendJson(response, 200, { snapshot: await options.groupDecisions.reviseRoster(principal, rosterRoute[1]!, rosterRoute[2]!, await readJson(request, maxBodyBytes)) }); return;
             }
           }
-          const groupRoute = /^\/groups\/([A-Za-z0-9_-]{1,80})\/(invitations|remove)$/.exec(path);
+          const groupRoute = /^\/groups\/([A-Za-z0-9_-]{1,80})\/(invitations|remove|name)$/.exec(path);
           if (groupRoute && request.method === 'POST') {
             const body = await readJson(request, maxBodyBytes);
-            const result = groupRoute[2] === 'invitations'
+            const result = groupRoute[2] === 'name' ? { group: await options.groups.rename(principal, groupRoute[1]!, body) } : groupRoute[2] === 'invitations'
               ? await options.groups.invite(principal, groupRoute[1]!, body)
               : { group: await (body && typeof body === 'object' && Object.hasOwn(body, 'kind')
                 ? options.groups.removeItem(principal, groupRoute[1]!, body) : options.groups.remove(principal, groupRoute[1]!, body)) };

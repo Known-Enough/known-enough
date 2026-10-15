@@ -293,6 +293,7 @@ function publicSnapshot(
     publicRevision: decision.publicRevision,
     status: decision.status,
     frameConfirmations: decision.frameConfirmations,
+    participantProgress: decision.owners.map(owner => ({ participantId: owner.participantId, answersSaved: owner.readiness === 'READY' })),
     currentProposal: decision.publicProposal,
     approvedParticipantIds: currentApprovals(decision),
     publishedDisclosures: audiences,

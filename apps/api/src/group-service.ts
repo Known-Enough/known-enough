@@ -49,7 +49,7 @@ export class GroupService {
         displayName: state.accounts.find(item => item.subject === value)!.displayName, isOrganizer: value === group.organizer })),
       drafts: group.drafts.filter(item => !item.deleted).map(item => ({ id: item.id, title: item.frame.title, created: !!item.createdDecisionId, needsClarification: item.clarificationQuestions.length > 0, current: item.groupVersion === group.version })),
       pendingInvitations: group.invitations.filter(item => !item.acceptedBy && item.expiresAt > this.options.now()).length,
-      decisions: group.decisions.filter(item => !item.deleted).map(item => ({ id: item.id, current: item.version === group.version })) });
+      decisions: group.decisions.filter(item => !item.deleted).map(item => ({ id: item.id, title: item.title ?? group.drafts.find(draft => draft.createdDecisionId === item.id)?.frame.title, current: item.version === group.version })) });
   }
   async register(principal: TrustedPrincipal | null, profile: { email: string; verified: boolean }, raw: unknown) {
     const who = subject(principal);
@@ -153,6 +153,20 @@ export class GroupService {
       if (!group.members.includes(who)) { group.members.push(who); group.version++; }
       invitation.acceptedBy = who;
       return this.snapshot(state, group, who);
+    });
+  }
+  async rename(principal: TrustedPrincipal | null, id: string, raw: unknown) {
+    const parsed = Groups.GroupNamePatch.safeParse(raw); if (!parsed.success) return fail('INVALID_COMMAND');
+    const patch = parsed.data;
+    return this.repository.transaction(state => {
+      const group = this.currentGroup(state, principal, id, true);
+      if (group.version !== patch.version) return fail('STALE_CONTEXT');
+      const binding = patch.decisionId ? group.decisions.find(item => item.id === patch.decisionId && !item.deleted) : null;
+      if (patch.decisionId && !binding) return fail('NOT_FOUND');
+      const previous = binding ? binding.title ?? group.drafts.find(draft => draft.createdDecisionId === binding.id)?.frame.title ?? 'Untitled decision' : group.name;
+      if (previous !== patch.previousName && previous !== patch.name) return fail('STALE_CONTEXT');
+      if (binding) binding.title = patch.name; else group.name = patch.name;
+      return this.snapshot(state, group, subject(principal));
     });
   }
   async removeItem(principal: TrustedPrincipal | null, id: string, raw: unknown) {

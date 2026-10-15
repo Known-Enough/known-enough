@@ -3753,3 +3753,9 @@ FIX01 usability capability checkpoint 2026-10-15T07:05:35.356382+00:00: CODE_REA
 
 
 FIX01/FF resume 2026-10-15T17:29:23.761676+00:00: B synchronized clean main979deb6, preserved A published runtime3da3ded/APIc1ec4a07/worker35f7dd0f and final frontend e8f4dac/Amplify97. A claims released, no active implementation or duplicate publication. Own [38777589072](https://github.com/Known-Enough/known-enough/actions/runs/38777589072) exact-source SUCCESS/READBACK_PASS confirms required timestamp policy still absent, boundary absent, no denials/0writes/provider. [Receipt](review-artifacts/FIX01/resume-policy-readback-20261015.json). Repairs PUBLISHED/manual acceptance pending; private interpretation BLOCKED on user-deferred installed capability. Point to [current FF02 command](tasks/active/ff/FF02/cloudshell-command.md); mark earlier API046 command historical. No tests/signup/model/configuration/data changes, new claim/successor/worker/schedule; original synthetic archive remains separately pending.
+
+
+2026-10-15T22:33:03.836428+00:00 — FF06 claimed by B on clean ff-only main476b8f9. Scope connected decision overview/modal UI, group/decision presentation names and existing authenticated group/runtime/application paths, contracts, styling and FF06/B tracking. Model/effort not exposed. No tests, AI, cloud setup or deployment; static compilation/build only. FF07–09 remain unclaimed until predecessor checkpoint. No other active implementation observed in synchronized records.
+
+
+FF06 CODE_READY/B — compact overview and focused dialogs, owner-only summary/public progress, deterministic short draft titles and cosmetic organizer renames implemented. Static type/build/lint/boundaries576/whitespace PASS; no tests, AI, setup or deployment. New name route and coordinated reader publication required; installed capability unverified. Claim released; FF07 next per direct request. Details/manual walkthrough: docs/tasks/active/ff/FF06/ticket.md.

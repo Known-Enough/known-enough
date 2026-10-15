@@ -1018,3 +1018,8 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 @media (max-width: 600px) { .ke-private-wizard { width: calc(100vw - 20px); } .ke-private-question { padding: 16px; } }
 
 :root[data-theme="dark"] .ke-private-wizard input[type="checkbox"], :root[data-theme="dark"] .ke-private-wizard input[type="radio"] { accent-color: #82c6a5; }
+
+.ke-step-dialog { width: min(700px, calc(100vw - 32px)); max-height: 85dvh; overflow: auto; padding: 24px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface, #fff); color: var(--text, #15382d); }
+.ke-step-dialog::backdrop { background: #0008; }
+.ke-decision-overview > button { margin: 6px; }
+:root[data-theme="dark"] .ke-step-dialog { background: #17251e; color: #e8eee9; }

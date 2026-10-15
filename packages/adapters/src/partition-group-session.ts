@@ -175,7 +175,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
       drafts: group.drafts.filter(draft => !draft.deleted).map(draft => ({ id: draft.id, title: draft.frame.title, needsClarification: !!draft.clarificationQuestions.length,
         current: draft.groupVersion === group.version, created: !!draft.createdDecisionId })),
       pendingInvitations: group.invitations.filter(invitation => !invitation.acceptedBy && invitation.expiresAt > time).length,
-      decisions: group.decisions.filter(binding => !binding.deleted).map(binding => ({ id: binding.id, current: binding.version === group.version })) });
+      decisions: group.decisions.filter(binding => !binding.deleted).map(binding => ({ id: binding.id, title: binding.title ?? group.drafts.find(draft => draft.createdDecisionId === binding.id)?.frame.title, current: binding.version === group.version })) });
   }
   return {
     list(principal: TrustedPrincipal | null, raw: unknown = {}, supplied?: PartitionIOContext) {
@@ -552,6 +552,23 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           return { ...structuredClone(result), fence: { mutations: structuredClone(fence.mutations),
             assertCurrent: () => safe(() => fence.assertCurrent()) } };
         });
+      });
+    },
+    rename(principal: TrustedPrincipal | null, rawId: string, raw: unknown) {
+      return safe(async () => {
+        const who = participant(principal); const key = groupId(rawId); const parsed = Groups.GroupNamePatch.safeParse(raw);
+        if (!parsed.success) return deny('INVALID_COMMAND');
+        const patch = parsed.data; const io = partitionIO(limits);
+        return selected(who, key, io, resolved => repository.transaction(resolved, state => {
+          const group = current(state, who, key, true);
+          if (group.version !== patch.version) return deny('STALE_CONTEXT');
+          const binding = patch.decisionId ? group.decisions.find(item => item.id === patch.decisionId && !item.deleted) : null;
+          if (patch.decisionId && !binding) return deny('NOT_FOUND');
+          const previous = binding ? binding.title ?? group.drafts.find(draft => draft.createdDecisionId === binding.id)?.frame.title ?? 'Untitled decision' : group.name;
+          if (previous !== patch.previousName && previous !== patch.name) return deny('STALE_CONTEXT');
+          if (binding) binding.title = patch.name; else group.name = patch.name;
+          return snapshot(state, group, who);
+        }, io));
       });
     },
     /** Retain replay-bearing rows, but revoke all app access. Group/header CAS also fences in-flight work. */

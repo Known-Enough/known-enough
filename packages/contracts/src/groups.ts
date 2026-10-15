@@ -29,18 +29,21 @@ export const GroupDraft = z.object({ id, bodyHash: z.string().regex(/^[a-f0-9]{6
   deleted: z.literal(true).optional(),
   publicClarifications: z.array(z.object({ question: z.string().min(1).max(500), answer: z.string().trim().min(1).max(500) }).strict()).max(36).optional() }).strict();
 /** Uses the existing authenticated group/remove endpoint; identity is never body-selected. */
+/** Cosmetic labels live on the group binding, outside semantic decision consent. */
+export const GroupNamePatch = z.object({ version: z.number().int().positive(), name: z.string().trim().min(1).max(80),
+  previousName: z.string().max(160), decisionId: id.optional() }).strict();
 export const GroupItemRemoval = z.object({ kind: z.enum(['DRAFT', 'DECISION']), id, version: z.number().int().positive().max(Number.MAX_SAFE_INTEGER) }).strict();
 export type GroupDraft = z.infer<typeof GroupDraft>;
 export const Group = z.object({ id, name: text, organizer: id, version: z.number().int().positive(),
   drafts: z.array(GroupDraft).max(64).default([]),
-  members: z.array(id).min(1).max(16), decisions: z.array(z.object({ id, version: z.number().int().positive(), deleted: z.literal(true).optional() }).strict()).max(64),
+  members: z.array(id).min(1).max(16), decisions: z.array(z.object({ id, version: z.number().int().positive(), title: z.string().trim().min(1).max(80).optional(), deleted: z.literal(true).optional() }).strict()).max(64),
   invitations: z.array(z.object({ tokenHash: z.string().regex(/^[a-f0-9]{64}$/), recipientHash: z.string().regex(/^[a-f0-9]{64}$/),
     expiresAt: z.number().int().positive(), acceptedBy: id.nullable() }).strict()).max(64) }).strict();
 export const GroupState = z.object({ accounts: z.array(Account).max(256), groups: z.array(Group).max(32) }).strict();
 export const GroupSnapshot = z.object({ id, name: text, version: z.number().int().positive(), isOrganizer: z.boolean(),
   members: z.array(z.object({ id, displayName: text, isOrganizer: z.boolean() }).strict()).max(16),
   drafts: z.array(z.object({ id, title: z.string().trim().min(1).max(160), needsClarification: z.boolean(), current: z.boolean(), created: z.boolean().default(false) }).strict()).max(64).default([]),
-  pendingInvitations: z.number().int().nonnegative(), decisions: z.array(z.object({ id, current: z.boolean() }).strict()).max(64) }).strict();
+  pendingInvitations: z.number().int().nonnegative(), decisions: z.array(z.object({ id, current: z.boolean(), title: z.string().max(160).optional() }).strict()).max(64) }).strict();
 export const AccountSnapshot = z.object({ status: AccountStatus, displayName: text, version: z.number().int().positive() }).strict();
 export type GroupState = z.infer<typeof GroupState>;
 export type Group = z.infer<typeof Group>;

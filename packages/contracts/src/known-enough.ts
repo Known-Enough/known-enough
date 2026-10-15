@@ -740,6 +740,7 @@ export const PublicDecisionSnapshot = z.strictObject({
   publicRevision: Version,
   status: PublicDecisionStatus,
   frameConfirmations: z.array(FrameConfirmation).max(MAX_DECISION_PARTICIPANTS),
+  participantProgress: z.array(z.strictObject({ participantId: Id, answersSaved: z.boolean() })).max(MAX_DECISION_PARTICIPANTS).optional(),
   currentProposal: PublicCandidateProposal.nullable(),
   approvedParticipantIds: z.array(Id).max(MAX_DECISION_PARTICIPANTS).refine(unique),
   publishedDisclosures: z.array(PublishedDisclosure).max(64),

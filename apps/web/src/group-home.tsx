@@ -1,3 +1,4 @@
+import { RenameAction } from './rename-action';
 import { useEffect, useRef, useState } from 'react';
 import { GroupDecisions } from './group-decisions';
 import { Groups } from '@deal-table/contracts';
@@ -263,7 +264,10 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
           <section className="ke-card ke-group-overview" aria-label="Group overview">
             <div className="ke-group-overview-copy">
               <p className="ke-eyebrow"><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="UsersRound" /></span><span>GROUP OVERVIEW</span></p>
-              <h2>{group.name}</h2>
+              <h2>{group.name}</h2>{group.isOrganizer && <RenameAction name={group.name} save={async name => {
+                const response = await api(`/groups/${group.id}/name`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ version: group.version, previousName: group.name, name }) });
+                if (!response.ok) throw new Error('unavailable'); await load();
+              }} />}
               <div className="ke-group-summary">
                 <div><span>Organizer</span><strong>{organizer?.displayName ?? 'Group organizer'}</strong></div>
                 <div><span>Members</span><strong>{group.members.length} {group.members.length === 1 ? 'member' : 'members'}</strong></div>

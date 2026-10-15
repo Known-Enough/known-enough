@@ -195,7 +195,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         const url = URL.parse(request.url ?? '/', 'http://local.invalid');
         if (!url || url.hash || (url.search && (url.pathname !== '/groups' || request.method !== 'GET'))) return reject('INVALID_COMMAND');
         const memberProfile = /^\/groups\/([A-Za-z0-9_-]{1,80})\/members\/([A-Za-z0-9_-]{1,80})\/profile$/.exec(url.pathname);
-        const group = /^\/groups\/([A-Za-z0-9_-]{1,80})(\/(?:remove|invite|invitations))?$/.exec(url.pathname);
+        const group = /^\/groups\/([A-Za-z0-9_-]{1,80})(\/(?:remove|invite|invitations|name))?$/.exec(url.pathname);
         const draft = /^\/groups\/([A-Za-z0-9_-]{1,80})\/drafts(?:\/([A-Za-z0-9_-]{1,80})(\/create)?)?$/.exec(url.pathname);
         const ownerConversation = /^\/decisions\/([A-Za-z0-9_-]{1,80})\/owner-conversation\/(draft|requests\/([A-Za-z0-9_-]{1,80})(\/close)?)$/.exec(url.pathname);
         const decision = /^\/decisions\/([A-Za-z0-9_-]{1,80})\/(public|me|commands)$/.exec(url.pathname);
@@ -342,7 +342,8 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         if (group && request.method === 'POST' && group[2]) {
           const raw = await body(request, maximum, bodyMs, controller);
           if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
-          if (group[2] === '/invitations') send(response, 200, await session.invite(principal, group[1]!, raw));
+          if (group[2] === '/name') send(response, 200, { group: await session.rename(principal, group[1]!, raw) });
+          else if (group[2] === '/invitations') send(response, 200, await session.invite(principal, group[1]!, raw));
           else if (group[2] === '/invite') send(response, 200, { invitation: await session.invite(principal, group[1]!, raw) });
           else send(response, 200, { group: await (raw && typeof raw === 'object' && Object.hasOwn(raw, 'kind')
             ? session.removeItem(principal, group[1]!, raw) : session.remove(principal, group[1]!, raw)) }); return;
