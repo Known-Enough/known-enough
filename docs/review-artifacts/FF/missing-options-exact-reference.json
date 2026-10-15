@@ -1,0 +1,194 @@
+{
+  "source": "555533567f8bd21cbb1d94fa34d8ada204770fb9",
+  "awsWrites": 0,
+  "providerCalls": 0,
+  "events": [
+    {
+      "timestamp": 1792096636218,
+      "event": "FIX01_PUBLIC_DRAFT_DIAGNOSTIC",
+      "requestId": "59453c40-ae80-4df8-80be-9ae98fe0c0a9",
+      "sourceSha": "df940b85b79e3b93c7facc061ccec44a64756a3a",
+      "phase": "REQUEST_STARTED",
+      "providerDispatched": false,
+      "providerAcknowledged": false,
+      "elapsedMs": 0
+    },
+    {
+      "timestamp": 1792096636789,
+      "event": "FIX01_PUBLIC_DRAFT_DIAGNOSTIC",
+      "requestId": "59453c40-ae80-4df8-80be-9ae98fe0c0a9",
+      "sourceSha": "df940b85b79e3b93c7facc061ccec44a64756a3a",
+      "phase": "PROVIDER_DISPATCHED",
+      "providerDispatched": true,
+      "providerAcknowledged": false,
+      "elapsedMs": 570
+    },
+    {
+      "timestamp": 1792096638735,
+      "event": "FIX01_PUBLIC_DRAFT_DIAGNOSTIC",
+      "requestId": "59453c40-ae80-4df8-80be-9ae98fe0c0a9",
+      "sourceSha": "df940b85b79e3b93c7facc061ccec44a64756a3a",
+      "phase": "PROVIDER_COMPLETED",
+      "providerDispatched": true,
+      "providerAcknowledged": true,
+      "elapsedMs": 2517,
+      "stopReason": "tool_use",
+      "usage": {
+        "inputTokens": 3023,
+        "outputTokens": 239
+      }
+    },
+    {
+      "timestamp": 1792096638771,
+      "event": "FIX01_PUBLIC_DRAFT_DIAGNOSTIC",
+      "requestId": "59453c40-ae80-4df8-80be-9ae98fe0c0a9",
+      "sourceSha": "df940b85b79e3b93c7facc061ccec44a64756a3a",
+      "phase": "MODEL_VALIDATION_FAILURE",
+      "stage": "ARCHITECT_SCHEMA_VARIABLES",
+      "providerDispatched": true,
+      "providerAcknowledged": true,
+      "elapsedMs": 2553,
+      "stopReason": "tool_use",
+      "usage": {
+        "inputTokens": 3023,
+        "outputTokens": 239
+      },
+      "diagnostics": [
+        {
+          "stage": "ARCHITECT_SCHEMA_VARIABLES",
+          "validation": [
+            {
+              "path": [
+                "variables",
+                1,
+                "options"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "timestamp": 1792096638952,
+      "event": "FIX01_PUBLIC_DRAFT_FAILURE",
+      "requestId": "59453c40-ae80-4df8-80be-9ae98fe0c0a9",
+      "sourceSha": "df940b85b79e3b93c7facc061ccec44a64756a3a",
+      "phase": "DEAD",
+      "reason": "INVALID_OUTPUT",
+      "stage": "ARCHITECT_SCHEMA_VARIABLES",
+      "providerDispatched": true,
+      "providerAcknowledged": true,
+      "elapsedMs": 2734,
+      "stopReason": "tool_use",
+      "usage": {
+        "inputTokens": 3023,
+        "outputTokens": 239
+      },
+      "diagnostics": [
+        {
+          "stage": "ARCHITECT_SCHEMA_VARIABLES",
+          "validation": [
+            {
+              "path": [
+                "variables",
+                1,
+                "options"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "timestamp": 1792096638952,
+      "event": "FIX01_PUBLIC_DRAFT_DIAGNOSTIC",
+      "requestId": "59453c40-ae80-4df8-80be-9ae98fe0c0a9",
+      "sourceSha": "df940b85b79e3b93c7facc061ccec44a64756a3a",
+      "phase": "REQUEST_FINISHED",
+      "reason": "FAILED",
+      "stage": "ARCHITECT_SCHEMA_VARIABLES",
+      "providerDispatched": true,
+      "providerAcknowledged": true,
+      "elapsedMs": 2734,
+      "stopReason": "tool_use",
+      "usage": {
+        "inputTokens": 3023,
+        "outputTokens": 239
+      },
+      "diagnostics": [
+        {
+          "stage": "ARCHITECT_SCHEMA_VARIABLES",
+          "validation": [
+            {
+              "path": [
+                "variables",
+                1,
+                "options"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "timestamp": 1792096638953,
+      "event": "PUBLIC_DRAFT_HTTP_RESULT",
+      "requestId": "59453c40-ae80-4df8-80be-9ae98fe0c0a9",
+      "elapsedMs": 2904,
+      "result": "FAILED",
+      "code": "NEEDS_CLARIFICATION",
+      "status": 422
+    }
+  ],
+  "failures": [
+    {
+      "timestamp": 1792096638952,
+      "event": "FIX01_PUBLIC_DRAFT_FAILURE",
+      "requestId": "59453c40-ae80-4df8-80be-9ae98fe0c0a9",
+      "sourceSha": "df940b85b79e3b93c7facc061ccec44a64756a3a",
+      "phase": "DEAD",
+      "reason": "INVALID_OUTPUT",
+      "stage": "ARCHITECT_SCHEMA_VARIABLES",
+      "providerDispatched": true,
+      "providerAcknowledged": true,
+      "elapsedMs": 2734,
+      "stopReason": "tool_use",
+      "usage": {
+        "inputTokens": 3023,
+        "outputTokens": 239
+      },
+      "diagnostics": [
+        {
+          "stage": "ARCHITECT_SCHEMA_VARIABLES",
+          "validation": [
+            {
+              "path": [
+                "variables",
+                1,
+                "options"
+              ],
+              "code": "invalid_type",
+              "received": "missing",
+              "expected": "array"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "windowStart": 1792089472491,
+  "windowEnd": 1792096672491,
+  "result": "DRAFT_DIAGNOSTICS_READ",
+  "windowComplete": true,
+  "requestReferenceCorrelation": "EXACT_REFERENCE_MATCH",
+  "run": "https://github.com/Known-Enough/known-enough/actions/runs/38803481971"
+}

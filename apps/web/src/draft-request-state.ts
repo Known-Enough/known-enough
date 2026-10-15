@@ -15,7 +15,7 @@ export function draftFailureMessage(status: number, body: unknown): string {
   if (status === 403) return 'Only the current approved group organizer can do this. Refresh your access and group.';
   if (category === 'AI_AT_CAPACITY') return 'All AI processing slots are occupied. No new AI call started. Close this unfinished request to return to your saved draft; try again after service recovery.';
   if (category === 'AI_UNAVAILABLE') return 'AI drafting is unavailable on this server. Recover the request before trying again later.';
-  if (category === 'INVALID_MODEL_OUTPUT') return 'The AI response did not match the supported decision format. Your earlier saved draft and answers are kept. Check this request below, then close it when available to continue editing.';
+  if (category === 'INVALID_MODEL_OUTPUT') return 'The AI response was incomplete or did not match the supported decision format. Your saved draft and answers are kept. We will check the request’s final status before allowing another attempt.';
   if (category === 'PROVIDER_FAILED') return 'The AI provider could not complete this request. Recover its status before trying again.';
   if (category === 'REQUEST_PENDING') return 'This draft request is still processing. Recover its status; do not start another request.';
   if (category === 'REQUEST_UNKNOWN') return 'The outcome is not confirmed. Recover this same request before starting another.';

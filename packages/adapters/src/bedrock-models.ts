@@ -6,6 +6,7 @@ import type { DecisionArchitectModel, OwnerConversationModel, DecisionNegotiatio
 import { reportModelFailure } from '@deal-table/application';
 import { z } from 'zod';
 import { ModelRuntimeError } from './model-jobs.ts';
+import { architectToolSchema, decodeArchitectOutput, ArchitectWireError } from './architect-tool.ts';
 
 export const BEDROCK_CONFIGURATION = Object.freeze({
   region: 'us-east-1', modelId: 'amazon.nova-lite-v1:0', maxTokens: 2_048, temperature: 0,
@@ -53,7 +54,7 @@ const prompts: Record<ModelJobKind, string> = {
     + 'When an answer says not sure or requests suggestions, offer bounded tentative choices for review instead of repeating the question. When it says ask each participant privately, use participantInformationRequirements for those needs; never infer their values. '
     + 'The engine can check at most 64 complete public combinations. Keep the product of public variable domain sizes at or below 64 (include one omitted value for each optional variable). ENUM has one value per option; ENUM_SET has 2^optionCount subsets. Use ENUM when choosing one option, and do not add speculative variables beyond the stated decision. Numeric/date/time domains need explicit IN/EQ or tight finite bounds. '
     + 'Follow-up answers are cumulative public context: retain already supplied choices and bounds; do not ask for those details again. If an earlier answer is insufficient, identify the exact remaining public fact and explain why it matters instead of repeating the same question. If a domain is still too large, identify that choice and its required bound in one concrete question. '
-    + 'For an unsupported public objective with no finite verifiable domain, return a concise draft with one public clarification question asking for a finite supported scope. Do not invent proxy variables or rules for subjective happiness, external predictions or unlimited alternatives. For open scope return empty variables and rules; for supplied publicVariables retain exact variableIds. Keep description concise and do not elaborate hypothetical plans. '
+    + 'For an unsupported public objective with no finite verifiable domain, return a concise draft with one public clarification question asking for a finite supported scope. Do not invent proxy variables or rules for subjective happiness, external predictions or unlimited alternatives. For open scope return empty arrays in every variables and rules group; for supplied publicVariables retain exact variableIds. Keep description concise and do not elaborate hypothetical plans. '
     + 'Private budgets, dates, preferences and accessibility needs to collect later belong in participantInformationRequirements; '
     + 'their absence alone does not prevent drafting the public frame. Never invent their values. '
     + 'Not having selected a winning option is never missing public scope. Do not ask which supplied date or option is preferred; collect each participant’s availability and preferences privately later. '
@@ -67,10 +68,10 @@ const prompts: Record<ModelJobKind, string> = {
     + 'purpose is PUBLIC_SCOPE for an essential missing shared fact or PRIVATE_NEED for an individual preference/budget/availability. variableId is the relevant variable ID or an empty string for a general shared fact. '
     + 'participantInformationRequirements is an array of {participantId,kind}, kind DATES, PREFERENCES, ACCESSIBILITY or BUDGET. '
     + 'When publicVariables is supplied, return variableIds instead of variables and copy only the exact supplied IDs. '
-    + 'Each new variable needs id, type, label, required, visibility=PUBLIC and allowedValues. Do not return ownerParticipantId; the server owns identity. '
+    + 'variables is an object of type-named arrays: NUMBER, MONEY, PERCENTAGE, DATE, DATETIME, DURATION, BOOLEAN, ENUM, ENUM_SET, PARTICIPANT. Return every group; unused groups are []. Put each variable in exactly one group. Each item needs id, label, required and allowedValues plus its type-specific required fields. Do not return type, visibility or ownerParticipantId; the server derives them from the group. '
     + 'Additional variable fields by type: NUMBER unitCode and scale; MONEY currencyCode and minorUnit; DATETIME displayTimeZone; DURATION unit=SECONDS; ENUM/ENUM_SET options [{id,label}]; PARTICIPANT participantIds. BOOLEAN, DATE and PERCENTAGE need no extra fields. '
     + 'Use unique short lowercase IDs matching /^[A-Za-z0-9_-]{1,80}$/; every reference must name a supplied participant or a declared variable/option. '
-    + 'Return rules=[] when there are no additional shared restrictions; do not repeat the finite allowedValues as extra rules. Each rule has id, visibility=PUBLIC and operator plus ONLY that operator’s fields. '
+    + 'rules is an object of operator-named arrays: COMPARE, IN, RANGE, SUM_EQUALS, ALL_DIFFERENT, MUTUALLY_EXCLUSIVE, IMPLIES. Return every group; unused groups are []. Do not repeat finite allowedValues as extra rules. Each rule has id and ONLY that operator’s required fields. Do not return operator or visibility; the server derives them from the group. '
     + 'COMPARE: variableId, comparison (EQ/NE/LT/LTE/GT/GTE), value (one text literal). IN: variableId, values (nonempty array of text literals). '
     + 'RANGE: variableId, minimum, maximum (text literals), includeMinimum, includeMaximum (booleans). SUM_EQUALS: variableIds and target (text literal in their common type/unit). '
     + 'ALL_DIFFERENT: variableIds. MUTUALLY_EXCLUSIVE: variableIds and maximumSelected (integer). IMPLIES: antecedent and consequent, each {variableId,operator:EQ or NE,value:text literal}. '
@@ -115,7 +116,6 @@ const nonEmptyStringArray = { type: 'array', items: stringSchema, minItems: 1 };
 const objectSchema = (properties: Record<string, unknown>, required: string[]) => ({ type: 'object', properties, required });
 const strictObjectSchema = (properties: Record<string, unknown>, required: string[]) => ({ ...objectSchema(properties, required), additionalProperties: false });
 const objectArray = (itemSchema: Record<string, unknown>) => ({ type: 'array', items: itemSchema });
-const optionSchema = objectSchema({ id: stringSchema, label: stringSchema }, ['id', 'label']);
 const valueSchema = objectSchema({
   type: { type: 'string', enum: ['NUMBER', 'MONEY', 'PERCENTAGE', 'DATE', 'DATETIME', 'DURATION', 'BOOLEAN', 'ENUM', 'ENUM_SET', 'PARTICIPANT'] },
   coefficient: integerSchema, scale: integerSchema, unitCode: stringSchema, amountMinor: integerSchema,
@@ -123,14 +123,6 @@ const valueSchema = objectSchema({
   instant: stringSchema, displayTimeZone: stringSchema, seconds: integerSchema, value: { type: 'boolean' },
   optionId: stringSchema, optionIds: stringArray, participantId: stringSchema,
 }, ['type']);
-const variableSchema = objectSchema({
-  id: stringSchema,
-  type: { type: 'string', enum: ['NUMBER', 'MONEY', 'PERCENTAGE', 'DATE', 'DATETIME', 'DURATION', 'BOOLEAN', 'ENUM', 'ENUM_SET', 'PARTICIPANT'] },
-  label: stringSchema, required: { type: 'boolean' }, visibility: { type: 'string', enum: ['PUBLIC'] },
-  unitCode: stringSchema, scale: integerSchema, currencyCode: stringSchema, minorUnit: integerSchema,
-  displayTimeZone: stringSchema, unit: { type: 'string', enum: ['SECONDS'] },
-  options: objectArray(optionSchema), participantIds: stringArray,
-}, ['id', 'type', 'label', 'required', 'visibility']);
 const validationRuleSchema = (visibilities: string[], literal: Record<string, unknown> = valueSchema) => objectSchema({
   id: stringSchema, visibility: { type: 'string', enum: visibilities },
   operator: { type: 'string', enum: ['COMPARE', 'IN', 'RANGE', 'SUM_EQUALS', 'ALL_DIFFERENT', 'MUTUALLY_EXCLUSIVE', 'IMPLIES'] },
@@ -141,14 +133,6 @@ const validationRuleSchema = (visibilities: string[], literal: Record<string, un
   antecedent: objectSchema({ variableId: stringSchema, operator: { type: 'string', enum: ['EQ', 'NE'] }, value: literal }, ['variableId', 'operator', 'value']),
   consequent: objectSchema({ variableId: stringSchema, operator: { type: 'string', enum: ['EQ', 'NE'] }, value: literal }, ['variableId', 'operator', 'value']),
 }, ['id', 'visibility', 'operator']);
-const architectLiteralSchema = { type: 'string', maxLength: 2048, description: 'Canonical literal text. Type and units come only from the referenced variable; never a typed object.' };
-const architectRuleSchema = validationRuleSchema(['PUBLIC'], architectLiteralSchema);
-const architectVariableSchema = objectSchema({ ...variableSchema.properties,
-  allowedValues: { type: 'array', items: architectLiteralSchema, maxItems: 32 },
-}, [...variableSchema.required, 'allowedValues']);
-const architectQuestionSchema = objectSchema({ question: stringSchema,
-  purpose: { type: 'string', enum: ['PUBLIC_SCOPE', 'PRIVATE_NEED'] }, variableId: stringSchema,
-}, ['question', 'purpose', 'variableId']);
 const ownerRuleSchema = validationRuleSchema(['TRUSTED_BACKEND']);
 const draftConditionSchema = objectSchema({
   constraintId: stringSchema, kind: { type: 'string', enum: ['HARD', 'NEGOTIABLE', 'PREFERENCE'] },
@@ -158,12 +142,7 @@ const draftConditionSchema = objectSchema({
 const unsupportedConditionSchema = objectSchema({ id: stringSchema, sourceSummary: stringSchema, clarificationQuestion: stringSchema },
   ['id', 'sourceSummary', 'clarificationQuestion']);
 const outputTools = {
-  ARCHITECT: { name: 'ke_architect_output', schema: { type: 'object', properties: {
-    title: stringSchema, description: stringSchema, variables: objectArray(architectVariableSchema), rules: objectArray(architectRuleSchema),
-    clarificationQuestions: objectArray(architectQuestionSchema),
-    participantInformationRequirements: objectArray(objectSchema({ participantId: stringSchema,
-      kind: { type: 'string', enum: ['DATES', 'PREFERENCES', 'ACCESSIBILITY', 'BUDGET'] } }, ['participantId', 'kind'])),
-  }, required: ['title', 'description', 'variables', 'rules', 'clarificationQuestions', 'participantInformationRequirements'] } },
+  ARCHITECT: { name: 'ke_architect_output', schema: architectToolSchema() },
   OWNER: { name: 'ke_owner_output', schema: { type: 'object', properties: {
     sourceSummary: stringSchema, proposedConstraints: objectArray(draftConditionSchema), unsupportedConditions: objectArray(unsupportedConditionSchema),
   }, required: ['sourceSummary', 'proposedConstraints', 'unsupportedConditions'] } },
@@ -178,6 +157,7 @@ const outputTools = {
 } satisfies Record<ModelJobKind, { name: string; schema: Record<string, unknown> }>;
 
 function normalizeToolOutput(kind: ModelJobKind, value: unknown, payload: unknown): unknown {
+  if (kind === 'ARCHITECT') value = decodeArchitectOutput(value, !!payload && typeof payload === 'object' && 'publicVariables' in payload);
   if (kind === 'ARCHITECT' && payload && typeof payload === 'object' && 'publicVariables' in payload) {
     const variables = (payload as { publicVariables: KE.PublicDecisionVariable[] }).publicVariables;
     const output = value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : null;
@@ -322,8 +302,10 @@ export function createBedrockModels(options: {
           reportModelFailure(options.diagnostic, kind, 'TOOL_OUTPUT');
           throw new ModelRuntimeError('INVALID_OUTPUT');
         }
-      try { return normalizeToolOutput(kind, result, payload); } catch {
-        reportModelFailure(options.diagnostic, kind, 'TOOL_OUTPUT'); throw new ModelRuntimeError('INVALID_OUTPUT');
+      try { return normalizeToolOutput(kind, result, payload); } catch (error) {
+        reportModelFailure(options.diagnostic, kind, error instanceof ArchitectWireError ? 'ARCHITECT_WIRE_SCHEMA' : 'TOOL_OUTPUT',
+          error instanceof ArchitectWireError ? error.validation : undefined);
+        throw new ModelRuntimeError('INVALID_OUTPUT');
       }
     });
   }

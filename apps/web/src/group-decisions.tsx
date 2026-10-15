@@ -71,11 +71,22 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
       || ('progress' in state && !['NOT_STARTED','IN_PROGRESS','EXPIRED','NEEDS_RECOVERY','STOPPED'].includes(String(state.progress)))) throw new Error('Invalid request status');
     setRequestState({ state: String(state.state), canRelease: state.canRelease, revision: Number(state.revision), ...('progress' in state ? { progress: String(state.progress) } : {}) });
     if (state.state === 'SAVED' && 'draft' in state) { const saved = Groups.GroupDraft.parse(state.draft); setDraft(saved); setObjective(saved.frame.objective); setQuestionIndex(0); setStep(saved.clarificationQuestions.length ? 'questions' : 'review'); setDirty(false); setReviewed(false); finishRequest(); setNotice('The saved draft was recovered without another AI call.'); await reload(); }
+    else if (state.state === 'FAILED' && state.canRelease) {
+      // Only a confirmed terminal outcome may close automatically. Unknown or active
+      // calls keep their original key; this never starts another paid request.
+      const released = await request(`draft-requests/${key}/release`, { revision: state.revision });
+      if (epoch !== recoveryEpoch.current) return;
+      const value = released.draftRequest as { state?: unknown; canRelease?: unknown } | undefined;
+      if (!value || !['FAILED','CANCELLED'].includes(String(value.state)) || value.canRelease !== true) throw new Error('Terminal release not confirmed');
+      finishRequest();
+      setNotice('That attempt finished without a new draft. Your saved draft and answers are kept. You can edit and try again; no automatic AI retry was made.');
+      return 'CLOSED';
+    }
     else setNotice('progress' in state && state.progress === 'EXPIRED' ? 'This request expired before AI started. Close the unfinished request to return to your saved draft.'
       : state.state === 'UNKNOWN' ? 'We haven’t confirmed the AI result yet. Keep this request and check again; contact the operator if it stays uncertain.'
       : state.state === 'PENDING' ? state.canRelease ? 'AI has not started this request. Check progress or close it to return to your draft.' : 'The request has not finished. Check progress; if it stays unresolved, contact the operator.'
       : 'This request has stopped. Choose “Close unfinished request” to continue.');
-    return state.state === 'SAVED' && 'draft' in state;
+    return state.state === 'SAVED' && 'draft' in state ? 'SAVED' : false;
   }
   useEffect(() => {
     if (!group.isOrganizer) { setCheckingRequest(false); return; } let active = true; const controller = new AbortController();
@@ -124,7 +135,15 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
         : 'Your draft is saved and ready for review. Check the suggested choices before creating the decision.'); await reload();
     } catch (error) {
       // A failed acknowledgement is followed by a status read, never a second paid call.
-      try { if (await recoverRequest(pending.current?.idempotencyKey)) return; } catch { /* Keep the original failure and nonce. */ }
+      try {
+        const recovered = await recoverRequest(pending.current?.idempotencyKey);
+        if (recovered === 'SAVED') return;
+        if (recovered === 'CLOSED') {
+          setNotice((error instanceof UserFlowError ? error.message : 'That attempt finished without a new draft.')
+            + ' The finished request is closed. You can edit and try again. No automatic AI retry was made.');
+          return;
+        }
+      } catch { /* Keep the original failure and nonce unless closure was confirmed. */ }
       throw error;
     } finally { setAiWorking(false); }
   }

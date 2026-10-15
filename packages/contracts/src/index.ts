@@ -1,4 +1,5 @@
 import { z } from 'zod';
+export * as ArchitectOutput from './architect-output.ts';
 
 export const Id = z.string().regex(/^[A-Za-z0-9_-]{1,80}$/);
 export const Version = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
