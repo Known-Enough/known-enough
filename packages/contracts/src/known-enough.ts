@@ -752,6 +752,9 @@ export const PublicDecisionSnapshot = z.strictObject({
     issue('Snapshot viewer must belong to the current roster', ['viewerParticipantId']);
   if (snapshot.frame.semanticVersion !== snapshot.semanticVersion || snapshot.frame.contextToken !== snapshot.contextToken)
     issue('Snapshot and frame contexts must match', ['frame']);
+  if (snapshot.participantProgress && (!unique(snapshot.participantProgress.map(item => item.participantId))
+    || snapshot.participantProgress.some(item => !participants.includes(item.participantId))))
+    issue('Progress must identify unique current participants only', ['participantProgress']);
   const confirmationIds = snapshot.frameConfirmations.map(confirmation => confirmation.participantId);
   if (!unique(confirmationIds)) issue('Frame confirmations must be unique', ['frameConfirmations']);
   snapshot.frameConfirmations.forEach((confirmation, index) => {

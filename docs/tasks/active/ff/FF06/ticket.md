@@ -1,6 +1,6 @@
 # FF06 — Simple decision overview, guided modals and editable names
 
-Status: CODE_READY / B; implementation claim released. Publication and manual acceptance pending.
+Status: CODE_READY / B; implementation claim released. Publication/manual acceptance pending.
 
 ## First read
 
@@ -35,3 +35,5 @@ Compact overview now shows a short description, owner-only saved conditions, pub
 Static typecheck, production build/bundle boundary, lint/import boundaries (576 references), and whitespace checks passed using Node24.21.0/npm11.19.0. No tests, model calls, cloud setup or deployment. Publication must include matching API/worker readers for the optional binding title and public progress schema, plus JWT POST and NONE OPTIONS `/groups/{groupId}/name` routes; installed route support is unverified. No infrastructure was changed.
 
 Manual walkthrough: open a decision, inspect your private summary and public progress, open/close each applicable step, confirm shared choices explicitly, then save answers and review a proposal. Rename a group and decision, reopen and verify labels persist while existing answers, links and confirmations remain. Check a second account sees progress only. This is CODE_READY, not live acceptance.
+
+Final source-review follow-up 2026-10-15T22:44:22.013207+00:00: one primary next-step action now opens proposal/permission work when applicable; display sessions can open the public proposal; private summary is capped at three conditions with a link back to all answers. Short-title generation ignores common introductory filler words. Rename validation explains the80-character limit; public progress validates unique current roster IDs. Final type/build/lint/boundaries579/reference7/whitespace PASS. No tests/deployment. Follow-up claim released.

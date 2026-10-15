@@ -2836,3 +2836,9 @@ FF09 claimed/B after FF08 synchronized060b0a0. Scope existing decision-guide com
 
 
 FF09 CODE_READY/B — fictional guide embedded only in creation dialog, form/request state remains mounted, return focus restored, external/landing/groups entry points removed; retired guide query falls back to normal app preserving callback data. Static type/build/lint/boundaries579/whitespace PASS. No tests/AI/setup/deployment. Claim released; FF06–09 implementation delivered, publication/manual acceptance pending. FF10/E2E01 remain unclaimed.
+
+
+2026-10-15T22:42:47.789437+00:00 — FF06 final source-review follow-up claimed/B on clean synchronized860d4f9, after sequential FF06–09 checkpoints. Bounded scope overview next-step/display proposal access/compact summary, deterministic content-word naming, rename validation, progress schema validation and final batch evidence. No parallel task, tests/AI/setup/deployment. Source inspection found duplicate overview primary actions and no proposal opener for display sessions; correcting before final handoff.
+
+
+2026-10-15T22:44:22.013207+00:00 — FF06 final source-review follow-up complete/B, claim released. Sequential FF06–09 are CODE_READY, not published/manual accepted. Added single applicable overview action, display proposal entry, three-condition summary, content-word default title, clear rename bound and strict public-progress roster validation. Final pinned Node24.21.0/npm11.19.0 typecheck/build/lint/import boundaries579/reference hashes7/whitespace PASS. No automated/unit/browser/live tests, AI/signup calls, AWS setup, runtime/config/data changes or deployment. Existing worker schedule unchanged. Final handoff: docs/review-artifacts/FF/ff06-09-code-ready.md. FF10/E2E01 unclaimed.

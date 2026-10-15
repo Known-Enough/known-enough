@@ -50,6 +50,14 @@ export type DecisionArchitectureDraft = {
 
 export type DecisionArchitectErrorCode = 'INVALID_COMMAND' | 'STALE_CONTEXT' | 'RETRYABLE_SERVER_ERROR';
 
+/** A local public label, independent of AI output and stable decision identity. */
+function shortPublicTitle(idea: string): string {
+  const words = idea.match(/[\p{L}\p{N}][\p{L}\p{N}'’–-]*/gu) ?? [];
+  const filler = new Set(['i', 'we', 'our', 'a', 'an', 'the', 'to', 'would', 'like', 'want', 'need', 'let', "let's", 'let’s', 'us', 'please', 'help', 'decide', 'choose', 'have', 'for', 'of', 'together', 'and', 'or', 'is', 'are', 'on', 'at', 'in', 'with', 'which', 'what', 'where', 'should', 'can', 'you']);
+  const meaningful = words.filter(word => !filler.has(word.toLocaleLowerCase('en-US')));
+  return (meaningful.length ? meaningful : words).slice(0, 3).join(' ').slice(0, 80) || 'New group decision';
+}
+
 export class DecisionArchitectError extends Error {
   constructor(readonly code: DecisionArchitectErrorCode) {
     super(code);
@@ -346,7 +354,7 @@ export class DecisionArchitect {
         frameVersion: 1,
         semanticVersion: 1,
         contextToken: await token(Id.parse(this.id())),
-        title: request.objective.trim().split(/\s+/).slice(0, 3).join(' ').slice(0, 80),
+        title: shortPublicTitle(request.objective),
         objective: request.objective.trim(),
         description: output.description,
         participants: participants.map(person => ({ ...person, requiredForApproval: true })),
