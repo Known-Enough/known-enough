@@ -4,6 +4,7 @@ dist-hosted-preview/
 coverage/
 playwright-report/
 test-results/
+e2ecredentials.json
 .env*
 !.env.example
 *.tsbuildinfo
