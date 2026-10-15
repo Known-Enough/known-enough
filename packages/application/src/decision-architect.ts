@@ -83,6 +83,37 @@ function boundedStrings(value: unknown, maximum: number, length: number): value 
   return Array.isArray(value) && value.length <= maximum
     && value.every(item => typeof item === 'string' && item.trim().length > 0 && item.length <= length);
 }
+/** Tool literals are text; only the referenced public variable determines their type and units. */
+function publicLiteral(value: unknown, variable: Record<string, unknown> | undefined): unknown {
+  if (typeof value !== 'string' || value.length > 2048 || !variable) return value; // Existing typed/injected ports stay compatible.
+  const integer = (text: string) => /^-?(0|[1-9]\d*)$/.test(text) && Number.isSafeInteger(Number(text)) ? Number(text) : undefined;
+  const scaled = (places: unknown) => {
+    if (!Number.isInteger(places) || Number(places) < 0 || Number(places) > 6 || !/^-?(0|[1-9]\d*)(\.\d+)?$/.test(value)) return undefined;
+    const [whole, fraction = ''] = value.replace(/^-/, '').split('.');
+    if (fraction.length > Number(places)) return undefined;
+    const amount = BigInt((whole ?? '') + fraction.padEnd(Number(places), '0')) * (value.startsWith('-') ? -1n : 1n);
+    return amount >= BigInt(Number.MIN_SAFE_INTEGER) && amount <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(amount) : undefined;
+  };
+  let result: unknown;
+  switch (variable.type) {
+    case 'DATE': result = { type: 'DATE', date: value }; break;
+    case 'DATETIME': result = { type: 'DATETIME', instant: value, displayTimeZone: variable.displayTimeZone }; break;
+    case 'ENUM': result = { type: 'ENUM', optionId: value }; break;
+    case 'PARTICIPANT': result = { type: 'PARTICIPANT', participantId: value }; break;
+    case 'ENUM_SET': {
+      try { result = { type: 'ENUM_SET', optionIds: JSON.parse(value) }; } catch { return value; }
+      break;
+    }
+    case 'BOOLEAN': if (value !== 'true' && value !== 'false') return value; result = { type: 'BOOLEAN', value: value === 'true' }; break;
+    case 'NUMBER': result = { type: 'NUMBER', coefficient: scaled(variable.scale), scale: variable.scale, unitCode: variable.unitCode }; break;
+    case 'MONEY': result = { type: 'MONEY', amountMinor: scaled(variable.minorUnit), currencyCode: variable.currencyCode, minorUnit: variable.minorUnit }; break;
+    case 'PERCENTAGE': result = { type: 'PERCENTAGE', basisPoints: integer(value) }; break;
+    case 'DURATION': result = { type: 'DURATION', seconds: integer(value) }; break;
+    default: return value;
+  }
+  const parsed = KE.DecisionValue.safeParse(result);
+  return parsed.success ? parsed.data : value; // Malformed text still fails the unchanged strict definition validator.
+}
 function normalizePublicModelFields(variables: unknown[], rules: unknown[]): { variables: unknown[]; rules: unknown[] } {
   const remaps = new Map<string, Map<string, string>>();
   const domainRules: unknown[] = [];
@@ -97,7 +128,8 @@ function normalizePublicModelFields(variables: unknown[], rules: unknown[]): { v
         let ruleId = `ke-domain-${variableIndex + 1}`;
         while (usedRuleIds.has(ruleId)) ruleId += 'x';
         usedRuleIds.add(ruleId);
-        domainRules.push({ id: ruleId, visibility: 'PUBLIC', operator: 'IN', variableId: value.id, values: value.allowedValues });
+        domainRules.push({ id: ruleId, visibility: 'PUBLIC', operator: 'IN', variableId: value.id,
+          values: value.allowedValues.map(item => publicLiteral(item, value)) });
       }
     }
     if ((value.type === 'ENUM' || value.type === 'ENUM_SET') && Array.isArray(value.options)
@@ -124,7 +156,10 @@ function normalizePublicModelFields(variables: unknown[], rules: unknown[]): { v
   });
 
   const rewriteValue = (value: unknown, variableId: unknown): unknown => {
-    if (!record(value) || typeof variableId !== 'string') return value;
+    if (typeof variableId !== 'string') return value;
+    const variable = variables.find(item => record(item) && item.id === variableId);
+    value = publicLiteral(value, record(variable) ? variable : undefined);
+    if (!record(value)) return value;
     const remap = remaps.get(variableId);
     if (!remap) return value;
     if (value.type === 'ENUM' && typeof value.optionId === 'string' && remap.has(value.optionId))
@@ -139,6 +174,7 @@ function normalizePublicModelFields(variables: unknown[], rules: unknown[]): { v
     for (const field of ['value', 'minimum', 'maximum']) {
       if (Object.hasOwn(value, field)) rule[field] = rewriteValue(value[field], value.variableId);
     }
+    if (Object.hasOwn(value, 'target') && Array.isArray(value.variableIds)) rule.target = rewriteValue(value.target, value.variableIds[0]);
     if (Array.isArray(value.values)) rule.values = value.values.map(item => rewriteValue(item, value.variableId));
     for (const field of ['antecedent', 'consequent']) {
       const condition = value[field];
@@ -315,8 +351,14 @@ export class DecisionArchitect {
       });
       if (!definition.success) {
         const roots = definition.error.issues.map(issue => issue.path[0]);
-        this.rejectModel(roots.every(root => root === 'variables') ? 'ARCHITECT_SCHEMA_VARIABLES'
-          : roots.every(root => root === 'rules') ? 'ARCHITECT_SCHEMA_RULES' : 'ARCHITECT_SCHEMA_OTHER');
+        if (roots.every(root => root === 'rules')) {
+          if (normalized.rules.some(rule => !KE.ValidationRule.safeParse(rule).success)) this.rejectModel('ARCHITECT_RULE_FIELDS');
+          if (definition.error.issues.some(issue => issue.message === 'Rule references an unknown variable')) this.rejectModel('ARCHITECT_RULE_REFERENCE');
+          if (definition.error.issues.some(issue => issue.message === 'Rule value does not match the referenced variable type or domain')) this.rejectModel('ARCHITECT_RULE_VALUE');
+          if (definition.error.issues.some(issue => /unique|duplicate/i.test(issue.message))) this.rejectModel('ARCHITECT_RULE_DUPLICATE');
+          this.rejectModel('ARCHITECT_SCHEMA_RULES');
+        }
+        this.rejectModel(roots.every(root => root === 'variables') ? 'ARCHITECT_SCHEMA_VARIABLES' : 'ARCHITECT_SCHEMA_OTHER');
       }
       if (definition.data.variables.some(variable => variable.visibility !== 'PUBLIC')
         || definition.data.rules.some(rule => rule.visibility !== 'PUBLIC')) {

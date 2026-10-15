@@ -1,3 +1,5 @@
+Current user-directed priority — FF03 IN_PROGRESS/A: repair repeated initial-draft format rejection after own sanitized log readback. No tests or AI probes; preserve published FF04 deletion.
+
 Latest user-directed checkpoint — FF04 deletion PUBLISHED/source56a7a9a/frontendAmplify101. [Task](tasks/active/ff/FF04/ticket.md), [receipt](review-artifacts/FF/deletion-publication.json). A claim released; user manual acceptance pending. No tests or model calls; FF03 output-format report remains open.
 
 Current user-directed priority — FF04 IN_PROGRESS/A: [delete saved drafts and decisions](tasks/active/ff/FF04/ticket.md). No tests, user manual acceptance; one writer. FF03 output-format report remains open.
