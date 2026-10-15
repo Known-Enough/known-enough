@@ -1,0 +1,31 @@
+name: Read recent primary draft failure stages
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha: {type: string, required: true}
+permissions: {contents: read}
+jobs:
+  inspect:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && (github.actor_id == '44531296' || github.actor_id == '143764700')
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    permissions: {contents: read, id-token: write}
+    env:
+      EXPECTED_SOURCE: ${{ inputs.source_sha }}
+      AWS_MAX_ATTEMPTS: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - name: Verify source
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubStagingInspector
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - run: python3 -B scripts/fix01/draft-failure-readback.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with: {name: draft-failure-readback, path: '${{ runner.temp }}/draft-failure-readback.json', if-no-files-found: error}
