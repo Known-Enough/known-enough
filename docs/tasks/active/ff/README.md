@@ -11,3 +11,5 @@
 At the user's direction no tests, model calls or synthetic signups were performed by A. Builds/publication/configuration readback do not establish functional acceptance. User permission receipt17:43:10Z and independent38780875342 readback confirm the timestamp capability is installed; the former CloudShell block is resolved. Do not repeat historical installation commands.
 
 No active A implementation claim or new B dispatch/schedule. Preserve current compatible runtime, private state, participant approval/consent and uncertain-request protection. Historical FF03 response fields remain unknown; no replay performed.
+
+Latest onboarding publication: [example flow](https://main.d143q5ravxp5av.amplifyapp.com/?guide=decision), frontend38782882735 SUCCESS/sourcecaf3829. A read-only fictional walkthrough plus optional real-wizard description help; existing backend/permissions unchanged, no setup or tests. [Receipt](../../../review-artifacts/FF/onboarding-publication.json). A claim released/manual review pending.

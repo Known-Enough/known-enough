@@ -33,3 +33,9 @@ Actual acceptance remains pending the user's observations. Historical FF03 error
 ## Generic guide continuation
 
 Start with “Let’s go to a restaurant” even if you do not know the day or cost. The saved starting point should show proposed choices and important unknowns. If asked something you cannot answer, select Not sure—suggest options, then Let AI update the draft. If the question belongs to participants’ private needs, select Ask each person privately and submit that request. These help buttons fill an explicit answer; they do not silently call AI. Saved public answers appear in a collapsible history. An unchanged answer to a repeated question should not be resubmitted as another paid call. The same behavior should work for a trip or shared purchase; use the [behavior reference](FF03/gold-standard.md).
+
+## Public onboarding and description help
+
+Open [the example walkthrough](https://main.d143q5ravxp5av.amplifyapp.com/?guide=decision) without signing in. Review four example steps, fictional participant perspectives, theme/mobile layout and Copy example link. These are explicit fictional illustrations, not real model results or account operations.
+
+In the actual group wizard, the example opens in a new tab; return to the original tab to retain the draft. Expand Help me describe my idea, enter the goal/options/undecided details and Add these details to my idea. Existing typed text must remain; overlength content must be refused without truncation. Continue with AI explicitly submits the real shared request. The next shared review/private participant steps should be understandable; no approval is automatic.
