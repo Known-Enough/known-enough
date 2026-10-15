@@ -158,7 +158,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
       response.setHeader('Cache-Control', 'no-store'); response.statusCode = 204; response.end(); return;
     }
     if (active >= concurrency || authenticating >= concurrency) { send(response, 503, errorBody('RETRYABLE_SERVER_ERROR', requestId)); request.resume(); return; }
-    active++;
+    active++; const requestStartedAt = Date.now(); let publicDraftRequest = false;
     const controller = new AbortController();
     const closed = () => { if (!response.writableEnded) controller.abort(); };
     request.once('aborted', closed); response.once('close', closed);
@@ -264,14 +264,19 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         }
         if (draft && (request.method === 'GET' || request.method === 'POST')) {
           if (draft[3] && request.method !== 'POST') return reject('NOT_FOUND');
-          const io = partitionIO(!draft[2] && request.method === 'POST' ? { timeoutMs: 27000 } : {}); const context = { ...io, signal: AbortSignal.any([io.signal, controller.signal]) };
+          // The logged reference is server-generated; a caller's request header cannot inject identity into logs.
+          if (!draft[2] && request.method === 'POST') { requestId = randomUUID(); publicDraftRequest = true; }
+          const io = partitionIO(!draft[2] && request.method === 'POST' ? { timeoutMs: 27000 } : {}); const context = { ...io,
+            diagnosticRequestId: requestId, signal: AbortSignal.any([io.signal, controller.signal]) };
           if (!draft[2]) {
             if (request.method !== 'POST') return reject('NOT_FOUND');
             await session.roster(principal, draft[1]!, context);
             if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
             const raw = await body(request, maximum, bodyMs, controller);
             if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
-            send(response, 200, { draft: await session.generateDraft(principal, draft[1]!, raw, context) }); return;
+            const saved = await session.generateDraft(principal, draft[1]!, raw, context);
+            try { console.info(JSON.stringify({ event: 'PUBLIC_DRAFT_HTTP_RESULT', requestId, result: 'SAVED', status: 200, elapsedMs: Date.now() - requestStartedAt })); } catch { /* Logging cannot replace the saved result. */ }
+            send(response, 200, { requestId, draft: saved }); return;
           }
           // Authenticate and admit the organizer before reading an edit body; commit rechecks the same scope.
           const current = await session.readDraft(principal, draft[1]!, draft[2]!, context);
@@ -413,6 +418,8 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         }
         const code = error instanceof RepositoryCapacityError || (error instanceof PartitionSessionError && error.code === 'SESSION_CAPACITY') ? 'CAPACITY_EXCEEDED'
           : error instanceof KnownEnoughApplicationError ? error.code : 'RETRYABLE_SERVER_ERROR';
+        if (publicDraftRequest) { try { console.warn(JSON.stringify({ event: 'PUBLIC_DRAFT_HTTP_RESULT', requestId, result: 'FAILED', code, status: KE.DECISION_ERROR_HTTP_STATUS[code],
+          elapsedMs: Date.now() - requestStartedAt, ...(error instanceof PartitionDraftFailure ? { draftFailure: error.category } : {}) })); } catch { /* Diagnostics cannot replace the response. */ } }
         const result = errorBody(code, requestId); send(response, result.error.httpStatus, error instanceof PartitionDraftFailure ? { ...result, draftFailure: error.category } : error instanceof PartitionOwnerFailure ? { ...result, interpretationFailure: error.category } : result);
       } finally {
         active--; request.off('aborted', closed); response.off('close', closed); request.resume();

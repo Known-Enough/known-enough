@@ -1,14 +1,20 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { DecisionArchitect, type ModelFailureDiagnostic } from '@deal-table/application';
+import { DecisionArchitect, safeModelDiagnostic, type ModelFailureDiagnostic } from '@deal-table/application';
 import { createBedrockModels, type ConverseTransport } from '@deal-table/adapters';
 import { DurableModelJobs, DurableJobError, createManagedPublicDraftPorts,
   type PublicDraftAtomicItem, type DurableJobStore, type JobReference, type JobPin, type PublicDraftCommit, type PublicDraftFence, type PublicDraftEffect } from '@deal-table/adapters/durable-model-runtime';
 import { PartitionDraftFailure, type PartitionDraftArchitect } from '@deal-table/adapters/partition-request';
 import type { PartitionFence, PartitionIOContext } from '@deal-table/adapters/partition-request';
 import { stableDeliveryId } from './durable-enqueue.ts';
+type DraftDiagnostic = {
+  sourceSha: string; requestId?: string; elapsedMs: number; providerDispatched: boolean; providerAcknowledged: boolean;
+  phase: string; reason: string | null; rejectionStage?: ModelFailureDiagnostic['stage']; diagnostics?: ModelFailureDiagnostic[];
+  usage?: { inputTokens: number; outputTokens: number }; stopReason?: string;
+};
 /** Public architecture only. No decision/private snapshots or caller-selected provider capabilities. */
 export function createPartitionDraftRuntime(options: {
-  diagnostic?: (value: { providerDispatched: boolean; providerAcknowledged: boolean; phase: string; reason: string | null; rejectionStage?: ModelFailureDiagnostic['stage'] }) => void;
+  diagnostic?: (value: DraftDiagnostic) => void;
+  trace?: (value: DraftDiagnostic) => void;
   sourceSha: string; now?: () => number; transport: ConverseTransport;
   store: (commit: PublicDraftCommit) => DurableJobStore<PublicDraftFence, PublicDraftEffect>;
   authority: () => Promise<JobPin>;
@@ -16,8 +22,31 @@ export function createPartitionDraftRuntime(options: {
 }): PartitionDraftArchitect {
   if (!/^[a-f0-9]{40}$/.test(options.sourceSha)) throw new Error('PUBLIC_DRAFT_RUNTIME_INVALID');
   return async (subject, request, io, scope) => {
+    const now = options.now ?? Date.now; const startedAt = now();
+    let usage: { inputTokens: number; outputTokens: number } | null = null; let providerFailed = false; let providerAcknowledged = false; let providerDispatched = false;
+    let requestOutcome = 'FAILED';
+    let rejectionStage: ModelFailureDiagnostic['stage'] | undefined; let stopReason: string | undefined; let failureLogged = false;
+    const diagnostics: ModelFailureDiagnostic[] = [];
+    const requestId = typeof io.diagnosticRequestId === 'string' && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(io.diagnosticRequestId) ? io.diagnosticRequestId : undefined;
+    const emit = (phase: string, reason: string | null = null, failure = false) => {
+      try {
+        const callback = failure ? options.diagnostic : options.trace;
+        if (failure) failureLogged = true;
+        callback?.({ sourceSha: options.sourceSha, ...(requestId ? { requestId } : {}), elapsedMs: Math.max(0, Math.floor(now() - startedAt)),
+          providerDispatched, providerAcknowledged, phase, reason, ...(rejectionStage ? { rejectionStage } : {}),
+          ...(diagnostics.length ? { diagnostics: structuredClone(diagnostics) } : {}), ...(usage ? { usage: { ...usage } } : {}), ...(stopReason ? { stopReason } : {}) });
+      } catch { /* Logging never changes request disposition or repeats a provider call. */ }
+    };
+    const captureDiagnostic = (value: ModelFailureDiagnostic) => {
+      const safe = safeModelDiagnostic(value); if (!safe || safe.kind !== 'ARCHITECT') return;
+      if (diagnostics.length < 8) diagnostics.push(safe);
+      if (safe.stage !== 'ARCHITECT_CALL' || !rejectionStage) rejectionStage = safe.stage;
+      if (safe.stage.startsWith('PROVIDER')) { providerFailed = true; if (safe.stage !== 'PROVIDER') providerAcknowledged = true; }
+      emit('MODEL_VALIDATION_FAILURE');
+    };
+    emit('REQUEST_STARTED');
+    try {
     if (!scope || io.signal.aborted) throw new PartitionDraftFailure('AI_UNAVAILABLE');
-    const now = options.now ?? Date.now;
     const id = stableDeliveryId(options.sourceSha, scope.groupId, request.draftId);
     const captures = new WeakMap<PublicDraftFence, PartitionFence>();
     const store = options.store(async (fence, effect) => {
@@ -34,7 +63,6 @@ export function createPartitionDraftRuntime(options: {
       sourceSha: options.sourceSha, expiresAt: now() + 300000, requestKey: scope.requestKey };
     if (ref.kind !== 'ARCHITECT' || ref.subject !== subject || ref.decisionId !== scope.groupId
       || ref.reasoningJobId !== request.draftId || ref.authorityHash !== scope.bodyHash || ref.requestKey !== scope.requestKey || ref.sourceSha !== options.sourceSha) throw new PartitionDraftFailure('REQUEST_UNKNOWN');
-    let usage: { inputTokens: number; outputTokens: number } | null = null; let providerFailed = false; let providerAcknowledged = false; let providerDispatched = false; let rejectionStage: ModelFailureDiagnostic['stage'] | undefined;
     const capture = async (output?: unknown): Promise<PublicDraftFence> => {
       const native = await scope.fence(output); const fence: PublicDraftFence = { kind: 'PUBLIC_DRAFT', reference: structuredClone(ref) };
       captures.set(fence, native); return fence;
@@ -48,12 +76,13 @@ export function createPartitionDraftRuntime(options: {
         },
         invoke: async (input, signal) => {
           const models = createBedrockModels({ transport: { send: async (command, options_) => {
-              providerDispatched = true; const response = await options.transport.send(command, options_); providerAcknowledged = true;
+              providerDispatched = true; emit('PROVIDER_DISPATCHED'); const response = await options.transport.send(command, options_); providerAcknowledged = true;
+              stopReason = ['tool_use', 'max_tokens', 'end_turn', 'stop_sequence', 'content_filtered', 'guardrail_intervened'].includes(response.stopReason ?? '') ? response.stopReason : 'OTHER';
               const inputTokens = response.usage?.inputTokens, outputTokens = response.usage?.outputTokens;
               if (typeof inputTokens === 'number' && typeof outputTokens === 'number' && [inputTokens, outputTokens].every(value => Number.isSafeInteger(value) && value >= 0 && value <= 1000000)) usage = { inputTokens, outputTokens };
-              return response;
+              emit('PROVIDER_COMPLETED'); return response;
             } }, enabled: () => !signal.aborted && !io.signal.aborted,
-            diagnostic: value => { if (value.kind === 'ARCHITECT') rejectionStage = value.stage; if (value.kind === 'ARCHITECT' && value.stage.startsWith('PROVIDER')) { providerFailed = true; if (value.stage !== 'PROVIDER') providerAcknowledged = true; } },
+            diagnostic: captureDiagnostic,
             usage: value => { if (value.kind !== 'ARCHITECT') throw new DurableJobError('INVALID_OUTPUT'); usage = { inputTokens: value.inputTokens, outputTokens: value.outputTokens }; },
             jobs: { run: async (kind, invocation, task) => {
               if (kind !== 'ARCHITECT' || io.signal.aborted) throw new DurableJobError('DISABLED');
@@ -61,7 +90,7 @@ export function createPartitionDraftRuntime(options: {
               const result = await task(AbortSignal.any([signal, io.signal]));
               await invocation.assertCurrent(); return result;
             } } });
-          const architect = new DecisionArchitect(models.architect, randomUUID, now, () => !signal.aborted && !io.signal.aborted, value => { rejectionStage = value.stage; });
+          const architect = new DecisionArchitect(models.architect, randomUUID, now, () => !signal.aborted && !io.signal.aborted, captureDiagnostic);
           let output: unknown;
           try { output = await architect.draft(subject, input); }
           catch (error) { if (!usage) { if (!providerDispatched || providerAcknowledged) throw new DurableJobError('PROVIDER_REJECTED'); throw error; } output = null; } // Acknowledged invalid output is quiescent; usage stays charged.
@@ -76,17 +105,23 @@ export function createPartitionDraftRuntime(options: {
     try { await engine.enqueue(ref); await engine.process({ jobId: id }); }
     catch { /* Read the single durable outcome; never repeat an ambiguous provider dispatch. */ }
     const after = await store.read(id);
-    if (after.job?.phase !== 'SUCCEEDED') { try { options.diagnostic?.({ providerDispatched, providerAcknowledged, phase: after.job?.phase ?? 'MISSING', reason: after.job?.reason ?? null, ...(rejectionStage ? { rejectionStage } : {}) }); } catch { /* Diagnostics cannot change dispatch or disposition. */ } }
-    if (after.job?.phase === 'SUCCEEDED') return undefined; // The same atomic transaction saved the strictly checked native draft.
+    if (after.job?.phase !== 'SUCCEEDED') emit(after.job?.phase ?? 'MISSING', after.job?.reason ?? null, true);
+    if (after.job?.phase === 'SUCCEEDED') { requestOutcome = 'SUCCEEDED'; emit('SUCCEEDED'); return undefined; } // The same atomic transaction saved the strictly checked native draft.
     if (after.job?.phase === 'DEAD') throw new PartitionDraftFailure(after.job.reason === 'INVALID_OUTPUT' ? 'INVALID_MODEL_OUTPUT'
       : after.job.reason === 'PROVIDER_UNCONFIRMED' ? providerFailed ? 'PROVIDER_FAILED' : 'REQUEST_UNKNOWN' : providerFailed && providerAcknowledged ? 'PROVIDER_FAILED' : 'AI_UNAVAILABLE');
     throw new PartitionDraftFailure('REQUEST_PENDING');
+    } catch (error) {
+      if (!failureLogged) emit('REQUEST_REJECTED', error instanceof PartitionDraftFailure ? error.category : 'RUNTIME_UNAVAILABLE', true);
+      throw error;
+    } finally { emit('REQUEST_FINISHED', requestOutcome); }
   };
 }
 export function createManagedPartitionDraftRuntime(options: {
   sourceSha: string; prepareGroupCommit: Parameters<typeof createPartitionDraftRuntime>[0]['prepareGroupCommit'];
 }): PartitionDraftArchitect {
-  return createPartitionDraftRuntime({ ...options, ...createManagedPublicDraftPorts(options.sourceSha), diagnostic: value => console.warn(JSON.stringify({ event: 'FIX01_PUBLIC_DRAFT_FAILURE', ...value })) });
+  return createPartitionDraftRuntime({ ...options, ...createManagedPublicDraftPorts(options.sourceSha),
+    diagnostic: value => console.warn(JSON.stringify({ event: 'FIX01_PUBLIC_DRAFT_FAILURE', ...value })),
+    trace: value => console.info(JSON.stringify({ event: 'FIX01_PUBLIC_DRAFT_DIAGNOSTIC', ...value })) });
 }
 /** Same identity-bound key on reload, independent of a browser's raw objective or model output. */
 export function publicDraftId(groupId: string, subject: string, key: string) {

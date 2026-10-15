@@ -1,6 +1,6 @@
 import { createServer, type RequestListener } from 'node:http';
 import { genericCandidates, createDynamoGroupRepository, createAwsDynamoDBRoomRepository } from '@deal-table/adapters';
-import { KnownEnoughApplication, MODEL_FAILURE_STAGES, type ModelFailureDiagnostic } from '@deal-table/application';
+import { KnownEnoughApplication, safeModelDiagnostic, type ModelFailureDiagnostic } from '@deal-table/application';
 import { createCognitoKnownEnoughApiHandler } from './http-core.ts';
 import { createKnownEnoughModelRuntime } from './model-runtime.ts';
 import { ScenarioService, readScenarioMembers, scenarioCandidates, type ScenarioMember } from './scenario-service.ts';
@@ -38,12 +38,11 @@ export interface Ke13bConfig {
 const MAX_GATEWAY_BODY_BYTES = 64 * 1024;
 /** Reconstruct a strict allowlist even if a caller bypasses TypeScript. Never serialize the original object. */
 export function logModelFailure(value: ModelFailureDiagnostic, write: (line: string) => void = console.info): void {
-  if (!value || typeof value !== 'object' || Array.isArray(value)
-    || Object.keys(value).sort().join('|') !== 'kind|stage'
-    || !['ARCHITECT', 'OWNER', 'NEGOTIATION'].includes(value.kind)
-    || !MODEL_FAILURE_STAGES.some(stage => stage === value.stage)) return;
-  try { write(JSON.stringify({ event: 'ke14-model-failure', kind: value.kind, stage: value.stage })); }
-  catch { /* Logging cannot change the request outcome. */ }
+  try {
+    const safe = safeModelDiagnostic(value); if (!safe) return;
+    write(JSON.stringify({ event: 'ke14-model-failure', kind: safe.kind, stage: safe.stage,
+      ...(safe.validation ? { validation: safe.validation } : {}) }));
+  } catch { /* Logging cannot change the request outcome. */ }
 }
 const RESPONSE_HEADERS = [
   'content-type', 'cache-control', 'access-control-allow-origin', 'access-control-allow-methods',

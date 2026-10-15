@@ -31,7 +31,7 @@ type DomainRow = Exclude<PartitionRow, { kind: 'DIRECTORY' | 'MEMBERSHIP' }>;
 export type PartitionKey = { PK: string; SK: string };
 export type PartitionScope = { accountSubjects: string[]; groupId?: string };
 export type PartitionMutation = { key: PartitionKey; expected: number; next: PartitionRow | null };
-export interface PartitionIOContext { signal: AbortSignal; request(): void }
+export interface PartitionIOContext { signal: AbortSignal; request(): void; /** Server-generated opaque HTTP reference; never an identity or stored authority. */ diagnosticRequestId?: string }
 /** All mutations, including read-only conditions, MUST commit as one atomic transaction. */
 export interface PartitionTransport {
   read(key: PartitionKey, context?: PartitionIOContext): Promise<unknown | null>;

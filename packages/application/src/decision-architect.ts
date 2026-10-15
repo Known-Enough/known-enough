@@ -1,4 +1,4 @@
-import { reportModelFailure, type ModelInvocation, type ModelFailureDiagnostic } from './model-runtime.ts';
+import { reportModelFailure, modelValidationIssues, type ModelValidationIssue, type ModelInvocation, type ModelFailureDiagnostic } from './model-runtime.ts';
 import { Id, KnownEnough as KE } from '@deal-table/contracts';
 import type { KnownEnough as KETypes } from '@deal-table/contracts';
 
@@ -229,8 +229,8 @@ export class DecisionArchitect {
     private readonly isEnabled: () => boolean = () => true,
     private readonly diagnostic?: (value: ModelFailureDiagnostic) => void) {}
 
-  private rejectModel(stage: ModelFailureDiagnostic['stage']): never {
-    reportModelFailure(this.diagnostic, 'ARCHITECT', stage);
+  private rejectModel(stage: ModelFailureDiagnostic['stage'], validation?: ModelValidationIssue[]): never {
+    reportModelFailure(this.diagnostic, 'ARCHITECT', stage, validation);
     return fail('RETRYABLE_SERVER_ERROR');
   }
 
@@ -321,7 +321,12 @@ export class DecisionArchitect {
         || !questionsValid(output.clarificationQuestions)
         || !Array.isArray(output.participantInformationRequirements)
         || output.participantInformationRequirements.length > MAX_REQUIREMENTS) {
-        this.rejectModel('ARCHITECT_FIELDS');
+        const shape = record(output) ? output : {};
+        const fields = MODEL_FIELDS.filter(field => !Object.hasOwn(shape, field)
+          || ['variables', 'rules', 'clarificationQuestions', 'participantInformationRequirements'].includes(field) && !Array.isArray(shape[field])
+          || ['title', 'description'].includes(field) && typeof shape[field] !== 'string');
+        this.rejectModel('ARCHITECT_FIELDS', modelValidationIssues(fields.length ? fields.map(field => ({ code: 'invalid_type', path: [field],
+          expected: ['title', 'description'].includes(field) ? 'string' : 'array' })) : [{ code: 'custom', path: [] }], output));
       }
 
       const knownParticipants = new Set(participantIds);
@@ -330,12 +335,12 @@ export class DecisionArchitect {
         if (!record(item) || !sameKeys(item, ['kind', 'participantId'])
           || typeof item.participantId !== 'string' || !knownParticipants.has(item.participantId)
           || typeof item.kind !== 'string' || !Object.hasOwn(REQUIREMENT_PROMPTS, item.kind))
-          this.rejectModel('ARCHITECT_REQUIREMENTS');
+          this.rejectModel('ARCHITECT_REQUIREMENTS', modelValidationIssues([{ code: 'custom', path: ['participantInformationRequirements', requirements.length] }], output));
         requirements.push({ participantId: item.participantId, prompt: REQUIREMENT_PROMPTS[item.kind]! });
       }
 
       const normalized = normalizePublicModelFields(output.variables, output.rules);
-      const definition = KE.DecisionDefinition.safeParse({
+      const definitionValue = {
         schemaVersion: KE.KE_SCHEMA_VERSION,
         decisionId: Id.parse(this.id()),
         frameVersion: 1,
@@ -348,17 +353,19 @@ export class DecisionArchitect {
         requiredParticipantIds: participantIds,
         variables: normalized.variables,
         rules: normalized.rules,
-      });
+      };
+      const definition = KE.DecisionDefinition.safeParse(definitionValue);
       if (!definition.success) {
+        const validation = modelValidationIssues(definition.error.issues, definitionValue);
         const roots = definition.error.issues.map(issue => issue.path[0]);
         if (roots.every(root => root === 'rules')) {
-          if (normalized.rules.some(rule => !KE.ValidationRule.safeParse(rule).success)) this.rejectModel('ARCHITECT_RULE_FIELDS');
-          if (definition.error.issues.some(issue => issue.message === 'Rule references an unknown variable')) this.rejectModel('ARCHITECT_RULE_REFERENCE');
-          if (definition.error.issues.some(issue => issue.message === 'Rule value does not match the referenced variable type or domain')) this.rejectModel('ARCHITECT_RULE_VALUE');
-          if (definition.error.issues.some(issue => /unique|duplicate/i.test(issue.message))) this.rejectModel('ARCHITECT_RULE_DUPLICATE');
-          this.rejectModel('ARCHITECT_SCHEMA_RULES');
+          if (normalized.rules.some(rule => !KE.ValidationRule.safeParse(rule).success)) this.rejectModel('ARCHITECT_RULE_FIELDS', validation);
+          if (definition.error.issues.some(issue => issue.message === 'Rule references an unknown variable')) this.rejectModel('ARCHITECT_RULE_REFERENCE', validation);
+          if (definition.error.issues.some(issue => issue.message === 'Rule value does not match the referenced variable type or domain')) this.rejectModel('ARCHITECT_RULE_VALUE', validation);
+          if (definition.error.issues.some(issue => /unique|duplicate/i.test(issue.message))) this.rejectModel('ARCHITECT_RULE_DUPLICATE', validation);
+          this.rejectModel('ARCHITECT_SCHEMA_RULES', validation);
         }
-        this.rejectModel(roots.every(root => root === 'variables') ? 'ARCHITECT_SCHEMA_VARIABLES' : 'ARCHITECT_SCHEMA_OTHER');
+        this.rejectModel(roots.every(root => root === 'variables') ? 'ARCHITECT_SCHEMA_VARIABLES' : 'ARCHITECT_SCHEMA_OTHER', validation);
       }
       if (definition.data.variables.some(variable => variable.visibility !== 'PUBLIC')
         || definition.data.rules.some(rule => rule.visibility !== 'PUBLIC')) {
