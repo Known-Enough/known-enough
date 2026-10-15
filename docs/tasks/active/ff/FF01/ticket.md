@@ -44,3 +44,5 @@ Manual check: sign out, open Create account and Sign in; check narrow/mobile lay
 
 
 2026-10-15 A handoff — PUBLISHED; manual acceptance pending. Auth styling published in38761806414/Amplify95 and included in final38762440602. No tests. Check registration/sign-in on mobile and both themes; password toggles, Back/Create one, contextual email verification and password reset remain available. A implementation claim released; user manual acceptance remains. [Receipt](../../../../review-artifacts/FF/a-publication-20261015.json).
+
+2026-10-15 finishing publication38763689905 SUCCESS/sourcee8f4dac: Forgot password directly beneath password; verification navigation disabled while submitting, password visibility reset for each sign-in stage. Build complete, no tests; user manual acceptance pending. Claim released.

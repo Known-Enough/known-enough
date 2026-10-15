@@ -172,5 +172,70 @@
     "disabled private worker schedule",
     "explicit participant consent",
     "strict output validation and unknown-call protection"
-  ]
+  ],
+  "finishingPublication": {
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38763689905",
+    "conclusion": "success",
+    "report": {
+      "sourceSha": "e8f4dac0170dc69c869635815d65afd6b125f671",
+      "result": "FRONTEND_PUBLICATION_PASS",
+      "providerCalls": 0,
+      "signup": 0,
+      "apiPublication": "NOT_EXECUTED",
+      "files": [
+        {
+          "path": "/assets/app-chrome-CMY0kSUy.js",
+          "sha256": "536c62041c5f4990aba35b745b94fa1ed9aa8ab105910b8415a94edf4dd132f3"
+        },
+        {
+          "path": "/assets/connected-app-ChDH495D.js",
+          "sha256": "43920e5db7cd03615633d440e774b79288d3d9b355e6c7ca57d001b34eac088a"
+        },
+        {
+          "path": "/assets/index-BY43judR.js",
+          "sha256": "4f96f7f639d31fa8efdbd28f34bbc0a4fcd235c5860923850fc34dd8eb03c53d"
+        },
+        {
+          "path": "/assets/index-BnkOjH-r.css",
+          "sha256": "5f3ae63f7b375da34876c076840257d6389ae8fb19978c5b7ff04aa10e3b25fa"
+        },
+        {
+          "path": "/cover.png",
+          "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151"
+        },
+        {
+          "path": "/",
+          "sha256": "aae1c472d5ac5757d86896d8db58bad6c7ff254e4fa747d5c2dcb556fe07ae7a"
+        },
+        {
+          "path": "/logo.png",
+          "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb"
+        }
+      ],
+      "amplifyJobId": "97"
+    },
+    "configurationReadback": {
+      "result": "ZZ02_SETUP_READBACK_PASS",
+      "configurationWrites": 0,
+      "dataWrites": 0,
+      "providerCalls": 0,
+      "signupDelivery": "NOT_EXECUTED",
+      "configurationSha256": "f6f32c6bd2cb66bebd8e4d40c35b1f198426172f1f8f372eaab35c472327da6b",
+      "postConfirmation": "MATCH",
+      "smsRoleConfigured": false,
+      "apiSha256": "c1ec4a079d137f1e39c24066a42df03a9b4f7746ae33297456747f2e8397e0ec",
+      "groupReadRoutes": [
+        "GET /groups/{groupId}/draft-requests",
+        "GET /groups",
+        "GET /groups/{groupId}/draft-requests/{requestKey}",
+        "GET /groups/{groupId}/drafts/{draftId}",
+        "GET /groups/{groupId}/decisions/{decisionId}/review",
+        "GET /groups/{groupId}/members/{memberId}/profile",
+        "GET /groups/{groupId}"
+      ],
+      "profileRoutesPresent": 5,
+      "managedRoutesPresent": 6
+    },
+    "tests": "NOT_EXECUTED_USER_REQUEST"
+  }
 }
