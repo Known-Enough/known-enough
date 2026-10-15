@@ -56,7 +56,9 @@ const prompts: Record<ModelJobKind, string> = {
     + 'For an unsupported public objective with no finite verifiable domain, return a concise draft with one public clarification question asking for a finite supported scope. Do not invent proxy variables or rules for subjective happiness, external predictions or unlimited alternatives. For open scope return empty variables and rules; for supplied publicVariables retain exact variableIds. Keep description concise and do not elaborate hypothetical plans. '
     + 'Private budgets, dates, preferences and accessibility needs to collect later belong in participantInformationRequirements; '
     + 'their absence alone does not prevent drafting the public frame. Never invent their values. '
-    + 'Return title, description, rules, clarificationQuestions (string array), participantInformationRequirements '
+    + 'Not having selected a winning option is never missing public scope. Do not ask which supplied date or option is preferred; collect each participant’s availability and preferences privately later. '
+    + 'For every returned variable include allowedValues: an empty array for ENUM/BOOLEAN/PARTICIPANT with intrinsic alternatives, or a finite list of typed decision values for DATE/DATETIME/NUMBER/MONEY/PERCENTAGE/DURATION. Copy supplied date/value alternatives into this list even when no winner is selected. The server compiles nonempty allowedValues into a validated public IN rule. Do not add variables for participant readiness, individual availability, preference strength or personal budgets just because those private needs are unknown. They constrain the actual shared choice variables privately. A shared date or agreed spending-plan choice is distinct from any person’s private availability or limit. '
+    + 'Return title, description, rules, clarificationQuestions as objects {question,purpose,variableId}, and participantInformationRequirements. purpose is PUBLIC_SCOPE for an essential missing shared fact, or PRIVATE_NEED for a participant’s preference/budget/availability (not shown to the organizer). variableId identifies the choice needing clarification or is an empty string for a general shared fact. Questions about a choice already bounded by supplied alternatives are unnecessary. '
     + '(array of {participantId,kind}, kind one of DATES, PREFERENCES, ACCESSIBILITY, BUDGET). '
     + 'Also return variableIds when publicVariables is supplied; otherwise return variables. '
     + 'For an open-scope draft, every variable must include id, type, label, required, visibility="PUBLIC", and ownerParticipantId=null. '
@@ -135,6 +137,12 @@ const validationRuleSchema = (visibilities: string[]) => objectSchema({
   consequent: objectSchema({ variableId: stringSchema, operator: { type: 'string', enum: ['EQ', 'NE'] }, value: valueSchema }, ['variableId', 'operator', 'value']),
 }, ['id', 'visibility', 'operator']);
 const architectRuleSchema = validationRuleSchema(['PUBLIC']);
+const architectVariableSchema = objectSchema({ ...variableSchema.properties,
+  allowedValues: { type: 'array', items: valueSchema, maxItems: 32 },
+}, [...variableSchema.required, 'allowedValues']);
+const architectQuestionSchema = objectSchema({ question: stringSchema,
+  purpose: { type: 'string', enum: ['PUBLIC_SCOPE', 'PRIVATE_NEED'] }, variableId: stringSchema,
+}, ['question', 'purpose', 'variableId']);
 const ownerRuleSchema = validationRuleSchema(['TRUSTED_BACKEND']);
 const draftConditionSchema = objectSchema({
   constraintId: stringSchema, kind: { type: 'string', enum: ['HARD', 'NEGOTIABLE', 'PREFERENCE'] },
@@ -145,8 +153,8 @@ const unsupportedConditionSchema = objectSchema({ id: stringSchema, sourceSummar
   ['id', 'sourceSummary', 'clarificationQuestion']);
 const outputTools = {
   ARCHITECT: { name: 'ke_architect_output', schema: { type: 'object', properties: {
-    title: stringSchema, description: stringSchema, variables: objectArray(variableSchema), rules: objectArray(architectRuleSchema),
-    clarificationQuestions: stringArray,
+    title: stringSchema, description: stringSchema, variables: objectArray(architectVariableSchema), rules: objectArray(architectRuleSchema),
+    clarificationQuestions: objectArray(architectQuestionSchema),
     participantInformationRequirements: objectArray(objectSchema({ participantId: stringSchema,
       kind: { type: 'string', enum: ['DATES', 'PREFERENCES', 'ACCESSIBILITY', 'BUDGET'] } }, ['participantId', 'kind'])),
   }, required: ['title', 'description', 'variables', 'rules', 'clarificationQuestions', 'participantInformationRequirements'] } },

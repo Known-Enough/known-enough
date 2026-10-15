@@ -1,6 +1,6 @@
 # FF03 — Unsupported AI follow-up draft and confusing recovery UI
 
-Status: PUBLISHED / onboarding and decision-guide manual acceptance pending for B
+Status: IN_PROGRESS / A structured question-boundary repair for B
 Scheduling: preserve the current active claim and one implementation writer. This overlaps FIX01's public-draft lifecycle: B should correlate these reports with the current FIX01 repair first, without starting a parallel claim. If FIX01 resolves the same defect, link its actual evidence here instead of duplicating work; otherwise take this bounded follow-up sequentially.
 
 ## Observed report
@@ -46,3 +46,5 @@ User-directed FIX01 continuation 2026-10-15T06:08:44.323908+00:00: overlapping r
 2026-10-15 onboarding scope: public `/?guide=decision` fictional four-step walkthrough with no API/model/account calls, links from signed-out entry/group/wizard that open separately to preserve real drafts, optional bounded goal/options/unknowns description scaffold that appends rather than replaces input. User input/AI draft/review/privacy/consent and real-request guards remain. No new AWS permission or dependencies. Build completed; no tests, frontend publication pending.
 
 2026-10-15 onboarding published: frontend38782882735 SUCCESS/sourcecaf3829/Amplify99. Public `/?guide=decision` fictional example and optional real-wizard description scaffold available. Config readbackMATCH/0configuration/data/provider writes; APIcdeb3078 unchanged, no runtime publication or IAM changes. Build complete, tests not run per user instruction. [Receipt](../../../../review-artifacts/FF/onboarding-publication.json). A claim released; manual acceptance pending.
+
+2026-10-15 redundant-date-preference repair: unselected supplied alternatives no longer count as unanswered preference questions. Model tool questions carry purpose/target; model scalar/date allowedValues compile into strict public IN rules. Existing private questions are excluded from shared setup and candidate limits remain separately enforced. Visible date alternatives and one explicit legacy rebuild action added. Build/type compilation completed; no tests/provider calls. Compatible publication pending.

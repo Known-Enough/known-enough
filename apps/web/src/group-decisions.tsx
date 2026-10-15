@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Groups, KnownEnough as KE } from '@deal-table/contracts';
-import { ruleText, variableText } from './connected-decision';
+import { ruleText, variableText, valueText } from './connected-decision';
 import { readDraftRequest,saveDraftRequest,draftFailureMessage } from './draft-request-state';
 import { LoadingSkeleton, PageIcon } from './app-chrome';
 class UserFlowError extends Error {}
@@ -9,6 +9,12 @@ function savedPublicAnswer(draft: Groups.GroupDraft | null, question: string): s
   return [...(draft?.publicClarifications ?? [])].reverse().find(item => guidanceText(item.question) === guidanceText(question))?.answer;
 }
 const suggestionAnswer = 'I am not sure yet. Suggest a small set of clearly labelled provisional shared options for us to review. Keep our earlier answers, and do not assume anyone’s private preferences, availability or budget.';
+const rebuildAnswer = 'Use the shared alternatives already in my original idea and saved answers to build the choices for review. Keep all alternatives unselected. Each person will provide their preferred option, availability and spending limits privately later. Do not ask me for their preferences.';
+function publicChoiceValues(variable: KE.PublicDecisionFrame['variables'][number], frame: KE.PublicDecisionFrame): string[] {
+  if (variable.type === 'ENUM' || variable.type === 'ENUM_SET') return variable.options.map(option => option.label);
+  const rule = frame.rules.find(item => 'variableId' in item && item.variableId === variable.id && (item.operator === 'IN' || item.operator === 'COMPARE' && item.comparison === 'EQ'));
+  return rule?.operator === 'IN' ? rule.values.map(value => valueText(value, variable)) : rule?.operator === 'COMPARE' ? [valueText(rule.value, variable)] : [];
+}
 const privateAnswer = 'Each participant should provide their own preferences, availability and spending limits privately later. Help us draft the shared choices now without assuming those personal answers.';
 export function GroupDecisions({ group, api, reload, openDecision }: { group: Groups.GroupSnapshot;
   api: (path: string, init?: RequestInit) => Promise<Response>; reload: () => Promise<void>; openDecision: (id: string) => void; startCollapsed?: boolean }) {
@@ -131,6 +137,7 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
     const prior = savedPublicAnswer(draft, item);
     return prior !== undefined && guidanceText(prior) === guidanceText(answers[index] ?? '');
   });
+  const rebuiltAlready = !!draft?.clarificationQuestions.length && draft.clarificationQuestions.every(item => savedPublicAnswer(draft, item) === rebuildAnswer);
   function answerQuestion(value: string) {
     if (!question || busy || pendingKey) return;
     answersByQuestion.current[question] = value;
@@ -262,12 +269,13 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
           {step === 'questions' && draft && !pendingKey && <div className="ke-wizard-step">
             <article className="ke-wizard-starting-point"><span className="ke-wizard-eyebrow">Your starting point · saved</span><h3>{draft.frame.title}</h3><p>{draft.frame.objective}</p>
               {draft.frame.description && <p>{draft.frame.description}</p>}
-              {!!draft.frame.variables.length && <><h4>Choices proposed for review</h4><ul>{draft.frame.variables.map(variable => <li key={variable.id}><strong>{variable.label}</strong>{variable.type === 'ENUM' || variable.type === 'ENUM_SET' ? `: ${variable.options.map(option => option.label).join(', ')}` : ''}</li>)}</ul></>}
+              {!!draft.frame.variables.length && <><h4>Choices proposed for review</h4><ul>{draft.frame.variables.map(variable => <li key={variable.id}><strong>{variable.label}</strong>{publicChoiceValues(variable, draft.frame).length ? `: ${publicChoiceValues(variable, draft.frame).join(', ')}` : ''}</li>)}</ul></>}
               <small>These are shared draft choices. They do not confirm anyone’s availability, budget, preferences or approval.</small>
             </article>
             <div className="ke-wizard-ai-note"><strong>{previousAnswer !== undefined ? 'AI has asked about an earlier answer.' : 'Let’s work out the next shared detail.'}</strong><p>{previousAnswer !== undefined ? 'Your earlier answer is saved. If you don’t have more detail, ask AI to suggest a starting point rather than repeating the same answer.' : 'Answer what you know, or ask AI to suggest a starting point. Personal preferences and limits belong in each person’s private conversation later.'}</p></div>
             {!!draft.publicClarifications?.length && <details className="ke-wizard-history"><summary>What you’ve already shared with AI</summary><dl>{draft.publicClarifications.map((item, index) => <div key={index}><dt>{item.question}</dt><dd>{item.answer}</dd></div>)}</dl></details>}
             <p className="ke-wizard-help">One question at a time. A short shared answer is enough; you can also choose a help option below. Nothing is sent until you select “Let AI update the draft.”</p>
+            <div className="ke-wizard-rebuild"><p>If your idea already lists the options, you don’t need to choose a winner or answer on anyone else’s behalf.</p><button type="button" className="secondary" disabled={busy || !!pendingKey || checkingRequest || !requestLookupAvailable || dirty || rebuiltAlready} onClick={() => void action(() => draftObjective(draft.frame.objective, { draftId: draft.id, revision: draft.revision, answers: draft.clarificationQuestions.map(() => rebuildAnswer) }))}>Rebuild shared choices with AI</button><small>This sends your existing idea and shared answers to AI once. It does not provide anyone’s private preferences.</small>{rebuiltAlready && <small>AI already received this rebuild request. Add a concrete missing shared detail above before another update.</small>}</div>
             <p className="ke-wizard-question-count">Question {questionIndex + 1} of {draft.clarificationQuestions.length}</p>
             <label className="ke-wizard-question" htmlFor={`public-answer-${group.id}-${questionIndex}`}>{question}</label>
             <textarea id={`public-answer-${group.id}-${questionIndex}`} value={answers[questionIndex] ?? ''} maxLength={500}
@@ -289,7 +297,7 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
             <div className="ke-wizard-ai-note"><strong>Here’s what your group will review.</strong><p>Check the choices below. Creating the decision starts your group’s review. Next, each person adds their needs privately and reviews the interpretation; everyone approves proposals for themselves.</p></div>
             <p className="ke-wizard-help">Required: resolve all follow-up questions, save any wording changes, and tick the review confirmation for this saved draft. The saved-request check must finish before Create decision is enabled.</p>
             <article className="ke-wizard-preview"><h3>{draft.frame.title}</h3><p>{draft.frame.objective}</p><p className="ke-wizard-description">{draft.frame.description}</p>
-              <h4>Choices to explore</h4><ul>{draft.frame.variables.map(variable => <li key={variable.id}>{variableText(variable, draft.frame)}</li>)}</ul>
+              <h4>Choices to explore</h4><ul>{draft.frame.variables.map(variable => <li key={variable.id}>{variableText(variable, draft.frame)}{variable.type !== 'ENUM' && variable.type !== 'ENUM_SET' && publicChoiceValues(variable, draft.frame).length > 0 && <small className="ke-wizard-counter">Choices: {publicChoiceValues(variable, draft.frame).join(', ')}</small>}</li>)}</ul>
               {!!draft.frame.rules.length && <><h4>Shared rules</h4><ul>{draft.frame.rules.map(rule => <li key={rule.id}>{ruleText(rule, draft.frame.variables)}</li>)}</ul></>}
               <h4>Who will review it</h4><div className="ke-wizard-members">{draft.frame.participants.map(member => <span key={member.id}>{member.displayName}</span>)}</div>
             </article>

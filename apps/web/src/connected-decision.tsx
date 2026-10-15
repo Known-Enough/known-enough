@@ -6,7 +6,7 @@ class DecisionRequestError extends Error {
   constructor(readonly status: number, readonly code: string, readonly category: string, readonly reference: string) { super(code); }
 }
 type Variable = KE.DecisionVariable | KE.PublicDecisionFrame['variables'][number];
-function valueText(value: KE.DecisionValue, variable?: Variable): string {
+export function valueText(value: KE.DecisionValue, variable?: Variable): string {
   if (value.type === 'MONEY') return new Intl.NumberFormat('en-US', { style: 'currency', currency: value.currencyCode }).format(value.amountMinor / 10 ** value.minorUnit);
   if (value.type === 'PERCENTAGE') return `${value.basisPoints / 100}%`;
   if (value.type === 'ENUM') return variable?.type === 'ENUM' ? variable.options.find(item => item.id === value.optionId)?.label ?? value.optionId : value.optionId;

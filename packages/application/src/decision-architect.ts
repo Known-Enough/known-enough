@@ -85,9 +85,21 @@ function boundedStrings(value: unknown, maximum: number, length: number): value 
 }
 function normalizePublicModelFields(variables: unknown[], rules: unknown[]): { variables: unknown[]; rules: unknown[] } {
   const remaps = new Map<string, Map<string, string>>();
+  const domainRules: unknown[] = [];
+  const usedRuleIds = new Set(rules.flatMap(rule => record(rule) && typeof rule.id === 'string' ? [rule.id] : []));
   const normalizedVariables = variables.map((value, variableIndex) => {
     if (!record(value) || value.visibility !== 'PUBLIC') return value;
     const variable: Record<string, unknown> = { ...value, ownerParticipantId: null };
+    if (Object.hasOwn(value, 'allowedValues')) {
+      if (!Array.isArray(value.allowedValues) || value.allowedValues.length > 32) return value;
+      delete variable.allowedValues;
+      if (value.allowedValues.length) {
+        let ruleId = `ke-domain-${variableIndex + 1}`;
+        while (usedRuleIds.has(ruleId)) ruleId += 'x';
+        usedRuleIds.add(ruleId);
+        domainRules.push({ id: ruleId, visibility: 'PUBLIC', operator: 'IN', variableId: value.id, values: value.allowedValues });
+      }
+    }
     if ((value.type === 'ENUM' || value.type === 'ENUM_SET') && Array.isArray(value.options)
       && typeof value.id === 'string') {
       const usedIds = new Set(value.options.flatMap(option => record(option) && Id.safeParse(option.id).success
@@ -121,7 +133,7 @@ function normalizePublicModelFields(variables: unknown[], rules: unknown[]): { v
       return { ...value, optionIds: value.optionIds.map(id => typeof id === 'string' ? remap.get(id) ?? id : id) };
     return value;
   };
-  const normalizedRules = rules.map(value => {
+  const normalizedRules = [...rules, ...domainRules].map(value => {
     if (!record(value)) return value;
     const rule: Record<string, unknown> = { ...value };
     for (const field of ['value', 'minimum', 'maximum']) {
@@ -135,6 +147,34 @@ function normalizePublicModelFields(variables: unknown[], rules: unknown[]): { v
     return rule;
   });
   return { variables: normalizedVariables, rules: normalizedRules };
+}
+type ArchitectQuestion = string | { question: string; purpose: 'PUBLIC_SCOPE' | 'PRIVATE_NEED'; variableId: string };
+function questionsValid(value: unknown): value is ArchitectQuestion[] {
+  return Array.isArray(value) && value.length <= MAX_QUESTIONS && value.every(item =>
+    typeof item === 'string' ? boundedStrings([item], 1, 500) // Existing injected model ports remain compatible.
+      : record(item) && sameKeys(item, ['purpose', 'question', 'variableId'])
+        && boundedStrings([item.question], 1, 500) && ['PUBLIC_SCOPE', 'PRIVATE_NEED'].includes(String(item.purpose))
+        && typeof item.variableId === 'string' && (item.variableId === '' || Id.safeParse(item.variableId).success));
+}
+function publicQuestions(questions: ArchitectQuestion[], frame: KETypes.PublicDecisionFrame): string[] {
+  const boundedChoice = (variable: KETypes.PublicDecisionFrame['variables'][number]) =>
+    ['ENUM', 'BOOLEAN', 'PARTICIPANT'].includes(variable.type)
+    || variable.type === 'ENUM_SET' && variable.options.length <= 6
+    || frame.rules.some(rule => 'variableId' in rule && rule.variableId === variable.id
+      && (rule.operator === 'IN' || rule.operator === 'COMPARE' && rule.comparison === 'EQ'));
+  const choicesSpecified = frame.variables.length > 0 && frame.variables.every(boundedChoice);
+  return questions.flatMap(item => {
+    if (typeof item === 'string') return choicesSpecified ? [] : [item];
+    if (item.purpose === 'PRIVATE_NEED') return [];
+    if (item.variableId) {
+      const variable = frame.variables.find(value => value.id === item.variableId);
+      if (!variable) fail('RETRYABLE_SERVER_ERROR');
+      if (boundedChoice(variable)) return [];
+    } else if (choicesSpecified) return [];
+    // These are draft choices for explicit review, not selected values or agreement.
+    // The candidate catalog separately enforces size, completeness and feasibility.
+    return [item.question];
+  });
 }
 async function token(id: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(id));
@@ -242,7 +282,7 @@ export class DecisionArchitect {
         || typeof output.title !== 'string' || output.title.trim().length === 0 || output.title.length > 160
         || typeof output.description !== 'string' || output.description.length > 4_000
         || !Array.isArray(output.variables) || !Array.isArray(output.rules)
-        || !boundedStrings(output.clarificationQuestions, MAX_QUESTIONS, 500)
+        || !questionsValid(output.clarificationQuestions)
         || !Array.isArray(output.participantInformationRequirements)
         || output.participantInformationRequirements.length > MAX_REQUIREMENTS) {
         this.rejectModel('ARCHITECT_FIELDS');
@@ -316,13 +356,14 @@ export class DecisionArchitect {
         }),
       });
 
+      const clarificationQuestions = publicQuestions(output.clarificationQuestions, frame);
       await invocation.assertCurrent();
       return {
         draftId: request.draftId,
         revision: request.revision,
-        status: output.clarificationQuestions.length ? 'NEEDS_CLARIFICATION' : 'DEFINING',
+        status: clarificationQuestions.length ? 'NEEDS_CLARIFICATION' : 'DEFINING',
         frame,
-        clarificationQuestions: [...output.clarificationQuestions],
+        clarificationQuestions,
         participantInformationRequirements: requirements,
       };
     } finally {
