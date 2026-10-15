@@ -1,13 +1,13 @@
-# FF — Focused frontend and decision-flow repairs
+# FF — Frontend and decision-flow repairs
 
 | Task | Purpose | Current status |
 | --- | --- | --- |
-| [FF01](FF01/README.md) | Compact consistent registration/sign-in screens, password toggle and contextual verification. | PUBLISHED/A; user manual acceptance pending |
-| [FF02](FF02/README.md) | Native private interpretation and clear participant prerequisites. | CODE PUBLISHED; administrator timestamp permission still needed; [one command](FF02/cloudshell-command.md) |
-| [FF03](FF03/README.md) | Structured follow-ups and clearer failed-request recovery. | PUBLISHED/A; user manual acceptance pending |
+| [FF01](FF01/README.md) | Compact account screens, password visibility and contextual recovery. | PUBLISHED; user manual acceptance pending |
+| [FF02](FF02/README.md) | Owner-only interpretation with explicit participant prerequisites/consent. | PUBLISHED; required permission now installed; user manual acceptance pending |
+| [FF03](FF03/README.md) | Generic incomplete-idea guide, concrete public questions and safer recovery. | Updated PUBLISHED/source32f3e11/Amplify98; user manual acceptance pending |
 
-[Actual publication/configuration receipts](../../../review-artifacts/FF/a-publication-20261015.json). User directed no tests: only build, publication and configuration readback were performed by A. No app/browser/signup/model tests or calls. Existing B historical checks remain separate evidence.
+[Latest guide publication](../../../review-artifacts/FF/generic-guide-publication.json), [earlier FF receipts](../../../review-artifacts/FF/a-publication-20261015.json), [generic behavior reference](FF03/gold-standard.md), [manual checklist](manual-checklist.md).
 
-A implementation claim released at this checkpoint. Preserve the installed source and pending FF02 permission; no duplicate B implementation, worker or schedule created. Every participant still reviews/confirms independently. Original FF03 historical responses have not been individually reconstructed.
+At the user's direction no tests, model calls or synthetic signups were performed by A. Builds/publication/configuration readback do not establish functional acceptance. User permission receipt17:43:10Z and independent38780875342 readback confirm the timestamp capability is installed; the former CloudShell block is resolved. Do not repeat historical installation commands.
 
-Final A finishing publication: [38763689905](https://github.com/Known-Enough/known-enough/actions/runs/38763689905) SUCCESS, source `e8f4dac`, Amplify 97. All currently identified FF code work is published; tests/manual acceptance pending. User explicitly defers the FF02 command until the end. See the [manual checklist](manual-checklist.md). No active FF implementation claim.
+No active A implementation claim or new B dispatch/schedule. Preserve current compatible runtime, private state, participant approval/consent and uncertain-request protection. Historical FF03 response fields remain unknown; no replay performed.

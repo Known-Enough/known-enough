@@ -1,3 +1,5 @@
+**Already applied by the user — 2026-10-15T17:43:10Z.** The named permission installation succeeded. Keep this block as historical setup evidence; do not rerun it for later API deployments. Its old API hash will intentionally reject a newer package. [User receipt](../../../../review-artifacts/FF/processing-stamp-user-receipt.json).
+
 # Complete FF02 private-interpretation access
 
 The native owner route is now published in coordinated source `3da3ded80337cd9693bb213d48180c42f495ad6b`. A's actual read-only run [38762492720](https://github.com/Known-Enough/known-enough/actions/runs/38762492720) confirms the named `FIX01VerifiedSyntheticProcessingStamp` policy is absent. Use your own administrator CloudShell in account `092954139775` to add only that transactional timestamp permission. No new human approval is requested; the missing AWS capability cannot be installed by the deployed GitHub roles.

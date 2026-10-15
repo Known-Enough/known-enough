@@ -12,8 +12,8 @@
     "amplifyJob": "95"
   },
   "ff02": {
-    "status": "PUBLISHED_BLOCKED_ON_STAMP_PERMISSION",
-    "remaining": "FIX01VerifiedSyntheticProcessingStamp permission absent in own readback38762492720; user administrator command required",
+    "status": "PUBLISHED_PERMISSION_INSTALLED_MANUAL_ACCEPTANCE_PENDING",
+    "remaining": "User manual interpretation acceptance; user supplied permission receipt17:43:10Z and independent38780875342 matches expected policy hash.",
     "command": "../../tasks/active/ff/FF02/cloudshell-command.md"
   },
   "ff03": {
@@ -237,5 +237,6 @@
       "managedRoutesPresent": 6
     },
     "tests": "NOT_EXECUTED_USER_REQUEST"
-  }
+  },
+  "latestGuidePublication": "generic-guide-publication.json"
 }

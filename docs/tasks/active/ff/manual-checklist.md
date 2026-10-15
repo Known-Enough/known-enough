@@ -1,6 +1,6 @@
-# FF manual acceptance — commands last
+# FF manual acceptance
 
-A has published the FF code. At the user’s direction no new automated or manual product tests are run by this A chat. Compilation and publication are separate from the manual checks below. The user controls when to run the deferred command.
+A has published the FF code. At the user’s direction no new automated or manual product tests are run by this A chat. Compilation and publication are separate from the manual checks below. The previously deferred FF02 permission command was applied successfully by the user; no repeat setup is needed.
 
 Open [Known Enough](https://main.d143q5ravxp5av.amplifyapp.com/) and refresh to get the latest frontend.
 
@@ -19,11 +19,9 @@ Open [Known Enough](https://main.d143q5ravxp5av.amplifyapp.com/) and refresh to 
 - If a request fails, its recovery screen should explain whether it stopped, has not started or has an uncertain result. Use Check progress, and Close unfinished request only when offered. An uncertain call must not silently run again.
 - Check the saved decision from another actual group member's own account. Drafts still belong to the organizer; a decision becomes shared after creation.
 
-## FF02 — Private interpretation (one deferred command)
+## FF02 — Private interpretation (permission applied)
 
-You can review the shared-frame prerequisite UI now. Successful private processing still requires the [single timestamp-permission command](FF02/cloudshell-command.md), which the user has chosen to run at the end. Do not rerun unrelated installations. The current command remains pinned to installed APIc1ec4a07; frontend-only updates do not change it.
-
-After that command succeeds:
+The [timestamp-permission command](FF02/cloudshell-command.md) already succeeded in the user’s CloudShell at17:43:10Z. Do not repeat it or rerun unrelated installations. Private processing still requires the normal shared-frame and individual processing-consent steps below:
 
 - Every required group member reviews and confirms the current shared frame in their own account. The person interpreting private conditions must confirm it too.
 - Enter only fictional test conditions, such as “For this fictional dinner I prefer Green Bowl and want to spend at most $20.” Explicitly select the fictional-test processing consent checkbox.
@@ -31,3 +29,7 @@ After that command succeeds:
 - If something fails, keep the error reference and describe the step; do not send private text, credentials or raw AI output. Your text and earlier saved conditions should remain available for safe recovery.
 
 Actual acceptance remains pending the user's observations. Historical FF03 error responses have not been reconstructed, and publication alone is not proof that every AI response will be accepted.
+
+## Generic guide continuation
+
+Start with “Let’s go to a restaurant” even if you do not know the day or cost. The saved starting point should show proposed choices and important unknowns. If asked something you cannot answer, select Not sure—suggest options, then Let AI update the draft. If the question belongs to participants’ private needs, select Ask each person privately and submit that request. These help buttons fill an explicit answer; they do not silently call AI. Saved public answers appear in a collapsible history. An unchanged answer to a repeated question should not be resubmitted as another paid call. The same behavior should work for a trip or shared purchase; use the [behavior reference](FF03/gold-standard.md).
