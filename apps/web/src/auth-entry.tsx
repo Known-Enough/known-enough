@@ -23,6 +23,7 @@ export function AuthEntry({ config, notice, callbackPending = false, direct, onS
         </div>}
       {notice && <p role="status">{notice}</p>}
     </section>}
+    {!callbackPending && !registering && !signing && <p className="ke-entry-guide"><a href="/?guide=decision" target="_blank" rel="noopener noreferrer">See how a decision works</a><span>A short fictional example · opens in a new tab</span></p>}
     <div className="ke-entry-privacy"><PrivacyBar /></div>
   </main>;
 }

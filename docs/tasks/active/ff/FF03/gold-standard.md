@@ -34,3 +34,9 @@ A useful proposal could identify a compatible day and a provisional spending lim
 6. Incompatible or unverified conditions: state the unresolved issue; do not announce false agreement or fabricate price/availability.
 
 Acceptance assesses truthful progress and preservation of information, not exact prose or an exact generated proposal. Publication is not proof of live AI quality or a complete new negotiation engine. This continuation improves the shared starting/follow-up guide and reuses the existing private interpretation/proposal/approval machinery; any demonstrated limitations there remain explicit rather than silently bypassed.
+
+## Shareable onboarding
+
+The public `/?guide=decision` walkthrough illustrates Describe → Review → Private needs → Proposal/approval using explicitly fictional content. It performs no real AI, account, group or decision action and loads independently of AWS/Cognito configuration. Application links open it in a new tab so the existing draft stays mounted. OAuth callback parameters retain their normal routing.
+
+The real wizard encourages known options and unresolved details, offers an optional goal/options/unknowns text scaffold, appends its bounded content without silently replacing/truncating the idea, and continues using the actual server AI only on explicit submission. It explains the private-participant step after shared review. This is frontend guidance, not simulated successful backend execution.

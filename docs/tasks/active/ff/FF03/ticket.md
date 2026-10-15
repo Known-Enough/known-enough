@@ -1,6 +1,6 @@
 # FF03 — Unsupported AI follow-up draft and confusing recovery UI
 
-Status: PUBLISHED / generic decision-guide manual acceptance pending for B
+Status: IN_PROGRESS / A shareable onboarding continuation for B
 Scheduling: preserve the current active claim and one implementation writer. This overlaps FIX01's public-draft lifecycle: B should correlate these reports with the current FIX01 repair first, without starting a parallel claim. If FIX01 resolves the same defect, link its actual evidence here instead of duplicating work; otherwise take this bounded follow-up sequentially.
 
 ## Observed report
@@ -42,3 +42,5 @@ User-directed FIX01 continuation 2026-10-15T06:08:44.323908+00:00: overlapping r
 2026-10-15 agreed-plan implementation: generic incomplete-idea prompt, explicit tentative suggestions/one essential public question, saved starting-point/history UI, two explicit user help answers, normalized repeated-question/unchanged-answer guard and real request progress. No restaurant keyword branch or model-output/schema relaxation. [Behavior reference](gold-standard.md). Tests not run; compatible publication pending.
 
 2026-10-15 continuation published: coordinated runtime38780717128/APIcdeb3078/worker a2205514, frontend38780870859 SUCCESS/Amplify98, source32f3e11. Control38780866738 enabled same-source public processing; existing synthetic policy unchanged/individual consent required/TOTAL unchanged. Own38780875342 confirms installed timestamp permission matches expected hash with no denials. No tests or AI calls; prompt effectiveness and manual journey pending. No further CloudShell setup. [Receipt](../../../../review-artifacts/FF/generic-guide-publication.json). A implementation claim released.
+
+2026-10-15 onboarding scope: public `/?guide=decision` fictional four-step walkthrough with no API/model/account calls, links from signed-out entry/group/wizard that open separately to preserve real drafts, optional bounded goal/options/unknowns description scaffold that appends rather than replaces input. User input/AI draft/review/privacy/consent and real-request guards remain. No new AWS permission or dependencies. Build completed; no tests, frontend publication pending.

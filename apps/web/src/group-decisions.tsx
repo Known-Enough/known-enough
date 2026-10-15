@@ -19,6 +19,11 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
   const dialog = useRef<HTMLDialogElement>(null);
   const launcher = useRef<HTMLButtonElement>(null);
   const busyGuard = useRef(false);
+  const objectiveInput = useRef<HTMLTextAreaElement>(null);
+  const descriptionHelp = useRef<HTMLDetailsElement>(null);
+  const [helpGoal, setHelpGoal] = useState('');
+  const [helpOptions, setHelpOptions] = useState('');
+  const [helpUnknowns, setHelpUnknowns] = useState('');
   const [objective, setObjective] = useState(''); const [draft, setDraft] = useState<Groups.GroupDraft | null>(null);
   const draftHeading = useRef<HTMLHeadingElement>(null);
   useEffect(() => { if (starting && dialog.current?.open) draftHeading.current?.focus(); }, [starting, step, questionIndex]);
@@ -142,6 +147,15 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
   const readiness = requestRequirement || (draft?.clarificationQuestions.length ? 'Answer the AI’s follow-up questions first.'
     : dirty ? 'Save your changes before creating the decision.'
     : !reviewed ? 'Tick the review confirmation below to enable Create decision.' : '');
+  const descriptionParts = [helpGoal.trim(), helpOptions.trim() ? `Options we are considering: ${helpOptions.trim()}` : '', helpUnknowns.trim() ? `Still undecided: ${helpUnknowns.trim()}` : ''].filter(Boolean).join('\n');
+  const assistedDescription = [objective.trim(), descriptionParts].filter(Boolean).join('\n\n');
+  function applyDescriptionHelp() {
+    if (busy || pendingKey || !descriptionParts || assistedDescription.length > 2000) return;
+    setObjective(assistedDescription); setReviewed(false);
+    setHelpGoal(''); setHelpOptions(''); setHelpUnknowns('');
+    if (descriptionHelp.current) descriptionHelp.current.open = false;
+    objectiveInput.current?.focus();
+  }
   function closeWizard() {
     if (busyGuard.current) return;
     dialog.current?.close(); setStarting(false); launcher.current?.focus();
@@ -165,7 +179,7 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
   }
   return <section className="ke-card ke-group-panel ke-decisions-panel" aria-busy={busy} aria-labelledby={`decisions-heading-${group.id}`}>
     <header className="ke-panel-heading"><div><h2 id={`decisions-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="ListChecks" /></span><span>Decisions</span></h2>
-      <p className="ke-panel-subtitle">A clear path from an idea to a shared decision.</p></div>
+      <p className="ke-panel-subtitle">Describe your idea, review the choices, then hear from everyone privately.</p><a className="ke-decision-example-link" href="/?guide=decision" target="_blank" rel="noopener noreferrer">See an example decision flow <span className="ke-sr-only">(opens in a new tab)</span></a></div>
       {group.isOrganizer && (group.decisions.length > 0 || group.drafts.length > 0 || pendingKey)
         && <button ref={launcher} type="button" className="ke-start-decision ke-icon-action" disabled={busy} onClick={startWizard}><PageIcon name="Plus" />{draft || pendingKey ? 'Continue your draft' : 'Start a decision'}</button>}</header>
     {!group.decisions.length && !group.drafts.length && !pendingKey && <div className="ke-decision-empty">
@@ -200,6 +214,7 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
           <h2 id={`decision-wizard-title-${group.id}`} ref={draftHeading} tabIndex={-1}>{step === 'describe' ? 'What would you like to decide?' : step === 'questions' ? 'Let’s fill in a few details.' : 'Your decision, ready to review.'}</h2></div>
           <button type="button" className="secondary ke-wizard-close" aria-label="Close decision guide" disabled={busy} onClick={closeWizard}><PageIcon name="X" /></button>
         </header>
+        <p className="ke-wizard-example"><a href="/?guide=decision" target="_blank" rel="noopener noreferrer">New here? See the example flow <span className="ke-sr-only">(opens in a new tab)</span></a></p>
         <ol className="ke-wizard-steps" aria-label="Decision creation steps">{(['describe','questions','review'] as const).map((value, index) => <li key={value} data-complete={index < ['describe','questions','review'].indexOf(step)} aria-current={step === value ? 'step' : undefined}>
           <span aria-hidden="true">{index < ['describe','questions','review'].indexOf(step) ? <PageIcon name="Check" /> : index + 1}</span><span className="ke-wizard-step-label">{['Your idea','Build the draft','Review'][index]}</span></li>)}</ol>
         <div className="ke-wizard-body" aria-busy={busy}>
@@ -221,18 +236,28 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
             </div>
           </div>}
           {step === 'describe' && !pendingKey && <div className="ke-wizard-step">
-            <div className="ke-wizard-ai-note"><strong>Start with a simple idea.</strong><p>What would you like your group to decide? You don’t need to know the day, cost or everyone’s preferences yet.</p></div>
-            <p className="ke-wizard-help">AI will help propose shared choices for your group to review. Anything it suggests is a starting point, not a confirmed plan. Each person adds their own needs privately after the shared frame is reviewed.</p>
+            <div className="ke-wizard-ai-note"><strong>Tell us what you have in mind.</strong><p>Include the options you’re considering and anything still undecided. A few useful details help AI shape the choices. You don’t need everyone’s preferences or personal budget.</p></div>
+            <p className="ke-wizard-help">First, describe the idea. Then review AI’s draft and create the decision. Each participant reviews the shared choices and adds their own needs privately; nothing is approved automatically.</p>
             <details className="ke-wizard-limits"><summary>About the current preview</summary><p>The app compares up to 64 combinations. AI should keep the initial choices small and ask for a specific limit only when needed. Suggested dates, places or spending limits are unverified until your group reviews them.</p></details>
             <label htmlFor={`group-objective-${group.id}`}>Tell me what you want to decide</label>
-            <textarea id={`group-objective-${group.id}`} value={objective} maxLength={2000} placeholder="For example: Let’s go to a restaurant. We haven’t decided when or how much to spend."
+            <textarea ref={objectiveInput} id={`group-objective-${group.id}`} value={objective} maxLength={2000} placeholder="For example: We want dinner together. We’re considering Place X, Place Y or Place Z, on Friday or Saturday. We don’t know what works best for everyone yet."
               disabled={busy || !!pendingKey || checkingRequest || !requestLookupAvailable} onChange={event => { setObjective(event.target.value); setReviewed(false); }} />
-            <div className="ke-wizard-examples"><span>Ideas to get started</span>{['Choose a restaurant for our group dinner.', 'Choose a destination for our weekend trip.', 'Choose which shared purchase to make.'].map(example => <button type="button" key={example} className="secondary"
-              disabled={busy || !!pendingKey || checkingRequest || !requestLookupAvailable} onClick={() => setObjective(example)}>{example}</button>)}</div>
+            <small className="ke-wizard-counter">{objective.length} / 2,000 characters · shared with your group</small>
+            <details ref={descriptionHelp} className="ke-wizard-description-help"><summary>Help me describe my idea</summary><p>Answer whichever prompts help. These details are shared; keep personal limits for your private conversation later. This prepares your description without calling AI.</p>
+              <fieldset disabled={busy || !!pendingKey || checkingRequest || !requestLookupAvailable}>
+                <label htmlFor={`idea-goal-${group.id}`}>What would you like to decide?</label><input id={`idea-goal-${group.id}`} value={helpGoal} maxLength={500} placeholder="For example: Plan a dinner together" onChange={event => setHelpGoal(event.target.value)} />
+                <label htmlFor={`idea-options-${group.id}`}>Which options are you considering? <span>(optional)</span></label><textarea id={`idea-options-${group.id}`} value={helpOptions} maxLength={500} placeholder="For example: Place X, Place Y or Place Z" onChange={event => setHelpOptions(event.target.value)} />
+                <label htmlFor={`idea-unknowns-${group.id}`}>What is still undecided? <span>(optional)</span></label><textarea id={`idea-unknowns-${group.id}`} value={helpUnknowns} maxLength={500} placeholder="For example: Friday or Saturday; the spending plan is still open" onChange={event => setHelpUnknowns(event.target.value)} />
+                <button type="button" className="secondary" disabled={!descriptionParts || assistedDescription.length > 2000} onClick={applyDescriptionHelp}>Add these details to my idea</button>
+                {assistedDescription.length > 2000 && <p role="status">These details would exceed 2,000 characters. Shorten your idea or these answers before adding them; nothing has been removed.</p>}
+              </fieldset>
+            </details>
+            {!objective.trim() && <div className="ke-wizard-examples"><span>Or start with an example</span>{['Compare three restaurants for dinner on Friday or Saturday.', 'Choose between a coastal or mountain weekend trip.', 'Compare two shared purchases and decide which fits the group.'].map(example => <button type="button" key={example} className="secondary"
+              disabled={busy || !!pendingKey || checkingRequest || !requestLookupAvailable} onClick={() => setObjective(example)}>{example}</button>)}</div>}
             <div className="ke-wizard-actions"><button type="button" className="ke-icon-action" disabled={busy || checkingRequest || !requestLookupAvailable || !objective.trim() || !!pendingKey}
               onClick={() => void action(() => draftObjective(objective))}>Continue with AI<PageIcon name="ArrowRight" /></button>
               {draft && !pendingKey && <button type="button" className="secondary" disabled={busy} onClick={() => setStep(draft.clarificationQuestions.length ? 'questions' : 'review')}>Continue the saved draft</button>}</div>
-            {!objective.trim() && <p className="ke-wizard-help">Tell us what your group wants to decide to continue.</p>}
+            {!objective.trim() && <p className="ke-wizard-help">Describe the decision above, or use “Help me describe my idea” to get started.</p>}
           </div>}
           {step === 'questions' && draft && !pendingKey && <div className="ke-wizard-step">
             <article className="ke-wizard-starting-point"><span className="ke-wizard-eyebrow">Your starting point · saved</span><h3>{draft.frame.title}</h3><p>{draft.frame.objective}</p>
@@ -261,7 +286,7 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
             {!answers[questionIndex]?.trim() && <p className="ke-wizard-help">Answer what you know or choose a help option to continue.</p>}
           </div>}
           {step === 'review' && draft && <div className="ke-wizard-step">
-            <div className="ke-wizard-ai-note"><strong>Here’s what your group will review.</strong><p>Check the choices below. Creating the decision starts your group’s review; everyone still confirms their own needs and approvals.</p></div>
+            <div className="ke-wizard-ai-note"><strong>Here’s what your group will review.</strong><p>Check the choices below. Creating the decision starts your group’s review. Next, each person adds their needs privately and reviews the interpretation; everyone approves proposals for themselves.</p></div>
             <p className="ke-wizard-help">Required: resolve all follow-up questions, save any wording changes, and tick the review confirmation for this saved draft. The saved-request check must finish before Create decision is enabled.</p>
             <article className="ke-wizard-preview"><h3>{draft.frame.title}</h3><p>{draft.frame.objective}</p><p className="ke-wizard-description">{draft.frame.description}</p>
               <h4>Choices to explore</h4><ul>{draft.frame.variables.map(variable => <li key={variable.id}>{variableText(variable, draft.frame)}</li>)}</ul>
