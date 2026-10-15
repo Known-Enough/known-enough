@@ -20,3 +20,5 @@ Latest FF03 question-boundary publication: [receipt](../../../review-artifacts/F
 FF04 deletion published: [receipt](../../../review-artifacts/FF/deletion-publication.json). Organizer confirmation and server-enforced logical removal; history retained, no item deleted by A. Runtime/frontend/control successful, no tests/model/signup calls. A claim released; user manual acceptance pending.
 
 Latest FF03 literal protocol published/sourceaf21299/API1c867d50/worker43e91222, runtime38792166599/enable38792310374 SUCCESS. Frontend unchanged/Amplify101. [Receipt](../../../review-artifacts/FF/literal-protocol-publication.json). No tests/provider probes; manual acceptance pending and A claim released. No new CloudShell setup.
+
+Latest FF03 logging: [guide](../../../debugging-decision-drafts.md), [receipt](../../../review-artifacts/FF/detailed-logging-publication.json). Sourcedf940b8/APIc59a9849/worker00275cda published; no tests/AI probes. Exact new-request field/correlation proof awaits user manual attempt; drafting bug stays open. A logging claim released.

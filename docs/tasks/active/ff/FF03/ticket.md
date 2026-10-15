@@ -1,6 +1,6 @@
 # FF03 — Unsupported AI follow-up draft and confusing recovery UI
 
-Status: IN_PROGRESS / A — detailed diagnostic logging after repeated live failure
+Status: DETAILED LOGGING PUBLISHED / draft-generation defect OPEN; new manual attempt pending; A claim released
 Scheduling: preserve the current active claim and one implementation writer. This overlaps FIX01's public-draft lifecycle: B should correlate these reports with the current FIX01 repair first, without starting a parallel claim. If FIX01 resolves the same defect, link its actual evidence here instead of duplicating work; otherwise take this bounded follow-up sequentially.
 
 ## Observed report
@@ -60,3 +60,5 @@ Repair: replace architect tool literal objects (a permissive ten-type union with
 2026-10-15 literal repair published/sourceaf21299/runtime38792166599 SUCCESS/API1c867d50/worker43e91222; enable38792310374 SUCCESS/same-source/TOTAL unchanged/synthetic consent required. Frontend remains compatible56a7a9a/Amplify101; no UI files changed. No tests/model/signup calls. [Receipt](../../../../review-artifacts/FF/literal-protocol-publication.json). A claim released; user manual initial-draft acceptance pending. Historical malformed field remains unknown; no false live PASS.
 
 2026-10-15 logging continuation: user reports repeated failure/reference8689ef94-b9ba-4887-85bf-2d4d344dd95d. Read-only38792952801 shows recent VARIABLES/OTHER category failures; old records have no exact field detail/reference linkage. Implement bounded safe validation paths/codes/types/unexpected known fields, server-generated HTTP reference propagation, source/runtime lifecycle/provider completion/token/stop metadata, final HTTP result, and own-GitHub UUID-filtered reader with readable job summary. No raw values, input/output, secrets, identities or framework error text; unknown field names masked. Reader validates scope, bounds pagination/output and returns failure for unavailable reads. [Debug guide](../../../../debugging-decision-drafts.md). No tests/model probes; no functional success inferred. Compatible publication pending.
+
+2026-10-15T20:32:38.552909+00:00 logging publication complete/sourcedf940b8/runtime38802422173 SUCCESS/APIc59a9849/worker00275cda and enable38802600731 SUCCESS. [Receipt](../../../../review-artifacts/FF/detailed-logging-publication.json), [debug guide](../../../../debugging-decision-drafts.md). No tests/model calls or synthetic failing request by A. Actual user failure with new field-level logging is pending; old exact malformed fields remain unknown. Reader38802199759 read successfully/zero matches, not a functional or correlation PASS. A bounded logging claim released; root bug remains open.

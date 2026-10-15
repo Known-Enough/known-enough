@@ -1,0 +1,112 @@
+{
+  "result": "DETAILED_DRAFT_LOGGING_PUBLISHED_MANUAL_ATTEMPT_PENDING",
+  "source": "df940b85b79e3b93c7facc061ccec44a64756a3a",
+  "utc": "2026-10-15T20:32:38.552909+00:00",
+  "changes": [
+    "Server-generated UUID matches browser error reference and request-scoped model trace",
+    "Bounded schema paths/codes/expected-received types and allowlisted unexpected fields",
+    "Provider dispatch/completion/stop/token metadata, source SHA, elapsed time and HTTP outcome",
+    "Root diagnostic survives generic architect-call wrapper; no content/credential/identity logs",
+    "Own GitHub read-only reference lookup and readable summary; explicit missing/incomplete results"
+  ],
+  "checks": {
+    "typescriptCompilation": "COMPLETED",
+    "browserBuild": "COMPLETED",
+    "pythonSyntax": "COMPLETED",
+    "tests": "NOT_EXECUTED_USER_REQUEST",
+    "modelCalls": 0,
+    "signupCalls": 0
+  },
+  "runtime": {
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38802422173",
+    "api": {
+      "sourceSha": "df940b85b79e3b93c7facc061ccec44a64756a3a",
+      "result": "LIFECYCLE_OWNER_CODE_READBACK_PASS",
+      "backendSha256": "c59a9849e31085f02da3d15d343fd112ee85c1fb9618c65d12ad7bdfbf91670b",
+      "priorBackendSha256": "1c867d5001eca7b13e20459e0676560a7dd5744f661fc9b322348411b9696b35",
+      "environment": "UNCHANGED",
+      "migration": "UNCHANGED",
+      "modelCalls": 0,
+      "dataChanges": 0,
+      "managedOwnerProof": "PENDING"
+    },
+    "worker": {
+      "result": "WORKER_CODE_DISABLED_READBACK_PASS",
+      "providerCalls": 0,
+      "activation": "NOT_EXECUTED",
+      "codeWriteRequested": true,
+      "actualWorkerSha256": "43e9122261a2f0b6e1c2142b365c78a1f77b7016a46dc0b1f1f9a407b92cc3f2",
+      "expectedPriorWorkerSha256": "43e9122261a2f0b6e1c2142b365c78a1f77b7016a46dc0b1f1f9a407b92cc3f2",
+      "workerSha256": "00275cda97a5b4402a9ecea06401861d4f4b55b9aa6c229e81b9b426c15e65b6",
+      "sourceSha": "df940b85b79e3b93c7facc061ccec44a64756a3a",
+      "schedule": "DISABLED"
+    },
+    "sourceTransition": {
+      "sourceSha": "df940b85b79e3b93c7facc061ccec44a64756a3a",
+      "result": "JOB_SOURCE_DISABLED_READBACK_PASS",
+      "writeRequested": true,
+      "state": "DISABLED",
+      "active": 0,
+      "slots": 0,
+      "totalWrites": 0,
+      "totalsUnchangedDuringCheck": true,
+      "providerCalls": 0
+    }
+  },
+  "control": {
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38802600731",
+    "readback": {
+      "utc": "2026-10-15T20:31:24.816202+00:00",
+      "source": "df940b85b79e3b93c7facc061ccec44a64756a3a",
+      "phase": "enable",
+      "controlWrites": 1,
+      "dataWrites": 0,
+      "providerCalls": 0,
+      "controlSource": "df940b85b79e3b93c7facc061ccec44a64756a3a",
+      "priorEnabled": false,
+      "privateRetention": "ENABLED_SYNTHETIC_CONSENT_REQUIRED",
+      "enabled": true,
+      "totals": "UNCHANGED",
+      "result": "CONTROL_READBACK_PASS"
+    },
+    "syntheticPolicy": {
+      "source": "df940b85b79e3b93c7facc061ccec44a64756a3a",
+      "phase": "apply",
+      "policyWrites": 0,
+      "backupWrites": 0,
+      "accountWrites": 0,
+      "stampWrites": 0,
+      "totalWrites": 0,
+      "providerCalls": 0,
+      "result": "SYNTHETIC_PROCESSING_APPLY_PASS",
+      "rawConversationMs": 0,
+      "realPersonPolicy": "UNAPPROVED",
+      "participantConsent": "REQUIRED_IN_APP",
+      "utc": "2026-10-15T20:31:36.195116+00:00"
+    }
+  },
+  "reader": {
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38802199759",
+    "report": {
+      "source": "df940b85b79e3b93c7facc061ccec44a64756a3a",
+      "awsWrites": 0,
+      "providerCalls": 0,
+      "events": [],
+      "failures": [],
+      "windowStart": 1792092506129,
+      "windowEnd": 1792096106129,
+      "result": "DRAFT_DIAGNOSTICS_READ",
+      "windowComplete": true,
+      "requestReferenceCorrelation": "WINDOW_ONLY"
+    },
+    "interpretation": "Own-role bounded read succeeded with zero matching events in that window; no new-attempt/correlation/field-detail live proof inferred"
+  },
+  "frontend": "UNCHANGED_SOURCE56a7a9a_AMPLIFY101",
+  "limitations": [
+    "Draft-generation defect remains open; this change adds diagnostics",
+    "Old raw answers/field details/reference links cannot be reconstructed",
+    "New user manual attempt needed to establish actual field-level correlation; no agent probe was made",
+    "Unknown field names are masked; diagnostics are bounded and contain no raw model/private data"
+  ],
+  "manualNext": "Refresh, close the failed request and submit the same description once. Send its error reference so A or B can fetch the matching sanitized timeline and schema issues."
+}
