@@ -1,6 +1,6 @@
 # FF03 — Unsupported AI follow-up draft and confusing recovery UI
 
-Status: IN_PROGRESS / A structured question-boundary repair for B
+Status: PUBLISHED / structured question-boundary manual acceptance pending for B
 Scheduling: preserve the current active claim and one implementation writer. This overlaps FIX01's public-draft lifecycle: B should correlate these reports with the current FIX01 repair first, without starting a parallel claim. If FIX01 resolves the same defect, link its actual evidence here instead of duplicating work; otherwise take this bounded follow-up sequentially.
 
 ## Observed report
@@ -48,3 +48,5 @@ User-directed FIX01 continuation 2026-10-15T06:08:44.323908+00:00: overlapping r
 2026-10-15 onboarding published: frontend38782882735 SUCCESS/sourcecaf3829/Amplify99. Public `/?guide=decision` fictional example and optional real-wizard description scaffold available. Config readbackMATCH/0configuration/data/provider writes; APIcdeb3078 unchanged, no runtime publication or IAM changes. Build complete, tests not run per user instruction. [Receipt](../../../../review-artifacts/FF/onboarding-publication.json). A claim released; manual acceptance pending.
 
 2026-10-15 redundant-date-preference repair: unselected supplied alternatives no longer count as unanswered preference questions. Model tool questions carry purpose/target; model scalar/date allowedValues compile into strict public IN rules. Existing private questions are excluded from shared setup and candidate limits remain separately enforced. Visible date alternatives and one explicit legacy rebuild action added. Build/type compilation completed; no tests/provider calls. Compatible publication pending.
+
+2026-10-15 question repair published/source1508146: runtime38785052427 SUCCESS/API40bbf2c0/worker a04f547d; frontend38785325862 SUCCESS/Amplify100; enable38785321551 SUCCESS/same-source/TOTAL unchanged/synthetic policy unchanged/explicit consent required. Build and TypeScript compile completed, no tests/provider/signup calls. Existing supplied-date draft can be explicitly rebuilt from saved public context; do not answer on others’ behalf or replay an uncertain pending call. [Receipt](../../../../review-artifacts/FF/question-boundary-publication.json). A claim released/manual acceptance pending. No new CloudShell setup.

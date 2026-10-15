@@ -39,3 +39,9 @@ Start with “Let’s go to a restaurant” even if you do not know the day or c
 Open [the example walkthrough](https://main.d143q5ravxp5av.amplifyapp.com/?guide=decision) without signing in. Review four example steps, fictional participant perspectives, theme/mobile layout and Copy example link. These are explicit fictional illustrations, not real model results or account operations.
 
 In the actual group wizard, the example opens in a new tab; return to the original tab to retain the draft. Expand Help me describe my idea, enter the goal/options/undecided details and Add these details to my idea. Existing typed text must remain; overlength content must be refused without truncation. Continue with AI explicitly submits the real shared request. The next shared review/private participant steps should be understandable; no approval is automatic.
+
+## Unnecessary preferred-date question repair
+
+Refresh the real app and reopen the existing draft. If it still contains a historical preference question or unbounded date from the old output, select **Rebuild shared choices with AI** once. This explicitly uses the original idea and shared answers; do not enter anyone’s private preferences. It is not an automatic provider replay and is disabled while an unfinished request requires recovery.
+
+With the supplied dinner example, look for both 2026-10-23 and 2026-10-24 displayed as date choices and all three named restaurants. A winning date must remain unselected until participant input/review. Private-preference questions should not block shared review. Review and create only after checking the alternatives; each participant later confirms the frame and gives their own conditions privately. Missing actual shared bounds or candidate capacity can still require a real public-scope clarification. No agent model test has established this live outcome yet.

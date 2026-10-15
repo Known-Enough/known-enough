@@ -13,3 +13,5 @@ At the user's direction no tests, model calls or synthetic signups were performe
 No active A implementation claim or new B dispatch/schedule. Preserve current compatible runtime, private state, participant approval/consent and uncertain-request protection. Historical FF03 response fields remain unknown; no replay performed.
 
 Latest onboarding publication: [example flow](https://main.d143q5ravxp5av.amplifyapp.com/?guide=decision), frontend38782882735 SUCCESS/sourcecaf3829. A read-only fictional walkthrough plus optional real-wizard description help; existing backend/permissions unchanged, no setup or tests. [Receipt](../../../review-artifacts/FF/onboarding-publication.json). A claim released/manual review pending.
+
+Latest FF03 question-boundary publication: [receipt](../../../review-artifacts/FF/question-boundary-publication.json), source1508146/runtimeAPI40bbf2c0/frontendAmplify100. Private questions excluded from shared clarification; explicit finite date/scalar alternatives and legacy-draft rebuild. No tests/AI/signup calls, no new CloudShell setup. A claim released; user manual acceptance pending.
