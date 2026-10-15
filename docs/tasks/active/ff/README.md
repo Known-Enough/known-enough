@@ -2,6 +2,7 @@
 
 | Task | Purpose | Current status |
 | --- | --- | --- |
+| [FF10](FF10/README.md) | Compare logs/code/live pages and update outdated example guidance. | READY for B after FF09; no functional tests/deployment |
 | [FF09](FF09/README.md) | Example guidance only inside the create-decision modal. | READY for B after FF08; code only |
 | [FF08](FF08/README.md) | Joining preserves progress without repeat review; finished decisions remain finished. | READY for B after FF07; code only |
 | [FF07](FF07/README.md) | Member photos/profile viewing, resized uploads, light-mode names and brand navigation. | READY for B after FF06; code only |
