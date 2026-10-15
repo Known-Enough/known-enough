@@ -2,7 +2,7 @@
 
 | Task | Purpose | Current status |
 | --- | --- | --- |
-| [FF05](FF05/README.md) | Guided private-answer modal with direct option selection and optional AI notes. | CODE_READY / publication pending; no tests or AI calls |
+| [FF05](FF05/README.md) | Guided private-answer modal with direct option selection and optional AI notes. | PUBLISHED/sourcea3e665f/Amplify103; manual acceptance pending |
 | [FF01](FF01/README.md) | Compact account screens, password visibility and contextual recovery. | PUBLISHED; user manual acceptance pending |
 | [FF02](FF02/README.md) | Owner-only interpretation with explicit participant prerequisites/consent. | PUBLISHED; required permission now installed; user manual acceptance pending |
 | [FF04](FF04/README.md) | Organizer-confirmed deletion of saved drafts and decisions, with old-link/replay protection. | PUBLISHED/source56a7a9a/Amplify101; manual acceptance pending |
@@ -27,3 +27,5 @@ Latest FF03 logging: [guide](../../../debugging-decision-drafts.md), [receipt](.
 Latest generic FF03 repair: [receipt](../../../review-artifacts/FF/generic-resilience-publication.json), source1cff7b5/APIe17e2b25/worker5cc192b8/frontendAmplify102. Required fields derive from every supported variable/operator contract; strict compilation, safe diagnostics and confirmed-failure closure preserve drafts/answers/unknown outcomes. All three publication/control runs succeeded, no tests/model probes or new CloudShell setup. A claim released, manual acceptance pending.
 
 Latest omitted-group correction: [receipt](../../../review-artifacts/FF/unused-groups-correction-publication.json), source4288829/API01c44130/worker0100ee83, runtime38806235725/enable38806363325 SUCCESS. Source1cff7b5 had a confirmed new manual failure because it required omitted unused collections. Those collections are now optional; actual entry fields remain strict. Frontend1cff7b5/Amplify102 unchanged. A claim released, new manual acceptance pending; no tests/model calls or CloudShell setup.
+
+Latest FF05 private modal publication: [receipt](../../../review-artifacts/FF/private-answer-modal-publication.json), sourcea3e665f/API01767852/worker6de8cf66/Amplify103. Direct selections, optional favourites/AI notes and plain-language review use the existing guarded API command path. No model upgrade, tests/provider probes, participant actions or new CloudShell setup; A claim released, manual acceptance pending.

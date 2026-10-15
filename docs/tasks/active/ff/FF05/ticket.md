@@ -1,6 +1,6 @@
 # FF05 — Guided private answers in a modal
 
-Status: CODE_READY / A publication in progress; manual acceptance pending; no tests or AI calls.
+Status: PUBLISHED / user manual acceptance pending; A claim released; no tests or AI calls.
 
 ## Problem
 
@@ -17,3 +17,7 @@ Build/static compilation and compatible publication; no new tests/model probes p
 Implementation note: public finite-domain extraction is shared with the existing candidate builder (no scenario-specific options). Native direct answers use the existing commands route and guarded confirmation/invalidation transition in one transaction. Required input fields/options/identity are server-owned. NONE creates a private unresolved condition that remains visible and blocks readiness; an explicit replacement resolves earlier extra notes only at the owner’s choice. The existing boundary checker flagged the unchanged walkthrough’s `new URL` as an import; its same-origin link is now built by string concatenation, with the exact URL preserved.
 
 Static results: TypeScript compilation, frontend production build, changed-source lint and import/dependency boundary checks completed. The safe diagnostic reader compiles without being executed. Tests, signups, participant actions and model calls NOT_EXECUTED under the user’s manual-testing direction. Existing model remains Nova Lite v1; no model migration or new AWS role/route/storage is included.
+
+## Publication — 2026-10-15T21:32:12.165916+00:00
+
+Exact source `a3e665f7390ca14fde24150374f6b6a455ba9f0f`: [native API/worker38810143062](https://github.com/Known-Enough/known-enough/actions/runs/38810143062) SUCCESS/API`01767852`/worker`6de8cf66`; [enable38810286050](https://github.com/Known-Enough/known-enough/actions/runs/38810286050) SUCCESS/current source/TOTAL unchanged/individual consent required; [frontend38810285927](https://github.com/Known-Enough/known-enough/actions/runs/38810285927) SUCCESS/Amplify103/nine published files verified. Registration/profile/managed routes configuration matched with zero configuration writes. [Receipt](../../../../review-artifacts/FF/private-answer-modal-publication.json), [manual checklist](../manual-checklist.md), [debugging](../../../../debugging-decision-drafts.md). No participant records changed by A, no tests or provider calls, no new cloud installation. A claim released; functional acceptance remains unverified. Existing automated assertions for the former inline UI have not been refreshed or executed under the user’s manual-testing pause.
