@@ -2,6 +2,7 @@
 
 Only unfinished, currently applicable work belongs here. READY means it can be claimed under the shared queue; BLOCKED means its prerequisite is still missing. One implementation task runs at a time; preserved claims remain in their tickets.
 
+- [E2E live journeys](e2e/README.md): E2E01, one Luna agent and two users, after FF10/publication.
 - [ZZ product usability](zz/README.md): ZZ01 fixes the first screen and competing signup navigation.
 - [MVP readiness](mvp/README.md): MVP01 follows OPS03; inspect code and actual journeys, fix or prioritize essential gaps.
 - [Real online testing](live-testing/README.md): finish LIVE04 and collect ASSESS07 proof.
