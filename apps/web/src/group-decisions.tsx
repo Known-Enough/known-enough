@@ -17,8 +17,8 @@ function publicChoiceValues(variable: KE.PublicDecisionFrame['variables'][number
   return rule?.operator === 'IN' ? rule.values.map(value => valueText(value, variable)) : rule?.operator === 'COMPARE' ? [valueText(rule.value, variable)] : [];
 }
 const privateAnswer = 'Each participant should provide their own preferences, availability and spending limits privately later. Help us draft the shared choices now without assuming those personal answers.';
-export function GroupDecisions({ group, api, reload, openDecision }: { group: Groups.GroupSnapshot;
-  api: (path: string, init?: RequestInit) => Promise<Response>; reload: () => Promise<void>; openDecision: (id: string) => void; startCollapsed?: boolean }) {
+export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange }: { group: Groups.GroupSnapshot;
+  api: (path: string, init?: RequestInit) => Promise<Response>; reload: () => Promise<void>; openDecision: (id: string) => void; startCollapsed?: boolean; onDirtyChange?: (dirty: boolean) => void }) {
   const [starting, setStarting] = useState(false);
   const [step, setStep] = useState<'describe' | 'questions' | 'review'>('describe');
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -59,6 +59,7 @@ export function GroupDecisions({ group, api, reload, openDecision }: { group: Gr
   const [checkingRequest,setCheckingRequest] = useState(group.isOrganizer);
   const [requestLookupAvailable,setRequestLookupAvailable] = useState(false);
   const [requestState,setRequestState] = useState<{ state: string; canRelease: boolean; revision: number; progress?: string } | null>(null);
+  useEffect(() => { onDirtyChange?.(busy || !!pendingKey || dirty || !!objective.trim() || Object.values(answers).some(value => !!value.trim())); }, [busy, pendingKey, dirty, objective, answers, onDirtyChange]);
   const recoveryEpoch = useRef(0);
   const [recoveryGeneration,setRecoveryGeneration] = useState(0);
   const finishRequest = () => { pending.current = null; saveDraftRequest(group.id,null); setPendingKey(null); setRequestState(null); setCheckingRequest(true); setRequestLookupAvailable(false); setRecoveryGeneration(value => value + 1); };

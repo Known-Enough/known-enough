@@ -3759,3 +3759,9 @@ FIX01/FF resume 2026-10-15T17:29:23.761676+00:00: B synchronized clean main979de
 
 
 FF06 CODE_READY/B — compact overview and focused dialogs, owner-only summary/public progress, deterministic short draft titles and cosmetic organizer renames implemented. Static type/build/lint/boundaries576/whitespace PASS; no tests, AI, setup or deployment. New name route and coordinated reader publication required; installed capability unverified. Claim released; FF07 next per direct request. Details/manual walkthrough: docs/tasks/active/ff/FF06/ticket.md.
+
+
+FF07 claimed/B after synchronized FF06 6761bff. Scope existing profile/member/avatar/header UI, browser upload normalization, navigation dirty-state propagation and styles/B records only. FIX02 evidence shows authorized reads/PNG persistence previously passed; current list lacks image fetch entirely. No tests/AI/setup/deployment.
+
+
+FF07 CODE_READY/B — authenticated member avatars, browser photo normalization within existing128px/16KB PNG limit, scoped theme contrast, accessible logo navigation and propagated draft/pending guards. Static type/build/lint/boundaries580/whitespace PASS; no tests/AI/setup/deployment. Claim released; FF08 next. Manual steps in FF07 ticket.

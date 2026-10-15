@@ -1,3 +1,4 @@
+import { avatarUpload } from './avatar-upload';
 import { useEffect, useRef, useState } from 'react';
 import { Groups } from '@deal-table/contracts';
 import { LoadingSkeleton, PageIcon, ProfileIcon } from './app-chrome';
@@ -86,12 +87,12 @@ export function ProfileModal({ api, open, target, onClose, restoreFocus, onOwner
 
   async function upload(file: File | undefined) {
     if (!file || !owner || !profile || profile.version === null || busy) return;
-    if (file.type !== 'image/png' || file.size > 16384) { setNotice('Choose a PNG up to 128 × 128 pixels and 16 KB.'); return; }
-    const epoch = generation.current;
+    const epoch = generation.current; setBusy(true); setSaving(true); setNotice('Resizing your photo…');
     try {
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      if (generation.current === epoch) await update('/account/profile/image', { version: profile.version, bytesBase64: btoa(String.fromCharCode(...bytes)) }, true);
-    } catch { if (generation.current === epoch) setNotice('The picture could not be read. Choose another PNG.'); }
+      const bytesBase64 = await avatarUpload(file);
+      if (generation.current === epoch) await update('/account/profile/image', { version: profile.version, bytesBase64 }, true);
+    } catch (error) { if (generation.current === epoch) setNotice((error instanceof Error ? error.message : 'The picture could not be read.') + ' Your saved photo is kept.'); }
+    finally { if (generation.current === epoch) { setBusy(false); setSaving(false); } }
   }
 
   return <dialog ref={dialog} className="ke-profile-modal" aria-labelledby="profile-title" onCancel={event => { event.preventDefault(); close(); }}
@@ -118,9 +119,9 @@ export function ProfileModal({ api, open, target, onClose, restoreFocus, onOwner
             <textarea id="profile-description" value={description} maxLength={280} disabled={busy} onChange={event => setDescription(event.target.value)} />
             <div className="ke-profile-photo-editor">
               <button type="button" className="secondary ke-profile-change-photo" aria-describedby="profile-picture-help" disabled={busy} onClick={() => pictureInput.current?.click()}><PageIcon name="Camera" />Change photo</button>
-              <input ref={pictureInput} id="profile-picture" className="ke-profile-file-input" type="file" accept="image/png" disabled={busy} aria-describedby="profile-picture-help" onChange={event => { void upload(event.target.files?.[0]); event.target.value = ''; }} />
+              <input ref={pictureInput} id="profile-picture" className="ke-profile-file-input" type="file" accept="image/png,image/jpeg,image/webp" disabled={busy} aria-describedby="profile-picture-help" onChange={event => { void upload(event.target.files?.[0]); event.target.value = ''; }} />
               {profile.image && <button type="button" className="secondary ke-profile-remove-photo" disabled={busy} onClick={() => void update('/account/profile/image', { version: profile.version, bytesBase64: null }, true)}>Remove photo</button>}
-              <p id="profile-picture-help" className="ke-profile-helper">PNG · RGB/RGBA · up to 128 × 128 px · 16 KB max</p>
+              <p id="profile-picture-help" className="ke-profile-helper">PNG, JPEG or WebP · up to 20 MB · resized automatically to fit the saved avatar limit</p>
             </div>
             <div className="ke-profile-form-actions"><button type="submit" disabled={busy || !name.trim()}><PageIcon name="Check" />Save</button>
               <button type="button" className="secondary" disabled={busy} onClick={() => setEditing(false)}>Cancel</button></div>

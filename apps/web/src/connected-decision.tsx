@@ -62,7 +62,6 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
   useEffect(() => { if (detailStep) detailDialog.current?.showModal(); else detailDialog.current?.close(); }, [detailStep]);
   const [editingNeeds, setEditingNeeds] = useState(false);
   const [structuredDirty, setStructuredDirty] = useState(false);
-  useEffect(() => { onDirtyChange?.(!!text.trim() || structuredDirty); }, [text, structuredDirty, onDirtyChange]);
   const [reviewed, setReviewed] = useState(false);
   const [reviewedFrame, setReviewedFrame] = useState<string | null>(null);
   useEffect(() => { setReviewed(false); }, [owner?.draft?.draftId, snapshot.currentProposal?.proposalId]);
@@ -194,6 +193,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
   };
   const proposal = snapshot.currentProposal;
   const blocked = busy || pendingAction || !!interpretationRequest;
+  useEffect(() => { onDirtyChange?.(!!text.trim() || structuredDirty || pendingAction || !!interpretationRequest || busy); }, [text, structuredDirty, pendingAction, interpretationRequest, busy, onDirtyChange]);
   const describeCondition = (item: KE.AIConstraintDraft['proposedConstraints'][number]) => item.kind === 'PREFERENCE'
     ? `I prefer ${variables.find(variable => variable.id === item.preference.variableId)?.label ?? 'this choice'}: ${valueText(item.preference.value, variables.find(variable => variable.id === item.preference.variableId))}`
     : `${item.kind === 'HARD' ? 'Must work for me' : 'Ask me before changing'}: ${ruleText(item.rule, variables)}`;

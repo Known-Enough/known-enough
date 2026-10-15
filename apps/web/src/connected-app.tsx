@@ -120,7 +120,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
   }, [target, session, config, expire]);
   if (!session) return <AuthEntry config={config} direct={direct} onSession={value=>{sessionStorage.setItem('known-enough-cognito-session',JSON.stringify(value));setSession(value);setStatus('');const wanted=takeIntendedView();if(wanted)move(wanted,true);}} notice={status} callbackPending={callbackPending} />;
   return <main className={view.kind === 'group' ? 'ke-home ke-group-route' : view.kind === 'groups' ? 'ke-home ke-groups-dashboard' : 'ke-home'}>
-    <header className="ke-masthead"><Brand /><div className="ke-header-actions">
+    <header className="ke-masthead"><Brand onNavigate={() => move({ kind: 'groups' })} /><div className="ke-header-actions">
       <ThemeToggle />
       {session.kind === 'participant' ? <ProfileDrawer key={session.accessToken} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} signOut={signOut} /> : <button type="button" className="secondary" onClick={signOut}>Sign out</button>}
     </div>
@@ -142,7 +142,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
           onDirtyChange={value => { dirty.current = value; }} onQueued={receipt => { if (!owner) return; setTarget({ decisionId: snapshot.frame.decisionId, contextToken: snapshot.contextToken, semanticVersion: snapshot.semanticVersion, ownerParticipantId: owner.ownerParticipantId, expiresAt: receipt.expiresAt }); }} /></div>}
       </> : session.kind === 'display' ? <section className="ke-card"><h2>Shared screen</h2><p>Open a shared decision link from your group to show its progress. This screen cannot enter private needs or approve proposals.</p></section>
         : <GroupHome key={`${session.accessToken}:${view.kind === 'group' ? view.groupId : 'home'}:${invitationEpoch}`} {...(view.kind === 'group' ? { selectedGroupId: view.groupId } : {})}
-          api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} onOpenGroup={id => move({ kind: 'group', groupId: id })} onBack={() => move({ kind: 'groups' })}
+          api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} onOpenGroup={id => move({ kind: 'group', groupId: id })} onBack={() => move({ kind: 'groups' })} onDirtyChange={value => { dirty.current = value; }}
           openDecision={id => move({ kind: 'decision', decisionId: id, ...(view.kind === 'group' ? { groupId: view.groupId } : {}) })} />}
   </main>;
 }

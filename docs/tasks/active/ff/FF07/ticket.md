@@ -1,6 +1,6 @@
 # FF07 — Member photos, image sizing and header fixes
 
-Status: READY / unclaimed. Intended worker: B, after FF06; one task at a time.
+Status: CODE_READY / B; claim released. Publication/manual acceptance pending.
 
 ## Reported issues
 
@@ -23,3 +23,9 @@ Log prior findings, changed files, remaining issues and a short manual walkthrou
 ## User manual checklist
 
 Saved member photos appear; a member without one shows a clean initial fallback. Clicking a member shows permitted profile details. A large uploaded photo is resized and displays correctly after reopening. Failed uploads preserve the previous image. Names are readable in both themes. Clicking the logo returns to your own groups while respecting unsaved work.
+
+## B implementation checkpoint
+
+Prior FIX02 evidence demonstrated saved PNG/member-profile reads; source inspection found the member list always rendered an initial without fetching images. New MemberAvatar uses only that authenticated same-group read, cancels stale requests, clears old photos, crops circularly and falls back on absent/unavailable/broken images. Profile clicks retain the existing permitted modal. Browser uploads accept PNG/JPEG/WebP up to20MB, honor orientation, retain aspect ratio and normalize to PNG within the existing 128px/16KB server contract (stricter than the ticket's target maximum512px); progressively smaller output avoids broadening server validation. Decode/resize failures never remove the saved photo. Member/profile name theme styles are scoped. Logo uses accessible in-app navigation and propagated unsaved/unknown-request guards; no reload.
+
+Node24.21.0/npm11.19.0 typecheck, production build/bundle and lint/import boundaries580 PASS; whitespace PASS. No tests, AI, cloud setup or deployment. User walkthrough after separate publication: open members in both themes, compare saved photo versus initial fallback, open member profile, upload a large/oriented JPEG and reopen, try corrupt/unsupported input and verify the saved photo remains, then navigate with the logo while editing and while a request is unresolved. Actual rendering/persistence remains manually unverified.

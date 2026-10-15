@@ -62,8 +62,9 @@ export function ThemeToggle() {
   </button>;
 }
 
-export function Brand() {
-  return <span className="ke-brand"><img src="/logo.png" alt="" width="38" height="38" decoding="async" /><span>Known Enough</span></span>;
+export function Brand({ onNavigate }: { onNavigate?: () => void } = {}) {
+  const content = <span className="ke-brand"><img src="/logo.png" alt="" width="38" height="38" decoding="async" /><span>Known Enough</span></span>;
+  return <a className="ke-brand-link" href="/" aria-label="Known Enough — your groups" onClick={event => { if (onNavigate && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onNavigate(); } }}>{content}</a>;
 }
 
 type LoadingKind = 'auth' | 'groups' | 'group' | 'decision' | 'profile' | 'example' | 'inline';

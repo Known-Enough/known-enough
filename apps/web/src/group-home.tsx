@@ -1,3 +1,4 @@
+import { MemberAvatar } from './member-avatar';
 import { RenameAction } from './rename-action';
 import { useEffect, useRef, useState } from 'react';
 import { GroupDecisions } from './group-decisions';
@@ -5,8 +6,10 @@ import { Groups } from '@deal-table/contracts';
 import { GroupIcon, LoadingSkeleton, PageIcon } from './app-chrome';
 import { ProfileModal, type ProfileTarget } from './profile-drawer';
 type LoadFailure = { title: string; description: string; reference: string | null };
-export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onBack }: { api: (path: string, init?: RequestInit) => Promise<Response>;
-  openDecision: (id: string) => void; selectedGroupId?: string; onOpenGroup: (id: string) => void; onBack: () => void }) {
+export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onBack, onDirtyChange }: { api: (path: string, init?: RequestInit) => Promise<Response>;
+  openDecision: (id: string) => void; selectedGroupId?: string; onOpenGroup: (id: string) => void; onBack: () => void; onDirtyChange?: (dirty: boolean) => void }) {
+  const [childDirty, setChildDirty] = useState(false);
+  const [avatarRevision, setAvatarRevision] = useState(0);
   const [available, setAvailable] = useState(false);
   const [checking, setChecking] = useState(true);
   const [account, setAccount] = useState<ReturnType<typeof Groups.AccountSnapshot.parse> | null>(null);
@@ -23,6 +26,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
   const [groupName, setGroupName] = useState('');
   const [creating, setCreating] = useState(false);
   const [email, setEmail] = useState(''); const [link, setLink] = useState(''); const [replace, setReplace] = useState(false);
+  useEffect(() => { onDirtyChange?.(childDirty || !!groupName.trim() || !!email.trim()); }, [childDirty, groupName, email, onDirtyChange]);
   const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false);
   const [loadFailure, setLoadFailure] = useState<LoadFailure | null>(null);
   useEffect(() => { if (activeMenuGroupId) menuActionRef.current?.focus(); }, [activeMenuGroupId]);
@@ -289,7 +293,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
               <ul className="ke-member-list">{group.members.map(member => <li key={member.id}>
                 <button type="button" className="ke-member-profile-trigger" aria-label={`View ${member.displayName}'s profile`}
                   onClick={event => { profileTriggerRef.current = event.currentTarget; setProfileTarget({ kind: 'member', groupId: group.id, memberId: member.id }); }}>
-                  <span className="ke-member-avatar" aria-hidden="true">{member.displayName.slice(0, 1).toUpperCase()}</span>
+                  <MemberAvatar api={api} groupId={group.id} memberId={member.id} name={member.displayName} revision={avatarRevision} />
                   <span className="ke-member-name">{member.displayName}{member.isOrganizer && <span className="ke-member-role">Organizer</span>}</span>
                 </button>
                 {group.isOrganizer && !member.isOrganizer && <button type="button" className="secondary ke-remove-member" disabled={busy}
@@ -300,7 +304,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
               </details>
             </section>
 
-            <GroupDecisions group={group} api={api} reload={load} openDecision={openDecision} startCollapsed />
+            <GroupDecisions group={group} api={api} reload={load} openDecision={openDecision} onDirtyChange={setChildDirty} startCollapsed />
 
             {group.isOrganizer && <section className="ke-card ke-group-panel ke-invitations-panel" aria-labelledby={`invitations-heading-${group.id}`}>
               <header className="ke-panel-heading"><div><h2 id={`invitations-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="Mail" /></span><span>Invitations</span></h2>
@@ -328,7 +332,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       })}
     </>}
     </fieldset>
-    {profileTarget && <ProfileModal api={api} open target={profileTarget} onClose={() => setProfileTarget(null)} restoreFocus={() => profileTriggerRef.current?.focus()} />}
+    {profileTarget && <ProfileModal api={api} open target={profileTarget} onClose={() => { setProfileTarget(null); setAvatarRevision(value => value + 1); }} restoreFocus={() => profileTriggerRef.current?.focus()} />}
     {(checking || busy) && <LoadingSkeleton kind="inline" label={checking ? 'Refreshing account and groups' : 'Updating the group'} />}
     {!checking && !busy && notice && <p role="status">{notice}</p>}
   </section>;

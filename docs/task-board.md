@@ -1,3 +1,5 @@
+FF07 B checkpoint: CODE_READY; publication/manual acceptance pending. [Ticket](tasks/active/ff/FF07/ticket.md).
+
 FF06 B checkpoint: CODE_READY; code/static checks only, publication/manual acceptance pending. See [ticket](tasks/active/ff/FF06/ticket.md). Direct user request continues FF07→FF08→FF09 sequentially.
 
 2026-10-15 E2E01 — [Two-user real-app journeys](tasks/active/e2e/E2E01/ticket.md) created after FF10/publication: exactly one Luna agent, two isolated user sessions, at least ten distinct scenarios, private local credentials, sanitized screenshots/error/log evidence and defect follow-ups. Scoped live-test/AI authority applies when taken; no tests started now, no new monitor or deployment. QUEUED/unclaimed; report actual model/version and separate execution completion from product PASS.
