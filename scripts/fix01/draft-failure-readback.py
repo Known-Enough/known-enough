@@ -9,7 +9,7 @@ from pathlib import Path
 ACCOUNT = '092954139775'
 ROLE = 'KnownEnoughGithubStagingInspector'
 UUID = re.compile(r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$')
-EVENTS = {'FIX01_PUBLIC_DRAFT_FAILURE', 'FIX01_PUBLIC_DRAFT_DIAGNOSTIC', 'PUBLIC_DRAFT_HTTP_RESULT'}
+EVENTS = {'FIX01_PUBLIC_DRAFT_FAILURE', 'FIX01_PUBLIC_DRAFT_DIAGNOSTIC', 'PUBLIC_DRAFT_HTTP_RESULT', 'PRIVATE_ANSWERS_HTTP_RESULT'}
 TYPES = {'string', 'number', 'boolean', 'object', 'array', 'null', 'missing', 'integer', 'int', 'unknown'}
 CODES = {'invalid_type', 'invalid_value', 'invalid_union', 'unrecognized_keys', 'too_small', 'too_big', 'invalid_format', 'not_multiple_of', 'custom'}
 PHASES = {'REQUEST_STARTED', 'MODEL_VALIDATION_FAILURE', 'PROVIDER_DISPATCHED', 'PROVIDER_COMPLETED',

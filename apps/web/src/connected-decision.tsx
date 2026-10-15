@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { KnownEnough as KE } from '@deal-table/contracts';
+import { KnownEnough as KE, publicChoiceOptions } from '@deal-table/contracts';
+import { PrivateAnswersModal } from './private-answers-modal';
 import { backgroundRequest, submitBackgroundRequest, type BackgroundReceipt } from './background-negotiation';
 
 class DecisionRequestError extends Error {
@@ -48,10 +49,6 @@ export function ruleText(rule: KE.ValidationRule, variables: Variable[]): string
     case 'IMPLIES': return `If ${atom(rule.antecedent)}, then ${atom(rule.consequent)}`;
   }
 }
-function preferenceText(preference: KE.PreferenceCriterion, variables: Variable[]): string {
-  const variable = variables.find(item => item.id === preference.variableId);
-  return `${variable?.label ?? preference.variableId}: ${valueText(preference.value, variable)} (preference cost ${preference.cost})`;
-}
 
 export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNegotiation = false, onQueued, onDirtyChange, staged = false }: {
   snapshot: KE.PublicDecisionSnapshot; owner: KE.OwnerDecisionSnapshot | null;
@@ -61,12 +58,11 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
   const [text, setText] = useState('');
   const [syntheticProcessing, setSyntheticProcessing] = useState(false);
   const [editingNeeds, setEditingNeeds] = useState(false);
-  useEffect(() => { onDirtyChange?.(!!text.trim()); }, [text, onDirtyChange]);
-  const [selected, setSelected] = useState<string[]>([]);
-  const [empty, setEmpty] = useState(false);
+  const [structuredDirty, setStructuredDirty] = useState(false);
+  useEffect(() => { onDirtyChange?.(!!text.trim() || structuredDirty); }, [text, structuredDirty, onDirtyChange]);
   const [reviewed, setReviewed] = useState(false);
   const [reviewedFrame, setReviewedFrame] = useState<string | null>(null);
-  useEffect(() => { setSelected([]); setEmpty(false); setReviewed(false); }, [owner?.draft?.draftId, snapshot.currentProposal?.proposalId]);
+  useEffect(() => { setReviewed(false); }, [owner?.draft?.draftId, snapshot.currentProposal?.proposalId]);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
   const [awaitingJob, setAwaitingJob] = useState(false);
@@ -77,10 +73,12 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
   const decisionId = snapshot.frame.decisionId;
   const interpretationKey = 'ke-owner-request:' + decisionId + ':' + (owner?.ownerParticipantId ?? 'display') + ':' + snapshot.contextToken;
   const [interpretationRequest, setInterpretationRequest] = useState<string | null>(() => typeof sessionStorage === 'undefined' ? null : sessionStorage.getItem(interpretationKey));
+  const interpretationStorageKey = useRef(interpretationKey);
   const interpretationGuard = useRef(false);
   const [interpretationRelease, setInterpretationRelease] = useState<number | null>(null);
-  const clearInterpretation = () => { sessionStorage.removeItem(interpretationKey); setInterpretationRequest(null); setInterpretationRelease(null); };
+  const clearInterpretation = () => { sessionStorage.removeItem(interpretationStorageKey.current); setInterpretationRequest(null); setInterpretationRelease(null); };
   const frameReviewKey = `${snapshot.contextToken}:${snapshot.frame.frameVersion}`;
+  useEffect(() => { setSyntheticProcessing(false); }, [frameReviewKey]);
   const variables: Variable[] = [...snapshot.frame.variables, ...(owner?.privateVariables ?? [])];
   const allConfirmed = snapshot.frame.requiredParticipantIds.every(id => snapshot.frameConfirmations.some(item => item.participantId === id));
   const confirmed = owner && snapshot.frameConfirmations.some(item => item.participantId === owner.ownerParticipantId);
@@ -96,7 +94,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
     return result;
   };
   const command = async (type: string, payload: unknown) => {
-    if (!owner || commandGuard.current) return;
+    if (!owner || commandGuard.current) return false;
     commandGuard.current = true; setBusy(true); setNotice('');
     if (!pending.current) {
       const id = crypto.randomUUID();
@@ -106,14 +104,20 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
     }
     try {
       KE.DecisionCommandResult.parse(await request(`/decisions/${decisionId}/commands`, pending.current.body));
-      pending.current = null; setPendingAction(false); setSelected([]); setEmpty(false); setReviewed(false);
-      await refresh(); setNotice(type === 'CONFIRM_FRAME' ? 'Your shared-frame confirmation is saved.' : type === 'CONFIRM_CONSTRAINTS' ? 'Your selected private conditions are confirmed.' : 'Your choice is recorded.');
+      pending.current = null; setPendingAction(false); setReviewed(false);
+      await refresh(); setNotice(type === 'CONFIRM_FRAME' ? 'Your confirmation of what we’re deciding is saved.' : type === 'CONFIRM_PRIVATE_ANSWERS' ? 'Your private answers are saved. Any unanswered needs still require clarification.' : type === 'CONFIRM_CONSTRAINTS' ? 'Your selected private conditions are confirmed.' : 'Your choice is recorded.');
+      if (type === 'CONFIRM_PRIVATE_ANSWERS') { setText(''); setStructuredDirty(false); }
+      return true;
     } catch (error) {
       if (error instanceof DecisionRequestError && error.status === 409) {
         pending.current = null; setPendingAction(false); setReviewedFrame(null); setReviewed(false);
         try { await refresh(); setNotice('The decision changed while you were reviewing it. The latest version is loaded; review and confirm it again.'); }
         catch { setNotice('The decision changed. Refresh its current state before confirming again.'); }
+      } else if (error instanceof DecisionRequestError && [400,401,403,404,422].includes(error.status)) {
+        pending.current = null; setPendingAction(false);
+        setNotice((error.status === 401 ? 'Your session expired. Sign in again; your unsaved answers are kept in this window.' : 'These answers could not be saved. Your selections are kept. Review the current choices and your access before trying again.') + (error.reference ? ` Reference: ${error.reference}.` : ''));
       } else setNotice('The action was rejected or its result is unknown. Retry the same action, or refresh to review current state.');
+      return false;
     }
     finally { commandGuard.current = false; setBusy(false); }
   };
@@ -123,7 +127,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
     setInterpretationRelease(value.interpretation?.canRelease === true && Number.isSafeInteger(value.interpretation.revision) ? Number(value.interpretation.revision) : null);
     if (value.draft) {
       KE.AIConstraintDraft.parse(value.draft); await refresh(); clearInterpretation();
-      setText(''); setSelected([]); setEmpty(false); setReviewed(false); setNotice('Your interpretation is saved. Review the proposed conditions before confirming them.');
+      setText(''); setReviewed(false); setNotice('AI suggestions for your notes are saved. Review them before including any; your selected options are unchanged.');
     } else if (value.interpretation?.state === 'FAILED') {
       clearInterpretation(); setNotice('No new interpretation was saved. Your text and earlier saved conditions are kept. You can edit and try again.');
     } else if (value.interpretation?.state === 'NOT_SUBMITTED') {
@@ -152,7 +156,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
   const interpret = async () => {
     if (!allConfirmed || !confirmed || !text.trim() || !syntheticProcessing || interpretationRequest || interpretationGuard.current) return;
     interpretationGuard.current = true; setBusy(true); setNotice('');
-    const requestId = crypto.randomUUID(); sessionStorage.setItem(interpretationKey, requestId); setInterpretationRequest(requestId);
+    const requestId = crypto.randomUUID(); interpretationStorageKey.current = interpretationKey; sessionStorage.setItem(interpretationKey, requestId); setInterpretationRequest(requestId);
     try {
       await acceptInterpretation(await request(`/decisions/${decisionId}/owner-conversation/draft`, { requestId, processingConsent: 'SYNTHETIC_TEST', messages: [{ role: 'owner', text }] }));
     } catch (error) {
@@ -186,53 +190,46 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
     finally { setBusy(false); }
   };
   const proposal = snapshot.currentProposal;
-  const draft = owner?.draft;
   const blocked = busy || pendingAction || !!interpretationRequest;
+  const describeCondition = (item: KE.AIConstraintDraft['proposedConstraints'][number]) => item.kind === 'PREFERENCE'
+    ? `I prefer ${variables.find(variable => variable.id === item.preference.variableId)?.label ?? 'this choice'}: ${valueText(item.preference.value, variables.find(variable => variable.id === item.preference.variableId))}`
+    : `${item.kind === 'HARD' ? 'Must work for me' : 'Ask me before changing'}: ${ruleText(item.rule, variables)}`;
+  const recoveryControls = <>
+    {interpretationRequest && <div className="ke-wizard-recovery" role="status"><p>Your previous AI notes request needs a status check. Your selections and saved conditions are kept.</p><button type="button" disabled={busy} onClick={() => void checkInterpretation()}>Check AI notes result</button>{interpretationRelease !== null && <button type="button" disabled={busy} onClick={() => void closeInterpretation()}>Close AI notes request</button>}</div>}
+    {pendingAction && <div className="ke-wizard-recovery"><p>The previous action needs a result check. Do not submit different answers yet.</p><button type="button" disabled={busy} onClick={() => void (pending.current!.type === 'REQUEST_NEGOTIATION' ? generate() : command(pending.current!.type, {}))}>Retry the same action</button>
+      <button type="button" disabled={busy} onClick={() => { void (async () => { setBusy(true); try { await refresh(); pending.current = null; setPendingAction(false); setReviewed(false); setReviewedFrame(null); setNotice('The latest decision is loaded. Review it before confirming again.'); } catch { setNotice('The latest state could not be loaded. Your pending action is kept; try refreshing again.'); } finally { setBusy(false); } })(); }}>Refresh and review current state</button></div>}
+  </>;
   return <>
-    <section className="ke-card"><h2>Shared frame</h2><p>{snapshot.frame.objective}</p>
-      <p>{snapshot.frame.description}</p>
-      <p>Review these current shared terms, the people, choices and rules before confirming them.</p>
-      <h3>Participants and approvals</h3>
-      <ul aria-label="Frame participants and approvals">{snapshot.frame.participants.map(person => <li key={person.id}>{person.displayName}: {person.requiredForApproval ? 'required approver' : 'optional participant'} · {snapshot.frameConfirmations.some(item => item.participantId === person.id) ? 'frame confirmed' : 'frame review pending'}</li>)}</ul>
-      <h3>Shared topics and options</h3>
-      <ul aria-label="Shared frame options and types">{snapshot.frame.variables.map(variable => <li key={variable.id}>{variableText(variable, snapshot.frame)}</li>)}</ul>
-      <h3>Public decision rules</h3>
-      {snapshot.frame.rules.length ? <ul aria-label="Public decision rules">{snapshot.frame.rules.map(rule => <li key={rule.id}>{ruleText(rule, snapshot.frame.variables)}</li>)}</ul> : <p>No public decision rules were declared.</p>}
-      <p>{snapshot.frame.requiredParticipantIds.filter(id => snapshot.frameConfirmations.some(item => item.participantId === id)).length} of {snapshot.frame.requiredParticipantIds.length} required frame confirmations.</p>
-      {owner && confirmed && <p>Your confirmation of this shared frame is saved.</p>}
-      {!allConfirmed && <p>Waiting for {snapshot.frame.participants.filter(person => snapshot.frame.requiredParticipantIds.includes(person.id) && !snapshot.frameConfirmations.some(item => item.participantId === person.id)).map(person => person.displayName).join(', ')} to confirm the current shared frame. Each person must review it from their own account before private interpretation can begin.</p>}
+    <section className="ke-card ke-shared-decision"><h2>What we’re deciding</h2><p>{snapshot.frame.description || snapshot.frame.objective}</p>
+      {snapshot.frame.description && snapshot.frame.description !== snapshot.frame.objective && <details><summary>Original idea and shared details</summary><p className="ke-shared-original">{snapshot.frame.objective}</p></details>}
+      <p>Review the choices, people and shared rules before confirming.</p>
+      <h3>People reviewing this decision</h3>
+      <ul aria-label="Frame participants and approvals">{snapshot.frame.participants.map(person => <li key={person.id}>{person.displayName}: {person.requiredForApproval ? 'approval needed' : 'optional participant'} · {snapshot.frameConfirmations.some(item => item.participantId === person.id) ? 'review confirmed' : 'review pending'}</li>)}</ul>
+      <h3>The choices</h3>
+      <ul className="ke-shared-choice-list" aria-label="Shared frame options and types">{snapshot.frame.variables.map(variable => {
+        const options = publicChoiceOptions(snapshot.frame, variable);
+        return <li key={variable.id}><strong>{variable.label}</strong>{options ? <span>{options.map(value => value.type === 'DATE' ? new Intl.DateTimeFormat('en', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(value.date + 'T00:00:00Z')) : valueText(value, variable)).join(' · ')}</span> : <span>{variableText(variable, snapshot.frame)}</span>}</li>;
+      })}</ul>
+      <details className="ke-shared-rules"><summary>Shared rules ({snapshot.frame.rules.length})</summary>
+      {snapshot.frame.rules.length ? <ul aria-label="Public decision rules">{snapshot.frame.rules.map(rule => <li key={rule.id}>{ruleText(rule, snapshot.frame.variables)}</li>)}</ul> : <p>No additional shared rules.</p>}</details>
+      <p>{snapshot.frame.requiredParticipantIds.filter(id => snapshot.frameConfirmations.some(item => item.participantId === id)).length} of {snapshot.frame.requiredParticipantIds.length} people have confirmed these choices.</p>
+      {owner && confirmed && <p>You have confirmed what we’re deciding.</p>}
+      {!allConfirmed && <p>Waiting for {snapshot.frame.participants.filter(person => snapshot.frame.requiredParticipantIds.includes(person.id) && !snapshot.frameConfirmations.some(item => item.participantId === person.id)).map(person => person.displayName).join(', ')} to confirm. Each person must review these choices in their own account before private answers can be saved.</p>}
       {owner && !confirmed && <><label><input type="checkbox" disabled={blocked} checked={reviewedFrame === frameReviewKey}
-        onChange={event => setReviewedFrame(event.target.checked ? frameReviewKey : null)} />I reviewed this frame version, its options and public rules.</label>
-        <button disabled={blocked || reviewedFrame !== frameReviewKey} onClick={() => void command('CONFIRM_FRAME', { frameVersion: snapshot.frame.frameVersion })}>Confirm shared frame</button></>}
+        onChange={event => setReviewedFrame(event.target.checked ? frameReviewKey : null)} />I reviewed these choices, the people and the shared rules.</label>
+        <button disabled={blocked || reviewedFrame !== frameReviewKey} onClick={() => void command('CONFIRM_FRAME', { frameVersion: snapshot.frame.frameVersion })}>Confirm these shared choices</button></>}
     </section>
-    {owner && (!staged || allConfirmed) && <section className="ke-card"><h2>Your private conditions</h2>
-      <p>Known Enough and its authorized AI process these inputs. Other participants receive only shared facts and disclosures you authorize. Outcomes may imply information. Use synthetic data here.</p>
-      {(!staged || allConfirmed && (owner.ownInputReadiness !== 'READY' || !!draft || editingNeeds)) && <>
-      <label htmlFor="connected-owner-text">Explain your limits and preferences privately</label>
-      <textarea id="connected-owner-text" value={text} onChange={event => setText(event.target.value)} maxLength={2000} disabled={blocked || !allConfirmed || !confirmed} />
-      <small>{text.length} / 2,000 characters · visible only to you and authorized AI processing</small>
-      <label><input type="checkbox" checked={syntheticProcessing} disabled={blocked || !allConfirmed || !confirmed} onChange={event => setSyntheticProcessing(event.target.checked)} />These are synthetic test conditions. I agree to their processing by Known Enough and its AI.</label>
-      <p className="ke-help" id="owner-interpretation-requirements">{!allConfirmed ? 'Waiting for the shared frame confirmations listed above.' : !confirmed ? 'Review and confirm the shared frame above before adding your conditions.' : !syntheticProcessing ? 'Confirm that you are using fictional test conditions before continuing.' : !text.trim() ? 'Add your limits and preferences above, then ask AI to interpret them.' : 'AI will suggest private conditions for you to review. Nothing is confirmed automatically.'}</p>
-      <button aria-describedby="owner-interpretation-requirements" disabled={blocked || !allConfirmed || !confirmed || !text.trim() || !syntheticProcessing} onClick={() => void interpret()}>Interpret my conditions</button>
-      {!allConfirmed && <p>Everyone must confirm the current frame first.</p>}
-      {owner.ownInputReadiness === 'NEEDS_CLARIFICATION' && <p>An unresolved condition is blocking exploration. Clarify it in your private conversation before continuing.</p>}
-      <ul>{owner.confirmedConstraints.filter(item => item.status === 'ACTIVE').map(item => <li key={`${item.constraintId}:${item.constraintVersion}`}>
-        {item.kind.toLowerCase()}: {item.kind === 'PREFERENCE' ? preferenceText(item.preference, variables) : ruleText(item.rule, variables)}
-      </li>)}</ul>
-      {draft && <div><h3>Review the interpretation</h3>
-        {draft.proposedConstraints.map(item => <label key={item.constraintId}><input type="checkbox" disabled={blocked} checked={selected.includes(item.constraintId)}
-          onChange={event => setSelected(current => event.target.checked ? [...current, item.constraintId] : current.filter(id => id !== item.constraintId))} />
-          {item.kind.toLowerCase()}: {item.kind === 'PREFERENCE' ? preferenceText(item.preference, variables) : ruleText(item.rule, variables)}</label>)}
-        {draft.unsupportedConditions.map(item => <p key={item.id}>Needs clarification: {item.clarificationQuestion}</p>)}
-        {!draft.proposedConstraints.length && <label><input type="checkbox" disabled={blocked} checked={empty} onChange={event => setEmpty(event.target.checked)} />I confirm that I have no additional conditions.</label>}
-        <button disabled={blocked || !allConfirmed || !(selected.length || empty)} onClick={() => void command('CONFIRM_CONSTRAINTS', {
-          draftId: draft.draftId, draftVersion: draft.draftVersion, constraintIds: selected })}>Confirm selected conditions</button>
-        <p>Only selected conditions become authoritative. Replacing confirmed conditions requires everyone to reconfirm the revised frame.</p>
-      </div>}
-      </>}
-      {staged && allConfirmed && owner.ownInputReadiness === 'READY' && !draft && !editingNeeds && <button className="secondary" onClick={() => setEditingNeeds(true)}>Change my private needs</button>}
+    {owner && (!staged || allConfirmed) && <section className="ke-card"><h2>Your private answers</h2>
+      <p>Choose what works for you. Your selections are saved directly; optional AI help is available for extra notes.</p>
+      <p className="ke-help">Other participants cannot read your answers or private notes. Outcomes may imply information about people’s needs. Use fictional, non-sensitive data in this preview.</p>
+      {owner.ownInputReadiness === 'READY' ? <p>Your current private answers are saved.</p> : owner.ownInputReadiness === 'NEEDS_CLARIFICATION' ? <p>Some needs still need clarification or new shared options. Open your answers to review them.</p> : <p>Your private answers have not been saved yet.</p>}
+      <button type="button" disabled={busy || !allConfirmed || !confirmed} onClick={() => setEditingNeeds(true)}>{owner.ownInputReadiness === 'NOT_STARTED' ? 'Add my private answers' : 'Review or change my private answers'}</button>
+      {!allConfirmed && <p>Everyone must confirm the shared choices first.</p>}
+      <PrivateAnswersModal open={editingNeeds} owner={owner} busy={busy} blocked={blocked} notes={text} consent={syntheticProcessing} notice={notice} recovery={recoveryControls}
+        onClose={() => setEditingNeeds(false)} onNotes={setText} onConsent={setSyntheticProcessing} onInterpret={interpret} onDirty={setStructuredDirty}
+        onSave={payload => command('CONFIRM_PRIVATE_ANSWERS', payload)} describeValue={valueText} describeCondition={describeCondition} />
       {owner.pendingQuestions.filter(question => question.status === 'PENDING').map(question => <div key={question.questionId}><h3>Private negotiation question</h3>
-        <p>Would this alternative work, provided all your confirmed hard limits still pass?</p><p>{ruleText(question.adjustment, variables)}</p>
+        <p>Would this alternative work, provided all your confirmed must-have requirements still pass?</p><p>{ruleText(question.adjustment, variables)}</p>
         <p>Expires {question.expiresAt}. Permission for this adjustment does not disclose your conditions or approve a final proposal.</p>
         {(['ALLOW', 'DECLINE'] as const).map(answer => <button key={answer} disabled={blocked} onClick={() => void command('ANSWER_NEGOTIATION', {
           questionId: question.questionId, constraintVersion: question.constraintVersion, requestIdentity: question.requestIdentity, answer })}>{answer === 'ALLOW' ? 'Allow this adjustment' : 'Decline this adjustment'}</button>)}
@@ -273,9 +270,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
         {owner.ownApproval && <button disabled={blocked} onClick={() => void command('WITHDRAW_APPROVAL', { proposalId: proposal.proposalId,
           proposalVersion: proposal.facts.proposalVersion, publicHash: proposal.publicHash })}>Withdraw my approval</button>}</>}
     </section>}
-    {interpretationRequest && <div role="status"><p>Your previous interpretation request needs a status check. Your saved conditions are kept.</p><button disabled={busy} onClick={() => void checkInterpretation()}>Check interpretation result</button>{interpretationRelease !== null && <button disabled={busy} onClick={() => void closeInterpretation()}>Close interpretation request</button>}</div>}
-    {pendingAction && <div><button disabled={busy} onClick={() => void (pending.current!.type === 'REQUEST_NEGOTIATION' ? generate() : command(pending.current!.type, {}))}>Retry the same action</button>
-      <button disabled={busy} onClick={() => { void (async () => { setBusy(true); try { await refresh(); pending.current = null; setPendingAction(false); setReviewed(false); setReviewedFrame(null); setNotice('The latest decision is loaded. Review it before confirming again.'); } catch { setNotice('The latest state could not be loaded. Your pending action is kept; try refreshing again.'); } finally { setBusy(false); } })(); }}>Refresh and review current state</button></div>}
-    {notice && <p role="status">{notice}</p>}
+    {!editingNeeds && recoveryControls}
+    {!editingNeeds && notice && <p role="status">{notice}</p>}
   </>;
 }

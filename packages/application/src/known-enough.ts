@@ -1,5 +1,5 @@
 import type { ModelCommitGuard } from './model-runtime.ts';
-import { Id, KnownEnough as KE } from '@deal-table/contracts';
+import { Id, KnownEnough as KE, publicChoiceOptions } from '@deal-table/contracts';
 import type { KnownEnough as KETypes } from '@deal-table/contracts';
 import { evaluateKnownEnoughCandidate, MAX_ACTIVE_CONFIRMED_CONSTRAINTS } from '@deal-table/domain';
 import { RepositoryCapacityError } from './types.ts';
@@ -1293,6 +1293,71 @@ export class KnownEnoughApplication {
           owner.draftVersion = owner.draft.draftVersion;
         }
         decision.status = readinessStatus(decision);
+        return;
+      }
+      case 'CONFIRM_PRIVATE_ANSWERS': {
+        if (!requiredConfirmed(decision) || !decision.frameConfirmations.some(item => item.participantId === owner.participantId))
+          fail('NEEDS_CLARIFICATION');
+        const frame = publicFrame(decision.definition);
+        const questions = frame.variables.filter(variable => variable.visibility === 'PUBLIC').flatMap(variable => {
+          const options = publicChoiceOptions(frame, variable);
+          return options ? [{ variable, options }] : [];
+        });
+        if (command.payload.answers.length !== questions.length
+          || questions.some(question => !command.payload.answers.some(answer => answer.variableId === question.variable.id))) fail('INVALID_COMMAND');
+        const draftId = this.id();
+        const prefix = draftId.slice(0, 42);
+        const proposed: KE.AIConstraintDraft['proposedConstraints'] = [];
+        const unsupported: KE.AIConstraintDraft['unsupportedConditions'] = [];
+        for (const [index, answer] of command.payload.answers.entries()) {
+          const question = questions.find(item => item.variable.id === answer.variableId) ?? fail('INVALID_COMMAND');
+          if (answer.acceptableIndices.some(option => !question.options[option])
+            || answer.preferredIndex !== undefined && !question.options[answer.preferredIndex]) fail('INVALID_COMMAND');
+          if (answer.mode === 'NONE') {
+            // An explicit unavailable answer must never become an empty READY input.
+            unsupported.push({ id: `answer-${prefix}-unavailable-${index}`,
+              sourceSummary: 'No listed option works for this participant.',
+              clarificationQuestion: `None of the listed options for ${question.variable.label} work. Additional shared options are needed.` });
+          } else if (answer.mode === 'SELECTED') proposed.push({ constraintId: `answer-${prefix}-required-${index}`, kind: 'HARD',
+            rule: { id: `answer-${prefix}-rule-${index}`, visibility: 'TRUSTED_BACKEND', operator: 'IN', variableId: answer.variableId,
+              values: answer.acceptableIndices.map(option => structuredClone(question.options[option]!)) } });
+          if (answer.preferredIndex !== undefined) proposed.push({ constraintId: `answer-${prefix}-preferred-${index}`, kind: 'PREFERENCE',
+            preference: { variableId: answer.variableId, value: structuredClone(question.options[answer.preferredIndex]!), cost: 1 } });
+        }
+        const retained = owner.confirmedConstraints.filter(item => item.status === 'ACTIVE' && command.payload.retainedConstraintIds.includes(item.constraintId));
+        if (retained.length !== command.payload.retainedConstraintIds.length) fail('INVALID_COMMAND');
+        proposed.push(...retained.map(item => item.kind === 'PREFERENCE'
+          ? { constraintId: item.constraintId, kind: item.kind, preference: structuredClone(item.preference) }
+          : { constraintId: item.constraintId, kind: item.kind, rule: structuredClone(item.rule) }));
+        const old = owner.draft, selection = command.payload.draft;
+        if (!!old !== !!selection || old && selection && (old.draftId !== selection.draftId || old.draftVersion !== selection.draftVersion
+          || owner.draftVersion !== old.draftVersion || old.ownerVersion !== owner.ownerVersion
+          || old.contextToken !== decision.definition.contextToken || old.semanticVersion !== decision.definition.semanticVersion)) fail('STALE_DRAFT');
+        if (old && selection) {
+          if (selection.replace && selection.constraintIds.length) fail('INVALID_COMMAND');
+          const included = old.proposedConstraints.filter(item => selection.constraintIds.includes(item.constraintId));
+          if (included.length !== selection.constraintIds.length) fail('INVALID_COMMAND');
+          proposed.push(...structuredClone(included));
+          if (!selection.replace) unsupported.push(...structuredClone(old.unsupportedConditions));
+        }
+        const prepared = KE.AIConstraintDraft.safeParse({ schemaVersion: KE.KE_SCHEMA_VERSION, draftId,
+          draftVersion: (owner.draftVersion ?? 0) + 1, decisionId: decision.decisionId, ownerParticipantId: owner.participantId,
+          ownerVersion: owner.ownerVersion, semanticVersion: decision.definition.semanticVersion, contextToken: decision.definition.contextToken,
+          sourceSummary: 'Private answers explicitly reviewed and saved by this participant.',
+          proposedConstraints: proposed, unsupportedConditions: unsupported, createdAt: now });
+        if (!prepared.success) fail('INVALID_COMMAND');
+        validateDraftAgainstDefinition(decision.definition, prepared.data);
+        owner.draft = prepared.data; owner.draftVersion = prepared.data.draftVersion;
+        // Use the existing confirmation/invalidation transition in this SAME transaction.
+        await this.applyCommand(decision, owner, { ...command, type: 'CONFIRM_CONSTRAINTS', payload: {
+          draftId, draftVersion: prepared.data.draftVersion, constraintIds: proposed.map(item => item.constraintId) } }, now);
+        if (unsupported.length && !owner.draft) {
+          owner.draft = KE.AIConstraintDraft.parse({ ...prepared.data, draftId: this.id(), draftVersion: 1,
+            ownerVersion: owner.ownerVersion, semanticVersion: decision.definition.semanticVersion,
+            contextToken: decision.definition.contextToken, proposedConstraints: [],
+            sourceSummary: 'Some private answers still need additional shared options.' });
+          owner.draftVersion = 1;
+        }
         return;
       }
       case 'CONFIRM_CONSTRAINTS': {

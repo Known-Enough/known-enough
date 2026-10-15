@@ -58,6 +58,7 @@ export function createPartitionManagedDriver(options: PartitionManagedOptions): 
   prepareDecisionCommit: (command: TransactWriteItemsCommand, context: PartitionIOContext) => Promise<TransactWriteItem[]>;
   prepareGroupCommit: (mutations: Parameters<PartitionTransport['commit']>[0], context: PartitionIOContext) => Promise<TransactWriteItem[]>;
   groups: PartitionTransport; decisions: PartitionDecisionTransport; membershipDiscovery: PartitionGroupDiscovery;
+  privateAnswerDecisions: (subject: string, conditions: () => Promise<TransactWriteItem[]>) => PartitionDecisionTransport;
   archivePorts: (options: PartitionManagedArchiveOptions) => PartitionArchivePorts;
   lifecycle: (options: Omit<DynamoLifecycleOptions, 'activation' | 'verifiedTarget'>) => ReturnType<typeof createDynamoPartitionLifecycle>;
   decisionArn: string; partitionArn: string;
@@ -175,13 +176,14 @@ export function createPartitionManagedDriver(options: PartitionManagedOptions): 
       }
     },
   };
-  const decisions: PartitionDecisionTransport = { async send(command, io) {
+  const decisionTransport = (retention?: () => Promise<TransactWriteItem[]>): PartitionDecisionTransport => ({ async send(command, io) {
     // Capture and validate BEFORE awaiting activation, so caller mutation cannot change the approved native request.
     const copy = command instanceof TransactGetItemsCommand ? new TransactGetItemsCommand(structuredClone(command.input))
       : command instanceof TransactWriteItemsCommand ? new TransactWriteItemsCommand(structuredClone(command.input)) : invalid();
     validatePartitionDecisionCommand(copy);
     if (copy instanceof TransactWriteItemsCommand) {
-      copy.input.TransactItems = await joined(copy.input.TransactItems!, io);
+      const privateChecks = retention ? await retention() : [];
+      copy.input.TransactItems = [...await joined(copy.input.TransactItems!, io), ...privateChecks];
       try { return await partitionCall(io, () => client.send(copy, { abortSignal: io.signal }), false); }
       catch (error) {
         // A changed activation tuple needs a fresh request/config check, not six retries against a cached tuple.
@@ -190,7 +192,20 @@ export function createPartitionManagedDriver(options: PartitionManagedOptions): 
       }
     }
     await checkpoint(io); return partitionCall(io, () => client.send(copy, { abortSignal: io.signal }), false);
-  } };
+  } });
+  const decisions = decisionTransport();
+  const privateAnswerDecisions = (subject: string, conditions: () => Promise<TransactWriteItem[]>) => decisionTransport(async () => {
+    if (!/^[A-Za-z0-9_-]{1,80}$/.test(subject)) return invalid();
+    const checks = structuredClone(await conditions());
+    const expected = new Set(['OPERATIONS#RETENTION/STATE', `RETENTION#${subject}/STAMP`]);
+    if (checks.length !== 2 || checks.some(item => {
+      const check = item.ConditionCheck;
+      const key = `${check?.Key?.PK?.S}/${check?.Key?.SK?.S}`;
+      if (Object.keys(item).join('|') !== 'ConditionCheck' || check?.TableName !== journalArn || !expected.delete(key)) return true;
+      return false;
+    }) || expected.size) return invalid();
+    return checks;
+  });
   const membershipDiscovery: PartitionGroupDiscovery = async (request, io) => {
     const copy = structuredClone(request); await checkpoint(io); return discovery.list(copy, io);
   };
@@ -257,5 +272,5 @@ export function createPartitionManagedDriver(options: PartitionManagedOptions): 
     const items = partitionDynamoWrites('KnownEnoughPartitions', structuredClone(mutations));
     for (const item of items) (item.ConditionCheck ?? item.Put)!.TableName = target.partitionArn;
     return joined(items, io);
-  }, groups, decisions, membershipDiscovery, archivePorts, lifecycle, legacyPublicDecision, ...target };
+  }, groups, decisions, privateAnswerDecisions, membershipDiscovery, archivePorts, lifecycle, legacyPublicDecision, ...target };
 }

@@ -1,9 +1,9 @@
-import { createManagedPartitionOwnerRuntime } from './partition-owner-runtime.ts';
+import { PartitionOwnerFailure, createManagedPartitionOwnerRuntime } from './partition-owner-runtime.ts';
 import { createManagedDraftRequestRecovery } from './partition-draft-recovery.ts';
 import { createManagedPartitionDraftRuntime } from './partition-draft-runtime.ts';
 import type { IncomingMessage } from 'node:http';
 import type { Clock, IdSource } from '@deal-table/application';
-import { createPartitionManagedDriver, type PartitionManagedOptions, type PartitionDraftArchitect } from '@deal-table/adapters/partition-request';
+import { createPartitionDecisionRepository, createPartitionManagedDriver, type PartitionManagedOptions, type PartitionDraftArchitect } from '@deal-table/adapters/partition-request';
 import { createCognitoIdentityResolver, type CognitoIdentityOptions } from './cognito-identity.ts';
 import { createLifecycleOwnerHandler } from './partition-lifecycle-http.ts';
 import { createManagedDurableEnqueue } from './durable-enqueue.ts';
@@ -93,6 +93,14 @@ export function createPartitionRuntime(options: PartitionRuntimeOptions) {
     legacyPublicDecision: driver.legacyPublicDecision,
     ...(draftArchitect ? { draftArchitect } : jobs ? { draftArchitect: createManagedPartitionDraftRuntime({ sourceSha: jobs.sourceSha, prepareGroupCommit: driver.prepareGroupCommit }) } : {}),
     ...(enqueue ? { requestNegotiation: enqueue } : {}),
+    ...(service && lifecycle ? { privateAnswersSource: lifecycle.sourceSha, privateAnswersRepository: async (principal, io) => {
+      try { await service.acknowledgeSyntheticProcessing(principal); await service.assertRetained(principal); }
+      catch { throw new PartitionOwnerFailure('PROCESSING_NOT_READY'); }
+      const transport = driver.privateAnswerDecisions(principal.subject, () => service.retentionConditions(principal));
+      const repositories = createPartitionDecisionRepository({ decisionArn: driver.decisionArn, partitionArn: driver.partitionArn,
+        groups: driver.groups, transport });
+      return repositories.forParticipant(principal, io);
+    } } : {}),
     ...(jobs && service ? { ownerInterpretation: createManagedPartitionOwnerRuntime({ sourceSha: jobs.sourceSha, groups: driver.groups, decisions: driver.decisions,
       decisionArn: driver.decisionArn, partitionArn: driver.partitionArn, clock, ids, prepareDecisionCommit: driver.prepareDecisionCommit,
       assertRetained: principal => service.assertRetained(principal), acknowledgeSyntheticProcessing: principal => service.acknowledgeSyntheticProcessing(principal), retentionConditions: principal => service.retentionConditions(principal) }) } : {}),

@@ -31,3 +31,7 @@ Records include the server-generated reference, installed source SHA, elapsed ti
 Passwords, tokens, emails, subjects, group/decision IDs, raw prompts/model answers, private inputs and raw error messages/stacks are excluded. Unknown field names are masked. Full provider invocation logging stays disabled. Diagnostics cannot authorize anything, change request disposition or launch a retry. The reader uses the existing inspector role and reconstructs the same safe allowlist before writing GitHub output.
 
 Exact-reference run [38803481971](https://github.com/Known-Enough/known-enough/actions/runs/38803481971) verified live correlation and reported `variables[1].options` missing without recording raw content. That proves the logging path, not successful draft generation. The generic grouped transport adds `ARCHITECT_WIRE_SCHEMA` with paths such as `variables.ENUM[0].options`; existing persisted-schema and semantic stages remain. No tests or model probes were executed by A; user manual acceptance is required after publication.
+
+## Direct private-answer saves
+
+FF05 adds `PRIVATE_ANSWERS_HTTP_RESULT` in the same primary Lambda log group. It records only the opaque reference, installed source, saved/failed status, error code and duration. No participant identity, selections, reasons or raw notes are logged. The same workflow above can look up the exact save error reference; its blank-reference mode remains the public-draft failure list. A direct save makes no AI call.

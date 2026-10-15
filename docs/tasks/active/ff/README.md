@@ -2,6 +2,7 @@
 
 | Task | Purpose | Current status |
 | --- | --- | --- |
+| [FF05](FF05/README.md) | Guided private-answer modal with direct option selection and optional AI notes. | CODE_READY / publication pending; no tests or AI calls |
 | [FF01](FF01/README.md) | Compact account screens, password visibility and contextual recovery. | PUBLISHED; user manual acceptance pending |
 | [FF02](FF02/README.md) | Owner-only interpretation with explicit participant prerequisites/consent. | PUBLISHED; required permission now installed; user manual acceptance pending |
 | [FF04](FF04/README.md) | Organizer-confirmed deletion of saved drafts and decisions, with old-link/replay protection. | PUBLISHED/source56a7a9a/Amplify101; manual acceptance pending |

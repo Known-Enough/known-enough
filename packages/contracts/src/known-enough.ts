@@ -1033,12 +1033,38 @@ export const OwnerDecisionSnapshot = z.strictObject({
 });
 export type OwnerDecisionSnapshot = z.infer<typeof OwnerDecisionSnapshot>;
 
+/** Direct selections refer only to the current server-owned public option vocabulary. */
+export const PrivateChoiceAnswer = z.strictObject({
+  variableId: Id,
+  mode: z.enum(['ANY', 'SELECTED', 'NONE']),
+  acceptableIndices: z.array(z.number().int().min(0).max(63)).max(64).refine(values => new Set(values).size === values.length),
+  preferredIndex: z.number().int().min(0).max(63).optional(),
+}).superRefine((answer, ctx) => {
+  if ((answer.mode === 'SELECTED') !== (answer.acceptableIndices.length > 0)
+    || answer.mode === 'NONE' && answer.preferredIndex !== undefined
+    || answer.mode === 'SELECTED' && answer.preferredIndex !== undefined && !answer.acceptableIndices.includes(answer.preferredIndex))
+    ctx.addIssue({ code: 'custom', message: 'Choose acceptable options and a compatible optional favourite' });
+});
+export type PrivateChoiceAnswer = z.infer<typeof PrivateChoiceAnswer>;
+
 export const DecisionCommand = z.discriminatedUnion('type', [
   z.strictObject({
     schemaVersion: z.literal(KE_SCHEMA_VERSION), type: z.literal('CONFIRM_FRAME'),
     requestId: Id, decisionId: Id, idempotencyKey: Id,
     expected: z.strictObject({ contextToken: ContextToken, semanticVersion: Version, controlVersion: Version, ownerVersion: Version }),
     payload: z.strictObject({ frameVersion: Version }),
+  }),
+  z.strictObject({
+    schemaVersion: z.literal(KE_SCHEMA_VERSION), type: z.literal('CONFIRM_PRIVATE_ANSWERS'),
+    requestId: Id, decisionId: Id, idempotencyKey: Id,
+    expected: z.strictObject({ contextToken: ContextToken, semanticVersion: Version, controlVersion: Version, ownerVersion: Version }),
+    payload: z.strictObject({
+      processingConsent: z.literal('SYNTHETIC_TEST'),
+      answers: z.array(PrivateChoiceAnswer).max(MAX_DECISION_VARIABLES).refine(items => unique(items.map(item => item.variableId))),
+      retainedConstraintIds: z.array(Id).max(MAX_PRIVATE_CONSTRAINTS).refine(unique),
+      draft: z.strictObject({ draftId: Id, draftVersion: Version,
+        constraintIds: z.array(Id).max(MAX_PRIVATE_CONSTRAINTS).refine(unique), replace: z.boolean() }).optional(),
+    }),
   }),
   z.strictObject({
     schemaVersion: z.literal(KE_SCHEMA_VERSION), type: z.literal('CONFIRM_CONSTRAINTS'),

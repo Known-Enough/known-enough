@@ -13,7 +13,7 @@ export function DecisionGuide() {
     heading.current?.focus();
   }, [step]);
   const steps = ['Describe your idea', 'Review the choices', 'Share needs privately', 'Decide together'];
-  const url = new URL('/?guide=decision', window.location.origin).href;
+  const url = window.location.origin + '/?guide=decision';
   async function copyLink() {
     try { await navigator.clipboard.writeText(url); setCopyNotice('Example link copied.'); }
     catch { setCopyNotice('Copy the example link shown below.'); }

@@ -990,3 +990,31 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 :root[data-theme="dark"] .ke-delete-action.secondary { color: #efa99e; }
 :root[data-theme="dark"] .ke-delete-action.secondary:hover { background: #422924; border-color: #765149; }
 @media (max-width: 600px) { .ke-decision-row-actions { width: 100%; justify-content: flex-start; } .ke-delete-dialog { padding: 22px; } }
+
+/* Direct private answers reuse the native decision-guide dialog and theme tokens. */
+.ke-private-wizard { width: min(660px, calc(100vw - 40px)); max-width: 660px; }
+.ke-private-wizard .ke-wizard-header .ke-wizard-help { margin-top: 10px; }
+.ke-private-question { margin: 0; padding: 20px; min-width: 0; border: 1px solid var(--wizard-border); border-radius: 16px; background: var(--wizard-soft); }
+.ke-private-question legend { padding: 0 8px; color: var(--wizard-text); font-size: 17px; font-weight: 650; }
+.ke-private-options, .ke-private-option-list { display: grid; gap: 10px; }
+.ke-private-wizard .ke-private-options label, .ke-private-wizard .ke-private-option-list label, .ke-private-wizard .ke-private-check { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.6; }
+.ke-private-wizard input[type="checkbox"], .ke-private-wizard input[type="radio"] { width: 17px; height: 17px; min-height: 17px; flex: 0 0 17px; margin: 4px 0 0; padding: 0; accent-color: #236449; }
+.ke-private-option-list { max-height: 250px; overflow-y: auto; margin: 16px 0; padding: 14px; border: 1px solid var(--wizard-border); border-radius: 12px; background: var(--wizard-surface); }
+.ke-private-wizard .ke-private-favourite { display: grid; gap: 8px; margin-top: 18px !important; font-size: 13px; }
+.ke-private-wizard select { width: 100%; min-height: 46px; padding: 11px 14px; border: 1px solid var(--wizard-border); border-radius: 10px; font: inherit; color: var(--wizard-text); background: var(--wizard-surface); }
+.ke-private-wizard select:focus-visible, .ke-private-wizard textarea:focus-visible { outline: 3px solid #409b7540; outline-offset: 2px; border-color: #398768; }
+.ke-private-wizard .ke-private-check { margin-top: 12px !important; }
+.ke-private-review + .ke-private-review { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--wizard-border); }
+.ke-private-wizard .ke-private-review h3 { margin-bottom: 8px; font-size: 16px; }
+.ke-private-wizard .ke-wizard-edit h3 { margin: 0 0 12px; font-size: 17px; }
+.ke-shared-choice-list { display: grid; gap: 10px; padding: 0; list-style: none; }
+.ke-shared-choice-list li { display: grid; gap: 5px; padding: 14px 16px; border: 1px solid #dde5dd; border-radius: 12px; }
+.ke-shared-choice-list li span { color: #617166; font-size: 14px; line-height: 1.6; }
+.ke-shared-decision details { margin: 14px 0; }
+.ke-shared-decision summary { cursor: pointer; font-size: 14px; font-weight: 550; }
+.ke-shared-original { white-space: pre-wrap; }
+:root[data-theme="dark"] .ke-shared-choice-list li { border-color: var(--ke-dark-border); }
+:root[data-theme="dark"] .ke-shared-choice-list li span { color: var(--ke-dark-muted); }
+@media (max-width: 600px) { .ke-private-wizard { width: calc(100vw - 20px); } .ke-private-question { padding: 16px; } }
+
+:root[data-theme="dark"] .ke-private-wizard input[type="checkbox"], :root[data-theme="dark"] .ke-private-wizard input[type="radio"] { accent-color: #82c6a5; }

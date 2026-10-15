@@ -1,3 +1,4 @@
+export { publicChoiceOptions } from './public-choice-options.ts';
 import { z } from 'zod';
 export * as ArchitectOutput from './architect-output.ts';
 

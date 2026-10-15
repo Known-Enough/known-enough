@@ -6,13 +6,16 @@ import type { DurableEnqueueRequest } from './durable-enqueue.ts';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { Id, KnownEnough as KE } from '@deal-table/contracts';
 import { KnownEnoughApplication, KnownEnoughApplicationError, RepositoryCapacityError,
-  type Clock, type IdSource, type TrustedPrincipal } from '@deal-table/application';
+  type Clock, type IdSource, type TrustedPrincipal, type KnownEnoughRepository } from '@deal-table/application';
 import { createPartitionGroupSession, createPartitionDecisionRepository, PartitionSessionError, PartitionDraftFailure, PartitionRegistrationConflict, partitionIO,
-  type PartitionTransport, type PartitionDecisionTransport, type PartitionGroupDiscovery, type PartitionDraftArchitect } from '@deal-table/adapters/partition-request';
+  type PartitionTransport, type PartitionDecisionTransport, type PartitionIOContext, type PartitionGroupDiscovery, type PartitionDraftArchitect } from '@deal-table/adapters/partition-request';
 
 type ErrorCode = Extract<KE.DecisionCommandResult, { ok: false }>['error']['code'];
 export interface PartitionParticipantApiOptions {
   ownerInterpretation?: OwnerInterpretation;
+  /** Server-owned private processing gate and atomic retention-fenced repository; no model call. */
+  privateAnswersSource?: string;
+  privateAnswersRepository?: (principal: TrustedPrincipal, io: PartitionIOContext) => Promise<KnownEnoughRepository>;
   /** Trusted server resolver: verify access tokens; never map caller-selected identity headers. */
   draftRequest?: (request: DraftRecoveryRequest) => Promise<unknown>;
   authenticate: (request: IncomingMessage, signal: AbortSignal) => Promise<TrustedPrincipal | null>;
@@ -158,7 +161,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
       response.setHeader('Cache-Control', 'no-store'); response.statusCode = 204; response.end(); return;
     }
     if (active >= concurrency || authenticating >= concurrency) { send(response, 503, errorBody('RETRYABLE_SERVER_ERROR', requestId)); request.resume(); return; }
-    active++; const requestStartedAt = Date.now(); let publicDraftRequest = false;
+    active++; const requestStartedAt = Date.now(); let publicDraftRequest = false; let privateAnswersRequest = false;
     const controller = new AbortController();
     const closed = () => { if (!response.writableEnded) controller.abort(); };
     request.once('aborted', closed); response.once('close', closed);
@@ -405,11 +408,25 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
           const receipt = NegotiationReceipt.parse(result);
           send(response, 200, { ok: true, requestId: queued.data.requestId, job: receipt }); return;
         }
+        privateAnswersRequest = !!raw && typeof raw === 'object' && 'type' in raw && raw.type === 'CONFIRM_PRIVATE_ANSWERS';
         const command = KE.DecisionCommand.safeParse(raw);
         if (!command.success || command.data.decisionId !== decision[1]!) return reject('INVALID_COMMAND');
         requestId = command.data.requestId;
         if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
-        const result = await application.execute(principal, command.data);
+        let writer = application;
+        if (command.data.type === 'CONFIRM_PRIVATE_ANSWERS') {
+          if (!options.privateAnswersRepository) throw new PartitionOwnerFailure('PROCESSING_NOT_READY');
+          const owner = await application.getOwnerSnapshot(principal, decision[1]!);
+          if (!owner.publicSnapshot.frame.requiredParticipantIds.every(id => owner.publicSnapshot.frameConfirmations.some(item => item.participantId === id))
+            || !owner.publicSnapshot.frameConfirmations.some(item => item.participantId === owner.ownerParticipantId)) throw new PartitionOwnerFailure('FRAME_NOT_CONFIRMED');
+          const io = partitionIO({ timeoutMs: 27000 }); const context = { ...io, signal: AbortSignal.any([io.signal, controller.signal]) };
+          const retained = await options.privateAnswersRepository(principal, context);
+          writer = new KnownEnoughApplication({ repository: retained, clock, ids });
+        }
+        const result = await writer.execute(principal, command.data);
+        if (privateAnswersRequest) { try { console.info(JSON.stringify({ event: 'PRIVATE_ANSWERS_HTTP_RESULT', requestId,
+          ...(options.privateAnswersSource ? { sourceSha: options.privateAnswersSource } : {}), result: result.ok ? 'SAVED' : 'FAILED',
+          status: result.ok ? 200 : result.error.httpStatus, ...(!result.ok ? { code: result.error.code } : {}), elapsedMs: Date.now() - requestStartedAt })); } catch { /* No private selections or notes are logged. */ } }
         send(response, result.ok ? 200 : result.error.httpStatus, result);
       } catch (error) {
         if (error instanceof PartitionRegistrationConflict) {
@@ -420,6 +437,9 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
           : error instanceof KnownEnoughApplicationError ? error.code : 'RETRYABLE_SERVER_ERROR';
         if (publicDraftRequest) { try { console.warn(JSON.stringify({ event: 'PUBLIC_DRAFT_HTTP_RESULT', requestId, result: 'FAILED', code, status: KE.DECISION_ERROR_HTTP_STATUS[code],
           elapsedMs: Date.now() - requestStartedAt, ...(error instanceof PartitionDraftFailure ? { draftFailure: error.category } : {}) })); } catch { /* Diagnostics cannot replace the response. */ } }
+        if (privateAnswersRequest) { try { console.warn(JSON.stringify({ event: 'PRIVATE_ANSWERS_HTTP_RESULT', requestId,
+          ...(options.privateAnswersSource ? { sourceSha: options.privateAnswersSource } : {}), result: 'FAILED', code,
+          status: KE.DECISION_ERROR_HTTP_STATUS[code], elapsedMs: Date.now() - requestStartedAt })); } catch { /* Diagnostics cannot replace a response. */ } }
         const result = errorBody(code, requestId); send(response, result.error.httpStatus, error instanceof PartitionDraftFailure ? { ...result, draftFailure: error.category } : error instanceof PartitionOwnerFailure ? { ...result, interpretationFailure: error.category } : result);
       } finally {
         active--; request.off('aborted', closed); response.off('close', closed); request.resume();
