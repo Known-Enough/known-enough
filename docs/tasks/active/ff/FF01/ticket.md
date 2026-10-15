@@ -1,6 +1,6 @@
 # FF01 — Premium registration and sign-in UI
 
-Status: READY / unclaimed
+Status: PUBLISHED / user manual acceptance pending
 Intended worker: B, at the next eligible idle intake after the current claim.
 Scope: focused frontend styling, authentication presentation and navigation only. Preserve Cognito authentication, validation, security, password recovery and verification. Avoid unrelated refactoring, new dependencies and AWS changes. This extends the existing FIX03 UI rather than replacing its authentication implementation.
 

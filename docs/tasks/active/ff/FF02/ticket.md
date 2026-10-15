@@ -1,6 +1,6 @@
 # FF02 — Fix unavailable private-conditions interpretation
 
-Status: READY / unclaimed
+Status: CODE PUBLISHED / BLOCKED on administrator timestamp permission
 Intended worker: B, sequentially after the existing active claim and FF01; do not interrupt current work or create another monitor.
 
 ## User report
