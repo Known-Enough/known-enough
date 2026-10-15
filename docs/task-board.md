@@ -1,3 +1,5 @@
+FF09 B checkpoint: CODE_READY; publication/manual acceptance pending. [Ticket](tasks/active/ff/FF09/ticket.md). FF06–09 coding checkpoints complete sequentially; no current claim.
+
 FF08 B checkpoint: CODE_READY; publication/manual acceptance pending. [Ticket](tasks/active/ff/FF08/ticket.md).
 
 FF07 B checkpoint: CODE_READY; publication/manual acceptance pending. [Ticket](tasks/active/ff/FF07/ticket.md).

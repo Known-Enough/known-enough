@@ -1033,3 +1033,8 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 :root[data-theme="light"] .ke-profile-summary-copy h3 { color: #15382d; }
 :root[data-theme="dark"] .ke-member-profile-trigger .ke-member-name,
 :root[data-theme="dark"] .ke-profile-summary-copy h3 { color: var(--ke-dark-text); }
+
+.ke-guide-embedded { margin: 12px 0; max-width: 100%; }
+.ke-guide-embedded .ke-guide-intro { padding: 12px 0; }
+.ke-guide-embedded .ke-guide-nav { flex-wrap: wrap; }
+.ke-guide-embedded .ke-guide-controls { flex-wrap: wrap; gap: 8px; }

@@ -1,3 +1,4 @@
+import { DecisionGuide } from './decision-guide';
 import { RenameAction } from './rename-action';
 import { useEffect, useRef, useState } from 'react';
 import { Groups, KnownEnough as KE } from '@deal-table/contracts';
@@ -19,6 +20,9 @@ function publicChoiceValues(variable: KE.PublicDecisionFrame['variables'][number
 const privateAnswer = 'Each participant should provide their own preferences, availability and spending limits privately later. Help us draft the shared choices now without assuming those personal answers.';
 export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange }: { group: Groups.GroupSnapshot;
   api: (path: string, init?: RequestInit) => Promise<Response>; reload: () => Promise<void>; openDecision: (id: string) => void; startCollapsed?: boolean; onDirtyChange?: (dirty: boolean) => void }) {
+  const [showExample, setShowExample] = useState(false);
+  const exampleTrigger = useRef<HTMLButtonElement>(null);
+  const returnFromExample = () => { setShowExample(false); exampleTrigger.current?.focus(); };
   const [starting, setStarting] = useState(false);
   const [step, setStep] = useState<'describe' | 'questions' | 'review'>('describe');
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -229,7 +233,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
   }
   return <section className="ke-card ke-group-panel ke-decisions-panel" aria-busy={busy} aria-labelledby={`decisions-heading-${group.id}`}>
     <header className="ke-panel-heading"><div><h2 id={`decisions-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="ListChecks" /></span><span>Decisions</span></h2>
-      <p className="ke-panel-subtitle">Describe your idea, review the choices, then hear from everyone privately.</p><a className="ke-decision-example-link" href="/?guide=decision" target="_blank" rel="noopener noreferrer">See an example decision flow <span className="ke-sr-only">(opens in a new tab)</span></a></div>
+      <p className="ke-panel-subtitle">Describe your idea, review the choices, then hear from everyone privately.</p></div>
       {group.isOrganizer && (group.decisions.length > 0 || group.drafts.length > 0 || pendingKey)
         && <button ref={launcher} type="button" className="ke-start-decision ke-icon-action" disabled={busy} onClick={startWizard}><PageIcon name="Plus" />{draft || pendingKey ? 'Continue your draft' : 'Start a decision'}</button>}</header>
     {!group.decisions.length && !group.drafts.length && !pendingKey && <div className="ke-decision-empty">
@@ -285,7 +289,9 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
           <h2 id={`decision-wizard-title-${group.id}`} ref={draftHeading} tabIndex={-1}>{step === 'describe' ? 'What would you like to decide?' : step === 'questions' ? 'Let’s fill in a few details.' : 'Your decision, ready to review.'}</h2></div>
           <button type="button" className="secondary ke-wizard-close" aria-label="Close decision guide" disabled={busy} onClick={closeWizard}><PageIcon name="X" /></button>
         </header>
-        <p className="ke-wizard-example"><a href="/?guide=decision" target="_blank" rel="noopener noreferrer">New here? See the example flow <span className="ke-sr-only">(opens in a new tab)</span></a></p>
+        <p className="ke-wizard-example"><button ref={exampleTrigger} type="button" className="secondary" aria-expanded={showExample} aria-controls={`create-example-${group.id}`} onClick={() => setShowExample(value => !value)}>{showExample ? 'Back to my decision draft' : 'See an example'}</button></p>
+        {showExample && <div id={`create-example-${group.id}`}><DecisionGuide onReturn={returnFromExample} /></div>}
+        <div hidden={showExample}>
         <ol className="ke-wizard-steps" aria-label="Decision creation steps">{(['describe','questions','review'] as const).map((value, index) => <li key={value} data-complete={index < ['describe','questions','review'].indexOf(step)} aria-current={step === value ? 'step' : undefined}>
           <span aria-hidden="true">{index < ['describe','questions','review'].indexOf(step) ? <PageIcon name="Check" /> : index + 1}</span><span className="ke-wizard-step-label">{['Your idea','Build the draft','Review'][index]}</span></li>)}</ol>
         <div className="ke-wizard-body" aria-busy={busy}>
@@ -387,6 +393,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
           </div>}
           {busy && <LoadingSkeleton kind="inline" label="Preparing or saving your decision" />}
           {!busy && notice && <div className="ke-wizard-notice" role="status">{notice}</div>}
+        </div>
         </div>
         <footer className="ke-wizard-footer">A saved draft can be continued later. No one’s private needs or final approval are confirmed by this guide.</footer>
       </div>

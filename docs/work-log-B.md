@@ -3771,3 +3771,9 @@ FF08 claimed/B after FF07 synchronized. Scope invitation acceptance and binding-
 
 
 FF08 CODE_READY/B — group joining preserves current binding access without auto-enrollment; explicit additive inclusion preserves owners/confirmations, new owners start empty, unfinished proposals retire and finished records remain unchanged. Removal/material revisions and atomic fences retained. Static type/build/lint/boundaries580/whitespace PASS; no tests/AI/setup/deployment. Claim released; FF09 next. Manual walkthrough and old-record behavior in FF08 ticket.
+
+
+FF09 claimed/B after FF08 synchronized060b0a0. Scope existing decision-guide component embedded inside creation modal, removal of landing/groups launchers and standalone query routing, focus/style and FF09/B records. Read prior FF03 onboarding/FF06 checkpoints; reuse fictional content, preserve creation state and authentication callbacks. No tests/AI/cloud/deployment. FF10/E2E01 unclaimed.
+
+
+FF09 CODE_READY/B — fictional guide embedded only in creation dialog, form/request state remains mounted, return focus restored, external/landing/groups entry points removed; retired guide query falls back to normal app preserving callback data. Static type/build/lint/boundaries579/whitespace PASS. No tests/AI/setup/deployment. Claim released; FF06–09 implementation delivered, publication/manual acceptance pending. FF10/E2E01 remain unclaimed.

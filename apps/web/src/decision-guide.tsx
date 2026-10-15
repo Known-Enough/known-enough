@@ -1,26 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
-import { Brand, PrivacyBar, ThemeToggle } from './app-chrome';
 
 /** Public instructional content only: no account data, server fixtures or model calls. */
-export function DecisionGuide() {
+export function DecisionGuide({ onReturn }: { onReturn: () => void }) {
   const [step, setStep] = useState(0);
   const [participant, setParticipant] = useState<'Alex' | 'Sam'>('Alex');
-  const [copyNotice, setCopyNotice] = useState('');
   const heading = useRef<HTMLHeadingElement>(null);
-  const firstRender = useRef(true);
   useEffect(() => {
-    if (firstRender.current) { firstRender.current = false; return; }
     heading.current?.focus();
   }, [step]);
   const steps = ['Describe your idea', 'Review the choices', 'Share needs privately', 'Decide together'];
-  const url = window.location.origin + '/?guide=decision';
-  async function copyLink() {
-    try { await navigator.clipboard.writeText(url); setCopyNotice('Example link copied.'); }
-    catch { setCopyNotice('Copy the example link shown below.'); }
-  }
-  return <main className="ke-home ke-guide">
-    <header className="ke-masthead"><Brand /><div className="ke-header-actions"><ThemeToggle /><a className="ke-guide-app-link" href="/">Open the app</a></div></header>
-    <section className="ke-guide-intro"><span className="ke-guide-badge">Fictional example · no sign-in needed</span><h1>From an idea to a decision.</h1>
+  return <section className="ke-guide ke-guide-embedded" aria-label="Fictional decision example">
+    <button type="button" className="secondary" onClick={onReturn}>Back to my decision draft</button>
+    <section className="ke-guide-intro"><span className="ke-guide-badge">Fictional example · read-only</span><h3>From an idea to a decision.</h3>
       <p>See how a group can shape the choices, share needs privately, and review a proposal together.</p>
       <p className="ke-guide-disclaimer">This is an illustrated walkthrough, not a live decision or AI result. Names, places and prices are fictional. Nothing here creates an account, calls AI or changes a group.</p>
     </section>
@@ -56,10 +47,8 @@ export function DecisionGuide() {
         <p>Each person independently reviews the proposal and either approves it or asks for a change. AI does not approve for anyone or reveal their private reasons automatically.</p>
         <div className="ke-guide-note"><strong>The same flow works for other choices.</strong><p>For a trip, compare destinations and dates. For a shared purchase, compare products. Each person’s limits still belong in their own private conversation.</p></div>
       </>}
-      <footer className="ke-guide-controls"><button type="button" className="secondary" disabled={step === 0} onClick={() => setStep(value => value - 1)}>Previous example step</button>{step < steps.length - 1 ? <button type="button" onClick={() => setStep(value => value + 1)}>Next example step</button> : <a className="ke-guide-start" href="/">Open Known Enough</a>}</footer>
+      <footer className="ke-guide-controls"><button type="button" className="secondary" disabled={step === 0} onClick={() => setStep(value => value - 1)}>Previous example step</button>{step < steps.length - 1 ? <button type="button" onClick={() => setStep(value => value + 1)}>Next example step</button> : <button type="button" onClick={onReturn}>Back to my decision draft</button>}</footer>
     </article>
-    <section className="ke-guide-share" aria-label="Share this example"><div><h2>Show someone how it works.</h2><a href="/?guide=decision">{url}</a></div><button type="button" className="secondary" onClick={() => void copyLink()}>Copy example link</button>{copyNotice && <p role="status">{copyNotice}</p>}</section>
-    <p className="ke-guide-return-note">Opened this from a draft? Return to your original browser tab to continue it. This example does not change your draft.</p>
-    <PrivacyBar />
-  </main>;
+    <p className="ke-guide-return-note">Your creation form and saved request are kept in this modal. Viewing this fictional guidance does not submit anything.</p>
+  </section>;
 }

@@ -2692,3 +2692,6 @@ FF07 CODE_READY/B — authenticated member avatars, browser photo normalization 
 
 
 FF08 CODE_READY/B — group joining preserves current binding access without auto-enrollment; explicit additive inclusion preserves owners/confirmations, new owners start empty, unfinished proposals retire and finished records remain unchanged. Removal/material revisions and atomic fences retained. Static type/build/lint/boundaries580/whitespace PASS; no tests/AI/setup/deployment. Claim released; FF09 next. Manual walkthrough and old-record behavior in FF08 ticket.
+
+
+FF09 CODE_READY/B — fictional guide embedded only in creation dialog, form/request state remains mounted, return focus restored, external/landing/groups entry points removed; retired guide query falls back to normal app preserving callback data. Static type/build/lint/boundaries579/whitespace PASS. No tests/AI/setup/deployment. Claim released; FF06–09 implementation delivered, publication/manual acceptance pending. FF10/E2E01 remain unclaimed.

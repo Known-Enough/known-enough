@@ -11,10 +11,12 @@ const render = (component: React.ReactNode) => createRoot(root).render(<StrictMo
 let configured;
 try { configured = parseCognitoConfig(import.meta.env); } catch { configured = null; }
 const search = new URLSearchParams(window.location.search);
-const guide = search.get('guide') === 'decision' && !['code', 'state', 'error'].some(key => search.has(key));
-if (guide) {
-  const { DecisionGuide } = await import('./decision-guide'); render(<DecisionGuide />);
-} else if (configured) {
+// Retired public example links return to the normal app. OAuth query/fragment data is preserved.
+if (search.get('guide') === 'decision' && !['code', 'state', 'error'].some(key => search.has(key))) {
+  search.delete('guide');
+  window.history.replaceState(null, '', window.location.pathname + (search.size ? '?' + search.toString() : '') + window.location.hash);
+}
+if (configured) {
   if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('demo') === 'legacy') {
     const { ConnectedDemo } = await import('./connected-demo'); render(<ConnectedDemo config={configured} />);
   } else { const { ConnectedApp } = await import('./connected-app'); render(<ConnectedApp config={configured} />); }
