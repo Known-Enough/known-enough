@@ -179,12 +179,21 @@
     "reportedAt": "2026-10-15T01:29:29.724727+00:00"
   },
   "latestArchiveDiagnostic": {
-    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38648358389",
-    "stage": "READ_OPERATOR_POLICY",
-    "exceptionName": "SyntaxError",
-    "sourceFile": "prove.mjs",
-    "line": 47,
-    "dataWrites": 0,
-    "providerCalls": 0
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38667776396",
+    "source": "d680aaabd96b16b39b4c3af68ddb50012f4cfc4b",
+    "stage": "PREPARE_ARCHIVE",
+    "code": "ARCHIVE_INVALID",
+    "operatorPolicyPresent": false,
+    "structuralChecks": "all five rows PASS",
+    "providerCalls": 0,
+    "signupCalls": 0,
+    "dataWrites": 0
+  },
+  "archiveConfigurationSetup": {
+    "status": "PREPARED_NOT_EXECUTED",
+    "command": "archive-control-command.md",
+    "checks": "Python syntax and six safety scenarios PASS; reference7/planning15 PASS",
+    "scope": "existing native archive policy, verified B actor143764700; project archive service, not per-group policy",
+    "remaining": "Own administrator setup receipt, then original synthetic group cleanup-only verification"
   }
 }
