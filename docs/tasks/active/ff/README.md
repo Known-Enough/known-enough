@@ -1,10 +1,12 @@
-Current service status (2026-10-16): [draft-service source repaired](../../../review-artifacts/FF/draft-service-source-repair.json), runtime70d3fab/API99a2f2/worker817cdb/control ENABLED and matching. Earlier source-rebind-held notes below are historical. No tests/model calls; manual acceptance pending.
+Latest: [FF11 modal publication](../../../review-artifacts/FF/open-decision-modal-publication.json), frontend0419904/Amplify109/APIb6dc8215/worker0f6b56df; control matches enabled runtimee192cf1. Direct answers, no separate review wizard. No tests/model calls; manual acceptance pending.
+
+Historical service repair (followed by FF11 publication below), 2026-10-16: [draft-service source repaired](../../../review-artifacts/FF/draft-service-source-repair.json), runtime70d3fab/API99a2f2/worker817cdb/control ENABLED and matching. Earlier source-rebind-held notes below are historical. No tests/model calls; manual acceptance pending.
 
 # FF — Frontend and decision-flow repairs
 
 | Task | Purpose | Current status |
 | --- | --- | --- |
-| [FF11](FF11/README.md) | Decision opens in modal with direct answers, without a separate review flow. | IN_PROGRESS/A; publication pending |
+| [FF11](FF11/README.md) | Decision opens in modal with direct answers, without a separate review flow. | PUBLISHED/Amplify109; user manual acceptance pending |
 | [FF10](FF10/README.md) | Compare logs/code/live pages and update outdated example guidance. | PUBLISHED/sourcef1c9100/Amplify104; manual acceptance pending |
 | [FF09](FF09/README.md) | Example guidance only inside the create-decision modal. | PUBLISHED/sourcef1c9100/Amplify104; manual acceptance pending |
 | [FF08](FF08/README.md) | Joining preserves progress without repeat review; finished decisions remain finished. | PUBLISHED/sourcef1c9100/API4766bc5/worker4025f44/Amplify104; manual acceptance pending; model-job source rebind held |

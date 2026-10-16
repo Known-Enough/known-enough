@@ -1,0 +1,153 @@
+{
+  "result": "FF11_PUBLISHED_MANUAL_ACCEPTANCE_PENDING",
+  "utc": "2026-10-16T15:36:35.716339+00:00",
+  "runtimeSource": "e192cf1ef649d960c2988353c1fd3a5f1346242c",
+  "frontendSource": "0419904f1aabf7c68628fc8985688d325993e908",
+  "website": "https://main.d143q5ravxp5av.amplifyapp.com/",
+  "runtimeRun": "https://github.com/Known-Enough/known-enough/actions/runs/38924857353",
+  "enableRun": "https://github.com/Known-Enough/known-enough/actions/runs/38925088244",
+  "frontendRun": "https://github.com/Known-Enough/known-enough/actions/runs/38925092727",
+  "disableRun": "https://github.com/Known-Enough/known-enough/actions/runs/38924742696",
+  "runtimeReports": {
+    "partition-publish-report.json": {
+      "sourceSha": "e192cf1ef649d960c2988353c1fd3a5f1346242c",
+      "result": "LIFECYCLE_OWNER_CODE_READBACK_PASS",
+      "backendSha256": "b6dc8215f92909c0b50d2e6fd4d195d2603373871952096d367194d8454414b4",
+      "priorBackendSha256": "99a2f2fa79f223cffb13bac3dbdbffd0370ac3671824d13e36a306b7d23fcd3f",
+      "environment": "UNCHANGED",
+      "migration": "UNCHANGED",
+      "modelCalls": 0,
+      "dataChanges": 0,
+      "managedOwnerProof": "PENDING"
+    },
+    "partition-worker-publish-report.json": {
+      "result": "WORKER_CODE_DISABLED_READBACK_PASS",
+      "providerCalls": 0,
+      "activation": "NOT_EXECUTED",
+      "codeWriteRequested": true,
+      "actualWorkerSha256": "817cdbbaae969b78ddc52bb3a5abafca6c7c76ea93fe259acbfa77691bbe076f",
+      "expectedPriorWorkerSha256": "817cdbbaae969b78ddc52bb3a5abafca6c7c76ea93fe259acbfa77691bbe076f",
+      "workerSha256": "0f6b56df7d77294469fdb3d0d8562fa181c9b79c7d88b641285a4e10a499fa97",
+      "sourceSha": "e192cf1ef649d960c2988353c1fd3a5f1346242c",
+      "schedule": "DISABLED"
+    },
+    "partition-job-preflight-report.json": {
+      "result": "DISABLED_EMPTY_QUEUE_PREPUBLICATION_PASS",
+      "awsWrites": 0,
+      "providerCalls": 0,
+      "sourceSha": "70d3fabbb5f223930dc1f282b9edf072a95db47d"
+    },
+    "partition-job-source-report.json": {
+      "sourceSha": "e192cf1ef649d960c2988353c1fd3a5f1346242c",
+      "result": "JOB_SOURCE_DISABLED_READBACK_PASS",
+      "writeRequested": true,
+      "state": "DISABLED",
+      "active": 0,
+      "slots": 0,
+      "totalWrites": 0,
+      "totalsUnchangedDuringCheck": true,
+      "providerCalls": 0
+    }
+  },
+  "enableReport": {
+    "utc": "2026-10-16T15:35:05.526514+00:00",
+    "source": "e192cf1ef649d960c2988353c1fd3a5f1346242c",
+    "phase": "enable",
+    "controlWrites": 1,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "observedControl": {
+      "sourceSha": "e192cf1ef649d960c2988353c1fd3a5f1346242c",
+      "enabled": false,
+      "activeCount": 0,
+      "slotCount": 0
+    },
+    "controlSource": "e192cf1ef649d960c2988353c1fd3a5f1346242c",
+    "priorEnabled": false,
+    "privateRetention": "ENABLED_SYNTHETIC_CONSENT_REQUIRED",
+    "enabled": true,
+    "totals": "UNCHANGED",
+    "result": "CONTROL_READBACK_PASS"
+  },
+  "frontendReport": {
+    "sourceSha": "0419904f1aabf7c68628fc8985688d325993e908",
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "providerCalls": 0,
+    "signup": 0,
+    "apiPublication": "NOT_EXECUTED",
+    "files": [
+      {
+        "path": "/assets/app-chrome-DyJwxjBm.js",
+        "sha256": "eec5b87122af6c54603b93ba595a340db2c08044cd7c41b70dcda5e2a8ed12a0"
+      },
+      {
+        "path": "/assets/connected-app-CFVE_d60.js",
+        "sha256": "b60ca8d53ee18dc388821157d05778d5f23ba6d895b0acc5b19b8a736b68896e"
+      },
+      {
+        "path": "/assets/index-DECZPAvE.css",
+        "sha256": "62a11073b2f1b7dbe6e82607516f283913dc230a1f7f7fcf731d2d02b37f9b3b"
+      },
+      {
+        "path": "/assets/index-DuiGS5vT.js",
+        "sha256": "70be5bf5d7beaa3443d3ddb08c80f6c04f0dbc5d4137dfd0536c8bde1273b323"
+      },
+      {
+        "path": "/cover.png",
+        "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151"
+      },
+      {
+        "path": "/",
+        "sha256": "cb37ca0bee0126971cd3c46a3f4def4e4d12e072bd4931ff138159dde92e4e3b"
+      },
+      {
+        "path": "/logo.png",
+        "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb"
+      }
+    ],
+    "amplifyJobId": "109"
+  },
+  "configurationReport": {
+    "result": "ZZ02_SETUP_READBACK_PASS",
+    "configurationWrites": 0,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "signupDelivery": "NOT_EXECUTED",
+    "configurationSha256": "72fd2816d6ce2bcce7ca35fd053ba4b447d0c6882fcf9ffba2c3fa0081872718",
+    "postConfirmation": "MATCH",
+    "smsRoleConfigured": false,
+    "apiSha256": "b6dc8215f92909c0b50d2e6fd4d195d2603373871952096d367194d8454414b4",
+    "groupReadRoutes": [
+      "GET /groups/{groupId}/draft-requests",
+      "GET /groups",
+      "GET /groups/{groupId}/draft-requests/{requestKey}",
+      "GET /groups/{groupId}/drafts/{draftId}",
+      "GET /groups/{groupId}/decisions/{decisionId}/review",
+      "GET /groups/{groupId}/members/{memberId}/profile",
+      "GET /groups/{groupId}"
+    ],
+    "profileRoutesPresent": 5,
+    "managedRoutesPresent": 10
+  },
+  "behavior": [
+    "Decision itself opens as native modal from navigation or direct link",
+    "Short summary, own saved answers and public participant progress above direct choice form",
+    "No separate shared-choice confirmation screen or private-answer review wizard",
+    "Explicit save atomically binds own current choices; no waiting for others to review",
+    "Other owners retain saved answers when direct answers change; stale proposals/permissions retired",
+    "Optional notes keep explicit processing consent, strict model draft/context/version/retention checks",
+    "Final proposal approval and disclosure permission remain independent",
+    "Finished decisions hide editable answer form; Close/Escape preserve unsaved-work warning"
+  ],
+  "checks": {
+    "typecheck": "PASS",
+    "frontendBuild": "PASS",
+    "changedSourceLint": "PASS",
+    "tests": "NOT_EXECUTED_USER_DIRECTION",
+    "providerCalls": 0,
+    "signupCalls": 0,
+    "participantActions": "NOT_EXECUTED",
+    "newCloudShellOrIAM": "NONE",
+    "manualAcceptance": "PENDING_USER"
+  }
+}
