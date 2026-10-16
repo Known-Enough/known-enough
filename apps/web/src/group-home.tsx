@@ -183,6 +183,10 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
   }
   const renameTarget = groups.find(group => group.id === renameGroupId) ?? null;
   const deleteTarget = groups.find(group => group.id === deleteGroupId) ?? null;
+  const groupSections = [
+    { heading: 'Groups you own', groups: groups.filter(group => group.isOrganizer) },
+    { heading: 'Groups you’re a member of', groups: groups.filter(group => !group.isOrganizer) },
+  ].filter(section => section.groups.length > 0);
   if (checking && !available) return <LoadingSkeleton kind={selectedGroupId ? 'group' : 'groups'} label={selectedGroupId ? 'Opening your group' : 'Loading your groups'}
     className={selectedGroupId ? 'ke-group-route-loading' : 'ke-group-home'} />;
   if (loadFailure) return <section className="ke-card ke-state-card ke-error-card" role="alert">
@@ -213,14 +217,15 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       {!selectedGroupId && <>
       {creating && <div className="ke-create-group-form"><div><label htmlFor="new-group-name">New group name</label>
         <input id="new-group-name" value={groupName} maxLength={80} disabled={!!groupRequest.current} onChange={event => setGroupName(event.target.value)} /></div>
-        <button disabled={busy || !groupName.trim()} onClick={() => { const pending = groupRequest.current ?? { name: groupName, idempotencyKey: crypto.randomUUID(), requestId: crypto.randomUUID() }; groupRequest.current = pending; void action('/groups', pending, result => {
+        <button disabled={busy || !groupName.trim()} onClick={() => { const pending = groupRequest.current ?? { name: groupName, idempotencyKey: crypto.randomUUID(), requestId: crypto.randomUUID() }; groupRequest.current = pending; void action('/groups', { name: pending.name, idempotencyKey: pending.idempotencyKey }, result => {
         const group = Groups.GroupSnapshot.parse(result.group); groupRequest.current = null; setGroupName(''); onOpenGroup(group.id); return true;
       }, status => { if ((status >= 400 && status < 500) || status === 507) groupRequest.current = null; }, pending.requestId); }}>Create group</button></div>}
       {!groups.length && <div className="ke-empty-state"><span className="ke-state-icon"><GroupIcon /></span><h3>No groups yet.</h3><p>Start a group with the people you want to decide with, or accept an invitation.</p></div>}
       {token && <><p>A group invitation is waiting. Accepting joins the group; it does not confirm a decision or approve a proposal.</p>
         <button disabled={busy} onClick={() => void action('/groups/accept', { token }, result => { const group = Groups.GroupSnapshot.parse(result.group); setToken(''); sessionStorage.removeItem('ke-group-invite'); onOpenGroup(group.id); return true; })}>Accept group invitation</button>
         <button className="secondary" onClick={() => { setToken(''); sessionStorage.removeItem('ke-group-invite'); }}>Decline group invitation</button></>}
-      {!!groups.length && <ul className="ke-group-list" aria-label="Decision groups">{groups.map(group => {
+      {!!groups.length && <div className="ke-group-sections">{groupSections.map(section => <section className="ke-group-section" key={section.heading}>
+        <h3>{section.heading}</h3><ul className="ke-group-list" aria-label={section.heading}>{section.groups.map(group => {
         const decisionCount = Array.isArray(group.decisions) ? group.decisions.length : null;
         const menuOpen = activeMenuGroupId === group.id;
         const menuId = `group-actions-${group.id}`;
@@ -279,7 +284,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
             </div>}
           </div>
         </li>;
-      })}</ul>}
+      })}</ul></section>)}</div>}
       </>}
       {selectedGroupId && groups.map(group => {
         const organizer = group.members.find(member => member.isOrganizer);
