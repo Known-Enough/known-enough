@@ -28,7 +28,9 @@ Published source `26c9a22b19a7036eb54016de632cfc65949ca670`; [frontend release](
 
 ## Decision idea textbox lock — 2026-10-16
 
-The idea textarea and description-helper fieldset were also disabled while the background saved-request lookup was running or unavailable (`checkingRequest` / `requestLookupAvailable`). That coupled local typing to a recovery/API read, so a failed request lookup left the new-decision textboxes unusable even though no AI submission was being made. The submit button already has the necessary recovery gate. The current correction allows local typing and example selection unless the form is actively busy or has an unresolved request key; AI submission remains disabled until saved-request status is verified. Publication pending.
+The idea textarea and description-helper fieldset were also disabled while the background saved-request lookup was running or unavailable (`checkingRequest` / `requestLookupAvailable`). That coupled local typing to a recovery/API read, so a failed request lookup left the new-decision textboxes unusable even though no AI submission was being made. The submit button already has the necessary recovery gate. The correction allows local typing and example selection unless the form is actively busy or has an unresolved request key; AI submission remains disabled until saved-request status is verified.
+
+Published source `c778eb094d302831411495b3e952636a934fe2f1`; [frontend release](https://github.com/Known-Enough/known-enough/actions/runs/38842984875) passed, Amplify job `107`. The API hash matched, all ten managed routes read back, and no configuration/data writes were needed. The hosted build passed; manual acceptance remains pending.
 
 ## First read
 
