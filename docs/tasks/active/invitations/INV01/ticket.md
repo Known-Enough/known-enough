@@ -1,6 +1,6 @@
 # INV01 — Dashboard group invitations
 
-Status: IN_PROGRESS / implementation underway, not published or user-tested.
+Status: CODE COMPLETE / publication blocked by the installed job-control transition guard; not deployed or user-tested.
 
 ## Goal
 
@@ -23,3 +23,12 @@ The current local implementation adds a private username hash directory entry, r
 Use two existing synthetic accounts. Invite by username and by email in separate groups; verify only the addressed account sees each item; accept from its dashboard; confirm the group appears and the invitation disappears. A wrong account cannot list or accept another recipient's invitation. Check the original copy-link path, expiry/replacement, and that invitation payloads contain no login/email/hash/token data. Confirm accepting does not confirm or approve any decision.
 
 No live publication or end-user acceptance is claimed until recorded with exact source and route readback.
+
+## Publication checkpoint — 2026-10-16
+
+- Source committed to `main` as `364fb4070bdccc2cd24ff39032a9fed7ebc5fdd6` (subsequent documentation and safe publisher investigation commits followed).
+- Local lint, typecheck, production build, four API/adapter suites (177 tests), focused feature suites (96 tests), and existing API-release guard checks passed.
+- The legacy profile API publisher is incompatible with the installed `api.handler`; it was not used for deployment.
+- The correct coordinated jobs/API package prepared successfully, including a new matching worker archive while the EventBridge worker rule remained disabled. Its read-only preflight refused publication with `DISABLE_AND_RESOLVE_QUEUE_BEFORE_CODE_PUBLICATION`.
+- Matching readback confirmed the installed model-job control is `enabled: true`, `active: 0`, `slots: 0`, source `23822677f4b8e9ffd43e09b3971844b2673a78af`. Cumulative totals were read only. No API/worker code, route, or control write occurred in the coordinated attempt.
+- Preserve the current control state and worker schedule. Before release, decide a guarded temporary pause/rebind/restore that leaves admission enabled and the EventBridge schedule disabled at the end. Until that is implemented and read back, E2E02 remains NOT STARTED and end-user readiness is not established.
