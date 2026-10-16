@@ -177,8 +177,8 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
   }
   const requestRequirement = busy ? aiWorking ? 'AI is working on your draft. Please wait; your earlier answers are kept.' : 'Please wait while we check or save your decision.'
     : pendingKey ? 'Resolve the unfinished request below before editing or submitting again. Closing a request keeps your saved draft.'
-    : checkingRequest ? 'Checking for unresolved AI requests. Please wait before continuing.'
-    : !requestLookupAvailable ? 'We could not check your previous requests. Choose “Check saved requests again” to continue; your answer will be kept.' : '';
+    : checkingRequest ? 'Checking for unresolved AI requests. You can keep typing; wait for the check before sending anything to AI.'
+    : !requestLookupAvailable ? 'We could not check your previous requests. You can keep typing; choose “Check saved requests again” before sending anything to AI.' : '';
   const questionRequirement = requestRequirement || (dirty ? 'Save your wording changes below before sending these answers to AI.'
     : answersTooLong ? 'Keep each answer within 500 characters.'
     : unchangedRepeatedAnswers ? 'AI repeated a question you already answered. Choose a help option below, or add the specific missing detail. We won’t send the same answers again unchanged.'
@@ -318,10 +318,10 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
             <details className="ke-wizard-limits"><summary>About the current preview</summary><p>The app compares up to 64 combinations. AI should keep the initial choices small and ask for a specific limit only when needed. Suggested dates, places or spending limits are unverified until your group reviews them.</p></details>
             <label htmlFor={`group-objective-${group.id}`}>Tell me what you want to decide</label>
             <textarea ref={objectiveInput} id={`group-objective-${group.id}`} value={objective} maxLength={2000} placeholder="For example: We want dinner together. We’re considering Place X, Place Y or Place Z, on Friday or Saturday. We don’t know what works best for everyone yet."
-              disabled={busy || !!pendingKey || checkingRequest || !requestLookupAvailable} onChange={event => { setObjective(event.target.value); setReviewed(false); }} />
+              disabled={busy || !!pendingKey} onChange={event => { setObjective(event.target.value); setReviewed(false); }} />
             <small className="ke-wizard-counter">{objective.length} / 2,000 characters · shared with your group</small>
             <details ref={descriptionHelp} className="ke-wizard-description-help"><summary>Help me describe my idea</summary><p>Answer whichever prompts help. These details are shared; keep personal limits for your private conversation later. This prepares your description without calling AI.</p>
-              <fieldset disabled={busy || !!pendingKey || checkingRequest || !requestLookupAvailable}>
+              <fieldset disabled={busy || !!pendingKey}>
                 <label htmlFor={`idea-goal-${group.id}`}>What would you like to decide?</label><input id={`idea-goal-${group.id}`} value={helpGoal} maxLength={500} placeholder="For example: Plan a dinner together" onChange={event => setHelpGoal(event.target.value)} />
                 <label htmlFor={`idea-options-${group.id}`}>Which options are you considering? <span>(optional)</span></label><textarea id={`idea-options-${group.id}`} value={helpOptions} maxLength={500} placeholder="For example: Place X, Place Y or Place Z" onChange={event => setHelpOptions(event.target.value)} />
                 <label htmlFor={`idea-unknowns-${group.id}`}>What is still undecided? <span>(optional)</span></label><textarea id={`idea-unknowns-${group.id}`} value={helpUnknowns} maxLength={500} placeholder="For example: Friday or Saturday; the spending plan is still open" onChange={event => setHelpUnknowns(event.target.value)} />
@@ -330,7 +330,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
               </fieldset>
             </details>
             {!objective.trim() && <div className="ke-wizard-examples"><span>Or start with an example</span>{['Compare three restaurants for dinner on Friday or Saturday.', 'Choose between a coastal or mountain weekend trip.', 'Compare two shared purchases and decide which fits the group.'].map(example => <button type="button" key={example} className="secondary"
-              disabled={busy || !!pendingKey || checkingRequest || !requestLookupAvailable} onClick={() => setObjective(example)}>{example}</button>)}</div>}
+              disabled={busy || !!pendingKey} onClick={() => setObjective(example)}>{example}</button>)}</div>}
             <div className="ke-wizard-actions"><button type="button" className="ke-icon-action" disabled={busy || checkingRequest || !requestLookupAvailable || !objective.trim() || !!pendingKey}
               onClick={() => void action(() => draftObjective(objective))}>Continue with AI<PageIcon name="ArrowRight" /></button>
               {draft && !pendingKey && <button type="button" className="secondary" disabled={busy} onClick={() => setStep(draft.clarificationQuestions.length ? 'questions' : 'review')}>Continue the saved draft</button>}</div>

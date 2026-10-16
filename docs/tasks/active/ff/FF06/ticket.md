@@ -26,6 +26,10 @@ The overview now lets a participant who has personally confirmed the shared fram
 
 Published source `26c9a22b19a7036eb54016de632cfc65949ca670`; [frontend release](https://github.com/Known-Enough/known-enough/actions/runs/38842621414) passed, Amplify job `106`. The existing API hash matched and all ten managed routes read back; no configuration or data writes were needed. The hosted build passed. Manual acceptance is still pending.
 
+## Decision idea textbox lock — 2026-10-16
+
+The idea textarea and description-helper fieldset were also disabled while the background saved-request lookup was running or unavailable (`checkingRequest` / `requestLookupAvailable`). That coupled local typing to a recovery/API read, so a failed request lookup left the new-decision textboxes unusable even though no AI submission was being made. The submit button already has the necessary recovery gate. The current correction allows local typing and example selection unless the form is actively busy or has an unresolved request key; AI submission remains disabled until saved-request status is verified. Publication pending.
+
 ## First read
 
 Read the latest [A handoff](../../../../handoff-B.md), [work log](../../../../work-log-A.md), [FF05](../FF05/ticket.md), and [publication receipt](../../../../review-artifacts/FF/private-answer-modal-publication.json). Inspect existing group/decision naming and permissions before changing them. Preserve current FF01–05 work; do not rebuild the private-answer backend or repeat old AWS setup.
