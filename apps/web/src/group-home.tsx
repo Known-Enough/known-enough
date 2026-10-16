@@ -242,7 +242,11 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       {creating && <div className="ke-create-group-form"><div><label htmlFor="new-group-name">New group name</label>
         <input id="new-group-name" value={groupName} maxLength={80} disabled={!!groupRequest.current} onChange={event => setGroupName(event.target.value)} /></div>
         <button disabled={busy || !groupName.trim()} onClick={() => { const pending = groupRequest.current ?? { name: groupName, idempotencyKey: crypto.randomUUID(), requestId: crypto.randomUUID() }; groupRequest.current = pending; void action('/groups', { name: pending.name, idempotencyKey: pending.idempotencyKey }, result => {
-        const group = Groups.GroupSnapshot.parse(result.group); groupRequest.current = null; setGroupName(''); onOpenGroup(group.id); return true;
+        const group = Groups.GroupSnapshot.parse(result.group); groupRequest.current = null; setGroupName('');
+        // Navigation reads the parent's ref before the state/effect update. The
+        // confirmed group name is saved; retain only genuinely unsaved input.
+        onDirtyChange?.(childDirty || !!recipient.trim());
+        onOpenGroup(group.id); return true;
       }, status => { if ((status >= 400 && status < 500) || status === 507) groupRequest.current = null; }, pending.requestId); }}>Create group</button></div>}
       {!groups.length && <div className="ke-empty-state"><span className="ke-state-icon"><GroupIcon /></span><h3>No groups yet.</h3><p>Start a group with the people you want to decide with, or accept an invitation.</p></div>}
       {token && <><p>A group invitation is waiting. Accepting joins the group; it does not confirm a decision or approve a proposal.</p>
