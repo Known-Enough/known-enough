@@ -14,6 +14,10 @@ on:
         description: Publish authenticated enqueue API and rebind only empty disabled control
         type: boolean
         default: false
+      resume_paused:
+        description: Resume a prior guarded cutover whose empty control is already disabled
+        type: boolean
+        default: false
       previous_worker_sha256:
         description: Independently verified installed worker hash from matching prior publication
         required: true
@@ -131,12 +135,19 @@ jobs:
           retry-max-attempts: 1
           unset-current-credentials: true
       - name: Pause only the verified empty admission control and preserve totals
-        if: inputs.publish_api
+        if: inputs.publish_api && !inputs.resume_paused
         env:
           EXPECTED_SOURCE: ${{ inputs.source_sha }}
           PREVIOUS_JOB_SOURCE: ${{ inputs.previous_job_source }}
           OWNER_INTERPRETATION: 'true'
         run: python3 -B scripts/fix01/enable.py disable --control-source "$PREVIOUS_JOB_SOURCE" --expected-enabled true
+      - name: Verify the already paused empty admission control and preserved totals
+        if: inputs.publish_api && inputs.resume_paused
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_sha }}
+          PREVIOUS_JOB_SOURCE: ${{ inputs.previous_job_source }}
+          OWNER_INTERPRETATION: 'true'
+        run: python3 -B scripts/fix01/enable.py disable --control-source "$PREVIOUS_JOB_SOURCE" --expected-enabled false
       - name: Refuse blocked source transition before replacing either runtime
         if: inputs.publish_api
         env:
@@ -243,7 +254,7 @@ jobs:
           allowed-account-ids: '092954139775'
           retry-max-attempts: 1
           unset-current-credentials: true
-      - name: Restore prior enabled admission only after exact API worker and logging guards
+      - name: Restore enabled admission only after exact API worker and logging guards
         if: inputs.publish_api
         env:
           EXPECTED_SOURCE: ${{ inputs.source_sha }}
