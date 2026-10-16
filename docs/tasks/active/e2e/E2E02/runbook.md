@@ -45,6 +45,10 @@ Open sign-in in Context 1, fill credentials privately and submit. Expect signed-
 
 Repeat in Context 2. Expect User 2 identity, not User 1's session. Confirm changing/signing out of one context does not share its session with the other, without destroying an in-progress scenario. Two usable identities are required for later joint cases. A missing credential file is a prerequisite blocker, not a demonstrated sign-in bug.
 
+### Dashboard regression from INV01 — verify during 01–03
+
+After account and groups return successfully, the browser must attempt the exact authenticated `/invitations` read; a local `Invalid API path` must not prevent it. If invitations alone cannot load, validated groups remain visible with a clear invitations retry notice, rather than a full-page groups-format error or a false zero-invitation claim. Record the actual request/status and frontend source. This is a user-reported confirmed client-route defect; do not reuse the earlier public smoke as authenticated evidence.
+
 ### 03 — Group creation gives truthful feedback
 
 Use a working user's account as organizer; record which alias. Create `E2E02 <run ID> Workshop` with one click. Observe pending/success/error feedback and network result. Confirm the new group appears, including after a supported refresh. If the UI says no group/error but readback proves creation, record the feedback failure separately from successful persistence. If the write result is unknown, read the organizer's groups before retrying; do not duplicate creation.

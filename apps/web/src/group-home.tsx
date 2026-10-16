@@ -15,6 +15,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
   const [account, setAccount] = useState<ReturnType<typeof Groups.AccountSnapshot.parse> | null>(null);
   const [groups, setGroups] = useState<Groups.GroupSnapshot[]>([]);
   const [invitations, setInvitations] = useState<Groups.InvitationSnapshot[]>([]);
+  const [invitationFailure, setInvitationFailure] = useState<string | null>(null);
   const [profileTarget, setProfileTarget] = useState<ProfileTarget | null>(null);
   const profileTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [activeMenuGroupId, setActiveMenuGroupId] = useState<string | null>(null);
@@ -90,7 +91,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
     const epoch = ++loadEpoch.current; loadAbort.current?.abort();
     const controller = new AbortController(); loadAbort.current = controller;
     const current = () => mounted.current && epoch === loadEpoch.current;
-    setChecking(true); setLoadFailure(null); if (!preserveLink) setLink('');
+    setChecking(true); setLoadFailure(null); setInvitationFailure(null); if (!preserveLink) setLink('');
     let stage: 'account' | 'groups' | 'group' | 'invitations' = 'account';
     let httpStatus: number | null = null, reference: string | null = null;
     let emailConflict = false;
@@ -98,6 +99,11 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       httpStatus = response.status;
       const id = response.headers.get('apigw-requestid') ?? response.headers.get('x-amzn-requestid');
       reference = id && /^[A-Za-z0-9_-]{8,80}$/.test(id) ? id : null;
+    };
+    const diagnostic = (error: unknown) => {
+      console.info('Known Enough group loading diagnostic', { stage, httpStatus,
+        reason: error instanceof Error && error.message === 'Invalid API path' ? 'CLIENT_PATH_BLOCKED'
+          : httpStatus === null ? 'CONNECTION_OR_TIMEOUT' : httpStatus >= 400 ? 'HTTP_ERROR' : 'RESPONSE_FORMAT', ...(reference ? { reference } : {}) });
     };
     try {
       const response = await api('/account', {signal: controller.signal});
@@ -121,6 +127,8 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       }
       const next = result.account ? Groups.AccountSnapshot.parse(result.account) : null;
       let nextGroups: Groups.GroupSnapshot[] = [];
+      let nextInvitations: Groups.InvitationSnapshot[] = [];
+      let nextInvitationFailure: string | null = null;
       if (next?.status === 'APPROVED') {
         stage = selectedGroupId ? 'group' : 'groups'; httpStatus = null; reference = null;
         const response = await api(selectedGroupId ? '/groups/' + selectedGroupId : '/groups', {signal: controller.signal});
@@ -130,17 +138,24 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
         if (!selectedGroupId && !Array.isArray(result.groups)) throw new Error('Invalid groups response');
         nextGroups = selectedGroupId ? [Groups.GroupSnapshot.parse(result.group)] : result.groups!.map(group => Groups.GroupSnapshot.parse(group));
         if (!selectedGroupId) {
-          const pendingResponse = await api('/invitations', { signal: controller.signal }); observe(pendingResponse);
-          if (!pendingResponse.ok) { stage = 'invitations'; throw new Error('Invitations unavailable'); }
-          const pending = await pendingResponse.json() as { invitations?: unknown[] };
-          if (!Array.isArray(pending.invitations)) { stage = 'invitations'; throw new Error('Invalid invitations response'); }
-          setInvitations(pending.invitations.map(value => Groups.InvitationSnapshot.parse(value)));
+          stage = 'invitations'; httpStatus = null; reference = null;
+          try {
+            const pendingResponse = await api('/invitations', { signal: controller.signal }); observe(pendingResponse);
+            if (!pendingResponse.ok) throw new Error('Invitations unavailable');
+            const pending = await pendingResponse.json() as { invitations?: unknown[] };
+            if (!Array.isArray(pending.invitations)) throw new Error('Invalid invitations response');
+            nextInvitations = pending.invitations.map(value => Groups.InvitationSnapshot.parse(value));
+          } catch (error) {
+            if (!current()) return;
+            diagnostic(error);
+            nextInvitationFailure = 'Your groups are available, but invitations could not be checked. Try again.';
+          }
         }
       }
       if (!current()) return;
-      setAvailable(true); setAccount(next); setGroups(nextGroups); setNotice('');
+      setAvailable(true); setAccount(next); setGroups(nextGroups); setInvitations(nextInvitations); setInvitationFailure(nextInvitationFailure); setNotice('');
       if (next?.status !== 'APPROVED') {setLink(''); setRecipient(''); setReplace(false); setInvitations([]);}
-    } catch {
+    } catch (error) {
       if (!current()) return;
       setAvailable(false); setAccount(null); setGroups([]); setInvitations([]); setLink(''); setRecipient(''); setReplace(false);
       const missingGroup = stage === 'group' && (httpStatus === 403 || httpStatus === 404);
@@ -151,8 +166,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
           : httpStatus === null ? 'We couldn’t reach the service. Check your connection and try again.'
           : stage === 'invitations' ? 'Your groups loaded, but invitations could not be checked. Refresh to try again.'
           : 'The service couldn’t load this view right now. Try again, or return to your groups.', reference });
-      console.info('Known Enough group loading diagnostic', { stage, httpStatus,
-        reason: httpStatus === null ? 'CONNECTION_OR_TIMEOUT' : httpStatus >= 400 ? 'HTTP_ERROR' : 'RESPONSE_FORMAT', ...(reference ? { reference } : {}) });
+      diagnostic(error);
     } finally {if (current()) setChecking(false);}
   }
   useEffect(() => {
@@ -256,6 +270,9 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       {token && <><p>A group invitation is waiting. Accepting joins the group; it does not confirm a decision or approve a proposal.</p>
         <button disabled={busy} onClick={() => void action('/groups/accept', { token }, result => { const group = Groups.GroupSnapshot.parse(result.group); setToken(''); sessionStorage.removeItem('ke-group-invite'); onOpenGroup(group.id); return true; })}>Accept group invitation</button>
         <button className="secondary" onClick={() => { setToken(''); sessionStorage.removeItem('ke-group-invite'); }}>Decline group invitation</button></>}
+      {invitationFailure && <section className="ke-card ke-dashboard-invitations" role="status">
+        <p>{invitationFailure}</p><button type="button" className="secondary" disabled={busy || checking} onClick={() => void load()}>Retry invitations</button>
+      </section>}
       {!!invitations.length && <section className="ke-card ke-dashboard-invitations" aria-labelledby="pending-invitations-heading">
         <header className="ke-panel-heading"><div><h3 id="pending-invitations-heading"><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="Mail" /></span><span>Pending invitations</span></h3>
           <p className="ke-panel-subtitle">Accepting adds you to the group. It does not confirm or approve any decision.</p></div>
