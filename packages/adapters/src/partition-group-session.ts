@@ -1,7 +1,8 @@
+import { isDeepStrictEqual } from 'node:util';
 import { sanitizeOwnedAvatar } from './owned-avatar.ts';
 import { createHash, createHmac, randomBytes } from 'node:crypto';
 import { z } from 'zod';
-import { Groups, KnownEnough as KE } from '@deal-table/contracts';
+import { ChoicePlan, compileChoicePlan, Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { KnownEnoughApplicationError, type TrustedPrincipal, type DecisionArchitectRequest } from '@deal-table/application';
 import { ArchivedGroupRow } from './partition-archive.ts';
 import { PartitionMembershipError } from './partition-membership.ts';
@@ -23,12 +24,13 @@ const profile = z.strictObject({ subject: id, email, verified: z.literal(true), 
 const invite = z.strictObject({ email, replace: z.boolean() });
 const accept = z.strictObject({ token: z.string().regex(/^[A-Za-z0-9_-]{32,80}$/) });
 const draftGeneration = z.strictObject({ objective: z.string().max(2000).trim().min(1), idempotencyKey: id,
+  choicePlan: ChoicePlan.optional(), choiceContext: ChoicePlan.optional(),
   followUp: z.strictObject({ draftId: id, revision: z.number().int().positive(), answers: z.array(z.string().trim().min(1).max(500)).min(1).max(12) }).optional() });
 const draftCreation = z.strictObject({ revision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER) });
-const architectureOutput = z.strictObject({ draftId: id, revision: z.literal(1), status: z.enum(['DEFINING', 'NEEDS_CLARIFICATION']),
+const architectureOutput = z.strictObject({ choicePlan: ChoicePlan.optional(), draftId: id, revision: z.literal(1), status: z.enum(['DEFINING', 'NEEDS_CLARIFICATION']),
   frame: KE.PublicDecisionFrame, clarificationQuestions: Groups.GroupDraft.shape.clarificationQuestions,
   participantInformationRequirements: z.array(z.strictObject({ participantId: id, prompt: z.string().min(1).max(500) })).max(64) });
-const draftEdit = z.strictObject({ revision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+const draftEdit = z.strictObject({ choicePlan: ChoicePlan.optional(), revision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
   title: KE.PublicDecisionFrame.shape.title, objective: KE.PublicDecisionFrame.shape.objective,
   variables: KE.PublicDecisionFrame.shape.variables, rules: KE.PublicDecisionFrame.shape.rules });
 const cursor = z.string().regex(/^[A-Za-z0-9_-]{40,1600}$/);
@@ -391,6 +393,30 @@ export function createPartitionGroupSession(transport: PartitionTransport,
         if (!request.success) return deny('INVALID_COMMAND');
         const io = supplied ?? partitionIO(limits);
         const draftId = `draft-${createHash('sha256').update(JSON.stringify([key, who, request.data.idempotencyKey])).digest('hex').slice(0, 40)}`;
+        if (request.data.choicePlan) {
+          if (request.data.followUp || request.data.choiceContext) return deny('INVALID_COMMAND');
+          const plan = request.data.choicePlan;
+          const compiled = compileChoicePlan(plan);
+          return selected(who, key, io, resolved => repository.transaction(resolved, state => {
+            const group = current(state, who, key, true), participants = publicRoster(state, group);
+            const bodyHash = createHash('sha256').update(JSON.stringify([request.data.objective, group.version, plan])).digest('hex');
+            const existing = group.drafts.find(value => value.id === draftId);
+            if (existing?.deleted) return deny('NOT_FOUND');
+            if (existing) {
+              if (existing.bodyHash !== bodyHash || existing.groupVersion !== group.version) return deny('STALE_CONTEXT');
+              return Groups.GroupDraft.parse(existing);
+            }
+            if (group.drafts.length >= 64) throw new PartitionSessionError('SESSION_CAPACITY');
+            const frame = KE.PublicDecisionFrame.parse({ schemaVersion: KE.KE_SCHEMA_VERSION,
+              decisionId: draftId, frameVersion: 1, semanticVersion: 1, contextToken: randomBytes(32).toString('hex'),
+              title: plan.title.trim() || request.data.objective.trim().split(/\s+/).slice(0,3).join(' ').slice(0,80),
+              objective: request.data.objective, description: plan.description, participants,
+              requiredParticipantIds: participants.map(value => value.id), variables: compiled.variables, rules: compiled.rules });
+            const saved = Groups.GroupDraft.parse({ id: draftId, bodyHash, revision: 1, groupVersion: group.version,
+              frame, choicePlan: plan, clarificationQuestions: compiled.questions, createdDecisionId: null });
+            group.drafts.push(saved); return saved;
+          }, io));
+        }
         const before = await selected(who, key, io, resolved => repository.transaction(resolved, state => {
           const group = current(state, who, key, true); const participants = publicRoster(state, group);
           const followUp = request.data.followUp;
@@ -399,7 +425,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
             || previous.frame.objective !== request.data.objective || previous.clarificationQuestions.length !== followUp!.answers.length)) return deny('STALE_CONTEXT');
           const publicClarifications = previous ? [...(previous.publicClarifications ?? []), ...previous.clarificationQuestions.map((question, index) => ({ question, answer: followUp!.answers[index]! }))] : [];
           if (publicClarifications.length > 36) return deny('INVALID_COMMAND');
-          const bodyHash = createHash('sha256').update(JSON.stringify([request.data.objective, group.version, ...(followUp ? [followUp] : [])])).digest('hex');
+          const bodyHash = createHash('sha256').update(JSON.stringify([request.data.objective, group.version, ...(followUp ? [followUp] : []), ...(request.data.choiceContext ? [request.data.choiceContext] : [])])).digest('hex');
           const existing = group.drafts.find(value => value.id === draftId);
           if (existing?.deleted) return deny('NOT_FOUND');
           if (existing && (existing.bodyHash !== bodyHash || existing.groupVersion !== group.version)) return deny('STALE_CONTEXT');
@@ -415,6 +441,11 @@ export function createPartitionGroupSession(transport: PartitionTransport,
         let output: z.infer<typeof architectureOutput>;
         try { output = architectureOutput.parse(JSON.parse(serialized)); }
         catch { throw new PartitionSessionError('SESSION_INVALID'); }
+        if (output.choicePlan) {
+          const compiled = compileChoicePlan(output.choicePlan);
+          if (!isDeepStrictEqual(output.frame.variables, compiled.variables)
+            || !isDeepStrictEqual(output.frame.rules, compiled.rules)) throw new PartitionSessionError('SESSION_INVALID');
+        }
         if (output.draftId !== draftId || output.frame.objective !== request.data.objective
           || output.frame.frameVersion !== 1 || output.frame.semanticVersion !== 1
           || JSON.stringify(output.frame.participants) !== JSON.stringify(before.participants)
@@ -425,6 +456,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
         const questions = [...output.clarificationQuestions]; const catalog = genericCandidateCatalog(output.frame);
         if (catalog.clarificationQuestion && !questions.includes(catalog.clarificationQuestion)) questions.push(catalog.clarificationQuestion);
         return Groups.GroupDraft.parse({ id: draftId, bodyHash: before.bodyHash, revision: 1, groupVersion: before.groupVersion,
+          ...(output.choicePlan ? { choicePlan: output.choicePlan } : {}),
           frame: output.frame, clarificationQuestions: questions.slice(0, 12), createdDecisionId: null, ...(before.publicClarifications.length ? { publicClarifications: before.publicClarifications } : {}) });
         };
         const readSaved = () => selected(who, key, io, resolved => repository.transaction(resolved, state => {
@@ -455,7 +487,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           return Promise.resolve().then(() => {
             if (io.signal.aborted) throw new PartitionSessionError('SESSION_TIMEOUT');
             return draftArchitect(who, { draftId, revision: 1, objective: request.data.objective,
-              participants: before.participants.map(({ id, displayName }) => ({ id, displayName })), allowedOptions: [], generateOptions: true, ...(before.previous ? { followUp: { previousFrame: before.previous.frame, answers: before.publicClarifications } } : {}) }, io, scope);
+              participants: before.participants.map(({ id, displayName }) => ({ id, displayName })), allowedOptions: [], generateOptions: true, ...(request.data.choiceContext ? { choiceContext: request.data.choiceContext } : {}), ...(before.previous ? { followUp: { previousFrame: before.previous.frame, answers: before.publicClarifications } } : {}) }, io, scope);
           }).finally(() => { generating--; });
         });
         if (preparedOutput) { const saved = await readSaved(); if (saved) return saved; }
@@ -506,10 +538,16 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           const draft = currentDraft(state, who, key, draftId);
           if (draft.createdDecisionId || request.data.revision !== draft.revision) return deny('STALE_CONTEXT');
           if (draft.revision >= Number.MAX_SAFE_INTEGER) throw new PartitionSessionError('SESSION_CAPACITY');
+          const compiled = request.data.choicePlan ? compileChoicePlan(request.data.choicePlan) : null;
           const frame = KE.PublicDecisionFrame.safeParse({ ...draft.frame, title: request.data.title, objective: request.data.objective,
-            variables: request.data.variables, rules: request.data.rules });
+            description: request.data.choicePlan?.description ?? draft.frame.description,
+            variables: compiled?.variables ?? request.data.variables, rules: compiled?.rules ?? request.data.rules });
           if (!frame.success || frame.data.variables.some(value => value.visibility !== 'PUBLIC') || frame.data.rules.some(value => value.visibility !== 'PUBLIC')) return deny('INVALID_COMMAND');
           draft.frame = frame.data; draft.revision++;
+          if (request.data.choicePlan && compiled) {
+            draft.choicePlan = request.data.choicePlan;
+            draft.clarificationQuestions = compiled.questions;
+          }
           const catalog = genericCandidateCatalog(draft.frame);
           // Editing never answers a previously unresolved model or public-catalog question.
           if (catalog.clarificationQuestion && !draft.clarificationQuestions.includes(catalog.clarificationQuestion))

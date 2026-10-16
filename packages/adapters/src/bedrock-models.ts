@@ -1,9 +1,9 @@
 import { BedrockRuntimeClient, ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 import type { ConverseCommandInput, ConverseCommandOutput } from '@aws-sdk/client-bedrock-runtime';
-import { KnownEnough as KE } from '@deal-table/contracts';
+import { ChoicePlan, KnownEnough as KE } from '@deal-table/contracts';
 import type { DecisionArchitectModel, OwnerConversationModel, DecisionNegotiationModel,
   ModelInvocation, ModelJobKind, ModelJobRunner, ModelFailureDiagnostic } from '@deal-table/application';
-import { reportModelFailure } from '@deal-table/application';
+import { reportModelFailure, modelValidationIssues } from '@deal-table/application';
 import { z } from 'zod';
 import { ModelRuntimeError } from './model-jobs.ts';
 import { architectToolSchema, decodeArchitectOutput, ArchitectWireError } from './architect-tool.ts';
@@ -229,6 +229,19 @@ export function createBedrockModels(options: {
     try { text = JSON.stringify(payload); } catch { throw new ModelRuntimeError('INVALID_INPUT'); }
     let tool: { name: string; schema: Record<string, unknown> } = outputTools[kind];
     let prompt = prompts[kind];
+    const simpleChoices = kind === 'ARCHITECT' && !!payload && typeof payload === 'object'
+      && 'generateOptions' in payload && payload.generateOptions === true && !('publicVariables' in payload);
+    if (simpleChoices) {
+      const json = z.toJSONSchema(ChoicePlan, { unrepresentable: 'throw' });
+      tool = { name: tool.name, schema: { type: 'object', properties: json.properties, required: json.required } };
+      prompt = policy + 'Extract a small editable public choice plan from the idea and cumulative public follow-up. Return title (about three words), description and topics only. '
+        + 'Each topic has label, kind CHOICE or DATE, and options as plain strings. Dates must be exact ISO YYYY-MM-DD only if the date is unambiguous; otherwise use CHOICE and keep the original labels. '
+        + 'choiceContext, when supplied, contains user-edited public choices. Help fill its missing labels/options without changing existing answers. Copy all supplied alternatives. Keep prices and other supplied context visible in description or option labels; never invent verified facts, dates or prices. '
+        + 'Do not ask the organizer for private preferences, availability or budgets. Each person answers privately later. '
+        + 'No variable/option ids, rule objects, participant ids or consent fields. The server constructs those. '
+        + 'If a topic has no supplied options, return an empty options list so the editor can ask a focused question. Do not pretend unknowns are known. '
+        + 'Use at most six topics and sixteen options per topic. Prefer just the topics actually requested. Follow-up context may add missing shared options; retain previously supplied alternatives.';
+    }
     if (kind === 'ARCHITECT' && payload && typeof payload === 'object' && 'publicVariables' in payload) {
       const variables = (payload as { publicVariables: KE.PublicDecisionVariable[] }).publicVariables;
       const { variables: omitted, ...properties } = outputTools.ARCHITECT.schema.properties;
@@ -302,9 +315,9 @@ export function createBedrockModels(options: {
           reportModelFailure(options.diagnostic, kind, 'TOOL_OUTPUT');
           throw new ModelRuntimeError('INVALID_OUTPUT');
         }
-      try { return normalizeToolOutput(kind, result, payload); } catch (error) {
-        reportModelFailure(options.diagnostic, kind, error instanceof ArchitectWireError ? 'ARCHITECT_WIRE_SCHEMA' : 'TOOL_OUTPUT',
-          error instanceof ArchitectWireError ? error.validation : undefined);
+      try { return simpleChoices ? { choicePlan: ChoicePlan.parse(result) } : normalizeToolOutput(kind, result, payload); } catch (error) {
+        reportModelFailure(options.diagnostic, kind, error instanceof ArchitectWireError || simpleChoices && error instanceof z.ZodError ? 'ARCHITECT_WIRE_SCHEMA' : 'TOOL_OUTPUT',
+          error instanceof ArchitectWireError ? error.validation : simpleChoices && error instanceof z.ZodError ? modelValidationIssues(error.issues, result) : undefined);
         throw new ModelRuntimeError('INVALID_OUTPUT');
       }
     });
@@ -326,6 +339,7 @@ export function createBedrockModels(options: {
       return invoke('ARCHITECT', {
         objective: input.objective, ...(input.followUp ? { followUp: structuredClone(input.followUp) } : {}), participants: input.participants.map(person => ({ id: person.id, displayName: person.displayName })),
         allowedOptions: input.allowedOptions,
+        ...(input.choiceContext ? { choiceContext: ChoicePlan.parse(input.choiceContext) } : {}),
         ...(input.generateOptions === true ? { generateOptions: true } : {}),
         ...(publicVariables ? { publicVariables } : {}),
       }, invocation);

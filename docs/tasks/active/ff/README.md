@@ -6,6 +6,7 @@ Historical service repair (followed by FF11 publication below), 2026-10-16: [dra
 
 | Task | Purpose | Current status |
 | --- | --- | --- |
+| [FF12](FF12/README.md) | Editable choices, deterministic compilation and no-AI creation fallback. | IN_PROGRESS/A; publication pending |
 | [FF11](FF11/README.md) | Decision opens in modal with direct answers, without a separate review flow. | PUBLISHED/Amplify109; user manual acceptance pending |
 | [FF10](FF10/README.md) | Compare logs/code/live pages and update outdated example guidance. | PUBLISHED/sourcef1c9100/Amplify104; manual acceptance pending |
 | [FF09](FF09/README.md) | Example guidance only inside the create-decision modal. | PUBLISHED/sourcef1c9100/Amplify104; manual acceptance pending |

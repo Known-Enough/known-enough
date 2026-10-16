@@ -1,5 +1,5 @@
 import { reportModelFailure, modelValidationIssues, type ModelValidationIssue, type ModelInvocation, type ModelFailureDiagnostic } from './model-runtime.ts';
-import { Id, KnownEnough as KE } from '@deal-table/contracts';
+import { Id, ChoicePlan, compileChoicePlan, KnownEnough as KE } from '@deal-table/contracts';
 import type { KnownEnough as KETypes } from '@deal-table/contracts';
 
 export interface DecisionArchitectParticipant {
@@ -22,6 +22,7 @@ export interface DecisionArchitectRequest {
   /** Explicit general-draft mode: propose new bounded public option labels for participant review. */
   generateOptions?: boolean;
   followUp?: PublicDraftFollowUp;
+  choiceContext?: ChoicePlan;
 }
 
 export interface DecisionArchitectModelInput {
@@ -32,6 +33,7 @@ export interface DecisionArchitectModelInput {
   /** Explicit general-draft mode: propose new bounded public option labels for participant review. */
   generateOptions?: boolean;
   followUp?: PublicDraftFollowUp;
+  choiceContext?: ChoicePlan;
 }
 
 /** A model port is injected by the caller. Raw output is always treated as untrusted. */
@@ -40,6 +42,7 @@ export interface DecisionArchitectModel {
 }
 
 export type DecisionArchitectureDraft = {
+  choicePlan?: ChoicePlan;
   draftId: string;
   revision: number;
   status: 'DEFINING' | 'NEEDS_CLARIFICATION';
@@ -291,11 +294,13 @@ export class DecisionArchitect {
     };
     try {
       let output: unknown;
+      let choicePlan: ChoicePlan | undefined;
       try {
         output = await this.model.draft({
           objective: request.objective.trim(),
           participants: participants as DecisionArchitectParticipant[],
           allowedOptions,
+          ...(request.choiceContext ? { choiceContext: ChoicePlan.parse(request.choiceContext) } : {}),
           ...(request.followUp ? { followUp: structuredClone(request.followUp) } : {}),
           ...(request.generateOptions === true ? { generateOptions: true } : {}),
           ...(publicVariables ? { publicVariables: structuredClone(publicVariables) } : {}),
@@ -321,6 +326,27 @@ export class DecisionArchitect {
       }
       try { output = JSON.parse(serialized) as unknown; } catch {
         this.rejectModel('ARCHITECT_FIELDS');
+      }
+      if (record(output) && Object.keys(output).join('|') === 'choicePlan') {
+        const parsed = ChoicePlan.safeParse(output.choicePlan);
+        if (!parsed.success) this.rejectModel('ARCHITECT_FIELDS');
+        choicePlan = parsed.data;
+        if (request.choiceContext?.topics.length) {
+          const previous = ChoicePlan.parse(request.choiceContext);
+          choicePlan = ChoicePlan.parse({ ...choicePlan, title: previous.title.trim() || choicePlan.title,
+            topics: previous.topics.map((topic, index) => {
+              const suggestion = choicePlan!.topics.find(value => value.label.trim().toLowerCase() === topic.label.trim().toLowerCase())
+                ?? (!topic.label.trim() ? choicePlan!.topics[index] : undefined);
+              return { label: topic.label.trim() || suggestion?.label || '', kind: topic.label.trim() ? topic.kind : suggestion?.kind ?? topic.kind,
+                options: topic.options.some(value => value.trim()) ? topic.options : suggestion?.options ?? [] };
+            }) });
+        }
+        choicePlan = { ...choicePlan, title: choicePlan.title.trim() || shortPublicTitle(request.objective) };
+        const compiled = compileChoicePlan(choicePlan);
+        output = { title: choicePlan.title.trim() || request.objective.trim().split(/\s+/).slice(0, 3).join(' ').slice(0,80),
+          description: choicePlan.description, variables: compiled.variables, rules: compiled.rules,
+          clarificationQuestions: compiled.questions.map(question => ({ question, purpose: 'PUBLIC_SCOPE', variableId: '' })),
+          participantInformationRequirements: [] };
       }
       if (!record(output) || !sameKeys(output, MODEL_FIELDS)
         || typeof output.title !== 'string' || output.title.trim().length === 0 || output.title.length > 160
@@ -354,7 +380,7 @@ export class DecisionArchitect {
         frameVersion: 1,
         semanticVersion: 1,
         contextToken: await token(Id.parse(this.id())),
-        title: shortPublicTitle(request.objective),
+        title: choicePlan?.title || shortPublicTitle(request.objective),
         objective: request.objective.trim(),
         description: output.description,
         participants: participants.map(person => ({ ...person, requiredForApproval: true })),
@@ -413,9 +439,10 @@ export class DecisionArchitect {
         }),
       });
 
-      const clarificationQuestions = publicQuestions(output.clarificationQuestions, frame);
+      const clarificationQuestions = choicePlan ? compileChoicePlan(choicePlan).questions : publicQuestions(output.clarificationQuestions, frame);
       await invocation.assertCurrent();
       return {
+        ...(choicePlan ? { choicePlan } : {}),
         draftId: request.draftId,
         revision: request.revision,
         status: clarificationQuestions.length ? 'NEEDS_CLARIFICATION' : 'DEFINING',

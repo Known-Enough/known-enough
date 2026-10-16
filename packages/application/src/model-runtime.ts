@@ -16,7 +16,7 @@ export interface ModelFailureDiagnostic {
   stage: typeof MODEL_FAILURE_STAGES[number];
   validation?: ModelValidationIssue[];
 }
-const validationFields = new Set(('NUMBER MONEY PERCENTAGE DATE DATETIME DURATION BOOLEAN ENUM ENUM_SET PARTICIPANT COMPARE IN RANGE SUM_EQUALS ALL_DIFFERENT MUTUALLY_EXCLUSIVE IMPLIES title description variables rules clarificationQuestions participantInformationRequirements '
+const validationFields = new Set(('NUMBER MONEY PERCENTAGE DATE DATETIME DURATION BOOLEAN ENUM ENUM_SET PARTICIPANT COMPARE IN RANGE SUM_EQUALS ALL_DIFFERENT MUTUALLY_EXCLUSIVE IMPLIES title description topics choicePlan kind variables rules clarificationQuestions participantInformationRequirements '
   + 'schemaVersion decisionId frameVersion semanticVersion contextToken participants requiredParticipantIds '
   + 'id type label required visibility ownerParticipantId options participantIds unitCode scale currencyCode minorUnit displayTimeZone unit allowedValues '
   + 'operator variableId comparison value values minimum maximum includeMinimum includeMaximum variableIds target maximumSelected antecedent consequent '

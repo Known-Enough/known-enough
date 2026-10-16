@@ -205,7 +205,7 @@ export class GroupService {
     });
   }
   async deleteGroup(principal: TrustedPrincipal | null, id: string, raw: unknown) {
-    const who = subject(principal); const parsed = Groups.GroupRemoval.safeParse(raw);
+    subject(principal); const parsed = Groups.GroupRemoval.safeParse(raw);
     if (!parsed.success) return fail('INVALID_COMMAND');
     return this.repository.transaction(state => {
       const group = this.currentGroup(state, principal, id, true);

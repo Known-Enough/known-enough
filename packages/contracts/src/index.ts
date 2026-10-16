@@ -205,3 +205,5 @@ export type FinalApproval = z.infer<typeof FinalApproval>;
 export * as KnownEnough from './known-enough.ts';
 
 export * as Groups from './groups.ts';
+
+export { ChoicePlan, compileChoicePlan } from './choice-plan.ts';

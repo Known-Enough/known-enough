@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ChoicePlan } from './choice-plan.ts';
 import { PublicDecisionFrame } from './known-enough.ts';
 const id = z.string().regex(/^[A-Za-z0-9_-]{1,80}$/);
 const text = z.string().trim().min(1).max(80);
@@ -21,7 +22,7 @@ export const Account = z.object({ subject: id, emailHash: z.string().regex(/^[a-
   status: AccountStatus, version: z.number().int().positive(), profile: PrivateProfile.optional(),
   /** Private, immutable subject-specific ownership for a server-allowlisted test email. */
   sharedTestEmail: z.literal(true).optional() }).strict();
-export const GroupDraft = z.object({ id, bodyHash: z.string().regex(/^[a-f0-9]{64}$/),
+export const GroupDraft = z.object({ choicePlan: ChoicePlan.optional(), id, bodyHash: z.string().regex(/^[a-f0-9]{64}$/),
   revision: z.number().int().positive(), groupVersion: z.number().int().positive(),
   frame: PublicDecisionFrame, clarificationQuestions: z.array(z.string().min(1).max(500)).max(12),
   createdDecisionId: id.nullable(),

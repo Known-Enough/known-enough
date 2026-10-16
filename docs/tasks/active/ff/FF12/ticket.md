@@ -1,0 +1,13 @@
+# FF12 — Reliable editable decision creation
+
+Status: IN_PROGRESS/A; publication/manual acceptance pending.
+
+Exact request950c5741…/read38926202181 showed acknowledged tool_use,248 output tokens, then ARCHITECT_RULE_FIELDS/rules[1].values strings expected objects. This is a confirmed format/conversion rejection, not timeout/AWS denial. User authorizes a generic design replacing dependence on AI-generated backend rules.
+
+General AI drafts now use one small public ChoicePlan: title, description and topics with named or date options. The app owns IDs, participants, typed variables and date-domain rules; old canonical/selected public-variable ports remain compatible. Choice context preserves existing user options when asking AI to fill gaps. Finite scope is explicit: up to six topics, sixteen options each and64total combinations. Prices/context remain supplied labels/description; no invented budgets, real quotes or verified availability.
+
+A shared deterministic compiler and editable browser form ask specific questions for missing labels/options, duplicates, invalid dates and excess combinations. Both incomplete and complete drafts can be saved; incomplete drafts cannot be created. Native organizer-authenticated no-AI save on the existing draft route retains admission, roster, revision, deletion, capacity and idempotency guards. Server recompiles public choices rather than trusting client rules. AI draft commits strictly validate the same compiled frame. Existing drafts without ChoicePlan retain legacy editing and validation.
+
+The no-AI editor is available even if AI inventory is unavailable/unknown. It retains original AI nonce/status, never retries paid calls automatically, and saves separately. Same manual save key/body is retained across refresh; recovered earlier saves do not overwrite newer edits or create an older plan silently. Owner-public idea/plan/draft checkpoints stay in session storage, without passwords/private participant answers. Separate final proposal approval, processing consent and disclosure rules remain. Example content follows the new creation and FF11 private-answer flow.
+
+No tests/AI calls/signup/participant probes in this A chat. Type/build/lint/boundary checks allowed. Compatible API/worker/frontend publication and matching enabled source required; no new AWS route/IAM/CloudShell. User performs manual acceptance.99.9% reliability is an unmeasured goal; a successful build/deployment does not establish that rate. B's later E2E work should evaluate diverse domains, invalid AI output, missing choices, reloads and interrupted saves under its separate task authority.
