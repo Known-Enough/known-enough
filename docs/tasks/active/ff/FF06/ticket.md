@@ -18,6 +18,12 @@ The follow-up restores editable structured answers during an unresolved optional
 
 Walkthrough: open a decision with an uncertain notes request and edit/save structured answers; create a group and retry only the same request if its result is unknown; use the group dots to inspect members/decisions, rename, and confirm deletion; verify deleted groups and linked decisions return not found to their former members.
 
+## New-decision answer-entry correction — 2026-10-16
+
+Review of the published flow found the remaining lock: the overview routed to shared-choice review whenever any required participant had not confirmed. The private-answer entry button and its parent step also required every participant to have confirmed, even though only saving is guarded by the API. This prevented participants from preparing private answers for a new decision while waiting for others.
+
+The overview now lets a participant who has personally confirmed the shared frame open and edit their private answers while others are pending. The save control remains disabled, with a clear explanation, until every required participant has confirmed; the API's existing check remains authoritative. No backend or confirmation rule changed. Frontend publication pending.
+
 ## First read
 
 Read the latest [A handoff](../../../../handoff-B.md), [work log](../../../../work-log-A.md), [FF05](../FF05/ticket.md), and [publication receipt](../../../../review-artifacts/FF/private-answer-modal-publication.json). Inspect existing group/decision naming and permissions before changing them. Preserve current FF01–05 work; do not rebuild the private-answer backend or repeat old AWS setup.

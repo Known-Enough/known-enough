@@ -6,9 +6,9 @@ type Answer = { mode: KE.PrivateChoiceAnswer['mode'] | ''; acceptable: number[];
 type Payload = Extract<KE.DecisionCommand, { type: 'CONFIRM_PRIVATE_ANSWERS' }>['payload'];
 type Condition = KE.AIConstraintDraft['proposedConstraints'][number];
 const direct = (id: string) => id.startsWith('answer-');
-export function PrivateAnswersModal({ open, owner, busy, blocked, notesLocked, notes, consent, notice, recovery,
+export function PrivateAnswersModal({ open, owner, busy, blocked, saveBlocked, notesLocked, notes, consent, notice, recovery,
   onClose, onNotes, onConsent, onInterpret, onSave, onDirty, describeValue, describeCondition }: {
-  open: boolean; owner: KE.OwnerDecisionSnapshot; busy: boolean; blocked: boolean; notesLocked: boolean;
+  open: boolean; owner: KE.OwnerDecisionSnapshot; busy: boolean; blocked: boolean; saveBlocked: boolean; notesLocked: boolean;
   notes: string; consent: boolean; notice: string; recovery: ReactNode;
   onClose: () => void; onNotes: (value: string) => void; onConsent: (value: boolean) => void;
   onInterpret: () => Promise<void>; onSave: (payload: Payload) => Promise<boolean>;
@@ -71,7 +71,7 @@ export function PrivateAnswersModal({ open, owner, busy, blocked, notesLocked, n
     return value.type === 'DATE' ? new Intl.DateTimeFormat('en', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(value.date + 'T00:00:00Z')) : describeValue(value, variable);
   }
   async function save() {
-    if (blocked || !complete || !consent || !reviewed || notes.trim()) return;
+    if (blocked || saveBlocked || !complete || !consent || !reviewed || notes.trim()) return;
     const payload: Payload = { processingConsent: 'SYNTHETIC_TEST', retainedConstraintIds: retained,
       answers: questions.map(({ variable }) => {
         const answer = answers[variable.id]!;
@@ -94,6 +94,7 @@ export function PrivateAnswersModal({ open, owner, busy, blocked, notesLocked, n
       <div className="ke-wizard-body">
         <p className="ke-wizard-privacy"><PageIcon name="ShieldCheck" />Your answers are private. Other people see shared choices and only disclosures you authorize.</p>
         {frameChanged && <p role="status" className="ke-wizard-save">The decision changed. Review the current options again. Extra notes in this window are kept.</p>}
+        {saveBlocked && <p role="status" className="ke-wizard-save">You can prepare your answers now. Confirm the shared choices yourself and wait for the other required participants before saving.</p>}
         {recovery}
         {step === 0 && <div className="ke-wizard-step">
           <p className="ke-wizard-help">Choose what you could accept, then optionally tell us your first choice. These selections are saved directly without AI interpretation.</p>
@@ -121,7 +122,7 @@ export function PrivateAnswersModal({ open, owner, busy, blocked, notesLocked, n
             onChange={event => { onNotes(event.target.value); setReviewed(false); }} placeholder="For example: I need step-free access." />
           <small className="ke-wizard-help">{notes.length} / 2,000 characters · private</small>
           <label className="ke-wizard-confirm"><input type="checkbox" checked={consent} disabled={blocked || notesLocked} onChange={event => onConsent(event.target.checked)} />These are fictional test answers. I agree to their processing by Known Enough and, if I use AI help, its AI.</label>
-          {notes.trim() && <><button type="button" className="secondary" disabled={blocked || notesLocked || !consent} onClick={() => void onInterpret()}>Use AI help for these notes</button>
+          {notes.trim() && <><button type="button" className="secondary" disabled={blocked || saveBlocked || notesLocked || !consent} onClick={() => void onInterpret()}>Use AI help for these notes</button>
             <p className="ke-wizard-help">Review the AI suggestions next. To continue without these notes, clear them explicitly.</p>
             <button type="button" className="ke-text-link" disabled={blocked} onClick={() => { onNotes(''); setReviewed(false); }}>Clear these unsaved notes</button></>}
           {owner.draft && <p className="ke-wizard-help">Extra conditions are available. You can review or replace them in the next step.</p>}
@@ -144,7 +145,7 @@ export function PrivateAnswersModal({ open, owner, busy, blocked, notesLocked, n
           </div>}
           {owner.ownInputReadiness !== 'NOT_STARTED' && <p className="ke-wizard-help">Changing confirmed answers requires everyone to review the decision again. Earlier proposal approvals will no longer apply.</p>}
           <label className="ke-wizard-confirm"><input type="checkbox" disabled={blocked} checked={reviewed} onChange={event => setReviewed(event.target.checked)} />I reviewed these private answers and any extra conditions I am keeping.</label>
-          <div className="ke-wizard-actions"><button type="button" className="secondary" disabled={busy} onClick={() => setStep(1)}>Back</button><button type="button" disabled={blocked || !complete || !consent || !reviewed || !!notes.trim()} onClick={() => void save()}>Save my private answers</button></div>
+          <div className="ke-wizard-actions"><button type="button" className="secondary" disabled={busy} onClick={() => setStep(1)}>Back</button><button type="button" disabled={blocked || saveBlocked || !complete || !consent || !reviewed || !!notes.trim()} onClick={() => void save()}>Save my private answers</button></div>
         </div>}
         {notice && <p role="status" className="ke-wizard-notice">{notice}</p>}
       </div>

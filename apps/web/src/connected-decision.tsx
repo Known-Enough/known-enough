@@ -210,7 +210,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
       <button type="button" disabled={busy} onClick={() => { void (async () => { setBusy(true); try { await refresh(); pending.current = null; setPendingAction(false); setReviewed(false); setReviewedFrame(null); setNotice('The latest decision is loaded. Review it before confirming again.'); } catch { setNotice('The latest state could not be loaded. Your pending action is kept; try refreshing again.'); } finally { setBusy(false); } })(); }}>Refresh and review current state</button></div>}
   </>;
   const continueToProposal = !!proposal || owner?.ownInputReadiness === 'READY' || !!owner?.pendingQuestions.some(question => question.status === 'PENDING') || !!owner?.disclosurePermissions.some(permission => permission.status === 'PENDING');
-  const nextStep = !confirmed || !allConfirmed ? 'Review shared choices' : proposal ? 'Review proposal' : continueToProposal ? 'Continue' : 'What works for you?';
+  const nextStep = !confirmed ? 'Review shared choices' : !allConfirmed ? 'Add your private answers' : proposal ? 'Review proposal' : continueToProposal ? 'Continue' : 'What works for you?';
   return <>
     <section className="ke-card ke-decision-overview">
       <p>{(snapshot.frame.description || snapshot.frame.objective).split(/(?<=[.!?])\s+/).slice(0, 2).join(' ')}</p>
@@ -219,9 +219,9 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
         : <p>{owner.ownInputReadiness === 'READY' ? 'Your answers are saved. All available choices work for you.' : "You haven't answered yet."}</p>}</>}
       {owner && owner.confirmedConstraints.filter(item => item.status === 'ACTIVE').length > 3 && <p>More saved conditions are available in your private answers.</p>}
       <h3>Everyone’s progress</h3><ul>{snapshot.frame.participants.map(person => <li key={person.id}>{person.displayName}: {snapshot.approvedParticipantIds.includes(person.id) ? 'proposal approved' : !snapshot.frameConfirmations.some(item => item.participantId === person.id) ? 'reviewing choices' : !snapshot.participantProgress ? 'choices confirmed' : snapshot.participantProgress.find(item => item.participantId === person.id)?.answersSaved ? 'answers saved' : 'answers pending'}</li>)}</ul>
-      {owner && <button type="button" disabled={busy} onClick={() => { if (!confirmed || !allConfirmed) setDetailStep('shared'); else if (continueToProposal) setDetailStep('proposal'); else setEditingNeeds(true); }}>{nextStep}</button>}
-      {confirmed && !allConfirmed && <p>Waiting for everyone to review the shared choices before private answers can be saved.</p>}
-      {owner && confirmed && nextStep !== 'What works for you?' && <button type="button" className="secondary" disabled={busy || !allConfirmed} onClick={() => setEditingNeeds(true)}>What works for you?</button>}
+      {owner && <button type="button" disabled={busy} onClick={() => { if (!confirmed) setDetailStep('shared'); else if (!allConfirmed) setEditingNeeds(true); else if (continueToProposal) setDetailStep('proposal'); else setEditingNeeds(true); }}>{nextStep}</button>}
+      {confirmed && !allConfirmed && <p>You can draft your private answers now. They can be saved after everyone confirms the shared choices.</p>}
+      {owner && confirmed && nextStep !== 'What works for you?' && <button type="button" className="secondary" disabled={busy} onClick={() => setEditingNeeds(true)}>What works for you?</button>}
       <button type="button" className="secondary" onClick={() => setDetailStep('shared')}>Shared details</button>
       {!owner && proposal && <button type="button" onClick={() => setDetailStep('proposal')}>View proposal</button>}
     </section>
@@ -296,7 +296,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
           proposalVersion: proposal.facts.proposalVersion, publicHash: proposal.publicHash })}>Withdraw my approval</button>}</>}
     </section>}
     </dialog>
-    {owner && <PrivateAnswersModal open={editingNeeds} owner={owner} busy={busy} blocked={answersBlocked} notesLocked={!!interpretationRequest} notes={text} consent={syntheticProcessing} notice={notice} recovery={recoveryControls}
+    {owner && <PrivateAnswersModal open={editingNeeds} owner={owner} busy={busy} blocked={answersBlocked} saveBlocked={!allConfirmed || !confirmed} notesLocked={!!interpretationRequest} notes={text} consent={syntheticProcessing} notice={notice} recovery={recoveryControls}
         onClose={() => setEditingNeeds(false)} onNotes={setText} onConsent={setSyntheticProcessing} onInterpret={interpret} onDirty={setStructuredDirty}
         onSave={payload => command('CONFIRM_PRIVATE_ANSWERS', payload)} describeValue={valueText} describeCondition={describeCondition} />}
     {!editingNeeds && recoveryControls}
