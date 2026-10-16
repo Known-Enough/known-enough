@@ -135,6 +135,7 @@ jobs:
         env:
           EXPECTED_SOURCE: ${{ inputs.source_sha }}
           PREVIOUS_JOB_SOURCE: ${{ inputs.previous_job_source }}
+          OWNER_INTERPRETATION: 'true'
         run: python3 -B scripts/fix01/enable.py disable --control-source "$PREVIOUS_JOB_SOURCE" --expected-enabled true
       - name: Refuse blocked source transition before replacing either runtime
         if: inputs.publish_api
@@ -246,6 +247,7 @@ jobs:
         if: inputs.publish_api
         env:
           EXPECTED_SOURCE: ${{ inputs.source_sha }}
+          OWNER_INTERPRETATION: 'true'
         run: python3 -B scripts/fix01/enable.py enable --expected-enabled false
       - name: Publish only completed or failed finite phase reports
         if: always()
