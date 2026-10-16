@@ -1,6 +1,6 @@
 # E2E01 — Two-user live journeys with one Luna agent
 
-Status: QUEUED / unclaimed; after FF10 and publication of the changes being evaluated. Creation does not start testing.
+Status: RUN COMPLETE / qualification BLOCKED; claim released 2026-10-16T05:50:48Z. The single Luna agent stopped after sign-in because neither account session was verified; all ten outcomes are recorded in [the run report](run-2026-10-16.md). No product PASS or confirmed defect.
 
 ## Goal and authority
 

@@ -9,3 +9,4 @@ e2ecredentials.json
 !.env.example
 *.tsbuildinfo
 .vercel
+e2e-credentials.json
