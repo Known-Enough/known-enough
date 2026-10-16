@@ -22,7 +22,9 @@ Walkthrough: open a decision with an uncertain notes request and edit/save struc
 
 Review of the published flow found the remaining lock: the overview routed to shared-choice review whenever any required participant had not confirmed. The private-answer entry button and its parent step also required every participant to have confirmed, even though only saving is guarded by the API. This prevented participants from preparing private answers for a new decision while waiting for others.
 
-The overview now lets a participant who has personally confirmed the shared frame open and edit their private answers while others are pending. The save control remains disabled, with a clear explanation, until every required participant has confirmed; the API's existing check remains authoritative. No backend or confirmation rule changed. Frontend publication pending.
+The overview now lets a participant who has personally confirmed the shared frame open and edit their private answers while others are pending. The save control remains disabled, with a clear explanation, until every required participant has confirmed; the API's existing check remains authoritative. No backend or confirmation rule changed.
+
+Published source `26c9a22b19a7036eb54016de632cfc65949ca670`; [frontend release](https://github.com/Known-Enough/known-enough/actions/runs/38842621414) passed, Amplify job `106`. The existing API hash matched and all ten managed routes read back; no configuration or data writes were needed. The hosted build passed. Manual acceptance is still pending.
 
 ## First read
 
