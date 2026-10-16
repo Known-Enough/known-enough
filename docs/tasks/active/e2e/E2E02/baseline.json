@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-10-16T23:27:10.639151+00:00",
+  "qualification": "NOT_VERIFIED_BY_PLAN_REFRESH",
+  "primaryUrl": "https://main.d143q5ravxp5av.amplifyapp.com/",
+  "frontend": {
+    "sourceCommit": "6cb97c414b8dced2f06effa9557fb6d2102389c6",
+    "amplifyJobId": "117",
+    "releaseRun": "https://github.com/Known-Enough/known-enough/actions/runs/38980855371",
+    "receipt": "docs/review-artifacts/FF/choice-modal-layout-publication.json",
+    "files": [
+      {
+        "path": "/assets/app-chrome-B4Sk8Vtx.js",
+        "sha256": "19ba28027b06a034a563407fb79f0b51f74ae6aa7456e41111f830bc745dda04"
+      },
+      {
+        "path": "/assets/connected-app-Cbs-KlDq.js",
+        "sha256": "5c4fc2c595091e5f7707e36518aa4bec0c78a2c3895b17430f30905f63ef9373"
+      },
+      {
+        "path": "/assets/index-C-JMs3Sc.js",
+        "sha256": "8d5608eee0a7b997a7b1bdc288e0034d595393059e2adf7383db9979b4a901c7"
+      },
+      {
+        "path": "/assets/index-CUpbnyJf.css",
+        "sha256": "128cae12e3438de8332a627c8864eb7c96ff135c918506abdfc3f855412ff27a"
+      },
+      {
+        "path": "/cover.png",
+        "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151"
+      },
+      {
+        "path": "/",
+        "sha256": "341504478b06a5bba00e0cc3dd1faa9390a4d1b7a296b12efdbd616bad132006"
+      },
+      {
+        "path": "/logo.png",
+        "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb"
+      }
+    ]
+  },
+  "backend": {
+    "sourceCommit": "40ec579c55410b1ae15aecb12fc2a0a30b2cc4c6",
+    "apiArtifactSha256": "6f2bff590976861470bd4faa2475141e612b2afb0dd0f23057777496dd4a853f",
+    "workerArtifactSha256": "715f84620c9a65ef4a1b2ea2bcf2d6fe1217d319a79533b0d0e7913211b9e05d",
+    "releaseRun": "https://github.com/Known-Enough/known-enough/actions/runs/38979307088",
+    "receipt": "docs/review-artifacts/INV01/username-lookup-repair-publication.json"
+  },
+  "runtimeUsernamePermission": {
+    "lastObserved": "INSTALLED",
+    "readbackRun": "https://github.com/Known-Enough/known-enough/actions/runs/38978757882",
+    "note": "Historical missing-permission blocker is superseded; older accounts recover their username lookup on own signed-in account refresh."
+  },
+  "executionOrder": [
+    "01",
+    "02",
+    "03",
+    "04",
+    "07",
+    "05",
+    "06",
+    "08",
+    "09",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16"
+  ],
+  "liveExecutionStartedByThisRefresh": false,
+  "credentialsAndCurrentAccountHealth": "VERIFY_PRIVATELY_ON_EXECUTION_MACHINE"
+}
