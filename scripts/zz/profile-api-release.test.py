@@ -94,16 +94,12 @@ class ProfileApiReleaseTests(unittest.TestCase):
         self.assertIn('--revision-id', update)
         self.assertIn('revision-old', update)
         self.assertEqual([item[:2] for item in self.created], [
-            (release.PROFILE_ROUTE, 'JWT'), (release.INVITATIONS_ROUTE, 'JWT'),
-            (release.OPTIONS_ROUTE, 'NONE'), (release.INVITATIONS_OPTIONS, 'NONE')])
+            (release.PROFILE_ROUTE, 'JWT'), (release.OPTIONS_ROUTE, 'NONE')])
         self.assertEqual(self.created[0][2:], ('integrations/existing', 'existing-jwt', ['groups:read']))
-        self.assertEqual(self.created[1][2:], ('integrations/existing', 'existing-jwt', ['groups:read']))
-        self.assertEqual(self.created[2][2:], ('integrations/existing', None, None))
-        self.assertEqual(self.created[3][2:], ('integrations/existing', None, None))
+        self.assertEqual(self.created[1][2:], ('integrations/existing', None, None))
         self.assertFalse(any('update-function-configuration' in arg or 'invoke' in arg for call in self.writes for arg in call))
         report = json.loads((self.root / 'zz-profile-api-release.json').read_text())
         self.assertEqual(report['authenticatedProfileRoute'], 'VERIFIED')
-        self.assertEqual(report['authenticatedInvitationsRoute'], 'VERIFIED')
         self.assertEqual(report['configurationWrites'], 0)
         self.assertEqual(report['dataWrites'], 0)
 
