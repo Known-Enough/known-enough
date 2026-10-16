@@ -11,7 +11,7 @@ ROLE = 'KnownEnoughGithubStagingInspector'
 UUID = re.compile(r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$')
 EVENTS = {'FIX01_PUBLIC_DRAFT_FAILURE', 'FIX01_PUBLIC_DRAFT_DIAGNOSTIC', 'PUBLIC_DRAFT_HTTP_RESULT', 'PRIVATE_ANSWERS_HTTP_RESULT',
           'known-enough.group-request', 'known-enough.group-result', 'known-enough.group-failure'}
-GROUP_OPERATIONS = {'group.create', 'group.list', 'group.open', 'group.accept', 'group.manage', 'group.draft', 'group.delete', 'account.read', 'account.register'}
+GROUP_OPERATIONS = {'group.create', 'group.list', 'group.open', 'group.accept', 'group.invite', 'group.manage', 'group.draft', 'group.delete', 'account.read', 'account.register'}
 TYPES = {'string', 'number', 'boolean', 'object', 'array', 'null', 'missing', 'integer', 'int', 'unknown'}
 CODES = {'invalid_type', 'invalid_value', 'invalid_union', 'unrecognized_keys', 'too_small', 'too_big', 'invalid_format', 'not_multiple_of', 'custom'}
 PHASES = {'REQUEST_STARTED', 'MODEL_VALIDATION_FAILURE', 'PROVIDER_DISPATCHED', 'PROVIDER_COMPLETED',
@@ -122,6 +122,11 @@ try:
                 item['result'] = value['result']
             if value.get('operation') in GROUP_OPERATIONS:
                 item['operation'] = value['operation']
+            if value.get('sessionCode') in {'SESSION_INVALID', 'SESSION_STORAGE_UNAVAILABLE', 'SESSION_TIMEOUT', 'SESSION_REQUEST_LIMIT', 'SESSION_CAPACITY'}:
+                item['sessionCode'] = value['sessionCode']
+            if isinstance(value.get('causes'), list):
+                item['causes'] = [cause for cause in value['causes'][:5] if cause in {'AccessDeniedException', 'ResourceNotFoundException',
+                    'ThrottlingException', 'TransactionCanceledException', 'TransactionConflictException', 'TimeoutError', 'AbortError'}]
             if value.get('outcome') in {'OK'}:
                 item['outcome'] = value['outcome']
             if value.get('code') in HTTP_CODES:

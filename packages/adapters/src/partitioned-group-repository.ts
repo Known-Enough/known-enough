@@ -30,7 +30,9 @@ export { rowSchema as PartitionRowSchema };
 export type PartitionRow = z.infer<typeof rowSchema>;
 type DomainRow = Exclude<PartitionRow, { kind: 'DIRECTORY' | 'MEMBERSHIP' }>;
 export type PartitionKey = { PK: string; SK: string };
-export type PartitionScope = { accountSubjects: string[]; groupId?: string };
+export type PartitionScope = { accountSubjects: string[]; groupId?: string;
+  /** Server-only own-account refresh: recover a missing immutable username lookup. */
+  ensureUsername?: boolean };
 export type PartitionMutation = { key: PartitionKey; expected: number; next: PartitionRow | null };
 export interface PartitionIOContext { signal: AbortSignal; request(): void; /** Server-generated opaque HTTP reference; never an identity or stored authority. */ diagnosticRequestId?: string }
 /** All mutations, including read-only conditions, MUST commit as one atomic transaction. */
@@ -105,6 +107,7 @@ function scopeKeys(scope: PartitionScope) {
   // An account-only operation or one group's complete roster; no unbounded global callback.
   if (!scope.accountSubjects.length || scope.accountSubjects.length > 17
     || new Set(scope.accountSubjects).size !== scope.accountSubjects.length) return fail('PARTITION_INVALID');
+  if (scope.ensureUsername && (scope.groupId !== undefined || scope.accountSubjects.length !== 1)) return fail('PARTITION_INVALID');
   return scope.accountSubjects.map(partitionAccountKey).concat(scope.groupId ? [partitionGroupKey(scope.groupId)] : []);
 }
 function uniqueIds(values: { id: string }[]) {
@@ -289,6 +292,19 @@ export function createPartitionedGroupRepository(transport: PartitionTransport,
         }
       }
     }
+    if (scope.ensureUsername) {
+      for (const account of snapshot.state.accounts) {
+        const key = partitionAccountKey(account.subject);
+        const previous = snapshot.rows.get(encodedKey(key))?.row;
+        const current = next.get(encodedKey(key))?.row;
+        // A trusted pre-existing account supplies the alias; no client-selected owner,
+        // group roster or caller-provided username can create this mapping.
+        if (previous?.kind === 'ACCOUNT' && current?.kind === 'ACCOUNT' && current.value.profile?.loginUsername) {
+          claims.push({ type: 'USERNAME', usernameHash: createHash('sha256').update(current.value.profile.loginUsername.trim().toLowerCase()).digest('hex'),
+            subject: current.value.subject, emailHash: current.value.emailHash });
+        }
+      }
+    }
     const claimKeys = claims.map(partitionDirectoryKey);
     if (new Set(claimKeys.map(encodedKey)).size !== claimKeys.length) fail('PARTITION_IDENTITY_CONFLICT');
     if (output.length + claims.length > 100) fail('PARTITION_CAPACITY');
@@ -297,7 +313,16 @@ export function createPartitionedGroupRepository(transport: PartitionTransport,
       const key = claimKeys[index]!; const raw = storedClaims[index];
       const prior = raw === null ? null : checkedRow(raw, key);
       // Existing parent rows handle replay. Retained identifiers cannot recreate removed edges.
-      if (prior) fail('PARTITION_IDENTITY_CONFLICT');
+      if (prior) {
+        // Refresh is idempotent only for the exact same immutable owner and email.
+        // A different owner, malformed claim or retained identifier is never replaced.
+        if (scope.ensureUsername && value.type === 'USERNAME' && prior.kind === 'DIRECTORY' && prior.value.type === 'USERNAME'
+          && prior.value.usernameHash === value.usernameHash && prior.value.subject === value.subject && prior.value.emailHash === value.emailHash) {
+          output.push({ key, expected: prior.revision, next: null });
+          continue;
+        }
+        fail('PARTITION_IDENTITY_CONFLICT');
+      }
       output.push({ key, expected: 0, next: { schemaVersion: 1, revision: 1, kind: 'DIRECTORY', value } });
     }
     if (output.length > 100 || Buffer.byteLength(JSON.stringify(output)) > 3_500_000) fail('PARTITION_CAPACITY');

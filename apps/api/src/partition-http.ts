@@ -161,7 +161,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
       response.setHeader('Cache-Control', 'no-store'); response.statusCode = 204; response.end(); return;
     }
     if (active >= concurrency || authenticating >= concurrency) { send(response, 503, errorBody('RETRYABLE_SERVER_ERROR', requestId)); request.resume(); return; }
-    active++; const requestStartedAt = Date.now(); let publicDraftRequest = false; let privateAnswersRequest = false;
+    active++; const requestStartedAt = Date.now(); let publicDraftRequest = false; let privateAnswersRequest = false; let invitationRequest = false;
     const controller = new AbortController();
     const closed = () => { if (!response.writableEnded) controller.abort(); };
     request.once('aborted', closed); response.once('close', closed);
@@ -200,6 +200,9 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         const ownerConversation = /^\/decisions\/([A-Za-z0-9_-]{1,80})\/owner-conversation\/(draft|requests\/([A-Za-z0-9_-]{1,80})(\/close)?)$/.exec(url.pathname);
         const decision = /^\/decisions\/([A-Za-z0-9_-]{1,80})\/(public|me|commands)$/.exec(url.pathname);
         const roster = /^\/groups\/([A-Za-z0-9_-]{1,80})\/decisions\/([A-Za-z0-9_-]{1,80})\/(review|revise)$/.exec(url.pathname);
+        if (group && request.method === 'POST' && (group[2] === '/invitations' || group[2] === '/invite')) {
+          requestId = randomUUID(); invitationRequest = true;
+        }
         if (url.pathname === '/account/profile' || url.pathname === '/account/profile/image') {
           if (request.method === 'GET' && url.pathname === '/account/profile') {
             send(response, 200, { profile: await session.ownProfile(principal) }); return;
@@ -346,8 +349,12 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
           const raw = await body(request, maximum, bodyMs, controller);
           if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
           if (group[2] === '/name') send(response, 200, { group: await session.rename(principal, group[1]!, raw) });
-          else if (group[2] === '/invitations') send(response, 200, await session.invite(principal, group[1]!, raw));
-          else if (group[2] === '/invite') send(response, 200, { invitation: await session.invite(principal, group[1]!, raw) });
+          else if (group[2] === '/invitations' || group[2] === '/invite') {
+            const invitation = await session.invite(principal, group[1]!, raw);
+            try { console.info(JSON.stringify({ event: 'known-enough.group-result', requestId, operation: 'group.invite',
+              outcome: 'OK', status: 200, elapsedMs: Date.now() - requestStartedAt })); } catch { /* Never log recipient or invitation tokens. */ }
+            send(response, 200, group[2] === '/invite' ? { invitation } : invitation);
+          }
           else send(response, 200, { group: await (raw && typeof raw === 'object' && Object.hasOwn(raw, 'kind')
             ? session.removeItem(principal, group[1]!, raw) : session.remove(principal, group[1]!, raw)) }); return;
         }
@@ -444,6 +451,17 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         }
         const code = error instanceof RepositoryCapacityError || (error instanceof PartitionSessionError && error.code === 'SESSION_CAPACITY') ? 'CAPACITY_EXCEEDED'
           : error instanceof KnownEnoughApplicationError ? error.code : 'RETRYABLE_SERVER_ERROR';
+        if (invitationRequest) { try {
+          const causes: string[] = []; let cause: unknown = error;
+          const allowed = new Set(['AccessDeniedException', 'ResourceNotFoundException', 'ThrottlingException',
+            'TransactionCanceledException', 'TransactionConflictException', 'TimeoutError', 'AbortError']);
+          for (let depth = 0; depth < 5 && cause instanceof Error; depth++, cause = cause.cause) {
+            if (allowed.has(cause.name)) causes.push(cause.name);
+          }
+          console.warn(JSON.stringify({ event: 'known-enough.group-failure', requestId, operation: 'group.invite', code,
+            status: KE.DECISION_ERROR_HTTP_STATUS[code], elapsedMs: Date.now() - requestStartedAt,
+            ...(error instanceof PartitionSessionError ? { sessionCode: error.code } : {}), causes }));
+        } catch { /* Allowlisted categories only, without inputs, messages, stack traces or identities. */ } }
         if (publicDraftRequest) { try { console.warn(JSON.stringify({ event: 'PUBLIC_DRAFT_HTTP_RESULT', requestId, result: 'FAILED', code, status: KE.DECISION_ERROR_HTTP_STATUS[code],
           elapsedMs: Date.now() - requestStartedAt, ...(error instanceof PartitionDraftFailure ? { draftFailure: error.category } : {}) })); } catch { /* Diagnostics cannot replace the response. */ } }
         if (privateAnswersRequest) { try { console.warn(JSON.stringify({ event: 'PRIVATE_ANSWERS_HTTP_RESULT', requestId,

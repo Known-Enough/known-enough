@@ -234,12 +234,15 @@ export function createPartitionGroupSession(transport: PartitionTransport,
         if (!request.success) return deny('INVALID_COMMAND');
         const hash = emailHash(verified.data.email); const io = partitionIO(limits);
         try {
-          return await repository.transaction({ accountSubjects: [who] }, async state => {
+          return await repository.transaction({ accountSubjects: [who], ensureUsername: true }, async state => {
             let account = state.accounts.find(value => value.subject === who);
             if (account) {
               if (account.emailHash !== hash) return deny('FORBIDDEN');
               const owner = await repository.lookup(accountEmailLookup(account), io);
               if (!owner || !['EMAIL', 'SHARED_EMAIL'].includes(owner.type) || !('subject' in owner) || owner.subject !== who) return deny('FORBIDDEN');
+              if (!account.profile?.loginUsername && verified.data.username) {
+                account.profile = { ...(account.profile ?? { description: '', image: null }), loginUsername: verified.data.username };
+              }
             } else {
               account = { subject: who, emailHash: hash, displayName: request.data.displayName, status: 'PENDING', version: 1,
                 ...(sharedEmails.has(hash) ? { sharedTestEmail: true as const } : {}),
@@ -288,7 +291,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
     status(principal: TrustedPrincipal | null) {
       return safe(async () => {
         const who = participant(principal); const io = partitionIO(limits);
-        return repository.transaction({ accountSubjects: [who] }, state => {
+        return repository.transaction({ accountSubjects: [who], ensureUsername: true }, state => {
           const account = state.accounts.find(account => account.subject === who);
           return account ? Groups.AccountSnapshot.parse({ status: account.status, displayName: account.displayName, version: account.version }) : null;
         }, io);

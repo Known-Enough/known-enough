@@ -186,6 +186,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
           if (typeof errorBody.requestId === 'string' && /^[A-Za-z0-9_-]{8,80}$/.test(errorBody.requestId)) reference = errorBody.requestId;
         } catch { /* The HTTP status remains useful when an error body is unavailable. */ }
         const message = response.status === 507 ? 'This pilot has reached its capacity. Ask the operator about capacity; retrying will not free space.'
+          : response.status === 404 && /\/groups\/[^/]+\/invitations$/.test(path) ? 'We couldn’t find an approved account with that username or email. Check the sign-in username, or ask the person to sign in and refresh their account once.'
           : response.status === 409 ? 'The group or link changed. Refresh and review before trying again.'
           : response.status === 403 ? 'Account approval or organizer access is required.'
           : 'This action could not be completed. Check access, the recipient and link expiry.';
