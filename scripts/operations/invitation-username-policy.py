@@ -1,8 +1,9 @@
-"""Add the username directory key to the existing participant policy only."""
+"""Add USERNAME#* only to the existing participant policy's scoped partition statements."""
 import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 
@@ -12,6 +13,7 @@ POLICY = 'KnownEnoughPartitionParticipant'
 TABLE = f'arn:aws:dynamodb:us-east-1:{ACCOUNT}:table/KnownEnoughPartitions'
 EXPECTED_PRIOR_SHA = 'a5c483ca534d34c864543dcebe47cb27657090143a9968932c7a1a645bc70abd'
 EXPECTED_KEYS = ['ACCOUNT#*', 'GROUP#*', 'EMAIL#*', 'INVITATION#*', 'DECISION#*', 'MEMBER#*']
+PHASES = {'prepare', 'apply', 'readback'}
 
 
 def canonical(value):
@@ -45,67 +47,80 @@ def candidate(prior):
     return out
 
 
-def run(executor=subprocess.run, root=None):
+def run(executor=subprocess.run, root=None, phase=None):
     root = Path(root or os.environ['RUNNER_TEMP'])
-    report = {'result': 'BLOCKED', 'role': ROLE, 'policy': POLICY, 'iamWrites': 0, 'writeRequested': False,
-              'dataWrites': 0, 'providerCalls': 0}
+    phase = phase or os.environ.get('INVITATION_POLICY_PHASE', 'prepare')
+    report = {'result': 'BLOCKED', 'phase': phase, 'role': ROLE, 'policy': POLICY, 'iamWrites': 0,
+              'writeRequested': False, 'dataWrites': 0, 'providerCalls': 0}
+    if phase not in PHASES:
+        report['code'] = 'POLICY_REPAIR_PHASE_INVALID'
+        return report
 
     def aws(service, action, *args, mutation=False):
         result = executor(['aws', service, action, *args, '--region', 'us-east-1', '--output', 'json', '--no-cli-pager'],
                           capture_output=True, text=True, timeout=20)
         if result.returncode:
-            import re
             match = re.search(r'An error occurred \(([A-Za-z0-9]+)\)', result.stderr or '')
             code = match.group(1) if match else 'AWS_REQUEST_FAILED'
-            raise ValueError(('iam:' + action + '/' + code) if not mutation else 'IAM_WRITE_UNCONFIRMED')
+            raise ValueError(('iam:' + action + '/' + code) if not mutation else 'iam:put-role-policy/' + code)
         return json.loads(result.stdout or '{}')
 
     try:
+        expected_role = 'KnownEnoughGithubModelJobOperations' if phase == 'apply' else 'KnownEnoughGithubStagingInspector'
         report['operation'] = 'sts:GetCallerIdentity'
         identity = aws('sts', 'get-caller-identity')
         if identity.get('Account') != ACCOUNT or not identity.get('Arn', '').startswith(
-                f'arn:aws:sts::{ACCOUNT}:assumed-role/KnownEnoughGithubModelJobOperations/'):
+                f'arn:aws:sts::{ACCOUNT}:assumed-role/{expected_role}/'):
             raise ValueError('OWN_ROLE_TARGET_INVALID')
-        report['operation'] = 'iam:GetRole'
-        role = aws('iam', 'get-role', '--role-name', ROLE)['Role']
-        if role.get('Arn') != f'arn:aws:iam::{ACCOUNT}:role/{ROLE}' or role.get('PermissionsBoundary'):
-            raise ValueError('RUNTIME_ROLE_BINDING_CHANGED')
-        report['operation'] = 'iam:GetRolePolicy'
-        prior = aws('iam', 'get-role-policy', '--role-name', ROLE, '--policy-name', POLICY).get('PolicyDocument')
-        if not isinstance(prior, dict) or digest(prior) != EXPECTED_PRIOR_SHA:
-            raise ValueError('PARTICIPANT_POLICY_BASELINE_CHANGED')
-        updated = candidate(prior)
-        report['priorPolicySha256'] = digest(prior)
-        report['candidatePolicySha256'] = digest(updated)
         root.mkdir(mode=0o700, parents=True, exist_ok=True)
-        backup = root / 'participant-policy-before-private.json'
-        fd = os.open(backup, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-        with os.fdopen(fd, 'w') as stream:
-            stream.write(canonical(prior))
-        if '--apply' in sys.argv:
+        prior_path = root / 'participant-policy-before-private.json'
+        candidate_path = root / 'participant-policy-candidate-private.json'
+
+        if phase == 'prepare':
+            report['operation'] = 'iam:GetRole'
+            role = aws('iam', 'get-role', '--role-name', ROLE)['Role']
+            if role.get('Arn') != f'arn:aws:iam::{ACCOUNT}:role/{ROLE}' or role.get('PermissionsBoundary'):
+                raise ValueError('RUNTIME_ROLE_BINDING_CHANGED')
+            report['operation'] = 'iam:GetRolePolicy'
+            prior = aws('iam', 'get-role-policy', '--role-name', ROLE, '--policy-name', POLICY).get('PolicyDocument')
+            if not isinstance(prior, dict) or digest(prior) != EXPECTED_PRIOR_SHA:
+                raise ValueError('PARTICIPANT_POLICY_BASELINE_CHANGED')
+            updated = candidate(prior)
+            for path, value in ((prior_path, prior), (candidate_path, updated)):
+                fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+                with os.fdopen(fd, 'w') as stream:
+                    stream.write(canonical(value))
+            report.update(result='USERNAME_DIRECTORY_POLICY_PREPARED', priorPolicySha256=digest(prior),
+                          candidatePolicySha256=digest(updated))
+        elif phase == 'apply':
+            prior = json.loads(prior_path.read_text())
+            updated = json.loads(candidate_path.read_text())
+            if digest(prior) != EXPECTED_PRIOR_SHA or candidate(prior) != updated:
+                raise ValueError('PARTICIPANT_POLICY_PRIVATE_PLAN_INVALID')
             report['writeRequested'] = True
             report['operation'] = 'iam:PutRolePolicy'
-            try:
-                aws('iam', 'put-role-policy', '--role-name', ROLE, '--policy-name', POLICY,
-                    '--policy-document', canonical(updated), mutation=True)
-                report['iamWrites'] = 1
-            except ValueError as error:
-                report['writeAcknowledgment'] = str(error)
+            aws('iam', 'put-role-policy', '--role-name', ROLE, '--policy-name', POLICY,
+                '--policy-document', canonical(updated), mutation=True)
+            report.update(iamWrites=1, result='USERNAME_DIRECTORY_POLICY_WRITE_REQUESTED',
+                          candidatePolicySha256=digest(updated))
+        else:
+            updated = json.loads(candidate_path.read_text())
+            report['operation'] = 'iam:GetRolePolicy'
             observed = aws('iam', 'get-role-policy', '--role-name', ROLE, '--policy-name', POLICY).get('PolicyDocument')
             if not isinstance(observed, dict) or observed != updated:
                 raise ValueError('PARTICIPANT_POLICY_READBACK_MISMATCH')
-            report['iamWrites'] = 1
-            report.update(result='USERNAME_DIRECTORY_POLICY_READBACK_PASS', read=True, transactionalWrite=True)
-        else:
-            report.update(result='USERNAME_DIRECTORY_POLICY_PREVIEW_PASS', read=True, transactionalWrite=True)
+            report.update(result='USERNAME_DIRECTORY_POLICY_READBACK_PASS', read=True, transactionalWrite=True,
+                          candidatePolicySha256=digest(updated))
     except Exception as error:
         report['code'] = str(error) if isinstance(error, ValueError) else 'POLICY_REPAIR_UNAVAILABLE'
-    report_path = root / 'invitation-username-policy-report.json'
-    report_path.write_text(json.dumps(report) + '\n')
     return report
 
 
 if __name__ == '__main__':
     result = run()
+    report_path = Path(os.environ['RUNNER_TEMP']) / ('invitation-username-policy-' + result['phase'] + '.json')
+    report_path.write_text(json.dumps(result) + '\n')
     print(json.dumps(result))
-    raise SystemExit(0 if result['result'] == 'USERNAME_DIRECTORY_POLICY_READBACK_PASS' else 1)
+    expected = {'prepare': 'USERNAME_DIRECTORY_POLICY_PREPARED', 'apply': 'USERNAME_DIRECTORY_POLICY_WRITE_REQUESTED',
+                'readback': 'USERNAME_DIRECTORY_POLICY_READBACK_PASS'}
+    raise SystemExit(0 if result['result'] == expected.get(result['phase']) else 1)

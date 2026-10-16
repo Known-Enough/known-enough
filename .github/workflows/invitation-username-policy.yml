@@ -31,20 +31,51 @@ jobs:
           python3 -B scripts/operations/invitation-username-policy.test.py
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubStagingInspector
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Prepare exact scoped candidate from the read-only inspector role
+        id: prepare
+        run: |
+          umask 077
+          INVITATION_POLICY_PHASE=prepare python3 -B scripts/operations/invitation-username-policy.py
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: steps.prepare.outcome == 'success'
+        with:
           role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobOperations
           aws-region: us-east-1
           role-duration-seconds: 900
           allowed-account-ids: '092954139775'
           retry-max-attempts: 1
           unset-current-credentials: true
-      - name: Add only USERNAME to existing scoped read and transactional write keys
-        run: |
-          umask 077
-          python3 -B scripts/operations/invitation-username-policy.py --apply > "$RUNNER_TEMP/invitation-username-policy-report.json"
+      - name: Submit the single narrowly scoped policy update
+        id: apply
+        if: steps.prepare.outcome == 'success'
+        continue-on-error: true
+        env:
+          INVITATION_POLICY_PHASE: apply
+        run: python3 -B scripts/operations/invitation-username-policy.py
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: always() && steps.prepare.outcome == 'success'
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubStagingInspector
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Read back exact USERNAME permissions independently
+        if: always() && steps.prepare.outcome == 'success'
+        env:
+          INVITATION_POLICY_PHASE: readback
+        run: python3 -B scripts/operations/invitation-username-policy.py
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: invitation-username-policy
-          path: ${{ runner.temp }}/invitation-username-policy-report.json
+          path: ${{ runner.temp }}/invitation-username-policy-*.json
           if-no-files-found: warn
           retention-days: 30
