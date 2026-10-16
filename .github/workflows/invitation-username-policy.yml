@@ -16,6 +16,11 @@ on:
         required: false
         type: boolean
         default: true
+      recipient_username_sha256:
+        description: Optional normalized username SHA256 for private read-only consistency inspection
+        required: false
+        type: string
+        default: ''
 permissions:
   contents: read
 concurrency:
@@ -55,6 +60,19 @@ jobs:
         env:
           INVITATION_POLICY_PHASE: inspect
         run: python3 -B scripts/operations/invitation-username-policy.py
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: inputs.inspect_only && inputs.recipient_username_sha256 != ''
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPartitionMigration
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Inspect recipient identity and private username directory without changing data
+        if: inputs.inspect_only && inputs.recipient_username_sha256 != ''
+        env:
+          RECIPIENT_USERNAME_SHA256: ${{ inputs.recipient_username_sha256 }}
+        run: python3 -B scripts/operations/invitation-recipient-inspect.py
       - name: Prepare exact scoped candidate from the read-only inspector role
         id: prepare
         if: '!inputs.inspect_only'
@@ -96,5 +114,12 @@ jobs:
         with:
           name: invitation-username-policy
           path: ${{ runner.temp }}/invitation-username-policy-*.json
+          if-no-files-found: warn
+          retention-days: 30
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always() && inputs.inspect_only && inputs.recipient_username_sha256 != ''
+        with:
+          name: invitation-recipient-inspect
+          path: ${{ runner.temp }}/invitation-recipient-inspect.json
           if-no-files-found: warn
           retention-days: 30
