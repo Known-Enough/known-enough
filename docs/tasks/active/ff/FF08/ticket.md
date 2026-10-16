@@ -1,6 +1,6 @@
 # FF08 — Joining without restarting decisions
 
-Status: CODE_READY / B; claim released. Publication/manual acceptance pending.
+Status: PUBLISHED / B; claim released. Manual acceptance pending; model-job source rebind held because its control was not disabled and empty. [Receipt](../../../../review-artifacts/FF/ff06-10-publication.json).
 
 ## User report and agreed behavior
 

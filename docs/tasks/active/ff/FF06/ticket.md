@@ -1,6 +1,6 @@
 # FF06 — Simple decision overview, guided modals and editable names
 
-Status: CODE_READY / B; implementation claim released. Publication/manual acceptance pending.
+Status: PUBLISHED / B; implementation claim released. Manual acceptance pending; model-job source rebind held because its control was not disabled and empty. [Receipt](../../../../review-artifacts/FF/ff06-10-publication.json).
 
 ## First read
 

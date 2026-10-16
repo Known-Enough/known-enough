@@ -2,18 +2,20 @@
 
 | Task | Purpose | Current status |
 | --- | --- | --- |
-| [FF10](FF10/README.md) | Compare logs/code/live pages and update outdated example guidance. | CODE_READY/B; publication/manual acceptance pending |
-| [FF09](FF09/README.md) | Example guidance only inside the create-decision modal. | CODE_READY/B; publication/manual acceptance pending |
-| [FF08](FF08/README.md) | Joining preserves progress without repeat review; finished decisions remain finished. | CODE_READY/B; publication/manual acceptance pending |
-| [FF07](FF07/README.md) | Member photos/profile viewing, resized uploads, light-mode names and brand navigation. | CODE_READY/B; publication/manual acceptance pending |
-| [FF06](FF06/README.md) | Compact decision overview, guided modals, short titles and editable group/decision names. | CODE_READY/B; publication/manual acceptance pending |
-| [FF05](FF05/README.md) | Guided private-answer modal with direct option selection and optional AI notes. | PUBLISHED/sourcea3e665f/Amplify103; manual acceptance pending |
+| [FF10](FF10/README.md) | Compare logs/code/live pages and update outdated example guidance. | PUBLISHED/sourcef1c9100/Amplify104; manual acceptance pending |
+| [FF09](FF09/README.md) | Example guidance only inside the create-decision modal. | PUBLISHED/sourcef1c9100/Amplify104; manual acceptance pending |
+| [FF08](FF08/README.md) | Joining preserves progress without repeat review; finished decisions remain finished. | PUBLISHED/sourcef1c9100/API4766bc5/worker4025f44/Amplify104; manual acceptance pending; model-job source rebind held |
+| [FF07](FF07/README.md) | Member photos/profile viewing, resized uploads, light-mode names and brand navigation. | PUBLISHED/sourcef1c9100/API4766bc5/worker4025f44/Amplify104; manual acceptance pending; model-job source rebind held |
+| [FF06](FF06/README.md) | Compact decision overview, guided modals, short titles and editable group/decision names. | PUBLISHED/sourcef1c9100/API4766bc5/worker4025f44/Amplify104; manual acceptance pending; model-job source rebind held |
+| [FF05](FF05/README.md) | Guided private-answer modal with direct option selection and optional AI notes. | PUBLISHED/current sourcef1c9100/API4766bc5/worker4025f44/Amplify104; manual acceptance pending; model-job source rebind held |
 | [FF01](FF01/README.md) | Compact account screens, password visibility and contextual recovery. | PUBLISHED; user manual acceptance pending |
 | [FF02](FF02/README.md) | Owner-only interpretation with explicit participant prerequisites/consent. | PUBLISHED; required permission now installed; user manual acceptance pending |
 | [FF04](FF04/README.md) | Organizer-confirmed deletion of saved drafts and decisions, with old-link/replay protection. | PUBLISHED/source56a7a9a/Amplify101; manual acceptance pending |
 | [FF03](FF03/README.md) | Generic incomplete-idea guide, concrete public questions and safer recovery. | Unused-group correction PUBLISHED/API source4288829; frontend102; manual acceptance pending |
 
 [Latest guide publication](../../../review-artifacts/FF/generic-guide-publication.json), [earlier FF receipts](../../../review-artifacts/FF/a-publication-20261015.json), [generic behavior reference](FF03/gold-standard.md), [manual checklist](manual-checklist.md).
+
+FF06–FF10 are now published from source `f1c91003d5b190acd0f97d3f820ee39a2d77ad92`: API `4766bc54738d31b0999ca9183752a9c89dc6c48fda60f556bb53777274eee69c`, worker `4025f4485e4cdbae9e8a8181bf0d5a51b180d54e9bed0d09b77b55d979463aef` (schedule remains disabled), and Amplify job104. The group rename routes were installed and read back. The coordinated workflow deliberately left the model-job source unchanged because its current control was not disabled and empty; no write or provider call occurred in that phase. See the [publication receipt](../../../review-artifacts/FF/ff06-10-publication.json). Manual acceptance remains pending.
 
 At the user's direction no tests, model calls or synthetic signups were performed by A. Builds/publication/configuration readback do not establish functional acceptance. User permission receipt17:43:10Z and independent38780875342 readback confirm the timestamp capability is installed; the former CloudShell block is resolved. Do not repeat historical installation commands.
 

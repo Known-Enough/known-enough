@@ -1,16 +1,16 @@
-2026-10-16 A FF06–FF10 publication IN_PROGRESS — user explicitly requests publication. A sole publication worker, B code claims released. Add authenticated group-rename POST and unauthenticated OPTIONS to existing application configuration declaration, then coordinated native API/worker/frontend publication. Tests/model/signup calls excluded; retain private package, participant state, source/rollback and disabled worker schedule.
+2026-10-16 FF06–FF10 publication complete — [receipt](review-artifacts/FF/ff06-10-publication.json). Source f1c9100: API and worker code read back, worker schedule disabled, frontend Amplify104, group rename routes installed. Required checks passed; no model/signup/participant calls or decision data changes. The job-source rebind was safely held because current control was not disabled and empty; no control write. User manual acceptance pending.
 
-Current FF10 status: **CODE_READY/B**, claim released; guidance build complete, publication/manual acceptance pending. [Comparison and static live readback](tasks/active/ff/FF10/comparison.md). FF06–FF10 remain unpublished; E2E01 unclaimed. Earlier queued entries below are historical.
+Current FF10 status: **PUBLISHED/B**, claim released; user manual acceptance pending. [Comparison and static live readback](tasks/active/ff/FF10/comparison.md). E2E01 remains unclaimed. Earlier queued entries below are historical.
 
-Current FF06–FF09 status: **CODE_READY/B**, all implementation claims released; publication/manual acceptance pending. [Delivery and exact remaining publication requirements](review-artifacts/FF/ff06-09-code-ready.md). No tests or deployment performed. FF10/E2E01 remain unclaimed. Earlier queue entries below are dated history.
+Current FF06–FF09 status: **PUBLISHED/B**, implementation claims released; manual acceptance pending. [Delivery](review-artifacts/FF/ff06-09-code-ready.md) · [publication receipt](review-artifacts/FF/ff06-10-publication.json). Model-job source rebind held; see receipt. Earlier queue entries below are dated history.
 
-FF09 B checkpoint: CODE_READY; publication/manual acceptance pending. [Ticket](tasks/active/ff/FF09/ticket.md). FF06–09 coding checkpoints complete sequentially; no current claim.
+Historical FF09 B checkpoint: CODE_READY before publication; current status is PUBLISHED. [Ticket](tasks/active/ff/FF09/ticket.md). FF06–09 coding checkpoints complete sequentially; no current claim.
 
-FF08 B checkpoint: CODE_READY; publication/manual acceptance pending. [Ticket](tasks/active/ff/FF08/ticket.md).
+Historical FF08 B checkpoint: CODE_READY before publication; current status is PUBLISHED. [Ticket](tasks/active/ff/FF08/ticket.md).
 
-FF07 B checkpoint: CODE_READY; publication/manual acceptance pending. [Ticket](tasks/active/ff/FF07/ticket.md).
+Historical FF07 B checkpoint: CODE_READY before publication; current status is PUBLISHED. [Ticket](tasks/active/ff/FF07/ticket.md).
 
-FF06 B checkpoint: CODE_READY; code/static checks only, publication/manual acceptance pending. See [ticket](tasks/active/ff/FF06/ticket.md). Direct user request continues FF07→FF08→FF09 sequentially.
+Historical FF06 B checkpoint: CODE_READY before publication; current status is PUBLISHED. See [ticket](tasks/active/ff/FF06/ticket.md).
 
 2026-10-15 E2E01 — [Two-user real-app journeys](tasks/active/e2e/E2E01/ticket.md) created after FF10/publication: exactly one Luna agent, two isolated user sessions, at least ten distinct scenarios, private local credentials, sanitized screenshots/error/log evidence and defect follow-ups. Scoped live-test/AI authority applies when taken; no tests started now, no new monitor or deployment. QUEUED/unclaimed; report actual model/version and separate execution completion from product PASS.
 

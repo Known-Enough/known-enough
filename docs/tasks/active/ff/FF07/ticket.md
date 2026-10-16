@@ -1,6 +1,6 @@
 # FF07 — Member photos, image sizing and header fixes
 
-Status: CODE_READY / B; claim released. Publication/manual acceptance pending.
+Status: PUBLISHED / B; claim released. Manual acceptance pending; model-job source rebind held because its control was not disabled and empty. [Receipt](../../../../review-artifacts/FF/ff06-10-publication.json).
 
 ## Reported issues
 

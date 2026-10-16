@@ -1,6 +1,6 @@
 # FF09 — Example inside the create-decision modal only
 
-Status: CODE_READY / B; claim released. Publication/manual acceptance pending.
+Status: PUBLISHED / B; claim released. Manual acceptance pending. [Receipt](../../../../review-artifacts/FF/ff06-10-publication.json).
 
 ## User direction
 
