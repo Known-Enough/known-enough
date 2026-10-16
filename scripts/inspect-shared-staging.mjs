@@ -24,12 +24,14 @@ const requiredGroupRoutes = [
   'GET /groups',
   'POST /groups',
   'POST /groups/accept',
+  'GET /invitations',
   'POST /groups/{groupId}/invitations',
   'POST /groups/{groupId}/remove',
   'OPTIONS /account',
   'OPTIONS /account/register',
   'OPTIONS /groups',
   'OPTIONS /groups/{proxy+}',
+  'OPTIONS /invitations',
 ];
 
 const output = {

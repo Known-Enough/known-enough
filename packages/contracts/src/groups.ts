@@ -20,6 +20,9 @@ export const SharedAvatar = z.object({ mimeType: z.literal('image/png'), width: 
 export const GroupMemberProfile = z.object({ displayName: text, description: z.string().max(280), image: SharedAvatar.nullable() }).strict();
 export const Account = z.object({ subject: id, emailHash: z.string().regex(/^[a-f0-9]{64}$/), displayName: text,
   status: AccountStatus, version: z.number().int().positive(), profile: PrivateProfile.optional(),
+  /** Private recipient-owned references to live invitations. No invitation bearer token is stored here. */
+  pendingInvitations: z.array(z.object({ groupId: id, invitationId: z.string().regex(/^[a-f0-9]{64}$/), groupName: text,
+    organizerName: text, expiresAt: z.number().int().positive() }).strict()).max(32).optional(),
   /** Private, immutable subject-specific ownership for a server-allowlisted test email. */
   sharedTestEmail: z.literal(true).optional() }).strict();
 export const GroupDraft = z.object({ choicePlan: ChoicePlan.optional(), id, bodyHash: z.string().regex(/^[a-f0-9]{64}$/),
@@ -47,6 +50,10 @@ export const GroupSnapshot = z.object({ id, name: text, version: z.number().int(
   members: z.array(z.object({ id, displayName: text, isOrganizer: z.boolean() }).strict()).max(16),
   drafts: z.array(z.object({ id, title: z.string().trim().min(1).max(160), needsClarification: z.boolean(), current: z.boolean(), created: z.boolean().default(false) }).strict()).max(64).default([]),
   pendingInvitations: z.number().int().nonnegative(), decisions: z.array(z.object({ id, current: z.boolean(), title: z.string().max(160).optional() }).strict()).max(64) }).strict();
+/** Recipient-only dashboard projection. Contains no recipient email, username or invitation capability token. */
+export const InvitationSnapshot = z.object({ id: z.string().regex(/^[a-f0-9]{64}$/), groupId: id, groupName: text,
+  organizerName: text, expiresAt: z.number().int().positive() }).strict();
+export type InvitationSnapshot = z.infer<typeof InvitationSnapshot>;
 export const AccountSnapshot = z.object({ status: AccountStatus, displayName: text, version: z.number().int().positive() }).strict();
 export type GroupState = z.infer<typeof GroupState>;
 export type Group = z.infer<typeof Group>;

@@ -65,7 +65,7 @@ Use the corrected six-combination input M, save and create. Expect one new decis
 
 ### 07 — Join the group
 
-If both users work, invite the other existing user to the new group and accept in their own context. Use the supported link/UI, no fresh signup or third account. Confirm both members appear and each retains their own identity. Do not publish the invitation URL. If only one user works, mark this and dependent joint cases BLOCKED; still continue independent AI/editor checks.
+If both users work, test the main-dashboard invitation flow before proceeding. With User 1 organizing the new group, send an invitation using User 2's exact login username. Switch to User 2's separate context, verify the pending-invitations section shows the group, organizer and expiry, then explicitly accept there; confirm the group appears in User 2's group list and the invitation disappears. In a second new group, reverse organizer/recipient and send by the recipient's verified email; accept from that recipient's dashboard as well. Do not create accounts or use a third user. Do not publish usernames, email addresses, invitation URLs, IDs or tokens. Confirm the organizer's group view/snapshot never exposes recipient identifiers, and that the other signed-in user cannot list or accept an invitation addressed to someone else. If either account lacks a trusted verified-email claim or login username, mark only the dependent invitation case BLOCKED with the actual observed prerequisite; do not guess identifiers. If the inbox route or username-key permission is missing from exact deployment readback, stop invitation cases as BLOCKED and continue independent decision journeys. If only one user works, mark membership/invitation and other dependent cases BLOCKED while continuing safe independent checks. Preserve the existing recipient-bound link route as a separately checked fallback without generating a replacement link or exposing it in evidence.
 
 ### 08 — Opening really opens a clean decision modal
 
@@ -101,7 +101,7 @@ Use an observed failure from 11/12, or intercept only the agent's own response/r
 
 ### 15 — Joining preserves ongoing and finished decisions
 
-In another owned group with only the organizer, create two simple manual decisions using input M with distinct titles. Save organizer answers on the ongoing one, and complete/approve the other as a one-person decision. Invite the second existing user afterwards. Expect existing ongoing answers/progress to remain without repeat review solely for joining; the new person supplies their own answers where applicable. The finished decision stays finished with the same outcome/historical approvals and no editable answer form. Respect the new member's allowed historical visibility. No third user is needed.
+In another owned group with only the organizer, create two simple manual decisions using input M with distinct titles. Save organizer answers on the ongoing one, and complete/approve the other as a one-person decision. Invite the second existing user afterwards through the dashboard username/email control, then accept from their pending invitation section. Expect existing ongoing answers/progress to remain without repeat review solely for joining; the new person supplies their own answers where applicable. The finished decision stays finished with the same outcome/historical approvals and no editable answer form. Respect the new member's allowed historical visibility. No third user is needed.
 
 ### 16 — Answer changes retire stale approvals
 

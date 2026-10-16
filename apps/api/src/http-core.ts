@@ -52,7 +52,7 @@ export interface CognitoApiOptions extends CognitoIdentityOptions {
 export interface KnownEnoughLocalApiOptions {
   readonly groups?: GroupService;
   readonly groupDecisions?: GroupDecisionService;
-  readonly registrationProfile?: (authorization: string | string[] | undefined) => Promise<{ subject: string; email: string; verified: boolean }>;
+  readonly registrationProfile?: (authorization: string | string[] | undefined) => Promise<{ subject: string; email: string; verified: boolean; username?: string }>;
   readonly scenarios?: ScenarioService;
   readonly application: KnownEnoughApplication;
   /** Optional injected, non-live model port for the public frame-draft route. */
@@ -71,7 +71,7 @@ export interface KnownEnoughLocalApiOptions {
 export interface KnownEnoughCognitoApiOptions extends CognitoIdentityOptions {
   readonly groups?: GroupService;
   readonly groupDecisions?: GroupDecisionService;
-  readonly registrationProfile?: (authorization: string | string[] | undefined) => Promise<{ subject: string; email: string; verified: boolean }>;
+  readonly registrationProfile?: (authorization: string | string[] | undefined) => Promise<{ subject: string; email: string; verified: boolean; username?: string }>;
   readonly scenarios?: ScenarioService;
   readonly application: KnownEnoughApplication;
   /** Production callers must explicitly inject a reviewed provider implementation. */
@@ -164,6 +164,7 @@ function groupAuthFailure(request: IncomingMessage, operation: string | null): v
 function groupOperation(method: string | undefined, path: string): string | null {
   if (path === '/groups' && method === 'POST') return 'group.create';
   if (path === '/groups' && method === 'GET') return 'group.list';
+  if (path === '/invitations' && method === 'GET') return 'group.invitations';
   if (/^\/groups\/[A-Za-z0-9_-]{1,80}$/.test(path) && method === 'GET') return 'group.open';
   if (path === '/account' && method === 'GET') return 'account.read';
   if (path === '/account/register' && method === 'POST') return 'account.register';
@@ -510,6 +511,9 @@ function createKnownEnoughApiHandler(
             sendJson(response, 200, { account }); return;
           }
           await options.groups.requireApproved(principal);
+          if (path === '/invitations' && request.method === 'GET') {
+            sendJson(response, 200, { invitations: await options.groups.invitations(principal) }); return;
+          }
           const memberProfile = /^\/groups\/([A-Za-z0-9_-]{1,80})\/members\/([A-Za-z0-9_-]{1,80})\/profile$/.exec(path);
           if (memberProfile && request.method === 'GET') {
             sendJson(response, 200, { profile: await options.groups.memberProfile(principal, memberProfile[1]!, memberProfile[2]!) }); return;

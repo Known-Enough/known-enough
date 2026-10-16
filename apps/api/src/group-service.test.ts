@@ -53,13 +53,25 @@ describe('NP01 admission and recipient-bound groups', () => {
     await service.accept(principal('guest'), { token: next.token }); expire();
     await expect(service.accept(principal('guest'), { token: next.token })).rejects.toMatchObject({ code: 'NOT_FOUND' });
   });
-  it('membership revisions freeze linked decisions and deny removed users and stale roster binding', async () => {
+  it('issues a username-targeted invitation to the recipient dashboard and accepts it without a bearer link', async () => {
+    const { service, repository, register } = setup(); await register('host');
+    await service.register(principal('guest'), { email: 'guest@example.invalid', verified: true, username: 'guest-login' }, { displayName: 'Guest' });
+    await operateAccount(repository, 'approve', 'guest', 1);
+    const group = await service.create(principal('host'), { name: 'Reading group', idempotencyKey: 'reading' });
+    await service.invite(principal('host'), group.id, { recipient: 'guest-login', replace: false });
+    const inbox = await service.invitations(principal('guest'));
+    expect(inbox).toHaveLength(1); expect(inbox[0]).toMatchObject({ groupId: group.id, groupName: 'Reading group', organizerName: 'host' });
+    expect(JSON.stringify(inbox)).not.toMatch(/guest@example.invalid|guest-login|emailHash|subject/);
+    const joined = await service.accept(principal('guest'), { groupId: group.id, invitationId: inbox[0]!.id });
+    expect(joined.members).toHaveLength(2); expect(await service.invitations(principal('guest'))).toEqual([]);
+  });
+  it('group additions preserve current decision bindings while removal still denies former members', async () => {
     const { service, register } = setup(); await register('host'); await register('guest');
     const group = await service.create(principal('host'), { name: 'Club', idempotencyKey: 'club' });
     const invite = await service.invite(principal('host'), group.id, { email: 'guest@example.invalid', replace: false });
     await service.bindDecision(principal('host'), group.id, 'decision-one', 1);
     await service.accept(principal('guest'), { token: invite.token });
-    await expect(service.authorizeDecision(principal('host'), 'decision-one')).rejects.toMatchObject({ code: 'STALE_CONTEXT' });
+    await expect(service.authorizeDecision(principal('host'), 'decision-one')).resolves.toBeUndefined();
     await expect(service.bindDecision(principal('host'), group.id, 'decision-two', 1)).rejects.toMatchObject({ code: 'STALE_CONTEXT' });
     await service.remove(principal('host'), group.id, { memberId: memberId('guest'), version: 2 });
     await expect(service.authorizeDecision(principal('guest'), 'decision-one')).rejects.toMatchObject({ code: 'NOT_FOUND' });

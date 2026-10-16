@@ -62,6 +62,8 @@ function compileRows(state: Groups.GroupState, manifestHash: string, schemaVersi
   for (const account of state.accounts) {
     const rows = partitionSeedRows({ accounts: [account], groups: [] }, { accountSubjects: [account.subject] });
     rows.forEach(add); claim({ type: 'EMAIL', subject: account.subject, emailHash: account.emailHash });
+    if (account.profile?.loginUsername) claim({ type: 'USERNAME', subject: account.subject, emailHash: account.emailHash,
+      usernameHash: createHash('sha256').update(account.profile.loginUsername.trim().toLowerCase()).digest('hex') });
   }
   for (const group of state.groups) {
     const accounts = state.accounts.filter(item => group.members.includes(item.subject));

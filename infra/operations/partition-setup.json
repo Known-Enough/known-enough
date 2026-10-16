@@ -166,6 +166,7 @@
                   "ACCOUNT#*",
                   "GROUP#*",
                   "EMAIL#*",
+                  "USERNAME#*",
                   "INVITATION#*",
                   "DECISION#*",
                   "MEMBER#*"
@@ -214,6 +215,7 @@
                   "ACCOUNT#*",
                   "GROUP#*",
                   "EMAIL#*",
+                  "USERNAME#*",
                   "INVITATION#*",
                   "DECISION#*",
                   "MEMBER#*"
@@ -353,6 +355,7 @@
                   "ACCOUNT#*",
                   "GROUP#*",
                   "EMAIL#*",
+                  "USERNAME#*",
                   "INVITATION#*",
                   "DECISION#*",
                   "MEMBER#*",
@@ -381,6 +384,7 @@
                   "ACCOUNT#*",
                   "GROUP#*",
                   "EMAIL#*",
+                  "USERNAME#*",
                   "INVITATION#*",
                   "DECISION#*",
                   "MEMBER#*",

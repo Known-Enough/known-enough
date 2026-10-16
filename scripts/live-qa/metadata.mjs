@@ -9,13 +9,13 @@ export const EXPECTED_ROUTING = {
     functionArn: 'arn:aws:lambda:us-east-1:092954139775:function:known-enough-stage-api'
 };
 export const REQUIRED_ROUTES = [
-    'GET /account', 'POST /account/register', 'GET /groups', 'POST /groups', 'POST /groups/accept',
+    'GET /account', 'POST /account/register', 'GET /groups', 'POST /groups', 'POST /groups/accept', 'GET /invitations',
     'POST /groups/{groupId}/invitations', 'POST /groups/{groupId}/remove', 'POST /groups/{groupId}/drafts',
     'GET /groups/{groupId}/drafts/{draftId}', 'POST /groups/{groupId}/drafts/{draftId}', 'POST /groups/{groupId}/drafts/{draftId}/create',
     'GET /groups/{groupId}/decisions/{decisionId}/review', 'POST /groups/{groupId}/decisions/{decisionId}/revise',
     'POST /decisions', 'ANY /decisions/{proxy+}'
 ];
-const OPTIONS_ROUTES = ['OPTIONS /account', 'OPTIONS /account/register', 'OPTIONS /groups', 'OPTIONS /groups/{proxy+}', 'OPTIONS /decisions', 'OPTIONS /decisions/{proxy+}'];
+const OPTIONS_ROUTES = ['OPTIONS /account', 'OPTIONS /account/register', 'OPTIONS /groups', 'OPTIONS /groups/{proxy+}', 'OPTIONS /invitations', 'OPTIONS /decisions', 'OPTIONS /decisions/{proxy+}'];
 const exact = (actual, expected) => Array.isArray(actual) && actual.length === expected.length && [...actual].sort().join() === [...expected].sort().join();
 /** Fixed independently observed staging identities; never copy expected identity from live routes. */
 export function routingMatches(routing) {

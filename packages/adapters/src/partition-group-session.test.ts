@@ -53,6 +53,26 @@ it('returns current selected-group allowlists and opaque member ids without priv
   expect(await session.status(participant('absent'))).toBeNull();
 });
 
+it('lets an organizer invite a verified account by username and shows a private pending invite in the recipient dashboard', async () => {
+  const f = fixture(syntheticKey);
+  const usernameHash = createHash('sha256').update('luca_login').digest('hex');
+  const luca = f.get('ACCOUNT#luca/STATE');
+  luca.value.profile = { description: '', image: null, loginUsername: 'luca_login' };
+  f.rows.set(`USERNAME#${usernameHash}/CLAIM`, { schemaVersion: 1, revision: 1, kind: 'DIRECTORY',
+    value: { type: 'USERNAME', usernameHash, emailHash: luca.value.emailHash, subject: 'luca' } });
+  const host = f.session({ token: () => 'u'.repeat(40) });
+  const issued = await host.invite(participant('iris'), 'garden', { recipient: 'luca_login', replace: false });
+  const tokenHash = createHash('sha256').update('u'.repeat(40)).digest('hex');
+  expect(issued).toMatchObject({ delivery: 'COPY_LINK' });
+  const guest = f.session();
+  const inbox = await guest.invitations(participant('luca'));
+  expect(inbox).toEqual([{ id: tokenHash, groupId: 'garden', groupName: 'Garden', organizerName: 'IRIS', expiresAt: 86_400_100 }]);
+  expect(JSON.stringify(inbox)).not.toMatch(/luca_login|example\.invalid|emailHash|subject|tokenHash/);
+  const joined = await guest.accept(participant('luca'), { groupId: 'garden', invitationId: tokenHash });
+  expect(joined.members).toHaveLength(3);
+  expect(await guest.invitations(participant('luca'))).toEqual([]);
+});
+
 it('denies untrusted roles and malformed subject/group/command fields before any storage access', async () => {
   const f = fixture(); const session = f.session();
   for (const who of [null, { kind: 'display', subject: 'iris', roomId: 'decision' }, { kind: 'service', subject: 'iris', roomIds: ['decision'] }, { kind: 'participant', subject: '../iris' }] as (TrustedPrincipal | null)[]) {
@@ -343,22 +363,23 @@ it('issues organizer-private links with retained immutable lookup, strict recipi
   await expect(session.invite(participant(), 'garden', { email: 'luca@example.invalid', replace: true, subject: 'omar' })).rejects.toThrow('INVALID_COMMAND');
 });
 
-it('joins only the approved intended recipient atomically, stales prior bindings and makes explicit acceptance replay read-only', async () => {
+it('joins only the approved intended recipient atomically, preserves current bindings and makes explicit acceptance replay read-only', async () => {
   const f = fixture(syntheticKey); const session = f.session({ token: () => 'a'.repeat(43) });
   const invitation = await session.invite(participant(), 'garden', { email: 'luca@example.invalid', replace: false });
   await expect(session.accept(participant('omar'), { token: invitation.token })).rejects.toThrow('NOT_FOUND');
   const accountBefore = structuredClone(f.get('ACCOUNT#luca/STATE'));
+  const accountAfter = structuredClone(accountBefore.value); delete accountAfter.pendingInvitations;
   const joined = await session.accept(participant('luca'), { token: invitation.token }); expect(joined.version).toBe(2); expect(joined.members).toHaveLength(3);
   expect(f.commits.at(-1)!).toEqual(expect.arrayContaining([
     expect.objectContaining({ key: partitionMembershipKey('luca', 'garden'), expected: 0 }),
     expect.objectContaining({ key: { PK: 'ACCOUNT#luca', SK: 'STATE' }, expected: accountBefore.revision,
-      next: expect.objectContaining({ revision: accountBefore.revision + 1, value: accountBefore.value }) }),
+      next: expect.objectContaining({ revision: accountBefore.revision + 1, value: accountAfter }) }),
     expect.objectContaining({ key: { PK: 'GROUP#garden', SK: 'STATE' }, next: expect.objectContaining({ kind: 'GROUP' }) })]));
   expect(f.get('MEMBER#luca/GROUP#garden')).toMatchObject({ revision: 1, value: { active: true } });
-  await expect(session.decisionFence(participant('luca'), 'decision')).rejects.toThrow('STALE_CONTEXT');
+  await expect(session.decisionFence(participant('luca'), 'decision')).resolves.toBeDefined();
   expect(await session.accept(participant('luca'), { token: invitation.token })).toEqual(joined);
   expect(f.commits.at(-1)!.every(item => item.next === null)).toBe(true); expect(f.get('MEMBER#luca/GROUP#garden').revision).toBe(1);
-  expect(f.get('ACCOUNT#luca/STATE')).toMatchObject({ revision: accountBefore.revision + 1, value: accountBefore.value });
+  expect(f.get('ACCOUNT#luca/STATE')).toMatchObject({ revision: accountBefore.revision + 1, value: accountAfter });
 });
 
 it('never reuses an accepted link to restore a removed member but allows a fresh intended invitation without restoring old decision consent', async () => {

@@ -2,7 +2,7 @@
 
 Only unfinished, currently applicable work belongs here. READY means it can be claimed under the shared queue; BLOCKED means its prerequisite is still missing. One implementation task runs at a time; preserved claims remain in their tickets.
 
-- [E2E live journeys](e2e/README.md): E2E02 is the next fresh run for published FF11–FF12, with exact Luna steps, two users, sixteen cases and screenshots/logs. E2E01 retains earlier evidence. Tests not started.
+- [E2E live journeys](e2e/README.md): E2E02 is the next fresh run for published FF11–FF12 and INV01, with exact Luna steps, two users, sixteen cases including username/email dashboard invitations, and screenshots/logs. E2E01 retains earlier evidence. E2E02 stays blocked until INV01 is published and its inbox route/username permission are read back; no new run started yet.
 - [ZZ product usability](zz/README.md): ZZ01 fixes the first screen and competing signup navigation.
 - [MVP readiness](mvp/README.md): MVP01 follows OPS03; inspect code and actual journeys, fix or prioritize essential gaps.
 - [Real online testing](live-testing/README.md): finish LIVE04 and collect ASSESS07 proof.

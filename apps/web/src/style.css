@@ -277,6 +277,20 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 .ke-empty-state p { max-width: 400px; margin: 0; color: #5f7166; font-size: 13px; line-height: 1.55; }
 .ke-group-list { margin: 0; padding: 0; overflow: visible; list-style: none; border: 1px solid #dfe6de; border-radius: 14px; background: #fff; box-shadow: 0 4px 16px #173c3006; }
 .ke-group-sections { display: grid; gap: 20px; }
+.ke-dashboard-invitations { margin: 0 0 20px; padding: 18px; }
+.ke-send-invitation .ke-invitation-form { margin-top: 15px; }
+.ke-send-invitation label:not(.ke-invitation-replace) { display: block; margin: 0 0 7px; color: #294a3d; font-size: 13px; font-weight: 600; }
+.ke-send-invitation input:not([type="checkbox"]), .ke-send-invitation select { display: block; width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; border: 1px solid #c4d0c5; border-radius: 9px; background: #fff; color: #173c30; }
+.ke-send-invitation .ke-invitation-replace { grid-column: 1; grid-row: 2; }
+.ke-send-invitation .ke-invitation-submit { grid-column: 2; grid-row: 2; }
+.ke-dashboard-invitations .ke-panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.ke-dashboard-invitations .ke-panel-heading h3 { display: flex; align-items: center; gap: 9px; margin: 0; color: #173c30; font-size: 17px; }
+.ke-pending-invitations { display: grid; gap: 8px; margin: 14px 0 0; padding: 0; list-style: none; }
+.ke-pending-invitations li { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0 0; border-top: 1px solid #e8ede7; }
+.ke-pending-invitations li > div { display: grid; gap: 3px; min-width: 0; }
+.ke-pending-invitations li strong { color: #294a3d; overflow-wrap: anywhere; }
+.ke-pending-invitations li span, .ke-pending-invitations li small { color: #65766b; font-size: 12px; }
+@media (max-width: 560px) { .ke-pending-invitations li { align-items: stretch; flex-direction: column; } .ke-pending-invitations li button { width: 100%; } }
 .ke-group-section { display: grid; gap: 8px; min-width: 0; }
 .ke-group-section > h3 { margin: 0; color: #52685a; font-size: 13px; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; }
 .ke-group-row { position: relative; z-index: 0; display: flex; align-items: center; gap: 10px; min-width: 0; padding: 8px 12px 8px 16px; background: transparent; transition: background .15s ease; }
@@ -631,6 +645,15 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 :root[data-theme="dark"] .ke-home.ke-groups-dashboard .ke-refresh-icon:hover { color: var(--ke-dark-text) !important; background: var(--ke-dark-hover-surface) !important; border-color: var(--ke-dark-hover-border) !important; }
 :root[data-theme="dark"] .ke-group-home .ke-empty-state,
 :root[data-theme="dark"] .ke-group-home .ke-create-group-form { color: var(--ke-dark-text); background: var(--ke-dark-surface); border-color: var(--ke-dark-border); }
+:root[data-theme="dark"] .ke-dashboard-invitations { color: var(--ke-dark-text); background: var(--ke-dark-surface); border-color: var(--ke-dark-border); }
+:root[data-theme="dark"] .ke-dashboard-invitations .ke-panel-heading h3,
+:root[data-theme="dark"] .ke-pending-invitations li strong { color: var(--ke-dark-text); }
+:root[data-theme="dark"] .ke-send-invitation label:not(.ke-invitation-replace) { color: var(--ke-dark-text); }
+:root[data-theme="dark"] .ke-send-invitation input:not([type="checkbox"]),
+:root[data-theme="dark"] .ke-send-invitation select { color: var(--ke-dark-text); background: #131c17; border-color: var(--ke-dark-border); }
+:root[data-theme="dark"] .ke-pending-invitations li { border-color: var(--ke-dark-border); }
+:root[data-theme="dark"] .ke-pending-invitations li span,
+:root[data-theme="dark"] .ke-pending-invitations li small { color: var(--ke-dark-muted); }
 :root[data-theme="dark"] .ke-group-home .ke-empty-state p,
 :root[data-theme="dark"] .ke-group-home .ke-create-group-form label { color: var(--ke-dark-muted); }
 :root[data-theme="dark"] .ke-group-list { border-color: var(--ke-dark-border); background: var(--ke-dark-surface); box-shadow: 0 5px 18px #0003; }

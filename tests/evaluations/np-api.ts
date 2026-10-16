@@ -37,7 +37,7 @@ export async function npApi(transport: ConverseTransport = npTransport()) {
   const server = createServer(createCognitoKnownEnoughApiHandlerWithJwksCache({ application, groups, groupDecisions, ownerConversation: runtime.ownerConversation, negotiator: runtime.negotiator,
     registrationProfile: async authorization => {
       const value = JSON.parse(Buffer.from((authorization as string).split('.')[1]!, 'base64url').toString());
-      return { subject: value.sub, email: `${value.sub}@example.invalid`, verified: value.sub !== 'unverified' };
+      return { subject: value.sub, email: `${value.sub}@example.invalid`, verified: value.sub !== 'unverified', username: `login-${value.sub}` };
     }, userPoolId: pool, participantClientId: 'participant-client', displayClientId: 'display-client', allowedOrigins: ['https://api.example.test'] }, cache));
   await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
   const address = server.address(); if (!address || typeof address === 'string') throw new Error('Missing address');

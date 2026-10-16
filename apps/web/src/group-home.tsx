@@ -14,6 +14,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
   const [checking, setChecking] = useState(true);
   const [account, setAccount] = useState<ReturnType<typeof Groups.AccountSnapshot.parse> | null>(null);
   const [groups, setGroups] = useState<Groups.GroupSnapshot[]>([]);
+  const [invitations, setInvitations] = useState<Groups.InvitationSnapshot[]>([]);
   const [profileTarget, setProfileTarget] = useState<ProfileTarget | null>(null);
   const profileTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [activeMenuGroupId, setActiveMenuGroupId] = useState<string | null>(null);
@@ -30,8 +31,9 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
   const groupRequest = useRef<{ name: string; idempotencyKey: string; requestId: string } | null>(null);
   const [groupName, setGroupName] = useState('');
   const [creating, setCreating] = useState(false);
-  const [email, setEmail] = useState(''); const [link, setLink] = useState(''); const [replace, setReplace] = useState(false);
-  useEffect(() => { onDirtyChange?.(childDirty || !!groupName.trim() || !!email.trim()); }, [childDirty, groupName, email, onDirtyChange]);
+  const [recipient, setRecipient] = useState(''); const [link, setLink] = useState(''); const [replace, setReplace] = useState(false);
+  const [inviteGroupId, setInviteGroupId] = useState('');
+  useEffect(() => { onDirtyChange?.(childDirty || !!groupName.trim() || !!recipient.trim()); }, [childDirty, groupName, recipient, onDirtyChange]);
   const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false);
   const [loadFailure, setLoadFailure] = useState<LoadFailure | null>(null);
   useEffect(() => { if (activeMenuGroupId) menuActionRef.current?.focus(); }, [activeMenuGroupId]);
@@ -89,7 +91,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
     const controller = new AbortController(); loadAbort.current = controller;
     const current = () => mounted.current && epoch === loadEpoch.current;
     setChecking(true); setLoadFailure(null); if (!preserveLink) setLink('');
-    let stage: 'account' | 'groups' | 'group' = 'account';
+    let stage: 'account' | 'groups' | 'group' | 'invitations' = 'account';
     let httpStatus: number | null = null, reference: string | null = null;
     let emailConflict = false;
     const observe = (response: Response) => {
@@ -127,19 +129,27 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
         const result = await response.json() as { groups?: unknown[]; group?: unknown };
         if (!selectedGroupId && !Array.isArray(result.groups)) throw new Error('Invalid groups response');
         nextGroups = selectedGroupId ? [Groups.GroupSnapshot.parse(result.group)] : result.groups!.map(group => Groups.GroupSnapshot.parse(group));
+        if (!selectedGroupId) {
+          const pendingResponse = await api('/invitations', { signal: controller.signal }); observe(pendingResponse);
+          if (!pendingResponse.ok) { stage = 'invitations'; throw new Error('Invitations unavailable'); }
+          const pending = await pendingResponse.json() as { invitations?: unknown[] };
+          if (!Array.isArray(pending.invitations)) { stage = 'invitations'; throw new Error('Invalid invitations response'); }
+          setInvitations(pending.invitations.map(value => Groups.InvitationSnapshot.parse(value)));
+        }
       }
       if (!current()) return;
       setAvailable(true); setAccount(next); setGroups(nextGroups); setNotice('');
-      if (next?.status !== 'APPROVED') {setLink(''); setEmail(''); setReplace(false);}
+      if (next?.status !== 'APPROVED') {setLink(''); setRecipient(''); setReplace(false); setInvitations([]);}
     } catch {
       if (!current()) return;
-      setAvailable(false); setAccount(null); setGroups([]); setLink(''); setEmail(''); setReplace(false);
+      setAvailable(false); setAccount(null); setGroups([]); setInvitations([]); setLink(''); setRecipient(''); setReplace(false);
       const missingGroup = stage === 'group' && (httpStatus === 403 || httpStatus === 404);
-      setLoadFailure({ title: emailConflict ? 'This email already has an account' : missingGroup ? 'This group is unavailable' : stage === 'account' ? 'We couldn’t load your account' : stage === 'group' ? 'We couldn’t open this group' : 'We couldn’t load your groups',
+      setLoadFailure({ title: emailConflict ? 'This email already has an account' : missingGroup ? 'This group is unavailable' : stage === 'account' ? 'We couldn’t load your account' : stage === 'group' ? 'We couldn’t open this group' : stage === 'invitations' ? 'We couldn’t load your invitations' : 'We couldn’t load your groups',
         description: emailConflict ? 'Sign out and sign in with your original username, or use Forgot password on the sign-in screen. To create a separate account, use a different email address.'
           : missingGroup ? 'The link may no longer be available to your account. Go back to your groups to continue.'
           : httpStatus === 401 ? 'Your session has expired. Sign in again to continue.'
           : httpStatus === null ? 'We couldn’t reach the service. Check your connection and try again.'
+          : stage === 'invitations' ? 'Your groups loaded, but invitations could not be checked. Refresh to try again.'
           : 'The service couldn’t load this view right now. Try again, or return to your groups.', reference });
       console.info('Known Enough group loading diagnostic', { stage, httpStatus,
         reason: httpStatus === null ? 'CONNECTION_OR_TIMEOUT' : httpStatus >= 400 ? 'HTTP_ERROR' : 'RESPONSE_FORMAT', ...(reference ? { reference } : {}) });
@@ -187,6 +197,8 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
     { heading: 'Groups you own', groups: groups.filter(group => group.isOrganizer) },
     { heading: 'Groups you’re a member of', groups: groups.filter(group => !group.isOrganizer) },
   ].filter(section => section.groups.length > 0);
+  const organizerGroups = groups.filter(group => group.isOrganizer);
+  useEffect(() => { setInviteGroupId(current => organizerGroups.some(group => group.id === current) ? current : organizerGroups[0]?.id ?? ''); }, [groups]);
   if (checking && !available) return <LoadingSkeleton kind={selectedGroupId ? 'group' : 'groups'} label={selectedGroupId ? 'Opening your group' : 'Loading your groups'}
     className={selectedGroupId ? 'ke-group-route-loading' : 'ke-group-home'} />;
   if (loadFailure) return <section className="ke-card ke-state-card ke-error-card" role="alert">
@@ -221,9 +233,41 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
         const group = Groups.GroupSnapshot.parse(result.group); groupRequest.current = null; setGroupName(''); onOpenGroup(group.id); return true;
       }, status => { if ((status >= 400 && status < 500) || status === 507) groupRequest.current = null; }, pending.requestId); }}>Create group</button></div>}
       {!groups.length && <div className="ke-empty-state"><span className="ke-state-icon"><GroupIcon /></span><h3>No groups yet.</h3><p>Start a group with the people you want to decide with, or accept an invitation.</p></div>}
+      {!!organizerGroups.length && <section className="ke-card ke-dashboard-invitations ke-send-invitation" aria-labelledby="send-invitation-heading">
+        <header className="ke-panel-heading"><div><h3 id="send-invitation-heading"><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="Mail" /></span><span>Invite someone</span></h3>
+          <p className="ke-panel-subtitle">Choose a group and enter the person’s username or verified email.</p></div></header>
+        <div className="ke-invitation-form">
+          <div><label htmlFor="dashboard-invite-group">Group</label><select id="dashboard-invite-group" value={inviteGroupId} onChange={event => setInviteGroupId(event.target.value)}>
+            {organizerGroups.map(group => <option key={group.id} value={group.id}>{group.name}</option>)}</select></div>
+          <div><label htmlFor="dashboard-invite-recipient">Username or email</label><input id="dashboard-invite-recipient" type="text" autoComplete="off" value={recipient} maxLength={254}
+            onChange={event => setRecipient(event.target.value)} /></div>
+          <label className="ke-invitation-replace"><input type="checkbox" checked={replace} onChange={event => setReplace(event.target.checked)} />
+            <span>Replace an existing invitation <small>(the previous invitation stops working)</small></span></label>
+          <button type="button" className="ke-invitation-submit ke-icon-action" disabled={busy || !recipient.trim() || !inviteGroupId}
+            onClick={() => void action(`/groups/${inviteGroupId}/invitations`, { recipient, replace }, result => {
+              if (typeof result.token !== 'string' || !/^[A-Za-z0-9_-]{32,80}$/.test(result.token)) throw new Error('Invalid invitation response');
+              setLink(`${window.location.origin}${window.location.pathname}#groupInvite=${result.token}`); setRecipient(''); setReplace(false);
+            })}><PageIcon name="UserRoundPlus" />Send invitation</button>
+        </div>
+        {link && <div className="ke-invitation-result" role="status"><p>If the person already has an approved account, the invitation appears on their dashboard. This private link is also available as a fallback and expires in 24 hours.</p>
+          <label htmlFor="dashboard-invitation-link">Private invitation link</label><input id="dashboard-invitation-link" readOnly value={link} onFocus={event => event.currentTarget.select()} />
+          <button type="button" className="secondary" onClick={() => setLink('')}>Hide invitation link</button></div>}
+      </section>}
       {token && <><p>A group invitation is waiting. Accepting joins the group; it does not confirm a decision or approve a proposal.</p>
         <button disabled={busy} onClick={() => void action('/groups/accept', { token }, result => { const group = Groups.GroupSnapshot.parse(result.group); setToken(''); sessionStorage.removeItem('ke-group-invite'); onOpenGroup(group.id); return true; })}>Accept group invitation</button>
         <button className="secondary" onClick={() => { setToken(''); sessionStorage.removeItem('ke-group-invite'); }}>Decline group invitation</button></>}
+      {!!invitations.length && <section className="ke-card ke-dashboard-invitations" aria-labelledby="pending-invitations-heading">
+        <header className="ke-panel-heading"><div><h3 id="pending-invitations-heading"><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="Mail" /></span><span>Pending invitations</span></h3>
+          <p className="ke-panel-subtitle">Accepting adds you to the group. It does not confirm or approve any decision.</p></div>
+          <span className="ke-count-badge" aria-label={`${invitations.length} pending invitations`}>{invitations.length}</span></header>
+        <ul className="ke-pending-invitations">{invitations.map(invitation => <li key={invitation.id}>
+          <div><strong>{invitation.groupName}</strong><span>Invited by {invitation.organizerName}</span>
+            <small>Expires {new Date(invitation.expiresAt).toLocaleDateString()}</small></div>
+          <button type="button" disabled={busy} onClick={() => void action('/groups/accept', { groupId: invitation.groupId, invitationId: invitation.id }, result => {
+            const group = Groups.GroupSnapshot.parse(result.group); setInvitations(current => current.filter(value => value.id !== invitation.id)); onOpenGroup(group.id); return true;
+          })}>Accept invitation</button>
+        </li>)}</ul>
+      </section>}
       {!!groups.length && <div className="ke-group-sections">{groupSections.map(section => <section className="ke-group-section" key={section.heading}>
         <h3>{section.heading}</h3><ul className="ke-group-list" aria-label={section.heading}>{section.groups.map(group => {
         const decisionCount = Array.isArray(group.decisions) ? group.decisions.length : null;
@@ -332,20 +376,20 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
 
             {group.isOrganizer && <section className="ke-card ke-group-panel ke-invitations-panel" aria-labelledby={`invitations-heading-${group.id}`}>
               <header className="ke-panel-heading"><div><h2 id={`invitations-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="Mail" /></span><span>Invitations</span></h2>
-                <p className="ke-panel-subtitle">Send a private invitation link to join this group.</p></div></header>
+                <p className="ke-panel-subtitle">Invite an existing member by username or email. They’ll see it on their dashboard.</p></div></header>
               <div className="ke-invitation-form">
-                <div className="ke-invitation-email"><label htmlFor={`group-email-${group.id}`}>Recipient email</label>
-                  <input id={`group-email-${group.id}`} type="email" autoComplete="email" inputMode="email" value={email} maxLength={254}
-                    onChange={event => setEmail(event.target.value)} /></div>
+                <div className="ke-invitation-email"><label htmlFor={`group-recipient-${group.id}`}>Username or email</label>
+                  <input id={`group-recipient-${group.id}`} type="text" autoComplete="off" value={recipient} maxLength={254}
+                    onChange={event => setRecipient(event.target.value)} /></div>
                 <label className="ke-invitation-replace"><input type="checkbox" checked={replace} onChange={event => setReplace(event.target.checked)} />
                   <span>Replace a lost link <small>(the previous link stops working)</small></span></label>
-                <button type="button" className="ke-invitation-submit ke-icon-action" disabled={busy || !email.trim()} onClick={() => void action(`/groups/${group.id}/invitations`, { email, replace }, result => {
+                <button type="button" className="ke-invitation-submit ke-icon-action" disabled={busy || !recipient.trim()} onClick={() => void action(`/groups/${group.id}/invitations`, { recipient, replace }, result => {
                   if (typeof result.token !== 'string' || !/^[A-Za-z0-9_-]{32,80}$/.test(result.token)) throw new Error('Invalid link');
-                  setLink(`${window.location.origin}${window.location.pathname}#groupInvite=${result.token}`); setEmail(''); setReplace(false);
+                  setLink(`${window.location.origin}${window.location.pathname}#groupInvite=${result.token}`); setRecipient(''); setReplace(false);
                 })}><PageIcon name="Link" />Create invitation link</button>
               </div>
               {link && <div className="ke-invitation-result" role="status">
-                <p>Copy this recipient-bound link privately. It expires after 24 hours. No email has been sent; share it only with the intended recipient.</p>
+                <p>The invitation expires after 24 hours. A registered recipient sees it on their dashboard; keep this private link as a fallback.</p>
                 <label htmlFor={`group-copy-link-${group.id}`}>Invitation link</label>
                 <input id={`group-copy-link-${group.id}`} readOnly value={link} onFocus={event => event.currentTarget.select()} />
                 <button type="button" className="secondary" onClick={() => setLink('')}>Hide invitation link</button>

@@ -23,6 +23,8 @@ AUTHORIZER_ISSUER = 'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_V9OMj
 AUTHORIZER_AUDIENCES = {'3accf7paalvon2m8ue8okfi853', '481ru24906sv26f30i569gq8g0'}
 PROFILE_ROUTE = 'GET /groups/{groupId}/members/{memberId}/profile'
 OPTIONS_ROUTE = 'OPTIONS /groups/{groupId}/members/{memberId}/profile'
+INVITATIONS_ROUTE = 'GET /invitations'
+INVITATIONS_OPTIONS = 'OPTIONS /invitations'
 GROUP_ROUTE = 'GET /groups/{groupId}'
 GROUP_OPTIONS = 'OPTIONS /groups/{proxy+}'
 
@@ -223,6 +225,8 @@ def publish() -> None:
     require(isinstance(scopes, list) and all(isinstance(scope, str) for scope in scopes), 'GROUP_ROUTE_SCOPES_INVALID')
     has_profile = route_readback(route_map, PROFILE_ROUTE, auth='JWT', target=target,
                                  authorizer=authorizer, scopes=scopes)
+    has_invitations = route_readback(route_map, INVITATIONS_ROUTE, auth='JWT', target=target,
+                                     authorizer=authorizer, scopes=scopes)
 
     # Exact preflight route; mirror an existing catch-all if present, otherwise
     # the same Lambda integration handles OPTIONS and applies the configured CORS policy.
@@ -234,6 +238,7 @@ def publish() -> None:
     else:
         options_target = target
     has_options = route_readback(route_map, OPTIONS_ROUTE, auth='NONE', target=options_target)
+    has_invitations_options = route_readback(route_map, INVITATIONS_OPTIONS, auth='NONE', target=options_target)
 
     stage = aws_json('apigatewayv2', 'get-stage', '--api-id', API_ID, '--stage-name', '$default')
     require(stage.get('AutoDeploy') is True, 'API_STAGE_NOT_AUTODEPLOY')
@@ -254,14 +259,24 @@ def publish() -> None:
         if not has_profile:
             new_route_ids.append(create_route(PROFILE_ROUTE, 'JWT', target, authorizer, scopes))
             writes.append('authenticated-profile-route')
+        if not has_invitations:
+            new_route_ids.append(create_route(INVITATIONS_ROUTE, 'JWT', target, authorizer, scopes))
+            writes.append('authenticated-invitations-route')
         if not has_options:
             new_route_ids.append(create_route(OPTIONS_ROUTE, 'NONE', options_target))
             writes.append('cors-preflight-route')
+        if not has_invitations_options:
+            new_route_ids.append(create_route(INVITATIONS_OPTIONS, 'NONE', options_target))
+            writes.append('invitations-cors-preflight-route')
         observed = routes()
         require(route_readback(observed, PROFILE_ROUTE, auth='JWT', target=target,
                                authorizer=authorizer, scopes=scopes), 'PROFILE_ROUTE_FINAL_READBACK_MISMATCH')
+        require(route_readback(observed, INVITATIONS_ROUTE, auth='JWT', target=target,
+                               authorizer=authorizer, scopes=scopes), 'INVITATIONS_ROUTE_FINAL_READBACK_MISMATCH')
         require(route_readback(observed, OPTIONS_ROUTE, auth='NONE', target=options_target),
                 'OPTIONS_ROUTE_FINAL_READBACK_MISMATCH')
+        require(route_readback(observed, INVITATIONS_OPTIONS, auth='NONE', target=options_target),
+                'INVITATIONS_OPTIONS_FINAL_READBACK_MISMATCH')
         final_config = lambda_config()
         require(final_config.get('CodeSha256') == new_code_sha and final_config.get('State') == 'Active'
                 and final_config.get('LastUpdateStatus') == 'Successful', 'LAMBDA_FINAL_READBACK_MISMATCH')
@@ -292,7 +307,8 @@ def publish() -> None:
 
     report = {'sourceSha': source, 'apiZipSha256': new_sha, 'lambdaCodeSha256': new_code_sha,
               'lambdaState': final_config['State'], 'lambdaUpdateStatus': final_config['LastUpdateStatus'],
-              'authenticatedProfileRoute': 'VERIFIED', 'corsPreflightRoute': 'VERIFIED',
+              'authenticatedProfileRoute': 'VERIFIED', 'authenticatedInvitationsRoute': 'VERIFIED',
+              'corsPreflightRoute': 'VERIFIED', 'invitationsCorsPreflightRoute': 'VERIFIED',
               'routeWrites': writes, 'configurationWrites': 0, 'dataWrites': 0,
               'providerCalls': 0, 'accountTests': 'NOT_EXECUTED'}
     output = Path(os.environ.get('RUNNER_TEMP', '/tmp')) / 'zz-profile-api-release.json'

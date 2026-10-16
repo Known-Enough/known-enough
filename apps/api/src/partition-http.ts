@@ -212,6 +212,9 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         if (request.method === 'GET' && url.pathname === '/account') {
           send(response, 200, { account: await session.status(principal) }); return;
         }
+        if (request.method === 'GET' && url.pathname === '/invitations') {
+          send(response, 200, { invitations: await session.invitations(principal) }); return;
+        }
         if (request.method === 'GET' && url.pathname === '/groups') {
           const params = url.searchParams;
           if (url.search.length > 2000 || [...params.keys()].some(key => !['limit', 'cursor'].includes(key) || params.getAll(key).length !== 1)) return reject('INVALID_COMMAND');
@@ -352,7 +355,12 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
           if (!options.ownerInterpretation || (ownerConversation[2] === 'draft' || ownerConversation[4] ? request.method !== 'POST' : request.method !== 'GET')) return reject('NOT_FOUND');
           const io = partitionIO({ timeoutMs: 27000 }); const context = { ...io, signal: AbortSignal.any([io.signal, controller.signal]) };
           const application = new KnownEnoughApplication({ repository: repositories.forParticipant(principal, context), clock, ids });
-          await application.getOwnerSnapshot(principal, ownerConversation[1]!);
+          const owner = await application.getOwnerSnapshot(principal, ownerConversation[1]!);
+          if (ownerConversation[2] === 'draft'
+            && (!owner.publicSnapshot.frame.requiredParticipantIds.every(id => owner.publicSnapshot.frameConfirmations.some(item => item.participantId === id))
+              || !owner.publicSnapshot.frameConfirmations.some(item => item.participantId === owner.ownerParticipantId))) {
+            throw new PartitionOwnerFailure('FRAME_NOT_CONFIRMED');
+          }
           let messages: unknown; let closeRevision: number | undefined;
           if (ownerConversation[2] === 'draft') {
             const raw = await body(request, maximum, bodyMs, controller);

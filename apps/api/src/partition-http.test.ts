@@ -616,9 +616,12 @@ it('generates and replays a draft through trusted HTTP without caller identity o
   } });
   a.options.draftArchitect = async () => { throw new Error('Caller configuration alias'); };
   const response = await a.post(generationPath, generation); expect(response.status).toBe(200); expect(response.headers.get('cache-control')).toBe('no-store');
-  const value = (await response.json()).draft; expect(value).toMatchObject({ revision: 1, groupVersion: 1, frame: { objective: 'Choose a task' } });
+  const initial = await response.json(); const value = initial.draft;
+  expect(initial.requestId).toMatch(/^[0-9a-f-]{36}$/);
+  expect(value).toMatchObject({ revision: 1, groupVersion: 1, frame: { objective: 'Choose a task' } });
   expect(JSON.stringify(value)).not.toMatch(/subject|emailHash|recipientHash|ACCOUNT#|MEMBER#/);
-  const replay = await a.post(generationPath, generation); expect(replay.status).toBe(200); expect(await replay.json()).toEqual({ draft: value }); expect(calls).toBe(1);
+  const replay = await a.post(generationPath, generation); expect(replay.status).toBe(200);
+  expect(await replay.json()).toMatchObject({ draft: value, requestId: expect.stringMatching(/^[0-9a-f-]{36}$/) }); expect(calls).toBe(1);
   expect((await a.post(generationPath, { ...generation, objective: 'Other' })).status).toBe(409); expect(calls).toBe(1);
   expect((await a.get(generationPath + '/' + value.id)).status).toBe(200);
   expect((await a.get(generationPath)).status).toBe(404); expect(f.writes).toEqual([]); expect(f.reads).toEqual([]);

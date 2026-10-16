@@ -6,6 +6,7 @@ const hash = z.string().regex(/^[a-f0-9]{64}$/);
 export const PartitionDirectoryClaim = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('EMAIL'), emailHash: hash, subject: id }),
   z.strictObject({ type: z.literal('SHARED_EMAIL'), emailHash: hash, subject: id }),
+  z.strictObject({ type: z.literal('USERNAME'), usernameHash: hash, emailHash: hash, subject: id }),
   z.strictObject({ type: z.literal('INVITATION'), tokenHash: hash, groupId: id, recipientHash: hash,
     expiresAt: z.number().int().positive().max(Number.MAX_SAFE_INTEGER) }),
   z.strictObject({ type: z.literal('DECISION'), decisionId: id, groupId: id }),
@@ -14,6 +15,7 @@ export type PartitionDirectoryClaim = z.infer<typeof PartitionDirectoryClaim>;
 export const PartitionDirectoryLookup = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('EMAIL'), emailHash: hash }),
   z.strictObject({ type: z.literal('SHARED_EMAIL'), emailHash: hash, subject: id }),
+  z.strictObject({ type: z.literal('USERNAME'), usernameHash: hash }),
   z.strictObject({ type: z.literal('INVITATION'), tokenHash: hash }),
   z.strictObject({ type: z.literal('DECISION'), decisionId: id }),
 ]);
@@ -25,11 +27,13 @@ export function partitionDirectoryKey(raw: PartitionDirectoryClaim | PartitionDi
   const claim = full.success ? full.data : PartitionDirectoryLookup.parse(raw);
   return claim.type === 'SHARED_EMAIL' ? { PK: `EMAIL#${claim.emailHash}#${claim.subject}`, SK: 'CLAIM' }
     : claim.type === 'EMAIL' ? { PK: `EMAIL#${claim.emailHash}`, SK: 'CLAIM' }
+    : claim.type === 'USERNAME' ? { PK: `USERNAME#${claim.usernameHash}`, SK: 'CLAIM' }
     : claim.type === 'INVITATION' ? { PK: `INVITATION#${claim.tokenHash}`, SK: 'TARGET' }
     : { PK: `DECISION#${claim.decisionId}`, SK: 'GROUP' };
 }
 export function isPartitionDirectoryKey(key: { PK: string; SK: string }): boolean {
   return (/^EMAIL#[a-f0-9]{64}(?:#[A-Za-z0-9_-]{1,80})?$/.test(key.PK) && key.SK === 'CLAIM')
+    || (/^USERNAME#[a-f0-9]{64}$/.test(key.PK) && key.SK === 'CLAIM')
     || (/^INVITATION#[a-f0-9]{64}$/.test(key.PK) && key.SK === 'TARGET')
     || (/^DECISION#[A-Za-z0-9_-]{1,80}$/.test(key.PK) && key.SK === 'GROUP');
 }

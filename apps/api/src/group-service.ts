@@ -51,7 +51,7 @@ export class GroupService {
       pendingInvitations: group.invitations.filter(item => !item.acceptedBy && item.expiresAt > this.options.now()).length,
       decisions: group.decisions.filter(item => !item.deleted).map(item => ({ id: item.id, title: item.title ?? group.drafts.find(draft => draft.createdDecisionId === item.id)?.frame.title, current: item.version === group.version })) });
   }
-  async register(principal: TrustedPrincipal | null, profile: { email: string; verified: boolean }, raw: unknown) {
+  async register(principal: TrustedPrincipal | null, profile: { email: string; verified: boolean; username?: string }, raw: unknown) {
     const who = subject(principal);
     if (profile.verified !== true) return fail('FORBIDDEN');
     const displayName = label(fields(raw, ['displayName']).displayName);
@@ -62,7 +62,8 @@ export class GroupService {
       if (!account) {
         if (state.accounts.length >= 256) throw new GroupCapacityError();
         if (state.accounts.some(item => item.emailHash === emailHash)) return fail('FORBIDDEN');
-        account = { subject: who, emailHash, displayName, status: 'PENDING', version: 1 }; state.accounts.push(account);
+        account = { subject: who, emailHash, displayName, status: 'PENDING', version: 1,
+          ...(profile.username ? { profile: { description: '', image: null, loginUsername: profile.username } } : {}) }; state.accounts.push(account);
       }
       return Groups.AccountSnapshot.parse({ status: account.status, displayName: account.displayName, version: account.version });
     });
@@ -82,6 +83,15 @@ export class GroupService {
     const who = subject(principal);
     return this.repository.transaction(state => { this.account(state, who);
       return state.groups.filter(group => !group.deleted && group.members.includes(who)).map(group => this.snapshot(state, group, who)); });
+  }
+  async invitations(principal: TrustedPrincipal | null) {
+    const who = subject(principal);
+    return this.repository.transaction(state => {
+      const account = this.account(state, who);
+      return (account.pendingInvitations ?? []).filter(item => item.expiresAt > this.options.now())
+        .map(item => Groups.InvitationSnapshot.parse({ id: item.invitationId, groupId: item.groupId, groupName: item.groupName,
+          organizerName: item.organizerName, expiresAt: item.expiresAt }));
+    });
   }
   async getGroup(principal: TrustedPrincipal | null, rawId: string) {
     const who = subject(principal), id = Id.parse(rawId);
@@ -119,31 +129,48 @@ export class GroupService {
     });
   }
   async invite(principal: TrustedPrincipal | null, id: string, raw: unknown) {
-    const who = subject(principal); const body = fields(raw, ['email', 'replace']);
-    if (typeof body.email !== 'string' || typeof body.replace !== 'boolean') return fail('INVALID_COMMAND');
-    const recipientHash = this.emailHash(body.email);
+    const who = subject(principal); const values = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
+    const hasEmail = Object.keys(values).sort().join('|') === 'email|replace';
+    const hasRecipient = Object.keys(values).sort().join('|') === 'recipient|replace';
+    if ((!hasEmail && !hasRecipient) || typeof values.replace !== 'boolean' || typeof (hasEmail ? values.email : values.recipient) !== 'string') return fail('INVALID_COMMAND');
+    const recipient = (hasEmail ? values.email : values.recipient) as string;
+    const recipientHash = recipient.includes('@') ? this.emailHash(recipient) : await this.repository.transaction(state => {
+      const account = state.accounts.find(item => item.profile?.loginUsername?.toLowerCase() === recipient.trim().toLowerCase());
+      return account?.emailHash ?? fail('NOT_FOUND');
+    });
+    const replace = values.replace;
     const token = this.options.token?.() ?? randomBytes(32).toString('base64url');
     if (!/^[A-Za-z0-9_-]{32,80}$/.test(token)) throw new Error('Invalid invitation source');
     return this.repository.transaction(state => {
       const group = this.group(state, who, id); if (group.organizer !== who) return fail('FORBIDDEN');
       if (group.members.some(value => state.accounts.find(item => item.subject === value)?.emailHash === recipientHash)) return fail('INVALID_COMMAND');
       const prior = group.invitations.find(item => item.recipientHash === recipientHash && !item.acceptedBy && item.expiresAt > this.options.now());
-      if (prior && !body.replace) return fail('STALE_CONTEXT');
+      if (prior && !replace) return fail('STALE_CONTEXT');
+      const target = state.accounts.find(item => item.emailHash === recipientHash && item.status === 'APPROVED');
       group.invitations = group.invitations.filter(item => item.recipientHash !== recipientHash && item.expiresAt > this.options.now());
       if (group.invitations.length >= 64) throw new GroupCapacityError();
       const expiresAt = this.options.now() + 24 * 60 * 60_000;
       group.invitations.push({ recipientHash, tokenHash: digest(token), expiresAt, acceptedBy: null });
+      if (target) {
+        target.pendingInvitations = [...(target.pendingInvitations ?? []).filter(item => item.groupId !== id && item.expiresAt > this.options.now()),
+          { groupId: id, invitationId: digest(token), groupName: group.name,
+            organizerName: state.accounts.find(item => item.subject === group.organizer)?.displayName ?? 'Group organizer', expiresAt }];
+      }
       return { token, expiresAt, delivery: 'COPY_LINK' as const };
     });
   }
   async accept(principal: TrustedPrincipal | null, raw: unknown) {
-    const who = subject(principal); const body = fields(raw, ['token']);
-    if (typeof body.token !== 'string' || !/^[A-Za-z0-9_-]{32,80}$/.test(body.token)) return fail('INVALID_COMMAND');
-    const tokenHash = digest(body.token);
+    const who = subject(principal); const values = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
+    const byToken = Object.keys(values).join('|') === 'token' && typeof values.token === 'string' && /^[A-Za-z0-9_-]{32,80}$/.test(values.token);
+    const byInbox = Object.keys(values).sort().join('|') === 'groupId|invitationId' && typeof values.groupId === 'string'
+      && typeof values.invitationId === 'string' && /^[a-f0-9]{64}$/.test(values.invitationId);
+    if (!byToken && !byInbox) return fail('INVALID_COMMAND');
+    const tokenHash = byToken ? digest(values.token as string) : values.invitationId as string;
     return this.repository.transaction(state => {
       const account = this.account(state, who);
       const group = state.groups.find(item => !item.deleted && item.invitations.some(invitation => invitation.tokenHash === tokenHash));
       if (!group) return fail('NOT_FOUND');
+      if (byInbox && group.id !== values.groupId) return fail('NOT_FOUND');
       const invitation = group.invitations.find(item => item.tokenHash === tokenHash)!;
       if (invitation.recipientHash !== account.emailHash || invitation.expiresAt <= this.options.now()) return fail('NOT_FOUND');
       if (invitation.acceptedBy) {
@@ -156,6 +183,10 @@ export class GroupService {
         for (const binding of group.decisions) if (!binding.deleted && binding.version === priorVersion) binding.version = group.version;
       }
       invitation.acceptedBy = who;
+      if (account.pendingInvitations) {
+        const pending = account.pendingInvitations.filter(item => item.invitationId !== tokenHash);
+        if (pending.length) account.pendingInvitations = pending; else delete account.pendingInvitations;
+      }
       return this.snapshot(state, group, who);
     });
   }

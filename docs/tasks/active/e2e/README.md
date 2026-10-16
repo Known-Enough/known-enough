@@ -2,7 +2,7 @@
 
 | Task | Purpose | Status |
 | --- | --- | --- |
-| [E2E02](E2E02/README.md) | Next fresh run: one Luna agent, two users; exact steps for manual/AI creation, joint decisions, screenshots and diagnostic logs. | READY for sequential intake / unclaimed; sixteen cases, NOT STARTED. |
-| [E2E01](E2E01/README.md) | Preserved earlier run and updated FF11–FF12 reference checklist. | Previous run complete; S2 PASS, S1 incomplete, S3–10 BLOCKED; qualification BLOCKED. Fresh execution moved to E2E02. |
+| [E2E01](E2E01/README.md) | Previous two-user run; evidence retained for reference. | Complete: scenarios 1–2 PASS, 3–10 BLOCKED; qualification BLOCKED. [Latest report](E2E01/run-2026-10-16-test02-test03.md) |
+| [E2E02](E2E02/README.md) | One Luna agent, two users, sixteen current-release journeys including username/email dashboard invitations. | READY/unclaimed after [INV01](../invitations/INV01/ticket.md) publication; no new run started |
 
-Only E2E02 is queued for fresh execution; do not run both tasks in parallel or overwrite earlier evidence. Use synthetic accounts/private local credentials, preserve uncertain outcomes and publish sanitized screenshots and exact failure diagnostics. One active project task at a time. Task creation starts no tests or monitor.
+Use dedicated synthetic accounts, private local credentials and evidence-based reports. No passwords or tokens in repository artifacts. One active project task at a time; do not begin E2E02 until INV01 backend/frontend source, route, permissions and live readback are ready.

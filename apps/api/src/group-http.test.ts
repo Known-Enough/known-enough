@@ -44,9 +44,16 @@ it('shared participant profile is group-scoped and returns only display name, bi
       owner.profile = { description: 'A short bio for the group.', loginUsername: 'private-login', image: {
         id: 'private-avatar-id', mimeType: 'image/png', width: 1, height: 1, bytesBase64: 'YQ==', sha256: 'a'.repeat(64) } };
     });
-    const invite = await api.call('owner', `/groups/${group.id}/invitations`, { email: 'guest@example.invalid', replace: false });
-    const token = (await invite.json()).token;
-    expect((await api.call('guest', '/groups/accept', { token })).status).toBe(200);
+    const invite = await api.call('owner', `/groups/${group.id}/invitations`, { recipient: 'login-guest', replace: false });
+    expect(invite.status).toBe(200);
+    const inboxResponse = await api.call('guest', '/invitations'); expect(inboxResponse.status).toBe(200);
+    const inbox = (await inboxResponse.json()).invitations;
+    expect(inbox).toHaveLength(1); expect(inbox[0]).toMatchObject({ groupId: group.id, groupName: 'Shared profile club', organizerName: 'Owner name' });
+    expect(JSON.stringify(inbox)).not.toMatch(/guest@example.invalid|login-guest|emailHash|subject|tokenHash/);
+    expect((await api.call('outsider', '/invitations')).status).toBe(200);
+    expect((await api.call('outsider', '/invitations').then(response => response.json())).invitations).toEqual([]);
+    expect((await api.call('guest', '/groups/accept', { groupId: inbox[0].groupId, invitationId: inbox[0].id })).status).toBe(200);
+    expect((await api.call('guest', '/invitations').then(response => response.json())).invitations).toEqual([]);
     const snapshot = await api.call('guest', `/groups/${group.id}`); const members = (await snapshot.json()).group.members;
     const memberId = members.find((member: { displayName: string }) => member.displayName === 'Owner name').id;
     const shared = await api.call('guest', `/groups/${group.id}/members/${memberId}/profile`);
