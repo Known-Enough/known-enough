@@ -133,9 +133,19 @@ def main():
     REPORT['writesRequested'] = 1
     try:
         aws('dynamodb','transact-write-items','--client-request-token',str(uuid.uuid4()),'--transact-items',json.dumps(transaction))
-    except ValueError:
-        pass
-    if read(TABLE,'OPERATIONS#MODEL_JOBS') != next_control_row or read(TABLE,'MODELJOB#'+job_id) != next_job_row or read(BUDGET,'TOTAL') != state['totals']:
+    except ValueError as error:
+        REPORT['writeError'] = str(error)
+    observed_control = read(TABLE, 'OPERATIONS#MODEL_JOBS')
+    observed_job = read(TABLE, 'MODELJOB#'+job_id)
+    observed_totals = read(BUDGET, 'TOTAL')
+    REPORT['readback'] = {
+        'controlMatchesDesired': observed_control == next_control_row,
+        'jobMatchesDesired': observed_job == next_job_row,
+        'controlUnchanged': observed_control == state['control'],
+        'jobUnchanged': observed_job == state['job'],
+        'totalsUnchanged': observed_totals == state['totals']
+    }
+    if observed_control != next_control_row or observed_job != next_job_row or observed_totals != state['totals']:
         stop('RECOVERY_READBACK_UNCONFIRMED')
     REPORT.update(result='EXPIRED_UNCALLED_REQUEST_RETIRED', control='DISABLED_EMPTY', totalValues='UNCHANGED')
 

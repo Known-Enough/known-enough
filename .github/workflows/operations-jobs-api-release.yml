@@ -125,6 +125,19 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         if: inputs.publish_api
         with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobOperations
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Refuse blocked source transition before replacing either runtime
+        if: inputs.publish_api
+        env:
+          PREVIOUS_JOB_SOURCE: ${{ inputs.previous_job_source }}
+        run: python3 -B scripts/operations/jobs-publication-preflight.py
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: inputs.publish_api
+        with:
           role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobRelease
           aws-region: us-east-1
           role-duration-seconds: 900
