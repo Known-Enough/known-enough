@@ -1,6 +1,6 @@
 # FF06 — Simple decision overview, guided modals and editable names
 
-Status: PUBLISHED / B; implementation claim released. Manual acceptance pending; model-job source rebind held because its control was not disabled and empty. [Receipt](../../../../review-artifacts/FF/ff06-10-publication.json).
+Status: PUBLISHED / B; implementation claim released. Follow-up fixes published from `70d3fabbb5f223930dc1f282b9edf072a95db47d`; manual acceptance pending. The model-job source rebind remains held because its control was not disabled and empty. [FF06–FF10 receipt](../../../../review-artifacts/FF/ff06-10-publication.json).
 
 ## User-directed follow-up — group list actions
 
@@ -8,7 +8,15 @@ Status: PUBLISHED / B; implementation claim released. Manual acceptance pending;
 
 Changed files: `apps/web/src/group-home.tsx`, `apps/web/src/style.css`, `apps/web/src/connected-decision.tsx`, `apps/web/src/private-answers-modal.tsx`, `packages/contracts/src/groups.ts`, `apps/api/src/group-service.ts`, `apps/api/src/http-core.ts`, `scripts/fix01/draft-failure-readback.py`, and `docs/debugging-decision-drafts.md`.
 
-No automated tests, AI calls, cloud setup, or deployment were performed. `git diff --check` and Python syntax parsing passed. TypeScript checking could not complete cleanly because npm is unavailable and the workspace package links for `@deal-table/*` are absent. The group menu and delete flow still need manual acceptance in the published build. Walkthrough: open the groups page, use a group's dots to inspect members/decisions, rename the group, then reopen the menu and confirm deletion; verify the deleted group and its decision links are unavailable to its former members.
+Initial implementation checks: `git diff --check` and Python syntax parsing passed. No automated tests, AI calls, or new cloud setup were performed. Local TypeScript checking could not complete because npm and workspace links for `@deal-table/*` were unavailable. The release workflow's frontend build passed.
+
+## Follow-up fix publication — 2026-10-16
+
+Pushed commit `70d3fabbb5f223930dc1f282b9edf072a95db47d` to `main`. [Backend release](https://github.com/Known-Enough/known-enough/actions/runs/38837325423) read back API hash `99a2f2fa79f223cffb13bac3dbdbffd0370ac3671824d13e36a306b7d23fcd3f`; matching worker hash `817cdbbaae969b78ddc52bb3a5abafca6c7c76ea93fe259acbfa77691bbe076f` was published with its schedule disabled. The workflow concluded failure only at the separate model-job source rebind guard (`JOB_SOURCE_NOT_DISABLED_EMPTY`); the API code publication step passed. [Frontend release](https://github.com/Known-Enough/known-enough/actions/runs/38837426011) passed and published Amplify job `105`. Its configuration readback matched API hash `99a2f2fa…`, confirmed all eight managed routes including group deletion, and recorded two configuration writes, zero data writes and zero provider calls.
+
+The follow-up restores editable structured answers during an unresolved optional AI notes request; prevents newly typed notes from being cleared by an earlier response; hardens group-create retry behavior; moves member/decision details and organizer rename/delete into the dots menu; adds organizer/version-checked group tombstones; and logs privacy-safe group request outcomes with UUID correlation IDs. No automated regression tests or AI calls were run. Manual acceptance is still pending.
+
+Walkthrough: open a decision with an uncertain notes request and edit/save structured answers; create a group and retry only the same request if its result is unknown; use the group dots to inspect members/decisions, rename, and confirm deletion; verify deleted groups and linked decisions return not found to their former members.
 
 ## First read
 
