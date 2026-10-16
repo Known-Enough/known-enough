@@ -1,0 +1,33 @@
+{
+  "result": "GROUP_CREATE_FIX_AND_GROUP_SORTING_PUBLISHED",
+  "utc": "2026-10-16T03:57:47Z",
+  "sourceSha": "dcf89a086b609299e24ba9c2478027b151bc811e",
+  "cause": "Group creation sent requestId as an extra JSON field. The strict backend command accepts only name and idempotencyKey, so it rejected the command as INVALID_COMMAND. The request ID now stays in the x-request-id header.",
+  "diagnostics": {
+    "exactReferenceRun": "https://github.com/Known-Enough/known-enough/actions/runs/38847861923",
+    "exactReferenceResult": "NO_MATCH_IN_BOUNDED_120_MINUTE_WINDOW",
+    "recentGroupFailuresRun": "https://github.com/Known-Enough/known-enough/actions/runs/38847937336",
+    "recentGroupFailuresResult": "NO_EVENTS_IN_BOUNDED_120_MINUTE_WINDOW"
+  },
+  "frontend": {
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38848037756",
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "amplifyJobId": "108",
+    "apiPublication": "NOT_EXECUTED",
+    "apiSha256": "99a2f2fa79f223cffb13bac3dbdbffd0370ac3671824d13e36a306b7d23fcd3f",
+    "configurationWrites": 0,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "signupCalls": 0,
+    "tests": "NOT_RUN_USER_DIRECTION",
+    "build": "PASS"
+  },
+  "liveReadback": {
+    "website": "https://main.d143q5ravxp5av.amplifyapp.com/",
+    "connectedAppAsset": "/assets/connected-app-C7W7_iTv.js",
+    "connectedAppSha256": "57b4add06fc5b348539064bf8c46bf0304a3be3653de5039c03fe1babf246e4f",
+    "assetHash": "MATCH",
+    "ownerAndMemberSections": "PRESENT",
+    "groupCreateRequestBody": "name-and-idempotencyKey-only"
+  }
+}
