@@ -1,0 +1,51 @@
+name: Recover one expired never-called request before publication
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha: {type: string, required: true}
+      runtime_source: {type: string, required: true}
+permissions: {contents: read}
+concurrency: {group: known-enough-lifecycle-installation, cancel-in-progress: false}
+jobs:
+  recover:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && (github.actor_id == '143764700' || github.actor_id == '44531296')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {contents: read, id-token: write}
+    env:
+      RUNTIME_SOURCE: ${{ inputs.runtime_source }}
+      AWS_MAX_ATTEMPTS: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - run: test "$(git rev-parse HEAD)" = "${{ inputs.source_sha }}"
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobOperations
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - run: python3 -B scripts/operations/publication-precall-recovery.py prepare
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubQaRelease
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - run: python3 -B scripts/operations/publication-precall-recovery.py backup
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobOperations
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - run: python3 -B scripts/operations/publication-precall-recovery.py apply
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: publication-precall-recovery
+          path: ${{ runner.temp }}/publication-precall-*-report.json
+          retention-days: 30
