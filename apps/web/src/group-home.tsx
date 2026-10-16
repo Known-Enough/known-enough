@@ -252,7 +252,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       {token && <><p>A group invitation is waiting. Accepting joins the group; it does not confirm a decision or approve a proposal.</p>
         <button disabled={busy} onClick={() => void action('/groups/accept', { token }, result => { const group = Groups.GroupSnapshot.parse(result.group); setToken(''); sessionStorage.removeItem('ke-group-invite'); onOpenGroup(group.id); return true; })}>Accept group invitation</button>
         <button className="secondary" onClick={() => { setToken(''); sessionStorage.removeItem('ke-group-invite'); }}>Decline group invitation</button></>}
-      <section className="ke-card ke-dashboard-invitations" aria-labelledby="pending-invitations-heading">
+      {(invitations.length > 0 || invitationFailure) && <section className="ke-card ke-dashboard-invitations" aria-labelledby="pending-invitations-heading">
         <header className="ke-panel-heading"><div><h3 id="pending-invitations-heading"><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="Mail" /></span><span>Invitations for you</span></h3>
           <p className="ke-panel-subtitle">Invitations sent to you. Accept one to join the group.</p></div>
           {!invitationFailure && <span className="ke-count-badge" aria-label={`${invitations.length} pending invitations for you`}>{invitations.length}</span>}</header>
@@ -265,7 +265,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
             const group = Groups.GroupSnapshot.parse(result.group); setInvitations(current => current.filter(value => value.id !== invitation.id)); onOpenGroup(group.id); return true;
           })}>Accept invitation</button>
         </li>)}</ul> : <p>No pending invitations.</p>}
-      </section>
+      </section>}
       {!!groups.length && <div className="ke-group-sections">{groupSections.map(section => <section className="ke-group-section" key={section.heading}>
         <h3>{section.heading}</h3><ul className="ke-group-list" aria-label={section.heading}>{section.groups.map(group => {
         const decisionCount = Array.isArray(group.decisions) ? group.decisions.length : null;
