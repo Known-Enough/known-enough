@@ -14,7 +14,7 @@ POLICY = 'KnownEnoughPartitionParticipant'
 TABLE = f'arn:aws:dynamodb:us-east-1:{ACCOUNT}:table/KnownEnoughPartitions'
 EXPECTED_PRIOR_SHA = 'a5c483ca534d34c864543dcebe47cb27657090143a9968932c7a1a645bc70abd'
 EXPECTED_KEYS = ['ACCOUNT#*', 'GROUP#*', 'EMAIL#*', 'INVITATION#*', 'DECISION#*', 'MEMBER#*']
-PHASES = {'prepare', 'apply', 'readback'}
+PHASES = {'inspect', 'prepare', 'apply', 'readback'}
 
 
 def canonical(value):
@@ -77,7 +77,22 @@ def run(executor=subprocess.run, root=None, phase=None):
         prior_path = root / 'participant-policy-before-private.json'
         candidate_path = root / 'participant-policy-candidate-private.json'
 
-        if phase == 'prepare':
+        if phase == 'inspect':
+            report['operation'] = 'iam:GetRole'
+            role = aws('iam', 'get-role', '--role-name', ROLE)['Role']
+            if role.get('Arn') != f'arn:aws:iam::{ACCOUNT}:role/{ROLE}' or role.get('PermissionsBoundary'):
+                raise ValueError('RUNTIME_ROLE_BINDING_CHANGED')
+            report['operation'] = 'iam:GetRolePolicy'
+            observed = aws('iam', 'get-role-policy', '--role-name', ROLE, '--policy-name', POLICY).get('PolicyDocument')
+            if not isinstance(observed, dict):
+                raise ValueError('PARTICIPANT_POLICY_SHAPE_INVALID')
+            observed_sha = digest(observed)
+            status = ('MISSING' if observed_sha == EXPECTED_PRIOR_SHA else
+                      'INSTALLED' if observed_sha == '95f21ec3a40bd3ef06aabe34907f0304c18002f2d2ac79b4de5f323c68a6aaa5'
+                      else 'UNRECOGNIZED_POLICY')
+            report.update(result='USERNAME_DIRECTORY_POLICY_INSPECTED', observedPolicySha256=observed_sha,
+                          usernamePermission=status, effectiveInvitation='NOT_EXECUTED')
+        elif phase == 'prepare':
             report['operation'] = 'iam:GetRole'
             role = aws('iam', 'get-role', '--role-name', ROLE)['Role']
             if role.get('Arn') != f'arn:aws:iam::{ACCOUNT}:role/{ROLE}' or role.get('PermissionsBoundary'):
@@ -181,7 +196,7 @@ if __name__ == '__main__':
     report_path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     report_path.write_text(json.dumps(result) + '\n')
     print(json.dumps(result))
-    expected = {'prepare': 'USERNAME_DIRECTORY_POLICY_PREPARED', 'apply': 'USERNAME_DIRECTORY_POLICY_WRITE_REQUESTED',
+    expected = {'inspect': 'USERNAME_DIRECTORY_POLICY_INSPECTED', 'prepare': 'USERNAME_DIRECTORY_POLICY_PREPARED', 'apply': 'USERNAME_DIRECTORY_POLICY_WRITE_REQUESTED',
                 'readback': 'USERNAME_DIRECTORY_POLICY_READBACK_PASS'}
     success = result['result'] == 'USERNAME_DIRECTORY_POLICY_READBACK_PASS' if is_cloudshell else (
         result['result'] == expected.get(result['phase']))

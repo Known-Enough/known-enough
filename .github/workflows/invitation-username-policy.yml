@@ -6,6 +6,16 @@ on:
         description: Exact checked main source
         required: true
         type: string
+      inspect_only:
+        description: Read installed permission only; no policy update
+        required: false
+        type: boolean
+        default: true
+      run_checks:
+        description: Run isolated policy-change tests
+        required: false
+        type: boolean
+        default: true
 permissions:
   contents: read
 concurrency:
@@ -25,9 +35,12 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
-      - name: Verify exact source and isolated policy-change tests
+      - name: Verify exact source
         run: |
           test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
+      - name: Run isolated policy-change tests
+        if: inputs.run_checks
+        run: |
           python3 -B scripts/operations/invitation-username-policy.test.py
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
@@ -37,8 +50,14 @@ jobs:
           allowed-account-ids: '092954139775'
           retry-max-attempts: 1
           unset-current-credentials: true
+      - name: Inspect installed username permission without modifying it
+        if: inputs.inspect_only
+        env:
+          INVITATION_POLICY_PHASE: inspect
+        run: python3 -B scripts/operations/invitation-username-policy.py
       - name: Prepare exact scoped candidate from the read-only inspector role
         id: prepare
+        if: '!inputs.inspect_only'
         run: |
           umask 077
           INVITATION_POLICY_PHASE=prepare python3 -B scripts/operations/invitation-username-policy.py
