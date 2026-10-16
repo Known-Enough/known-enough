@@ -1,6 +1,6 @@
 # E2E01 — Two-user live journeys with one Luna agent
 
-Status: RUN COMPLETE / qualification BLOCKED; claim released 2026-10-16T05:50:48Z. The single Luna agent stopped after sign-in because neither account session was verified; all ten outcomes are recorded in [the run report](run-2026-10-16.md). No product PASS or confirmed defect.
+Status: RUN COMPLETE / qualification BLOCKED; claim released 2026-10-16T07:04:50.825Z. The resumed attempt authenticated User 2 only; one group-create action has an unknown outcome after a failed read-only refresh. All ten scenario outcomes are recorded across [the initial report](run-2026-10-16.md) and [the resumed report](run-2026-10-16-resume.md). No product PASS or confirmed defect.
 
 ## Goal and authority
 
