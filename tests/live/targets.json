@@ -46,49 +46,44 @@
       "kind": "connected-staging",
       "frontendUrl": "https://main.d143q5ravxp5av.amplifyapp.com/",
       "frontend": {
-        "sourceCommit": "bafa1d4e21cb6e29008dce76b6b52f8b146d6a5e",
-        "lastVerifiedAt": "2026-10-01T03:31:43Z",
-        "evidence": "docs/np00-technical-closeout.md and docs/review-artifacts/NP00-local-artifact-manifest.json",
+        "sourceCommit": "2e5902f44f10f2b68dd3f7905a79ba4c8b7aa95c",
+        "lastVerifiedAt": "2026-10-16T20:36:12Z",
+        "evidence": "https://github.com/Known-Enough/known-enough/actions/runs/38963388395",
         "files": [
           {
             "path": "/",
-            "sha256": "867259c6c93dc3a2bb3abd6774d81d383c0631b9015d4151572ba24e2161a43d",
-            "bytes": 545,
+            "sha256": "da90f067ae289aebe5c506c6c10ee2968870739d4801bbf77b4ce321209181ed",
             "mediaType": "text/html"
           },
           {
-            "path": "/assets/connected-app-CxhluTmY.js",
-            "sha256": "be5c65705b996b53271925a469266fffc1bdb290cc61cc5b242bfa5495ad3176",
-            "bytes": 159713,
+            "path": "/assets/app-chrome-DyJwxjBm.js",
+            "sha256": "eec5b87122af6c54603b93ba595a340db2c08044cd7c41b70dcda5e2a8ed12a0",
             "mediaType": "javascript"
           },
           {
-            "path": "/assets/index-B96ri3Se.js",
-            "sha256": "29db0b86589df4fdbb2a2b3921a69e74114e914dc9296c721bf19a11f79fab18",
-            "bytes": 213566,
+            "path": "/assets/connected-app-BQt7nZWl.js",
+            "sha256": "19471ac5fc9168d7e9ece82515338b382c462bf8513f64f5a6413b83c4c40923",
             "mediaType": "javascript"
           },
           {
-            "path": "/assets/index-CrFboyLM.css",
-            "sha256": "d5fc935c58c26d1d2ccd98b707bfb07ee4083f78720a476c3079232592c6c627",
-            "bytes": 9506,
+            "path": "/assets/index-PWSWnxUF.js",
+            "sha256": "0937dc042d4a7946f6a73a29abc0c1b93e40208fe363fbe1241319b4002f3049",
+            "mediaType": "javascript"
+          },
+          {
+            "path": "/assets/index-BZl1FoL5.css",
+            "sha256": "0c0038cdfe6fc64dbc1cba34fdcbabb7c405ddc1575a0a10342384fc32893a98",
             "mediaType": "text/css"
-          },
-          {
-            "path": "/assets/jsx-runtime-D6BUY6Oc.js",
-            "sha256": "919f9139c48fa2d94a4794afd4647cb65d5f67339b1932ff02f9978b1d3ffdf8",
-            "bytes": 13524,
-            "mediaType": "javascript"
           }
         ]
       },
       "backend": {
         "status": "last-verified",
         "apiBaseUrl": "https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com",
-        "expectedArtifactSha256": "d5194b8da79250fbad2422ba948d4122654947941c20822ec58de768ef2f9b4f",
-        "sourceCommit": null,
-        "lastVerifiedAt": "2026-10-01T18:18:06Z",
-        "evidence": "docs/review-artifacts/NP00-wsl-deployment-preflight.json; WSL read-only AWS CodeSha256 readback and downloaded ZIP hash match, but deployed source commit remains unknown"
+        "expectedArtifactSha256": "9b0badc58d00d3855735bc36cd300ccff6710486510f243d2f357236a1e81a87",
+        "sourceCommit": "2e5902f44f10f2b68dd3f7905a79ba4c8b7aa95c",
+        "lastVerifiedAt": "2026-10-16T20:35:00Z",
+        "evidence": "https://github.com/Known-Enough/known-enough/actions/runs/38963203435"
       },
       "unauthenticatedApiProbe": {
         "method": "GET",

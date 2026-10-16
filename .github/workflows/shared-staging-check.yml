@@ -80,6 +80,9 @@ jobs:
         with:
           node-version-file: .nvmrc
 
+      - name: Check username directory permission evaluator
+        run: node --test scripts/username-directory-policy.test.mjs
+
       - name: Assume the read-only staging inspector role
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:

@@ -2,6 +2,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { safeAwsFailureDetail } from './shared-staging-error.mjs';
+import { usernameDirectoryPermissions } from './username-directory-policy.mjs';
 
 const ACCOUNT = '092954139775';
 const REGION = 'us-east-1';
@@ -248,6 +249,7 @@ try {
     '--query', 'PolicyNames',
   ], 'IAM ListRolePolicies');
   let runtimeInlineBedrockGrant = false;
+  const runtimePolicies = [];
   for (const policyName of policyNames) {
     const policy = awsJson([
       'iam', 'get-role-policy',
@@ -256,7 +258,9 @@ try {
       '--query', 'PolicyDocument',
     ], 'IAM GetRolePolicy');
     runtimeInlineBedrockGrant ||= hasPotentialBedrockInlineGrant(policy);
+    runtimePolicies.push(policy);
   }
+  const usernamePermissions = usernameDirectoryPermissions(runtimePolicies);
   output.lambda = {
     functionName: LAMBDA_NAME,
     codeSha256Hex: Buffer.from(lambda.CodeSha256 ?? '', 'base64').toString('hex'),
@@ -270,7 +274,10 @@ try {
     modelMode: lambda.ModelMode ?? null,
     paidCallsApproved: lambda.PaidCallsApproved ?? null,
     runtimeInlineBedrockGrant,
+    usernameDirectoryPermissions: usernamePermissions,
   };
+  check('Username directory permissions', usernamePermissions.read && usernamePermissions.transactionalWrite ? 'passed' : 'failed',
+    `USERNAME partition read=${usernamePermissions.read}; conditional transactional write=${usernamePermissions.transactionalWrite}`);
 
   const routeItems = awsJson([
     'apigatewayv2', 'get-routes',
