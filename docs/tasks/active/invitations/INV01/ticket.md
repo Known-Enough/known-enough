@@ -1,17 +1,17 @@
-# INV01 — Dashboard group invitations
+# INV01 — Group invitations and recipient inbox
 
-Status: IMPLEMENTED AND DEPLOYED / blocked from end-user testing by missing installed USERNAME directory permission.
+Status: IMPLEMENTED AND DEPLOYED / recipient-inbox layout correction CODE_READY; user manual acceptance pending. The last recorded USERNAME directory permission gap has no fresh readback in this UI task.
 
 ## Goal
 
-Let an organizer invite an existing approved Known Enough account using its login username or verified email. Show each recipient's pending invitations on their own main dashboard and let them explicitly accept.
+Inside each group, let its organizer invite an existing approved Known Enough account using its login username or verified email. The main Groups page shows only invitations sent to the signed-in recipient, with explicit acceptance; it has no invitation-sending form.
 
 ## Requirements
 
 - Keep the invitation organizer-only, recipient-bound, expiring and replay-safe. The server resolves username/email to a verified account; request fields never select a subject or email hash.
 - Keep usernames, email addresses, hashes and invitation capability tokens out of group snapshots and logs. Return only a recipient-owned invitation summary.
 - A recipient sees the group name, organizer display name and expiry, and accepts explicitly. Accepting only joins the group; it does not confirm answers or approve a proposal.
-- Preserve copy-link acceptance for the existing recipient-bound token flow and existing invitation replacement behavior.
+- Remove the replacement/lost-link checkbox from the UI. Send the existing non-replacing request (`replace: false`); preserve server expiry/replay safeguards and recipient-bound link acceptance. An optional private link stays collapsed inside the group after a successful send.
 - Keep current membership, decision-version, privacy, and identity checks. Do not expose a directory/search endpoint for account enumeration.
 
 ## Changed source
@@ -20,7 +20,7 @@ The current local implementation adds a private username hash directory entry, r
 
 ## Acceptance
 
-Use two existing synthetic accounts. Invite by username and by email in separate groups; verify only the addressed account sees each item; accept from its dashboard; confirm the group appears and the invitation disappears. A wrong account cannot list or accept another recipient's invitation. Check the original copy-link path, expiry/replacement, and that invitation payloads contain no login/email/hash/token data. Confirm accepting does not confirm or approve any decision.
+Use two existing synthetic accounts. Confirm the main Groups page shows Invitations for you (with accurate empty/error states) and no sending form. Open each group to send by username and by email, without any replacement checkbox; verify only the addressed account sees each item; accept from its dashboard; confirm the group appears and the invitation disappears. A wrong account cannot list or accept another recipient's invitation. Check the original copy-link path, expiry/replacement, and that invitation payloads contain no login/email/hash/token data. Confirm accepting does not confirm or approve any decision.
 
 No live publication or end-user acceptance is claimed until recorded with exact source and route readback.
 
@@ -53,3 +53,10 @@ Pinned Node24.21.0 TypeScript, changed-source lint and production build passed. 
 
 
 The dashboard hotfix is now published: frontend source `75becd1f8ce36bbb3df64c5aac6689eaa7513a43`, Amplify job **112**, [run38977439627](https://github.com/Known-Enough/known-enough/actions/runs/38977439627) SUCCESS. All seven public files matched their release hashes. [Sanitized receipt](../../../../review-artifacts/INV01/groups-dashboard-publication.json). Configuration/data/provider writes were zero; installed API hash `9b0badc58d00d3855735bc36cd300ccff6710486510f243d2f357236a1e81a87` is unchanged. A's bounded hotfix claim is released; user manual acceptance and later authenticated E2E proof remain pending. This publication does not establish that the separate username-directory IAM command was applied. No new test agent or schedule was started.
+
+
+## User-directed invitation placement — 2026-10-16
+
+Main Groups is a recipient inbox: an always-visible Invitations for you section contains pending invitations, a truthful empty state, or its own load-error/retry notice. Sending exists only inside the selected group for its organizer, with username/email and Send invitation. The group selector and sending card have been removed from the dashboard. The lost-link checkbox/state and obsolete replacement copy are removed. Existing server requests keep `replace: false`; no silent invitation replacement is introduced. A returned private link remains available only in a collapsed group-local fallback so existing copy-link behavior is preserved.
+
+UI/CSS-only change; no API/IAM/storage/schema or real participant action. Static compilation/build allowed, no tests or AI calls; frontend publication and user manual acceptance follow separately.

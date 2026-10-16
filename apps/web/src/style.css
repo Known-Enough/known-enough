@@ -278,11 +278,6 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 .ke-group-list { margin: 0; padding: 0; overflow: visible; list-style: none; border: 1px solid #dfe6de; border-radius: 14px; background: #fff; box-shadow: 0 4px 16px #173c3006; }
 .ke-group-sections { display: grid; gap: 20px; }
 .ke-dashboard-invitations { margin: 0 0 20px; padding: 18px; }
-.ke-send-invitation .ke-invitation-form { margin-top: 15px; }
-.ke-send-invitation label:not(.ke-invitation-replace) { display: block; margin: 0 0 7px; color: #294a3d; font-size: 13px; font-weight: 600; }
-.ke-send-invitation input:not([type="checkbox"]), .ke-send-invitation select { display: block; width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; border: 1px solid #c4d0c5; border-radius: 9px; background: #fff; color: #173c30; }
-.ke-send-invitation .ke-invitation-replace { grid-column: 1; grid-row: 2; }
-.ke-send-invitation .ke-invitation-submit { grid-column: 2; grid-row: 2; }
 .ke-dashboard-invitations .ke-panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .ke-dashboard-invitations .ke-panel-heading h3 { display: flex; align-items: center; gap: 9px; margin: 0; color: #173c30; font-size: 17px; }
 .ke-pending-invitations { display: grid; gap: 8px; margin: 14px 0 0; padding: 0; list-style: none; }
@@ -402,14 +397,13 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 .ke-group-page input[type="checkbox"] { width: 19px; height: 19px; margin: 0; accent-color: #173c30; }
 .ke-invitation-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 14px 18px; }
 .ke-invitation-email { min-width: 0; }
-.ke-invitation-replace { display: flex !important; grid-column: 1; align-items: center; gap: 10px; min-width: 0; min-height: 44px; padding: 6px 0; margin: 0 !important; color: #40564a !important; font-size: 13px !important; font-weight: 480 !important; line-height: 1.45; cursor: pointer; }
-.ke-invitation-replace span { display: block; }
-.ke-invitation-replace small { display: inline; margin: 0; color: #5f6b62; font-size: 12px; font-weight: 400; }
-.ke-invitation-submit { grid-column: 2; grid-row: 2; white-space: nowrap; }
+.ke-invitation-submit { grid-column: 2; grid-row: 1; white-space: nowrap; }
 .ke-invitation-submit svg { display: block; flex: none; width: 18px; height: 18px; }
 .ke-invitation-result { display: grid; gap: 8px; margin-top: 16px; padding: 16px; border: 1px solid #dce5dc; border-radius: 12px; background: #f8faf7; }
 .ke-invitation-result p { margin: 0 0 4px; color: #56675d; font-size: 13px; }
 .ke-invitation-result button { justify-self: start; }
+.ke-invitation-result summary { cursor: pointer; font-size: 13px; }
+.ke-invitation-result details[open] summary { margin-bottom: 12px; }
 @media (max-width: 650px) {
   .ke-home, .ke-entry { padding: 22px 20px 40px; }
   .ke-hero { margin: 38px 0 26px; }
@@ -451,7 +445,7 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
   .ke-member-list li, .ke-decision-row { align-items: flex-start; flex-direction: column; }
   .ke-group-panel .ke-remove-member, .ke-decision-row button { width: 100%; }
   .ke-invitation-form { grid-template-columns: minmax(0, 1fr); }
-  .ke-invitation-replace, .ke-invitation-submit { grid-column: 1; grid-row: auto; }
+  .ke-invitation-submit { grid-column: 1; grid-row: auto; }
   .ke-invitation-submit { width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { .ke-privacy-bar summary::after, .ke-home button, .ke-entry button { transition: none; } }
@@ -564,8 +558,6 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 :root[data-theme="dark"] .ke-membership-note summary,
 :root[data-theme="dark"] .ke-decision-empty p,
 :root[data-theme="dark"] .ke-decision-row p,
-:root[data-theme="dark"] .ke-invitation-replace,
-:root[data-theme="dark"] .ke-invitation-replace small,
 :root[data-theme="dark"] .ke-invitation-result p,
 :root[data-theme="dark"] .ke-private-identity { color: var(--ke-dark-muted); }
 :root[data-theme="dark"] .ke-group-overview .ke-eyebrow { color: var(--ke-dark-subtle); }
@@ -648,9 +640,6 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 :root[data-theme="dark"] .ke-dashboard-invitations { color: var(--ke-dark-text); background: var(--ke-dark-surface); border-color: var(--ke-dark-border); }
 :root[data-theme="dark"] .ke-dashboard-invitations .ke-panel-heading h3,
 :root[data-theme="dark"] .ke-pending-invitations li strong { color: var(--ke-dark-text); }
-:root[data-theme="dark"] .ke-send-invitation label:not(.ke-invitation-replace) { color: var(--ke-dark-text); }
-:root[data-theme="dark"] .ke-send-invitation input:not([type="checkbox"]),
-:root[data-theme="dark"] .ke-send-invitation select { color: var(--ke-dark-text); background: #131c17; border-color: var(--ke-dark-border); }
 :root[data-theme="dark"] .ke-pending-invitations li { border-color: var(--ke-dark-border); }
 :root[data-theme="dark"] .ke-pending-invitations li span,
 :root[data-theme="dark"] .ke-pending-invitations li small { color: var(--ke-dark-muted); }
