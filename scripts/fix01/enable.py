@@ -37,6 +37,7 @@ try:
   state=json.loads(current['payload']['S']);standing=json.loads(auth['payload']['S']);policy=json.loads(retention['payload']['S'])
   control_source=args.control_source or SOURCE
   if not re.fullmatch('[a-f0-9]{40}',control_source) or (args.phase=='enable' and control_source!=SOURCE):raise ValueError('CONTROL_SOURCE_INVALID')
+  report['observedControl']={'sourceSha':state.get('sourceSha'),'enabled':state.get('enabled'),'activeCount':len(state.get('active',[])),'slotCount':len(state.get('slots',[]))}
   if state.get('sourceSha')!=control_source or state.get('active')!=[] or state.get('slots')!=[]:raise ValueError('SOURCE_OR_ACTIVE_JOBS_STOP')
   synthetic_enabled=False
   if policy.get('enabled') is not False:
