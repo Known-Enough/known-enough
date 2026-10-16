@@ -80,6 +80,26 @@ try:
                 and claim['value'].get('subject') == subject and claim['value'].get('emailHash') == account['value'].get('emailHash'))
         except RuntimeError as error:
             report['checks']['usernameDirectoryRead'] = str(error)
+            # The installed operator may lack the newer USERNAME key fence. Its existing
+            # key-only catalog can establish absence without exporting any account data.
+            if str(error) == 'dynamodb:get-item/AccessDeniedException':
+                token, found = None, False
+                for _ in range(5):
+                    args = ['--table-name', 'KnownEnoughPartitions', '--projection-expression', 'PK,SK',
+                            '--select', 'SPECIFIC_ATTRIBUTES', '--filter-expression', 'PK = :pk AND SK = :sk',
+                            '--expression-attribute-values', json.dumps({':pk': {'S': 'USERNAME#' + hashed}, ':sk': {'S': 'CLAIM'}}),
+                            '--consistent-read', '--limit', '1000']
+                    if token:
+                        args += ['--exclusive-start-key', json.dumps(token)]
+                    page = aws('dynamodb', 'scan', *args)
+                    found = found or bool(page.get('Items'))
+                    token = page.get('LastEvaluatedKey')
+                    if not token:
+                        report['checks']['usernameDirectoryPresent'] = found
+                        report['checks']['usernameDirectoryCatalogComplete'] = True
+                        break
+                else:
+                    report['checks']['usernameDirectoryCatalogComplete'] = False
     report['result'] = 'INVITATION_RECIPIENT_INSPECTED'
 except (RuntimeError, OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError) as error:
     report.update(result='READBACK_UNAVAILABLE', code=str(error) if isinstance(error, RuntimeError) else type(error).__name__)
