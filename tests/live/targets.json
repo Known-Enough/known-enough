@@ -46,9 +46,9 @@
       "kind": "connected-staging",
       "frontendUrl": "https://main.d143q5ravxp5av.amplifyapp.com/",
       "frontend": {
-        "sourceCommit": "e553ef6430342adc8c340af18b3ac22d54ecbb80",
-        "lastVerifiedAt": "2026-10-16T23:11:09.123398+00:00",
-        "evidence": "https://github.com/Known-Enough/known-enough/actions/runs/38979916451",
+        "sourceCommit": "5d180c45afe90f74127c65445b86dff11c08ccbb",
+        "lastVerifiedAt": "2026-10-16T23:13:38.381871+00:00",
+        "evidence": "https://github.com/Known-Enough/known-enough/actions/runs/38980172188",
         "files": [
           {
             "path": "/assets/app-chrome-B4Sk8Vtx.js",
@@ -56,8 +56,8 @@
             "mediaType": "javascript"
           },
           {
-            "path": "/assets/connected-app-7jILcRav.js",
-            "sha256": "312b1a7a1986bae26f7b546c1d82b3876f4e0ac0eb72637aa4b126709fbb24f5",
+            "path": "/assets/connected-app-Bhb1VYJ2.js",
+            "sha256": "8cdd42437a9e094f0cefe07fd8175af89ca4f900f486a66d9ba3d42049a6b808",
             "mediaType": "javascript"
           },
           {
@@ -66,13 +66,13 @@
             "mediaType": "text/css"
           },
           {
-            "path": "/assets/index-qZaQFS36.js",
-            "sha256": "8d82cd53bb9a694bf8b7f1836cbb715fb9ff3565b8806c9be9d48bee714bdfa2",
+            "path": "/assets/index-Mn5pKq-K.js",
+            "sha256": "c30cd8badc6c32ba3d6243f337cf63fff7c24b8f0f3c309b1690c0b3ad5536cf",
             "mediaType": "javascript"
           },
           {
             "path": "/",
-            "sha256": "52100ba4b98effd209512ab93dedd5cd93476c707f04ee8de9ae4eed54b473fb",
+            "sha256": "c5e23bddb758536c74eeaca9054efa7ac26d49c9b91c3a0f37001fc3bc818a74",
             "mediaType": "text/html"
           }
         ]
