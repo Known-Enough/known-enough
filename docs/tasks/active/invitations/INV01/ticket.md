@@ -1,6 +1,6 @@
 # INV01 — Group invitations and recipient inbox
 
-Status: IMPLEMENTED AND DEPLOYED / recipient-inbox layout correction CODE_READY; user manual acceptance pending. The last recorded USERNAME directory permission gap has no fresh readback in this UI task.
+Status: IMPLEMENTED AND DEPLOYED / recipient-inbox layout correction PUBLISHED; user manual acceptance pending. The last recorded USERNAME directory permission gap has no fresh readback in this UI task.
 
 ## Goal
 
@@ -60,3 +60,6 @@ The dashboard hotfix is now published: frontend source `75becd1f8ce36bbb3df64c5a
 Main Groups is a recipient inbox: an always-visible Invitations for you section contains pending invitations, a truthful empty state, or its own load-error/retry notice. Sending exists only inside the selected group for its organizer, with username/email and Send invitation. The group selector and sending card have been removed from the dashboard. The lost-link checkbox/state and obsolete replacement copy are removed. Existing server requests keep `replace: false`; no silent invitation replacement is introduced. A returned private link remains available only in a collapsed group-local fallback so existing copy-link behavior is preserved.
 
 UI/CSS-only change; no API/IAM/storage/schema or real participant action. Static compilation/build allowed, no tests or AI calls; frontend publication and user manual acceptance follow separately.
+
+
+Placement publication completed on source `3e98c274544be9605468aa2317b311a914d60fad`, Amplify **113**, [run38978248451](https://github.com/Known-Enough/known-enough/actions/runs/38978248451) SUCCESS. [Receipt](../../../../review-artifacts/INV01/invitation-placement-publication.json) records seven verified public file hashes and zero configuration/data/provider writes. API remains `9b0badc58d00d3855735bc36cd300ccff6710486510f243d2f357236a1e81a87`. A claim released; user manual acceptance is pending, not inferred from publication. No tests, invitations or AI calls were executed; the separate historical IAM gap is not reclassified by this UI release.
