@@ -65,8 +65,8 @@ def checked(state):
     REPORT['observedJob'] = {name: job.get(name) for name in ['phase', 'attempts', 'reservedTokens', 'reservedCostMicros']}
     ref = job['reference']
     REPORT['observedJob']['expired'] = isinstance(ref.get('expiresAt'), int) and ref['expiresAt'] <= int(datetime.datetime.now(datetime.timezone.utc).timestamp() * 1000)
-    if job.get('schemaVersion') != 1 or ref.get('jobId') != job_id or ref.get('sourceSha') != SOURCE or ref.get('kind') not in ['ARCHITECT', 'OWNER'] or not REPORT['observedJob']['expired']:
-        stop('EXPIRED_CURRENT_TRANSIENT_REQUEST_REQUIRED')
+    if job.get('schemaVersion') != 1 or ref.get('jobId') != job_id or ref.get('sourceSha') != SOURCE or ref.get('kind') not in ['ARCHITECT', 'OWNER', 'NEGOTIATION'] or not REPORT['observedJob']['expired']:
+        stop('EXPIRED_CURRENT_REQUEST_REQUIRED')
     if job.get('phase') != 'READY' or job.get('attempts') != 0 or job.get('failures') != 0 or job.get('reservedTokens') != 0 or job.get('reservedCostMicros') != 0 or job.get('lease') is not None or job.get('usage') is not None or job.get('reason') is not None or job.get('recoveryProofHash') is not None:
         stop('CALLED_LEASED_OR_UNCERTAIN_JOB_PRESERVED')
     authority = decode(state['authority'], 'AUTH', 'version')

@@ -1,0 +1,88 @@
+name: Restore exact installed decision service source
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha: {type: string, required: true}
+      runtime_source: {type: string, required: true}
+      previous_job_source: {type: string, required: true}
+      api_sha256: {type: string, required: true}
+      worker_sha256: {type: string, required: true}
+permissions: {contents: read}
+concurrency: {group: known-enough-lifecycle-installation, cancel-in-progress: false}
+jobs:
+  restore:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && (github.actor_id == '44531296' || github.actor_id == '143764700')
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions: {contents: read, id-token: write}
+    env:
+      EXPECTED_SOURCE: ${{ inputs.runtime_source }}
+      API_SHA256: ${{ inputs.api_sha256 }}
+      WORKER_SHA256: ${{ inputs.worker_sha256 }}
+      PREVIOUS_JOB_SOURCE: ${{ inputs.previous_job_source }}
+      OWNER_INTERPRETATION: 'true'
+      AWS_MAX_ATTEMPTS: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - run: test "$(git rev-parse HEAD)" = "${{ inputs.source_sha }}"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: {node-version-file: .nvmrc}
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPrimaryRelease
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - run: python3 -B scripts/fix01/enable.py api --api-sha256 "$API_SHA256"
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobRelease
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - run: python3 -B scripts/fix01/enable.py worker --worker-sha256 "$WORKER_SHA256"
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubStagingInspector
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - run: python3 -B scripts/fix01/enable.py logging
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobOperations
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Rebind disabled empty control to independently recorded installed runtime
+        run: |
+          node --no-warnings --experimental-transform-types --input-type=module - <<'JS'
+          import { transitionDisabledJobSource } from './scripts/operations/jobs-source-transition.mjs';
+          import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+          import { readFileSync,writeFileSync } from 'node:fs';
+          const root=process.env.RUNNER_TEMP;
+          for (const phase of ['api','worker','logging']) {
+            const report=JSON.parse(readFileSync(root+'/fix01-'+phase+'-guard.json'));
+            if(report.result!=='GUARD_PASS'||report.source!==process.env.EXPECTED_SOURCE)throw Error('INSTALLED_GUARD_REQUIRED');
+          }
+          const client=new DynamoDBClient({region:'us-east-1',maxAttempts:1});
+          const report=await transitionDisabledJobSource(client.send.bind(client),process.env.PREVIOUS_JOB_SOURCE,process.env.EXPECTED_SOURCE);
+          writeFileSync(root+'/decision-source-rebind.json',JSON.stringify(report)+'\n');
+          console.log(JSON.stringify(report));
+          JS
+      - name: Enable only matching verified current control without provider calls
+        run: python3 -B scripts/fix01/enable.py enable
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: decision-service-rebind
+          path: |
+            ${{ runner.temp }}/fix01-*-guard.json
+            ${{ runner.temp }}/decision-source-rebind.json
+          if-no-files-found: warn
