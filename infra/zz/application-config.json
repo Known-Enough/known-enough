@@ -13,6 +13,8 @@
     "POST /account/profile",
     "POST /account/profile/image",
     "OPTIONS /account/profile",
-    "OPTIONS /account/profile/image"
+    "OPTIONS /account/profile/image",
+    "POST /groups/{groupId}/name",
+    "OPTIONS /groups/{groupId}/name"
   ]
 }

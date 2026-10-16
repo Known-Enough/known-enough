@@ -1,3 +1,5 @@
+2026-10-16 A FF06–FF10 publication IN_PROGRESS — user explicitly requests publication. A sole publication worker, B code claims released. Add authenticated group-rename POST and unauthenticated OPTIONS to existing application configuration declaration, then coordinated native API/worker/frontend publication. Tests/model/signup calls excluded; retain private package, participant state, source/rollback and disabled worker schedule.
+
 Current FF10 status: **CODE_READY/B**, claim released; guidance build complete, publication/manual acceptance pending. [Comparison and static live readback](tasks/active/ff/FF10/comparison.md). FF06–FF10 remain unpublished; E2E01 unclaimed. Earlier queued entries below are historical.
 
 Current FF06–FF09 status: **CODE_READY/B**, all implementation claims released; publication/manual acceptance pending. [Delivery and exact remaining publication requirements](review-artifacts/FF/ff06-09-code-ready.md). No tests or deployment performed. FF10/E2E01 remain unclaimed. Earlier queue entries below are dated history.
