@@ -215,7 +215,10 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
         : <p>{owner.ownInputReadiness === 'READY' ? 'Your answers are saved. All available choices work for you.' : "You haven't answered yet."}</p>}</>}
       {owner && owner.confirmedConstraints.filter(item => item.status === 'ACTIVE').length > 3 && <p>More saved conditions are available in your private answers.</p>}
       <h3>Everyone’s progress</h3><ul>{snapshot.frame.participants.map(person => <li key={person.id}>{person.displayName}: {snapshot.approvedParticipantIds.includes(person.id) ? 'proposal approved' : !snapshot.participantProgress ? 'answers pending' : snapshot.participantProgress.find(item => item.participantId === person.id)?.answersSaved ? 'answers saved' : 'answers pending'}</li>)}</ul>
-      {owner && continueToProposal && <button type="button" disabled={busy} onClick={() => setDetailStep('proposal')}>{proposal ? 'See proposal' : 'Find an outcome'}</button>}
+      {owner && continueToProposal && <button type="button" disabled={blocked || awaitingJob} onClick={() => {
+        if (proposal || owner.pendingQuestions.some(question => question.status === 'PENDING') || owner.disclosurePermissions.some(permission => permission.status === 'PENDING')) setDetailStep('proposal');
+        else void generate();
+      }}>{proposal ? 'See proposal' : 'Find an outcome'}</button>}
       <button type="button" className="secondary" onClick={() => setDetailStep('shared')}>Decision details</button>
       {!owner && proposal && <button type="button" onClick={() => setDetailStep('proposal')}>View proposal</button>}
     </section>
