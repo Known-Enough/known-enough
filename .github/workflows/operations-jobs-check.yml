@@ -6,6 +6,10 @@ on:
         description: Exact checked main source SHA
         required: true
         type: string
+      run_checks:
+        description: Run regression tests; false performs read-only diagnosis without tests
+        type: boolean
+        default: true
       operation:
         description: Read-only inspection or conditional absent disabled-control installation
         required: true
@@ -41,7 +45,9 @@ jobs:
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
           node scripts/operations/verify.mjs > /dev/null
           npm ci
-          node --experimental-transform-types --test scripts/operations/jobs-installed-check.test.mjs scripts/operations/jobs-control.test.mjs
+          if [ "${{ inputs.run_checks }}" = true ]; then
+            node --experimental-transform-types --test scripts/operations/jobs-installed-check.test.mjs scripts/operations/jobs-control.test.mjs
+          fi
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
           role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobOperations
