@@ -1,6 +1,6 @@
 # E2E01 — Two-user live journeys with one Luna agent
 
-Status: RUN COMPLETE / qualification BLOCKED; claim released 2026-10-16T07:04:50.825Z. The resumed attempt authenticated User 2 only; one group-create action has an unknown outcome after a failed read-only refresh. All ten scenario outcomes are recorded across [the initial report](run-2026-10-16.md) and [the resumed report](run-2026-10-16-resume.md). No product PASS or confirmed defect.
+Status: RUN COMPLETE / qualification BLOCKED; claim released 2026-10-16T07:21:34Z. Final outcomes: scenario 2 PASS; scenario 1 FAIL/incomplete; scenarios 3–10 BLOCKED. The final addendum records two unknown cleanup responses and the required next step. No overall product PASS or confirmed defect.
 
 ## Goal and authority
 
