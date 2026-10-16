@@ -60,10 +60,8 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
   const [detailStep, setDetailStep] = useState<'shared' | 'proposal' | null>(null);
   const detailDialog = useRef<HTMLDialogElement>(null);
   useEffect(() => { if (detailStep) detailDialog.current?.showModal(); else detailDialog.current?.close(); }, [detailStep]);
-  const [editingNeeds, setEditingNeeds] = useState(false);
   const [structuredDirty, setStructuredDirty] = useState(false);
   const [reviewed, setReviewed] = useState(false);
-  const [reviewedFrame, setReviewedFrame] = useState<string | null>(null);
   useEffect(() => { setReviewed(false); }, [owner?.draft?.draftId, snapshot.currentProposal?.proposalId]);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
@@ -84,7 +82,6 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
   useEffect(() => { setSyntheticProcessing(false); }, [frameReviewKey]);
   const variables: Variable[] = [...snapshot.frame.variables, ...(owner?.privateVariables ?? [])];
   const allConfirmed = snapshot.frame.requiredParticipantIds.every(id => snapshot.frameConfirmations.some(item => item.participantId === id));
-  const confirmed = owner && snapshot.frameConfirmations.some(item => item.participantId === owner.ownerParticipantId);
   const request = async (path: string, body: unknown) => {
     const response = await api(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
     const result: unknown = await response.json();
@@ -113,7 +110,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
       return true;
     } catch (error) {
       if (error instanceof DecisionRequestError && error.status === 409) {
-        pending.current = null; setPendingAction(false); setReviewedFrame(null); setReviewed(false);
+        pending.current = null; setPendingAction(false); setReviewed(false);
         try { await refresh(); setNotice('The decision changed while you were reviewing it. The latest version is loaded; review and confirm it again.'); }
         catch { setNotice('The decision changed. Refresh its current state before confirming again.'); }
       } else if (error instanceof DecisionRequestError && [400,401,403,404,422].includes(error.status)) {
@@ -159,7 +156,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
     finally { interpretationGuard.current = false; setBusy(false); }
   };
   const interpret = async () => {
-    if (!allConfirmed || !confirmed || !text.trim() || !syntheticProcessing || interpretationRequest || interpretationGuard.current) return;
+    if (!text.trim() || !syntheticProcessing || interpretationRequest || interpretationGuard.current) return;
     interpretationGuard.current = true; setBusy(true); setNotice('');
     const requestId = crypto.randomUUID(); interpretationStorageKey.current = interpretationKey; sessionStorage.setItem(interpretationKey, requestId); setInterpretationRequest(requestId);
     interpretationSubmittedText.current = text;
@@ -207,10 +204,9 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
   const recoveryControls = <>
     {interpretationRequest && <div className="ke-wizard-recovery" role="status"><p>Your previous AI notes request needs a status check. Your selections and saved conditions are kept.</p><button type="button" disabled={busy} onClick={() => void checkInterpretation()}>Check AI notes result</button>{interpretationRelease !== null && <button type="button" disabled={busy} onClick={() => void closeInterpretation()}>Close AI notes request</button>}</div>}
     {pendingAction && <div className="ke-wizard-recovery"><p>The previous action needs a result check. Do not submit different answers yet.</p><button type="button" disabled={busy} onClick={() => void (pending.current!.type === 'REQUEST_NEGOTIATION' ? generate() : command(pending.current!.type, {}))}>Retry the same action</button>
-      <button type="button" disabled={busy} onClick={() => { void (async () => { setBusy(true); try { await refresh(); pending.current = null; setPendingAction(false); setReviewed(false); setReviewedFrame(null); setNotice('The latest decision is loaded. Review it before confirming again.'); } catch { setNotice('The latest state could not be loaded. Your pending action is kept; try refreshing again.'); } finally { setBusy(false); } })(); }}>Refresh and review current state</button></div>}
+      <button type="button" disabled={busy} onClick={() => { void (async () => { setBusy(true); try { await refresh(); pending.current = null; setPendingAction(false); setReviewed(false); setNotice('The latest decision is loaded. Review it before confirming again.'); } catch { setNotice('The latest state could not be loaded. Your pending action is kept; try refreshing again.'); } finally { setBusy(false); } })(); }}>Refresh and review current state</button></div>}
   </>;
-  const continueToProposal = !!proposal || owner?.ownInputReadiness === 'READY' || !!owner?.pendingQuestions.some(question => question.status === 'PENDING') || !!owner?.disclosurePermissions.some(permission => permission.status === 'PENDING');
-  const nextStep = !confirmed ? 'Review shared choices' : !allConfirmed ? 'Add your private answers' : proposal ? 'Review proposal' : continueToProposal ? 'Continue' : 'What works for you?';
+  const continueToProposal = !!proposal || ['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status) || !!owner?.pendingQuestions.some(question => question.status === 'PENDING') || !!owner?.disclosurePermissions.some(permission => permission.status === 'PENDING');
   return <>
     <section className="ke-card ke-decision-overview">
       <p>{(snapshot.frame.description || snapshot.frame.objective).split(/(?<=[.!?])\s+/).slice(0, 2).join(' ')}</p>
@@ -218,20 +214,18 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
         ? <ul>{owner.confirmedConstraints.filter(item => item.status === 'ACTIVE').slice(0, 3).map(item => <li key={item.constraintId}>{describeCondition(item)}</li>)}</ul>
         : <p>{owner.ownInputReadiness === 'READY' ? 'Your answers are saved. All available choices work for you.' : "You haven't answered yet."}</p>}</>}
       {owner && owner.confirmedConstraints.filter(item => item.status === 'ACTIVE').length > 3 && <p>More saved conditions are available in your private answers.</p>}
-      <h3>Everyone’s progress</h3><ul>{snapshot.frame.participants.map(person => <li key={person.id}>{person.displayName}: {snapshot.approvedParticipantIds.includes(person.id) ? 'proposal approved' : !snapshot.frameConfirmations.some(item => item.participantId === person.id) ? 'reviewing choices' : !snapshot.participantProgress ? 'choices confirmed' : snapshot.participantProgress.find(item => item.participantId === person.id)?.answersSaved ? 'answers saved' : 'answers pending'}</li>)}</ul>
-      {owner && <button type="button" disabled={busy} onClick={() => { if (!confirmed) setDetailStep('shared'); else if (!allConfirmed) setEditingNeeds(true); else if (continueToProposal) setDetailStep('proposal'); else setEditingNeeds(true); }}>{nextStep}</button>}
-      {confirmed && !allConfirmed && <p>You can draft your private answers now. They can be saved after everyone confirms the shared choices.</p>}
-      {owner && confirmed && nextStep !== 'What works for you?' && <button type="button" className="secondary" disabled={busy} onClick={() => setEditingNeeds(true)}>What works for you?</button>}
-      <button type="button" className="secondary" onClick={() => setDetailStep('shared')}>Shared details</button>
+      <h3>Everyone’s progress</h3><ul>{snapshot.frame.participants.map(person => <li key={person.id}>{person.displayName}: {snapshot.approvedParticipantIds.includes(person.id) ? 'proposal approved' : !snapshot.participantProgress ? 'answers pending' : snapshot.participantProgress.find(item => item.participantId === person.id)?.answersSaved ? 'answers saved' : 'answers pending'}</li>)}</ul>
+      {owner && continueToProposal && <button type="button" disabled={busy} onClick={() => setDetailStep('proposal')}>{proposal ? 'See proposal' : 'Find an outcome'}</button>}
+      <button type="button" className="secondary" onClick={() => setDetailStep('shared')}>Decision details</button>
       {!owner && proposal && <button type="button" onClick={() => setDetailStep('proposal')}>View proposal</button>}
     </section>
-    <dialog ref={detailDialog} className="ke-step-dialog" aria-label={detailStep === 'shared' ? 'Review shared choices' : 'Review proposal and permissions'} onCancel={event => { event.preventDefault(); setDetailStep(null); }}>
+    <dialog ref={detailDialog} className="ke-step-dialog" aria-label={detailStep === 'shared' ? 'Decision details' : 'Review proposal and permissions'} onCancel={event => { event.preventDefault(); setDetailStep(null); }}>
       <button type="button" className="secondary" onClick={() => setDetailStep(null)}>Back to overview</button>
     {detailStep === 'shared' && <section className="ke-card ke-shared-decision"><h2>What we’re deciding</h2><p>{snapshot.frame.description || snapshot.frame.objective}</p>
       {snapshot.frame.description && snapshot.frame.description !== snapshot.frame.objective && <details><summary>Original idea and shared details</summary><p className="ke-shared-original">{snapshot.frame.objective}</p></details>}
-      <p>Review the choices, people and shared rules before confirming.</p>
-      <h3>People reviewing this decision</h3>
-      <ul aria-label="Frame participants and approvals">{snapshot.frame.participants.map(person => <li key={person.id}>{person.displayName}: {person.requiredForApproval ? 'approval needed' : 'optional participant'} · {snapshot.frameConfirmations.some(item => item.participantId === person.id) ? 'review confirmed' : 'review pending'}</li>)}</ul>
+
+      <h3>Participants</h3>
+      <ul aria-label="Frame participants and approvals">{snapshot.frame.participants.map(person => <li key={person.id}>{person.displayName}: {person.requiredForApproval ? 'approval needed' : 'optional participant'}</li>)}</ul>
       <h3>The choices</h3>
       <ul className="ke-shared-choice-list" aria-label="Shared frame options and types">{snapshot.frame.variables.map(variable => {
         const options = publicChoiceOptions(snapshot.frame, variable);
@@ -239,20 +233,9 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
       })}</ul>
       <details className="ke-shared-rules"><summary>Shared rules ({snapshot.frame.rules.length})</summary>
       {snapshot.frame.rules.length ? <ul aria-label="Public decision rules">{snapshot.frame.rules.map(rule => <li key={rule.id}>{ruleText(rule, snapshot.frame.variables)}</li>)}</ul> : <p>No additional shared rules.</p>}</details>
-      <p>{snapshot.frame.requiredParticipantIds.filter(id => snapshot.frameConfirmations.some(item => item.participantId === id)).length} of {snapshot.frame.requiredParticipantIds.length} people have confirmed these choices.</p>
-      {owner && confirmed && <p>You have confirmed what we’re deciding.</p>}
-      {!allConfirmed && <p>Waiting for {snapshot.frame.participants.filter(person => snapshot.frame.requiredParticipantIds.includes(person.id) && !snapshot.frameConfirmations.some(item => item.participantId === person.id)).map(person => person.displayName).join(', ')} to confirm. Each person must review these choices in their own account before private answers can be saved.</p>}
-      {owner && !confirmed && <><label><input type="checkbox" disabled={blocked} checked={reviewedFrame === frameReviewKey}
-        onChange={event => setReviewedFrame(event.target.checked ? frameReviewKey : null)} />I reviewed these choices, the people and the shared rules.</label>
-        <button disabled={blocked || reviewedFrame !== frameReviewKey} onClick={() => void command('CONFIRM_FRAME', { frameVersion: snapshot.frame.frameVersion })}>Confirm these shared choices</button></>}
     </section>}
-    {detailStep === 'proposal' && owner && (!staged || allConfirmed) && <section className="ke-card"><h2>Your private answers</h2>
-      <p>Choose what works for you. Your selections are saved directly; optional AI help is available for extra notes.</p>
-      <p className="ke-help">Other participants cannot read your answers or private notes. Outcomes may imply information about people’s needs. Use fictional, non-sensitive data in this preview.</p>
-      {owner.ownInputReadiness === 'READY' ? <p>Your current private answers are saved.</p> : owner.ownInputReadiness === 'NEEDS_CLARIFICATION' ? <p>Some needs still need clarification or new shared options. Open your answers to review them.</p> : <p>Your private answers have not been saved yet.</p>}
-      <button type="button" disabled={busy || !allConfirmed || !confirmed} onClick={() => setEditingNeeds(true)}>{owner.ownInputReadiness === 'NOT_STARTED' ? 'Add my private answers' : 'Review or change my private answers'}</button>
-      {!allConfirmed && <p>Everyone must confirm the shared choices first.</p>}
-
+    {detailStep === 'proposal' && owner && (!staged || allConfirmed) && <section className="ke-card"><h2>Find an outcome</h2>
+      <p>Your saved private answers are used to find choices that work for everyone.</p>
       {owner.pendingQuestions.filter(question => question.status === 'PENDING').map(question => <div key={question.questionId}><h3>Private negotiation question</h3>
         <p>Would this alternative work, provided all your confirmed must-have requirements still pass?</p><p>{ruleText(question.adjustment, variables)}</p>
         <p>Expires {question.expiresAt}. Permission for this adjustment does not disclose your conditions or approve a final proposal.</p>
@@ -296,10 +279,9 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
           proposalVersion: proposal.facts.proposalVersion, publicHash: proposal.publicHash })}>Withdraw my approval</button>}</>}
     </section>}
     </dialog>
-    {owner && <PrivateAnswersModal open={editingNeeds} owner={owner} busy={busy} blocked={answersBlocked} saveBlocked={!allConfirmed || !confirmed} notesLocked={!!interpretationRequest} notes={text} consent={syntheticProcessing} notice={notice} recovery={recoveryControls}
-        onClose={() => setEditingNeeds(false)} onNotes={setText} onConsent={setSyntheticProcessing} onInterpret={interpret} onDirty={setStructuredDirty}
+    {owner && !['AGREED', 'CLOSED'].includes(snapshot.status) && <PrivateAnswersModal embedded open={true} owner={owner} busy={busy} blocked={answersBlocked} saveBlocked={false} notesLocked={!!interpretationRequest} notes={text} consent={syntheticProcessing} notice={notice} recovery={recoveryControls}
+        onClose={() => {}} onNotes={setText} onConsent={setSyntheticProcessing} onInterpret={interpret} onDirty={setStructuredDirty}
         onSave={payload => command('CONFIRM_PRIVATE_ANSWERS', payload)} describeValue={valueText} describeCondition={describeCondition} />}
-    {!editingNeeds && recoveryControls}
-    {!editingNeeds && notice && <p role="status">{notice}</p>}
+    {(!owner || ['AGREED', 'CLOSED'].includes(snapshot.status)) && notice && <p role="status">{notice}</p>}
   </>;
 }

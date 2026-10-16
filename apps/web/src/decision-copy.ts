@@ -1,7 +1,7 @@
 import type { KnownEnough as KE } from '@deal-table/contracts';
 const statusText: Record<KE.PublicDecisionSnapshot['status'], string> = {
   CREATING: 'Preparing the decision.', DEFINING: 'Review the proposed public choices.',
-  COLLECTING_FRAME_CONFIRMATION: 'Waiting for everyone to review and confirm the shared choices.',
+  COLLECTING_FRAME_CONFIRMATION: 'Waiting for everyone to add their answers.',
   COLLECTING_PRIVATE_INPUT: 'Waiting for everyone to save their private answers.',
   NEEDS_CLARIFICATION: 'Some answers need clarification or new shared options.',
   READY: 'Everyone’s answers are saved. You can explore proposals.', REASONING: 'Exploring proposals against the confirmed needs.',

@@ -25,6 +25,15 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
   const [decisionTitle, setDecisionTitle] = useState<{ id: string; title: string } | null>(null);
   const [status, setStatus] = useState(''), [busy, setBusy] = useState(false), [background, setBackground] = useState(false);
   const [target, setTarget] = useState<BackgroundTarget | null>(null);
+  const decisionDialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const element = decisionDialog.current;
+    if (view.kind !== 'decision' || !session || !element) return;
+    const previous = document.activeElement;
+    if (!element.open) element.showModal();
+    const overflow = document.body.style.overflow; document.body.style.overflow = 'hidden';
+    return () => { element.close(); document.body.style.overflow = overflow; if (previous instanceof HTMLElement && previous.isConnected) previous.focus(); };
+  }, [view.kind, !!session]);
   const epoch = useRef(0), abort = useRef<AbortController | null>(null), dirty = useRef(false);
   const selection = useRef({ id: '', token: '' }); selection.current = { id: view.kind === 'decision' ? view.decisionId : '', token: session?.accessToken ?? '' };
   function move(next: AppView, replace = false) {
@@ -129,9 +138,9 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     <PrivacyBar />
     {view.kind !== 'decision' && status && <p role="status">{status}</p>}
     {view.kind === 'invalid' ? <section className="ke-card"><h2>This link is unavailable</h2><button onClick={() => move({ kind: 'groups' }, true)}>Back to groups</button></section>
-      : view.kind === 'decision' ? <>
-        <button className="secondary" onClick={() => move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' })}>{view.groupId ? 'Back to group' : 'Back to groups'}</button>
-        <section className={`ke-card${snapshot ? ' ke-load-reveal' : ''}`} aria-busy={busy || (!snapshot && !status)}><h2>{snapshot ? decisionTitle?.id === snapshot.frame.decisionId ? decisionTitle.title : snapshot.frame.title : 'Your decision'}</h2>
+      : view.kind === 'decision' ? <dialog ref={decisionDialog} className="ke-decision-wizard ke-open-decision-dialog" aria-labelledby="open-decision-title" onCancel={event => { event.preventDefault(); move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' }); }}>
+        <button className="secondary" onClick={() => move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' })}>Close decision</button>
+        <section className={`ke-card${snapshot ? ' ke-load-reveal' : ''}`} aria-busy={busy || (!snapshot && !status)}><h2 id="open-decision-title">{snapshot ? decisionTitle?.id === snapshot.frame.decisionId ? decisionTitle.title : snapshot.frame.title : 'Your decision'}</h2>
           {snapshot && <p role="status">Status: {decisionStatusText(snapshot.status)}</p>}
           <button className="secondary" disabled={busy} onClick={() => { if (dirty.current && !window.confirm('Refresh and discard unsaved input?')) return; dirty.current = false; void load().catch(() => {}); }}>Refresh decision</button>
           {!snapshot && !status && <LoadingSkeleton kind="decision" label="Loading current decision" />}
@@ -140,7 +149,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
         {snapshot && <div className="ke-load-reveal"><ConnectedDecision key={`${session.accessToken}:${snapshot.contextToken}`}
           snapshot={snapshot} owner={owner} backgroundNegotiation={background} staged api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} refresh={async () => { dirty.current = false; await load(); }}
           onDirtyChange={value => { dirty.current = value; }} onQueued={receipt => { if (!owner) return; setTarget({ decisionId: snapshot.frame.decisionId, contextToken: snapshot.contextToken, semanticVersion: snapshot.semanticVersion, ownerParticipantId: owner.ownerParticipantId, expiresAt: receipt.expiresAt }); }} /></div>}
-      </> : session.kind === 'display' ? <section className="ke-card"><h2>Shared screen</h2><p>Open a shared decision link from your group to show its progress. This screen cannot enter private needs or approve proposals.</p></section>
+      </dialog> : session.kind === 'display' ? <section className="ke-card"><h2>Shared screen</h2><p>Open a shared decision link from your group to show its progress. This screen cannot enter private needs or approve proposals.</p></section>
         : <GroupHome key={`${session.accessToken}:${view.kind === 'group' ? view.groupId : 'home'}:${invitationEpoch}`} {...(view.kind === 'group' ? { selectedGroupId: view.groupId } : {})}
           api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} onOpenGroup={id => move({ kind: 'group', groupId: id })} onBack={() => move({ kind: 'groups' })} onDirtyChange={value => { dirty.current = value; }}
           openDecision={id => move({ kind: 'decision', decisionId: id, ...(view.kind === 'group' ? { groupId: view.groupId } : {}) })} />}

@@ -519,9 +519,7 @@ export class KnownEnoughApplication {
           || guard.isEnabled?.() === false || !Number.isFinite(guard.expiresAt) || Date.parse(this.now()) >= guard.expiresAt
           || decision.controlVersion !== guard.controlVersion) fail('STALE_CONTEXT');
       }
-      if (!decision.frameConfirmations.some(item => item.participantId === owner.participantId
-        && item.contextToken === decision.definition.contextToken)
-        || draft.contextToken !== decision.definition.contextToken
+      if (draft.contextToken !== decision.definition.contextToken
         || draft.semanticVersion !== decision.definition.semanticVersion
         || draft.ownerVersion !== owner.ownerVersion
         || draft.draftVersion !== (owner.draftVersion ?? 0) + 1) fail('STALE_CONTEXT');
@@ -1301,6 +1299,7 @@ export class KnownEnoughApplication {
     owner: DecisionOwner,
     command: DecisionCommand,
     now: string,
+    directAnswers = false,
   ): Promise<void> {
     switch (command.type) {
       case 'CONFIRM_FRAME': {
@@ -1329,8 +1328,8 @@ export class KnownEnoughApplication {
         return;
       }
       case 'CONFIRM_PRIVATE_ANSWERS': {
-        if (!requiredConfirmed(decision) || !decision.frameConfirmations.some(item => item.participantId === owner.participantId))
-          fail('NEEDS_CLARIFICATION');
+        // Explicit owner save binds these selections to the current shared choices.
+        // Other participants need not complete a separate review first.
         const frame = publicFrame(decision.definition);
         const questions = frame.variables.filter(variable => variable.visibility === 'PUBLIC').flatMap(variable => {
           const options = publicChoiceOptions(frame, variable);
@@ -1383,7 +1382,9 @@ export class KnownEnoughApplication {
         owner.draft = prepared.data; owner.draftVersion = prepared.data.draftVersion;
         // Use the existing confirmation/invalidation transition in this SAME transaction.
         await this.applyCommand(decision, owner, { ...command, type: 'CONFIRM_CONSTRAINTS', payload: {
-          draftId, draftVersion: prepared.data.draftVersion, constraintIds: proposed.map(item => item.constraintId) } }, now);
+          draftId, draftVersion: prepared.data.draftVersion, constraintIds: proposed.map(item => item.constraintId) } }, now, true);
+        await this.applyCommand(decision, owner, { ...command, type: 'CONFIRM_FRAME',
+          payload: { frameVersion: decision.definition.frameVersion } }, now);
         if (unsupported.length && !owner.draft) {
           owner.draft = KE.AIConstraintDraft.parse({ ...prepared.data, draftId: this.id(), draftVersion: 1,
             ownerVersion: owner.ownerVersion, semanticVersion: decision.definition.semanticVersion,
@@ -1394,7 +1395,7 @@ export class KnownEnoughApplication {
         return;
       }
       case 'CONFIRM_CONSTRAINTS': {
-        if (!requiredConfirmed(decision)) fail('NEEDS_CLARIFICATION');
+        if (!directAnswers && !requiredConfirmed(decision)) fail('NEEDS_CLARIFICATION');
         const isRevision = owner.readiness !== 'NOT_STARTED';
         const draft = owner.draft;
         if (!draft || draft.draftId !== command.payload.draftId || draft.draftVersion !== command.payload.draftVersion
@@ -1437,7 +1438,17 @@ export class KnownEnoughApplication {
         owner.readiness = draft.unsupportedConditions.length ? 'NEEDS_CLARIFICATION' : 'READY';
         owner.draft = null;
         owner.draftVersion = null;
-        if (isRevision) await this.invalidateConfirmedContext(decision, now, owner.participantId, draft.unsupportedConditions);
+        if (isRevision && !directAnswers) await this.invalidateConfirmedContext(decision, now, owner.participantId, draft.unsupportedConditions);
+        if (directAnswers) {
+          // Public terms are unchanged. Keep other owners' saved answers and bindings;
+          // retire dependent permissions/approvals and pending reasoning, never reuse them.
+          for (const person of decision.owners) {
+            retireOwnerPermissions(decision, person);
+            person.pendingQuestions = [];
+            person.negotiationPermissions = [];
+            person.disclosurePermissions = [];
+          }
+        }
         decision.status = readinessStatus(decision);
         return;
       }

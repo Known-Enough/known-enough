@@ -90,8 +90,6 @@ export function createPartitionOwnerRuntime(options: {
     if (messages === undefined || before.job) return disposition(before.job);
     if (!before.control.enabled || before.control.sourceSha !== options.sourceSha) throw new PartitionOwnerFailure('AI_UNAVAILABLE');
     if (before.control.slots.length >= 2) throw new PartitionOwnerFailure('AI_AT_CAPACITY');
-    if (!current.publicSnapshot.frame.requiredParticipantIds.every(id => current.publicSnapshot.frameConfirmations.some(item => item.participantId === id))
-      || !current.publicSnapshot.frameConfirmations.some(item => item.participantId === current.ownerParticipantId)) throw new PartitionOwnerFailure('FRAME_NOT_CONFIRMED');
     try {
       if (messages !== undefined) await options.acknowledgeSyntheticProcessing(principal);
       await options.assertRetained(principal);
