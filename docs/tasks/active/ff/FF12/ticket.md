@@ -1,6 +1,6 @@
 # FF12 — Reliable editable decision creation
 
-Status: IN_PROGRESS/A; publication/manual acceptance pending.
+Status: PUBLISHED / A claim released; user manual acceptance pending.
 
 Exact request950c5741…/read38926202181 showed acknowledged tool_use,248 output tokens, then ARCHITECT_RULE_FIELDS/rules[1].values strings expected objects. This is a confirmed format/conversion rejection, not timeout/AWS denial. User authorizes a generic design replacing dependence on AI-generated backend rules.
 
@@ -11,3 +11,5 @@ A shared deterministic compiler and editable browser form ask specific questions
 The no-AI editor is available even if AI inventory is unavailable/unknown. It retains original AI nonce/status, never retries paid calls automatically, and saves separately. Same manual save key/body is retained across refresh; recovered earlier saves do not overwrite newer edits or create an older plan silently. Owner-public idea/plan/draft checkpoints stay in session storage, without passwords/private participant answers. Separate final proposal approval, processing consent and disclosure rules remain. Example content follows the new creation and FF11 private-answer flow.
 
 No tests/AI calls/signup/participant probes in this A chat. Type/build/lint/boundary checks allowed. Compatible API/worker/frontend publication and matching enabled source required; no new AWS route/IAM/CloudShell. User performs manual acceptance.99.9% reliability is an unmeasured goal; a successful build/deployment does not establish that rate. B's later E2E work should evaluate diverse domains, invalid AI output, missing choices, reloads and interrupted saves under its separate task authority.
+
+Publication: [receipt](../../../../review-artifacts/FF/editable-choice-creation-publication.json). Exact source2382267, runtime38928550083/enable38928759794/frontend38928764921 all SUCCESS, Amplify110, no new route/IAM/setup. Manual walkthrough: refresh, describe idea, use AI or Add/edit choices without AI; edit missing options, save/reopen, create, then add private answers in FF11 modal. Later qualification should include incomplete/malformed AI, irrelevant AI questions, varying domains, excessive combinations, invalid dates, late recovery and interrupted saves. No99.9% claim from publication.

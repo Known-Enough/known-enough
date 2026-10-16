@@ -1,0 +1,166 @@
+{
+  "result": "FF12_EDITABLE_CHOICES_PUBLISHED_MANUAL_ACCEPTANCE_PENDING",
+  "utc": "2026-10-16T16:04:21.750338+00:00",
+  "sourceSha": "23822677f4b8e9ffd43e09b3971844b2673a78af",
+  "website": "https://main.d143q5ravxp5av.amplifyapp.com/",
+  "diagnosis": {
+    "reference": "950c5741-0e4e-4f5d-943e-76bcda58bec3",
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/38926202181",
+    "confirmed": "ARCHITECT_RULE_FIELDS, rules[1].values[0..2] plain strings expected typed objects; provider completed tool_use,248 output tokens,~3.3 seconds.",
+    "rootScope": "Old AI transport generated application rule structure; new general choice path builds these fields exclusively in code."
+  },
+  "runtimeRun": "https://github.com/Known-Enough/known-enough/actions/runs/38928550083",
+  "enableRun": "https://github.com/Known-Enough/known-enough/actions/runs/38928759794",
+  "frontendRun": "https://github.com/Known-Enough/known-enough/actions/runs/38928764921",
+  "disableRun": "https://github.com/Known-Enough/known-enough/actions/runs/38928374809",
+  "runtimeReports": {
+    "partition-publish-report.json": {
+      "sourceSha": "23822677f4b8e9ffd43e09b3971844b2673a78af",
+      "result": "LIFECYCLE_OWNER_CODE_READBACK_PASS",
+      "backendSha256": "02cfb0b50a7914e9be75c888f57fa60e653f1b5dc44ef4e55b7d1ed26faf84d3",
+      "priorBackendSha256": "b6dc8215f92909c0b50d2e6fd4d195d2603373871952096d367194d8454414b4",
+      "environment": "UNCHANGED",
+      "migration": "UNCHANGED",
+      "modelCalls": 0,
+      "dataChanges": 0,
+      "managedOwnerProof": "PENDING"
+    },
+    "partition-worker-publish-report.json": {
+      "result": "WORKER_CODE_DISABLED_READBACK_PASS",
+      "providerCalls": 0,
+      "activation": "NOT_EXECUTED",
+      "codeWriteRequested": true,
+      "actualWorkerSha256": "0f6b56df7d77294469fdb3d0d8562fa181c9b79c7d88b641285a4e10a499fa97",
+      "expectedPriorWorkerSha256": "0f6b56df7d77294469fdb3d0d8562fa181c9b79c7d88b641285a4e10a499fa97",
+      "workerSha256": "c0e681fc102dcbb616022a8a1bde0ad62cf18c9f65d1ce6ef7cae71bc5ea63a7",
+      "sourceSha": "23822677f4b8e9ffd43e09b3971844b2673a78af",
+      "schedule": "DISABLED"
+    },
+    "partition-job-preflight-report.json": {
+      "result": "DISABLED_EMPTY_QUEUE_PREPUBLICATION_PASS",
+      "awsWrites": 0,
+      "providerCalls": 0,
+      "sourceSha": "e192cf1ef649d960c2988353c1fd3a5f1346242c"
+    },
+    "partition-job-source-report.json": {
+      "sourceSha": "23822677f4b8e9ffd43e09b3971844b2673a78af",
+      "result": "JOB_SOURCE_DISABLED_READBACK_PASS",
+      "writeRequested": true,
+      "state": "DISABLED",
+      "active": 0,
+      "slots": 0,
+      "totalWrites": 0,
+      "totalsUnchangedDuringCheck": true,
+      "providerCalls": 0
+    }
+  },
+  "enableReport": {
+    "utc": "2026-10-16T16:02:39.677133+00:00",
+    "source": "23822677f4b8e9ffd43e09b3971844b2673a78af",
+    "phase": "enable",
+    "controlWrites": 1,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "observedControl": {
+      "sourceSha": "23822677f4b8e9ffd43e09b3971844b2673a78af",
+      "enabled": false,
+      "activeCount": 0,
+      "slotCount": 0
+    },
+    "controlSource": "23822677f4b8e9ffd43e09b3971844b2673a78af",
+    "priorEnabled": false,
+    "privateRetention": "ENABLED_SYNTHETIC_CONSENT_REQUIRED",
+    "enabled": true,
+    "totals": "UNCHANGED",
+    "result": "CONTROL_READBACK_PASS"
+  },
+  "frontendReport": {
+    "sourceSha": "23822677f4b8e9ffd43e09b3971844b2673a78af",
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "providerCalls": 0,
+    "signup": 0,
+    "apiPublication": "NOT_EXECUTED",
+    "files": [
+      {
+        "path": "/assets/app-chrome-DyJwxjBm.js",
+        "sha256": "eec5b87122af6c54603b93ba595a340db2c08044cd7c41b70dcda5e2a8ed12a0"
+      },
+      {
+        "path": "/assets/connected-app-CGxHi5ih.js",
+        "sha256": "e0ce2cbe570f26b91ba389a179fcf42e8fb6aace798cab5df7f10c36efdbb795"
+      },
+      {
+        "path": "/assets/index-CnGNnBVS.css",
+        "sha256": "caec29148217b2a538178b0432fe50a360fc3a62f3070d383419d81f584df42c"
+      },
+      {
+        "path": "/assets/index-DpUR4-3A.js",
+        "sha256": "aa22a2a61c6c18a7e81cea0d948c06c0889fa9b943cf23671697d69bb6cd425a"
+      },
+      {
+        "path": "/cover.png",
+        "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151"
+      },
+      {
+        "path": "/",
+        "sha256": "6e6f6eba2eb5cbcecac9869b55a73cfd094c148bea22018a14b72dd9e0be577d"
+      },
+      {
+        "path": "/logo.png",
+        "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb"
+      }
+    ],
+    "amplifyJobId": "110"
+  },
+  "configurationReport": {
+    "result": "ZZ02_SETUP_READBACK_PASS",
+    "configurationWrites": 0,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "signupDelivery": "NOT_EXECUTED",
+    "configurationSha256": "72fd2816d6ce2bcce7ca35fd053ba4b447d0c6882fcf9ffba2c3fa0081872718",
+    "postConfirmation": "MATCH",
+    "smsRoleConfigured": false,
+    "apiSha256": "02cfb0b50a7914e9be75c888f57fa60e653f1b5dc44ef4e55b7d1ed26faf84d3",
+    "groupReadRoutes": [
+      "GET /groups/{groupId}/draft-requests",
+      "GET /groups",
+      "GET /groups/{groupId}/draft-requests/{requestKey}",
+      "GET /groups/{groupId}/drafts/{draftId}",
+      "GET /groups/{groupId}/decisions/{decisionId}/review",
+      "GET /groups/{groupId}/members/{memberId}/profile",
+      "GET /groups/{groupId}"
+    ],
+    "profileRoutesPresent": 5,
+    "managedRoutesPresent": 10
+  },
+  "changes": [
+    "Narrow general AI ChoicePlan suggestion format: title/description/topics/kind/string options; server owns IDs, participants and rules",
+    "Shared deterministic compiler for explicit finite named/date domains; targeted missing/duplicate/date/combination prompts",
+    "Same authenticated draft route can save/create without model controls or provider calls",
+    "Incomplete plans retained with actionable questions; invalid plans cannot create a decision",
+    "Choice context fills gaps while preserving existing entered options; no restaurant-specific branch",
+    "Original AI nonce/outcome retained while manual editor proceeds independently; no automatic AI retry",
+    "Public local idea/plan/checkpoint and pending save key persist across refresh; newer edits are never silently replaced by older save/AI results",
+    "Known save/create outcomes are preserved when an unrelated list refresh fails",
+    "Old canonical/selected-variable model ports and drafts without ChoicePlan remain compatible",
+    "Example and privacy wording match current creation/direct-answer modal flow"
+  ],
+  "limits": {
+    "newEditor": "Finite single-option topics, named choices or exact dates; up to6topics/16options each/64combinations total. Existing advanced canonical paths remain separate.",
+    "prices": "Supplied context/labels only; no invented pricing or automatic real-world budget validation.",
+    "model": "amazon.nova-lite-v1:0 unchanged; no new provider/model credentials",
+    "reliability": "99.9% target NOT MEASURED. No functional/AI tests were run; user manual acceptance and later E2E qualification required.",
+    "network": "Backend/network outages still require recovery; no success inferred from unknown writes."
+  },
+  "checks": {
+    "typecheck": "PASS",
+    "productionBuild": "PASS",
+    "lintAndBoundaries": "PASS_586_REFERENCES",
+    "tests": "NOT_EXECUTED_USER_DIRECTION",
+    "providerCalls": 0,
+    "participantProbes": 0,
+    "signupCalls": 0,
+    "newCloudShellOrIAM": "NONE"
+  }
+}

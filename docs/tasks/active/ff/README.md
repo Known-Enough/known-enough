@@ -1,3 +1,5 @@
+Latest: [FF12 editable choices](../../../review-artifacts/FF/editable-choice-creation-publication.json), source2382267/API02cfb0b5/workerc0e681fc/Amplify110, control enabled/matching. Guided editable choices/no-AI creation path; tests/AI probes not run,99.9% unmeasured and manual acceptance pending.
+
 Latest: [FF11 modal publication](../../../review-artifacts/FF/open-decision-modal-publication.json), frontend0419904/Amplify109/APIb6dc8215/worker0f6b56df; control matches enabled runtimee192cf1. Direct answers, no separate review wizard. No tests/model calls; manual acceptance pending.
 
 Historical service repair (followed by FF11 publication below), 2026-10-16: [draft-service source repaired](../../../review-artifacts/FF/draft-service-source-repair.json), runtime70d3fab/API99a2f2/worker817cdb/control ENABLED and matching. Earlier source-rebind-held notes below are historical. No tests/model calls; manual acceptance pending.
@@ -6,7 +8,7 @@ Historical service repair (followed by FF11 publication below), 2026-10-16: [dra
 
 | Task | Purpose | Current status |
 | --- | --- | --- |
-| [FF12](FF12/README.md) | Editable choices, deterministic compilation and no-AI creation fallback. | IN_PROGRESS/A; publication pending |
+| [FF12](FF12/README.md) | Editable choices, deterministic compilation and no-AI creation fallback. | PUBLISHED/Amplify110; manual acceptance pending |
 | [FF11](FF11/README.md) | Decision opens in modal with direct answers, without a separate review flow. | PUBLISHED/Amplify109; user manual acceptance pending |
 | [FF10](FF10/README.md) | Compare logs/code/live pages and update outdated example guidance. | PUBLISHED/sourcef1c9100/Amplify104; manual acceptance pending |
 | [FF09](FF09/README.md) | Example guidance only inside the create-decision modal. | PUBLISHED/sourcef1c9100/Amplify104; manual acceptance pending |
