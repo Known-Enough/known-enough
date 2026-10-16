@@ -1,0 +1,176 @@
+{
+  "result": "DRAFT_SERVICE_SOURCE_RESTORED_MANUAL_ACCEPTANCE_PENDING",
+  "utc": "2026-10-16T15:22:24.327759+00:00",
+  "toolingSource": "594c3d838b970403ce95909826abcf55df0faba9",
+  "runtimeSource": "70d3fabbb5f223930dc1f282b9edf072a95db47d",
+  "cause": "Installed API/worker source70d3fab differed from queue control sourcea3e665f. One expired READY/NEGOTIATION job with zero attempts/reservation blocked source migration. Native request inventory rejects the mismatch with STALE, surfaced as503.",
+  "diagnosticRun": "https://github.com/Known-Enough/known-enough/actions/runs/38923013574",
+  "observedQueue": {
+    "result": "JOB_QUEUE_READ_PASS",
+    "requests": 3,
+    "mutations": 0,
+    "providerCalls": 0,
+    "controlSource": "a3e665f7390ca14fde24150374f6b6a455ba9f0f",
+    "enabled": true,
+    "active": 1,
+    "slots": 0,
+    "slotsExpired": 0,
+    "jobs": [
+      {
+        "kind": "NEGOTIATION",
+        "phase": "READY",
+        "reason": null,
+        "attempts": 0,
+        "failures": 0,
+        "expired": true,
+        "leaseExpired": null,
+        "reservedTokens": 0,
+        "reservedCostMicros": 0,
+        "usageRecorded": false
+      }
+    ]
+  },
+  "logReadRun": "https://github.com/Known-Enough/known-enough/actions/runs/38922508772",
+  "logReadResult": "NO_EVENTS_IN_COMPLETE_BOUNDED_WINDOW_NOT_A_PROOF_OF_NO_REQUESTS",
+  "firstRecoveryRun": "https://github.com/Known-Enough/known-enough/actions/runs/38922807879",
+  "firstRecoveryResult": "READBACK_UNCONFIRMED; later consistent queue/total inspection confirmed unchanged. Unsupported TOTAL condition identified in checked role policy; exact AWS error not captured by older helper.",
+  "recoveryRun": "https://github.com/Known-Enough/known-enough/actions/runs/38923116464",
+  "recoveryReports": {
+    "publication-precall-backup-report": {
+      "phase": "backup",
+      "providerCalls": 0,
+      "draftWrites": 0,
+      "totalWrites": 0,
+      "writesRequested": 1,
+      "observedJob": {
+        "phase": "READY",
+        "attempts": 0,
+        "reservedTokens": 0,
+        "reservedCostMicros": 0,
+        "expired": true
+      },
+      "result": "PRIVATE_BACKUP_READBACK_PASS"
+    },
+    "publication-precall-apply-report": {
+      "phase": "apply",
+      "providerCalls": 0,
+      "draftWrites": 0,
+      "totalWrites": 0,
+      "writesRequested": 1,
+      "observedJob": {
+        "phase": "READY",
+        "attempts": 0,
+        "reservedTokens": 0,
+        "reservedCostMicros": 0,
+        "expired": true
+      },
+      "readback": {
+        "controlMatchesDesired": true,
+        "jobMatchesDesired": true,
+        "controlUnchanged": false,
+        "jobUnchanged": false,
+        "totalsUnchanged": true
+      },
+      "result": "EXPIRED_UNCALLED_REQUEST_RETIRED",
+      "control": "DISABLED_EMPTY",
+      "totalValues": "UNCHANGED"
+    },
+    "publication-precall-prepare-report": {
+      "phase": "prepare",
+      "providerCalls": 0,
+      "draftWrites": 0,
+      "totalWrites": 0,
+      "writesRequested": 0,
+      "observedJob": {
+        "phase": "READY",
+        "attempts": 0,
+        "reservedTokens": 0,
+        "reservedCostMicros": 0,
+        "expired": true
+      },
+      "result": "PRECALL_RECOVERY_PREPARED"
+    }
+  },
+  "rebindRun": "https://github.com/Known-Enough/known-enough/actions/runs/38923221908",
+  "rebindReports": {
+    "decision-source-rebind": {
+      "sourceSha": "70d3fabbb5f223930dc1f282b9edf072a95db47d",
+      "result": "JOB_SOURCE_DISABLED_READBACK_PASS",
+      "writeRequested": true,
+      "state": "DISABLED",
+      "active": 0,
+      "slots": 0,
+      "totalWrites": 0,
+      "totalsUnchangedDuringCheck": true,
+      "providerCalls": 0
+    },
+    "fix01-worker-guard": {
+      "utc": "2026-10-16T15:21:24.657899+00:00",
+      "source": "70d3fabbb5f223930dc1f282b9edf072a95db47d",
+      "phase": "worker",
+      "controlWrites": 0,
+      "dataWrites": 0,
+      "providerCalls": 0,
+      "codeSha256": "817cdbbaae969b78ddc52bb3a5abafca6c7c76ea93fe259acbfa77691bbe076f",
+      "schedule": "DISABLED",
+      "result": "GUARD_PASS"
+    },
+    "fix01-api-guard": {
+      "utc": "2026-10-16T15:21:22.336396+00:00",
+      "source": "70d3fabbb5f223930dc1f282b9edf072a95db47d",
+      "phase": "api",
+      "controlWrites": 0,
+      "dataWrites": 0,
+      "providerCalls": 0,
+      "codeSha256": "99a2f2fa79f223cffb13bac3dbdbffd0370ac3671824d13e36a306b7d23fcd3f",
+      "result": "GUARD_PASS"
+    },
+    "fix01-logging-guard": {
+      "utc": "2026-10-16T15:21:27.316216+00:00",
+      "source": "70d3fabbb5f223930dc1f282b9edf072a95db47d",
+      "phase": "logging",
+      "controlWrites": 0,
+      "dataWrites": 0,
+      "providerCalls": 0,
+      "logging": "DISABLED",
+      "result": "GUARD_PASS"
+    },
+    "fix01-enable-guard": {
+      "utc": "2026-10-16T15:21:29.657884+00:00",
+      "source": "70d3fabbb5f223930dc1f282b9edf072a95db47d",
+      "phase": "enable",
+      "controlWrites": 1,
+      "dataWrites": 0,
+      "providerCalls": 0,
+      "observedControl": {
+        "sourceSha": "70d3fabbb5f223930dc1f282b9edf072a95db47d",
+        "enabled": false,
+        "activeCount": 0,
+        "slotCount": 0
+      },
+      "controlSource": "70d3fabbb5f223930dc1f282b9edf072a95db47d",
+      "priorEnabled": false,
+      "privateRetention": "ENABLED_SYNTHETIC_CONSENT_REQUIRED",
+      "enabled": true,
+      "totals": "UNCHANGED",
+      "result": "CONTROL_READBACK_PASS"
+    }
+  },
+  "preserved": [
+    "Participant decisions, inputs, drafts and approvals",
+    "Usage totals and synthetic consent policy",
+    "Existing API and worker code hashes",
+    "Disabled background worker schedule",
+    "Unknown or called jobs: none were retired"
+  ],
+  "preventRecurrence": "Coordinated release now reads disabled/empty prior-source queue before either worker/API code replacement; final CAS/source guard remains. New prepublication check syntax-reviewed, not executed during this recovery.",
+  "verification": {
+    "pythonAndYamlSyntax": "PARSED",
+    "tests": "NOT_EXECUTED_USER_DIRECTION",
+    "modelCalls": 0,
+    "participantProbes": 0,
+    "frontendPublication": "NOT_REQUIRED_UNCHANGED",
+    "newCloudShellOrIAM": "NONE",
+    "manualCreationAcceptance": "PENDING_USER"
+  }
+}

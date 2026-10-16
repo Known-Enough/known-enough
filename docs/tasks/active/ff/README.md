@@ -1,3 +1,5 @@
+Current service status (2026-10-16): [draft-service source repaired](../../../review-artifacts/FF/draft-service-source-repair.json), runtime70d3fab/API99a2f2/worker817cdb/control ENABLED and matching. Earlier source-rebind-held notes below are historical. No tests/model calls; manual acceptance pending.
+
 # FF — Frontend and decision-flow repairs
 
 | Task | Purpose | Current status |
