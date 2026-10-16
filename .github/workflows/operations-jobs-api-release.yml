@@ -130,6 +130,11 @@ jobs:
           allowed-account-ids: '092954139775'
           retry-max-attempts: 1
           unset-current-credentials: true
+      - name: Pause only the verified empty admission control and preserve totals
+        if: inputs.publish_api
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_sha }}
+        run: python3 -B scripts/fix01/enable.py disable --control-source "$PREVIOUS_JOB_SOURCE" --expected-enabled true
       - name: Refuse blocked source transition before replacing either runtime
         if: inputs.publish_api
         env:
@@ -184,6 +189,36 @@ jobs:
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
           node --experimental-transform-types scripts/operations/jobs-source-transition.mjs > "$RUNNER_TEMP/partition-job-source-report.json" 2>&1
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: inputs.publish_api
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPrimaryRelease
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Verify exact installed API package before restoring admission
+        if: inputs.publish_api
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_sha }}
+        run: |
+          API_HASH="$(python3 -c 'import json,os,pathlib; print(json.loads((pathlib.Path(os.environ["RUNNER_TEMP"])/"partition-prepare-report.json").read_text())["apiSha256"])')"
+          python3 -B scripts/fix01/enable.py api --api-sha256 "$API_HASH"
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: inputs.publish_api
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobRelease
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Verify exact installed worker package and disabled schedule
+        if: inputs.publish_api
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_sha }}
+        run: |
+          WORKER_HASH="$(python3 -c 'import json,os,pathlib; print(json.loads((pathlib.Path(os.environ["RUNNER_TEMP"])/"partition-prepare-report.json").read_text())["worker"]["sha256"])')"
+          python3 -B scripts/fix01/enable.py worker --worker-sha256 "$WORKER_HASH"
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
           role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubStagingInspector
           aws-region: us-east-1
@@ -193,7 +228,24 @@ jobs:
           retry-max-attempts: 1
           unset-current-credentials: true
       - name: Verify current provider logging without a model call
-        run: python3 -B scripts/operations/jobs-logging-readback.py
+        run: |
+          python3 -B scripts/operations/jobs-logging-readback.py
+          if [ "${{ inputs.publish_api }}" = true ]; then
+            EXPECTED_SOURCE="${{ inputs.source_sha }}" python3 -B scripts/fix01/enable.py logging
+          fi
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: inputs.publish_api
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobOperations
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Restore prior enabled admission only after exact API worker and logging guards
+        if: inputs.publish_api
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_sha }}
+        run: python3 -B scripts/fix01/enable.py enable --expected-enabled false
       - name: Publish only completed or failed finite phase reports
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -203,5 +255,6 @@ jobs:
             ${{ runner.temp }}/partition-*-report.json
             ${{ runner.temp }}/model-job-logging-report.json
             ${{ runner.temp }}/model-job-runtime-private/runtime-template.json
+            ${{ runner.temp }}/fix01-*-guard.json
           if-no-files-found: warn
           retention-days: 30
