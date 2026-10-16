@@ -43,6 +43,15 @@ jobs:
       - name: Verify exact source
         run: |
           test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
+      - name: Keep the private recipient selector out of step logs
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          with open(os.environ['GITHUB_EVENT_PATH']) as stream:
+              selector = json.load(stream).get('inputs', {}).get('recipient_username_sha256', '')
+          if re.fullmatch('[a-f0-9]{64}', selector):
+              print('::add-mask::' + selector)
+          PY
       - name: Run isolated policy-change tests
         if: inputs.run_checks
         run: |

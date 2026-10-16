@@ -46,44 +46,44 @@
       "kind": "connected-staging",
       "frontendUrl": "https://main.d143q5ravxp5av.amplifyapp.com/",
       "frontend": {
-        "sourceCommit": "2e5902f44f10f2b68dd3f7905a79ba4c8b7aa95c",
-        "lastVerifiedAt": "2026-10-16T20:36:12Z",
-        "evidence": "https://github.com/Known-Enough/known-enough/actions/runs/38963388395",
+        "sourceCommit": "40ec579c55410b1ae15aecb12fc2a0a30b2cc4c6",
+        "lastVerifiedAt": "2026-10-16T23:06:29.792301+00:00",
+        "evidence": "https://github.com/Known-Enough/known-enough/actions/runs/38979456558",
         "files": [
           {
-            "path": "/",
-            "sha256": "da90f067ae289aebe5c506c6c10ee2968870739d4801bbf77b4ce321209181ed",
-            "mediaType": "text/html"
-          },
-          {
-            "path": "/assets/app-chrome-DyJwxjBm.js",
-            "sha256": "eec5b87122af6c54603b93ba595a340db2c08044cd7c41b70dcda5e2a8ed12a0",
+            "path": "/assets/app-chrome-B4Sk8Vtx.js",
+            "sha256": "19ba28027b06a034a563407fb79f0b51f74ae6aa7456e41111f830bc745dda04",
             "mediaType": "javascript"
           },
           {
-            "path": "/assets/connected-app-BQt7nZWl.js",
-            "sha256": "19471ac5fc9168d7e9ece82515338b382c462bf8513f64f5a6413b83c4c40923",
+            "path": "/assets/connected-app-6ux-L5Y3.js",
+            "sha256": "2be953530c80345c37bbc9b0acc9c1271e65f829f5a189723c20ab2dc5421b96",
             "mediaType": "javascript"
           },
           {
-            "path": "/assets/index-PWSWnxUF.js",
-            "sha256": "0937dc042d4a7944f6a73a29abc0c1b93e40208fe363fbe1241319b4002f3049",
-            "mediaType": "javascript"
-          },
-          {
-            "path": "/assets/index-BZl1FoL5.css",
-            "sha256": "0c0038cdfe6fc64dbc1cba34fdcbabb7c405ddc1575a0a10342384fc32893a98",
+            "path": "/assets/index-I9bkZf5C.css",
+            "sha256": "d3e3d859a0785afe2fe3856614f94a1e1f72a2d9021ddb5b41f57c8f390465bb",
             "mediaType": "text/css"
+          },
+          {
+            "path": "/assets/index-ln-ZI3QK.js",
+            "sha256": "e78cb5ba7eaea58cf7d5923b34ec37ab24efd541a3bfad4abd43a84a73ee0463",
+            "mediaType": "javascript"
+          },
+          {
+            "path": "/",
+            "sha256": "ce186a18c1ad2be8eeccefe7c2fa65fd78f25ae8e8e3efd2ef0f3f62e4e15dc6",
+            "mediaType": "text/html"
           }
         ]
       },
       "backend": {
         "status": "last-verified",
         "apiBaseUrl": "https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com",
-        "expectedArtifactSha256": "9b0badc58d00d3855735bc36cd300ccff6710486510f243d2f357236a1e81a87",
-        "sourceCommit": "2e5902f44f10f2b68dd3f7905a79ba4c8b7aa95c",
-        "lastVerifiedAt": "2026-10-16T20:35:00Z",
-        "evidence": "https://github.com/Known-Enough/known-enough/actions/runs/38963203435"
+        "expectedArtifactSha256": "6f2bff590976861470bd4faa2475141e612b2afb0dd0f23057777496dd4a853f",
+        "sourceCommit": "40ec579c55410b1ae15aecb12fc2a0a30b2cc4c6",
+        "lastVerifiedAt": "2026-10-16T23:06:29.792301+00:00",
+        "evidence": "https://github.com/Known-Enough/known-enough/actions/runs/38979307088"
       },
       "unauthenticatedApiProbe": {
         "method": "GET",

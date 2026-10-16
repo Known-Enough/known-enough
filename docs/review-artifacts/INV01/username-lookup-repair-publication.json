@@ -1,0 +1,137 @@
+{
+  "result": "INVITATION_LOOKUP_REPAIR_PUBLISHED_MANUAL_ACCEPTANCE_PENDING",
+  "utc": "2026-10-16T23:06:29.792301+00:00",
+  "source": "40ec579c55410b1ae15aecb12fc2a0a30b2cc4c6",
+  "website": "https://main.d143q5ravxp5av.amplifyapp.com/",
+  "diagnosis": "Existing approved account has saved verified login username but missing USERNAME directory entry.",
+  "diagnosisEvidence": "docs/review-artifacts/INV01/username-lookup-diagnosis.json",
+  "runtimeRun": "https://github.com/Known-Enough/known-enough/actions/runs/38979307088",
+  "frontendRun": "https://github.com/Known-Enough/known-enough/actions/runs/38979456558",
+  "apiSha256": "6f2bff590976861470bd4faa2475141e612b2afb0dd0f23057777496dd4a853f",
+  "workerSha256": "715f84620c9a65ef4a1b2ea2bcf2d6fe1217d319a79533b0d0e7913211b9e05d",
+  "changes": [
+    "Own-account refresh and verified registration atomically recover missing immutable username lookup.",
+    "Existing exact-owner claims are condition-checked; conflicting identities cannot be overwritten.",
+    "Native invitation success/failure logs correlate server-generated request UUIDs with finite categories only.",
+    "Failed recipient lookup now explains how to check username and refresh an older account."
+  ],
+  "runtimePublication": {
+    "sourceSha": "40ec579c55410b1ae15aecb12fc2a0a30b2cc4c6",
+    "result": "LIFECYCLE_OWNER_CODE_READBACK_PASS",
+    "backendSha256": "6f2bff590976861470bd4faa2475141e612b2afb0dd0f23057777496dd4a853f",
+    "priorBackendSha256": "9b0badc58d00d3855735bc36cd300ccff6710486510f243d2f357236a1e81a87",
+    "environment": "UNCHANGED",
+    "migration": "UNCHANGED",
+    "modelCalls": 0,
+    "dataChanges": 0,
+    "managedOwnerProof": "PENDING"
+  },
+  "jobSourceTransition": {
+    "sourceSha": "40ec579c55410b1ae15aecb12fc2a0a30b2cc4c6",
+    "result": "JOB_SOURCE_DISABLED_READBACK_PASS",
+    "writeRequested": true,
+    "state": "DISABLED",
+    "active": 0,
+    "slots": 0,
+    "totalWrites": 0,
+    "totalsUnchangedDuringCheck": true,
+    "providerCalls": 0
+  },
+  "admissionReadback": {
+    "utc": "2026-10-16T23:04:17.750392+00:00",
+    "source": "40ec579c55410b1ae15aecb12fc2a0a30b2cc4c6",
+    "phase": "enable",
+    "controlWrites": 1,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "observedControl": {
+      "sourceSha": "40ec579c55410b1ae15aecb12fc2a0a30b2cc4c6",
+      "enabled": false,
+      "activeCount": 0,
+      "slotCount": 0
+    },
+    "controlSource": "40ec579c55410b1ae15aecb12fc2a0a30b2cc4c6",
+    "priorEnabled": false,
+    "privateRetention": "ENABLED_SYNTHETIC_CONSENT_REQUIRED",
+    "enabled": true,
+    "totals": "UNCHANGED",
+    "result": "CONTROL_READBACK_PASS"
+  },
+  "workerSchedule": "DISABLED",
+  "iamChanges": 0,
+  "participantActions": "NOT_EXECUTED",
+  "invitationsSent": 0,
+  "applicationDataChangesDuringPublication": 0,
+  "modelCalls": 0,
+  "emailSent": 0,
+  "staticChecks": {
+    "pinnedNode": "24.21.0",
+    "typecheck": "PASS",
+    "changedSourceLint": "PASS",
+    "productionBuild": "PASS",
+    "referenceHashes": "7_MATCH",
+    "pythonAndWorkflowSyntax": "PARSED"
+  },
+  "tests": "NOT_EXECUTED_USER_DIRECTION",
+  "frontendPublication": {
+    "sourceSha": "40ec579c55410b1ae15aecb12fc2a0a30b2cc4c6",
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "providerCalls": 0,
+    "signup": 0,
+    "apiPublication": "NOT_EXECUTED",
+    "files": [
+      {
+        "path": "/assets/app-chrome-B4Sk8Vtx.js",
+        "sha256": "19ba28027b06a034a563407fb79f0b51f74ae6aa7456e41111f830bc745dda04"
+      },
+      {
+        "path": "/assets/connected-app-6ux-L5Y3.js",
+        "sha256": "2be953530c80345c37bbc9b0acc9c1271e65f829f5a189723c20ab2dc5421b96"
+      },
+      {
+        "path": "/assets/index-I9bkZf5C.css",
+        "sha256": "d3e3d859a0785afe2fe3856614f94a1e1f72a2d9021ddb5b41f57c8f390465bb"
+      },
+      {
+        "path": "/assets/index-ln-ZI3QK.js",
+        "sha256": "e78cb5ba7eaea58cf7d5923b34ec37ab24efd541a3bfad4abd43a84a73ee0463"
+      },
+      {
+        "path": "/cover.png",
+        "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151"
+      },
+      {
+        "path": "/",
+        "sha256": "ce186a18c1ad2be8eeccefe7c2fa65fd78f25ae8e8e3efd2ef0f3f62e4e15dc6"
+      },
+      {
+        "path": "/logo.png",
+        "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb"
+      }
+    ],
+    "amplifyJobId": "114"
+  },
+  "configurationReadback": {
+    "result": "ZZ02_SETUP_READBACK_PASS",
+    "configurationWrites": 0,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "signupDelivery": "NOT_EXECUTED",
+    "configurationSha256": "164884d5c87c288a5f21638fb3fbef35860427263e373f9069e34d9250095dce",
+    "postConfirmation": "MATCH",
+    "smsRoleConfigured": false,
+    "apiSha256": "6f2bff590976861470bd4faa2475141e612b2afb0dd0f23057777496dd4a853f",
+    "groupReadRoutes": [
+      "GET /groups/{groupId}/draft-requests",
+      "GET /groups",
+      "GET /groups/{groupId}/draft-requests/{requestKey}",
+      "GET /groups/{groupId}/drafts/{draftId}",
+      "GET /groups/{groupId}/decisions/{decisionId}/review",
+      "GET /groups/{groupId}/members/{memberId}/profile",
+      "GET /groups/{groupId}"
+    ],
+    "profileRoutesPresent": 5,
+    "managedRoutesPresent": 12
+  },
+  "manualAcceptance": "PENDING: recipient signs in and refreshes its own account once; organizer then sends invitation and recipient explicitly accepts."
+}
