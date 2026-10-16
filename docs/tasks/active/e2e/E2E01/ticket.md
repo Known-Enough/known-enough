@@ -1,6 +1,6 @@
 # E2E01 — Two-user live journeys with one Luna agent
 
-Status: REQUALIFICATION QUEUED / unclaimed. Updated 2026-10-16 for published FF11–FF12; this update starts no tests. Overall qualification remains BLOCKED pending fresh results. The previous claim was released 2026-10-16T07:21:34Z.
+Status: PREVIOUS RUN COMPLETE / qualification BLOCKED; claim released 2026-10-16T07:21:34Z. The 2026-10-16 FF11–FF12 checklist update remains reference planning. Fresh execution now belongs to [E2E02](../E2E02/README.md), not a second E2E01 run. Neither task update started tests.
 
 ## Goal and authority
 
