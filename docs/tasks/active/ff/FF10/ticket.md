@@ -1,6 +1,6 @@
 # FF10 — Align the example with the current app
 
-Status: READY / unclaimed. Intended worker: B after FF09; one task at a time.
+Status: CODE_READY / B; implementation claim released. Publication/manual acceptance pending.
 
 ## User request
 
@@ -23,3 +23,9 @@ Log which code/version, prior records and live pages were examined, exact differ
 ## Expected result
 
 A short, accurate example available inside decision creation that matches the latest implemented flow. Any difference between deployed and prepared code is stated explicitly so future workers do not mistake old screens for the new design.
+
+## B delivery — 2026-10-16T00:36:02.376898+00:00
+
+Compared current prepared source7139b22 with FF03/FF05 receipts, FF06–09 implementation and anonymous public static website reads. Landing HTML and six code/style files matched recorded FF05 sourcea3e665f/Amplify103; authenticated/visual/backend behavior was not observed. Updated only example guidance: explicit creation/review labels, short editable names, direct private choices and optional AI notes, coherent date/restaurant-only scenario, own-summary/public-progress overview, participant additions and exact proposal approval. FF09 placement/draft/request preservation unchanged. [Comparison, source findings and manual walkthrough](comparison.md), [exact static HTTP readback](live-comparison.json). Existing unrelated roster reset copy discrepancy is documented, not silently rewritten in this task.
+
+Static typecheck/build/lint/boundaries579/reference7/whitespace PASS on pinned Node24.21.0/npm11.19.0; no functional tests, AI/signup/participant actions, cloud setup or deployment. Code-only scope complete; publication and user manual acceptance remain separate. No new worker/chat/monitor/schedule; E2E01 remains unclaimed.

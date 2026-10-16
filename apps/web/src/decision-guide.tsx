@@ -8,44 +8,48 @@ export function DecisionGuide({ onReturn }: { onReturn: () => void }) {
   useEffect(() => {
     heading.current?.focus();
   }, [step]);
-  const steps = ['Describe your idea', 'Review the choices', 'Share needs privately', 'Decide together'];
+  const steps = ['Describe your idea', 'Create the decision', 'What works for you?', 'Review the proposal'];
   return <section className="ke-guide ke-guide-embedded" aria-label="Fictional decision example">
     <button type="button" className="secondary" onClick={onReturn}>Back to my decision draft</button>
     <section className="ke-guide-intro"><span className="ke-guide-badge">Fictional example · read-only</span><h3>From an idea to a decision.</h3>
-      <p>See how a group can shape the choices, share needs privately, and review a proposal together.</p>
-      <p className="ke-guide-disclaimer">This is an illustrated walkthrough, not a live decision or AI result. Names, places and prices are fictional. Nothing here creates an account, calls AI or changes a group.</p>
+      <p>Follow Alex and Sam from a shared idea to private selections and independent proposal approvals.</p>
+      <p className="ke-guide-disclaimer">This is an illustrated walkthrough, not a live decision or AI result. People, places and choices are fictional. Nothing here creates an account, calls AI or changes a group.</p>
     </section>
     <nav aria-label="Example decision steps"><ol className="ke-guide-nav">{steps.map((label, index) => <li key={label}><button type="button" className="secondary" aria-current={step === index ? 'step' : undefined} onClick={() => setStep(index)}><span aria-hidden="true">{index + 1}</span>{label}</button></li>)}</ol></nav>
     <article className="ke-guide-scene" aria-labelledby="guide-scene-title">
       <p className="ke-guide-step-count">Step {step + 1} of {steps.length}</p><h2 ref={heading} tabIndex={-1} id="guide-scene-title">{steps[step]}</h2>
       {step === 0 && <>
         <p>Describe the decision naturally. Include options you already know and anything still undecided.</p>
-        <blockquote>“Let’s have dinner together. We’re considering Olive Room, Noodle Corner or Garden Table, on Friday or Saturday. We don’t know which works best for everyone.”</blockquote>
-        <div className="ke-guide-note"><strong>A little detail helps.</strong><p>You don’t need everyone’s preferences or personal budget. Each person supplies those privately later.</p></div>
-        <details><summary>What if I only know the basic idea?</summary><p>You can start with “Let’s go to a restaurant.” Choose <strong>Help me describe my idea</strong>, or ask AI to suggest a small starting set of choices. Suggestions need your review; they are not confirmed facts.</p></details>
+        <blockquote>“Choose our group dinner: Olive Room, Noodle Corner or Garden Table, on 16 October 2026 or 17 October 2026. We don’t know which works best for everyone.”</blockquote>
+        <div className="ke-guide-note"><strong>A little detail helps.</strong><p>List the shared alternatives, without choosing for anyone else. In the real form, Continue with AI prepares a draft; it does not create a decision or confirm anyone’s answers.</p></div>
+        <details><summary>What if I only know the basic idea?</summary><p>Open <strong>Help me describe my idea</strong> to prepare your description without AI. If a shared follow-up is unclear, <strong>Not sure—suggest options</strong> prepares an answer asking for a small provisional set. Sending that answer to AI is a separate action; review its suggestions before using them.</p></details>
       </>}
       {step === 1 && <>
-        <p>AI helps turn your description into choices. You review its understanding before creating the decision.</p>
-        <div className="ke-guide-sample"><span className="ke-guide-view-label">Shared draft · organizer review</span><h3>Choose our group dinner</h3>
-          <dl><div><dt>Restaurant</dt><dd>Olive Room · Noodle Corner · Garden Table</dd></div><div><dt>Day</dt><dd>Friday · Saturday</dd></div><div><dt>People</dt><dd>Alex and Sam</dd></div></dl>
+        <p>Review the saved draft and answer any shared follow-up questions. New drafts get a short name from the public idea. You can edit the Decision title—for example, “Group dinner plan”—without changing its stable link.</p>
+        <div className="ke-guide-sample"><span className="ke-guide-view-label">Shared draft · organizer review</span><h3>Group dinner plan</h3>
+          <dl><div><dt>Restaurant</dt><dd>Olive Room · Noodle Corner · Garden Table</dd></div><div><dt>Date</dt><dd>16 October 2026 · 17 October 2026</dd></div><div><dt>People</dt><dd>Alex and Sam</dd></div></dl>
         </div>
-        <p>If something is missing or wrong, add that detail or adjust the draft. Creating it starts everyone’s review; it does not confirm their needs or approve an outcome.</p>
-        <p className="ke-guide-disclaimer">For the later illustration, assume the group supplied fictional per-person estimates: Olive Room $18, Noodle Corner $22, Garden Table $32. AI must not invent real prices or opening times.</p>
+        <p>Resolve follow-ups, save wording changes, then tick “I’ve reviewed these shared choices and who needs to approve.” Choose <strong>Create decision</strong>. Each participant must then review and <strong>Confirm these shared choices</strong> in their own account; the organizer cannot confirm for them.</p>
+        <p className="ke-guide-disclaimer">This example supplies only restaurants and dates. It does not establish prices, availability or dietary suitability. The preview compares at most 64 combinations; suggestions still need review.</p>
       </>}
       {step === 2 && <>
-        <p>Everyone first reviews the same shared choices. Then each person describes and confirms their own needs in their private conversation.</p>
+        <p>Once everyone has confirmed the shared choices, open <strong>What works for you?</strong> from the decision overview. The private modal has three steps: Your choices, Extra notes and Review. Listed options are saved directly without AI interpretation.</p>
         <div className="ke-guide-personas" role="group" aria-label="View a fictional participant’s perspective">{(['Alex', 'Sam'] as const).map(name => <button key={name} type="button" className="secondary" aria-pressed={participant === name} onClick={() => setParticipant(name)}>Example: {name}’s own view</button>)}</div>
         <div className="ke-guide-sample ke-guide-private"><span className="ke-guide-view-label">Fictional private view · {participant}</span>
-          <blockquote>{participant === 'Alex' ? '“I can only do Saturday, I’d like to stay under $25, and I prefer Noodle Corner. Olive Room is okay too.”' : '“Friday or Saturday works. Noodle Corner or Garden Table would be good. I’d like to spend at most $30.”'}</blockquote>
-          <p><strong>AI helps interpret the message.</strong> {participant === 'Alex' ? 'Saturday is required; Noodle Corner is preferred and Olive Room is acceptable.' : 'Either day is possible; Noodle Corner and Garden Table are preferred.'} {participant} checks the interpretation before confirming it.</p>
+          <dl><div><dt>Restaurant · Only the options I select work</dt><dd>{participant === 'Alex' ? 'Olive Room and Noodle Corner' : 'Noodle Corner and Garden Table'}</dd></div>
+            <div><dt>Date</dt><dd>{participant === 'Alex' ? 'Only the options I select work: 17 October 2026' : 'Any listed option works for me: 16 or 17 October 2026'}</dd></div>
+            <div><dt>My first choice — optional</dt><dd>Noodle Corner</dd></div></dl>
+          <p>{participant} leaves Extra notes empty, ticks the fictional-data processing consent, then chooses <strong>Review answers</strong>. After checking the summary and ticking the private review confirmation, {participant} chooses <strong>Save my private answers</strong>.</p>
         </div>
+        <details><summary>What about extra notes or an option that doesn’t work?</summary><p>Extra notes are optional. <strong>Use AI help for these notes</strong> requires processing consent, and its suggestions need your review; it cannot change your direct selections. Unresolved needs require clarification. Choosing <strong>None of these options work</strong> saves that problem instead of inventing agreement.</p></details>
         <p className="ke-guide-disclaimer">You can switch perspectives in this fictional example. In the real app, participants see their own private inputs; the shared view contains only permitted shared facts and disclosures. An outcome may still imply information.</p>
       </>}
       {step === 3 && <>
-        <p>With usable choices and confirmed needs, the app helps compare a proposal. Missing facts or incompatible needs need clarification; AI must not announce false agreement.</p>
-        <div className="ke-guide-sample"><span className="ke-guide-view-label">Illustrative shared proposal</span><h3>Noodle Corner · Saturday</h3><p>Fictional estimate: $22 per person, supplied for this example. Actual prices and availability would need checking before booking.</p></div>
-        <p>Each person independently reviews the proposal and either approves it or asks for a change. AI does not approve for anyone or reveal their private reasons automatically.</p>
-        <div className="ke-guide-note"><strong>The same flow works for other choices.</strong><p>For a trip, compare destinations and dates. For a shared purchase, compare products. Each person’s limits still belong in their own private conversation.</p></div>
+        <p>The overview shows your own private summary and everyone’s progress, without anyone else’s selections or notes. When all required answers are ready, <strong>Continue</strong> opens the next step; <strong>Explore proposals</strong> is available when the decision is ready.</p>
+        <div className="ke-guide-sample"><span className="ke-guide-view-label">Illustrative shared proposal</span><h3>Noodle Corner · 17 October 2026</h3><p>This illustrative combination fits both fictional acceptable sets. It is an example, not a generated result or a guarantee of the best outcome.</p></div>
+        <p>Each person opens <strong>Review proposal</strong>, checks the shared outcome and their private part, ticks the review confirmation, then chooses <strong>Approve this exact proposal</strong> only if they agree. The decision reaches agreement only when every required participant approves that same proposal. Approval does not make a booking or purchase.</p>
+        <details><summary>What if someone joins or the proposal changes?</summary><p>Joining the group alone does not enroll someone in existing decisions. The organizer can use <strong>Update decision participants</strong> to include a newcomer in an ongoing decision. Earlier answers and shared-choice confirmations stay saved; the newcomer supplies their own. An unfinished proposal needs fresh approval after inclusion. A finished decision keeps its recorded participants and outcome. Changing shared choices or confirmed answers still follows the app’s existing review rules.</p></details>
+        <div className="ke-guide-note"><strong>Agreement is never automatic.</strong><p>Missing facts or incompatible needs may require clarification or new options. Permission to adjust or disclose a private detail is separate from approving the final proposal.</p></div>
       </>}
       <footer className="ke-guide-controls"><button type="button" className="secondary" disabled={step === 0} onClick={() => setStep(value => value - 1)}>Previous example step</button>{step < steps.length - 1 ? <button type="button" onClick={() => setStep(value => value + 1)}>Next example step</button> : <button type="button" onClick={onReturn}>Back to my decision draft</button>}</footer>
     </article>

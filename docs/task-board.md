@@ -1,3 +1,5 @@
+Current FF10 status: **CODE_READY/B**, claim released; guidance build complete, publication/manual acceptance pending. [Comparison and static live readback](tasks/active/ff/FF10/comparison.md). FF06–FF10 remain unpublished; E2E01 unclaimed. Earlier queued entries below are historical.
+
 Current FF06–FF09 status: **CODE_READY/B**, all implementation claims released; publication/manual acceptance pending. [Delivery and exact remaining publication requirements](review-artifacts/FF/ff06-09-code-ready.md). No tests or deployment performed. FF10/E2E01 remain unclaimed. Earlier queue entries below are dated history.
 
 FF09 B checkpoint: CODE_READY; publication/manual acceptance pending. [Ticket](tasks/active/ff/FF09/ticket.md). FF06–09 coding checkpoints complete sequentially; no current claim.

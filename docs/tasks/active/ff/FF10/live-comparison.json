@@ -1,0 +1,61 @@
+{
+  "utc": "2026-10-16T00:33:54.700677+00:00",
+  "method": "Anonymous public static HTTP GET only; no application interaction",
+  "site": "https://main.d143q5ravxp5av.amplifyapp.com",
+  "receipt": "docs/review-artifacts/FF/private-answer-modal-publication.json",
+  "recordedFrontendSource": "a3e665f7390ca14fde24150374f6b6a455ba9f0f",
+  "recordedAmplifyJob": "103",
+  "observed": [
+    {
+      "path": "/assets/app-chrome-B_qlJFew.js",
+      "status": 200,
+      "sha256": "81e16d96770b6510d70f6dbe6b1a3292f4707c86fb54a74d00d903796be18716",
+      "matchesRecordedFF05": true
+    },
+    {
+      "path": "/assets/cognito-session-DaLlFB3t.js",
+      "status": 200,
+      "sha256": "c060cf9628ff1bb8b40b0a7448e6919a61f48b8bdfb0fa520ecdc19fc8184901",
+      "matchesRecordedFF05": true
+    },
+    {
+      "path": "/assets/connected-app-i73qZsIl.js",
+      "status": 200,
+      "sha256": "d96ad76c45550ab4045ab8bc6d8e296fc64e7b30bd6cee4376f702bb4c4d71ab",
+      "matchesRecordedFF05": true
+    },
+    {
+      "path": "/assets/decision-guide-DnqnCjQu.js",
+      "status": 200,
+      "sha256": "446c813d5c1c035ce2d9fcbe8d28f3f30e4373571b6b1b604c34dfa3eecfb81f",
+      "matchesRecordedFF05": true
+    },
+    {
+      "path": "/assets/index-B4V6rTY4.js",
+      "status": 200,
+      "sha256": "390f23431d29ac7c4b9c036648db5daebcc072bd39e59a87ce552d4a5b8b8d91",
+      "matchesRecordedFF05": true
+    },
+    {
+      "path": "/assets/index-DeDXMChW.css",
+      "status": 200,
+      "sha256": "bc7e84ca1e85f7e6dc20082354d520ce2f559ce6d1b3c8007415acefcca4bb04",
+      "matchesRecordedFF05": true
+    },
+    {
+      "path": "/",
+      "status": 200,
+      "sha256": "74432a2593859f8a776a485fccb6699749b19933e79b689096bafa61fcd25645",
+      "matchesRecordedFF05": true
+    }
+  ],
+  "allObservedFilesMatch": true,
+  "apiRuntime": "NOT_OBSERVED",
+  "authenticatedScreens": "NOT_OBSERVED",
+  "visualRendering": "NOT_OBSERVED",
+  "functionalTests": "NOT_EXECUTED",
+  "modelCalls": 0,
+  "participantActions": 0,
+  "deployment": "NOT_EXECUTED",
+  "webReader": "Reported URL inaccessible; anonymous HTTP GET succeeded"
+}
