@@ -128,8 +128,10 @@ def main():
         return {'ConditionExpression':'#v = :v AND #p = :p','ExpressionAttributeNames':{'#v':field,'#p':'payload'},'ExpressionAttributeValues':{':v':row[field],':p':row['payload']}}
     transaction = [{'Put': {'TableName': TABLE, 'Item': next_control_row, **guard(state['control'],'revision')}},
                    {'Put': {'TableName': TABLE, 'Item': next_job_row, **guard(state['job'],'revision')}},
-                   {'ConditionCheck': {'TableName': BUDGET, 'Key': key('AUTH'), **guard(state['authority'],'version')}},
-                   {'ConditionCheck': {'TableName': BUDGET, 'Key': key('TOTAL'), **guard(state['totals'],'version')}}]
+                   {'ConditionCheck': {'TableName': BUDGET, 'Key': key('AUTH'), **guard(state['authority'],'version')}}]
+    # No budget row is written. The installed role permits AUTH checks, not TOTAL
+    # ConditionCheckItem. Control/job CAS excludes a concurrent lease/reservation;
+    # the totals snapshot is read again below without broadening IAM permissions.
     REPORT['writesRequested'] = 1
     try:
         aws('dynamodb','transact-write-items','--client-request-token',str(uuid.uuid4()),'--transact-items',json.dumps(transaction))
