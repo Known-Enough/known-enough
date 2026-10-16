@@ -6,9 +6,9 @@ type Answer = { mode: KE.PrivateChoiceAnswer['mode'] | ''; acceptable: number[];
 type Payload = Extract<KE.DecisionCommand, { type: 'CONFIRM_PRIVATE_ANSWERS' }>['payload'];
 type Condition = KE.AIConstraintDraft['proposedConstraints'][number];
 const direct = (id: string) => id.startsWith('answer-');
-export function PrivateAnswersModal({ open, owner, busy, blocked, notes, consent, notice, recovery,
+export function PrivateAnswersModal({ open, owner, busy, blocked, notesLocked, notes, consent, notice, recovery,
   onClose, onNotes, onConsent, onInterpret, onSave, onDirty, describeValue, describeCondition }: {
-  open: boolean; owner: KE.OwnerDecisionSnapshot; busy: boolean; blocked: boolean;
+  open: boolean; owner: KE.OwnerDecisionSnapshot; busy: boolean; blocked: boolean; notesLocked: boolean;
   notes: string; consent: boolean; notice: string; recovery: ReactNode;
   onClose: () => void; onNotes: (value: string) => void; onConsent: (value: boolean) => void;
   onInterpret: () => Promise<void>; onSave: (payload: Payload) => Promise<boolean>;
@@ -120,8 +120,8 @@ export function PrivateAnswersModal({ open, owner, busy, blocked, notes, consent
           <label htmlFor="private-extra-notes">Extra private notes</label><textarea id="private-extra-notes" value={notes} maxLength={2000} disabled={blocked}
             onChange={event => { onNotes(event.target.value); setReviewed(false); }} placeholder="For example: I need step-free access." />
           <small className="ke-wizard-help">{notes.length} / 2,000 characters · private</small>
-          <label className="ke-wizard-confirm"><input type="checkbox" checked={consent} disabled={blocked} onChange={event => onConsent(event.target.checked)} />These are fictional test answers. I agree to their processing by Known Enough and, if I use AI help, its AI.</label>
-          {notes.trim() && <><button type="button" className="secondary" disabled={blocked || !consent} onClick={() => void onInterpret()}>Use AI help for these notes</button>
+          <label className="ke-wizard-confirm"><input type="checkbox" checked={consent} disabled={blocked || notesLocked} onChange={event => onConsent(event.target.checked)} />These are fictional test answers. I agree to their processing by Known Enough and, if I use AI help, its AI.</label>
+          {notes.trim() && <><button type="button" className="secondary" disabled={blocked || notesLocked || !consent} onClick={() => void onInterpret()}>Use AI help for these notes</button>
             <p className="ke-wizard-help">Review the AI suggestions next. To continue without these notes, clear them explicitly.</p>
             <button type="button" className="ke-text-link" disabled={blocked} onClick={() => { onNotes(''); setReviewed(false); }}>Clear these unsaved notes</button></>}
           {owner.draft && <p className="ke-wizard-help">Extra conditions are available. You can review or replace them in the next step.</p>}

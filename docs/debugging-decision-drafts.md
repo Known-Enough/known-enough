@@ -14,7 +14,7 @@ gh workflow run decision-draft-diagnostic.yml \
   -f lookback_minutes=60
 ```
 
-Open **GitHub → Actions → Read recent primary draft failure stages → latest run → Summary**. The summary gives a timeline and readable validation details; the `draft-failure-readback` artifact contains the matching JSON. Increase the window up to 120 minutes if needed. Leave `request_id` blank to list recent failures. A failed source check means main changed during dispatch: refresh the source and run the read-only command again.
+Open **GitHub → Actions → Read recent primary draft failure stages → latest run → Summary**. The summary gives a timeline and readable validation details; the `draft-failure-readback` artifact contains the matching JSON. Increase the window up to 120 minutes if needed. Leave `request_id` blank to list recent public-draft and group-route failures. Group creation/open/list events can be correlated by the request reference displayed after an error. A failed source check means main changed during dispatch: refresh the source and run the read-only command again.
 
 This workflow only reads logs. It never creates a decision, calls AI, sends email, changes permissions or retries a failed request. A missing match or an incomplete bounded window is reported explicitly and does not mean the request succeeded. Failures from before detailed logging was deployed lack exact-reference/field details; their raw answers cannot be reconstructed.
 
@@ -34,4 +34,6 @@ Exact-reference run [38803481971](https://github.com/Known-Enough/known-enough/a
 
 ## Direct private-answer saves
 
-FF05 adds `PRIVATE_ANSWERS_HTTP_RESULT` in the same primary Lambda log group. It records only the opaque reference, installed source, saved/failed status, error code and duration. No participant identity, selections, reasons or raw notes are logged. The same workflow above can look up the exact save error reference; its blank-reference mode remains the public-draft failure list. A direct save makes no AI call.
+FF05 adds `PRIVATE_ANSWERS_HTTP_RESULT` in the same primary Lambda log group. It records only the opaque reference, installed source, saved/failed status, error code and duration. No participant identity, selections, reasons or raw notes are logged. The same workflow above can look up the exact save error reference. A direct save makes no AI call.
+
+Group routes now emit `known-enough.group-request`, `known-enough.group-result`, and `known-enough.group-failure` records. They contain a UUID request reference, a fixed operation label, actor class, outcome/error code, and HTTP status where applicable. They never include group names or IDs, email addresses, participant identity, request bodies, or decision content. The read-only workflow includes these events in exact-reference lookups and lists recent group failures when no reference is supplied. The browser reuses the same reference and idempotency key when a group-create result is uncertain; a definitive HTTP rejection unlocks the name field for correction.

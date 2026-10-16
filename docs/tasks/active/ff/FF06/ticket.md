@@ -2,6 +2,14 @@
 
 Status: PUBLISHED / B; implementation claim released. Manual acceptance pending; model-job source rebind held because its control was not disabled and empty. [Receipt](../../../../review-artifacts/FF/ff06-10-publication.json).
 
+## User-directed follow-up — group list actions
+
+2026-10-15 (Mexico City): The user asks for the dots panel to show group members and decisions directly, with organizer rename and delete actions instead of Quick view. The list panel now displays the existing authorized group snapshot fields; renaming uses the existing version-checked route. Group deletion uses an organizer-only, version-checked retained tombstone and makes linked drafts/decisions unavailable to every member. A confirmation explains the impact before deletion. The previous group-creation/answer-editing repairs and privacy-safe group diagnostics remain in the same local change set.
+
+Changed files: `apps/web/src/group-home.tsx`, `apps/web/src/style.css`, `apps/web/src/connected-decision.tsx`, `apps/web/src/private-answers-modal.tsx`, `packages/contracts/src/groups.ts`, `apps/api/src/group-service.ts`, `apps/api/src/http-core.ts`, `scripts/fix01/draft-failure-readback.py`, and `docs/debugging-decision-drafts.md`.
+
+No automated tests, AI calls, cloud setup, or deployment were performed. `git diff --check` and Python syntax parsing passed. TypeScript checking could not complete cleanly because npm is unavailable and the workspace package links for `@deal-table/*` are absent. The group menu and delete flow still need manual acceptance in the published build. Walkthrough: open the groups page, use a group's dots to inspect members/decisions, rename the group, then reopen the menu and confirm deletion; verify the deleted group and its decision links are unavailable to its former members.
+
 ## First read
 
 Read the latest [A handoff](../../../../handoff-B.md), [work log](../../../../work-log-A.md), [FF05](../FF05/ticket.md), and [publication receipt](../../../../review-artifacts/FF/private-answer-modal-publication.json). Inspect existing group/decision naming and permissions before changing them. Preserve current FF01–05 work; do not rebuild the private-answer backend or repeat old AWS setup.

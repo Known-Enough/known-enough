@@ -9,7 +9,9 @@ from pathlib import Path
 ACCOUNT = '092954139775'
 ROLE = 'KnownEnoughGithubStagingInspector'
 UUID = re.compile(r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$')
-EVENTS = {'FIX01_PUBLIC_DRAFT_FAILURE', 'FIX01_PUBLIC_DRAFT_DIAGNOSTIC', 'PUBLIC_DRAFT_HTTP_RESULT', 'PRIVATE_ANSWERS_HTTP_RESULT'}
+EVENTS = {'FIX01_PUBLIC_DRAFT_FAILURE', 'FIX01_PUBLIC_DRAFT_DIAGNOSTIC', 'PUBLIC_DRAFT_HTTP_RESULT', 'PRIVATE_ANSWERS_HTTP_RESULT',
+          'known-enough.group-request', 'known-enough.group-result', 'known-enough.group-failure'}
+GROUP_OPERATIONS = {'group.create', 'group.list', 'group.open', 'group.accept', 'group.manage', 'group.draft', 'group.delete', 'account.read', 'account.register'}
 TYPES = {'string', 'number', 'boolean', 'object', 'array', 'null', 'missing', 'integer', 'int', 'unknown'}
 CODES = {'invalid_type', 'invalid_value', 'invalid_union', 'unrecognized_keys', 'too_small', 'too_big', 'invalid_format', 'not_multiple_of', 'custom'}
 PHASES = {'REQUEST_STARTED', 'MODEL_VALIDATION_FAILURE', 'PROVIDER_DISPATCHED', 'PROVIDER_COMPLETED',
@@ -18,7 +20,7 @@ REASONS = {'INVALID_OUTPUT', 'PROVIDER_UNCONFIRMED', 'CANCELLED', 'DISABLED', 'E
            'RETRY_LIMIT', 'AI_UNAVAILABLE', 'AI_AT_CAPACITY', 'REQUEST_UNKNOWN', 'REQUEST_PENDING',
            'PROVIDER_FAILED', 'INVALID_MODEL_OUTPUT', 'RUNTIME_UNAVAILABLE', 'FAILED', 'SUCCEEDED'}
 STOP_REASONS = {'tool_use', 'max_tokens', 'end_turn', 'stop_sequence', 'content_filtered', 'guardrail_intervened', 'OTHER'}
-HTTP_CODES = {'FORBIDDEN', 'NOT_FOUND', 'INVALID_COMMAND', 'STALE_CONTEXT', 'NEEDS_CLARIFICATION', 'RETRYABLE_SERVER_ERROR', 'CAPACITY_EXCEEDED'}
+HTTP_CODES = {'FORBIDDEN', 'NOT_FOUND', 'INVALID_COMMAND', 'STALE_CONTEXT', 'NEEDS_CLARIFICATION', 'RETRYABLE_SERVER_ERROR', 'CAPACITY_EXCEEDED', 'UNAUTHENTICATED'}
 output = Path(os.environ['RUNNER_TEMP']) / 'draft-failure-readback.json'
 report = {'source': os.environ['EXPECTED_SOURCE'], 'awsWrites': 0, 'providerCalls': 0, 'events': [], 'failures': []}
 
@@ -71,9 +73,10 @@ try:
     token = None
     seen = set()
     for _ in range(5):
+        filter_pattern = '"' + request_id + '"' if request_id else '{ $.event = "FIX01_PUBLIC_DRAFT_FAILURE" || $.event = "known-enough.group-failure" }'
         args = ['logs', 'filter-log-events', '--log-group-name', '/aws/lambda/known-enough-stage-api',
                 '--start-time', str(end - lookback * 60000), '--end-time', str(end),
-                '--filter-pattern', '"' + (request_id or 'FIX01_PUBLIC_DRAFT_FAILURE') + '"',
+                '--filter-pattern', filter_pattern,
                 '--limit', '1000', '--no-paginate']
         if token:
             args += ['--next-token', token]
@@ -117,15 +120,23 @@ try:
                 item['diagnostics'] = diagnostics
             if value.get('result') in {'SAVED', 'FAILED'}:
                 item['result'] = value['result']
+            if value.get('operation') in GROUP_OPERATIONS:
+                item['operation'] = value['operation']
+            if value.get('outcome') in {'OK'}:
+                item['outcome'] = value['outcome']
             if value.get('code') in HTTP_CODES:
                 item['code'] = value['code']
+            elif value.get('error') in HTTP_CODES:
+                item['code'] = value['error']
             if bounded_number(value.get('status'), 599) is not None:
                 item['status'] = value['status']
+            if bounded_number(value.get('httpStatus'), 599) is not None:
+                item['status'] = value['httpStatus']
             report['events'].append(item)
             if len(report['events']) > 200:
                 report['events'].pop(0)
                 report['eventsTruncated'] = True
-            if value['event'] == 'FIX01_PUBLIC_DRAFT_FAILURE':
+            if value['event'] in {'FIX01_PUBLIC_DRAFT_FAILURE', 'known-enough.group-failure'}:
                 report['failures'].append(item)
                 if len(report['failures']) > 200:
                     report['failures'].pop(0)
@@ -150,7 +161,11 @@ finally:
                  '| UTC | Reference | Phase/result | Validation stage |', '| --- | --- | --- | --- |']
         for item in report['events'][-30:]:
             stamp = datetime.datetime.fromtimestamp(item['timestamp'] / 1000, datetime.timezone.utc).isoformat() if item.get('timestamp') else 'Unknown'
-            lines.append('| ' + ' | '.join([stamp, item.get('requestId', 'Not recorded'), item.get('phase', item.get('result', 'Unknown')), item.get('stage', '')]) + ' |')
+            description = item.get('operation', item.get('phase', item.get('result', 'Unknown')))
+            outcome = item.get('outcome', item.get('code', ''))
+            if outcome:
+                description += ' · ' + outcome
+            lines.append('| ' + ' | '.join([stamp, item.get('requestId', 'Not recorded'), description, item.get('stage', '')]) + ' |')
         failures = [item for item in report['events'] if item.get('diagnostics')][-1:]
         for item in failures:
             lines += ['', '### Recorded validation details', '']

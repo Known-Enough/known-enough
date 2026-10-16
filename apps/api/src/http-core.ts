@@ -142,6 +142,38 @@ function debugLog(enabled: boolean, event: string, details: Record<string, Debug
   console.log(`[deal-table] ${event}${suffix ? ` ${suffix}` : ''}`);
 }
 
+function groupDiagnostic(event: string, request: IncomingMessage, principal: HttpIdentity, operation: string,
+  details: Record<string, DebugValue> = {}): void {
+  // Group diagnostics are enabled for the authenticated production routes too.
+  // Keep them to a fixed route label, request correlation ID, actor class and
+  // finite outcome fields; never log names, emails, group IDs, or request bodies.
+  const id = requestId(request);
+  const correlationId = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id) ? id : 'unavailable';
+  try { console.info(JSON.stringify({ event: `known-enough.${event}`, requestId: correlationId,
+    actor: actor(principal), operation, ...details })); } catch { /* Diagnostics must not affect the request. */ }
+}
+
+function groupAuthFailure(request: IncomingMessage, operation: string | null): void {
+  if (!operation) return;
+  const id = requestId(request);
+  const correlationId = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id) ? id : 'unavailable';
+  try { console.info(JSON.stringify({ event: 'known-enough.group-failure', requestId: correlationId,
+    actor: 'unauthenticated', operation, error: 'UNAUTHENTICATED', httpStatus: 401 })); } catch { /* Diagnostics must not affect the request. */ }
+}
+
+function groupOperation(method: string | undefined, path: string): string | null {
+  if (path === '/groups' && method === 'POST') return 'group.create';
+  if (path === '/groups' && method === 'GET') return 'group.list';
+  if (/^\/groups\/[A-Za-z0-9_-]{1,80}$/.test(path) && method === 'GET') return 'group.open';
+  if (path === '/account' && method === 'GET') return 'account.read';
+  if (path === '/account/register' && method === 'POST') return 'account.register';
+  if (path === '/groups/accept' && method === 'POST') return 'group.accept';
+  if (/^\/groups\/[A-Za-z0-9_-]{1,80}\/delete$/.test(path) && method === 'POST') return 'group.delete';
+  if (/^\/groups\/[A-Za-z0-9_-]{1,80}\/(invitations|remove|name)$/.test(path) && method === 'POST') return 'group.manage';
+  if (/^\/groups\/[A-Za-z0-9_-]{1,80}\/drafts/.test(path)) return 'group.draft';
+  return null;
+}
+
 function actor(principal: HttpIdentity): string {
   // Do not put the stable Cognito subject or any personal identifier in logs.
   return principal.kind;
@@ -459,10 +491,15 @@ function createKnownEnoughApiHandler(
       }
       let principal: HttpIdentity | null = null;
       try { principal = await authenticate(request); } catch { /* fail closed */ }
-      if (!principal) { sendJson(response, 401, decisionErrorBody('UNAUTHENTICATED', id)); return; }
+      if (!principal) {
+        if (options.groups) groupAuthFailure(request, groupOperation(request.method, url?.pathname ?? ''));
+        sendJson(response, 401, decisionErrorBody('UNAUTHENTICATED', id)); return;
+      }
       if (options.groups) {
+        const path = url?.pathname ?? '';
+        const operation = groupOperation(request.method, path);
+        if (operation) groupDiagnostic('group-request', request, principal, operation);
         try {
-          const path = url?.pathname ?? '';
           if (path === '/account' && request.method === 'GET') {
             sendJson(response, 200, { account: await options.groups.status(principal) }); return;
           }
@@ -478,7 +515,9 @@ function createKnownEnoughApiHandler(
             sendJson(response, 200, { profile: await options.groups.memberProfile(principal, memberProfile[1]!, memberProfile[2]!) }); return;
           }
           if (path === '/groups' && request.method === 'GET') {
-            sendJson(response, 200, { groups: await options.groups.list(principal) }); return;
+            const groups = await options.groups.list(principal);
+            if (operation) groupDiagnostic('group-result', request, principal, operation, { outcome: 'OK', count: groups.length });
+            sendJson(response, 200, { groups }); return;
           }
           const transientDraftRequests = /^\/groups\/([A-Za-z0-9_-]{1,80})\/draft-requests$/.exec(path);
           if (transientDraftRequests && request.method === 'GET') {
@@ -488,10 +527,14 @@ function createKnownEnoughApiHandler(
           }
           const selectedGroup = /^\/groups\/([A-Za-z0-9_-]{1,80})$/.exec(path);
           if (selectedGroup && request.method === 'GET') {
-            sendJson(response, 200, { group: await options.groups.getGroup(principal, selectedGroup[1]!) }); return;
+            const group = await options.groups.getGroup(principal, selectedGroup[1]!);
+            if (operation) groupDiagnostic('group-result', request, principal, operation, { outcome: 'OK' });
+            sendJson(response, 200, { group }); return;
           }
           if (path === '/groups' && request.method === 'POST') {
-            sendJson(response, 200, { group: await options.groups.create(principal, await readJson(request, maxBodyBytes)) }); return;
+            const group = await options.groups.create(principal, await readJson(request, maxBodyBytes));
+            if (operation) groupDiagnostic('group-result', request, principal, operation, { outcome: 'OK' });
+            sendJson(response, 200, { group }); return;
           }
           if (path === '/groups/accept' && request.method === 'POST') {
             sendJson(response, 200, { group: await options.groups.accept(principal, await readJson(request, maxBodyBytes)) }); return;
@@ -519,19 +562,23 @@ function createKnownEnoughApiHandler(
               sendJson(response, 200, { snapshot: await options.groupDecisions.reviseRoster(principal, rosterRoute[1]!, rosterRoute[2]!, await readJson(request, maxBodyBytes)) }); return;
             }
           }
-          const groupRoute = /^\/groups\/([A-Za-z0-9_-]{1,80})\/(invitations|remove|name)$/.exec(path);
+          const groupRoute = /^\/groups\/([A-Za-z0-9_-]{1,80})\/(invitations|remove|name|delete)$/.exec(path);
           if (groupRoute && request.method === 'POST') {
             const body = await readJson(request, maxBodyBytes);
-            const result = groupRoute[2] === 'name' ? { group: await options.groups.rename(principal, groupRoute[1]!, body) } : groupRoute[2] === 'invitations'
+            const result = groupRoute[2] === 'delete' ? await options.groups.deleteGroup(principal, groupRoute[1]!, body)
+              : groupRoute[2] === 'name' ? { group: await options.groups.rename(principal, groupRoute[1]!, body) } : groupRoute[2] === 'invitations'
               ? await options.groups.invite(principal, groupRoute[1]!, body)
               : { group: await (body && typeof body === 'object' && Object.hasOwn(body, 'kind')
                 ? options.groups.removeItem(principal, groupRoute[1]!, body) : options.groups.remove(principal, groupRoute[1]!, body)) };
+            if (operation) groupDiagnostic('group-result', request, principal, operation, { outcome: 'OK' });
             sendJson(response, 200, result); return;
           }
           const decision = /^\/decisions\/([A-Za-z0-9_-]{1,80})\//.exec(path);
           if (decision) await options.groups.authorizeDecision(principal, decision[1]!);
         } catch (error) {
           const result = knownEnoughRequestError(error, id);
+          if (operation) groupDiagnostic('group-failure', request, principal, operation,
+            { error: result.error.code, httpStatus: result.error.httpStatus });
           sendJson(response, result.error.httpStatus, result); return;
         }
       }

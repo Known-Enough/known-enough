@@ -17,12 +17,17 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
   const [profileTarget, setProfileTarget] = useState<ProfileTarget | null>(null);
   const profileTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [activeMenuGroupId, setActiveMenuGroupId] = useState<string | null>(null);
-  const [quickViewGroupId, setQuickViewGroupId] = useState<string | null>(null);
+  const [renameGroupId, setRenameGroupId] = useState<string | null>(null);
+  const [renameGroupValue, setRenameGroupValue] = useState('');
+  const [renameGroupNotice, setRenameGroupNotice] = useState('');
+  const renameGroupDialog = useRef<HTMLDialogElement | null>(null);
+  const [deleteGroupId, setDeleteGroupId] = useState<string | null>(null);
+  const [deleteGroupNotice, setDeleteGroupNotice] = useState('');
+  const deleteGroupDialog = useRef<HTMLDialogElement | null>(null);
   const menuTriggerRef = useRef<HTMLButtonElement | null>(null);
   const menuActionRef = useRef<HTMLButtonElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
-  const quickViewRef = useRef<HTMLElement | null>(null);
-  const groupRequest = useRef<{ name: string; idempotencyKey: string } | null>(null);
+  const groupRequest = useRef<{ name: string; idempotencyKey: string; requestId: string } | null>(null);
   const [groupName, setGroupName] = useState('');
   const [creating, setCreating] = useState(false);
   const [email, setEmail] = useState(''); const [link, setLink] = useState(''); const [replace, setReplace] = useState(false);
@@ -30,20 +35,21 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
   const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false);
   const [loadFailure, setLoadFailure] = useState<LoadFailure | null>(null);
   useEffect(() => { if (activeMenuGroupId) menuActionRef.current?.focus(); }, [activeMenuGroupId]);
-  useEffect(() => { if (quickViewGroupId) quickViewRef.current?.focus(); }, [quickViewGroupId]);
+  useEffect(() => { const dialog = renameGroupDialog.current; if (renameGroupId) { if (dialog && !dialog.open) dialog.showModal(); } else dialog?.close(); }, [renameGroupId]);
+  useEffect(() => { const dialog = deleteGroupDialog.current; if (deleteGroupId) { if (dialog && !dialog.open) dialog.showModal(); } else dialog?.close(); }, [deleteGroupId]);
   useEffect(() => {
-    if (!activeMenuGroupId && !quickViewGroupId) return;
+    if (!activeMenuGroupId) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
       event.preventDefault();
-      setActiveMenuGroupId(null); setQuickViewGroupId(null);
+      setActiveMenuGroupId(null);
       menuTriggerRef.current?.focus();
     };
     const onPointerDown = (event: PointerEvent) => {
       if (!(event.target instanceof Node)) return;
       const target = event.target;
-      if (menuRef.current?.contains(target) || quickViewRef.current?.contains(target) || menuTriggerRef.current?.contains(target)) return;
-      setActiveMenuGroupId(null); setQuickViewGroupId(null);
+      if (menuRef.current?.contains(target) || menuTriggerRef.current?.contains(target)) return;
+      setActiveMenuGroupId(null);
     };
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('pointerdown', onPointerDown);
@@ -51,7 +57,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       document.removeEventListener('keydown', onKeyDown);
       document.removeEventListener('pointerdown', onPointerDown);
     };
-  }, [activeMenuGroupId, quickViewGroupId]);
+  }, [activeMenuGroupId]);
   const [token, setToken] = useState(() => {
     const fragment = new URLSearchParams(window.location.hash.slice(1));
     const value = fragment.get('groupInvite');
@@ -144,30 +150,39 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
     void load();
     return () => {mounted.current = false; ++loadEpoch.current; loadAbort.current?.abort();};
   }, []); // The component is keyed to the authenticated session.
-  async function action(path: string, body: unknown, after?: (result: Record<string, unknown>) => boolean | void) {
+  async function action(path: string, body: unknown, after?: (result: Record<string, unknown>) => boolean | void,
+    onDefinitiveFailure?: (status: number) => void, requestId?: string) {
     setBusy(true); setNotice('');
     try {
-      const response = await api(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+      const response = await api(path, { method: 'POST', headers: { 'content-type': 'application/json', ...(requestId ? { 'x-request-id': requestId } : {}) }, body: JSON.stringify(body) });
       if (!response.ok) {
-        setNotice(response.status === 507 ? 'This pilot has reached its capacity. Ask the operator about capacity; retrying will not free space.'
+        if ((response.status >= 400 && response.status < 500) || response.status === 507) onDefinitiveFailure?.(response.status);
+        let reference = response.headers.get('x-request-id') ?? response.headers.get('apigw-requestid') ?? '';
+        try {
+          const errorBody = await response.clone().json() as { requestId?: unknown };
+          if (typeof errorBody.requestId === 'string' && /^[A-Za-z0-9_-]{8,80}$/.test(errorBody.requestId)) reference = errorBody.requestId;
+        } catch { /* The HTTP status remains useful when an error body is unavailable. */ }
+        const message = response.status === 507 ? 'This pilot has reached its capacity. Ask the operator about capacity; retrying will not free space.'
           : response.status === 409 ? 'The group or link changed. Refresh and review before trying again.'
           : response.status === 403 ? 'Account approval or organizer access is required.'
-          : 'This action could not be completed. Check access, the recipient and link expiry.'); return;
+          : 'This action could not be completed. Check access, the recipient and link expiry.';
+        setNotice(message + (reference && /^[A-Za-z0-9_-]{8,80}$/.test(reference) ? ` Reference: ${reference}.` : '')); return;
       }
       const result = await response.json() as Record<string, unknown>; if (!mounted.current) return; if (after?.(result) !== true) await load(true);
-    } catch { setNotice('The result is unknown. Refresh before retrying; replace a lost invitation link explicitly.'); }
+    } catch { setNotice('The result is unknown. Refresh before retrying; replace a lost invitation link explicitly.'
+      + (requestId ? ` Reference: ${requestId}.` : '')); }
     finally { setBusy(false); }
   }
   function openGroupMenu(groupId: string, trigger: HTMLButtonElement) {
     menuTriggerRef.current = trigger;
-    setQuickViewGroupId(null);
     setActiveMenuGroupId(groupId);
   }
   function toggleGroupMenu(groupId: string, trigger: HTMLButtonElement) {
     menuTriggerRef.current = trigger;
-    setQuickViewGroupId(null);
     setActiveMenuGroupId(current => current === groupId ? null : groupId);
   }
+  const renameTarget = groups.find(group => group.id === renameGroupId) ?? null;
+  const deleteTarget = groups.find(group => group.id === deleteGroupId) ?? null;
   if (checking && !available) return <LoadingSkeleton kind={selectedGroupId ? 'group' : 'groups'} label={selectedGroupId ? 'Opening your group' : 'Loading your groups'}
     className={selectedGroupId ? 'ke-group-route-loading' : 'ke-group-home'} />;
   if (loadFailure) return <section className="ke-card ke-state-card ke-error-card" role="alert">
@@ -198,21 +213,18 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       {!selectedGroupId && <>
       {creating && <div className="ke-create-group-form"><div><label htmlFor="new-group-name">New group name</label>
         <input id="new-group-name" value={groupName} maxLength={80} disabled={!!groupRequest.current} onChange={event => setGroupName(event.target.value)} /></div>
-        <button disabled={busy || !groupName.trim()} onClick={() => { groupRequest.current ??= { name: groupName, idempotencyKey: crypto.randomUUID() }; void action('/groups', groupRequest.current, result => {
+        <button disabled={busy || !groupName.trim()} onClick={() => { const pending = groupRequest.current ?? { name: groupName, idempotencyKey: crypto.randomUUID(), requestId: crypto.randomUUID() }; groupRequest.current = pending; void action('/groups', pending, result => {
         const group = Groups.GroupSnapshot.parse(result.group); groupRequest.current = null; setGroupName(''); onOpenGroup(group.id); return true;
-      }); }}>Create group</button></div>}
+      }, status => { if ((status >= 400 && status < 500) || status === 507) groupRequest.current = null; }, pending.requestId); }}>Create group</button></div>}
       {!groups.length && <div className="ke-empty-state"><span className="ke-state-icon"><GroupIcon /></span><h3>No groups yet.</h3><p>Start a group with the people you want to decide with, or accept an invitation.</p></div>}
       {token && <><p>A group invitation is waiting. Accepting joins the group; it does not confirm a decision or approve a proposal.</p>
         <button disabled={busy} onClick={() => void action('/groups/accept', { token }, result => { const group = Groups.GroupSnapshot.parse(result.group); setToken(''); sessionStorage.removeItem('ke-group-invite'); onOpenGroup(group.id); return true; })}>Accept group invitation</button>
         <button className="secondary" onClick={() => { setToken(''); sessionStorage.removeItem('ke-group-invite'); }}>Decline group invitation</button></>}
       {!!groups.length && <ul className="ke-group-list" aria-label="Decision groups">{groups.map(group => {
-        const organizer = group.members.find(member => member.isOrganizer);
         const decisionCount = Array.isArray(group.decisions) ? group.decisions.length : null;
         const menuOpen = activeMenuGroupId === group.id;
-        const quickViewOpen = quickViewGroupId === group.id;
         const menuId = `group-actions-${group.id}`;
-        const quickViewId = `group-quick-view-${group.id}`;
-        return <li key={group.id} className="ke-group-row">
+        return <li key={group.id} className={`ke-group-row${menuOpen ? ' ke-group-row-menu-open' : ''}`}>
           <button type="button" className="secondary ke-group-row-open" aria-label={`Open group ${group.name}`} disabled={busy}
             onClick={() => onOpenGroup(group.id)}>
             <span className="ke-group-row-icon"><GroupIcon /></span>
@@ -223,13 +235,13 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
             <PageIcon name="ChevronRight" />
           </button>
           <div className="ke-group-row-actions">
-          <button type="button" className="secondary ke-group-menu-trigger" aria-label={`Actions for ${group.name}`} aria-haspopup="menu"
+          <button type="button" className="secondary ke-group-menu-trigger" aria-label={`Details and actions for ${group.name}`} aria-haspopup="dialog"
               aria-expanded={menuOpen} aria-controls={menuOpen ? menuId : undefined} disabled={busy}
               onClick={event => { event.stopPropagation(); toggleGroupMenu(group.id, event.currentTarget); }}
               onKeyDown={event => { if (event.key === 'ArrowDown') { event.preventDefault(); openGroupMenu(group.id, event.currentTarget); } }}>
               <PageIcon name="Ellipsis" />
             </button>
-            {menuOpen && <div id={menuId} className="ke-group-actions-menu" role="menu" aria-label={`${group.name} actions`} ref={menuRef}
+            {menuOpen && <div id={menuId} className="ke-group-actions-menu" role="dialog" aria-label={`${group.name} details and actions`} ref={menuRef}
               onKeyDown={event => {
                 if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
                 event.preventDefault();
@@ -244,20 +256,27 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
                 if (next instanceof Node && (event.currentTarget.contains(next) || menuTriggerRef.current?.contains(next))) return;
                 setActiveMenuGroupId(null);
               }}>
-              <button type="button" className="secondary ke-group-menu-item" role="menuitem" aria-haspopup="dialog" ref={menuActionRef}
-                onClick={event => { event.stopPropagation(); setActiveMenuGroupId(null); setQuickViewGroupId(group.id); }}>Quick view</button>
+              <h3 className="ke-group-menu-title">{group.name}</h3>
+              <section className="ke-group-menu-section" aria-label="Members">
+                <h4>Members <span>{group.members.length}</span></h4>
+                <ul>{group.members.map(member => <li key={member.id}>{member.displayName}{member.isOrganizer ? <small>Organizer</small> : null}</li>)}</ul>
+              </section>
+              <section className="ke-group-menu-section" aria-label="Decisions">
+                <h4>Decisions <span>{decisionCount ?? 0}</span></h4>
+                {group.decisions.length ? <ul>{group.decisions.map(decision => <li key={decision.id}>{decision.title ?? 'Untitled decision'}{!decision.current && <small>Needs review</small>}</li>)}</ul>
+                  : <p className="ke-group-menu-empty">No decisions yet.</p>}
+              </section>
+              <div className="ke-group-menu-actions">
+                <button type="button" className="secondary ke-group-menu-item" role="menuitem" ref={menuActionRef}
+                  onClick={event => { event.stopPropagation(); setActiveMenuGroupId(null); onOpenGroup(group.id); }}>Open group</button>
+                {group.isOrganizer && <>
+                  <button type="button" className="secondary ke-group-menu-item" role="menuitem"
+                    onClick={event => { event.stopPropagation(); setActiveMenuGroupId(null); setRenameGroupValue(group.name); setRenameGroupNotice(''); setRenameGroupId(group.id); }}>Rename group</button>
+                  <button type="button" className="secondary ke-group-menu-item ke-group-menu-delete" role="menuitem"
+                    onClick={event => { event.stopPropagation(); setActiveMenuGroupId(null); setDeleteGroupNotice(''); setDeleteGroupId(group.id); }}>Delete group</button>
+                </>}
+              </div>
             </div>}
-            {quickViewOpen && <section id={quickViewId} className="ke-group-quick-view" role="dialog" aria-labelledby={`${quickViewId}-heading`}
-              aria-describedby={`${quickViewId}-details`} tabIndex={-1} ref={quickViewRef}>
-              <header><div><p>Quick view</p><h3 id={`${quickViewId}-heading`}>{group.name}</h3></div>
-                <button type="button" className="secondary ke-group-quick-view-close" aria-label={`Close ${group.name} quick view`}
-                  onClick={event => { event.stopPropagation(); setQuickViewGroupId(null); menuTriggerRef.current?.focus(); }}><PageIcon name="X" /></button></header>
-              <dl id={`${quickViewId}-details`}>
-                {organizer && <div><dt>Organizer</dt><dd>{organizer.displayName}</dd></div>}
-                <div><dt>Members</dt><dd>{group.members.length} {group.members.length === 1 ? 'member' : 'members'}</dd></div>
-                {decisionCount !== null && <div><dt>Decisions</dt><dd>{decisionCount} {decisionCount === 1 ? 'decision' : 'decisions'}</dd></div>}
-              </dl>
-            </section>}
           </div>
         </li>;
       })}</ul>}
@@ -332,6 +351,57 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       })}
     </>}
     </fieldset>
+    <dialog ref={renameGroupDialog} className="ke-delete-dialog ke-group-action-dialog" aria-labelledby="rename-group-heading"
+      onCancel={event => { event.preventDefault(); if (!busy) setRenameGroupId(null); }}>
+      <form onSubmit={event => {
+        event.preventDefault(); if (!renameTarget || busy || !renameGroupValue.trim()) return;
+        void (async () => {
+          const requestId = crypto.randomUUID(); setBusy(true); setRenameGroupNotice('');
+          try {
+            const response = await api(`/groups/${renameTarget.id}/name`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-request-id': requestId },
+              body: JSON.stringify({ version: renameTarget.version, previousName: renameTarget.name, name: renameGroupValue.trim() }) });
+            if (!response.ok) throw new Error(String(response.status));
+            setRenameGroupId(null); await load(true);
+          } catch (error) {
+            const status = error instanceof Error && /^\d+$/.test(error.message) ? Number(error.message) : 0;
+            setRenameGroupNotice((status === 409 ? 'The group changed. Refresh and review its current name before trying again.'
+              : status === 403 ? 'Only the organizer can rename this group.' : 'The group name could not be saved; refresh to check its current value.') + ` Reference: ${requestId}.`);
+          } finally { setBusy(false); }
+        })();
+      }}>
+        <h2 id="rename-group-heading">Rename group</h2>
+        <label htmlFor="rename-group-name">Group name<input id="rename-group-name" value={renameGroupValue} maxLength={80} required disabled={busy}
+          onChange={event => setRenameGroupValue(event.target.value)} /></label>
+        {renameGroupNotice && <p role="status">{renameGroupNotice}</p>}
+        <div className="ke-wizard-actions"><button type="button" className="secondary" disabled={busy} onClick={() => setRenameGroupId(null)}>Cancel</button>
+          <button type="submit" disabled={busy || !renameGroupValue.trim()}>Save name</button></div>
+      </form>
+    </dialog>
+    <dialog ref={deleteGroupDialog} className="ke-delete-dialog ke-group-action-dialog" aria-labelledby="delete-group-heading"
+      aria-describedby="delete-group-description" onCancel={event => { event.preventDefault(); if (!busy) setDeleteGroupId(null); }}>
+      <h2 id="delete-group-heading">Delete group?</h2>
+      <p id="delete-group-description">{deleteTarget ? `Delete “${deleteTarget.name}” for everyone in the group? Members will lose access to its saved decisions and drafts.` : 'This group will be removed for all its members.'}</p>
+      <p className="ke-delete-note">This cannot be undone. Historical records are retained and the group will no longer appear in anyone’s group list.</p>
+      {deleteGroupNotice && <p role="status">{deleteGroupNotice}</p>}
+      <div className="ke-wizard-actions"><button type="button" className="secondary" disabled={busy} onClick={() => setDeleteGroupId(null)}>Keep group</button>
+        <button type="button" className="ke-group-delete-confirm" disabled={busy || !deleteTarget} onClick={() => {
+          if (!deleteTarget || busy) return;
+          const target = deleteTarget, requestId = crypto.randomUUID(); setBusy(true); setDeleteGroupNotice('');
+          void (async () => {
+            try {
+              const response = await api(`/groups/${target.id}/delete`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-request-id': requestId },
+                body: JSON.stringify({ version: target.version }) });
+              if (!response.ok) throw new Error(String(response.status));
+              setGroups(current => current.filter(group => group.id !== target.id)); setDeleteGroupId(null);
+              setNotice('The group was deleted for all members.');
+            } catch (error) {
+              const status = error instanceof Error && /^\d+$/.test(error.message) ? Number(error.message) : 0;
+              setDeleteGroupNotice((status === 409 ? 'The group changed. Refresh the group list before trying again.'
+                : status === 403 ? 'Only the organizer can delete this group.' : 'The result is unknown. Refresh the group list to check whether the group was deleted.') + ` Reference: ${requestId}.`);
+            } finally { setBusy(false); }
+          })();
+        }}>Delete group</button></div>
+    </dialog>
     {profileTarget && <ProfileModal api={api} open target={profileTarget} onClose={() => { setProfileTarget(null); setAvatarRevision(value => value + 1); }} restoreFocus={() => profileTriggerRef.current?.focus()} />}
     {(checking || busy) && <LoadingSkeleton kind="inline" label={checking ? 'Refreshing account and groups' : 'Updating the group'} />}
     {!checking && !busy && notice && <p role="status">{notice}</p>}

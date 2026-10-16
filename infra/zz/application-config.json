@@ -15,6 +15,8 @@
     "OPTIONS /account/profile",
     "OPTIONS /account/profile/image",
     "POST /groups/{groupId}/name",
-    "OPTIONS /groups/{groupId}/name"
+    "OPTIONS /groups/{groupId}/name",
+    "POST /groups/{groupId}/delete",
+    "OPTIONS /groups/{groupId}/delete"
   ]
 }

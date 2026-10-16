@@ -33,8 +33,10 @@ export const GroupDraft = z.object({ id, bodyHash: z.string().regex(/^[a-f0-9]{6
 export const GroupNamePatch = z.object({ version: z.number().int().positive(), name: z.string().trim().min(1).max(80),
   previousName: z.string().max(160), decisionId: id.optional() }).strict();
 export const GroupItemRemoval = z.object({ kind: z.enum(['DRAFT', 'DECISION']), id, version: z.number().int().positive().max(Number.MAX_SAFE_INTEGER) }).strict();
+/** Organizer-only, version-guarded, irreversible group removal. */
+export const GroupRemoval = z.object({ version: z.number().int().positive().max(Number.MAX_SAFE_INTEGER) }).strict();
 export type GroupDraft = z.infer<typeof GroupDraft>;
-export const Group = z.object({ id, name: text, organizer: id, version: z.number().int().positive(),
+export const Group = z.object({ id, name: text, organizer: id, version: z.number().int().positive(), deleted: z.literal(true).optional(),
   drafts: z.array(GroupDraft).max(64).default([]),
   members: z.array(id).min(1).max(16), decisions: z.array(z.object({ id, version: z.number().int().positive(), title: z.string().trim().min(1).max(80).optional(), deleted: z.literal(true).optional() }).strict()).max(64),
   invitations: z.array(z.object({ tokenHash: z.string().regex(/^[a-f0-9]{64}$/), recipientHash: z.string().regex(/^[a-f0-9]{64}$/),

@@ -34,7 +34,7 @@ export class GroupService {
   }
   private group(state: Groups.GroupState, who: string, id: string): Groups.Group {
     this.account(state, who);
-    const group = state.groups.find(item => item.id === id && item.members.includes(who));
+    const group = state.groups.find(item => item.id === id && !item.deleted && item.members.includes(who));
     return group ?? fail('NOT_FOUND');
   }
   currentGroup(state: Groups.GroupState, principal: TrustedPrincipal | null, groupId: string, organizerOnly = false): Groups.Group {
@@ -81,12 +81,12 @@ export class GroupService {
   async list(principal: TrustedPrincipal | null) {
     const who = subject(principal);
     return this.repository.transaction(state => { this.account(state, who);
-      return state.groups.filter(group => group.members.includes(who)).map(group => this.snapshot(state, group, who)); });
+      return state.groups.filter(group => !group.deleted && group.members.includes(who)).map(group => this.snapshot(state, group, who)); });
   }
   async getGroup(principal: TrustedPrincipal | null, rawId: string) {
     const who = subject(principal), id = Id.parse(rawId);
     return this.repository.transaction(state => {
-      this.account(state, who); const group = state.groups.find(value => value.id === id);
+      this.account(state, who); const group = state.groups.find(value => value.id === id && !value.deleted);
       if (!group || !group.members.includes(who)) return fail('NOT_FOUND');
       return this.snapshot(state, group, who);
     });
@@ -111,6 +111,7 @@ export class GroupService {
     return this.repository.transaction(state => {
       this.account(state, who);
       let group = state.groups.find(item => item.id === id);
+      if (group?.deleted) return fail('STALE_CONTEXT');
       if (group && group.name !== name) return fail('STALE_CONTEXT');
       if (!group) { if (state.groups.length >= 32) throw new GroupCapacityError();
         group = { id, name, organizer: who, version: 1, members: [who], invitations: [], decisions: [], drafts: [] }; state.groups.push(group); }
@@ -141,7 +142,7 @@ export class GroupService {
     const tokenHash = digest(body.token);
     return this.repository.transaction(state => {
       const account = this.account(state, who);
-      const group = state.groups.find(item => item.invitations.some(invitation => invitation.tokenHash === tokenHash));
+      const group = state.groups.find(item => !item.deleted && item.invitations.some(invitation => invitation.tokenHash === tokenHash));
       if (!group) return fail('NOT_FOUND');
       const invitation = group.invitations.find(item => item.tokenHash === tokenHash)!;
       if (invitation.recipientHash !== account.emailHash || invitation.expiresAt <= this.options.now()) return fail('NOT_FOUND');
@@ -203,6 +204,19 @@ export class GroupService {
       return this.snapshot(state, group, who);
     });
   }
+  async deleteGroup(principal: TrustedPrincipal | null, id: string, raw: unknown) {
+    const who = subject(principal); const parsed = Groups.GroupRemoval.safeParse(raw);
+    if (!parsed.success) return fail('INVALID_COMMAND');
+    return this.repository.transaction(state => {
+      const group = this.currentGroup(state, principal, id, true);
+      if (group.version !== parsed.data.version) return fail('STALE_CONTEXT');
+      group.deleted = true;
+      group.version++;
+      for (const decision of group.decisions) decision.deleted = true;
+      for (const draft of group.drafts) draft.deleted = true;
+      return { deleted: true as const };
+    });
+  }
   /** Every bound decision read/command checks current admission AND exact group version. */
   async authorizeDecision(principal: TrustedPrincipal | null, decisionId: string) {
     const fence = await this.repository.fence(state => {
@@ -211,6 +225,7 @@ export class GroupService {
         const account = state.accounts.find(item => item.subject === principal.subject);
         if (account && account.status !== 'APPROVED') return fail('FORBIDDEN');
         const group = state.groups.find(item => item.decisions.some(decision => decision.id === decisionId));
+        if (group?.deleted) return fail('NOT_FOUND');
         if (group?.decisions.find(item => item.id === decisionId)?.deleted) return fail('NOT_FOUND');
         if (group && group.decisions.find(item => item.id === decisionId)!.version !== group.version) return fail('STALE_CONTEXT');
         return;
@@ -218,6 +233,7 @@ export class GroupService {
       const who = subject(principal);
       this.account(state, who);
       const group = state.groups.find(item => item.decisions.some(decision => decision.id === decisionId));
+      if (group?.deleted) return fail('NOT_FOUND');
       if (!group) return; // legacy membership is still checked by the decision boundary
       if (group.decisions.find(item => item.id === decisionId)?.deleted) return fail('NOT_FOUND');
       this.group(state, who, group.id);

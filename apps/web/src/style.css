@@ -277,6 +277,7 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 .ke-empty-state p { max-width: 400px; margin: 0; color: #5f7166; font-size: 13px; line-height: 1.55; }
 .ke-group-list { margin: 0; padding: 0; overflow: visible; list-style: none; border: 1px solid #dfe6de; border-radius: 14px; background: #fff; box-shadow: 0 4px 16px #173c3006; }
 .ke-group-row { position: relative; z-index: 0; display: flex; align-items: center; gap: 10px; min-width: 0; padding: 8px 12px 8px 16px; background: transparent; transition: background .15s ease; }
+.ke-group-row-menu-open { z-index: 6; }
 .ke-group-row + .ke-group-row { border-top: 1px solid #e8ede7; }
 .ke-group-row:hover, .ke-group-row:focus-within { z-index: 1; background: #f7faf7; }
 .ke-group-row-open { display: flex !important; flex: 1; align-items: center; gap: 12px; min-width: 0; min-height: 58px !important; margin: 0 !important; padding: 7px 0 !important; border: 0 !important; border-radius: 8px !important; color: #173c30 !important; background: transparent !important; box-shadow: none !important; text-align: left; }
@@ -297,9 +298,19 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 .ke-group-menu-trigger:focus-visible, .ke-group-quick-view-close:focus-visible, .ke-group-menu-item:focus-visible { outline: 2px solid #71927c; outline-offset: 2px; }
 .ke-group-menu-trigger svg { display: block; width: 19px; height: 19px; }
 .ke-group-actions-menu, .ke-group-quick-view { position: absolute; right: 0; z-index: 5; width: 176px; border: 1px solid #dfe6de; border-radius: 12px; background: #fff; box-shadow: 0 12px 30px #173c3018, 0 2px 6px #173c3008; }
-.ke-group-actions-menu { top: calc(100% + 5px); padding: 5px; }
+.ke-group-actions-menu { top: calc(100% + 5px); width: min(340px, calc(100vw - 32px)); max-height: min(70vh, 560px); overflow: auto; padding: 14px; }
+.ke-group-menu-title { margin: 0 0 12px; overflow-wrap: anywhere; font-size: 16px; }
+.ke-group-menu-section { padding: 11px 0; border-top: 1px solid #e8ede7; }
+.ke-group-menu-section h4 { display: flex; justify-content: space-between; gap: 10px; margin: 0 0 7px; color: #66776b; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+.ke-group-menu-section ul { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
+.ke-group-menu-section li { display: flex; justify-content: space-between; gap: 12px; color: #294a3d; font-size: 13px; overflow-wrap: anywhere; }
+.ke-group-menu-section li small { flex: none; color: #66776b; }
+.ke-group-menu-empty { margin: 0; color: #66776b; font-size: 13px; }
+.ke-group-menu-actions { display: grid; gap: 3px; padding-top: 9px; border-top: 1px solid #e8ede7; }
+.ke-group-home .ke-group-actions-menu .ke-group-menu-delete { color: #9c342f !important; }
 .ke-group-home .ke-group-actions-menu .ke-group-menu-item { display: flex; justify-content: flex-start; width: 100%; min-height: 38px; margin: 0 !important; padding: 8px 10px !important; border-color: transparent !important; border-radius: 8px !important; color: #294a3d !important; background: transparent !important; text-align: left; font-size: 13px; }
 .ke-group-home .ke-group-actions-menu .ke-group-menu-item:hover { background: #f1f5f1 !important; }
+.ke-group-home .ke-group-actions-menu .ke-group-menu-delete:hover { background: #fff0ee !important; }
 .ke-group-quick-view { top: calc(100% + 5px); width: min(300px, calc(100vw - 32px)); padding: 15px; }
 .ke-group-quick-view:focus { outline: 2px solid #71927c; outline-offset: 2px; }
 .ke-group-quick-view > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid #e8ede7; }
@@ -635,6 +646,13 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 :root[data-theme="dark"] .ke-group-quick-view { color: var(--ke-dark-text); background: var(--ke-dark-raised); border-color: var(--ke-dark-border); box-shadow: 0 12px 30px #0006; }
 :root[data-theme="dark"] .ke-group-home .ke-group-actions-menu .ke-group-menu-item { color: var(--ke-dark-text) !important; background: transparent !important; }
 :root[data-theme="dark"] .ke-group-home .ke-group-actions-menu .ke-group-menu-item:hover { background: var(--ke-dark-hover-surface) !important; }
+:root[data-theme="dark"] .ke-group-menu-section { border-color: var(--ke-dark-border); }
+:root[data-theme="dark"] .ke-group-menu-section h4, :root[data-theme="dark"] .ke-group-menu-section li small,
+:root[data-theme="dark"] .ke-group-menu-empty { color: var(--ke-dark-muted); }
+:root[data-theme="dark"] .ke-group-menu-section li { color: var(--ke-dark-text); }
+:root[data-theme="dark"] .ke-group-menu-actions { border-color: var(--ke-dark-border); }
+:root[data-theme="dark"] .ke-group-home .ke-group-actions-menu .ke-group-menu-delete { color: #ffb5aa !important; }
+:root[data-theme="dark"] .ke-group-home .ke-group-actions-menu .ke-group-menu-delete:hover { background: #653531 !important; }
 :root[data-theme="dark"] .ke-group-quick-view > header { border-color: var(--ke-dark-border); }
 :root[data-theme="dark"] .ke-group-quick-view dd { color: var(--ke-dark-text); }
 :root[data-theme="dark"] .ke-home button.ke-start-decision { color: #fff; background: #1f644b; border-color: #1f644b; }
@@ -983,9 +1001,15 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 .ke-delete-dialog p { line-height: 1.6; }
 .ke-delete-note { color: #667269; font-size: 13px; }
 .ke-delete-dialog .ke-wizard-actions { margin-top: 24px; }
+.ke-group-action-dialog form { display: grid; gap: 15px; }
+.ke-group-action-dialog form > label { display: grid; gap: 7px; font-weight: 600; }
+.ke-group-action-dialog input { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid #cfd9cf; border-radius: 9px; font: inherit; }
+.ke-group-action-dialog .ke-group-delete-confirm { color: #fff; background: #a33a32; border-color: #a33a32; }
+.ke-group-action-dialog .ke-group-delete-confirm:hover { background: #842e28; border-color: #842e28; }
 .ke-delete-confirm { background: #9a3d35; border-color: #9a3d35; color: white; }
 .ke-delete-confirm:hover { background: #7c302a; }
 :root[data-theme="dark"] .ke-delete-dialog { background: #1a2821; color: #edf2ed; border-color: #405448; }
+:root[data-theme="dark"] .ke-group-action-dialog input { color: #edf2ed; background: #202f27; border-color: #405448; }
 :root[data-theme="dark"] .ke-delete-note { color: #b0bfb3; }
 :root[data-theme="dark"] .ke-delete-action.secondary { color: #efa99e; }
 :root[data-theme="dark"] .ke-delete-action.secondary:hover { background: #422924; border-color: #765149; }

@@ -71,6 +71,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
   useEffect(() => { if (snapshot.status !== 'REASONING') setAwaitingJob(false); }, [snapshot.status, owner?.controlVersion]);
   const pending = useRef<{ type: string; body: unknown } | null>(null);
   const commandGuard = useRef(false);
+  const interpretationSubmittedText = useRef('');
   const [pendingAction, setPendingAction] = useState(false);
   const decisionId = snapshot.frame.decisionId;
   const interpretationKey = 'ke-owner-request:' + decisionId + ':' + (owner?.ownerParticipantId ?? 'display') + ':' + snapshot.contextToken;
@@ -129,7 +130,9 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
     setInterpretationRelease(value.interpretation?.canRelease === true && Number.isSafeInteger(value.interpretation.revision) ? Number(value.interpretation.revision) : null);
     if (value.draft) {
       KE.AIConstraintDraft.parse(value.draft); await refresh(); clearInterpretation();
-      setText(''); setReviewed(false); setNotice('AI suggestions for your notes are saved. Review them before including any; your selected options are unchanged.');
+      setText(current => current === interpretationSubmittedText.current ? '' : current);
+      interpretationSubmittedText.current = '';
+      setReviewed(false); setNotice('AI suggestions for your notes are saved. Review them before including any; your selected options are unchanged.');
     } else if (value.interpretation?.state === 'FAILED') {
       clearInterpretation(); setNotice('No new interpretation was saved. Your text and earlier saved conditions are kept. You can edit and try again.');
     } else if (value.interpretation?.state === 'NOT_SUBMITTED') {
@@ -159,6 +162,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
     if (!allConfirmed || !confirmed || !text.trim() || !syntheticProcessing || interpretationRequest || interpretationGuard.current) return;
     interpretationGuard.current = true; setBusy(true); setNotice('');
     const requestId = crypto.randomUUID(); interpretationStorageKey.current = interpretationKey; sessionStorage.setItem(interpretationKey, requestId); setInterpretationRequest(requestId);
+    interpretationSubmittedText.current = text;
     try {
       await acceptInterpretation(await request(`/decisions/${decisionId}/owner-conversation/draft`, { requestId, processingConsent: 'SYNTHETIC_TEST', messages: [{ role: 'owner', text }] }));
     } catch (error) {
@@ -192,7 +196,10 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
     finally { setBusy(false); }
   };
   const proposal = snapshot.currentProposal;
+  // An uncertain optional AI-notes request must not freeze structured answers,
+  // while other decision actions remain blocked until its result is checked.
   const blocked = busy || pendingAction || !!interpretationRequest;
+  const answersBlocked = busy || pendingAction;
   useEffect(() => { onDirtyChange?.(!!text.trim() || structuredDirty || pendingAction || !!interpretationRequest || busy); }, [text, structuredDirty, pendingAction, interpretationRequest, busy, onDirtyChange]);
   const describeCondition = (item: KE.AIConstraintDraft['proposedConstraints'][number]) => item.kind === 'PREFERENCE'
     ? `I prefer ${variables.find(variable => variable.id === item.preference.variableId)?.label ?? 'this choice'}: ${valueText(item.preference.value, variables.find(variable => variable.id === item.preference.variableId))}`
@@ -289,7 +296,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
           proposalVersion: proposal.facts.proposalVersion, publicHash: proposal.publicHash })}>Withdraw my approval</button>}</>}
     </section>}
     </dialog>
-    {owner && <PrivateAnswersModal open={editingNeeds} owner={owner} busy={busy} blocked={blocked} notes={text} consent={syntheticProcessing} notice={notice} recovery={recoveryControls}
+    {owner && <PrivateAnswersModal open={editingNeeds} owner={owner} busy={busy} blocked={answersBlocked} notesLocked={!!interpretationRequest} notes={text} consent={syntheticProcessing} notice={notice} recovery={recoveryControls}
         onClose={() => setEditingNeeds(false)} onNotes={setText} onConsent={setSyntheticProcessing} onInterpret={interpret} onDirty={setStructuredDirty}
         onSave={payload => command('CONFIRM_PRIVATE_ANSWERS', payload)} describeValue={valueText} describeCondition={describeCondition} />}
     {!editingNeeds && recoveryControls}
