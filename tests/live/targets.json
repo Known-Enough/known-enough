@@ -67,7 +67,7 @@
           },
           {
             "path": "/assets/index-PWSWnxUF.js",
-            "sha256": "0937dc042d4a7946f6a73a29abc0c1b93e40208fe363fbe1241319b4002f3049",
+            "sha256": "0937dc042d4a7944f6a73a29abc0c1b93e40208fe363fbe1241319b4002f3049",
             "mediaType": "javascript"
           },
           {
@@ -91,11 +91,11 @@
         "expectedStatus": 401
       },
       "page": {
-        "heading": "Decide together",
+        "heading": "Decide together.",
         "keyboard": {
           "mode": "first-button-focus",
           "role": "button",
-          "name": "Participant sign-in"
+          "name": "Sign in"
         }
       }
     }
