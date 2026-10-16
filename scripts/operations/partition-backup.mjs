@@ -62,7 +62,8 @@ async function main() {
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try { await main(); }
   catch (error) {
-    const observed = typeof error.stderr === 'string' ? error.stderr.match(/An error occurred \(([A-Za-z0-9]+)\)/)?.[1] : error.name;
+    const stderr = Buffer.isBuffer(error.stderr) ? error.stderr.toString('utf8') : typeof error.stderr === 'string' ? error.stderr : '';
+    const observed = stderr.match(/An error occurred \(([A-Za-z0-9]+)\)/)?.[1] ?? error.name;
     console.error(JSON.stringify({ result: 'BLOCKED', code: ['NoSuchKey', 'AccessDenied', 'NoSuchBucket'].includes(observed)
       ? observed : 'PARTITION_BACKUP_UNVERIFIED', codeUpdate: 'NOT_EXECUTED', sourceFreeze: 'NOT_EXECUTED' })); process.exitCode = 1;
   }
