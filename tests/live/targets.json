@@ -46,9 +46,9 @@
       "kind": "connected-staging",
       "frontendUrl": "https://main.d143q5ravxp5av.amplifyapp.com/",
       "frontend": {
-        "sourceCommit": "5d180c45afe90f74127c65445b86dff11c08ccbb",
-        "lastVerifiedAt": "2026-10-16T23:13:38.381871+00:00",
-        "evidence": "https://github.com/Known-Enough/known-enough/actions/runs/38980172188",
+        "sourceCommit": "6cb97c414b8dced2f06effa9557fb6d2102389c6",
+        "lastVerifiedAt": "2026-10-16T23:21:17.405700+00:00",
+        "evidence": "https://github.com/Known-Enough/known-enough/actions/runs/38980855371",
         "files": [
           {
             "path": "/assets/app-chrome-B4Sk8Vtx.js",
@@ -56,23 +56,23 @@
             "mediaType": "javascript"
           },
           {
-            "path": "/assets/connected-app-Bhb1VYJ2.js",
-            "sha256": "8cdd42437a9e094f0cefe07fd8175af89ca4f900f486a66d9ba3d42049a6b808",
+            "path": "/assets/connected-app-Cbs-KlDq.js",
+            "sha256": "5c4fc2c595091e5f7707e36518aa4bec0c78a2c3895b17430f30905f63ef9373",
             "mediaType": "javascript"
           },
           {
-            "path": "/assets/index-I9bkZf5C.css",
-            "sha256": "d3e3d859a0785afe2fe3856614f94a1e1f72a2d9021ddb5b41f57c8f390465bb",
+            "path": "/assets/index-C-JMs3Sc.js",
+            "sha256": "8d5608eee0a7b997a7b1bdc288e0034d595393059e2adf7383db9979b4a901c7",
+            "mediaType": "javascript"
+          },
+          {
+            "path": "/assets/index-CUpbnyJf.css",
+            "sha256": "128cae12e3438de8332a627c8864eb7c96ff135c918506abdfc3f855412ff27a",
             "mediaType": "text/css"
           },
           {
-            "path": "/assets/index-Mn5pKq-K.js",
-            "sha256": "c30cd8badc6c32ba3d6243f337cf63fff7c24b8f0f3c309b1690c0b3ad5536cf",
-            "mediaType": "javascript"
-          },
-          {
             "path": "/",
-            "sha256": "c5e23bddb758536c74eeaca9054efa7ac26d49c9b91c3a0f37001fc3bc818a74",
+            "sha256": "341504478b06a5bba00e0cc3dd1faa9390a4d1b7a296b12efdbd616bad132006",
             "mediaType": "text/html"
           }
         ]

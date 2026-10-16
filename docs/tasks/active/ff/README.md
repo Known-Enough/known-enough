@@ -1,3 +1,5 @@
+Latest: [Choice-modal layout repair](../../../review-artifacts/FF/choice-modal-layout-publication.json), frontend source6cb97c4/Amplify117; API6f2bff59 unchanged. Compact choices, corrected scrolling and persistent actions. No tests/AI/participant actions; user visual acceptance pending.
+
 Latest: [FF12 editable choices](../../../review-artifacts/FF/editable-choice-creation-publication.json), source2382267/API02cfb0b5/workerc0e681fc/Amplify110, control enabled/matching. Guided editable choices/no-AI creation path; tests/AI probes not run,99.9% unmeasured and manual acceptance pending.
 
 Latest: [FF11 modal publication](../../../review-artifacts/FF/open-decision-modal-publication.json), frontend0419904/Amplify109/APIb6dc8215/worker0f6b56df; control matches enabled runtimee192cf1. Direct answers, no separate review wizard. No tests/model calls; manual acceptance pending.
