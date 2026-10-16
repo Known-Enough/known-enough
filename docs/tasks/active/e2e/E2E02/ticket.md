@@ -1,6 +1,6 @@
 # E2E02 — Current-release decision journeys and useful failure evidence
 
-Status: READY for sequential intake / unclaimed. Created 2026-10-16 at the user's request; execution NOT STARTED. Overall current-release qualification is NOT VERIFIED.
+Status: BLOCKED before start by INV01's installed USERNAME-key permission. Execution NOT STARTED. Overall current-release qualification is NOT VERIFIED.
 
 ## Purpose
 
@@ -18,7 +18,7 @@ Do not change application code, publish a deployment, repair IAM, reset accounts
 
 Primary site: https://main.d143q5ravxp5av.amplifyapp.com/ . Do not switch to the separate QA site and claim the primary passed.
 
-Latest recorded compatible baseline: source `23822677f4b8e9ffd43e09b3971844b2673a78af`, Amplify `110`, API SHA `02cfb0b50a7914e9be75c888f57fa60e653f1b5dc44ef4e55b7d1ed26faf84d3`, worker SHA `c0e681fc102dcbb616022a8a1bde0ad62cf18c9f65d1ce6ef7cae71bc5ea63a7`. [FF12 receipt](../../../../review-artifacts/FF/editable-choice-creation-publication.json), [FF11 receipt](../../../../review-artifacts/FF/open-decision-modal-publication.json). Verify loaded assets and available runtime evidence at intake; record a newer compatible release if present. These saved publication receipts do not prove current functional success.
+Latest deployment: API source `2e5902f44f10f2b68dd3f7905a79ba4c8b7aa95c`, API SHA `9b0badc58d00d3855735bc36cd300ccff6710486510f243d2f357236a1e81a87`, worker SHA `1d20b9a783134d2321d3d0a380bcdf15a81057f5118ea03b7d33774c9dc06cf8`, Amplify job `111`. [Coordinated backend](https://github.com/Known-Enough/known-enough/actions/runs/38963203435), [frontend and route reconciliation](https://github.com/Known-Enough/known-enough/actions/runs/38963388395), [public smoke](https://github.com/Known-Enough/known-enough/actions/runs/38964421870). The public smoke passed; authenticated behavior remains unverified. A read-only check found the runtime role lacks USERNAME-scoped access. The attempted policy update was denied before any IAM write; details and the guarded operator command are in [INV01](../../invitations/INV01/ticket.md). Resume E2E02 only after independent USERNAME read/write permission readback passes.
 
 INV01 adds organizer dashboard invitation sending by exact username or verified email, plus a recipient-owned pending-invitation section and explicit dashboard acceptance. Include this feature in case 07 and case 15 as specified in the runbook. Start live tests only after the INV01 source, authenticated API route, and effective username-key access are read back on the deployed app. A source commit alone is not a published invitation feature.
 

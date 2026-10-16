@@ -1,6 +1,6 @@
 # INV01 — Dashboard group invitations
 
-Status: CODE COMPLETE / publication blocked by the installed job-control transition guard; not deployed or user-tested.
+Status: IMPLEMENTED AND DEPLOYED / blocked from end-user testing by missing installed USERNAME directory permission.
 
 ## Goal
 
@@ -32,3 +32,12 @@ No live publication or end-user acceptance is claimed until recorded with exact 
 - The correct coordinated jobs/API package prepared successfully, including a new matching worker archive while the EventBridge worker rule remained disabled. Its read-only preflight refused publication with `DISABLE_AND_RESOLVE_QUEUE_BEFORE_CODE_PUBLICATION`.
 - Matching readback confirmed the installed model-job control is `enabled: true`, `active: 0`, `slots: 0`, source `23822677f4b8e9ffd43e09b3971844b2673a78af`. Cumulative totals were read only. No API/worker code, route, or control write occurred in the coordinated attempt.
 - Preserve the current control state and worker schedule. Before release, decide a guarded temporary pause/rebind/restore that leaves admission enabled and the EventBridge schedule disabled at the end. Until that is implemented and read back, E2E02 remains NOT STARTED and end-user readiness is not established.
+
+## Deployment and permission checkpoint — 2026-10-16
+
+- Guarded coordinated publication succeeded at [run 38963203435](https://github.com/Known-Enough/known-enough/actions/runs/38963203435): API source `2e5902f44f10f2b68dd3f7905a79ba4c8b7aa95c`, API SHA `9b0badc58d00d3855735bc36cd300ccff6710486510f243d2f357236a1e81a87`, worker SHA `1d20b9a783134d2321d3d0a380bcdf15a81057f5118ea03b7d33774c9dc06cf8`. Admission was restored enabled, totals remained unchanged, schedule stayed disabled, provider calls were zero.
+- Frontend Amplify job `111` and route reconciliation succeeded in [run 38963388395](https://github.com/Known-Enough/known-enough/actions/runs/38963388395). Read-only route inspection confirmed `GET /invitations` and `POST /groups/{groupId}/invitations` use JWT; `OPTIONS /invitations` uses NONE.
+- Public staging smoke passed after refreshing stale expected asset/heading evidence in [run 38964421870](https://github.com/Known-Enough/known-enough/actions/runs/38964421870). This proves public loading and access-denial checks only; it does not prove authenticated invitation behavior.
+- Read-only runtime IAM inspection found no `USERNAME#*`-scoped read or conditional write in `KnownEnoughStageApiRole`. The current `KnownEnoughPartitionParticipant` policy matched baseline SHA `a5c483ca534d34c864543dcebe47cb27657090143a9968932c7a1a645bc70abd`; candidate SHA `95f21ec3a40bd3ef06aabe34907f0304c18002f2d2ac79b4de5f323c68a6aaa5` adds only `USERNAME#*` to the existing scoped partition read/transactional commit statements.
+- The guarded policy write attempt [run 38964718851](https://github.com/Known-Enough/known-enough/actions/runs/38964718851) was denied as `iam:put-role-policy/AccessDenied`; `iamWrites: 0`. Independent readback confirmed the candidate was not installed. No IAM change occurred.
+- E2E02 remains NOT STARTED under its prerequisite. To complete the narrowly scoped permission repair using the operator's existing same-account CloudShell identity, run `python3 -B scripts/operations/invitation-username-policy.py --cloudshell` from the checked repository at `main`. The script checks the exact prior policy hash, saves mode-0600 prior/candidate files, submits one update, and verifies exact readback; it refuses drift. Then rerun the shared staging inspection and E2E02.

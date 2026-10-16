@@ -3,6 +3,6 @@
 | Task | Purpose | Status |
 | --- | --- | --- |
 | [E2E01](E2E01/README.md) | Previous two-user run; evidence retained for reference. | Complete: scenarios 1–2 PASS, 3–10 BLOCKED; qualification BLOCKED. [Latest report](E2E01/run-2026-10-16-test02-test03.md) |
-| [E2E02](E2E02/README.md) | One Luna agent, two users, sixteen current-release journeys including username/email dashboard invitations. | READY/unclaimed after [INV01](../invitations/INV01/ticket.md) publication; no new run started |
+| [E2E02](E2E02/README.md) | One Luna agent, two users, sixteen current-release journeys including username/email dashboard invitations. | BLOCKED before start: INV01 is deployed, but effective USERNAME-key access is not installed; see [INV01](../invitations/INV01/ticket.md) |
 
 Use dedicated synthetic accounts, private local credentials and evidence-based reports. No passwords or tokens in repository artifacts. One active project task at a time; do not begin E2E02 until INV01 backend/frontend source, route, permissions and live readback are ready.
