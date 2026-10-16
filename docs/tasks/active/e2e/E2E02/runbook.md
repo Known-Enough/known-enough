@@ -126,3 +126,6 @@ Write the dated report using [the template](report-template.md), including all s
 
 
 Invitation regression from INV01 (2026-10-16): an older verified/approved account can have a saved login username but no USERNAME directory entry. Before the username invitation case, have that recipient refresh its own signed-in account once on the matching repaired runtime. This should atomically recover the lookup, without a new approval, group membership or provider/AI call. Then send the username invitation from the organizer's group and verify recipient-owned inbox/explicit acceptance. Existing exact-owner lookups must remain unchanged; conflicting ownership must be refused. Use server request UUIDs for any new failure; no raw identities/tokens in reports. A's repair publication does not count as this functional proof.
+
+
+FF12 choice-modal layout follow-up: in Set up your choices, verify both topic cards are reachable without clipping; desktop uses side-by-side cards, mobile stacks them in a scrollable form, and Save draft/Create decision stay outside that scroll area. Expand/edit the retained original idea, open/return from the in-modal example, and check all fields remain reachable on short viewports. These are later manual/E2E expectations, not tests executed by A.

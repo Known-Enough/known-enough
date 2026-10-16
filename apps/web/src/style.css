@@ -1098,3 +1098,59 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 .ke-choice-topic { display: grid; gap: 12px; border: 1px solid var(--wizard-border); border-radius: 14px; padding: 18px; min-width: 0; }
 .ke-choice-topic textarea { min-height: 110px; }
 .ke-choice-editor select { min-height: 44px; border: 1px solid var(--wizard-border); border-radius: 10px; padding: 8px; background: var(--wizard-surface); color: var(--wizard-text); }
+
+/* Creation keeps one bounded scroll area; save/create actions stay visible. */
+.ke-create-decision-dialog .ke-wizard-shell { height: min(720px, calc(100dvh - 50px)); }
+.ke-create-decision-dialog .ke-wizard-header,
+.ke-create-decision-dialog .ke-wizard-example,
+.ke-create-decision-dialog .ke-wizard-steps,
+.ke-create-decision-dialog .ke-wizard-footer,
+.ke-choice-footer { flex: 0 0 auto; }
+.ke-create-decision-dialog .ke-wizard-header { padding: 18px 24px 14px; }
+.ke-create-decision-dialog .ke-wizard-header h2 { font-size: clamp(22px, 3vw, 27px); margin-top: 6px; }
+.ke-create-decision-dialog .ke-wizard-example { padding: 0 24px 12px; }
+.ke-create-decision-dialog .ke-wizard-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 24px 14px; }
+.ke-wizard-content { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; min-width: 0; }
+.ke-wizard-content[hidden] { display: none; }
+.ke-wizard-content > .ke-wizard-body { flex: 1 1 auto; padding: 16px 24px 20px; scrollbar-gutter: stable; }
+.ke-wizard-example-content { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.ke-choice-wizard { width: min(900px, calc(100vw - 40px)); max-width: 900px; }
+.ke-choice-wizard .ke-wizard-privacy { margin-bottom: 12px; }
+.ke-choice-wizard .ke-wizard-footer { padding: 10px 24px; }
+.ke-wizard-original-idea { margin-bottom: 14px; }
+.ke-wizard-original-idea summary { cursor: pointer; color: var(--wizard-muted); font-size: 13px; }
+.ke-wizard-original-idea label { display: grid; gap: 8px; padding-top: 12px; }
+.ke-choice-editor { gap: 12px; }
+.ke-choice-editor > label { max-width: 480px; }
+.ke-choice-topics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; min-width: 0; }
+.ke-choice-topic { padding: 14px; gap: 10px; }
+.ke-choice-topic legend { padding: 0 6px; font-size: 14px; font-weight: 600; }
+.ke-choice-topic-fields { display: grid; grid-template-columns: minmax(0, 1fr) 130px; align-items: end; gap: 10px; }
+.ke-choice-topic-fields label { min-width: 0; }
+.ke-choice-topic input, .ke-choice-topic select, .ke-choice-topic textarea { width: 100%; min-width: 0; }
+.ke-decision-wizard .ke-choice-topic textarea { min-height: 96px; height: 96px; resize: vertical; }
+.ke-choice-topic small { font-size: 12px; line-height: 1.5; color: var(--wizard-muted); }
+.ke-choice-footer { padding: 12px 24px; border-top: 1px solid var(--wizard-border); background: var(--wizard-surface); }
+.ke-choice-footer .ke-wizard-actions { display: grid; grid-template-columns: auto auto minmax(0, 1fr); gap: 8px; margin: 0; }
+.ke-choice-footer .ke-text-link { grid-column: 1 / -1; justify-self: center; }
+@media (max-width: 700px) {
+  .ke-choice-topics { grid-template-columns: minmax(0, 1fr); }
+  .ke-choice-wizard { width: calc(100vw - 20px); }
+}
+@media (max-width: 550px) {
+  .ke-create-decision-dialog .ke-wizard-shell { height: calc(100dvh - 22px); }
+  .ke-create-decision-dialog .ke-wizard-header { padding: 16px; }
+  .ke-create-decision-dialog .ke-wizard-example { padding: 0 16px 10px; }
+  .ke-create-decision-dialog .ke-wizard-steps { padding: 0 16px 12px; }
+  .ke-wizard-content > .ke-wizard-body { padding: 14px 16px 18px; }
+  .ke-choice-footer { padding: 10px 16px; }
+  .ke-choice-footer .ke-wizard-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ke-choice-footer .ke-wizard-actions > button:nth-child(3) { grid-column: 1 / -1; }
+  .ke-choice-footer button { font-size: 13px; padding: 8px; }
+  .ke-choice-topic-fields { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-height: 500px) {
+  .ke-create-decision-dialog { overflow-y: auto; }
+  .ke-create-decision-dialog .ke-wizard-shell { height: auto; max-height: none; }
+  .ke-create-decision-dialog .ke-wizard-content > .ke-wizard-body { overflow-y: visible; }
+}
