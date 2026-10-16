@@ -50,21 +50,27 @@ def run(executor=subprocess.run, root=None):
     report = {'result': 'BLOCKED', 'role': ROLE, 'policy': POLICY, 'iamWrites': 0, 'writeRequested': False,
               'dataWrites': 0, 'providerCalls': 0}
 
-    def aws(service, operation, *args, mutation=False):
-        result = executor(['aws', service, operation, *args, '--region', 'us-east-1', '--output', 'json', '--no-cli-pager'],
+    def aws(service, action, *args, mutation=False):
+        result = executor(['aws', service, action, *args, '--region', 'us-east-1', '--output', 'json', '--no-cli-pager'],
                           capture_output=True, text=True, timeout=20)
         if result.returncode:
-            raise ValueError('IAM_WRITE_UNCONFIRMED' if mutation else 'IAM_READ_UNAVAILABLE')
+            import re
+            match = re.search(r'An error occurred \(([A-Za-z0-9]+)\)', result.stderr or '')
+            code = match.group(1) if match else 'AWS_REQUEST_FAILED'
+            raise ValueError(('iam:' + action + '/' + code) if not mutation else 'IAM_WRITE_UNCONFIRMED')
         return json.loads(result.stdout or '{}')
 
     try:
+        report['operation'] = 'sts:GetCallerIdentity'
         identity = aws('sts', 'get-caller-identity')
         if identity.get('Account') != ACCOUNT or not identity.get('Arn', '').startswith(
                 f'arn:aws:sts::{ACCOUNT}:assumed-role/KnownEnoughGithubModelJobOperations/'):
             raise ValueError('OWN_ROLE_TARGET_INVALID')
+        report['operation'] = 'iam:GetRole'
         role = aws('iam', 'get-role', '--role-name', ROLE)['Role']
         if role.get('Arn') != f'arn:aws:iam::{ACCOUNT}:role/{ROLE}' or role.get('PermissionsBoundary'):
             raise ValueError('RUNTIME_ROLE_BINDING_CHANGED')
+        report['operation'] = 'iam:GetRolePolicy'
         prior = aws('iam', 'get-role-policy', '--role-name', ROLE, '--policy-name', POLICY).get('PolicyDocument')
         if not isinstance(prior, dict) or digest(prior) != EXPECTED_PRIOR_SHA:
             raise ValueError('PARTICIPANT_POLICY_BASELINE_CHANGED')
@@ -78,6 +84,7 @@ def run(executor=subprocess.run, root=None):
             stream.write(canonical(prior))
         if '--apply' in sys.argv:
             report['writeRequested'] = True
+            report['operation'] = 'iam:PutRolePolicy'
             try:
                 aws('iam', 'put-role-policy', '--role-name', ROLE, '--policy-name', POLICY,
                     '--policy-document', canonical(updated), mutation=True)
