@@ -200,7 +200,10 @@ def publish() -> None:
     require(prior.get('State') == 'Active' and prior.get('LastUpdateStatus') == 'Successful',
             'LAMBDA_NOT_READY')
     require(prior.get('Runtime') == 'nodejs24.x', 'LAMBDA_RUNTIME_MISMATCH')
-    require(prior.get('Handler') == 'ke13b-lambda.handler', 'LAMBDA_HANDLER_MISMATCH')
+    handler = prior.get('Handler')
+    if handler != 'ke13b-lambda.handler':
+        safe_handler = handler if isinstance(handler, str) and re.fullmatch(r'[A-Za-z0-9_.-]{1,128}', handler) else 'UNKNOWN'
+        raise ReleaseError(f'LAMBDA_HANDLER_MISMATCH_{safe_handler}')
     require(prior.get('FunctionArn') == FUNCTION_ARN, 'LAMBDA_FUNCTION_TARGET_MISMATCH')
     require(prior.get('Role') == ROLE_ARN, 'LAMBDA_EXECUTION_ROLE_MISMATCH')
     require(prior.get('GroupsEnabled') == 'true', 'GROUPS_RUNTIME_NOT_ENABLED')
