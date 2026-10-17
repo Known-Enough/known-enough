@@ -1,0 +1,57 @@
+{
+  "utc": "2026-10-17T18:33:23.030Z",
+  "kind": "TARGETED_LIVE_REPAIR_CHECK",
+  "providerCalls": 0,
+  "finalApprovals": 0,
+  "originalUnknownCallsRetried": 0,
+  "fixturesRetained": true,
+  "checks": {
+    "verifiedIdentities": {
+      "bothVerified": true,
+      "distinctSubjects": true,
+      "distinctEmails": false
+    },
+    "emailInvitation": {
+      "sent": true,
+      "accepted": true,
+      "delivery": "PRIVATE_LINK_FALLBACK"
+    }
+  },
+  "operations": [
+    {
+      "stage": "joint_group",
+      "status": 200,
+      "method": "API"
+    },
+    {
+      "stage": "email_invitation_send",
+      "status": 200,
+      "method": "API"
+    },
+    {
+      "stage": "email_invitation_inbox",
+      "status": 200,
+      "method": "API"
+    },
+    {
+      "stage": "email_invitation_accept",
+      "status": 200,
+      "method": "API"
+    },
+    {
+      "stage": "manual_draft",
+      "status": 200,
+      "method": "API"
+    }
+  ],
+  "failures": [
+    {
+      "stage": "manual_draft",
+      "code": "DUPLICATE_CREATE_CONTROL"
+    }
+  ],
+  "navigationWarnings": 0,
+  "result": "TARGETED_REPAIR_LIVE_FAILED_OR_BLOCKED",
+  "endedAt": "2026-10-17T18:33:36.309Z",
+  "runnerCorrection": "Checked Create controls before the draft response rendered; no Create was submitted. Resumed only after owned group/draft readback and waited for the loaded editor. No duplicate group/draft or unknown-write replay."
+}

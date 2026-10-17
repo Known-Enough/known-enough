@@ -388,7 +388,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
                 })}><PageIcon name="UserRoundPlus" />Send invitation</button>
               </div>
               {link && <div className="ke-invitation-result" role="status">
-                <p>Invitation created. Existing approved accounts will see it under Invitations for you on their Groups page.</p>
+                <p>Invitation created. Have them check Invitations for you on their Groups page. If they don’t see it, share the private link below with the intended person.</p>
                 <details><summary>Share an invitation link</summary>
                   <label htmlFor={`group-copy-link-${group.id}`}>Private invitation link</label>
                   <input id={`group-copy-link-${group.id}`} readOnly value={link} onFocus={event => event.currentTarget.select()} />
