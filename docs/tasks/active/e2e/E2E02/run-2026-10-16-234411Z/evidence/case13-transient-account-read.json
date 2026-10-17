@@ -1,0 +1,20 @@
+{
+  "runId": "E2E02-20261016-234411Z",
+  "kind": "LIVE",
+  "at": "2026-10-17T00:46:30.164Z",
+  "request": {
+    "method": "GET",
+    "path": "/account",
+    "status": null,
+    "networkFailure": true
+  },
+  "visibleMessage": "We couldn’t load your account. We couldn’t reach the service. Check your connection and try again.",
+  "singleReadOnlyRetry": {
+    "at": "2026-10-17T00:46:44.331Z",
+    "method": "GET",
+    "path": "/account",
+    "status": 200,
+    "followingGroupReadStatus": 200
+  },
+  "writesRepeated": false
+}

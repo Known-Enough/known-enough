@@ -1,0 +1,157 @@
+{
+  "startedAt": "2026-10-16T23:50:32.190Z",
+  "endedAt": "2026-10-16T23:51:47.357Z",
+  "contexts": [
+    [
+      {
+        "at": "2026-10-16T23:50:32.469Z",
+        "method": "GET",
+        "path": "/",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-16T23:50:32.499Z",
+        "method": "GET",
+        "path": "/assets/index-CUpbnyJf.css",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-16T23:50:32.524Z",
+        "method": "GET",
+        "path": "/assets/app-chrome-B4Sk8Vtx.js",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-16T23:50:32.530Z",
+        "method": "GET",
+        "path": "/assets/index-C-JMs3Sc.js",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-16T23:50:32.607Z",
+        "method": "GET",
+        "path": "/assets/connected-app-Cbs-KlDq.js",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-16T23:50:32.685Z",
+        "method": "GET",
+        "path": "/logo.png",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-16T23:50:43.391Z",
+        "method": "GET",
+        "path": "/account",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-16T23:50:43.829Z",
+        "method": "GET",
+        "path": "/groups",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-16T23:50:44.108Z",
+        "method": "GET",
+        "path": "/invitations",
+        "status": 200,
+        "reference": null
+      }
+    ],
+    [
+      {
+        "at": "2026-10-16T23:50:33.305Z",
+        "method": "GET",
+        "path": "/",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-16T23:50:33.332Z",
+        "method": "GET",
+        "path": "/assets/index-CUpbnyJf.css",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-16T23:50:33.350Z",
+        "method": "GET",
+        "path": "/assets/app-chrome-B4Sk8Vtx.js",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-16T23:50:33.350Z",
+        "method": "GET",
+        "path": "/assets/index-C-JMs3Sc.js",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-16T23:50:33.409Z",
+        "method": "GET",
+        "path": "/assets/connected-app-Cbs-KlDq.js",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-16T23:50:33.466Z",
+        "method": "GET",
+        "path": "/logo.png",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-16T23:50:49.669Z",
+        "method": "GET",
+        "path": "/account",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-16T23:50:50.084Z",
+        "method": "GET",
+        "path": "/groups",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-16T23:50:50.618Z",
+        "method": "GET",
+        "path": "/invitations",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-16T23:51:22.146Z",
+        "method": "GET",
+        "path": "/account",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-16T23:51:22.563Z",
+        "method": "GET",
+        "path": "/groups",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-16T23:51:22.863Z",
+        "method": "GET",
+        "path": "/invitations",
+        "status": 200,
+        "reference": null
+      }
+    ]
+  ]
+}

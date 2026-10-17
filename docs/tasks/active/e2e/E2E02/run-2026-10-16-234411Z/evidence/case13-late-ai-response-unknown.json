@@ -1,0 +1,16 @@
+{
+  "runId": "E2E02-20261016-234411Z",
+  "kind": "INJECTED",
+  "scenario": "Own browser AI draft response held after route.fetch",
+  "attemptWindow": "After 2026-10-17T00:53:37Z and before the follow-up read-only browser started at 2026-10-17T00:54:30Z; exact POST timestamp not captured.",
+  "result": "UNKNOWN; response was not delivered to the page",
+  "safeHarnessError": "Local helper failed while calling APIResponse.allHeaders; response status could not be recorded.",
+  "followupReadback": {
+    "groupRead": "PASS",
+    "savedDraftsObserved": 2,
+    "originalRecoveryDraftStillPresent": true,
+    "additionalAIRequestDraftObserved": true
+  },
+  "repeatPerformed": false,
+  "lateResponseOverwriteCheck": "NOT_COMPLETED"
+}

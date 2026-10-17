@@ -1,0 +1,372 @@
+{
+  "startedAt": "2026-10-17T00:14:06.939Z",
+  "endedAt": "2026-10-17T00:20:33.295Z",
+  "contexts": [
+    [
+      {
+        "at": "2026-10-17T00:14:07.322Z",
+        "method": "GET",
+        "path": "/",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:07.349Z",
+        "method": "GET",
+        "path": "/assets/index-CUpbnyJf.css",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:07.365Z",
+        "method": "GET",
+        "path": "/assets/app-chrome-B4Sk8Vtx.js",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:07.366Z",
+        "method": "GET",
+        "path": "/assets/index-C-JMs3Sc.js",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:07.425Z",
+        "method": "GET",
+        "path": "/assets/connected-app-Cbs-KlDq.js",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:07.498Z",
+        "method": "GET",
+        "path": "/logo.png",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:20.274Z",
+        "method": "GET",
+        "path": "/account",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:20.759Z",
+        "method": "GET",
+        "path": "/groups",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:21.002Z",
+        "method": "GET",
+        "path": "/invitations",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:30.515Z",
+        "method": "GET",
+        "path": "/account",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:30.779Z",
+        "method": "GET",
+        "path": "/groups/:id",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:31.111Z",
+        "method": "GET",
+        "path": "/groups/:id/members/:id/profile",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:31.265Z",
+        "method": "GET",
+        "path": "/groups/:id/draft-requests",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:31.940Z",
+        "method": "GET",
+        "path": "/groups/:id/members/:id/profile",
+        "status": null,
+        "networkFailure": true
+      },
+      {
+        "at": "2026-10-17T00:14:32.316Z",
+        "method": "GET",
+        "path": "/decisions/:id/public",
+        "status": 503,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:15:16.936Z",
+        "method": "GET",
+        "path": "/decisions/:id/public",
+        "status": null,
+        "networkFailure": true
+      },
+      {
+        "at": "2026-10-17T00:15:34.222Z",
+        "method": "GET",
+        "path": "/account",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:15:34.551Z",
+        "method": "GET",
+        "path": "/groups/:id",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:15:34.894Z",
+        "method": "GET",
+        "path": "/groups/:id/members/:id/profile",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:15:34.937Z",
+        "method": "GET",
+        "path": "/groups/:id/members/:id/profile",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:15:35.260Z",
+        "method": "GET",
+        "path": "/groups/:id/draft-requests",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:15:41.706Z",
+        "method": "GET",
+        "path": "/groups/:id/decisions/:id/review",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:16:56.390Z",
+        "method": "POST",
+        "path": "/groups/:id/decisions/:id/revise",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:16:56.694Z",
+        "method": "GET",
+        "path": "/account",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:16:57.014Z",
+        "method": "GET",
+        "path": "/groups/:id",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:16:57.017Z",
+        "browserDialogType": "confirm",
+        "safeMessage": "Leave this view and discard unsaved input?"
+      },
+      {
+        "at": "2026-10-17T00:17:14.453Z",
+        "method": "GET",
+        "path": "/decisions/:id/public",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:17:14.798Z",
+        "method": "GET",
+        "path": "/decisions/:id/me",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:17:15.235Z",
+        "method": "GET",
+        "path": "/groups/:id",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:18:14.724Z",
+        "method": "POST",
+        "path": "/decisions/:id/commands",
+        "status": 422,
+        "reference": null
+      }
+    ],
+    [
+      {
+        "at": "2026-10-17T00:14:08.108Z",
+        "method": "GET",
+        "path": "/",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:08.135Z",
+        "method": "GET",
+        "path": "/assets/index-CUpbnyJf.css",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:08.151Z",
+        "method": "GET",
+        "path": "/assets/app-chrome-B4Sk8Vtx.js",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:08.151Z",
+        "method": "GET",
+        "path": "/assets/index-C-JMs3Sc.js",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:08.206Z",
+        "method": "GET",
+        "path": "/assets/connected-app-Cbs-KlDq.js",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:08.260Z",
+        "method": "GET",
+        "path": "/logo.png",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:26.482Z",
+        "method": "GET",
+        "path": "/account",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:26.853Z",
+        "method": "GET",
+        "path": "/groups",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:14:27.142Z",
+        "method": "GET",
+        "path": "/invitations",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:15:08.898Z",
+        "method": "GET",
+        "path": "/account",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:15:09.200Z",
+        "method": "GET",
+        "path": "/groups/:id",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:15:09.606Z",
+        "method": "GET",
+        "path": "/groups/:id/members/:id/profile",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:15:09.650Z",
+        "method": "GET",
+        "path": "/groups/:id/members/:id/profile",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:15:10.697Z",
+        "method": "GET",
+        "path": "/decisions/:id/public",
+        "status": 404,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:15:55.302Z",
+        "method": "GET",
+        "path": "/decisions/:id/public",
+        "status": null,
+        "networkFailure": true
+      },
+      {
+        "at": "2026-10-17T00:17:13.471Z",
+        "method": "GET",
+        "path": "/account",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:17:13.803Z",
+        "method": "GET",
+        "path": "/groups/:id",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:17:14.169Z",
+        "method": "GET",
+        "path": "/groups/:id/members/:id/profile",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:17:14.248Z",
+        "method": "GET",
+        "path": "/groups/:id/members/:id/profile",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:17:25.416Z",
+        "method": "GET",
+        "path": "/decisions/:id/public",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:17:25.752Z",
+        "method": "GET",
+        "path": "/decisions/:id/me",
+        "status": 200,
+        "reference": null
+      },
+      {
+        "at": "2026-10-17T00:17:26.043Z",
+        "method": "GET",
+        "path": "/groups/:id",
+        "status": 200,
+        "reference": null
+      }
+    ]
+  ]
+}

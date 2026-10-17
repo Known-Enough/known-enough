@@ -1,0 +1,86 @@
+{
+  "observedAt": "2026-10-16T22:33:51.930Z",
+  "requestId": "99c8344a-97f4-4e83-bfa0-bb50ddc1e9ea",
+  "action": "authenticated UI sign-in and one read-only GET /groups",
+  "network": [
+    {
+      "at": "2026-10-16T22:33:53.966Z",
+      "method": "GET",
+      "route": "/account",
+      "status": 200
+    },
+    {
+      "at": "2026-10-16T22:33:54.315Z",
+      "method": "GET",
+      "route": "/groups",
+      "status": 200
+    }
+  ],
+  "responseShape": {
+    "topLevel": {
+      "isObject": true,
+      "missing": 0,
+      "unexpectedCount": 1
+    },
+    "groupsIsArray": true,
+    "groupCount": 2,
+    "groups": [
+      {
+        "isObject": true,
+        "missing": 0,
+        "unexpectedCount": 0,
+        "validId": true,
+        "validName": true,
+        "validVersion": true,
+        "validOrganizerFlag": true,
+        "validPendingCount": true,
+        "members": {
+          "isArray": true,
+          "count": 1,
+          "valid": true
+        },
+        "drafts": {
+          "isArray": true,
+          "count": 0,
+          "valid": true
+        },
+        "decisions": {
+          "isArray": true,
+          "count": 0,
+          "valid": true
+        }
+      },
+      {
+        "isObject": true,
+        "missing": 0,
+        "unexpectedCount": 0,
+        "validId": true,
+        "validName": true,
+        "validVersion": true,
+        "validOrganizerFlag": true,
+        "validPendingCount": true,
+        "members": {
+          "isArray": true,
+          "count": 1,
+          "valid": true
+        },
+        "drafts": {
+          "isArray": true,
+          "count": 0,
+          "valid": true
+        },
+        "decisions": {
+          "isArray": true,
+          "count": 0,
+          "valid": true
+        }
+      }
+    ]
+  },
+  "dashboard": {
+    "profileControlVisible": true,
+    "groupsHeadingVisible": false,
+    "alertVisible": true,
+    "alertText": "We couldn’t load your groups\n\nThe service couldn’t load this view right now. Try again, or return to your groups.\n\nTry again\nBack to groups"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "source": "37bb0f9eee9ebe348c71e4846c0ef2206c65c791",
+  "awsWrites": 0,
+  "providerCalls": 0,
+  "events": [
+    {
+      "timestamp": 1792196294952,
+      "event": "PRIVATE_ANSWERS_HTTP_RESULT",
+      "requestId": "52cfb633-d008-4fe2-b43e-e73c7b001ada",
+      "sourceSha": "40ec579c55410b1ae15aecb12fc2a0a30b2cc4c6",
+      "elapsedMs": 191,
+      "result": "FAILED",
+      "code": "NEEDS_CLARIFICATION",
+      "status": 422
+    }
+  ],
+  "failures": [],
+  "windowStart": 1792192744390,
+  "windowEnd": 1792196344390,
+  "result": "DRAFT_DIAGNOSTICS_READ",
+  "windowComplete": true,
+  "requestReferenceCorrelation": "EXACT_REFERENCE_MATCH"
+}

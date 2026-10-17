@@ -1,0 +1,13 @@
+{
+  "evidenceKind": "LIVE",
+  "observationWindowUtc": "2026-10-16T22:29:19Z through approximately 22:30Z",
+  "accounts": ["User 1", "User 2"],
+  "separateBrowserContexts": true,
+  "user1AuthenticatedBeforeUser2SignOut": true,
+  "user2ExplicitlySignedOut": true,
+  "user1RemainedAuthenticatedAfterUser2SignOut": true,
+  "user1SignInFormRemainedAbsent": true,
+  "signOutExactTimestamp": "not separately captured",
+  "dashboardLoad": "failed in both contexts with the groups-loading alert; recorded separately",
+  "supportingEvidence": "network-summary.json"
+}

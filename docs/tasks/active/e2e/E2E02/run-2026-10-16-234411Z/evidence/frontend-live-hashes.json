@@ -1,0 +1,45 @@
+{
+  "observedAt": "2026-10-16T23:46:16.444323+00:00",
+  "targetId": "amplify-connected-staging",
+  "frontendUrl": "https://main.d143q5ravxp5av.amplifyapp.com/",
+  "sourceCommit": "6cb97c414b8dced2f06effa9557fb6d2102389c6",
+  "manifestLastVerifiedAt": "2026-10-16T23:21:17.405700+00:00",
+  "files": [
+    {
+      "path": "/assets/app-chrome-B4Sk8Vtx.js",
+      "httpStatus": 200,
+      "expectedSha256": "19ba28027b06a034a563407fb79f0b51f74ae6aa7456e41111f830bc745dda04",
+      "actualSha256": "19ba28027b06a034a563407fb79f0b51f74ae6aa7456e41111f830bc745dda04",
+      "matches": true
+    },
+    {
+      "path": "/assets/connected-app-Cbs-KlDq.js",
+      "httpStatus": 200,
+      "expectedSha256": "5c4fc2c595091e5f7707e36518aa4bec0c78a2c3895b17430f30905f63ef9373",
+      "actualSha256": "5c4fc2c595091e5f7707e36518aa4bec0c78a2c3895b17430f30905f63ef9373",
+      "matches": true
+    },
+    {
+      "path": "/assets/index-C-JMs3Sc.js",
+      "httpStatus": 200,
+      "expectedSha256": "8d5608eee0a7b997a7b1bdc288e0034d595393059e2adf7383db9979b4a901c7",
+      "actualSha256": "8d5608eee0a7b997a7b1bdc288e0034d595393059e2adf7383db9979b4a901c7",
+      "matches": true
+    },
+    {
+      "path": "/assets/index-CUpbnyJf.css",
+      "httpStatus": 200,
+      "expectedSha256": "128cae12e3438de8332a627c8864eb7c96ff135c918506abdfc3f855412ff27a",
+      "actualSha256": "128cae12e3438de8332a627c8864eb7c96ff135c918506abdfc3f855412ff27a",
+      "matches": true
+    },
+    {
+      "path": "/",
+      "httpStatus": 200,
+      "expectedSha256": "341504478b06a5bba00e0cc3dd1faa9390a4d1b7a296b12efdbd616bad132006",
+      "actualSha256": "341504478b06a5bba00e0cc3dd1faa9390a4d1b7a296b12efdbd616bad132006",
+      "matches": true
+    }
+  ],
+  "allFilesMatch": true
+}

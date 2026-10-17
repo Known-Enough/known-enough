@@ -1,6 +1,8 @@
 # E2E02 — Current-release decision journeys and useful failure evidence
 
-Status: PLAN READY for a fresh current-release run; execution/results NOT VERIFIED by this refresh. Preserve any actual active worker/claim. Frontend117 and repaired API6f2bff59 are published; the former runtime USERNAME permission gap is resolved.
+Status: TWO PARTIAL LIVE RUNS COMPLETE; qualification NOT VERIFIED. The user-directed rerun is [E2E02-20261016-234411Z](run-2026-10-16-234411Z/report.md): 8 PASS, 4 FAIL, 4 BLOCKED. Username invitation send/accept passed; direct answer saves and AI draft creation failed. Preserve both reports; no end-user readiness claim.
+
+The rerun's frontend117/API6f2bff59 baseline matches the current plan refresh. The former USERNAME permission gap is resolved; invitation behavior passed by username. Current defects and unverified worker alignment remain as detailed in the report.
 
 ## Purpose
 

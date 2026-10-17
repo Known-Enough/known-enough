@@ -1,0 +1,26 @@
+{
+  "runId": "E2E02-20261016-234411Z",
+  "kind": "LIVE",
+  "request": {
+    "at": "2026-10-17T00:39:11.750Z",
+    "method": "POST",
+    "path": "/groups/:id/drafts",
+    "status": 200,
+    "requestReference": null
+  },
+  "generatedContentRetained": false,
+  "booleanChecks": {
+    "museumOptionInEditableDraft": true,
+    "parkOptionInEditableDraft": true,
+    "unmarkedUnsupportedDaySuggestionsPresent": true,
+    "organizerReplacedDayOptionsWithRunbookDates": true,
+    "draftEditSaveAt": "2026-10-17T00:43:08.498Z",
+    "draftEditSaveStatus": 200,
+    "savedAfterReload": true,
+    "decisionCreateAt": "2026-10-17T00:44:13.138Z",
+    "decisionCreateStatus": 200,
+    "reopenedDecisionShowsMuseumAndPark": true,
+    "reopenedDecisionShowsNovember14And15": true
+  },
+  "usageEvidence": "Provider call count and cost unavailable; no provider usage payload was retained."
+}
