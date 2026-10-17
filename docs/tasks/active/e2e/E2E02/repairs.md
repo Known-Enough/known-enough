@@ -1,6 +1,6 @@
 # E2E02 findings repair
 
-Status: PUBLISHED/B; targeted live repair checks PASS. A frontend-only invitation-message clarification is CODE_READY and awaits publication. User-directed repair of [the completed report](run-2026-10-16-234411Z/report.md) on baseline `88c84e7cf42b9689532f6e49f468dfbce1a20d29`. Historical reports remain unchanged.
+Status: COMPLETE/B repair; claim released. API/worker755440b and frontend119/72f1906 published; targeted live repair checks PASS. Full16-case E2E02 qualification remains unverified. User-directed repair of [the completed report](run-2026-10-16-234411Z/report.md) on baseline `88c84e7cf42b9689532f6e49f468dfbce1a20d29`. Historical reports remain unchanged.
 
 | Finding | Repair/evidence | Status |
 | --- | --- | --- |
@@ -21,8 +21,8 @@ One direct worker; no new automation, account reset, IAM expansion, disabled-sch
 
 ## Publication and live proof
 
-[Publication receipt](../../../../review-artifacts/E2E02/repair-publication.json): frontend118 and coordinated API/worker on755440b, admission restored/current source, TOTAL unchanged, worker scheduleDISABLED. Independent worker code/artifact/private-source checks pass before and after. [Exact diagnostic](../../../../review-artifacts/E2E02/repair-diagnostic.json) resolves a controlled stale-version rejection without raw input or model data.
+[Publication receipt](../../../../review-artifacts/E2E02/repair-publication.json): frontend119/72f1906 and coordinated API/worker on755440b, admission restored/current source, TOTAL unchanged, worker scheduleDISABLED. Independent worker code/artifact/private-source checks pass before and after. [Exact diagnostic](../../../../review-artifacts/E2E02/repair-diagnostic.json) resolves a controlled stale-version rejection without raw input or model data.
 
 [Targeted live proof](../../../../review-artifacts/E2E02/repair-targeted-live.json) verifies one choice editor, save revision2/create200/automatic navigation, two independent consented owner saves200, first owner’s two conditions retained, READY public progress with no private conditions, the original case11 AI draft edited/created200 with public options preserved and no new AI call, email private-link acceptance and username inbox acceptance, and joining/explicit decision inclusion without losing earlier answers/confirmations. Native direct saves require no separate frame review. No final outcome/AI call was initiated in these live checks; proposal, finished-result and stale-approval behavior have local regression proof only.
 
-The accounts share a verified email, so email delivery uses the supported private-link fallback. The sender text is being clarified to ask recipients to check their inbox and otherwise share the private link, instead of promising a dashboard item for every address. The first repair runner checked the Create control before the draft response rendered; it submitted no create. Its [initial record](../../../../review-artifacts/E2E02/repair-initial-live-runner-check.json) is retained; the successful continuation read back that same owned group/draft before proceeding. No duplicate fixture or unknown write was replayed.
+The accounts share a verified email, so email delivery uses the supported private-link fallback. Frontend119 now asks recipients to check their inbox and otherwise share the private link; it no longer promises a dashboard item for every address. The first repair runner checked the Create control before the draft response rendered; it submitted no create. Its [initial record](../../../../review-artifacts/E2E02/repair-initial-live-runner-check.json) is retained; the successful continuation read back that same owned group/draft before proceeding. No duplicate fixture or unknown write was replayed.

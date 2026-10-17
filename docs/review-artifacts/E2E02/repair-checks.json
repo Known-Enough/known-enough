@@ -1,7 +1,7 @@
 {
   "utc": "2026-10-17T18:28:46.363728+00:00",
   "baseline": "88c84e7cf42b9689532f6e49f468dfbce1a20d29",
-  "status": "PUBLISHED_TARGETED_LIVE_PASS",
+  "status": "REPAIR_COMPLETE_TARGETED_LIVE_PASS",
   "focusedUnit": {
     "passed": 184,
     "failed": 0
@@ -40,7 +40,10 @@
   },
   "fullCheck": "FAIL_REPRODUCED_BASELINE_DEBT_SEE_COMPARISON",
   "providerCalls": 0,
-  "deployment": "API_WORKER_755440B_FRONTEND118",
+  "deployment": "API_WORKER_755440B_FRONTEND_119",
   "productQualification": "NOT_CLAIMED",
-  "liveProof": "docs/review-artifacts/E2E02/repair-targeted-live.json"
+  "liveProof": "docs/review-artifacts/E2E02/repair-targeted-live.json",
+  "testedImplementationSource": "755440b658df2e8f549b41968bfc2f7e8e5a8352",
+  "noticeOnlyFrontendSource": "72f19060085bd1c9fa274f724a2afe858d6b9eed",
+  "noticeBuild": "PASS"
 }

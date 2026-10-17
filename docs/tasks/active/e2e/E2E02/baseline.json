@@ -1,25 +1,25 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-16T23:27:10.639151+00:00",
-  "qualification": "NOT_VERIFIED_BY_PLAN_REFRESH",
+  "updatedAt": "2026-10-17T18:38:06.044180+00:00",
+  "qualification": "TARGETED_REPAIR_LIVE_PASS_FULL_E2E02_NOT_RERUN",
   "primaryUrl": "https://main.d143q5ravxp5av.amplifyapp.com/",
   "frontend": {
-    "sourceCommit": "6cb97c414b8dced2f06effa9557fb6d2102389c6",
-    "amplifyJobId": "117",
-    "releaseRun": "https://github.com/Known-Enough/known-enough/actions/runs/38980855371",
-    "receipt": "docs/review-artifacts/FF/choice-modal-layout-publication.json",
+    "sourceCommit": "72f19060085bd1c9fa274f724a2afe858d6b9eed",
+    "amplifyJobId": "119",
+    "releaseRun": "https://github.com/Known-Enough/known-enough/actions/runs/39058861616",
+    "receipt": "docs/review-artifacts/E2E02/repair-publication.json",
     "files": [
       {
         "path": "/assets/app-chrome-B4Sk8Vtx.js",
         "sha256": "19ba28027b06a034a563407fb79f0b51f74ae6aa7456e41111f830bc745dda04"
       },
       {
-        "path": "/assets/connected-app-Cbs-KlDq.js",
-        "sha256": "5c4fc2c595091e5f7707e36518aa4bec0c78a2c3895b17430f30905f63ef9373"
+        "path": "/assets/connected-app-D87XwNzE.js",
+        "sha256": "b373f7b91d14bbbe04c0f196fc8af0504aa62d52372cafd91b42a01fc2607b02"
       },
       {
-        "path": "/assets/index-C-JMs3Sc.js",
-        "sha256": "8d5608eee0a7b997a7b1bdc288e0034d595393059e2adf7383db9979b4a901c7"
+        "path": "/assets/index-CNySPxKq.js",
+        "sha256": "d437b2dcfb027de1543f179b4279bb09b237cd2531f29e1405af21d1de5e22eb"
       },
       {
         "path": "/assets/index-CUpbnyJf.css",
@@ -31,7 +31,7 @@
       },
       {
         "path": "/",
-        "sha256": "341504478b06a5bba00e0cc3dd1faa9390a4d1b7a296b12efdbd616bad132006"
+        "sha256": "cdf29657027256e2558a82a80f3e9b0aad411cb5d593221043050ad20c2f9238"
       },
       {
         "path": "/logo.png",
@@ -40,11 +40,11 @@
     ]
   },
   "backend": {
-    "sourceCommit": "40ec579c55410b1ae15aecb12fc2a0a30b2cc4c6",
-    "apiArtifactSha256": "6f2bff590976861470bd4faa2475141e612b2afb0dd0f23057777496dd4a853f",
-    "workerArtifactSha256": "715f84620c9a65ef4a1b2ea2bcf2d6fe1217d319a79533b0d0e7913211b9e05d",
-    "releaseRun": "https://github.com/Known-Enough/known-enough/actions/runs/38979307088",
-    "receipt": "docs/review-artifacts/INV01/username-lookup-repair-publication.json"
+    "sourceCommit": "755440b658df2e8f549b41968bfc2f7e8e5a8352",
+    "apiArtifactSha256": "bc56395c2e6136269dd935b9752fd00b4d07436c9e0d6b0fe343477273819c8d",
+    "workerArtifactSha256": "5a253d564cac5588e6472298bfba1f0b74a4a492b4b940b00ab7c9a17e03814e",
+    "releaseRun": "https://github.com/Known-Enough/known-enough/actions/runs/39058521781",
+    "receipt": "docs/review-artifacts/E2E02/repair-publication.json"
   },
   "runtimeUsernamePermission": {
     "lastObserved": "INSTALLED",
@@ -70,5 +70,12 @@
     "16"
   ],
   "liveExecutionStartedByThisRefresh": false,
-  "credentialsAndCurrentAccountHealth": "VERIFY_PRIVATELY_ON_EXECUTION_MACHINE"
+  "credentialsAndCurrentAccountHealth": "TWO_OWNED_APPROVED_SESSIONS_AND_VERIFIED_IDENTITIES_CHECKED_PRIVATELY",
+  "repairTargetedLiveVerification": {
+    "result": "TARGETED_REPAIR_LIVE_PASS",
+    "proof": "docs/review-artifacts/E2E02/repair-targeted-live.json",
+    "newModelCalls": 0,
+    "finalApprovals": 0,
+    "fullSixteenCaseRun": false
+  }
 }
