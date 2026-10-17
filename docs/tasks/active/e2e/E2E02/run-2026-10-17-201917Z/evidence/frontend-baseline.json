@@ -1,0 +1,50 @@
+{
+  "utc": "2026-10-17T20:19:17.335242+00:00",
+  "frontendSource": "72f19060085bd1c9fa274f724a2afe858d6b9eed",
+  "amplify": "119",
+  "files": [
+    {
+      "path": "/assets/app-chrome-B4Sk8Vtx.js",
+      "status": 200,
+      "match": true,
+      "sha256": "19ba28027b06a034a563407fb79f0b51f74ae6aa7456e41111f830bc745dda04"
+    },
+    {
+      "path": "/assets/connected-app-D87XwNzE.js",
+      "status": 200,
+      "match": true,
+      "sha256": "b373f7b91d14bbbe04c0f196fc8af0504aa62d52372cafd91b42a01fc2607b02"
+    },
+    {
+      "path": "/assets/index-CNySPxKq.js",
+      "status": 200,
+      "match": true,
+      "sha256": "d437b2dcfb027de1543f179b4279bb09b237cd2531f29e1405af21d1de5e22eb"
+    },
+    {
+      "path": "/assets/index-CUpbnyJf.css",
+      "status": 200,
+      "match": true,
+      "sha256": "128cae12e3438de8332a627c8864eb7c96ff135c918506abdfc3f855412ff27a"
+    },
+    {
+      "path": "/cover.png",
+      "status": 200,
+      "match": true,
+      "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151"
+    },
+    {
+      "path": "/",
+      "status": 200,
+      "match": true,
+      "sha256": "cdf29657027256e2558a82a80f3e9b0aad411cb5d593221043050ad20c2f9238"
+    },
+    {
+      "path": "/logo.png",
+      "status": 200,
+      "match": true,
+      "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb"
+    }
+  ],
+  "allMatch": true
+}

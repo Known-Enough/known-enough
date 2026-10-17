@@ -1,5 +1,8 @@
 # E2E02 findings repair
 
+**Full rerun, 2026-10-17:** [Latest report](run-2026-10-17-201917Z/report.md) records11PASS/5BLOCKED. Direct saves, real-AI creation, trusted invitations, recovery and ongoing membership additions passed. M/A/B accepted outcomes remain REASONING with the disabled worker schedule; final approvals, completed-decision preservation and stale-approval qualification remain open. This supersedes the earlier not-rerun observation while retaining its dated evidence. No application or installed configuration changed during the rerun.
+
+
 Status: COMPLETE/B repair; claim released. API/worker755440b and frontend119/72f1906 published; targeted live repair checks PASS. Full16-case E2E02 qualification remains unverified. User-directed repair of [the completed report](run-2026-10-16-234411Z/report.md) on baseline `88c84e7cf42b9689532f6e49f468dfbce1a20d29`. Historical reports remain unchanged.
 
 | Finding | Repair/evidence | Status |

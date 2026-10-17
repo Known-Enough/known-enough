@@ -1,8 +1,6 @@
 # E2E02 — Current-release decision journeys and useful failure evidence
 
-Status: TWO PARTIAL LIVE RUNS COMPLETE; qualification NOT VERIFIED. The user-directed rerun is [E2E02-20261016-234411Z](run-2026-10-16-234411Z/report.md): 8 PASS, 4 FAIL, 4 BLOCKED. Username invitation send/accept passed; direct answer saves and AI draft creation failed. Preserve both reports; no end-user readiness claim.
-
-The rerun's frontend117/API6f2bff59 baseline matches the current plan refresh. The former USERNAME permission gap is resolved; invitation behavior passed by username. Current defects and unverified worker alignment remain as detailed in the report.
+Status: LATEST RERUN COMPLETE —11 PASS/5 BLOCKED; qualification BLOCKED. [Current run](run-2026-10-17-201917Z/report.md). Repairs remain published on frontend119/APIbc56395c. Outcome requests did not produce proposals; no approvals or full release acceptance claimed. Historical runs remain below.
 
 ## Current repair — 2026-10-17T02:15:20Z
 
@@ -32,7 +30,7 @@ Do not change application code, publish a deployment, repair IAM, reset accounts
 
 Primary site: https://main.d143q5ravxp5av.amplifyapp.com/ . Do not switch to the separate QA site and claim the primary passed.
 
-Use [baseline.json](baseline.json) as the single source for published versions and public asset hashes. At this refresh:
+Use [baseline.json](baseline.json) as the single source for published versions and public asset hashes. The following historical plan-refresh baseline is retained; use baseline.json and the latest run above for the current release:
 
 - Frontend source `6cb97c414b8dced2f06effa9557fb6d2102389c6`, Amplify **117**, [matching release](https://github.com/Known-Enough/known-enough/actions/runs/38980855371) and [modal-layout receipt](../../../../review-artifacts/FF/choice-modal-layout-publication.json).
 - API source `40ec579c55410b1ae15aecb12fc2a0a30b2cc4c6`, artifact SHA `6f2bff590976861470bd4faa2475141e612b2afb0dd0f23057777496dd4a853f`; matching worker SHA `715f84620c9a65ef4a1b2ea2bcf2d6fe1217d319a79533b0d0e7913211b9e05d`. [Backend/username recovery receipt](../../../../review-artifacts/INV01/username-lookup-repair-publication.json).
@@ -71,3 +69,8 @@ Release the claim after reporting a complete run or a documented external blocke
 ## Status history retained
 
 E2E02 previously carried IN PROGRESS/start-direction language while its README said unclaimed/not started, and cited frontend113/API9b0badc5 with a missing IAM permission. Those were older preparation states, not current qualification. This refresh found no dated E2E02 report/evidence folder in this task directory; it does not establish whether an inaccessible B browser worker is active. Preserve any actual claim and obtain fresh observations against the current baseline. E2E01 reports and historical INV01 evidence remain unchanged.
+
+
+## Full rerun handback — 2026-10-17T22:24:23.906898+00:00
+
+[Report](run-2026-10-17-201917Z/report.md), [receipt](../../../../review-artifacts/E2E02/full-rerun-20261017.json). Testing COMPLETE/B, claim released; qualification BLOCKED. Three real AI drafts returned200; direct saves/recovery/invitation/membership checks passed. M/A/B remain REASONING with0approvals and disabled schedule. Preserve accepted requests and the separate unknown R save; no blind replay. Next managed execution work belongs to existing OPS03/E2E02; known roster copy is documented in FF10. No implementation/deployment/configuration/new-agent scope was started.

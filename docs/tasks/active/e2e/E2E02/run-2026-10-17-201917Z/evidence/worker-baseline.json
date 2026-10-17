@@ -1,0 +1,29 @@
+{
+  "result": "INSTALLED_WORKER_READBACK_PASS",
+  "checks": {
+    "codeHash": true,
+    "artifactHash": true,
+    "packageSource": true,
+    "function": true,
+    "runtime": true,
+    "handler": true,
+    "role": true,
+    "timeout": true,
+    "memory": true,
+    "state": true,
+    "environment": true,
+    "rule": true,
+    "schedule": true
+  },
+  "workerSha256": "5a253d564cac5588e6472298bfba1f0b74a4a492b4b940b00ab7c9a17e03814e",
+  "installedCodeSha256": "5a253d564cac5588e6472298bfba1f0b74a4a492b4b940b00ab7c9a17e03814e",
+  "artifactSha256": "5a253d564cac5588e6472298bfba1f0b74a4a492b4b940b00ab7c9a17e03814e",
+  "packageSource": "755440b658df2e8f549b41968bfc2f7e8e5a8352",
+  "mutations": 0,
+  "providerCalls": 0,
+  "effectiveRuntimePermissions": "NOT_EXECUTED",
+  "reservedConcurrency": "NOT_READ",
+  "targetBinding": "NOT_READ",
+  "sourceSha": "fd8758f5f67dbe68e7fc9322cf021e25074ef68b",
+  "workflowRun": "https://github.com/Known-Enough/known-enough/actions/runs/39066321002"
+}

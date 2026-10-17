@@ -1,0 +1,119 @@
+{
+  "runId": "E2E02-20261017-201917Z",
+  "status": "RERUN_COMPLETE_PARTIAL",
+  "qualification": "BLOCKED",
+  "startedAt": "2026-10-17T20:19:17.335242+00:00",
+  "endedAt": "2026-10-17T22:22:52.888Z",
+  "counts": {
+    "PASS": 11,
+    "FAIL": 0,
+    "BLOCKED": 5
+  },
+  "cases": [
+    {
+      "case": "01",
+      "result": "PASS",
+      "observation": "User 1 signed in and approved; authenticated inbox GET200, empty card hidden. Injected inbox503 keeps groups and shows Retry invitations."
+    },
+    {
+      "case": "02",
+      "result": "PASS",
+      "observation": "Separate verified identity/session. Signing out User2 preserved User1 UI and approved account access."
+    },
+    {
+      "case": "03",
+      "result": "PASS",
+      "observation": "One create200, opened saved group without false discard warning. Genuine unsaved-name guard warned and Cancel retained text."
+    },
+    {
+      "case": "04",
+      "result": "PASS",
+      "observation": "Group renamed200 and persisted after reopen."
+    },
+    {
+      "case": "05",
+      "result": "PASS",
+      "observation": "Incomplete draft saved/reopened; duplicate/date/72-combination prompts, 64-combination recovery, original idea/example and four layouts passed. Short-height actions reachable by scrolling."
+    },
+    {
+      "case": "06",
+      "result": "PASS",
+      "observation": "Manual current-roster decision created200, reopened, renamed Shared Kit Pickup. Saved public choices and two participants preserved; cosmetic name is directory metadata, not frame.title."
+    },
+    {
+      "case": "07",
+      "result": "PASS",
+      "observation": "Username inbox send/accept and reverse-role shared-email private-link acceptance200. Both provider identities verified, delivery guidance truthful; no recipient username/email/token in group projection."
+    },
+    {
+      "case": "08",
+      "result": "PASS",
+      "observation": "Native modal, private answer controls, public progress, focus, Escape, phone fit and unsaved-edit cancellation passed. Opening submitted no command."
+    },
+    {
+      "case": "09",
+      "result": "PASS",
+      "observation": "Both owners saved200 independently; first owner conditions preserved, two saved progress and owner/public projection boundaries checked."
+    },
+    {
+      "case": "10",
+      "result": "BLOCKED",
+      "observation": "Manual outcome command200, no proposal after183678ms and later readback; REASONING, zero approvals. No resubmission."
+    },
+    {
+      "case": "11",
+      "result": "BLOCKED",
+      "observation": "Real AI200, original restaurant/day alternatives retained, notice shown, saved draft create200 and both private saves200. Outcome accepted200, remains REASONING; joint final approval untestable."
+    },
+    {
+      "case": "12",
+      "result": "BLOCKED",
+      "observation": "Real AI200 retained Museum/Park, requested missing days. Supplied dates manually, create200 and both private saves200. Outcome accepted200 on supported READY readback, remains REASONING; no final proposal."
+    },
+    {
+      "case": "13",
+      "result": "PASS",
+      "observation": "Reload restored public work; two live stale409 conflicts resolved using Keep my edits and Use latest saved draft. Injected lost save/create200 acknowledgements recovered by reads, one create. Delayed real AI200 delivered once preserved newer local edits and listed prior draft separately."
+    },
+    {
+      "case": "14",
+      "result": "PASS",
+      "observation": "INJECTED request-inventory503: original manual route saved/created200 with no automatic AI retry. Real provider transport outage not observed."
+    },
+    {
+      "case": "15",
+      "result": "BLOCKED",
+      "observation": "Join and explicit ongoing inclusion preserve old answers/confirmations; newcomer saves directly, two saved. Finished-decision preservation lacks a completed F because outcomes never finished. Existing contradictory roster reset copy observed."
+    },
+    {
+      "case": "16",
+      "result": "BLOCKED",
+      "observation": "Independent two-person R created; User1 saved. User2 UI save had no matching HTTP acknowledgement; readback shows only one saved. No retry or stale-approval claim; no proposal existed to test retirement."
+    }
+  ],
+  "fullEndToEndPass": false,
+  "core01Through12Pass": false,
+  "explicitAIDraftingRequests": 3,
+  "knownAI200Results": 3,
+  "exactReferenceUsage": {
+    "requests": 2,
+    "inputTokens": 1997,
+    "outputTokens": 238,
+    "totalTokens": 2235
+  },
+  "thirdAIUsage": "NOT_AVAILABLE",
+  "completeProviderCost": "NOT_VERIFIED",
+  "finalApprovals": 0,
+  "acceptedOutcomeRequests": 3,
+  "workerSchedule": "DISABLED_READBACK",
+  "applicationCodeChanges": 0,
+  "deployments": 0,
+  "iamChanges": 0,
+  "modelControlChanges": 0,
+  "unknownWritesRetried": 0,
+  "retainedFixtureGroups": 8,
+  "retainedDecisions": 7,
+  "testClaim": "RELEASED",
+  "source": "fd8758f5f67dbe68e7fc9322cf021e25074ef68b",
+  "report": "docs/tasks/active/e2e/E2E02/run-2026-10-17-201917Z/report.md"
+}

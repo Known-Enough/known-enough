@@ -1,0 +1,6 @@
+{
+  "restaurantsRetained": true,
+  "suppliedDaysSemanticallyRetained": true,
+  "dayRepresentation": "NAMED_OPTIONS",
+  "exactIsoStringAssertionInInitialRunner": "INAPPLICABLE: evaluate supplied date meaning, not exact model wording"
+}

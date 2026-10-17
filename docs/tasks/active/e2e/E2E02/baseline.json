@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-17T18:38:06.044180+00:00",
-  "qualification": "TARGETED_REPAIR_LIVE_PASS_FULL_E2E02_NOT_RERUN",
+  "updatedAt": "2026-10-17T22:24:23.906898+00:00",
+  "qualification": "LATEST_FULL_RERUN_11_PASS_5_BLOCKED",
   "primaryUrl": "https://main.d143q5ravxp5av.amplifyapp.com/",
   "frontend": {
     "sourceCommit": "72f19060085bd1c9fa274f724a2afe858d6b9eed",
@@ -77,5 +77,17 @@
     "newModelCalls": 0,
     "finalApprovals": 0,
     "fullSixteenCaseRun": false
+  },
+  "latestFullRerun": {
+    "runId": "E2E02-20261017-201917Z",
+    "report": "docs/tasks/active/e2e/E2E02/run-2026-10-17-201917Z/report.md",
+    "result": "PARTIAL_BLOCKED",
+    "counts": {
+      "PASS": 11,
+      "FAIL": 0,
+      "BLOCKED": 5
+    },
+    "explicitAIDraftingRequests": 3,
+    "finalApprovals": 0
   }
 }
