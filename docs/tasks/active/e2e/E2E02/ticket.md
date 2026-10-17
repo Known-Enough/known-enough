@@ -4,6 +4,10 @@ Status: TWO PARTIAL LIVE RUNS COMPLETE; qualification NOT VERIFIED. The user-dir
 
 The rerun's frontend117/API6f2bff59 baseline matches the current plan refresh. The former USERNAME permission gap is resolved; invitation behavior passed by username. Current defects and unverified worker alignment remain as detailed in the report.
 
+## Current repair — 2026-10-17T02:15:20Z
+
+Direct user request authorizes fixing all findings in the completed report. B owns the single repair implementation on synchronized `88c84e7cf42b9689532f6e49f468dfbce1a20d29`; this supersedes the testing-only code/deployment restriction below for this bounded repair. Historical testing remains unchanged and is not a repair PASS. See [repair ledger](repairs.md). No new test agent, chat or schedule.
+
 ## Purpose
 
 Establish whether two existing users can actually use the current application, create a decision with or without AI, save private answers and reach a shared outcome. E2E01 proved separate sign-ins and group create/rename in its latest report, but never proved a complete two-user decision or real AI journey. Do not repeat its pattern of treating the first failed dependency as a reason to skip safe independent checks. A completed report is not the same as a working product.
