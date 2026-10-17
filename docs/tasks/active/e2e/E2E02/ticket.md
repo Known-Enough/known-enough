@@ -12,6 +12,10 @@ Direct user request authorizes fixing all findings in the completed report. B ow
 
 Repair COMPLETE/B; claim released. Frontend119/72f1906 and API/worker755440b published, source/artifact/disabled-schedule guards pass. [Targeted live evidence](../../../../review-artifacts/E2E02/repair-targeted-live.json) proves direct saves, the original AI-draft creation and membership preservation. [Final ledger](repairs.md) retains all findings and limitations. Historical E2E02 remains partial/unqualified; no new AI/final outcome/full sixteen-case run or new agent was started.
 
+## Fresh full rerun — 2026-10-17T20:19:17.335242+00:00
+
+IN_PROGRESS/B under direct user request after repair publication. [New run](run-2026-10-17-201917Z/report.md). One direct worker; no new subagent/chat/schedule. Preserve the historical partial runs and targeted repair receipts.
+
 ## Purpose
 
 Establish whether two existing users can actually use the current application, create a decision with or without AI, save private answers and reach a shared outcome. E2E01 proved separate sign-ins and group create/rename in its latest report, but never proved a complete two-user decision or real AI journey. Do not repeat its pattern of treating the first failed dependency as a reason to skip safe independent checks. A completed report is not the same as a working product.
