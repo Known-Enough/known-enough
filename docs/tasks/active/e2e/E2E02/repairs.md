@@ -1,17 +1,20 @@
 # E2E02 findings repair
 
-Status: IN_PROGRESS/B, 2026-10-17T02:15:20Z. Baseline `88c84e7cf42b9689532f6e49f468dfbce1a20d29`.
-
-User asks to fix all issues in [the completed report](run-2026-10-16-234411Z/report.md). Preserve the report as historical evidence.
+Status: CODE_VERIFIED/B; compatible publication and targeted live checks pending. User-directed repair of [the completed report](run-2026-10-16-234411Z/report.md) on baseline `88c84e7cf42b9689532f6e49f468dfbce1a20d29`. Historical reports remain unchanged.
 
 | Finding | Repair/evidence | Status |
 | --- | --- | --- |
-| 09/15 direct answer saves return 422 | Trace native admission and application transition, preserve private ownership and explicit consent | Investigating |
-| 11 saved AI draft create returns 409 | Trace saved editor/frame and native creation identity/version binding | Investigating |
-| 12 generated dates unmarked | Enforce visible tentative AI suggestion disclosure without relying on model prose | Investigating |
-| 13 stale-save conflict/late AI result unresolved | Preserve local edits; add supported readback/reconciliation and correct delayed-response helper | Investigating |
-| 07 verified-email prerequisite unavailable | Use verified own-account provider identity without exposing another account or relying on hosted user-info scope | Investigating |
-| Worker hash readback disagrees with release receipt | Inspect actual installed worker and publication/readback logic before compatible release | Investigating |
-| 08 membership read failures and dependent 10/15/16 coverage | Check roster transition and regressions for proposal, answers, completed outcomes and stale approvals | Investigating |
+| 09/15 direct answer saves return 422 | Removed obsolete native API requirement for every participant’s frame confirmation. Explicit owner save still uses current identity/version/consent and the existing atomic retention repository. New HTTP regression saves both owners independently and preserves the first; application checks cover NONE, outcomes and approvals. | Local checks pass; live publication pending |
+| 11 saved AI draft create returns 409 | Two simultaneously rendered editors kept separate revisions: legacy Save changes advanced only one. Choice drafts now have one editor/Create action. Corrected save→navigation dirty reporting; uncertain creation resolves by readback without another create. | Browser regression passes |
+| 12 generated dates unmarked | Server-owned aiAssisted marker survives edits; editable AI drafts display an always-visible tentative-suggestion notice. Simple-choice prompt asks for missing dates rather than inventing them. Caller cannot forge assistance metadata. | Adapter/browser checks pass |
+| 13 stale-save and delayed-result recovery | Explicit latest-draft/keep-my-edits resolution; newer local choices survive late AI and reload/status recovery. Corrected route.fetch APIResponse header capture; the original response is delivered once, never fetched again after a helper error. | Seven browser scenarios and helper checks pass |
+| 07 verified-email prerequisite | Both owned sessions returned verified, matching identities using token-authorized Cognito GetUser. Hosted user-info was the wrong endpoint for native SRP sessions. Added bounded private runner helper and clarified runbook. | Own-session readback passes; delivery check pending |
+| Worker readback disagrees with receipt | Publication38979307088’s actualWorkerSha256 was its pre-update baseline. Final worker guard and workerSha256 both prove715f8462… installed. New fields distinguish prior/final installed hashes; independent readback requires a published hash/source and verifies the private package’s actual source. | Prior evidence reconciled; fresh readback pending |
+| 08 membership reads and 10/15/16 dependency | Joining alone intentionally does not enroll an existing decision. Local direct-save tests verify proposal/two approvals, unchanged other-owner answers, stale approval rejection, addition-only preservation and immutable finished decisions. | Five application scenarios pass; live acceptance pending |
+| No case11 exact-reference logs | All native draft generation/edit/create results now emit server-generated UUID, finite operation/result/status and timing only; diagnostic reader retains those fields. No raw content/identity/model data logged. | Source checked; live diagnostic check pending |
 
-One direct worker; no new automation, account reset, IAM scope expansion or unknown-request replay. Local tests and source/target readbacks distinguish code verification from live acceptance.
+[Checked evidence](../../../../review-artifacts/E2E02/repair-checks.json): 184 focused unit checks, seven browser scenarios, five private runner-helper checks, 51 release guards, worker release/readback checks, production build/type/lint and hosted preview pass. Public layout examples: [desktop](../../../../review-artifacts/E2E02/modal-1280-light.png), [phone](../../../../review-artifacts/E2E02/modal-390-light.png), [short dark viewport](../../../../review-artifacts/E2E02/modal-844-dark.png). These are local synthetic screenshots, not primary-release acceptance.
+
+The full npm run check reached the unit suite and failed. [Baseline comparison](../../../../review-artifacts/E2E02/repair-baseline-comparison.json) reproduces33 of its35 failures on the original source. The two current-only intermittent failures passed a separate31-test run; two obsolete architect assertions were aligned with already-published behavior. This is no full-suite PASS. [Own-account readback](../../../../review-artifacts/E2E02/repair-owned-readback.json) publishes booleans and counts only, never usernames/emails/tokens/private answers.
+
+One direct worker; no new automation, account reset, IAM expansion, disabled-schedule change or uncertain-request replay. No model calls during implementation or checks. Full E2E02 qualification remains separate from this repair.

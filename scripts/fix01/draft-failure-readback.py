@@ -73,7 +73,10 @@ try:
     token = None
     seen = set()
     for _ in range(5):
-        filter_pattern = '"' + request_id + '"' if request_id else '{ $.event = "FIX01_PUBLIC_DRAFT_FAILURE" || $.event = "known-enough.group-failure" }'
+        filter_pattern = '"' + request_id + '"' if request_id else (
+            '{ $.event = "FIX01_PUBLIC_DRAFT_FAILURE" || $.event = "known-enough.group-failure" '
+            '|| ($.event = "PUBLIC_DRAFT_HTTP_RESULT" && $.result = "FAILED") '
+            '|| ($.event = "PRIVATE_ANSWERS_HTTP_RESULT" && $.result = "FAILED") }')
         args = ['logs', 'filter-log-events', '--log-group-name', '/aws/lambda/known-enough-stage-api',
                 '--start-time', str(end - lookback * 60000), '--end-time', str(end),
                 '--filter-pattern', filter_pattern,
@@ -120,6 +123,8 @@ try:
                 item['diagnostics'] = diagnostics
             if value.get('result') in {'SAVED', 'FAILED'}:
                 item['result'] = value['result']
+            if value.get('draftOperation') in {'GENERATE', 'EDIT', 'CREATE'}:
+                item['draftOperation'] = value['draftOperation']
             if value.get('operation') in GROUP_OPERATIONS:
                 item['operation'] = value['operation']
             if value.get('sessionCode') in {'SESSION_INVALID', 'SESSION_STORAGE_UNAVAILABLE', 'SESSION_TIMEOUT', 'SESSION_REQUEST_LIMIT', 'SESSION_CAPACITY'}:

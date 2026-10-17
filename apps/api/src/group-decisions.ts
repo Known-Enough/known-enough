@@ -52,7 +52,7 @@ export class GroupDecisionService {
     const questions = [...output.clarificationQuestions];
     const catalog = genericCandidateCatalog(output.frame);
     if (catalog.clarificationQuestion) questions.push(catalog.clarificationQuestion);
-    const draft = Groups.GroupDraft.parse({ id, bodyHash, revision: 1, groupVersion: roster.version,
+    const draft = Groups.GroupDraft.parse({ id, bodyHash, revision: 1, groupVersion: roster.version, aiAssisted: true,
       frame: output.frame, clarificationQuestions: questions.slice(0, 12), createdDecisionId: null, ...(publicClarifications.length ? { publicClarifications } : {}) });
     if (!this.options.isEnabled()) return fail('STALE_CONTEXT');
     return this.options.groups.repository.transaction(state => {

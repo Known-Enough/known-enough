@@ -502,7 +502,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           || (output.status === 'NEEDS_CLARIFICATION') !== (output.clarificationQuestions.length > 0)) throw new PartitionSessionError('SESSION_INVALID');
         const questions = [...output.clarificationQuestions]; const catalog = genericCandidateCatalog(output.frame);
         if (catalog.clarificationQuestion && !questions.includes(catalog.clarificationQuestion)) questions.push(catalog.clarificationQuestion);
-        return Groups.GroupDraft.parse({ id: draftId, bodyHash: before.bodyHash, revision: 1, groupVersion: before.groupVersion,
+        return Groups.GroupDraft.parse({ id: draftId, bodyHash: before.bodyHash, revision: 1, groupVersion: before.groupVersion, aiAssisted: true,
           ...(output.choicePlan ? { choicePlan: output.choicePlan } : {}),
           frame: output.frame, clarificationQuestions: questions.slice(0, 12), createdDecisionId: null, ...(before.publicClarifications.length ? { publicClarifications: before.publicClarifications } : {}) });
         };

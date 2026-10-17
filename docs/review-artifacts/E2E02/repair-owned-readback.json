@@ -1,0 +1,85 @@
+{
+  "utc": "2026-10-17T02:18:40.066Z",
+  "kind": "READ_ONLY",
+  "users": [
+    {
+      "user": 1,
+      "groupStatus": 200,
+      "verifiedEmailLookupStatus": 200,
+      "emailPresent": true,
+      "emailVerified": true,
+      "usernameMatches": true,
+      "groups": [
+        {
+          "groupVersion": 2,
+          "members": 2,
+          "drafts": [
+            {
+              "revision": 2,
+              "groupVersion": 2,
+              "choicePlanPresent": true,
+              "rosterExact": true,
+              "rosterIds": true,
+              "rosterNames": true,
+              "created": false,
+              "questions": 0,
+              "topicCount": 2,
+              "titleMatchesPlan": true,
+              "descriptionPresent": true,
+              "publicLabelOrderOnlyMismatch": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "user": 2,
+      "groupStatus": 200,
+      "verifiedEmailLookupStatus": 200,
+      "emailPresent": true,
+      "emailVerified": true,
+      "usernameMatches": true,
+      "groups": [
+        {
+          "groupVersion": 1,
+          "members": 1,
+          "drafts": [
+            {
+              "revision": 2,
+              "groupVersion": 1,
+              "choicePlanPresent": true,
+              "rosterExact": true,
+              "rosterIds": true,
+              "rosterNames": true,
+              "created": false,
+              "questions": 0,
+              "topicCount": 2,
+              "titleMatchesPlan": true,
+              "descriptionPresent": false,
+              "publicLabelOrderOnlyMismatch": true
+            },
+            {
+              "revision": 1,
+              "groupVersion": 1,
+              "choicePlanPresent": true,
+              "rosterExact": true,
+              "rosterIds": true,
+              "rosterNames": true,
+              "created": false,
+              "questions": 1,
+              "topicCount": 2,
+              "titleMatchesPlan": true,
+              "descriptionPresent": true,
+              "publicLabelOrderOnlyMismatch": true
+            }
+          ]
+        },
+        {
+          "groupVersion": 2,
+          "members": 2,
+          "drafts": []
+        }
+      ]
+    }
+  ]
+}

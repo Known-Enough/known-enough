@@ -239,7 +239,7 @@ export function createBedrockModels(options: {
         + 'choiceContext, when supplied, contains user-edited public choices. Help fill its missing labels/options without changing existing answers. Copy all supplied alternatives. Keep prices and other supplied context visible in description or option labels; never invent verified facts, dates or prices. '
         + 'Do not ask the organizer for private preferences, availability or budgets. Each person answers privately later. '
         + 'No variable/option ids, rule objects, participant ids or consent fields. The server constructs those. '
-        + 'If a topic has no supplied options, return an empty options list so the editor can ask a focused question. Do not pretend unknowns are known. '
+        + 'If a topic has no supplied options, return an empty options list so the editor can ask a focused question. Do not invent dates for an undecided day. When explicitly asked for suggestions, label those suggestions tentative in description. Do not pretend unknowns are known. '
         + 'Use at most six topics and sixteen options per topic. Prefer just the topics actually requested. Follow-up context may add missing shared options; retain previously supplied alternatives.';
     }
     if (kind === 'ARCHITECT' && payload && typeof payload === 'object' && 'publicVariables' in payload) {

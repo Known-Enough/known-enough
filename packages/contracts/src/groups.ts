@@ -25,7 +25,7 @@ export const Account = z.object({ subject: id, emailHash: z.string().regex(/^[a-
     organizerName: text, expiresAt: z.number().int().positive() }).strict()).max(32).optional(),
   /** Private, immutable subject-specific ownership for a server-allowlisted test email. */
   sharedTestEmail: z.literal(true).optional() }).strict();
-export const GroupDraft = z.object({ choicePlan: ChoicePlan.optional(), id, bodyHash: z.string().regex(/^[a-f0-9]{64}$/),
+export const GroupDraft = z.object({ choicePlan: ChoicePlan.optional(), aiAssisted: z.literal(true).optional(), id, bodyHash: z.string().regex(/^[a-f0-9]{64}$/),
   revision: z.number().int().positive(), groupVersion: z.number().int().positive(),
   frame: PublicDecisionFrame, clarificationQuestions: z.array(z.string().min(1).max(500)).max(12),
   createdDecisionId: id.nullable(),

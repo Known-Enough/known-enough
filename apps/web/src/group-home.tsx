@@ -1,6 +1,6 @@
 import { MemberAvatar } from './member-avatar';
 import { RenameAction } from './rename-action';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { GroupDecisions } from './group-decisions';
 import { Groups } from '@deal-table/contracts';
 import { GroupIcon, LoadingSkeleton, PageIcon } from './app-chrome';
@@ -33,6 +33,9 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
   const [groupName, setGroupName] = useState('');
   const [creating, setCreating] = useState(false);
   const [recipient, setRecipient] = useState(''); const [link, setLink] = useState('');
+  const reportChildDirty = useCallback((value: boolean) => {
+    setChildDirty(value); onDirtyChange?.(value || !!groupName.trim() || !!recipient.trim());
+  }, [groupName, recipient, onDirtyChange]);
   useEffect(() => { onDirtyChange?.(childDirty || !!groupName.trim() || !!recipient.trim()); }, [childDirty, groupName, recipient, onDirtyChange]);
   const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false);
   const [loadFailure, setLoadFailure] = useState<LoadFailure | null>(null);
@@ -370,7 +373,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
               </details>
             </section>
 
-            <GroupDecisions group={group} api={api} reload={load} openDecision={openDecision} onDirtyChange={setChildDirty} startCollapsed />
+            <GroupDecisions group={group} api={api} reload={load} openDecision={openDecision} onDirtyChange={reportChildDirty} startCollapsed />
 
             {group.isOrganizer && <section className="ke-card ke-group-panel ke-invitations-panel" aria-labelledby={`invitations-heading-${group.id}`}>
               <header className="ke-panel-heading"><div><h2 id={`invitations-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="Mail" /></span><span>Invite someone</span></h2>

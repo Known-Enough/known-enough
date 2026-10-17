@@ -1,0 +1,45 @@
+{
+  "utc": "2026-10-17T18:28:46.363728+00:00",
+  "baseline": "88c84e7cf42b9689532f6e49f468dfbce1a20d29",
+  "status": "CODE_VERIFIED_PUBLICATION_PENDING",
+  "focusedUnit": {
+    "passed": 184,
+    "failed": 0
+  },
+  "targetedBrowser": {
+    "passed": 7,
+    "failed": 0,
+    "live": false,
+    "coverage": [
+      "single editor and current revision",
+      "stale save explicit resolution",
+      "lost create response readback without retry",
+      "late AI response",
+      "reload before AI recovery",
+      "desktop/phone/short-height light/dark controls"
+    ]
+  },
+  "pythonWorkerRelease": {
+    "passed": 9
+  },
+  "pythonWorkerReadback": {
+    "passed": 8
+  },
+  "browserHelpers": {
+    "passed": 5
+  },
+  "releaseGuards": {
+    "passed": 51
+  },
+  "frontendReleaseGuards": "PASS",
+  "productionBuild": "PASS",
+  "typecheck": "PASS",
+  "lint": "PASS",
+  "hostedPreview": {
+    "passed": 1
+  },
+  "fullCheck": "FAIL_REPRODUCED_BASELINE_DEBT_SEE_COMPARISON",
+  "providerCalls": 0,
+  "deployment": "PENDING",
+  "productQualification": "NOT_CLAIMED"
+}

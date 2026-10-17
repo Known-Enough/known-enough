@@ -53,7 +53,10 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
     try { const parsed = Groups.GroupDraft.safeParse(JSON.parse(sessionStorage.getItem(editorKey) ?? 'null')?.draft);
       return parsed.success && !parsed.data.createdDecisionId && !parsed.data.deleted ? parsed.data : null; } catch { return null; }
   });
-  const choiceEditing = useRef(false); choiceEditing.current = choiceMode;
+  const [choiceConflict, setChoiceConflict] = useState<Groups.GroupDraft | null>(null);
+  const editorVersion = useRef(0);
+  // A restored local editor may contain newer work even before the modal opens.
+  const choiceEditing = useRef(false); choiceEditing.current = choiceMode || !!choicePlan;
   const manualPendingKey = editorKey + ':save';
   const manualPending = useRef<{ objective: string; choicePlan: ChoicePlan; idempotencyKey: string } | null>((() => {
     try { const value = JSON.parse(sessionStorage.getItem(manualPendingKey) ?? 'null');
@@ -62,13 +65,15 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
         && ChoicePlan.safeParse(value.choicePlan).success ? value : null;
     } catch { return null; }
   })());
-  function changeChoices(plan: ChoicePlan) { setChoicePlan(plan); setChoiceSaved(false); setDirty(true); }
+  function changeChoices(plan: ChoicePlan) { editorVersion.current++; setChoicePlan(plan); setChoiceSaved(false); setDirty(true); }
   function openChoices() {
-    if (draft?.choicePlan) { setChoicePlan(draft.choicePlan); setChoiceDraft(draft); setChoiceSaved(true); }
+    editorVersion.current++;
+    if (!choicePlan && draft?.choicePlan) { setChoicePlan(draft.choicePlan); setChoiceDraft(draft); setChoiceSaved(true); }
     else if (!choicePlan) setChoicePlan({ title: objective.trim().split(/\s+/).slice(0,3).join(' ').slice(0,80), description: '', topics: [{ label: '', kind: 'CHOICE', options: [] }] });
     setChoiceMode(true); setStarting(true);
   }
   async function saveChoices() {
+    if (choiceConflict) throw new UserFlowError('Choose how to resolve the newer saved draft before saving your edits.');
     if (!choicePlan || !objective.trim()) throw new UserFlowError('Describe the decision first. Your choices are kept.');
     const parsed = ChoicePlan.safeParse(choicePlan);
     if (!parsed.success) throw new UserFlowError('Check the choice names and option lengths. Your draft is kept.');
@@ -81,8 +86,11 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
       try { const result = await request(`drafts/${choiceDraft.id}`, body, true); saved = Groups.GroupDraft.parse(result.draft); }
       catch (error) {
         const result = await request(`drafts/${choiceDraft.id}`, undefined, true);
-        const observed = Groups.GroupDraft.parse(result.draft); setChoiceDraft(observed);
-        if (JSON.stringify(observed.choicePlan) !== JSON.stringify(parsed.data) || observed.frame.objective !== objective) throw error;
+        const observed = Groups.GroupDraft.parse(result.draft);
+        if (JSON.stringify(observed.choicePlan) !== JSON.stringify(parsed.data) || observed.frame.objective !== objective) {
+          if (observed.revision !== choiceDraft.revision || observed.createdDecisionId) setChoiceConflict(observed);
+          throw error;
+        }
         saved = observed;
       }
     } else {
@@ -107,12 +115,29 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
     await reload().catch(() => setNotice('Your draft is saved. The group list could not refresh, but you can continue here.')); return saved;
   }
   async function createChoices() {
-    if (!choicePlan || compileChoicePlan(choicePlan).questions.length) return;
+    if (!choicePlan || choiceConflict || compileChoicePlan(choicePlan).questions.length) return;
     const saved = choiceSaved && choiceDraft ? choiceDraft : await saveChoices();
-    const result = await request(`drafts/${saved.id}/create`, { revision: saved.revision }, true);
-    const snapshot = KE.PublicDecisionSnapshot.parse(result.snapshot);
+    let snapshot: KE.PublicDecisionSnapshot;
+    try {
+      const result = await request(`drafts/${saved.id}/create`, { revision: saved.revision }, true);
+      snapshot = KE.PublicDecisionSnapshot.parse(result.snapshot);
+    } catch (error) {
+      // A read can confirm an applied create, but never starts another creation.
+      const observed = Groups.GroupDraft.parse((await request(`drafts/${saved.id}`, undefined, true)).draft);
+      if (observed.revision !== saved.revision || JSON.stringify(observed.choicePlan) !== JSON.stringify(saved.choicePlan)
+        || observed.frame.objective !== saved.frame.objective) { setChoiceConflict(observed); throw error; }
+      if (!observed.createdDecisionId) {
+        if (observed.revision !== saved.revision) setChoiceConflict(observed);
+        throw error;
+      }
+      const response = await api(`/decisions/${observed.createdDecisionId}/public`);
+      if (!response.ok) throw error;
+      snapshot = KE.PublicDecisionSnapshot.parse(await response.json());
+      if (snapshot.frame.decisionId !== observed.createdDecisionId) throw error;
+    }
     setDirty(false); setChoiceMode(false); setChoiceDraft(null); setChoicePlan(null); setDraft(null); setObjective('');
-    sessionStorage.removeItem(editorKey); await reload().catch(() => {}); setStarting(false); openDecision(snapshot.frame.decisionId);
+    sessionStorage.removeItem(editorKey); await reload().catch(() => {}); setStarting(false);
+    onDirtyChange?.(false); openDecision(snapshot.frame.decisionId);
   }
   const [objective, setObjective] = useState(() => {
     try { const value = JSON.parse(sessionStorage.getItem(editorKey) ?? 'null')?.objective; return typeof value === 'string' && value.length <= 2000 ? value : ''; } catch { return ''; }
@@ -210,10 +235,15 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
   async function draftObjective(value: string, followUp?: { draftId: string; revision: number; answers: string[] }, choiceContext?: ChoicePlan) {
     if (!pending.current) { const key = crypto.randomUUID(); pending.current = { objective: value, ...(followUp ? { followUp } : {}), ...(choiceContext ? { choiceContext } : {}), idempotencyKey: key }; saveDraftRequest(group.id,key); setPendingKey(key); }
     if (!pending.current.objective) { await recoverRequest(pending.current.idempotencyKey); return; }
+    const startedVersion = editorVersion.current;
     setAiWorking(true);
     try {
       const result = await request('drafts', pending.current);
       const prepared = Groups.GroupDraft.parse(result.draft);
+      if (editorVersion.current !== startedVersion) {
+        finishRequest(); setNotice('The earlier AI draft is saved separately. Your current editor changes are kept.');
+        await reload(); return;
+      }
       if (prepared.choicePlan) { setChoicePlan(prepared.choicePlan); setChoiceDraft(prepared); setChoiceSaved(true); setChoiceMode(true); }
       setDraft(prepared); setStep(prepared.clarificationQuestions.length ? 'questions' : 'review'); setQuestionIndex(0); setDirty(false); setRoster(null);
       finishRequest(); setReviewed(false); setNotice(prepared.choicePlan ? 'Your choices are saved. Fill any missing details below, then create the decision.' : prepared.clarificationQuestions.length
@@ -288,7 +318,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
     const result = await request(`drafts/${id}`), saved = Groups.GroupDraft.parse(result.draft);
     setDraft(saved); setObjective(saved.frame.objective); setQuestionIndex(0); setStep(saved.clarificationQuestions.length ? 'questions' : 'review');
     if (saved.choicePlan) { setChoicePlan(saved.choicePlan); setChoiceDraft(saved); setChoiceSaved(true); setChoiceMode(true); }
-    setDirty(false); setRoster(null); setReviewed(false); setStarting(true);
+    setChoiceConflict(null); setDirty(false); setRoster(null); setReviewed(false); setStarting(true);
   }
   async function deleteItem() {
     if (!deleteTarget || !group.isOrganizer) return;
@@ -393,9 +423,24 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
               {pending.current?.objective && (!requestState || requestState.state === 'NOT_SUBMITTED') && <button type="button" className="secondary" disabled={busy || checkingRequest || !requestLookupAvailable} onClick={() => { const retry = pending.current?.objective; if (retry) void action(() => draftObjective(retry, pending.current?.followUp)); }}>Retry this same request</button>}
             </div>
           </div>}
-          {choiceMode && choicePlan && <><details className="ke-wizard-original-idea"><summary>Your original idea</summary><label>Edit your idea<textarea value={objective} maxLength={2000} disabled={busy} onChange={event => { setObjective(event.target.value); setChoiceSaved(false); setDirty(true); }} /></label></details>
-            <ChoicePlanEditor plan={choicePlan} onChange={changeChoices} busy={busy} /></>}
-          {!choiceMode && <button type="button" className="secondary" disabled={busy} onClick={openChoices}>Add or edit choices without AI</button>}
+          {choiceMode && choicePlan && <><details className="ke-wizard-original-idea"><summary>Your original idea</summary><label>Edit your idea<textarea value={objective} maxLength={2000} disabled={busy && !aiWorking} onChange={event => { editorVersion.current++; setObjective(event.target.value); setChoiceSaved(false); setDirty(true); }} /></label></details>
+            {(choiceDraft?.aiAssisted || draft?.aiAssisted) && <p className="ke-wizard-ai-note" role="note"><strong>AI suggestions for review.</strong> Options or dates added by AI are tentative. Check and edit them before creating the decision; prices and availability are not verified.</p>}
+            <ChoicePlanEditor plan={choicePlan} onChange={changeChoices} busy={busy && !aiWorking} />
+            {choiceConflict && <aside className="ke-wizard-save" role="alert"><strong>A newer draft is saved. Your edits are kept here.</strong>
+              <details><summary>Review the latest saved choices</summary><h4>{choiceConflict.frame.title}</h4><p>{choiceConflict.frame.objective}</p>
+                <ul>{choiceConflict.frame.variables.map(variable => <li key={variable.id}>{variableText(variable, choiceConflict.frame)}</li>)}</ul></details>
+              {!choiceConflict.createdDecisionId && <button type="button" className="secondary" disabled={busy} onClick={() => { const latest = choiceConflict;
+                if (!latest.choicePlan) return;
+                editorVersion.current++; setChoicePlan(latest.choicePlan); setObjective(latest.frame.objective); setChoiceDraft(latest); setDraft(latest);
+                setChoiceSaved(!latest.createdDecisionId); setDirty(false); setChoiceConflict(null); setNotice('The latest saved draft is loaded.');
+              }}>Use latest saved draft</button>}
+              {!choiceConflict.createdDecisionId && <button type="button" className="secondary" disabled={busy} onClick={() => {
+                editorVersion.current++; setChoiceDraft(choiceConflict); setChoiceConflict(null); setChoiceSaved(false); setDirty(true);
+                setNotice('Your edits are kept. Save them explicitly to replace the reviewed saved draft.');
+              }}>Keep my edits</button>}
+              {choiceConflict.createdDecisionId && <button type="button" disabled={busy} onClick={() => { closeWizard(); openDecision(choiceConflict.createdDecisionId!); }}>Open created decision</button>}
+            </aside>}</>}
+          {!choiceMode && <button type="button" className="secondary" disabled={busy && !aiWorking} onClick={openChoices}>Add or edit choices without AI</button>}
           {!choiceMode && step === 'describe' && !pendingKey && <div className="ke-wizard-step">
             <div className="ke-wizard-ai-note"><strong>Tell us what you have in mind.</strong><p>Include the options you’re considering and anything still undecided. A few useful details help AI shape the choices. You don’t need everyone’s preferences or personal budget.</p></div>
             <p className="ke-wizard-help">Describe your idea, edit the choices and create the decision. AI is optional. Each participant adds their own private answers; final approval stays separate.</p>
@@ -417,7 +462,9 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
               disabled={busy || !!pendingKey} onClick={() => setObjective(example)}>{example}</button>)}</div>}
             <div className="ke-wizard-actions"><button type="button" className="ke-icon-action" disabled={busy || checkingRequest || !requestLookupAvailable || !objective.trim() || !!pendingKey}
               onClick={() => void action(() => draftObjective(objective))}>Continue with AI<PageIcon name="ArrowRight" /></button>
-              {draft && !pendingKey && <button type="button" className="secondary" disabled={busy} onClick={() => setStep(draft.clarificationQuestions.length ? 'questions' : 'review')}>Continue the saved draft</button>}</div>
+              {draft && !pendingKey && <button type="button" className="secondary" disabled={busy} onClick={() => {
+                if (draft.choicePlan) setChoiceMode(true); else setStep(draft.clarificationQuestions.length ? 'questions' : 'review');
+              }}>Continue the saved draft</button>}</div>
             {!objective.trim() && <p className="ke-wizard-help">Describe the decision above, or use “Help me describe my idea” to get started.</p>}
           </div>}
           {!choiceMode && step === 'questions' && draft && !pendingKey && <div className="ke-wizard-step">
@@ -447,7 +494,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
             </div>
             {!answers[questionIndex]?.trim() && <p className="ke-wizard-help">Answer what you know or choose a help option to continue.</p>}
           </div>}
-          {step === 'review' && draft && <div className="ke-wizard-step">
+          {!choiceMode && !draft?.choicePlan && step === 'review' && draft && <div className="ke-wizard-step">
             <div className="ke-wizard-ai-note"><strong>Here’s what your group will review.</strong><p>Check the choices below. Creating the decision starts your group’s review. Next, each person adds their needs privately and reviews the interpretation; everyone approves proposals for themselves.</p></div>
             <p className="ke-wizard-help">Required: resolve all follow-up questions, save any wording changes, and tick the review confirmation for this saved draft. The saved-request check must finish before Create decision is enabled.</p>
             <article className="ke-wizard-preview"><h3>{draft.frame.title}</h3><p>{draft.frame.objective}</p><p className="ke-wizard-description">{draft.frame.description}</p>
@@ -471,7 +518,8 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
               {draft.createdDecisionId ? <button type="button" disabled={busy} onClick={() => { closeWizard(); openDecision(draft.createdDecisionId!); }}>Open decision</button>
                 : <button type="button" disabled={busy || !reviewed || dirty || !!pendingKey || checkingRequest || !requestLookupAvailable || draft.clarificationQuestions.length > 0} onClick={() => void action(async () => {
                   const result = await request(`drafts/${draft.id}/create`, { revision: draft.revision });
-                  const snapshot = KE.PublicDecisionSnapshot.parse(result.snapshot); await reload(); setDraft(null); setStarting(false); openDecision(snapshot.frame.decisionId);
+                  const snapshot = KE.PublicDecisionSnapshot.parse(result.snapshot); await reload(); setDraft(null); setStarting(false);
+                  onDirtyChange?.(false); openDecision(snapshot.frame.decisionId);
                 })}>Create decision</button>}
             </div>
           </div>}
@@ -480,8 +528,8 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
         </div>
         </div>
         {choiceMode && choicePlan && !showExample && <div className="ke-choice-footer">
-          <ChoicePlanActions busy={busy} saved={choiceSaved} ready={!compileChoicePlan(choicePlan).questions.length}
-            onSave={() => void action(saveChoices)} onCreate={() => void action(createChoices)} onBack={() => setChoiceMode(false)}
+          <ChoicePlanActions busy={busy || !!choiceConflict} saved={choiceSaved} ready={!compileChoicePlan(choicePlan).questions.length}
+            onSave={() => void action(saveChoices)} onCreate={() => void action(createChoices)} onBack={() => { setChoiceMode(false); setStep('describe'); }}
             {...(!pendingKey && requestLookupAvailable && !checkingRequest && objective.trim() ? { onAI: () => { setChoiceMode(false); void action(() => draftObjective(objective, undefined, choicePlan)); } } : {})} />
         </div>}
         <footer className="ke-wizard-footer">A saved draft can be continued later. No one’s private needs or final approval are confirmed by this guide.</footer>

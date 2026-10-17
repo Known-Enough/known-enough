@@ -738,6 +738,19 @@ function architecture(input: DecisionArchitectRequest): DecisionArchitectureDraf
 }
 const generate = { objective: ' Choose a task ', idempotencyKey: 'generate-one' };
 
+it('records AI assistance on the server and preserves it after editing while manual drafts cannot claim it', async () => {
+  const f = fixture(); const session = f.session({ draftArchitect: async (_subject, input) => architecture(input) });
+  const saved = await session.generateDraft(participant(), 'garden', generate);
+  expect(saved.aiAssisted).toBe(true);
+  const edited = await session.editDraft(participant(), 'garden', saved.id, edit(saved));
+  expect(edited.aiAssisted).toBe(true);
+  expect((await session.readDraft(participant(), 'garden', saved.id)).aiAssisted).toBe(true);
+  const manual = { objective: 'Choose a task', idempotencyKey: 'manual-one', choicePlan: {
+    title: 'Task', description: '', topics: [{ label: 'Task', kind: 'CHOICE', options: ['Planting', 'Watering'] }] } };
+  await expect(session.generateDraft(participant(), 'garden', { ...manual, aiAssisted: true })).rejects.toThrow('INVALID_COMMAND');
+  expect((await session.generateDraft(participant(), 'garden', manual)).aiAssisted).toBeUndefined();
+});
+
 it('generates one fingerprinted draft from the trusted public roster and replays it without invoking the architect again', async () => {
   const f = fixture(); const calls: DecisionArchitectRequest[] = []; const options = { draftArchitect: async (subject: string, input: DecisionArchitectRequest) => {
     expect(subject).toBe('iris'); calls.push(structuredClone(input)); return architecture(input);

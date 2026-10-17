@@ -6,6 +6,14 @@ on:
         description: Exact checked main source SHA
         required: true
         type: string
+      worker_sha256:
+        description: Independently published current worker hash
+        required: true
+        type: string
+      runtime_source_sha:
+        description: Source SHA of that independently published worker
+        required: true
+        type: string
 permissions:
   contents: read
 concurrency:
@@ -22,6 +30,8 @@ jobs:
     env:
       AWS_MAX_ATTEMPTS: 1
       AWS_RETRY_MODE: standard
+      EXPECTED_WORKER_SHA256: ${{ inputs.worker_sha256 }}
+      EXPECTED_WORKER_SOURCE: ${{ inputs.runtime_source_sha }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:

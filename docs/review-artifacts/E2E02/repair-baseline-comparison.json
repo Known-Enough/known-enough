@@ -1,0 +1,23 @@
+{
+  "baseline": "88c84e7cf42b9689532f6e49f468dfbce1a20d29",
+  "baselineFailed": 35,
+  "currentFailed": 35,
+  "sharedFailureCount": 33,
+  "currentOnly": [
+    "large Lambda ZIP uses private binary file with revision guard and cleanup (status 254)",
+    "reconstructs after partial/lost chunk or root acknowledgements without replacing any saved object/version"
+  ],
+  "baselineOnly": [
+    "injected decision architect drafts a contract-valid public frame and asks for clarification without confirming it",
+    "retains schema rejection without exposing invalid model fields in diagnostics"
+  ],
+  "currentOnlyRechecked": {
+    "result": "PASS",
+    "tests": 31,
+    "files": [
+      "tests/integration/live-qa-aws-errors.test.ts",
+      "packages/adapters/src/partition-archive-recovery.test.ts"
+    ]
+  },
+  "classification": "33 reproduced baseline failures; two transient current-only failures passed the isolated 31-test rerun; two obsolete architect expectations updated to current short-title and sanitized-diagnostic behavior"
+}

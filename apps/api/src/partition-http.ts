@@ -161,7 +161,8 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
       response.setHeader('Cache-Control', 'no-store'); response.statusCode = 204; response.end(); return;
     }
     if (active >= concurrency || authenticating >= concurrency) { send(response, 503, errorBody('RETRYABLE_SERVER_ERROR', requestId)); request.resume(); return; }
-    active++; const requestStartedAt = Date.now(); let publicDraftRequest = false; let privateAnswersRequest = false; let invitationRequest = false;
+    active++; const requestStartedAt = Date.now(); let publicDraftRequest = false; let draftOperation: 'GENERATE' | 'EDIT' | 'CREATE' | undefined;
+    let privateAnswersRequest = false; let invitationRequest = false;
     const controller = new AbortController();
     const closed = () => { if (!response.writableEnded) controller.abort(); };
     request.once('aborted', closed); response.once('close', closed);
@@ -274,7 +275,8 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         if (draft && (request.method === 'GET' || request.method === 'POST')) {
           if (draft[3] && request.method !== 'POST') return reject('NOT_FOUND');
           // The logged reference is server-generated; a caller's request header cannot inject identity into logs.
-          if (!draft[2] && request.method === 'POST') { requestId = randomUUID(); publicDraftRequest = true; }
+          if (request.method === 'POST') { requestId = randomUUID(); publicDraftRequest = true;
+            draftOperation = !draft[2] ? 'GENERATE' : draft[3] ? 'CREATE' : 'EDIT'; }
           const io = partitionIO(!draft[2] && request.method === 'POST' ? { timeoutMs: 27000 } : {}); const context = { ...io,
             diagnosticRequestId: requestId, signal: AbortSignal.any([io.signal, controller.signal]) };
           if (!draft[2]) {
@@ -284,7 +286,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
             const raw = await body(request, maximum, bodyMs, controller);
             if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
             const saved = await session.generateDraft(principal, draft[1]!, raw, context);
-            try { console.info(JSON.stringify({ event: 'PUBLIC_DRAFT_HTTP_RESULT', requestId, result: 'SAVED', status: 200, elapsedMs: Date.now() - requestStartedAt })); } catch { /* Logging cannot replace the saved result. */ }
+            try { console.info(JSON.stringify({ event: 'PUBLIC_DRAFT_HTTP_RESULT', requestId, draftOperation, result: 'SAVED', status: 200, elapsedMs: Date.now() - requestStartedAt })); } catch { /* Logging cannot replace the saved result. */ }
             send(response, 200, { requestId, draft: saved }); return;
           }
           // Authenticate and admit the organizer before reading an edit body; commit rechecks the same scope.
@@ -306,9 +308,12 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
             const publication = new KnownEnoughApplication({ repository: repositories.forParticipant(principal, context), clock, ids });
             const snapshot = await publication.getPublicSnapshot(principal, decisionId);
             if (controller.signal.aborted) return reject('RETRYABLE_SERVER_ERROR');
+            try { console.info(JSON.stringify({ event: 'PUBLIC_DRAFT_HTTP_RESULT', requestId, draftOperation, result: 'SAVED', status: 200, elapsedMs: Date.now() - requestStartedAt })); } catch { /* No public/private contents in diagnostics. */ }
             send(response, 200, { snapshot }); return;
           }
-          send(response, 200, { draft: await session.editDraft(principal, draft[1]!, draft[2]!, raw, context) }); return;
+          const saved = await session.editDraft(principal, draft[1]!, draft[2]!, raw, context);
+          try { console.info(JSON.stringify({ event: 'PUBLIC_DRAFT_HTTP_RESULT', requestId, draftOperation, result: 'SAVED', status: 200, elapsedMs: Date.now() - requestStartedAt })); } catch { /* No public/private contents in diagnostics. */ }
+          send(response, 200, { draft: saved }); return;
         }
         if (roster) {
           if (!(request.method === 'GET' && roster[3] === 'review') && !(request.method === 'POST' && roster[3] === 'revise')) return reject('NOT_FOUND');
@@ -432,9 +437,9 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         let writer = application;
         if (command.data.type === 'CONFIRM_PRIVATE_ANSWERS') {
           if (!options.privateAnswersRepository) throw new PartitionOwnerFailure('PROCESSING_NOT_READY');
-          const owner = await application.getOwnerSnapshot(principal, decision[1]!);
-          if (!owner.publicSnapshot.frame.requiredParticipantIds.every(id => owner.publicSnapshot.frameConfirmations.some(item => item.participantId === id))
-            || !owner.publicSnapshot.frameConfirmations.some(item => item.participantId === owner.ownerParticipantId)) throw new PartitionOwnerFailure('FRAME_NOT_CONFIRMED');
+          // This explicit save binds only this owner to the current public terms.
+          // execute() checks owner/version/consent under the retention fence; peers
+          // do not need to complete a separate shared-frame review first.
           const io = partitionIO({ timeoutMs: 27000 }); const context = { ...io, signal: AbortSignal.any([io.signal, controller.signal]) };
           const retained = await options.privateAnswersRepository(principal, context);
           writer = new KnownEnoughApplication({ repository: retained, clock, ids });
@@ -462,7 +467,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
             status: KE.DECISION_ERROR_HTTP_STATUS[code], elapsedMs: Date.now() - requestStartedAt,
             ...(error instanceof PartitionSessionError ? { sessionCode: error.code } : {}), causes }));
         } catch { /* Allowlisted categories only, without inputs, messages, stack traces or identities. */ } }
-        if (publicDraftRequest) { try { console.warn(JSON.stringify({ event: 'PUBLIC_DRAFT_HTTP_RESULT', requestId, result: 'FAILED', code, status: KE.DECISION_ERROR_HTTP_STATUS[code],
+        if (publicDraftRequest) { try { console.warn(JSON.stringify({ event: 'PUBLIC_DRAFT_HTTP_RESULT', requestId, draftOperation, result: 'FAILED', code, status: KE.DECISION_ERROR_HTTP_STATUS[code],
           elapsedMs: Date.now() - requestStartedAt, ...(error instanceof PartitionDraftFailure ? { draftFailure: error.category } : {}) })); } catch { /* Diagnostics cannot replace the response. */ } }
         if (privateAnswersRequest) { try { console.warn(JSON.stringify({ event: 'PRIVATE_ANSWERS_HTTP_RESULT', requestId,
           ...(options.privateAnswersSource ? { sourceSha: options.privateAnswersSource } : {}), result: 'FAILED', code,

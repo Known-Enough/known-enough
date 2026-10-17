@@ -91,6 +91,16 @@ class ReleaseTests(unittest.TestCase):
         result,report,calls=self.execute(already=True)
         self.assertEqual(result,0);self.assertNotIn(['lambda','update-function-code'],calls)
         self.assertFalse(report['codeWriteRequested'])
+        self.assertEqual(report['priorInstalledWorkerSha256'], self.sha)
+        self.assertEqual(report['installedWorkerSha256'], self.sha)
+        self.assertNotIn('actualWorkerSha256', report)
+
+    def test_prior_hash_is_distinct_from_the_final_installed_hash(self):
+        result,report,_=self.execute()
+        self.assertEqual(result,0)
+        self.assertEqual(report['priorInstalledWorkerSha256'], m.OLD_HASH)
+        self.assertEqual(report['installedWorkerSha256'], self.sha)
+        self.assertEqual(report['workerSha256'], report['installedWorkerSha256'])
 
 
 if __name__=='__main__':unittest.main()

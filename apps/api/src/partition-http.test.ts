@@ -166,6 +166,38 @@ function command(owner: KE.OwnerDecisionSnapshot, id = 'frame-iris'): KE.Decisio
       controlVersion: owner.controlVersion, ownerVersion: owner.ownerVersion }, payload: { frameVersion: owner.publicSnapshot.frame.frameVersion } };
 }
 
+it('saves direct owner answers before peer frame confirmations and preserves each owner on the next save', async () => {
+  const f = await fixture();
+  f.initial.definition.variables = [{ id: 'indoors', type: 'BOOLEAN', label: 'Indoors', required: true,
+    visibility: 'PUBLIC', ownerParticipantId: null }];
+  await seed(f);
+  const retained = vi.fn(async (principal: TrustedPrincipal, io: ReturnType<typeof partitionIO>) => f.factory().forParticipant(principal, io));
+  let sequence = 0;
+  const a = await api(f, { privateAnswersRepository: retained, ids: { next: () => `direct-${++sequence}` } });
+  async function answer(subject: string, index: number) {
+    const owner = KE.OwnerDecisionSnapshot.parse(await (await a.get('/decisions/decision/me', subject)).json());
+    return { ...command(owner, `answer-${subject}-${index}`), type: 'CONFIRM_PRIVATE_ANSWERS' as const,
+      payload: { processingConsent: 'SYNTHETIC_TEST' as const, answers: [{ variableId: 'indoors', mode: 'SELECTED' as const,
+        acceptableIndices: [index], preferredIndex: index }], retainedConstraintIds: [] } };
+  }
+  const first = await answer('iris', 0);
+  expect((await a.post('/decisions/decision/commands', first)).status).toBe(200);
+  const iris = structuredClone(f.current().owners.find(person => person.participantId === partitionMemberId('iris'))!);
+  expect(f.current().frameConfirmations.map(person => person.participantId)).toEqual([partitionMemberId('iris')]);
+  expect(iris.readiness).toBe('READY');
+  expect((await a.post('/decisions/decision/commands', first)).status).toBe(200);
+  expect(f.current().owners.find(person => person.participantId === iris.participantId)).toEqual(iris);
+  expect((await a.post('/decisions/decision/commands', await answer('omar', 1), 'omar')).status).toBe(200);
+  expect(f.current().owners.find(person => person.participantId === iris.participantId)).toEqual(iris);
+  expect(f.current().owners.every(person => person.readiness === 'READY')).toBe(true);
+  expect(f.current().status).toBe('READY');
+  expect(retained).toHaveBeenCalled();
+  const invalid = await answer('iris', 0);
+  expect((await a.post('/decisions/decision/commands', { ...invalid, payload: { ...invalid.payload, processingConsent: false } })).status).toBe(422);
+  f.change('ACCOUNT#iris', value => { value.status = 'DISABLED'; });
+  expect((await a.post('/decisions/decision/commands', invalid)).status).toBe(403);
+});
+
 it('creates and replays a group through the trusted participant HTTP boundary with strict public fields', async () => {
   const f = await fixture(); const a = await api(f); const raw = { name: '  Garden two  ', idempotencyKey: 'create-garden' };
   const response = await a.post('/groups', raw); expect(response.status).toBe(200); expect(response.headers.get('cache-control')).toBe('no-store');

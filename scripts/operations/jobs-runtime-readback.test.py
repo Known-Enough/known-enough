@@ -1,10 +1,12 @@
 import base64
 import copy
 import hashlib
+import io
 import importlib.util
+import json
 import unittest
+import zipfile
 from pathlib import Path
-from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location('readback', Path(__file__).with_name('jobs-runtime-readback.py'))
 module = importlib.util.module_from_spec(spec)
@@ -13,7 +15,11 @@ spec.loader.exec_module(module)
 
 class ReadbackTests(unittest.TestCase):
     def setUp(self):
-        self.package = b'synthetic opaque worker bytes'
+        memory = io.BytesIO()
+        with zipfile.ZipFile(memory, 'w') as archive:
+            archive.writestr('jobs-private.json', json.dumps({'schemaVersion': 1, 'sourceSha': 'b' * 40}))
+            archive.writestr('worker.mjs', '// synthetic opaque worker')
+        self.package = memory.getvalue()
         self.sha = hashlib.sha256(self.package).hexdigest()
         self.config = dict(CodeSha256=base64.b64encode(bytes.fromhex(self.sha)).decode(),
                            FunctionName=module.FUNCTION, Runtime='nodejs24.x', Handler='worker.handler',
@@ -23,11 +29,22 @@ class ReadbackTests(unittest.TestCase):
                          State='DISABLED', ScheduleExpression='rate(1 minute)')
 
     def result(self, config=None, rule=None, package=None):
-        with patch.object(module, 'EXPECTED_SHA', self.sha):
-            return module.validate(config or self.config, rule or self.rule, self.package if package is None else package)
+        return module.validate(config or self.config, rule or self.rule, self.package if package is None else package, self.sha, 'b' * 40)
+
+    def test_independent_release_hash_and_source_are_required(self):
+        for sha,source in [('', 'b'*40), (self.sha, ''), ('z'*64, 'b'*40)]:
+            with self.assertRaises(RuntimeError):
+                module.validate(self.config, self.rule, self.package, sha, source)
 
     def test_matching_disabled_worker(self):
         self.assertEqual(self.result()['result'], 'INSTALLED_WORKER_READBACK_PASS')
+        self.assertEqual(self.result()['packageSource'], 'b' * 40)
+
+    def test_package_source_is_read_independently_of_the_expected_source(self):
+        report = module.validate(self.config, self.rule, self.package, self.sha, 'c' * 40)
+        self.assertEqual(report['result'], 'INSTALLED_WORKER_MISMATCH')
+        self.assertEqual(report['packageSource'], 'b' * 40)
+        self.assertFalse(report['checks']['packageSource'])
 
     def test_artifact_and_deployed_hash_are_independent(self):
         self.assertEqual(self.result(package=b'other')['result'], 'INSTALLED_WORKER_MISMATCH')

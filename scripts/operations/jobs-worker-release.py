@@ -65,7 +65,7 @@ def main():
         config = aws('lambda', 'get-function-configuration', '--function-name', FUNCTION)
         rule = aws('events', 'describe-rule', '--name', 'KnownEnoughModelJobs')
         expected_prior = os.environ.get('PREVIOUS_WORKER_HASH', '')
-        report['actualWorkerSha256'] = base64.b64decode(config.get('CodeSha256', ''), validate=True).hex()
+        report['priorInstalledWorkerSha256'] = base64.b64decode(config.get('CodeSha256', ''), validate=True).hex()
         report['expectedPriorWorkerSha256'] = expected_prior if re.fullmatch(r'[a-f0-9]{64}', expected_prior) else 'NOT_SUPPLIED'
         prior_hash = validate_installed(config, rule, sha, expected_prior)
         if prior_hash != sha:
@@ -86,7 +86,9 @@ def main():
         rule = aws('events', 'describe-rule', '--name', 'KnownEnoughModelJobs')
         if validate_installed(config, rule, sha) != sha:
             raise RuntimeError('WORKER_CODE_WRITE_UNCONFIRMED')
-        report.update(result='WORKER_CODE_DISABLED_READBACK_PASS', workerSha256=sha, sourceSha=source, schedule='DISABLED')
+        report.update(result='WORKER_CODE_DISABLED_READBACK_PASS', workerSha256=sha,
+                      installedWorkerSha256=base64.b64decode(config['CodeSha256'], validate=True).hex(),
+                      sourceSha=source, schedule='DISABLED')
     except (RuntimeError, ValueError, KeyError, OSError, subprocess.TimeoutExpired) as error:
         report.update(result='WORKER_PUBLICATION_BLOCKED', operation=operation, code=str(error) if isinstance(error, RuntimeError) else type(error).__name__)
     (root/'partition-worker-publish-report.json').write_text(json.dumps(report)+'\n')
