@@ -1382,3 +1382,51 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
   .ke-private-wizard:has(.ke-response-sheet) { padding: 18px; }
 }
 @media (prefers-reduced-motion: reduce) { .ke-response-sheet button { transition: none; } }
+
+/* Compact decision details: public activity stays separate from private answers. */
+.ke-response-phase { flex-wrap: wrap; gap: 0 4px; padding: 4px 0; border-radius: 0; background: transparent; font-size: 12px; }
+.ke-response-status-divider, .ke-response-count { color: var(--wizard-muted); font-weight: 400; }
+.ke-response-progress.ke-compact-activity { padding: 0; border: 0; border-radius: 0; margin: 10px 0 0; }
+.ke-compact-activity summary { width: fit-content; min-height: 32px; }
+.ke-open-decision-dialog .ke-compact-activity ul { gap: 8px; margin-top: 4px; padding-top: 10px; }
+.ke-open-decision-dialog .ke-response-overview { padding: 10px 0 14px; }
+.ke-response-summary { margin-bottom: 5px; line-height: 1.5; }
+.ke-response-overview-actions { margin-top: 6px; }
+.ke-saved-answers { padding-top: 18px; color: var(--wizard-text); }
+.ke-saved-answers > header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.ke-saved-answers h2 { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; margin: 0; font-size: 17px; letter-spacing: -.2px; }
+.ke-saved-answers h2 svg { width: 15px; height: 15px; }
+.ke-saved-answers h2 small { color: var(--wizard-muted); font-size: 11px; font-weight: 400; }
+.ke-saved-answers header button { display: inline-flex; gap: 6px; align-items: center; min-height: 36px; padding: 7px 11px; font-size: 12px; color: var(--wizard-text); background: transparent; border: 1px solid var(--wizard-border); box-shadow: none; }
+.ke-saved-answers header button svg { width: 13px; height: 13px; }
+.ke-saved-answer-topics { display: grid; gap: 13px 24px; margin: 16px 0; }
+.ke-saved-answer-topics > div { min-width: 0; }
+.ke-saved-answer-topics dt { color: var(--wizard-muted); font-size: 11px; margin-bottom: 4px; }
+.ke-saved-answer-topics dd { font-size: 13px; line-height: 1.5; margin: 0; overflow-wrap: anywhere; }
+.ke-saved-answer-topics small { display: block; margin-top: 3px; color: var(--wizard-muted); font-size: 11px; }
+.ke-saved-answers > details { font-size: 11px; color: var(--wizard-muted); }
+.ke-saved-answers summary { cursor: pointer; min-height: 28px; align-content: center; }
+.ke-response-sheet .ke-wizard-header { padding-top: 17px; }
+.ke-response-privacy { margin-bottom: 14px; }
+.ke-response-topics { gap: 16px 22px; }
+.ke-response-sheet .ke-response-topic { padding-bottom: 14px; }
+.ke-response-sheet .ke-response-options { gap: 5px; }
+.ke-response-sheet .ke-response-option { min-height: 40px; padding: 8px 10px; gap: 9px; font-size: 13px; border-radius: 8px; }
+.ke-response-sheet .ke-response-none { min-height: 36px; padding: 7px 10px; gap: 9px; }
+.ke-response-sheet .ke-private-favourite { margin-top: 7px !important; }
+.ke-response-sheet .ke-private-favourite > span { grid-column: 1 / -1; }
+.ke-response-sheet .ke-private-extra-notes { margin: 14px 0; }
+.ke-response-privacy-details { margin: 12px 0; }
+@media (min-width: 700px) {
+  .ke-response-topics[data-columns="true"], .ke-saved-answer-topics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.ke-open-decision-dialog .ke-response-header, .ke-open-decision-dialog .ke-response-overview { background: transparent; box-shadow: none; border-radius: 0; }
+.ke-response-save .ke-response-save-actions { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 8px 12px; max-width: none; flex: none; }
+.ke-response-save-actions > button:not(.ke-response-text-button) { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 43px; font-size: 13px; border-radius: 10px; white-space: nowrap; }
+.ke-response-save-actions svg { width: 15px; height: 15px; }
+:root[data-theme="dark"] .ke-response-save-actions > button:not(.ke-response-text-button) { background: #367858; border-color: #367858; color: #fff; }
+:root[data-theme="dark"] .ke-open-decision-dialog > .ke-response-close svg { color: var(--wizard-text); }
+@media (max-width: 600px) {
+  .ke-response-save .ke-response-save-actions { width: 100%; }
+  .ke-response-save-actions > button:not(.ke-response-text-button) { flex: 1; min-height: 44px; }
+}

@@ -1,0 +1,80 @@
+{
+  "utc": "2026-10-18T22:21:00.902561+00:00",
+  "baseline": "0159f8ca18f44fb028dc881bf570d01ef0ea1b24",
+  "focusedBrowser": {
+    "passed": 8,
+    "provider": "LOCAL_INTERCEPTED_SYNTHETIC",
+    "liveQualification": false
+  },
+  "focusedUnit": {
+    "passed": 6
+  },
+  "hostedPreview": {
+    "passed": 1
+  },
+  "staticChecks": [
+    "typecheck",
+    "lint",
+    "boundaries597",
+    "build",
+    "bundle",
+    "references7",
+    "planning15",
+    "whitespace"
+  ],
+  "fullCheck": {
+    "passed": 1634,
+    "failed": 31,
+    "skipped": 2,
+    "unhandledErrors": 1,
+    "result": "FAILED_AT_UNIT_SUITE"
+  },
+  "baselineComparison": {
+    "sourceOfPriorComparison": "../wizard-redesign/validation.json",
+    "newFailureGroups": [],
+    "resolvedLegacyUiExpectation": [
+      "FAIL  apps/web/src/connected-decision.test.ts > KE14 exact closed-rule review text > renders a valid complex private draft and names the preferred variable before confirmation"
+    ],
+    "remainingFailureGroups": [
+      "FAIL  apps/api/src/group-decisions.test.ts > NP02 group-owned generic decisions > drafts a new objective and arbitrary roster, persists/edits/replays before create, rejects private and forged fields",
+      "FAIL  apps/api/src/group-decisions.test.ts > NP02 group-owned generic decisions > group removal denies old access; explicit roster revision resets authority and new drafts differ from gallery",
+      "FAIL  apps/api/src/group-decisions.test.ts > connects four new users to private conditions, explicit negotiation and exact unanimous approval on a generated frame",
+      "FAIL  apps/api/src/group-decisions.test.ts > retains a reserved draft after failed persistence so reconstruction can retry the identical creation",
+      "FAIL  apps/api/src/known-enough-http.test.ts > Known Enough local HTTP adapter > authenticates and returns only an injected, validated public frame draft",
+      "FAIL  apps/api/src/partition-draft-runtime.test.ts > a definitive failure before transport dispatch does not quarantine an uncalled provider and logs only safe flags",
+      "FAIL  apps/api/src/partition-draft-runtime.test.ts > a public response after the former eight-second cutoff can still commit within its bounded lease",
+      "FAIL  apps/api/src/partition-draft-runtime.test.ts > real forced-tool architect composition joins the validated native draft and durable result, replays after a lost acknowledgement without another call",
+      "FAIL  apps/api/src/scenario-service.test.ts > KE14 authenticated provisioning and trusted catalog composition > distinguishes definition failure with static diagnostics and no private payload or repeated model call",
+      "FAIL  apps/api/src/scenario-service.test.ts > KE14 authenticated provisioning and trusted catalog composition > distinguishes fields failure with static diagnostics and no private payload or repeated model call",
+      "FAIL  apps/web/src/draft-request-state.test.ts > server unavailability and missing route never become organizer advice; backend categories do not echo content",
+      "FAIL  packages/adapters/src/bedrock-models.test.ts > Bedrock role adapters > sends structured public scope and copies exact definitions only after all declared IDs are selected",
+      "FAIL  packages/adapters/src/partition-decision-repository.test.ts > rejects stale control versions, closed decisions and substituted revision membership without binding mutation",
+      "FAIL  packages/application/src/known-enough.test.ts > KE09 disclosure lifecycle corrections > R3 keeps authorized reads valid after frame revision",
+      "FAIL  tests/integration/assessment-admission.test.ts > a private read delayed after initial admission rejects an intervening account disable",
+      "FAIL  tests/integration/assessment-admission.test.ts > account disabled during decision creation cannot leave a newly committed decision",
+      "FAIL  tests/integration/assessment-admission.test.ts > delayed valid owner model output cannot commit after disable",
+      "FAIL  tests/integration/assessment-admission.test.ts > delayed valid owner model output cannot commit after remove",
+      "FAIL  tests/integration/assessment-admission.test.ts > failure before roster commit preserves decision and binding; retry commits both and resets consent once",
+      "FAIL  tests/integration/assessment-automation.test.ts > routing proves fixed authorizer, issuer/audiences, integration and every protected route",
+      "FAIL  tests/integration/assessment-clarification.test.ts > unchanged/title-only saves preserve unresolved questions; explicit answer redraft is reviewed independently",
+      "FAIL  tests/integration/live-qa-display.test.ts > LIVE04 preinstallation display repair; signed local identity and fixture model only > a recorded pending or disabled account cannot bypass admission through the display client",
+      "FAIL  tests/integration/live-qa-display.test.ts > LIVE04 preinstallation display repair; signed local identity and fixture model only > bound display cannot access another decision and current group roster still freezes public reads",
+      "FAIL  tests/integration/live-qa-display.test.ts > LIVE04 preinstallation display repair; signed local identity and fixture model only > verified bound display reads strict public projection but cannot read owners, write or invoke models",
+      "FAIL  tests/integration/live-qa-model-failure-diagnostics.test.ts > every declared runtime diagnostic survives the strict standalone report boundary",
+      "FAIL  tests/integration/np-qualification.test.ts > NP04 offline fresh-group qualification; no cloud or paid model calls > disclosure permission, publication and revocation remain independent from exact approvals and audience isolation",
+      "FAIL  tests/integration/np-qualification.test.ts > NP04 offline fresh-group qualification; no cloud or paid model calls > honors refusal without repeat pressure and blocks unsupported owner needs",
+      "FAIL  tests/integration/np-qualification.test.ts > NP04 offline fresh-group qualification; no cloud or paid model calls > membership revision rejects old approvals and resets all participant authority",
+      "FAIL  tests/integration/np-qualification.test.ts > NP04 offline fresh-group qualification; no cloud or paid model calls > reconstructs exact persisted authority in a fresh application and replays a committed command once",
+      "FAIL  tests/integration/np-qualification.test.ts > NP04 offline fresh-group qualification; no cloud or paid model calls > rejects unverified/unapproved/disabled/expired/display and foreign-group authority without leaking private state",
+      "FAIL  tests/integration/np-qualification.test.ts > NP04 offline fresh-group qualification; no cloud or paid model calls > revoking an allowed adjustment clears the proposal and rejects its previously prepared exact approval"
+    ]
+  },
+  "backendChanges": 0,
+  "providerCalls": 0,
+  "realUserActions": 0,
+  "screenshots": [
+    "saved-desktop.png",
+    "light-mobile.png",
+    "dark-mobile.png"
+  ]
+}

@@ -6,13 +6,33 @@ type Answer = { mode: KE.PrivateChoiceAnswer['mode'] | ''; acceptable: number[];
 type Payload = Extract<KE.DecisionCommand, { type: 'CONFIRM_PRIVATE_ANSWERS' }>['payload'];
 type Condition = KE.AIConstraintDraft['proposedConstraints'][number];
 const direct = (id: string) => id.startsWith('answer-');
+/** Only acknowledged owner constraints belong in the saved summary, never AI suggestions. */
+export function savedChoiceAnswers(owner: KE.OwnerDecisionSnapshot): Record<string, Answer> {
+  const frame = owner.publicSnapshot.frame;
+  const active = owner.confirmedConstraints.filter(item => item.status === 'ACTIVE' && direct(item.constraintId));
+  return Object.fromEntries(frame.variables.filter(variable => variable.visibility === 'PUBLIC').flatMap(variable => {
+    const options = publicChoiceOptions(frame, variable);
+    if (!options) return [];
+    const limit = active.find(item => item.kind !== 'PREFERENCE' && item.rule.operator === 'IN' && item.rule.variableId === variable.id);
+    const favourite = active.find(item => item.kind === 'PREFERENCE' && item.preference.variableId === variable.id);
+    const acceptable = limit && limit.kind !== 'PREFERENCE' && limit.rule.operator === 'IN'
+      ? options.flatMap((option, index) => limit.rule.operator === 'IN' && limit.rule.values.some(value => JSON.stringify(value) === JSON.stringify(option)) ? [index] : []) : [];
+    const preferred = favourite?.kind === 'PREFERENCE' ? options.findIndex(option => JSON.stringify(option) === JSON.stringify(favourite.preference.value)) : -1;
+    const noneSaved = owner.ownInputReadiness === 'NEEDS_CLARIFICATION' && owner.draft?.unsupportedConditions.some(item => direct(item.id)
+      && item.clarificationQuestion === `None of the listed options for ${variable.label} work. Additional shared options are needed.`);
+    // Legacy extra conditions may restrict a topic without a structured answer.
+    const legacy = owner.confirmedConstraints.some(item => item.status === 'ACTIVE' && !direct(item.constraintId));
+    const mode: Answer['mode'] = noneSaved ? 'NONE' : limit ? 'SELECTED' : !legacy && (favourite || owner.ownInputReadiness === 'READY') ? 'ANY' : '';
+    return [[variable.id, { mode, acceptable, preferred: preferred >= 0 ? String(preferred) : '' }]];
+  }));
+}
 export function PrivateAnswersModal({ open, owner, busy, blocked, saveBlocked, notesLocked, notes, consent, notice, recovery,
-  onClose, onNotes, onConsent, onInterpret, onSave, onDirty, describeValue, describeCondition, embedded = false }: {
+  onClose, onNotes, onConsent, onInterpret, onSave, onDirty, describeValue, describeCondition, embedded = false, onEditingChange }: {
   embedded?: boolean; open: boolean; owner: KE.OwnerDecisionSnapshot; busy: boolean; blocked: boolean; saveBlocked: boolean; notesLocked: boolean;
   notes: string; consent: boolean; notice: string; recovery: ReactNode;
   onClose: () => void; onNotes: (value: string) => void; onConsent: (value: boolean) => void;
   onInterpret: () => Promise<void>; onSave: (payload: Payload) => Promise<boolean>;
-  onDirty: (value: boolean) => void;
+  onDirty: (value: boolean) => void; onEditingChange?: (value: boolean) => void;
   describeValue: (value: KE.DecisionValue, variable: KE.PublicDecisionFrame['variables'][number]) => string;
   describeCondition: (condition: Condition) => string;
 }) {
@@ -23,7 +43,10 @@ export function PrivateAnswersModal({ open, owner, busy, blocked, saveBlocked, n
     return options ? [{ variable, options }] : [];
   }), [frame]);
   const dialog = useRef<HTMLDialogElement>(null), heading = useRef<HTMLHeadingElement>(null);
-  const [answers, setAnswers] = useState<Record<string, Answer>>({});
+  const readOnly = ['AGREED', 'CLOSED'].includes(owner.publicSnapshot.status);
+  const [editing, setEditing] = useState(owner.ownInputReadiness === 'NOT_STARTED' && !readOnly);
+  const summaryHeading = useRef<HTMLHeadingElement>(null);
+  const [answers, setAnswers] = useState<Record<string, Answer>>(() => savedChoiceAnswers(owner));
   const [retained, setRetained] = useState<string[]>([]);
   const [included, setIncluded] = useState<string[]>([]);
   const [replaceDraft, setReplaceDraft] = useState(false);
@@ -37,27 +60,28 @@ export function PrivateAnswersModal({ open, owner, busy, blocked, saveBlocked, n
   const onlyDirectDraft = !!owner.draft && !draftExtras.length && !unresolvedExtras.length;
   const extras = owner.confirmedConstraints.filter(item => item.status === 'ACTIVE' && !direct(item.constraintId));
   useEffect(() => {
-    const active = [...owner.confirmedConstraints.filter(item => item.status === 'ACTIVE' && direct(item.constraintId)),
-      ...(owner.draft?.proposedConstraints.filter(item => direct(item.constraintId)) ?? [])];
-    const next: Record<string, Answer> = {};
-    for (const { variable, options } of questions) {
-      const limit = active.find(item => item.kind !== 'PREFERENCE' && item.rule.operator === 'IN' && item.rule.variableId === variable.id);
-      const favourite = active.find(item => item.kind === 'PREFERENCE' && item.preference.variableId === variable.id);
-      const acceptable = limit && limit.kind !== 'PREFERENCE' && limit.rule.operator === 'IN'
-        ? options.flatMap((option, index) => limit.rule.operator === 'IN' && limit.rule.values.some(value => JSON.stringify(value) === JSON.stringify(option)) ? [index] : []) : [];
-      const preferred = favourite?.kind === 'PREFERENCE' ? options.findIndex(option => JSON.stringify(option) === JSON.stringify(favourite.preference.value)) : -1;
-      const noneSaved = owner.draft?.unsupportedConditions.some(item => direct(item.id)
-        && item.clarificationQuestion === `None of the listed options for ${variable.label} work. Additional shared options are needed.`);
-      next[variable.id] = { mode: noneSaved ? 'NONE' : limit ? 'SELECTED' : favourite || owner.ownInputReadiness === 'READY' ? 'ANY' : '', acceptable,
-        preferred: preferred >= 0 ? String(preferred) : '' };
+    setAnswers(savedChoiceAnswers(owner));
+    setRetained(owner.confirmedConstraints.filter(item => item.status === 'ACTIVE' && !direct(item.constraintId)).map(item => item.constraintId));
+    if (boundContext.current !== choiceFrameKey) {
+      setFrameChanged(true); setChanged(false); setEditing(!readOnly); boundContext.current = choiceFrameKey;
     }
-    setAnswers(next); setRetained(owner.confirmedConstraints.filter(item => item.status === 'ACTIVE' && !direct(item.constraintId)).map(item => item.constraintId));
-
-    if (boundContext.current !== choiceFrameKey) { setFrameChanged(true); boundContext.current = choiceFrameKey; }
     // Bind indices to this exact frame; a refreshed AI draft must not reset direct answers.
   }, [choiceFrameKey]);
   useEffect(() => { setIncluded([]); setReplaceDraft(false);  }, [owner.draft?.draftId]);
   useEffect(() => { onDirty(changed || !!notes.trim()); }, [changed, notes, onDirty]);
+  useEffect(() => { onEditingChange?.(editing && !readOnly); }, [editing, readOnly, onEditingChange]);
+  useEffect(() => { if (readOnly) setEditing(false); }, [readOnly]);
+  function edit() {
+    setAnswers(savedChoiceAnswers(owner));
+    setRetained(extras.map(item => item.constraintId));
+    setEditing(true);
+    requestAnimationFrame(() => heading.current?.focus());
+  }
+  function cancelEditing() {
+    if (blocked || saving || ((changed || notes.trim()) && !window.confirm('Discard your unsaved answer edits? Your saved answers will be kept.'))) return;
+    setChanged(false); setIncluded([]); setReplaceDraft(false); onNotes(''); onDirty(false); setEditing(false);
+    requestAnimationFrame(() => summaryHeading.current?.focus());
+  }
   useEffect(() => {
     if (embedded) return;
     const element = dialog.current;
@@ -83,7 +107,7 @@ export function PrivateAnswersModal({ open, owner, busy, blocked, saveBlocked, n
     return value.type === 'DATE' ? new Intl.DateTimeFormat('en', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(value.date + 'T00:00:00Z')) : describeValue(value, variable);
   }
   async function save() {
-    if (saveGuard.current || blocked || saveBlocked || !complete || !consent || notes.trim()) return;
+    if (readOnly || saveGuard.current || blocked || saveBlocked || !complete || !consent || notes.trim()) return;
     const payload: Payload = { processingConsent: 'SYNTHETIC_TEST', retainedConstraintIds: retained,
       answers: questions.map(({ variable }) => {
         const answer = answers[variable.id]!;
@@ -93,13 +117,31 @@ export function PrivateAnswersModal({ open, owner, busy, blocked, saveBlocked, n
       }), ...(owner.draft ? { draft: { draftId: owner.draft.draftId, draftVersion: owner.draft.draftVersion,
         constraintIds: replaceDraft || onlyDirectDraft ? [] : included, replace: replaceDraft || onlyDirectDraft } } : {}) };
     saveGuard.current = true; setSaving(true);
-    try { if (await onSave(payload)) { setChanged(false); onDirty(false); if (!embedded) onClose(); } }
+    try { if (await onSave(payload)) { setChanged(false); setEditing(false); setFrameChanged(false); onDirty(false); requestAnimationFrame(() => summaryHeading.current?.focus()); if (!embedded) onClose(); } }
     finally { saveGuard.current = false; setSaving(false); }
   }
   const saveHint = !complete ? 'Select at least one option for each topic, or choose “None work for me”.'
     : !consent ? 'Confirm the processing consent to save your answers.'
     : notes.trim() ? 'Review your notes with AI, or clear them to save just your selections.'
     : 'Saving your answers does not approve a final proposal.';
+  const privacyDetails = <details className="ke-response-privacy-details"><summary>Privacy and preview limits</summary>
+    <p>Known Enough and its authorized AI process your private answers to help with the decision. Private notes are sent for AI help when you request it. Other participants see shared choices and only disclosures you authorize. An outcome may still reveal something about people’s needs. Use fictional, non-sensitive information in this preview. Updating your answers keeps other people’s answers; a revised proposal needs fresh approval.</p>
+  </details>;
+  const savedAnswers = savedChoiceAnswers(owner);
+  const savedSummary = <div className="ke-saved-answers">
+    <header><h2 id="private-answers-title" ref={summaryHeading} tabIndex={-1}><PageIcon name="Lock" />Your answers <small>Private</small></h2>
+      {!readOnly && <button type="button" className="secondary" disabled={blocked || saving} onClick={edit}>Edit answers<PageIcon name="Pencil" /></button>}</header>
+    {owner.ownInputReadiness === 'NOT_STARTED' ? <p>No saved answers.</p> : <dl className="ke-saved-answer-topics">{questions.map(({ variable, options }) => {
+      const answer = savedAnswers[variable.id]!;
+      return <div key={variable.id}><dt>{variable.label}</dt><dd>{answer.mode === 'NONE' ? 'None of these options work' : answer.mode
+        ? selectedOptions(answer, options.length).map(index => label(options[index]!, variable)).join(' · ') : extras.length ? 'See saved conditions below' : 'No option selection recorded'}
+        {answer.preferred !== '' && <small>Favorite: {label(options[Number(answer.preferred)]!, variable)}</small>}</dd></div>;
+    })}</dl>}
+    {!!extras.length && <details><summary>Saved extra conditions ({extras.length})</summary><ul>{extras.map(item => <li key={item.constraintId}>{describeCondition(item)}</li>)}</ul></details>}
+    {owner.ownInputReadiness === 'NEEDS_CLARIFICATION' && <p className="ke-response-topic-hint">A follow-up or different shared options are needed before an outcome can be found.</p>}
+    {owner.draft && !onlyDirectDraft && <p className="ke-response-topic-hint">Your extra notes have suggestions to review. They are not saved answers yet.</p>}
+    {recovery}{notice && <p role="status">{notice}</p>}{privacyDetails}
+  </div>;
   const content = <div className="ke-wizard-shell ke-response-sheet">
     <header className="ke-wizard-header"><div><h2 ref={heading} tabIndex={-1} id="private-answers-title">What works for you?</h2>
       <p className="ke-wizard-help">Select every option you’re happy with. You can choose more than one.</p></div>
@@ -110,7 +152,7 @@ export function PrivateAnswersModal({ open, owner, busy, blocked, saveBlocked, n
       {frameChanged && <p role="status">The options changed. Choose what works for you from the current list.</p>}
       {recovery}
       {!questions.length && <p>No selectable options are available yet. Add a private note or ask the organizer to update the decision.</p>}
-      <div className="ke-response-topics">{questions.map(({ variable, options }, topicIndex) => {
+      <div className="ke-response-topics" data-columns={questions.length > 1 && questions.every(question => question.options.length <= 6)}>{questions.map(({ variable, options }, topicIndex) => {
         const answer = answers[variable.id] ?? { mode: '', acceptable: [], preferred: '' };
         const selected = selectedOptions(answer, options.length);
         return <fieldset key={variable.id} className="ke-private-question ke-response-topic" disabled={blocked || saving}>
@@ -152,18 +194,16 @@ export function PrivateAnswersModal({ open, owner, busy, blocked, saveBlocked, n
               {owner.draft.unsupportedConditions.map(item => <p className="ke-wizard-save" key={item.id}>Still unresolved: {item.clarificationQuestion} Your answers can be saved, but a proposal must wait for clarification.</p>)}</>}
           </div>}
 
-      <details className="ke-response-privacy-details"><summary>Privacy and preview limits</summary>
-        <p>Known Enough and its authorized AI process your private answers to help with the decision. Private notes are sent for AI help when you request it. Other participants see shared choices and only disclosures you authorize. An outcome may still reveal something about people’s needs. Use fictional, non-sensitive information in this preview. Updating your answers keeps other people’s answers; a revised proposal needs fresh approval.</p>
-      </details>
+      {privacyDetails}
       <label className="ke-wizard-confirm ke-response-consent"><input type="checkbox" checked={consent} disabled={blocked || saving} onChange={event => onConsent(event.target.checked)} />These are fictional test answers. I agree to their processing by Known Enough and, if I use AI help, its AI.</label>
       {notice && <p role="status" className="ke-wizard-notice">{notice}</p>}
     </div>
     <footer className="ke-response-save"><div><p id="private-save-help" className="ke-response-save-help">{saveHint}</p>
-      {changed && <small>Unsaved changes</small>}</div><button type="button" aria-describedby="private-save-help" disabled={saving || blocked || saveBlocked || !complete || !consent || !!notes.trim()} onClick={() => void save()}>{saving ? 'Saving…' : 'Save my answers'}<PageIcon name="Check" /></button>
+      {changed && <small>Unsaved changes</small>}</div><div className="ke-response-save-actions">{owner.ownInputReadiness !== 'NOT_STARTED' && <button type="button" className="ke-response-text-button" disabled={saving || blocked} onClick={cancelEditing}>Cancel editing</button>}<button type="button" aria-describedby="private-save-help" disabled={saving || blocked || saveBlocked || !complete || !consent || !!notes.trim()} onClick={() => void save()}>{saving ? 'Saving…' : 'Save answers'}<PageIcon name="Check" /></button></div>
     </footer>
   </div>;
-  return embedded ? <section className="ke-private-inline ke-response-inline" aria-labelledby="private-answers-title">{content}</section> :
+  return embedded ? <section className="ke-private-inline ke-response-inline" aria-labelledby="private-answers-title">{editing && !readOnly ? content : savedSummary}</section> :
     <dialog ref={dialog} className="ke-decision-wizard ke-private-wizard" aria-labelledby="private-answers-title"
       onCancel={event => { event.preventDefault(); if (!busy) onClose(); }}
-      onClick={event => { if (event.target === event.currentTarget && !busy) onClose(); }}>{content}</dialog>;
+      onClick={event => { if (event.target === event.currentTarget && !busy) onClose(); }}>{editing && !readOnly ? content : savedSummary}</dialog>;
 }

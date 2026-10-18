@@ -62,6 +62,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
   const detailDialog = useRef<HTMLDialogElement>(null);
   useEffect(() => { if (detailStep) detailDialog.current?.showModal(); else detailDialog.current?.close(); }, [detailStep]);
   const [structuredDirty, setStructuredDirty] = useState(false);
+  const [editingAnswers, setEditingAnswers] = useState(owner?.ownInputReadiness === 'NOT_STARTED');
   const [reviewed, setReviewed] = useState(false);
   useEffect(() => { setReviewed(false); }, [owner?.draft?.draftId, snapshot.currentProposal?.proposalId]);
   const [busy, setBusy] = useState(false);
@@ -211,26 +212,20 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
   return <>
     <section className="ke-card ke-decision-overview ke-response-overview">
       <p className="ke-response-summary">{(snapshot.frame.description || snapshot.frame.objective).split(/(?<=[.!?])\s+/).slice(0, 2).join(' ')}</p>
-      {owner && (structuredDirty || owner.ownInputReadiness !== 'NOT_STARTED') && <p className="ke-response-own-status"><PageIcon name={structuredDirty ? 'Pencil' : 'Lock'} />
-        {structuredDirty ? 'You have unsaved changes' : owner.ownInputReadiness === 'READY' ? 'Your answers are saved privately' : 'Your saved answers need a follow-up'}</p>}
-      <details className="ke-response-progress"><summary><span><PageIcon name="Users" />Group progress</span><span>{snapshot.participantProgress
-        ? `${snapshot.participantProgress.filter(person => person.answersSaved).length} of ${snapshot.frame.participants.length} answered`
-        : `${snapshot.frame.participants.length} ${snapshot.frame.participants.length === 1 ? 'participant' : 'participants'}`}<PageIcon name="ChevronRight" /></span></summary>
+      <details className="ke-response-progress ke-compact-activity"><summary><span><PageIcon name="Users" />Group activity<PageIcon name="ChevronRight" /></span></summary>
         <ul>{snapshot.frame.participants.map(person => {
           const approved = snapshot.approvedParticipantIds.includes(person.id);
-          const answered = snapshot.participantProgress?.find(item => item.participantId === person.id)?.answersSaved;
+          const progress = snapshot.participantProgress?.find(item => item.participantId === person.id);
+          const answered = progress?.answersSaved;
           return <li key={person.id}><span className="ke-response-person"><span aria-hidden="true" className="ke-response-person-initial">{person.displayName.slice(0, 1).toLocaleUpperCase()}</span>{person.displayName}{person.id === owner?.ownerParticipantId && <small>You</small>}</span>
-            <span className="ke-response-person-state" data-complete={approved || answered}>{approved ? 'Approved' : answered ? 'Answered' : snapshot.participantProgress ? 'Waiting for answers' : 'Not checked yet'}</span></li>;
+            <span className="ke-response-person-state" data-complete={approved || answered}>{approved ? 'Approved' : answered ? 'Answered' : progress ? 'Waiting for answers' : 'Not checked yet'}</span></li>;
         })}</ul>
       </details>
-      {owner && ['AGREED', 'CLOSED'].includes(snapshot.status) && <details className="ke-response-saved-details"><summary>Your saved answers · private</summary>
-        {owner.confirmedConstraints.some(item => item.status === 'ACTIVE') ? <ul>{owner.confirmedConstraints.filter(item => item.status === 'ACTIVE').map(item => <li key={item.constraintId}>{describeCondition(item)}</li>)}</ul> : <p>{owner.ownInputReadiness === 'READY' ? 'All listed choices work for you.' : 'No saved answers.'}</p>}
-      </details>}
       <div className="ke-response-overview-actions">
-      {owner && continueToProposal && <button type="button" disabled={blocked || awaitingJob} onClick={() => {
+      {owner && !editingAnswers && !structuredDirty && continueToProposal && <button type="button" disabled={blocked || awaitingJob} onClick={() => {
         if (proposal || owner.pendingQuestions.some(question => question.status === 'PENDING') || owner.disclosurePermissions.some(permission => permission.status === 'PENDING')) setDetailStep('proposal');
         else void generate();
-      }}>{proposal ? 'See proposal' : 'Find an outcome'}</button>}
+      }}>{proposal ? ['AGREED', 'CLOSED'].includes(snapshot.status) ? 'View outcome' : 'View proposal' : owner.pendingQuestions.some(question => question.status === 'PENDING') || owner.disclosurePermissions.some(permission => permission.status === 'PENDING') ? 'Review follow-up' : 'Find an outcome'}</button>}
       <button type="button" className="ke-response-text-button" onClick={() => setDetailStep('shared')}>Decision details<PageIcon name="ChevronRight" /></button>
       {!owner && proposal && <button type="button" onClick={() => setDetailStep('proposal')}>View proposal</button>}
       </div>
@@ -295,9 +290,9 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
           proposalVersion: proposal.facts.proposalVersion, publicHash: proposal.publicHash })}>Withdraw my approval</button>}</>}
     </section>}
     </dialog>
-    {owner && !['AGREED', 'CLOSED'].includes(snapshot.status) && <PrivateAnswersModal embedded open={true} owner={owner} busy={busy} blocked={answersBlocked} saveBlocked={false} notesLocked={!!interpretationRequest} notes={text} consent={syntheticProcessing} notice={notice} recovery={recoveryControls}
-        onClose={() => {}} onNotes={setText} onConsent={setSyntheticProcessing} onInterpret={interpret} onDirty={setStructuredDirty}
+    {owner && <PrivateAnswersModal embedded open={true} owner={owner} busy={busy} blocked={answersBlocked} saveBlocked={false} notesLocked={!!interpretationRequest} notes={text} consent={syntheticProcessing} notice={notice} recovery={recoveryControls}
+        onClose={() => {}} onNotes={setText} onConsent={setSyntheticProcessing} onInterpret={interpret} onDirty={setStructuredDirty} onEditingChange={setEditingAnswers}
         onSave={payload => command('CONFIRM_PRIVATE_ANSWERS', payload)} describeValue={valueText} describeCondition={describeCondition} />}
-    {(!owner || ['AGREED', 'CLOSED'].includes(snapshot.status)) && notice && <p role="status">{notice}</p>}
+    {!owner && notice && <p role="status">{notice}</p>}
   </>;
 }

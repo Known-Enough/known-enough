@@ -34,7 +34,7 @@ describe('KE14 exact closed-rule review text', () => {
       .toBe('If First choice equals Yes, then Second choice does not equal Yes');
   });
 
-  it('renders a valid complex private draft and names the preferred variable before confirmation', async () => {
+  it('keeps an unconfirmed complex private draft out of the saved-answer summary', async () => {
     const fixture = await buildHypotheticalContributionFixture();
     const owner = fixture.ownerSnapshot;
     const draft = KE.AIConstraintDraft.parse({ schemaVersion: 2, draftId: 'review-draft', draftVersion: 1,
@@ -51,9 +51,11 @@ describe('KE14 exact closed-rule review text', () => {
     const current = KE.OwnerDecisionSnapshot.parse({ ...owner, draftVersion: 1, draft });
     const markup = renderToStaticMarkup(createElement(ConnectedDecision, { snapshot: current.publicSnapshot,
       owner: current, api: async () => Response.json({}), refresh: async () => {} }));
-    expect(markup).toContain('Sum of Maya proposed ownership + Leo proposed ownership + Nina proposed ownership = 100%');
-    expect(markup).toContain('Maya proposed ownership: 50% (preference cost 2)');
+    expect(markup).not.toContain('Sum of Maya proposed ownership + Leo proposed ownership + Nina proposed ownership = 100%');
+    expect(markup).not.toContain('Maya proposed ownership: 50% (preference cost 2)');
     expect(markup).not.toContain('Combined condition');
-    expect(markup).toContain('Confirm selected conditions');
+    expect(markup).toContain('Your extra notes have suggestions to review.');
+    expect(markup).toContain('Edit answers');
+    expect(markup).not.toContain('Confirm selected conditions');
   });
 });

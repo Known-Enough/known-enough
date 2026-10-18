@@ -2,6 +2,10 @@
 
 Status: PUBLISHED; implementation claims released; user manual acceptance pending. Latest native group-delete hotfix: source3910e84/frontendAmplify121, [receipt](../../../../review-artifacts/FF/group-deletion-publication.json). Earlier dated source/control notes below are historical.
 
+## Compact decision details — 2026-10-18
+
+A implements the user’s compact status/activity, acknowledged private-answer summary, Edit/Cancel, denser responsive topic rows and contextual actions. [Report](../../../../review-artifacts/FF/compact-decision-details/README.md). Relevant controlled tests explicitly authorized for this continuation: browser8/unit6/hosted1 and static/build checks pass; full check retains31 previously recorded failures/1unhandled error. Frontend publication pending; user live acceptance pending. Backend/permissions/consent/final approval and uncertain-request recovery preserved.
+
 ## User-directed follow-up — group list actions
 
 2026-10-15 (Mexico City): The user asks for the dots panel to show group members and decisions directly, with organizer rename and delete actions instead of Quick view. The list panel now displays the existing authorized group snapshot fields; renaming uses the existing version-checked route. Group deletion uses an organizer-only, version-checked retained tombstone and makes linked drafts/decisions unavailable to every member. A confirmation explains the impact before deletion. The previous group-creation/answer-editing repairs and privacy-safe group diagnostics remain in the same local change set.
