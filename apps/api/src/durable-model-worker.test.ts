@@ -110,6 +110,30 @@ it('known malformed model result cancels only its matching reasoning in the join
   expect(f.parsed(r.journal, `MODELJOB#${f.reference.jobId}`).usage).toEqual({ inputTokens: 4, outputTokens: 3 });
   expect(f.parsed(r.budget, 'TOTAL').reservedTokens).toBe(18_932);
 });
+it('expires an uncalled delivery and releases matching reasoning atomically without changing answers or usage', async () => {
+  const f = await fixture(); await f.worker().enqueue(f.reference);
+  const before = f.parsed(r.decisions, 'ROOM#decision').record;
+  const totals = f.parsed(r.budget, 'TOTAL');
+  f.setTime(f.reference.expiresAt);
+  expect(await f.worker().process({ jobId: f.reference.jobId })).toBe('DEAD');
+  const after = f.parsed(r.decisions, 'ROOM#decision').record;
+  expect(after).toMatchObject({ status: 'READY', job: null, owners: before.owners, frameConfirmations: before.frameConfirmations });
+  expect(after.solveEpoch).toBe(before.solveEpoch + 1);
+  expect(f.get(r.decisions, 'ROOM#decision', 'GUARD').version!.N).toBe('2');
+  expect(f.parsed(r.journal, `MODELJOB#${f.reference.jobId}`)).toMatchObject({ phase: 'DEAD', reason: 'EXPIRED', attempts: 0, reservedTokens: 0 });
+  expect(f.parsed(r.journal, 'OPERATIONS#MODEL_JOBS')).toMatchObject({ active: [], slots: [] });
+  expect(f.parsed(r.budget, 'TOTAL')).toEqual(totals);
+  expect(f.model).not.toHaveBeenCalled();
+});
+it('does not cancel replacement reasoning while expiring an older uncalled delivery', async () => {
+  const f = await fixture(); await f.worker().enqueue(f.reference);
+  const cell = f.get(r.decisions, 'ROOM#decision'), wire = JSON.parse(cell.payload!.S!);
+  wire.record.job.id = 'replacement-job'; cell.payload = { S: JSON.stringify(wire) };
+  f.setTime(f.reference.expiresAt);
+  expect(await f.worker().process({ jobId: f.reference.jobId })).toBe('DEAD');
+  expect(f.parsed(r.decisions, 'ROOM#decision').record).toEqual(wire.record);
+  expect(f.model).not.toHaveBeenCalled();
+});
 it('unknown paid-call failure leaves reasoning and capacity quarantined; verified recovery cancels current matching work', async () => {
   const f = await fixture();
   const model = vi.fn(async () => { throw new Error('synthetic unknown provider outcome'); });

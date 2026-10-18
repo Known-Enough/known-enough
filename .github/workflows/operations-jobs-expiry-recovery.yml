@@ -1,0 +1,111 @@
+name: Recover owned expired never-called decision jobs
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        required: true
+        type: string
+      runtime_source_sha:
+        required: true
+        type: string
+      worker_sha256:
+        required: true
+        type: string
+      owned_decision_hashes:
+        description: Comma-separated SHA256 hashes of positively owned synthetic decision IDs
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: known-enough-lifecycle-installation
+  cancel-in-progress: false
+jobs:
+  recover:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && github.actor_id == '143764700'
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      EXPECTED_SOURCE: ${{ inputs.source_sha }}
+      EXPECTED_WORKER_SOURCE: ${{ inputs.runtime_source_sha }}
+      EXPECTED_WORKER_SHA256: ${{ inputs.worker_sha256 }}
+      RUNTIME_SOURCE: ${{ inputs.runtime_source_sha }}
+      OWNED_HASHES: ${{ inputs.owned_decision_hashes }}
+      AWS_MAX_ATTEMPTS: '1'
+      NODE_NO_WARNINGS: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Verify exact source and cancellation guards
+        run: |
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node scripts/operations/verify.mjs > /dev/null
+          npm ci
+          npx vitest run apps/api/src/durable-model-worker.test.ts packages/adapters/src/durable-model-jobs.test.ts
+          node --experimental-transform-types --test scripts/operations/jobs-expiry-recovery.test.mjs
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Verify independently published worker and disabled schedule
+        run: python3 -B scripts/operations/jobs-runtime-readback.py
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobOperations
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Privately inspect exact owned expired deliveries and native authority
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/jobs-expiry-recovery.mjs inspect
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubQaRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Preserve immutable encrypted private recovery checkpoint
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/jobs-expiry-recovery.mjs backup
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobOperations
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Atomically cancel matching reasoning and verify preserved answers and totals
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/jobs-expiry-recovery.mjs recover
+      - name: Publish finite results only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: operations-jobs-expiry-recovery
+          path: |
+            ${{ runner.temp }}/expiry-*-report.json
+            ${{ runner.temp }}/jobs-runtime-readback.json
+          if-no-files-found: warn
+          retention-days: 30

@@ -148,7 +148,15 @@ export class DurableModelJobs<Context, Fence, Effect> {
     // A dead worker might already have sent a paid request. Never reissue uncertain calls.
     if (job.phase === 'CALLING' || job.reference.expiresAt <= now || !prior.control.enabled) {
       this.finish(next, 'DEAD', job.phase === 'CALLING' ? 'PROVIDER_UNCONFIRMED' : !prior.control.enabled ? 'DISABLED' : 'EXPIRED');
-      await this.save(prior, next); return 'DEAD';
+      let fence: Fence | undefined; let effect: Effect | undefined;
+      if (job.phase !== 'CALLING' && this.options.execution.cancel) {
+        try {
+          const cleanup = await this.bounded(() => this.options.execution.reload(job.reference), this.now() + this.bounds.leaseMs);
+          effect = await this.bounded(() => this.options.execution.cancel!(job.reference, cleanup.context), this.now() + this.bounds.leaseMs);
+          fence = cleanup.fence;
+        } catch { /* Changed or revoked authority must not cancel a successor's reasoning. */ }
+      }
+      await this.save(prior, next, fence, effect); return 'DEAD';
     }
     if (job.availableAt > now) return 'SKIPPED';
     // Expired CALLING slots remain occupied until their IDs are reconciled above.

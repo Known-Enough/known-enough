@@ -138,7 +138,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     <PrivacyBar />
     {view.kind !== 'decision' && status && <p role="status">{status}</p>}
     {view.kind === 'invalid' ? <section className="ke-card"><h2>This link is unavailable</h2><button onClick={() => move({ kind: 'groups' }, true)}>Back to groups</button></section>
-      : view.kind === 'decision' ? <dialog ref={decisionDialog} className="ke-decision-wizard ke-open-decision-dialog" aria-labelledby="open-decision-title" onCancel={event => { event.preventDefault(); move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' }); }}>
+      : view.kind === 'decision' ? <dialog ref={decisionDialog} className="ke-decision-wizard ke-open-decision-dialog" data-decision-id={snapshot?.frame.decisionId} aria-labelledby="open-decision-title" onCancel={event => { event.preventDefault(); move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' }); }}>
         <button className="secondary" onClick={() => move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' })}>Close decision</button>
         <section className={`ke-card${snapshot ? ' ke-load-reveal' : ''}`} aria-busy={busy || (!snapshot && !status)}><h2 id="open-decision-title">{snapshot ? decisionTitle?.id === snapshot.frame.decisionId ? decisionTitle.title : snapshot.frame.title : 'Your decision'}</h2>
           {snapshot && <p role="status">Status: {decisionStatusText(snapshot.status)}</p>}

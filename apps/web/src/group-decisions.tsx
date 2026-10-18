@@ -540,7 +540,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
       <ul>{roster.participants.map(member => <li key={member.id}>{member.displayName}</li>)}</ul>
       {roster.frame.variables.map(variable => <p key={variable.id}>{variableText(variable, roster.frame)}</p>)}
       <ul>{roster.frame.rules.map(rule => <li key={rule.id}>{ruleText(rule, roster.frame.variables)}</li>)}</ul>
-      <p>Continuing resets every old frame confirmation, private input confirmation, permission and final approval. Everyone must review and confirm again.</p>
+      <p>Adding members preserves existing answers and confirmations. New participants supply their own answers. Any new proposal needs explicit approval from everyone included in the decision.</p>
       <label><input type="checkbox" checked={reviewed} onChange={event => setReviewed(event.target.checked)} /> Include these people in this decision. Existing answers and confirmations stay saved when only adding people.</label>
       <button disabled={busy || !reviewed} onClick={() => void action(async () => {
         const result = await request(`decisions/${roster.id}/revise`, { controlVersion: roster.controlVersion, groupVersion: roster.groupVersion });

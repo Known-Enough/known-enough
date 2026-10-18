@@ -21,7 +21,7 @@ function fixture() {
   const reload = vi.fn(async () => { if (!current) throw new DurableJobError('STALE'); return { context: 'transient private condition and raw conversation', fence: true }; });
   const invoke = vi.fn(async () => ({ output: 'transient model output', usage: { inputTokens: 30, outputTokens: 4 } }));
   const prepare = vi.fn(async () => 'kernel-checked-result');
-  const worker = () => new DurableModelJobs({ store, now: () => time, execution: { reload, invoke, prepare }, bounds: { timeoutMs: 100, leaseMs: 200, maxTokens: 100, maxCostMicros: 50 } });
+  const worker = (cancel?: (reference: JobReference, context: string) => Promise<string>) => new DurableModelJobs({ store, now: () => time, execution: { reload, invoke, prepare, ...(cancel ? { cancel } : {}) }, bounds: { timeoutMs: 100, leaseMs: 200, maxTokens: 100, maxCostMicros: 50 } });
   return { worker, jobs, global, commits, effects, reload, invoke, prepare, store,
     setTime: (value: number) => { time = value; }, stale: () => { current = false; } };
 }
@@ -60,13 +60,13 @@ describe('durable model job recovery and charging', () => {
     expect(await f.worker().process({ jobId: r.jobId })).toBe('APPLIED'); expect(f.invoke).toHaveBeenCalledTimes(1);
   });
   it('restart after dispatch never reissues an uncertain provider call or releases its quarantine slot', async () => {
-    const f = fixture(), r = ref(); await f.worker().enqueue(r);
+    const f = fixture(), r = ref(), cancel = vi.fn(async () => 'cancelled'); await f.worker().enqueue(r);
     const job = f.jobs.get(r.jobId)!; job.phase = 'CALLING'; job.lease = { token: randomUUID(), until: 1100 };
     job.attempts = 1; job.reservedTokens = 100; job.reservedCostMicros = 50;
     f.global.control.slots.push({ jobId: r.jobId, ...job.lease }); f.global.totals.reservedTokens += 100; f.global.totals.reservedCostMicros += 50;
-    f.setTime(1200); expect(await f.worker().process({ jobId: r.jobId })).toBe('DEAD');
+    f.setTime(1200); expect(await f.worker(cancel).process({ jobId: r.jobId })).toBe('DEAD');
     expect(f.jobs.get(r.jobId)?.reason).toBe('PROVIDER_UNCONFIRMED'); expect(f.global.control.slots).toHaveLength(1);
-    expect(f.global.totals.reservedTokens).toBe(200); expect(f.invoke).not.toHaveBeenCalled();
+    expect(f.global.totals.reservedTokens).toBe(200); expect(f.invoke).not.toHaveBeenCalled(); expect(cancel).not.toHaveBeenCalled();
     expect(await f.worker().process({ jobId: r.jobId })).toBe('SKIPPED');
   });
   it.each(['before', 'after'] as const)('stale authority %s provider prevents output', async stage => {

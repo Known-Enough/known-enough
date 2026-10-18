@@ -1,4 +1,29 @@
 /** Synthetic browser-run helpers. Returned identities/responses stay private to the runner. */
+export async function assertDecisionTarget(page, { base, groupId, decisionId }) {
+  const actual = URL.parse(page.url()), expected = URL.parse(base);
+  if (!actual || !expected || actual.origin !== expected.origin || actual.pathname !== expected.pathname
+    || actual.searchParams.get('group') !== groupId || actual.searchParams.get('decision') !== decisionId
+    || actual.hash || await page.locator('dialog.ke-open-decision-dialog[open]').getAttribute('data-decision-id') !== decisionId) {
+    throw new Error('DECISION_ROUTE_NOT_CONFIRMED');
+  }
+}
+
+/** Persist the exact command and idempotency key before allowing a write onto the network.
+ * The checkpoint is private. A missing acknowledgement remains UNKNOWN; callers must reconcile it.
+ */
+export async function checkpointDecisionWrite(route, { apiOrigin, decisionId, persist }) {
+  const request = route.request(), url = URL.parse(request.url());
+  if (!url || url.origin !== apiOrigin || url.pathname !== `/decisions/${decisionId}/commands`
+    || url.search || request.method() !== 'POST') throw new Error('DECISION_WRITE_TARGET_MISMATCH');
+  const body = request.postData();
+  if (typeof body !== 'string' || Buffer.byteLength(body) > 262144) throw new Error('DECISION_WRITE_BODY_INVALID');
+  JSON.parse(body);
+  const checkpoint = { url: url.href, method: 'POST', body, submittedAt: new Date().toISOString(), disposition: 'UNKNOWN' };
+  await persist(checkpoint);
+  await route.continue();
+  return checkpoint;
+}
+
 export async function verifiedSessionProfile(session, { domain, username, fetcher = globalThis.fetch }) {
   if (!session || typeof session.accessToken !== 'string' || !session.accessToken
     || session.kind !== 'participant' || typeof username !== 'string' || !username) throw new Error('PROFILE_SESSION_INVALID');

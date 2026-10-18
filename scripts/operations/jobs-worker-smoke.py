@@ -1,4 +1,4 @@
-"""One bounded schedule smoke against a previously verified disabled empty control."""
+"""Verify one empty scheduled tick; optionally activate the existing source-bound worker."""
 import base64
 import json
 import os
@@ -28,8 +28,10 @@ def main():
             raise RuntimeError(code.group(1).decode() if code else 'AWS_CLI_FAILED')
         return json.loads(result.stdout) if result.stdout.strip() else {}
     phase=os.environ['SMOKE_PHASE']
+    mode=os.environ.get('SCHEDULE_OPERATION','smoke')
     operation=phase
     try:
+        if mode not in ['smoke','activate']:raise RuntimeError('SCHEDULE_OPERATION_INVALID')
         identity=aws('sts','get-caller-identity')
         role='KnownEnoughGithubModelJobOperations' if phase=='control' else 'KnownEnoughGithubModelJobRelease'
         if identity.get('Account')!=ACCOUNT or not identity.get('Arn','').startswith(f'arn:aws:sts::{ACCOUNT}:assumed-role/{role}/'):
@@ -38,15 +40,21 @@ def main():
             operation='dynamodb:GetItem'
             item=aws('dynamodb','get-item','--table-name','KnownEnoughOperationsJournal','--key',json.dumps({'PK':{'S':'OPERATIONS#MODEL_JOBS'},'SK':{'S':'STATE'}}),'--consistent-read').get('Item',{})
             control=json.loads(item.get('payload',{}).get('S','null'))
-            if (not isinstance(control,dict) or control.get('enabled') is not False or control.get('active')!=[] or control.get('slots')!=[]
+            if (not isinstance(control,dict) or control.get('enabled') is not (mode=='activate') or control.get('active')!=[] or control.get('slots')!=[]
                     or control.get('sourceSha')!=os.environ['PACKAGE_SOURCE'] or item.get('revision',{}).get('N')!=str(control.get('revision'))):
                 raise RuntimeError('SMOKE_CONTROL_NOT_DISABLED_EMPTY_MATCHING')
-            (root/'worker-smoke-control.json').write_text(json.dumps({'sourceSha':control['sourceSha'],'result':'DISABLED_EMPTY_CONTROL_VERIFIED'})+'\n')
-            report.update(result='DISABLED_EMPTY_CONTROL_VERIFIED',packageSource=control['sourceSha'])
+            result='ENABLED_EMPTY_CONTROL_VERIFIED' if mode=='activate' else 'DISABLED_EMPTY_CONTROL_VERIFIED'
+            (root/'worker-smoke-control.json').write_text(json.dumps({'sourceSha':control['sourceSha'],'result':result})+'\n')
+            report.update(result=result,packageSource=control['sourceSha'])
         elif phase=='schedule':
             saved=json.loads((root/'worker-smoke-control.json').read_text())
-            if saved.get('sourceSha')!=os.environ['PACKAGE_SOURCE'] or saved.get('result')!='DISABLED_EMPTY_CONTROL_VERIFIED':
+            expected='ENABLED_EMPTY_CONTROL_VERIFIED' if mode=='activate' else 'DISABLED_EMPTY_CONTROL_VERIFIED'
+            if saved.get('sourceSha')!=os.environ['PACKAGE_SOURCE'] or saved.get('result')!=expected:
                 raise RuntimeError('SMOKE_CONTROL_RECEIPT_INVALID')
+            if mode=='activate':
+                logging=json.loads((root/'fix01-logging-guard.json').read_text())
+                if logging.get('source')!=os.environ['PACKAGE_SOURCE'] or logging.get('result')!='GUARD_PASS' or logging.get('logging')!='DISABLED':
+                    raise RuntimeError('SCHEDULE_LOGGING_GUARD_MISSING')
             config=aws('lambda','get-function-configuration','--function-name',FUNCTION)
             if config.get('CodeSha256')!=base64.b64encode(bytes.fromhex(os.environ['WORKER_SHA'])).decode() or config.get('State')!='Active' or config.get('LastUpdateStatus')!='Successful':
                 raise RuntimeError('SMOKE_WORKER_HASH_MISMATCH')
@@ -67,11 +75,14 @@ def main():
                 if any('MODEL_JOB_RUN_UNAVAILABLE' in message for message in messages) or any('"result":"UNAVAILABLE"' in body or '"result": "UNAVAILABLE"' in body for body in bodies):
                     raise RuntimeError('MODEL_JOB_RUN_UNAVAILABLE')
             else:raise RuntimeError('EMPTY_WORKER_EXECUTION_NOT_OBSERVED')
+            if mode=='activate':
+                if aws('events','describe-rule','--name',RULE).get('State')!='ENABLED':raise RuntimeError('SCHEDULE_ENABLED_READBACK_FAILED')
+                report.update(result='WORKER_SCHEDULE_ACTIVATION_PASS',schedule='ENABLED',packageSource=os.environ['PACKAGE_SOURCE'],workerSha256=os.environ['WORKER_SHA'])
         else:raise RuntimeError('SMOKE_PHASE_INVALID')
     except (RuntimeError,ValueError,KeyError,OSError,subprocess.TimeoutExpired) as error:
         report.update(result='WORKER_SMOKE_BLOCKED',operation=operation,code=str(error) if isinstance(error,RuntimeError) else type(error).__name__)
     finally:
-        if report['ruleEnableRequested']:
+        if report['ruleEnableRequested'] and report['result']!='WORKER_SCHEDULE_ACTIVATION_PASS':
             try:
                 aws('events','disable-rule','--name',RULE)
                 report['ruleDisabledReadback']=aws('events','describe-rule','--name',RULE).get('State')=='DISABLED'
@@ -80,7 +91,7 @@ def main():
                 report.update(result='WORKER_SMOKE_CLEANUP_UNVERIFIED',cleanupCode='RULE_DISABLE_UNVERIFIED')
     report['sourceSha']=os.environ['GITHUB_SHA']
     (root/('worker-smoke-'+phase+'-report.json')).write_text(json.dumps(report)+'\n');print(json.dumps(report))
-    return 0 if report['result'] in ['DISABLED_EMPTY_CONTROL_VERIFIED','EMPTY_WORKER_SCHEDULE_PASS'] else 1
+    return 0 if report['result'] in ['DISABLED_EMPTY_CONTROL_VERIFIED','ENABLED_EMPTY_CONTROL_VERIFIED','EMPTY_WORKER_SCHEDULE_PASS','WORKER_SCHEDULE_ACTIVATION_PASS'] else 1
 
 
 if __name__=='__main__':raise SystemExit(main())

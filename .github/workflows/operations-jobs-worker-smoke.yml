@@ -11,6 +11,11 @@ on:
       worker_sha:
         required: true
         type: string
+      schedule_operation:
+        description: Bounded smoke or activate the existing worker after a verified empty tick
+        type: choice
+        default: smoke
+        options: [smoke, activate]
 permissions:
   contents: read
 concurrency:
@@ -27,6 +32,7 @@ jobs:
     env:
       PACKAGE_SOURCE: ${{ inputs.package_source }}
       WORKER_SHA: ${{ inputs.worker_sha }}
+      SCHEDULE_OPERATION: ${{ inputs.schedule_operation }}
       AWS_MAX_ATTEMPTS: '1'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -51,6 +57,20 @@ jobs:
           SMOKE_PHASE: control
         run: python3 -B scripts/operations/jobs-worker-smoke.py
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: inputs.schedule_operation == 'activate'
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubStagingInspector
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Verify provider logging disabled before activation
+        if: inputs.schedule_operation == 'activate'
+        env:
+          EXPECTED_SOURCE: ${{ inputs.package_source }}
+        run: python3 -B scripts/fix01/enable.py logging
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
           role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobRelease
           aws-region: us-east-1
@@ -58,14 +78,17 @@ jobs:
           allowed-account-ids: '092954139775'
           retry-max-attempts: 1
           unset-current-credentials: true
-      - name: Observe one bounded empty worker tick and disable schedule
+      - name: Observe bounded empty worker tick and apply selected schedule operation
         env:
           SMOKE_PHASE: schedule
         run: python3 -B scripts/operations/jobs-worker-smoke.py
-      - name: Always disable schedule after an attempted schedule phase
+      - name: Disable schedule unless guarded activation passed
         if: always()
         run: |
           if test -f "$RUNNER_TEMP/worker-smoke-control.json"; then
+            if [ "$SCHEDULE_OPERATION" = activate ] && python3 -c 'import json,os; from pathlib import Path; p=Path(os.environ["RUNNER_TEMP"])/"worker-smoke-schedule-report.json"; assert json.loads(p.read_text()).get("result")=="WORKER_SCHEDULE_ACTIVATION_PASS"'; then
+              exit 0
+            fi
             aws events disable-rule --name KnownEnoughModelJobs --region us-east-1 --no-cli-pager
           fi
       - name: Publish finite smoke results only
