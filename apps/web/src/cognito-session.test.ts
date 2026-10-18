@@ -22,6 +22,15 @@ const session: CognitoSession = { accessToken: jwt, expiresAt: Date.now() + 60_0
 afterEach(() => vi.restoreAllMocks());
 
 describe('KE11 Cognito browser client', () => {
+  it('permits bounded group pages and rejects malformed cursors and extra query parameters before fetch', async () => {
+    const fetcher = vi.fn(async () => Response.json({ groups: [], cursor: null }));
+    for (const path of ['/groups?limit=5', '/groups?limit=5&cursor=' + 'A'.repeat(40)])
+      await cognitoApiFetch(config, session, path, () => {}, {}, fetcher);
+    for (const path of ['/groups?limit=50', '/groups?limit=5&cursor=short', '/groups?limit=5&cursor=' + 'A'.repeat(1601),
+      '/groups?limit=5&cursor=' + 'A'.repeat(40) + '&subject=other', '/groups?limit=5&limit=5', '/groups?limit=5#other'])
+      await expect(cognitoApiFetch(config, session, path, () => {}, {}, fetcher)).rejects.toThrow('Invalid API path');
+    expect(fetcher).toHaveBeenCalledTimes(2);
+  });
   it('permits the exact authenticated creation endpoint while rejecting foreign and unrelated paths', async () => {
     const fetcher = vi.fn(async () => new Response('{}', { status: 200 }));
     await cognitoApiFetch(config, session, '/decisions', () => {}, { method: 'POST' }, fetcher);

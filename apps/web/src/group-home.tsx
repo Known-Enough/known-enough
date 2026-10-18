@@ -6,6 +6,11 @@ import { Groups } from '@deal-table/contracts';
 import { GroupIcon, LoadingSkeleton, PageIcon } from './app-chrome';
 import { ProfileModal, type ProfileTarget } from './profile-drawer';
 type LoadFailure = { title: string; description: string; reference: string | null };
+function groupPage(value: { groups?: unknown[]; cursor?: unknown }) {
+  if (!Array.isArray(value.groups) || value.groups.length > 20
+    || (value.cursor != null && (typeof value.cursor !== 'string' || !/^[A-Za-z0-9_-]{40,1600}$/.test(value.cursor)))) throw new Error('Invalid groups response');
+  return { groups: value.groups.map(group => Groups.GroupSnapshot.parse(group)), cursor: typeof value.cursor === 'string' ? value.cursor : null };
+}
 export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onBack, onDirtyChange }: { api: (path: string, init?: RequestInit) => Promise<Response>;
   openDecision: (id: string) => void; selectedGroupId?: string; onOpenGroup: (id: string) => void; onBack: () => void; onDirtyChange?: (dirty: boolean) => void }) {
   const [childDirty, setChildDirty] = useState(false);
@@ -14,6 +19,8 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
   const [checking, setChecking] = useState(true);
   const [account, setAccount] = useState<ReturnType<typeof Groups.AccountSnapshot.parse> | null>(null);
   const [groups, setGroups] = useState<Groups.GroupSnapshot[]>([]);
+  const [groupCursor, setGroupCursor] = useState<string | null>(null);
+  const [groupPageFailure, setGroupPageFailure] = useState(false);
   const [invitations, setInvitations] = useState<Groups.InvitationSnapshot[]>([]);
   const [invitationFailure, setInvitationFailure] = useState<string | null>(null);
   const [profileTarget, setProfileTarget] = useState<ProfileTarget | null>(null);
@@ -93,7 +100,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
     const epoch = ++loadEpoch.current; loadAbort.current?.abort();
     const controller = new AbortController(); loadAbort.current = controller;
     const current = () => mounted.current && epoch === loadEpoch.current;
-    setChecking(true); setLoadFailure(null); setInvitationFailure(null); if (!preserveLink) setLink('');
+    setChecking(true); setLoadFailure(null); setInvitationFailure(null); setGroupPageFailure(false); if (!preserveLink) setLink('');
     let stage: 'account' | 'groups' | 'group' | 'invitations' = 'account';
     let httpStatus: number | null = null, reference: string | null = null;
     let emailConflict = false;
@@ -129,6 +136,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       }
       const next = result.account ? Groups.AccountSnapshot.parse(result.account) : null;
       let nextGroups: Groups.GroupSnapshot[] = [];
+      let nextCursor: string | null = null;
       let nextInvitations: Groups.InvitationSnapshot[] = [];
       let nextInvitationFailure: string | null = null;
       if (next?.status === 'APPROVED') {
@@ -136,9 +144,9 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
         const response = await api(selectedGroupId ? '/groups/' + selectedGroupId : '/groups', {signal: controller.signal});
         observe(response);
         if (!response.ok) throw new Error('Groups unavailable');
-        const result = await response.json() as { groups?: unknown[]; group?: unknown };
-        if (!selectedGroupId && !Array.isArray(result.groups)) throw new Error('Invalid groups response');
-        nextGroups = selectedGroupId ? [Groups.GroupSnapshot.parse(result.group)] : result.groups!.map(group => Groups.GroupSnapshot.parse(group));
+        const result = await response.json() as { groups?: unknown[]; group?: unknown; cursor?: unknown };
+        if (selectedGroupId) nextGroups = [Groups.GroupSnapshot.parse(result.group)];
+        else { const page = groupPage(result); nextGroups = page.groups; nextCursor = page.cursor; }
         if (!selectedGroupId) {
           stage = 'invitations'; httpStatus = null; reference = null;
           try {
@@ -155,11 +163,11 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
         }
       }
       if (!current()) return;
-      setAvailable(true); setAccount(next); setGroups(nextGroups); setInvitations(nextInvitations); setInvitationFailure(nextInvitationFailure); setNotice('');
+      setAvailable(true); setAccount(next); setGroups(nextGroups); setGroupCursor(nextCursor); setInvitations(nextInvitations); setInvitationFailure(nextInvitationFailure); setNotice('');
       if (next?.status !== 'APPROVED') {setLink(''); setRecipient(''); setInvitations([]);}
     } catch (error) {
       if (!current()) return;
-      setAvailable(false); setAccount(null); setGroups([]); setInvitations([]); setLink(''); setRecipient('');
+      setAvailable(false); setAccount(null); setGroups([]); setGroupCursor(null); setInvitations([]); setLink(''); setRecipient('');
       const missingGroup = stage === 'group' && (httpStatus === 403 || httpStatus === 404);
       setLoadFailure({ title: emailConflict ? 'This email already has an account' : missingGroup ? 'This group is unavailable' : stage === 'account' ? 'We couldn’t load your account' : stage === 'group' ? 'We couldn’t open this group' : stage === 'invitations' ? 'We couldn’t load your invitations' : 'We couldn’t load your groups',
         description: emailConflict ? 'Sign out and sign in with your original username, or use Forgot password on the sign-in screen. To create a separate account, use a different email address.'
@@ -176,6 +184,23 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
     void load();
     return () => {mounted.current = false; ++loadEpoch.current; loadAbort.current?.abort();};
   }, []); // The component is keyed to the authenticated session.
+  async function loadMoreGroups() {
+    if (!groupCursor || busy || checking || selectedGroupId) return;
+    const cursor = groupCursor, epoch = loadEpoch.current;
+    const controller = new AbortController(); loadAbort.current = controller;
+    const current = () => mounted.current && epoch === loadEpoch.current;
+    setBusy(true); setGroupPageFailure(false);
+    try {
+      const response = await api(`/groups?limit=5&cursor=${encodeURIComponent(cursor)}`, { signal: controller.signal });
+      if (!response.ok) throw new Error('Groups unavailable');
+      const page = groupPage(await response.json());
+      if (page.cursor === cursor) throw new Error('Group page did not advance');
+      if (!current()) return;
+      setGroups(previous => [...new Map([...previous, ...page.groups].map(group => [group.id, group])).values()]);
+      setGroupCursor(page.cursor);
+    } catch { if (current()) setGroupPageFailure(true); }
+    finally { if (current()) setBusy(false); }
+  }
   async function action(path: string, body: unknown, after?: (result: Record<string, unknown>) => boolean | void,
     onDefinitiveFailure?: (status: number) => void, requestId?: string) {
     setBusy(true); setNotice('');
@@ -251,7 +276,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
         onDirtyChange?.(childDirty || !!recipient.trim());
         onOpenGroup(group.id); return true;
       }, status => { if ((status >= 400 && status < 500) || status === 507) groupRequest.current = null; }, pending.requestId); }}>Create group</button></div>}
-      {!groups.length && <div className="ke-empty-state"><span className="ke-state-icon"><GroupIcon /></span><h3>No groups yet.</h3><p>Start a group with the people you want to decide with, or accept an invitation.</p></div>}
+      {!groups.length && !groupCursor && <div className="ke-empty-state"><span className="ke-state-icon"><GroupIcon /></span><h3>No groups yet.</h3><p>Start a group with the people you want to decide with, or accept an invitation.</p></div>}
       {token && <><p>A group invitation is waiting. Accepting joins the group; it does not confirm a decision or approve a proposal.</p>
         <button disabled={busy} onClick={() => void action('/groups/accept', { token }, result => { const group = Groups.GroupSnapshot.parse(result.group); setToken(''); sessionStorage.removeItem('ke-group-invite'); onOpenGroup(group.id); return true; })}>Accept group invitation</button>
         <button className="secondary" onClick={() => { setToken(''); sessionStorage.removeItem('ke-group-invite'); }}>Decline group invitation</button></>}
@@ -330,6 +355,9 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
           </div>
         </li>;
       })}</ul></section>)}</div>}
+      {groupPageFailure && <p role="status">More groups couldn’t be loaded. Your current groups are kept.</p>}
+      {groupCursor && <button type="button" className="secondary" disabled={busy || checking} onClick={() => void loadMoreGroups()}>
+        {groupPageFailure ? 'Retry loading groups' : 'Load more groups'}</button>}
       </>}
       {selectedGroupId && groups.map(group => {
         const organizer = group.members.find(member => member.isOrganizer);
