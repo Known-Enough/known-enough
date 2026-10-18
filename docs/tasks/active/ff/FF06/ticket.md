@@ -2,6 +2,10 @@
 
 Status: PUBLISHED; implementation claims released; user manual acceptance pending. Latest native group-delete hotfix: source3910e84/frontendAmplify121, [receipt](../../../../review-artifacts/FF/group-deletion-publication.json). Earlier dated source/control notes below are historical.
 
+## Cohesive decision header — 2026-10-18
+
+Published/source5a65cc0: title/description/status+progress unified, expandable activity through progress, details+Refresh in dots, visible primary actions and flat answer divider/900px layout. Existing behavior/permissions/privacy and legacy demo preserved. [Receipt](../../../../review-artifacts/FF/cohesive-decision-header-publication.json). Static build checks PASS; no tests, manual acceptance pending.
+
 ## Decision details visual polish — 2026-10-18
 
 Published/source94a32d7: two rounded cards, compact status badge/icon Refresh, responsive1000px container, aligned activity/private answer rows and light/dark styling. CSS/component layout only; all actions/privacy/permissions unchanged. [Receipt](../../../../review-artifacts/FF/decision-details-visual-publication.json). Static type/lint/build PASS; no tests, manual acceptance pending.
