@@ -1,0 +1,159 @@
+{
+  "utc": "2026-10-18T23:27:04.103353+00:00",
+  "result": "MCP_WEB_ASSISTANT_PUBLISHED_MANUAL_ACCEPTANCE_PENDING",
+  "source": "9807565505d9a657eafbc8d793680cf76a634974",
+  "apiSha256": "9ce393d32a77aff1127ce1d97a1a8a4083507a413c8e6ec3d272e9f742b5266f",
+  "workerSha256": "d8c9301d34e6aa2d8a2e81596e846f5caafb231d77081e4ac140c54c0799a7e9",
+  "frontend": {
+    "sourceSha": "9807565505d9a657eafbc8d793680cf76a634974",
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "providerCalls": 0,
+    "signup": 0,
+    "apiPublication": "NOT_EXECUTED",
+    "files": [
+      {
+        "path": "/assets/alexa-chat-QUcC3goV.js",
+        "sha256": "052558b80f7a8ab1c4cee9c96cee316807cc4e298b079f60b3e7325d2df2f13d"
+      },
+      {
+        "path": "/assets/app-chrome-Dr_hOIS6.js",
+        "sha256": "95cbb9cae445b3d743ac7a9b9a0973ff2ee9a6bad48eaafb140967f713268d9e"
+      },
+      {
+        "path": "/assets/connected-app-BY_IoPT3.js",
+        "sha256": "d490992ade6e040a7ec9da08ec1efe6e0fa9034cf290858655bd2cf1a68fce8a"
+      },
+      {
+        "path": "/assets/index-BZh5TrSB.js",
+        "sha256": "9a0b1034d4b16d14a1a665b3d97b372c5b051b1a407422401c159a366c0d8618"
+      },
+      {
+        "path": "/assets/index-Dg9iIwbm.css",
+        "sha256": "75b22857cc5ba9ba7c519162bfbc5d608eb61be273940e5e608a85ca40e5faee"
+      },
+      {
+        "path": "/assets/preload-helper-stXcScCQ.js",
+        "sha256": "78dbac21943a9f1ef768e0fc0a83f78a5b0e2cadd2c2ac6fed5e2da293be496a"
+      },
+      {
+        "path": "/assets/src-DovK0lpp.js",
+        "sha256": "570b3371776d239c513743ddb0228b8103861221be777e978a2d5c3f8575c4c3"
+      },
+      {
+        "path": "/cover.png",
+        "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151"
+      },
+      {
+        "path": "/",
+        "sha256": "a4c88f06a9ad5d593a3c06661c1a659222378afe04cd787363c41940c572d3c9"
+      },
+      {
+        "path": "/logo.png",
+        "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb"
+      }
+    ],
+    "amplifyJobId": "134"
+  },
+  "configuration": {
+    "result": "ZZ02_SETUP_READBACK_PASS",
+    "configurationWrites": 3,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "signupDelivery": "NOT_EXECUTED",
+    "configurationSha256": "cc8512bb72dd1ae153345460d95929bac4de2de1860ee466de2d7c14f2085eae",
+    "postConfirmation": "MATCH",
+    "smsRoleConfigured": false,
+    "apiSha256": "9ce393d32a77aff1127ce1d97a1a8a4083507a413c8e6ec3d272e9f742b5266f",
+    "groupReadRoutes": [
+      "GET /groups/{groupId}/draft-requests",
+      "GET /groups",
+      "GET /groups/{groupId}/draft-requests/{requestKey}",
+      "GET /groups/{groupId}/drafts/{draftId}",
+      "GET /groups/{groupId}/decisions/{decisionId}/review",
+      "GET /groups/{groupId}/members/{memberId}/profile",
+      "GET /groups/{groupId}"
+    ],
+    "profileRoutesPresent": 5,
+    "managedRoutesPresent": 12,
+    "backup": "/home/runner/.known-enough/zz02-setup-20261018T232555578371Z",
+    "privateBackupKey": "application-config/zz02-setup-20261018T232555578371Z/prior.json"
+  },
+  "schedule": {
+    "result": "WORKER_SCHEDULE_ACTIVATION_PASS",
+    "ruleEnableRequested": true,
+    "ruleDisabledReadback": false,
+    "paidDispatchReported": 0,
+    "matchingEmptySummaries": 1,
+    "schedule": "ENABLED",
+    "packageSource": "9807565505d9a657eafbc8d793680cf76a634974",
+    "workerSha256": "d8c9301d34e6aa2d8a2e81596e846f5caafb231d77081e4ac140c54c0799a7e9",
+    "sourceSha": "9807565505d9a657eafbc8d793680cf76a634974"
+  },
+  "admission": {
+    "utc": "2026-10-18T23:24:36.268214+00:00",
+    "source": "9807565505d9a657eafbc8d793680cf76a634974",
+    "phase": "enable",
+    "controlWrites": 1,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "observedControl": {
+      "sourceSha": "9807565505d9a657eafbc8d793680cf76a634974",
+      "enabled": false,
+      "activeCount": 0,
+      "slotCount": 0
+    },
+    "controlSource": "9807565505d9a657eafbc8d793680cf76a634974",
+    "priorEnabled": false,
+    "privateRetention": "ENABLED_SYNTHETIC_CONSENT_REQUIRED",
+    "enabled": true,
+    "totals": "UNCHANGED",
+    "result": "CONTROL_READBACK_PASS"
+  },
+  "browserHeaders": {
+    "result": "MCP_BROWSER_HEADERS_READBACK_PASS",
+    "httpStatus": 204,
+    "allowOrigin": "https://main.d143q5ravxp5av.amplifyapp.com",
+    "allowHeaders": "Authorization, Content-Type, Accept, MCP-Protocol-Version, MCP-Session-Id",
+    "allowMethods": "GET, POST, OPTIONS",
+    "authenticatedRequests": 0,
+    "toolCalls": 0
+  },
+  "runs": {
+    "preflight": "39176170451",
+    "emptyQueueAndDiagnostics": "39176227439",
+    "scheduleDeactivation": "39176273700",
+    "runtimePublication": "39176312070",
+    "scheduleRestoration": "39176457110",
+    "frontendPublication": "39176459024"
+  },
+  "scope": {
+    "protocol": "2025-11-25",
+    "endpoint": "https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com/mcp",
+    "tools": [
+      "list_groups",
+      "list_group_decisions",
+      "get_decision_progress",
+      "get_decision_outcome"
+    ],
+    "nativeAlexa": false,
+    "languageModelCalls": 0,
+    "authenticatedMcpQualification": "NOT_EXECUTED",
+    "manualAcceptance": "PENDING"
+  },
+  "validation": {
+    "typecheck": "PASS",
+    "lintAndBoundaries": "PASS",
+    "build": "PASS",
+    "npmAudit": "0 vulnerabilities",
+    "automatedProductTestsDispatched": false,
+    "automaticPushCI": {
+      "run": "39176166429",
+      "outcome": "CANCELLED after npm run check began; no complete test result claimed"
+    },
+    "automaticQualification": {
+      "run": "39176205350",
+      "outcome": "PROVENANCE_REJECTED before release/journey/provider lanes; not MCP qualification"
+    }
+  },
+  "existingActivity": "An already queued old-source decision job completed normally before the empty guarded cutover; it was not a new test dispatched by this task."
+}

@@ -1,6 +1,6 @@
 # ALX01 — Shared decision MCP assistant
 
-Status: IN_PROGRESS/A. User manual acceptance; no automated product tests.
+Status: PUBLISHED; A claim released. User manual acceptance pending. No product tests were dispatched; an automatic push check started and was cancelled (see receipt).
 
 Build a self-hosted authenticated MCP endpoint and an on-demand **Simulated Alexa+** chat inside each decision. Native Alexa+ partner tools are unavailable; this is our web simulator, not a native Alexa integration.
 
@@ -11,3 +11,5 @@ Open a decision → **Ask assistant**. Try “Who still needs to answer?”, “
 Delivery: compatible operations-managed API/worker publication, authenticated GET/POST /mcp plus unauthenticated OPTIONS, then matching frontend. Preserve existing runtime files, admission, totals and original worker schedule. Record publication hashes and matching workflow receipts; compilation/build is not manual end-to-end acceptance.
 
 References: [hackathon FAQ](https://amazonappdev2026.devpost.com/details/faqs), [MCP transport specification](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports).
+
+Published source `9807565505d9a657eafbc8d793680cf76a634974`, frontend Amplify job 134. [Exact publication receipt](../../../../review-artifacts/ALX01/publication.json). Backend/frontend release, three managed routes, browser CORS headers and original enabled schedule read back successfully. Authenticated MCP handshake/tool execution remains for the user’s manual check; no native Alexa integration or model inference is claimed.

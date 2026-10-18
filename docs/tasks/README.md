@@ -1,3 +1,5 @@
+Current A implementation: [ALX01 — shared decision MCP assistant](active/alexa/ALX01/ticket.md). Published; A claim released and user manual acceptance pending.
+
 New frontend batch: [FF — focused UI polish](active/ff/README.md), starting with [FF01 registration and sign-in](active/ff/FF01/README.md). READY/unclaimed for B after the current claim; no parallel work.
 
 **FIX04 added:** [List/approve access requests](active/fix/FIX04/ticket.md) is READY/unclaimed for B after FIX03. Queue FIX01 → FIX02 → FIX03 → FIX04; no current claim interrupted or real account approved.
