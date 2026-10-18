@@ -1674,3 +1674,46 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 
 .ke-decision-row-open .ke-decision-row-content { flex: 1; min-width: 0; }
 .ke-decision-row-open > .ke-decision-status-chip { margin-left: auto; max-width: 45%; text-align: center; justify-content: center; }
+
+/* On-demand shared assistant; own modal, no extra dashboard clutter. */
+.ke-alexa-chat { width: min(620px, calc(100vw - 24px)); max-height: calc(100dvh - 32px); padding: 0; border: 1px solid #dce5dc; border-radius: 18px; color: #173c30; background: #fff; box-shadow: 0 24px 80px #102c1f38; }
+.ke-alexa-chat[open] { display: flex; flex-direction: column; }
+.ke-alexa-chat::backdrop { background: #10251d80; backdrop-filter: blur(3px); }
+.ke-alexa-chat > header { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; padding: 23px 24px 17px; border-bottom: 1px solid #e4eae0; }
+.ke-alexa-eyebrow { color: #6c7e6e; font-size: 10px; letter-spacing: .09em; text-transform: uppercase; }
+.ke-alexa-chat h2 { margin: 6px 0 5px; font-size: 23px; line-height: 1.3; letter-spacing: -.5px; }
+.ke-alexa-chat header p { margin: 0; color: #687c6c; font-size: 12px; overflow-wrap: anywhere; }
+.ke-alexa-chat button.ke-alexa-close { display: grid; place-items: center; flex: none; width: 32px; min-height: 32px; padding: 6px; margin: 0; border: 0; border-radius: 50%; color: #607566; background: transparent; box-shadow: none; }
+.ke-alexa-close svg { width: 17px; height: 17px; }
+.ke-alexa-body { overflow: auto; min-height: 0; padding: 17px 24px; }
+.ke-alexa-connection { margin: 0 0 14px; color: #697d6d; font-size: 11px; line-height: 1.5; }
+.ke-alexa-connection[data-connected="true"] { color: #3c704d; }
+.ke-alexa-suggestions, .ke-alexa-groups { display: flex; flex-wrap: wrap; gap: 7px; }
+.ke-alexa-chat .ke-alexa-suggestions button, .ke-alexa-chat .ke-alexa-groups button { min-height: 32px; padding: 6px 9px; margin: 0; border: 1px solid #dfe7d9; border-radius: 8px; color: #45634e; background: #f5f8f1; font-size: 11px; font-weight: 450; box-shadow: none; }
+.ke-alexa-messages { display: grid; gap: 16px; list-style: none; padding: 0; margin: 20px 0 12px; }
+.ke-alexa-messages li { min-width: 0; }
+.ke-alexa-question { width: fit-content; max-width: 90%; padding: 9px 12px; margin: 0 0 9px auto; border-radius: 11px 11px 3px 11px; color: #315a40; background: #eef4e9; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.ke-alexa-answer { margin: 0; padding: 0 2px; color: #395a44; font-size: 13px; line-height: 1.75; white-space: pre-line; overflow-wrap: anywhere; }
+.ke-alexa-notice, .ke-alexa-working { color: #637667; font-size: 12px; line-height: 1.6; }
+.ke-alexa-trace { margin-top: 20px; color: #728274; font-size: 10px; }
+.ke-alexa-trace summary { min-height: 26px; cursor: pointer; }
+.ke-alexa-trace p, .ke-alexa-trace li { font-size: 10px; line-height: 1.6; overflow-wrap: anywhere; }
+.ke-alexa-trace ul { padding-left: 17px; }
+.ke-alexa-chat > form { flex: none; padding: 15px 24px 18px; border-top: 1px solid #e4eae0; }
+.ke-alexa-chat form > label { display: block; margin: 0 0 7px !important; color: #536d5b; font-size: 11px; }
+.ke-alexa-chat form > div { display: flex; gap: 8px; }
+.ke-alexa-chat form input { flex: 1; min-width: 0; width: 100%; margin: 0; padding: 10px 12px; border: 1px solid #d5e0d1; border-radius: 9px; color: #173c30; background: #fff; font-size: 12px; }
+.ke-alexa-chat form button { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 9px 13px; margin: 0; border-radius: 9px; font-size: 12px; }
+.ke-alexa-chat form button svg { width: 14px; height: 14px; }
+.ke-alexa-chat form p { margin: 10px 0 0; color: #718173; font-size: 10px; line-height: 1.6; }
+:root[data-theme="dark"] .ke-alexa-chat { background: #1c2b21; color: #d4e8d9; border-color: #405945; }
+:root[data-theme="dark"] .ke-alexa-chat > header, :root[data-theme="dark"] .ke-alexa-chat > form { border-color: #364e3e; }
+:root[data-theme="dark"] .ke-alexa-chat header p, :root[data-theme="dark"] .ke-alexa-eyebrow, :root[data-theme="dark"] .ke-alexa-trace, :root[data-theme="dark"] .ke-alexa-chat form p, :root[data-theme="dark"] .ke-alexa-notice, :root[data-theme="dark"] .ke-alexa-working, :root[data-theme="dark"] .ke-alexa-connection { color: #a9c1b0; }
+:root[data-theme="dark"] .ke-alexa-connection[data-connected="true"] { color: #acd5b6; }
+:root[data-theme="dark"] .ke-alexa-question { color: #d0e5d5; background: #304b37; }
+:root[data-theme="dark"] .ke-alexa-answer { color: #bfd7c7; }
+:root[data-theme="dark"] .ke-alexa-chat .ke-alexa-suggestions button, :root[data-theme="dark"] .ke-alexa-chat .ke-alexa-groups button { color: #c2dcc9; background: #293f30; border-color: #415d49; }
+:root[data-theme="dark"] .ke-alexa-chat button.ke-alexa-close { color: #bfd2c5; background: transparent; }
+:root[data-theme="dark"] .ke-alexa-chat form > label { color: #adc8b7; }
+:root[data-theme="dark"] .ke-alexa-chat form input { color: #d2e6d8; background: #22372a; border-color: #425d4a; }
+@media (max-width: 600px) { .ke-alexa-chat > header { padding: 20px 18px 15px; } .ke-alexa-body { padding: 15px 18px; } .ke-alexa-chat > form { padding: 13px 18px 16px; } .ke-alexa-chat h2 { font-size: 21px; } }

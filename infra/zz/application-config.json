@@ -19,6 +19,9 @@
     "POST /groups/{groupId}/delete",
     "OPTIONS /groups/{groupId}/delete",
     "GET /invitations",
-    "OPTIONS /invitations"
+    "OPTIONS /invitations",
+    "GET /mcp",
+    "POST /mcp",
+    "OPTIONS /mcp"
   ]
 }

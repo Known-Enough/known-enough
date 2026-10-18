@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { KnownEnough as KE, publicChoiceOptions } from '@deal-table/contracts';
 import { PrivateAnswersModal } from './private-answers-modal';
 import { PageIcon } from './app-chrome';
 import { decisionPhaseLabel, decisionStatusText } from './decision-copy';
 import { backgroundRequest, submitBackgroundRequest, type BackgroundReceipt } from './background-negotiation';
+
+const AlexaChat = lazy(() => import('./alexa-chat'));
 
 class DecisionRequestError extends Error {
   constructor(readonly status: number, readonly code: string, readonly category: string, readonly reference: string) { super(code); }
@@ -52,13 +54,14 @@ export function ruleText(rule: KE.ValidationRule, variables: Variable[]): string
   }
 }
 
-export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNegotiation = false, onQueued, onDirtyChange, staged = false, title, onRefresh, refreshing = false }: {
-  title?: string; onRefresh?: () => void; refreshing?: boolean;
+export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNegotiation = false, onQueued, onDirtyChange, staged = false, title, onRefresh, refreshing = false, mcpUrl, groupId }: {
+  mcpUrl?: string; groupId?: string; title?: string; onRefresh?: () => void; refreshing?: boolean;
   snapshot: KE.PublicDecisionSnapshot; owner: KE.OwnerDecisionSnapshot | null;
   api: (path: string, init?: RequestInit) => Promise<Response>; refresh: () => Promise<void>;
   backgroundNegotiation?: boolean; onQueued?: (receipt: BackgroundReceipt) => void; onDirtyChange?: (dirty: boolean) => void; staged?: boolean;
 }) {
   const [text, setText] = useState('');
+  const [assistantOpen, setAssistantOpen] = useState(false);
   const [syntheticProcessing, setSyntheticProcessing] = useState(false);
   const [detailStep, setDetailStep] = useState<'shared' | 'proposal' | null>(null);
   const detailDialog = useRef<HTMLDialogElement>(null);
@@ -249,6 +252,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
         if (proposal || owner.pendingQuestions.some(question => question.status === 'PENDING') || owner.disclosurePermissions.some(permission => permission.status === 'PENDING')) setDetailStep('proposal');
         else void generate();
       }}>{proposal ? ['AGREED', 'CLOSED'].includes(snapshot.status) ? 'View outcome' : 'View proposal' : owner.pendingQuestions.some(question => question.status === 'PENDING') || owner.disclosurePermissions.some(permission => permission.status === 'PENDING') ? 'Review follow-up' : 'Find an outcome'}</button>}
+      {staged && mcpUrl && <button type="button" className="ke-response-text-button" onClick={() => setAssistantOpen(true)}><PageIcon name="Sparkles" />Ask assistant</button>}
       {!staged && <button type="button" className="ke-response-text-button" onClick={() => setDetailStep('shared')}>Decision details<PageIcon name="ChevronRight" /></button>}
       {!owner && proposal && <button type="button" onClick={() => setDetailStep('proposal')}>View proposal</button>}
       </div>
@@ -332,6 +336,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
     </section>}
     {detailStep === 'proposal' && !proposal && owner && <>{recoveryControls}{notice && <p role="status" className="ke-outcome-notice">{notice}</p>}</>}
     </dialog>
+    {assistantOpen && mcpUrl && <Suspense fallback={<p role="status">Opening assistant…</p>}><AlexaChat decisionId={decisionId} title={title ?? snapshot.frame.title} groupId={groupId} endpoint={mcpUrl} api={api} onClose={() => setAssistantOpen(false)} /></Suspense>}
     {owner && <PrivateAnswersModal embedded open={true} owner={owner} busy={busy} blocked={answersBlocked} saveBlocked={false} notesLocked={!!interpretationRequest} notes={text} consent={syntheticProcessing} notice={notice} recovery={recoveryControls}
         onClose={() => {}} onNotes={setText} onConsent={setSyntheticProcessing} onInterpret={interpret} onDirty={setStructuredDirty} onEditingChange={setEditingAnswers}
         onSave={payload => command('CONFIRM_PRIVATE_ANSWERS', payload)} describeValue={valueText} describeCondition={describeCondition} />}

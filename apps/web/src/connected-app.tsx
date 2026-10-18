@@ -146,7 +146,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
         </section>}
         {snapshot && <div className="ke-load-reveal"><ConnectedDecision key={`${session.accessToken}:${snapshot.contextToken}`}
           snapshot={snapshot} owner={owner} backgroundNegotiation={background} staged
-          title={decisionTitle?.id === snapshot.frame.decisionId ? decisionTitle.title : snapshot.frame.title} refreshing={busy}
+          mcpUrl={config.apiBaseUrl + '/mcp'} {...(view.groupId ? { groupId: view.groupId } : {})} title={decisionTitle?.id === snapshot.frame.decisionId ? decisionTitle.title : snapshot.frame.title} refreshing={busy}
           onRefresh={() => { if (dirty.current && !window.confirm('Refresh and discard unsaved input?')) return; dirty.current = false; void load().catch(() => {}); }} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} refresh={async () => { dirty.current = false; await load(); }}
           onDirtyChange={value => { dirty.current = value; }} onQueued={receipt => { if (!owner) return; setTarget({ decisionId: snapshot.frame.decisionId, contextToken: snapshot.contextToken, semanticVersion: snapshot.semanticVersion, ownerParticipantId: owner.ownerParticipantId, expiresAt: receipt.expiresAt }); }} /></div>}
       </dialog> : session.kind === 'display' ? <section className="ke-card"><h2>Shared screen</h2><p>Open a shared decision link from your group to show its progress. This screen cannot enter private needs or approve proposals.</p></section>

@@ -1,3 +1,4 @@
+import { withSharedMcp } from '../../apps/api/src/mcp-server.ts';
 import { createPartitionManagedDriver, createPartitionGroupSession } from '@deal-table/adapters/partition-request';
 import { partitionDeploymentOptions } from '../../apps/api/src/partition-deployment.ts';
 import { createSignupIntake, isSignupIntakeEvent } from '../../apps/api/src/signup-intake.ts';
@@ -37,7 +38,7 @@ export async function handler(event: HttpApiEvent): Promise<unknown> {
       const driver = createPartitionManagedDriver(trusted.managed);
       intake = createSignupIntake({ userPoolId: trusted.identity.userPoolId, participantClientId: trusted.identity.participantClientId,
         session: createPartitionGroupSession(driver.groups, { emailKey: trusted.emailKey, ...(trusted.sharedTestEmailHashes ? { sharedTestEmailHashes: trusted.sharedTestEmailHashes } : {}) }) });
-      selected = createPartitionReleaseHandler({ configurationBytes,
+      selected = withSharedMcp(createPartitionReleaseHandler({ configurationBytes,
         ...(lifecycle ? { lifecycle } : {}),
         ...(jobs ? { jobs: { sourceSha: jobs.sourceSha } } : {}),
         manifestBytes, release,
@@ -49,7 +50,7 @@ export async function handler(event: HttpApiEvent): Promise<unknown> {
           if (item.PK?.S !== 'NP#GROUPS' || item.SK?.S !== 'STATE' || typeof item.version?.N !== 'string'
             || !/^[1-9][0-9]*$/.test(item.version.N) || typeof item.payload?.S !== 'string') throw new Error('PARTITION_RELEASE_INVALID');
           return { version: Number(item.version.N), payload: Buffer.from(item.payload.S) };
-        } });
+        } }), config.allowedOrigin);
     }
     if (trigger) return await intake!(event);
     return await selected(event);
