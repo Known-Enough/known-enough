@@ -78,8 +78,8 @@ async function fixture(page: Page, mode: 'normal' | 'conflict' | 'lost-create' |
 test('one choice editor saves the current revision and clearly labels AI suggestions', async ({ page }) => {
   const f = await fixture(page);
   await expect(page.getByRole('button', { name: 'Create decision', exact: true })).toHaveCount(1);
-  await expect(page.getByRole('button', { name: 'Back to my idea', exact: true })).toHaveCount(1);
-  await expect(page.getByText('AI suggestions for review.', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Back', exact: true })).toHaveCount(1);
+  await expect(page.getByText('This draft includes AI suggestions.', { exact: false })).toBeVisible();
   await expect(page.getByLabel('Decision title', { exact: true })).toHaveCount(0);
   await page.getByLabel('Decision name', { exact: true }).fill('Edited outing');
   await page.getByRole('button', { name: 'Save draft', exact: true }).click();
@@ -114,18 +114,21 @@ test('lost creation response resolves by authenticated reads with one create', a
 test('late AI response stays separate from newer manual editor changes', async ({ page }) => {
   const f = await fixture(page, 'late-ai');
   await page.getByRole('button', { name: 'Start a decision', exact: true }).click();
-  await page.getByLabel('Tell me what you want to decide', { exact: true }).fill('Choose an activity.');
-  await expect(page.getByRole('button', { name: 'Continue with AI', exact: true })).toBeEnabled();
-  await page.getByRole('button', { name: 'Continue with AI', exact: true }).click();
+  await page.getByLabel('Describe the decision', { exact: true }).fill('Choose an activity.');
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Suggest options', exact: true })).toBeEnabled();
+  await page.getByRole('button', { name: 'Suggest options', exact: true }).click();
   await expect.poll(f.aiCalls).toBe(1);
-  await page.getByRole('button', { name: 'Add or edit choices without AI', exact: true }).click();
   await page.getByLabel('Decision name', { exact: true }).fill('My newer manual work');
-  await page.getByLabel('What are you choosing?', { exact: true }).fill('Local activity');
-  await page.getByLabel('Which options are you considering? One per line', { exact: true }).fill('Drawing\nReading');
+  await page.getByRole('button', { name: 'Add option', exact: true }).click();
+  await page.getByLabel('Option 1 for Options', { exact: true }).fill('Drawing');
+  await page.getByRole('button', { name: 'Add option', exact: true }).click();
+  await page.getByLabel('Option 2 for Options', { exact: true }).fill('Reading');
   f.releaseAI();
-  await expect(page.locator('.ke-wizard-notice')).toHaveText('The earlier AI draft is saved separately. Your current editor changes are kept.');
+  await expect(page.locator('.ke-wizard-notice')).toHaveText('These suggestions use your earlier description. Your newer edits are kept.');
   await expect(page.getByLabel('Decision name', { exact: true })).toHaveValue('My newer manual work');
-  await expect(page.getByRole('textbox', { name: /^Which options are you considering/ })).toHaveValue('Drawing\nReading');
+  await expect(page.getByLabel('Option 1 for Options', { exact: true })).toHaveValue('Drawing');
+  await expect(page.getByLabel('Option 2 for Options', { exact: true })).toHaveValue('Reading');
   expect(f.aiCalls()).toBe(1); expect(f.edits()).toBe(0);
 });
 
@@ -134,7 +137,8 @@ test('a saved AI result recovered after reload cannot replace a restored newer m
   await expect.poll(() => page.evaluate(() => sessionStorage.getItem('ke-draft-request:garden'))).toBeNull();
   await page.getByRole('button', { name: 'Start a decision', exact: true }).click();
   await expect(page.getByLabel('Decision name', { exact: true })).toHaveValue('My restored manual work');
-  await expect(page.getByRole('textbox', { name: /^Which options are you considering/ })).toHaveValue('Drawing\nReading');
+  await expect(page.getByLabel('Option 1 for Task', { exact: true })).toHaveValue('Drawing');
+  await expect(page.getByLabel('Option 2 for Task', { exact: true })).toHaveValue('Reading');
   expect(f.aiCalls()).toBe(0); expect(f.edits()).toBe(0);
 });
 
@@ -144,8 +148,8 @@ test('choice fields and creation controls remain reachable in both themes at des
     await page.setViewportSize(viewport);
     for (const colorScheme of ['light','dark'] as const) {
       await page.emulateMedia({ colorScheme });
-      const options = page.getByRole('textbox', { name: /^Which options are you considering/ });
-      await expect(options).toHaveCount(2); await options.nth(1).scrollIntoViewIfNeeded(); await expect(options.nth(1)).toBeVisible();
+      const options = page.getByLabel('Option 2 for Day', { exact: true });
+      await options.scrollIntoViewIfNeeded(); await expect(options).toBeVisible();
       const create = page.getByRole('button', { name: 'Create decision', exact: true });
       await create.scrollIntoViewIfNeeded(); await expect(create).toBeVisible(); await expect(create).toBeEnabled();
       const box = await create.boundingBox(); expect(box).not.toBeNull(); expect(box!.y).toBeGreaterThanOrEqual(0);

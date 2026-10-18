@@ -65,15 +65,15 @@ test('new users request access, operator admits, organizer invites a new recipie
     await host.getByRole('button', { name: 'Refresh group' }).click();
     await expect(host.getByRole('button', { name: 'Remove Omar' })).toBeVisible();
     await host.getByRole('button', { name: 'Start a decision' }).click();
-    await host.getByLabel('Tell me what you want to decide').fill('Choose a gallery meetup venue and time.');
-    await host.getByRole('button', { name: 'Continue with AI', exact: true }).click();
-    await expect(host.getByRole('heading', { name: 'Your decision, ready to review.' })).toBeVisible();
-    await host.getByText('Adjust the wording', { exact: true }).click(); await host.getByLabel('Decision title', { exact: true }).fill('Garden club gallery meetup');
-    await expect(host.getByRole('checkbox', { name: 'I’ve reviewed these shared choices and who needs to approve.' })).toBeDisabled();
-    await expect(host.getByRole('button', { name: 'Create decision' })).toBeDisabled();
-    await host.getByRole('button', { name: 'Save changes' }).click();
-    await expect(host.getByRole('checkbox', { name: 'I’ve reviewed these shared choices and who needs to approve.' })).not.toBeChecked();
-    await host.getByRole('checkbox', { name: 'I’ve reviewed these shared choices and who needs to approve.' }).check();
+    await host.getByLabel('Describe the decision').fill('Choose a gallery meetup venue and time.');
+    await host.getByRole('button', { name: 'Continue', exact: true }).click(); await host.getByRole('button', { name: 'Suggest options', exact: true }).click(); await host.getByRole('button', { name: 'Use this saved draft', exact: true }).click();
+    await expect(host.getByRole('heading', { name: 'Review your options' })).toBeVisible();
+    await host.getByLabel('Decision name', { exact: true }).fill('Garden club gallery meetup');
+
+    await expect(host.getByRole('button', { name: 'Save draft', exact: true })).toBeEnabled();
+    await host.getByRole('button', { name: 'Save draft' }).click();
+
+
     await host.getByRole('button', { name: 'Create decision' }).click();
     await expect(host.getByRole('heading', { name: 'Shared frame', exact: true })).toBeVisible();
     await expect(host.getByRole('heading', { name: 'Garden club gallery meetup', exact: true })).toBeVisible();

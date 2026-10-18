@@ -49,11 +49,11 @@ test('four new independent browser owners create a garden decision from blank en
       await expect(guest.getByRole('heading', { name: 'Fresh garden club', exact: true })).toBeVisible();
     }
     await host.getByRole('button', { name: 'Start a decision' }).click();
-    await host.getByLabel('Tell me what you want to decide').fill('Choose our garden workday activity and time.');
-    await host.getByRole('button', { name: 'Continue with AI', exact: true }).click();
-    await expect(host.getByRole('heading', { name: 'Your decision, ready to review.' })).toBeVisible();
-    await expect(host.getByText('Planting, Watering', { exact: false })).toBeVisible();
-    await host.getByRole('checkbox', { name: 'I’ve reviewed these shared choices and who needs to approve.' }).check();
+    await host.getByLabel('Describe the decision').fill('Choose our garden workday activity and time.');
+    await host.getByRole('button', { name: 'Continue', exact: true }).click(); await host.getByRole('button', { name: 'Suggest options', exact: true }).click(); await host.getByRole('button', { name: 'Use this saved draft', exact: true }).click();
+    await expect(host.getByRole('heading', { name: 'Review your options' })).toBeVisible();
+    await expect(host.getByLabel('Option 1 for Activity', { exact: true })).toHaveValue('Planting');
+
     let releaseCreate!: () => void; let markCreateStarted!: () => void;
     const createGate = new Promise<void>(resolve => { releaseCreate = resolve; });
     const createStarted = new Promise<void>(resolve => { markCreateStarted = resolve; });

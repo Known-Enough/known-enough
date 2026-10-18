@@ -21,16 +21,16 @@ export function DecisionGuide({ onReturn }: { onReturn: () => void }) {
       {step === 0 && <>
         <p>Describe the decision naturally. Include options you already know and anything still undecided.</p>
         <blockquote>“Choose our group dinner: Olive Room, Noodle Corner or Garden Table, on 16 October 2026 or 17 October 2026. We don’t know which works best for everyone.”</blockquote>
-        <div className="ke-guide-note"><strong>A little detail helps.</strong><p>List the shared alternatives, without choosing for anyone else. In the real form, Continue with AI prepares a draft; it does not create a decision or confirm anyone’s answers.</p></div>
-        <details><summary>What if I only know the basic idea?</summary><p>Open <strong>Help me describe my idea</strong> to prepare your description without AI. Use <strong>Add or edit choices without AI</strong> to enter topics and options yourself. The editor asks specific questions for missing fields. AI help is optional and never required to create a valid decision.</p></details>
+        <div className="ke-guide-note"><strong>A little detail helps.</strong><p>List the shared alternatives, without choosing for anyone else. Choose Continue to review your options. This does not call AI or create a decision.</p></div>
+        <details><summary>What if I only know the basic idea?</summary><p>Use <strong>Help me get started</strong> for optional writing assistance. Your text stays unchanged until you choose Use this description. On Options, add your own alternatives or use <strong>Suggest options</strong> and add only the suggestions you want. You can complete the decision without AI.</p></details>
       </>}
       {step === 1 && <>
-        <p>Review the saved draft and answer any shared follow-up questions. New drafts get a short name from the public idea. You can edit the Decision title—for example, “Group dinner plan”—without changing its stable link.</p>
+        <p>Review your options in the second step. Add, rename or remove individual options, and edit the Decision name—for example, “Group dinner plan”—without changing its stable link.</p>
         <div className="ke-guide-sample"><span className="ke-guide-view-label">Shared draft · organizer review</span><h3>Group dinner plan</h3>
           <dl><div><dt>Restaurant</dt><dd>Olive Room · Noodle Corner · Garden Table</dd></div><div><dt>Date</dt><dd>16 October 2026 · 17 October 2026</dd></div><div><dt>People</dt><dd>Alex and Sam</dd></div></dl>
         </div>
-        <p>Edit the choice names and options in the builder, fill any missing details, then choose <strong>Create decision</strong>. The app constructs the decision from these choices. Each participant adds their own private answers; there is no separate shared-choice confirmation step.</p>
-        <p className="ke-guide-disclaimer">This example supplies only restaurants and dates. It does not establish prices, availability or dietary suitability. The preview compares at most 64 combinations; suggestions still need review.</p>
+        <p>Edit the topic names and option rows, fill any missing details, then choose <strong>Create decision</strong>. The app constructs the decision from these choices. Each participant adds their own private answers; there is no separate shared-choice confirmation step.</p>
+        <p className="ke-guide-disclaimer">This example supplies only restaurants and dates. It does not establish prices, availability or dietary suitability. Keep the choices manageable; suggestions still need your review.</p>
       </>}
       {step === 2 && <>
         <p><strong>Open decision</strong> opens the decision modal with its summary, everyone’s progress and <strong>What works for you?</strong> directly available. Choose and save your private answers without waiting for others. Listed options are saved directly without AI interpretation.</p>

@@ -18,14 +18,14 @@ for(const unknown of [false,true]) test(`draft503 gives honest cause and reload 
   await route.fulfill({status,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify(body)});
  });
  await page.goto('/?group=garden');const start=page.getByRole('button',{name:'Start a decision',exact:true});await expect(start).toBeEnabled();await expect.poll(()=>inventoryReady).toBe(true);await start.click();
- await page.getByLabel('Tell me what you want to decide').fill('PUBLIC_TRANSIENT_OBJECTIVE');await page.getByRole('button',{name:'Continue with AI',exact:true}).click();
- await expect(page.getByText(unknown?'The outcome is not confirmed. Recover this same request before starting another.':'AI drafting is unavailable on this server. Recover the request before trying again later.',{exact:true})).toBeVisible();
+ await page.getByLabel('Describe the decision',{exact:true}).fill('PUBLIC_TRANSIENT_OBJECTIVE');await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('button',{name:'Suggest options',exact:true}).click();
+ await expect(page.getByRole('dialog').locator('.ke-wizard-notice')).toContainText(unknown?'The outcome is not confirmed. Recover this same request before starting another.':'AI drafting is unavailable on this server. Recover the request before trying again later.');
  expect(await page.locator('body').innerText()).not.toMatch(/PRIVATE_SERVER_ERROR_CANARY|Check your account and organizer access/);
  expect(await page.evaluate(()=>sessionStorage.getItem('ke-draft-request:garden'))).toBe(key);
- expect(await page.evaluate(()=>JSON.stringify({...sessionStorage,...localStorage}))).not.toContain('PUBLIC_TRANSIENT_OBJECTIVE');
- await page.reload();await page.getByRole('button',{name:'Continue your draft',exact:true}).click();await expect(page.getByRole('button',{name:'Check progress',exact:true})).toBeVisible();expect(drafts).toBe(1);
+ expect(await page.evaluate(()=>JSON.stringify({...sessionStorage,...localStorage}))).not.toContain('PRIVATE_SERVER_ERROR_CANARY');expect(await page.evaluate(()=>sessionStorage.getItem('ke-draft-request:garden'))).toBe(key);
+ await page.reload();await page.getByRole('button',{name:'Continue your draft',exact:true}).click();await page.getByText('Previous suggestions need a check',{exact:true}).click();await expect(page.getByRole('button',{name:'Check progress',exact:true})).toBeVisible();expect(drafts).toBe(1);
  const release=page.getByRole('button',{name:'Close unfinished request',exact:true});
- if(unknown){await expect(release).toHaveCount(0);await expect(page.getByText('The previous AI result could not be confirmed.',{exact:false})).toBeVisible();expect(releases).toBe(0);}
- else{await expect(release).toBeEnabled();await release.click();await expect(page.getByText('The previous request is closed.',{exact:false})).toBeVisible();expect(await page.evaluate(()=>sessionStorage.getItem('ke-draft-request:garden'))).toBeNull();expect(releases).toBe(1);}
+ if(unknown){await expect(release).toHaveCount(0);await expect(page.getByText('The result hasn’t been confirmed.',{exact:false})).toBeVisible();expect(releases).toBe(0);}
+ else{await expect(release).toBeEnabled();await release.click();await expect(page.getByRole('dialog').locator('.ke-wizard-notice')).toContainText('The previous request is closed.');expect(await page.evaluate(()=>sessionStorage.getItem('ke-draft-request:garden'))).toBeNull();expect(releases).toBe(1);}
  expect(drafts).toBe(1);
 });

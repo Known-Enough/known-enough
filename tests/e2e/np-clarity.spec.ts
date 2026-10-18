@@ -98,34 +98,31 @@ test('public draft takes keyboard focus; malformed responses show a safe retry m
     await api.groups.create({ kind: 'participant', subject: 'iris' }, { name: 'Small club', idempotencyKey: 'small' });
     const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: /^Open group / }).first().click();
     await page.getByRole('button', { name: 'Start a decision' }).click();
-  await page.getByLabel('Tell me what you want to decide').fill('Choose a gallery meetup.'); await page.getByRole('button', { name: 'Continue with AI', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Your decision, ready to review.' })).toBeFocused();
-    await page.getByRole('checkbox', { name: 'I’ve reviewed these shared choices and who needs to approve.' }).check();
-    await page.getByText('Adjust the wording', { exact: true }).click(); await page.getByLabel('Decision title', { exact: true }).fill('Changed title');
-    await expect(page.getByRole('checkbox', { name: 'I’ve reviewed these shared choices and who needs to approve.' })).not.toBeChecked();
+  await page.getByLabel('Describe the decision').fill('Choose a gallery meetup.'); await page.getByRole('button', { name: 'Continue', exact: true }).click(); await page.getByRole('button', { name: 'Suggest options', exact: true }).click(); await page.getByRole('button', { name: 'Use this saved draft', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Review your options' })).toBeFocused();
+
+    await page.getByLabel('Decision name', { exact: true }).fill('Changed title');
+
     await page.route('https://api.example.test/groups/**/drafts', route => route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: 'PRIVATE_PROVIDER_PAYLOAD invalid json' }));
-    await page.getByRole('button', { name: 'Back to my idea', exact: true }).click();
-    await page.getByRole('button', { name: 'Continue with AI', exact: true }).click();
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await page.getByRole('button', { name: 'Continue', exact: true }).click(); await page.getByRole('button', { name: 'Suggest options', exact: true }).click();
     await expect(page.getByText('The action could not be completed. Refresh its current state before trying again.', { exact: false })).toBeVisible();
     expect(await page.locator('body').innerText()).not.toContain('PRIVATE_PROVIDER_PAYLOAD');
   } finally { await context.close(); await api.close(); }
 });
 
-test('delayed draft save clears premature review before creation can proceed', async ({ browser }) => {
+test('delayed draft save keeps creation disabled until the saved revision is confirmed', async ({ browser }) => {
   const api = await npApi(); const context = await browser.newContext();
   try {
     await connect(context, api, 'iris'); await api.call('iris', '/account/register', { displayName: 'Iris' }); await api.approve('iris');
     await api.groups.create({ kind: 'participant', subject: 'iris' }, { name: 'Small club', idempotencyKey: 'small' });
     const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: /^Open group / }).first().click();
     await page.getByRole('button', { name: 'Start a decision' }).click();
-  await page.getByLabel('Tell me what you want to decide').fill('Choose a fictional gallery meetup.');
-    await page.getByRole('button', { name: 'Continue with AI', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Your decision, ready to review.' })).toBeVisible();
-    const reviewed = page.getByRole('checkbox', { name: 'I’ve reviewed these shared choices and who needs to approve.' });
-    const create = page.getByRole('button', { name: 'Create decision' });
-    const unsaved = page.getByText('You changed the wording. Save it first, then confirm your review.', { exact: true });
-    await reviewed.check(); await page.getByText('Adjust the wording', { exact: true }).click(); await page.getByLabel('Decision title', { exact: true }).fill('Edited gallery meetup');
-    await expect(unsaved).toBeVisible(); await expect(reviewed).not.toBeChecked(); await expect(create).toBeDisabled();
+  await page.getByLabel('Describe the decision').fill('Choose a fictional gallery meetup.');
+    await page.getByRole('button', { name: 'Continue', exact: true }).click(); await page.getByRole('button', { name: 'Suggest options', exact: true }).click(); await page.getByRole('button', { name: 'Use this saved draft', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Review your options' })).toBeVisible();
+    const create = page.getByRole('button', { name: 'Create decision', exact: true });
+    await page.getByLabel('Decision name', { exact: true }).fill('Edited gallery meetup');
     let markSaveStarted!: () => void; let releaseSave!: () => void;
     const saveStarted = new Promise<void>(resolve => { markSaveStarted = resolve; });
     const saveGate = new Promise<void>(resolve => { releaseSave = resolve; });
@@ -133,13 +130,12 @@ test('delayed draft save clears premature review before creation can proceed', a
       if (route.request().method() === 'POST') { markSaveStarted(); await saveGate; }
       await route.fallback();
     });
-    await page.getByRole('button', { name: 'Save changes' }).click();
+    await page.getByRole('button', { name: 'Save draft', exact: true }).click();
     await saveStarted;
-    try { await expect(reviewed).toBeDisabled(); await expect(create).toBeDisabled(); } finally { releaseSave(); }
-    await expect(reviewed).not.toBeChecked(); await expect(create).toBeDisabled();
-    await expect(unsaved).toHaveCount(0); // The saved revision has now replaced the dirty draft.
+    try { await expect(create).toBeDisabled(); } finally { releaseSave(); }
+    await expect(page.getByRole('button', { name: 'Save draft', exact: true })).toHaveCount(0);
+    await expect(create).toBeEnabled();
     await expect(page.getByRole('dialog')).toHaveAttribute('open', '');
-    await reviewed.check(); await expect(create).toBeEnabled();
   } finally { await context.close(); await api.close(); }
 });
 
@@ -150,19 +146,20 @@ test('unanswered public questions survive saving and explicit answers create a r
     await api.groups.create({ kind: 'participant', subject: 'iris' }, { name: 'Small club', idempotencyKey: 'small' });
     const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: /^Open group / }).first().click();
     await page.getByRole('button', { name: 'Start a decision' }).click();
-  await page.getByLabel('Tell me what you want to decide').fill('Choose a gallery meetup.');
-    await page.getByRole('button', { name: 'Continue with AI', exact: true }).click();
+  await page.getByLabel('Describe the decision').fill('Choose a gallery meetup.');
+    await page.getByRole('button', { name: 'Continue', exact: true }).click(); await page.getByRole('button', { name: 'Suggest options', exact: true }).click(); await page.getByRole('button', { name: 'Use this saved draft', exact: true }).click();
     const question = page.getByText('Should this meetup be indoors or outdoors?', { exact: true });
     await expect(question).toBeVisible();
     const create = page.getByRole('button', { name: 'Create decision', exact: true });
-    await expect(create).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Let AI update the draft', exact: true })).toBeDisabled();
+    await expect(create).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Update suggestions', exact: true })).toBeDisabled();
     await page.getByLabel('Should this meetup be indoors or outdoors?', { exact: true }).fill('Indoors only.');
-    await page.getByRole('button', { name: 'Let AI update the draft', exact: true }).click();
-    await expect(question).toHaveCount(0); await expect(create).toBeDisabled();
-    await page.getByRole('checkbox', { name: 'I’ve reviewed these shared choices and who needs to approve.' }).check();
+    await page.getByRole('button', { name: 'Update suggestions', exact: true }).click();
+    await page.getByRole('button', { name: 'Use this saved draft', exact: true }).click();
+    await expect(question).toHaveCount(0);
+
     await expect(create).toBeEnabled(); await create.click();
-    await expect(page.getByRole('heading', { name: 'Shared frame', exact: true })).toBeVisible();
+    await expect.poll(() => new URL(page.url()).searchParams.has('decision')).toBe(true);
   } finally { await context.close(); await api.close(); }
 });
 
@@ -233,25 +230,24 @@ for (const lookupFailure of [false, true]) test(`follow-up answer proceeds after
     });
     const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: /^Open group / }).first().click();
     await page.getByRole('button', { name: 'Start a decision', exact: true }).click();
-    await page.getByLabel('Tell me what you want to decide').fill('Choose a gallery meetup.');
-    await page.getByRole('button', { name: 'Continue with AI', exact: true }).click();
+    await page.getByLabel('Describe the decision').fill('Choose a gallery meetup.');
+    await page.getByRole('button', { name: 'Continue', exact: true }).click(); await page.getByRole('button', { name: 'Suggest options', exact: true }).click(); await page.getByRole('button', { name: 'Use this saved draft', exact: true }).click();
     const answer = page.getByLabel('Should this meetup be indoors or outdoors?', { exact: true });
-    const proceed = page.getByRole('button', { name: 'Let AI update the draft', exact: true });
+    const proceed = page.getByRole('button', { name: 'Update suggestions', exact: true });
     await expect(answer).toBeVisible(); await expect(proceed).toBeDisabled();
     await answer.fill('Indoors only.');
     if (lookupFailure) {
       await expect(proceed).toBeDisabled();
-      await expect(page.getByText('We could not check your previous requests.', { exact: false })).toBeVisible();
-      await page.getByRole('button', { name: 'Check saved requests again', exact: true }).click();
+      await expect(page.getByText('Suggestions are temporarily unavailable.', { exact: false })).toBeVisible();
+      await page.getByRole('button', { name: 'Check again', exact: true }).click();
       await expect(answer).toHaveValue('Indoors only.');
     }
     await expect(proceed).toBeEnabled(); expect(draftCalls).toBe(1);
-    await proceed.click(); await expect(page.getByRole('heading', { name: 'Your decision, ready to review.' })).toBeVisible();
+    await proceed.click(); await page.getByRole('button', { name: 'Use this saved draft', exact: true }).click(); await expect(page.getByRole('heading', { name: 'Review your options' })).toBeVisible();
     expect(draftCalls).toBe(2); expect(objectives[1]).toBe(objectives[0]); expect(followUps[0]?.answers).toEqual(['Indoors only.']);
-    const create = page.getByRole('button', { name: 'Create decision', exact: true }); await expect(create).toBeDisabled();
-    await expect(page.getByText('Required: resolve all follow-up questions', { exact: false })).toBeVisible();
-    await page.getByRole('checkbox', { name: 'I’ve reviewed these shared choices and who needs to approve.' }).check();
-    await expect(create).toBeEnabled(); await create.click(); await expect(page.getByRole('heading', { name: 'Shared frame', exact: true })).toBeVisible();
+    const create = page.getByRole('button', { name: 'Create decision', exact: true }); await expect(create).toBeEnabled();
+
+    await expect(create).toBeEnabled(); await create.click(); await expect.poll(() => new URL(page.url()).searchParams.has('decision')).toBe(true);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   } finally { await context.close(); await api.close(); }
 });
@@ -269,12 +265,12 @@ test('an expired follow-up request closes without losing the saved draft or type
    await route.fulfill({json:{draftRequest:{state:releasing?'CANCELLED':'FAILED',progress:releasing?'STOPPED':'EXPIRED',canRelease:true,revision:releasing?4:3}},headers:{'access-control-allow-origin':'*'}});
   });
   const page=await context.newPage();await page.goto(url);await page.getByRole('button',{name:/^Open group /}).first().click();await page.getByRole('button',{name:'Start a decision',exact:true}).click();
-  await page.getByLabel('Tell me what you want to decide').fill('Choose a gallery meetup.');await page.getByRole('button',{name:'Continue with AI',exact:true}).click();
-  const answer=page.getByLabel('Should this meetup be indoors or outdoors?',{exact:true});await answer.fill('Indoors only.');await page.getByRole('button',{name:'Let AI update the draft',exact:true}).click();
-  await page.getByRole('button',{name:'Check progress',exact:true}).click();await expect(page.getByText('This request expired before AI started. Close it to return to your saved draft.',{exact:true})).toBeVisible();await expect(answer).toHaveCount(0);
+  await page.getByLabel('Describe the decision').fill('Choose a gallery meetup.');await page.getByRole('button', { name: 'Continue', exact: true }).click(); await page.getByRole('button', { name: 'Suggest options', exact: true }).click(); await page.getByRole('button', { name: 'Use this saved draft', exact: true }).click();
+  const answer=page.getByLabel('Should this meetup be indoors or outdoors?',{exact:true});await answer.fill('Indoors only.');await page.getByRole('button',{name:'Update suggestions',exact:true}).click();
+  await page.getByText('Previous suggestions need a check',{exact:true}).click();await page.getByRole('button',{name:'Check progress',exact:true}).click();await expect(page.getByText('This request expired before AI started. Close it to return to your saved draft.',{exact:true})).toBeVisible();await expect(answer).toHaveValue('Indoors only.');
   await page.getByRole('button',{name:'Close unfinished request',exact:true}).click();await expect(answer).toHaveValue('Indoors only.');await expect(answer).toBeEditable();
-  await page.getByRole('button',{name:'Let AI update the draft',exact:true}).click();await expect(page.getByRole('heading',{name:'Your decision, ready to review.'})).toBeVisible();
-  const create=page.getByRole('button',{name:'Create decision',exact:true});await expect(create).toBeDisabled();await page.getByRole('checkbox',{name:'I’ve reviewed these shared choices and who needs to approve.'}).check();await create.click();await expect(page.getByRole('heading',{name:'Shared frame',exact:true})).toBeVisible();expect(submissions).toBe(3);
+  await page.getByRole('button',{name:'Update suggestions',exact:true}).click();await page.getByRole('button',{name:'Use this saved draft',exact:true}).click();await expect(page.getByRole('heading',{name:'Review your options'})).toBeVisible();
+  const create=page.getByRole('button',{name:'Create decision',exact:true});await expect(create).toBeEnabled();await create.click();await expect.poll(() => new URL(page.url()).searchParams.has('decision')).toBe(true);expect(submissions).toBe(3);
  }finally{await context.close();await api.close();}
 });
 
@@ -359,10 +355,10 @@ test('a lost draft response opens the recovered saved review without repeating A
       json: { draftRequest: { state: 'SAVED', revision: 0, canRelease: true, draft: saved } }, headers: { 'access-control-allow-origin': '*' } }));
     const page = await context.newPage(); await page.goto(url); await page.getByRole('button', { name: /^Open group / }).first().click();
     await page.getByRole('button', { name: 'Start a decision', exact: true }).click();
-    await page.getByLabel('Tell me what you want to decide').fill('Choose a gallery meetup.'); await page.getByRole('button', { name: 'Continue with AI', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Your decision, ready to review.', exact: true })).toBeVisible();
-    await expect(page.getByText('The saved draft was recovered without another AI call.', { exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Create decision', exact: true })).toBeDisabled(); expect(posts).toBe(1);
+    await page.getByLabel('Describe the decision').fill('Choose a gallery meetup.'); await page.getByRole('button', { name: 'Continue', exact: true }).click(); await page.getByRole('button', { name: 'Suggest options', exact: true }).click(); await page.getByRole('button', { name: 'Use this saved draft', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Review your options', exact: true })).toBeVisible();
+    await expect(page.getByText('Your suggestions are ready. Your current draft is unchanged.', { exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Create decision', exact: true })).toBeEnabled(); expect(posts).toBe(1);
     await expect(page.getByText('The result is unknown. Refresh before retrying.', { exact: true })).toHaveCount(0);
   } finally { await context.close(); await api.close(); }
 });

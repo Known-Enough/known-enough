@@ -1,32 +1,30 @@
-import { ChoicePlanActions, ChoicePlanEditor } from './choice-plan-editor';
+import { ChoicePlanEditor } from './choice-plan-editor';
+import { addSuggestedOption, emptyChoicePlan, suggestedChoices, type CreationSuggestion } from './creation-options';
+import { CreationSuggestions } from './creation-suggestions';
 import { DecisionGuide } from './decision-guide';
 import { RenameAction } from './rename-action';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { ChoicePlan, compileChoicePlan, Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { ruleText, variableText, valueText } from './connected-decision';
 import { readDraftRequest,saveDraftRequest,draftFailureMessage } from './draft-request-state';
-import { LoadingSkeleton, PageIcon } from './app-chrome';
+import { PageIcon } from './app-chrome';
 class UserFlowError extends Error { constructor(message: string, readonly status?: number) { super(message); } }
 function guidanceText(value: string) { return value.normalize('NFKC').toLocaleLowerCase('en-US').replace(/[^\p{L}\p{N}]+/gu, ' ').trim(); }
 function savedPublicAnswer(draft: Groups.GroupDraft | null, question: string): string | undefined {
   return [...(draft?.publicClarifications ?? [])].reverse().find(item => guidanceText(item.question) === guidanceText(question))?.answer;
 }
-const suggestionAnswer = 'I am not sure yet. Suggest a small set of clearly labelled provisional shared options for us to review. Keep our earlier answers, and do not assume anyone’s private preferences, availability or budget.';
-const rebuildAnswer = 'Use the shared alternatives already in my original idea and saved answers to build the choices for review. Keep all alternatives unselected. Each person will provide their preferred option, availability and spending limits privately later. Do not ask me for their preferences.';
 function publicChoiceValues(variable: KE.PublicDecisionFrame['variables'][number], frame: KE.PublicDecisionFrame): string[] {
   if (variable.type === 'ENUM' || variable.type === 'ENUM_SET') return variable.options.map(option => option.label);
   const rule = frame.rules.find(item => 'variableId' in item && item.variableId === variable.id && (item.operator === 'IN' || item.operator === 'COMPARE' && item.comparison === 'EQ'));
   return rule?.operator === 'IN' ? rule.values.map(value => valueText(value, variable)) : rule?.operator === 'COMPARE' ? [valueText(rule.value, variable)] : [];
 }
-const privateAnswer = 'Each participant should provide their own preferences, availability and spending limits privately later. Help us draft the shared choices now without assuming those personal answers.';
 export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange }: { group: Groups.GroupSnapshot;
   api: (path: string, init?: RequestInit) => Promise<Response>; reload: () => Promise<void>; openDecision: (id: string) => void; startCollapsed?: boolean; onDirtyChange?: (dirty: boolean) => void }) {
   const [showExample, setShowExample] = useState(false);
   const exampleTrigger = useRef<HTMLButtonElement>(null);
-  const returnFromExample = () => { setShowExample(false); exampleTrigger.current?.focus(); };
+  const returnFromExample = () => { setShowExample(false); requestAnimationFrame(() => exampleTrigger.current?.focus()); };
   const [starting, setStarting] = useState(false);
-  const [step, setStep] = useState<'describe' | 'questions' | 'review'>('describe');
-  const [questionIndex, setQuestionIndex] = useState(0);
+  const [step, setStep] = useState<'describe' | 'options'>('describe');
   const [aiWorking, setAiWorking] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
   const wizardBody = useRef<HTMLDivElement>(null);
@@ -40,10 +38,13 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
   }, [deleteTarget, group.isOrganizer]);
   const busyGuard = useRef(false);
   const objectiveInput = useRef<HTMLTextAreaElement>(null);
-  const descriptionHelp = useRef<HTMLDetailsElement>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [helpGoal, setHelpGoal] = useState('');
-  const [helpOptions, setHelpOptions] = useState('');
-  const [helpUnknowns, setHelpUnknowns] = useState('');
+  const [descriptionError, setDescriptionError] = useState('');
+  const [exampleToApply, setExampleToApply] = useState<string | null>(null);
+  const aiIntent = useRef<'description' | 'options'>((() => {
+    try { return sessionStorage.getItem('ke-creation-assist-intent:' + group.id) === 'description' ? 'description' : 'options'; } catch { return 'options'; }
+  })());
   const editorKey = 'ke-public-choice-editor:' + group.id;
   const [choicePlan, setChoicePlan] = useState<ChoicePlan | null>(() => {
     try { const cached = JSON.parse(sessionStorage.getItem(editorKey) ?? 'null'); const parsed = ChoicePlan.safeParse(cached?.plan ?? cached); return parsed.success ? parsed.data : null; } catch { return null; }
@@ -53,10 +54,15 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
     try { const parsed = Groups.GroupDraft.safeParse(JSON.parse(sessionStorage.getItem(editorKey) ?? 'null')?.draft);
       return parsed.success && !parsed.data.createdDecisionId && !parsed.data.deleted ? parsed.data : null; } catch { return null; }
   });
+  const [aiReview, setAiReview] = useState<CreationSuggestion | null>(() => {
+    try { const raw = JSON.parse(sessionStorage.getItem(editorKey) ?? 'null')?.suggestion;
+      const saved = Groups.GroupDraft.safeParse(raw?.draft), plan = ChoicePlan.safeParse(raw?.plan);
+      return saved.success && plan.success && ['description', 'options'].includes(raw?.intent) && typeof raw?.description === 'string' && raw.description.length <= 2000
+        ? { draft: saved.data, plan: plan.data, description: raw.description, intent: raw.intent } : null;
+    } catch { return null; }
+  });
   const [choiceConflict, setChoiceConflict] = useState<Groups.GroupDraft | null>(null);
   const editorVersion = useRef(0);
-  // A restored local editor may contain newer work even before the modal opens.
-  const choiceEditing = useRef(false); choiceEditing.current = choiceMode || !!choicePlan;
   const manualPendingKey = editorKey + ':save';
   const manualPending = useRef<{ objective: string; choicePlan: ChoicePlan; idempotencyKey: string } | null>((() => {
     try { const value = JSON.parse(sessionStorage.getItem(manualPendingKey) ?? 'null');
@@ -69,8 +75,8 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
   function openChoices() {
     editorVersion.current++;
     if (!choicePlan && draft?.choicePlan) { setChoicePlan(draft.choicePlan); setChoiceDraft(draft); setChoiceSaved(true); }
-    else if (!choicePlan) setChoicePlan({ title: objective.trim().split(/\s+/).slice(0,3).join(' ').slice(0,80), description: '', topics: [{ label: '', kind: 'CHOICE', options: [] }] });
-    setChoiceMode(true); setStarting(true);
+    else if (!choicePlan) setChoicePlan(emptyChoicePlan(objective));
+    setChoiceMode(true); setStep('options'); setStarting(true);
   }
   async function saveChoices() {
     if (choiceConflict) throw new UserFlowError('Choose how to resolve the newer saved draft before saving your edits.');
@@ -111,7 +117,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
       setChoiceSaved(false); throw new UserFlowError('The earlier save is recovered. Your newer edits are kept; save them before creating the decision.');
     }
     setChoicePlan(saved.choicePlan ?? parsed.data);
-    setChoiceSaved(true); setDirty(false); setNotice('Your editable draft is saved. No AI call was needed.');
+    setChoiceSaved(true); setDirty(false); setNotice('Draft saved.');
     await reload().catch(() => setNotice('Your draft is saved. The group list could not refresh, but you can continue here.')); return saved;
   }
   async function createChoices() {
@@ -135,23 +141,33 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
       snapshot = KE.PublicDecisionSnapshot.parse(await response.json());
       if (snapshot.frame.decisionId !== observed.createdDecisionId) throw error;
     }
-    setDirty(false); setChoiceMode(false); setChoiceDraft(null); setChoicePlan(null); setDraft(null); setObjective('');
+    setDirty(false); setChoiceMode(false); setChoiceDraft(null); setChoicePlan(null); setDraft(null); setObjective(''); setAiReview(null);
     sessionStorage.removeItem(editorKey); await reload().catch(() => {}); setStarting(false);
     onDirtyChange?.(false); openDecision(snapshot.frame.decisionId);
   }
   const [objective, setObjective] = useState(() => {
     try { const value = JSON.parse(sessionStorage.getItem(editorKey) ?? 'null')?.objective; return typeof value === 'string' && value.length <= 2000 ? value : ''; } catch { return ''; }
   });
-  useEffect(() => { if (choicePlan || objective) { try { sessionStorage.setItem(editorKey, JSON.stringify({ plan: choicePlan, objective, draft: choiceDraft })); } catch { /* Keep the editor usable if storage is full. */ } } }, [choicePlan, objective, choiceDraft, editorKey]); const [draft, setDraft] = useState<Groups.GroupDraft | null>(null);
+  const [draft, setDraft] = useState<Groups.GroupDraft | null>(() => {
+    try { const saved = Groups.GroupDraft.safeParse(JSON.parse(sessionStorage.getItem(editorKey) ?? 'null')?.legacyDraft);
+      return saved.success && !saved.data.choicePlan && !saved.data.deleted && !saved.data.createdDecisionId ? saved.data : null;
+    } catch { return null; }
+  });
+  useEffect(() => {
+    try {
+      if (choicePlan || objective || aiReview || draft) sessionStorage.setItem(editorKey, JSON.stringify({ plan: choicePlan, objective, draft: choiceDraft, suggestion: aiReview, legacyDraft: draft && !draft.choicePlan ? draft : null }));
+      else sessionStorage.removeItem(editorKey);
+    } catch { /* Keep in-memory work when browser storage is unavailable. */ }
+  }, [choicePlan, objective, choiceDraft, aiReview, draft, editorKey]);
   const draftHeading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     if (!starting) return;
     wizardBody.current?.scrollTo({ top: 0 });
-    if (dialog.current?.open) draftHeading.current?.focus({ preventScroll: true });
-  }, [starting, step, questionIndex, choiceMode]);
+    if (dialog.current?.open) { if (step === 'describe') objectiveInput.current?.focus({ preventScroll: true }); else draftHeading.current?.focus({ preventScroll: true }); }
+  }, [starting, step, choiceMode]);
   useEffect(() => {
     const element = dialog.current;
-    if (starting && group.isOrganizer) { if (element && !element.open) element.showModal(); draftHeading.current?.focus(); }
+    if (starting && group.isOrganizer) { if (element && !element.open) element.showModal(); if (step === 'describe') objectiveInput.current?.focus(); else draftHeading.current?.focus(); }
     else element?.close();
     if (!starting || !group.isOrganizer) return;
     const prior = document.body.style.overflow; document.body.style.overflow = 'hidden';
@@ -159,7 +175,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
   }, [starting, group.isOrganizer]);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const answersByQuestion = useRef<Record<string, string>>({});
-  useEffect(() => { setAnswers(Object.fromEntries((draft?.clarificationQuestions ?? []).map((question, index) => [index, answersByQuestion.current[question] ?? savedPublicAnswer(draft, question) ?? '']))); setQuestionIndex(0); }, [draft?.id]);
+  useEffect(() => { setAnswers(Object.fromEntries((draft?.clarificationQuestions ?? []).map((question, index) => [index, answersByQuestion.current[question] ?? savedPublicAnswer(draft, question) ?? '']))); }, [draft?.id]);
   const [dirty, setDirty] = useState(false);
   const [reviewed, setReviewed] = useState(false); const [busy, setBusy] = useState(false); const [notice, setNotice] = useState('');
   const pending = useRef<{ objective?: string; followUp?: { draftId: string; revision: number; answers: string[] }; choiceContext?: ChoicePlan; idempotencyKey: string } | null>(null);
@@ -180,7 +196,10 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
       || !['SAVED','NOT_SUBMITTED','PENDING','UNKNOWN','FAILED','CANCELLED'].includes(String(state.state)) || typeof state.canRelease !== 'boolean' || !Number.isSafeInteger(state.revision)
       || ('progress' in state && !['NOT_STARTED','IN_PROGRESS','EXPIRED','NEEDS_RECOVERY','STOPPED'].includes(String(state.progress)))) throw new Error('Invalid request status');
     setRequestState({ state: String(state.state), canRelease: state.canRelease, revision: Number(state.revision), ...('progress' in state ? { progress: String(state.progress) } : {}) });
-    if (state.state === 'SAVED' && 'draft' in state) { const saved = Groups.GroupDraft.parse(state.draft); if (choiceEditing.current) { finishRequest(); setNotice('The earlier AI draft is saved separately. Your current editor changes are kept.'); await reload(); return 'SAVED'; } if (saved.choicePlan && !choiceMode) { setChoicePlan(saved.choicePlan); setChoiceDraft(saved); setChoiceSaved(true); setChoiceMode(true); } setDraft(saved); setObjective(saved.frame.objective); setQuestionIndex(0); setStep(saved.clarificationQuestions.length ? 'questions' : 'review'); setDirty(false); setReviewed(false); finishRequest(); setNotice('The saved draft was recovered without another AI call.'); await reload(); }
+    if (state.state === 'SAVED' && 'draft' in state) {
+      reviewSuggestions(Groups.GroupDraft.parse(state.draft)); finishRequest();
+      setNotice('Your suggestions are ready. Your current draft is unchanged.'); await reload(); return 'SAVED';
+    }
     else if (state.state === 'FAILED' && state.canRelease) {
       // Only a confirmed terminal outcome may close automatically. Unknown or active
       // calls keep their original key; this never starts another paid request.
@@ -240,15 +259,9 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
     try {
       const result = await request('drafts', pending.current);
       const prepared = Groups.GroupDraft.parse(result.draft);
-      if (editorVersion.current !== startedVersion) {
-        finishRequest(); setNotice('The earlier AI draft is saved separately. Your current editor changes are kept.');
-        await reload(); return;
-      }
-      if (prepared.choicePlan) { setChoicePlan(prepared.choicePlan); setChoiceDraft(prepared); setChoiceSaved(true); setChoiceMode(true); }
-      setDraft(prepared); setStep(prepared.clarificationQuestions.length ? 'questions' : 'review'); setQuestionIndex(0); setDirty(false); setRoster(null);
-      finishRequest(); setReviewed(false); setNotice(prepared.choicePlan ? 'Your choices are saved. Fill any missing details below, then create the decision.' : prepared.clarificationQuestions.length
-        ? 'Your starting draft is saved. Review it below, then answer the next shared question or choose a help option.'
-        : 'Your draft is saved and ready for review. Check the suggested choices before creating the decision.'); await reload();
+      reviewSuggestions(prepared); finishRequest();
+      setNotice(editorVersion.current !== startedVersion ? 'These suggestions use your earlier description. Your newer edits are kept.' : 'Suggestions are ready. Add only what you want to use.');
+      await reload().catch(() => {});
     } catch (error) {
       // A failed acknowledgement is followed by a status read, never a second paid call.
       try {
@@ -257,10 +270,10 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
         if (recovered === 'CLOSED') {
           setNotice((error instanceof UserFlowError ? error.message : 'That attempt finished without a new draft.')
             + ' The finished request is closed. You can edit and try again. No automatic AI retry was made.');
-          openChoices(); setNotice('AI could not finish this draft. Your idea is kept. Add the missing choices below, or ask AI again after changing the idea.'); return;
+          return;
         }
       } catch { /* Keep the original failure and nonce unless closure was confirmed. */ }
-      openChoices(); setNotice((error instanceof UserFlowError ? error.message : 'AI could not finish this draft.') + ' You can add choices below without another AI call. The original AI request status is retained.');
+      setNotice((error instanceof UserFlowError ? error.message : 'We couldn’t prepare suggestions.') + ' You can add choices below without another AI call. The original AI request status is retained.');
     } finally { setAiWorking(false); }
   }
 
@@ -271,53 +284,88 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
   async function saveDraft() {
     if (!draft) return;
     const result = await request(`drafts/${draft.id}`, { revision: draft.revision, title: draft.frame.title, objective: draft.frame.objective, variables: draft.frame.variables, rules: draft.frame.rules });
-    const saved = Groups.GroupDraft.parse(result.draft); setDraft(saved); setStep(saved.clarificationQuestions.length ? 'questions' : 'review'); setDirty(false); setRoster(null); setReviewed(false); await reload();
+    const saved = Groups.GroupDraft.parse(result.draft); setDraft(saved); setStep('options'); setDirty(false); setRoster(null); setReviewed(false); await reload(); return saved;
   }
-  const question = draft?.clarificationQuestions[questionIndex];
-  const previousAnswer = question ? savedPublicAnswer(draft, question) : undefined;
-  const unchangedRepeatedAnswers = !!draft?.clarificationQuestions.length && draft.clarificationQuestions.every((item, index) => {
-    const prior = savedPublicAnswer(draft, item);
-    return prior !== undefined && guidanceText(prior) === guidanceText(answers[index] ?? '');
-  });
-  const rebuiltAlready = !!draft?.clarificationQuestions.length && draft.clarificationQuestions.every(item => savedPublicAnswer(draft, item) === rebuildAnswer);
-  function answerQuestion(value: string) {
-    if (!question || busy || pendingKey) return;
-    answersByQuestion.current[question] = value;
-    setAnswers(current => ({ ...current, [questionIndex]: value }));
+  function changeDescription(value: string) {
+    editorVersion.current++; setObjective(value); setDescriptionError(''); setChoiceSaved(false); setDirty(true);
+    if (draft && !draft.choicePlan && !choicePlan) setDraft({ ...draft, frame: { ...draft.frame, objective: value } });
   }
-  const requestRequirement = choiceMode ? busy ? 'Saving or checking your draft. Your edits are kept.' : pendingKey ? 'Your earlier AI request is tracked separately. You can finish this choice draft without AI.' : '' : busy ? aiWorking ? 'AI is working on your draft. Please wait; your earlier answers are kept.' : 'Please wait while we check or save your decision.'
-    : pendingKey ? 'Resolve the unfinished request below before editing or submitting again. Closing a request keeps your saved draft.'
-    : checkingRequest ? 'Checking for unresolved AI requests. You can keep typing; wait for the check before sending anything to AI.'
-    : !requestLookupAvailable ? 'We could not check your previous requests. You can keep typing; choose “Check saved requests again” before sending anything to AI.' : '';
-  const questionRequirement = requestRequirement || (dirty ? 'Save your wording changes below before sending these answers to AI.'
-    : answersTooLong ? 'Keep each answer within 500 characters.'
-    : unchangedRepeatedAnswers ? 'AI repeated a question you already answered. Choose a help option below, or add the specific missing detail. We won’t send the same answers again unchanged.'
-    : draft?.clarificationQuestions.some((_question, index) => !answers[index]?.trim()) ? 'Enter an answer for every follow-up question. Use Back to reach any unanswered earlier question.' : '');
-  const readiness = requestRequirement || (draft?.clarificationQuestions.length ? 'Answer the AI’s follow-up questions first.'
-    : dirty ? 'Save your changes before creating the decision.'
-    : !reviewed ? 'Tick the review confirmation below to enable Create decision.' : '');
-  const descriptionParts = [helpGoal.trim(), helpOptions.trim() ? `Options we are considering: ${helpOptions.trim()}` : '', helpUnknowns.trim() ? `Still undecided: ${helpUnknowns.trim()}` : ''].filter(Boolean).join('\n');
-  const assistedDescription = [objective.trim(), descriptionParts].filter(Boolean).join('\n\n');
-  function applyDescriptionHelp() {
-    if (busy || pendingKey || !descriptionParts || assistedDescription.length > 2000) return;
-    setObjective(assistedDescription); setReviewed(false);
-    setHelpGoal(''); setHelpOptions(''); setHelpUnknowns('');
-    if (descriptionHelp.current) descriptionHelp.current.open = false;
-    objectiveInput.current?.focus();
+  function continueToOptions() {
+    if (!objective.trim()) { setDescriptionError('Describe the decision to continue.'); objectiveInput.current?.focus(); return; }
+    if (objective.length > 2000) { setDescriptionError('Keep your description within 2,000 characters.'); return; }
+    if (draft && !draft.choicePlan && !choicePlan) { setChoiceMode(false); setStep('options'); return; }
+    openChoices();
+  }
+  function reviewSuggestions(prepared: Groups.GroupDraft) {
+    setAiReview({ draft: prepared, plan: suggestedChoices(prepared), intent: aiIntent.current,
+      description: prepared.choicePlan?.description.trim() || prepared.frame.description.trim() || prepared.frame.objective });
+  }
+  function askForHelp(intent: 'description' | 'options', value = objective) {
+    if (!value.trim() || pendingKey || !requestLookupAvailable || checkingRequest || busyGuard.current) return;
+    aiIntent.current = intent;
+    try { sessionStorage.setItem('ke-creation-assist-intent:' + group.id, intent); } catch { /* In-memory intent remains available. */ }
+    const context = choicePlan?.topics.some(topic => topic.options.length) ? choicePlan : undefined;
+    void action(() => draftObjective(value, undefined, context));
+  }
+  function acceptOption(topic: ChoicePlan['topics'][number], option: string) {
+    const next = addSuggestedOption(choicePlan ?? emptyChoicePlan(objective), topic, option);
+    if (!next) return;
+    if (!choiceDraft && aiReview?.draft.choicePlan) { setChoiceDraft(aiReview.draft); setDraft(aiReview.draft); }
+    changeChoices(next); setChoiceMode(true);
+  }
+  function updateSuggestions(values: string[]) {
+    if (!aiReview || !requestLookupAvailable || pendingKey) return;
+    if (aiReview.draft.clarificationQuestions.every((question, index) => guidanceText(savedPublicAnswer(aiReview.draft, question) ?? '') === guidanceText(values[index] ?? ''))) {
+      setNotice('Add a little more detail, or edit your options directly.'); return;
+    }
+    aiIntent.current = aiReview.intent;
+    void action(() => draftObjective(aiReview.draft.frame.objective, { draftId: aiReview.draft.id, revision: aiReview.draft.revision, answers: values }));
+  }
+  async function createLegacyDraft() {
+    if (!draft || draft.clarificationQuestions.length || answersTooLong) return;
+    const saved = dirty ? await saveDraft() : draft;
+    if (!saved || saved.clarificationQuestions.length) return;
+    let snapshot: KE.PublicDecisionSnapshot;
+    try { snapshot = KE.PublicDecisionSnapshot.parse((await request(`drafts/${saved.id}/create`, { revision: saved.revision })).snapshot); }
+    catch (error) {
+      const observed = Groups.GroupDraft.parse((await request(`drafts/${saved.id}`)).draft);
+      if (observed.revision !== saved.revision || !observed.createdDecisionId) throw error;
+      const response = await api(`/decisions/${observed.createdDecisionId}/public`);
+      if (!response.ok) throw error;
+      snapshot = KE.PublicDecisionSnapshot.parse(await response.json());
+      if (snapshot.frame.decisionId !== observed.createdDecisionId) throw error;
+    }
+    await reload().catch(() => {});
+    setDraft(null); setObjective(''); setChoicePlan(null); setAiReview(null); setDirty(false); setStarting(false);
+    sessionStorage.removeItem(editorKey); onDirtyChange?.(false); openDecision(snapshot.frame.decisionId);
   }
   function closeWizard() {
     if (busyGuard.current) return;
+    if (dirty && !window.confirm('Close this decision? Your unfinished draft will stay in this browser.')) return;
     dialog.current?.close(); setStarting(false); launcher.current?.focus();
   }
+  function keepWizardFocus(event: KeyboardEvent<HTMLDialogElement>) {
+    if (event.key !== 'Tab') return;
+    const element = event.currentTarget;
+    const controls = [...element.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href], summary, [tabindex]:not([tabindex="-1"])')]
+      .filter(control => control.getClientRects().length > 0 && !control.closest('[hidden]') && getComputedStyle(control).visibility !== 'hidden');
+    const first = controls[0], last = controls.at(-1), active = document.activeElement;
+    if (!first || !last) { event.preventDefault(); draftHeading.current?.focus(); return; }
+    if (!controls.includes(active as HTMLElement) || event.shiftKey && active === first || !event.shiftKey && active === last) {
+      event.preventDefault(); (event.shiftKey ? last : first).focus();
+    }
+  }
   function startWizard() {
-    setStep(draft ? draft.clarificationQuestions.length ? 'questions' : 'review' : 'describe');
+    setStep(draft || choicePlan ? 'options' : 'describe');
     if (choicePlan) setChoiceMode(true);
     setStarting(true);
   }
   async function loadDraft(id: string) {
+    if (dirty && !window.confirm('Open this saved draft and replace the unsaved edits in this window?')) return;
     const result = await request(`drafts/${id}`), saved = Groups.GroupDraft.parse(result.draft);
-    setDraft(saved); setObjective(saved.frame.objective); setQuestionIndex(0); setStep(saved.clarificationQuestions.length ? 'questions' : 'review');
+    setDraft(saved); setObjective(saved.frame.objective); setStep('options');
     if (saved.choicePlan) { setChoicePlan(saved.choicePlan); setChoiceDraft(saved); setChoiceSaved(true); setChoiceMode(true); }
+    else { setChoicePlan(null); setChoiceDraft(null); setChoiceMode(false); setChoiceSaved(false); }
     setChoiceConflict(null); setDirty(false); setRoster(null); setReviewed(false); setStarting(true);
   }
   async function deleteItem() {
@@ -327,10 +375,12 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
     const updated = Groups.GroupSnapshot.parse(result.group);
     if (updated.id !== group.id || (selected.kind === 'DRAFT' ? updated.drafts : updated.decisions).some(item => item.id === selected.id)) throw new Error('Deletion not confirmed');
     if (selected.kind === 'DECISION' && roster?.id === selected.id) setRoster(null);
-    if (draft && (draft.id === selected.id || draft.createdDecisionId === selected.id)) {
+    if (draft && (draft.id === selected.id || draft.createdDecisionId === selected.id) || choiceDraft?.id === selected.id) {
+      setChoicePlan(null); setChoiceDraft(null); setChoiceMode(false);
       setDraft(null); setObjective(''); setAnswers({}); answersByQuestion.current = {};
       setDirty(false); setReviewed(false); setStep('describe'); setStarting(false);
     }
+    if (aiReview?.draft.id === selected.id) setAiReview(null);
     setDeleteTarget(null);
     setNotice(selected.kind === 'DRAFT' ? 'Draft deleted.' : 'Decision deleted for everyone in this group.');
     await reload();
@@ -340,17 +390,17 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
     const result = await request(`draft-requests/${pendingKey}/release`, { revision: requestState.revision });
     const value = result.draftRequest as { state?: unknown; canRelease?: unknown } | undefined;
     if (!value || !value.canRelease || !['CANCELLED','FAILED','SAVED'].includes(String(value.state))) throw new Error('Release not confirmed');
-    finishRequest(); setStep(draft ? draft.clarificationQuestions.length ? 'questions' : 'review' : 'describe');
+    finishRequest(); setStep(draft || choicePlan ? 'options' : 'describe');
     setNotice('The previous request is closed. Your saved draft and any answers in this window are kept. You can continue editing.');
   }
   return <section className="ke-card ke-group-panel ke-decisions-panel" aria-busy={busy} aria-labelledby={`decisions-heading-${group.id}`}>
     <header className="ke-panel-heading"><div><h2 id={`decisions-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="ListChecks" /></span><span>Decisions</span></h2>
-      <p className="ke-panel-subtitle">Describe your idea, review the choices, then hear from everyone privately.</p></div>
+      <p className="ke-panel-subtitle">Organize your options, then hear from everyone privately.</p></div>
       {group.isOrganizer && (group.decisions.length > 0 || group.drafts.length > 0 || pendingKey)
         && <button ref={launcher} type="button" className="ke-start-decision ke-icon-action" disabled={busy} onClick={startWizard}><PageIcon name="Plus" />{draft || pendingKey ? 'Continue your draft' : 'Start a decision'}</button>}</header>
     {!group.decisions.length && !group.drafts.length && !pendingKey && <div className="ke-decision-empty">
       <span className="ke-decision-empty-icon" aria-hidden="true"><PageIcon name="ListChecks" /></span>
-      <h3>What will you decide together?</h3><p>Tell the AI what you have in mind. We’ll help you shape the choices, one step at a time.</p>
+      <h3>What will you decide together?</h3><p>Describe a decision and bring your group together.</p>
       {group.isOrganizer ? <button ref={launcher} type="button" className="ke-start-decision ke-icon-action" disabled={busy} onClick={startWizard}><PageIcon name="Plus" />Start a decision</button>
         : <p>Your group organizer can start a decision.</p>}
     </div>}
@@ -394,145 +444,87 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
       </div>
       {notice && <p role="status">{notice}</p>}
     </dialog>}
-    {group.isOrganizer && <dialog ref={dialog} className={`ke-decision-wizard ke-create-decision-dialog${choiceMode ? ' ke-choice-wizard' : ''}`} aria-labelledby={`decision-wizard-title-${group.id}`}
-      onCancel={event => { event.preventDefault(); closeWizard(); }} onClick={event => { if (event.target === dialog.current) closeWizard(); }}>
+    {group.isOrganizer && <dialog ref={dialog} className="ke-decision-wizard ke-create-decision-dialog ke-creation-v2" aria-labelledby={`decision-wizard-title-${group.id}`}
+      aria-describedby={`decision-wizard-subtitle-${group.id}`} onKeyDown={keepWizardFocus} onCancel={event => { event.preventDefault(); closeWizard(); }} onClick={event => { if (event.target === dialog.current) closeWizard(); }}>
       <div className="ke-wizard-shell">
-        <header className="ke-wizard-header"><div><span className="ke-wizard-eyebrow">AI decision guide · {group.name}</span>
-          <h2 id={`decision-wizard-title-${group.id}`} ref={draftHeading} tabIndex={-1}>{choiceMode ? 'Set up your choices.' : step === 'describe' ? 'What would you like to decide?' : step === 'questions' ? 'Let’s fill in a few details.' : 'Your decision, ready to review.'}</h2></div>
-          <button type="button" className="secondary ke-wizard-close" aria-label="Close decision guide" disabled={busy} onClick={closeWizard}><PageIcon name="X" /></button>
+        <header className="ke-wizard-header"><div><span className="ke-wizard-eyebrow">New decision</span>
+          <h2 id={`decision-wizard-title-${group.id}`} ref={draftHeading} tabIndex={-1}>{showExample ? 'A decision, step by step' : step === 'describe' ? 'What are we deciding?' : 'Review your options'}</h2>
+          <p id={`decision-wizard-subtitle-${group.id}`} className="ke-creation-subtitle">{step === 'describe' ? 'Describe the decision in your own words. Include any options you’re already considering.' : 'Add, remove, or adjust the options your group will consider.'}</p></div>
+          <button type="button" className="secondary ke-wizard-close" aria-label="Close new decision" disabled={busy} onClick={closeWizard}><PageIcon name="X" /></button>
         </header>
-        <p className="ke-wizard-example"><button ref={exampleTrigger} type="button" className="secondary" aria-expanded={showExample} aria-controls={`create-example-${group.id}`} onClick={() => setShowExample(value => !value)}>{showExample ? 'Back to my decision draft' : 'See an example'}</button></p>
-        {showExample && <div className="ke-wizard-example-content" id={`create-example-${group.id}`}><DecisionGuide onReturn={returnFromExample} /></div>}
-        <div className="ke-wizard-content" hidden={showExample}>
-        <ol className="ke-wizard-steps" aria-label="Decision creation steps">{['Your idea', 'Your choices'].map((label, index) => <li key={label} aria-current={(choiceMode || step !== 'describe' ? 1 : 0) === index ? 'step' : undefined}><span aria-hidden="true">{index + 1}</span><span className="ke-wizard-step-label">{label}</span></li>)}</ol>
-        <div ref={wizardBody} className="ke-wizard-body" aria-busy={busy}>
-          <p className="ke-wizard-privacy"><PageIcon name="ShieldCheck" />These choices are shared with your group. AI receives them only when you ask for help. Keep personal limits for your private answers later.</p>
-          {requestRequirement && step !== 'review' && <p className="ke-wizard-help" role="status">{requestRequirement}</p>}
-          {!choiceMode && !requestLookupAvailable && !checkingRequest && !pendingKey && <button type="button" className="secondary" disabled={busy}
-            onClick={() => { setNotice(''); setCheckingRequest(true); setRecoveryGeneration(value => value + 1); }}>Check saved requests again</button>}
-          {aiWorking && <LoadingSkeleton kind="inline" label={pending.current?.followUp ? 'AI is updating your saved draft with your answers' : 'AI is preparing a starting draft from your idea'} />}
-          {pendingKey && !aiWorking && <div className="ke-wizard-recovery">
-            <h3>{requestState?.state === 'FAILED' ? 'This attempt did not produce a new draft.' : requestState?.state === 'UNKNOWN' ? 'Your request needs a result check.' : 'Let’s check your previous request.'}</h3><p>{requestState?.progress === 'EXPIRED' ? 'This request expired before AI started. Close it to return to your saved draft.'
-              : requestState?.state === 'PENDING' ? requestState.canRelease ? 'AI has not started this request. You can check progress or close it to return to your draft.'
-                : 'This request has not finished. Check progress; contact the operator if it stays unresolved.'
-              : requestState?.state === 'UNKNOWN' ? 'The previous AI result could not be confirmed. This needs service recovery if checking again does not resolve it. Your saved draft is kept.'
-              : requestState?.state === 'FAILED' ? 'This attempt finished without a new draft. Your earlier saved draft and answers are kept. Close this request to edit or try again.'
-              : 'We’ll recover a saved result, or safely close the previous request before starting a new one.'}</p>
-            <div className="ke-wizard-actions"><button type="button" className="secondary" disabled={busy || checkingRequest} onClick={() => void action(() => recoverRequest())}>Check progress</button>
-              {requestState?.canRelease && <button type="button" className="secondary" disabled={busy} onClick={() => void action(releaseRequest)}>Close unfinished request</button>}
-              {pending.current?.objective && (!requestState || requestState.state === 'NOT_SUBMITTED') && <button type="button" className="secondary" disabled={busy || checkingRequest || !requestLookupAvailable} onClick={() => { const retry = pending.current?.objective; if (retry) void action(() => draftObjective(retry, pending.current?.followUp)); }}>Retry this same request</button>}
-            </div>
-          </div>}
-          {choiceMode && choicePlan && <><details className="ke-wizard-original-idea"><summary>Your original idea</summary><label>Edit your idea<textarea value={objective} maxLength={2000} disabled={busy && !aiWorking} onChange={event => { editorVersion.current++; setObjective(event.target.value); setChoiceSaved(false); setDirty(true); }} /></label></details>
-            {(choiceDraft?.aiAssisted || draft?.aiAssisted) && <p className="ke-wizard-ai-note" role="note"><strong>AI suggestions for review.</strong> Options or dates added by AI are tentative. Check and edit them before creating the decision; prices and availability are not verified.</p>}
-            <ChoicePlanEditor plan={choicePlan} onChange={changeChoices} busy={busy && !aiWorking} />
-            {choiceConflict && <aside className="ke-wizard-save" role="alert"><strong>A newer draft is saved. Your edits are kept here.</strong>
-              <details><summary>Review the latest saved choices</summary><h4>{choiceConflict.frame.title}</h4><p>{choiceConflict.frame.objective}</p>
-                <ul>{choiceConflict.frame.variables.map(variable => <li key={variable.id}>{variableText(variable, choiceConflict.frame)}</li>)}</ul></details>
-              {!choiceConflict.createdDecisionId && <button type="button" className="secondary" disabled={busy} onClick={() => { const latest = choiceConflict;
-                if (!latest.choicePlan) return;
-                editorVersion.current++; setChoicePlan(latest.choicePlan); setObjective(latest.frame.objective); setChoiceDraft(latest); setDraft(latest);
-                setChoiceSaved(!latest.createdDecisionId); setDirty(false); setChoiceConflict(null); setNotice('The latest saved draft is loaded.');
-              }}>Use latest saved draft</button>}
-              {!choiceConflict.createdDecisionId && <button type="button" className="secondary" disabled={busy} onClick={() => {
-                editorVersion.current++; setChoiceDraft(choiceConflict); setChoiceConflict(null); setChoiceSaved(false); setDirty(true);
-                setNotice('Your edits are kept. Save them explicitly to replace the reviewed saved draft.');
-              }}>Keep my edits</button>}
-              {choiceConflict.createdDecisionId && <button type="button" disabled={busy} onClick={() => { closeWizard(); openDecision(choiceConflict.createdDecisionId!); }}>Open created decision</button>}
-            </aside>}</>}
-          {!choiceMode && <button type="button" className="secondary" disabled={busy && !aiWorking} onClick={openChoices}>Add or edit choices without AI</button>}
-          {!choiceMode && step === 'describe' && !pendingKey && <div className="ke-wizard-step">
-            <div className="ke-wizard-ai-note"><strong>Tell us what you have in mind.</strong><p>Include the options you’re considering and anything still undecided. A few useful details help AI shape the choices. You don’t need everyone’s preferences or personal budget.</p></div>
-            <p className="ke-wizard-help">Describe your idea, edit the choices and create the decision. AI is optional. Each participant adds their own private answers; final approval stays separate.</p>
-            <details className="ke-wizard-limits"><summary>About the current preview</summary><p>The app compares up to 64 combinations. AI should keep the initial choices small and ask for a specific limit only when needed. Suggested dates, places or spending limits are unverified until your group reviews them.</p></details>
-            <label htmlFor={`group-objective-${group.id}`}>Tell me what you want to decide</label>
-            <textarea ref={objectiveInput} id={`group-objective-${group.id}`} value={objective} maxLength={2000} placeholder="For example: We want dinner together. We’re considering Place X, Place Y or Place Z, on Friday or Saturday. We don’t know what works best for everyone yet."
-              disabled={busy || !!pendingKey} onChange={event => { setObjective(event.target.value); setReviewed(false); }} />
-            <small className="ke-wizard-counter">{objective.length} / 2,000 characters · shared with your group</small>
-            <details ref={descriptionHelp} className="ke-wizard-description-help"><summary>Help me describe my idea</summary><p>Answer whichever prompts help. These details are shared; keep personal limits for your private conversation later. This prepares your description without calling AI.</p>
-              <fieldset disabled={busy || !!pendingKey}>
-                <label htmlFor={`idea-goal-${group.id}`}>What would you like to decide?</label><input id={`idea-goal-${group.id}`} value={helpGoal} maxLength={500} placeholder="For example: Plan a dinner together" onChange={event => setHelpGoal(event.target.value)} />
-                <label htmlFor={`idea-options-${group.id}`}>Which options are you considering? <span>(optional)</span></label><textarea id={`idea-options-${group.id}`} value={helpOptions} maxLength={500} placeholder="For example: Place X, Place Y or Place Z" onChange={event => setHelpOptions(event.target.value)} />
-                <label htmlFor={`idea-unknowns-${group.id}`}>What is still undecided? <span>(optional)</span></label><textarea id={`idea-unknowns-${group.id}`} value={helpUnknowns} maxLength={500} placeholder="For example: Friday or Saturday; the spending plan is still open" onChange={event => setHelpUnknowns(event.target.value)} />
-                <button type="button" className="secondary" disabled={!descriptionParts || assistedDescription.length > 2000} onClick={applyDescriptionHelp}>Add these details to my idea</button>
-                {assistedDescription.length > 2000 && <p role="status">These details would exceed 2,000 characters. Shorten your idea or these answers before adding them; nothing has been removed.</p>}
-              </fieldset>
-            </details>
-            {!objective.trim() && <div className="ke-wizard-examples"><span>Or start with an example</span>{['Compare three restaurants for dinner on Friday or Saturday.', 'Choose between a coastal or mountain weekend trip.', 'Compare two shared purchases and decide which fits the group.'].map(example => <button type="button" key={example} className="secondary"
-              disabled={busy || !!pendingKey} onClick={() => setObjective(example)}>{example}</button>)}</div>}
-            <div className="ke-wizard-actions"><button type="button" className="ke-icon-action" disabled={busy || checkingRequest || !requestLookupAvailable || !objective.trim() || !!pendingKey}
-              onClick={() => void action(() => draftObjective(objective))}>Continue with AI<PageIcon name="ArrowRight" /></button>
-              {draft && !pendingKey && <button type="button" className="secondary" disabled={busy} onClick={() => {
-                if (draft.choicePlan) setChoiceMode(true); else setStep(draft.clarificationQuestions.length ? 'questions' : 'review');
-              }}>Continue the saved draft</button>}</div>
-            {!objective.trim() && <p className="ke-wizard-help">Describe the decision above, or use “Help me describe my idea” to get started.</p>}
-          </div>}
-          {!choiceMode && step === 'questions' && draft && !pendingKey && <div className="ke-wizard-step">
-            <article className="ke-wizard-starting-point"><span className="ke-wizard-eyebrow">Your starting point · saved</span><h3>{draft.frame.title}</h3><p>{draft.frame.objective}</p>
-              {draft.frame.description && <p>{draft.frame.description}</p>}
-              {!!draft.frame.variables.length && <><h4>Choices proposed for review</h4><ul>{draft.frame.variables.map(variable => <li key={variable.id}><strong>{variable.label}</strong>{publicChoiceValues(variable, draft.frame).length ? `: ${publicChoiceValues(variable, draft.frame).join(', ')}` : ''}</li>)}</ul></>}
-              <small>These are shared draft choices. They do not confirm anyone’s availability, budget, preferences or approval.</small>
-            </article>
-            <div className="ke-wizard-ai-note"><strong>{previousAnswer !== undefined ? 'AI has asked about an earlier answer.' : 'Let’s work out the next shared detail.'}</strong><p>{previousAnswer !== undefined ? 'Your earlier answer is saved. If you don’t have more detail, ask AI to suggest a starting point rather than repeating the same answer.' : 'Answer what you know, or ask AI to suggest a starting point. Personal preferences and limits belong in each person’s private conversation later.'}</p></div>
-            {!!draft.publicClarifications?.length && <details className="ke-wizard-history"><summary>What you’ve already shared with AI</summary><dl>{draft.publicClarifications.map((item, index) => <div key={index}><dt>{item.question}</dt><dd>{item.answer}</dd></div>)}</dl></details>}
-            <p className="ke-wizard-help">One question at a time. A short shared answer is enough; you can also choose a help option below. Nothing is sent until you select “Let AI update the draft.”</p>
-            <div className="ke-wizard-rebuild"><p>If your idea already lists the options, you don’t need to choose a winner or answer on anyone else’s behalf.</p><button type="button" className="secondary" disabled={busy || !!pendingKey || checkingRequest || !requestLookupAvailable || dirty || rebuiltAlready} onClick={() => void action(() => draftObjective(draft.frame.objective, { draftId: draft.id, revision: draft.revision, answers: draft.clarificationQuestions.map(() => rebuildAnswer) }))}>Rebuild shared choices with AI</button><small>This sends your existing idea and shared answers to AI once. It does not provide anyone’s private preferences.</small>{rebuiltAlready && <small>AI already received this rebuild request. Add a concrete missing shared detail above before another update.</small>}</div>
-            <p className="ke-wizard-question-count">Question {questionIndex + 1} of {draft.clarificationQuestions.length}</p>
-            <label className="ke-wizard-question" htmlFor={`public-answer-${group.id}-${questionIndex}`}>{question}</label>
-            <textarea id={`public-answer-${group.id}-${questionIndex}`} value={answers[questionIndex] ?? ''} maxLength={500}
-              placeholder="Share what you know, or choose a help option below…" disabled={busy || !!pendingKey} onChange={event => answerQuestion(event.target.value)} />
-            {previousAnswer !== undefined && <small>Your previously submitted answer is kept. You don’t need to start over.</small>}
-            <div className="ke-wizard-help-options" aria-label="Help with this shared question"><button type="button" className="secondary" disabled={busy || !!pendingKey} onClick={() => answerQuestion(suggestionAnswer)}>Not sure—suggest options</button><button type="button" className="secondary" disabled={busy || !!pendingKey} onClick={() => answerQuestion(privateAnswer)}>Ask each person privately</button></div>
-            <small className="ke-wizard-counter">{(answers[questionIndex] ?? '').length} / 500 characters · shared with the group</small>
-            {questionRequirement && !requestRequirement && <p className="ke-wizard-help" role="status">{questionRequirement}</p>}
-            {dirty && <button type="button" disabled={busy || !!pendingKey} onClick={() => void action(saveDraft)}>Save changes</button>}
-            <div className="ke-wizard-actions"><button type="button" className="secondary" disabled={busy || !!pendingKey} onClick={() => questionIndex ? setQuestionIndex(questionIndex - 1) : setStep('describe')}>Back</button>
-              {questionIndex < draft.clarificationQuestions.length - 1
-                ? <button type="button" disabled={busy || !!pendingKey || !answers[questionIndex]?.trim()} onClick={() => setQuestionIndex(questionIndex + 1)}>Next question</button>
-                : <button type="button" disabled={busy || !!pendingKey || checkingRequest || !requestLookupAvailable || dirty || answersTooLong || unchangedRepeatedAnswers || draft.clarificationQuestions.some((_question, index) => !answers[index]?.trim())}
-                  onClick={() => void action(() => draftObjective(draft.frame.objective, { draftId: draft.id, revision: draft.revision, answers: draft.clarificationQuestions.map((_question, index) => (answers[index] ?? '').trim()) }))}>Let AI update the draft</button>}
-            </div>
-            {!answers[questionIndex]?.trim() && <p className="ke-wizard-help">Answer what you know or choose a help option to continue.</p>}
-          </div>}
-          {!choiceMode && !draft?.choicePlan && step === 'review' && draft && <div className="ke-wizard-step">
-            <div className="ke-wizard-ai-note"><strong>Here’s what your group will review.</strong><p>Check the choices below. Creating the decision starts your group’s review. Next, each person adds their needs privately and reviews the interpretation; everyone approves proposals for themselves.</p></div>
-            <p className="ke-wizard-help">Required: resolve all follow-up questions, save any wording changes, and tick the review confirmation for this saved draft. The saved-request check must finish before Create decision is enabled.</p>
-            <article className="ke-wizard-preview"><h3>{draft.frame.title}</h3><p>{draft.frame.objective}</p><p className="ke-wizard-description">{draft.frame.description}</p>
-              <h4>Choices to explore</h4><ul>{draft.frame.variables.map(variable => <li key={variable.id}>{variableText(variable, draft.frame)}{variable.type !== 'ENUM' && variable.type !== 'ENUM_SET' && publicChoiceValues(variable, draft.frame).length > 0 && <small className="ke-wizard-counter">Choices: {publicChoiceValues(variable, draft.frame).join(', ')}</small>}</li>)}</ul>
-              {!!draft.frame.rules.length && <><h4>Shared rules</h4><ul>{draft.frame.rules.map(rule => <li key={rule.id}>{ruleText(rule, draft.frame.variables)}</li>)}</ul></>}
-              <h4>Who will review it</h4><div className="ke-wizard-members">{draft.frame.participants.map(member => <span key={member.id}>{member.displayName}</span>)}</div>
-            </article>
-            {!draft.createdDecisionId && <details className="ke-wizard-edit"><summary>Adjust the wording</summary>
-              <label htmlFor={`draft-title-${group.id}`}>Decision title</label><input id={`draft-title-${group.id}`} value={draft.frame.title} maxLength={160} disabled={busy || !!pendingKey} onChange={event => changeFrame({ ...draft.frame, title: event.target.value })} />
-              {draft.frame.variables.map((variable, index) => <div key={variable.id}><label htmlFor={`draft-label-${group.id}-${index}`}>Choice name {index + 1}</label>
-                <input id={`draft-label-${group.id}-${index}`} value={variable.label} disabled={busy || !!pendingKey} maxLength={160} onChange={event => changeFrame({ ...draft.frame, variables: draft.frame.variables.map((item, at) => at === index ? { ...item, label: event.target.value } : item) })} />
-                {(variable.type === 'ENUM' || variable.type === 'ENUM_SET') && variable.options.map((option, at) => <label key={option.id}>Option {at + 1} for {variable.label}
-                  <input value={option.label} maxLength={120} disabled={busy || !!pendingKey} onChange={event => changeFrame({ ...draft.frame, variables: draft.frame.variables.map((item, vi) => vi === index && (item.type === 'ENUM' || item.type === 'ENUM_SET') ? { ...item, options: item.options.map((value, oi) => oi === at ? { ...value, label: event.target.value } : value) } : item) })} /></label>)}
-              </div>)}
+        <nav className="ke-creation-stepper" aria-label="Decision creation steps">
+          <button type="button" disabled={busy && !aiWorking} aria-current={step === 'describe' ? 'step' : undefined} onClick={() => { setShowExample(false); setStep('describe'); }}>1. Describe</button>
+          <PageIcon name="ArrowRight" /><button type="button" disabled={!objective.trim() || busy && !aiWorking} aria-current={step === 'options' ? 'step' : undefined} onClick={() => { setShowExample(false); continueToOptions(); }}>2. Options</button>
+        </nav>
+        <div ref={wizardBody} className="ke-wizard-body" aria-busy={busy && !aiWorking}>
+          {showExample && <DecisionGuide onReturn={returnFromExample} />}
+          <div className="ke-creation-form" hidden={showExample}>
+            {step === 'describe' && <section className="ke-creation-describe" aria-label="Decision description">
+              <label htmlFor={`group-objective-${group.id}`}>Describe the decision</label>
+              <textarea ref={objectiveInput} id={`group-objective-${group.id}`} rows={6} value={objective} maxLength={2000}
+                placeholder="e.g. We’re planning a weekend trip together and need to decide where to go."
+                aria-invalid={!!descriptionError} aria-describedby={`description-help-${group.id}${descriptionError ? ` description-error-${group.id}` : ''}`}
+                disabled={busy && !aiWorking} onChange={event => changeDescription(event.target.value)} />
+              <div className="ke-description-meta"><p id={`description-help-${group.id}`} className="ke-creation-privacy"><PageIcon name="Lock" />Your description and options will be shared with the group. Personal preferences come later.</p>
+                <small>{objective.length.toLocaleString()} / 2,000</small></div>
+              {descriptionError && <p id={`description-error-${group.id}`} className="ke-creation-error" role="alert">{descriptionError}</p>}
+              <div className="ke-creation-inspiration"><span>Need inspiration?</span>{[
+                ['Plan a trip', 'We want to plan a weekend trip together. We’re considering the coast, the mountains or a city break, and haven’t picked a date yet.'],
+                ['Choose a restaurant', 'Our group is choosing a restaurant for Saturday dinner. We’re considering Cedar Kitchen, Moon Noodles and Garden Table.'],
+                ['Compare a purchase', 'We want to buy something together and compare two shortlisted options. We need to decide which one best fits the group.'],
+              ].map(([label, example]) => <button type="button" key={label} className="secondary" disabled={busy && !aiWorking} onClick={() => { if (objective.trim()) setExampleToApply(example!); else changeDescription(example!); }}>{label}</button>)}</div>
+              {exampleToApply && <div className="ke-example-confirm" role="group" aria-label="Replace description with example"><p>Replace your description with this example? Your options will stay.</p>
+                <button type="button" className="secondary" onClick={() => { changeDescription(exampleToApply); setExampleToApply(null); }}>Use this example</button>
+                <button type="button" className="ke-text-link" onClick={() => setExampleToApply(null)}>Keep my text</button></div>}
+              <button type="button" className="ke-text-link ke-icon-action ke-creation-assist" aria-expanded={helpOpen} disabled={busy} onClick={() => { setHelpGoal(objective); setHelpOpen(value => !value); }}><PageIcon name="Sparkles" />Help me get started</button>
+              {helpOpen && <section className="ke-description-assistance" aria-label="Writing assistance"><label>A few words about the decision<input value={helpGoal} maxLength={2000} disabled={busy} placeholder="e.g. Choose a holiday destination" onChange={event => setHelpGoal(event.target.value)} /></label>
+                <p className="ke-creation-hint">AI will use this shared text and your current options. Your description stays unchanged until you accept a suggestion.</p>
+                <button type="button" className="secondary ke-icon-action" disabled={busy || !!pendingKey || checkingRequest || !requestLookupAvailable || !helpGoal.trim()} onClick={() => askForHelp('description', helpGoal)}><PageIcon name="Sparkles" />Suggest a description</button></section>}
+            </section>}
+            {step === 'options' && <section className="ke-creation-options" aria-label="Review your options">
+              {choiceMode && choicePlan ? <>
+                <div className="ke-options-toolbar"><button type="button" className="ke-text-link ke-icon-action" disabled={busy || !!pendingKey || checkingRequest || !requestLookupAvailable} onClick={() => askForHelp('options')}><PageIcon name="Sparkles" />Suggest options</button>
+                  <div className="ke-creation-save-state">{choiceSaved && <small role="status">Draft saved</small>}<button type="button" className="ke-text-link" disabled={busy || choiceSaved || !!choiceConflict} onClick={() => void action(saveChoices)}>Save draft</button></div></div>
+                <ChoicePlanEditor plan={choicePlan} onChange={changeChoices} busy={busy && !aiWorking} />
+                {(choiceDraft?.aiAssisted || draft?.aiAssisted) && <p className="ke-creation-hint">This draft includes AI suggestions. Check names, dates and availability before creating it.</p>}
+                {choiceConflict && <aside className="ke-wizard-save" role="alert"><strong>A newer draft is saved. Your edits are kept here.</strong>
+                  <details><summary>Review the latest saved choices</summary><h3>{choiceConflict.frame.title}</h3><p>{choiceConflict.frame.objective}</p><ul>{choiceConflict.frame.variables.map(variable => <li key={variable.id}>{variableText(variable, choiceConflict.frame)}</li>)}</ul></details>
+                  {!choiceConflict.createdDecisionId && <button type="button" className="secondary" disabled={busy} onClick={() => { const latest = choiceConflict; if (!latest.choicePlan) return;
+                    editorVersion.current++; setChoicePlan(latest.choicePlan); setObjective(latest.frame.objective); setChoiceDraft(latest); setDraft(latest); setChoiceSaved(true); setDirty(false); setChoiceConflict(null); setNotice('The latest saved draft is loaded.'); }}>Use latest saved draft</button>}
+                  {!choiceConflict.createdDecisionId && <button type="button" className="secondary" disabled={busy} onClick={() => { editorVersion.current++; setChoiceDraft(choiceConflict); setChoiceConflict(null); setChoiceSaved(false); setDirty(true); setNotice('Your edits are kept. Save them to replace the reviewed saved draft.'); }}>Keep my edits</button>}
+                  {choiceConflict.createdDecisionId && <button type="button" disabled={busy} onClick={() => { closeWizard(); openDecision(choiceConflict.createdDecisionId!); }}>Open created decision</button>}
+                </aside>}
+              </> : draft && <section className="ke-legacy-draft"><p className="ke-creation-hint">This saved draft keeps its original options and shared rules.</p>
+                <button type="button" className="ke-text-link ke-icon-action" disabled={busy || !!pendingKey || checkingRequest || !requestLookupAvailable} onClick={() => askForHelp('options')}><PageIcon name="Sparkles" />Suggest options</button>
+                <label>Decision name<input value={draft.frame.title} maxLength={160} disabled={busy} onChange={event => changeFrame({ ...draft.frame, title: event.target.value })} /></label>
+                {draft.frame.variables.map((variable, index) => <fieldset key={variable.id}><legend>{variable.label}</legend><label>Topic name<input value={variable.label} maxLength={160} disabled={busy} onChange={event => changeFrame({ ...draft.frame, variables: draft.frame.variables.map((value, at) => at === index ? { ...value, label: event.target.value } : value) })} /></label>
+                  {(variable.type === 'ENUM' || variable.type === 'ENUM_SET') ? variable.options.map((option, at) => <label key={option.id}>Option {at + 1} for {variable.label}<input value={option.label} maxLength={120} disabled={busy} onChange={event => changeFrame({ ...draft.frame, variables: draft.frame.variables.map((item, vi) => vi === index && (item.type === 'ENUM' || item.type === 'ENUM_SET') ? { ...item, options: item.options.map((value, oi) => oi === at ? { ...value, label: event.target.value } : value) } : item) })} /></label>) : <p>{publicChoiceValues(variable, draft.frame).join(' · ') || variableText(variable, draft.frame)}</p>}</fieldset>)}
+                {!!draft.frame.rules.length && <details><summary>Shared rules</summary><ul>{draft.frame.rules.map(rule => <li key={rule.id}>{ruleText(rule, draft.frame.variables)}</li>)}</ul></details>}
+                {draft.clarificationQuestions.map((question, index) => <label key={question}>{question}<textarea rows={2} maxLength={500} disabled={busy || !!pendingKey} value={answers[index] ?? ''} onChange={event => { answersByQuestion.current[question] = event.target.value; setAnswers(current => ({ ...current, [index]: event.target.value })); }} /></label>)}
+                {!!draft.clarificationQuestions.length && <button type="button" className="secondary" disabled={busy || dirty || !!pendingKey || !requestLookupAvailable || draft.clarificationQuestions.some((_q, i) => !answers[i]?.trim())} onClick={() => { aiIntent.current = 'options'; void action(() => draftObjective(draft.frame.objective, { draftId: draft.id, revision: draft.revision, answers: draft.clarificationQuestions.map((_q, i) => answers[i]!.trim()) })); }}>Update suggestions</button>}
+                {dirty && <button type="button" className="ke-text-link" disabled={busy} onClick={() => void action(saveDraft)}>Save draft</button>}
+              </section>}
+              <p className="ke-creation-privacy"><PageIcon name="Lock" />These options are shared. Everyone adds their own preferences privately after creation.</p>
+            </section>}
+            {aiWorking && <p className="ke-creation-assist-status" role="status"><PageIcon name="Sparkles" />Preparing suggestions. You can keep editing.</p>}
+            {aiReview && ((step === 'describe' && aiReview.intent === 'description') || (step === 'options' && aiReview.intent === 'options')) && <CreationSuggestions key={aiReview.draft.id} review={aiReview} plan={choicePlan ?? emptyChoicePlan(objective)} busy={busy}
+              onChange={setAiReview} onAdd={acceptOption} onDismiss={() => setAiReview(null)} onUseDescription={() => { changeDescription(aiReview.description); setAiReview(null); setHelpOpen(false); }}
+              onUseLegacyDraft={() => { setDraft(aiReview.draft); setObjective(aiReview.draft.frame.objective); setChoicePlan(null); setChoiceDraft(null); setChoiceMode(false); setAiReview(null); setDirty(false); setStep('options'); requestAnimationFrame(() => draftHeading.current?.focus()); }} onFollowUp={updateSuggestions} />}
+            {pendingKey && !aiWorking && <details className="ke-creation-recovery"><summary>Previous suggestions need a check</summary><p>{requestState?.state === 'UNKNOWN' ? 'The result hasn’t been confirmed. Check this request before asking for more suggestions. You can still work on your own options.' : 'Check the earlier request before asking for more suggestions. Your current draft is kept.'}</p>
+              <button type="button" className="secondary" disabled={busy || checkingRequest} onClick={() => void action(() => recoverRequest())}>Check progress</button>
+              {requestState?.canRelease && <button type="button" className="ke-text-link" disabled={busy} onClick={() => void action(releaseRequest)}>Close unfinished request</button>}
             </details>}
-            {dirty && <div className="ke-wizard-save"><p>You changed the wording. Save it first, then confirm your review.</p><button type="button" disabled={busy || !!pendingKey} onClick={() => void action(saveDraft)}>Save changes</button></div>}
-            {!draft.createdDecisionId && <label className="ke-wizard-confirm"><input type="checkbox" checked={reviewed} disabled={busy || dirty || !!pendingKey} onChange={event => setReviewed(event.target.checked)} />
-              <span>I’ve reviewed these shared choices and who needs to approve.</span></label>}
-            {!draft.createdDecisionId && readiness && <p className="ke-wizard-help" role="status">{readiness}</p>}
-            <div className="ke-wizard-actions"><button type="button" className="secondary" disabled={busy || !!pendingKey} onClick={() => setStep('describe')}>Back to my idea</button>
-              {draft.createdDecisionId ? <button type="button" disabled={busy} onClick={() => { closeWizard(); openDecision(draft.createdDecisionId!); }}>Open decision</button>
-                : <button type="button" disabled={busy || !reviewed || dirty || !!pendingKey || checkingRequest || !requestLookupAvailable || draft.clarificationQuestions.length > 0} onClick={() => void action(async () => {
-                  const result = await request(`drafts/${draft.id}/create`, { revision: draft.revision });
-                  const snapshot = KE.PublicDecisionSnapshot.parse(result.snapshot); await reload(); setDraft(null); setStarting(false);
-                  onDirtyChange?.(false); openDecision(snapshot.frame.decisionId);
-                })}>Create decision</button>}
-            </div>
-          </div>}
-          {busy && <LoadingSkeleton kind="inline" label="Preparing or saving your decision" />}
-          {!busy && notice && <div className="ke-wizard-notice" role="status">{notice}</div>}
+            {!requestLookupAvailable && !checkingRequest && !pendingKey && (helpOpen || step === 'options') && <p className="ke-creation-hint">Suggestions are temporarily unavailable. You can add your own options. <button type="button" className="ke-text-link" disabled={busy} onClick={() => { setCheckingRequest(true); setRecoveryGeneration(value => value + 1); }}>Check again</button></p>}
+            {!busy && notice && <div className="ke-wizard-notice" role="status">{notice}</div>}
+            <details className="ke-creation-details ke-creation-privacy-details"><summary>Privacy and preview limits</summary><p>Your description and options are shared with your group. AI processes this public draft when you request assistance. Keep personal limits for your private answers later, and use fictional, non-sensitive data in this preview. Suggestions do not verify real-world prices or availability. The preview supports up to six topics, sixteen options per topic and 64 combinations. Creating a decision does not confirm anyone’s preferences or approve a final proposal.</p></details>
+            {step === 'describe' && <button ref={exampleTrigger} type="button" className="ke-text-link ke-creation-example-link" onClick={() => setShowExample(true)}>How decisions work</button>}
+          </div>
         </div>
-        </div>
-        {choiceMode && choicePlan && !showExample && <div className="ke-choice-footer">
-          <ChoicePlanActions busy={busy || !!choiceConflict} saved={choiceSaved} ready={!compileChoicePlan(choicePlan).questions.length}
-            onSave={() => void action(saveChoices)} onCreate={() => void action(createChoices)} onBack={() => { setChoiceMode(false); setStep('describe'); }}
-            {...(!pendingKey && requestLookupAvailable && !checkingRequest && objective.trim() ? { onAI: () => { setChoiceMode(false); void action(() => draftObjective(objective, undefined, choicePlan)); } } : {})} />
-        </div>}
-        <footer className="ke-wizard-footer">A saved draft can be continued later. No one’s private needs or final approval are confirmed by this guide.</footer>
+        {!showExample && <footer className="ke-creation-footer">
+          {step === 'options' && <button type="button" className="secondary" disabled={busy && !aiWorking} onClick={() => setStep('describe')}><PageIcon name="ArrowLeft" />Back</button>}
+          {step === 'describe' ? <button type="button" className="ke-icon-action ke-creation-primary" disabled={busy && !aiWorking} onClick={continueToOptions}>Continue<PageIcon name="ArrowRight" /></button>
+            : <button type="button" className="ke-icon-action ke-creation-primary" disabled={busy || !!choiceConflict || (choiceMode ? !choicePlan || !!compileChoicePlan(choicePlan).questions.length : !draft || !!draft.clarificationQuestions.length)} onClick={() => void action(choiceMode ? createChoices : createLegacyDraft)}>{busy && !aiWorking ? 'Creating…' : 'Create decision'}<PageIcon name="ArrowRight" /></button>}
+        </footer>}
       </div>
     </dialog>}
     {roster && <div className="local-note"><h4>Include current group members</h4><p>{roster.frame.objective}</p>
