@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { KnownEnough as KE, publicChoiceOptions } from '@deal-table/contracts';
 import { PrivateAnswersModal } from './private-answers-modal';
 import { PageIcon } from './app-chrome';
+import { decisionPhaseLabel, decisionStatusText } from './decision-copy';
 import { backgroundRequest, submitBackgroundRequest, type BackgroundReceipt } from './background-negotiation';
 
 class DecisionRequestError extends Error {
@@ -51,7 +52,8 @@ export function ruleText(rule: KE.ValidationRule, variables: Variable[]): string
   }
 }
 
-export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNegotiation = false, onQueued, onDirtyChange, staged = false }: {
+export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNegotiation = false, onQueued, onDirtyChange, staged = false, title, onRefresh, refreshing = false }: {
+  title?: string; onRefresh?: () => void; refreshing?: boolean;
   snapshot: KE.PublicDecisionSnapshot; owner: KE.OwnerDecisionSnapshot | null;
   api: (path: string, init?: RequestInit) => Promise<Response>; refresh: () => Promise<void>;
   backgroundNegotiation?: boolean; onQueued?: (receipt: BackgroundReceipt) => void; onDirtyChange?: (dirty: boolean) => void; staged?: boolean;
@@ -60,6 +62,12 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
   const [syntheticProcessing, setSyntheticProcessing] = useState(false);
   const [detailStep, setDetailStep] = useState<'shared' | 'proposal' | null>(null);
   const detailDialog = useRef<HTMLDialogElement>(null);
+  const headerMenu = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const outside = (event: PointerEvent) => { if (event.target instanceof Node && headerMenu.current?.open && !headerMenu.current.contains(event.target)) headerMenu.current.open = false; };
+    document.addEventListener('pointerdown', outside);
+    return () => document.removeEventListener('pointerdown', outside);
+  }, []);
   useEffect(() => { if (detailStep) detailDialog.current?.showModal(); else detailDialog.current?.close(); }, [detailStep]);
   const [structuredDirty, setStructuredDirty] = useState(false);
   const [editingAnswers, setEditingAnswers] = useState(owner?.ownInputReadiness === 'NOT_STARTED');
@@ -210,9 +218,24 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
   </>;
   const continueToProposal = !!proposal || ['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status) || !!owner?.pendingQuestions.some(question => question.status === 'PENDING') || !!owner?.disclosurePermissions.some(permission => permission.status === 'PENDING');
   return <>
-    <section className="ke-card ke-decision-overview ke-response-overview">
+    <section className={`ke-card ke-decision-overview ke-response-overview${staged ? ' ke-cohesive-decision-header' : ''}`}>
+      {staged && <>
+        <h2 id="open-decision-title">{title ?? snapshot.frame.title}</h2>
+        <details ref={headerMenu} className="ke-decision-header-menu" onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false; }}
+          onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); event.currentTarget.open = false; event.currentTarget.querySelector('summary')?.focus(); } }}>
+          <summary aria-label="Decision actions"><PageIcon name="Ellipsis" /></summary>
+          <div className="ke-decision-header-menu-items">
+            <button type="button" onClick={() => { if (headerMenu.current) headerMenu.current.open = false; setDetailStep('shared'); }}><PageIcon name="ListChecks" />Decision details</button>
+            <button type="button" aria-label="Refresh decision" disabled={busy || refreshing} onClick={() => { if (headerMenu.current) headerMenu.current.open = false; if (onRefresh) onRefresh(); else void refresh(); }}><PageIcon name="RefreshCw" />{refreshing ? 'Refreshing…' : 'Refresh'}</button>
+          </div>
+        </details>
+      </>}
       <p className="ke-response-summary">{(snapshot.frame.description || snapshot.frame.objective).split(/(?<=[.!?])\s+/).slice(0, 2).join(' ')}</p>
-      <details className="ke-response-progress ke-compact-activity"><summary><span><PageIcon name="Users" />Group activity<PageIcon name="ChevronRight" /></span></summary>
+      <details className={`ke-response-progress ke-compact-activity${staged ? ' ke-header-activity' : ''}`}><summary aria-label={staged ? 'Show participant activity' : undefined}>{staged ? <>
+        <span className="ke-response-phase" data-finished={['AGREED', 'CLOSED'].includes(snapshot.status)} title={decisionStatusText(snapshot.status)}>{decisionPhaseLabel(snapshot.status)}</span>
+        <span className="ke-response-status-divider" aria-hidden="true">·</span>
+        <span className="ke-response-count">{snapshot.participantProgress ? `${snapshot.frame.participants.filter(person => snapshot.participantProgress?.some(progress => progress.participantId === person.id && progress.answersSaved)).length}/${snapshot.frame.participants.length} responded` : `${snapshot.frame.participants.length} participants`}<PageIcon name="ChevronRight" /></span>
+      </> : <span><PageIcon name="Users" />Group activity<PageIcon name="ChevronRight" /></span>}</summary>
         <ul>{snapshot.frame.participants.map(person => {
           const approved = snapshot.approvedParticipantIds.includes(person.id);
           const progress = snapshot.participantProgress?.find(item => item.participantId === person.id);
@@ -226,7 +249,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
         if (proposal || owner.pendingQuestions.some(question => question.status === 'PENDING') || owner.disclosurePermissions.some(permission => permission.status === 'PENDING')) setDetailStep('proposal');
         else void generate();
       }}>{proposal ? ['AGREED', 'CLOSED'].includes(snapshot.status) ? 'View outcome' : 'View proposal' : owner.pendingQuestions.some(question => question.status === 'PENDING') || owner.disclosurePermissions.some(permission => permission.status === 'PENDING') ? 'Review follow-up' : 'Find an outcome'}</button>}
-      <button type="button" className="ke-response-text-button" onClick={() => setDetailStep('shared')}>Decision details<PageIcon name="ChevronRight" /></button>
+      {!staged && <button type="button" className="ke-response-text-button" onClick={() => setDetailStep('shared')}>Decision details<PageIcon name="ChevronRight" /></button>}
       {!owner && proposal && <button type="button" onClick={() => setDetailStep('proposal')}>View proposal</button>}
       </div>
     </section>

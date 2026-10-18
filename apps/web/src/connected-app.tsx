@@ -8,7 +8,6 @@ import { ProfileDrawer } from './profile-drawer';
 import { Brand, LoadingSkeleton, PageIcon, PrivacyBar, ThemeToggle, WelcomeHeading } from './app-chrome';
 import { GroupHome } from './group-home';
 import { ConnectedDecision } from './connected-decision';
-import { decisionPhaseLabel, decisionStatusText } from './decision-copy';
 import { backgroundNegotiationAvailable, pollBackgroundDecision, type BackgroundTarget } from './background-negotiation';
 import { readAppView, appViewSearch, saveIntendedView, takeIntendedView, type AppView } from './navigation';
 let callbackCompletion: ReturnType<typeof finishCognitoSignIn> | null = null;
@@ -140,16 +139,15 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     {view.kind === 'invalid' ? <section className="ke-card"><h2>This link is unavailable</h2><button onClick={() => move({ kind: 'groups' }, true)}>Back to groups</button></section>
       : view.kind === 'decision' ? <dialog ref={decisionDialog} className="ke-decision-wizard ke-open-decision-dialog" data-decision-id={snapshot?.frame.decisionId} aria-labelledby="open-decision-title" onCancel={event => { event.preventDefault(); move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' }); }}>
         <button className="secondary ke-response-close" aria-label="Close decision" onClick={() => move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' })}><PageIcon name="X" /></button>
-        <button className="ke-response-refresh" aria-label="Refresh decision" title={busy ? 'Refreshing…' : 'Refresh decision'} disabled={busy} onClick={() => { if (dirty.current && !window.confirm('Refresh and discard unsaved input?')) return; dirty.current = false; void load().catch(() => {}); }}><PageIcon name="RefreshCw" /><span className="ke-response-refresh-label">{busy ? 'Refreshing…' : 'Refresh'}</span></button>
-        <section className={`ke-response-header${snapshot ? ' ke-load-reveal' : ''}`} aria-busy={busy || (!snapshot && !status)}><span className="ke-wizard-eyebrow">Group decision</span>
-          <h2 id="open-decision-title">{snapshot ? decisionTitle?.id === snapshot.frame.decisionId ? decisionTitle.title : snapshot.frame.title : 'Your decision'}</h2>
-          <div className="ke-response-header-meta">{snapshot && <span className="ke-response-phase" data-finished={['AGREED', 'CLOSED'].includes(snapshot.status)} role="status" title={decisionStatusText(snapshot.status)}>{decisionPhaseLabel(snapshot.status)}<span className="ke-response-status-divider" aria-hidden="true"> · </span><span className="ke-response-count">{snapshot.participantProgress ? `${snapshot.frame.participants.filter(person => snapshot.participantProgress?.some(progress => progress.participantId === person.id && progress.answersSaved)).length}/${snapshot.frame.participants.length} responded` : `${snapshot.frame.participants.length} participants`}</span></span>}
-          </div>
-          {!snapshot && !status && <LoadingSkeleton kind="decision" label="Loading current decision" />}
-          {!snapshot && status && <p role="status">{status}</p>}
-        </section>
+        {!snapshot && <section className="ke-response-header" aria-busy={busy || !status}>
+          <h2 id="open-decision-title">Your decision</h2>
+          {!status && <LoadingSkeleton kind="decision" label="Loading current decision" />}
+          {status && <><p role="status">{status}</p><button type="button" disabled={busy} aria-label="Refresh decision" onClick={() => { if (dirty.current && !window.confirm('Refresh and discard unsaved input?')) return; dirty.current = false; void load().catch(() => {}); }}>Try again</button></>}
+        </section>}
         {snapshot && <div className="ke-load-reveal"><ConnectedDecision key={`${session.accessToken}:${snapshot.contextToken}`}
-          snapshot={snapshot} owner={owner} backgroundNegotiation={background} staged api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} refresh={async () => { dirty.current = false; await load(); }}
+          snapshot={snapshot} owner={owner} backgroundNegotiation={background} staged
+          title={decisionTitle?.id === snapshot.frame.decisionId ? decisionTitle.title : snapshot.frame.title} refreshing={busy}
+          onRefresh={() => { if (dirty.current && !window.confirm('Refresh and discard unsaved input?')) return; dirty.current = false; void load().catch(() => {}); }} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} refresh={async () => { dirty.current = false; await load(); }}
           onDirtyChange={value => { dirty.current = value; }} onQueued={receipt => { if (!owner) return; setTarget({ decisionId: snapshot.frame.decisionId, contextToken: snapshot.contextToken, semanticVersion: snapshot.semanticVersion, ownerParticipantId: owner.ownerParticipantId, expiresAt: receipt.expiresAt }); }} /></div>}
       </dialog> : session.kind === 'display' ? <section className="ke-card"><h2>Shared screen</h2><p>Open a shared decision link from your group to show its progress. This screen cannot enter private needs or approve proposals.</p></section>
         : <GroupHome key={`${session.accessToken}:${view.kind === 'group' ? view.groupId : 'home'}:${invitationEpoch}`} {...(view.kind === 'group' ? { selectedGroupId: view.groupId } : {})}
