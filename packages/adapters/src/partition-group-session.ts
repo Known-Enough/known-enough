@@ -98,7 +98,7 @@ async function safe<T>(work: () => Promise<T>): Promise<T> {
 function current(state: Groups.GroupState, who: string, selected: string, organizer = false): Groups.Group {
   if (state.accounts.find(account => account.subject === who)?.status !== 'APPROVED') return deny('FORBIDDEN');
   const group = state.groups.find(group => group.id === selected && group.members.includes(who));
-  if (!group) return deny('NOT_FOUND');
+  if (!group || group.deleted) return deny('NOT_FOUND');
   if (organizer && group.organizer !== who) return deny('FORBIDDEN');
   return group;
 }
@@ -158,6 +158,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
     }
     const header = checkPartitionRow(rows[1], keys[1]!);
     if (header.kind !== 'GROUP' || new Set(header.value.members).size !== header.value.members.length) throw new PartitionSessionError('SESSION_INVALID');
+    if (header.value.deleted) return deny('NOT_FOUND');
     if (admission) {
       const invitation = header.value.invitations.find(value => value.tokenHash === admission.tokenHash);
       if (!invitation || invitation.recipientHash !== admission.recipientHash || invitation.expiresAt !== admission.expiresAt
@@ -658,6 +659,22 @@ export function createPartitionGroupSession(transport: PartitionTransport,
         }, io));
       });
     },
+    /** One retained header marker revokes the whole group without rewriting every saved child. */
+    deleteGroup(principal: TrustedPrincipal | null, rawId: string, raw: unknown) {
+      return safe(async () => {
+        const who = participant(principal); const key = groupId(rawId); const request = Groups.GroupRemoval.safeParse(raw);
+        if (!request.success) return deny('INVALID_COMMAND');
+        const io = partitionIO(limits);
+        return selected(who, key, io, resolved => repository.transaction(resolved, state => {
+          const group = current(state, who, key, true);
+          if (group.version !== request.data.version) return deny('STALE_CONTEXT');
+          if (group.version >= Number.MAX_SAFE_INTEGER) throw new PartitionSessionError('SESSION_CAPACITY');
+          group.deleted = true;
+          group.version++;
+          return { deleted: true as const };
+        }, io));
+      });
+    },
     /** Retain replay-bearing rows, but revoke all app access. Group/header CAS also fences in-flight work. */
     removeItem(principal: TrustedPrincipal | null, rawId: string, raw: unknown) {
       return safe(async () => {
@@ -765,6 +782,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           if (rawHeader === null || ArchivedGroupRow.safeParse(rawHeader).success) return deny('NOT_FOUND');
           const header = checkPartitionRow(rawHeader, headerKey);
           if (header.kind !== 'GROUP') throw new PartitionSessionError('SESSION_INVALID');
+          if (header.value.deleted) return deny('NOT_FOUND');
           const rawAccount = await partitionCall(io, () => transport.read(accountKey, io));
           const account = rawAccount === null ? null : checkPartitionRow(rawAccount, accountKey);
           if (account !== null && (account.kind !== 'ACCOUNT' || account.value.status !== 'APPROVED')) return deny('FORBIDDEN');
@@ -772,7 +790,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
             const fence = await repository.fence({ groupId: directory.groupId, accountSubjects: [...header.value.members] }, state => {
               const group = state.groups.find(value => value.id === directory.groupId);
               const binding = group?.decisions.find(value => value.id === decisionId);
-              if (!group || !binding || binding.deleted) return deny('NOT_FOUND');
+              if (!group || group.deleted || !binding || binding.deleted) return deny('NOT_FOUND');
               if (binding.version !== group.version) return deny('STALE_CONTEXT');
             }, io);
             const expected = account?.revision ?? 0;

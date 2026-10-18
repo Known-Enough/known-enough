@@ -5,6 +5,10 @@ on:
       source_sha:
         required: true
         type: string
+      run_checks:
+        description: Run local regression tests; false retains deployment source and runtime guards for manual acceptance
+        type: boolean
+        default: true
       package_source:
         required: true
         type: string
@@ -43,7 +47,9 @@ jobs:
           EXPECTED_SOURCE: ${{ inputs.source_sha }}
         run: |
           test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
-          python3 -B scripts/operations/jobs-worker-smoke.test.py
+          if [ "${{ inputs.run_checks }}" = true ]; then
+            python3 -B scripts/operations/jobs-worker-smoke.test.py
+          fi
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
           role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobOperations

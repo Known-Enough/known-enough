@@ -432,22 +432,30 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       <h2 id="delete-group-heading">Delete group?</h2>
       <p id="delete-group-description">{deleteTarget ? `Delete “${deleteTarget.name}” for everyone in the group? Members will lose access to its saved decisions and drafts.` : 'This group will be removed for all its members.'}</p>
       <p className="ke-delete-note">This cannot be undone. Historical records are retained and the group will no longer appear in anyone’s group list.</p>
-      {deleteGroupNotice && <p role="status">{deleteGroupNotice}</p>}
+      {deleteGroupNotice && <><p role="status">{deleteGroupNotice}</p>
+        <button type="button" className="secondary" disabled={busy} onClick={() => { setDeleteGroupId(null); void load(); }}>Refresh group list</button></>}
       <div className="ke-wizard-actions"><button type="button" className="secondary" disabled={busy} onClick={() => setDeleteGroupId(null)}>Keep group</button>
         <button type="button" className="ke-group-delete-confirm" disabled={busy || !deleteTarget} onClick={() => {
           if (!deleteTarget || busy) return;
           const target = deleteTarget, requestId = crypto.randomUUID(); setBusy(true); setDeleteGroupNotice('');
           void (async () => {
+            let status = 0; let reference: string = requestId;
             try {
               const response = await api(`/groups/${target.id}/delete`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-request-id': requestId },
                 body: JSON.stringify({ version: target.version }) });
-              if (!response.ok) throw new Error(String(response.status));
+              status = response.status;
+              const result = await response.json().catch(() => null) as { deleted?: unknown; requestId?: unknown } | null;
+              if (typeof result?.requestId === 'string' && /^[a-f0-9-]{36}$/i.test(result.requestId)) reference = result.requestId;
+              if (!response.ok) throw new Error('Delete rejected');
+              if (result?.deleted !== true) { status = 0; throw new Error('Delete not confirmed'); }
               setGroups(current => current.filter(group => group.id !== target.id)); setDeleteGroupId(null);
               setNotice('The group was deleted for all members.');
-            } catch (error) {
-              const status = error instanceof Error && /^\d+$/.test(error.message) ? Number(error.message) : 0;
+            } catch {
               setDeleteGroupNotice((status === 409 ? 'The group changed. Refresh the group list before trying again.'
-                : status === 403 ? 'Only the organizer can delete this group.' : 'The result is unknown. Refresh the group list to check whether the group was deleted.') + ` Reference: ${requestId}.`);
+                : status === 403 ? 'Only the organizer can delete this group.'
+                  : status === 404 ? 'This group is unavailable or has already been deleted. Refresh the group list.'
+                    : status === 400 || status === 422 ? 'The deletion request could not be accepted. Refresh the group list before trying again.'
+                      : 'The result is unknown. Refresh the group list to check whether the group was deleted.') + ` Reference: ${reference}.`);
             } finally { setBusy(false); }
           })();
         }}>Delete group</button></div>

@@ -224,6 +224,7 @@ export function createPartitionedGroupRepository(transport: PartitionTransport,
       if (prior?.kind === 'ACCOUNT' && row.kind === 'ACCOUNT' && (prior.value.emailHash !== row.value.emailHash || prior.value.sharedTestEmail !== row.value.sharedTestEmail
         || (prior.value.profile?.loginUsername && row.value.profile?.loginUsername !== prior.value.profile.loginUsername))) fail('PARTITION_IDENTITY_CONFLICT');
       if (prior?.kind === 'GROUP' && row.kind === 'GROUP') {
+        if (prior.value.deleted && !row.value.deleted) fail('PARTITION_INVALID');
         for (const invitation of row.value.invitations) {
           const old = prior.value.invitations.find(item => item.tokenHash === invitation.tokenHash);
           if (old && (old.recipientHash !== invitation.recipientHash || old.expiresAt !== invitation.expiresAt
@@ -242,11 +243,11 @@ export function createPartitionedGroupRepository(transport: PartitionTransport,
       if (!next.has(key)) output.push({ key: prior.key, expected: 0, next: null });
     }
     // Discovery edges are private derived data, never callback-controlled authority.
-    // Only roster differences change them; the header/account guards join every put.
+    // Roster changes and retained group deletion update edges under the same header/account guards.
     const priorHeader = scope.groupId ? snapshot.rows.get(encodedKey(partitionGroupKey(scope.groupId)))?.row : null;
     const nextHeader = scope.groupId ? next.get(encodedKey(partitionGroupKey(scope.groupId)))?.row : null;
-    const before = priorHeader?.kind === 'GROUP' ? priorHeader.value.members : [];
-    const after = nextHeader?.kind === 'GROUP' ? nextHeader.value.members : [];
+    const before = priorHeader?.kind === 'GROUP' && !priorHeader.value.deleted ? priorHeader.value.members : [];
+    const after = nextHeader?.kind === 'GROUP' && !nextHeader.value.deleted ? nextHeader.value.members : [];
     const changedMembers = [...new Set([...before, ...after])].filter(subject => before.includes(subject) !== after.includes(subject));
     // Inventory phantom fence: every discovery edge transition advances its owner's account revision.
     // A lifecycle inventory rechecks that account revision; new groups cannot slip between enumeration and freeze.

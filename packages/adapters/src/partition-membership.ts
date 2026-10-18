@@ -55,7 +55,7 @@ export function partitionMembershipSeeds(raw: unknown) {
   const row = header(raw);
   return row.value.members.map(subject => ({ key: partitionMembershipKey(subject, row.value.id),
     row: PartitionMembershipRow.parse({ schemaVersion: 1, kind: 'MEMBERSHIP', revision: 1,
-      value: { subject, groupId: row.value.id, active: true } }) }));
+      value: { subject, groupId: row.value.id, active: !row.value.deleted } }) }));
 }
 
 /** Discovery only: callers still hydrate/authorize each selected group through the scoped service/fence. */
@@ -186,7 +186,7 @@ export function createPartitionMembershipReader(config: { sourceSha: string; pla
       if (!isDeepStrictEqual(initial, current)) return fail('MEMBERSHIP_STALE');
       const latestAccount = await account(subject, context); const latestControl = await control(context);
       if (!isDeepStrictEqual(beforeAccount, latestAccount) || !isDeepStrictEqual(beforeControl, latestControl)) return fail('MEMBERSHIP_STALE');
-      const summaries = current.flatMap(row => row?.kind === 'GROUP' && row.value.members.includes(subject) ? [{
+      const summaries = current.flatMap(row => row?.kind === 'GROUP' && !row.value.deleted && row.value.members.includes(subject) ? [{
         id: row.value.id, name: row.value.name, version: row.value.version, isOrganizer: row.value.organizer === subject,
       }] : []);
       const issuedAt = now();
