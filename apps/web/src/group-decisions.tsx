@@ -51,8 +51,9 @@ function DecisionRow({ decision, status, organizer, busy, onOpen, onReview, onRe
   return <article ref={root} className="ke-decision-row ke-clickable-decision-row">
     <button type="button" className="ke-decision-row-open" disabled={busy || (!decision.current && !organizer)}
       onClick={decision.current ? onOpen : onReview}>
-      <span className="ke-decision-row-content"><span className="ke-decision-row-title"><strong>{name}</strong><span className="ke-decision-status-chip" data-tone={currentStatus.tone}>{currentStatus.label}</span></span>
+      <span className="ke-decision-row-content"><span className="ke-decision-row-title"><strong>{name}</strong></span>
         {!decision.current ? <small>{organizer ? 'Resolve membership change' : 'The organizer needs to resolve a membership change.'}</small> : currentStatus.detail && <small>{currentStatus.detail}</small>}</span>
+      <span className="ke-decision-status-chip" data-tone={currentStatus.tone}>{currentStatus.label}</span>
       <PageIcon name="ChevronRight" />
     </button>
     {organizer && <div className="ke-decision-menu-wrap" onKeyDown={event => {
