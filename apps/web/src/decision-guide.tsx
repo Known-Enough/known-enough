@@ -33,15 +33,15 @@ export function DecisionGuide({ onReturn }: { onReturn: () => void }) {
         <p className="ke-guide-disclaimer">This example supplies only restaurants and dates. It does not establish prices, availability or dietary suitability. Keep the choices manageable; suggestions still need your review.</p>
       </>}
       {step === 2 && <>
-        <p><strong>Open decision</strong> opens the decision modal with its summary, everyone’s progress and <strong>What works for you?</strong> directly available. Choose and save your private answers without waiting for others. Listed options are saved directly without AI interpretation.</p>
+        <p><strong>Open decision</strong> opens the decision modal with its summary, everyone’s progress and <strong>What works for you?</strong> directly available. Tick every option that works for you, or choose Select all or None work for me. Save your private answers without waiting for others. Listed options are saved directly without AI interpretation.</p>
         <div className="ke-guide-personas" role="group" aria-label="View a fictional participant’s perspective">{(['Alex', 'Sam'] as const).map(name => <button key={name} type="button" className="secondary" aria-pressed={participant === name} onClick={() => setParticipant(name)}>Example: {name}’s own view</button>)}</div>
         <div className="ke-guide-sample ke-guide-private"><span className="ke-guide-view-label">Fictional private view · {participant}</span>
-          <dl><div><dt>Restaurant · Only the options I select work</dt><dd>{participant === 'Alex' ? 'Olive Room and Noodle Corner' : 'Noodle Corner and Garden Table'}</dd></div>
-            <div><dt>Date</dt><dd>{participant === 'Alex' ? 'Only the options I select work: 17 October 2026' : 'Any listed option works for me: 16 or 17 October 2026'}</dd></div>
-            <div><dt>My first choice — optional</dt><dd>Noodle Corner</dd></div></dl>
+          <dl><div><dt>Restaurant · Selected options</dt><dd>{participant === 'Alex' ? 'Olive Room and Noodle Corner' : 'Noodle Corner and Garden Table'}</dd></div>
+            <div><dt>Date</dt><dd>{participant === 'Alex' ? '17 October 2026' : '16 and 17 October 2026'}</dd></div>
+            <div><dt>Favorite · optional</dt><dd>Noodle Corner</dd></div></dl>
           <p>{participant} leaves Extra notes empty, ticks the fictional-data processing consent, then chooses <strong>Save my answers</strong>. There is no extra private-answer review wizard.</p>
         </div>
-        <details><summary>What about extra notes or an option that doesn’t work?</summary><p>Extra notes are optional. <strong>Use AI help for these notes</strong> requires processing consent, and its suggestions need your review; it cannot change your direct selections. Unresolved needs require clarification. Choosing <strong>None of these options work</strong> saves that problem instead of inventing agreement.</p></details>
+        <details><summary>What about extra notes or an option that doesn’t work?</summary><p>Extra notes are optional. <strong>Help with my notes</strong> requires processing consent, and its suggestions need your review; it cannot change your direct selections. Unresolved needs require clarification. Choosing <strong>None work for me</strong> saves that problem instead of inventing agreement.</p></details>
         <p className="ke-guide-disclaimer">You can switch perspectives in this fictional example. In the real app, participants see their own private inputs; the shared view contains only permitted shared facts and disclosures. An outcome may still imply information.</p>
       </>}
       {step === 3 && <>

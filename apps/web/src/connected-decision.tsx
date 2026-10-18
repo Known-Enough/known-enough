@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { KnownEnough as KE, publicChoiceOptions } from '@deal-table/contracts';
 import { PrivateAnswersModal } from './private-answers-modal';
+import { PageIcon } from './app-chrome';
 import { backgroundRequest, submitBackgroundRequest, type BackgroundReceipt } from './background-negotiation';
 
 class DecisionRequestError extends Error {
@@ -105,7 +106,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
     try {
       KE.DecisionCommandResult.parse(await request(`/decisions/${decisionId}/commands`, pending.current.body));
       pending.current = null; setPendingAction(false); setReviewed(false);
-      await refresh(); setNotice(type === 'CONFIRM_FRAME' ? 'Your confirmation of what we’re deciding is saved.' : type === 'CONFIRM_PRIVATE_ANSWERS' ? 'Your private answers are saved. Any unanswered needs still require clarification.' : type === 'CONFIRM_CONSTRAINTS' ? 'Your selected private conditions are confirmed.' : 'Your choice is recorded.');
+      await refresh(); setNotice(type === 'CONFIRM_FRAME' ? 'Your confirmation of what we’re deciding is saved.' : type === 'CONFIRM_PRIVATE_ANSWERS' ? 'Your private answers are saved.' : type === 'CONFIRM_CONSTRAINTS' ? 'Your selected private conditions are confirmed.' : 'Your choice is recorded.');
       if (type === 'CONFIRM_PRIVATE_ANSWERS') { setText(''); setStructuredDirty(false); }
       return true;
     } catch (error) {
@@ -208,19 +209,31 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
   </>;
   const continueToProposal = !!proposal || ['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status) || !!owner?.pendingQuestions.some(question => question.status === 'PENDING') || !!owner?.disclosurePermissions.some(permission => permission.status === 'PENDING');
   return <>
-    <section className="ke-card ke-decision-overview">
-      <p>{(snapshot.frame.description || snapshot.frame.objective).split(/(?<=[.!?])\s+/).slice(0, 2).join(' ')}</p>
-      {owner && <><h3>Your answers · private</h3>{owner.confirmedConstraints.some(item => item.status === 'ACTIVE')
-        ? <ul>{owner.confirmedConstraints.filter(item => item.status === 'ACTIVE').slice(0, 3).map(item => <li key={item.constraintId}>{describeCondition(item)}</li>)}</ul>
-        : <p>{owner.ownInputReadiness === 'READY' ? 'Your answers are saved. All available choices work for you.' : "You haven't answered yet."}</p>}</>}
-      {owner && owner.confirmedConstraints.filter(item => item.status === 'ACTIVE').length > 3 && <p>More saved conditions are available in your private answers.</p>}
-      <h3>Everyone’s progress</h3><ul>{snapshot.frame.participants.map(person => <li key={person.id}>{person.displayName}: {snapshot.approvedParticipantIds.includes(person.id) ? 'proposal approved' : !snapshot.participantProgress ? 'answers pending' : snapshot.participantProgress.find(item => item.participantId === person.id)?.answersSaved ? 'answers saved' : 'answers pending'}</li>)}</ul>
+    <section className="ke-card ke-decision-overview ke-response-overview">
+      <p className="ke-response-summary">{(snapshot.frame.description || snapshot.frame.objective).split(/(?<=[.!?])\s+/).slice(0, 2).join(' ')}</p>
+      {owner && (structuredDirty || owner.ownInputReadiness !== 'NOT_STARTED') && <p className="ke-response-own-status"><PageIcon name={structuredDirty ? 'Pencil' : 'Lock'} />
+        {structuredDirty ? 'You have unsaved changes' : owner.ownInputReadiness === 'READY' ? 'Your answers are saved privately' : 'Your saved answers need a follow-up'}</p>}
+      <details className="ke-response-progress"><summary><span><PageIcon name="Users" />Group progress</span><span>{snapshot.participantProgress
+        ? `${snapshot.participantProgress.filter(person => person.answersSaved).length} of ${snapshot.frame.participants.length} answered`
+        : `${snapshot.frame.participants.length} ${snapshot.frame.participants.length === 1 ? 'participant' : 'participants'}`}<PageIcon name="ChevronRight" /></span></summary>
+        <ul>{snapshot.frame.participants.map(person => {
+          const approved = snapshot.approvedParticipantIds.includes(person.id);
+          const answered = snapshot.participantProgress?.find(item => item.participantId === person.id)?.answersSaved;
+          return <li key={person.id}><span className="ke-response-person"><span aria-hidden="true" className="ke-response-person-initial">{person.displayName.slice(0, 1).toLocaleUpperCase()}</span>{person.displayName}{person.id === owner?.ownerParticipantId && <small>You</small>}</span>
+            <span className="ke-response-person-state" data-complete={approved || answered}>{approved ? 'Approved' : answered ? 'Answered' : snapshot.participantProgress ? 'Waiting for answers' : 'Not checked yet'}</span></li>;
+        })}</ul>
+      </details>
+      {owner && ['AGREED', 'CLOSED'].includes(snapshot.status) && <details className="ke-response-saved-details"><summary>Your saved answers · private</summary>
+        {owner.confirmedConstraints.some(item => item.status === 'ACTIVE') ? <ul>{owner.confirmedConstraints.filter(item => item.status === 'ACTIVE').map(item => <li key={item.constraintId}>{describeCondition(item)}</li>)}</ul> : <p>{owner.ownInputReadiness === 'READY' ? 'All listed choices work for you.' : 'No saved answers.'}</p>}
+      </details>}
+      <div className="ke-response-overview-actions">
       {owner && continueToProposal && <button type="button" disabled={blocked || awaitingJob} onClick={() => {
         if (proposal || owner.pendingQuestions.some(question => question.status === 'PENDING') || owner.disclosurePermissions.some(permission => permission.status === 'PENDING')) setDetailStep('proposal');
         else void generate();
       }}>{proposal ? 'See proposal' : 'Find an outcome'}</button>}
-      <button type="button" className="secondary" onClick={() => setDetailStep('shared')}>Decision details</button>
+      <button type="button" className="ke-response-text-button" onClick={() => setDetailStep('shared')}>Decision details<PageIcon name="ChevronRight" /></button>
       {!owner && proposal && <button type="button" onClick={() => setDetailStep('proposal')}>View proposal</button>}
+      </div>
     </section>
     <dialog ref={detailDialog} className="ke-step-dialog" aria-label={detailStep === 'shared' ? 'Decision details' : 'Review proposal and permissions'} onCancel={event => { event.preventDefault(); setDetailStep(null); }}>
       <button type="button" className="secondary" onClick={() => setDetailStep(null)}>Back to overview</button>
@@ -234,8 +247,8 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
         const options = publicChoiceOptions(snapshot.frame, variable);
         return <li key={variable.id}><strong>{variable.label}</strong>{options ? <span>{options.map(value => value.type === 'DATE' ? new Intl.DateTimeFormat('en', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(value.date + 'T00:00:00Z')) : valueText(value, variable)).join(' · ')}</span> : <span>{variableText(variable, snapshot.frame)}</span>}</li>;
       })}</ul>
-      <details className="ke-shared-rules"><summary>Shared rules ({snapshot.frame.rules.length})</summary>
-      {snapshot.frame.rules.length ? <ul aria-label="Public decision rules">{snapshot.frame.rules.map(rule => <li key={rule.id}>{ruleText(rule, snapshot.frame.variables)}</li>)}</ul> : <p>No additional shared rules.</p>}</details>
+      {snapshot.frame.rules.length > 0 && <details className="ke-shared-rules"><summary>Shared rules ({snapshot.frame.rules.length})</summary>
+        <ul aria-label="Public decision rules">{snapshot.frame.rules.map(rule => <li key={rule.id}>{ruleText(rule, snapshot.frame.variables)}</li>)}</ul></details>}
     </section>}
     {detailStep === 'proposal' && owner && (!staged || allConfirmed) && <section className="ke-card"><h2>Find an outcome</h2>
       <p>Your saved private answers are used to find choices that work for everyone.</p>

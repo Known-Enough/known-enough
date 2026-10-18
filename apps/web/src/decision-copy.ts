@@ -15,3 +15,13 @@ export const privateReadinessText = (status: KE.OwnerDecisionSnapshot['ownInputR
   NOT_STARTED: 'Your private answers have not been saved yet.', NEEDS_CLARIFICATION: 'Clarify your unresolved condition before continuing.',
   READY: 'Your current private answers are saved.',
 })[status];
+
+/** Compact labels for the decision header; full guidance remains available separately. */
+const phaseLabel: Record<KE.PublicDecisionSnapshot['status'], string> = {
+  CREATING: 'Preparing', DEFINING: 'Setting up', COLLECTING_FRAME_CONFIRMATION: 'Collecting answers',
+  COLLECTING_PRIVATE_INPUT: 'Collecting answers', NEEDS_CLARIFICATION: 'Follow-up needed',
+  READY: 'Ready to find an outcome', REASONING: 'Finding an outcome', PRIVATE_NEGOTIATION: 'Private follow-up',
+  PROPOSED: 'Proposal ready', APPROVING: 'Waiting for approvals', AGREED: 'Decision agreed',
+  NO_AGREEMENT: 'No agreement yet', SUPERSEDED: 'Decision updated', CLOSED: 'Closed',
+};
+export const decisionPhaseLabel = (status: KE.PublicDecisionSnapshot['status']) => phaseLabel[status];
