@@ -2,6 +2,10 @@
 
 Status: PUBLISHED; implementation claims released; user manual acceptance pending. Latest native group-delete hotfix: source3910e84/frontendAmplify121, [receipt](../../../../review-artifacts/FF/group-deletion-publication.json). Earlier dated source/control notes below are historical.
 
+## Decision list status — 2026-10-18
+
+Published/sourcee9bc454: one current-user status chip and optional metadata per row, Draft chip on saved drafts. Existing authenticated owner snapshot projected to labels/counts only; bounded cancellable reads, no polling/retries/private content storage or display. Row/chevron/dots/permissions unchanged. Honest ready-for-outcome/closed/stale/unavailable edge states. [Receipt](../../../../review-artifacts/FF/decision-status-chips-publication.json). Final static checks/build PASS after optional-type correction; no tests, manual acceptance pending.
+
 ## Outcome view — 2026-10-18
 
 Published/sourcedad629b: result-first topic choices, Proposed outcome/Decision agreed, compact required-approval progress/public participants, approved-owner confirmation/withdrawal or explicit review acknowledgement+Approve proposal. Original exact proposal commands/private scope/adjustment/disclosure/recovery retained; acknowledgement resets on version/hash. About limitations/subtle back link/light-dark styling. [Receipt](../../../../review-artifacts/FF/outcome-view-publication.json). Static build checks PASS; no tests, manual acceptance pending.
