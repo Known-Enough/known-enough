@@ -1,0 +1,21 @@
+{
+  "localOnly": true,
+  "providerCalls": 0,
+  "awsWrites": 0,
+  "projections": "Both owned M snapshots, privately retained",
+  "kernelCatalogCandidates": 6,
+  "kernelOutcomes": {
+    "INVALID": 5,
+    "APPLIED": 1
+  },
+  "nativeWorkerMockResult": "APPLIED",
+  "productionBundlerWorkerMockResult": "APPLIED",
+  "liveAttempt": {
+    "result": "DEAD_STALE",
+    "providerResponseKnown": true,
+    "inputTokens": 3646,
+    "outputTokens": 28,
+    "workerDurationMs": 1756.22
+  },
+  "conclusion": "Lease expiry is not the observed cause. Known provider output is rejected later in the live worker. Local kernel/native composition/bundling admit the compatible outcome. Final-CAS revalidation and finite execution-stage diagnostics are being added; no paid retry performed."
+}

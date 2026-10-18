@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { describe, it, expect, vi } from 'vitest';
-import { DurableModelJobs, DurableJobError, type DurableJob, type JobReference, type JobSnapshot, type DurableJobStore } from './durable-model-jobs.ts';
+import { DurableModelJobs, DurableJobError, type DurableJob, type JobReference, type JobSnapshot, type DurableJobStore, type DurableFailureDiagnostic } from './durable-model-jobs.ts';
 const source = 'a'.repeat(40), authorityHash = 'b'.repeat(64);
 const ref = (): JobReference => ({ jobId: randomUUID(), kind: 'NEGOTIATION', subject: 'synthetic', decisionId: 'decision', reasoningJobId: 'reasoning', authorityHash, sourceSha: source, expiresAt: 100_000 });
 function fixture() {
@@ -21,11 +21,38 @@ function fixture() {
   const reload = vi.fn(async () => { if (!current) throw new DurableJobError('STALE'); return { context: 'transient private condition and raw conversation', fence: true }; });
   const invoke = vi.fn(async () => ({ output: 'transient model output', usage: { inputTokens: 30, outputTokens: 4 } }));
   const prepare = vi.fn(async () => 'kernel-checked-result');
-  const worker = (cancel?: (reference: JobReference, context: string) => Promise<string>) => new DurableModelJobs({ store, now: () => time, execution: { reload, invoke, prepare, ...(cancel ? { cancel } : {}) }, bounds: { timeoutMs: 100, leaseMs: 200, maxTokens: 100, maxCostMicros: 50 } });
+  const worker = (cancel?: (reference: JobReference, context: string) => Promise<string>, reportFailure?: (value: DurableFailureDiagnostic) => void) => new DurableModelJobs({ store, now: () => time, ...(reportFailure ? { reportFailure } : {}), execution: { reload, invoke, prepare, ...(cancel ? { cancel } : {}) }, bounds: { timeoutMs: 100, leaseMs: 200, maxTokens: 100, maxCostMicros: 50 } });
   return { worker, jobs, global, commits, effects, reload, invoke, prepare, store,
     setTime: (value: number) => { time = value; }, stale: () => { current = false; } };
 }
 describe('durable model job recovery and charging', () => {
+  it('revalidates a known response after a definite output CAS conflict without another paid call or reservation', async () => {
+    const f = fixture(), r = ref(); await f.worker().enqueue(r); const commit = f.store.commit; let conflicts = 0;
+    f.store.commit = async (prior, next, fence, effect) => {
+      if (next.job?.phase === 'SUCCEEDED' && conflicts++ === 0) return false;
+      return commit(prior, next, fence, effect);
+    };
+    expect(await f.worker().process({ jobId: r.jobId })).toBe('APPLIED');
+    expect(f.invoke).toHaveBeenCalledTimes(1); expect(f.prepare).toHaveBeenCalledTimes(2);
+    expect(f.effects).toEqual(['kernel-checked-result']); expect(f.global.totals.reservedTokens).toBe(200);
+  });
+  it('withdrawn authority after an output CAS conflict prevents publishing the retained response', async () => {
+    const f = fixture(), r = ref(); await f.worker().enqueue(r); const commit = f.store.commit;
+    f.store.commit = async (prior, next, fence, effect) => {
+      if (next.job?.phase === 'SUCCEEDED') { f.stale(); return false; }
+      return commit(prior, next, fence, effect);
+    };
+    expect(await f.worker().process({ jobId: r.jobId })).toBe('DEAD');
+    expect(f.invoke).toHaveBeenCalledTimes(1); expect(f.effects).toEqual([]); expect(f.global.totals.reservedTokens).toBe(200);
+  });
+  it('bounds output CAS recovery and emits only finite failure metadata even if its diagnostic sink throws', async () => {
+    const f = fixture(), r = ref(); await f.worker().enqueue(r); const commit = f.store.commit; const events: DurableFailureDiagnostic[] = [];
+    f.store.commit = async (prior, next, fence, effect) => next.job?.phase === 'SUCCEEDED' ? false : commit(prior, next, fence, effect);
+    expect(await f.worker(undefined, value => { events.push(value); throw Error('PRIVATE_SINK'); }).process({ jobId: r.jobId })).toBe('DEAD');
+    expect(f.invoke).toHaveBeenCalledTimes(1); expect(f.prepare).toHaveBeenCalledTimes(3); expect(f.effects).toEqual([]);
+    expect(events).toEqual([{ stage: 'COMMIT_RESULT', code: 'CONFLICT', providerResponded: true }]);
+    expect(JSON.stringify(events)).not.toContain('private'); expect(f.jobs.get(r.jobId)?.usage).toEqual({ inputTokens: 30, outputTokens: 4 });
+  });
   it('recovers an ID-only persisted pending job in a new worker; preserves inherited cumulative counters', async () => {
     const f = fixture(), r = ref(); await f.worker().enqueue(r);
     expect(await f.worker().deliveries()).toEqual([{ jobId: r.jobId }]);

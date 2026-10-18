@@ -1,0 +1,27 @@
+{
+  "status": "LOCAL_PASS_PUBLICATION_PENDING",
+  "focusedUnitAndIntegration": {
+    "passed": 108,
+    "files": 5
+  },
+  "schedulerTests": {
+    "passed": 7
+  },
+  "finiteDiagnosticTests": {
+    "passed": 1
+  },
+  "lint": "PASS",
+  "typecheck": "PASS",
+  "fullCheckBeforeFinalFenceCorrection": {
+    "failed": 36,
+    "passed": 1618,
+    "knownBaselineFailed": 33,
+    "timingFailuresPassedInIsolation": 2,
+    "guardAttemptCountFailureFixedWithRealReloadAndFocusedProof": 1,
+    "unhandledRuntimeError": 1
+  },
+  "providerRetry": "NEVER",
+  "knownResponseCASRetries": 3,
+  "authorityFence": "REQUIRE_EXACT_UNCHANGED_PINS_AND_GUARD",
+  "usage": "RESERVE_ONCE_PRESERVE_INTERVENING_TOTAL_CHARGES"
+}

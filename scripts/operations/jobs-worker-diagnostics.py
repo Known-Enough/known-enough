@@ -9,6 +9,8 @@ from pathlib import Path
 
 COUNTS = {'discovered', 'attempted', 'applied', 'skipped', 'retry', 'dead', 'failed', 'deferred'}
 STAGES = {'OUTPUT_SHAPE', 'CANDIDATE_SCHEMA', 'CATALOG_MISMATCH', 'KERNEL_STALE', 'KERNEL_INVALID', 'KERNEL_CLARIFICATION', 'QUESTION_TARGETS', 'QUESTION_SHAPE', 'QUESTION_ADJUSTMENT', 'QUESTION_COMMIT', 'QUESTION_COUNT'}
+FAILURE_STAGES = {'RELOAD_INPUT', 'RESERVE', 'PRE_DISPATCH', 'CALL', 'RELOAD_RESULT', 'PREPARE', 'COMMIT_RESULT'}
+FAILURE_CODES = {'INVALID', 'CONFLICT', 'CAPACITY', 'STALE', 'DISABLED', 'BUDGET', 'RETRYABLE', 'INVALID_OUTPUT', 'PROVIDER_REJECTED', 'TYPE_ERROR', 'SCHEMA', 'UNCLASSIFIED'}
 
 
 def finite_events(events):
@@ -27,6 +29,8 @@ def finite_events(events):
             if isinstance(value, dict) and set(value) == {'event', 'stage'} and value.get('event') == 'model-job-output-invalid' and value.get('stage') in STAGES:
                 output.append({'timestamp': event.get('timestamp'), **value})
             if isinstance(value, dict) and set(value) == COUNTS | {'event'} and value.get('event') == 'model-job-run' and all(type(value[k]) is int and 0 <= value[k] <= 64 for k in COUNTS):
+                output.append({'timestamp': event.get('timestamp'), **value})
+            if isinstance(value, dict) and set(value) == {'event', 'stage', 'code', 'providerResponded'} and value.get('event') == 'model-job-failure' and value.get('stage') in FAILURE_STAGES and value.get('code') in FAILURE_CODES and type(value.get('providerResponded')) is bool:
                 output.append({'timestamp': event.get('timestamp'), **value})
         except (ValueError, TypeError):
             pass

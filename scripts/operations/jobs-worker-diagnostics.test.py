@@ -12,10 +12,13 @@ class DiagnosticTests(unittest.TestCase):
             'prefix {"event":"model-job-output-invalid","stage":"KERNEL_STALE"}',
             '{"event":"model-job-output-invalid","stage":"KERNEL_STALE","private":"CANARY"}',
             '{"event":"model-job-output-invalid","stage":[]}', 'PRIVATE_CANARY', 'bad-json {',
+            '{"event":"model-job-failure","stage":"COMMIT_RESULT","code":"CONFLICT","providerResponded":true}',
+            '{"event":"model-job-failure","stage":"COMMIT_RESULT","code":"CONFLICT","providerResponded":true,"private":"CANARY"}',
         ]]
         self.assertEqual(m.finite_events(events), [
             {'event': 'duration', 'timestamp': 1000, 'durationMs': 10023.52},
             {'event': 'model-job-output-invalid', 'stage': 'KERNEL_STALE', 'timestamp': 1000},
+            {'event': 'model-job-failure', 'stage': 'COMMIT_RESULT', 'code': 'CONFLICT', 'providerResponded': True, 'timestamp': 1000},
         ])
 
 

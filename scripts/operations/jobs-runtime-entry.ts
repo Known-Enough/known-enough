@@ -20,7 +20,8 @@ export async function handler(event: unknown, context: JobInvocation) {
     // Native loader still independently joins current AUTH, all-member retention, admission and consent.
     const worker = createManagedDurableNegotiationWorker({ verifiedTarget: { account: '092954139775', region: 'us-east-1' }, sourceSha: config.sourceSha,
       approval: { paidCallsApproved: true, invocationLoggingDisabled: true, retentionReviewed: true }, publicCandidates: genericCandidates,
-      reportInvalidOutput: stage => console.warn(JSON.stringify({ event: 'model-job-output-invalid', stage })) });
+      reportInvalidOutput: stage => console.warn(JSON.stringify({ event: 'model-job-output-invalid', stage })),
+      reportFailure: value => console.warn(JSON.stringify({ event: 'model-job-failure', ...value })) });
     return await createDurableScheduledWorker({ worker, report: summary => console.info(JSON.stringify(summary)) })(event, context);
   } catch {
     console.warn(JSON.stringify({ event: 'model-job-run', result: 'UNAVAILABLE' }));

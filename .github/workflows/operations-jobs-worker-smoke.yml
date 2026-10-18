@@ -15,7 +15,7 @@ on:
         description: Bounded smoke or activate the existing worker after a verified empty tick
         type: choice
         default: smoke
-        options: [smoke, activate]
+        options: [smoke, activate, deactivate]
 permissions:
   contents: read
 concurrency:

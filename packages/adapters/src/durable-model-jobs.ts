@@ -66,11 +66,14 @@ export interface DurableExecution<Context, Fence, Effect> {
   /** Optional current-state kernel cancellation; never used for uncertain provider calls. */
   cancel?(reference: JobReference, context: Context): Promise<Effect>;
 }
+export type DurableFailureStage = 'RELOAD_INPUT' | 'RESERVE' | 'PRE_DISPATCH' | 'CALL' | 'RELOAD_RESULT' | 'PREPARE' | 'COMMIT_RESULT';
+export interface DurableFailureDiagnostic { stage: DurableFailureStage; code: DurableJobError['code'] | 'TYPE_ERROR' | 'SCHEMA' | 'UNCLASSIFIED'; providerResponded: boolean }
 /** Explicit server-only inactive worker, independent of the installed transient closure runner. */
 export class DurableModelJobs<Context, Fence, Effect> {
   private readonly bounds: { leaseMs: number; timeoutMs: number; maxTokens: number; maxCostMicros: number };
   constructor(private readonly options: { kind?: 'NEGOTIATION' | 'ARCHITECT' | 'OWNER'; store: DurableJobStore<Fence, Effect>; now: () => number;
     reconcile?: (reference: JobReference, evidence: unknown) => Promise<{ providerStopped: true; proofHash: string; usage: z.infer<typeof usage> | null }>;
+    reportFailure?: (value: DurableFailureDiagnostic) => void;
     execution: DurableExecution<Context, Fence, Effect>; bounds?: Partial<DurableModelJobs<Context, Fence, Effect>['bounds']> }) {
     this.bounds = { leaseMs: 10_000, timeoutMs: 8_000, maxTokens: 18_432, maxCostMicros: 10_000, ...options.bounds };
     const b = this.bounds;
@@ -167,6 +170,7 @@ export class DurableModelJobs<Context, Fence, Effect> {
     next.control.slots.push({ jobId: id, token, until });
     await this.save(prior, next);
     let called = false; let responded = false; let observedUsage: z.infer<typeof usage> | null = null; let callTimer: ReturnType<typeof setTimeout> | undefined; const controller = new AbortController();
+    let stage: DurableFailureStage = 'RELOAD_INPUT';
     try {
       const prepared = await this.bounded(() => this.options.execution.reload(job.reference), until);
       prior = await this.read(id); this.current(prior, token);
@@ -177,30 +181,50 @@ export class DurableModelJobs<Context, Fence, Effect> {
       reserved.job!.reservedCostMicros = safeSum(prior.job!.reservedCostMicros, this.bounds.maxCostMicros);
       reserved.totals.reservedTokens = safeSum(prior.totals.reservedTokens, this.bounds.maxTokens);
       reserved.totals.reservedCostMicros = safeSum(prior.totals.reservedCostMicros, this.bounds.maxCostMicros);
+      stage = 'RESERVE';
       await this.save(prior, reserved, prepared.fence);
       // Refresh once more immediately before provider dispatch; reserved counters stay charged if this fails.
-      const immediate = await this.bounded(() => this.options.execution.reload(job.reference), until);
+      stage = 'PRE_DISPATCH'; const immediate = await this.bounded(() => this.options.execution.reload(job.reference), until);
       prior = await this.read(id); this.current(prior, token); if (prior.job!.phase !== 'CALLING') fail('STALE');
       await this.save(prior, structuredClone(prior), immediate.fence);
       prior = await this.read(id); this.current(prior, token);
       called = true;
+      stage = 'CALL';
       const allowance = Math.min(this.bounds.timeoutMs, until - this.now()); if (allowance <= 0) fail('STALE');
       const deadline = new Promise<never>((_, reject) => { callTimer = setTimeout(() => { controller.abort(); reject(new DurableJobError('STALE')); }, allowance); });
       const result = await Promise.race([deadline, this.options.execution.invoke(immediate.context, controller.signal)]);
       responded = true;
+      if (callTimer) { clearTimeout(callTimer); callTimer = undefined; }
       const observed = usage.safeParse(result.usage);
       if (!observed.success) return fail('INVALID_OUTPUT');
       if (safeSum(observed.data.inputTokens, observed.data.outputTokens) > this.bounds.maxTokens) return fail('INVALID_OUTPUT');
       // Context and authority are reloaded, never inferred from old queue bytes or provider output.
       observedUsage = observed.data;
-      const fresh = await this.bounded(() => this.options.execution.reload(job.reference), until);
-      const effect = await this.bounded(() => this.options.execution.prepare(job.reference, fresh.context, result.output), until);
-      prior = await this.read(id); this.current(prior, token);
-      const completed = structuredClone(prior); completed.job!.usage = observed.data;
-      this.finish(completed, 'SUCCEEDED', null);
-      await this.save(prior, completed, fresh.fence, effect); return 'APPLIED';
+      let responseFence: Fence | undefined;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        stage = 'RELOAD_RESULT'; const fresh = await this.bounded(() => this.options.execution.reload(job.reference), until);
+        // A new incarnation, consent, admission or semantic pin invalidates the old response.
+        // Only journal/TOTAL contention outside the unchanged authority fence can be retried.
+        if (attempt > 0 && !isDeepStrictEqual(responseFence, fresh.fence)) fail('STALE');
+        responseFence = structuredClone(fresh.fence);
+        stage = 'PREPARE'; const effect = await this.bounded(() => this.options.execution.prepare(job.reference, fresh.context, result.output), until);
+        prior = await this.read(id); this.current(prior, token);
+        const completed = structuredClone(prior); completed.job!.usage = observed.data;
+        this.finish(completed, 'SUCCEEDED', null);
+        stage = 'COMMIT_RESULT';
+        try { await this.save(prior, completed, fresh.fence, effect); return 'APPLIED'; }
+        catch (error) {
+          if (!(error instanceof DurableJobError) || error.code !== 'CONFLICT' || attempt === 2) throw error;
+          // A definite failed CAS may revalidate this same known response, never invoke the provider again.
+          prior = await this.read(id); if (prior.job?.phase === 'SUCCEEDED') return 'APPLIED'; this.current(prior, token);
+        }
+      }
+      return fail('STALE');
     } catch (error) {
       controller.abort();
+      try { this.options.reportFailure?.({ stage, code: error instanceof DurableJobError ? error.code : error instanceof TypeError ? 'TYPE_ERROR'
+        : error instanceof Error && error.name === 'ZodError' ? 'SCHEMA' : 'UNCLASSIFIED', providerResponded: responded }); }
+      catch { /* Finite diagnostics cannot alter accounting, cancellation or quarantine. */ }
       const failure = error instanceof DurableJobError ? error.code : 'STALE';
       prior = await this.read(id);
       // A lost token never cancels/retries a successor, and uncertain transaction acknowledgements are read back.

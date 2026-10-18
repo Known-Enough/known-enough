@@ -1,4 +1,4 @@
-import { modelJobAuthorityHash, DurableModelJobs, DurableJobError, type JobReference, type DurableExecution, type DurableJobStore } from '@deal-table/adapters/durable-model-runtime';
+import { modelJobAuthorityHash, DurableModelJobs, DurableJobError, type JobReference, type DurableExecution, type DurableJobStore, type DurableFailureDiagnostic } from '@deal-table/adapters/durable-model-runtime';
 import { checkedJobFence, type JobFence, type JobEffect } from '@deal-table/adapters/durable-model-runtime';
 import type { TrustedPrincipal } from '@deal-table/application';
 
@@ -15,8 +15,8 @@ export { modelJobAuthorityHash };
 /** Inactive composition; verified server session/application/kernel ports are supplied at installation. */
 export function createDurableModelWorker<Context>(options: { now: () => number; store: DurableJobStore<JobFence, JobEffect>;
   reload: (reference: JobReference) => Promise<CurrentJobAuthority<Context>>;
-  reconcile?: ReconciliationVerifier; bounds?: Partial<{ leaseMs: number; timeoutMs: number; maxTokens: number; maxCostMicros: number }>; invoke: DurableExecution<Context, JobFence, JobEffect>['invoke']; cancel?: NonNullable<DurableExecution<Context, JobFence, JobEffect>['cancel']>; prepare: DurableExecution<Context, JobFence, JobEffect>['prepare'] }) {
-  return new DurableModelJobs({ store: options.store, now: options.now, ...(options.reconcile ? { reconcile: options.reconcile } : {}), ...(options.bounds ? { bounds: options.bounds } : {}), execution: {
+  reconcile?: ReconciliationVerifier; reportFailure?: (value: DurableFailureDiagnostic) => void; bounds?: Partial<{ leaseMs: number; timeoutMs: number; maxTokens: number; maxCostMicros: number }>; invoke: DurableExecution<Context, JobFence, JobEffect>['invoke']; cancel?: NonNullable<DurableExecution<Context, JobFence, JobEffect>['cancel']>; prepare: DurableExecution<Context, JobFence, JobEffect>['prepare'] }) {
+  return new DurableModelJobs({ store: options.store, now: options.now, ...(options.reportFailure ? { reportFailure: options.reportFailure } : {}), ...(options.reconcile ? { reconcile: options.reconcile } : {}), ...(options.bounds ? { bounds: options.bounds } : {}), execution: {
     async reload(reference) {
       const value = await options.reload(structuredClone(reference));
       if (value.principal?.kind !== 'participant' || value.principal.subject !== reference.subject
@@ -51,7 +51,7 @@ function localApplication(record: KnownEnoughRecord, now: () => number) {
 /** Reconstructs structured negotiation input and runs the real application/kernel in a transient sandbox.
  * Only its checked STATE bytes are returned to the joined durable/Dynamo output transaction. */
 export function createDurableNegotiationWorker(options: { now: () => number; store: DurableJobStore<JobFence, JobEffect>;
-  reconcile?: ReconciliationVerifier; bounds?: Partial<{ leaseMs: number; timeoutMs: number; maxTokens: number; maxCostMicros: number }>;
+  reconcile?: ReconciliationVerifier; reportFailure?: (value: DurableFailureDiagnostic) => void; bounds?: Partial<{ leaseMs: number; timeoutMs: number; maxTokens: number; maxCostMicros: number }>;
   load: (reference: JobReference) => Promise<{ principal: TrustedPrincipal | null; fence: JobFence; enabled: boolean }>;
   model: (input: Parameters<DecisionNegotiationModel>[0]) => Promise<{ output: unknown; usage: { inputTokens: number; outputTokens: number } }>; publicCandidates: (frame: KE.PublicDecisionFrame) => readonly KE.CandidateProposal['values'][]; reportInvalidOutput?: (stage: DurableOutputFailureStage) => void;
 }) {
@@ -59,7 +59,7 @@ export function createDurableNegotiationWorker(options: { now: () => number; sto
     try { options.reportInvalidOutput?.(stage); } catch { /* Diagnostics cannot change validation, retry or publication. */ }
     throw new DurableJobError('INVALID_OUTPUT');
   };
-  return createDurableModelWorker<NegotiationContext>({ now: options.now, store: options.store, ...(options.reconcile ? { reconcile: options.reconcile } : {}), ...(options.bounds ? { bounds: options.bounds } : {}),
+  return createDurableModelWorker<NegotiationContext>({ now: options.now, store: options.store, ...(options.reportFailure ? { reportFailure: options.reportFailure } : {}), ...(options.reconcile ? { reconcile: options.reconcile } : {}), ...(options.bounds ? { bounds: options.bounds } : {}),
     async reload(reference) {
       const loaded = await options.load(reference); const fence = checkedJobFence(loaded.fence);
       const state = fence.pins.find(pin => pin.table === JOB_TARGET.decisions)!;
@@ -163,10 +163,10 @@ import { createDynamoModelJobStore, createDynamoModelJobLoader, createDurableBed
 /** Complete inactive managed composition; construction performs no network operation or runtime selection. */
 export function createManagedDurableNegotiationWorker(options: { verifiedTarget: { account: string; region: string }; sourceSha: string;
   approval: { paidCallsApproved: boolean; invocationLoggingDisabled: boolean; retentionReviewed: boolean };
-  publicCandidates: (frame: KE.PublicDecisionFrame) => readonly KE.CandidateProposal['values'][]; reportInvalidOutput?: (stage: DurableOutputFailureStage) => void; reconcile?: ReconciliationVerifier; now?: () => number }) {
+  publicCandidates: (frame: KE.PublicDecisionFrame) => readonly KE.CandidateProposal['values'][]; reportInvalidOutput?: (stage: DurableOutputFailureStage) => void; reportFailure?: (value: DurableFailureDiagnostic) => void; reconcile?: ReconciliationVerifier; now?: () => number }) {
   const store = createDynamoModelJobStore(options), load = createDynamoModelJobLoader(options);
   const model = createDurableBedrockNegotiation({ approval: options.approval, enabled: () => true });
-  const worker = createDurableNegotiationWorker({ store, load, model, ...(options.reconcile ? { reconcile: options.reconcile } : {}), publicCandidates: options.publicCandidates, ...(options.reportInvalidOutput ? { reportInvalidOutput: options.reportInvalidOutput } : {}), now: options.now ?? Date.now });
+  const worker = createDurableNegotiationWorker({ store, load, model, ...(options.reportFailure ? { reportFailure: options.reportFailure } : {}), ...(options.reconcile ? { reconcile: options.reconcile } : {}), publicCandidates: options.publicCandidates, ...(options.reportInvalidOutput ? { reportInvalidOutput: options.reportInvalidOutput } : {}), now: options.now ?? Date.now });
   return {
     enqueue(principal: TrustedPrincipal | null, reference: JobReference) {
       if (principal?.kind !== 'participant' || principal.subject !== reference.subject) throw new DurableJobError('STALE');

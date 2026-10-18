@@ -17,8 +17,8 @@ class SmokeTests(unittest.TestCase):
         for bad in [{**good,'attempted':1},{**good,'attempted':False},{**good,'private':'synthetic'},dict(event='model-job-run'),'not-json']:
             self.assertFalse(m.empty_summary(json.dumps(bad) if isinstance(bad,dict) else bad))
 
-    def execute(self,failed=False,missing=False,activate=False,logging=True):
-        calls=[];source='c'*40;sha='d'*64;enabled=False
+    def execute(self,failed=False,missing=False,activate=False,logging=True,deactivate=False):
+        calls=[];source='c'*40;sha='d'*64;enabled=deactivate
         def run(args,**kwargs):
             nonlocal enabled
             op=args[1:3];calls.append(op)
@@ -32,8 +32,8 @@ class SmokeTests(unittest.TestCase):
             elif op in [['events','enable-rule'],['events','disable-rule']]:enabled=op[1]=='enable-rule';data={}
             else:raise AssertionError(op)
             return type('R',(),dict(returncode=0,stdout=json.dumps(data).encode(),stderr=b''))()
-        with tempfile.TemporaryDirectory() as d,patch.dict(os.environ,{'RUNNER_TEMP':d,'GITHUB_SHA':source,'PACKAGE_SOURCE':source,'WORKER_SHA':sha,'SMOKE_PHASE':'schedule','SCHEDULE_OPERATION':'activate' if activate else 'smoke'}),patch.object(m.subprocess,'run',run),patch.object(m.time,'sleep'):
-            Path(d,'worker-smoke-control.json').write_text(json.dumps(dict(sourceSha=source,result='ENABLED_EMPTY_CONTROL_VERIFIED' if activate else 'DISABLED_EMPTY_CONTROL_VERIFIED')))
+        with tempfile.TemporaryDirectory() as d,patch.dict(os.environ,{'RUNNER_TEMP':d,'GITHUB_SHA':source,'PACKAGE_SOURCE':source,'WORKER_SHA':sha,'SMOKE_PHASE':'schedule','SCHEDULE_OPERATION':'deactivate' if deactivate else 'activate' if activate else 'smoke'}),patch.object(m.subprocess,'run',run),patch.object(m.time,'sleep'):
+            Path(d,'worker-smoke-control.json').write_text(json.dumps(dict(sourceSha=source,result='ENABLED_EMPTY_CONTROL_VERIFIED' if activate or deactivate else 'DISABLED_EMPTY_CONTROL_VERIFIED')))
             Path(d,'fix01-logging-guard.json').write_text(json.dumps(dict(source=source,result='GUARD_PASS',logging='DISABLED' if logging else 'ENABLED')))
             result=m.main();report=json.loads(Path(d,'worker-smoke-schedule-report.json').read_text())
         return result,report,calls
@@ -65,6 +65,12 @@ class SmokeTests(unittest.TestCase):
         result,report,calls=self.execute(activate=True,logging=False)
         self.assertEqual(result,1);self.assertEqual(report['code'],'SCHEDULE_LOGGING_GUARD_MISSING')
         self.assertNotIn(['events','enable-rule'],calls)
+
+    def test_deactivation_verifies_empty_control_and_worker_before_disabling_existing_schedule(self):
+        result,report,calls=self.execute(deactivate=True)
+        self.assertEqual(result,0);self.assertEqual(report['result'],'WORKER_SCHEDULE_DEACTIVATION_PASS')
+        self.assertEqual(calls.count(['events','disable-rule']),1);self.assertNotIn(['events','enable-rule'],calls)
+        self.assertNotIn(['logs','filter-log-events'],calls)
 
 
 if __name__=='__main__':unittest.main()

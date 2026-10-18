@@ -1,0 +1,63 @@
+{
+  "result": "FINITE_WORKER_DIAGNOSTIC_READ",
+  "mutations": 0,
+  "providerCalls": 0,
+  "workerSha256": "599a99405cc838204492ab4363cd8212472d6873170fcb0e2320d643006d5cf0",
+  "startMs": 1792294209117,
+  "endMs": 1792294368296,
+  "events": [
+    {
+      "timestamp": 1792294212868,
+      "event": "model-job-run",
+      "discovered": 1,
+      "attempted": 1,
+      "applied": 0,
+      "skipped": 0,
+      "retry": 0,
+      "dead": 1,
+      "failed": 0,
+      "deferred": 0
+    },
+    {
+      "event": "duration",
+      "timestamp": 1792294212870,
+      "durationMs": 1756.22
+    },
+    {
+      "timestamp": 1792294271470,
+      "event": "model-job-run",
+      "discovered": 0,
+      "attempted": 0,
+      "applied": 0,
+      "skipped": 0,
+      "retry": 0,
+      "dead": 0,
+      "failed": 0,
+      "deferred": 0
+    },
+    {
+      "event": "duration",
+      "timestamp": 1792294271472,
+      "durationMs": 314.58
+    },
+    {
+      "timestamp": 1792294331308,
+      "event": "model-job-run",
+      "discovered": 0,
+      "attempted": 0,
+      "applied": 0,
+      "skipped": 0,
+      "retry": 0,
+      "dead": 0,
+      "failed": 0,
+      "deferred": 0
+    },
+    {
+      "event": "duration",
+      "timestamp": 1792294331310,
+      "durationMs": 121.62
+    }
+  ],
+  "truncated": true,
+  "workflowRun": "https://github.com/Known-Enough/known-enough/actions/runs/39093984581"
+}

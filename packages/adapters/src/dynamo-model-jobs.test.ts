@@ -8,8 +8,9 @@ afterEach(() => vi.restoreAllMocks());
 async function workerFixture() {
   const f = await durableFixture(implementation => vi.spyOn(DynamoDBClient.prototype, 'send').mockImplementation(implementation as never));
   const invoke = vi.fn(async () => ({ output: 'transient', usage: { inputTokens: 1, outputTokens: 1 } }));
+  const load = createDynamoModelJobLoader({ verifiedTarget: { account: r.account, region: r.region }, sourceSha: f.reference.sourceSha });
   const make = () => new DurableModelJobs({ store: f.store(), now: f.now, execution: {
-    reload: async () => ({ context: null, fence: f.fence() }), invoke,
+    reload: async () => ({ context: null, fence: (await load(f.reference)).fence }), invoke,
     prepare: async () => ({ writes: [{ key: { PK: 'ROOM#decision', SK: 'STATE' }, payload: encodeDecisionStateItem({ ...f.record, job: null, controlVersion: f.record.controlVersion + 1, status: 'NO_AGREEMENT' }).payload!.S! }] }),
   } });
   return { ...f, make, invoke };
@@ -49,6 +50,17 @@ it('lost final acknowledgement is read back without duplicate charge or applicat
   expect(await f.make().process({ jobId: f.reference.jobId })).toBe('APPLIED');
   expect(await f.make().process({ jobId: f.reference.jobId })).toBe('SKIPPED'); expect(f.invoke).toHaveBeenCalledTimes(1);
   expect(f.parsed(r.budget, 'TOTAL').reservedTokens).toBe(18_932);
+});
+it('revalidates the same response after unrelated TOTAL contention while retaining intervening charges', async () => {
+  const f = await workerFixture(); await f.make().enqueue(f.reference); let changed = false;
+  f.before(items => {
+    if (changed || !items.some(item => item.Put?.TableName === r.decisions)) return;
+    changed = true; const cell = f.get(r.budget, 'TOTAL'), value = JSON.parse(cell.payload!.S!);
+    cell.version = { N: String(Number(cell.version!.N) + 1) }; value.reservedTokens += 99; cell.payload = { S: JSON.stringify(value) };
+  });
+  expect(await f.make().process({ jobId: f.reference.jobId })).toBe('APPLIED');
+  expect(f.invoke).toHaveBeenCalledTimes(1); expect(f.parsed(r.budget, 'TOTAL').reservedTokens).toBe(19_031);
+  expect(f.get(r.decisions, 'ROOM#decision', 'GUARD').version!.N).toBe('2');
 });
 it('missing TOTAL or inactive-source configuration cannot seed/reset accounting', async () => {
   const f = await workerFixture(); f.cells.delete(`${r.budget}/TOTAL/STATE`);
