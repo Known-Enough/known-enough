@@ -1653,3 +1653,21 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
   .ke-outcome-choices dd { font-size: 14px; }
   .ke-outcome-approve > button { width: 100%; }
 }
+
+/* One quiet, user-scoped status per decision; existing row actions stay in place. */
+.ke-decision-row-content { display: grid; gap: 5px; min-width: 0; }
+.ke-decision-row-title { display: flex; align-items: center; flex-wrap: wrap; gap: 7px 11px; min-width: 0; }
+.ke-decision-row-title > strong { min-width: 0; overflow-wrap: anywhere; }
+.ke-decision-row-open .ke-decision-row-content > small { margin-top: 0; color: #6b7b6e; font-size: 10px; font-weight: 400; line-height: 1.5; }
+.ke-decision-status-chip { display: inline-flex; align-items: center; flex: none; max-width: 100%; padding: 3px 8px; border: 1px solid #dfe6dc; border-radius: 30px; color: #637365; background: #f1f4ee; font-size: 10px; line-height: 1.5; font-weight: 500; white-space: normal; text-decoration: none; }
+.ke-decision-status-chip[data-tone="action"] { color: #315e43; background: #eaf2e6; border-color: #d5e4d0; }
+.ke-decision-status-chip[data-tone="waiting"] { color: #617363; background: #f1f4ee; border-color: #e1e7dc; }
+.ke-decision-status-chip[data-tone="agreed"] { color: #32654a; background: #e8f2e9; border-color: #d1e3d4; }
+:root[data-theme="dark"] .ke-decision-row-open .ke-decision-row-content > small { color: #a3b8aa; }
+:root[data-theme="dark"] .ke-decision-status-chip { color: #acc0b1; background: #29392e; border-color: #3a4d40; }
+:root[data-theme="dark"] .ke-decision-status-chip[data-tone="action"] { color: #c5dfca; background: #2d4633; border-color: #45614c; }
+:root[data-theme="dark"] .ke-decision-status-chip[data-tone="waiting"] { color: #b1c5b7; background: #293b30; border-color: #3c5143; }
+:root[data-theme="dark"] .ke-decision-status-chip[data-tone="agreed"] { color: #c0e1ca; background: #2b4434; border-color: #425f4b; }
+@media (max-width: 600px) { .ke-decision-row-title { gap: 6px 8px; } .ke-decision-status-chip { font-size: 9px; padding: 3px 7px; } }
+.ke-group-panel button.ke-decision-row-open:hover { text-decoration: none; }
+.ke-group-panel button.ke-decision-row-open:hover strong { text-decoration: underline; text-underline-offset: 3px; }
