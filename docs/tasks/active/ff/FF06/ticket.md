@@ -2,6 +2,10 @@
 
 Status: PUBLISHED; implementation claims released; user manual acceptance pending. Latest native group-delete hotfix: source3910e84/frontendAmplify121, [receipt](../../../../review-artifacts/FF/group-deletion-publication.json). Earlier dated source/control notes below are historical.
 
+## Decision row actions — 2026-10-18
+
+Published/source9140830: click the decision row to open; organizer three-dot menu for existing Rename/Delete. Confirmation/permissions/stale-membership recovery preserved. [Receipt](../../../../review-artifacts/FF/decision-row-menu-publication.json). Static checks/build PASS; no tests by explicit user direction, manual acceptance pending.
+
 ## Compact decision details — 2026-10-18
 
 A implements the user’s compact status/activity, acknowledged private-answer summary, Edit/Cancel, denser responsive topic rows and contextual actions. [Report](../../../../review-artifacts/FF/compact-decision-details/README.md). Relevant controlled tests explicitly authorized for this continuation: browser8/unit6/hosted1 and static/build checks pass; full check retains31 previously recorded failures/1unhandled error. Frontend published/sourcef0c436c/Amplify127, [receipt](../../../../review-artifacts/FF/compact-decision-details/publication.json); user live acceptance pending. Backend/permissions/consent/final approval and uncertain-request recovery preserved.
