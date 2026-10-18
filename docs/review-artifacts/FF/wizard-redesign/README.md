@@ -1,6 +1,6 @@
 # Decision creation redesign
 
-User-requested two-step creation flow: **Describe → Options**. Frontend source starts at `2963d81`, including B’s group-pagination repairs. Publication evidence will be recorded here after release.
+User-requested two-step creation flow: **Describe → Options**. Frontend source starts at `2963d81`, including B’s group-pagination repairs. Published source `54853c9`, Amplify job 124: [successful release](https://github.com/Known-Enough/known-enough/actions/runs/39151648793), [publication receipt](publication.json). All seven public files matched their release hashes; configuration, data and provider writes were zero. Manual live acceptance remains with the user.
 
 ## What changed
 

@@ -107,5 +107,7 @@
   "iamChanges": 0,
   "newCloudShellSteps": 0,
   "manualAcceptance": "PENDING_USER",
-  "publication": "PENDING"
+  "publication": "FRONTEND_PUBLICATION_PASS",
+  "sourceSha": "54853c91c523c89bf6315c501d63353af91729f7",
+  "publicationRun": "https://github.com/Known-Enough/known-enough/actions/runs/39151648793"
 }
