@@ -18,7 +18,7 @@ function publicChoiceValues(variable: KE.PublicDecisionFrame['variables'][number
   const rule = frame.rules.find(item => 'variableId' in item && item.variableId === variable.id && (item.operator === 'IN' || item.operator === 'COMPARE' && item.comparison === 'EQ'));
   return rule?.operator === 'IN' ? rule.values.map(value => valueText(value, variable)) : rule?.operator === 'COMPARE' ? [valueText(rule.value, variable)] : [];
 }
-type DecisionListStatus = { label: string; tone: 'action' | 'waiting' | 'agreed' | 'muted'; detail?: string };
+type DecisionListStatus = { label: string; tone: 'action' | 'waiting' | 'agreed' | 'muted'; detail?: string | undefined };
 function decisionListStatus(owner: KE.OwnerDecisionSnapshot): DecisionListStatus {
   const snapshot = owner.publicSnapshot;
   const answered = snapshot.participantProgress ? `${snapshot.participantProgress.filter(item => item.answersSaved).length} of ${snapshot.frame.participants.length} answered` : undefined;
@@ -35,7 +35,7 @@ function decisionListStatus(owner: KE.OwnerDecisionSnapshot): DecisionListStatus
   return { label: 'Waiting for others', tone: 'waiting', detail: snapshot.status === 'REASONING' ? 'Finding an outcome' : answered };
 }
 function DecisionRow({ decision, status, organizer, busy, onOpen, onReview, onRename, onDelete }: {
-  decision: Groups.GroupSnapshot['decisions'][number]; status?: DecisionListStatus; organizer: boolean; busy: boolean;
+  decision: Groups.GroupSnapshot['decisions'][number]; status: DecisionListStatus | undefined; organizer: boolean; busy: boolean;
   onOpen: () => void; onReview: () => void; onRename: (name: string) => Promise<void>; onDelete: () => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
