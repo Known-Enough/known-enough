@@ -70,12 +70,32 @@ export async function installedJobQueueProof(send,now=Date.now()) {
     leaseExpired:job.lease?job.lease.until<=now:null,reservedTokens:job.reservedTokens,reservedCostMicros:job.reservedCostMicros,usageRecorded:job.usage!==null}))};
  }catch(error){return {...result,code:errorCode(error)};}
 }
+/** Optional exact-ID terminal readback. Only finite disposition and observed usage are published. */
+export async function installedOwnedJobProof(send, ids, runtimeSource) {
+ const result={result:'OWNED_JOB_READ_INCOMPLETE',requests:0,mutations:0,providerCalls:0};
+ try {
+  if(!Array.isArray(ids)||ids.length<1||ids.length>8||new Set(ids).size!==ids.length
+   ||ids.some(id=>!/^[a-f0-9-]{36}$/.test(id))||!/^[a-f0-9]{40}$/.test(runtimeSource))throw Error();
+  const jobs=[];
+  for(const id of ids){result.requests++;const PK='MODELJOB#'+id;
+   const value=await send(new GetItemCommand({TableName:'KnownEnoughOperationsJournal',Key:{PK:{S:PK},SK:{S:'STATE'}},ConsistentRead:true}),{abortSignal:globalThis.AbortSignal.timeout(10000)});
+   const row=value.Item,job=JobSchema.parse(JSON.parse(row?.payload?.S??'null'));
+   if(row.PK?.S!==PK||row.SK?.S!=='STATE'||row.revision?.N!==String(job.revision)||JSON.stringify(job)!==row.payload.S
+    ||job.reference.jobId!==id||job.reference.sourceSha!==runtimeSource)throw Error();
+   jobs.push({kind:job.reference.kind,phase:job.phase,reason:job.reason,attempts:job.attempts,failures:job.failures,
+    reservedTokens:job.reservedTokens,reservedCostMicros:job.reservedCostMicros,usage:job.usage});
+  }
+  return {...result,result:'OWNED_JOB_READ_PASS',runtimeSource,jobs};
+ }catch(error){return {...result,code:errorCode(error)};}
+}
 async function main(){const sourceSha=verifySource(process.env);
  const {stdout}=await execute('aws',['sts','get-caller-identity','--region','us-east-1','--output','json','--no-cli-pager'],{timeout:15000,maxBuffer:8192});
  const identity=JSON.parse(stdout);if(identity.Account!=='092954139775'||!identity.Arn?.startsWith('arn:aws:sts::092954139775:assumed-role/KnownEnoughGithubModelJobOperations/'))throw Error('JOBS_ROLE_INVALID');
  const client=new DynamoDBClient({region:'us-east-1',endpoint:'https://dynamodb.us-east-1.amazonaws.com',maxAttempts:1});
- const result=await installedJobReadProof(client.send.bind(client),sourceSha);console.log(JSON.stringify({sourceSha,account:'092954139775',region:'us-east-1',...result,queue:await installedJobQueueProof(client.send.bind(client))}));
- if(result.result!=='JOB_READ_ACCESS_PASS')process.exitCode=1;
+ const send=client.send.bind(client),result=await installedJobReadProof(send,sourceSha);
+ const owned=process.env.OWNED_JOB_IDS?await installedOwnedJobProof(send,process.env.OWNED_JOB_IDS.split(','),process.env.RUNTIME_SOURCE):null;
+ console.log(JSON.stringify({sourceSha,account:'092954139775',region:'us-east-1',...result,queue:await installedJobQueueProof(send),...(owned?{owned}:{})}));
+ if(result.result!=='JOB_READ_ACCESS_PASS'||(owned&&owned.result!=='OWNED_JOB_READ_PASS'))process.exitCode=1;
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  try{await main();}catch{console.error(JSON.stringify({result:'JOBS_INSTALLED_READBACK_NOT_VERIFIED',mutations:0,providerCalls:0}));process.exitCode=1;}

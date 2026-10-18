@@ -1,10 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { classifyJobRead, installedJobReadProof } from './jobs-installed-check.mjs';
+import { classifyJobRead, installedJobReadProof, installedOwnedJobProof } from './jobs-installed-check.mjs';
 import { JobSchema } from '../../packages/adapters/src/durable-model-jobs.ts';
 import { jobSetupPreparation } from './jobs-setup.mjs';
 const source='a'.repeat(40);
 const envelope=value=>({revision:{N:String(value.revision)},payload:{S:JSON.stringify(value)}});
+test('exact owned terminal reads report usage without exposing identity, input or arbitrary rows',async()=>{
+ const id='12345678-1234-4234-8234-123456789abc';
+ const job=JobSchema.parse({schemaVersion:1,revision:1,reference:{jobId:id,kind:'NEGOTIATION',subject:'PRIVATE_IDENTITY',decisionId:'PRIVATE_DECISION',reasoningJobId:'private-reasoning',authorityHash:'b'.repeat(64),sourceSha:source,expiresAt:100},phase:'SUCCEEDED',reason:null,lease:null,attempts:1,failures:0,availableAt:0,reservedTokens:18432,reservedCostMicros:10000,usage:{inputTokens:45,outputTokens:8},recoveryProofHash:null});
+ const send=async command=>{assert.equal(command.input.Key.PK.S,'MODELJOB#'+id);return {Item:{PK:{S:'MODELJOB#'+id},SK:{S:'STATE'},...envelope(job)}};};
+ const result=await installedOwnedJobProof(send,[id],source);assert.equal(result.result,'OWNED_JOB_READ_PASS');assert.deepEqual(result.jobs[0].usage,{inputTokens:45,outputTokens:8});
+ assert.equal(result.mutations,0);assert.ok(!JSON.stringify(result).match(/PRIVATE|private|12345678/));
+ assert.equal((await installedOwnedJobProof(send,[id],'c'.repeat(40))).result,'OWNED_JOB_READ_INCOMPLETE');
+ let reads=0;for(const ids of [[],[id,id],Array(9).fill(id),['OPERATIONS#MODEL_JOBS']]){
+  assert.equal((await installedOwnedJobProof(async()=>{reads++;},ids,source)).result,'OWNED_JOB_READ_INCOMPLETE');
+ }assert.equal(reads,0);
+});
 test('absent configuration is an explicit missing prerequisite, never permission or activation proof',async()=>{
  const result=await installedJobReadProof(async()=>({}),source);assert.equal(result.result,'JOB_READ_ACCESS_PASS');
  assert.ok(result.checks.every(check=>check.state==='ABSENT'));assert.equal(result.providerCalls,0);assert.equal(result.mutations,0);

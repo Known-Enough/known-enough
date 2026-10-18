@@ -1,0 +1,12 @@
+{
+  "utc": "2026-10-18T03:27:19.075489+00:00",
+  "source": "b779b9797388f314be14c0e4d92c03d0a73460a3",
+  "phase": "worker",
+  "controlWrites": 0,
+  "dataWrites": 0,
+  "providerCalls": 0,
+  "codeSha256": "599a99405cc838204492ab4363cd8212472d6873170fcb0e2320d643006d5cf0",
+  "schedule": "DISABLED",
+  "result": "GUARD_PASS",
+  "workflowRun": "https://github.com/Known-Enough/known-enough/actions/runs/39093617326"
+}

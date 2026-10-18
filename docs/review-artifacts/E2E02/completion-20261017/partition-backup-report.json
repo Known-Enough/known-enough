@@ -1,0 +1,12 @@
+{
+  "sourceSha": "b779b9797388f314be14c0e4d92c03d0a73460a3",
+  "account": "092954139775",
+  "region": "us-east-1",
+  "result": "PARTITION_PRIOR_CODE_BACKUP_VERIFIED",
+  "privateBackupBytes": 452106,
+  "priorCodeSha256": "bc56395c2e6136269dd935b9752fd00b4d07436c9e0d6b0fe343477273819c8d",
+  "codeUpdate": "NOT_EXECUTED",
+  "sourceFreeze": "NOT_EXECUTED",
+  "activation": "NOT_EXECUTED",
+  "workflowRun": "https://github.com/Known-Enough/known-enough/actions/runs/39093617326"
+}

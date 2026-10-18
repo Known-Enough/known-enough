@@ -1,0 +1,12 @@
+{
+  "sourceSha": "b779b9797388f314be14c0e4d92c03d0a73460a3",
+  "result": "JOB_SOURCE_DISABLED_READBACK_PASS",
+  "writeRequested": true,
+  "state": "DISABLED",
+  "active": 0,
+  "slots": 0,
+  "totalWrites": 0,
+  "totalsUnchangedDuringCheck": true,
+  "providerCalls": 0,
+  "workflowRun": "https://github.com/Known-Enough/known-enough/actions/runs/39093617326"
+}

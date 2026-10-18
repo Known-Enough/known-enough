@@ -28,7 +28,13 @@
     "baselineSource": "88c84e7",
     "priorEvidence": "../repair-publication.json"
   },
-  "fullBrowser": "IN_PROGRESS",
+  "fullBrowser": {
+    "passed": 60,
+    "failed": 36,
+    "didNotRun": 3,
+    "baselineComparison": "NOT_RUN",
+    "newRegressionClaim": "NOT_ESTABLISHED"
+  },
   "liveRecovery": "NOT_EXECUTED",
   "publication": "NOT_EXECUTED"
 }

@@ -10,6 +10,14 @@ on:
         description: Run regression tests; false performs read-only diagnosis without tests
         type: boolean
         default: true
+      owned_job_ids:
+        description: Optional comma-separated exact owned job UUIDs for finite disposition and usage readback
+        type: string
+        default: ''
+      runtime_source:
+        description: Independently published runtime source required with owned job IDs
+        type: string
+        default: ''
       operation:
         description: Read-only inspection or conditional absent disabled-control installation
         required: true
@@ -59,6 +67,8 @@ jobs:
       - name: Read job control standing authority preserved totals retention and migration; no writes
         env:
           EXPECTED_SOURCE: ${{ inputs.source_sha }}
+          OWNED_JOB_IDS: ${{ inputs.owned_job_ids }}
+          RUNTIME_SOURCE: ${{ inputs.runtime_source }}
         run: |
           umask 077
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"

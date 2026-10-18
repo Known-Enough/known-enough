@@ -1,0 +1,21 @@
+{
+  "utc": "2026-10-18T03:26:50.571754+00:00",
+  "source": "b779b9797388f314be14c0e4d92c03d0a73460a3",
+  "phase": "disable",
+  "controlWrites": 1,
+  "dataWrites": 0,
+  "providerCalls": 0,
+  "observedControl": {
+    "sourceSha": "755440b658df2e8f549b41968bfc2f7e8e5a8352",
+    "enabled": true,
+    "activeCount": 0,
+    "slotCount": 0
+  },
+  "controlSource": "755440b658df2e8f549b41968bfc2f7e8e5a8352",
+  "priorEnabled": true,
+  "privateRetention": "ENABLED_SYNTHETIC_CONSENT_REQUIRED",
+  "enabled": false,
+  "totals": "UNCHANGED",
+  "result": "CONTROL_READBACK_PASS",
+  "workflowRun": "https://github.com/Known-Enough/known-enough/actions/runs/39093617326"
+}

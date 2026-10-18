@@ -1,0 +1,24 @@
+{
+  "sourceSha": "b779b9797388f314be14c0e4d92c03d0a73460a3",
+  "result": "COORDINATED_JOBS_PACKAGES_PREPARED",
+  "apiSha256": "71c859b337a2df43c0ad25dbc201843b3fab6def3c677fb534e5821c4295d031",
+  "priorApiSha256": "bc56395c2e6136269dd935b9752fd00b4d07436c9e0d6b0fe343477273819c8d",
+  "worker": {
+    "sourceSha": "b779b9797388f314be14c0e4d92c03d0a73460a3",
+    "result": "MODEL_JOB_RUNTIME_PREPARED",
+    "sha256": "599a99405cc838204492ab4363cd8212472d6873170fcb0e2320d643006d5cf0",
+    "bytes": 374071,
+    "workerKey": "599a99405cc838204492ab4363cd8212472d6873170fcb0e2320d643006d5cf0/model-worker.zip",
+    "schedule": "DISABLED",
+    "deployment": "NOT_EXECUTED",
+    "providerCalls": 0,
+    "artifactStorage": "VERIFIED"
+  },
+  "sharedTestEmail": "PRIVATE_SELECTED_EMAIL_CONFIGURED",
+  "signingKey": "PRESERVED",
+  "migration": "UNCHANGED",
+  "modelFlags": "UNCHANGED_DISABLED",
+  "controlActivation": "NOT_EXECUTED",
+  "providerCalls": 0,
+  "workflowRun": "https://github.com/Known-Enough/known-enough/actions/runs/39093617326"
+}
