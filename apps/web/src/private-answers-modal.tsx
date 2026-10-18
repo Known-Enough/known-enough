@@ -133,7 +133,7 @@ export function PrivateAnswersModal({ open, owner, busy, blocked, saveBlocked, n
       {!readOnly && <button type="button" className="secondary" disabled={blocked || saving} onClick={edit}>Edit answers<PageIcon name="Pencil" /></button>}</header>
     {owner.ownInputReadiness === 'NOT_STARTED' ? <p>No saved answers.</p> : <dl className="ke-saved-answer-topics">{questions.map(({ variable, options }) => {
       const answer = savedAnswers[variable.id]!;
-      return <div key={variable.id}><dt>{variable.label}</dt><dd>{answer.mode === 'NONE' ? 'None of these options work' : answer.mode
+      return <div key={variable.id}><dt>{variable.label}</dt><dd data-selected={answer.mode === 'ANY' || answer.mode === 'SELECTED'}>{answer.mode === 'NONE' ? 'None of these options work' : answer.mode
         ? selectedOptions(answer, options.length).map(index => label(options[index]!, variable)).join(' · ') : extras.length ? 'See saved conditions below' : 'No option selection recorded'}
         {answer.preferred !== '' && <small>Favorite: {label(options[Number(answer.preferred)]!, variable)}</small>}</dd></div>;
     })}</dl>}
