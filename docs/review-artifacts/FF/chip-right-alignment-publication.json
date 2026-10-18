@@ -1,0 +1,44 @@
+{
+  "utc": "2026-10-18T23:00:54.939892+00:00",
+  "result": "CHIP_RIGHT_ALIGNMENT_PUBLISHED",
+  "source": "1b6766fbe650252ead1975c6f019094a00dee6d3",
+  "run": "https://github.com/Known-Enough/known-enough/actions/runs/39174574194",
+  "amplifyJobId": "133",
+  "verifiedFiles": [
+    {
+      "path": "/assets/app-chrome-vzHddO2b.js",
+      "sha256": "42f6e0c1e80f258e24b4c222da9cd5ff03b83ab442eb0c3a8181d1040d799e4e"
+    },
+    {
+      "path": "/assets/connected-app-DZpwSZef.js",
+      "sha256": "03be08ff913654134c321928da04a7f6da063e419116306cd14154b0baec0783"
+    },
+    {
+      "path": "/assets/index-4r7wiopM.css",
+      "sha256": "29bb9b74fa5f1ad33b61b1e52e2a52ce4dcc86f260d23a18658313ffa4864771"
+    },
+    {
+      "path": "/assets/index-BVSXz_Dz.js",
+      "sha256": "f7432390c8c66b53d5732b2a06eed5ff4f5e8034b08b5f5364ce3e0d185f0a77"
+    },
+    {
+      "path": "/cover.png",
+      "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151"
+    },
+    {
+      "path": "/",
+      "sha256": "014a6d1fb4b4c1cab4ff13df51334313162b94d09f82e13896763bf1e4d4800b"
+    },
+    {
+      "path": "/logo.png",
+      "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb"
+    }
+  ],
+  "apiSha256": "9b20406e5faa21f486b2d96d532b915077815c72c382ff21b9d9407adf5ed7fa",
+  "configurationWrites": 0,
+  "dataWrites": 0,
+  "providerCalls": 0,
+  "validation": "Build/whitespace PASS; no tests",
+  "scope": "Move existing chip before chevron; status behavior/permissions unchanged",
+  "manualAcceptance": "PENDING_USER"
+}
