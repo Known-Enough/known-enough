@@ -24,6 +24,14 @@ export async function checkpointDecisionWrite(route, { apiOrigin, decisionId, pe
   return checkpoint;
 }
 
+/** A gateway/server failure can hide a committed write. Reconcile it before any resubmission. */
+export function writeAcknowledgementDisposition(status) {
+  if (!Number.isInteger(status)) return 'UNKNOWN';
+  if (status >= 200 && status < 300) return 'ACKNOWLEDGED';
+  if (status >= 400 && status < 500 && status !== 408) return 'REJECTED';
+  return 'UNKNOWN';
+}
+
 export async function verifiedSessionProfile(session, { domain, username, fetcher = globalThis.fetch }) {
   if (!session || typeof session.accessToken !== 'string' || !session.accessToken
     || session.kind !== 'participant' || typeof username !== 'string' || !username) throw new Error('PROFILE_SESSION_INVALID');

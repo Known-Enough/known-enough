@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { verifiedSessionProfile, captureDelayedResponse, assertDecisionTarget, checkpointDecisionWrite } from './browser-recovery.mjs';
+import { verifiedSessionProfile, captureDelayedResponse, assertDecisionTarget, checkpointDecisionWrite, writeAcknowledgementDisposition } from './browser-recovery.mjs';
 const domain = 'https://synthetic.auth.us-east-1.amazoncognito.com';
 const session = { accessToken: 'PRIVATE_SYNTHETIC_TOKEN', method: 'SRP', kind: 'participant' };
 const user = { Username: 'synthetic', UserAttributes: [{ Name: 'sub', Value: 'owner-one' },
@@ -23,6 +23,11 @@ test('persists exact command bytes before network submission and leaves lost ack
   await assert.rejects(checkpointDecisionWrite(route, { apiOrigin: 'https://api.invalid', decisionId: 'other', persist: async () => assert.fail() }));
   await assert.rejects(checkpointDecisionWrite(route, { apiOrigin: 'https://api.invalid', decisionId: 'owned', persist: async () => { throw Error('disk-full'); } }));
   assert.deepEqual(order, ['persist', 'submit']);
+});
+test('a service error or timeout leaves a checkpoint unknown while explicit stale rejection remains rejected', () => {
+  for (const status of [null, undefined, 0, 302, 408, 500, 503, 504]) assert.equal(writeAcknowledgementDisposition(status), 'UNKNOWN');
+  for (const status of [400, 401, 403, 404, 409, 422, 429]) assert.equal(writeAcknowledgementDisposition(status), 'REJECTED');
+  for (const status of [200, 201, 204]) assert.equal(writeAcknowledgementDisposition(status), 'ACKNOWLEDGED');
 });
 test('SRP looks up its own verified identity through token-authorized GetUser', async () => {
   const profile = await verifiedSessionProfile(session, { domain, username: 'synthetic', fetcher: async (url, init) => {
