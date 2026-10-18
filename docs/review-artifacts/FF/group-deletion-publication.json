@@ -1,0 +1,62 @@
+{
+  "utc": "2026-10-18T17:06:15.457114+00:00",
+  "source": "3910e84f62394e093c1d477d2bc7e723dfe40b87",
+  "result": "GROUP_DELETE_REPAIR_PUBLISHED",
+  "apiSha256": "79e3e3ba19e2a600df5651e4a835cb75dbda876b6d252b6382b2ef59115f1366",
+  "workerSha256": "5b03b634e093ddaab1dcf5ecf6ca90463d51b6858144f8a5b9808bd104f298a3",
+  "frontendJob": "121",
+  "backendRun": "https://github.com/Known-Enough/known-enough/actions/runs/39147765107",
+  "frontendRun": "https://github.com/Known-Enough/known-enough/actions/runs/39147882258",
+  "scheduleRestoreRun": "https://github.com/Known-Enough/known-enough/actions/runs/39147884803",
+  "diagnosticRun": "https://github.com/Known-Enough/known-enough/actions/runs/39147443829",
+  "historicalReferenceCorrelation": "NO_MATCH_IN_BOUNDED_WINDOW",
+  "workerSchedule": "ENABLED",
+  "scheduleDispatchesReported": 0,
+  "admissionEnabled": true,
+  "totals": "UNCHANGED",
+  "applicationConfigurationWrites": 0,
+  "applicationDataWrites": 0,
+  "iamWrites": 0,
+  "newCloudShellSteps": 0,
+  "tests": "NOT_RUN_BY_USER_DIRECTION",
+  "staticChecks": [
+    "typecheck",
+    "changed-source lint",
+    "production build",
+    "import boundaries",
+    "reference hashes",
+    "whitespace"
+  ],
+  "groupDeletionExecuted": false,
+  "manualAcceptance": "PENDING_USER",
+  "frontendFiles": [
+    {
+      "path": "/assets/app-chrome-B4Sk8Vtx.js",
+      "sha256": "19ba28027b06a034a563407fb79f0b51f74ae6aa7456e41111f830bc745dda04"
+    },
+    {
+      "path": "/assets/connected-app-0OrI-CCO.js",
+      "sha256": "34ef4b6fc7f9a2b8f5ca7355e652c0a34f2a7489237485adc0b306d328c75fff"
+    },
+    {
+      "path": "/assets/index-CUpbnyJf.css",
+      "sha256": "128cae12e3438de8332a627c8864eb7c96ff135c918506abdfc3f855412ff27a"
+    },
+    {
+      "path": "/assets/index-a_lggfhA.js",
+      "sha256": "cc80b390a41e4ad87ada95cc989eed01be89353b07306ced06bd33b4d39c176b"
+    },
+    {
+      "path": "/cover.png",
+      "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151"
+    },
+    {
+      "path": "/",
+      "sha256": "89cfa007d74d04afc39e7dca8353896d009c2c0bfd207501db040c930e41493d"
+    },
+    {
+      "path": "/logo.png",
+      "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb"
+    }
+  ]
+}

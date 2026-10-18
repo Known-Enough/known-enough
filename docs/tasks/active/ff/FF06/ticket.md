@@ -1,6 +1,6 @@
 # FF06 — Simple decision overview, guided modals and editable names
 
-Status: PUBLISHED / B; implementation claim released. Follow-up fixes published from `70d3fabbb5f223930dc1f282b9edf072a95db47d`; manual acceptance pending. The model-job source rebind remains held because its control was not disabled and empty. [FF06–FF10 receipt](../../../../review-artifacts/FF/ff06-10-publication.json).
+Status: PUBLISHED; implementation claims released; user manual acceptance pending. Latest native group-delete hotfix: source3910e84/frontendAmplify121, [receipt](../../../../review-artifacts/FF/group-deletion-publication.json). Earlier dated source/control notes below are historical.
 
 ## User-directed follow-up — group list actions
 
@@ -76,3 +76,7 @@ FF06/A group-create warning static checkpoint: synchronous dirty-state notificat
 
 
 2026-10-16T23:11:09.123398+00:00 FF06/A group-create warning repair PUBLISHED / A claim released — frontend sourcee553ef6/Amplify115, [release38979916451](https://github.com/Known-Enough/known-enough/actions/runs/38979916451) SUCCESS, seven public files hash-verified. Saved group name is removed from parent dirty state synchronously before automatic group navigation; genuine unrelated unsaved-input protection and failed/unknown-request recovery remain. Frontend only; API6f2bff59 unchanged, configuration/data/provider writes0, no IAM/backend setup or group/invitation actions. Pinned type/lint/build/reference/link/JSON/whitespace checks PASS; no tests or AI calls. User manual acceptance pending. [Receipt](../../../../review-artifacts/FF/group-create-warning-publication.json). No new B dispatch/chat/monitor/schedule.
+
+## Native group-delete repair — 2026-10-18
+
+The current operations-managed API lacked the delete handler despite the existing UI and declared route. A implemented organizer/version-checked retained deletion, inactive member discovery and direct/display/background access denial. Published API79e3e3ba/worker5b03b634/frontend121; original enabled schedule restored, no new IAM/CloudShell or tests. [Diagnosis and manual steps](../../../../review-artifacts/FF/group-deletion-repair.md). User manual acceptance pending; B E2E02 work preserved.
