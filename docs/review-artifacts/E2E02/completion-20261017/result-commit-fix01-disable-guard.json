@@ -1,0 +1,20 @@
+{
+  "utc": "2026-10-18T03:42:03.837339+00:00",
+  "source": "e81379ceac4f4d8cee20d29befc4d176958cdf3c",
+  "phase": "disable",
+  "controlWrites": 1,
+  "dataWrites": 0,
+  "providerCalls": 0,
+  "observedControl": {
+    "sourceSha": "b779b9797388f314be14c0e4d92c03d0a73460a3",
+    "enabled": true,
+    "activeCount": 0,
+    "slotCount": 0
+  },
+  "controlSource": "b779b9797388f314be14c0e4d92c03d0a73460a3",
+  "priorEnabled": true,
+  "privateRetention": "ENABLED_SYNTHETIC_CONSENT_REQUIRED",
+  "enabled": false,
+  "totals": "UNCHANGED",
+  "result": "CONTROL_READBACK_PASS"
+}

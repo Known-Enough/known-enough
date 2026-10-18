@@ -22,6 +22,34 @@ it('reconstructs real application context; real kernel/application result and gu
   expect(f.load.mock.calls).toHaveLength(4); expect(f.get(r.decisions, 'ROOM#decision', 'GUARD').version!.N).toBe('2');
   expect(f.parsed(r.budget, 'TOTAL').reservedTokens).toBe(18_932);
 });
+it.each(['screened', 'hard-invalid'] as const)('screens the whole catalog beyond the first preview batch and independently checks the %s response', async response => {
+  const f = await fixture(); const record = f.record;
+  record.definition.variables = [
+    { id: 'place', label: 'Place', type: 'ENUM', required: true, visibility: 'PUBLIC', ownerParticipantId: null,
+      options: Array.from({ length: 8 }, (_, i) => ({ id: `place-${i}`, label: `Place ${i}` })) },
+    { id: 'day', label: 'Day', type: 'ENUM', required: true, visibility: 'PUBLIC', ownerParticipantId: null,
+      options: Array.from({ length: 4 }, (_, i) => ({ id: `day-${i}`, label: `Day ${i}` })) },
+  ];
+  const owner = record.owners[0]!; owner.draft = null; owner.draftVersion = null;
+  owner.confirmedConstraints = [['place', 'place-7'], ['day', 'day-3']].map(([variableId, optionId], index) => ({
+    schemaVersion: 2, kind: 'HARD', constraintId: `allowed-${index}`, decisionId: record.decisionId,
+    ownerParticipantId: owner.participantId, constraintVersion: 1, ownerVersion: owner.ownerVersion,
+    semanticVersion: record.definition.semanticVersion, contextToken: record.definition.contextToken,
+    confirmedAt: new Date(f.now()).toISOString(), status: 'ACTIVE', sourceSummary: 'PRIVATE_SOURCE_NEVER_SENT',
+    rule: { id: `allowed-rule-${index}`, visibility: 'TRUSTED_BACKEND', operator: 'IN', variableId: variableId!, values: [{ type: 'ENUM', optionId: optionId! }] },
+  }));
+  const cell = f.get(r.decisions, 'ROOM#decision'), wire = JSON.parse(cell.payload!.S!); wire.record = record; delete wire.record.replays; cell.payload = { S: JSON.stringify(wire) };
+  const model = vi.fn(async (input: Parameters<Parameters<typeof createDurableNegotiationWorker>[0]['model']>[0]) => {
+    expect(input.publicCandidates).toEqual([[{ variableId: 'place', value: { type: 'ENUM', optionId: 'place-7' } }, { variableId: 'day', value: { type: 'ENUM', optionId: 'day-3' } }]]);
+    expect(input.candidateKernelStatuses).toEqual(['VALID']); expect(input.candidateQuestionTargets).toEqual([[]]);
+    expect(JSON.stringify(input)).not.toContain('PRIVATE_SOURCE_NEVER_SENT');
+    return { output: { values: response === 'screened' ? input.publicCandidates[0] : genericCandidates(input.context.publicSnapshot.frame)[0], permissionDependencies: [], questionIntents: [] }, usage: { inputTokens: 5, outputTokens: 3 } };
+  });
+  const worker = createDurableNegotiationWorker({ now: f.now, store: f.store(), load: f.load, model, publicCandidates: genericCandidates });
+  await worker.enqueue(f.reference); expect(await worker.process({ jobId: f.reference.jobId })).toBe(response === 'screened' ? 'APPLIED' : 'DEAD');
+  expect(model).toHaveBeenCalledTimes(1); expect(f.parsed(r.decisions, 'ROOM#decision').record).toMatchObject({ status: response === 'screened' ? 'PROPOSED' : 'READY', job: null });
+  expect(f.parsed(r.budget, 'TOTAL').reservedTokens).toBe(18_932);
+});
 it.each(['identity', 'kill', 'account', 'other-account', 'retention', 'other-retention', 'group', 'semantic', 'readiness', 'confirmation', 'confirmation-version', 'job'] as const)('fresh %s withdrawal before dispatch denies paid call', async change => {
   const f = await fixture(); await f.worker().enqueue(f.reference);
   if (change === 'identity') f.revokeIdentity(); else if (change === 'kill') f.stop();

@@ -101,7 +101,27 @@ export function createDurableNegotiationWorker(options: { now: () => number; sto
       const publicIds = new Set(value.context.publicSnapshot.frame.variables.filter(v => v.visibility === 'PUBLIC').map(v => v.id));
       const values = catalog.map(item => KE.PublicProposalFacts.shape.values.parse(item));
       if (values.some(items => items.some(item => !publicIds.has(item.variableId)))) throw new DurableJobError('INVALID');
-      const result = await options.model({ context: value.context, publicCandidates: values, attempt: 1, retryReason: null, signal,
+      // The model selects among checked combinations; it is not the authority for mandatory rules.
+      // Keep the full public vocabulary and final current-state validation independent of this preview.
+      const preview = localApplication(value.record, options.now).application;
+      const service: TrustedPrincipal = { kind: 'service', subject: 'durable-negotiator', roomIds: [value.record.decisionId] };
+      const statuses: string[] = [];
+      const questionTargets: NonNullable<Parameters<DecisionNegotiationModel>[0]['candidateQuestionTargets']> = [];
+      for (let offset = 0; offset < values.length; offset += 16) {
+        const candidates = values.slice(offset, offset + 16).map((assignments, index) => KE.CandidateProposal.parse({
+          schemaVersion: KE.KE_SCHEMA_VERSION, proposalId: `durable-preview-${offset + index}`, decisionId: value.record.decisionId,
+          contextToken: value.context.job.contextToken, semanticVersion: value.context.job.semanticVersion,
+          proposalVersion: value.context.proposalVersion, values: assignments, permissionDependencies: [],
+          createdAt: new Date(options.now()).toISOString(), validation: { status: 'VALID', checkedRuleIds: [], failedRuleIds: [], unknownRuleIds: [], unsupportedConditionIds: [] },
+        }));
+        const guidance = await preview.previewReasoningCatalogGuidance(service, value.record.decisionId, value.context.job.id, candidates);
+        statuses.push(...guidance.statuses); questionTargets.push(...guidance.questionTargets);
+      }
+      const eligible = values.flatMap((_, index) => ['VALID', 'NEEDS_PERMISSION'].includes(statuses[index]!) ? [index] : []);
+      const indices = eligible.length ? eligible : values.map((_, index) => index);
+      const result = await options.model({ context: value.context, publicCandidates: indices.map(index => values[index]!),
+        candidateKernelStatuses: indices.map(index => statuses[index]!), candidateQuestionTargets: indices.map(index => questionTargets[index]!),
+        attempt: 1, retryReason: null, signal,
         invocation: { expiresAt: options.now() + (options.bounds?.timeoutMs ?? 8000), signal, assertCurrent: async () => { if (signal.aborted) throw new DurableJobError('STALE'); } } });
       return result;
     },

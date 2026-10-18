@@ -1,0 +1,52 @@
+{
+  "diagnosticRun": "https://github.com/Known-Enough/known-enough/actions/runs/39113167218",
+  "observed": {
+    "providerResponded": true,
+    "failureStage": "PREPARE",
+    "failureCode": "INVALID_OUTPUT",
+    "kernelStage": "KERNEL_INVALID",
+    "queueActive": 0,
+    "slots": 0,
+    "actualUsage": {
+      "inputTokens": 3638,
+      "outputTokens": 28
+    }
+  },
+  "localOwnedSnapshotProof": {
+    "candidates": 6,
+    "invalid": 5,
+    "applied": 1,
+    "providerCalls": 0,
+    "awsWrites": 0
+  },
+  "repair": "Preview all public combinations with the existing trusted kernel in batches of sixteen; present VALID and NEEDS_PERMISSION choices with aligned guidance; retain full vocabulary and fresh final kernel/authority validation.",
+  "safeguards": [
+    "No provider retry",
+    "No automatic permission or proposal approval",
+    "No private source text in model guidance",
+    "Unknown provider outcomes remain quarantined"
+  ],
+  "checks": {
+    "focusedTests": 130,
+    "files": 5,
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "productionBundledOwnedAAndBMockProof": "APPLIED; providerCalls=0; awsWrites=0",
+    "fullCheck": {
+      "status": "FAIL",
+      "failed": 35,
+      "passed": 1622,
+      "skipped": 2,
+      "unhandledErrors": 1,
+      "knownBaselineFailures": 33,
+      "additionalConcurrentTimingFailures": 2,
+      "buildAndBrowserAfterUnitFailure": "NOT_RUN"
+    },
+    "concurrentTimingIsolation": {
+      "passed": 13,
+      "files": 1
+    }
+  },
+  "previousResultCommitPublication": "https://github.com/Known-Enough/known-enough/actions/runs/39094504678",
+  "previousResultCommitSchedule": "https://github.com/Known-Enough/known-enough/actions/runs/39094611427"
+}
