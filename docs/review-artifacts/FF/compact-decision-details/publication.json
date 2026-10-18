@@ -1,0 +1,69 @@
+{
+  "utc": "2026-10-18T22:22:52.957293+00:00",
+  "result": "COMPACT_DECISION_DETAILS_PUBLISHED",
+  "source": "f0c436ccdfe5773ea74a3ca86d9cd0371ac1588e",
+  "run": "https://github.com/Known-Enough/known-enough/actions/runs/39171843902",
+  "frontend": {
+    "sourceSha": "f0c436ccdfe5773ea74a3ca86d9cd0371ac1588e",
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "providerCalls": 0,
+    "signup": 0,
+    "apiPublication": "NOT_EXECUTED",
+    "files": [
+      {
+        "path": "/assets/app-chrome-vzHddO2b.js",
+        "sha256": "42f6e0c1e80f258e24b4c222da9cd5ff03b83ab442eb0c3a8181d1040d799e4e"
+      },
+      {
+        "path": "/assets/connected-app-DbdXBs5m.js",
+        "sha256": "d5fc883a6ce60f13e4246c39fba2f1656150f1a3b94d4033ef7446120efbf434"
+      },
+      {
+        "path": "/assets/index-BtdBxa5B.css",
+        "sha256": "bd96513394837efd5b35f6b3e48e7759a2330a24e9e9e84de88076b864fbe241"
+      },
+      {
+        "path": "/assets/index-DhpGSg2C.js",
+        "sha256": "830d181c5af9246c0a35f194da9f4127c06bf8c6252c55b3de6ca07fa2ccf48f"
+      },
+      {
+        "path": "/cover.png",
+        "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151"
+      },
+      {
+        "path": "/",
+        "sha256": "295c50e94faf498a69fd7b95c23b3f06a67999a79f2ef29d3e15058b81b51ea6"
+      },
+      {
+        "path": "/logo.png",
+        "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb"
+      }
+    ],
+    "amplifyJobId": "127"
+  },
+  "configuration": {
+    "result": "ZZ02_SETUP_READBACK_PASS",
+    "configurationWrites": 0,
+    "dataWrites": 0,
+    "providerCalls": 0,
+    "signupDelivery": "NOT_EXECUTED",
+    "configurationSha256": "164884d5c87c288a5f21638fb3fbef35860427263e373f9069e34d9250095dce",
+    "postConfirmation": "MATCH",
+    "smsRoleConfigured": false,
+    "apiSha256": "9b20406e5faa21f486b2d96d532b915077815c72c382ff21b9d9407adf5ed7fa",
+    "groupReadRoutes": [
+      "GET /groups/{groupId}/draft-requests",
+      "GET /groups",
+      "GET /groups/{groupId}/draft-requests/{requestKey}",
+      "GET /groups/{groupId}/drafts/{draftId}",
+      "GET /groups/{groupId}/decisions/{decisionId}/review",
+      "GET /groups/{groupId}/members/{memberId}/profile",
+      "GET /groups/{groupId}"
+    ],
+    "profileRoutesPresent": 5,
+    "managedRoutesPresent": 12
+  },
+  "manualAcceptance": "PENDING_USER",
+  "liveQualification": "NOT_EXECUTED",
+  "apiWorkerSchedule": "UNCHANGED"
+}

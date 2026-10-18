@@ -4,7 +4,7 @@ Status: PUBLISHED; implementation claims released; user manual acceptance pendin
 
 ## Compact decision details — 2026-10-18
 
-A implements the user’s compact status/activity, acknowledged private-answer summary, Edit/Cancel, denser responsive topic rows and contextual actions. [Report](../../../../review-artifacts/FF/compact-decision-details/README.md). Relevant controlled tests explicitly authorized for this continuation: browser8/unit6/hosted1 and static/build checks pass; full check retains31 previously recorded failures/1unhandled error. Frontend publication pending; user live acceptance pending. Backend/permissions/consent/final approval and uncertain-request recovery preserved.
+A implements the user’s compact status/activity, acknowledged private-answer summary, Edit/Cancel, denser responsive topic rows and contextual actions. [Report](../../../../review-artifacts/FF/compact-decision-details/README.md). Relevant controlled tests explicitly authorized for this continuation: browser8/unit6/hosted1 and static/build checks pass; full check retains31 previously recorded failures/1unhandled error. Frontend published/sourcef0c436c/Amplify127, [receipt](../../../../review-artifacts/FF/compact-decision-details/publication.json); user live acceptance pending. Backend/permissions/consent/final approval and uncertain-request recovery preserved.
 
 ## User-directed follow-up — group list actions
 

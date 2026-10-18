@@ -1,6 +1,6 @@
 # Compact decision details
 
-Frontend-only continuation of FF06. Publication pending; user live acceptance pending.
+Frontend-only continuation of FF06. Published from `f0c436ccdfe5773ea74a3ca86d9cd0371ac1588e`, Amplify127, [successful release](https://github.com/Known-Enough/known-enough/actions/runs/39171843902). All seven public file/hash readbacks match; API/configuration unchanged, no data/provider actions. [Receipt](publication.json). User live acceptance pending.
 
 - One status line includes the public responded count. Missing progress is shown as a participant count, never a fabricated completion count.
 - Borderless expandable Group activity shows names and public response/approval status, without anyone else’s private choices.
