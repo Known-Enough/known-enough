@@ -18,6 +18,40 @@ function publicChoiceValues(variable: KE.PublicDecisionFrame['variables'][number
   const rule = frame.rules.find(item => 'variableId' in item && item.variableId === variable.id && (item.operator === 'IN' || item.operator === 'COMPARE' && item.comparison === 'EQ'));
   return rule?.operator === 'IN' ? rule.values.map(value => valueText(value, variable)) : rule?.operator === 'COMPARE' ? [valueText(rule.value, variable)] : [];
 }
+function DecisionRow({ decision, organizer, busy, onOpen, onReview, onRename, onDelete }: {
+  decision: Groups.GroupSnapshot['decisions'][number]; organizer: boolean; busy: boolean;
+  onOpen: () => void; onReview: () => void; onRename: (name: string) => Promise<void>; onDelete: () => void;
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const root = useRef<HTMLElement>(null), trigger = useRef<HTMLButtonElement>(null);
+  const name = decision.title ?? 'Untitled decision';
+  useEffect(() => {
+    if (!menuOpen) return;
+    const outside = (event: PointerEvent) => { if (event.target instanceof Node && !root.current?.contains(event.target)) setMenuOpen(false); };
+    document.addEventListener('pointerdown', outside);
+    return () => document.removeEventListener('pointerdown', outside);
+  }, [menuOpen]);
+  return <article ref={root} className="ke-decision-row ke-clickable-decision-row">
+    <button type="button" className="ke-decision-row-open" disabled={busy || (!decision.current && !organizer)}
+      onClick={decision.current ? onOpen : onReview}>
+      <span><strong>{name}</strong>{!decision.current && <small>{organizer ? 'Resolve membership change' : 'The organizer needs to resolve a membership change.'}</small>}</span>
+      <PageIcon name="ChevronRight" />
+    </button>
+    {organizer && <div className="ke-decision-menu-wrap" onKeyDown={event => {
+      if (event.key === 'Escape') { event.preventDefault(); setMenuOpen(false); trigger.current?.focus(); }
+    }} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setMenuOpen(false); }}>
+      <RenameAction name={name} save={onRename} renderTrigger={rename => <>
+        <button ref={trigger} type="button" className="ke-group-menu-trigger" disabled={busy}
+          aria-label={`Actions for ${name}`} aria-expanded={menuOpen} aria-controls={`decision-actions-${decision.id}`}
+          onClick={() => setMenuOpen(current => !current)}><PageIcon name="Ellipsis" /></button>
+        <div id={`decision-actions-${decision.id}`} className="ke-decision-actions-menu" hidden={!menuOpen}>
+          <button type="button" disabled={busy} onClick={() => { setMenuOpen(false); rename(); }}><PageIcon name="Pencil" />Rename</button>
+          <button type="button" className="ke-decision-menu-delete" disabled={busy} onClick={() => { setMenuOpen(false); onDelete(); }}><PageIcon name="X" />Delete decision</button>
+        </div>
+      </>} />
+    </div>}
+  </article>;
+}
 export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange }: { group: Groups.GroupSnapshot;
   api: (path: string, init?: RequestInit) => Promise<Response>; reload: () => Promise<void>; openDecision: (id: string) => void; startCollapsed?: boolean; onDirtyChange?: (dirty: boolean) => void }) {
   const [showExample, setShowExample] = useState(false);
@@ -404,23 +438,15 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
       {group.isOrganizer ? <button ref={launcher} type="button" className="ke-start-decision ke-icon-action" disabled={busy} onClick={startWizard}><PageIcon name="Plus" />Start a decision</button>
         : <p>Your group organizer can start a decision.</p>}
     </div>}
-    <div className="ke-decision-list">{group.decisions.map(decision => <article className="ke-decision-row" key={decision.id}>
-      <div><h3>{decision.title ?? 'Untitled decision'}</h3>
-        {!decision.current && <p>This decision has an older member list. The organizer can resolve it below.</p>}
-      </div>
-      <div className="ke-decision-row-actions">{decision.current
-        ? <button type="button" className="secondary" disabled={busy} onClick={() => openDecision(decision.id)}>Open decision</button>
-        : null}
-        {group.isOrganizer && !decision.current && <button type="button" disabled={busy} onClick={() => void action(async () => {
-          const result = await request(`decisions/${decision.id}/review`);
-          setDraft(null); setDirty(false); setRoster({ id: decision.id, frame: KE.PublicDecisionFrame.parse(result.frame), controlVersion: result.controlVersion as number,
-            groupVersion: result.groupVersion as number, participants: result.participants as { id: string; displayName: string }[] }); setReviewed(false);
-        })}>Resolve membership change</button>}
-        {group.isOrganizer && <RenameAction name={decision.title ?? 'Untitled decision'} save={async name => { await request('name', { version: group.version, name, previousName: decision.title ?? 'Untitled decision', decisionId: decision.id }); await reload(); }} />}
-        {group.isOrganizer && <button type="button" className="secondary ke-delete-action" disabled={busy}
-          onClick={() => setDeleteTarget({ kind: 'DECISION', id: decision.id, title: 'this decision' })}>Delete decision</button>}
-      </div>
-    </article>)}</div>
+    <div className="ke-decision-list">{group.decisions.map(decision => <DecisionRow key={decision.id} decision={decision} organizer={group.isOrganizer} busy={busy}
+      onOpen={() => openDecision(decision.id)}
+      onReview={() => void action(async () => {
+        const result = await request(`decisions/${decision.id}/review`);
+        setDraft(null); setDirty(false); setRoster({ id: decision.id, frame: KE.PublicDecisionFrame.parse(result.frame), controlVersion: result.controlVersion as number,
+          groupVersion: result.groupVersion as number, participants: result.participants as { id: string; displayName: string }[] }); setReviewed(false);
+      })}
+      onRename={async name => { await request('name', { version: group.version, name, previousName: decision.title ?? 'Untitled decision', decisionId: decision.id }); await reload(); }}
+      onDelete={() => setDeleteTarget({ kind: 'DECISION', id: decision.id, title: decision.title ?? 'this decision' })} />)}</div>
     {group.isOrganizer && group.drafts.some(item => !item.created) && <div className="ke-wizard-saved-list">
       <h3>Your saved drafts</h3>{group.drafts.filter(item => !item.created).map(item => <div className="ke-decision-row" key={item.id}>
         <span>{item.title}</span><div className="ke-decision-row-actions">{item.current
