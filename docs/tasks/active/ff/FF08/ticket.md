@@ -1,6 +1,6 @@
 # FF08 — Joining without restarting decisions
 
-Status: IN_PROGRESS / A — automatic membership continuation, 2026-10-18. Earlier B publication preserved.
+Status: PUBLISHED / A — automatic membership continuation, 2026-10-18; claim released, user manual acceptance pending. [Behavior](../../../../review-artifacts/FF/automatic-membership.md) and [receipt](../../../../review-artifacts/FF/automatic-membership-publication.json). Earlier B publication preserved.
 
 Historical status: PUBLISHED / B; claim released. Manual acceptance pending; model-job source rebind held because its control was not disabled and empty. [Receipt](../../../../review-artifacts/FF/ff06-10-publication.json).
 
