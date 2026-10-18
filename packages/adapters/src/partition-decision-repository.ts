@@ -1,6 +1,6 @@
 import { DynamoDBClient, TransactGetItemsCommand, TransactWriteItemsCommand,
   type TransactWriteItem, type AttributeValue } from '@aws-sdk/client-dynamodb';
-import { KnownEnoughApplicationError, RepositoryCapacityError,
+import { KnownEnoughApplicationError, RepositoryCapacityError, includeDecisionGroupMembers,
   type KnownEnoughRepository, type TrustedPrincipal, type DecisionTransactionOptions } from '@deal-table/application';
 import { currentAdmissionFence } from './admission-context.ts';
 import { DynamoDBRoomRepository } from './dynamodb.ts';
@@ -17,6 +17,9 @@ export const PARTITION_DECISION_TARGET = Object.freeze({
 });
 type Command = TransactGetItemsCommand | TransactWriteItemsCommand;
 type Item = Record<string, AttributeValue>;
+type ParticipantFence = PartitionFence & {
+  groupMembers?: { subject: string; participantId: string; displayName: string }[];
+};
 /** One physical request per call; honor signal. The concrete SDK transport pins maxAttempts=1. */
 export interface PartitionDecisionTransport { send(command: Command, context: PartitionIOContext): Promise<unknown> }
 export class PartitionDecisionError extends Error {
@@ -171,12 +174,12 @@ export function createPartitionDecisionRepository(options: { decisionArn: string
     if (!creation) checkedWrite(items); return items;
   }
   async function perform<T>(principal: TrustedPrincipal | null, decisionId: string, create: boolean,
-    work: (repository: KnownEnoughRepository, io: PartitionIOContext, fence: PartitionFence) => Promise<T>,
+    work: (repository: KnownEnoughRepository, io: PartitionIOContext, fence: ParticipantFence) => Promise<T>,
     prepared?: { io: PartitionIOContext; fence?: PartitionFence; mutation?: boolean }): Promise<T> {
     return safe(async () => {
       // Mixed legacy authority is incompatible, never silently discarded or projected as one condition.
       if (currentAdmissionFence(decisionId)) fail('DECISION_INVALID');
-      const io = prepared?.io ?? partitionIO(limits); const fence = prepared?.fence ?? (principal?.kind === 'display'
+      const io = prepared?.io ?? partitionIO(limits); const fence: ParticipantFence = prepared?.fence ?? (principal?.kind === 'display'
         ? await session.displayFence(principal, decisionId, io) : await session.decisionFence(principal, decisionId, io));
       const guards = conditions(fence, prepared?.mutation === true || (create && prepared?.fence !== undefined),
         principal?.kind === 'display' ? { subject: principal.subject, roomId: principal.roomId } : undefined);
@@ -354,12 +357,19 @@ export function createPartitionDecisionRepository(options: { decisionArn: string
           || decision.definition.participants.some(person => !roster.members.some(member => member.participantId === person.id && member.displayName === person.displayName))) stale();
         await repository.createDecision(structuredClone(decision));
       }, supplied ? { io: supplied } : undefined),
-      transactionDecision: (decisionId, transition, transactionOptions?: DecisionTransactionOptions) => perform(principal, decisionId, false, async (repository, io) => {
+      transactionDecision: (decisionId, transition, transactionOptions?: DecisionTransactionOptions) => perform(principal, decisionId, false, async (repository, io, fence) => {
         const replay = transactionOptions?.replay;
         const hash = replay ? await partitionCall(io, () => replay.keyHash, false) : undefined;
         if (replay && (typeof hash !== 'string' || !/^[a-f0-9]{64}$/.test(hash))) fail('DECISION_INVALID');
         return repository.transactionDecision(decisionId, record => partitionCall(io,
-          async () => structuredClone(await transition(record)), false), replay ? { replay: { ...replay, keyHash: Promise.resolve(hash!) } } : undefined);
+          async () => {
+            // Membership comes only from the server's current group/account fence. This joins
+            // additions and the participant operation in the same guarded decision write.
+            if (record && fence.groupMembers) includeDecisionGroupMembers(record,
+              fence.groupMembers.map(member => ({ id: member.participantId, displayName: member.displayName, requiredForApproval: true })),
+              fence.groupMembers.map(member => ({ subject: member.subject, participantId: member.participantId, active: true })));
+            return structuredClone(await transition(record));
+          }, false), replay ? { replay: { ...replay, keyHash: Promise.resolve(hash!) } } : undefined);
       }, supplied ? { io: supplied } : undefined),
     };
   } };

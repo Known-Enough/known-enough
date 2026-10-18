@@ -1,6 +1,12 @@
 # FF08 — Joining without restarting decisions
 
-Status: PUBLISHED / B; claim released. Manual acceptance pending; model-job source rebind held because its control was not disabled and empty. [Receipt](../../../../review-artifacts/FF/ff06-10-publication.json).
+Status: IN_PROGRESS / A — automatic membership continuation, 2026-10-18. Earlier B publication preserved.
+
+Historical status: PUBLISHED / B; claim released. Manual acceptance pending; model-job source rebind held because its control was not disabled and empty. [Receipt](../../../../review-artifacts/FF/ff06-10-publication.json).
+
+## Current user correction — 2026-10-18
+
+A new group member must automatically be included in unfinished decisions. No “Update decision participants” button, organizer inclusion action or repeat review is required for additions. Server-owned current-group membership supplies the roster on decision access; new members still provide their own private answers and consent. Existing answers/confirmations remain, finished outcomes stay immutable, and genuine removals retain their authorization/version safeguards. This supersedes the older no-automatic-enrollment wording below for additions. Static checks and compatible publication are in scope; no automated/live tests or provider calls in this chat.
 
 ## User report and agreed behavior
 

@@ -110,6 +110,40 @@ function readinessStatus(decision: KnownEnoughRecord): KnownEnoughRecord['status
     decision.owners.find(owner => owner.participantId === id)?.readiness !== 'READY')) return 'COLLECTING_PRIVATE_INPUT';
   return 'READY';
 }
+/** Trusted current-group composition only. The repository must atomically fence that exact roster.
+ * Adds empty owners without accepting private processing, answers or final proposals for them.
+ */
+export function includeDecisionGroupMembers(decision: KnownEnoughRecord,
+  participants: readonly KETypes.DecisionDefinition['participants'][number][],
+  memberships: readonly DecisionMembership[]): boolean {
+  if (['AGREED', 'CLOSED'].includes(decision.status)) return false;
+  if (!decision.definition.participants.every(person => participants.some(next => next.id === person.id))
+    || !decision.memberships.every(member => memberships.some(next => next.subject === member.subject
+      && next.participantId === member.participantId && next.active === member.active))) fail('STALE_CONTEXT');
+  const additions = participants.filter(person => !decision.definition.participants.some(previous => previous.id === person.id));
+  const identities = memberships.map(member => member.participantId);
+  if (new Set(identities).size !== identities.length || new Set(memberships.map(member => member.subject)).size !== memberships.length
+    || memberships.length !== participants.length || memberships.some(member => !member.active || !Id.safeParse(member.subject).success
+      || !participants.some(person => person.id === member.participantId))) fail('INVALID_COMMAND');
+  if (!additions.length) return false;
+  const definition = KE.DecisionDefinition.parse({ ...decision.definition,
+    participants: [...decision.definition.participants, ...additions.map(person => ({ ...person, requiredForApproval: true }))],
+    requiredParticipantIds: [...decision.definition.requiredParticipantIds, ...additions.map(person => person.id)] });
+  retireCurrentProposal(decision); // Previous outcome approvals never apply to a different roster/proposal.
+  for (const owner of decision.owners) {
+    owner.pendingQuestions = owner.pendingQuestions.map(question => question.status === 'PENDING' ? { ...question, status: 'SUPERSEDED' as const } : question);
+    owner.negotiationPermissions = owner.negotiationPermissions.map(permission => permission.status === 'ACTIVE' ? { ...permission, status: 'SUPERSEDED' as const, permissionVersion: permission.permissionVersion + 1 } : permission);
+    owner.disclosurePermissions = owner.disclosurePermissions.map(permission => ['PENDING', 'ACTIVE'].includes(permission.status) ? { ...permission, status: 'SUPERSEDED' as const, permissionVersion: permission.permissionVersion + 1 } : permission);
+  }
+  // Preserve semantic context, confirmations, drafts and confirmed constraints verbatim. New owners start empty.
+  decision.definition = definition;
+  decision.memberships = structuredClone(memberships) as DecisionMembership[];
+  decision.owners.push(...additions.map(person => emptyOwner(person.id)));
+  decision.status = readinessStatus(decision);
+  decision.publicRevision += 1; decision.controlVersion += 1;
+  return true;
+}
+
 function ownerRulesValid(
   definition: KETypes.DecisionDefinition,
   ownerParticipantId: string,
@@ -1021,27 +1055,7 @@ export class KnownEnoughApplication {
       const additionOnly = rosterOnly && decision.definition.participants.every(person => parsed.data.participants.some(next => next.id === person.id))
         && decision.memberships.every(member => input.memberships.some(next => next.subject === member.subject && next.participantId === member.participantId && next.active === member.active));
       if (additionOnly) {
-        const additions = parsed.data.participants.filter(person => !decision.definition.participants.some(previous => previous.id === person.id));
-        const identities = input.memberships.map(member => member.participantId);
-        if (new Set(identities).size !== identities.length || new Set(input.memberships.map(member => member.subject)).size !== input.memberships.length
-          || input.memberships.length !== parsed.data.participants.length || input.memberships.some(member => !member.active || !Id.safeParse(member.subject).success
-            || !parsed.data.participants.some(person => person.id === member.participantId))) fail('INVALID_COMMAND');
-        if (!additions.length) return;
-        const definition = KE.DecisionDefinition.parse({ ...decision.definition,
-          participants: [...decision.definition.participants, ...additions.map(person => ({ ...person, requiredForApproval: true }))],
-          requiredParticipantIds: [...decision.definition.requiredParticipantIds, ...additions.map(person => person.id)] });
-        retireCurrentProposal(decision); // Previous outcome approvals never apply to a different roster/proposal.
-        for (const owner of decision.owners) {
-          owner.pendingQuestions = owner.pendingQuestions.map(question => question.status === 'PENDING' ? { ...question, status: 'SUPERSEDED' as const } : question);
-          owner.negotiationPermissions = owner.negotiationPermissions.map(permission => permission.status === 'ACTIVE' ? { ...permission, status: 'SUPERSEDED' as const, permissionVersion: permission.permissionVersion + 1 } : permission);
-          owner.disclosurePermissions = owner.disclosurePermissions.map(permission => ['PENDING', 'ACTIVE'].includes(permission.status) ? { ...permission, status: 'SUPERSEDED' as const, permissionVersion: permission.permissionVersion + 1 } : permission);
-        }
-        // Preserve semantic context, confirmations, drafts and confirmed constraints verbatim. New owners start empty.
-        decision.definition = definition;
-        decision.memberships = structuredClone(input.memberships) as DecisionMembership[];
-        decision.owners.push(...additions.map(person => emptyOwner(person.id)));
-        decision.status = readinessStatus(decision);
-        decision.publicRevision += 1; decision.controlVersion += 1;
+        includeDecisionGroupMembers(decision, parsed.data.participants, input.memberships);
         return;
       }
       if (decision.status === 'CLOSED') fail('FORBIDDEN');

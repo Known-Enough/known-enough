@@ -398,7 +398,8 @@ export function createPartitionGroupSession(transport: PartitionTransport,
             if (!group.members.includes(who)) {
               if (group.members.length >= 16 || group.version >= Number.MAX_SAFE_INTEGER) throw new PartitionSessionError('SESSION_CAPACITY');
               const priorVersion = group.version; group.members.push(who); group.version++;
-              // Joining the group does not enroll this person in any decision or mutate its consent.
+              // Decision access includes current members automatically under this same group/account fence.
+              // Acceptance itself never copies private answers or supplies participant consent.
               for (const binding of group.decisions) if (!binding.deleted && binding.version === priorVersion) binding.version = group.version;
             }
             invitation.acceptedBy = who;
@@ -811,18 +812,26 @@ export function createPartitionGroupSession(transport: PartitionTransport,
       });
     },
     /** Conditions MUST join the actual decision transaction; assertCurrent alone cannot authorize a write. */
-    decisionFence(principal: TrustedPrincipal | null, rawDecisionId: string, supplied?: PartitionIOContext): Promise<PartitionFence> {
+    decisionFence(principal: TrustedPrincipal | null, rawDecisionId: string, supplied?: PartitionIOContext): Promise<PartitionFence & {
+      groupMembers: { subject: string; participantId: string; displayName: string }[];
+    }> {
       return safe(async () => {
         const who = participant(principal); const decisionId = groupId(rawDecisionId); const io = supplied ?? partitionIO(limits);
         const directory = await repository.lookup({ type: 'DECISION', decisionId }, io);
         if (directory?.type !== 'DECISION') return deny('NOT_FOUND');
+        let groupMembers: { subject: string; participantId: string; displayName: string }[] = [];
         const fence = await selected(who, directory.groupId, io, resolved => repository.fence(resolved, state => {
           const group = current(state, who, directory.groupId);
           const binding = group.decisions.find(binding => binding.id === decisionId);
           if (!binding || binding.deleted) return deny('NOT_FOUND');
           if (binding.version !== group.version) return deny('STALE_CONTEXT');
+          groupMembers = publicRoster(state, group).map(person => ({
+            subject: group.members.find(subject => partitionMemberId(subject) === person.id)!,
+            participantId: person.id, displayName: person.displayName,
+          }));
         }, io));
-        return { mutations: structuredClone(fence.mutations), assertCurrent: () => safe(() => fence.assertCurrent()) };
+        return { mutations: structuredClone(fence.mutations), groupMembers: structuredClone(groupMembers),
+          assertCurrent: () => safe(() => fence.assertCurrent()) };
       });
     },
   };

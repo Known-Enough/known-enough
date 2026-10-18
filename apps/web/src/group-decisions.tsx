@@ -406,16 +406,16 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
     </div>}
     <div className="ke-decision-list">{group.decisions.map(decision => <article className="ke-decision-row" key={decision.id}>
       <div><h3>{decision.title ?? 'Untitled decision'}</h3>
-        {!decision.current && <p>This decision needs an organizer membership update. Existing answers are kept when only adding people.</p>}
+        {!decision.current && <p>This decision has an older member list. The organizer can resolve it below.</p>}
       </div>
       <div className="ke-decision-row-actions">{decision.current
         ? <button type="button" className="secondary" disabled={busy} onClick={() => openDecision(decision.id)}>Open decision</button>
         : null}
-        {group.isOrganizer && <button type="button" disabled={busy} onClick={() => void action(async () => {
+        {group.isOrganizer && !decision.current && <button type="button" disabled={busy} onClick={() => void action(async () => {
           const result = await request(`decisions/${decision.id}/review`);
           setDraft(null); setDirty(false); setRoster({ id: decision.id, frame: KE.PublicDecisionFrame.parse(result.frame), controlVersion: result.controlVersion as number,
             groupVersion: result.groupVersion as number, participants: result.participants as { id: string; displayName: string }[] }); setReviewed(false);
-        })}>Update decision participants</button>}
+        })}>Resolve membership change</button>}
         {group.isOrganizer && <RenameAction name={decision.title ?? 'Untitled decision'} save={async name => { await request('name', { version: group.version, name, previousName: decision.title ?? 'Untitled decision', decisionId: decision.id }); await reload(); }} />}
         {group.isOrganizer && <button type="button" className="secondary ke-delete-action" disabled={busy}
           onClick={() => setDeleteTarget({ kind: 'DECISION', id: decision.id, title: 'this decision' })}>Delete decision</button>}
@@ -527,17 +527,17 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
         </footer>}
       </div>
     </dialog>}
-    {roster && <div className="local-note"><h4>Include current group members</h4><p>{roster.frame.objective}</p>
+    {roster && <div className="local-note"><h4>Resolve membership change</h4><p>{roster.frame.objective}</p>
       <p>New participants provide their own answers. A finished decision keeps its recorded outcome and participants. Removing people or changing shared choices still needs the existing review.</p>
       <ul>{roster.participants.map(member => <li key={member.id}>{member.displayName}</li>)}</ul>
       {roster.frame.variables.map(variable => <p key={variable.id}>{variableText(variable, roster.frame)}</p>)}
       <ul>{roster.frame.rules.map(rule => <li key={rule.id}>{ruleText(rule, roster.frame.variables)}</li>)}</ul>
       <p>Adding members preserves existing answers and confirmations. New participants supply their own answers. Any new proposal needs explicit approval from everyone included in the decision.</p>
-      <label><input type="checkbox" checked={reviewed} onChange={event => setReviewed(event.target.checked)} /> Include these people in this decision. Existing answers and confirmations stay saved when only adding people.</label>
+      <label><input type="checkbox" checked={reviewed} onChange={event => setReviewed(event.target.checked)} /> I have reviewed who remains in this decision after the membership change.</label>
       <button disabled={busy || !reviewed} onClick={() => void action(async () => {
         const result = await request(`decisions/${roster.id}/revise`, { controlVersion: roster.controlVersion, groupVersion: roster.groupVersion });
         const snapshot = KE.PublicDecisionSnapshot.parse(result.snapshot); setRoster(null); setReviewed(false); await reload(); openDecision(snapshot.frame.decisionId);
-      })}>Update decision participants</button>
+      })}>Save membership change</button>
     </div>}
     {!starting && !busy && notice && <p className="ke-wizard-help" role="status">{notice}</p>}
   </section>;

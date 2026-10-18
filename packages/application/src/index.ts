@@ -736,7 +736,7 @@ export class DealTableApplication {
   }
 }
 
-export { KnownEnoughApplication, KnownEnoughApplicationError } from './known-enough.ts';
+export { KnownEnoughApplication, KnownEnoughApplicationError, includeDecisionGroupMembers } from './known-enough.ts';
 export { DecisionArchitect, DecisionArchitectError } from './decision-architect.ts';
 export { OwnerConversationArchitect, OwnerConversationError } from './owner-conversation.ts';
 export type {
