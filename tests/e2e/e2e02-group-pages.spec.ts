@@ -10,6 +10,7 @@ function group(id: string): Groups.GroupSnapshot {
 }
 async function fixture(page: Page, mode: 'normal' | 'empty' | 'failed' | 'repeated') {
   let pageReads = 0, writes = 0;
+  let initialLimit: string | null = null;
   await page.addInitScript(() => sessionStorage.setItem('known-enough-cognito-session', JSON.stringify({
     accessToken: 'header.payload.signature', kind: 'participant', expiresAt: Date.now() + 900000 })));
   await page.route(origin + '/**', async route => {
@@ -20,9 +21,13 @@ async function fixture(page: Page, mode: 'normal' | 'empty' | 'failed' | 'repeat
     let body: unknown, status = 200;
     if (url.pathname === '/account') body = { account: { status: 'APPROVED', displayName: 'Organizer', version: 1 } };
     else if (url.pathname === '/invitations') body = { invitations: [] };
-    else if (url.pathname === '/groups' && !url.search) body = { groups: mode === 'empty' ? [] : [group('first')], cursor };
+    else if (url.pathname === '/groups' && !url.searchParams.has('cursor')) {
+      initialLimit = url.searchParams.get('limit');
+      expect(initialLimit).toBe('5');
+      body = { groups: mode === 'empty' ? [] : [group('first')], cursor };
+    }
     else if (url.pathname === '/groups') {
-      expect(url.searchParams.get('limit')).toBe('5'); expect(url.searchParams.get('cursor')).toBe(cursor); pageReads++;
+      expect(url.searchParams.get('limit')).toBe(initialLimit); expect(url.searchParams.get('cursor')).toBe(cursor); pageReads++;
       if (mode === 'failed' && pageReads === 1) { status = 503; body = {}; }
       else body = { groups: mode === 'empty' ? [group('later')] : [group('first'), group('later')], cursor: mode === 'repeated' ? cursor : null };
     } else { status = 404; body = {}; }

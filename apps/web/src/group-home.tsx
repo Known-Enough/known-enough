@@ -141,7 +141,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       let nextInvitationFailure: string | null = null;
       if (next?.status === 'APPROVED') {
         stage = selectedGroupId ? 'group' : 'groups'; httpStatus = null; reference = null;
-        const response = await api(selectedGroupId ? '/groups/' + selectedGroupId : '/groups', {signal: controller.signal});
+        const response = await api(selectedGroupId ? '/groups/' + selectedGroupId : '/groups?limit=5', {signal: controller.signal});
         observe(response);
         if (!response.ok) throw new Error('Groups unavailable');
         const result = await response.json() as { groups?: unknown[]; group?: unknown; cursor?: unknown };
