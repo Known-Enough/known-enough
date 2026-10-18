@@ -16,4 +16,4 @@ Static validation: pinned Node24.21.0/npm11.19.0 typecheck, full lint/import bou
 
 Manual check after publication: refresh the site, open an unfinished decision, confirm every option is visible, select several choices, Select all, choose None, pick/remove an optional favorite, and save with the existing processing consent. Reopen to check the saved choices. Optional notes and final approval remain separate actions.
 
-Publication pending; frontend only.
+Published source `ff5f141`, Amplify126: [successful release](https://github.com/Known-Enough/known-enough/actions/runs/39170747931), [publication receipt](decision-response-publication.json). Seven public files returned matching hashes. Existing API `9b20406e` independently matched, frontend reconciliation configuration/data/provider writes0. No backend/worker/schedule/IAM/CloudShell changes. User manual acceptance pending.
