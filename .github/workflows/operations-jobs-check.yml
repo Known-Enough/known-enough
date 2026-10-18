@@ -18,6 +18,14 @@ on:
         description: Independently published runtime source required with owned job IDs
         type: string
         default: ''
+      worker_sha256:
+        description: Independently published worker hash for optional finite log diagnosis
+        type: string
+        default: ''
+      diagnostic_start_ms:
+        description: Optional start of one bounded ten-minute worker log window
+        type: string
+        default: ''
       operation:
         description: Read-only inspection or conditional absent disabled-control installation
         required: true
@@ -82,6 +90,21 @@ jobs:
           umask 077
           export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
           NODE_NO_WARNINGS=1 node --experimental-transform-types scripts/operations/jobs-control.mjs > "$RUNNER_TEMP/jobs-control-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        if: inputs.diagnostic_start_ms != ''
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobRelease
+          aws-region: us-east-1
+          role-duration-seconds: 900
+          allowed-account-ids: '092954139775'
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Read finite worker stages counters and execution durations
+        if: inputs.diagnostic_start_ms != ''
+        env:
+          DIAGNOSTIC_START_MS: ${{ inputs.diagnostic_start_ms }}
+          EXPECTED_WORKER_SHA256: ${{ inputs.worker_sha256 }}
+        run: python3 -B scripts/operations/jobs-worker-diagnostics.py
       - name: Record access checks that could not start
         if: always()
         run: |
@@ -100,5 +123,6 @@ jobs:
           path: |
             ${{ runner.temp }}/jobs-installed-report.json
             ${{ runner.temp }}/jobs-control-report.json
+            ${{ runner.temp }}/jobs-worker-diagnostic.json
           if-no-files-found: warn
           retention-days: 30
