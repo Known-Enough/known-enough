@@ -2,6 +2,10 @@
 
 Status: LATEST RERUN COMPLETE —11 PASS/5 BLOCKED; qualification BLOCKED. [Current run](run-2026-10-17-201917Z/report.md). Repairs remain published on frontend119/APIbc56395c. Outcome requests did not produce proposals; no approvals or full release acceptance claimed. Historical runs remain below.
 
+## User-directed completion — 2026-10-18T01:05:09.309312+00:00
+
+IN_PROGRESS/B: user authorizes completing the suggested outcome diagnosis/repair, complete two-user decision, uncertain-save/runner reconciliation, five blocked cases and copy/fixture cleanup. One sequential E2E02 completion claim includes the relevant OPS03 managed-execution slice; no separate parallel task. Preserve the earlier reports and accepted/unknown requests. Standing project testing/deployment/configuration authority applies.
+
 ## Current repair — 2026-10-17T02:15:20Z
 
 Direct user request authorizes fixing all findings in the completed report. B owns the single repair implementation on synchronized `88c84e7cf42b9689532f6e49f468dfbce1a20d29`; this supersedes the testing-only code/deployment restriction below for this bounded repair. Historical testing remains unchanged and is not a repair PASS. See [repair ledger](repairs.md). No new test agent, chat or schedule.
