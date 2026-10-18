@@ -72,7 +72,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
   const [structuredDirty, setStructuredDirty] = useState(false);
   const [editingAnswers, setEditingAnswers] = useState(owner?.ownInputReadiness === 'NOT_STARTED');
   const [reviewed, setReviewed] = useState(false);
-  useEffect(() => { setReviewed(false); }, [owner?.draft?.draftId, snapshot.currentProposal?.proposalId]);
+  useEffect(() => { setReviewed(false); }, [owner?.draft?.draftId, snapshot.currentProposal?.proposalId, snapshot.currentProposal?.facts.proposalVersion, snapshot.currentProposal?.publicHash]);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
   const [awaitingJob, setAwaitingJob] = useState(false);
@@ -253,8 +253,8 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
       {!owner && proposal && <button type="button" onClick={() => setDetailStep('proposal')}>View proposal</button>}
       </div>
     </section>
-    <dialog ref={detailDialog} className="ke-step-dialog" aria-label={detailStep === 'shared' ? 'Decision details' : 'Review proposal and permissions'} onCancel={event => { event.preventDefault(); setDetailStep(null); }}>
-      <button type="button" className="secondary" onClick={() => setDetailStep(null)}>Back to overview</button>
+    <dialog ref={detailDialog} className={`ke-step-dialog${detailStep === 'proposal' ? ' ke-outcome-dialog' : ''}`} aria-label={detailStep === 'shared' ? 'Decision details' : 'Review proposal and permissions'} onCancel={event => { event.preventDefault(); setDetailStep(null); }}>
+      <button type="button" className={detailStep === 'proposal' ? 'ke-outcome-back' : 'secondary'} onClick={() => setDetailStep(null)}>{detailStep === 'proposal' && <PageIcon name="ArrowLeft" />}Back to overview</button>
     {detailStep === 'shared' && <section className="ke-card ke-shared-decision"><h2>What we’re deciding</h2><p>{snapshot.frame.description || snapshot.frame.objective}</p>
       {snapshot.frame.description && snapshot.frame.description !== snapshot.frame.objective && <details><summary>Original idea and shared details</summary><p className="ke-shared-original">{snapshot.frame.objective}</p></details>}
 
@@ -268,8 +268,38 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
       {snapshot.frame.rules.length > 0 && <details className="ke-shared-rules"><summary>Shared rules ({snapshot.frame.rules.length})</summary>
         <ul aria-label="Public decision rules">{snapshot.frame.rules.map(rule => <li key={rule.id}>{ruleText(rule, snapshot.frame.variables)}</li>)}</ul></details>}
     </section>}
-    {detailStep === 'proposal' && owner && (!staged || allConfirmed) && <section className="ke-card"><h2>Find an outcome</h2>
-      <p>Your saved private answers are used to find choices that work for everyone.</p>
+    {detailStep === 'proposal' && proposal && <section className="ke-outcome-result" aria-labelledby="outcome-title">
+      <header className="ke-outcome-heading"><h2 id="outcome-title">{snapshot.status === 'AGREED' ? 'Decision agreed' : 'Proposed outcome'}</h2>
+        <p>{snapshot.status === 'AGREED' ? 'Everyone approved this exact outcome.' : 'Review the choices before giving your approval.'}</p>
+      </header>
+      <dl className="ke-outcome-choices" aria-label="Selected shared choices">{proposal.facts.values.map(item => {
+        const variable = variables.find(variable => variable.id === item.variableId);
+        return <div key={item.variableId}><dt>{variable?.label ?? 'Choice'}</dt><dd>{item.value.type === 'DATE'
+          ? new Intl.DateTimeFormat('en', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(item.value.date + 'T00:00:00Z')) : valueText(item.value, variable)}</dd></div>;
+      })}</dl>
+      {owner?.privateProposalValues && <section className="ke-outcome-private"><h3><PageIcon name="Lock" />Your private part</h3>
+        <dl>{owner.privateProposalValues.values.map(item => <div key={item.variableId}><dt>{variables.find(variable => variable.id === item.variableId)?.label ?? 'Your value'}</dt><dd>{valueText(item.value, variables.find(variable => variable.id === item.variableId))}</dd></div>)}</dl>
+      </section>}
+      <details className="ke-outcome-approvals"><summary><span><PageIcon name="Users" />{snapshot.frame.requiredParticipantIds.filter(id => snapshot.approvedParticipantIds.includes(id)).length} of {snapshot.frame.requiredParticipantIds.length} approved</span><PageIcon name="ChevronRight" /></summary>
+        <ul>{snapshot.frame.participants.map(person => <li key={person.id}><span>{person.displayName}{person.id === owner?.ownerParticipantId && <small>You</small>}{!person.requiredForApproval && <small>Optional</small>}</span>
+          <span data-approved={snapshot.approvedParticipantIds.includes(person.id)}>{snapshot.approvedParticipantIds.includes(person.id) ? 'Approved' : 'Awaiting approval'}</span></li>)}</ul>
+      </details>
+      {owner && (owner.ownApproval ? <div className="ke-outcome-your-approval"><p><PageIcon name="Check" />You approved this outcome.</p>
+        <button type="button" className="ke-outcome-text-action" disabled={blocked} onClick={() => void command('WITHDRAW_APPROVAL', { proposalId: proposal.proposalId,
+          proposalVersion: proposal.facts.proposalVersion, publicHash: proposal.publicHash })}>Withdraw approval</button>
+      </div> : <div className="ke-outcome-approve">
+        <label><input type="checkbox" disabled={blocked} checked={reviewed} onChange={event => setReviewed(event.target.checked)} /><span>I reviewed the shared outcome and my private part of this exact proposal.</span></label>
+        <button type="button" disabled={blocked || !reviewed} onClick={() => void command('APPROVE_PROPOSAL', { proposalId: proposal.proposalId,
+          proposalVersion: proposal.facts.proposalVersion, publicHash: proposal.publicHash })}>Approve proposal<PageIcon name="Check" /></button>
+      </div>)}
+      <details className="ke-outcome-about"><summary>About this outcome</summary>
+        <p>This outcome fits the currently confirmed supported conditions. Review the choices and your own needs; it is not a promise of the best possible outcome. {decisionId.startsWith('groupdecision-') ? '' : 'This is a hypothetical example; all offers are synthetic. '}It does not make a booking or purchase, or establish legal ownership.</p>
+        <p>Your approval applies to this exact proposal. Adjustments and permission to share private information remain separate. An outcome may still reveal something about people’s needs.</p>
+      </details>
+      {recoveryControls}{notice && <p role="status" className="ke-outcome-notice">{notice}</p>}
+    </section>}
+    {detailStep === 'proposal' && owner && (!staged || allConfirmed) && (!proposal || ['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status) || owner.pendingQuestions.some(question => question.status === 'PENDING') || owner.negotiationPermissions.some(permission => permission.status === 'ACTIVE')) && <section className="ke-card ke-outcome-auxiliary"><h2>{proposal ? owner.pendingQuestions.some(question => question.status === 'PENDING') || owner.negotiationPermissions.some(permission => permission.status === 'ACTIVE') ? 'Your private conditions' : 'Explore another outcome' : snapshot.status === 'REASONING' ? 'Finding an outcome' : 'Find an outcome'}</h2>
+      {!proposal && <p>Your saved private answers help find choices that work for everyone.</p>}
       {owner.pendingQuestions.filter(question => question.status === 'PENDING').map(question => <div key={question.questionId}><h3>Private negotiation question</h3>
         <p>Would this alternative work, provided all your confirmed must-have requirements still pass?</p><p>{ruleText(question.adjustment, variables)}</p>
         <p>Expires {question.expiresAt}. Permission for this adjustment does not disclose your conditions or approve a final proposal.</p>
@@ -282,7 +312,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
       </div>)}
       {(!staged || ['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status)) && <button disabled={blocked || awaitingJob || !['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status)} onClick={() => void generate()}>Explore proposals</button>}
     </section>}
-    {detailStep === 'proposal' && owner && owner.disclosurePermissions.length > 0 && <section className="ke-card"><h2>Your disclosure choices</h2>
+    {detailStep === 'proposal' && owner && owner.disclosurePermissions.length > 0 && <section className="ke-card ke-outcome-auxiliary"><h2>Your disclosure choices</h2>
       <p>Sharing a detail is separate from allowing an adjustment or approving a proposal. Declining to share does not by itself reject the proposal.</p>
       {owner.disclosurePermissions.map(permission => <div key={permission.permissionId}>
         <h3>{permission.status === 'PENDING' ? 'Review this exact disclosure' : 'Disclosure record'}</h3>
@@ -300,18 +330,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
         <p>Revoking stops future publication. People cannot unread information already shared.</p>
       </div>)}
     </section>}
-    {detailStep === 'proposal' && proposal && <section className="ke-card"><h2>{decisionId.startsWith('groupdecision-') ? 'Current proposal' : 'Current hypothetical proposal'}</h2>
-      <ul>{proposal.facts.values.map(item => <li key={item.variableId}>{variables.find(variable => variable.id === item.variableId)?.label}: {valueText(item.value, variables.find(variable => variable.id === item.variableId))}</li>)}</ul>
-      {owner?.privateProposalValues && <div><h3>Your private part of this proposal</h3>
-        <ul>{owner.privateProposalValues.values.map(item => <li key={item.variableId}>{variables.find(variable => variable.id === item.variableId)?.label}: {valueText(item.value, variables.find(variable => variable.id === item.variableId))}</li>)}</ul></div>}
-      <p>Valid under currently confirmed supported conditions. {decisionId.startsWith('groupdecision-') ? 'Review the actual choices and your own needs before approving; this is not a promise of the best possible outcome.' : 'All offers are synthetic.'} This does not execute a booking or purchase, or establish legal ownership.</p>
-      <p>{snapshot.approvedParticipantIds.length} of {snapshot.frame.requiredParticipantIds.length} approvals. {snapshot.status === 'AGREED' ? 'Everyone approved this exact outcome.' : 'Agreement is still pending.'}</p>
-      {owner && <><label><input type="checkbox" disabled={blocked} checked={reviewed} onChange={event => setReviewed(event.target.checked)} />I reviewed the shared outcome and my private part of this exact proposal.</label>
-        <button disabled={blocked || !reviewed || !!owner.ownApproval} onClick={() => void command('APPROVE_PROPOSAL', { proposalId: proposal.proposalId,
-          proposalVersion: proposal.facts.proposalVersion, publicHash: proposal.publicHash })}>Approve this exact proposal</button>
-        {owner.ownApproval && <button disabled={blocked} onClick={() => void command('WITHDRAW_APPROVAL', { proposalId: proposal.proposalId,
-          proposalVersion: proposal.facts.proposalVersion, publicHash: proposal.publicHash })}>Withdraw my approval</button>}</>}
-    </section>}
+    {detailStep === 'proposal' && !proposal && owner && <>{recoveryControls}{notice && <p role="status" className="ke-outcome-notice">{notice}</p>}</>}
     </dialog>
     {owner && <PrivateAnswersModal embedded open={true} owner={owner} busy={busy} blocked={answersBlocked} saveBlocked={false} notesLocked={!!interpretationRequest} notes={text} consent={syntheticProcessing} notice={notice} recovery={recoveryControls}
         onClose={() => {}} onNotes={setText} onConsent={setSyntheticProcessing} onInterpret={interpret} onDirty={setStructuredDirty} onEditingChange={setEditingAnswers}
