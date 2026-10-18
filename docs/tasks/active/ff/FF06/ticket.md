@@ -2,6 +2,10 @@
 
 Status: PUBLISHED; implementation claims released; user manual acceptance pending. Latest native group-delete hotfix: source3910e84/frontendAmplify121, [receipt](../../../../review-artifacts/FF/group-deletion-publication.json). Earlier dated source/control notes below are historical.
 
+## Outcome view — 2026-10-18
+
+Published/sourcedad629b: result-first topic choices, Proposed outcome/Decision agreed, compact required-approval progress/public participants, approved-owner confirmation/withdrawal or explicit review acknowledgement+Approve proposal. Original exact proposal commands/private scope/adjustment/disclosure/recovery retained; acknowledgement resets on version/hash. About limitations/subtle back link/light-dark styling. [Receipt](../../../../review-artifacts/FF/outcome-view-publication.json). Static build checks PASS; no tests, manual acceptance pending.
+
 ## Cohesive decision header — 2026-10-18
 
 Published/source5a65cc0: title/description/status+progress unified, expandable activity through progress, details+Refresh in dots, visible primary actions and flat answer divider/900px layout. Existing behavior/permissions/privacy and legacy demo preserved. [Receipt](../../../../review-artifacts/FF/cohesive-decision-header-publication.json). Static build checks PASS; no tests, manual acceptance pending.
