@@ -1,10 +1,10 @@
 {
   "runId": "20261019T174036Z",
-  "state": "RUNNING",
+  "state": "BLOCKED",
   "startedAt": "2026-10-19T17:40:45.921654+00:00",
-  "lastProgressAt": "2026-10-19T17:44:49.105642Z",
-  "endedAt": null,
-  "lastConfirmedAction": "u1.fill-draft",
+  "lastProgressAt": "2026-10-19T17:47:17.883687Z",
+  "endedAt": "2026-10-19T17:46:29.610Z",
+  "lastConfirmedAction": "u1.login",
   "inFlightAction": null,
   "cases": {
     "01": "NOT_RUN",
@@ -28,16 +28,23 @@
   "evidence": [
     "events.jsonl",
     "preflight.json",
-    "report.md"
+    "report.md",
+    "u2.login-failure.png"
   ],
-  "error": null,
-  "nextSafeAction": "Publish this runner correction, restart the same logged run, sign in again, then create the single manual decision.",
+  "error": {
+    "code": "APP_HTTP_503",
+    "domain": "APP_HTTP",
+    "stage": "u2.login",
+    "route": "/account",
+    "note": "U2 account load failed; cause within the service is undiagnosed."
+  },
+  "nextSafeAction": "Investigate the authenticated /account HTTP 503. Then begin a fresh live run; do not retry within this run.",
   "publication": {
     "lastConfirmedUrl": null,
     "unpublishedLocalChanges": true
   },
   "runnerChecks": {
-    "passed": 3,
+    "passed": 4,
     "failed": 0,
     "appRequests": 0
   },
@@ -49,5 +56,20 @@
       "save-answer"
     ],
     "focusedChecks": "PASS 3/3"
+  },
+  "lastError": {
+    "code": "AUTHENTICATED_GROUP_READ_TIMEOUT",
+    "domain": "AUTOMATION",
+    "stage": "u2.login",
+    "screenshot": "u2.login-failure.png",
+    "pageOrigin": "https://main.d143q5ravxp5av.amplifyapp.com"
+  },
+  "applicationWrites": 0,
+  "providerCalls": 0,
+  "emailRequests": 0,
+  "runnerMisclassification": {
+    "reported": "AUTHENTICATED_GROUP_READ_TIMEOUT",
+    "cause": "Concurrent response-body readers delayed handling of the observed HTTP 503.",
+    "correctedInSource": "2ecebcf"
   }
 }
