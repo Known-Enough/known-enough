@@ -110,6 +110,21 @@ function readinessStatus(decision: KnownEnoughRecord): KnownEnoughRecord['status
     decision.owners.find(owner => owner.participantId === id)?.readiness !== 'READY')) return 'COLLECTING_PRIVATE_INPUT';
   return 'READY';
 }
+function collectingIndependentAnswers(decision: KnownEnoughRecord): boolean {
+  return ['COLLECTING_FRAME_CONFIRMATION', 'COLLECTING_PRIVATE_INPUT', 'NEEDS_CLARIFICATION', 'READY'].includes(decision.status)
+    && !decision.job && !decision.pendingCandidate && !decision.candidate && !decision.publicProposal
+    && !decision.owners.some(owner => owner.approval !== null);
+}
+/** Concurrency marker, not permission: peer answers do not change these facts.
+ * Keep proposal history in the marker even after a proposal is retired.
+ */
+function privateAnswerContext(decision: KnownEnoughRecord, owner: DecisionOwner): Promise<string> {
+  return sha256(stable({ purpose: 'private-answer-save-v1', decisionId: decision.decisionId,
+    contextToken: decision.definition.contextToken, semanticVersion: decision.definition.semanticVersion,
+    frameVersion: decision.definition.frameVersion, ownerParticipantId: owner.participantId,
+    ownerVersion: owner.ownerVersion, draftId: owner.draft?.draftId ?? null, draftVersion: owner.draftVersion,
+    proposalVersion: decision.proposalVersion, collecting: collectingIndependentAnswers(decision) }));
+}
 /** Trusted current-group composition only. The repository must atomically fence that exact roster.
  * Adds empty owners without accepting private processing, answers or final proposals for them.
  */
@@ -504,7 +519,7 @@ export class KnownEnoughApplication {
   }
 
   async getOwnerSnapshot(principal: TrustedPrincipal | null, decisionId: string): Promise<KETypes.OwnerDecisionSnapshot> {
-    return this.options.repository.transactionDecision(decisionId, decision => {
+    return this.options.repository.transactionDecision(decisionId, async decision => {
       if (!decision) fail('NOT_FOUND');
       const membership = this.member(decision, principal);
       const owner = decision.owners.find(item => item.participantId === membership.participantId) ?? fail('NOT_FOUND');
@@ -526,6 +541,7 @@ export class KnownEnoughApplication {
         privateProposalValues,
         controlVersion: decision.controlVersion,
         ownerVersion: owner.ownerVersion,
+        privateAnswerContext: await privateAnswerContext(decision, owner),
         draftVersion: owner.draftVersion,
         draft: owner.draft,
         confirmedConstraints: owner.confirmedConstraints,
@@ -1163,10 +1179,18 @@ export class KnownEnoughApplication {
     });
   }
 
-  private expected(decision: KnownEnoughRecord, command: DecisionCommand, owner: DecisionOwner): void {
+  private async expected(decision: KnownEnoughRecord, command: DecisionCommand, owner: DecisionOwner): Promise<void> {
     if (command.expected.contextToken !== decision.definition.contextToken
-      || command.expected.semanticVersion !== decision.definition.semanticVersion
-      || command.expected.controlVersion !== decision.controlVersion) fail('STALE_CONTEXT');
+      || command.expected.semanticVersion !== decision.definition.semanticVersion) fail('STALE_CONTEXT');
+    if (command.expected.controlVersion !== decision.controlVersion) {
+      // Only an explicitly bound private-answer save may cross peer progress.
+      // Approval, proposal, permission and legacy commands retain the full guard.
+      if (command.type !== 'CONFIRM_PRIVATE_ANSWERS'
+        || command.expected.controlVersion > decision.controlVersion) fail('STALE_CONTEXT');
+      if (command.expected.ownerVersion !== owner.ownerVersion) fail('STALE_OWNER');
+      if (!collectingIndependentAnswers(decision) || !command.expected.privateAnswerContext
+        || command.expected.privateAnswerContext !== await privateAnswerContext(decision, owner)) fail('STALE_CONTEXT');
+    }
     if (command.expected.ownerVersion !== owner.ownerVersion) fail('STALE_OWNER');
   }
   private sweep(decision: KnownEnoughRecord, now: string): void {
@@ -1238,7 +1262,7 @@ export class KnownEnoughApplication {
         let result: KETypes.DecisionCommandResult;
         try {
           if (decision.status === 'CLOSED') fail('FORBIDDEN');
-          this.expected(decision, command, owner);
+          await this.expected(decision, command, owner);
           const working = structuredClone(decision);
           const workingOwner = working.owners.find(item => item.participantId === membership.participantId)!;
           await this.applyCommand(working, workingOwner, command, now);
@@ -1342,6 +1366,7 @@ export class KnownEnoughApplication {
         return;
       }
       case 'CONFIRM_PRIVATE_ANSWERS': {
+        if (decision.status === 'AGREED' || decision.status === 'CLOSED') fail('FORBIDDEN');
         // Explicit owner save binds these selections to the current shared choices.
         // Other participants need not complete a separate review first.
         const frame = publicFrame(decision.definition);

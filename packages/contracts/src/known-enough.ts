@@ -842,6 +842,8 @@ export const OwnerDecisionSnapshot = z.strictObject({
   privateProposalValues: z.strictObject({ proposalId: Id, proposalVersion: Version, values: ValueAssignments }).nullable(),
   controlVersion: Version,
   ownerVersion: Version,
+  /** Owner/choice-bound revision for independent saves; absent on older servers. */
+  privateAnswerContext: Hash.optional(),
   draftVersion: Version.nullable(),
   draft: AIConstraintDraft.nullable(),
   confirmedConstraints: z.array(ConfirmedConstraint).max(MAX_PRIVATE_CONSTRAINTS),
@@ -1061,7 +1063,8 @@ export const DecisionCommand = z.discriminatedUnion('type', [
   z.strictObject({
     schemaVersion: z.literal(KE_SCHEMA_VERSION), type: z.literal('CONFIRM_PRIVATE_ANSWERS'),
     requestId: Id, decisionId: Id, idempotencyKey: Id,
-    expected: z.strictObject({ contextToken: ContextToken, semanticVersion: Version, controlVersion: Version, ownerVersion: Version }),
+    expected: z.strictObject({ contextToken: ContextToken, semanticVersion: Version, controlVersion: Version, ownerVersion: Version,
+      privateAnswerContext: Hash.optional() }),
     payload: z.strictObject({
       processingConsent: z.literal('SYNTHETIC_TEST'),
       answers: z.array(PrivateChoiceAnswer).max(MAX_DECISION_VARIABLES).refine(items => unique(items.map(item => item.variableId))),

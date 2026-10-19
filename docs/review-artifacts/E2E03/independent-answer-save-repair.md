@@ -1,0 +1,17 @@
+# Independent private-answer save repair
+
+Status: CODE_READY; publication and manual acceptance pending. No automated, browser or live product tests were run for this repair.
+
+The live E2E03 run returned `409 STALE_CONTEXT` for U2 after U1 saved. Source confirms every accepted command increments global `controlVersion`, but an open answer form retains its earlier value. This counter was therefore rejecting independent private answers whose shared choices and owner data were still current.
+
+The owner snapshot now optionally includes a derived `privateAnswerContext` hash. It binds the decision, current public semantic/frame context, exact owner identity/version/draft revision, retained proposal version and whether the decision is collecting answers. It contains no participant answers, is not an authorization credential, is not persisted, and grants no new access. The browser echoes it only for `CONFIRM_PRIVATE_ANSWERS`.
+
+Only that command may cross an older global control counter, and only when its marker matches current server state inside the existing atomic transaction. The current state must still be answer collection, with no active job, pending/current proposal or approvals. A future control counter, changed shared context, changed owner or draft, intervening proposal, or current reasoning/proposal phase is rejected. Legacy requests without the marker retain strict global-counter checks. Final `AGREED`/`CLOSED` decisions explicitly reject private-answer mutations, including requests carrying a current counter.
+
+Proposal version remains in the marker after retirement, so a proposal appearing and disappearing cannot silently restore an old save context. Membership additions preserve the existing no-repeat-review behavior because public answer vocabulary and owner state remain unchanged. Existing participant/admission/retention/consent checks, transaction revision conditions, unknown-result handling, idempotency receipts and exact proposal approval guards remain in place. There are no automatic save retries or per-save preflight reads.
+
+The frontend also distinguishes changed own answers/notes from changed choices or outcome phase and includes the server reference. A normal peer save preserves the form selections.
+
+Validation: TypeScript no-emit compilation, ESLint on all three changed source files, frontend production build and whitespace checks passed. These are static checks, not live functional proof. Manual acceptance remains pending; prior failed E2E03 evidence and its acknowledged U1 answer are preserved. U2's saved state must be read before any new save attempt; the rejected request must not be replayed with changed content.
+
+Release order: publish the frontend first, whose optional contract accepts the older server response and only sends a marker when present; then publish the compatible API/worker packages. Existing loaded browser code should be refreshed after publication to read the extended owner snapshot. No new AWS resources, IAM permissions, data migration, CloudShell setup, signup, email or provider request is required.

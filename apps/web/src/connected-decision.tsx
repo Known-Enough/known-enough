@@ -115,7 +115,9 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
       const id = crypto.randomUUID();
       setPendingAction(true); pending.current = { type, body: { schemaVersion: 2, decisionId, type, requestId: id, idempotencyKey: id,
         expected: { contextToken: snapshot.contextToken, semanticVersion: snapshot.semanticVersion,
-          controlVersion: owner.controlVersion, ownerVersion: owner.ownerVersion }, payload } };
+          controlVersion: owner.controlVersion, ownerVersion: owner.ownerVersion,
+          ...(type === 'CONFIRM_PRIVATE_ANSWERS' && owner.privateAnswerContext
+            ? { privateAnswerContext: owner.privateAnswerContext } : {}) }, payload } };
     }
     try {
       KE.DecisionCommandResult.parse(await request(`/decisions/${decisionId}/commands`, pending.current.body));
@@ -126,7 +128,12 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
     } catch (error) {
       if (error instanceof DecisionRequestError && error.status === 409) {
         pending.current = null; setPendingAction(false); setReviewed(false);
-        try { await refresh(); setNotice('The decision changed while you were reviewing it. The latest version is loaded; review and confirm it again.'); }
+        const conflict = type === 'CONFIRM_PRIVATE_ANSWERS'
+          ? error.code === 'STALE_OWNER' || error.code === 'STALE_DRAFT'
+            ? 'Your saved answers or notes changed in another window. Your latest saved information is loaded; review it before saving your edits.'
+            : 'The choices or outcome stage changed. Your answers were not saved. Review the latest decision before saving again.'
+          : 'The decision changed while you were reviewing it. The latest version is loaded; review and confirm it again.';
+        try { await refresh(); setNotice(conflict + (error.reference ? ` Reference: ${error.reference}.` : '')); }
         catch { setNotice('The decision changed. Refresh its current state before confirming again.'); }
       } else if (error instanceof DecisionRequestError && [400,401,403,404,422].includes(error.status)) {
         pending.current = null; setPendingAction(false);
