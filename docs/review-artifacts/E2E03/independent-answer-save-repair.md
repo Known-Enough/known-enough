@@ -1,6 +1,6 @@
 # Independent private-answer save repair
 
-Status: CODE_READY; publication and manual acceptance pending. No automated, browser or live product tests were run for this repair.
+Status: PUBLISHED; manual acceptance pending. No automated, browser or live product tests were run for this repair.
 
 The live E2E03 run returned `409 STALE_CONTEXT` for U2 after U1 saved. Source confirms every accepted command increments global `controlVersion`, but an open answer form retains its earlier value. This counter was therefore rejecting independent private answers whose shared choices and owner data were still current.
 
@@ -15,3 +15,5 @@ The frontend also distinguishes changed own answers/notes from changed choices o
 Validation: TypeScript no-emit compilation, ESLint on all three changed source files, frontend production build and whitespace checks passed. These are static checks, not live functional proof. Manual acceptance remains pending; prior failed E2E03 evidence and its acknowledged U1 answer are preserved. U2's saved state must be read before any new save attempt; the rejected request must not be replayed with changed content.
 
 Release order: publish the frontend first, whose optional contract accepts the older server response and only sends a marker when present; then publish the compatible API/worker packages. Existing loaded browser code should be refreshed after publication to read the extended owner snapshot. No new AWS resources, IAM permissions, data migration, CloudShell setup, signup, email or provider request is required.
+
+Published source `eb66a97ec532514faae0f2db8c4d389096ad4e85`: frontend Amplify job `150` ([release](https://github.com/Known-Enough/known-enough/actions/runs/39306764528)) before the coordinated API/worker ([release](https://github.com/Known-Enough/known-enough/actions/runs/39306973114)). API `c60d475f00f0f277f52983bf007cbfa6e89971d2e94646b5df6aacefeb9dc023`; worker `216695169555297f3da9944ea4314ba1f6f242de164f819f427db593a6b63a3c`. Admission is enabled and cumulative totals stayed unchanged during cutover. The existing background schedule was restored ENABLED with a normal empty tick and zero paid dispatch ([restoration](https://github.com/Known-Enough/known-enough/actions/runs/39307179034)). [Finite publication receipt](independent-answer-save-publication.json). Refresh previously loaded browser tabs once before manual acceptance. The separate intermittent account transaction-cancellation finding remains open.

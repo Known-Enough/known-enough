@@ -1,0 +1,48 @@
+{
+  "result": "INDEPENDENT_ANSWER_REPAIR_PUBLISHED",
+  "recordedAt": "2026-10-19T19:00:56.630114Z",
+  "sourceSha": "eb66a97ec532514faae0f2db8c4d389096ad4e85",
+  "apiSha256": "c60d475f00f0f277f52983bf007cbfa6e89971d2e94646b5df6aacefeb9dc023",
+  "workerSha256": "216695169555297f3da9944ea4314ba1f6f242de164f819f427db593a6b63a3c",
+  "frontend": {
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "amplifyJobId": "150",
+    "filesHashVerified": 10
+  },
+  "admission": {
+    "result": "CONTROL_READBACK_PASS",
+    "enabled": true,
+    "totals": "UNCHANGED"
+  },
+  "schedule": {
+    "result": "WORKER_SCHEDULE_ACTIVATION_PASS",
+    "state": "ENABLED",
+    "paidDispatchReported": 0,
+    "matchingEmptySummaries": 1,
+    "runId": 39307179034
+  },
+  "workflows": {
+    "preflight": 39306743820,
+    "frontend": 39306764528,
+    "pauseSchedule": 39306872844,
+    "apiAndWorker": 39306973114,
+    "restoreSchedule": 39307179034
+  },
+  "staticChecks": {
+    "typescript": "PASS",
+    "changedSourceEslint": "PASS",
+    "frontendProductionBuild": "PASS",
+    "whitespace": "PASS"
+  },
+  "tests": "NOT_EXECUTED_BY_USER_DIRECTION",
+  "liveParticipantActions": 0,
+  "providerRequests": 0,
+  "signupOrEmailRequests": 0,
+  "iamChanges": 0,
+  "newCloudResources": 0,
+  "dataMigration": "NOT_REQUIRED",
+  "manualAcceptance": "PENDING",
+  "priorE2E03": "20261019T183505Z FAIL; historical result unchanged; U1 answer remains acknowledged and U2 state requires own readback before any new save.",
+  "scope": "Private-answer concurrency and genuine-conflict messaging only; account transaction-cancellation finding remains separate.",
+  "deploymentObservation": "Existing background schedule restored and its normal empty tick observed; no product test or participant action was dispatched."
+}
