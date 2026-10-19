@@ -97,8 +97,7 @@ export function ProfileModal({ api, open, target, onClose, restoreFocus, onOwner
     finally { if (generation.current === epoch) { setBusy(false); setSaving(false); } }
   }
 
-  return <Modal closeButton={false} ref={dialog} className="ke-profile-modal" aria-labelledby="profile-title" onCancel={event => { event.preventDefault(); close(); }}
-    onClick={event => { if (event.target === dialog.current) close(); }}>
+  return <Modal closeButton={false} ref={dialog} className="ke-profile-modal" aria-labelledby="profile-title" onCancel={event => { event.preventDefault(); close(); }}>
     <div className="ke-profile-shell">
       <header className="ke-profile-header"><h2 id="profile-title" ref={heading} tabIndex={-1}>Profile</h2>
         <button type="button" className="secondary ke-profile-close" aria-label="Close profile" title="Close profile" disabled={saving} onClick={close}><PageIcon name="X" /></button>
