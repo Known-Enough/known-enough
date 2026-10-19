@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { groupsResponse, safeRoute, Recorder } from './session-runner.mjs';
+import { EventEmitter } from 'node:events';
+import { groupsResponse, safeRoute, Recorder, waitForGroups } from './session-runner.mjs';
 
 test('real Playwright Response shape recognizes only successful authenticated group reads', () => {
   const response = (status = 200, method = 'GET', url = 'https://example.execute-api.us-east-1.amazonaws.com/groups') =>
@@ -16,6 +17,16 @@ test('real Playwright Response shape recognizes only successful authenticated gr
 test('network evidence strips account identifiers and query credentials', () => {
   assert.equal(safeRoute('https://example.execute-api.us-east-1.amazonaws.com/groups/group-secret/draft-requests/request-secret?token=private'), '/groups/:id/draft-requests/:id');
   assert.equal(safeRoute('https://cognito-idp.us-east-1.amazonaws.com/'), null);
+});
+test('account HTTP failure is reported immediately without consuming a shared response body', async () => {
+  const page = new EventEmitter(); let bodyRead = false;
+  const pending = waitForGroups(page, 1000);
+  page.emit('response', { url: () => 'https://abc.execute-api.us-east-1.amazonaws.com/account',
+    request: () => ({ method: () => 'GET' }), status: () => 503,
+    json: () => { bodyRead = true; return new Promise(() => {}); } });
+  await assert.rejects(pending, error => error.domain === 'APP_HTTP'
+    && error.status === 503 && error.route === '/account');
+  assert.equal(bodyRead, false);
 });
 test('timeout captures screenshot before closure and persists intent/result without error secrets', async () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'e2e03-recorder-test-'));

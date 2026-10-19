@@ -28,11 +28,10 @@ export function waitForGroups(page, timeout = 45000) {
       const url = new URL(response.url());
       if (response.request().method() !== 'GET' || !safeRoute(response.url())
         || !/^\/(account|groups)$/.test(url.pathname) || response.status() < 400) return;
-      let body = {}; try { body = await response.json(); } catch { /* Status is still evidence. */ }
-      const safe = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,100}$/.test(value) ? value : null;
+      // Another response observer records JSON asynchronously. Do not read the
+      // same body here: a locked stream can leave sign-in waiting until timeout.
       finish(Object.assign(new Error('APP_HTTP_' + response.status()), {
         domain: 'APP_HTTP', status: response.status(), route: safeRoute(response.url()),
-        serverCode: safe(body.error?.code), reference: safe(body.requestId),
       }));
     };
     const timer = setTimeout(() => finish(Object.assign(new Error('AUTHENTICATED_GROUP_READ_TIMEOUT'), {
