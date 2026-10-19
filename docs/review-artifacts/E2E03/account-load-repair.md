@@ -1,6 +1,6 @@
 # Account-load resilience repair
 
-Status: CODE_READY; not deployed or tested, per the user's no-tests instruction.
+Status: CODE_READY; focused local regression passed. Not deployed or verified on the live site.
 
 The latest hosted run observed `/account/profile` HTTP 200 followed by `/account` HTTP 503. Source inspection found that account status also synchronously ensures the immutable username directory entry, while own-profile reading does not. A directory read/write failure or conflicting retained entry can therefore make status unavailable even when the account itself remains readable. This is a possible cause; the historical 503's precise server cause has not been confirmed.
 
@@ -8,4 +8,4 @@ The status path keeps the existing alias repair attempt. If it fails operational
 
 Deferred lookup repair and remaining account-status errors now log allowlisted codes and the server request reference, without usernames, email addresses, tokens or private answers.
 
-Validation: source/diff review only. No unit/browser/live tests, application requests, AI, email, cloud changes or deployment. The E2E03 live result remains BLOCKED; this code is awaiting publication and manual acceptance.
+Validation: `npm test -- packages/adapters/src/partition-group-session.test.ts` passed 86/86, including a new case where a conflicting derived username entry does not prevent an authenticated owner account read and no username claim is written. No browser/live request, AI, email, cloud change or deployment occurred in this check. The earlier E2E03 live result remains BLOCKED; live behavior still awaits a coordinated runtime publication and a fresh read.

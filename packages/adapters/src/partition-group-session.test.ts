@@ -6,7 +6,7 @@ import type { TrustedPrincipal, DecisionArchitectRequest, DecisionArchitectureDr
 import { createPartitionGroupSession, partitionMemberId } from './partition-group-session.ts';
 import { preparePartitionMigration } from './partition-migration.ts';
 import { partitionMembershipKey } from './partition-membership-contract.ts';
-import { createPartitionedGroupRepository, partitionIO, type PartitionTransport, type PartitionMutation, type PartitionKey } from './partitioned-group-repository.ts';
+import { createPartitionedGroupRepository, partitionIO, PartitionStorageError, type PartitionTransport, type PartitionMutation, type PartitionKey } from './partitioned-group-repository.ts';
 
 const participant = (subject = 'iris'): TrustedPrincipal => ({ kind: 'participant', subject });
 const code = (key: PartitionKey) => `${key.PK}/${key.SK}`;
@@ -51,6 +51,21 @@ it('returns current selected-group allowlists and opaque member ids without priv
   expect(f.reads.flat().some(key => key.PK === 'ACCOUNT#luca' || key.PK === 'ACCOUNT#pending')).toBe(false);
   expect(await session.status(participant('pending'))).toEqual({ status: 'PENDING', displayName: 'PENDING', version: 1 });
   expect(await session.status(participant('absent'))).toBeNull();
+});
+
+it('keeps account status readable when the derived username directory conflicts', async () => {
+  const f = fixture(syntheticKey);
+  const account = f.get('ACCOUNT#iris/STATE');
+  account.value.profile = { description: '', image: null, loginUsername: 'iris_login' };
+  const usernameHash = createHash('sha256').update('iris_login').digest('hex');
+  f.rows.set(`USERNAME#${usernameHash}/CLAIM`, { schemaVersion: 1, revision: 1, kind: 'DIRECTORY',
+    value: { type: 'USERNAME', usernameHash, emailHash: f.get('ACCOUNT#omar/STATE').value.emailHash, subject: 'omar' } });
+
+  const snapshot = await f.session().status(participant('iris'), 'x'.repeat(36));
+
+  expect(snapshot).toEqual({ status: 'APPROVED', displayName: 'IRIS', version: 1 });
+  expect(f.commits).toHaveLength(1);
+  expect(f.commits.flat().some(change => change.key.PK.startsWith('USERNAME#'))).toBe(false);
 });
 
 it('lets an organizer invite a verified account by username and shows a private pending invite in the recipient dashboard', async () => {
