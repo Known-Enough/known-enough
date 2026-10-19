@@ -2,9 +2,9 @@
   "runId": "20261019T174036Z",
   "state": "RUNNING",
   "startedAt": "2026-10-19T17:40:45.921654+00:00",
-  "lastProgressAt": "2026-10-19T17:41:00.217394+00:00",
+  "lastProgressAt": "2026-10-19T17:44:49.105642Z",
   "endedAt": null,
-  "lastConfirmedAction": null,
+  "lastConfirmedAction": "u1.fill-draft",
   "inFlightAction": null,
   "cases": {
     "01": "NOT_RUN",
@@ -31,7 +31,7 @@
     "report.md"
   ],
   "error": null,
-  "nextSafeAction": "Sign in as U1 and U2 in separate persistent browser contexts; inspect read-only catalogs and stop on account/groups HTTP failure.",
+  "nextSafeAction": "Publish this runner correction, restart the same logged run, sign in again, then create the single manual decision.",
   "publication": {
     "lastConfirmedUrl": null,
     "unpublishedLocalChanges": true
@@ -40,5 +40,14 @@
     "passed": 3,
     "failed": 0,
     "appRequests": 0
+  },
+  "runnerEnhancement": {
+    "sourceCommit": "d570a7c",
+    "operations": [
+      "create-decision",
+      "open-created-decision",
+      "save-answer"
+    ],
+    "focusedChecks": "PASS 3/3"
   }
 }
