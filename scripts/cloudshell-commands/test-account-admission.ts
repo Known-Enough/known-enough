@@ -26,9 +26,13 @@ try {
     console.log(JSON.stringify({ result: 'ACCOUNT_ADMISSION_TOOL_READY' }));
   } else {
     const state = JSON.parse(await readFile(stateFile!, 'utf8'));
+    const named = state.batchKind === 'NAMED_FIFTEEN';
+    const count = named ? 15 : 10;
+    const expectedNames = Array.from({ length: 15 }, (_, index) => 'test' + String(index + 4).padStart(2, '0'));
     if (state.account !== '092954139775' || state.pool !== config.userPoolId
       || state.email !== 'martelaxe@gmail.com' || !Array.isArray(state.users)
-      || state.users.length !== 10 || new Set(state.users.map((u: { username: string }) => u.username)).size !== 10)
+      || state.users.length !== count || new Set(state.users.map((u: { username: string }) => u.username)).size !== count
+      || (named && state.users.some((user: { username: string }, index: number) => user.username !== expectedNames[index])))
       fail('BATCH_IDENTITY_MISMATCH');
     const session = createPartitionGroupSession(managed.groups, {
       emailKey: options.emailKey,
@@ -47,7 +51,7 @@ try {
       await rename(stateFile! + '.new', stateFile!);
     };
     for (const [index, user] of state.users.entries()) {
-      if (!/^ke-test-[a-f0-9]{6}-\d{2}$/.test(user.username) || user.status !== 'LOGIN_CREATED')
+      if ((!named && !/^ke-test-[a-f0-9]{6}-\d{2}$/.test(user.username)) || user.status !== 'LOGIN_CREATED')
         fail('CONFIRMED_OWNED_LOGIN_REQUIRED');
       const identity = await providerByUsername(user.username);
       if (!identity || identity.subject !== user.subject || identity.username !== user.username
@@ -57,7 +61,7 @@ try {
       // lookup, not an invented JWT, user-supplied subject, or browser mock.
       const account = await session.register({ kind: 'participant', subject: identity.subject },
         { subject: identity.subject, email: identity.email, verified: true, username: identity.username },
-        { displayName: 'Test ' + String(index + 1).padStart(2, '0') });
+        { displayName: named ? user.username : 'Test ' + String(index + 1).padStart(2, '0') });
       if (!['PENDING', 'APPROVED'].includes(account.status)) fail('ACCOUNT_NOT_ELIGIBLE');
       user.appStatus = 'APPROVAL_REQUESTED'; await save();
       const approved = await operator.approve(identity.username);
@@ -68,7 +72,7 @@ try {
       console.log(JSON.stringify({ username: identity.username, appAccess: 'APPROVED' }));
     }
     state.appAccess = 'APPROVED'; await save();
-    console.log(JSON.stringify({ result: 'TEN_TEST_ACCOUNTS_READY', count: 10,
+    console.log(JSON.stringify({ result: named ? 'FIFTEEN_TEST_ACCOUNTS_READY' : 'TEN_TEST_ACCOUNTS_READY', count,
       appAccess: 'APPROVED', credentialsFile: stateFile, emailSent: false,
       modelCalls: 0, groupsCreated: 0, consentGranted: false }));
   }

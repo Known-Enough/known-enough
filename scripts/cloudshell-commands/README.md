@@ -1,5 +1,18 @@
 # CloudShell commands — account access
 
+## Fifteen named test accounts: test04 through test18
+
+Latest user direction selects **15 accounts**, starting at `test04` and ending at `test18` (inclusive):
+
+```bash
+python3 -B scripts/cloudshell-commands/08-create-ten-test-accounts.py \
+  --source "$(git rev-parse HEAD)" --named-fifteen
+```
+
+The helper creates, registers and approves these exact usernames using the same native admission code described below. Their display names also match their usernames. Credentials/progress are saved privately at `~/.known-enough/test-accounts/test04-test18-private.json`; the previous random-name batch and its credential file are preserved. The helper checks all 15 requested names before its first creation write. If any name already exists outside this saved batch, it reports `REQUESTED_USERNAME_ALREADY_EXISTS:<username>` without adopting that identity or resetting its password. Repeating a completed/safely resumable named setup uses the same batch.
+
+Expected final result is `FIFTEEN_TEST_ACCOUNTS_READY`, `count: 15`, `appAccess: APPROVED`. To read the credentials privately in your own CloudShell, use `cat "$HOME/.known-enough/test-accounts/test04-test18-private.json"`; do not paste that file into chat or commit it. Setup only was prepared and compiled here; no accounts, tests, AI calls or email were executed.
+
 ## Create ten ready-to-use test accounts
 
 Run this in the administrator's CloudShell from a checked repository copy:

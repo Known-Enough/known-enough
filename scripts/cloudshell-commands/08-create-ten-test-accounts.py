@@ -31,7 +31,7 @@ root = Path.home() / '.known-enough' / 'test-accounts'
 state = None
 state_file = root / 'ten-accounts-private.json'
 stage = 'PREFLIGHT'
-BUNDLE_SHA256 = '198267ce16ee4945d013cbabb19c9b5eab6f7018ef0ce02cd523ca0330629990'
+BUNDLE_SHA256 = '45e7392d76bc618b58941b54c143ca4c7b27c0b2bd25e35bfea59a187339ca5c'
 NODE_ARCHIVES = {
     'x86_64': ('x64', 'fd8e59d5a511510f6a298afb548f18c7d2b1be404d8b4a27d94fbe49f56cb2d6'),
     'aarch64': ('arm64', '6ad1325edbdb5649c379b75a237147a666c95d4f9ae8d340fef2d1575d289ad2')}
@@ -134,12 +134,18 @@ def save():
 
 
 def main():
-    global state, stage
+    global state, stage, state_file
     parser = argparse.ArgumentParser()
     parser.add_argument('--source', required=True)
+    parser.add_argument('--named-fifteen', action='store_true',
+                        help='Create test04 through test18 in a separate private batch.')
     args = parser.parse_args()
     if not re.fullmatch('[a-f0-9]{40}', args.source):
         raise RuntimeError('PINNED_SOURCE_REQUIRED')
+    names = [f'test{index:02d}' for index in range(4, 19)] if args.named_fifteen else None
+    count = 15 if names else 10
+    if names:
+        state_file = root / 'test04-test18-private.json'
     os.umask(0o077)
     root.mkdir(parents=True, exist_ok=True, mode=0o700)
     if root.is_symlink() or state_file.is_symlink():
@@ -191,22 +197,36 @@ def main():
         if state_file.exists():
             state = json.loads(state_file.read_text())
             if (state.get('account') != ACCOUNT or state.get('pool') != POOL
-                    or state.get('email') != EMAIL or len(state.get('users', [])) != 10
-                    or len({u['username'] for u in state['users']}) != 10
-                    or any(not re.fullmatch('ke-test-[a-f0-9]{6}-[0-9]{2}', u['username'])
+                    or state.get('email') != EMAIL or len(state.get('users', [])) != count
+                    or len({u['username'] for u in state['users']}) != count
+                    or (names and (state.get('batchKind') != 'NAMED_FIFTEEN'
+                                   or [u['username'] for u in state['users']] != names))
+                    or any((not names and not re.fullmatch('ke-test-[a-f0-9]{6}-[0-9]{2}', u['username']))
                            or not isinstance(u.get('password'), str) or len(u['password']) < 8
                            for u in state['users'])):
                 raise RuntimeError('SAVED_BATCH_INVALID')
             state_file.chmod(0o600)
-            print('Reusing the saved ten accounts; no duplicate batch.', flush=True)
+            print(f'Reusing the saved {count} accounts; no duplicate batch.', flush=True)
         else:
+            if names:
+                # Check every requested fixed name before the first account write.
+                # Never adopt someone else's identity or reset an existing password.
+                for username in names:
+                    try:
+                        aws('cognito-idp', 'admin-get-user', {'UserPoolId': POOL, 'Username': username})
+                    except RuntimeError as error:
+                        if str(error) == 'cognito-idp:admin-get-user:UserNotFoundException':
+                            continue
+                        raise
+                    raise RuntimeError('REQUESTED_USERNAME_ALREADY_EXISTS:' + username)
             prefix = 'ke-test-' + secrets.token_hex(3)
             state = {'account': ACCOUNT, 'pool': POOL, 'email': EMAIL,
+                     'batchKind': 'NAMED_FIFTEEN' if names else 'RANDOM_TEN',
                      'createdAt': datetime.datetime.now(datetime.timezone.utc).isoformat(),
                      'appAccess': 'NOT_APPROVED', 'users': [
-                         {'username': f'{prefix}-{index:02d}',
+                         {'username': names[index - 1] if names else f'{prefix}-{index:02d}',
                           'password': 'Ke1!' + secrets.token_urlsafe(15), 'status': 'PLANNED'}
-                         for index in range(1, 11)]}
+                         for index in range(1, count + 1)]}
             save()
         for user in state['users']:
             stage = 'CREATE_LOGIN'
