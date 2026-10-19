@@ -2,10 +2,10 @@
   "runId": "20261019T170618Z",
   "state": "RUNNING",
   "startedAt": "2026-10-19T17:06:18Z",
-  "lastProgressAt": "2026-10-19T17:16:35Z",
+  "lastProgressAt": "2026-10-19T17:17:05Z",
   "endedAt": null,
-  "lastConfirmedAction": "reconcile.u1.groups.retry1",
-  "inFlightAction": "reconcile.u1.group-metadata.retry2",
+  "lastConfirmedAction": "reconcile.u1.group-metadata.retry2",
+  "inFlightAction": "reconcile.u2.group-metadata",
   "cases": {
     "01": "NOT_RUN",
     "02": "NOT_RUN",
@@ -30,12 +30,12 @@
     "preflight.json"
   ],
   "error": {
-    "domain": "AUTOMATION",
-    "code": "AUTH_SESSION_NOT_PRESERVED",
-    "state": "RETRY_PENDING",
-    "detail": "Playwright storageState omitted the app\u2019s session-storage authentication; the attempted refresh made no authenticated group request."
+    "domain": "UNKNOWN",
+    "code": "OLD_FIXTURE_NOT_IDENTIFIED",
+    "state": "UNRESOLVED",
+    "detail": "U1 does not see an exact Friday activity item in the current group list. U2 shared membership and any prior saved state remain unverified."
   },
-  "nextSafeAction": "Fresh hosted U1 login in the same browser session, then read-only catalog of groups, drafts, and decisions.",
+  "nextSafeAction": "Fresh hosted U2 login; compare shared group/decision metadata and inspect only U2-owned status for any historical matching fixture.",
   "publication": {
     "lastConfirmedUrl": "https://github.com/Known-Enough/known-enough/blob/e2d6900d54d5c1ea8d0021d92c05833b76aabf39/docs/review-artifacts/E2E03/20261019T170618Z/report.md",
     "unpublishedLocalChanges": true
