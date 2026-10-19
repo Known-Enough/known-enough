@@ -2,9 +2,9 @@
   "runId": "20261019T181400Z",
   "state": "RUNNING",
   "startedAt": "2026-10-19T18:14:13.604Z",
-  "lastProgressAt": "2026-10-19T18:14:13.604Z",
+  "lastProgressAt": "2026-10-19T18:14:28.069Z",
   "endedAt": null,
-  "lastConfirmedAction": "startup record prepared",
+  "lastConfirmedAction": "startup evidence published before browser actions",
   "inFlightAction": null,
   "cases": {
     "01": "RUNNING",
@@ -29,7 +29,8 @@
   "error": null,
   "nextSafeAction": "Log in both users, reconcile the saved group and decision IDs, then inspect each own answer state before any answer write.",
   "publication": {
-    "lastConfirmedUrl": null,
+    "lastConfirmedUrl": "https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/E2E03/20261019T181400Z/report.md",
+    "commit": "9224ec2",
     "unpublishedLocalChanges": true
   },
   "serving": {
