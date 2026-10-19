@@ -40,8 +40,9 @@
   },
   "nextSafeAction": "Investigate the authenticated /account HTTP 503. Then begin a fresh live run; do not retry within this run.",
   "publication": {
-    "lastConfirmedUrl": null,
-    "unpublishedLocalChanges": true
+    "lastConfirmedUrl": "https://github.com/Known-Enough/known-enough/commit/0c303cefdb55b1c50ac8b526b9af26da2632ab50",
+    "lastConfirmedAt": "2026-10-19T17:48:00Z",
+    "unpublishedLocalChanges": false
   },
   "runnerChecks": {
     "passed": 4,
