@@ -1,3 +1,4 @@
+import { Modal } from './modal';
 import { createDirectCognito } from './cognito-direct';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Groups, KnownEnough as KE } from '@deal-table/contracts';
@@ -147,7 +148,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     <PrivacyBar />
     {view.kind !== 'decision' && status && <p role="status">{status}</p>}
     {view.kind === 'invalid' ? <section className="ke-card"><h2>This link is unavailable</h2><button onClick={() => move({ kind: 'groups' }, true)}>Back to groups</button></section>
-      : view.kind === 'decision' ? <dialog ref={decisionDialog} className="ke-decision-wizard ke-open-decision-dialog" data-decision-id={snapshot?.frame.decisionId} aria-labelledby="open-decision-title" onCancel={event => { event.preventDefault(); move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' }); }}>
+      : view.kind === 'decision' ? <Modal closeButton={false} ref={decisionDialog} className="ke-decision-wizard ke-open-decision-dialog" data-decision-id={snapshot?.frame.decisionId} aria-labelledby="open-decision-title" onCancel={event => { event.preventDefault(); move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' }); }}>
         <button className="secondary ke-response-close" aria-label="Close decision" onClick={() => move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' })}><PageIcon name="X" /></button>
         {!snapshot && <section className="ke-response-header" aria-busy={busy || !status}>
           <h2 id="open-decision-title">Your decision</h2>
@@ -159,7 +160,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
           mcpUrl={config.apiBaseUrl + '/mcp'} {...(view.groupId ? { groupId: view.groupId } : {})} title={decisionTitle?.id === snapshot.frame.decisionId ? decisionTitle.title : snapshot.frame.title} refreshing={busy}
           onRefresh={() => { if (dirty.current && !window.confirm('Refresh and discard unsaved input?')) return; dirty.current = false; void load().catch(() => {}); }} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} refresh={async () => { dirty.current = false; await load(); }}
           onDirtyChange={value => { dirty.current = value; }} onQueued={receipt => { if (!owner) return; setTarget({ decisionId: snapshot.frame.decisionId, contextToken: snapshot.contextToken, semanticVersion: snapshot.semanticVersion, ownerParticipantId: owner.ownerParticipantId, expiresAt: receipt.expiresAt }); }} /></div>}
-      </dialog> : session.kind === 'display' ? <section className="ke-card"><h2>Shared screen</h2><p>Open a shared decision link from your group to show its progress. This screen cannot enter private needs or approve proposals.</p></section>
+      </Modal> : session.kind === 'display' ? <section className="ke-card"><h2>Shared screen</h2><p>Open a shared decision link from your group to show its progress. This screen cannot enter private needs or approve proposals.</p></section>
         : <GroupHome preferencesKey={groupPreferencesKey} key={`${session.accessToken}:${view.kind === 'group' ? view.groupId : 'home'}:${invitationEpoch}`} {...(view.kind === 'group' ? { selectedGroupId: view.groupId } : {})}
           api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} onOpenGroup={id => move({ kind: 'group', groupId: id })} onBack={() => move({ kind: 'groups' })} onDirtyChange={value => { dirty.current = value; }}
           openDecision={id => move({ kind: 'decision', decisionId: id, ...(view.kind === 'group' ? { groupId: view.groupId } : {}) })} />}

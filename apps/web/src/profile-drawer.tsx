@@ -1,3 +1,4 @@
+import { Modal } from './modal';
 import { avatarRead } from './member-avatar';
 import { avatarUpload } from './avatar-upload';
 import { useEffect, useRef, useState } from 'react';
@@ -96,7 +97,7 @@ export function ProfileModal({ api, open, target, onClose, restoreFocus, onOwner
     finally { if (generation.current === epoch) { setBusy(false); setSaving(false); } }
   }
 
-  return <dialog ref={dialog} className="ke-profile-modal" aria-labelledby="profile-title" onCancel={event => { event.preventDefault(); close(); }}
+  return <Modal closeButton={false} ref={dialog} className="ke-profile-modal" aria-labelledby="profile-title" onCancel={event => { event.preventDefault(); close(); }}
     onClick={event => { if (event.target === dialog.current) close(); }}>
     <div className="ke-profile-shell">
       <header className="ke-profile-header"><h2 id="profile-title" ref={heading} tabIndex={-1}>Profile</h2>
@@ -136,7 +137,7 @@ export function ProfileModal({ api, open, target, onClose, restoreFocus, onOwner
         {!busy && notice && <p className="ke-profile-notice" role="status" aria-live="polite">{notice}</p>}
       </div>
     </div>
-  </dialog>;
+  </Modal>;
 }
 
 export function ProfileDrawer({ api, signOut }: { api: Api; signOut: () => void }) {

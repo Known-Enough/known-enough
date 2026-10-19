@@ -1,3 +1,4 @@
+import { Modal } from './modal';
 import { ChoicePlanEditor } from './choice-plan-editor';
 import { addSuggestedOption, emptyChoicePlan, suggestedChoices, type CreationSuggestion } from './creation-options';
 import { CreationSuggestions } from './creation-suggestions';
@@ -502,7 +503,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
         </div>
       </div>)}
     </div>}
-    {group.isOrganizer && <dialog ref={deleteDialog} className="ke-delete-dialog" aria-labelledby={`delete-title-${group.id}`}
+    {group.isOrganizer && <Modal ref={deleteDialog} className="ke-delete-dialog" aria-labelledby={`delete-title-${group.id}`}
       aria-describedby={`delete-description-${group.id}`} onCancel={event => { event.preventDefault(); if (!busyGuard.current) setDeleteTarget(null); }}>
       <h2 id={`delete-title-${group.id}`}>Delete {deleteTarget?.kind === 'DRAFT' ? 'draft' : 'decision'}?</h2>
       <p id={`delete-description-${group.id}`}>{deleteTarget?.kind === 'DRAFT'
@@ -514,9 +515,9 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
         <button type="button" className="ke-delete-confirm" disabled={busy || !deleteTarget} onClick={() => void action(deleteItem)}>{busy ? 'Deleting…' : deleteTarget?.kind === 'DRAFT' ? 'Delete draft' : 'Delete decision'}</button>
       </div>
       {notice && <p role="status">{notice}</p>}
-    </dialog>}
-    {group.isOrganizer && <dialog ref={dialog} className="ke-decision-wizard ke-create-decision-dialog ke-creation-v2" aria-labelledby={`decision-wizard-title-${group.id}`}
-      aria-describedby={`decision-wizard-subtitle-${group.id}`} onKeyDown={keepWizardFocus} onCancel={event => { event.preventDefault(); closeWizard(); }} onClick={event => { if (event.target === dialog.current) closeWizard(); }}>
+    </Modal>}
+    {group.isOrganizer && <Modal closeButton={false} ref={dialog} className="ke-decision-wizard ke-create-decision-dialog ke-creation-v2" aria-labelledby={`decision-wizard-title-${group.id}`}
+      aria-describedby={`decision-wizard-subtitle-${group.id}`} onKeyDown={keepWizardFocus} onCancel={event => { event.preventDefault(); closeWizard(); }}>
       <div className="ke-wizard-shell">
         <header className="ke-wizard-header"><div><span className="ke-wizard-eyebrow">New decision</span>
           <h2 id={`decision-wizard-title-${group.id}`} ref={draftHeading} tabIndex={-1}>{showExample ? 'A decision, step by step' : step === 'describe' ? 'What are we deciding?' : 'Review your options'}</h2>
@@ -597,7 +598,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
             : <button type="button" className="ke-icon-action ke-creation-primary" disabled={busy || !!choiceConflict || (choiceMode ? !choicePlan || !!compileChoicePlan(choicePlan).questions.length : !draft || !!draft.clarificationQuestions.length)} onClick={() => void action(choiceMode ? createChoices : createLegacyDraft)}>{busy && !aiWorking ? 'Creating…' : 'Create decision'}<PageIcon name="ArrowRight" /></button>}
         </footer>}
       </div>
-    </dialog>}
+    </Modal>}
     {roster && <div className="local-note"><h4>Resolve membership change</h4><p>{roster.frame.objective}</p>
       <p>New participants provide their own answers. A finished decision keeps its recorded outcome and participants. Removing people or changing shared choices still needs the existing review.</p>
       <ul>{roster.participants.map(member => <li key={member.id}>{member.displayName}</li>)}</ul>

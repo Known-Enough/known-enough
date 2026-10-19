@@ -1,3 +1,4 @@
+import { Modal } from './modal';
 import { MemberAvatar } from './member-avatar';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { KnownEnough as KE, publicChoiceOptions } from '@deal-table/contracts';
@@ -258,7 +259,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
       {!owner && proposal && <button type="button" onClick={() => setDetailStep('proposal')}>View proposal</button>}
       </div>
     </section>
-    <dialog ref={detailDialog} className={`ke-step-dialog${detailStep === 'proposal' ? ' ke-outcome-dialog' : ''}`} aria-label={detailStep === 'shared' ? 'Decision details' : 'Review proposal and permissions'} onCancel={event => { event.preventDefault(); setDetailStep(null); }}>
+    <Modal ref={detailDialog} className={`ke-step-dialog${detailStep === 'proposal' ? ' ke-outcome-dialog' : ''}`} aria-label={detailStep === 'shared' ? 'Decision details' : 'Review proposal and permissions'} onCancel={event => { event.preventDefault(); setDetailStep(null); }}>
       <button type="button" className={detailStep === 'proposal' ? 'ke-outcome-back' : 'secondary'} onClick={() => setDetailStep(null)}>{detailStep === 'proposal' && <PageIcon name="ArrowLeft" />}Back to overview</button>
     {detailStep === 'shared' && <section className="ke-card ke-shared-decision"><h2>What we’re deciding</h2><p>{snapshot.frame.description || snapshot.frame.objective}</p>
       {snapshot.frame.description && snapshot.frame.description !== snapshot.frame.objective && <details><summary>Original idea and shared details</summary><p className="ke-shared-original">{snapshot.frame.objective}</p></details>}
@@ -336,7 +337,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
       </div>)}
     </section>}
     {detailStep === 'proposal' && !proposal && owner && <>{recoveryControls}{notice && <p role="status" className="ke-outcome-notice">{notice}</p>}</>}
-    </dialog>
+    </Modal>
     {assistantOpen && mcpUrl && <Suspense fallback={<p role="status">Opening assistant…</p>}><AlexaChat decisionId={decisionId} title={title ?? snapshot.frame.title} groupId={groupId} endpoint={mcpUrl} api={api} onClose={() => setAssistantOpen(false)} /></Suspense>}
     {owner && <PrivateAnswersModal embedded open={true} owner={owner} busy={busy} blocked={answersBlocked} saveBlocked={false} notesLocked={!!interpretationRequest} notes={text} consent={syntheticProcessing} notice={notice} recovery={recoveryControls}
         onClose={() => {}} onNotes={setText} onConsent={setSyntheticProcessing} onInterpret={interpret} onDirty={setStructuredDirty} onEditingChange={setEditingAnswers}

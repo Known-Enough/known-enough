@@ -1,3 +1,4 @@
+import { Modal } from './modal';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { KnownEnough as KE, publicChoiceOptions } from '@deal-table/contracts';
 import { PageIcon } from './app-chrome';
@@ -203,7 +204,6 @@ export function PrivateAnswersModal({ open, owner, busy, blocked, saveBlocked, n
     </footer>
   </div>;
   return embedded ? <section className="ke-private-inline ke-response-inline" aria-labelledby="private-answers-title">{editing && !readOnly ? content : savedSummary}</section> :
-    <dialog ref={dialog} className="ke-decision-wizard ke-private-wizard" aria-labelledby="private-answers-title"
-      onCancel={event => { event.preventDefault(); if (!busy) onClose(); }}
-      onClick={event => { if (event.target === event.currentTarget && !busy) onClose(); }}>{editing && !readOnly ? content : savedSummary}</dialog>;
+    <Modal closeButton={false} ref={dialog} className="ke-decision-wizard ke-private-wizard" aria-labelledby="private-answers-title"
+      onCancel={event => { event.preventDefault(); if (!busy) onClose(); }}>{editing && !readOnly ? content : savedSummary}</Modal>;
 }

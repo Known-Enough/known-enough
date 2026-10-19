@@ -1,3 +1,4 @@
+import { Modal } from './modal';
 import { useEffect, useRef, useState } from 'react';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
@@ -136,7 +137,7 @@ export default function AlexaChat({ decisionId, title, endpoint, api, onClose }:
   function changeTab(next: Chat.Scope) { if (working || next === scope) return; setScope(next); setAskAssistant(next === 'private'); }
   const currentConversation = conversation?.scope === scope && conversation.decisionId === decisionId ? conversation : null;
   const messages = currentConversation?.messages ?? [];
-  return <dialog ref={dialog} className="ke-alexa-chat ke-alexa-conversations" aria-labelledby="alexa-chat-title" onCancel={event => { event.preventDefault(); onClose(); }}>
+  return <Modal closeButton={false} ref={dialog} className="ke-alexa-chat ke-alexa-conversations" aria-labelledby="alexa-chat-title" onCancel={event => { event.preventDefault(); onClose(); }}>
     <header><div><span className="ke-alexa-eyebrow">Alexa+ simulator</span><h2 id="alexa-chat-title">Talk it through</h2><p>{title}</p></div><button type="button" className="ke-alexa-close" aria-label="Close assistant" onClick={onClose}><PageIcon name="X" /></button></header>
     <div className="ke-alexa-tabs" role="tablist" aria-label="Conversation">
       {(['group', 'private'] as const).map(tab => <button type="button" role="tab" key={tab} id={'alexa-tab-' + tab} aria-controls="alexa-conversation" aria-selected={scope === tab} tabIndex={scope === tab ? 0 : -1} disabled={working}
@@ -169,5 +170,5 @@ export default function AlexaChat({ decisionId, title, endpoint, api, onClose }:
       {askAssistant && <label className="ke-alexa-check ke-alexa-consent"><input type="checkbox" checked={consent} disabled={working} onChange={event => setConsent(event.target.checked)} />Use AI for my messages in this tab and the shared choices. My saved private answers are not accessed.</label>}
       <p>Messages are available until this decision is deleted or for up to 30 days, whichever comes first. Your current retention policy can shorten that time.</p>
     </form>
-  </dialog>;
+  </Modal>;
 }

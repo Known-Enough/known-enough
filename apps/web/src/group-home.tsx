@@ -1,3 +1,4 @@
+import { Modal } from './modal';
 import { MemberAvatar } from './member-avatar';
 import { RenameAction } from './rename-action';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -456,7 +457,7 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
       })}
     </>}
     </fieldset>
-    <dialog ref={renameGroupDialog} className="ke-delete-dialog ke-group-action-dialog" aria-labelledby="rename-group-heading"
+    <Modal ref={renameGroupDialog} className="ke-delete-dialog ke-group-action-dialog" aria-labelledby="rename-group-heading"
       onCancel={event => { event.preventDefault(); if (!busy) setRenameGroupId(null); }}>
       <form onSubmit={event => {
         event.preventDefault(); if (!renameTarget || busy || !renameGroupValue.trim()) return;
@@ -481,8 +482,8 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
         <div className="ke-wizard-actions"><button type="button" className="secondary" disabled={busy} onClick={() => setRenameGroupId(null)}>Cancel</button>
           <button type="submit" disabled={busy || !renameGroupValue.trim()}>Save name</button></div>
       </form>
-    </dialog>
-    <dialog ref={deleteGroupDialog} className="ke-delete-dialog ke-group-action-dialog" aria-labelledby="delete-group-heading"
+    </Modal>
+    <Modal ref={deleteGroupDialog} className="ke-delete-dialog ke-group-action-dialog" aria-labelledby="delete-group-heading"
       aria-describedby="delete-group-description" onCancel={event => { event.preventDefault(); if (!busy) setDeleteGroupId(null); }}>
       <h2 id="delete-group-heading">Delete group?</h2>
       <p id="delete-group-description">{deleteTarget ? `Delete “${deleteTarget.name}” for everyone in the group? Members will lose access to its saved decisions and drafts.` : 'This group will be removed for all its members.'}</p>
@@ -514,7 +515,7 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
             } finally { setBusy(false); }
           })();
         }}>Delete group</button></div>
-    </dialog>
+    </Modal>
     {profileTarget && <ProfileModal api={api} open target={profileTarget} onClose={() => { setProfileTarget(null); setAvatarRevision(value => value + 1); }} restoreFocus={() => profileTriggerRef.current?.focus()} />}
     {(checking || busy) && <LoadingSkeleton kind="inline" label={checking ? 'Refreshing account and groups' : 'Updating the group'} />}
     {!checking && !busy && notice && <p role="status">{notice}</p>}
