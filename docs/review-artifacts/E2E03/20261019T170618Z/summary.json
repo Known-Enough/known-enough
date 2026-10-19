@@ -2,10 +2,10 @@
   "runId": "20261019T170618Z",
   "state": "RUNNING",
   "startedAt": "2026-10-19T17:06:18Z",
-  "lastProgressAt": "2026-10-19T17:13:37Z",
+  "lastProgressAt": "2026-10-19T17:15:17Z",
   "endedAt": null,
-  "lastConfirmedAction": "reconcile.u1.login.retry1",
-  "inFlightAction": "reconcile.u1.groups.retry1",
+  "lastConfirmedAction": "reconcile.u1.groups.retry1",
+  "inFlightAction": "reconcile.u1.group-metadata.retry1",
   "cases": {
     "01": "NOT_RUN",
     "02": "NOT_RUN",
@@ -30,12 +30,12 @@
     "preflight.json"
   ],
   "error": {
-    "domain": "AUTOMATION",
-    "code": "HYDRATION_NOT_WAITED",
-    "state": "RETRY_PENDING",
-    "detail": "The first group-page inspection stopped before frontend hydration; authenticated U1 access is confirmed by seven HTTP 200 reads."
+    "domain": "UNKNOWN",
+    "code": "OLD_FIXTURE_NOT_IDENTIFIED",
+    "state": "UNRESOLVED",
+    "detail": "Current U1 group metadata has no exact Friday activity title; own-answer state for the historical fixture has not been read."
   },
-  "nextSafeAction": "Wait for frontend hydration, sign U1 in, and inspect only the old group/decision metadata. Do not create or save anything.",
+  "nextSafeAction": "Refresh U1 group metadata only, identify any intended existing U1/U2 fixture, then inspect that decision\u2019s owner/public state read-only.",
   "publication": {
     "lastConfirmedUrl": "https://github.com/Known-Enough/known-enough/blob/e2d6900d54d5c1ea8d0021d92c05833b76aabf39/docs/review-artifacts/E2E03/20261019T170618Z/report.md",
     "unpublishedLocalChanges": true
