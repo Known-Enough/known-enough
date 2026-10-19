@@ -1,0 +1,18 @@
+{
+  "source": "5cfeb27ff51ca69ce75c1984f14fea93274aa8cd",
+  "awsWrites": 0,
+  "providerCalls": 0,
+  "events": [
+    {
+      "timestamp": 1792446792450,
+      "event": "partition-storage-transition",
+      "code": "SOURCE_UNAVAILABLE"
+    }
+  ],
+  "failures": [],
+  "windowStart": 1792444838486,
+  "windowEnd": 1792447238486,
+  "result": "DRAFT_DIAGNOSTICS_READ",
+  "windowComplete": true,
+  "requestReferenceCorrelation": "WINDOW_ONLY"
+}

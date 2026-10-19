@@ -3050,3 +3050,6 @@ FF09 CODE_READY/B — fictional guide embedded only in creation dialog, form/req
 
 
 2026-10-19T21:52Z — A user-requested E2E03 live run RELEASED / BLOCKED. Startup evidence published before site access. U1/U2 reconciled the same existing group/draft/decision; U1 answer already present. One U2 answer save acknowledged HTTP200 and own-page readback. U2's read-only refresh returned groups, but decision reopen timed out after browser `net::ERR_FAILED` on `/decisions/:id/me` and `/account`; no server reference. No repeat save/outcome/assistant request. Cases01 BLOCKED,02–03 NOT_RUN; [report](review-artifacts/E2E03/20261019T215250Z/report.md).
+
+
+2026-10-19T22:03:58.069589+00:00 — A claims the direct user-requested E2E03 network-read repair. Scope: exact-origin early API failure responses/correlation, ephemeral loopback connection lifecycle, one bounded GET recovery, matching safe diagnostics/runner wait and compatible publication. No tests, AI or participant actions. Preserve the acknowledged fixture/U1/U2 answers, all identity/privacy/consent/atomic command/unknown-write guards, existing worker/schedule and historical reports.

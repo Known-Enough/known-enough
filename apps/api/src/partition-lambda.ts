@@ -1,12 +1,5 @@
 import { createPartitionRuntime, type PartitionRuntimeOptions } from './partition-runtime.ts';
-import { invokeHttpApi, type HttpApiEvent, type HttpApiResult } from './ke13b-lambda.ts';
-
-function invalid(statusCode: 422 | 503): HttpApiResult {
-  return { statusCode, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
-    body: JSON.stringify({ ok: false, requestId: 'invalid-request',
-      error: { code: statusCode === 422 ? 'INVALID_COMMAND' : 'RETRYABLE_SERVER_ERROR', httpStatus: statusCode } }),
-    isBase64Encoded: false };
-}
+import { gatewayFailure, invokeHttpApi, type HttpApiEvent, type HttpApiResult } from './ke13b-lambda.ts';
 
 function hasControlOrSpace(value: string): boolean {
   for (const character of value) {
@@ -24,16 +17,16 @@ export function createPartitionLambdaHandler(options: PartitionRuntimeOptions): 
   const listener = createPartitionRuntime(options);
   return async event => {
     try {
-      if (!event || typeof event !== 'object' || Array.isArray(event) || event.version !== '2.0') return invalid(503);
+      if (!event || typeof event !== 'object' || Array.isArray(event) || event.version !== '2.0') return gatewayFailure(event, 503, options.allowedOrigin, 'REQUEST');
       const path = event.rawPath; const query = event.rawQueryString;
-      if (typeof path !== 'string' || (query !== undefined && typeof query !== 'string')) return invalid(422);
+      if (typeof path !== 'string' || (query !== undefined && typeof query !== 'string')) return gatewayFailure(event, 422, options.allowedOrigin, 'REQUEST');
       const target = query ? `${path}?${query}` : path;
       if (target.length > 2048 || !path.startsWith('/') || path.startsWith('//')
         || hasControlOrSpace(path) || /[\\?#]/.test(path)
-        || (query !== undefined && (hasControlOrSpace(query) || /[\\#]/.test(query)))) return invalid(422);
+        || (query !== undefined && (hasControlOrSpace(query) || /[\\#]/.test(query)))) return gatewayFailure(event, 422, options.allowedOrigin, 'REQUEST');
       // Gateway v2 separates query from rawPath; the Node listener needs both.
       // The shared transport forwards only its existing header/body allowlists.
-      return await invokeHttpApi(listener, { ...event, rawPath: target });
-    } catch { return invalid(503); }
+      return await invokeHttpApi(listener, { ...event, rawPath: target }, options.allowedOrigin);
+    } catch (error) { return gatewayFailure(event, 503, options.allowedOrigin, 'RUNTIME_DISPATCH', error); }
   };
 }

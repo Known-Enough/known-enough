@@ -29,6 +29,7 @@ export function waitForGroups(page, timeout = 45000) {
   // a successful groups response that the app will never request after failure.
   return new Promise((resolve, reject) => {
     let settled = false;
+    const transientFailures = new Map();
     const finish = (error, response) => {
       if (settled) return; settled = true; clearTimeout(timer);
       page.off('response', onResponse); page.off('close', onClose);
@@ -40,6 +41,13 @@ export function waitForGroups(page, timeout = 45000) {
       const url = new URL(response.url());
       if (response.request().method() !== 'GET' || !safeRoute(response.url())
         || !/^\/(account|groups)$/.test(url.pathname) || response.status() < 400) return;
+      // The browser client now recovers one transient GET within its original
+      // deadline. Observe the recovery instead of failing on its first response.
+      if ([502, 503, 504].includes(response.status())) {
+        const count = (transientFailures.get(url.pathname) || 0) + 1;
+        transientFailures.set(url.pathname, count);
+        if (count < 2) return;
+      }
       // Another response observer records JSON asynchronously. Do not read the
       // same body here: a locked stream can leave sign-in waiting until timeout.
       finish(Object.assign(new Error('APP_HTTP_' + response.status()), {

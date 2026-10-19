@@ -3,17 +3,13 @@ import { Groups } from '@deal-table/contracts';
 import { loadPartitionMigration } from '@deal-table/adapters/partition-operations';
 import { createPartitionDeploymentHandler, type PartitionDeploymentBinding } from './partition-deployment.ts';
 import type { PartitionRuntimeOptions } from './partition-runtime.ts';
-import type { HttpApiEvent, HttpApiResult } from './ke13b-lambda.ts';
+import { gatewayFailure, type HttpApiEvent, type HttpApiResult } from './ke13b-lambda.ts';
 
 interface SourceSnapshot { version: number; payload: Buffer }
 interface MarkerBinding {
   planHash: string; manifestHash: string; manifestVersion: string; sourceSha: string; sourceRevision: number; sourceHash: string;
 }
 const invalid = (): never => { throw new Error('PARTITION_RELEASE_INVALID'); };
-function unavailable(): HttpApiResult {
-  return { statusCode: 503, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'retry-after': '3' },
-    body: JSON.stringify({ ok: false, requestId: 'storage-transition', error: { code: 'RETRYABLE_SERVER_ERROR', httpStatus: 503 } }), isBase64Encoded: false };
-}
 /** State classification is not authentication. Native operations still verify their complete activation tuple. */
 export function partitionReleaseMode(source: SourceSnapshot | null, binding: MarkerBinding): 'LEGACY' | 'FROZEN' | 'PARTITION' {
   if (!binding || !/^[a-f0-9]{64}$/.test(binding.planHash) || !/^[a-f0-9]{64}$/.test(binding.manifestHash)
@@ -50,6 +46,8 @@ export function createPartitionReleaseHandler(options: {
   const config = Buffer.from(options.configurationBytes); const manifest = Buffer.from(options.manifestBytes);
   const release = structuredClone(options.release);
   const native = createPartitionDeploymentHandler(config, manifest, release, undefined, options.lifecycle, options.jobs);
+  // Construction above validates these private bytes before using their origin.
+  const allowedOrigin = (JSON.parse(config.toString('utf8')) as { allowedOrigin: string }).allowedOrigin;
   const plan = loadPartitionMigration(manifest, { sourceSha: release.sourceSha, sourceRevision: release.sourceRevision,
     sourceHash: release.sourceHash, manifestHash: release.manifestHash });
   const binding: MarkerBinding = { planHash: plan.planHash, manifestHash: release.manifestHash,
@@ -58,6 +56,7 @@ export function createPartitionReleaseHandler(options: {
   const diagnostic = options.diagnostic ?? (code => console.warn(JSON.stringify({ event: 'partition-storage-transition', code })));
   const report = (code: 'SOURCE_UNAVAILABLE' | 'SOURCE_FROZEN') => { try { diagnostic(code); } catch { /* Logging never changes selection. */ } };
   return async event => {
+    let stage: 'SOURCE_READ' | 'RUNTIME_DISPATCH' = 'SOURCE_READ';
     try {
       const signal = AbortSignal.timeout(5000);
       const source = await new Promise<SourceSnapshot | null>((resolve, reject) => {
@@ -66,12 +65,13 @@ export function createPartitionReleaseHandler(options: {
         Promise.resolve().then(() => readSource(signal)).then(resolve, reject)
           .finally(() => signal.removeEventListener('abort', abort));
       });
-      if (signal.aborted) { report('SOURCE_UNAVAILABLE'); return unavailable(); }
+      if (signal.aborted) { report('SOURCE_UNAVAILABLE'); return gatewayFailure(event, 503, allowedOrigin, stage); }
       const mode = partitionReleaseMode(source, binding);
+      stage = 'RUNTIME_DISPATCH';
       if (mode === 'LEGACY') return await legacy(event);
       if (mode === 'PARTITION') return await native(event);
       report('SOURCE_FROZEN');
-    } catch { report('SOURCE_UNAVAILABLE'); }
-    return unavailable();
+      return gatewayFailure(event, 503, allowedOrigin, 'SOURCE_FROZEN');
+    } catch (error) { report('SOURCE_UNAVAILABLE'); return gatewayFailure(event, 503, allowedOrigin, stage, error); }
   };
 }

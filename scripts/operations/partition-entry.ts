@@ -9,7 +9,7 @@ import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
 import { createPartitionReleaseHandler } from '../../apps/api/src/partition-release.ts';
 import { loadLifecyclePackage } from './lifecycle-package.ts';
 import { loadJobsPackage } from './jobs-package.ts';
-import { createKe13bLambdaHandler, readKe13bConfig, type HttpApiEvent, type HttpApiResult } from '../../apps/api/src/ke13b-lambda.ts';
+import { createKe13bLambdaHandler, gatewayFailure, readKe13bConfig, type HttpApiEvent, type HttpApiResult } from '../../apps/api/src/ke13b-lambda.ts';
 let intake: ReturnType<typeof createSignupIntake> | undefined;
 let selected: ((event: HttpApiEvent) => Promise<HttpApiResult>) | undefined;
 export async function handler(event: HttpApiEvent): Promise<unknown> {
@@ -54,7 +54,10 @@ export async function handler(event: HttpApiEvent): Promise<unknown> {
     }
     if (trigger) return await intake!(event);
     return await selected(event);
-  } catch { if (trigger) throw new Error('SIGNUP_INTAKE_UNAVAILABLE');
-    return { statusCode: 503, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'retry-after': '3' },
-    body: JSON.stringify({ ok: false, error: { code: 'RETRYABLE_SERVER_ERROR', httpStatus: 503 } }), isBase64Encoded: false }; }
+  } catch (error) { if (trigger) {
+    // Keep Cognito's existing sanitized trigger failure; its logs must not serialize intake details.
+    // eslint-disable-next-line preserve-caught-error
+    throw new Error('SIGNUP_INTAKE_UNAVAILABLE');
+  }
+    return gatewayFailure(event, 503, process.env.KE13B_ALLOWED_ORIGIN, 'RUNTIME_INIT', error); }
 }

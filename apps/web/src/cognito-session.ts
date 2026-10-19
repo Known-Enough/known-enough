@@ -174,6 +174,14 @@ export function cognitoLogoutUrl(config: CognitoBrowserConfig, session: CognitoS
   url.search = new URLSearchParams({ client_id: clientId(config, session.kind), logout_uri: callbackUrl(location) }).toString();
   return url.href;
 }
+async function pauseReadRecovery(signal: AbortSignal, milliseconds: number): Promise<void> {
+  signal.throwIfAborted();
+  await new Promise<void>((resolve, reject) => {
+    const aborted = () => { clearTimeout(timer); signal.removeEventListener('abort', aborted); reject(signal.reason); };
+    const timer = setTimeout(() => { signal.removeEventListener('abort', aborted); resolve(); }, milliseconds);
+    signal.addEventListener('abort', aborted, { once: true });
+  });
+}
 export async function cognitoApiFetch(config: CognitoBrowserConfig, session: CognitoSession, path: string,
   onUnauthorized: () => void, init?: RequestInit, fetcher: typeof fetch = fetch): Promise<Response> {
   const groupPage = /^\/groups\?limit=5(?:&cursor=[A-Za-z0-9_-]{40,1600})?$/.test(path);
@@ -184,7 +192,28 @@ export async function cognitoApiFetch(config: CognitoBrowserConfig, session: Cog
   headers.set('authorization', `Bearer ${session.accessToken}`);
   const deadline = AbortSignal.timeout(45000);
   const signal = init?.signal ? AbortSignal.any([init.signal, deadline]) : deadline;
-  const response = await fetcher(`${config.apiBaseUrl}${path}`, { ...init, signal, headers, credentials: 'omit', redirect: 'error' });
-  if (response.status === 401) onUnauthorized();
-  return response;
+  // Reads can recover once from a transient transport/service failure within
+  // the same deadline. Commands, consent, approvals and AI requests never replay.
+  const recoverableRead = (init?.method ?? 'GET').toUpperCase() === 'GET' && init?.body == null;
+  for (let attempt = 0; ; attempt++) {
+    signal.throwIfAborted();
+    if (session.expiresAt <= Date.now() + 5000) { onUnauthorized(); throw new Error('Session expired'); }
+    let response: Response;
+    try { response = await fetcher(`${config.apiBaseUrl}${path}`, { ...init, signal, headers, credentials: 'omit', redirect: 'error' }); }
+    catch (error) {
+      if (!recoverableRead || attempt !== 0 || signal.aborted || !(error instanceof TypeError)) throw error;
+      console.info('Known Enough API read recovery', { attempt: 2, reason: 'CONNECTION' });
+      await pauseReadRecovery(signal, 250); continue;
+    }
+    if (response.status === 401) onUnauthorized();
+    if (!recoverableRead || attempt !== 0 || ![502, 503, 504].includes(response.status) || signal.aborted) return response;
+    const after = response.headers.get('retry-after');
+    // Do not retry earlier than a server's longer delay or extend this operation.
+    if (after && !/^\d+$/.test(after)) return response;
+    const wait = after && /^\d+$/.test(after) ? Number(after) * 1000 : 250;
+    if (wait > 3000) return response;
+    console.info('Known Enough API read recovery', { attempt: 2, reason: 'SERVICE', httpStatus: response.status });
+    void response.body?.cancel().catch(() => {});
+    await pauseReadRecovery(signal, wait);
+  }
 }

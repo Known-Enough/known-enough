@@ -1,4 +1,5 @@
 import { createServer, type RequestListener } from 'node:http';
+import { randomUUID } from 'node:crypto';
 import { genericCandidates, createDynamoGroupRepository, createAwsDynamoDBRoomRepository } from '@deal-table/adapters';
 import { KnownEnoughApplication, safeModelDiagnostic, type ModelFailureDiagnostic } from '@deal-table/application';
 import { createCognitoKnownEnoughApiHandler } from './http-core.ts';
@@ -47,10 +48,32 @@ export function logModelFailure(value: ModelFailureDiagnostic, write: (line: str
 const RESPONSE_HEADERS = [
   'content-type', 'cache-control', 'access-control-allow-origin', 'access-control-allow-methods',
   'access-control-allow-headers', 'vary',
+  'access-control-expose-headers', 'retry-after', 'x-request-id',
 ] as const;
-function failure(statusCode: number): HttpApiResult {
-  return { statusCode, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
-    body: JSON.stringify({ ok: false, requestId: 'invalid-request',
+type GatewayFailureStage = 'REQUEST' | 'BODY' | 'HTTP_LISTEN' | 'HTTP_TRANSPORT' | 'SOURCE_READ' | 'SOURCE_FROZEN' | 'RUNTIME_DISPATCH' | 'RUNTIME_INIT';
+/** Early failures must retain exact-origin CORS and an opaque correlation ID, too. */
+export function gatewayFailure(event: HttpApiEvent, statusCode: number, allowedOrigin: string | undefined,
+  stage: GatewayFailureStage, error?: unknown): HttpApiResult {
+  const requestId = randomUUID();
+  const headers: Record<string, string> = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store',
+    vary: 'Origin', 'x-request-id': requestId, ...(statusCode === 503 ? { 'retry-after': '3' } : {}) };
+  const trustedOrigin = typeof allowedOrigin === 'string' ? URL.parse(allowedOrigin) : null;
+  if (trustedOrigin?.protocol === 'https:' && trustedOrigin.origin === allowedOrigin && !trustedOrigin.username && !trustedOrigin.password
+    && eventHeaders(event?.headers).origin === allowedOrigin) {
+    headers['access-control-allow-origin'] = allowedOrigin;
+    headers['access-control-allow-methods'] = 'GET, POST, OPTIONS';
+    headers['access-control-allow-headers'] = 'Authorization, Content-Type, X-Request-Id';
+    headers['access-control-expose-headers'] = 'X-Request-Id, Retry-After';
+  }
+  const details = error && typeof error === 'object' ? error as { name?: unknown; cause?: { code?: unknown } } : {};
+  const names = ['TypeError', 'TimeoutError', 'AbortError', 'AccessDeniedException', 'ThrottlingException', 'InternalServerError'];
+  const transportCodes = ['ECONNRESET', 'ECONNREFUSED', 'EPIPE', 'ETIMEDOUT', 'UND_ERR_SOCKET', 'UND_ERR_CONNECT_TIMEOUT'];
+  try { console.warn(JSON.stringify({ event: 'known-enough.gateway-failure', requestId, stage, status: statusCode,
+    ...(error ? { errorType: typeof details.name === 'string' && names.includes(details.name) ? details.name : 'OTHER',
+      transportCode: typeof details.cause?.code === 'string' && transportCodes.includes(details.cause.code) ? details.cause.code : 'OTHER' } : {}) })); }
+  catch { /* Never log raw messages, event headers, request bodies or identity. */ }
+  return { statusCode, headers,
+    body: JSON.stringify({ ok: false, requestId,
       error: { code: statusCode === 422 ? 'INVALID_COMMAND'
         : statusCode === 404 ? 'NOT_FOUND' : 'RETRYABLE_SERVER_ERROR', httpStatus: statusCode } }),
     isBase64Encoded: false };
@@ -112,21 +135,26 @@ function eventBody(event: HttpApiEvent): string | null {
   return body.toString('utf8');
 }
 /** Transport adapter keeps the existing Cognito verification and application request path intact. */
-export async function invokeHttpApi(listener: RequestListener, event: HttpApiEvent): Promise<HttpApiResult> {
+export async function invokeHttpApi(listener: RequestListener, event: HttpApiEvent, allowedOrigin?: string): Promise<HttpApiResult> {
   if (event.version !== '2.0' || typeof event.rawPath !== 'string' || !event.rawPath.startsWith('/')
-    || event.rawPath.length > 2048 || typeof event.requestContext?.http?.method !== 'string') return failure(503);
-  if (!['GET', 'POST', 'OPTIONS'].includes(event.requestContext.http.method)) return failure(404);
+    || event.rawPath.length > 2048 || typeof event.requestContext?.http?.method !== 'string') return gatewayFailure(event, 503, allowedOrigin, 'REQUEST');
+  if (!['GET', 'POST', 'OPTIONS'].includes(event.requestContext.http.method)) return gatewayFailure(event, 404, allowedOrigin, 'REQUEST');
   let body: string | null;
-  try { body = eventBody(event); } catch { return failure(422); }
+  try { body = eventBody(event); } catch (error) { return gatewayFailure(event, 422, allowedOrigin, 'BODY', error); }
   const headers = eventHeaders(event.headers);
+  // This listener exists for one invocation only. Do not pool loopback sockets
+  // across its close/reopen lifecycle in a warm Lambda environment.
+  headers.connection = 'close';
   const server = createServer(listener);
+  let stage: GatewayFailureStage = 'HTTP_LISTEN';
   try {
     await new Promise<void>((resolve, reject) => {
       server.once('error', reject);
       server.listen(0, '127.0.0.1', () => { server.off('error', reject); resolve(); });
     });
     const address = server.address();
-    if (!address || typeof address === 'string') return failure(503);
+    if (!address || typeof address === 'string') return gatewayFailure(event, 503, allowedOrigin, stage);
+    stage = 'HTTP_TRANSPORT';
     const response = await fetch(`http://127.0.0.1:${address.port}${event.rawPath}`, {
       method: event.requestContext.http.method,
       headers,
@@ -139,7 +167,7 @@ export async function invokeHttpApi(listener: RequestListener, event: HttpApiEve
       if (value !== null) resultHeaders[header] = value;
     }
     return { statusCode: response.status, headers: resultHeaders, body: await response.text(), isBase64Encoded: false };
-  } catch { return failure(503); }
+  } catch (error) { return gatewayFailure(event, 503, allowedOrigin, stage, error); }
   finally {
     if (server.listening) {
       server.closeAllConnections();
@@ -178,11 +206,11 @@ export function createKe13bLambdaHandler(config: Ke13bConfig): (event: HttpApiEv
     allowedOrigins: [config.allowedOrigin], ...(runtime ? {
       ownerConversation: runtime.ownerConversation, negotiator: runtime.negotiator } : {}),
     ...(scenarios ? { scenarios } : {}) });
-  return event => invokeHttpApi(listener, event);
+  return event => invokeHttpApi(listener, event, config.allowedOrigin);
 }
 let liveHandler: ((event: HttpApiEvent) => Promise<HttpApiResult>) | null = null;
 /** AWS Lambda handler. Configuration is immutable for a warm execution environment. */
 export async function handler(event: HttpApiEvent): Promise<HttpApiResult> {
   try { liveHandler ??= createKe13bLambdaHandler(readKe13bConfig()); return await liveHandler(event); }
-  catch { return failure(503); }
+  catch (error) { return gatewayFailure(event, 503, process.env.KE13B_ALLOWED_ORIGIN, 'RUNTIME_INIT', error); }
 }
