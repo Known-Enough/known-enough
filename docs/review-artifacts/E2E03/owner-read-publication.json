@@ -1,0 +1,53 @@
+{
+  "result": "OWNER_READ_REPAIR_PUBLISHED",
+  "recordedAt": "2026-10-19T23:06:04.069157+00:00",
+  "sourceSha": "1f7d441c4913090fb08bd216c3759d7fd2f4cd57",
+  "apiSha256": "e8338c82bb6314f157f743d7f27c1bf4b5e0e7d8c17aa7da5efbc1789be70436",
+  "workerSha256": "c4258495a6e94c97aacff8729e79c725b8732174c565a21b38ef0d499f448fa0",
+  "frontend": {
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "amplifyJobId": "152",
+    "filesHashVerified": 10
+  },
+  "workflows": {
+    "readOnlyMetadata": 39338499778,
+    "emptyQueuePreflight": 39338831938,
+    "pauseSchedule": 39338943718,
+    "apiAndWorker": 39339019360,
+    "frontend": 39339200904,
+    "restoreSchedule": 39339196296
+  },
+  "admission": {
+    "enabled": true,
+    "totals": "UNCHANGED"
+  },
+  "schedule": {
+    "state": "ENABLED",
+    "matchingEmptySummaries": 1,
+    "paidDispatchReported": 0
+  },
+  "environment": "UNCHANGED",
+  "migration": "UNCHANGED",
+  "frontendConfigurationWrites": 0,
+  "staticChecks": {
+    "typescript": "PASS",
+    "changedFileEslint": "PASS",
+    "runnerSyntax": "PASS",
+    "diagnosticReaderAst": "PASS",
+    "nativeCompilation": "PASS_IN_RELEASE",
+    "frontendProductionBuild": "PASS_IN_RELEASE",
+    "whitespace": "PASS"
+  },
+  "tests": "NOT_EXECUTED_DURING_REPAIR",
+  "existingAssertionsUpdated": "Owner-only polling and owner capability advertisement; unexecuted",
+  "liveParticipantActions": 0,
+  "providerRequests": 0,
+  "signupOrEmailRequests": 0,
+  "iamChanges": 0,
+  "newCloudResources": 0,
+  "acceptance": "PENDING_READ_ONLY_REOPEN_OF_EXISTING_AGREED_FIXTURE",
+  "priorTest": "20261019T224223Z: case01 PASS, case02 BLOCKED at final U1 reopen; historical report unchanged",
+  "scope": "Single authorized owner decision read and background poll; nonblocking bounded cosmetic title; source-owned owner capability advertisement; per-case masked failure capture and fixed console error categories.",
+  "historicalNetworkCause": "UNPROVEN; API stage rate5/burst10 confirmed, exact initiating browser failure remains uncorrelated.",
+  "observation": "Existing schedule restored and one regular empty tick observed; no product test dispatched."
+}

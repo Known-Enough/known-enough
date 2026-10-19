@@ -3,7 +3,7 @@
 | Task | Purpose | Status |
 | --- | --- | --- |
 | [E2E04](E2E04/README.md) | Fifteen distinct users, one complex shared outcome, fifteen approvals, useful/private AI, pagination and milestone screenshots. | READY / unclaimed; task preparation only. |
-| [E2E03](E2E03/README.md) | Lightweight two-user regression with durable per-action reporting. | Case01 PASS; case02 reached two-owner agreement but remains BLOCKED at final U1 reopen. [Latest report](../../../review-artifacts/E2E03/20261019T224223Z/report.md). |
+| [E2E03](E2E03/README.md) | Lightweight two-user regression with durable per-action reporting. | Case01 PASS; case02 awaiting final read-only agreement verification. Owner-read repair published at frontend152; no rerun yet. [Repair](../../../review-artifacts/E2E03/owner-read-repair.md) · [Last report](../../../review-artifacts/E2E03/20261019T224223Z/report.md). |
 | [E2E01](E2E01/README.md) | Previous two-user run; evidence retained for reference. | Complete: scenarios 1–2 PASS, 3–10 BLOCKED; qualification BLOCKED. [Latest report](E2E01/run-2026-10-16-test02-test03.md) |
 | [E2E02](E2E02/README.md) | Two-user, sixteen-case current-release journeys. | Five formerly blocked cases PASS; earlier eleven retain dated evidence. [Completion report](../../../review-artifacts/E2E02/completion-20261017/report.md). Owned cleanup complete; claim released. No fresh sixteen-case single-source run. |
 
