@@ -4,6 +4,8 @@ Status: **BLOCKED / claim released** after rerun `20261019T180154Z`. The account
 
 **Account-load repair PUBLISHED — direct user request:** A added a fresh fenced account-read fallback when optional username-directory maintenance fails, plus safe request-correlated diagnostics. The historical 503 cause remains unconfirmed, but both users now pass live account loading on the published API. The focused adapter suite passed 86/86. [Repair and release evidence](../../../../review-artifacts/E2E03/account-load-repair.md). The separate E2E run remains blocked by the post-create loading assertion above; do not repeat the decision creation before reconciling its saved state.
 
+**Runner loading repair CODE_READY:** Source confirms the loading shell and loaded decision share the heading ID. Both create/open checks now wait for the acknowledged decision ID and exact title, with a bounded `DECISION_VIEW_NOT_READY` failure. Local focused checks 5/5 PASS; [repair evidence](../../../../review-artifacts/E2E03/decision-readiness-repair.md). No live rerun or application deployment; the existing fixture still needs reconciliation before further writes.
+
 
 ## Goal and previous evidence
 

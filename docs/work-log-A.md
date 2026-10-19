@@ -2656,3 +2656,6 @@ FF12/A layout static checkpoint: creation now has a bounded flex content wrapper
 
 
 2026-10-19 A — User-requested E2E03 rerun after account-load fix. Focused adapter regression: 86/86. Published coordinated API source 5499a8e and restored existing worker schedule after a verified empty tick. Live U1/U2 sign-in and GET /account returned 200, six groups each. Draft and manual decision POSTs returned 200; runner stopped on CREATED_DECISION_TITLE_MISMATCH while modal was still loading. A later read-only inspection showed expected heading/form. No private answers/outcome/assistant/email; two synthetic records remain for reconciliation. Overall E2E03 BLOCKED, claim released. [Report](review-artifacts/E2E03/20261019T180154Z/report.md).
+
+
+2026-10-19T18:10:47.428767Z — A completed the user-requested E2E03 loading assertion repair. The loading shell reused the loaded heading ID; create/open now wait for acknowledged dialog identity and exact expected heading, with bounded DECISION_VIEW_NOT_READY. Local Chromium regression and runner checks 5/5 PASS; no live rerun, app deployment, AI or cloud changes. Existing acknowledged fixture preserved for read-only reconciliation before any further write. Code claim released. [Repair](review-artifacts/E2E03/decision-readiness-repair.md).

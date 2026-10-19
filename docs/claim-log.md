@@ -3029,3 +3029,6 @@ FF09 CODE_READY/B — fictional guide embedded only in creation dialog, form/req
 
 
 2026-10-19T18:01:54Z — A resumed bounded E2E03 verification at the user's request after publishing the account-load repair. U1/U2 account reads and groups passed; one manual draft and decision were acknowledged. The run stopped at a runner title assertion during modal loading; later read-only inspection showed the expected title. Case 01 BLOCKED, cases 02–03 NOT_RUN; no answer/outcome/assistant/email. Claim released at 18:03:58Z. Reconcile the two owned synthetic records and fix runner readiness before any further write. [Report](review-artifacts/E2E03/20261019T180154Z/report.md).
+
+
+2026-10-19T18:10:47.428767Z — A completed the user-requested E2E03 loading assertion repair. The loading shell reused the loaded heading ID; create/open now wait for acknowledged dialog identity and exact expected heading, with bounded DECISION_VIEW_NOT_READY. Local Chromium regression and runner checks 5/5 PASS; no live rerun, app deployment, AI or cloud changes. Existing acknowledged fixture preserved for read-only reconciliation before any further write. Code claim released. [Repair](review-artifacts/E2E03/decision-readiness-repair.md).

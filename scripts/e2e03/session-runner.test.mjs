@@ -4,7 +4,32 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { EventEmitter } from 'node:events';
-import { groupsResponse, safeRoute, Recorder, waitForGroups } from './session-runner.mjs';
+import { chromium } from 'playwright';
+import { groupsResponse, safeRoute, Recorder, waitForGroups, waitForDecisionReady } from './session-runner.mjs';
+
+test('decision readiness waits past the loading shell and wrong record, and still rejects a wrong title', async () => {
+  const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
+  try {
+    const page = await browser.newPage();
+    await page.setContent('<dialog open class="ke-open-decision-dialog"><h2 id="open-decision-title">Your decision</h2></dialog>');
+    let ready = false;
+    const pending = waitForDecisionReady(page, 'decision-owned', 'Friday activity', 3000).then(() => { ready = true; });
+    await page.waitForTimeout(100);
+    assert.equal(ready, false);
+    await page.evaluate(() => {
+      document.querySelector('dialog').dataset.decisionId = 'decision-other';
+      document.querySelector('h2').textContent = 'Friday activity';
+    });
+    await page.waitForTimeout(100);
+    assert.equal(ready, false);
+    await page.evaluate(() => { document.querySelector('dialog').dataset.decisionId = 'decision-owned'; });
+    await pending;
+    assert.equal(ready, true);
+    await page.evaluate(() => { document.querySelector('h2').textContent = 'Different decision'; });
+    await assert.rejects(waitForDecisionReady(page, 'decision-owned', 'Friday activity', 150),
+      error => error.domain === 'AUTOMATION' && error.code === 'DECISION_VIEW_NOT_READY');
+  } finally { await browser.close(); }
+});
 
 test('real Playwright Response shape recognizes only successful authenticated group reads', () => {
   const response = (status = 200, method = 'GET', url = 'https://example.execute-api.us-east-1.amazonaws.com/groups') =>

@@ -40,6 +40,23 @@ export function waitForGroups(page, timeout = 45000) {
     page.on('response', onResponse); page.once('close', onClose);
   });
 }
+function loadedDecisionDialog(page, decisionId) {
+  if (typeof decisionId !== 'string' || !/^[A-Za-z0-9_-]{1,120}$/.test(decisionId)) {
+    throw Object.assign(new Error('DECISION_ID_INVALID'), { code: 'DECISION_ID_INVALID', domain: 'AUTOMATION' });
+  }
+  return page.locator(`dialog[open].ke-open-decision-dialog[data-decision-id="${decisionId}"]`);
+}
+export async function waitForDecisionReady(page, decisionId, title, timeout = 15000) {
+  // The loading shell also has #open-decision-title. Require the acknowledged
+  // decision's loaded identity and expected heading before checking its form.
+  const dialog = loadedDecisionDialog(page, decisionId);
+  try { await dialog.getByRole('heading', { name: title, exact: true }).waitFor({ state: 'visible', timeout }); }
+  catch (cause) {
+    throw Object.assign(new Error('DECISION_VIEW_NOT_READY', { cause }), {
+      code: 'DECISION_VIEW_NOT_READY', domain: 'AUTOMATION',
+    });
+  }
+}
 export function safeRoute(raw) {
   const url = new URL(raw);
   if (!url.hostname.endsWith('.execute-api.us-east-1.amazonaws.com')) return null;
@@ -270,20 +287,18 @@ export async function serve(options, recorder) {
       const decisionId = body.snapshot?.frame?.decisionId;
       if (typeof decisionId !== 'string' || !/^[A-Za-z0-9_-]{1,120}$/.test(decisionId)) throw new Error('DECISION_CREATE_ACK_MISSING_ID');
       fixture.decisionId = decisionId; persistFixture();
-      await page.locator('#open-decision-title').waitFor({ state: 'visible', timeout: 15000 });
-      if (await page.locator('#open-decision-title').innerText() !== 'Friday activity') throw new Error('CREATED_DECISION_TITLE_MISMATCH');
+      await waitForDecisionReady(page, fixture.decisionId, 'Friday activity');
       return { status: result.status(), decisionCreated: true, title: 'Friday activity', requiredParticipants: 2 };
     },
     async 'open-created-decision'(actor, user) {
       if (!fixture?.decisionId) throw new Error('DECISION_NOT_CREATED');
       const page = user.page;
-      if (actor === 'U2' || !(await page.locator('#open-decision-title').isVisible().catch(() => false))) {
+      if (actor === 'U2' || !(await loadedDecisionDialog(page, fixture.decisionId).isVisible())) {
         await openGroup(actor, user);
         const row = page.locator('.ke-decision-row-open').filter({ hasText: 'Friday activity' });
         await row.waitFor({ state: 'visible' }); await row.click();
       }
-      await page.locator('#open-decision-title').waitFor({ state: 'visible', timeout: 15000 });
-      if (await page.locator('#open-decision-title').innerText() !== 'Friday activity') throw new Error('OPENED_DECISION_TITLE_MISMATCH');
+      await waitForDecisionReady(page, fixture.decisionId, 'Friday activity');
       return { decisionOpened: true, actor };
     },
     async 'save-answer'(actor, user, command) {
