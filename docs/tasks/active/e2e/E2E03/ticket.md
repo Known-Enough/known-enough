@@ -2,6 +2,8 @@
 
 Status: BLOCKED / claim released after user-requested run on 2026-10-19. The two existing approved accounts and an existing shared U1-organized two-member group were verified. The browser runner ended without persisting its phase/result summary; answer-save state is unverified. One read-only UI reconciliation did not complete fixture inspection. Preserve any possible `Friday activity` decision and do not recreate, save again, request an outcome or clean up until a successful readback establishes its state. [Run report](../../../../review-artifacts/E2E03/20261019T065759Z/report.md).
 
+**User-requested reporting correction — 2026-10-19:** The next attempt must follow [durable execution reporting](execution-reporting.md). Record a started report before browser work, persist each meaningful action's intent/result outside the browser, and retain exact sanitized controller/HTTP errors and readback evidence. A missing final browser summary must leave an identifiable last step and unresolved action, not an unexplained empty report. This is a prepared requirement, not installed logging, a rerun or recovered historical evidence; the historical BLOCKED result above remains unchanged.
+
 ## Goal and previous evidence
 
 Finish **two small scenarios**, using one decision and two existing approved synthetic users. A third scenario is optional. This is a limited regression result, not whole-project qualification.
@@ -10,12 +12,13 @@ Finish **two small scenarios**, using one decision and two existing approved syn
 
 ## Keep it small
 
-- One existing worker, one task at a time, two isolated browser contexts. No new agent/chat/schedule. Reuse existing browser tooling; do not build a new test framework.
+- One existing worker, one task at a time, two isolated browser contexts. No new agent/chat/schedule. Reuse existing browser tooling; add only the small external logging/wrapper integration needed to meet this ticket, not a new test framework.
 - Read required project instructions, this ticket, the previous report's results table and only relevant current publication evidence. Use focused snippets; avoid rereading entire work/monitor logs or repository history.
 - Aim for 15–20 minutes. Two required cases, third only if straightforward. Stop at the first reproducible failure within a dependent case; record it instead of repeatedly trying variations. Safe independent optional work may continue.
 - Maximum **one Find an outcome request**, plus **one optional assistant question**. No AI drafting, AI interpretation of private notes, automatic paid retries, budget/control changes or fresh signups/email. Report actual internal model calls/tokens when available; one UI request is not necessarily one provider call. Never invent usage or cost.
 - No full unit/browser suite, deployment, code fixes, IAM repair, CloudShell setup, broad AWS audit or account resets. Use the worker's own access, not A's credentials. A genuine missing prerequisite is BLOCKED with the exact reason.
 - Preserve participant consent, private isolation, exact proposal approval and unknown-request safeguards. Check status read-only once for an uncertain request; never resend it or clear its records to make a case pass.
+- Logging is part of execution, not a report to reconstruct at the end. The evidence writer must persist and read back a startup record before any app action. If that fails, record LOGGING_BLOCKED and perform no test writes. Keep the original two-case/optional-third scope and AI limits; better reporting does not authorize more product scenarios.
 
 ## Minimal setup
 
@@ -24,6 +27,8 @@ Site: https://main.d143q5ravxp5av.amplifyapp.com/
 Use [the existing private credential instructions](../E2E01/credentials.md). Read credentials privately on the execution machine; never print them, put them in prompts, or copy them between workers. Report users as U1/U2.
 
 Record current serving frontend and backend evidence from the latest completed publication receipts; do not assume Git HEAD equals the deployed runtime. Use existing bounded readback tooling only if needed. Do not start a deployment to synchronize versions.
+
+Before creating or resubmitting any decision, perform the previously required read-only reconciliation of the selected group and both users' state. Persist which old fixture/action was found, its current observable state, what remains unknown, and whether it is safe to continue. Do not turn an uncompleted reconciliation into a new blank attempt. Follow the explicit no-repeat rule in [execution reporting](execution-reporting.md#recovery-and-finalization).
 
 Prefer an existing positively owned synthetic group containing U1/U2. Otherwise create **one** `E2E03 <UTC>` group, invite the second approved synthetic account once through the app and accept. If either account/access/invitation is unavailable, state that prerequisite precisely; do not turn this into another onboarding investigation.
 
@@ -64,16 +69,17 @@ Run only if time/access remain. Uses at most one assistant request and may run i
 
 ## Evidence, closeout and completion
 
-Create `docs/review-artifacts/E2E03/<UTC>/report.md` and at most **two screenshots per attempted case**. Capture only useful end-state/failure evidence; do not record a video or a step-by-step transcript. Never capture credentials, tokens, headers, real-person data or invitation links.
+Create `docs/review-artifacts/E2E03/<UTC>/report.md`, append-only `events.jsonl`, incremental `summary.json`, and at most **two screenshots per attempted case**, following [execution reporting](execution-reporting.md). Capture useful end-state/failure evidence; the event journal is a compact action/status ledger, not a video, full UI transcript, raw HAR or raw console dump. Never capture credentials, tokens, headers, real-person data, other owners' private answers or invitation links.
 
 Report only:
 
 - UTC and actual serving source/publication references; U1/U2 aliases.
 - A three-row table: case, PASS/FAIL/BLOCKED/NOT_RUN, one-sentence actual result, evidence link. Optional 03 NOT_RUN is acceptable when explained.
 - Up to five short lines for failures: exact step, safe request ID/HTTP code, confirmed observation, next repair. Do not diagnose from a generic UI message alone or claim unknown logs were inspected.
+- Link the event journal, current summary, screenshots and sanitized failure packet. Show the last confirmed step, any in-flight/unknown action, browser/tool error or its explicitly unavailable status, and the exact next read-only check. Missing screenshots, HTTP acknowledgment or tool diagnostics each need a separate availability reason, not one generic "browser ended" sentence.
 - Outcome/assistant request counts and actual usage if known; UNKNOWN otherwise. Clearly distinguish no AI request from no available usage evidence.
 - One short final chat summary, matching the report. Keep the report under roughly 400 words, excluding identifiers/links/table.
 
-Update this ticket and the E2E index with observed results/source boundaries, publish the compact report through the worker's authorized repository workflow, and release the claim. No unrelated documentation rewrite. If positively owned work is settled, remove just the newly created synthetic fixture through the normal app; if any outcome is uncertain, retain it and name the next safe action. No broad cleanup or new support/email task.
+Publish the initial RUNNING report before browser work, refresh remote evidence at each completed case or unexpected stop, and publish the final compact report through the worker's authorized repository workflow. If synchronization fails, state exactly what remains local and give the last confirmed remote link; do not report a failed push as published. Update this ticket and the E2E index with observed results/source boundaries and release the claim. No unrelated documentation rewrite. If positively owned work is settled, remove just the newly created synthetic fixture through the normal app; if any outcome is uncertain, retain it and name the next safe action. No broad cleanup or new support/email task.
 
-Close the bounded run and publish its honest report after the two required cases are attempted. Mark E2E03 DONE only if both required cases PASS. Otherwise record FAIL/BLOCKED, the exact follow-up and release the claim; do not keep debugging or rerunning inside this task. Optional 03 cannot substitute for either required case. No whole-project reliability percentage or full-suite PASS is implied.
+Close the bounded run and publish its honest report after the two required cases are attempted. Mark E2E03 DONE only if both required cases PASS **and their per-action acknowledgments, owner readbacks and final reporting are present**. Otherwise record FAIL/BLOCKED, the exact follow-up and release the claim; do not keep debugging or rerunning inside this task. Optional 03 cannot substitute for either required case. No whole-project reliability percentage or full-suite PASS is implied.
