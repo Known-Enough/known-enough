@@ -39,6 +39,6 @@
   "nextSafeAction": "A future attempt must repair the caller-side login/readiness recorder first. Reconcile the same group again before any write; do not claim a product defect or E2E PASS from this run.",
   "publication": {
     "lastConfirmedUrl": "https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/E2E03/20261019T170618Z/report.md",
-    "unpublishedLocalChanges": true
+    "unpublishedLocalChanges": false
   }
 }
