@@ -254,7 +254,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
         if (proposal || owner.pendingQuestions.some(question => question.status === 'PENDING') || owner.disclosurePermissions.some(permission => permission.status === 'PENDING')) setDetailStep('proposal');
         else void generate();
       }}>{proposal ? ['AGREED', 'CLOSED'].includes(snapshot.status) ? 'View outcome' : 'View proposal' : owner.pendingQuestions.some(question => question.status === 'PENDING') || owner.disclosurePermissions.some(permission => permission.status === 'PENDING') ? 'Review follow-up' : 'Find an outcome'}</button>}
-      {staged && mcpUrl && <button type="button" className="ke-response-text-button" onClick={() => setAssistantOpen(true)}><PageIcon name="Sparkles" />Ask assistant</button>}
+      {staged && mcpUrl && <button type="button" className="ke-response-text-button" onClick={() => setAssistantOpen(true)}><PageIcon name="MessageCircle" />Chat</button>}
       {!staged && <button type="button" className="ke-response-text-button" onClick={() => setDetailStep('shared')}>Decision details<PageIcon name="ChevronRight" /></button>}
       {!owner && proposal && <button type="button" onClick={() => setDetailStep('proposal')}>View proposal</button>}
       </div>

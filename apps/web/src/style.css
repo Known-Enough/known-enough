@@ -1830,3 +1830,7 @@ dialog[data-standard-close] h2 { padding-right: 30px; }
 .ke-open-decision-dialog > button.ke-response-close, dialog button.ke-modal-dismiss { z-index: 10; pointer-events: auto; }
 
 .ke-alexa-reply-status { display: grid; gap: 3px; margin-top: 7px; color: var(--chat-muted); font-size: 11px; line-height: 1.5; }
+
+.ke-alexa-composer[data-scope="group"] { flex-wrap: wrap; }
+.ke-alexa-composer[data-scope="group"] textarea { flex-basis: 100%; }
+.ke-alexa-composer[data-scope="group"] > button[type="submit"] { margin-left: auto; }
