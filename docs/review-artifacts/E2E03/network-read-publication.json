@@ -1,0 +1,52 @@
+{
+  "result": "NETWORK_READ_REPAIR_PUBLISHED",
+  "recordedAt": "2026-10-19T22:10:07.121982+00:00",
+  "runtimeSourceSha": "1117433d4f486d9e8f5a931857e32dd90331908e",
+  "frontendSourceSha": "656c3dc514b4aa0fe8a1ee5ec5b0474dc791d028",
+  "apiSha256": "9e9c3672ffdbe2a93ca8fa99b83ca49247cea6fea4db2e2585dfc60402987572",
+  "workerSha256": "37bcbd5c936536da8d8e1ceca2081aae536711d0d603c1287b5af019c87d2790",
+  "frontend": {
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "amplifyJobId": "151",
+    "filesHashVerified": 10
+  },
+  "workflows": {
+    "readOnlyDiagnosis": 39331823826,
+    "emptyQueuePreflight": 39332276016,
+    "pauseSchedule": 39332390332,
+    "apiAndWorker": 39332472317,
+    "frontend": 39332724102,
+    "restoreSchedule": 39332718974
+  },
+  "admission": {
+    "enabled": true,
+    "totals": "UNCHANGED"
+  },
+  "schedule": {
+    "state": "ENABLED",
+    "matchingEmptySummaries": 1,
+    "paidDispatchReported": 0
+  },
+  "environment": "UNCHANGED",
+  "migration": "UNCHANGED",
+  "frontendConfigurationWrites": 0,
+  "staticChecks": {
+    "typescript": "PASS",
+    "changedSourceEslint": "PASS",
+    "runnerSyntax": "PASS",
+    "diagnosticReaderAst": "PASS",
+    "nativePackageCompilation": "PASS_IN_RELEASE",
+    "frontendProductionBuild": "PASS_IN_RELEASE",
+    "whitespace": "PASS"
+  },
+  "tests": "NOT_EXECUTED_BY_USER_DIRECTION",
+  "liveParticipantActions": 0,
+  "providerRequests": 0,
+  "signupOrEmailRequests": 0,
+  "iamChanges": 0,
+  "newCloudResources": 0,
+  "manualAcceptance": "PENDING",
+  "historicalFailureCause": "Early response CORS omission proven in source; SOURCE_UNAVAILABLE observed in window only. Exact initiating exception/correlation unproven.",
+  "scope": "Exact-origin/UUID early failures, bounded one-time GET recovery, ephemeral loopback connection closure, safe gateway diagnostics and user-visible error references. No command replay.",
+  "observation": "Existing schedule restored and one regular empty tick observed; no product test dispatched."
+}

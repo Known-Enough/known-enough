@@ -1,6 +1,9 @@
+# E2E03 — Small regression check
+
+**Network/read repair PUBLISHED — 2026-10-19T22:09Z / claim released.** API `1117433` / `9e9c3672`, worker `37bcbd5c`, frontend `656c3dc` / Amplify151; prior schedule and admission restored ENABLED. Early API errors retain exact-origin headers, safe UUIDs and bounded stage diagnostics; the ephemeral loopback transport closes its per-invocation connection. GETs recover at most once within the original deadline, while commands/approvals/AI requests never replay. Account/decision loading can show a safe server reference. Static/build/publication guards passed; **no tests or participant/AI calls**. Exact historical initiating error remains unproven; live acceptance remains pending and the prior E2E03 BLOCKED result is unchanged. [Repair](../../../../review-artifacts/E2E03/network-read-repair.md) · [Receipt](../../../../review-artifacts/E2E03/network-read-publication.json).
+
 **Latest run BLOCKED — 2026-10-19T21:52Z.** Both users and the existing fixture reconciled. U2's one private-answer save was acknowledged (HTTP200, own-view readback). A later read-only refresh succeeded, but reopening the decision timed out amid browser `net::ERR_FAILED` requests. Post-reload persistence/isolation and the outcome flow remain unverified; no outcome or assistant request was made. [Report](../../../../review-artifacts/E2E03/20261019T215250Z/report.md).
 
-# E2E03 — Small regression check
 
 **Stability repair PUBLISHED / acceptance pending.** Runtime `9569a82` adds bounded classified activation-read recovery and failed-cache eviction; the runner now bounds catalog/navigation/acknowledgment waits and retains safe error UUIDs. API/worker installed, prior schedule restored ENABLED; static checks only, no live rerun. [Repair](../../../../review-artifacts/E2E03/account-read-stability-repair.md).
 

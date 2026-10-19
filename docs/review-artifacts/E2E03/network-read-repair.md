@@ -1,6 +1,6 @@
 # E2E03 browser read recovery and early failure repair
 
-Status: API/worker PUBLISHED at `1117433`; frontend publication and prior schedule restoration pending. User explicitly requests repair with no tests. The historical [21:52Z run](20261019T215250Z/report.md) remains BLOCKED. Its U2 answer is acknowledged and must not be submitted again before a read-only owner check.
+Status: PUBLISHED. Runtime source `1117433` / API `9e9c3672` / worker `37bcbd5c`; frontend source `656c3dc` / Amplify job151. Prior admission and background schedule are ENABLED. [Publication receipt](network-read-publication.json). User explicitly requests repair with no tests. The historical [21:52Z run](20261019T215250Z/report.md) remains BLOCKED. Its U2 answer is acknowledged and must not be submitted again before a read-only owner check.
 
 ## Evidence
 
@@ -17,3 +17,7 @@ The browser recorded network-level failures, rather than readable HTTP error res
 ## Verification boundary
 
 TypeScript compilation, changed-file ESLint, runner/Python syntax and whitespace passed. No unit/browser/live/product/AI/signup test was run. The repair improves failure handling and traceability; live recovery and the remaining outcome scenario are unverified.
+
+## Publication
+
+[Coordinated API/worker release](https://github.com/Known-Enough/known-enough/actions/runs/39332472317), [frontend publication](https://github.com/Known-Enough/known-enough/actions/runs/39332724102), and [schedule restoration](https://github.com/Known-Enough/known-enough/actions/runs/39332718974) succeeded. Ten published files matched their hashes. Environment, migration and cumulative totals were preserved; frontend configuration matched with zero writes. The original schedule was restored and one regular empty tick reported zero paid dispatch. No functional/manual acceptance result is inferred. Repair claim released.
