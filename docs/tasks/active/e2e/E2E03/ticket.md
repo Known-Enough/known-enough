@@ -1,6 +1,6 @@
 # E2E03 — Cheap, focused regression check
 
-Status: READY / unclaimed. Creating this task starts no run. B may claim it at the next genuine idle intake under existing standing testing authority; no new routine approval is needed. This A chat remains documentation-only/no tests. Preserve any genuinely active claim.
+Status: BLOCKED / claim released after user-requested run on 2026-10-19. The two existing approved accounts and an existing shared U1-organized two-member group were verified. The browser runner ended without persisting its phase/result summary; answer-save state is unverified. One read-only UI reconciliation did not complete fixture inspection. Preserve any possible `Friday activity` decision and do not recreate, save again, request an outcome or clean up until a successful readback establishes its state. [Run report](../../../../review-artifacts/E2E03/20261019T065759Z/report.md).
 
 ## Goal and previous evidence
 
