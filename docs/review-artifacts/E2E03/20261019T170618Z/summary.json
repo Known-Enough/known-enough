@@ -2,10 +2,10 @@
   "runId": "20261019T170618Z",
   "state": "RUNNING",
   "startedAt": "2026-10-19T17:06:18Z",
-  "lastProgressAt": "2026-10-19T17:24:00Z",
+  "lastProgressAt": "2026-10-19T17:26:10Z",
   "endedAt": null,
-  "lastConfirmedAction": "reconcile.u2.group-metadata",
-  "inFlightAction": "case01.reconcile-after-timeout",
+  "lastConfirmedAction": "case01.reconcile-after-timeout",
+  "inFlightAction": "case01.u1.save-draft.retry1",
   "cases": {
     "01": "NOT_RUN",
     "02": "NOT_RUN",
@@ -19,7 +19,7 @@
     "outcome": 0,
     "assistant": 0
   },
-  "requestObservationComplete": false,
+  "requestObservationComplete": true,
   "providerUsage": {
     "calls": null,
     "tokens": null,
@@ -29,13 +29,8 @@
     "events.jsonl",
     "preflight.json"
   ],
-  "error": {
-    "domain": "AUTOMATION",
-    "code": "TimeoutError",
-    "state": "UNKNOWN_WRITE_DISPATCH",
-    "detail": "Controller timed out after 36.651 seconds and did not retain the failing step or request-failure routes; draft-save dispatch is unknown."
-  },
-  "nextSafeAction": "Read the selected group\u2019s Friday activity draft presence and draft-request statuses as U1 before deciding whether the prior save can be retried.",
+  "error": null,
+  "nextSafeAction": "Submit the manual-choice draft once with stage-level diagnostics and read back the saved draft before the separate create action.",
   "publication": {
     "lastConfirmedUrl": "https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/E2E03/20261019T170618Z/report.md",
     "unpublishedLocalChanges": true
