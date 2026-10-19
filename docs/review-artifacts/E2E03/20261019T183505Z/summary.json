@@ -1,13 +1,13 @@
 {
   "runId": "20261019T183505Z",
-  "state": "RUNNING",
+  "state": "BLOCKED",
   "startedAt": "2026-10-19T18:35:05.698Z",
-  "lastProgressAt": "2026-10-19T18:35:05.698Z",
+  "lastProgressAt": "2026-10-19T18:38:50.055Z",
   "endedAt": null,
-  "lastConfirmedAction": null,
+  "lastConfirmedAction": "u2.inspect after the rejected save",
   "inFlightAction": null,
   "cases": {
-    "01": "NOT_RUN",
+    "01": "FAIL",
     "02": "NOT_RUN",
     "03": "NOT_RUN"
   },
@@ -23,17 +23,27 @@
   "providerUsage": {
     "calls": 0,
     "tokens": null,
-    "availability": "NO_PROVIDER_REQUEST_PLANNED"
+    "availability": "NO_OUTCOME_OR_ASSISTANT_REQUEST; TOKEN_USAGE_NOT_READ"
   },
   "evidence": [
     "events.jsonl",
     "summary.json",
-    "report.md"
+    "u2.save-answer-failure.png",
+    "u2.refresh-failure.png"
   ],
-  "error": null,
-  "nextSafeAction": "Authenticate U1 and U2, reconcile the exact existing fixture, then test decision loading; stop on first failure.",
+  "error": {
+    "code": "STALE_CONTEXT",
+    "domain": "APP_HTTP",
+    "status": 409,
+    "route": "/decisions/:id/commands",
+    "reference": "998fac95-f718-4113-91d8-c0802b401bb1",
+    "rootCause": "UNVERIFIED_TRIGGER; server classified command as stale context.",
+    "screenshot": "u2.save-answer-failure.png"
+  },
+  "nextSafeAction": "Read U2\u2019s own answer state once before any further attempt; do not repeat the rejected save. Repair the stale-context refresh/recovery path before rerunning the two-user flow.",
   "publication": {
-    "lastConfirmedUrl": null,
+    "lastConfirmedUrl": "https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/E2E03/20261019T183505Z/report.md",
+    "commit": "55c1f55",
     "unpublishedLocalChanges": true
   },
   "serving": {
@@ -43,6 +53,26 @@
   },
   "runnerSource": "3648e6a432ecd6e696572cd44483ba31e93dbf91",
   "fixture": "previously acknowledged Friday activity decision; private identifiers remain local",
-  "appWriteRequestsObserved": 0,
-  "reconciliation": null
+  "appWriteRequestsObserved": 2,
+  "reconciliation": {
+    "bothUsersAuthenticated": true,
+    "exactGroupVisibleToBoth": true,
+    "exactDecisionVisibleToBoth": true,
+    "originalDraftVisibleToBoth": true,
+    "newGroupOrDecisionCreated": false,
+    "u1AnswerSavedAndOwnerReadback": true,
+    "u2AnswerSaved": "NOT_CONFIRMED; rejected request was not repeated"
+  },
+  "lastError": {
+    "code": "AUTHENTICATED_GROUP_READ_TIMEOUT",
+    "domain": "AUTOMATION",
+    "stage": "u2.refresh",
+    "rootCause": "The runner did not observe the expected authenticated group response within its timeout; no corresponding HTTP error was recorded.",
+    "screenshot": "u2.refresh-failure.png",
+    "status": null,
+    "route": null
+  },
+  "endedAtAvailability": "Runner termination time and exit code were not exposed after operator interrupt.",
+  "appWriteRequestsAcknowledged": 1,
+  "failureExplanation": "Server returned STALE_CONTEXT for U2 after U1 saved. Stale page state is the leading explanation, not proven."
 }
