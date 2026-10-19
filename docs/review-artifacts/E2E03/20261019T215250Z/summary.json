@@ -1,21 +1,27 @@
 {
   "runId": "20261019T215250Z",
-  "state": "RUNNING",
+  "state": "BLOCKED",
   "startedAt": "2026-10-19T21:52:53.476Z",
-  "endedAt": null,
+  "endedAt": "2026-10-19T21:58:04Z",
   "cases": {
-    "01": "NOT_RUN",
+    "01": "BLOCKED",
     "02": "NOT_RUN",
     "03": "NOT_RUN"
   },
-  "lastConfirmedAction": null,
+  "lastConfirmedAction": "u2.refresh",
   "inFlightAction": null,
   "observedRequests": {
     "outcome": 0,
     "assistant": 0
   },
-  "error": null,
-  "lastProgressAt": "2026-10-19T21:52:53.479Z",
+  "error": {
+    "code": "AUTHENTICATED_GROUP_READ_TIMEOUT",
+    "domain": "AUTOMATION",
+    "stage": "u1.login",
+    "screenshot": "u1.login-failure.png",
+    "pageOrigin": "https://main.d143q5ravxp5av.amplifyapp.com"
+  },
+  "lastProgressAt": "2026-10-19T21:58:04Z",
   "serving": {
     "frontend": "Amplify job 150 (unchanged)",
     "apiSource": "9569a82eb370032c01d00ea518a053438aa85b44",
@@ -24,5 +30,21 @@
     "publicationRun": "https://github.com/Known-Enough/known-enough/actions/runs/39311668948",
     "scheduleRestoreRun": "https://github.com/Known-Enough/known-enough/actions/runs/39329850471"
   },
-  "case01Reconciliation": "PENDING"
+  "case01Reconciliation": "MATCHED_FOR_BOTH_USERS",
+  "lastError": {
+    "code": "TimeoutError",
+    "domain": "AUTOMATION",
+    "stage": "u2.open-created-decision",
+    "screenshot": "u2.open-created-decision-failure.png",
+    "pageOrigin": "https://main.d143q5ravxp5av.amplifyapp.com"
+  },
+  "appWrites": {
+    "accepted": 1,
+    "uncertain": 0,
+    "rejected": 0
+  },
+  "outcomeRequests": 0,
+  "assistantRequests": 0,
+  "aiProviderUsage": "No outcome or assistant request was made by this run; provider usage outside this run was not inspected.",
+  "nextSafeAction": "Repair or diagnose the browser network/open-decision failure; then verify U2 own-answer persistence read-only before any new answer write."
 }

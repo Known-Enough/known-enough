@@ -1,3 +1,5 @@
+**Latest run BLOCKED — 2026-10-19T21:52Z.** Both users and the existing fixture reconciled. U2's one private-answer save was acknowledged (HTTP200, own-view readback). A later read-only refresh succeeded, but reopening the decision timed out amid browser `net::ERR_FAILED` requests. Post-reload persistence/isolation and the outcome flow remain unverified; no outcome or assistant request was made. [Report](../../../../review-artifacts/E2E03/20261019T215250Z/report.md).
+
 # E2E03 — Small regression check
 
 **Stability repair PUBLISHED / acceptance pending.** Runtime `9569a82` adds bounded classified activation-read recovery and failed-cache eviction; the runner now bounds catalog/navigation/acknowledgment waits and retains safe error UUIDs. API/worker installed, prior schedule restored ENABLED; static checks only, no live rerun. [Repair](../../../../review-artifacts/E2E03/account-read-stability-repair.md).

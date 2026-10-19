@@ -1,3 +1,7 @@
+## Latest attempt — 2026-10-19T21:52Z
+
+**BLOCKED; run closed.** Two synthetic users signed in and reconciled the same existing two-member group, draft and decision. U1 already had a private answer. U2's planned answer was submitted once, returned HTTP200 and appeared in U2's own saved-answer view. After one read-only refresh, U2's decision could not be reopened before the runner timed out. Several `/decisions/:id/me` requests ended with browser `net::ERR_FAILED`; one later returned200, and a concurrent `/account` request also failed at the network layer. No server response/reference was available for the timeout. The runner was closed; no answer was resubmitted. Case01 remains BLOCKED because post-reload persistence/isolation could not be verified; case02/03 NOT_RUN. One app write accepted; no outcome or assistant requests. [Run report](../../../../review-artifacts/E2E03/20261019T215250Z/report.md) · [events](../../../../review-artifacts/E2E03/20261019T215250Z/events.jsonl) · [summary](../../../../review-artifacts/E2E03/20261019T215250Z/summary.json). Next: diagnose browser network/open-decision failure, then read U2's saved answer before any new write.
+
 # E2E03 — Cheap, focused regression check
 
 
