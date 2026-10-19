@@ -10,8 +10,9 @@ ACCOUNT = '092954139775'
 ROLE = 'KnownEnoughGithubStagingInspector'
 UUID = re.compile(r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$')
 EVENTS = {'FIX01_PUBLIC_DRAFT_FAILURE', 'FIX01_PUBLIC_DRAFT_DIAGNOSTIC', 'PUBLIC_DRAFT_HTTP_RESULT', 'PRIVATE_ANSWERS_HTTP_RESULT',
-          'known-enough.group-request', 'known-enough.group-result', 'known-enough.group-failure'}
-GROUP_OPERATIONS = {'group.create', 'group.list', 'group.open', 'group.accept', 'group.invite', 'group.manage', 'group.draft', 'group.delete', 'account.read', 'account.register'}
+          'known-enough.group-request', 'known-enough.group-result', 'known-enough.group-failure',
+          'known-enough.account-failure', 'known-enough.account-lookup-repair-deferred'}
+GROUP_OPERATIONS = {'group.create', 'group.list', 'group.open', 'group.accept', 'group.invite', 'group.manage', 'group.draft', 'group.delete', 'account.read', 'account.status', 'account.register'}
 TYPES = {'string', 'number', 'boolean', 'object', 'array', 'null', 'missing', 'integer', 'int', 'unknown'}
 CODES = {'invalid_type', 'invalid_value', 'invalid_union', 'unrecognized_keys', 'too_small', 'too_big', 'invalid_format', 'not_multiple_of', 'custom'}
 PHASES = {'REQUEST_STARTED', 'MODEL_VALIDATION_FAILURE', 'PROVIDER_DISPATCHED', 'PROVIDER_COMPLETED',
@@ -75,6 +76,7 @@ try:
     for _ in range(5):
         filter_pattern = '"' + request_id + '"' if request_id else (
             '{ $.event = "FIX01_PUBLIC_DRAFT_FAILURE" || $.event = "known-enough.group-failure" '
+            '|| $.event = "known-enough.account-failure" || $.event = "known-enough.account-lookup-repair-deferred" '
             '|| ($.event = "PUBLIC_DRAFT_HTTP_RESULT" && $.result = "FAILED") '
             '|| ($.event = "PRIVATE_ANSWERS_HTTP_RESULT" && $.result = "FAILED") }')
         args = ['logs', 'filter-log-events', '--log-group-name', '/aws/lambda/known-enough-stage-api',
@@ -129,6 +131,11 @@ try:
                 item['operation'] = value['operation']
             if value.get('sessionCode') in {'SESSION_INVALID', 'SESSION_STORAGE_UNAVAILABLE', 'SESSION_TIMEOUT', 'SESSION_REQUEST_LIMIT', 'SESSION_CAPACITY'}:
                 item['sessionCode'] = value['sessionCode']
+            if value.get('event') == 'known-enough.account-lookup-repair-deferred' and value.get('code') in {
+                    'PARTITION_INVALID', 'PARTITION_CAPACITY', 'PARTITION_CONFLICT', 'PARTITION_STALE',
+                    'PARTITION_TIMEOUT', 'PARTITION_REQUEST_LIMIT', 'PARTITION_IDENTITY_CONFLICT',
+                    'SESSION_INVALID', 'SESSION_STORAGE_UNAVAILABLE', 'SESSION_TIMEOUT', 'SESSION_REQUEST_LIMIT', 'SESSION_CAPACITY'}:
+                item['storageCode'] = value['code']
             if isinstance(value.get('causes'), list):
                 item['causes'] = [cause for cause in value['causes'][:5] if cause in {'AccessDeniedException', 'ResourceNotFoundException',
                     'ThrottlingException', 'TransactionCanceledException', 'TransactionConflictException', 'TimeoutError', 'AbortError'}]
