@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
+import { setTimeout as delay } from 'node:timers/promises';
 import { z } from 'zod';
 import { DynamoDBClient, TransactGetItemsCommand, TransactWriteItemsCommand,
   type TransactWriteItem } from '@aws-sdk/client-dynamodb';
@@ -53,6 +54,29 @@ function activationRejected(error: unknown, size: number) {
     && ['None', 'ConditionalCheckFailed', 'TransactionConflict'].includes(reason.Code))
     && value.CancellationReasons.slice(0, 3).some(reason => reason.Code === 'ConditionalCheckFailed');
 }
+function activationReadConflict(error: unknown) {
+  if (!error || typeof error !== 'object') return false;
+  const value = error as { name?: unknown; CancellationReasons?: unknown };
+  if (value.name !== 'TransactionCanceledException' || !Array.isArray(value.CancellationReasons)
+    || value.CancellationReasons.length !== 3) return false;
+  return value.CancellationReasons.every(reason => reason && typeof reason === 'object' && !Array.isArray(reason)
+    && ['None', 'TransactionConflict'].includes(reason.Code))
+    && value.CancellationReasons.some(reason => reason.Code === 'TransactionConflict');
+}
+function activationReadDiagnostic(io: PartitionIOContext, attempt: number, result: 'RETRYING' | 'FAILED' | 'RECOVERED', error?: unknown) {
+  const value = error && typeof error === 'object' ? error as { name?: unknown; CancellationReasons?: unknown } : {};
+  const names = ['TransactionCanceledException', 'TransactionConflictException', 'AccessDeniedException', 'ResourceNotFoundException',
+    'ProvisionedThroughputExceededException', 'ThrottlingException', 'RequestLimitExceeded', 'InternalServerError', 'ValidationException', 'AbortError'];
+  const codes = ['None', 'TransactionConflict', 'ConditionalCheckFailed', 'ProvisionedThroughputExceeded', 'ThrottlingError', 'ValidationError', 'ItemCollectionSizeLimitExceeded'];
+  try { console.warn(JSON.stringify({ event: 'known-enough.storage-read', command: 'TransactGetItems', stage: 'ACTIVATION', attempt, result,
+    ...(error ? { errorType: typeof value.name === 'string' && names.includes(value.name) ? value.name : 'OTHER',
+      cancellationCodes: Array.isArray(value.CancellationReasons) ? value.CancellationReasons.slice(0, 3).map(reason =>
+        reason && typeof reason === 'object' && codes.includes(reason.Code) ? reason.Code : 'OTHER') : [],
+      cancellationCount: Array.isArray(value.CancellationReasons) ? Math.min(value.CancellationReasons.length, 100) : null } : {}),
+    ...(io.diagnosticRequestId && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(io.diagnosticRequestId)
+      ? { requestId: io.diagnosticRequestId } : {}) })); }
+  catch { /* No item contents, provider messages or identity; diagnostics cannot affect authority. */ }
+}
 
 export function createPartitionManagedDriver(options: PartitionManagedOptions): {
   prepareDecisionCommit: (command: TransactWriteItemsCommand, context: PartitionIOContext) => Promise<TransactWriteItem[]>;
@@ -92,17 +116,32 @@ export function createPartitionManagedDriver(options: PartitionManagedOptions): 
   const base = createDynamoPartitionTransport('KnownEnoughPartitions', 'us-east-1');
   const discovery = createPartitionMembershipReader({ sourceSha: plan.sourceSha, planHash: plan.planHash,
     cursorKey: Buffer.from(captured.cursorKey), verifiedTarget: { ...captured.verifiedTarget } });
-  // One atomic activation read per operation context, including parallel reads. It never replaces the commit conditions.
+  // Share successful atomic activation reads within an operation, never rejected promises.
+  // Only a fully classified transient READ conflict can be repeated; commit conditions stay exact.
   const guards = new WeakMap<PartitionIOContext, Promise<TransactWriteItem[]>>();
-  async function checkpoint(io: PartitionIOContext): Promise<TransactWriteItem[]> {
-    let pending = guards.get(io);
-    if (!pending) {
-      pending = (async () => {
+  async function readActivation(io: PartitionIOContext) {
+    for (let attempt = 1; ; attempt++) {
+      try {
         const result = await partitionCall(io, () => client.send(new TransactGetItemsCommand({ TransactItems: [
           { Get: { TableName: sourceArn, Key: attributes(sourceKey) } },
           { Get: { TableName: target.partitionArn, Key: attributes(controlKey) } },
           { Get: { TableName: journalArn, Key: attributes(journalKey) } },
         ] }), { abortSignal: io.signal }));
+        if (attempt > 1) activationReadDiagnostic(io, attempt, 'RECOVERED');
+        return result;
+      } catch (error) {
+        const retry = attempt < 3 && activationReadConflict(error);
+        activationReadDiagnostic(io, attempt, retry ? 'RETRYING' : 'FAILED', error);
+        if (!retry) throw error;
+        await partitionCall(io, () => delay(25 * attempt + Math.floor(Math.random() * 25), undefined, { signal: io.signal }), false);
+      }
+    }
+  }
+  async function checkpoint(io: PartitionIOContext): Promise<TransactWriteItem[]> {
+    let pending = guards.get(io);
+    if (!pending) {
+      pending = (async () => {
+        const result = await readActivation(io);
         if (!Array.isArray(result.Responses) || result.Responses.length !== 3) return unavailable();
         const source = sourceEnvelope.safeParse(result.Responses[0]?.Item);
         if (!source.success || source.data.PK.S !== sourceKey.PK || source.data.SK.S !== sourceKey.SK
@@ -135,8 +174,13 @@ export function createPartitionManagedDriver(options: PartitionManagedOptions): 
       })();
       guards.set(io, pending);
     }
-    const complete = await pending;
-    return partitionCall(io, async () => structuredClone(complete), false);
+    try {
+      const complete = await pending;
+      return await partitionCall(io, async () => structuredClone(complete), false);
+    } catch (error) {
+      if (guards.get(io) === pending) guards.delete(io);
+      throw error;
+    }
   }
   async function joined(items: TransactWriteItem[], io: PartitionIOContext) {
     if (!items.length || items.length > 97) throw new RepositoryCapacityError();

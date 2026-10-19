@@ -1,6 +1,8 @@
 # E2E03 — Cheap, focused regression check
 
 
+**Account-read/runner stability repair CODE_READY:** bounded classified read-conflict recovery, failed-cache eviction, correlated safe cancellation diagnostics and bounded catalog-only runner reads. No new app tests or AI calls. Compatible publication pending; [repair](../../../../review-artifacts/E2E03/account-read-stability-repair.md).
+
 ## Latest attempt — 2026-10-19T19:03Z
 
 **BLOCKED before case 01; claim released.** The latest independent-answer repair at source `eb66a97` was not exercised: U1 signed in, but U2 `GET /account` returned HTTP 503 while `/account/profile` returned 200. One read-only refresh eventually returned six groups after about 140 seconds; the runner exited before fixture reconciliation or U2 answer-state read. No app writes, outcomes or assistant requests occurred.

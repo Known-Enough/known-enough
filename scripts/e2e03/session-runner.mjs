@@ -4,6 +4,18 @@ import { createRequire } from 'node:module';
 import { parseArgs } from 'node:util';
 import { createInterface } from 'node:readline';
 import { pathToFileURL } from 'node:url';
+import { setTimeout, clearTimeout } from 'node:timers';
+
+async function readResponseJson(response, timeout = 5000) {
+  let timer;
+  try {
+    return await Promise.race([response.json(), new Promise((_, reject) => {
+      timer = setTimeout(() => reject(Object.assign(new Error('RESPONSE_BODY_TIMEOUT'), {
+        code: 'RESPONSE_BODY_TIMEOUT', domain: 'AUTOMATION',
+      })), timeout);
+    })]);
+  } finally { clearTimeout(timer); }
+}
 
 // Playwright Response exposes its HTTP method through request(), not method().
 export function groupsResponse(response) {
@@ -31,7 +43,7 @@ export function waitForGroups(page, timeout = 45000) {
       // Another response observer records JSON asynchronously. Do not read the
       // same body here: a locked stream can leave sign-in waiting until timeout.
       finish(Object.assign(new Error('APP_HTTP_' + response.status()), {
-        domain: 'APP_HTTP', status: response.status(), route: safeRoute(response.url()),
+        code: 'APP_HTTP_' + response.status(), domain: 'APP_HTTP', status: response.status(), route: safeRoute(response.url()),
       }));
     };
     const timer = setTimeout(() => finish(Object.assign(new Error('AUTHENTICATED_GROUP_READ_TIMEOUT'), {
@@ -160,8 +172,8 @@ export async function serve(options, recorder) {
   const persistFixture = () => atomicJson(fixtureFile, fixture);
   for (const [index, actor] of ['U1', 'U2'].entries()) {
     const context = await browser.newContext({ viewport: { width: 1365, height: 900 }, serviceWorkers: 'block' });
-    const page = await context.newPage(); page.setDefaultTimeout(15000);
-    const user = { page, context, credential: credentials[index], groups: [], bodies: new Map(), bodyJobs: [], writes: 0 };
+    const page = await context.newPage(); page.setDefaultTimeout(15000); page.setDefaultNavigationTimeout(20000);
+    const user = { page, context, credential: credentials[index], groups: [], catalogReads: new Set(), catalogReadError: null, writes: 0 };
     users.set(actor, user);
     context.on('request', request => {
       const route = safeRoute(request.url()); if (!route) return;
@@ -171,15 +183,34 @@ export async function serve(options, recorder) {
     context.on('response', response => {
       const route = safeRoute(response.url()); if (!route) return;
       recorder.event('HTTP_RESPONSE', { actor, route, method: response.request().method(), status: response.status() });
-      user.bodyJobs.push(response.json().then(body => {
-        user.bodies.set(new URL(response.url()).pathname, body);
-        if (groupsResponse(response) && Array.isArray(body.groups)) {
+      // Parse only catalogs needed for fixture reconciliation. Waiting on every
+      // old response body can hang after navigation aborts an earlier request.
+      if (groupsResponse(response)) {
+        const task = readResponseJson(response).then(body => {
+          if (!Array.isArray(body.groups)) throw Object.assign(new Error('GROUP_CATALOG_INVALID'), {
+            code: 'GROUP_CATALOG_INVALID', domain: 'AUTOMATION',
+          });
           for (const group of body.groups) {
             const at = user.groups.findIndex(value => value.id === group.id);
             if (at < 0) user.groups.push(group); else user.groups[at] = group;
           }
-        }
-      }).catch(() => {}));
+        }).catch(error => {
+          user.catalogReadError = error;
+          recorder.event('CATALOG_READ_FAILED', { actor, code: error.code || 'RESPONSE_BODY_UNAVAILABLE' });
+        }).finally(() => user.catalogReads.delete(task));
+        user.catalogReads.add(task);
+      } else if (response.request().method() === 'GET' && response.status() >= 400
+        && /^\/(account(?:\/profile)?|groups)$/.test(route)) {
+        // This observer is the only consumer of these GET error bodies. Export
+        // only the server UUID/category so a failure can be matched to logs.
+        void readResponseJson(response, 3000).then(body => {
+          const reference = typeof body.requestId === 'string' && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(body.requestId)
+            ? body.requestId : null;
+          const codes = ['RETRYABLE_SERVER_ERROR', 'FORBIDDEN', 'UNAUTHENTICATED', 'CAPACITY_EXCEEDED', 'STALE_CONTEXT'];
+          recorder.event('HTTP_FAILURE_DETAILS', { actor, route, status: response.status(), reference,
+            serverCode: codes.includes(body.error?.code) ? body.error.code : 'UNAVAILABLE' });
+        }).catch(() => recorder.event('HTTP_FAILURE_DETAILS_UNAVAILABLE', { actor, route, status: response.status() }));
+      }
     });
     context.on('requestfailed', request => {
       const route = safeRoute(request.url()); if (route) recorder.event('HTTP_FAILED', {
@@ -189,7 +220,10 @@ export async function serve(options, recorder) {
     page.on('close', () => recorder.event('PAGE_CLOSED', { actor }));
   }
   const mark = (actor, stage) => recorder.event('STEP', { actor, stage });
-  const settle = async user => { await Promise.allSettled(user.bodyJobs); };
+  const settle = async user => {
+    await Promise.allSettled([...user.catalogReads]);
+    if (user.catalogReadError) throw user.catalogReadError;
+  };
   const login = async (actor, user) => {
     const page = user.page;
     if (user.groups.length) return { authenticated: true, groupCount: user.groups.length, session: 'EXISTING_LIVE_CONTEXT' };
@@ -211,6 +245,7 @@ export async function serve(options, recorder) {
     if (!fixture) throw new Error('FIXTURE_NOT_SELECTED');
     const page = user.page;
     // A reload in this same page preserves the app's sessionStorage; no storageState serialization.
+    user.groups = []; user.catalogReadError = null;
     mark(actor, 'refresh-same-session'); await page.goto(options.site, { waitUntil: 'domcontentloaded' });
     const row = page.getByRole('button', { name: `Open group ${fixture.groupName}`, exact: true });
     await row.waitFor({ state: 'visible' }); await row.click();
@@ -247,7 +282,10 @@ export async function serve(options, recorder) {
     'open-group': openGroup,
     async refresh(actor, user) {
       const ready = waitForGroups(user.page).then(value => ({ value }), error => ({ error }));
-      mark(actor, 'explicit-read-only-refresh'); await user.page.reload({ waitUntil: 'domcontentloaded' });
+      user.groups = []; user.catalogReadError = null;
+      // A decision URL may not load /groups. Return to the catalog in the SAME
+      // authenticated context, then wait only for its bounded catalog read.
+      mark(actor, 'explicit-read-only-groups-refresh'); await user.page.goto(options.site, { waitUntil: 'domcontentloaded' });
       const result = await ready; if (result.error) throw result.error;
       await settle(user); return { authenticatedGroupsRead: true, groupCount: user.groups.length };
     },
@@ -329,7 +367,7 @@ export async function serve(options, recorder) {
       await waitForDecisionReady(page, fixture.decisionId, 'Friday activity');
       return { decisionOpened: true, actor };
     },
-    async 'save-answer'(actor, user, command) {
+    async 'save-answer'(actor, user) {
       if (!fixture?.decisionId) throw new Error('DECISION_NOT_CREATED');
       const page = user.page;
       const choices = actor === 'U1' ? ['Board games'] : ['Walk', 'Board games'];
@@ -401,8 +439,8 @@ async function main() {
   const recorder = new Recorder(values.evidence, path.basename(path.resolve(values.evidence)));
   if (values.prepare) {
     recorder.event('RUN_STARTED', { scope: 'E2E03; two users; one manual decision; outcome <=1; assistant <=1',
-      previousCause: 'CONFIRMED_WRONG_PLAYWRIGHT_RESPONSE_METHOD; no app/AWS change required' });
-    fs.writeFileSync(path.join(recorder.directory, 'report.md'), '# E2E03 runner repair and new run\n\nRUNNING. Startup journal and summary created before browser actions.\n\nConfirmed previous runner bug: response predicate used `response.method()` instead of `response.request().method()`. Same live page per user now preserves session storage. Failure capture runs before page closure.\n\n| Case | Result |\n| --- | --- |\n| 01 — two private saves | NOT_RUN |\n| 02 — one outcome/two approvals | NOT_RUN |\n| 03 — optional assistant | NOT_RUN |\n\n[Events](events.jsonl) · [Summary](summary.json)\n');
+      next: 'Record current serving publication and reconcile the existing fixture before any write.' });
+    fs.writeFileSync(path.join(recorder.directory, 'report.md'), '# E2E03 new run\n\nRUNNING. Startup journal and summary created before browser actions.\n\nRecord the current serving publication and latest report, then reconcile the existing fixture and both owners before any write. This startup record claims no diagnosed cause or completed product step.\n\n| Case | Result |\n| --- | --- |\n| 01 — two private saves | NOT_RUN |\n| 02 — one outcome/two approvals | NOT_RUN |\n| 03 — optional assistant | NOT_RUN |\n\n[Events](events.jsonl) · [Summary](summary.json)\n');
     console.log(JSON.stringify({ state: 'PREPARED', run: recorder.run }));
   } else if (values.serve) await serve(values, recorder);
 }

@@ -292,6 +292,9 @@ export function createPartitionGroupSession(transport: PartitionTransport,
     status(principal: TrustedPrincipal | null, diagnosticRequestId?: string) {
       return safe(async () => {
         const who = participant(principal); const io = partitionIO(limits);
+        if (diagnosticRequestId && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(diagnosticRequestId)) {
+          io.diagnosticRequestId = diagnosticRequestId;
+        }
         const snapshot = (state: Groups.GroupState) => {
           const account = state.accounts.find(account => account.subject === who);
           return account ? Groups.AccountSnapshot.parse({ status: account.status, displayName: account.displayName, version: account.version }) : null;
