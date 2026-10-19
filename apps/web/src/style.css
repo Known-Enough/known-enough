@@ -1765,4 +1765,4 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 .ke-group-filter { display: grid; gap: .4rem; margin: 0 0 1.25rem; max-width: 28rem; }
 .ke-group-filter label { font-size: .85rem; font-weight: 600; }
 .ke-group-filter input { width: 100%; margin: 0; }
-.ke-group-filter small { color: var(--muted); font-size: .78rem; }
+.ke-group-filter small { color: inherit; opacity: .75; font-size: .78rem; }
