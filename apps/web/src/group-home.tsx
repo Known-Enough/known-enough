@@ -1,3 +1,4 @@
+import { readDecisionListStatus, type DecisionListStatus } from './decision-list-status';
 import { Modal } from './modal';
 import { MemberAvatar } from './member-avatar';
 import { RenameAction } from './rename-action';
@@ -28,6 +29,37 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
     } catch { return []; }
   });
   const [showHiddenGroups, setShowHiddenGroups] = useState(false);
+  const [groupActions, setGroupActions] = useState<Record<string, DecisionListStatus>>({});
+  const actionApi = useRef(api); actionApi.current = api;
+  useEffect(() => {
+    let active = true, index = 0;
+    const controller = new AbortController();
+    setGroupActions({});
+    if (selectedGroupId) return () => controller.abort();
+    const listed = groups.filter(group => group.isOrganizer || showHiddenGroups || !hiddenGroups.includes(group.id));
+    async function worker() {
+      while (active && index < listed.length) {
+        const group = listed[index++]!;
+        let action: DecisionListStatus | undefined;
+        if (group.isOrganizer && group.decisions.some(decision => !decision.current)) action = { label: 'Needs your review', tone: 'action' };
+        else for (const decision of group.decisions) {
+          if (!active) return;
+          if (!decision.current) continue;
+          try {
+            const status = await readDecisionListStatus(actionApi.current, decision.id, controller.signal);
+            if (status.tone === 'action') {
+              action = status;
+              if (status.label !== 'Ready for outcome') break;
+            }
+          } catch { /* Unavailable reads never manufacture an action or reveal private details. */ }
+        }
+        if (active && action) setGroupActions(current => ({ ...current, [group.id]: action! }));
+      }
+    }
+    void Promise.all(Array.from({ length: Math.min(3, listed.length) }, () => worker()));
+    return () => { active = false; controller.abort(); };
+  }, [groups, selectedGroupId, hiddenGroups, showHiddenGroups]);
+
   function toggleHiddenGroup(group: Groups.GroupSnapshot) {
     if (group.isOrganizer) return;
     const next = hiddenGroups.includes(group.id) ? hiddenGroups.filter(id => id !== group.id) : [...hiddenGroups, group.id].slice(-256);
@@ -337,6 +369,7 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
               <span className="ke-group-row-meta"><span>{group.members.length} {group.members.length === 1 ? 'member' : 'members'}</span>
                 {decisionCount !== null && <><span className="ke-group-row-separator" aria-hidden="true">·</span><span>{decisionCount} {decisionCount === 1 ? 'decision' : 'decisions'}</span></>}</span>
             </span>
+            {groupActions[group.id] && <span className="ke-decision-status-chip ke-group-action-chip" data-tone="action">{groupActions[group.id]!.label}</span>}
             <PageIcon name="ChevronRight" />
           </button>
           <div className="ke-group-row-actions">

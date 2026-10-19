@@ -1,3 +1,4 @@
+import { readDecisionListStatus, type DecisionListStatus } from './decision-list-status';
 import { Modal } from './modal';
 import { ChoicePlanEditor } from './choice-plan-editor';
 import { addSuggestedOption, emptyChoicePlan, suggestedChoices, type CreationSuggestion } from './creation-options';
@@ -19,22 +20,6 @@ function publicChoiceValues(variable: KE.PublicDecisionFrame['variables'][number
   const rule = frame.rules.find(item => 'variableId' in item && item.variableId === variable.id && (item.operator === 'IN' || item.operator === 'COMPARE' && item.comparison === 'EQ'));
   return rule?.operator === 'IN' ? rule.values.map(value => valueText(value, variable)) : rule?.operator === 'COMPARE' ? [valueText(rule.value, variable)] : [];
 }
-type DecisionListStatus = { label: string; tone: 'action' | 'waiting' | 'agreed' | 'muted'; detail?: string | undefined };
-function decisionListStatus(owner: KE.OwnerDecisionSnapshot): DecisionListStatus {
-  const snapshot = owner.publicSnapshot;
-  const answered = snapshot.participantProgress ? `${snapshot.participantProgress.filter(item => item.answersSaved).length} of ${snapshot.frame.participants.length} answered` : undefined;
-  if (snapshot.status === 'AGREED') return { label: 'Decision agreed', tone: 'agreed' };
-  if (snapshot.status === 'CLOSED') return { label: 'Decision closed', tone: 'muted' };
-  if (['CREATING', 'DEFINING'].includes(snapshot.status)) return { label: 'Draft', tone: 'muted' };
-  if (owner.pendingQuestions.some(question => question.status === 'PENDING') || owner.disclosurePermissions.some(permission => permission.status === 'PENDING'))
-    return { label: 'Needs your answer', tone: 'action', detail: 'Private follow-up' };
-  if (snapshot.currentProposal) return owner.ownApproval
-    ? { label: 'Waiting for approvals', tone: 'waiting', detail: `${snapshot.frame.requiredParticipantIds.filter(id => snapshot.approvedParticipantIds.includes(id)).length} of ${snapshot.frame.requiredParticipantIds.length} approved` }
-    : { label: 'Ready for approval', tone: 'action', detail: 'Outcome proposed' };
-  if (owner.ownInputReadiness !== 'READY') return { label: 'Needs your answer', tone: 'action', detail: answered };
-  if (['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status)) return { label: 'Ready for outcome', tone: 'action', detail: answered };
-  return { label: 'Waiting for others', tone: 'waiting', detail: snapshot.status === 'REASONING' ? 'Finding an outcome' : answered };
-}
 function DecisionRow({ decision, status, organizer, busy, onOpen, onReview, onRename, onDelete }: {
   decision: Groups.GroupSnapshot['decisions'][number]; status: DecisionListStatus | undefined; organizer: boolean; busy: boolean;
   onOpen: () => void; onReview: () => void; onRename: (name: string) => Promise<void>; onDelete: () => void;
@@ -42,7 +27,7 @@ function DecisionRow({ decision, status, organizer, busy, onOpen, onReview, onRe
   const [menuOpen, setMenuOpen] = useState(false);
   const root = useRef<HTMLElement>(null), trigger = useRef<HTMLButtonElement>(null);
   const name = decision.title ?? 'Untitled decision';
-  const currentStatus: DecisionListStatus = decision.current ? status ?? { label: 'Loading status', tone: 'muted' } : { label: 'Needs review', tone: 'action' };
+  const currentStatus: DecisionListStatus = decision.current ? status ?? { label: 'Loading status', tone: 'muted' } : { label: organizer ? 'Needs your review' : 'Waiting for organizer', tone: organizer ? 'action' : 'waiting' };
   useEffect(() => {
     if (!menuOpen) return;
     const outside = (event: PointerEvent) => { if (event.target instanceof Node && !root.current?.contains(event.target)) setMenuOpen(false); };
@@ -86,11 +71,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
         const decision = decisions[index++]!;
         try {
           // Project immediately; private answers never enter list state or browser storage.
-          const response = await statusApi.current(`/decisions/${decision.id}/me`, { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(10000)]) });
-          if (!response.ok) throw new Error('Status unavailable');
-          const owner = KE.OwnerDecisionSnapshot.parse(await response.json());
-          if (owner.publicSnapshot.frame.decisionId !== decision.id) throw new Error('Wrong decision');
-          const status = decisionListStatus(owner);
+          const status = await readDecisionListStatus(statusApi.current, decision.id, controller.signal);
           if (active) setListStatuses(current => ({ ...current, [decision.id]: status }));
         } catch {
           if (active) setListStatuses(current => ({ ...current, [decision.id]: { label: 'Status unavailable', tone: 'muted' } }));
