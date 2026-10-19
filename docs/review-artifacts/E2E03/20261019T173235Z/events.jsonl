@@ -1,1 +1,49 @@
 {"utc":"2026-10-19T17:32:58.745Z","run":"20261019T173235Z","event":"RUN_STARTED","scope":"E2E03; two users; one manual decision; outcome <=1; assistant <=1","previousCause":"CONFIRMED_WRONG_PLAYWRIGHT_RESPONSE_METHOD; no app/AWS change required"}
+{"utc": "2026-10-19T17:33:13.540028+00:00", "event": "CALLER_RESULT", "run": "20261019T173235Z", "action": "runner.start", "state": "FAILED_BEFORE_BROWSER", "code": "NODE18_UNSUPPORTED_BY_PLAYWRIGHT", "exitCode": 1, "next": "Select the existing pinned Node24 binary before relaunch; no app requests."}
+{"utc":"2026-10-19T17:33:25.531Z","run":"20261019T173235Z","event":"ACTION_INTENT","actor":"U1","action":"u1.login"}
+{"utc":"2026-10-19T17:33:25.534Z","run":"20261019T173235Z","event":"STEP","actor":"U1","stage":"navigate"}
+{"utc":"2026-10-19T17:33:25.661Z","run":"20261019T173235Z","event":"STEP","actor":"U1","stage":"wait-hydrated-sign-in"}
+{"utc":"2026-10-19T17:33:26.115Z","run":"20261019T173235Z","event":"STEP","actor":"U1","stage":"submit-sign-in"}
+{"utc":"2026-10-19T17:33:26.243Z","run":"20261019T173235Z","event":"STEP","actor":"U1","stage":"wait-authenticated-groups"}
+{"utc":"2026-10-19T17:33:27.061Z","run":"20261019T173235Z","event":"HTTP_REQUEST","actor":"U1","route":"/account/profile","method":"GET"}
+{"utc":"2026-10-19T17:33:27.064Z","run":"20261019T173235Z","event":"HTTP_REQUEST","actor":"U1","route":"/account","method":"GET"}
+{"utc":"2026-10-19T17:33:27.440Z","run":"20261019T173235Z","event":"HTTP_RESPONSE","actor":"U1","route":"/account","method":"GET","status":200}
+{"utc":"2026-10-19T17:33:27.444Z","run":"20261019T173235Z","event":"HTTP_REQUEST","actor":"U1","route":"/groups","method":"GET"}
+{"utc":"2026-10-19T17:33:27.530Z","run":"20261019T173235Z","event":"HTTP_RESPONSE","actor":"U1","route":"/account/profile","method":"GET","status":200}
+{"utc":"2026-10-19T17:33:28.027Z","run":"20261019T173235Z","event":"HTTP_RESPONSE","actor":"U1","route":"/groups","method":"GET","status":200}
+{"utc":"2026-10-19T17:33:28.031Z","run":"20261019T173235Z","event":"HTTP_REQUEST","actor":"U1","route":"/groups","method":"GET"}
+{"utc":"2026-10-19T17:33:28.503Z","run":"20261019T173235Z","event":"HTTP_RESPONSE","actor":"U1","route":"/groups","method":"GET","status":200}
+{"utc":"2026-10-19T17:33:28.511Z","run":"20261019T173235Z","event":"HTTP_REQUEST","actor":"U1","route":"/groups","method":"GET"}
+{"utc":"2026-10-19T17:33:28.841Z","run":"20261019T173235Z","event":"HTTP_RESPONSE","actor":"U1","route":"/groups","method":"GET","status":200}
+{"utc":"2026-10-19T17:33:28.844Z","run":"20261019T173235Z","event":"HTTP_REQUEST","actor":"U1","route":"/invitations","method":"GET"}
+{"utc":"2026-10-19T17:33:29.130Z","run":"20261019T173235Z","event":"HTTP_RESPONSE","actor":"U1","route":"/invitations","method":"GET","status":200}
+{"utc":"2026-10-19T17:33:29.138Z","run":"20261019T173235Z","event":"HTTP_REQUEST","actor":"U1","route":"/decisions/:id/me","method":"GET"}
+{"utc":"2026-10-19T17:33:29.142Z","run":"20261019T173235Z","event":"HTTP_REQUEST","actor":"U1","route":"/decisions/:id/me","method":"GET"}
+{"utc":"2026-10-19T17:33:29.144Z","run":"20261019T173235Z","event":"HTTP_REQUEST","actor":"U1","route":"/decisions/:id/me","method":"GET"}
+{"utc":"2026-10-19T17:33:29.315Z","run":"20261019T173235Z","event":"ACTION_RESULT","actor":"U1","action":"u1.login","state":"VERIFIED","durationMs":3781,"actual":{"authenticated":true,"groupCount":6,"session":"SAME_LIVE_CONTEXT"}}
+{"utc":"2026-10-19T17:33:29.423Z","run":"20261019T173235Z","event":"HTTP_RESPONSE","actor":"U1","route":"/decisions/:id/me","method":"GET","status":200}
+{"utc":"2026-10-19T17:33:29.429Z","run":"20261019T173235Z","event":"HTTP_REQUEST","actor":"U1","route":"/decisions/:id/me","method":"GET"}
+{"utc":"2026-10-19T17:33:29.466Z","run":"20261019T173235Z","event":"HTTP_RESPONSE","actor":"U1","route":"/decisions/:id/me","method":"GET","status":200}
+{"utc":"2026-10-19T17:33:29.507Z","run":"20261019T173235Z","event":"HTTP_RESPONSE","actor":"U1","route":"/decisions/:id/me","method":"GET","status":200}
+{"utc":"2026-10-19T17:33:29.761Z","run":"20261019T173235Z","event":"HTTP_RESPONSE","actor":"U1","route":"/decisions/:id/me","method":"GET","status":200}
+{"utc":"2026-10-19T17:33:48.652Z","run":"20261019T173235Z","event":"ACTION_INTENT","actor":"U2","action":"u2.login"}
+{"utc":"2026-10-19T17:33:48.658Z","run":"20261019T173235Z","event":"STEP","actor":"U2","stage":"navigate"}
+{"utc":"2026-10-19T17:33:48.742Z","run":"20261019T173235Z","event":"STEP","actor":"U2","stage":"wait-hydrated-sign-in"}
+{"utc":"2026-10-19T17:33:49.110Z","run":"20261019T173235Z","event":"STEP","actor":"U2","stage":"submit-sign-in"}
+{"utc":"2026-10-19T17:33:49.245Z","run":"20261019T173235Z","event":"STEP","actor":"U2","stage":"wait-authenticated-groups"}
+{"utc":"2026-10-19T17:33:50.025Z","run":"20261019T173235Z","event":"HTTP_REQUEST","actor":"U2","route":"/account/profile","method":"GET"}
+{"utc":"2026-10-19T17:33:50.032Z","run":"20261019T173235Z","event":"HTTP_REQUEST","actor":"U2","route":"/account","method":"GET"}
+{"utc":"2026-10-19T17:33:51.876Z","run":"20261019T173235Z","event":"HTTP_RESPONSE","actor":"U2","route":"/account","method":"GET","status":503}
+{"utc":"2026-10-19T17:33:52.092Z","run":"20261019T173235Z","event":"HTTP_RESPONSE","actor":"U2","route":"/account/profile","method":"GET","status":200}
+{"utc":"2026-10-19T17:34:36.672Z","run":"20261019T173235Z","event":"ACTION_RESULT","actor":"U2","action":"u2.login","state":"FAILED","durationMs":48014,"diagnostic":{"code":"TimeoutError","stage":"u2.login","screenshot":"u2.login-failure.png","pageOrigin":"https://main.d143q5ravxp5av.amplifyapp.com"},"message":"See the last STEP and normalized HTTP events; raw errors are kept private."}
+{"utc":"2026-10-19T17:34:36.676Z","run":"20261019T173235Z","event":"ACTION_INTENT","actor":"U1","action":"u1.reconcile"}
+{"utc":"2026-10-19T17:34:37.543Z","run":"20261019T173235Z","event":"HTTP_FAILED","actor":"U2","route":"/account","method":"GET","code":"net::ERR_ABORTED"}
+{"utc":"2026-10-19T17:34:37.592Z","run":"20261019T173235Z","event":"ACTION_RESULT","actor":"U1","action":"u1.reconcile","state":"FAILED","durationMs":914,"diagnostic":{"code":"Error","stage":"u1.reconcile","screenshot":"u1.reconcile-failure.png","pageOrigin":"https://main.d143q5ravxp5av.amplifyapp.com"},"message":"See the last STEP and normalized HTTP events; raw errors are kept private."}
+{"utc":"2026-10-19T17:34:37.596Z","run":"20261019T173235Z","event":"ACTION_INTENT","actor":"U1","action":"u1.open-group"}
+{"utc":"2026-10-19T17:34:37.637Z","run":"20261019T173235Z","event":"ACTION_RESULT","actor":"U1","action":"u1.open-group","state":"FAILED","durationMs":39,"diagnostic":{"code":"Error","stage":"u1.open-group","screenshot":"u1.open-group-failure.png","pageOrigin":"https://main.d143q5ravxp5av.amplifyapp.com"},"message":"See the last STEP and normalized HTTP events; raw errors are kept private."}
+{"utc":"2026-10-19T17:34:37.641Z","run":"20261019T173235Z","event":"ACTION_INTENT","actor":"U1","action":"u1.inspect"}
+{"utc":"2026-10-19T17:34:37.661Z","run":"20261019T173235Z","event":"ACTION_RESULT","actor":"U1","action":"u1.inspect","state":"VERIFIED","durationMs":18,"actual":{"inspection":"PRIVATE_FILE","headingCount":6,"writes":0}}
+{"utc":"2026-10-19T17:34:52.766Z","run":"20261019T173235Z","event":"PAGE_CLOSED","actor":"U2"}
+{"utc":"2026-10-19T17:34:52.773Z","run":"20261019T173235Z","event":"PAGE_CLOSED","actor":"U1"}
+{"utc": "2026-10-19T17:37:13.585123+00:00", "run": "20261019T173235Z", "event": "SCREENSHOT_RETENTION", "relocatedPrivately": ["u1.open-group-failure.png", "u1.reconcile-failure.png"], "retained": "u2.login-failure.png", "reason": "Keep only the actual account-service failure screenshot in the report; redundant prerequisite screens retained privately."}
+{"utc": "2026-10-19T17:37:13.585123+00:00", "run": "20261019T173235Z", "event": "USER_STOP", "state": "STOPPED_BY_USER", "cases": {"01": "NOT_RUN", "02": "NOT_RUN", "03": "NOT_RUN"}, "appWrites": 0, "providerCalls": 0, "runnerRepair": "CODE_READY", "finalChangesTested": false, "browserPagesClosed": true, "runnerProcessStopped": true, "next": "Wait for a new user request before tests."}

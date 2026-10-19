@@ -1,19 +1,32 @@
 {
   "runId": "20261019T173235Z",
-  "state": "RUNNING",
+  "state": "STOPPED_BY_USER",
   "startedAt": "2026-10-19T17:32:58.745Z",
-  "endedAt": null,
+  "endedAt": "2026-10-19T17:37:13.585123+00:00",
   "cases": {
     "01": "NOT_RUN",
     "02": "NOT_RUN",
     "03": "NOT_RUN"
   },
-  "lastConfirmedAction": null,
+  "lastConfirmedAction": "u1.inspect",
   "inFlightAction": null,
   "observedRequests": {
     "outcome": 0,
     "assistant": 0
   },
-  "error": null,
-  "lastProgressAt": "2026-10-19T17:32:58.745Z"
+  "error": {
+    "domain": "APP_HTTP",
+    "route": "/account",
+    "httpStatus": 503,
+    "actor": "U2",
+    "rootCause": "UNVERIFIED",
+    "screenshot": "u2.login-failure.png"
+  },
+  "lastProgressAt": "2026-10-19T17:34:52.773Z",
+  "runnerRepair": "CODE_READY",
+  "appWrites": 0,
+  "providerCalls": 0,
+  "nextSafeAction": "Do not run tests until the user requests another run. On the next authorized run, use Node24 and the corrected session runner; account503 remains an unqualified app prerequisite.",
+  "finalCodeVerification": "NOT_RERUN_AFTER_USER_STOP",
+  "earlierRunnerChecks": "3 PASS before user stop; final diagnostics changes not tested"
 }

@@ -3,7 +3,7 @@
 | Task | Purpose | Status |
 | --- | --- | --- |
 | [E2E04](E2E04/README.md) | Fifteen distinct users, one complex shared outcome, fifteen approvals, useful/private AI, pagination and milestone screenshots. | READY / unclaimed; task preparation only. |
-| [E2E03](E2E03/README.md) | Lightweight regression with durable per-action reporting: two-user saves, one agreed outcome and optional private chat. | BLOCKED / claim released; case 01 BLOCKED by an authenticated group-read timeout; first draft dispatch unknown but readback absent; cases 02–03 NOT_RUN. [Latest report](../../../review-artifacts/E2E03/20261019T170618Z/report.md). |
+| [E2E03](E2E03/README.md) | Lightweight two-user regression with durable per-action reporting. | Tester repair CODE_READY; paused by user, all new scenarios NOT_RUN. [Repair report](../../../review-artifacts/E2E03/20261019T173235Z/report.md). No automatic rerun. |
 | [E2E01](E2E01/README.md) | Previous two-user run; evidence retained for reference. | Complete: scenarios 1–2 PASS, 3–10 BLOCKED; qualification BLOCKED. [Latest report](E2E01/run-2026-10-16-test02-test03.md) |
 | [E2E02](E2E02/README.md) | Two-user, sixteen-case current-release journeys. | Five formerly blocked cases PASS; earlier eleven retain dated evidence. [Completion report](../../../review-artifacts/E2E02/completion-20261017/report.md). Owned cleanup complete; claim released. No fresh sixteen-case single-source run. |
 

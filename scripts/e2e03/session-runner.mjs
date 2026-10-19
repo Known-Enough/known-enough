@@ -12,6 +12,35 @@ export function groupsResponse(response) {
     && url.hostname.endsWith('.execute-api.us-east-1.amazonaws.com')
     && /\/groups$/.test(url.pathname);
 }
+export function waitForGroups(page, timeout = 45000) {
+  // Surface actual account/groups failures immediately, rather than waiting for
+  // a successful groups response that the app will never request after failure.
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const finish = (error, response) => {
+      if (settled) return; settled = true; clearTimeout(timer);
+      page.off('response', onResponse); page.off('close', onClose);
+      if (error) reject(error); else resolve(response);
+    };
+    const onClose = () => finish(Object.assign(new Error('PAGE_CLOSED'), { domain: 'AUTOMATION' }));
+    const onResponse = async response => {
+      if (groupsResponse(response)) { finish(null, response); return; }
+      const url = new URL(response.url());
+      if (response.request().method() !== 'GET' || !safeRoute(response.url())
+        || !/^\/(account|groups)$/.test(url.pathname) || response.status() < 400) return;
+      let body = {}; try { body = await response.json(); } catch { /* Status is still evidence. */ }
+      const safe = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,100}$/.test(value) ? value : null;
+      finish(Object.assign(new Error('APP_HTTP_' + response.status()), {
+        domain: 'APP_HTTP', status: response.status(), route: safeRoute(response.url()),
+        serverCode: safe(body.error?.code), reference: safe(body.requestId),
+      }));
+    };
+    const timer = setTimeout(() => finish(Object.assign(new Error('AUTHENTICATED_GROUP_READ_TIMEOUT'), {
+      domain: 'AUTOMATION', code: 'AUTHENTICATED_GROUP_READ_TIMEOUT',
+    })), timeout);
+    page.on('response', onResponse); page.once('close', onClose);
+  });
+}
 export function safeRoute(raw) {
   const url = new URL(raw);
   if (!url.hostname.endsWith('.execute-api.us-east-1.amazonaws.com')) return null;
@@ -59,7 +88,8 @@ export class Recorder {
     } catch (error) {
       // Capture before browser/context shutdown, even when authentication failed.
       let screenshot = 'PAGE_UNAVAILABLE';
-      if (page && !page.isClosed()) {
+      const captures = fs.readdirSync(this.directory).filter(file => file.endsWith('.png')).length;
+      if (page && !page.isClosed() && captures < 2) {
         const file = action.replace(/[^a-zA-Z0-9._-]/g, '_') + '-failure.png';
         try {
           await page.screenshot({ path: path.join(this.directory, file), timeout: 5000,
@@ -68,9 +98,13 @@ export class Recorder {
           screenshot = file;
         } catch (captureError) { screenshot = 'CAPTURE_FAILED:' + captureError.name; }
       }
-      const diagnostic = { code: error.name || 'Error', stage: action, screenshot,
+      if (captures >= 2) screenshot = 'SCREENSHOT_LIMIT_REACHED';
+      const diagnostic = { code: error.code || error.name || 'Error',
+        domain: error.domain || 'AUTOMATION', stage: action, screenshot,
+        ...(error.domain === 'APP_HTTP' ? { status: error.status, route: error.route,
+          serverCode: error.serverCode, reference: error.reference } : {}),
         pageOrigin: page && !page.isClosed() ? new URL(page.url()).origin : null };
-      this.summary.error = diagnostic; this.summary.inFlightAction = null;
+      this.summary.error ??= diagnostic; this.summary.lastError = diagnostic; this.summary.inFlightAction = null;
       this.event('ACTION_RESULT', { actor, action, state: 'FAILED', durationMs: Date.now() - started,
         diagnostic, message: 'See the last STEP and normalized HTTP events; raw errors are kept private.' });
       throw error;
@@ -79,6 +113,10 @@ export class Recorder {
 }
 
 export async function serve(options, recorder) {
+  if (Number(process.versions.node.split('.')[0]) < 20) {
+    recorder.event('STARTUP_FAILED', { code: 'NODE20_OR_NEWER_REQUIRED', browserStarted: false });
+    throw new Error('NODE20_OR_NEWER_REQUIRED');
+  }
   const credentials = JSON.parse(fs.readFileSync(options.credentials, 'utf8')).users;
   if (!Array.isArray(credentials) || credentials.length !== 2) throw new Error('TWO_SYNTHETIC_USERS_REQUIRED');
   const privateDir = path.resolve(options['private-dir']); fs.mkdirSync(privateDir, { recursive: true, mode: 0o700 });
@@ -86,7 +124,7 @@ export async function serve(options, recorder) {
   const require = createRequire(path.join(path.resolve(options.dependencies || '.'), 'package.json'));
   const { chromium } = require('playwright');
   const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
-  const users = new Map(); let fixture = null;
+  const users = new Map(); let fixture = null; let halted = Boolean(recorder.summary.error);
   const fixtureFile = path.join(privateDir, 'fixture.json');
   if (fs.existsSync(fixtureFile)) fixture = JSON.parse(fs.readFileSync(fixtureFile, 'utf8'));
   const persistFixture = () => atomicJson(fixtureFile, fixture);
@@ -124,6 +162,7 @@ export async function serve(options, recorder) {
   const settle = async user => { await Promise.allSettled(user.bodyJobs); };
   const login = async (actor, user) => {
     const page = user.page;
+    if (user.groups.length) return { authenticated: true, groupCount: user.groups.length, session: 'EXISTING_LIVE_CONTEXT' };
     mark(actor, 'navigate'); await page.goto(options.site, { waitUntil: 'domcontentloaded' });
     mark(actor, 'wait-hydrated-sign-in'); const entry = page.getByRole('button', { name: 'Sign in', exact: true }).first();
     await entry.waitFor({ state: 'visible' }); await entry.click();
@@ -131,7 +170,7 @@ export async function serve(options, recorder) {
     await page.getByLabel('Username', { exact: true }).fill(user.credential.username);
     await page.getByLabel('Password', { exact: true }).fill(user.credential.password);
     // Listener precedes dispatch; handle rejection immediately to avoid an unhandled promise.
-    const ready = page.waitForResponse(groupsResponse, { timeout: 45000 }).then(value => ({ value }), error => ({ error }));
+    const ready = waitForGroups(page).then(value => ({ value }), error => ({ error }));
     mark(actor, 'submit-sign-in'); await page.locator('form.ke-auth-form button[type="submit"]').click();
     mark(actor, 'wait-authenticated-groups'); const result = await ready;
     if (result.error) throw result.error;
@@ -164,6 +203,12 @@ export async function serve(options, recorder) {
       return { priorFixtureMatches: 0, selectedSharedGroup: true, members: 2, mapping: 'PRIVATE_FILE' };
     },
     'open-group': openGroup,
+    async refresh(actor, user) {
+      const ready = waitForGroups(user.page).then(value => ({ value }), error => ({ error }));
+      mark(actor, 'explicit-read-only-refresh'); await user.page.reload({ waitUntil: 'domcontentloaded' });
+      const result = await ready; if (result.error) throw result.error;
+      await settle(user); return { authenticatedGroupsRead: true, groupCount: user.groups.length };
+    },
     async inspect(actor, user) {
       await settle(user);
       const page = user.page;
@@ -216,16 +261,24 @@ export async function serve(options, recorder) {
       command = JSON.parse(line); const actor = command.actor || 'U1'; const user = users.get(actor);
       if (command.operation === 'close') break;
       if (!user || !Object.hasOwn(operations, command.operation)) throw new Error('UNSUPPORTED_COMMAND');
+      if (halted && !['inspect', 'refresh'].includes(command.operation)) {
+        recorder.event('ACTION_SKIPPED', { actor, action: command.operation, reason: 'PRIOR_STEP_FAILED_REVIEW_REQUIRED' });
+        console.log(JSON.stringify({ state: 'SKIPPED', reason: 'PRIOR_STEP_FAILED_REVIEW_REQUIRED' })); continue;
+      }
       const action = command.action || actor.toLowerCase() + '.' + command.operation;
       const result = await recorder.step(actor, action, user.page, () => operations[command.operation](actor, user, command));
+      if (command.operation === 'refresh') halted = false;
       console.log(JSON.stringify(result));
     } catch (error) {
+      halted = true;
       if (command) atomicJson(path.join(privateDir, 'last-error.json'), { operation: command.operation,
         name: error.name, message: String(error.message), stack: String(error.stack) });
-      console.log(JSON.stringify({ state: 'FAILED', code: error.name, diagnostic: 'PRIVATE_ERROR_AND_PUBLIC_STEP_LEDGER' }));
+      console.log(JSON.stringify({ state: 'FAILED', code: recorder.summary.lastError?.code || error.name,
+        diagnostic: 'PRIVATE_ERROR_AND_PUBLIC_STEP_LEDGER' }));
     }
   }
-  await browser.close();
+  input.close(); await browser.close();
+  recorder.event('RUNNER_STOPPED', { browserClosed: true });
 }
 
 async function main() {
