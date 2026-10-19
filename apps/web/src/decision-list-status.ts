@@ -15,7 +15,7 @@ export function decisionListStatus(owner: KE.OwnerDecisionSnapshot): DecisionLis
     : { label: 'Ready for approval', tone: 'action', detail: 'Outcome proposed' };
   if (!required) return { label: 'Waiting for others', tone: 'waiting', detail: answered };
   if (owner.ownInputReadiness !== 'READY') return { label: 'Needs your answer', tone: 'action', detail: answered };
-  if (['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status)) return { label: 'Ready for outcome', tone: 'action', detail: answered };
+  if (['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status)) return { label: 'Ready for outcome', tone: 'muted', detail: answered };
   return { label: 'Waiting for others', tone: 'waiting', detail: snapshot.status === 'REASONING' ? 'Finding an outcome' : answered };
 }
 export async function readDecisionListStatus(api: (path: string, init?: RequestInit) => Promise<Response>, decisionId: string, signal: AbortSignal): Promise<DecisionListStatus> {

@@ -49,7 +49,7 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
             const status = await readDecisionListStatus(actionApi.current, decision.id, controller.signal);
             if (status.tone === 'action') {
               action = status;
-              if (status.label !== 'Ready for outcome') break;
+              break;
             }
           } catch { /* Unavailable reads never manufacture an action or reveal private details. */ }
         }
