@@ -1,0 +1,181 @@
+{
+  "source": "32e56aafd74d3aeb053a83f0afcf35cafdbd8883",
+  "awsWrites": 0,
+  "providerCalls": 0,
+  "events": [
+    {
+      "timestamp": 1792449836404,
+      "event": "known-enough.storage-read",
+      "command": "TransactGetItems",
+      "stage": "ACTIVATION",
+      "attempt": 1,
+      "result": "RETRYING",
+      "errorType": "TransactionCanceledException",
+      "cancellationCodes": [
+        "TransactionConflict",
+        "TransactionConflict",
+        "TransactionConflict"
+      ],
+      "cancellationCount": 3
+    },
+    {
+      "timestamp": 1792449836449,
+      "event": "known-enough.storage-read",
+      "command": "TransactGetItems",
+      "stage": "ACTIVATION",
+      "attempt": 2,
+      "result": "RECOVERED"
+    },
+    {
+      "timestamp": 1792449880299,
+      "event": "known-enough.storage-read",
+      "command": "TransactGetItems",
+      "stage": "ACTIVATION",
+      "attempt": 1,
+      "result": "RETRYING",
+      "errorType": "TransactionCanceledException",
+      "cancellationCodes": [
+        "TransactionConflict",
+        "TransactionConflict",
+        "TransactionConflict"
+      ],
+      "cancellationCount": 3
+    },
+    {
+      "timestamp": 1792449880339,
+      "event": "known-enough.storage-read",
+      "command": "TransactGetItems",
+      "stage": "ACTIVATION",
+      "attempt": 2,
+      "result": "RECOVERED"
+    },
+    {
+      "timestamp": 1792449928475,
+      "event": "known-enough.storage-read",
+      "command": "TransactGetItems",
+      "stage": "ACTIVATION",
+      "attempt": 1,
+      "result": "RETRYING",
+      "errorType": "TransactionCanceledException",
+      "cancellationCodes": [
+        "TransactionConflict",
+        "TransactionConflict",
+        "TransactionConflict"
+      ],
+      "cancellationCount": 3
+    },
+    {
+      "timestamp": 1792449928518,
+      "event": "known-enough.storage-read",
+      "command": "TransactGetItems",
+      "stage": "ACTIVATION",
+      "attempt": 2,
+      "result": "RECOVERED"
+    },
+    {
+      "timestamp": 1792450024196,
+      "event": "known-enough.storage-read",
+      "command": "TransactGetItems",
+      "stage": "ACTIVATION",
+      "attempt": 1,
+      "result": "RETRYING",
+      "errorType": "TransactionCanceledException",
+      "cancellationCodes": [
+        "TransactionConflict",
+        "TransactionConflict",
+        "TransactionConflict"
+      ],
+      "cancellationCount": 3
+    },
+    {
+      "timestamp": 1792450024228,
+      "event": "known-enough.storage-read",
+      "command": "TransactGetItems",
+      "stage": "ACTIVATION",
+      "attempt": 2,
+      "result": "RECOVERED"
+    },
+    {
+      "timestamp": 1792450034640,
+      "event": "known-enough.storage-read",
+      "command": "TransactGetItems",
+      "stage": "ACTIVATION",
+      "attempt": 1,
+      "result": "RETRYING",
+      "errorType": "TransactionCanceledException",
+      "cancellationCodes": [
+        "None",
+        "TransactionConflict",
+        "TransactionConflict"
+      ],
+      "cancellationCount": 3
+    },
+    {
+      "timestamp": 1792450034694,
+      "event": "known-enough.storage-read",
+      "command": "TransactGetItems",
+      "stage": "ACTIVATION",
+      "attempt": 2,
+      "result": "RETRYING",
+      "errorType": "TransactionCanceledException",
+      "cancellationCodes": [
+        "TransactionConflict",
+        "None",
+        "None"
+      ],
+      "cancellationCount": 3
+    },
+    {
+      "timestamp": 1792450034777,
+      "event": "known-enough.storage-read",
+      "command": "TransactGetItems",
+      "stage": "ACTIVATION",
+      "attempt": 3,
+      "result": "RECOVERED"
+    },
+    {
+      "timestamp": 1792450047691,
+      "event": "known-enough.storage-read",
+      "command": "TransactGetItems",
+      "stage": "ACTIVATION",
+      "attempt": 1,
+      "result": "RETRYING",
+      "errorType": "TransactionCanceledException",
+      "cancellationCodes": [
+        "TransactionConflict",
+        "None",
+        "TransactionConflict"
+      ],
+      "cancellationCount": 3
+    },
+    {
+      "timestamp": 1792450047734,
+      "event": "known-enough.storage-read",
+      "command": "TransactGetItems",
+      "stage": "ACTIVATION",
+      "attempt": 2,
+      "result": "RETRYING",
+      "errorType": "TransactionCanceledException",
+      "cancellationCodes": [
+        "TransactionConflict",
+        "TransactionConflict",
+        "TransactionConflict"
+      ],
+      "cancellationCount": 3
+    },
+    {
+      "timestamp": 1792450047814,
+      "event": "known-enough.storage-read",
+      "command": "TransactGetItems",
+      "stage": "ACTIVATION",
+      "attempt": 3,
+      "result": "RECOVERED"
+    }
+  ],
+  "failures": [],
+  "windowStart": 1792449280760,
+  "windowEnd": 1792450180760,
+  "result": "DRAFT_DIAGNOSTICS_READ",
+  "windowComplete": true,
+  "requestReferenceCorrelation": "WINDOW_ONLY"
+}
