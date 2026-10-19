@@ -1825,3 +1825,6 @@ dialog button.ke-modal-dismiss:hover { background: #edf3ed; color: #173c30; }
 dialog[data-standard-close] h2 { padding-right: 30px; }
 :root[data-theme="dark"] dialog button.ke-modal-dismiss { color: #bdd2c2; background: transparent; }
 :root[data-theme="dark"] dialog button.ke-modal-dismiss:hover { color: #e0eee4; background: #304536; }
+
+/* Keep close controls above animated content/header stacking layers. */
+.ke-open-decision-dialog > button.ke-response-close, dialog button.ke-modal-dismiss { z-index: 10; pointer-events: auto; }

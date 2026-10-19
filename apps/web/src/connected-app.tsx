@@ -149,7 +149,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     {view.kind !== 'decision' && status && <p role="status">{status}</p>}
     {view.kind === 'invalid' ? <section className="ke-card"><h2>This link is unavailable</h2><button onClick={() => move({ kind: 'groups' }, true)}>Back to groups</button></section>
       : view.kind === 'decision' ? <Modal closeButton={false} ref={decisionDialog} className="ke-decision-wizard ke-open-decision-dialog" data-decision-id={snapshot?.frame.decisionId} aria-labelledby="open-decision-title" onCancel={event => { event.preventDefault(); move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' }); }}>
-        <button className="secondary ke-response-close" aria-label="Close decision" onClick={() => move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' })}><PageIcon name="X" /></button>
+        <button type="button" className="secondary ke-response-close" aria-label="Close decision" onClick={() => move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' })}><PageIcon name="X" /></button>
         {!snapshot && <section className="ke-response-header" aria-busy={busy || !status}>
           <h2 id="open-decision-title">Your decision</h2>
           {!status && <LoadingSkeleton kind="decision" label="Loading current decision" />}
