@@ -1,0 +1,41 @@
+{
+  "runId": "20261019T180154Z",
+  "state": "RUNNING",
+  "startedAt": "2026-10-19T18:01:54.729759Z",
+  "lastProgressAt": "2026-10-19T18:01:54.729759Z",
+  "endedAt": null,
+  "lastConfirmedAction": null,
+  "inFlightAction": null,
+  "cases": {
+    "01": "NOT_RUN",
+    "02": "NOT_RUN",
+    "03": "NOT_RUN"
+  },
+  "plannedRequests": {
+    "outcome": 1,
+    "assistant": 0
+  },
+  "observedRequests": {
+    "outcome": 0,
+    "assistant": 0
+  },
+  "requestObservationComplete": true,
+  "providerUsage": {
+    "calls": null,
+    "tokens": null,
+    "availability": "NOT_READ"
+  },
+  "evidence": [],
+  "error": null,
+  "nextSafeAction": "log in with U1 and U2, then read-only reconcile the prior fixture",
+  "publication": {
+    "lastConfirmedUrl": null,
+    "unpublishedLocalChanges": true
+  },
+  "serving": {
+    "apiSource": "5499a8e8a7116c8204b7da33fe161139120182b3",
+    "apiSha256": "dba8649429b815fb8ce03bdb9424128ca180633038214f34edbc7871e033aa58",
+    "workerSha256": "33f5d50edb119df13ba570993bfea388d42dfb8c56883e506efb2748ca6eb674",
+    "frontendAmplifyJob": "145"
+  }
+}
