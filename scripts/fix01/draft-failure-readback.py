@@ -1,6 +1,7 @@
 """Read bounded, sanitized draft diagnostics. Never export raw log messages or model values."""
 import datetime
 import json
+import math
 import os
 import re
 import subprocess
@@ -66,6 +67,29 @@ try:
     if identity.get('Account') != ACCOUNT or not identity.get('Arn', '').startswith(
             f'arn:aws:sts::{ACCOUNT}:assumed-role/{ROLE}/'):
         raise RuntimeError('OWN_TARGET_IDENTITY_INVALID')
+    # Metadata only: never export stage variables, authorizers, headers or logs.
+    report['gateway'] = {}
+    try:
+        stage = aws('apigatewayv2', 'get-stage', '--api-id', 'u94iyvt6p9', '--stage-name', '$default')
+        def throttle(value):
+            return {key: number for key in ['ThrottlingBurstLimit', 'ThrottlingRateLimit']
+                    if isinstance((number := value.get(key)), (int, float)) and not isinstance(number, bool)
+                    and math.isfinite(number) and 0 <= number <= 100000}
+        report['gateway']['stage'] = {'result': 'READ', 'defaultThrottle': throttle(stage.get('DefaultRouteSettings', {})),
+            'decisionOverrides': {key: throttle(value) for key, value in stage.get('RouteSettings', {}).items()
+                if key in {'GET /decisions/{decisionId}/public', 'GET /decisions/{decisionId}/me'}},
+            'accessLoggingConfigured': bool(stage.get('AccessLogSettings', {}).get('DestinationArn'))}
+    except (RuntimeError, ValueError, subprocess.SubprocessError) as error:
+        report['gateway']['stage'] = {'result': 'UNAVAILABLE', 'code': str(error) if isinstance(error, RuntimeError) else 'READ_FAILED'}
+    try:
+        api = aws('apigatewayv2', 'get-api', '--api-id', 'u94iyvt6p9')
+        cors = api.get('CorsConfiguration', {})
+        report['gateway']['cors'] = {'result': 'READ', 'configured': bool(cors),
+            'expectedOriginAllowed': 'https://main.d143q5ravxp5av.amplifyapp.com' in cors.get('AllowOrigins', []),
+            'wildcardOrigin': '*' in cors.get('AllowOrigins', []), 'allowCredentials': cors.get('AllowCredentials') is True,
+            'authorizationAllowed': any(str(value).lower() in {'authorization', '*'} for value in cors.get('AllowHeaders', []))}
+    except (RuntimeError, ValueError, subprocess.SubprocessError) as error:
+        report['gateway']['cors'] = {'result': 'UNAVAILABLE', 'code': str(error) if isinstance(error, RuntimeError) else 'READ_FAILED'}
     source = Path('packages/application/src/model-runtime.ts').read_text()
     stages = set(re.findall(r"'([A-Z_]+)'", source.split('] as const;', 1)[0]))
     field_source = source.split('const validationFields = new Set((', 1)[1].split(".split(' ')", 1)[0]
