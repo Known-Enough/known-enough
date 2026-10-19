@@ -1,21 +1,21 @@
 {
   "runId": "20261019T230825Z",
-  "state": "RUNNING",
+  "state": "COMPLETE",
   "startedAt": "2026-10-19T23:08:25.268Z",
-  "endedAt": null,
+  "endedAt": "2026-10-19T23:10:08.070Z",
   "cases": {
-    "01": "NOT_RUN",
-    "02": "NOT_RUN",
+    "01": "PASS",
+    "02": "PASS",
     "03": "NOT_RUN"
   },
-  "lastConfirmedAction": null,
+  "lastConfirmedAction": "U2 decision-list status confirmed",
   "inFlightAction": null,
   "observedRequests": {
     "outcome": 0,
     "assistant": 0
   },
   "error": null,
-  "lastProgressAt": "2026-10-19T23:08:25.273Z",
+  "lastProgressAt": "2026-10-19T23:10:08.070Z",
   "servingSource": {
     "runtime": "1f7d441c4913090fb08bd216c3759d7fd2f4cd57",
     "apiSha256": "e8338c82bb6314f157f743d7f27c1bf4b5e0e7d8c17aa7da5efbc1789be70436",
@@ -23,5 +23,31 @@
     "frontend": "1f7d441c4913090fb08bd216c3759d7fd2f4cd57",
     "amplifyJob": 152
   },
-  "scope": "Read-only final persistence check on the existing agreed fixture; no answer/outcome/approval writes."
+  "scope": "Read-only final persistence check on the existing agreed fixture; no answer/outcome/approval writes.",
+  "finalReadback": {
+    "U1": {
+      "decision": "AGREED",
+      "answered": 2,
+      "required": 2,
+      "approved": 2,
+      "ownApproval": true,
+      "ownSelectionsMatch": true,
+      "proposalMatchesPinned": true,
+      "decisionChip": "Decision agreed"
+    },
+    "U2": {
+      "decision": "AGREED",
+      "answered": 2,
+      "required": 2,
+      "approved": 2,
+      "ownApproval": true,
+      "ownSelectionsMatch": true,
+      "proposalMatchesPinned": true,
+      "decisionChip": "Decision agreed"
+    },
+    "distinctOwners": true,
+    "newWrites": 0,
+    "newOutcomeRequests": 0,
+    "newAssistantRequests": 0
+  }
 }
