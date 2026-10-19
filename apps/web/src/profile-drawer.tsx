@@ -1,3 +1,4 @@
+import { avatarRead } from './member-avatar';
 import { avatarUpload } from './avatar-upload';
 import { useEffect, useRef, useState } from 'react';
 import { Groups } from '@deal-table/contracts';
@@ -141,6 +142,30 @@ export function ProfileModal({ api, open, target, onClose, restoreFocus, onOwner
 export function ProfileDrawer({ api, signOut }: { api: Api; signOut: () => void }) {
   const root = useRef<HTMLDivElement>(null), trigger = useRef<HTMLButtonElement>(null), profileAction = useRef<HTMLButtonElement>(null), signOutAction = useRef<HTMLButtonElement>(null);
   const [menuOpen, setMenuOpen] = useState(false), [profileOpen, setProfileOpen] = useState(false), [avatar, setAvatar] = useState<ProfileView | null>(null);
+  const avatarApi = useRef(api); avatarApi.current = api;
+  useEffect(() => {
+    const controller = new AbortController();
+    void avatarRead(controller.signal, async () => {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        let status: number | null = null;
+        try {
+          const response = await avatarApi.current('/account/profile', { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(8000)]), cache: 'no-store' });
+          status = response.status;
+          if (!response.ok) {
+            if ((status === 429 || status >= 500) && attempt < 2) continue;
+            throw new Error('Unavailable');
+          }
+          const next = ownerView(Groups.OwnProfile.parse((await response.json()).profile));
+          if (!controller.signal.aborted) setAvatar(current => current?.version != null && next.version != null && current.version > next.version ? current : next);
+          return;
+        } catch (error) {
+          if (controller.signal.aborted || status !== null || attempt === 2) throw error;
+        }
+      }
+    }).catch(() => { if (!controller.signal.aborted) console.info('Known Enough avatar loading diagnostic', { stage: 'account', reason: 'PROFILE_UNAVAILABLE' }); });
+    return () => controller.abort();
+  }, []);
+
   useEffect(() => {
     if (!menuOpen) return;
     profileAction.current?.focus();

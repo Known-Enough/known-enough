@@ -1,3 +1,4 @@
+import { MemberAvatar } from './member-avatar';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { KnownEnough as KE, publicChoiceOptions } from '@deal-table/contracts';
 import { PrivateAnswersModal } from './private-answers-modal';
@@ -243,7 +244,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
           const approved = snapshot.approvedParticipantIds.includes(person.id);
           const progress = snapshot.participantProgress?.find(item => item.participantId === person.id);
           const answered = progress?.answersSaved;
-          return <li key={person.id}><span className="ke-response-person"><span aria-hidden="true" className="ke-response-person-initial">{person.displayName.slice(0, 1).toLocaleUpperCase()}</span><span className="ke-response-person-name">{person.displayName}</span>{person.id === owner?.ownerParticipantId && <small>You</small>}</span>
+          return <li key={person.id}><span className="ke-response-person">{groupId ? <MemberAvatar api={api} groupId={groupId} memberId={person.id} name={person.displayName} revision={snapshot.publicRevision} /> : <span aria-hidden="true" className="ke-response-person-initial">{person.displayName.slice(0, 1).toLocaleUpperCase()}</span>}<span className="ke-response-person-name">{person.displayName}</span>{person.id === owner?.ownerParticipantId && <small>You</small>}</span>
             <span className="ke-response-person-state" data-complete={approved || answered}>{approved ? 'Approved' : answered ? 'Answered' : progress ? 'Waiting for answers' : 'Not checked yet'}</span></li>;
         })}</ul>
       </details>

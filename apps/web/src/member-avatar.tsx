@@ -5,7 +5,7 @@ import { Groups } from '@deal-table/contracts';
 let activeReads = 0;
 const pendingReads: (() => void)[] = [];
 function drainReads() { while (activeReads < 2 && pendingReads.length) pendingReads.shift()?.(); }
-function avatarRead<T>(signal: AbortSignal, read: () => Promise<T>): Promise<T> {
+export function avatarRead<T>(signal: AbortSignal, read: () => Promise<T>): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     pendingReads.push(() => {
       if (signal.aborted) { reject(new DOMException('Aborted', 'AbortError')); return; }
