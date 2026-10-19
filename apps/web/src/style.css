@@ -1674,7 +1674,7 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 :root[data-theme="dark"] .ke-decision-status-chip[data-tone="agreed"] { color: #c0e1ca; background: #2b4434; border-color: #425f4b; }
 @media (max-width: 600px) { .ke-decision-row-title { gap: 6px 8px; } .ke-decision-status-chip { font-size: 9px; padding: 3px 7px; } }
 .ke-group-panel button.ke-decision-row-open:hover { text-decoration: none; }
-.ke-group-panel button.ke-decision-row-open:hover strong { text-decoration: underline; text-underline-offset: 3px; }
+.ke-group-panel button.ke-decision-row-open strong, .ke-group-panel button.ke-decision-row-open:hover strong { text-decoration: none; }
 
 .ke-decision-row-open .ke-decision-row-content { flex: 1; min-width: 0; }
 .ke-decision-row-open > .ke-decision-status-chip { margin-left: auto; max-width: 45%; text-align: center; justify-content: center; }
