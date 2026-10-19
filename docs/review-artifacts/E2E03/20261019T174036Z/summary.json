@@ -1,0 +1,39 @@
+{
+  "runId": "20261019T174036Z",
+  "state": "RUNNING",
+  "startedAt": "2026-10-19T17:40:45.921654+00:00",
+  "lastProgressAt": "2026-10-19T17:40:45.921662+00:00",
+  "endedAt": null,
+  "lastConfirmedAction": null,
+  "inFlightAction": null,
+  "cases": {
+    "01": "NOT_RUN",
+    "02": "NOT_RUN",
+    "03": "NOT_RUN"
+  },
+  "plannedRequests": {
+    "outcome": 1,
+    "assistant": 1
+  },
+  "observedRequests": {
+    "outcome": 0,
+    "assistant": 0
+  },
+  "requestObservationComplete": true,
+  "providerUsage": {
+    "calls": 0,
+    "tokens": null,
+    "availability": "NO_PROVIDER_ACTION_REQUESTED"
+  },
+  "evidence": [
+    "events.jsonl",
+    "preflight.json",
+    "report.md"
+  ],
+  "error": null,
+  "nextSafeAction": "Sign in as U1 and U2 in separate persistent browser contexts; inspect read-only catalogs and stop on account/groups HTTP failure.",
+  "publication": {
+    "lastConfirmedUrl": null,
+    "unpublishedLocalChanges": true
+  }
+}

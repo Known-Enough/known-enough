@@ -1,0 +1,1 @@
+{"utc":"2026-10-19T17:40:45.891Z","run":"20261019T174036Z","event":"RUN_STARTED","scope":"E2E03; two users; one manual decision; outcome <=1; assistant <=1","previousCause":"CONFIRMED_WRONG_PLAYWRIGHT_RESPONSE_METHOD; no app/AWS change required"}
