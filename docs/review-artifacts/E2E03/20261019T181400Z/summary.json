@@ -43,7 +43,7 @@
   "publication": {
     "lastConfirmedUrl": "https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/E2E03/20261019T181400Z/report.md",
     "commit": "30e646a",
-    "unpublishedLocalChanges": true
+    "unpublishedLocalChanges": false
   },
   "serving": {
     "apiSource": "5499a8e8a7116c8204b7da33fe161139120182b3",
