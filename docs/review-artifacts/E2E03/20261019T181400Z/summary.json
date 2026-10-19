@@ -1,13 +1,13 @@
 {
   "runId": "20261019T181400Z",
-  "state": "RUNNING",
+  "state": "BLOCKED",
   "startedAt": "2026-10-19T18:14:13.604Z",
-  "lastProgressAt": "2026-10-19T18:14:28.069Z",
-  "endedAt": null,
-  "lastConfirmedAction": "startup evidence published before browser actions",
+  "lastProgressAt": "2026-10-19T18:18:43.002Z",
+  "endedAt": "2026-10-19T18:18:43.002Z",
+  "lastConfirmedAction": "u1.inspect after the failed decision open",
   "inFlightAction": null,
   "cases": {
-    "01": "RUNNING",
+    "01": "BLOCKED",
     "02": "NOT_RUN",
     "03": "NOT_RUN"
   },
@@ -19,18 +19,30 @@
     "outcome": 0,
     "assistant": 0
   },
-  "requestObservationComplete": false,
+  "requestObservationComplete": true,
   "providerUsage": {
     "calls": 0,
     "tokens": null,
-    "availability": "UNKNOWN"
+    "availability": "NO_OUTCOME_OR_ASSISTANT_REQUEST; TOKEN_USAGE_NOT_READ"
   },
   "evidence": [],
-  "error": null,
-  "nextSafeAction": "Log in both users, reconcile the saved group and decision IDs, then inspect each own answer state before any answer write.",
+  "error": {
+    "code": "ACCOUNT_VIEW_FAILED_AFTER_RELOAD",
+    "domain": "APP_HTTP",
+    "status": 503,
+    "routes": [
+      "/account",
+      "/account/profile"
+    ],
+    "rootCause": "UNVERIFIED",
+    "stage": "u1.open-created-decision",
+    "screenshot": "u1.open-created-decision-failure.png",
+    "pageOrigin": "https://main.d143q5ravxp5av.amplifyapp.com"
+  },
+  "nextSafeAction": "Investigate intermittent GET /account and /account/profile HTTP 503 on same-session reload. Preserve existing decision; do not save answers until account view opens reliably.",
   "publication": {
     "lastConfirmedUrl": "https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/E2E03/20261019T181400Z/report.md",
-    "commit": "9224ec2",
+    "commit": "3a478cd",
     "unpublishedLocalChanges": true
   },
   "serving": {
@@ -40,5 +52,26 @@
     "frontendAmplifyJob": "145"
   },
   "runnerSource": "870e5f080ea25a1678bfc4a2255808ef380c91cc",
-  "resumingPriorRun": "20261019T180154Z"
+  "resumingPriorRun": "20261019T180154Z",
+  "lastError": {
+    "code": "ACCOUNT_VIEW_FAILED_AFTER_RELOAD",
+    "domain": "APP_HTTP",
+    "status": 503,
+    "routes": [
+      "/account",
+      "/account/profile"
+    ],
+    "rootCause": "UNVERIFIED",
+    "stage": "u1.open-created-decision",
+    "screenshot": "u1.open-created-decision-failure.png",
+    "pageOrigin": "https://main.d143q5ravxp5av.amplifyapp.com"
+  },
+  "appWriteRequestsObserved": 0,
+  "reconciliation": {
+    "bothUsersAuthenticated": true,
+    "exactGroupVisibleToBoth": true,
+    "exactDecisionVisibleToBoth": true,
+    "exactPriorDraftVisibleToBoth": true,
+    "newGroupOrDecisionCreated": false
+  }
 }

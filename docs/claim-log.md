@@ -3032,3 +3032,6 @@ FF09 CODE_READY/B — fictional guide embedded only in creation dialog, form/req
 
 
 2026-10-19T18:10:47.428767Z — A completed the user-requested E2E03 loading assertion repair. The loading shell reused the loaded heading ID; create/open now wait for acknowledged dialog identity and exact expected heading, with bounded DECISION_VIEW_NOT_READY. Local Chromium regression and runner checks 5/5 PASS; no live rerun, app deployment, AI or cloud changes. Existing acknowledged fixture preserved for read-only reconciliation before any further write. Code claim released. [Repair](review-artifacts/E2E03/decision-readiness-repair.md).
+
+
+2026-10-19 E2E03/A resumed one-run claim RELEASED after first failure. Existing fixture reconciled; account view error followed U1 navigation with intermittent `/account` and `/account/profile` 503s. No new app writes or answers. Root cause unknown. Preserve fixture; investigate account reload path before another run. [Report](review-artifacts/E2E03/20261019T181400Z/report.md).
