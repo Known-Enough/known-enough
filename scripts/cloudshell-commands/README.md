@@ -1,5 +1,15 @@
 # CloudShell commands — account access
 
+## Create ten dedicated test logins
+
+Run `python3 -B scripts/cloudshell-commands/08-create-ten-test-accounts.py` in the administrator's CloudShell. It creates ten new, separate `ke-test-<batch>-01` through `-10` logins in the primary pool, with permanent generated passwords, using the owner's previously selected shared testing email. It requires both the installed shared-email exception and an existing enabled, confirmed, verified owner account for that mailbox. It sends no welcome emails and never changes existing users, aliases, password rules, IAM, groups or decisions.
+
+Credentials and per-user creation progress are saved privately at `~/.known-enough/test-accounts/ten-accounts-private.json` (0600). Read that file locally to obtain the passwords; do not paste it into chat or commit it. The script uses Python's standard library and the existing AWS CLI, so no Node/npm installation or repository clone is needed. Passwords go to the AWS CLI over stdin, not process arguments or shell history.
+
+**These are logins, not automatically approved app accounts.** Sign in once with each desired username so normal authenticated intake creates its pending app record, then approve those exact usernames with the existing operator command below. Each user still provides their own processing consent and joins groups explicitly. No shared-email approval, real signup verification test or successful sign-in is inferred from administrator provisioning.
+
+Rerunning the helper finds the saved batch and creates no additional users. If interrupted, preserve the private file and return only the sanitized result: partial creation needs review, not deletion of the journal or blind retry. This helper was syntax-checked and reviewed only; no accounts, emails or tests were run in A's chat.
+
 These are the current routine account commands for AWS account `092954139775`. The selected-email exception is already published; no new cloud installation or permission repair is needed for it.
 
 Open your existing AWS CloudShell. Before listing a new account, sign in to [Known Enough](https://main.d143q5ravxp5av.amplifyapp.com/) with that username and refresh. This creates its pending app-access request automatically when eligible. Each username still needs separate approval.
