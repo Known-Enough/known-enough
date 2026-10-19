@@ -2,10 +2,10 @@
   "runId": "20261019T170618Z",
   "state": "RUNNING",
   "startedAt": "2026-10-19T17:06:18Z",
-  "lastProgressAt": "2026-10-19T17:23:20Z",
+  "lastProgressAt": "2026-10-19T17:24:00Z",
   "endedAt": null,
   "lastConfirmedAction": "reconcile.u2.group-metadata",
-  "inFlightAction": "case01.u1.save-draft",
+  "inFlightAction": "case01.reconcile-after-timeout",
   "cases": {
     "01": "NOT_RUN",
     "02": "NOT_RUN",
@@ -35,7 +35,7 @@
     "state": "UNKNOWN_WRITE_DISPATCH",
     "detail": "Controller timed out after 36.651 seconds and did not retain the failing step or request-failure routes; draft-save dispatch is unknown."
   },
-  "nextSafeAction": "Fresh U1 login and read-only check for a Friday activity draft and pending draft request; do not repeat the write until this resolves.",
+  "nextSafeAction": "Read the selected group\u2019s Friday activity draft presence and draft-request statuses as U1 before deciding whether the prior save can be retried.",
   "publication": {
     "lastConfirmedUrl": "https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/E2E03/20261019T170618Z/report.md",
     "unpublishedLocalChanges": true
