@@ -1762,3 +1762,7 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 @media (max-width: 600px) { .ke-alexa-conversations { height: calc(100dvh - 24px); } .ke-alexa-tabs { padding: 0 18px; gap: 18px; } .ke-alexa-audience { padding: 10px 18px; } .ke-alexa-message { max-width: 94%; } .ke-alexa-bubble { font-size: 12px; } }
 :root[data-theme="dark"] .ke-alexa-conversations .ke-alexa-tabs button { background: transparent; color: var(--chat-muted); }
 :root[data-theme="dark"] .ke-alexa-conversations .ke-alexa-tabs button[aria-selected="true"] { color: #d4e8d9; }
+.ke-group-filter { display: grid; gap: .4rem; margin: 0 0 1.25rem; max-width: 28rem; }
+.ke-group-filter label { font-size: .85rem; font-weight: 600; }
+.ke-group-filter input { width: 100%; margin: 0; }
+.ke-group-filter small { color: var(--muted); font-size: .78rem; }

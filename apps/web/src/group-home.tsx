@@ -19,8 +19,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
   const [checking, setChecking] = useState(true);
   const [account, setAccount] = useState<ReturnType<typeof Groups.AccountSnapshot.parse> | null>(null);
   const [groups, setGroups] = useState<Groups.GroupSnapshot[]>([]);
-  const [groupCursor, setGroupCursor] = useState<string | null>(null);
-  const [groupPageFailure, setGroupPageFailure] = useState(false);
+  const [groupFilter, setGroupFilter] = useState('');
   const [invitations, setInvitations] = useState<Groups.InvitationSnapshot[]>([]);
   const [invitationFailure, setInvitationFailure] = useState<string | null>(null);
   const [profileTarget, setProfileTarget] = useState<ProfileTarget | null>(null);
@@ -100,7 +99,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
     const epoch = ++loadEpoch.current; loadAbort.current?.abort();
     const controller = new AbortController(); loadAbort.current = controller;
     const current = () => mounted.current && epoch === loadEpoch.current;
-    setChecking(true); setLoadFailure(null); setInvitationFailure(null); setGroupPageFailure(false); if (!preserveLink) setLink('');
+    setChecking(true); setLoadFailure(null); setInvitationFailure(null); if (!preserveLink) setLink('');
     let stage: 'account' | 'groups' | 'group' | 'invitations' = 'account';
     let httpStatus: number | null = null, reference: string | null = null;
     let emailConflict = false;
@@ -136,7 +135,6 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
       }
       const next = result.account ? Groups.AccountSnapshot.parse(result.account) : null;
       let nextGroups: Groups.GroupSnapshot[] = [];
-      let nextCursor: string | null = null;
       let nextInvitations: Groups.InvitationSnapshot[] = [];
       let nextInvitationFailure: string | null = null;
       if (next?.status === 'APPROVED') {
@@ -146,7 +144,22 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
         if (!response.ok) throw new Error('Groups unavailable');
         const result = await response.json() as { groups?: unknown[]; group?: unknown; cursor?: unknown };
         if (selectedGroupId) nextGroups = [Groups.GroupSnapshot.parse(result.group)];
-        else { const page = groupPage(result); nextGroups = page.groups; nextCursor = page.cursor; }
+        else {
+          let page = groupPage(result);
+          nextGroups = page.groups;
+          const seen = new Set<string>();
+          while (page.cursor) {
+            if (!current()) return;
+            if (seen.has(page.cursor)) throw new Error('Group page did not advance');
+            seen.add(page.cursor);
+            const more = await api(`/groups?limit=5&cursor=${encodeURIComponent(page.cursor)}`, { signal: controller.signal });
+            observe(more);
+            if (!more.ok) throw new Error('Groups unavailable');
+            page = groupPage(await more.json());
+            nextGroups.push(...page.groups);
+          }
+          nextGroups = [...new Map(nextGroups.map(group => [group.id, group])).values()];
+        }
         if (!selectedGroupId) {
           stage = 'invitations'; httpStatus = null; reference = null;
           try {
@@ -163,11 +176,11 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
         }
       }
       if (!current()) return;
-      setAvailable(true); setAccount(next); setGroups(nextGroups); setGroupCursor(nextCursor); setInvitations(nextInvitations); setInvitationFailure(nextInvitationFailure); setNotice('');
+      setAvailable(true); setAccount(next); setGroups(nextGroups); setInvitations(nextInvitations); setInvitationFailure(nextInvitationFailure); setNotice('');
       if (next?.status !== 'APPROVED') {setLink(''); setRecipient(''); setInvitations([]);}
     } catch (error) {
       if (!current()) return;
-      setAvailable(false); setAccount(null); setGroups([]); setGroupCursor(null); setInvitations([]); setLink(''); setRecipient('');
+      setAvailable(false); setAccount(null); setGroups([]); setInvitations([]); setLink(''); setRecipient('');
       const missingGroup = stage === 'group' && (httpStatus === 403 || httpStatus === 404);
       setLoadFailure({ title: emailConflict ? 'This email already has an account' : missingGroup ? 'This group is unavailable' : stage === 'account' ? 'We couldn’t load your account' : stage === 'group' ? 'We couldn’t open this group' : stage === 'invitations' ? 'We couldn’t load your invitations' : 'We couldn’t load your groups',
         description: emailConflict ? 'Sign out and sign in with your original username, or use Forgot password on the sign-in screen. To create a separate account, use a different email address.'
@@ -184,23 +197,6 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
     void load();
     return () => {mounted.current = false; ++loadEpoch.current; loadAbort.current?.abort();};
   }, []); // The component is keyed to the authenticated session.
-  async function loadMoreGroups() {
-    if (!groupCursor || busy || checking || selectedGroupId) return;
-    const cursor = groupCursor, epoch = loadEpoch.current;
-    const controller = new AbortController(); loadAbort.current = controller;
-    const current = () => mounted.current && epoch === loadEpoch.current;
-    setBusy(true); setGroupPageFailure(false);
-    try {
-      const response = await api(`/groups?limit=5&cursor=${encodeURIComponent(cursor)}`, { signal: controller.signal });
-      if (!response.ok) throw new Error('Groups unavailable');
-      const page = groupPage(await response.json());
-      if (page.cursor === cursor) throw new Error('Group page did not advance');
-      if (!current()) return;
-      setGroups(previous => [...new Map([...previous, ...page.groups].map(group => [group.id, group])).values()]);
-      setGroupCursor(page.cursor);
-    } catch { if (current()) setGroupPageFailure(true); }
-    finally { if (current()) setBusy(false); }
-  }
   async function action(path: string, body: unknown, after?: (result: Record<string, unknown>) => boolean | void,
     onDefinitiveFailure?: (status: number) => void, requestId?: string) {
     setBusy(true); setNotice('');
@@ -235,9 +231,10 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
   }
   const renameTarget = groups.find(group => group.id === renameGroupId) ?? null;
   const deleteTarget = groups.find(group => group.id === deleteGroupId) ?? null;
+  const filteredGroups = groups.filter(group => group.name.toLocaleLowerCase().includes(groupFilter.trim().toLocaleLowerCase()));
   const groupSections = [
-    { heading: 'Groups you own', groups: groups.filter(group => group.isOrganizer) },
-    { heading: 'Groups you’re a member of', groups: groups.filter(group => !group.isOrganizer) },
+    { heading: 'Groups you own', groups: filteredGroups.filter(group => group.isOrganizer) },
+    { heading: 'Groups you’re a member of', groups: filteredGroups.filter(group => !group.isOrganizer) },
   ].filter(section => section.groups.length > 0);
   if (checking && !available) return <LoadingSkeleton kind={selectedGroupId ? 'group' : 'groups'} label={selectedGroupId ? 'Opening your group' : 'Loading your groups'}
     className={selectedGroupId ? 'ke-group-route-loading' : 'ke-group-home'} />;
@@ -276,7 +273,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
         onDirtyChange?.(childDirty || !!recipient.trim());
         onOpenGroup(group.id); return true;
       }, status => { if ((status >= 400 && status < 500) || status === 507) groupRequest.current = null; }, pending.requestId); }}>Create group</button></div>}
-      {!groups.length && !groupCursor && <div className="ke-empty-state"><span className="ke-state-icon"><GroupIcon /></span><h3>No groups yet.</h3><p>Start a group with the people you want to decide with, or accept an invitation.</p></div>}
+      {!groups.length && <div className="ke-empty-state"><span className="ke-state-icon"><GroupIcon /></span><h3>No groups yet.</h3><p>Start a group with the people you want to decide with, or accept an invitation.</p></div>}
       {token && <><p>A group invitation is waiting. Accepting joins the group; it does not confirm a decision or approve a proposal.</p>
         <button disabled={busy} onClick={() => void action('/groups/accept', { token }, result => { const group = Groups.GroupSnapshot.parse(result.group); setToken(''); sessionStorage.removeItem('ke-group-invite'); onOpenGroup(group.id); return true; })}>Accept group invitation</button>
         <button className="secondary" onClick={() => { setToken(''); sessionStorage.removeItem('ke-group-invite'); }}>Decline group invitation</button></>}
@@ -294,7 +291,12 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
           })}>Accept invitation</button>
         </li>)}</ul> : <p>No pending invitations.</p>}
       </section>}
-      {!!groups.length && <div className="ke-group-sections">{groupSections.map(section => <section className="ke-group-section" key={section.heading}>
+      {!!groups.length && <div className="ke-group-filter"><label htmlFor="group-filter">Filter groups</label>
+        <input id="group-filter" type="search" placeholder="Search by group name" value={groupFilter} onChange={event => setGroupFilter(event.target.value)} />
+        <small role="status">{filteredGroups.length} of {groups.length} groups</small>
+      </div>}
+      {!!groups.length && !filteredGroups.length && <p role="status">No groups match “{groupFilter}”.</p>}
+      {!!filteredGroups.length && <div className="ke-group-sections">{groupSections.map(section => <section className="ke-group-section" key={section.heading}>
         <h3>{section.heading}</h3><ul className="ke-group-list" aria-label={section.heading}>{section.groups.map(group => {
         const decisionCount = Array.isArray(group.decisions) ? group.decisions.length : null;
         const menuOpen = activeMenuGroupId === group.id;
@@ -355,9 +357,6 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
           </div>
         </li>;
       })}</ul></section>)}</div>}
-      {groupPageFailure && <p role="status">More groups couldn’t be loaded. Your current groups are kept.</p>}
-      {groupCursor && <button type="button" className="secondary" disabled={busy || checking} onClick={() => void loadMoreGroups()}>
-        {groupPageFailure ? 'Retry loading groups' : 'Load more groups'}</button>}
       </>}
       {selectedGroupId && groups.map(group => {
         const organizer = group.members.find(member => member.isOrganizer);
