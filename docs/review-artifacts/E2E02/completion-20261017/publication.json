@@ -1,11 +1,52 @@
 {
-  "status": "API_WORKER_PUBLISHED_FRONTEND_AND_SCHEDULER_PENDING",
-  "source": "b779b9797388f314be14c0e4d92c03d0a73460a3",
-  "apiSha256": "71c859b337a2df43c0ad25dbc201843b3fab6def3c677fb534e5821c4295d031",
-  "workerSha256": "599a99405cc838204492ab4363cd8212472d6873170fcb0e2320d643006d5cf0",
-  "runtimeRun": "https://github.com/Known-Enough/known-enough/actions/runs/39093617326",
+  "status": "CURRENT_API_WORKER_FRONTEND_AND_SCHEDULE_VERIFIED",
+  "source": "3910e84f62394e093c1d477d2bc7e723dfe40b87",
+  "apiSha256": "79e3e3ba19e2a600df5651e4a835cb75dbda876b6d252b6382b2ef59115f1366",
+  "workerSha256": "5b03b634e093ddaab1dcf5ecf6ca90463d51b6858144f8a5b9808bd104f298a3",
+  "runtimeRun": "https://github.com/Known-Enough/known-enough/actions/runs/39147765107",
   "recoveryRun": "https://github.com/Known-Enough/known-enough/actions/runs/39093562429",
-  "frontendRun": "https://github.com/Known-Enough/known-enough/actions/runs/39093718239",
-  "schedulerRun": "https://github.com/Known-Enough/known-enough/actions/runs/39093719845",
-  "liveQualification": "NOT_EXECUTED"
+  "frontendRun": "https://github.com/Known-Enough/known-enough/actions/runs/39149007661",
+  "frontendSource": "2963d810fbe26b2a33dad02ab9e2f881d94b3f12",
+  "amplifyJobId": "123",
+  "cancelledPreparation": {
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/39113551100",
+    "cause": "Incorrect source input; canceled during checkout; credentials and runtime steps skipped",
+    "cloudChanges": 0
+  },
+  "admission": "ENABLED_MATCHING_SOURCE",
+  "totalsDuringPublication": "UNCHANGED",
+  "liveQualification": "FIVE_PREVIOUSLY_BLOCKED_CASES_PASS",
+  "schedulerRun": "https://github.com/Known-Enough/known-enough/actions/runs/39147884803",
+  "schedule": "ENABLED",
+  "liveCaseIds": [
+    "10",
+    "11",
+    "12",
+    "15",
+    "16"
+  ],
+  "freshSixteenCaseSingleSourceRun": false,
+  "journeyQualificationRelease": {
+    "source": "3cde8240a535a6cd2c2db01344f06e0c8569c7d4",
+    "apiSha256": "56f049d96eec9d3e24bf8c514ced7575679b05e7259bb6867f1c632e610b576d",
+    "workerSha256": "a13659d90385620226ae73284068cc6479bbeff205acab797cca4daf59c4beb2",
+    "runtimeRun": "https://github.com/Known-Enough/known-enough/actions/runs/39113596601",
+    "frontendRun": "https://github.com/Known-Enough/known-enough/actions/runs/39093718239",
+    "frontendSource": "b779b9797388f314be14c0e4d92c03d0a73460a3",
+    "amplifyJobId": "120",
+    "schedulerRun": "https://github.com/Known-Enough/known-enough/actions/runs/39113718480"
+  },
+  "cleanupCompatibilityPublication": "../../FF/group-deletion-publication.json",
+  "cleanupReadbackSource": "175f065185eb2b8ad55b0d5e573ced4a9a404b02",
+  "qualificationOnCurrentCleanupSource": "Completed outcomes preservation and owned-fixture cleanup only; five journey results retain their original source evidence",
+  "cleanupReadbackRun": "https://github.com/Known-Enough/known-enough/actions/runs/39148190971",
+  "cleanupRelease": {
+    "source": "3910e84f62394e093c1d477d2bc7e723dfe40b87",
+    "apiSha256": "79e3e3ba19e2a600df5651e4a835cb75dbda876b6d252b6382b2ef59115f1366",
+    "workerSha256": "5b03b634e093ddaab1dcf5ecf6ca90463d51b6858144f8a5b9808bd104f298a3",
+    "frontendRun": "https://github.com/Known-Enough/known-enough/actions/runs/39147882258",
+    "frontendSource": "3910e84f62394e093c1d477d2bc7e723dfe40b87",
+    "amplifyJobId": "121"
+  },
+  "paginationPublication": "pagination-publication.json"
 }

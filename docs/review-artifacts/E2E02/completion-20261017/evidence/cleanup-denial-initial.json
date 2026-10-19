@@ -1,0 +1,403 @@
+{
+  "utc": "2026-10-18T17:12:10.994Z",
+  "rows": [
+    {
+      "label": "group-0",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "ca781d58-fc44-4002-9ffb-591fb1095f3c"
+    },
+    {
+      "label": "group-0",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "b66ca789-2586-434b-8fec-eef7c3685dce"
+    },
+    {
+      "label": "group-1",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "d0d9712a-5e9f-4505-9dcb-c7ba10e8e5d9"
+    },
+    {
+      "label": "group-1",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "ead08436-62a2-4e1f-88f5-7f8e57998c9a"
+    },
+    {
+      "label": "group-2",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "1d08e6c2-e71f-4bea-8ab6-77d5340904a8"
+    },
+    {
+      "label": "group-2",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "b5cca185-b4ae-4eb1-a318-530b6491ea9e"
+    },
+    {
+      "label": "group-3",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "1035538b-339e-491a-a1a7-263e497f1a65"
+    },
+    {
+      "label": "group-3",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "90346507-44ff-4519-8bd6-f8127e712645"
+    },
+    {
+      "label": "group-4",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "2047d185-70ef-4aae-a743-8890b996bce8"
+    },
+    {
+      "label": "group-4",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "d5fd9870-9bce-43f1-b27b-77e348d7250b"
+    },
+    {
+      "label": "group-5",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "f09630c5-c765-4b91-a75a-25ccbd3b4113"
+    },
+    {
+      "label": "group-5",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "20d174d2-c14c-4510-a340-7cf9ddf97769"
+    },
+    {
+      "label": "group-6",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "f612fb0e-8c77-46cf-b8f4-08fd27164ada"
+    },
+    {
+      "label": "group-6",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "d3052d58-d0fa-4d4d-963f-4e24dbb3cc46"
+    },
+    {
+      "label": "group-7",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "3aed48bd-9d85-43fa-821a-73bcb0cf5e68"
+    },
+    {
+      "label": "group-7",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "60ad5583-5438-418b-812a-780919d94acb"
+    },
+    {
+      "label": "group-8",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "1e5a6dd7-2354-476d-8884-6ffdceba0f1f"
+    },
+    {
+      "label": "group-8",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "d528dd22-8c4c-42a4-8800-a6dc74a8772c"
+    },
+    {
+      "label": "decision-M",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "3d2b9d8c-980e-46ab-b76e-f7a6ceb92435"
+    },
+    {
+      "label": "decision-M",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "3eccff8a-f88c-4963-a54d-dd84ae225a4d"
+    },
+    {
+      "label": "decision-A",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "06e89a5c-5ae2-47a5-baf9-ebe348fae8b2"
+    },
+    {
+      "label": "decision-A",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "7084035a-3c4c-42d5-a9ff-a04f5de4a66b"
+    },
+    {
+      "label": "decision-B",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "56dd1cfe-8323-4ac7-8b2a-e1ef38115044"
+    },
+    {
+      "label": "decision-B",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "928eb1db-17e5-4dff-a186-b12337dc913b"
+    },
+    {
+      "label": "decision-Q",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "ee3a6fc6-d9b2-45f6-a91f-e1924d2576a2"
+    },
+    {
+      "label": "decision-Q",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "3528eb25-c296-4496-aa19-8ca59430d7e6"
+    },
+    {
+      "label": "decision-K",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "d6b838a4-da1c-4b54-834c-23c4a4697cc7"
+    },
+    {
+      "label": "decision-K",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "251dbb8b-537a-435c-a726-e3c9d71f32f0"
+    },
+    {
+      "label": "decision-O",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "99e43093-a10c-4d63-8589-ca3d66493e62"
+    },
+    {
+      "label": "decision-O",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "49a4fc64-263e-49f3-b6c2-a3fa443afd43"
+    },
+    {
+      "label": "decision-R",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "2c271533-68a6-42da-8dc4-3a95487731c7"
+    },
+    {
+      "label": "decision-R",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "f97e1d33-b8f2-414d-847f-173d0a322c83"
+    },
+    {
+      "label": "decision-O2",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "d98fb28f-9b23-472a-bf1a-04cce9331512"
+    },
+    {
+      "label": "decision-O2",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "586e51b6-2465-49e1-becb-386d5fece89d"
+    },
+    {
+      "label": "decision-F",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "b2a1651e-b90c-4a09-a817-89dcfa020d64"
+    },
+    {
+      "label": "decision-F",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "a14d5a1c-645c-4de4-9cb8-494dfe2eab97"
+    },
+    {
+      "label": "draft-0",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "d390c8e9-1247-4db9-b671-04ae52e0ebc9"
+    },
+    {
+      "label": "draft-0",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "c0d320c2-e566-4f9f-8df6-8207efdd4d9d"
+    },
+    {
+      "label": "draft-1",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "5c49f399-c080-4355-ba29-ae604c73190f"
+    },
+    {
+      "label": "draft-1",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "9f48fd09-f1a7-4751-9d39-31b4de4c9e77"
+    },
+    {
+      "label": "draft-2",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "d53b1067-ecda-4e24-bd99-75893cc14cfd"
+    },
+    {
+      "label": "draft-2",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "6acb506e-c52e-4521-bde7-cc5cb2b77b67"
+    },
+    {
+      "label": "draft-3",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "1d240bad-fd3d-4407-8966-2eaf42065a54"
+    },
+    {
+      "label": "draft-3",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "6484bf5a-33b4-4573-9120-c84d4c180c8c"
+    },
+    {
+      "label": "draft-4",
+      "user": 1,
+      "status": 429,
+      "code": null,
+      "reference": null
+    },
+    {
+      "label": "draft-4",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "fabfac01-f6e0-4f3e-9383-128eddd36593"
+    },
+    {
+      "label": "draft-5",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "cbc21e4b-1dde-473c-8d71-ec4dd97d5bee"
+    },
+    {
+      "label": "draft-5",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "9787c55c-c8a1-497f-985a-5e60bbf10fc1"
+    },
+    {
+      "label": "draft-6",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "c274c82e-ce02-4cac-92ea-92c5c329b3c9"
+    },
+    {
+      "label": "draft-6",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "d9d10e68-ba9c-4f25-abdf-c974ccfa436d"
+    },
+    {
+      "label": "draft-7",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "bd0c0c5a-1a6c-407a-a021-da4f4dfeec42"
+    },
+    {
+      "label": "draft-7",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "a445c788-fd39-4476-b134-e043e673b58c"
+    },
+    {
+      "label": "draft-8",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "a3654440-e93d-49b1-b4fe-5314753d8c53"
+    },
+    {
+      "label": "draft-8",
+      "user": 2,
+      "status": 429,
+      "code": null,
+      "reference": null
+    },
+    {
+      "label": "draft-9",
+      "user": 1,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "90ca0a6c-82bd-4232-8fda-cc99fd279dae"
+    },
+    {
+      "label": "draft-9",
+      "user": 2,
+      "status": 404,
+      "code": "NOT_FOUND",
+      "reference": "b63eb2d7-b155-4ed3-9b8f-6bd374a14a71"
+    }
+  ],
+  "oldReadsDenied": 54,
+  "allOldReadsDenied": false,
+  "ownedGroupsAbsent": true,
+  "unrelatedGroupsPreserved": true,
+  "ownedPendingInvitationsAbsent": true,
+  "modelCalls": 0
+}

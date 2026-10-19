@@ -1,0 +1,31 @@
+{
+  "historicalUnknownSave": {
+    "utc": "2026-10-18T03:43:50.271Z",
+    "historicalUnknownNotReplayed": true,
+    "currentVersionReviewed": true,
+    "exactRouteConfirmed": true,
+    "privateCommandCheckpointed": true,
+    "saved": true,
+    "ready": true,
+    "activeConditions": 2,
+    "publicSaved": 2,
+    "peerAnswersPreserved": true
+  },
+  "replacementRequest503": {
+    "utc": "2026-10-18T09:14:32.385Z",
+    "http503WithoutReceipt": true,
+    "exactVersionUnchanged": true,
+    "currentStatus": "READY",
+    "queueActive": 0,
+    "slots": 0,
+    "unknownRequestReservation": 0,
+    "providerDispatchNotPossibleWithoutReservation": true,
+    "originalRequestNotReplayed": true,
+    "freshExplicitRequestAllowedAfterReadback": true
+  },
+  "replacementApproval503": "NOT_APPLIED_FRESH_EXPLICIT_UI_REVIEW",
+  "queueProofRun": "https://github.com/Known-Enough/known-enough/actions/runs/39114432075",
+  "runnerAcknowledgementTests": 8,
+  "runnerLint": "PASS",
+  "noUnknownWriteReplayed": true
+}

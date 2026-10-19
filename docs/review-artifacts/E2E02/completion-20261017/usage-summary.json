@@ -1,0 +1,193 @@
+{
+  "completionModelCalls": 8,
+  "completionActualTokens": 27215,
+  "completionCalls": [
+    {
+      "label": "M known failed",
+      "kind": "NEGOTIATION",
+      "phase": "DEAD",
+      "reason": "STALE",
+      "attempts": 1,
+      "failures": 0,
+      "reservedTokens": 18432,
+      "reservedCostMicros": 10000,
+      "usage": {
+        "inputTokens": 3646,
+        "outputTokens": 28
+      }
+    },
+    {
+      "label": "M agreed",
+      "kind": "NEGOTIATION",
+      "phase": "SUCCEEDED",
+      "reason": null,
+      "attempts": 1,
+      "failures": 0,
+      "reservedTokens": 18432,
+      "reservedCostMicros": 10000,
+      "usage": {
+        "inputTokens": 3646,
+        "outputTokens": 28
+      }
+    },
+    {
+      "label": "A known rejected",
+      "kind": "NEGOTIATION",
+      "phase": "DEAD",
+      "reason": "INVALID_OUTPUT",
+      "attempts": 1,
+      "failures": 0,
+      "reservedTokens": 18432,
+      "reservedCostMicros": 10000,
+      "usage": {
+        "inputTokens": 3638,
+        "outputTokens": 28
+      }
+    },
+    {
+      "label": "A agreed",
+      "kind": "NEGOTIATION",
+      "phase": "SUCCEEDED",
+      "reason": null,
+      "attempts": 1,
+      "failures": 0,
+      "reservedTokens": 18432,
+      "reservedCostMicros": 10000,
+      "usage": {
+        "inputTokens": 3380,
+        "outputTokens": 28
+      }
+    },
+    {
+      "label": "B agreed",
+      "kind": "NEGOTIATION",
+      "phase": "SUCCEEDED",
+      "reason": null,
+      "attempts": 1,
+      "failures": 0,
+      "reservedTokens": 18432,
+      "reservedCostMicros": 10000,
+      "usage": {
+        "inputTokens": 2997,
+        "outputTokens": 28
+      }
+    },
+    {
+      "label": "F before joining",
+      "kind": "NEGOTIATION",
+      "phase": "SUCCEEDED",
+      "reason": null,
+      "attempts": 1,
+      "failures": 0,
+      "reservedTokens": 18432,
+      "reservedCostMicros": 10000,
+      "usage": {
+        "inputTokens": 2946,
+        "outputTokens": 28
+      }
+    },
+    {
+      "label": "R original retired",
+      "kind": "NEGOTIATION",
+      "phase": "SUCCEEDED",
+      "reason": null,
+      "attempts": 1,
+      "failures": 0,
+      "reservedTokens": 18432,
+      "reservedCostMicros": 10000,
+      "usage": {
+        "inputTokens": 3367,
+        "outputTokens": 28
+      }
+    },
+    {
+      "label": "R replacement agreed",
+      "kind": "NEGOTIATION",
+      "phase": "SUCCEEDED",
+      "reason": null,
+      "attempts": 1,
+      "failures": 0,
+      "reservedTokens": 18432,
+      "reservedCostMicros": 10000,
+      "usage": {
+        "inputTokens": 3371,
+        "outputTokens": 28
+      }
+    }
+  ],
+  "priorPublicDraftCalls": 3,
+  "priorPublicDraftActualTokens": 3278,
+  "priorPublicDraftUsage": [
+    {
+      "label": "A public draft",
+      "kind": "ARCHITECT",
+      "phase": "SUCCEEDED",
+      "reason": null,
+      "attempts": 1,
+      "failures": 0,
+      "reservedTokens": 18432,
+      "reservedCostMicros": 10000,
+      "usage": {
+        "inputTokens": 1022,
+        "outputTokens": 133
+      }
+    },
+    {
+      "label": "B public draft",
+      "kind": "ARCHITECT",
+      "phase": "SUCCEEDED",
+      "reason": null,
+      "attempts": 1,
+      "failures": 0,
+      "reservedTokens": 18432,
+      "reservedCostMicros": 10000,
+      "usage": {
+        "inputTokens": 975,
+        "outputTokens": 105
+      }
+    },
+    {
+      "label": "Delayed public draft",
+      "kind": "ARCHITECT",
+      "phase": "SUCCEEDED",
+      "reason": null,
+      "attempts": 1,
+      "failures": 0,
+      "reservedTokens": 18432,
+      "reservedCostMicros": 10000,
+      "usage": {
+        "inputTokens": 938,
+        "outputTokens": 105
+      }
+    }
+  ],
+  "combinedActualTokens": 30493,
+  "combinedCalls": 11,
+  "expiredOriginalOutcomeJobs": {
+    "count": 3,
+    "providerCalls": 0
+  },
+  "automaticPaidRetries": 0,
+  "initialTotals": {
+    "runs": 65,
+    "reservedTokens": 18459988,
+    "reservedCostMicros": 17987796,
+    "messages": 60
+  },
+  "totalsAsOfCompletedJourneys": {
+    "runs": 65,
+    "reservedTokens": 18607444,
+    "reservedCostMicros": 18067796,
+    "messages": 60
+  },
+  "completionReservationDelta": {
+    "tokens": 147456,
+    "costMicros": 80000
+  },
+  "refundsOrCounterResets": 0,
+  "billedProviderCost": "UNVERIFIED_RESERVATIONS_ARE_NOT_BILLING",
+  "historicalArchitectReadback": "https://github.com/Known-Enough/known-enough/actions/runs/39114775409",
+  "finalCurrentReadback": "https://github.com/Known-Enough/known-enough/actions/runs/39114777166",
+  "recordedAt": "2026-10-18T17:06:06.388110+00:00",
+  "observationSource": "Finite exact-job reports from runs39114775409 and39114777166; no claim of a new live read at recordedAt."
+}

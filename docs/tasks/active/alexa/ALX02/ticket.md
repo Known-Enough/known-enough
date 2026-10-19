@@ -1,6 +1,6 @@
 # ALX02 — Durable group chat and private assistant
 
-Status: CODE_READY / implementation claim released. Coordinated publication is pending. B direct worker; no helper agents.
+Status: IN_PROGRESS / B publication claim under explicit user direction to deploy and publish everything. No helper agents.
 
 Direct user request: pull latest main, add Group chat and Private assistant tabs to the Alexa+ simulator; normal bubbles, verified names and timestamps, one composer, small Technical details link. Persist messages across reopening until decision deletion or retention expiry. Group notice: “Everyone in this decision can see these messages.” Private sharing requires an explicit preview and post.
 

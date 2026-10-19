@@ -1,6 +1,6 @@
 {
   "checkedAt": "2026-10-18T03:25:07.943699+00:00",
-  "status": "IMPLEMENTED_LOCAL_NOT_PUBLISHED",
+  "status": "INITIAL_REPAIR_CHECKS_PUBLISHED_AND_LIVE_COMPLETED",
   "focusedUnit": {
     "files": 3,
     "passed": 66
@@ -35,6 +35,6 @@
     "baselineComparison": "NOT_RUN",
     "newRegressionClaim": "NOT_ESTABLISHED"
   },
-  "liveRecovery": "NOT_EXECUTED",
-  "publication": "NOT_EXECUTED"
+  "liveRecovery": "PASS_THREE_EXPIRED_UNCALLED_JOBS_CANCELLED_WITH_NATIVE_STATE",
+  "publication": "PASS_SEE_PUBLICATION_JSON"
 }

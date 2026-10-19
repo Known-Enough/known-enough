@@ -84,8 +84,8 @@
     "apps/web/src/cognito-session.test.ts": "9ea8f0d4b6408b9c8662c66a6171df10d27d4d461e77ad07b834a9682bad865c",
     "tests/e2e/e2e02-group-pages.spec.ts": "ad024cc219f16959414c9d18422ed16e2d8f99418f76aab01afafee0efd8c270"
   },
-  "publication": "CORRECTION_PENDING",
-  "livePaginationReadback": "INITIAL_FAILED_503_DUE_TO_CURSOR_PAGE_LIMIT_MISMATCH",
+  "publication": "PASS",
+  "livePaginationReadback": "PASS_THREE_REAL_PAGES_TWO_NEXT_PAGE_ACTIONS_ZERO_WRITES",
   "scope": "Frontend pagination and exact bounded query allowlist only; A API/worker3910e84 unchanged.",
   "correction": "Initial and subsequent list requests must both use limit5; server seals the limit into each cursor. Browser fixture now enforces the binding.",
   "fullCheckBeforeCursorCorrection": {
@@ -139,5 +139,9 @@
     "laterBuildHostedAndFullBrowserSteps": "NOT_REACHED_BY_FULL_CHECK",
     "separateProductionBuild": "PASS",
     "separateFocusedBrowser": "11_PASS"
-  }
+  },
+  "publishedSource": "2963d810fbe26b2a33dad02ab9e2f881d94b3f12",
+  "publicationRun": "https://github.com/Known-Enough/known-enough/actions/runs/39149007661",
+  "primaryAssets": "7_OF_7_MATCHING",
+  "liveEvidence": "pagination-live-readback.json"
 }

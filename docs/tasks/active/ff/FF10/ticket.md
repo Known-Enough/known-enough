@@ -31,3 +31,8 @@ Compared current prepared source7139b22 with FF03/FF05 receipts, FF06–09 imple
 Static typecheck/build/lint/boundaries579/reference7/whitespace PASS on pinned Node24.21.0/npm11.19.0; no functional tests, AI/signup/participant actions, cloud setup or deployment. Code-only scope complete; publication and user manual acceptance remain separate. No new worker/chat/monitor/schedule; E2E01 remains unclaimed.
 
 Later user-directed publication: source f1c91003d5b190acd0f97d3f820ee39a2d77ad92 is live on Amplify job104. Required publication checks passed; user manual acceptance remains pending. [Receipt](../../../../review-artifacts/FF/ff06-10-publication.json).
+
+
+## Roster-copy follow-up — 2026-10-18T17:20:36.576850+00:00
+
+The previously documented unconditional reset copy was corrected in frontendAmplify120 under E2E02. Case15 now proves ongoing answer/confirmation preservation and an unchanged finished decision; current frontendAmplify123 retains the correction. [Completion report](../../../../review-artifacts/E2E02/completion-20261017/report.md). This closes that copy finding only; no new FF10 claim or real-user manual acceptance is inferred.

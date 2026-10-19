@@ -1,0 +1,40 @@
+{
+  "result": "OWNED_FIXTURE_CLEANUP_PASS",
+  "completedAt": "2026-10-18T17:13:28.664Z",
+  "publicationSource": "3910e84f62394e093c1d477d2bc7e723dfe40b87",
+  "readbackRun": "https://github.com/Known-Enough/known-enough/actions/runs/39148190971",
+  "preconditions": {
+    "distinctOwnedApprovedIdentities": true,
+    "fiveAgreementsPreservedAfterPublication": true,
+    "queueActive": 0,
+    "queueSlots": 0,
+    "fiveCurrentOutcomeJobs": "SUCCEEDED_ATTEMPT_1"
+  },
+  "cleanup": {
+    "groups": 9,
+    "decisions": 9,
+    "checkpointedDrafts": 10,
+    "allChildAccessFencedByRetainedGroupTombstones": true,
+    "oldReadsDenied": 56,
+    "denialStatuses": {
+      "404": 56
+    },
+    "unrelatedGroupsPreserved": true,
+    "accountsPreserved": true,
+    "historicalTombstonesRetained": true,
+    "modelCalls": 0,
+    "uiDeletes": 5,
+    "supportedParticipantApiDeletes": 4,
+    "reconciledReadThrottles": 2
+  },
+  "commands": "Five normal organizer UI deletes and four supported participant API deletes, each checkpointed before network, each200 with confirming404; no deletion replay",
+  "readFailures": "One list503 before any delete; menu timeout submitted0writes; two later old-link reads429 reconciled to404 with two additional reads only",
+  "childDraftCount": "Ten checkpointed draft links verified; group tombstones fence all children, including the late AI draft whose ID was not in the private draft ledger",
+  "evidence": [
+    "evidence/observations.json",
+    "evidence/cleanup-denial-initial.json",
+    "evidence/cleanup-denial-readback.json",
+    "evidence/cleanup-frontend-current.json"
+  ],
+  "providerCallsDuringCleanup": 0
+}

@@ -1,6 +1,20 @@
 # E2E02 findings repair
 
-**Full rerun, 2026-10-17:** [Latest report](run-2026-10-17-201917Z/report.md) records11PASS/5BLOCKED. Direct saves, real-AI creation, trusted invitations, recovery and ongoing membership additions passed. M/A/B accepted outcomes remain REASONING with the disabled worker schedule; final approvals, completed-decision preservation and stale-approval qualification remain open. This supersedes the earlier not-rerun observation while retaining its dated evidence. No application or installed configuration changed during the rerun.
+**Completion follow-up PASS — 2026-10-18T17:20:36.576850+00:00; claim released.** Cases10/11/12/15/16 now pass. [Full completion evidence](../../../../review-artifacts/E2E02/completion-20261017/report.md) preserves the original reports and qualified source boundaries. No fresh sixteen-case single-source or all-green suite claim.
+
+| Follow-up finding | Repair and live evidence |
+| --- | --- |
+| Three accepted outcomes never progressed | Expired/never-called deliveries canceled atomically with native state, private backup and unchanged totals; existing application worker safely enabled. All later qualified jobs terminal with exact usage. |
+| Known output could fail final commit | Bounded reuse of the same known output requires unchanged full authority fences, charges once and never calls the provider again. M reached two-owner agreement. Original STALE failure phase remains unproved. |
+| AI selected a kernel-invalid combination | Complete bounded public catalog screened through the existing kernel before selection; independent final validation remains. Both original AI decisions reached agreement with two distinct approvals. |
+| Unknown save/service responses and wrong loaded decision | Exact route/dialog/body/key checkpoint before network;503 stays unknown until current state/version/queue/usage readback. No blind replay. R retired its old approval, rejected409 stale approval and reached a fresh two-owner agreement. |
+| Misleading roster reset copy | Copy now promises answer/confirmation preservation for additions; case15 proves ongoing preservation and an unchanged finished decision. |
+| Native organizer cleanup404 | A published retained group-delete/access fences and handed back; B deleted nine exact owned groups and verified56 old links404 while preserving unrelated groups/accounts. |
+| Later groups absent from dashboard | Proven server cursor was ignored. FrontendAmplify123 adds bounded Load more groups with failed-read recovery;20 client/11 browser checks and real primary pagination PASS, no writes/model calls. |
+
+The original three drafting calls now reconcile to3,278 tokens; eight follow-up outcome calls used27,215, combined11/30,493. Full final check:32 previously recorded failure names/1,626 passes/two skips/one unhandled error. Actual billed currency cost and broader managed/reliability acceptance remain unverified.
+
+**Historical full rerun, 2026-10-17:** [Latest report](run-2026-10-17-201917Z/report.md) records11PASS/5BLOCKED. Direct saves, real-AI creation, trusted invitations, recovery and ongoing membership additions passed. M/A/B accepted outcomes remain REASONING with the disabled worker schedule; final approvals, completed-decision preservation and stale-approval qualification remain open. This supersedes the earlier not-rerun observation while retaining its dated evidence. No application or installed configuration changed during the rerun.
 
 
 Status: COMPLETE/B repair; claim released. API/worker755440b and frontend119/72f1906 published; targeted live repair checks PASS. Full16-case E2E02 qualification remains unverified. User-directed repair of [the completed report](run-2026-10-16-234411Z/report.md) on baseline `88c84e7cf42b9689532f6e49f468dfbce1a20d29`. Historical reports remain unchanged.

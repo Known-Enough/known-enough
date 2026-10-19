@@ -1,0 +1,85 @@
+{
+  "files": [
+    {
+      "file": "case-A-agreed-verified.png",
+      "width": 700,
+      "height": 576,
+      "bytes": 66945,
+      "sha256": "6c439436875a59a3eccac69ae59e4a6ee4459b7b0fe59eeaef2c200c1acefc9b",
+      "visuallyReviewed": true,
+      "role": "Sanitized live evidence"
+    },
+    {
+      "file": "case-B-agreed-verified.png",
+      "width": 700,
+      "height": 576,
+      "bytes": 63322,
+      "sha256": "ee15a5f6b5f0fcc7c905633ca8dcd574034e1e5b5369f67a92bb4271e80a3d6f",
+      "visuallyReviewed": true,
+      "role": "Sanitized live evidence"
+    },
+    {
+      "file": "case-M-agreed-verified.png",
+      "width": 700,
+      "height": 576,
+      "bytes": 64214,
+      "sha256": "90ca51f36562210cd9ae9a097ae030f46fe105fe96fd45e4be302502ea37588f",
+      "visuallyReviewed": true,
+      "role": "Sanitized live evidence"
+    },
+    {
+      "file": "case-M-agreed.png",
+      "width": 740,
+      "height": 752,
+      "bytes": 52409,
+      "sha256": "6e076bcb0da9e897190fbceb40703b4e47a8edb3008568d2073070d98d123f74",
+      "visuallyReviewed": true,
+      "role": "Intermediate stale UI; not final agreement proof"
+    },
+    {
+      "file": "case-R-agreed-verified.png",
+      "width": 700,
+      "height": 576,
+      "bytes": 64107,
+      "sha256": "683a23281db015b92392ecd1723b84248cf2c27bd4f7209b40c9ea68d6ea3a3e",
+      "visuallyReviewed": true,
+      "role": "Sanitized live evidence"
+    },
+    {
+      "file": "case15-finished-after-join.png",
+      "width": 700,
+      "height": 576,
+      "bytes": 64013,
+      "sha256": "0cd4ac9cbcf89d7d54071dfbadc459933b2751252ada624eeb14d5c71cc736f4",
+      "visuallyReviewed": true,
+      "role": "Sanitized live evidence"
+    },
+    {
+      "file": "case15-finished-before-join.png",
+      "width": 700,
+      "height": 576,
+      "bytes": 64013,
+      "sha256": "0cd4ac9cbcf89d7d54071dfbadc459933b2751252ada624eeb14d5c71cc736f4",
+      "visuallyReviewed": true,
+      "role": "Sanitized live evidence"
+    },
+    {
+      "file": "case15-preservation-copy.png",
+      "width": 1146,
+      "height": 531,
+      "bytes": 79476,
+      "sha256": "ea0df5eb29379ede6d4cc0c7db5a4c664513ba0608d126e92700231059f4b2b1",
+      "visuallyReviewed": true,
+      "role": "Sanitized live evidence"
+    },
+    {
+      "file": "case16-old-approval-retired.png",
+      "width": 740,
+      "height": 752,
+      "bytes": 44448,
+      "sha256": "d3c07750906d1647d512a802915ead80e71ae7cde347b8152fa093bee8ea226a",
+      "visuallyReviewed": true,
+      "role": "Sanitized live evidence"
+    }
+  ]
+}

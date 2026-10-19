@@ -1,0 +1,17 @@
+{
+  "startedAt": "2026-10-18T17:16:48.275Z",
+  "kind": "LIVE_PRIMARY_READ_ONLY",
+  "frontendSource": "ee31eb3173c21f062ef34e18a2f2f046a150898d",
+  "pages": [
+    {
+      "groups": 5,
+      "hasCursor": true,
+      "httpStatus": 200
+    }
+  ],
+  "appWrites": 0,
+  "providerCalls": 0,
+  "verifiedOwnedIdentity": true,
+  "result": "FAIL",
+  "error": "NEXT_LIST_HTTP_503"
+}

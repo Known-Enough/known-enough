@@ -1,0 +1,123 @@
+{
+  "cases": [
+    {
+      "case": "10",
+      "status": "PASS",
+      "evidenceKey": "case10-complete",
+      "observed": {
+        "utc": "2026-10-18T03:45:13.848Z",
+        "agreed": true,
+        "required": 2,
+        "distinctApprovals": 2,
+        "publicValues": [
+          {
+            "type": "ENUM",
+            "value": "Clay Kit"
+          },
+          {
+            "type": "DATE",
+            "value": "2026-11-07"
+          }
+        ],
+        "persistedBoth": true,
+        "privateInputsPreserved": true
+      }
+    },
+    {
+      "case": "11",
+      "status": "PASS",
+      "evidenceKey": "case11-complete",
+      "observed": {
+        "utc": "2026-10-18T09:03:50.320Z",
+        "agreed": true,
+        "required": 2,
+        "distinctApprovals": 2,
+        "publicValues": [
+          {
+            "type": "ENUM",
+            "value": "Moon Noodles"
+          },
+          {
+            "type": "ENUM",
+            "value": "7 November 2026"
+          }
+        ],
+        "persistedBoth": true,
+        "privateInputsPreserved": true
+      }
+    },
+    {
+      "case": "12",
+      "status": "PASS",
+      "evidenceKey": "case12-complete",
+      "observed": {
+        "utc": "2026-10-18T09:04:47.368Z",
+        "agreed": true,
+        "required": 2,
+        "distinctApprovals": 2,
+        "publicValues": [
+          {
+            "type": "ENUM",
+            "value": "Park"
+          },
+          {
+            "type": "DATE",
+            "value": "2026-11-14"
+          }
+        ],
+        "persistedBoth": true,
+        "privateInputsPreserved": true
+      }
+    },
+    {
+      "case": "15",
+      "status": "PASS",
+      "evidenceKey": "case15-complete",
+      "observed": {
+        "utc": "2026-10-18T09:09:16.720Z",
+        "joiningDoesNotEnroll": true,
+        "joinPreservesAnswersAndConfirmations": true,
+        "inclusionPreservesAnswers": true,
+        "preTimeoutPreservationAssertionsPassed": true,
+        "continuationWasReadBeforeWrite": true,
+        "newcomer": {
+          "saved": true,
+          "ready": true,
+          "activeConditions": 2,
+          "publicSaved": 2
+        },
+        "repeatReviewRequired": false,
+        "finishedUnchanged": true,
+        "finishedParticipants": 1,
+        "finishedApprovals": 1,
+        "exactOriginalFinishedProposal": true,
+        "misleadingResetCopy": false
+      }
+    },
+    {
+      "case": "16",
+      "status": "PASS",
+      "evidenceKey": "case16-complete",
+      "observed": {
+        "utc": "2026-10-18T09:17:25.485Z",
+        "agreed": true,
+        "required": 2,
+        "distinctApprovals": 2,
+        "persistedBoth": true,
+        "privateInputsPreserved": true,
+        "newProposal": true,
+        "freshApprovalsRequired": true,
+        "serviceErrorReconciliation": "NOT_APPLIED_FRESH_EXPLICIT_UI_REVIEW",
+        "unknownWriteNotBlindlyReplayed": true,
+        "staleProposalRejectedHttp409": true
+      }
+    }
+  ],
+  "counts": {
+    "PASS": 5,
+    "FAIL": 0,
+    "BLOCKED": 0
+  },
+  "freshFullSixteenCaseRun": false,
+  "earlierElevenPassCases": "Retained in the 2026-10-17 full-run report"
+}

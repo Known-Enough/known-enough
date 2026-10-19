@@ -1,0 +1,19 @@
+{
+  "utc": "2026-10-18T17:20:56.131533+00:00",
+  "result": "REPORTING_AND_SOURCE_GUARDS_PASS",
+  "source": "2963d810fbe26b2a33dad02ab9e2f881d94b3f12",
+  "jsonArtifactsParsed": 92,
+  "markdownFiles": 13,
+  "localLinksChecked": 767,
+  "missingLocalLinks": 0,
+  "currentSourceHashesFrozen": true,
+  "historicalFullRunRetained": true,
+  "currentFrontendAssets": "7_OF_7_MATCH",
+  "caseCounts": {
+    "PASS": 5,
+    "FAIL": 0,
+    "BLOCKED": 0
+  },
+  "cleanup": "9_OWNED_GROUPS_56_READS_404",
+  "credentialAndPrivateFixtureLeakScan": "PASS"
+}

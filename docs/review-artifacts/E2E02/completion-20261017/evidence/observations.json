@@ -1,0 +1,1349 @@
+{
+  "runId": "E2E02-completion-20261017",
+  "startedAt": "2026-10-18T01:05:09.309312+00:00",
+  "browserVersion": "153.0.8010.12",
+  "toolVersion": "Playwright 1.63.0",
+  "actions": [
+    {
+      "utc": "2026-10-18T03:30:08.867Z",
+      "stage": "caseM-outcome",
+      "user": 1,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "1646fe90-dba1-4993-8b6e-7ff33cdf67fb"
+    },
+    {
+      "utc": "2026-10-18T03:43:49.220Z",
+      "stage": "case16-reconciled-current-save",
+      "user": 2,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "2065e2d6-90c6-42de-8c51-a99e7dac3a15"
+    },
+    {
+      "utc": "2026-10-18T03:44:40.297Z",
+      "stage": "caseM-outcome",
+      "user": 1,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "178d6570-5152-42a6-8158-1f8c5daf06f0"
+    },
+    {
+      "utc": "2026-10-18T03:45:09.268Z",
+      "stage": "caseM-first-approval",
+      "user": 1,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "735d39a8-c6fc-4494-9cfb-1c3ec0976a0d"
+    },
+    {
+      "utc": "2026-10-18T03:45:12.205Z",
+      "stage": "caseM-second-approval",
+      "user": 2,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "fdb07ac4-4675-46a8-8add-1db009749d30"
+    },
+    {
+      "utc": "2026-10-18T03:45:43.324Z",
+      "stage": "caseA-outcome",
+      "user": 1,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "f33f9047-9339-4fc4-943e-eafa1e6f384f"
+    },
+    {
+      "utc": "2026-10-18T09:03:20.775Z",
+      "stage": "caseA-outcome",
+      "user": 1,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "587d5b81-1479-4583-9f36-295a2c38d338"
+    },
+    {
+      "utc": "2026-10-18T09:03:43.666Z",
+      "stage": "caseA-first-approval",
+      "user": 1,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "e8b55800-51cd-49ac-bdb1-c9151ebb290a"
+    },
+    {
+      "utc": "2026-10-18T09:03:46.657Z",
+      "stage": "caseA-second-approval",
+      "user": 2,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "a8d6c729-3c73-4d4c-b13f-15e9dc838e73"
+    },
+    {
+      "utc": "2026-10-18T09:03:53.258Z",
+      "stage": "caseB-outcome",
+      "user": 1,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "c77743cb-f0c3-482c-ab45-86bf8a505325"
+    },
+    {
+      "utc": "2026-10-18T09:04:41.052Z",
+      "stage": "caseB-first-approval",
+      "user": 1,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "4e4d5afb-a7bc-446a-849a-78ead94efe31"
+    },
+    {
+      "utc": "2026-10-18T09:04:44.131Z",
+      "stage": "caseB-second-approval",
+      "user": 2,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "51d37ad0-7bcc-4f73-b163-77ea73c79902"
+    },
+    {
+      "utc": "2026-10-18T09:05:08.052Z",
+      "stage": "case15-fresh-prejoin-fixtures",
+      "user": 1,
+      "route": "/groups",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": null
+    },
+    {
+      "utc": "2026-10-18T09:05:54.269Z",
+      "stage": "case15-fresh-prejoin-fixtures",
+      "user": 1,
+      "route": "/groups/{group}/name",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": null
+    },
+    {
+      "utc": "2026-10-18T09:05:57.827Z",
+      "stage": "case15-fresh-prejoin-fixtures",
+      "user": 1,
+      "route": "/groups/{group}/drafts",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "ac982571-ddb7-4e62-a607-8eda932ed9d9"
+    },
+    {
+      "utc": "2026-10-18T09:05:58.858Z",
+      "stage": "case15-fresh-prejoin-fixtures",
+      "user": 1,
+      "route": "/groups/{group}/drafts/{draft}/create",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": null
+    },
+    {
+      "utc": "2026-10-18T09:06:01.962Z",
+      "stage": "case15-fresh-prejoin-fixtures",
+      "user": 1,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "195ef31a-75ed-4012-b188-0e165ddee5b0"
+    },
+    {
+      "utc": "2026-10-18T09:06:04.579Z",
+      "stage": "case15-fresh-prejoin-fixtures",
+      "user": 1,
+      "route": "/groups/{group}/drafts",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "de88af1e-fb1e-4f26-ae11-39f88642148b"
+    },
+    {
+      "utc": "2026-10-18T09:06:05.377Z",
+      "stage": "case15-fresh-prejoin-fixtures",
+      "user": 1,
+      "route": "/groups/{group}/drafts/{draft}/create",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": null
+    },
+    {
+      "utc": "2026-10-18T09:06:08.235Z",
+      "stage": "case15-fresh-prejoin-fixtures",
+      "user": 1,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "267c926b-8802-4760-97f7-57b058b59118"
+    },
+    {
+      "utc": "2026-10-18T09:06:11.816Z",
+      "stage": "case15-fresh-prejoin-fixtures",
+      "user": 1,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "2f1babe0-320e-4bd2-a276-a44c290cab0f"
+    },
+    {
+      "utc": "2026-10-18T09:06:40.330Z",
+      "stage": "case15-fresh-prejoin-fixtures",
+      "user": 1,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "c6c9f3f4-4a2c-4420-b985-bb9a8fae0255"
+    },
+    {
+      "utc": "2026-10-18T09:06:44.407Z",
+      "stage": "case15-complete",
+      "user": 1,
+      "route": "/groups/{group}/invitations",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": null
+    },
+    {
+      "utc": "2026-10-18T09:06:48.843Z",
+      "stage": "case15-complete",
+      "user": 2,
+      "route": "/groups/{group}",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": null
+    },
+    {
+      "utc": "2026-10-18T09:06:52.645Z",
+      "stage": "case15-complete",
+      "user": 1,
+      "route": "/groups/{group}/decisions/{decision}/revise",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": null
+    },
+    {
+      "utc": "2026-10-18T09:09:13.127Z",
+      "stage": "case15-complete",
+      "user": 2,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "8955ec96-1174-4496-8b0c-651c99d61371"
+    },
+    {
+      "utc": "2026-10-18T09:09:47.441Z",
+      "stage": "case16-original-proposal-and-one-approval",
+      "user": 1,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "68aaa731-2736-41e5-a636-e5a2d1ff0958"
+    },
+    {
+      "utc": "2026-10-18T09:10:41.243Z",
+      "stage": "case16-original-proposal-and-one-approval",
+      "user": 1,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "45f688de-06fd-4158-9092-3df4c7d953c9"
+    },
+    {
+      "utc": "2026-10-18T09:10:51.014Z",
+      "stage": "case16-change-retires-old-approval",
+      "user": 2,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "82fd4c80-5a50-4356-a20a-3b6ff0b2da7c"
+    },
+    {
+      "utc": "2026-10-18T09:10:52.384Z",
+      "stage": "case16-change-retires-old-approval",
+      "user": 2,
+      "route": "/decisions/{decision}/commands",
+      "status": 409,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": "STALE_CONTEXT",
+      "reference": "b10b58e6-7a22-4006-b8ea-25d25535d80e"
+    },
+    {
+      "utc": "2026-10-18T09:11:40.873Z",
+      "stage": "caseR-outcome",
+      "user": 1,
+      "route": "/decisions/{decision}/commands",
+      "status": 503,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": null
+    },
+    {
+      "utc": "2026-10-18T09:14:35.919Z",
+      "stage": "caseR-outcome",
+      "user": 1,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "01ac25b4-ffc7-444d-89c4-606fc4620c0c"
+    },
+    {
+      "utc": "2026-10-18T09:15:43.417Z",
+      "stage": "caseR-first-approval",
+      "user": 1,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "0cf4f2e5-194f-4561-86d2-f068c1a6b6f8"
+    },
+    {
+      "utc": "2026-10-18T09:15:46.123Z",
+      "stage": "caseR-second-approval",
+      "user": 2,
+      "route": "/decisions/{decision}/commands",
+      "status": 503,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": "RETRYABLE_SERVER_ERROR",
+      "reference": "851c3a96-cb7f-4df7-8775-efd7498d7095"
+    },
+    {
+      "utc": "2026-10-18T09:17:22.405Z",
+      "stage": "caseR-second-approval-after-readback",
+      "user": 2,
+      "route": "/decisions/{decision}/commands",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": "3f5d945d-62a5-4621-9cd9-06d5ef050fa9"
+    },
+    {
+      "utc": "2026-10-18T09:19:50.401Z",
+      "stage": "cleanup-group-0",
+      "user": 1,
+      "route": "/groups/{group}/delete",
+      "status": 404,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": null
+    },
+    {
+      "utc": "2026-10-18T17:09:46.956Z",
+      "stage": "cleanup-native-group-0",
+      "user": 1,
+      "route": "/groups/{group}/delete",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": null
+    },
+    {
+      "utc": "2026-10-18T17:09:49.594Z",
+      "stage": "cleanup-native-group-1",
+      "user": 2,
+      "route": "/groups/{group}/delete",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": null
+    },
+    {
+      "utc": "2026-10-18T17:09:52.217Z",
+      "stage": "cleanup-native-group-2",
+      "user": 1,
+      "route": "/groups/{group}/delete",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": null
+    },
+    {
+      "utc": "2026-10-18T17:09:54.384Z",
+      "stage": "cleanup-native-group-3",
+      "user": 1,
+      "route": "/groups/{group}/delete",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": null
+    },
+    {
+      "utc": "2026-10-18T17:09:56.548Z",
+      "stage": "cleanup-native-group-4",
+      "user": 1,
+      "route": "/groups/{group}/delete",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "code": null,
+      "reference": null
+    },
+    {
+      "utc": "2026-10-18T17:11:25.455Z",
+      "stage": "cleanup-native-group-5",
+      "user": 1,
+      "route": "/groups/{group}/delete",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "transport": "SUPPORTED_PARTICIPANT_API",
+      "code": null,
+      "reference": null
+    },
+    {
+      "utc": "2026-10-18T17:11:25.971Z",
+      "stage": "cleanup-native-group-6",
+      "user": 2,
+      "route": "/groups/{group}/delete",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "transport": "SUPPORTED_PARTICIPANT_API",
+      "code": null,
+      "reference": null
+    },
+    {
+      "utc": "2026-10-18T17:11:26.437Z",
+      "stage": "cleanup-native-group-7",
+      "user": 1,
+      "route": "/groups/{group}/delete",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "transport": "SUPPORTED_PARTICIPANT_API",
+      "code": null,
+      "reference": null
+    },
+    {
+      "utc": "2026-10-18T17:11:27.479Z",
+      "stage": "cleanup-native-group-8",
+      "user": 1,
+      "route": "/groups/{group}/delete",
+      "status": 200,
+      "submittedOnce": true,
+      "checkpointed": true,
+      "transport": "SUPPORTED_PARTICIPANT_API",
+      "code": null,
+      "reference": null
+    }
+  ],
+  "results": {
+    "login1": {
+      "utc": "2026-10-18T09:03:09.848Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedProviderIdentity": true,
+      "groupsReturned": true,
+      "inboxRead": true,
+      "pendingCount": 0,
+      "emptyInboxHidden": true,
+      "distinctSubject": null,
+      "sharedVerifiedEmail": null
+    },
+    "login2": {
+      "utc": "2026-10-18T09:03:15.120Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedProviderIdentity": true,
+      "groupsReturned": true,
+      "inboxRead": true,
+      "pendingCount": 0,
+      "emptyInboxHidden": true,
+      "distinctSubject": true,
+      "sharedVerifiedEmail": true
+    },
+    "initialReconciliation": {
+      "utc": "2026-10-18T03:25:19.542Z",
+      "retained": true,
+      "secondRReadiness": "NOT_STARTED",
+      "RHasProposal": false
+    },
+    "caseM-outcome": {
+      "utc": "2026-10-18T03:45:07.418Z",
+      "proposal": true,
+      "status": "PROPOSED",
+      "required": 2,
+      "elapsedMs": 27097,
+      "values": [
+        {
+          "type": "ENUM",
+          "value": "Clay Kit"
+        },
+        {
+          "type": "DATE",
+          "value": "2026-11-07"
+        }
+      ]
+    },
+    "change-login1": {
+      "utc": "2026-10-18T09:09:40.540Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedProviderIdentity": true,
+      "groupsReturned": true,
+      "inboxRead": true,
+      "pendingCount": 0,
+      "emptyInboxHidden": true,
+      "distinctSubject": null,
+      "sharedVerifiedEmail": null
+    },
+    "change-login2": {
+      "utc": "2026-10-18T09:09:44.755Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedProviderIdentity": true,
+      "groupsReturned": true,
+      "inboxRead": true,
+      "pendingCount": 0,
+      "emptyInboxHidden": true,
+      "distinctSubject": true,
+      "sharedVerifiedEmail": true
+    },
+    "case16-reconciled-current-save": {
+      "utc": "2026-10-18T03:43:50.271Z",
+      "historicalUnknownNotReplayed": true,
+      "currentVersionReviewed": true,
+      "exactRouteConfirmed": true,
+      "privateCommandCheckpointed": true,
+      "saved": true,
+      "ready": true,
+      "activeConditions": 2,
+      "publicSaved": 2,
+      "peerAnswersPreserved": true
+    },
+    "caseM-first-approval": {
+      "utc": "2026-10-18T03:45:10.138Z",
+      "approved": true,
+      "approvals": 1,
+      "required": 2,
+      "status": "APPROVING",
+      "agreed": false
+    },
+    "caseM-second-approval": {
+      "utc": "2026-10-18T03:45:13.117Z",
+      "approved": true,
+      "approvals": 2,
+      "required": 2,
+      "status": "AGREED",
+      "agreed": true
+    },
+    "case10-complete": {
+      "utc": "2026-10-18T03:45:13.848Z",
+      "agreed": true,
+      "required": 2,
+      "distinctApprovals": 2,
+      "publicValues": [
+        {
+          "type": "ENUM",
+          "value": "Clay Kit"
+        },
+        {
+          "type": "DATE",
+          "value": "2026-11-07"
+        }
+      ],
+      "persistedBoth": true,
+      "privateInputsPreserved": true
+    },
+    "caseA-outcome": {
+      "utc": "2026-10-18T09:03:41.304Z",
+      "proposal": true,
+      "status": "PROPOSED",
+      "required": 2,
+      "elapsedMs": 20508,
+      "values": [
+        {
+          "type": "ENUM",
+          "value": "Moon Noodles"
+        },
+        {
+          "type": "ENUM",
+          "value": "7 November 2026"
+        }
+      ]
+    },
+    "case10-final-screenshot": {
+      "utc": "2026-10-18T09:03:17.359Z",
+      "screenshot": "case-M-agreed-verified.png",
+      "bytes": 64214
+    },
+    "caseA-first-approval": {
+      "utc": "2026-10-18T09:03:44.740Z",
+      "approved": true,
+      "approvals": 1,
+      "required": 2,
+      "status": "APPROVING",
+      "agreed": false
+    },
+    "caseA-second-approval": {
+      "utc": "2026-10-18T09:03:47.659Z",
+      "approved": true,
+      "approvals": 2,
+      "required": 2,
+      "status": "AGREED",
+      "agreed": true
+    },
+    "case11-complete": {
+      "utc": "2026-10-18T09:03:50.320Z",
+      "agreed": true,
+      "required": 2,
+      "distinctApprovals": 2,
+      "publicValues": [
+        {
+          "type": "ENUM",
+          "value": "Moon Noodles"
+        },
+        {
+          "type": "ENUM",
+          "value": "7 November 2026"
+        }
+      ],
+      "persistedBoth": true,
+      "privateInputsPreserved": true
+    },
+    "caseB-outcome": {
+      "utc": "2026-10-18T09:04:39.364Z",
+      "proposal": true,
+      "status": "PROPOSED",
+      "required": 2,
+      "elapsedMs": 46085,
+      "values": [
+        {
+          "type": "ENUM",
+          "value": "Park"
+        },
+        {
+          "type": "DATE",
+          "value": "2026-11-14"
+        }
+      ]
+    },
+    "caseB-first-approval": {
+      "utc": "2026-10-18T09:04:41.919Z",
+      "approved": true,
+      "approvals": 1,
+      "required": 2,
+      "status": "APPROVING",
+      "agreed": false
+    },
+    "caseB-second-approval": {
+      "utc": "2026-10-18T09:04:44.997Z",
+      "approved": true,
+      "approvals": 2,
+      "required": 2,
+      "status": "AGREED",
+      "agreed": true
+    },
+    "case12-complete": {
+      "utc": "2026-10-18T09:04:47.368Z",
+      "agreed": true,
+      "required": 2,
+      "distinctApprovals": 2,
+      "publicValues": [
+        {
+          "type": "ENUM",
+          "value": "Park"
+        },
+        {
+          "type": "DATE",
+          "value": "2026-11-14"
+        }
+      ],
+      "persistedBoth": true,
+      "privateInputsPreserved": true
+    },
+    "membership-login1": {
+      "utc": "2026-10-18T09:05:01.466Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedProviderIdentity": true,
+      "groupsReturned": true,
+      "inboxRead": true,
+      "pendingCount": 0,
+      "emptyInboxHidden": true,
+      "distinctSubject": null,
+      "sharedVerifiedEmail": null
+    },
+    "membership-login2": {
+      "utc": "2026-10-18T09:05:05.784Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedProviderIdentity": true,
+      "groupsReturned": true,
+      "inboxRead": true,
+      "pendingCount": 0,
+      "emptyInboxHidden": true,
+      "distinctSubject": true,
+      "sharedVerifiedEmail": true
+    },
+    "case15-fresh-prejoin-fixtures": {
+      "utc": "2026-10-18T09:06:42.725Z",
+      "groupCreated": true,
+      "renamed": true,
+      "ongoingSaved": true,
+      "finishedBeforeJoining": true,
+      "finishedParticipants": 1,
+      "finishedApprovals": 1
+    },
+    "membership-resume-login1": {
+      "utc": "2026-10-18T09:08:19.711Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedProviderIdentity": true,
+      "groupsReturned": true,
+      "inboxRead": true,
+      "pendingCount": 0,
+      "emptyInboxHidden": true,
+      "distinctSubject": null,
+      "sharedVerifiedEmail": null
+    },
+    "membership-resume-login2": {
+      "utc": "2026-10-18T09:08:23.991Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedProviderIdentity": true,
+      "groupsReturned": true,
+      "inboxRead": true,
+      "pendingCount": 0,
+      "emptyInboxHidden": true,
+      "distinctSubject": true,
+      "sharedVerifiedEmail": true
+    },
+    "case15-resume-inspection": {
+      "utc": "2026-10-18T09:08:25.150Z",
+      "publicSameId": true,
+      "publicSchemaValid": true,
+      "publicIssues": [],
+      "ownerSchemaValid": true,
+      "ownerIssues": [],
+      "groupMembers": 2,
+      "newcomerReady": "NOT_STARTED",
+      "publicRequired": 2,
+      "ongoingStatus": "COLLECTING_FRAME_CONFIRMATION",
+      "ongoingSaved": 1,
+      "finishedStatus": "AGREED",
+      "finishedApprovals": 1
+    },
+    "membership-continuation-login1": {
+      "utc": "2026-10-18T09:09:05.144Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedProviderIdentity": true,
+      "groupsReturned": true,
+      "inboxRead": true,
+      "pendingCount": 0,
+      "emptyInboxHidden": true,
+      "distinctSubject": null,
+      "sharedVerifiedEmail": null
+    },
+    "membership-continuation-login2": {
+      "utc": "2026-10-18T09:09:09.664Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedProviderIdentity": true,
+      "groupsReturned": true,
+      "inboxRead": true,
+      "pendingCount": 0,
+      "emptyInboxHidden": true,
+      "distinctSubject": true,
+      "sharedVerifiedEmail": true
+    },
+    "case15-complete": {
+      "utc": "2026-10-18T09:09:16.720Z",
+      "joiningDoesNotEnroll": true,
+      "joinPreservesAnswersAndConfirmations": true,
+      "inclusionPreservesAnswers": true,
+      "preTimeoutPreservationAssertionsPassed": true,
+      "continuationWasReadBeforeWrite": true,
+      "newcomer": {
+        "saved": true,
+        "ready": true,
+        "activeConditions": 2,
+        "publicSaved": 2
+      },
+      "repeatReviewRequired": false,
+      "finishedUnchanged": true,
+      "finishedParticipants": 1,
+      "finishedApprovals": 1,
+      "exactOriginalFinishedProposal": true,
+      "misleadingResetCopy": false
+    },
+    "case16-original-proposal-and-one-approval": {
+      "utc": "2026-10-18T09:10:42.009Z",
+      "proposal": true,
+      "status": "PROPOSED",
+      "required": 2,
+      "elapsedMs": 52253,
+      "values": [
+        {
+          "type": "ENUM",
+          "value": "Clay Kit"
+        },
+        {
+          "type": "DATE",
+          "value": "2026-11-07"
+        }
+      ],
+      "oneApproval": true,
+      "agreementPending": true
+    },
+    "case16-change-retires-old-approval": {
+      "utc": "2026-10-18T09:10:54.171Z",
+      "unchangedOwnerAnswersPreserved": true,
+      "sharedTermsPreserved": true,
+      "oldProposalRetired": true,
+      "oldApprovals": 0,
+      "staleApprovalHttp409": true,
+      "currentStateUnchangedByStaleApproval": true
+    },
+    "change-reconcile-login1": {
+      "utc": "2026-10-18T09:12:54.769Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedProviderIdentity": true,
+      "groupsReturned": true,
+      "inboxRead": true,
+      "pendingCount": 0,
+      "emptyInboxHidden": true,
+      "distinctSubject": null,
+      "sharedVerifiedEmail": null
+    },
+    "change-reconcile-login2": {
+      "utc": "2026-10-18T09:12:59.929Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedProviderIdentity": true,
+      "groupsReturned": true,
+      "inboxRead": true,
+      "pendingCount": 0,
+      "emptyInboxHidden": true,
+      "distinctSubject": true,
+      "sharedVerifiedEmail": true
+    },
+    "case16-replacement-request-readback": {
+      "utc": "2026-10-18T09:13:00.820Z",
+      "sameStatus": true,
+      "status": "READY",
+      "required": 2,
+      "answersSaved": 2,
+      "approvals": 0,
+      "hasProposal": false,
+      "requestNotReplayed": true
+    },
+    "change-continuation-login1": {
+      "utc": "2026-10-18T09:14:26.459Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedProviderIdentity": true,
+      "groupsReturned": true,
+      "inboxRead": true,
+      "pendingCount": 0,
+      "emptyInboxHidden": true,
+      "distinctSubject": null,
+      "sharedVerifiedEmail": null
+    },
+    "change-continuation-login2": {
+      "utc": "2026-10-18T09:14:31.901Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedProviderIdentity": true,
+      "groupsReturned": true,
+      "inboxRead": true,
+      "pendingCount": 0,
+      "emptyInboxHidden": true,
+      "distinctSubject": true,
+      "sharedVerifiedEmail": true
+    },
+    "case16-service-error-reconciled": {
+      "utc": "2026-10-18T09:14:32.385Z",
+      "http503WithoutReceipt": true,
+      "exactVersionUnchanged": true,
+      "currentStatus": "READY",
+      "queueActive": 0,
+      "slots": 0,
+      "unknownRequestReservation": 0,
+      "providerDispatchNotPossibleWithoutReservation": true,
+      "originalRequestNotReplayed": true,
+      "freshExplicitRequestAllowedAfterReadback": true
+    },
+    "caseR-outcome": {
+      "utc": "2026-10-18T09:15:41.059Z",
+      "proposal": true,
+      "status": "PROPOSED",
+      "required": 2,
+      "elapsedMs": 65109,
+      "values": [
+        {
+          "type": "ENUM",
+          "value": "Paper Kit"
+        },
+        {
+          "type": "DATE",
+          "value": "2026-11-06"
+        }
+      ]
+    },
+    "caseR-first-approval": {
+      "utc": "2026-10-18T09:15:44.273Z",
+      "approved": true,
+      "approvals": 1,
+      "required": 2,
+      "status": "APPROVING",
+      "agreed": false
+    },
+    "approval-reconcile-login1": {
+      "utc": "2026-10-18T09:17:15.435Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedProviderIdentity": true,
+      "groupsReturned": true,
+      "inboxRead": true,
+      "pendingCount": 0,
+      "emptyInboxHidden": true,
+      "distinctSubject": null,
+      "sharedVerifiedEmail": null
+    },
+    "approval-reconcile-login2": {
+      "utc": "2026-10-18T09:17:19.697Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedProviderIdentity": true,
+      "groupsReturned": true,
+      "inboxRead": true,
+      "pendingCount": 0,
+      "emptyInboxHidden": true,
+      "distinctSubject": true,
+      "sharedVerifiedEmail": true
+    },
+    "caseR-second-approval-after-readback": {
+      "utc": "2026-10-18T09:17:23.336Z",
+      "approved": true,
+      "approvals": 2,
+      "required": 2,
+      "status": "AGREED",
+      "agreed": true
+    },
+    "case16-complete": {
+      "utc": "2026-10-18T09:17:25.485Z",
+      "agreed": true,
+      "required": 2,
+      "distinctApprovals": 2,
+      "persistedBoth": true,
+      "privateInputsPreserved": true,
+      "newProposal": true,
+      "freshApprovalsRequired": true,
+      "serviceErrorReconciliation": "NOT_APPLIED_FRESH_EXPLICIT_UI_REVIEW",
+      "unknownWriteNotBlindlyReplayed": true,
+      "staleProposalRejectedHttp409": true
+    },
+    "usage-inventory-login": {
+      "utc": "2026-10-18T09:17:35.141Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedProviderIdentity": true,
+      "groupsReturned": true,
+      "inboxRead": true,
+      "pendingCount": 0,
+      "emptyInboxHidden": true,
+      "distinctSubject": null,
+      "sharedVerifiedEmail": null
+    },
+    "historical-public-draft-inventory": {
+      "utc": "2026-10-18T09:17:35.539Z",
+      "positivelyOwned": true,
+      "publicDrafts": 3,
+      "exactSourceAndDraftDerivedDeliveryIds": true,
+      "providerCalls": 0
+    },
+    "cleanup-login1": {
+      "utc": "2026-10-18T09:18:56.274Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedProviderIdentity": true,
+      "groupsReturned": true,
+      "inboxRead": true,
+      "pendingCount": 0,
+      "emptyInboxHidden": true,
+      "distinctSubject": null,
+      "sharedVerifiedEmail": null
+    },
+    "cleanup-login2": {
+      "utc": "2026-10-18T09:19:00.476Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedProviderIdentity": true,
+      "groupsReturned": true,
+      "inboxRead": true,
+      "pendingCount": 0,
+      "emptyInboxHidden": true,
+      "distinctSubject": true,
+      "sharedVerifiedEmail": true
+    },
+    "cleanup-native-login1": {
+      "utc": "2026-10-18T17:11:18.548Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedIdentity": true,
+      "distinctIdentity": null
+    },
+    "cleanup-native-login2": {
+      "utc": "2026-10-18T17:11:21.837Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedIdentity": true,
+      "distinctIdentity": true
+    },
+    "completed-outcomes-preserved-after-deletion-publication": {
+      "utc": "2026-10-18T17:09:41.788Z",
+      "decisions": 5,
+      "jointDecisions": 4,
+      "soloFinishedDecision": 1,
+      "allAgreementsAndProposalsPreserved": true,
+      "modelCalls": 0
+    },
+    "cleanup-native-group-0": {
+      "utc": "2026-10-18T17:11:24.068Z",
+      "alreadyDeletedFromPositiveCheckpoint": true
+    },
+    "cleanup-native-group-1": {
+      "utc": "2026-10-18T17:11:24.177Z",
+      "alreadyDeletedFromPositiveCheckpoint": true
+    },
+    "cleanup-native-group-2": {
+      "utc": "2026-10-18T17:11:24.339Z",
+      "alreadyDeletedFromPositiveCheckpoint": true
+    },
+    "cleanup-native-group-3": {
+      "utc": "2026-10-18T17:11:24.513Z",
+      "alreadyDeletedFromPositiveCheckpoint": true
+    },
+    "cleanup-native-group-4": {
+      "utc": "2026-10-18T17:11:24.655Z",
+      "alreadyDeletedFromPositiveCheckpoint": true
+    },
+    "cleanup-dashboard-pagination-diagnosis": {
+      "utc": "2026-10-18T17:11:23.912Z",
+      "defaultPageSize": 6,
+      "hasCursor": true,
+      "remainingTargetInDefaultPage": false,
+      "submittedDeletesBeforeTimeout": 0,
+      "uiPaginationAvailable": 0
+    },
+    "cleanup-native-group-5": {
+      "utc": "2026-10-18T17:11:25.559Z",
+      "deleted": true,
+      "httpStatus": 200,
+      "supportedAbsentRead": true,
+      "reconciled": false,
+      "transport": "SUPPORTED_PARTICIPANT_API"
+    },
+    "cleanup-native-group-6": {
+      "utc": "2026-10-18T17:11:26.076Z",
+      "deleted": true,
+      "httpStatus": 200,
+      "supportedAbsentRead": true,
+      "reconciled": false,
+      "transport": "SUPPORTED_PARTICIPANT_API"
+    },
+    "cleanup-native-group-7": {
+      "utc": "2026-10-18T17:11:26.634Z",
+      "deleted": true,
+      "httpStatus": 200,
+      "supportedAbsentRead": true,
+      "reconciled": false,
+      "transport": "SUPPORTED_PARTICIPANT_API"
+    },
+    "cleanup-native-group-8": {
+      "utc": "2026-10-18T17:11:27.594Z",
+      "deleted": true,
+      "httpStatus": 200,
+      "supportedAbsentRead": true,
+      "reconciled": false,
+      "transport": "SUPPORTED_PARTICIPANT_API"
+    },
+    "cleanup-denial-scan-login1": {
+      "utc": "2026-10-18T17:11:58.333Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedIdentity": true,
+      "distinctIdentity": null
+    },
+    "cleanup-denial-scan-login2": {
+      "utc": "2026-10-18T17:12:01.814Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedIdentity": true,
+      "distinctIdentity": true
+    },
+    "cleanup-denial-scan": {
+      "utc": "2026-10-18T17:12:10.994Z",
+      "allOldReadsDenied": false,
+      "oldReadsDenied": 54,
+      "ownedGroupsAbsent": true,
+      "unrelatedGroupsPreserved": true,
+      "ownedPendingInvitationsAbsent": true
+    },
+    "cleanup-throttle-reconciliation-login1": {
+      "utc": "2026-10-18T17:13:24.728Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedIdentity": true,
+      "distinctIdentity": null
+    },
+    "cleanup-throttle-reconciliation-login2": {
+      "utc": "2026-10-18T17:13:28.152Z",
+      "authenticated": true,
+      "approved": true,
+      "verifiedIdentity": true,
+      "distinctIdentity": true
+    },
+    "cleanup-complete": {
+      "utc": "2026-10-18T17:13:28.664Z",
+      "groups": 9,
+      "decisions": 9,
+      "checkpointedDrafts": 10,
+      "allChildAccessFencedByRetainedGroupTombstones": true,
+      "oldReadsDenied": 56,
+      "denialStatuses": {
+        "404": 56
+      },
+      "unrelatedGroupsPreserved": true,
+      "accountsPreserved": true,
+      "historicalTombstonesRetained": true,
+      "modelCalls": 0,
+      "uiDeletes": 5,
+      "supportedParticipantApiDeletes": 4,
+      "reconciledReadThrottles": 2
+    }
+  },
+  "screenshots": [
+    {
+      "file": "case-M-agreed.png",
+      "utc": "2026-10-18T03:45:13.847Z",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "selector": "dialog.ke-open-decision-dialog[open]"
+    },
+    {
+      "file": "case-M-agreed-verified.png",
+      "utc": "2026-10-18T09:03:17.358Z",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "selector": "dialog.ke-step-dialog[open]"
+    },
+    {
+      "file": "case-A-agreed-verified.png",
+      "utc": "2026-10-18T09:03:50.319Z",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "selector": "dialog.ke-step-dialog[open]"
+    },
+    {
+      "file": "case-B-agreed-verified.png",
+      "utc": "2026-10-18T09:04:47.366Z",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "selector": "dialog.ke-step-dialog[open]"
+    },
+    {
+      "file": "case15-finished-before-join.png",
+      "utc": "2026-10-18T09:06:42.722Z",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "selector": "dialog.ke-step-dialog[open]"
+    },
+    {
+      "file": "case15-preservation-copy.png",
+      "utc": "2026-10-18T09:06:52.186Z",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    },
+    {
+      "file": "case15-finished-after-join.png",
+      "utc": "2026-10-18T09:09:16.719Z",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "selector": "dialog.ke-step-dialog[open]"
+    },
+    {
+      "file": "case16-old-approval-retired.png",
+      "utc": "2026-10-18T09:10:54.166Z",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "selector": "dialog.ke-open-decision-dialog[open]"
+    },
+    {
+      "file": "case-R-agreed-verified.png",
+      "utc": "2026-10-18T09:17:25.483Z",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "selector": "dialog.ke-step-dialog[open]"
+    }
+  ],
+  "failures": [
+    {
+      "stage": "caseM-outcome",
+      "error": "PROPOSAL_NOT_PRODUCED",
+      "utc": "2026-10-18T03:30:21.863Z"
+    },
+    {
+      "stage": "caseA-outcome",
+      "error": "PROPOSAL_NOT_PRODUCED",
+      "utc": "2026-10-18T03:46:02.373Z"
+    },
+    {
+      "stage": "case15-complete",
+      "error": "TimeoutError",
+      "utc": "2026-10-18T09:07:13.100Z"
+    },
+    {
+      "stage": "caseR-outcome",
+      "error": "HTTP_503_ERROR",
+      "utc": "2026-10-18T09:11:40.876Z"
+    },
+    {
+      "stage": "caseR-second-approval",
+      "error": "HTTP_503_RETRYABLE_SERVER_ERROR",
+      "utc": "2026-10-18T09:15:46.126Z"
+    },
+    {
+      "stage": "case16-complete",
+      "error": "APPROVAL_CHECKPOINT_TARGET_CHANGED",
+      "utc": "2026-10-18T09:16:40.132Z"
+    },
+    {
+      "stage": "cleanup-group-0",
+      "error": "HTTP_404_ERROR",
+      "utc": "2026-10-18T09:19:50.404Z"
+    },
+    {
+      "stage": "completed-outcomes-preserved-after-deletion-publication",
+      "error": "CLEANUP_READ_HTTP_503",
+      "utc": "2026-10-18T17:09:11.968Z"
+    },
+    {
+      "stage": "cleanup-native-group-5",
+      "error": "TimeoutError",
+      "utc": "2026-10-18T17:10:28.475Z"
+    },
+    {
+      "stage": "cleanup-complete",
+      "error": "OLD_LINK_NOT_DENIED",
+      "utc": "2026-10-18T17:11:33.923Z"
+    }
+  ],
+  "fixturesRetained": false,
+  "completedAt": "2026-10-18T17:13:28.664Z",
+  "cleanup": {
+    "groups": 9,
+    "decisions": 9,
+    "checkpointedDrafts": 10,
+    "allChildAccessFencedByRetainedGroupTombstones": true,
+    "oldReadsDenied": 56,
+    "denialStatuses": {
+      "404": 56
+    },
+    "unrelatedGroupsPreserved": true,
+    "accountsPreserved": true,
+    "historicalTombstonesRetained": true,
+    "modelCalls": 0,
+    "uiDeletes": 5,
+    "supportedParticipantApiDeletes": 4,
+    "reconciledReadThrottles": 2
+  }
+}
