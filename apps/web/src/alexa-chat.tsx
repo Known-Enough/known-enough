@@ -9,7 +9,7 @@ const labels = { group: 'Group chat', private: 'Private assistant' };
 const notices: Record<Chat.Receipt['state'], string> = {
   POSTED: 'Message posted.', ANSWERED: '', NOT_SUBMITTED: 'Your message is saved, but the assistant did not start. You can ask again when it is available.',
   PENDING: 'Your message is saved. The assistant response is pending; check its status without sending again.',
-  UNKNOWN: 'Your message is saved. The assistant response is unconfirmed. It will not be requested again automatically.',
+  UNKNOWN: 'Your message is saved, but the reply status is unknown. No automatic retry will be made. You can continue with another message.',
   UNAVAILABLE: 'Your message is saved. The assistant could not complete its response. You can send a new question.',
 };
 export default function AlexaChat({ decisionId, title, endpoint, api, onClose }: {
@@ -92,7 +92,9 @@ export default function AlexaChat({ decisionId, title, endpoint, api, onClose }:
     if (sequence.current !== current || lifetime.current?.signal.aborted) return;
     setConversation(value.conversation); setReplyStates(states => ({ ...states, [value.requestId]: value.state }));
     const exists = value.conversation.messages.some(message => message.id === value.requestId);
-    const uncertain = ['PENDING', 'UNKNOWN'].includes(value.state) || !exists;
+    // A confirmed saved message with an unknown reply stays in history for status checks,
+    // but does not lock the whole conversation. Its provider job/reservation is untouched.
+    const uncertain = value.state === 'PENDING' || !exists;
     if (!uncertain) {
       if (sessionStorage.getItem(pendingKey(value.conversation.viewerId, scope)) === value.requestId) sessionStorage.removeItem(pendingKey(value.conversation.viewerId, scope));
       setPending(current => current === value.requestId ? null : current);
