@@ -22,6 +22,15 @@
     "workerSha256": "6c4c94f8e752e0e9731cc61513d4ad3bf12121a9565ddd50d2bb165ee8d22c70",
     "freshReadbackThisRun": false
   },
+  "runner": {
+    "node": "v24.21.0",
+    "playwright": "1.63.0",
+    "chromium": "AVAILABLE",
+    "remoteNodeRepl": "FAILED_BEFORE_APP_ACCESS",
+    "remoteNodeReplError": "sandboxCwd is not a local file URI",
+    "browserOpened": false
+  },
+  "startCheckpoint": "PUBLISHED",
   "oldFixture": {
     "groupId": "NOT_RECORDED",
     "possibleDecision": "Friday activity",

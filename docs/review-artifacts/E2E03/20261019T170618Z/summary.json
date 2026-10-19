@@ -2,9 +2,9 @@
   "runId": "20261019T170618Z",
   "state": "RUNNING",
   "startedAt": "2026-10-19T17:06:18Z",
-  "lastProgressAt": "2026-10-19T17:06:18Z",
+  "lastProgressAt": "2026-10-19T17:06:22Z",
   "endedAt": null,
-  "lastConfirmedAction": "run.start",
+  "lastConfirmedAction": "runner.local-playwright",
   "inFlightAction": null,
   "cases": {"01": "NOT_RUN", "02": "NOT_RUN", "03": "NOT_RUN"},
   "plannedRequests": {"outcome": 1, "assistant": 1},
@@ -12,7 +12,7 @@
   "requestObservationComplete": true,
   "providerUsage": {"calls": null, "tokens": null, "availability": "NOT_READ"},
   "evidence": ["events.jsonl", "preflight.json"],
-  "error": null,
-  "nextSafeAction": "Publish this checkpoint; sign in as U1/U2 and read-only reconcile the previous shared group and any Friday activity before any write.",
-  "publication": {"lastConfirmedUrl": null, "unpublishedLocalChanges": true}
+  "error": {"domain": "AUTOMATION", "code": "SANDBOX_CONTEXT_UNAVAILABLE", "state": "RECOVERED", "detail": "Remote Node REPL was not attached; local Playwright is available."},
+  "nextSafeAction": "Publish this updated preflight checkpoint, then perform logged read-only browser reconciliation.",
+  "publication": {"lastConfirmedUrl": "https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/E2E03/20261019T170618Z/report.md", "unpublishedLocalChanges": true}
 }
