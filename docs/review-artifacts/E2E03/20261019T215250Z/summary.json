@@ -1,0 +1,28 @@
+{
+  "runId": "20261019T215250Z",
+  "state": "RUNNING",
+  "startedAt": "2026-10-19T21:52:53.476Z",
+  "endedAt": null,
+  "cases": {
+    "01": "NOT_RUN",
+    "02": "NOT_RUN",
+    "03": "NOT_RUN"
+  },
+  "lastConfirmedAction": null,
+  "inFlightAction": null,
+  "observedRequests": {
+    "outcome": 0,
+    "assistant": 0
+  },
+  "error": null,
+  "lastProgressAt": "2026-10-19T21:52:53.479Z",
+  "serving": {
+    "frontend": "Amplify job 150 (unchanged)",
+    "apiSource": "9569a82eb370032c01d00ea518a053438aa85b44",
+    "apiSha256": "54a4c508aba2a9ee7968b47db45e5c9375780aa1076abff030413fe45204de61",
+    "workerSha256": "b6da4204e2e29c1f644dbeb3b388974eed15eb9344d95c80e80bffa6870f1e8c",
+    "publicationRun": "https://github.com/Known-Enough/known-enough/actions/runs/39311668948",
+    "scheduleRestoreRun": "https://github.com/Known-Enough/known-enough/actions/runs/39329850471"
+  },
+  "case01Reconciliation": "PENDING"
+}
