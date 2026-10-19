@@ -11,7 +11,8 @@ ROLE = 'KnownEnoughGithubStagingInspector'
 UUID = re.compile(r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$')
 EVENTS = {'FIX01_PUBLIC_DRAFT_FAILURE', 'FIX01_PUBLIC_DRAFT_DIAGNOSTIC', 'PUBLIC_DRAFT_HTTP_RESULT', 'PRIVATE_ANSWERS_HTTP_RESULT',
           'known-enough.group-request', 'known-enough.group-result', 'known-enough.group-failure',
-          'known-enough.account-failure', 'known-enough.account-lookup-repair-deferred', 'known-enough.storage-read'}
+          'known-enough.account-failure', 'known-enough.account-lookup-repair-deferred', 'known-enough.storage-read',
+          'partition-storage-transition'}
 GROUP_OPERATIONS = {'group.create', 'group.list', 'group.open', 'group.accept', 'group.invite', 'group.manage', 'group.draft', 'group.delete', 'account.read', 'account.status', 'account.register'}
 TYPES = {'string', 'number', 'boolean', 'object', 'array', 'null', 'missing', 'integer', 'int', 'unknown'}
 CODES = {'invalid_type', 'invalid_value', 'invalid_union', 'unrecognized_keys', 'too_small', 'too_big', 'invalid_format', 'not_multiple_of', 'custom'}
@@ -78,6 +79,7 @@ try:
             '{ $.event = "FIX01_PUBLIC_DRAFT_FAILURE" || $.event = "known-enough.group-failure" '
             '|| $.event = "known-enough.account-failure" || $.event = "known-enough.account-lookup-repair-deferred" '
             '|| $.event = "known-enough.storage-read" '
+            '|| $.event = "partition-storage-transition" '
             '|| ($.event = "PUBLIC_DRAFT_HTTP_RESULT" && $.result = "FAILED") '
             '|| ($.event = "PRIVATE_ANSWERS_HTTP_RESULT" && $.result = "FAILED") }')
         args = ['logs', 'filter-log-events', '--log-group-name', '/aws/lambda/known-enough-stage-api',
@@ -99,6 +101,8 @@ try:
             if not isinstance(value, dict) or value.get('event') not in EVENTS or request_id and value.get('requestId') != request_id:
                 continue
             item = {'timestamp': bounded_number(event.get('timestamp'), 9999999999999), 'event': value['event']}
+            if value['event'] == 'partition-storage-transition' and value.get('code') in {'SOURCE_UNAVAILABLE', 'SOURCE_FROZEN'}:
+                item['code'] = value['code']
             if isinstance(value.get('requestId'), str) and UUID.fullmatch(value['requestId']):
                 item['requestId'] = value['requestId']
             if isinstance(value.get('sourceSha'), str) and re.fullmatch('[a-f0-9]{40}', value['sourceSha']):
