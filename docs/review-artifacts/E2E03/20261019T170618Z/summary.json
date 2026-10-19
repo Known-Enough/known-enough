@@ -1,13 +1,13 @@
 {
   "runId": "20261019T170618Z",
-  "state": "RUNNING",
+  "state": "BLOCKED",
   "startedAt": "2026-10-19T17:06:18Z",
-  "lastProgressAt": "2026-10-19T17:26:10Z",
-  "endedAt": null,
+  "lastProgressAt": "2026-10-19T17:26:29Z",
+  "endedAt": "2026-10-19T17:26:29Z",
   "lastConfirmedAction": "case01.reconcile-after-timeout",
-  "inFlightAction": "case01.u1.save-draft.retry1",
+  "inFlightAction": null,
   "cases": {
-    "01": "NOT_RUN",
+    "01": "BLOCKED",
     "02": "NOT_RUN",
     "03": "NOT_RUN"
   },
@@ -19,18 +19,24 @@
     "outcome": 0,
     "assistant": 0
   },
-  "requestObservationComplete": true,
+  "requestObservationComplete": false,
   "providerUsage": {
-    "calls": null,
+    "calls": 0,
     "tokens": null,
-    "availability": "NOT_READ"
+    "availability": "NO_PROVIDER_ACTION_REQUESTED"
   },
   "evidence": [
     "events.jsonl",
-    "preflight.json"
+    "preflight.json",
+    "report.md"
   ],
-  "error": null,
-  "nextSafeAction": "Submit the manual-choice draft once with stage-level diagnostics and read back the saved draft before the separate create action.",
+  "error": {
+    "domain": "AUTOMATION",
+    "code": "AUTHENTICATED_GROUP_READ_TIMEOUT",
+    "state": "BLOCKED",
+    "detail": "Final hosted U1 retry timed out waiting 45 seconds for GET /groups after sign-in submit; no write was dispatched in that retry. Earlier form attempt dispatch remains unknown, but fresh readback found no persisted Friday draft or pending request."
+  },
+  "nextSafeAction": "A future attempt must repair the caller-side login/readiness recorder first. Reconcile the same group again before any write; do not claim a product defect or E2E PASS from this run.",
   "publication": {
     "lastConfirmedUrl": "https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/E2E03/20261019T170618Z/report.md",
     "unpublishedLocalChanges": true
