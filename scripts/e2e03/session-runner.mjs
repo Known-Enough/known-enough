@@ -252,6 +252,67 @@ export async function serve(options, recorder) {
       await page.getByText('Draft saved', { exact: true }).waitFor({ state: 'visible' });
       return { status: result.status(), draftAcknowledged: true, uiSaved: true };
     },
+    async 'create-decision'(actor, user) {
+      if (!fixture) throw new Error('FIXTURE_NOT_SELECTED');
+      const page = user.page;
+      const response = page.waitForResponse(value => value.request().method() === 'POST'
+        && /\/groups\/[^/]+\/drafts\/[^/]+\/create$/.test(new URL(value.url()).pathname), { timeout: 30000 });
+      response.catch(() => {});
+      mark(actor, 'create-manual-decision-once');
+      await page.getByRole('button', { name: 'Create decision', exact: true }).click();
+      const result = await response;
+      let body = {}; try { body = await result.json(); } catch { /* status remains evidence */ }
+      if (!result.ok()) {
+        const error = new Error('DECISION_CREATE_HTTP_' + result.status());
+        error.domain = 'APP_HTTP'; error.status = result.status(); error.route = safeRoute(result.url());
+        const safe = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,100}$/.test(value) ? value : null;
+        error.serverCode = safe(body.error?.code); error.reference = safe(body.requestId); throw error;
+      }
+      const decisionId = body.snapshot?.frame?.decisionId;
+      if (typeof decisionId !== 'string' || !/^[A-Za-z0-9_-]{1,120}$/.test(decisionId)) throw new Error('DECISION_CREATE_ACK_MISSING_ID');
+      fixture.decisionId = decisionId; persistFixture();
+      await page.locator('#open-decision-title').waitFor({ state: 'visible', timeout: 15000 });
+      if (await page.locator('#open-decision-title').innerText() !== 'Friday activity') throw new Error('CREATED_DECISION_TITLE_MISMATCH');
+      return { status: result.status(), decisionCreated: true, title: 'Friday activity', requiredParticipants: 2 };
+    },
+    async 'open-created-decision'(actor, user) {
+      if (!fixture?.decisionId) throw new Error('DECISION_NOT_CREATED');
+      const page = user.page;
+      if (actor === 'U2' || !(await page.locator('#open-decision-title').isVisible().catch(() => false))) {
+        await openGroup(actor, user);
+        const row = page.locator('.ke-decision-row-open').filter({ hasText: 'Friday activity' });
+        await row.waitFor({ state: 'visible' }); await row.click();
+      }
+      await page.locator('#open-decision-title').waitFor({ state: 'visible', timeout: 15000 });
+      if (await page.locator('#open-decision-title').innerText() !== 'Friday activity') throw new Error('OPENED_DECISION_TITLE_MISMATCH');
+      return { decisionOpened: true, actor };
+    },
+    async 'save-answer'(actor, user, command) {
+      if (!fixture?.decisionId) throw new Error('DECISION_NOT_CREATED');
+      const page = user.page;
+      const choices = actor === 'U1' ? ['Board games'] : ['Walk', 'Board games'];
+      for (const choice of choices) {
+        const option = page.locator('.ke-response-option').filter({ hasText: choice }).locator('input[type="checkbox"]');
+        await option.check();
+      }
+      await page.locator('.ke-response-consent input[type="checkbox"]').check();
+      const response = page.waitForResponse(value => value.request().method() === 'POST'
+        && /\/decisions\/[^/]+\/commands$/.test(new URL(value.url()).pathname), { timeout: 30000 });
+      response.catch(() => {});
+      mark(actor, 'save-private-answer-once');
+      await page.getByRole('button', { name: 'Save answers', exact: true }).click();
+      const result = await response; let body = {}; try { body = await result.json(); } catch { /* status remains evidence */ }
+      if (!result.ok()) {
+        const error = new Error('PRIVATE_ANSWER_HTTP_' + result.status());
+        error.domain = 'APP_HTTP'; error.status = result.status(); error.route = safeRoute(result.url());
+        const safe = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,100}$/.test(value) ? value : null;
+        error.serverCode = safe(body.error?.code); error.reference = safe(body.requestId); throw error;
+      }
+      await page.locator('.ke-saved-answers').waitFor({ state: 'visible', timeout: 15000 });
+      const ownSummary = await page.locator('.ke-saved-answer-topics').innerText();
+      if (choices.some(choice => !ownSummary.includes(choice))) throw new Error('PRIVATE_ANSWER_READBACK_MISMATCH');
+      return { status: result.status(), privateAnswerSaved: true, ownReadback: true, selectedCount: choices.length };
+    },
   };
   console.log(JSON.stringify({ ready: true, run: recorder.run, actors: ['U1', 'U2'] }));
   const input = createInterface({ input: process.stdin, terminal: false });
