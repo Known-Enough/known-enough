@@ -2,7 +2,7 @@
   "runId": "20261019T183505Z",
   "state": "BLOCKED",
   "startedAt": "2026-10-19T18:35:05.698Z",
-  "lastProgressAt": "2026-10-19T18:38:50.055Z",
+  "lastProgressAt": "2026-10-19T18:39:49.351Z",
   "endedAt": null,
   "lastConfirmedAction": "u2.inspect after the rejected save",
   "inFlightAction": null,
@@ -43,8 +43,8 @@
   "nextSafeAction": "Read U2\u2019s own answer state once before any further attempt; do not repeat the rejected save. Repair the stale-context refresh/recovery path before rerunning the two-user flow.",
   "publication": {
     "lastConfirmedUrl": "https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/E2E03/20261019T183505Z/report.md",
-    "commit": "55c1f55",
-    "unpublishedLocalChanges": true
+    "commit": "4426cc2311436e9becf4d0caee84c1b636a2caed",
+    "unpublishedLocalChanges": false
   },
   "serving": {
     "apiSource": "5499a8e8a7116c8204b7da33fe161139120182b3",

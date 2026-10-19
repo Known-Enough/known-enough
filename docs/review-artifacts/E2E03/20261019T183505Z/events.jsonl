@@ -206,3 +206,4 @@
 {"utc":"2026-10-19T18:37:49.067Z","run":"20261019T183505Z","event":"PAGE_CLOSED","actor":"U1"}
 {"utc":"2026-10-19T18:37:49.073Z","run":"20261019T183505Z","event":"PAGE_CLOSED","actor":"U2"}
 {"utc":"2026-10-19T18:38:50.055Z","run":"20261019T183505Z","event":"RUN_FINALIZED","state":"BLOCKED","lastBrowserActionAt":"2026-10-19T18:37:49.073Z","runnerTermination":"OPERATOR_INTERRUPTED_AFTER_REFRESH_TIMEOUT","runnerExitCode":"UNAVAILABLE","reason":"Stop after U2 answer save returned HTTP 409 STALE_CONTEXT; read-only refresh then timed out. No answer resubmission."}
+{"utc":"2026-10-19T18:39:49.351Z","run":"20261019T183505Z","event":"FINAL_REPORT_PUBLISHED","commit":"4426cc2311436e9becf4d0caee84c1b636a2caed","url":"https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/E2E03/20261019T183505Z/report.md","result":"CONFIRMED_BY_GIT_PUSH"}
