@@ -13,6 +13,8 @@ The helper creates, registers and approves these exact usernames using the same 
 
 Expected final result is `FIFTEEN_TEST_ACCOUNTS_READY`, `count: 15`, `appAccess: APPROVED`. To read the credentials privately in your own CloudShell, use `cat "$HOME/.known-enough/test-accounts/test04-test18-private.json"`; do not paste that file into chat or commit it. Setup only was prepared and compiled here; no accounts, tests, AI calls or email were executed.
 
+CloudShell preflight update: the user reported `sts:get-caller-identity:ParamValidation` with zero accounts created, then successfully ran plain STS in the expected account. The helper now omits JSON input for empty-input operations and uses regular 0600 temporary request files for nonempty operations, removing the `/dev/stdin` transport. Temporary payloads are removed after each call, including failures; passwords remain outside process arguments/history. User execution is still needed to confirm this correction resolves the reported error.
+
 ## Create ten ready-to-use test accounts
 
 Run this in the administrator's CloudShell from a checked repository copy:
@@ -24,7 +26,7 @@ python3 -B scripts/cloudshell-commands/08-create-ten-test-accounts.py \
 
 It creates ten separate `ke-test-<batch>-01` through `-10` logins with permanent generated passwords, registers their app profiles and approves their app access. It uses the owner's previously selected shared testing email and requires both the installed shared-email exception and an existing enabled, confirmed, verified owner account for that mailbox. It sends no welcome emails, changes no existing unrelated users or aliases, and leaves password rules, IAM, groups and decisions untouched.
 
-Credentials and per-user progress are saved privately at `~/.known-enough/test-accounts/ten-accounts-private.json` (0600). Read that file locally to obtain the passwords; do not paste it into chat or commit it. The helper downloads a small checksum-pinned admission bundle, reuses existing pinned Node when available, or extracts only the pinned executable into temporary storage. There is no npm installation or full repository download. Passwords go to the AWS CLI over stdin, not process arguments or shell history.
+Credentials and per-user progress are saved privately at `~/.known-enough/test-accounts/ten-accounts-private.json` (0600). Read that file locally to obtain the passwords; do not paste it into chat or commit it. The helper downloads a small checksum-pinned admission bundle, reuses existing pinned Node when available, or extracts only the pinned executable into temporary storage. There is no npm installation or full repository download. Passwords go to the AWS CLI through temporary 0600 JSON files, not process arguments or shell history; each request file is removed after its call.
 
 The update supersedes the initial login-only helper. **No manual first sign-in or separate approval command is needed for setup.** It uses the existing native registration and exact-username approval functions with fresh administrator-authenticated Cognito identities. Original immutable email/username ownership, source/migration activation, account versions, conditional writes and readback checks remain. Each user still provides their own processing consent and joins groups explicitly; provisioning does not impersonate browser sessions or claim a successful live login/product test.
 

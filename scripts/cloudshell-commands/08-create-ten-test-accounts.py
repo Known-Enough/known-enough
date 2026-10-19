@@ -112,13 +112,21 @@ def admission(node, tool, folder, mode):
 
 
 def aws(service, operation, data):
-    # Input over stdin keeps passwords out of process arguments and shell history.
-    result = subprocess.run(
-        ['aws', service, operation, '--cli-input-json', 'file:///dev/stdin',
-         '--region', REGION, '--output', 'json', '--no-cli-pager',
-         '--no-paginate', '--cli-connect-timeout', '10', '--cli-read-timeout', '30'],
-        input=json.dumps(data), capture_output=True, text=True, timeout=45,
-        env={**os.environ, 'AWS_MAX_ATTEMPTS': '1', 'AWS_PAGER': ''})
+    # Empty-input operations use the ordinary CLI invocation that worked in the
+    # user's CloudShell. Other operations use a regular private JSON file; do not
+    # rely on the CLI opening /dev/stdin, or expose passwords in argv/history.
+    with tempfile.TemporaryDirectory(prefix='known-enough-aws-request-') as directory:
+        command = ['aws', service, operation]
+        if data:
+            request = Path(directory) / 'request.json'
+            request.write_text(json.dumps(data))
+            request.chmod(0o600)
+            command.extend(['--cli-input-json', 'file://' + str(request)])
+        command.extend(['--region', REGION, '--output', 'json', '--no-cli-pager',
+                        '--no-paginate', '--cli-connect-timeout', '10', '--cli-read-timeout', '30'])
+        result = subprocess.run(
+            command, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=45,
+            env={**os.environ, 'AWS_MAX_ATTEMPTS': '1', 'AWS_PAGER': ''})
     if result.returncode:
         match = re.search(r'An error occurred \(([A-Za-z0-9]+)\)', result.stderr)
         code = match.group(1) if match else 'AWS_CLI_FAILED'
