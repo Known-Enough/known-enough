@@ -1,14 +1,23 @@
 # CloudShell commands — account access
 
-## Create ten dedicated test logins
+## Create ten ready-to-use test accounts
 
-Run `python3 -B scripts/cloudshell-commands/08-create-ten-test-accounts.py` in the administrator's CloudShell. It creates ten new, separate `ke-test-<batch>-01` through `-10` logins in the primary pool, with permanent generated passwords, using the owner's previously selected shared testing email. It requires both the installed shared-email exception and an existing enabled, confirmed, verified owner account for that mailbox. It sends no welcome emails and never changes existing users, aliases, password rules, IAM, groups or decisions.
+Run this in the administrator's CloudShell from a checked repository copy:
 
-Credentials and per-user creation progress are saved privately at `~/.known-enough/test-accounts/ten-accounts-private.json` (0600). Read that file locally to obtain the passwords; do not paste it into chat or commit it. The script uses Python's standard library and the existing AWS CLI, so no Node/npm installation or repository clone is needed. Passwords go to the AWS CLI over stdin, not process arguments or shell history.
+```bash
+python3 -B scripts/cloudshell-commands/08-create-ten-test-accounts.py \
+  --source "$(git rev-parse HEAD)"
+```
 
-**These are logins, not automatically approved app accounts.** Sign in once with each desired username so normal authenticated intake creates its pending app record, then approve those exact usernames with the existing operator command below. Each user still provides their own processing consent and joins groups explicitly. No shared-email approval, real signup verification test or successful sign-in is inferred from administrator provisioning.
+It creates ten separate `ke-test-<batch>-01` through `-10` logins with permanent generated passwords, registers their app profiles and approves their app access. It uses the owner's previously selected shared testing email and requires both the installed shared-email exception and an existing enabled, confirmed, verified owner account for that mailbox. It sends no welcome emails, changes no existing unrelated users or aliases, and leaves password rules, IAM, groups and decisions untouched.
 
-Rerunning the helper finds the saved batch and creates no additional users. If interrupted, preserve the private file and return only the sanitized result: partial creation needs review, not deletion of the journal or blind retry. This helper was syntax-checked and reviewed only; no accounts, emails or tests were run in A's chat.
+Credentials and per-user progress are saved privately at `~/.known-enough/test-accounts/ten-accounts-private.json` (0600). Read that file locally to obtain the passwords; do not paste it into chat or commit it. The helper downloads a small checksum-pinned admission bundle, reuses existing pinned Node when available, or extracts only the pinned executable into temporary storage. There is no npm installation or full repository download. Passwords go to the AWS CLI over stdin, not process arguments or shell history.
+
+The update supersedes the initial login-only helper. **No manual first sign-in or separate approval command is needed for setup.** It uses the existing native registration and exact-username approval functions with fresh administrator-authenticated Cognito identities. Original immutable email/username ownership, source/migration activation, account versions, conditional writes and readback checks remain. Each user still provides their own processing consent and joins groups explicitly; provisioning does not impersonate browser sessions or claim a successful live login/product test.
+
+If the original command already created all ten logins, this helper finishes those same accounts without resetting their passwords or duplicating the batch. Already approved selected users are rechecked safely by the existing operator; interrupted registration/approval can resume through those native identity/version checks. An uncertain Cognito creation/password write stops for review. Preserve the private file and return only the sanitized result; do not remove the journal or run a fresh batch to bypass a failure.
+
+Expected final result: `TEN_TEST_ACCOUNTS_READY`, `count: 10`, `appAccess: APPROVED`. Provisioning was prepared and statically checked only, with no local account creation, email, AI calls or tests. To rebuild the public admission bundle without cloud execution, use pinned Node and `node scripts/cloudshell-commands/build-test-account-admission.mjs`; its compressed SHA-256 must match `BUNDLE_SHA256` in the Python helper.
 
 These are the current routine account commands for AWS account `092954139775`. The selected-email exception is already published; no new cloud installation or permission repair is needed for it.
 

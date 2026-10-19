@@ -1,16 +1,23 @@
 #!/usr/bin/env python3
-"""Create ten dedicated Cognito logins; app admission remains a separate action."""
+"""Create/register/approve ten owned test accounts using native admission code."""
+import argparse
+import base64
 import datetime
 import fcntl
+import gzip
 import hashlib
 import hmac
 import io
 import json
 import os
 from pathlib import Path
+import platform
 import re
 import secrets
+import shutil
 import subprocess
+import tarfile
+import tempfile
 import urllib.parse
 import urllib.request
 import zipfile
@@ -24,6 +31,84 @@ root = Path.home() / '.known-enough' / 'test-accounts'
 state = None
 state_file = root / 'ten-accounts-private.json'
 stage = 'PREFLIGHT'
+BUNDLE_SHA256 = '198267ce16ee4945d013cbabb19c9b5eab6f7018ef0ce02cd523ca0330629990'
+NODE_ARCHIVES = {
+    'x86_64': ('x64', 'fd8e59d5a511510f6a298afb548f18c7d2b1be404d8b4a27d94fbe49f56cb2d6'),
+    'aarch64': ('arm64', '6ad1325edbdb5649c379b75a237147a666c95d4f9ae8d340fef2d1575d289ad2')}
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *args, **kwargs):
+        return None
+
+
+def download(url, maximum):
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme != 'https' or parsed.username or parsed.password:
+        raise RuntimeError('HTTPS_DOWNLOAD_REQUIRED')
+    with urllib.request.build_opener(NoRedirect).open(url, timeout=45) as response:
+        data = response.read(maximum + 1)
+    if len(data) > maximum:
+        raise RuntimeError('DOWNLOAD_LIMIT')
+    return data
+
+
+def prepare_tools(source, folder):
+    if platform.system() != 'Linux' or platform.machine() not in NODE_ARCHIVES:
+        raise RuntimeError('CLOUDSHELL_LINUX_REQUIRED')
+    architecture, expected = NODE_ARCHIVES[platform.machine()]
+    candidates = [root.parent / 'access-users' / f'node-v24.21.0-linux-{architecture}/bin/node']
+    available = shutil.which('node')
+    if available:
+        candidates.append(Path(available))
+    node = None
+    for candidate in candidates:
+        if candidate.is_file() and subprocess.run(
+                [str(candidate), '--version'], capture_output=True, text=True,
+                timeout=10).stdout.strip() == 'v24.21.0':
+            node = candidate
+            break
+    if node is None:
+        # Only extract the pinned Node executable into /tmp. No npm, full source
+        # checkout, or persistent home-directory dependency installation.
+        name = f'node-v24.21.0-linux-{architecture}'
+        data = download(f'https://nodejs.org/dist/v24.21.0/{name}.tar.xz', 100 * 1024 * 1024)
+        if hashlib.sha256(data).hexdigest() != expected:
+            raise RuntimeError('NODE_ARCHIVE_HASH_MISMATCH')
+        with tarfile.open(fileobj=io.BytesIO(data)) as archive:
+            member = archive.getmember(name + '/bin/node')
+            if not member.isfile() or member.size > 160 * 1024 * 1024:
+                raise RuntimeError('NODE_BINARY_INVALID')
+            node = folder / 'node'
+            node.write_bytes(archive.extractfile(member).read())
+            node.chmod(0o700)
+    compressed = download(
+        f'https://raw.githubusercontent.com/Known-Enough/known-enough/{source}'
+        '/scripts/cloudshell-commands/test-account-admission.mjs.gz', 1024 * 1024)
+    if hashlib.sha256(compressed).hexdigest() != BUNDLE_SHA256:
+        raise RuntimeError('ADMISSION_BUNDLE_HASH_MISMATCH')
+    tool = folder / 'admission.mjs'
+    tool.write_bytes(gzip.decompress(compressed))
+    return node, tool
+
+
+def admission(node, tool, folder, mode):
+    result = subprocess.run([str(node), str(tool), str(folder), str(state_file), mode],
+                            capture_output=True, text=True, timeout=600,
+                            env={**os.environ, 'AWS_REGION': REGION, 'AWS_DEFAULT_REGION': REGION,
+                                 'AWS_MAX_ATTEMPTS': '1'})
+    # The bundled program emits only sanitized results and these owned usernames.
+    for line in result.stdout.splitlines():
+        value = json.loads(line)
+        if not isinstance(value, dict) or not set(value) <= {
+                'result', 'username', 'appAccess', 'code', 'operation', 'automaticRetry',
+                'count', 'credentialsFile', 'emailSent', 'modelCalls', 'groupsCreated', 'consentGranted'}:
+            raise RuntimeError('ADMISSION_OUTPUT_INVALID')
+        print(json.dumps(value), flush=True)
+    if result.returncode:
+        raise RuntimeError('NATIVE_ADMISSION_STOPPED')
+    if not result.stdout.strip():
+        raise RuntimeError('ADMISSION_RESULT_MISSING')
 
 
 def aws(service, operation, data):
@@ -50,23 +135,22 @@ def save():
 
 def main():
     global state, stage
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--source', required=True)
+    args = parser.parse_args()
+    if not re.fullmatch('[a-f0-9]{40}', args.source):
+        raise RuntimeError('PINNED_SOURCE_REQUIRED')
     os.umask(0o077)
     root.mkdir(parents=True, exist_ok=True, mode=0o700)
     if root.is_symlink() or state_file.is_symlink():
         raise RuntimeError('PRIVATE_DIRECTORY_REQUIRED')
     root.chmod(0o700)
-    with (root / 'create.lock').open('a') as lock:
+    with (root / 'create.lock').open('a') as lock, tempfile.TemporaryDirectory(
+            prefix='known-enough-account-setup-') as temporary:
+        folder = Path(temporary)
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         if aws('sts', 'get-caller-identity', {}).get('Account') != ACCOUNT:
             raise RuntimeError('WRONG_AWS_ACCOUNT')
-        if state_file.exists():
-            existing = json.loads(state_file.read_text())
-            ready = sum(user.get('status') == 'LOGIN_CREATED' for user in existing['users'])
-            print(json.dumps({'result': 'SAVED_BATCH_EXISTS', 'loginsCreated': ready,
-                              'credentialsFile': str(state_file), 'newAccountsCreated': 0,
-                              'next': 'Use the saved batch; partial work must be reviewed, not recreated.'}))
-            return
-
         # Reuse only the explicit installed email exception and an existing verified
         # owner mailbox. Do not enable the exception, steal aliases or edit old users.
         function = aws('lambda', 'get-function', {'FunctionName': API})
@@ -79,19 +163,15 @@ def main():
         url = urllib.parse.urlparse(location)
         if url.scheme != 'https' or not (url.hostname or '').endswith('.amazonaws.com'):
             raise RuntimeError('UNEXPECTED_PACKAGE_LOCATION')
-        # Refuse redirects rather than forwarding a private signed package URL.
-        class NoRedirect(urllib.request.HTTPRedirectHandler):
-            def redirect_request(self, *args, **kwargs):
-                return None
-        with urllib.request.build_opener(NoRedirect).open(location, timeout=30) as response:
-            package = response.read(50 * 1024 * 1024 + 1)
-        import base64
+        package = download(location, 50 * 1024 * 1024)
         if (len(package) > 50 * 1024 * 1024
                 or base64.b64encode(hashlib.sha256(package).digest()).decode() != config['CodeSha256']):
             raise RuntimeError('PACKAGE_HASH_MISMATCH')
         with zipfile.ZipFile(io.BytesIO(package)) as archive:
-            if archive.getinfo('configuration-private.json').file_size > 1024 * 1024:
-                raise RuntimeError('CONFIGURATION_LIMIT')
+            for name in ['configuration-private.json', 'manifest-private.json', 'release-private.json']:
+                if archive.getinfo(name).file_size > 1024 * 1024:
+                    raise RuntimeError('CONFIGURATION_LIMIT')
+                (folder / name).write_bytes(archive.read(name))
             private = json.loads(archive.read('configuration-private.json'))
         if private.get('userPoolId') != POOL:
             raise RuntimeError('UNEXPECTED_POOL')
@@ -105,16 +185,42 @@ def main():
                    for user in owners.get('Users', [])):
             raise RuntimeError('EXISTING_VERIFIED_OWNER_EMAIL_REQUIRED')
 
-        prefix = 'ke-test-' + secrets.token_hex(3)
-        state = {'account': ACCOUNT, 'pool': POOL, 'email': EMAIL,
-                 'createdAt': datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                 'appAccess': 'NOT_APPROVED', 'users': [
-                     {'username': f'{prefix}-{index:02d}',
-                      'password': 'Ke1!' + secrets.token_urlsafe(15), 'status': 'PLANNED'}
-                     for index in range(1, 11)]}
-        save()
+        stage = 'PREPARE_NATIVE_ADMISSION'
+        node, tool = prepare_tools(args.source, folder)
+        admission(node, tool, folder, 'prepare')
+        if state_file.exists():
+            state = json.loads(state_file.read_text())
+            if (state.get('account') != ACCOUNT or state.get('pool') != POOL
+                    or state.get('email') != EMAIL or len(state.get('users', [])) != 10
+                    or len({u['username'] for u in state['users']}) != 10
+                    or any(not re.fullmatch('ke-test-[a-f0-9]{6}-[0-9]{2}', u['username'])
+                           or not isinstance(u.get('password'), str) or len(u['password']) < 8
+                           for u in state['users'])):
+                raise RuntimeError('SAVED_BATCH_INVALID')
+            state_file.chmod(0o600)
+            print('Reusing the saved ten accounts; no duplicate batch.', flush=True)
+        else:
+            prefix = 'ke-test-' + secrets.token_hex(3)
+            state = {'account': ACCOUNT, 'pool': POOL, 'email': EMAIL,
+                     'createdAt': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                     'appAccess': 'NOT_APPROVED', 'users': [
+                         {'username': f'{prefix}-{index:02d}',
+                          'password': 'Ke1!' + secrets.token_urlsafe(15), 'status': 'PLANNED'}
+                         for index in range(1, 11)]}
+            save()
         for user in state['users']:
             stage = 'CREATE_LOGIN'
+            if user['status'] == 'LOGIN_CREATED':
+                observed = aws('cognito-idp', 'admin-get-user', {
+                    'UserPoolId': POOL, 'Username': user['username']})
+                attrs = {a['Name']: a['Value'] for a in observed['UserAttributes']}
+                if (observed['Username'] != user['username'] or not observed.get('Enabled')
+                        or observed.get('UserStatus') != 'CONFIRMED' or attrs.get('sub') != user.get('subject')
+                        or attrs.get('email') != EMAIL or attrs.get('email_verified') != 'true'):
+                    raise RuntimeError('SAVED_LOGIN_IDENTITY_CHANGED')
+                continue
+            if user['status'] != 'PLANNED':
+                raise RuntimeError('PARTIAL_LOGIN_WRITE_NEEDS_REVIEW')
             user['status'] = 'CREATE_REQUESTED'
             save()
             created = aws('cognito-idp', 'admin-create-user', {
@@ -141,16 +247,18 @@ def main():
             user['status'] = 'LOGIN_CREATED'
             save()
             print('Created ' + user['username'], flush=True)
-        print(json.dumps({'result': 'TEN_TEST_LOGINS_CREATED', 'count': 10,
-                          'credentialsFile': str(state_file), 'emailSent': False,
-                          'appAccess': 'NOT_APPROVED',
-                          'next': 'Sign in once per user, then approve these exact usernames with the account tool.'}))
+        stage = 'REGISTER_AND_APPROVE'
+        # Native registration and the existing exact-username operator keep the
+        # immutable email claim, profile, version and migration/source guards.
+        admission(node, tool, folder, 'approve')
 
 
 if __name__ == '__main__':
     try:
         main()
     except Exception as error:
+        # The native admission process saves its own incremental progress.
+        # Never overwrite that file with this process's older in-memory copy.
         safe = str(error) if isinstance(error, RuntimeError) else type(error).__name__
         print(json.dumps({'result': 'ACCOUNT_CREATION_STOPPED', 'stage': stage, 'code': safe,
                           'credentialsFile': str(state_file),
