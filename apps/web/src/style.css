@@ -1791,3 +1791,7 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 :root[data-theme="dark"] .ke-group-filter small, :root[data-theme="dark"] .ke-group-search-empty { color: #acc1b2; }
 :root[data-theme="dark"] .ke-group-search-empty h3 { color: #d4e8d9; }
 @media (max-width: 600px) { .ke-group-filter { flex-wrap: wrap; gap: 8px; } .ke-group-search { width: 100%; } }
+
+.ke-group-filter { flex-wrap: wrap; }
+.ke-group-filter button.ke-hidden-groups-toggle { min-height: 32px; margin: 0; padding: 6px 9px; font-size: 11px; white-space: nowrap; }
+.ke-hidden-group-label { display: inline-block; margin-left: 8px; font-size: 10px; font-weight: 400; opacity: .65; }

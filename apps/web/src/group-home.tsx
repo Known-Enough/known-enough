@@ -11,7 +11,7 @@ function groupPage(value: { groups?: unknown[]; cursor?: unknown }) {
     || (value.cursor != null && (typeof value.cursor !== 'string' || !/^[A-Za-z0-9_-]{40,1600}$/.test(value.cursor)))) throw new Error('Invalid groups response');
   return { groups: value.groups.map(group => Groups.GroupSnapshot.parse(group)), cursor: typeof value.cursor === 'string' ? value.cursor : null };
 }
-export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onBack, onDirtyChange }: { api: (path: string, init?: RequestInit) => Promise<Response>;
+export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, onOpenGroup, onBack, onDirtyChange }: { api: (path: string, init?: RequestInit) => Promise<Response>; preferencesKey?: string | undefined;
   openDecision: (id: string) => void; selectedGroupId?: string; onOpenGroup: (id: string) => void; onBack: () => void; onDirtyChange?: (dirty: boolean) => void }) {
   const [childDirty, setChildDirty] = useState(false);
   const [avatarRevision, setAvatarRevision] = useState(0);
@@ -20,6 +20,22 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
   const [account, setAccount] = useState<ReturnType<typeof Groups.AccountSnapshot.parse> | null>(null);
   const [groups, setGroups] = useState<Groups.GroupSnapshot[]>([]);
   const [groupFilter, setGroupFilter] = useState('');
+  const [hiddenGroups, setHiddenGroups] = useState<string[]>(() => {
+    try {
+      const saved: unknown = preferencesKey ? JSON.parse(localStorage.getItem(preferencesKey) ?? '[]') : [];
+      return Array.isArray(saved) ? saved.filter((id): id is string => typeof id === 'string' && /^[A-Za-z0-9_-]{1,80}$/.test(id)).slice(0, 256) : [];
+    } catch { return []; }
+  });
+  const [showHiddenGroups, setShowHiddenGroups] = useState(false);
+  function toggleHiddenGroup(group: Groups.GroupSnapshot) {
+    if (group.isOrganizer) return;
+    const next = hiddenGroups.includes(group.id) ? hiddenGroups.filter(id => id !== group.id) : [...hiddenGroups, group.id].slice(-256);
+    setHiddenGroups(next); setActiveMenuGroupId(null);
+    try { if (preferencesKey) localStorage.setItem(preferencesKey, JSON.stringify(next)); }
+    catch { setNotice('Your display preference could not be saved on this browser. It will last for this visit.'); }
+    groupSearch.current?.focus();
+  }
+
   const groupSearch = useRef<HTMLInputElement | null>(null);
   const clearGroupFilter = () => { setGroupFilter(''); groupSearch.current?.focus(); };
   const [invitations, setInvitations] = useState<Groups.InvitationSnapshot[]>([]);
@@ -233,7 +249,9 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
   }
   const renameTarget = groups.find(group => group.id === renameGroupId) ?? null;
   const deleteTarget = groups.find(group => group.id === deleteGroupId) ?? null;
-  const filteredGroups = groups.filter(group => group.name.toLocaleLowerCase().includes(groupFilter.trim().toLocaleLowerCase()));
+  const hiddenGroupCount = groups.filter(group => !group.isOrganizer && hiddenGroups.includes(group.id)).length;
+  const visibleGroups = groups.filter(group => group.isOrganizer || showHiddenGroups || !hiddenGroups.includes(group.id));
+  const filteredGroups = visibleGroups.filter(group => group.name.toLocaleLowerCase().includes(groupFilter.trim().toLocaleLowerCase()));
   const groupSections = [
     { heading: 'Groups you own', groups: filteredGroups.filter(group => group.isOrganizer) },
     { heading: 'Groups you’re a member of', groups: filteredGroups.filter(group => !group.isOrganizer) },
@@ -298,11 +316,12 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
           <input ref={groupSearch} id="group-filter" type="search" aria-label="Search groups" placeholder="Search groups..." value={groupFilter} onChange={event => setGroupFilter(event.target.value)} />
           {!!groupFilter && <button type="button" className="ke-group-search-clear" aria-label="Clear group search" title="Clear search" onClick={clearGroupFilter}><PageIcon name="X" /></button>}
         </div>
-        <small role="status">{groupFilter.trim() && filteredGroups.length !== groups.length ? `${filteredGroups.length} of ${groups.length} groups` : `${groups.length} ${groups.length === 1 ? 'group' : 'groups'}`}</small>
+        {hiddenGroupCount > 0 && <button type="button" className="secondary ke-hidden-groups-toggle" aria-pressed={showHiddenGroups} onClick={() => setShowHiddenGroups(value => !value)}>{showHiddenGroups ? 'Hide hidden groups' : `Show hidden (${hiddenGroupCount})`}</button>}
+        <small role="status">{groupFilter.trim() && filteredGroups.length !== visibleGroups.length ? `${filteredGroups.length} of ${visibleGroups.length} groups` : `${visibleGroups.length} ${visibleGroups.length === 1 ? 'group' : 'groups'}`}</small>
       </div>}
       {!!groups.length && !filteredGroups.length && <div className="ke-group-search-empty" role="status">
-        <PageIcon name="Search" /><h3>No matching groups</h3><p>Try another name or clear your search to see all groups.</p>
-        <button type="button" className="secondary" onClick={clearGroupFilter}>Clear search</button>
+        <PageIcon name="Search" /><h3>{visibleGroups.length ? 'No matching groups' : 'Your groups are hidden'}</h3><p>{visibleGroups.length ? 'Try another name or clear your search to see all groups.' : 'Hidden groups stay joined. You can show them again at any time.'}</p>
+        <button type="button" className="secondary" onClick={visibleGroups.length ? clearGroupFilter : () => { setGroupFilter(''); setShowHiddenGroups(true); }}>{visibleGroups.length ? 'Clear search' : 'Show hidden groups'}</button>
       </div>}
       {!!filteredGroups.length && <div className="ke-group-sections">{groupSections.map(section => <section className="ke-group-section" key={section.heading}>
         <h3>{section.heading}</h3><ul className="ke-group-list" aria-label={section.heading}>{section.groups.map(group => {
@@ -313,7 +332,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
           <button type="button" className="secondary ke-group-row-open" aria-label={`Open group ${group.name}`} disabled={busy}
             onClick={() => onOpenGroup(group.id)}>
             <span className="ke-group-row-icon"><GroupIcon /></span>
-            <span className="ke-group-row-copy"><span className="ke-group-row-name">{group.name}</span>
+            <span className="ke-group-row-copy"><span className="ke-group-row-name">{group.name}{!group.isOrganizer && hiddenGroups.includes(group.id) && <small className="ke-hidden-group-label">Hidden</small>}</span>
               <span className="ke-group-row-meta"><span>{group.members.length} {group.members.length === 1 ? 'member' : 'members'}</span>
                 {decisionCount !== null && <><span className="ke-group-row-separator" aria-hidden="true">·</span><span>{decisionCount} {decisionCount === 1 ? 'decision' : 'decisions'}</span></>}</span>
             </span>
@@ -354,6 +373,7 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
               <div className="ke-group-menu-actions">
                 <button type="button" className="secondary ke-group-menu-item" role="menuitem" ref={menuActionRef}
                   onClick={event => { event.stopPropagation(); setActiveMenuGroupId(null); onOpenGroup(group.id); }}>Open group</button>
+                {!group.isOrganizer && <button type="button" className="secondary ke-group-menu-item" role="menuitem" title="Only changes your group list on this browser; you remain a member" onClick={() => toggleHiddenGroup(group)}>{hiddenGroups.includes(group.id) ? 'Show group again' : 'Hide group'}</button>}
                 {group.isOrganizer && <>
                   <button type="button" className="secondary ke-group-menu-item" role="menuitem"
                     onClick={event => { event.stopPropagation(); setActiveMenuGroupId(null); setRenameGroupValue(group.name); setRenameGroupNotice(''); setRenameGroupId(group.id); }}>Rename group</button>

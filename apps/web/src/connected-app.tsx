@@ -14,6 +14,16 @@ let callbackCompletion: ReturnType<typeof finishCognitoSignIn> | null = null;
 export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
   const direct = useMemo(()=>createDirectCognito(config),[config]);
   const [session, setSession] = useState<CognitoSession | null>(() => readCognitoSession());
+  // Token payload scopes a local presentation preference only; it never authorizes API access.
+  const groupPreferencesKey = useMemo(() => {
+    try {
+      const part = session?.accessToken.split('.')[1];
+      if (!part) return undefined;
+      const claims = JSON.parse(atob(part.replace(/-/g, '+').replace(/_/g, '/'))) as { sub?: unknown };
+      return typeof claims.sub === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(claims.sub)
+        ? `known-enough-hidden-groups:${config.userPoolId}:${claims.sub}` : undefined;
+    } catch { return undefined; }
+  }, [session, config.userPoolId]);
   const [view, setView] = useState<AppView>(() => readAppView(window.location.search));
   const [callbackPending, setCallbackPending] = useState(() => {
     const query = new URLSearchParams(window.location.search);
@@ -150,7 +160,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
           onRefresh={() => { if (dirty.current && !window.confirm('Refresh and discard unsaved input?')) return; dirty.current = false; void load().catch(() => {}); }} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} refresh={async () => { dirty.current = false; await load(); }}
           onDirtyChange={value => { dirty.current = value; }} onQueued={receipt => { if (!owner) return; setTarget({ decisionId: snapshot.frame.decisionId, contextToken: snapshot.contextToken, semanticVersion: snapshot.semanticVersion, ownerParticipantId: owner.ownerParticipantId, expiresAt: receipt.expiresAt }); }} /></div>}
       </dialog> : session.kind === 'display' ? <section className="ke-card"><h2>Shared screen</h2><p>Open a shared decision link from your group to show its progress. This screen cannot enter private needs or approve proposals.</p></section>
-        : <GroupHome key={`${session.accessToken}:${view.kind === 'group' ? view.groupId : 'home'}:${invitationEpoch}`} {...(view.kind === 'group' ? { selectedGroupId: view.groupId } : {})}
+        : <GroupHome preferencesKey={groupPreferencesKey} key={`${session.accessToken}:${view.kind === 'group' ? view.groupId : 'home'}:${invitationEpoch}`} {...(view.kind === 'group' ? { selectedGroupId: view.groupId } : {})}
           api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} onOpenGroup={id => move({ kind: 'group', groupId: id })} onBack={() => move({ kind: 'groups' })} onDirtyChange={value => { dirty.current = value; }}
           openDecision={id => move({ kind: 'decision', decisionId: id, ...(view.kind === 'group' ? { groupId: view.groupId } : {}) })} />}
   </main>;
