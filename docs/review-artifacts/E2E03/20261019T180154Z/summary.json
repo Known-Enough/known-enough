@@ -1,13 +1,13 @@
 {
   "runId": "20261019T180154Z",
-  "state": "RUNNING",
+  "state": "BLOCKED",
   "startedAt": "2026-10-19T18:01:54.729759Z",
-  "lastProgressAt": "2026-10-19T18:01:54.729759Z",
-  "endedAt": null,
-  "lastConfirmedAction": null,
+  "lastProgressAt": "2026-10-19T18:03:58.045Z",
+  "endedAt": "2026-10-19T18:03:58.045Z",
+  "lastConfirmedAction": "u1.inspect-after-create",
   "inFlightAction": null,
   "cases": {
-    "01": "NOT_RUN",
+    "01": "BLOCKED",
     "02": "NOT_RUN",
     "03": "NOT_RUN"
   },
@@ -21,21 +21,33 @@
   },
   "requestObservationComplete": true,
   "providerUsage": {
-    "calls": null,
+    "calls": 0,
     "tokens": null,
-    "availability": "NOT_READ"
+    "availability": "NO_MODEL_REQUEST; TOKEN_USAGE_NOT_READ"
   },
   "evidence": [],
-  "error": null,
-  "nextSafeAction": "log in with U1 and U2, then read-only reconcile the prior fixture",
+  "error": {
+    "domain": "AUTOMATION",
+    "code": "CREATED_DECISION_TITLE_MISMATCH",
+    "rootCause": "UNVERIFIED",
+    "screenshot": "u1.create-decision-failure.png"
+  },
+  "nextSafeAction": "Repair the runner readiness assertion; reconcile the acknowledged draft/decision before any further save or creation.",
   "publication": {
-    "lastConfirmedUrl": null,
-    "unpublishedLocalChanges": true
+    "lastConfirmedUrl": "https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/E2E03/20261019T180154Z/report.md",
+    "unpublishedLocalChanges": false
   },
   "serving": {
     "apiSource": "5499a8e8a7116c8204b7da33fe161139120182b3",
     "apiSha256": "dba8649429b815fb8ce03bdb9424128ca180633038214f34edbc7871e033aa58",
     "workerSha256": "33f5d50edb119df13ba570993bfea388d42dfb8c56883e506efb2748ca6eb674",
     "frontendAmplifyJob": "145"
+  },
+  "lastError": {
+    "code": "Error",
+    "domain": "AUTOMATION",
+    "stage": "u1.create-decision",
+    "screenshot": "u1.create-decision-failure.png",
+    "pageOrigin": "https://main.d143q5ravxp5av.amplifyapp.com"
   }
 }
