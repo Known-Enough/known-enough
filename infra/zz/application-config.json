@@ -22,6 +22,11 @@
     "OPTIONS /invitations",
     "GET /mcp",
     "POST /mcp",
-    "OPTIONS /mcp"
+    "OPTIONS /mcp",
+    "GET /decisions/{decisionId}/chat/{scope}",
+    "POST /decisions/{decisionId}/chat/{scope}",
+    "OPTIONS /decisions/{decisionId}/chat/{scope}",
+    "GET /decisions/{decisionId}/chat/{scope}/requests/{requestId}",
+    "OPTIONS /decisions/{decisionId}/chat/{scope}/requests/{requestId}"
   ]
 }

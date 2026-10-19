@@ -1,10 +1,11 @@
 import { PartitionOwnerFailure, type OwnerInterpretation } from './partition-owner-runtime.ts';
 import type { DraftRecoveryRequest } from './partition-draft-recovery.ts';
+import type { AssistantChatRuntime } from './partition-chat-runtime.ts';
 import { randomUUID } from 'node:crypto';
 import { RequestNegotiation, NegotiationReceipt, BACKGROUND_NEGOTIATION_PROFILE } from '@deal-table/contracts/durable-command';
 import type { DurableEnqueueRequest } from './durable-enqueue.ts';
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { Id, KnownEnough as KE } from '@deal-table/contracts';
+import { Id, KnownEnough as KE, AssistantChat as Chat } from '@deal-table/contracts';
 import { KnownEnoughApplication, KnownEnoughApplicationError, RepositoryCapacityError,
   type Clock, type IdSource, type TrustedPrincipal, type KnownEnoughRepository } from '@deal-table/application';
 import { createPartitionGroupSession, createPartitionDecisionRepository, PartitionSessionError, PartitionDraftFailure, PartitionRegistrationConflict, partitionIO,
@@ -12,6 +13,7 @@ import { createPartitionGroupSession, createPartitionDecisionRepository, Partiti
 
 type ErrorCode = Extract<KE.DecisionCommandResult, { ok: false }>['error']['code'];
 export interface PartitionParticipantApiOptions {
+  assistantChat?: AssistantChatRuntime;
   ownerInterpretation?: OwnerInterpretation;
   /** Server-owned private processing gate and atomic retention-fenced repository; no model call. */
   privateAnswersSource?: string;
@@ -199,6 +201,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         const group = /^\/groups\/([A-Za-z0-9_-]{1,80})(\/(?:remove|invite|invitations|name|delete))?$/.exec(url.pathname);
         const draft = /^\/groups\/([A-Za-z0-9_-]{1,80})\/drafts(?:\/([A-Za-z0-9_-]{1,80})(\/create)?)?$/.exec(url.pathname);
         const ownerConversation = /^\/decisions\/([A-Za-z0-9_-]{1,80})\/owner-conversation\/(draft|requests\/([A-Za-z0-9_-]{1,80})(\/close)?)$/.exec(url.pathname);
+        const chat = /^\/decisions\/([A-Za-z0-9_-]{1,80})\/chat\/(group|private)(?:\/requests\/([A-Za-z0-9_-]{1,80}))?$/.exec(url.pathname);
         const decision = /^\/decisions\/([A-Za-z0-9_-]{1,80})\/(public|me|commands)$/.exec(url.pathname);
         const roster = /^\/groups\/([A-Za-z0-9_-]{1,80})\/decisions\/([A-Za-z0-9_-]{1,80})\/(review|revise)$/.exec(url.pathname);
         if (group && request.method === 'POST' && (group[2] === '/invitations' || group[2] === '/invite')) {
@@ -371,6 +374,18 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
           }
           else send(response, 200, { group: await (raw && typeof raw === 'object' && Object.hasOwn(raw, 'kind')
             ? session.removeItem(principal, group[1]!, raw) : session.remove(principal, group[1]!, raw)) }); return;
+        }
+        if (chat) {
+          if (!options.assistantChat || !['GET', 'POST'].includes(request.method ?? '') || chat[3] && request.method !== 'GET') return reject('NOT_FOUND');
+          const phase = partitionIO({ timeoutMs: 27000 }); const io = { ...phase, signal: AbortSignal.any([phase.signal, controller.signal]) };
+          // Existing repository proves admission, current group/binding and exact participant first.
+          const app = new KnownEnoughApplication({ repository: repositories.forParticipant(principal, io), clock, ids });
+          await app.getOwnerSnapshot(principal, chat[1]!);
+          const post = request.method === 'POST' ? Chat.Post.safeParse(await body(request, maximum, bodyMs, controller)) : undefined;
+          if (post && !post.success) return reject('INVALID_COMMAND');
+          const result = await options.assistantChat({ principal, decisionId: chat[1]!, scope: Chat.Scope.parse(chat[2]), io,
+            ...(post?.success ? { post: post.data } : {}), ...(chat[3] ? { requestId: chat[3] } : {}) });
+          send(response, 200, result); return;
         }
         if (ownerConversation) {
           if (!options.ownerInterpretation || (ownerConversation[2] === 'draft' || ownerConversation[4] ? request.method !== 'POST' : request.method !== 'GET')) return reject('NOT_FOUND');

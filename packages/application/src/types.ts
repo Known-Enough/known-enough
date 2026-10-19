@@ -4,7 +4,7 @@ import type {
   Participant, Policy, ProposalView, PublicRoomSnapshot, Schedule,
 } from '@deal-table/contracts';
 import type { RequiredGrantReference, SolveDecisionInput, SolveDecisionResult } from '@deal-table/domain';
-import type { KnownEnough as KE } from '@deal-table/contracts';
+import type { KnownEnough as KE, AssistantChat } from '@deal-table/contracts';
 
 /** Constructed only by a trusted identity adapter; this is not authentication. */
 export type TrustedPrincipal =
@@ -155,6 +155,8 @@ export interface DecisionJob {
 }
 /** Versioned generic state stored alongside legacy STATE v4 records. */
 export interface KnownEnoughRecord {
+  /** Server-only history; never part of an owner, public or decision-model DTO. */
+  assistantMessages?: AssistantChat.Message[] | undefined;
   /** Trusted provisioning receipt; never projected to owner/public payloads. */
   creationBodyHash?: string | undefined;
   decisionId: string;

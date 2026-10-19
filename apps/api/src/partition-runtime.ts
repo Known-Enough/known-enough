@@ -1,6 +1,7 @@
 import { PartitionOwnerFailure, createManagedPartitionOwnerRuntime } from './partition-owner-runtime.ts';
 import { createManagedDraftRequestRecovery } from './partition-draft-recovery.ts';
 import { createManagedPartitionDraftRuntime } from './partition-draft-runtime.ts';
+import { createManagedPartitionChatRuntime } from './partition-chat-runtime.ts';
 import type { IncomingMessage } from 'node:http';
 import type { Clock, IdSource } from '@deal-table/application';
 import { createPartitionDecisionRepository, createPartitionManagedDriver, type PartitionManagedOptions, type PartitionDraftArchitect } from '@deal-table/adapters/partition-request';
@@ -104,6 +105,12 @@ export function createPartitionRuntime(options: PartitionRuntimeOptions) {
     ...(jobs && service ? { ownerInterpretation: createManagedPartitionOwnerRuntime({ sourceSha: jobs.sourceSha, groups: driver.groups, decisions: driver.decisions,
       decisionArn: driver.decisionArn, partitionArn: driver.partitionArn, clock, ids, prepareDecisionCommit: driver.prepareDecisionCommit,
       assertRetained: principal => service.assertRetained(principal), acknowledgeSyntheticProcessing: principal => service.acknowledgeSyntheticProcessing(principal), retentionConditions: principal => service.retentionConditions(principal) }) } : {}),
+    ...(jobs && service ? { assistantChat: createManagedPartitionChatRuntime({ sourceSha: jobs.sourceSha,
+      groups: driver.groups, decisions: driver.decisions, decisionArn: driver.decisionArn, partitionArn: driver.partitionArn, clock,
+      retainedDecisions: principal => driver.privateAnswerDecisions(principal.subject, () => service.retentionConditions(principal)),
+      prepareDecisionCommit: driver.prepareDecisionCommit, assertRetained: principal => service.assertRetained(principal),
+      acknowledgeSyntheticProcessing: principal => service.acknowledgeSyntheticProcessing(principal),
+      retentionConditions: principal => service.retentionConditions(principal) }) } : {}),
     ...(jobs ? { draftRequest: createManagedDraftRequestRecovery({ sourceSha: jobs.sourceSha, prepareGroupCommit: driver.prepareGroupCommit }) } : {}),
     registrationProfile: async (request, signal) => {
       let response: Response | undefined;

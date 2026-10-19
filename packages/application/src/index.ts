@@ -755,4 +755,6 @@ export type {
 export type { DecisionNegotiationContext, NegotiationFailureTarget, KnownEnoughApplicationOptions } from './known-enough.ts';
 
 export { MODEL_FAILURE_STAGES, reportModelFailure, modelValidationIssues, safeModelDiagnostic } from './model-runtime.ts';
+export { AssistantChatApplication, renderChatPlan } from './assistant-chat.ts';
+export type { ChatContext } from './assistant-chat.ts';
 export type { ModelInvocation, ModelCommitGuard, ModelJobKind, ModelJobRunner, ModelFailureDiagnostic, ModelValidationIssue } from './model-runtime.ts';

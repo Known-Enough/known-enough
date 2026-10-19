@@ -305,7 +305,7 @@ function retireOwnerPermissions(decision: KnownEnoughRecord, owner: DecisionOwne
     .map(permission => permission.status === 'ACTIVE'
       ? { ...permission, status: 'SUPERSEDED' as const, permissionVersion: permission.permissionVersion + 1 } : permission));
 }
-function publicSnapshot(
+export function publicSnapshot(
   decision: KnownEnoughRecord,
   viewerParticipantId: string | null,
 ): KETypes.PublicDecisionSnapshot {

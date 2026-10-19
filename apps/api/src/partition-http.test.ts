@@ -1,11 +1,12 @@
 import { createPartitionOwnerRuntime } from './partition-owner-runtime.ts';
+import { createPartitionChatRuntime } from './partition-chat-runtime.ts';
 import { partitionIO } from '@deal-table/adapters/partition-request';
 import { JOB_TARGET, type JobSnapshot, type PublicDraftCommit, type DurableJobStore, type PublicDraftFence, type PublicDraftEffect } from '@deal-table/adapters/durable-model-runtime';
 import { createServer, request as httpRequest, type Server } from 'node:http';
 import { createHash, createHmac } from 'node:crypto';
 import { afterEach, expect, it, vi } from 'vitest';
 import { TransactGetItemsCommand, TransactWriteItemsCommand, type TransactWriteItem, type AttributeValue } from '@aws-sdk/client-dynamodb';
-import { Groups, KnownEnough as KE } from '@deal-table/contracts';
+import { Groups, KnownEnough as KE, AssistantChat as Chat } from '@deal-table/contracts';
 import { KnownEnoughApplication, type TrustedPrincipal, type DecisionArchitectRequest, type DecisionArchitectureDraft } from '@deal-table/application';
 import { InMemoryRoomRepository } from '@deal-table/adapters';
 import { preparePartitionMigration } from '../../../packages/adapters/src/partition-migration.ts';
@@ -1218,4 +1219,111 @@ it('closing an uncertain owner provider outcome is refused and keeps its reserva
   const before = structuredClone(h.state()); const a = await api(h.f, { ownerInterpretation: h.runtime });
   const result = await a.post('/decisions/decision/owner-conversation/requests/' + h.input.requestId + '/close', { revision: h.state().job!.revision });
   expect((await result.json()).interpretationFailure).toBe('REQUEST_UNKNOWN'); expect(h.state()).toEqual(before); expect(h.calls()).toBe(1);
+});
+
+async function chatRuntimeFixture(options: { uncertain?: boolean; invalid?: boolean; revoke?: boolean; loseAck?: boolean } = {}) {
+  const f = await fixture(); await seed(f);
+  const source = 'a'.repeat(40); let calls = 0, lost = false;
+  let state: JobSnapshot = { job: null, control: { schemaVersion: 1, revision: 1, enabled: true, sourceSha: source, active: [], slots: [] }, totals: { runs: 5, messages: 4, reservedTokens: 100, reservedCostMicros: 200 } };
+  const runtime = createPartitionChatRuntime({ ...target, sourceSha: source, groups: f.groups, decisions: f.transport,
+    retainedDecisions: () => f.transport, clock: { now: () => '2026-10-07T15:00:00.000Z' },
+    assertRetained: async () => ({ expiresAt: '2026-11-01T00:00:00.000Z' }), acknowledgeSyntheticProcessing: async () => {}, retentionConditions: async () => [],
+    prepareDecisionCommit: async transaction => structuredClone(transaction.input.TransactItems!),
+    authority: async () => ({ table: JOB_TARGET.budget, key: { PK: 'AUTH', SK: 'STATE' }, attribute: 'version', revision: 1, payload: '{}' }),
+    store: prepare => ({ read: async () => structuredClone(state), deliveries: async () => [],
+      commit: async (prior, next, fence, effect) => {
+        if (JSON.stringify(prior) !== JSON.stringify(state)) return false;
+        if (fence) { const prepared = await prepare(fence, effect); await f.transport.send(new TransactWriteItemsCommand({ TransactItems: prepared.items }), partitionIO()); }
+        state = structuredClone(next);
+        if (next.job?.phase === 'SUCCEEDED' && options.loseAck && !lost) { lost = true; throw new Error('lost response'); }
+        return true;
+      } }),
+    transport: { send: async command => {
+      calls++;
+      expect(JSON.stringify(command)).toContain('MY_CHAT_QUESTION');
+      expect(JSON.stringify(command)).not.toMatch(/PEER_PRIVATE_CANARY|confirmedConstraints|ownerVersion|emailHash/);
+      if (options.revoke) f.change('ACCOUNT#iris', account => { account.status = 'DISABLED'; });
+      if (options.uncertain) throw new Error('UNKNOWN_PROVIDER_RESULT');
+      return { $metadata: {}, metrics: { latencyMs: 1 }, stopReason: 'tool_use', usage: { inputTokens: 20, outputTokens: 30, totalTokens: 50 },
+        output: { message: { role: 'assistant', content: [{ toolUse: { toolUseId: 'chat-plan', name: 'response_plan', input: options.invalid
+          ? { focus: 'APPROVALS', optionIndexes: [], question: 'NONE', answer: 'Invented approval' }
+          : { focus: 'REFLECT', optionIndexes: [], question: 'PRIORITY' } } }] } } };
+    } },
+  });
+  return { f, runtime, calls: () => calls, state: () => state };
+}
+const chatPost = { requestId: 'chat-question', text: 'MY_CHAT_QUESTION: what matters most to me?', askAssistant: true, processingConsent: 'CHAT_AI' };
+it('native chat persists both audiences, verifies names, isolates private history and shares only an explicitly selected message', async () => {
+  const h = await chatRuntimeFixture(); const a = await api(h.f, { assistantChat: h.runtime });
+  const before = h.f.current();
+  const path = '/decisions/decision/chat/';
+  const peer = await a.post(path + 'private', { requestId: 'peer-private', text: 'PEER_PRIVATE_CANARY', askAssistant: false }, 'omar'); expect(peer.status).toBe(200);
+  const privateReply = await a.post(path + 'private', chatPost); expect(privateReply.status).toBe(200);
+  const answer = Chat.Receipt.parse(await privateReply.json()); expect(answer.state).toBe('ANSWERED');
+  expect(answer.conversation.messages).toHaveLength(2); expect(h.calls()).toBe(1);
+  const their = await a.get(path + 'private', 'omar'); expect(JSON.stringify(await their.json())).not.toContain('MY_CHAT_QUESTION');
+  expect((await (await a.get(path + 'group', 'omar')).json()).messages).toHaveLength(0);
+  expect((await a.post(path + 'group', { requestId: 'fake-share', text: 'PEER_PRIVATE_CANARY', askAssistant: false, shareMessageId: 'peer-private' })).status).toBe(403);
+  const shared = await a.post(path + 'group', { requestId: 'explicit-share', text: chatPost.text, askAssistant: false, shareMessageId: chatPost.requestId }); expect(shared.status).toBe(200);
+  const group = Chat.Snapshot.parse(await (await a.get(path + 'group', 'omar')).json()); expect(group.messages).toMatchObject([{ authorName: 'IRIS', text: chatPost.text }]);
+  expect(h.calls()).toBe(1); expect(h.state().job?.usage).toEqual({ inputTokens: 20, outputTokens: 30 });
+  const current = h.f.current(); delete current.assistantMessages; expect(current).toEqual(before);
+});
+it('native chat replays and status lookups recover a lost acknowledgment without another paid call', async () => {
+  const h = await chatRuntimeFixture({ loseAck: true }); const a = await api(h.f, { assistantChat: h.runtime }); const path = '/decisions/decision/chat/private';
+  expect(Chat.Receipt.parse(await (await a.post(path, chatPost)).json()).state).toBe('ANSWERED');
+  expect(Chat.Receipt.parse(await (await a.post(path, chatPost)).json()).state).toBe('ANSWERED');
+  expect(Chat.Receipt.parse(await (await a.get(path + '/requests/' + chatPost.requestId)).json()).state).toBe('ANSWERED');
+  expect(h.calls()).toBe(1);
+  expect((await a.post(path, { ...chatPost, text: 'Changed' })).status).toBe(409);
+});
+it('an uncertain chat provider call remains unknown through repeated status/replay reads, preserving usage reservations', async () => {
+  const h = await chatRuntimeFixture({ uncertain: true }); const a = await api(h.f, { assistantChat: h.runtime }); const path = '/decisions/decision/chat/private';
+  expect(Chat.Receipt.parse(await (await a.post(path, chatPost)).json()).state).toBe('UNKNOWN');
+  const totals = structuredClone(h.state().totals);
+  for (let n = 0; n < 2; n++) expect(Chat.Receipt.parse(await (await a.get(path + '/requests/' + chatPost.requestId)).json()).state).toBe('UNKNOWN');
+  expect(Chat.Receipt.parse(await (await a.post(path, chatPost)).json()).state).toBe('UNKNOWN');
+  expect(h.calls()).toBe(1); expect(h.state().totals).toEqual(totals); expect(h.state().job?.reason).toBe('PROVIDER_UNCONFIRMED');
+});
+it('invalid chat model prose is never saved but actual usage is recorded; revoked access prevents output', async () => {
+  for (const options of [{ invalid: true }, { revoke: true }]) {
+    const h = await chatRuntimeFixture(options); const a = await api(h.f, { assistantChat: h.runtime });
+    const response = await a.post('/decisions/decision/chat/private', chatPost);
+    if (options.invalid) { expect(response.status).toBe(200); expect(Chat.Receipt.parse(await response.json()).state).toBe('UNAVAILABLE'); }
+    else expect(response.status).not.toBe(200);
+    expect(h.calls()).toBe(1); expect(h.state().job?.usage).toEqual({ inputTokens: 20, outputTokens: 30 });
+    expect(h.f.current().assistantMessages).toHaveLength(1);
+  }
+});
+it('chat HTTP rejects missing AI consent, caller-selected identity, display, disabled accounts, deleted bindings and foreign decisions', async () => {
+  const h = await chatRuntimeFixture(); const a = await api(h.f, { assistantChat: h.runtime }); const path = '/decisions/decision/chat/private';
+  expect((await a.post(path, { ...chatPost, processingConsent: undefined })).status).toBe(422);
+  expect((await a.post(path, { ...chatPost, authorId: 'omar' })).status).toBe(422);
+  expect((await a.get('/decisions/unknown/chat/group')).status).toBe(404);
+  const display = await api(h.f, { assistantChat: h.runtime, authenticate: async () => ({ kind: 'display', subject: 'screen', roomId: 'decision' }) });
+  expect((await display.get(path)).status).toBe(403);
+  const cell = [...h.f.cells.values()].find(cell => cell.payload?.S && JSON.parse(cell.payload.S).kind === 'BINDING')!;
+  const binding = JSON.parse(cell.payload!.S!); binding.value.deleted = true; binding.revision++; cell.revision = { N: String(binding.revision) }; cell.payload = { S: JSON.stringify(binding) };
+  expect((await a.get(path)).status).toBe(404); expect(h.calls()).toBe(0);
+});
+
+it('an old-source chat request stays unknown after deployment instead of becoming eligible for another call', async () => {
+  const h = await chatRuntimeFixture({ uncertain: true }); const a = await api(h.f, { assistantChat: h.runtime }); const path = '/decisions/decision/chat/private';
+  expect(Chat.Receipt.parse(await (await a.post(path, chatPost)).json()).state).toBe('UNKNOWN');
+  const cell = h.f.cells.get(h.f.stateLocation)!; const envelope = JSON.parse(cell.payload!.S!);
+  envelope.record.assistantMessages[0].modelSource = 'b'.repeat(40); cell.payload = { S: JSON.stringify(envelope) };
+  const totals = structuredClone(h.state().totals);
+  expect(Chat.Receipt.parse(await (await a.get(path + '/requests/' + chatPost.requestId)).json()).state).toBe('UNKNOWN');
+  expect(h.calls()).toBe(1); expect(h.state().totals).toEqual(totals);
+});
+it('a full model queue preserves the chat question and never dispatches or retries it automatically', async () => {
+  const h = await chatRuntimeFixture(); const a = await api(h.f, { assistantChat: h.runtime });
+  const ids = [crypto.randomUUID(), crypto.randomUUID()];
+  h.state().control.active = ids;
+  h.state().control.slots = ids.map(jobId => ({ jobId, token: crypto.randomUUID(), until: Date.parse('2026-10-07T16:00:00.000Z') }));
+  const first = await a.post('/decisions/decision/chat/private', chatPost);
+  const receipt = Chat.Receipt.parse(await first.json()); expect(receipt.state).toBe('NOT_SUBMITTED');
+  expect(receipt.conversation.messages).toHaveLength(1); expect(h.calls()).toBe(0);
+  expect(Chat.Receipt.parse(await (await a.get('/decisions/decision/chat/private/requests/' + chatPost.requestId)).json()).state).toBe('NOT_SUBMITTED');
+  expect(h.calls()).toBe(0);
 });

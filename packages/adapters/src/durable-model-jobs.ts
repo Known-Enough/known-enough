@@ -7,8 +7,8 @@ const id = z.string().regex(/^[A-Za-z0-9_-]{1,80}$/);
 const hash = z.string().regex(/^[a-f0-9]{64}$/);
 const uuid = z.string().uuid();
 export const DeliverySchema = z.strictObject({ jobId: uuid });
-// Inputs/outputs/closures never enter a persisted record. OWNER/ARCHITECT execute only in authenticated requests; background workers accept NEGOTIATION only.
-export const JobReferenceSchema = z.strictObject({ jobId: uuid, kind: z.enum(['NEGOTIATION', 'ARCHITECT', 'OWNER']),
+// Inputs/outputs/closures never enter a job record. OWNER/ARCHITECT/CHAT execute only in authenticated requests; background workers accept NEGOTIATION only.
+export const JobReferenceSchema = z.strictObject({ jobId: uuid, kind: z.enum(['NEGOTIATION', 'ARCHITECT', 'OWNER', 'CHAT']),
   subject: id, decisionId: id, reasoningJobId: id, authorityHash: hash,
   sourceSha: z.string().regex(/^[a-f0-9]{40}$/), expiresAt: integer, requestKey: id.optional() }).refine(value => value.kind !== 'NEGOTIATION' ? Boolean(value.requestKey) : value.requestKey === undefined);
 const lease = z.strictObject({ token: uuid, until: integer });
@@ -71,7 +71,7 @@ export interface DurableFailureDiagnostic { stage: DurableFailureStage; code: Du
 /** Explicit server-only inactive worker, independent of the installed transient closure runner. */
 export class DurableModelJobs<Context, Fence, Effect> {
   private readonly bounds: { leaseMs: number; timeoutMs: number; maxTokens: number; maxCostMicros: number };
-  constructor(private readonly options: { kind?: 'NEGOTIATION' | 'ARCHITECT' | 'OWNER'; store: DurableJobStore<Fence, Effect>; now: () => number;
+  constructor(private readonly options: { kind?: 'NEGOTIATION' | 'ARCHITECT' | 'OWNER' | 'CHAT'; store: DurableJobStore<Fence, Effect>; now: () => number;
     reconcile?: (reference: JobReference, evidence: unknown) => Promise<{ providerStopped: true; proofHash: string; usage: z.infer<typeof usage> | null }>;
     reportFailure?: (value: DurableFailureDiagnostic) => void;
     execution: DurableExecution<Context, Fence, Effect>; bounds?: Partial<DurableModelJobs<Context, Fence, Effect>['bounds']> }) {

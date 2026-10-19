@@ -1,5 +1,6 @@
 // Server-only inactive OPS03 composition exports; browser imports remain prohibited.
 export * from './durable-model-jobs.ts';
+export { interpretAssistantChat } from './assistant-chat-model.ts';
 export * from './dynamo-model-jobs.ts';
 export { decodeDecisionStateItem, encodeDecisionStateItem, validateDecisionStateGuard } from './dynamodb-codec.ts';
 export { RetentionPolicy, RetentionStamp, retentionDeadline } from './partition-lifecycle.ts';

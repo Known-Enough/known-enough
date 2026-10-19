@@ -216,6 +216,10 @@ export function eraseDecisionOwner(record: DynamoKnownEnoughRecord, subject: str
       ? { ...permission, status: 'SUPERSEDED', permissionVersion: next(permission.permissionVersion) } : permission),
   });
   value.retiredPermissions = value.retiredPermissions.filter(owner => owner.participantId !== ownerId);
+  if (value.assistantMessages) {
+    const erased = new Set(value.assistantMessages.filter(message => message.ownerId === ownerId || message.authorId === ownerId).map(message => message.id));
+    value.assistantMessages = value.assistantMessages.filter(message => !erased.has(message.id) && (!message.replyTo || !erased.has(message.replyTo)));
+  }
   value.memberships.forEach(item => { if (item.participantId === ownerId) item.active = false; });
   value.invitations = value.invitations.filter(item => item.participantId !== ownerId);
   value.definition.participants.forEach(item => { if (item.id === ownerId) item.displayName = 'Erased participant'; });

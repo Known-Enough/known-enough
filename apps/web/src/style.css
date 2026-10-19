@@ -1717,3 +1717,48 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 :root[data-theme="dark"] .ke-alexa-chat form > label { color: #adc8b7; }
 :root[data-theme="dark"] .ke-alexa-chat form input { color: #d2e6d8; background: #22372a; border-color: #425d4a; }
 @media (max-width: 600px) { .ke-alexa-chat > header { padding: 20px 18px 15px; } .ke-alexa-body { padding: 15px 18px; } .ke-alexa-chat > form { padding: 13px 18px 16px; } .ke-alexa-chat h2 { font-size: 21px; } }
+
+/* Saved group and private conversations share one focused chat composer. */
+.ke-alexa-conversations { --chat-border: #dce5dc; --chat-muted: #607666; --chat-other: #f0f4ef; --chat-own: #e5f1e0; --chat-field: #fff; height: min(810px, calc(100dvh - 32px)); }
+.ke-alexa-conversations > header, .ke-alexa-tabs, .ke-alexa-audience { flex: none; }
+.ke-alexa-conversations > header { border-bottom: 0; padding-bottom: 15px; }
+.ke-alexa-tabs { display: flex; padding: 0 24px; border-bottom: 1px solid var(--chat-border); gap: 22px; }
+.ke-alexa-chat .ke-alexa-tabs button { display: flex; align-items: center; gap: 7px; padding: 11px 0; min-height: 44px; margin: 0; border: 0; border-bottom: 2px solid transparent; border-radius: 0; color: var(--chat-muted); background: transparent; box-shadow: none; font-size: 13px; font-weight: 500; }
+.ke-alexa-chat .ke-alexa-tabs button[aria-selected="true"] { border-bottom-color: #54885d; color: inherit; }
+.ke-alexa-tabs svg, .ke-alexa-audience svg { width: 15px; height: 15px; flex: none; }
+.ke-alexa-audience { display: flex; align-items: flex-start; gap: 8px; padding: 12px 24px; color: var(--chat-muted); background: var(--chat-other); }
+.ke-alexa-audience svg { margin-top: 2px; }
+.ke-alexa-audience p { margin: 0; font-size: 11px; line-height: 1.6; }
+.ke-alexa-conversations .ke-alexa-body { flex: 1; overscroll-behavior: contain; }
+.ke-alexa-empty { max-width: 340px; text-align: center; margin: 26px auto; color: var(--chat-muted); }
+.ke-alexa-empty > svg { width: 28px; height: 28px; }
+.ke-alexa-empty h3 { margin: 10px 0 8px; color: inherit; font-size: 16px; }
+.ke-alexa-empty p { font-size: 12px; line-height: 1.8; }
+.ke-alexa-conversations .ke-alexa-messages { margin: 5px 0 12px; gap: 20px; }
+.ke-alexa-message { max-width: 88%; justify-self: start; }
+.ke-alexa-message[data-own="true"] { justify-self: end; }
+.ke-alexa-message-meta { display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px 10px; margin-bottom: 5px; color: var(--chat-muted); font-size: 10px; }
+.ke-alexa-message-meta strong { font-weight: 600; overflow-wrap: anywhere; }
+.ke-alexa-message-meta time { font-size: 9px; }
+.ke-alexa-bubble { margin: 0; padding: 11px 14px; border-radius: 13px 13px 13px 3px; background: var(--chat-other); color: inherit; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; line-height: 1.7; }
+.ke-alexa-message[data-own="true"] .ke-alexa-bubble { background: var(--chat-own); border-radius: 13px 13px 3px 13px; }
+.ke-alexa-message[data-role="assistant"] .ke-alexa-bubble { border: 1px solid var(--chat-border); background: transparent; }
+.ke-alexa-chat button.ke-alexa-share { min-height: 30px; padding: 5px 0; margin: 3px 0 0; border: 0; background: transparent; color: var(--chat-muted); font-size: 10px; box-shadow: none; text-decoration: underline; text-underline-offset: 3px; }
+.ke-alexa-share-preview { border: 1px solid var(--chat-border); border-radius: 12px; padding: 16px; margin-top: 18px; }
+.ke-alexa-share-preview h3 { margin: 0 0 7px; font-size: 14px; }
+.ke-alexa-share-preview p { font-size: 12px; line-height: 1.6; }
+.ke-alexa-share-preview blockquote { padding: 10px 12px; margin: 12px 0; border-left: 2px solid #73957a; background: var(--chat-other); font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ke-alexa-share-preview button { min-height: 36px; font-size: 11px; }
+.ke-alexa-history-note { margin: 18px 0 0; color: var(--chat-muted); font-size: 10px; line-height: 1.6; }
+.ke-alexa-conversations .ke-alexa-trace { margin-top: 8px; }
+.ke-alexa-conversations .ke-alexa-trace summary { width: fit-content; text-decoration: underline; text-underline-offset: 3px; }
+.ke-alexa-conversations .ke-alexa-composer { align-items: flex-end; }
+.ke-alexa-composer textarea { height: 68px; min-height: 68px; flex: 1; min-width: 0; width: 100%; resize: vertical; max-height: 130px; margin: 0; padding: 10px 12px; border: 1px solid var(--chat-border); border-radius: 10px; color: inherit; background: var(--chat-field); font: inherit; font-size: 13px; line-height: 1.5; }
+.ke-alexa-chat form label.ke-alexa-check { display: flex; gap: 8px; align-items: flex-start; margin: 10px 0 0 !important; font-size: 11px; line-height: 1.6; cursor: pointer; }
+.ke-alexa-chat form .ke-alexa-check input { width: 14px; height: 14px; flex: none; margin: 2px 0 0; padding: 0; accent-color: #42764c; }
+.ke-alexa-chat form label.ke-alexa-consent { color: var(--chat-muted); font-size: 10px; }
+.ke-alexa-conversations :focus-visible { outline: 2px solid #608d68; outline-offset: 3px; }
+:root[data-theme="dark"] .ke-alexa-conversations { --chat-border: #405945; --chat-muted: #acc1b2; --chat-other: #293d30; --chat-own: #34513b; --chat-field: #22372a; }
+@media (max-width: 600px) { .ke-alexa-conversations { height: calc(100dvh - 24px); } .ke-alexa-tabs { padding: 0 18px; gap: 18px; } .ke-alexa-audience { padding: 10px 18px; } .ke-alexa-message { max-width: 94%; } .ke-alexa-bubble { font-size: 12px; } }
+:root[data-theme="dark"] .ke-alexa-conversations .ke-alexa-tabs button { background: transparent; color: var(--chat-muted); }
+:root[data-theme="dark"] .ke-alexa-conversations .ke-alexa-tabs button[aria-selected="true"] { color: #d4e8d9; }

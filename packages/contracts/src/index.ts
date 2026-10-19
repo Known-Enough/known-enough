@@ -208,3 +208,4 @@ export * as Groups from './groups.ts';
 
 export { ChoicePlan, compileChoicePlan } from './choice-plan.ts';
 export * as Alexa from './alexa.ts';
+export * as AssistantChat from './assistant-chat.ts';

@@ -2,7 +2,7 @@ import type { AttributeValue } from '@aws-sdk/client-dynamodb';
 import {
   CommandResult, ConfirmedInputs, DisclosureGrant, DisclosurePreview, ExceptionOffer,
   ExceptionGrant, FinalApproval, Hash, Id, InputDraft, Interval, Participant, Policy, ProposalView,
-  PublicStatus, PublishedDisclosure, Schedule, Timestamp, Version, KnownEnough as KE,
+  PublicStatus, PublishedDisclosure, Schedule, Timestamp, Version, KnownEnough as KE, AssistantChat,
 } from '@deal-table/contracts';
 import {
   MAX_PERMISSION_HISTORY_RECORDS,
@@ -179,6 +179,7 @@ const decisionInvitationSchema = z.strictObject({
 });
 const decisionJobSchema = z.strictObject({ id: Id, contextToken: Hash, semanticVersion: Version, epoch: Version });
 const decisionRecordSchema = z.strictObject({
+  assistantMessages: AssistantChat.History.optional(),
   creationBodyHash: z.string().regex(/^[a-f0-9]{64}$/).optional(),
   decisionId: Id,
   creatorSubject: Id,
