@@ -2,6 +2,7 @@
 
 | Task | Purpose | Status |
 | --- | --- | --- |
+| [E2E03](E2E03/README.md) | Lightweight regression: two-user saves and one agreed outcome; optional one-question private chat. | READY/unclaimed; two required cases, one optional; no tests started. |
 | [E2E01](E2E01/README.md) | Previous two-user run; evidence retained for reference. | Complete: scenarios 1–2 PASS, 3–10 BLOCKED; qualification BLOCKED. [Latest report](E2E01/run-2026-10-16-test02-test03.md) |
 | [E2E02](E2E02/README.md) | Two-user, sixteen-case current-release journeys. | Five formerly blocked cases PASS; earlier eleven retain dated evidence. [Completion report](../../../review-artifacts/E2E02/completion-20261017/report.md). Owned cleanup complete; claim released. No fresh sixteen-case single-source run. |
 
