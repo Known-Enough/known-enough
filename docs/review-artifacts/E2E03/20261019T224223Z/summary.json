@@ -1,0 +1,36 @@
+{
+  "runId": "20261019T224223Z",
+  "state": "RUNNING",
+  "startedAt": "2026-10-19T22:42:40.789Z",
+  "endedAt": null,
+  "cases": {
+    "01": "NOT_RUN",
+    "02": "NOT_RUN",
+    "03": "NOT_RUN"
+  },
+  "lastConfirmedAction": null,
+  "inFlightAction": null,
+  "observedRequests": {
+    "outcome": 0,
+    "assistant": 0
+  },
+  "error": null,
+  "lastProgressAt": "2026-10-19T22:42:40.792Z",
+  "serving": {
+    "runtimeSource": "1117433d4f486d9e8f5a931857e32dd90331908e",
+    "apiSha256": "9e9c3672ffdbe2a93ca8fa99b83ca49247cea6fea4db2e2585dfc60402987572",
+    "workerSha256": "37bcbd5c936536da8d8e1ceca2081aae536711d0d603c1287b5af019c87d2790",
+    "frontendSource": "656c3dc514b4aa0fe8a1ee5ec5b0474dc791d028",
+    "amplifyJobId": "151"
+  },
+  "plannedRequests": {
+    "outcome": 1,
+    "assistant": 0
+  },
+  "reconciliation": "PENDING: preserve acknowledged U1 and U2 answers; do not save them again.",
+  "providerUsage": {
+    "calls": null,
+    "tokens": null,
+    "availability": "NOT_READ"
+  }
+}

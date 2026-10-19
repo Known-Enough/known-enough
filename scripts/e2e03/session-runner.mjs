@@ -186,6 +186,17 @@ export async function serve(options, recorder) {
     context.on('request', request => {
       const route = safeRoute(request.url()); if (!route) return;
       if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method())) user.writes++;
+      if (request.method() === 'POST' && fixture?.decisionId
+        && new URL(request.url()).pathname.startsWith(`/decisions/${fixture.decisionId}/`)) {
+        let type; try { type = request.postDataJSON()?.type; } catch { /* No body is retained. */ }
+        if (type === 'REQUEST_NEGOTIATION' || route.endsWith('/reasoning')) {
+          recorder.summary.observedRequests.outcome++;
+          const requestId = request.postDataJSON()?.requestId;
+          fixture.outcomeAttempt = { ...fixture.outcomeAttempt, phase: 'DISPATCHED',
+            ...(typeof requestId === 'string' && /^[a-f0-9-]{36}$/.test(requestId) ? { requestId } : {}) };
+          persistFixture();
+        }
+      }
       recorder.event('HTTP_REQUEST', { actor, route, method: request.method() });
     });
     context.on('response', response => {
@@ -259,6 +270,43 @@ export async function serve(options, recorder) {
     await row.waitFor({ state: 'visible' }); await row.click();
     await page.getByRole('heading', { name: fixture.groupName, exact: true }).waitFor({ state: 'visible' });
     await settle(user); return { groupOpened: true };
+  };
+  const ownState = async user => {
+    const page = user.page;
+    await waitForDecisionReady(page, fixture.decisionId, 'Friday activity');
+    const pending = page.waitForResponse(response => response.request().method() === 'GET'
+      && new URL(response.url()).pathname === `/decisions/${fixture.decisionId}/me` && response.ok(), { timeout: 30000 });
+    pending.catch(() => {});
+    await page.locator('.ke-decision-header-menu > summary').click();
+    await page.getByRole('button', { name: 'Refresh decision', exact: true }).click();
+    const owner = await readResponseJson(await pending);
+    if (owner.publicSnapshot?.frame?.decisionId !== fixture.decisionId || typeof owner.ownerParticipantId !== 'string')
+      throw new Error('OWNER_READBACK_INVALID');
+    user.owner = owner; // Live owner data stays inside this isolated runner, never the public ledger.
+    return owner;
+  };
+  const stateSummary = (actor, owner) => {
+    const snapshot = owner.publicSnapshot;
+    const proposal = snapshot.currentProposal;
+    return { status: snapshot.status, ownReady: owner.ownInputReadiness === 'READY', ownApproval: !!owner.ownApproval,
+      requiredCount: snapshot.frame.requiredParticipantIds.length,
+      answeredCount: snapshot.participantProgress?.filter(item => item.answersSaved).length ?? null,
+      approvedCount: snapshot.approvedParticipantIds.length, hasProposal: !!proposal,
+      proposalMatchesPinned: fixture.proposal ? !!proposal && proposal.proposalId === fixture.proposal.proposalId
+        && proposal.facts.proposalVersion === fixture.proposal.proposalVersion && proposal.publicHash === fixture.proposal.publicHash : null,
+      actor };
+  };
+  const commandResponse = (page, type) => page.waitForResponse(response => {
+    if (response.request().method() !== 'POST' || new URL(response.url()).pathname !== `/decisions/${fixture.decisionId}/commands`) return false;
+    try { return response.request().postDataJSON()?.type === type; } catch { return false; }
+  }, { timeout: 30000 });
+  const requireAccepted = async response => {
+    const body = await readResponseJson(response);
+    if (!response.ok()) throw Object.assign(new Error('COMMAND_REJECTED'), { code: 'COMMAND_REJECTED', domain: 'APP_HTTP',
+      status: response.status(), route: safeRoute(response.url()),
+      serverCode: typeof body.error?.code === 'string' && /^[A-Z_]{1,60}$/.test(body.error.code) ? body.error.code : null,
+      reference: typeof body.requestId === 'string' && /^[a-f0-9-]{36}$/.test(body.requestId) ? body.requestId : null });
+    return body;
   };
   const operations = {
     login,
@@ -409,6 +457,91 @@ export async function serve(options, recorder) {
       const editor = await dialog.locator('.ke-response-sheet').isVisible();
       return { ownSavedAnswerPresent: saved, answerEditorVisible: editor,
         safeToSaveOnce: !saved && editor };
+    },
+    async 'read-state'(actor, user) {
+      const owner = await ownState(user), result = stateSummary(actor, owner);
+      fixture.owners ??= {};
+      if (fixture.owners[actor] && fixture.owners[actor] !== owner.ownerParticipantId) throw new Error('OWNER_IDENTITY_CHANGED');
+      fixture.owners[actor] = owner.ownerParticipantId;
+      if (Object.keys(fixture.owners).length === 2 && new Set(Object.values(fixture.owners)).size !== 2) throw new Error('OWNERS_NOT_DISTINCT');
+      persistFixture();
+      if (result.ownReady) {
+        await user.page.locator('.ke-saved-answers').waitFor({ state: 'visible' });
+        const text = await user.page.locator('.ke-saved-answer-topics').innerText();
+        result.ownSelectionsMatch = text.includes('Board games') && (actor === 'U1' ? !text.includes('Walk') : text.includes('Walk'));
+        if (!result.ownSelectionsMatch) throw new Error('PERSISTED_OWN_ANSWERS_MISMATCH');
+      }
+      return result;
+    },
+    async 'list-status'(actor, user) {
+      await openGroup(actor, user);
+      const row = user.page.locator('.ke-clickable-decision-row').filter({ hasText: 'Friday activity' });
+      if (await row.count() !== 1) throw new Error('DECISION_STATUS_ROW_AMBIGUOUS');
+      const chip = row.locator('.ke-decision-status-chip');
+      await chip.filter({ hasText: /^Loading status$/ }).waitFor({ state: 'hidden' });
+      const label = (await chip.innerText()).trim(), tone = await chip.getAttribute('data-tone');
+      if (label === 'Status unavailable') throw new Error('DECISION_STATUS_UNAVAILABLE');
+      const allowed = ['Needs your answer', 'Waiting for others', 'Ready for outcome', 'Ready for approval', 'Waiting for approvals', 'Decision agreed'];
+      if (!allowed.includes(label)) throw new Error('DECISION_STATUS_UNEXPECTED');
+      return { label, tone, groupActionAssertion: 'NOT_ASSERTED_OTHER_EXISTING_DECISIONS' };
+    },
+    async 'request-outcome'(actor, user) {
+      if (fixture.outcomeAttempt || recorder.summary.observedRequests.outcome !== 0) throw new Error('OUTCOME_ALREADY_ATTEMPTED');
+      const owner = await ownState(user), state = stateSummary(actor, owner);
+      if (state.hasProposal || state.status !== 'READY' || state.answeredCount !== 2 || state.requiredCount !== 2)
+        throw new Error('OUTCOME_PREREQUISITE_NOT_READY');
+      fixture.outcomeAttempt = { run: recorder.run, phase: 'INTENT' }; persistFixture();
+      const pending = commandResponse(user.page, 'REQUEST_NEGOTIATION'); pending.catch(() => {});
+      const started = Date.now(); await user.page.getByRole('button', { name: 'Find an outcome', exact: true }).click();
+      const response = await pending, body = await requireAccepted(response);
+      fixture.outcomeAttempt.phase = 'HTTP_ACKED';
+      if (typeof body.job?.jobId === 'string') fixture.outcomeAttempt.jobId = body.job.jobId;
+      persistFixture();
+      recorder.event('OUTCOME_ACKNOWLEDGED', { actor, status: response.status(), requestCount: recorder.summary.observedRequests.outcome });
+      try { await user.page.getByRole('button', { name: 'View proposal', exact: true }).waitFor({ state: 'visible', timeout: Math.max(1, 120000 - (Date.now() - started)) }); }
+      catch (cause) { throw Object.assign(new Error('OUTCOME_NOT_READY_WITHIN_TWO_MINUTES', { cause }), { code: 'OUTCOME_NOT_READY_WITHIN_TWO_MINUTES' }); }
+      fixture.outcomeAttempt.phase = 'PROPOSAL_VISIBLE'; persistFixture();
+      return { status: response.status(), outcomeRequests: recorder.summary.observedRequests.outcome, proposalVisible: true, durationMs: Date.now() - started };
+    },
+    async 'review-proposal'(actor, user) {
+      const owner = await ownState(user), proposal = owner.publicSnapshot.currentProposal;
+      if (!proposal) throw new Error('PROPOSAL_MISSING');
+      const pinned = { proposalId: proposal.proposalId, proposalVersion: proposal.facts.proposalVersion, publicHash: proposal.publicHash };
+      if (fixture.proposal && JSON.stringify(pinned) !== JSON.stringify(fixture.proposal)) throw new Error('PROPOSAL_CHANGED');
+      await user.page.getByRole('button', { name: owner.publicSnapshot.status === 'AGREED' ? 'View outcome' : 'View proposal', exact: true }).click();
+      const choices = user.page.locator('.ke-outcome-choices dd');
+      await choices.first().waitFor({ state: 'visible' });
+      if (await choices.count() !== 1 || (await choices.innerText()).trim() !== 'Board games') throw new Error('COMMON_OUTCOME_MISMATCH');
+      fixture.proposal ??= pinned; fixture.owners ??= {}; fixture.owners[actor] = owner.ownerParticipantId; persistFixture();
+      return { ...stateSummary(actor, owner), commonOptionMatches: true, exactProposalPinned: true };
+    },
+    async approve(actor, user) {
+      if (!fixture.proposal || !user.owner || user.owner.ownApproval || fixture.approvals?.[actor]) throw new Error('APPROVAL_NOT_SAFE_TO_SEND');
+      const pending = commandResponse(user.page, 'APPROVE_PROPOSAL'); pending.catch(() => {});
+      await user.page.getByRole('checkbox', { name: 'I reviewed the shared outcome and my private part of this exact proposal.', exact: true }).check();
+      await user.page.getByRole('button', { name: 'Approve proposal', exact: true }).click();
+      const response = await pending; await requireAccepted(response);
+      const payload = response.request().postDataJSON().payload;
+      if (!Object.entries(fixture.proposal).every(([key, value]) => payload[key] === value)) throw new Error('APPROVED_PROPOSAL_MISMATCH');
+      fixture.approvals ??= {}; fixture.approvals[actor] = fixture.owners[actor]; persistFixture();
+      await user.page.getByText('You approved this outcome.', { exact: true }).waitFor({ state: 'visible' });
+      await user.page.getByRole('button', { name: 'Back to overview', exact: true }).click();
+      const owner = await ownState(user), result = stateSummary(actor, owner);
+      if (!result.ownApproval || !result.proposalMatchesPinned) throw new Error('APPROVAL_READBACK_MISMATCH');
+      if (Object.keys(fixture.approvals).length === 2 && new Set(Object.values(fixture.approvals)).size !== 2) throw new Error('APPROVERS_NOT_DISTINCT');
+      return { ...result, statusCode: response.status(), explicitReview: true, exactProposalApproved: true };
+    },
+    async capture(actor, user, command) {
+      const name = command.case === '02' ? 'case02-' + actor.toLowerCase() + '.png' : 'case01-' + actor.toLowerCase() + '.png';
+      await user.page.screenshot({ path: path.join(recorder.directory, name), timeout: 5000, animations: 'disabled',
+        mask: [user.page.locator('input, textarea, .ke-saved-answer-topics, .ke-response-person-name, .ke-outcome-approvals li, [class*="avatar"]')] });
+      return { screenshot: name, masked: true };
+    },
+    async 'case-result'(actor, user, command) {
+      if (!['01', '02', '03'].includes(command.case) || !['PASS', 'FAIL', 'BLOCKED', 'NOT_RUN'].includes(command.result))
+        throw new Error('CASE_RESULT_INVALID');
+      recorder.summary.cases[command.case] = command.result;
+      return { case: command.case, result: command.result };
     },
   };
   console.log(JSON.stringify({ ready: true, run: recorder.run, actors: ['U1', 'U2'] }));

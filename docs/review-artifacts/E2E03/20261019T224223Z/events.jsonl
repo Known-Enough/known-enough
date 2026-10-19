@@ -1,0 +1,1 @@
+{"utc":"2026-10-19T22:42:40.792Z","run":"20261019T224223Z","event":"RUN_STARTED","scope":"E2E03; two users; one manual decision; outcome <=1; assistant <=1","next":"Record current serving publication and reconcile the existing fixture before any write."}
