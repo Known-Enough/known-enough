@@ -1,0 +1,48 @@
+{
+  "runId": "20261019T183505Z",
+  "state": "RUNNING",
+  "startedAt": "2026-10-19T18:35:05.698Z",
+  "lastProgressAt": "2026-10-19T18:35:05.698Z",
+  "endedAt": null,
+  "lastConfirmedAction": null,
+  "inFlightAction": null,
+  "cases": {
+    "01": "NOT_RUN",
+    "02": "NOT_RUN",
+    "03": "NOT_RUN"
+  },
+  "plannedRequests": {
+    "outcome": 0,
+    "assistant": 0
+  },
+  "observedRequests": {
+    "outcome": 0,
+    "assistant": 0
+  },
+  "requestObservationComplete": true,
+  "providerUsage": {
+    "calls": 0,
+    "tokens": null,
+    "availability": "NO_PROVIDER_REQUEST_PLANNED"
+  },
+  "evidence": [
+    "events.jsonl",
+    "summary.json",
+    "report.md"
+  ],
+  "error": null,
+  "nextSafeAction": "Authenticate U1 and U2, reconcile the exact existing fixture, then test decision loading; stop on first failure.",
+  "publication": {
+    "lastConfirmedUrl": null,
+    "unpublishedLocalChanges": true
+  },
+  "serving": {
+    "apiSource": "5499a8e8a7116c8204b7da33fe161139120182b3",
+    "workerSha256": "33f5d50edb119df13ba570993bfea388d42dfb8c56883e506efb2748ca6eb674",
+    "frontendAmplifyJob": "145"
+  },
+  "runnerSource": "3648e6a432ecd6e696572cd44483ba31e93dbf91",
+  "fixture": "previously acknowledged Friday activity decision; private identifiers remain local",
+  "appWriteRequestsObserved": 0,
+  "reconciliation": null
+}
