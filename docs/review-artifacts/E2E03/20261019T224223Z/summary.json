@@ -4,18 +4,18 @@
   "startedAt": "2026-10-19T22:42:40.789Z",
   "endedAt": null,
   "cases": {
-    "01": "NOT_RUN",
+    "01": "PASS",
     "02": "NOT_RUN",
     "03": "NOT_RUN"
   },
-  "lastConfirmedAction": null,
+  "lastConfirmedAction": "u1.case-result",
   "inFlightAction": null,
   "observedRequests": {
     "outcome": 0,
     "assistant": 0
   },
   "error": null,
-  "lastProgressAt": "2026-10-19T22:42:40.792Z",
+  "lastProgressAt": "2026-10-19T22:45:00.312Z",
   "serving": {
     "runtimeSource": "1117433d4f486d9e8f5a931857e32dd90331908e",
     "apiSha256": "9e9c3672ffdbe2a93ca8fa99b83ca49247cea6fea4db2e2585dfc60402987572",
