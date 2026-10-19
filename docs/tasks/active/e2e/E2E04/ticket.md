@@ -2,16 +2,40 @@
 
 Status: **READY / unclaimed**. Documentation preparation only. The existing B worker may claim this task at a genuine idle intake under standing project testing authority; do not interrupt active work or start another worker, chat, schedule or test run from task creation. This task authorizes its planned execution when claimed; the A chat remains preparation-only with no tests now.
 
+## Readiness update — 2026-10-19
+
+E2E03's required two-user flow is now complete: acknowledged private saves, one compatible outcome, two independent approvals, then successful post-repair reopening for both users. Read the [final readback](../../../../review-artifacts/E2E03/20261019T230825Z/report.md), [preceding action acknowledgments](../../../../review-artifacts/E2E03/20261019T224223Z/report.md) and [owner-read repair](../../../../review-artifacts/E2E03/owner-read-repair.md). Optional assistant case03 was NOT_RUN; fifteen-user scale, drafting and conversation quality still need E2E04 evidence.
+
+Last verified serving baseline: runtime/frontend source `1f7d441c4913090fb08bd216c3759d7fd2f4cd57`, API ZIP `e8338c82bb6314f157f743d7f27c1bf4b5e0e7d8c17aa7da5efbc1789be70436`, worker ZIP `c4258495a6e94c97aacff8729e79c725b8732174c565a21b38ef0d499f448fa0`, frontend Amplify job152. This is dated publication evidence; record a newer actual serving release if one exists at execution. Do not equate a later documentation commit with deployed code.
+
+The task is ready for one worker to prepare; a fifteen-user run is **not yet verified as executable**. Before any product actions:
+
+- Privately locate a credential file containing exactly one usable entry for each of `test04`–`test18`. Accept an explicit machine-local path in the documented `users` format; the default path is not mandatory. The readiness review found only a two-user file on A's current machine, with none of these fifteen accounts. It did not log in or check B's machine. Do not create accounts, reuse those two users, transfer passwords, or claim fifteen-account access is verified.
+- Prepare the recorder/browser adapter for fifteen aliases and the six cases below. `scripts/e2e03/session-runner.mjs` currently hardcodes U1/U2, the Friday activity fixture and two-user answers. It is **not a ready E2E04 command**. Reuse its corrected logging, request handling and readiness checks in a small E2E04 adapter; bounded test-harness preparation is in scope. Do not change its old fixture or hardcoded cases into fabricated E2E04 evidence, build a new framework, or modify/deploy the app during this test task.
+- Use installed Node24.21.0/Playwright. Verify private output persistence and publish the startup report before opening the application. Record credential/adapter readiness separately from actual authentication, approval and test results. If credentials are unavailable, finish useful recorder preparation, then report that exact prerequisite.
+
 ## Purpose and prerequisites
 
 Prove that fifteen distinct users can join one group, submit different private answers, receive one compatible proposal and independently approve it. Separately assess whether the assistant gives relevant natural answers, accurately describes current shared progress and keeps private conversations private. A correct finite-choice outcome alone is not proof of conversational intelligence, and matching response counts are not final agreement.
 
 - Site: https://main.d143q5ravxp5av.amplifyapp.com/
 - Accounts: exactly `test04` through `test18`; report aliases U01 through U15 in that order. U01 is organizer. All fifteen must be enabled, verified and app-approved. Do not assume the provisioning command ran successfully.
-- Owner-prepared credentials on the execution machine: `~/.known-enough/e2e-credentials.json`, using the [existing format](../E2E01/credentials.md). Select these exact fifteen usernames, not the first fifteen entries. Never print passwords, paste them in prompts, put them in screenshots/logs, commit them or copy credentials across accounts/workers. A file in A's CloudShell is not automatically present on B's machine.
-- Record the actual serving frontend/backend sources and UTC start. Read the [E2E03 result](../../../../review-artifacts/E2E03/20261019T065759Z/report.md) briefly: its browser lost a durable checkpoint. Preserve its possible `Friday activity` fixture and any uncertain request. E2E04 uses different positively owned fixtures; it must not reset/retry that old work.
+- Owner-prepared credentials on the execution machine: an explicit local file, default `~/.known-enough/e2e-credentials.json`, using the [existing format](../E2E01/credentials.md). Select these exact fifteen usernames, not the first fifteen entries. Never print passwords, paste them in prompts, put them in screenshots/logs, commit them or copy credentials across accounts/workers. A file in A's CloudShell is not automatically present on B's machine.
+- Record actual serving frontend/backend sources and UTC start. E2E03 now has a positively identified, agreed `Friday activity` fixture with saved answers and two approvals. Preserve it and every historical report. E2E04 uses its own positively owned fifteen-user fixture; never repeat the E2E03 outcome/approvals or reset its agreed state.
 - One existing worker/browser setup. Use isolated user sessions and at most three open pages at once; keep any saved authenticated state outside the repository with private permissions. Do not spawn fifteen agents or share cookies between users.
-- Split work into small browser blocks. Persist the run/fixture IDs, last acknowledged action and per-user completion **outside the browser controller after each block**, before starting another write. Save an intent before a write. If a controller stops without an acknowledgment, reconcile that action read-only before doing it again. Take reporting checkpoints after joins, users 5/10/15 answering, proposal and users 5/10/15 approving.
+- Split work into small browser blocks. Persist the run/fixture IDs, last acknowledged action and per-user completion **outside the browser controller after each block**, before starting another write. Save an intent before a write. If a controller stops without an acknowledgment, reconcile that action read-only before doing it again. Take reporting checkpoints after joins, users 5/7/10/15 answering, proposal and users 5/10/14/15 approving.
+
+## Durable reporting and lessons from E2E03
+
+Apply the [E2E03 reporting contract](../E2E03/execution-reporting.md) to this task's **six cases**, fifteen aliases and gallery limits. Publish `report.md`, `summary.json` and an append-only `events.jsonl` as RUNNING before browser actions, with actual serving sources, planned scope and all six cases NOT_RUN. Use evidence-only `[skip ci]` commits. Persist intent before every meaningful block and result/HTTP acknowledgment/readback afterward; publish progress at the named checkpoints and immediately on unexpected stop. A missing terminal event is RUN_INCOMPLETE, never PASS. Failed publication stays explicitly local.
+
+Reuse the corrected Playwright request method (`response.request().method()`) and bounded response-body handling. Install safe HTTP/request/page-error/disconnect listeners first; record only normalized routes, statuses, allowlisted references and fixed diagnostic categories. Never export raw bodies, console text, cookies, credentials or another user's private state. Screenshot failures must state their availability reason. Reserve gallery capacity for later cases; earlier images must not suppress final-approval/failure evidence.
+
+The repaired participant screen loads `/decisions/:id/me`, whose owner-authorized response contains the current public snapshot. Do not require a separate `/public` request to declare it loaded, compare revisions from separately fetched snapshots, or block on a cosmetic group-title lookup. Use normal UI and wait for the exact acknowledged decision ID and loaded title in the modal; the loading-shell heading alone is insufficient. Read each user's own fresh snapshot to verify identity, saved choices and counts. Observe the app's bounded GET recovery; a recovered transient response is recorded, while a final failure stops dependent work. These rules do not authorize write retries.
+
+Keep writes and progress checks sequential; do not run fifteen background pollers. The last bounded metadata read observed default API rate5/burst10, but did not establish the cause of the historical network failure. Respect actual retry/deadline behavior, retain error references and avoid drawing a server diagnosis from `net::ERR_FAILED` alone. Independent saved answers use server-owned context; keep each user's current context and never substitute another owner's revision/token.
+
+Record the outcome request ID before dispatch; once acknowledged or uncertain, inspect that same request instead of asking again. Pin proposal ID/version/public hash before the first approval, bind every approval to its distinct owner and that same proposal, and record each HTTP acknowledgment plus fresh own readback. On resumption, skip already acknowledged writes and reconcile any uncertain action before continuing. Final acceptance requires fresh agreement readback after reopening U01/U08/U15; retain the exact fixture privately so another run cannot accidentally repeat outcome or approval writes.
 
 ## One complex, bounded fixture
 
@@ -78,7 +102,7 @@ U15 approves last. Reopen U01, U08 and U15: all see **Decision agreed**, the sam
 
 ### 06 — Useful assistant conversation and privacy
 
-Use **Ask assistant** for the questions below; save actual expected-versus-observed results. Eight assistant requests maximum, sequentially, distributed across the stated checkpoints. Do not paraphrase a canned acknowledgment as an intelligent answer.
+In Group chat use **Ask assistant**; in Private assistant use **Send** after consent (its normal current UI action). Use those actions for the questions below; save actual expected-versus-observed results. Eight assistant requests maximum, sequentially, distributed across the stated checkpoints. Do not paraphrase a canned acknowledgment as an intelligent answer.
 
 | Checkpoint / user / scope | Question | Required behavior |
 | --- | --- | --- |
@@ -104,7 +128,7 @@ Consent is explicit before each user's first AI request. Reopen U15's private ch
 
 ## Evidence and definition of done
 
-Write `docs/review-artifacts/E2E04/<UTC>/report.md`, `summary.json` and `screenshots/`. Keep one six-case results table, short actual-versus-expected AI answers, timings/usage and exact next repairs; avoid raw browser transcripts and wholesale log dumps. Public reports use U01–U15; screenshots may show only these synthetic test usernames, never passwords, tokens, headers, real-user data or private invitation links.
+Write `docs/review-artifacts/E2E04/<UTC>/report.md`, `summary.json`, append-only `events.jsonl` and `screenshots/`. Keep one six-case results table, short actual-versus-expected AI answers, timings/usage and exact next repairs; avoid raw browser transcripts and wholesale log dumps. Public reports use U01–U15; screenshots may show only these synthetic test usernames, never passwords, tokens, headers, real-user data or private invitation links.
 
 Required gallery, approximately **eight useful screenshots**, with captions, viewport/theme and links in the report:
 
