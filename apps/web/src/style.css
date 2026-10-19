@@ -1836,3 +1836,10 @@ dialog[data-standard-close] h2 { padding-right: 30px; }
 .ke-alexa-composer[data-scope="group"] > button[type="submit"] { margin-left: auto; }
 
 .ke-group-row-open > .ke-group-action-chip { flex: none; margin-left: auto; max-width: 42%; text-align: center; justify-content: center; }
+
+/* Quiet in-flight status; recovery warnings appear only after an unresolved result. */
+.ke-decision-saving { display: inline-flex; align-items: center; gap: 8px; width: fit-content; max-width: 100%; margin: 10px 0; padding: 7px 11px; border: 1px solid #d7e5d7; border-radius: 999px; background: #edf5ec; color: #365d43; font-size: 12px; line-height: 1.4; }
+.ke-decision-saving > span { flex: none; width: 12px; height: 12px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: ke-decision-saving-spin .8s linear infinite; }
+@keyframes ke-decision-saving-spin { to { transform: rotate(360deg); } }
+:root[data-theme="dark"] .ke-decision-saving { background: #253c2d; border-color: #405c49; color: #bfdcc8; }
+@media (prefers-reduced-motion: reduce) { .ke-decision-saving > span { animation: none; } }
