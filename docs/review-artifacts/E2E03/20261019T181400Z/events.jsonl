@@ -94,3 +94,4 @@
 {"utc":"2026-10-19T18:17:32.668Z","run":"20261019T181400Z","event":"PAGE_CLOSED","actor":"U1"}
 {"utc":"2026-10-19T18:17:32.692Z","run":"20261019T181400Z","event":"RUNNER_STOPPED","browserClosed":true}
 {"utc":"2026-10-19T18:18:43.002Z","run":"20261019T181400Z","event":"RUN_BLOCKED","case01":"BLOCKED","case02":"NOT_RUN","case03":"NOT_RUN","lastConfirmedAction":"u1.inspect after the failed decision open","appWriteRequestsObserved":0,"outcomeRequests":0,"assistantRequests":0,"tokenUsage":"NOT_READ","rootCause":"UNVERIFIED","nextSafeAction":"Investigate intermittent account read 503; preserve existing fixture."}
+{"utc":"2026-10-19T18:19:19.293Z","run":"20261019T181400Z","event":"FINAL_REPORT_PUBLISHED","commit":"30e646a","url":"https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/E2E03/20261019T181400Z/report.md","state":"BLOCKED"}
