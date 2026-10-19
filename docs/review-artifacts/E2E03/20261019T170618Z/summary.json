@@ -2,10 +2,10 @@
   "runId": "20261019T170618Z",
   "state": "RUNNING",
   "startedAt": "2026-10-19T17:06:18Z",
-  "lastProgressAt": "2026-10-19T17:15:17Z",
+  "lastProgressAt": "2026-10-19T17:16:35Z",
   "endedAt": null,
   "lastConfirmedAction": "reconcile.u1.groups.retry1",
-  "inFlightAction": "reconcile.u1.group-metadata.retry1",
+  "inFlightAction": "reconcile.u1.group-metadata.retry2",
   "cases": {
     "01": "NOT_RUN",
     "02": "NOT_RUN",
@@ -30,12 +30,12 @@
     "preflight.json"
   ],
   "error": {
-    "domain": "UNKNOWN",
-    "code": "OLD_FIXTURE_NOT_IDENTIFIED",
-    "state": "UNRESOLVED",
-    "detail": "Current U1 group metadata has no exact Friday activity title; own-answer state for the historical fixture has not been read."
+    "domain": "AUTOMATION",
+    "code": "AUTH_SESSION_NOT_PRESERVED",
+    "state": "RETRY_PENDING",
+    "detail": "Playwright storageState omitted the app\u2019s session-storage authentication; the attempted refresh made no authenticated group request."
   },
-  "nextSafeAction": "Refresh U1 group metadata only, identify any intended existing U1/U2 fixture, then inspect that decision\u2019s owner/public state read-only.",
+  "nextSafeAction": "Fresh hosted U1 login in the same browser session, then read-only catalog of groups, drafts, and decisions.",
   "publication": {
     "lastConfirmedUrl": "https://github.com/Known-Enough/known-enough/blob/e2d6900d54d5c1ea8d0021d92c05833b76aabf39/docs/review-artifacts/E2E03/20261019T170618Z/report.md",
     "unpublishedLocalChanges": true
