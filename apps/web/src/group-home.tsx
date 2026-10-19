@@ -20,6 +20,8 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
   const [account, setAccount] = useState<ReturnType<typeof Groups.AccountSnapshot.parse> | null>(null);
   const [groups, setGroups] = useState<Groups.GroupSnapshot[]>([]);
   const [groupFilter, setGroupFilter] = useState('');
+  const groupSearch = useRef<HTMLInputElement | null>(null);
+  const clearGroupFilter = () => { setGroupFilter(''); groupSearch.current?.focus(); };
   const [invitations, setInvitations] = useState<Groups.InvitationSnapshot[]>([]);
   const [invitationFailure, setInvitationFailure] = useState<string | null>(null);
   const [profileTarget, setProfileTarget] = useState<ProfileTarget | null>(null);
@@ -291,11 +293,17 @@ export function GroupHome({ api, openDecision, selectedGroupId, onOpenGroup, onB
           })}>Accept invitation</button>
         </li>)}</ul> : <p>No pending invitations.</p>}
       </section>}
-      {!!groups.length && <div className="ke-group-filter"><label htmlFor="group-filter">Filter groups</label>
-        <input id="group-filter" type="search" placeholder="Search by group name" value={groupFilter} onChange={event => setGroupFilter(event.target.value)} />
-        <small role="status">{filteredGroups.length} of {groups.length} groups</small>
+      {!!groups.length && <div className="ke-group-filter">
+        <div className="ke-group-search"><PageIcon name="Search" />
+          <input ref={groupSearch} id="group-filter" type="search" aria-label="Search groups" placeholder="Search groups..." value={groupFilter} onChange={event => setGroupFilter(event.target.value)} />
+          {!!groupFilter && <button type="button" className="ke-group-search-clear" aria-label="Clear group search" title="Clear search" onClick={clearGroupFilter}><PageIcon name="X" /></button>}
+        </div>
+        <small role="status">{groupFilter.trim() && filteredGroups.length !== groups.length ? `${filteredGroups.length} of ${groups.length} groups` : `${groups.length} ${groups.length === 1 ? 'group' : 'groups'}`}</small>
       </div>}
-      {!!groups.length && !filteredGroups.length && <p role="status">No groups match “{groupFilter}”.</p>}
+      {!!groups.length && !filteredGroups.length && <div className="ke-group-search-empty" role="status">
+        <PageIcon name="Search" /><h3>No matching groups</h3><p>Try another name or clear your search to see all groups.</p>
+        <button type="button" className="secondary" onClick={clearGroupFilter}>Clear search</button>
+      </div>}
       {!!filteredGroups.length && <div className="ke-group-sections">{groupSections.map(section => <section className="ke-group-section" key={section.heading}>
         <h3>{section.heading}</h3><ul className="ke-group-list" aria-label={section.heading}>{section.groups.map(group => {
         const decisionCount = Array.isArray(group.decisions) ? group.decisions.length : null;
