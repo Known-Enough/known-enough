@@ -1,0 +1,43 @@
+{
+  "runId": "20261019T181400Z",
+  "state": "RUNNING",
+  "startedAt": "2026-10-19T18:14:13.604Z",
+  "lastProgressAt": "2026-10-19T18:14:13.604Z",
+  "endedAt": null,
+  "lastConfirmedAction": "startup record prepared",
+  "inFlightAction": null,
+  "cases": {
+    "01": "RUNNING",
+    "02": "NOT_RUN",
+    "03": "NOT_RUN"
+  },
+  "plannedRequests": {
+    "outcome": 1,
+    "assistant": 0
+  },
+  "observedRequests": {
+    "outcome": 0,
+    "assistant": 0
+  },
+  "requestObservationComplete": false,
+  "providerUsage": {
+    "calls": 0,
+    "tokens": null,
+    "availability": "UNKNOWN"
+  },
+  "evidence": [],
+  "error": null,
+  "nextSafeAction": "Log in both users, reconcile the saved group and decision IDs, then inspect each own answer state before any answer write.",
+  "publication": {
+    "lastConfirmedUrl": null,
+    "unpublishedLocalChanges": true
+  },
+  "serving": {
+    "apiSource": "5499a8e8a7116c8204b7da33fe161139120182b3",
+    "apiSha256": "dba8649429b815fb8ce03bdb9424128ca180633038214f34edbc7871e033aa58",
+    "workerSha256": "33f5d50edb119df13ba570993bfea388d42dfb8c56883e506efb2748ca6eb674",
+    "frontendAmplifyJob": "145"
+  },
+  "runnerSource": "870e5f080ea25a1678bfc4a2255808ef380c91cc",
+  "resumingPriorRun": "20261019T180154Z"
+}

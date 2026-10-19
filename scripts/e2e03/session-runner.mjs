@@ -57,6 +57,20 @@ export async function waitForDecisionReady(page, decisionId, title, timeout = 15
     });
   }
 }
+export function existingFixtureReadback(groups, fixture) {
+  const groupMatches = groups.filter(group => group.id === fixture?.groupId);
+  if (groupMatches.length !== 1) return { group: groupMatches.length === 0 ? 'MISSING' : 'AMBIGUOUS' };
+  const group = groupMatches[0];
+  const decisions = group.decisions.filter(item => item.id === fixture.decisionId);
+  const drafts = group.drafts.filter(item => item.id === fixture.draftId);
+  return {
+    group: 'PRESENT',
+    memberCount: group.members.length,
+    decision: decisions.length === 1 ? 'PRESENT' : decisions.length === 0 ? 'MISSING' : 'AMBIGUOUS',
+    decisionTitleMatches: decisions.length === 1 && decisions[0].title === 'Friday activity',
+    draft: drafts.length === 1 ? 'PRESENT' : drafts.length === 0 ? 'MISSING' : 'AMBIGUOUS',
+  };
+}
 export function safeRoute(raw) {
   const url = new URL(raw);
   if (!url.hostname.endsWith('.execute-api.us-east-1.amazonaws.com')) return null;
@@ -208,6 +222,18 @@ export async function serve(options, recorder) {
     async reconcile() {
       const u1 = users.get('U1'), u2 = users.get('U2'); await settle(u1); await settle(u2);
       if (!u1.groups.length || !u2.groups.length) throw new Error('BOTH_AUTHENTICATED_CATALOGS_REQUIRED');
+      if (fixture?.decisionId) {
+        const readbacks = [u1, u2].map(user => existingFixtureReadback(user.groups, fixture));
+        if (readbacks.some(item => item.group !== 'PRESENT' || item.memberCount !== 2
+          || item.decision !== 'PRESENT' || !item.decisionTitleMatches)) {
+          throw Object.assign(new Error('EXISTING_FIXTURE_NOT_SAFE_TO_RESUME'), {
+            code: 'EXISTING_FIXTURE_NOT_SAFE_TO_RESUME', domain: 'AUTOMATION',
+          });
+        }
+        return { existingFixture: true, bothUsersSeeGroup: true, bothUsersSeeDecision: true,
+          originalDraftVisibleToBoth: readbacks.every(item => item.draft === 'PRESENT'),
+          noNewGroupOrDecision: true };
+      }
       const matches = [u1, u2].flatMap(user => user.groups.flatMap(group => [...group.decisions, ...group.drafts]
         .filter(item => item.title === 'Friday activity')));
       if (matches.length) throw new Error('EXISTING_FRIDAY_FIXTURE_REQUIRES_RECONCILIATION');
@@ -296,7 +322,9 @@ export async function serve(options, recorder) {
       if (actor === 'U2' || !(await loadedDecisionDialog(page, fixture.decisionId).isVisible())) {
         await openGroup(actor, user);
         const row = page.locator('.ke-decision-row-open').filter({ hasText: 'Friday activity' });
-        await row.waitFor({ state: 'visible' }); await row.click();
+        await row.waitFor({ state: 'visible' });
+        if (await row.count() !== 1) throw new Error('EXISTING_DECISION_ROW_AMBIGUOUS');
+        await row.click();
       }
       await waitForDecisionReady(page, fixture.decisionId, 'Friday activity');
       return { decisionOpened: true, actor };
@@ -326,6 +354,15 @@ export async function serve(options, recorder) {
       const ownSummary = await page.locator('.ke-saved-answer-topics').innerText();
       if (choices.some(choice => !ownSummary.includes(choice))) throw new Error('PRIVATE_ANSWER_READBACK_MISMATCH');
       return { status: result.status(), privateAnswerSaved: true, ownReadback: true, selectedCount: choices.length };
+    },
+    async 'answer-state'(actor, user) {
+      if (!fixture?.decisionId) throw new Error('DECISION_NOT_CREATED');
+      const dialog = loadedDecisionDialog(user.page, fixture.decisionId);
+      await dialog.waitFor({ state: 'visible' });
+      const saved = await dialog.locator('.ke-saved-answers').isVisible();
+      const editor = await dialog.locator('.ke-response-sheet').isVisible();
+      return { ownSavedAnswerPresent: saved, answerEditorVisible: editor,
+        safeToSaveOnce: !saved && editor };
     },
   };
   console.log(JSON.stringify({ ready: true, run: recorder.run, actors: ['U1', 'U2'] }));

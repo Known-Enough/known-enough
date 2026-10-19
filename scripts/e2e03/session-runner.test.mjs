@@ -5,7 +5,18 @@ import os from 'node:os';
 import path from 'node:path';
 import { EventEmitter } from 'node:events';
 import { chromium } from 'playwright';
-import { groupsResponse, safeRoute, Recorder, waitForGroups, waitForDecisionReady } from './session-runner.mjs';
+import { existingFixtureReadback, groupsResponse, safeRoute, Recorder, waitForGroups, waitForDecisionReady } from './session-runner.mjs';
+
+test('existing fixture reconciliation matches stable IDs and never selects another same-title decision', () => {
+  const fixture = { groupId: 'group-kept', draftId: 'draft-kept', decisionId: 'decision-kept' };
+  const ownGroup = { id: 'group-kept', members: [{}, {}], drafts: [{ id: 'draft-kept' }],
+    decisions: [{ id: 'decision-kept', title: 'Friday activity' }, { id: 'decision-other', title: 'Friday activity' }] };
+  const result = existingFixtureReadback([ownGroup], fixture);
+  assert.deepEqual(result, { group: 'PRESENT', memberCount: 2, decision: 'PRESENT',
+    decisionTitleMatches: true, draft: 'PRESENT' });
+  assert.equal(existingFixtureReadback([], fixture).group, 'MISSING');
+  assert.equal(existingFixtureReadback([{ ...ownGroup, decisions: [ownGroup.decisions[0], ownGroup.decisions[0]] }], fixture).decision, 'AMBIGUOUS');
+});
 
 test('decision readiness waits past the loading shell and wrong record, and still rejects a wrong title', async () => {
   const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
