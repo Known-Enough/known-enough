@@ -30,6 +30,13 @@
     "remoteNodeReplError": "sandboxCwd is not a local file URI",
     "browserOpened": false
   },
+  "firstBrowserAttempt": {
+    "result": "FAILED_BEFORE_BROWSER_LAUNCH",
+    "code": "ERR_AMBIGUOUS_MODULE_SYNTAX",
+    "cause": "Confirmed local Node script used require with top-level await",
+    "applicationRequests": 0,
+    "screenshot": "NOT_ATTEMPTED_BROWSER_NOT_LAUNCHED"
+  },
   "startCheckpoint": "PUBLISHED",
   "oldFixture": {
     "groupId": "NOT_RECORDED",
