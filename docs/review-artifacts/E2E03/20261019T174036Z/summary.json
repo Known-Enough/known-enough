@@ -2,7 +2,7 @@
   "runId": "20261019T174036Z",
   "state": "RUNNING",
   "startedAt": "2026-10-19T17:40:45.921654+00:00",
-  "lastProgressAt": "2026-10-19T17:40:45.921662+00:00",
+  "lastProgressAt": "2026-10-19T17:41:00.217394+00:00",
   "endedAt": null,
   "lastConfirmedAction": null,
   "inFlightAction": null,
@@ -35,5 +35,10 @@
   "publication": {
     "lastConfirmedUrl": null,
     "unpublishedLocalChanges": true
+  },
+  "runnerChecks": {
+    "passed": 3,
+    "failed": 0,
+    "appRequests": 0
   }
 }
