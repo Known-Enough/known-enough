@@ -1432,13 +1432,17 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 }
 
 /* Decision rows follow the group list: open the row, manage from the dots. */
-.ke-decision-row.ke-clickable-decision-row { flex-direction: row; align-items: center; gap: 6px; padding: 5px 9px 5px 15px; }
+.ke-decision-row.ke-clickable-decision-row { flex-direction: row; align-items: center; gap: 6px; padding: 5px 9px 5px 15px; transition: background .15s ease; }
 .ke-group-panel button.ke-decision-row-open { display: flex; flex: 1; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; width: auto; min-height: 56px; margin: 0; padding: 8px 0; border: 0; border-radius: 7px; color: #173c30; background: transparent; box-shadow: none; text-align: left; }
 .ke-decision-row-open > span { min-width: 0; overflow-wrap: anywhere; }
 .ke-decision-row-open strong { display: block; font-size: 15px; font-weight: 600; }
 .ke-decision-row-open small { display: block; margin-top: 4px; font-size: 11px; color: #5f6b62; }
 .ke-decision-row-open > svg { flex: none; width: 17px; height: 17px; color: #71877a; }
-.ke-group-panel button.ke-decision-row-open:hover { background: transparent; text-decoration: underline; text-underline-offset: 3px; }
+.ke-decision-row.ke-clickable-decision-row:hover, .ke-decision-row.ke-clickable-decision-row:focus-within { background: #f7faf7; }
+.ke-group-panel button.ke-decision-row-open, .ke-group-panel button.ke-decision-row-open:hover { cursor: pointer; background: transparent; text-decoration: none; }
+.ke-group-panel button.ke-decision-row-open:focus-visible { outline: 2px solid #71927c; outline-offset: -2px; }
+.ke-group-panel button.ke-decision-row-open:active { opacity: .78; }
+:root[data-theme="dark"] .ke-decision-row.ke-clickable-decision-row:hover, :root[data-theme="dark"] .ke-decision-row.ke-clickable-decision-row:focus-within { background: #202b24; }
 .ke-decision-menu-wrap { position: relative; flex: none; }
 .ke-decision-actions-menu { position: absolute; right: 0; top: calc(100% + 4px); z-index: 6; width: 180px; padding: 5px; border: 1px solid #dfe6de; border-radius: 11px; background: #fff; box-shadow: 0 10px 26px #173c3018; }
 .ke-group-panel .ke-decision-actions-menu button { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 38px; margin: 0; padding: 8px 10px; border: 0; border-radius: 7px; color: #173c30; background: transparent; box-shadow: none; text-align: left; font-size: 13px; }
