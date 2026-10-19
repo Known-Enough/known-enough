@@ -1,0 +1,44 @@
+{
+  "result": "ACCOUNT_READ_STABILITY_REPAIR_PUBLISHED",
+  "recordedAt": "2026-10-19T21:46:40.938523+00:00",
+  "runtimeSourceSha": "9569a82eb370032c01d00ea518a053438aa85b44",
+  "apiSha256": "54a4c508aba2a9ee7968b47db45e5c9375780aa1076abff030413fe45204de61",
+  "workerSha256": "b6da4204e2e29c1f644dbeb3b388974eed15eb9344d95c80e80bffa6870f1e8c",
+  "frontend": "UNCHANGED_AMPLIFY_150",
+  "runnerScriptSha256": "b38f0a359fce1925a38c464fbc55df3c70fb3338a71535b973659d663f8a01e2",
+  "workflows": {
+    "preflight": 39311428051,
+    "pauseSchedule": 39311527026,
+    "apiAndWorker": 39311668948,
+    "restoreSchedule": 39329850471
+  },
+  "admission": {
+    "result": "CONTROL_READBACK_PASS",
+    "enabled": true,
+    "totals": "UNCHANGED_DURING_CUTOVER"
+  },
+  "schedule": {
+    "result": "WORKER_SCHEDULE_ACTIVATION_PASS",
+    "state": "ENABLED",
+    "matchingEmptySummaries": 1,
+    "paidDispatchReported": 0
+  },
+  "staticChecks": {
+    "typescript": "PASS",
+    "changedSourceEslint": "PASS",
+    "runnerSyntax": "PASS",
+    "diagnosticReaderPythonAst": "PASS",
+    "whitespace": "PASS",
+    "nativePackageCompilation": "PASS_IN_RELEASE"
+  },
+  "tests": "NOT_EXECUTED_BY_USER_DIRECTION",
+  "liveParticipantActions": 0,
+  "providerRequests": 0,
+  "iamChanges": 0,
+  "newCloudResources": 0,
+  "environment": "UNCHANGED",
+  "migration": "UNCHANGED",
+  "acceptance": "PENDING_LIVE_E2E03",
+  "scope": "Bounded classified activation read recovery, rejected cache eviction, correlated safe read diagnostics, catalog-only bounded runner bodies/navigation and bounded command acknowledgment reads. No write replay or authority relaxation.",
+  "observation": "Restored existing schedule and observed one normal empty worker tick; no product test dispatched."
+}

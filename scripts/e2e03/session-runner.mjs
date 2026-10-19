@@ -327,7 +327,7 @@ export async function serve(options, recorder) {
       mark(actor, 'dispatch-save-draft-once'); await page.getByRole('button', { name: 'Save draft', exact: true }).click();
       const result = await response; await settle(user);
       if (!result.ok()) throw new Error('DRAFT_HTTP_' + result.status());
-      const body = await result.json(); fixture.draftId = body.draft?.id; persistFixture();
+      const body = await readResponseJson(result); fixture.draftId = body.draft?.id; persistFixture();
       if (!fixture.draftId) throw new Error('MISSING_DRAFT_ACK');
       await page.getByText('Draft saved', { exact: true }).waitFor({ state: 'visible' });
       return { status: result.status(), draftAcknowledged: true, uiSaved: true };
@@ -341,7 +341,7 @@ export async function serve(options, recorder) {
       mark(actor, 'create-manual-decision-once');
       await page.getByRole('button', { name: 'Create decision', exact: true }).click();
       const result = await response;
-      let body = {}; try { body = await result.json(); } catch { /* status remains evidence */ }
+      let body = {}; try { body = await readResponseJson(result); } catch { /* status remains evidence */ }
       if (!result.ok()) {
         const error = new Error('DECISION_CREATE_HTTP_' + result.status());
         error.domain = 'APP_HTTP'; error.status = result.status(); error.route = safeRoute(result.url());
@@ -381,7 +381,7 @@ export async function serve(options, recorder) {
       response.catch(() => {});
       mark(actor, 'save-private-answer-once');
       await page.getByRole('button', { name: 'Save answers', exact: true }).click();
-      const result = await response; let body = {}; try { body = await result.json(); } catch { /* status remains evidence */ }
+      const result = await response; let body = {}; try { body = await readResponseJson(result); } catch { /* status remains evidence */ }
       if (!result.ok()) {
         const error = new Error('PRIVATE_ANSWER_HTTP_' + result.status());
         error.domain = 'APP_HTTP'; error.status = result.status(); error.route = safeRoute(result.url());

@@ -1,7 +1,7 @@
 # E2E03 — Cheap, focused regression check
 
 
-**Account-read/runner stability repair CODE_READY:** bounded classified read-conflict recovery, failed-cache eviction, correlated safe cancellation diagnostics and bounded catalog-only runner reads. No new app tests or AI calls. Compatible publication pending; [repair](../../../../review-artifacts/E2E03/account-read-stability-repair.md).
+**Account-read/runner stability repair PUBLISHED / repair claim released:** runtime source `9569a82`, API `54a4c508`, worker `b6da4204`; admission and the prior schedule restored ENABLED. Bounded classified read-conflict recovery, failed-cache eviction, correlated safe cancellation diagnostics, catalog-only bounded runner reads/navigation and bounded command acknowledgment reads. Static/native compilation checks passed; no app tests or AI calls. E2E03 live acceptance remains pending; [repair](../../../../review-artifacts/E2E03/account-read-stability-repair.md), [publication](../../../../review-artifacts/E2E03/account-read-stability-publication.json).
 
 ## Latest attempt — 2026-10-19T19:03Z
 
