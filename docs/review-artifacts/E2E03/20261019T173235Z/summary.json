@@ -1,0 +1,19 @@
+{
+  "runId": "20261019T173235Z",
+  "state": "RUNNING",
+  "startedAt": "2026-10-19T17:32:58.745Z",
+  "endedAt": null,
+  "cases": {
+    "01": "NOT_RUN",
+    "02": "NOT_RUN",
+    "03": "NOT_RUN"
+  },
+  "lastConfirmedAction": null,
+  "inFlightAction": null,
+  "observedRequests": {
+    "outcome": 0,
+    "assistant": 0
+  },
+  "error": null,
+  "lastProgressAt": "2026-10-19T17:32:58.745Z"
+}

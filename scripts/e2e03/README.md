@@ -1,0 +1,9 @@
+# E2E03 persistent session runner
+
+This small runner keeps U1 and U2 in separate browser contexts and reuses their live pages. It never exports authentication storage. HTTP evidence contains normalized paths/statuses, never bodies, headers or query strings. Each command persists an intent before dispatch and a result afterward; failures attempt a masked screenshot while the page is still open. Raw inspection/error files and fixture mapping stay in the separate private directory.
+
+From the repository, prepare a new run using `node scripts/e2e03/session-runner.mjs --prepare --evidence docs/review-artifacts/E2E03/<UTC>`. Publish that startup checkpoint before opening a browser. Then run with `--serve --evidence <same-directory> --credentials <private-file> --private-dir <private-directory> --dependencies <checkout-with-node_modules>`.
+
+The process accepts one JSON command per input line, for example `{"actor":"U1","operation":"login"}`. Complete U1/U2 login and `reconcile` before `open-group` or any form writes. `inspect` saves a private control inventory. `fill-draft` only edits the form; `save-draft` makes one explicit save. `close` shuts down the browser. No command is automatically retried. Resume uncertain actions by read-only inspection, never by repeating them.
+
+Run the bounded regression checks with `node --test scripts/e2e03/session-runner.test.mjs`. They cover the actual Playwright Response shape, identifier-safe networking evidence, and timeout evidence persisted before page closure. The 2026-10-19 timeout's confirmed cause was calling nonexistent `response.method()` inside a catch-all predicate that always returned false. This harness fixes the predicate without changing the app or AWS.
