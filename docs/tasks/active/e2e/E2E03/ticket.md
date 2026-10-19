@@ -1,6 +1,6 @@
 # E2E03 — Cheap, focused regression check
 
-Status: READY / unclaimed. Task preparation only; no execution authorized by this document alone in the current A chat. The existing user-directed testing worker may claim this task through normal intake under standing project authority. Preserve any genuinely active claim.
+Status: READY / unclaimed. Creating this task starts no run. B may claim it at the next genuine idle intake under existing standing testing authority; no new routine approval is needed. This A chat remains documentation-only/no tests. Preserve any genuinely active claim.
 
 ## Goal and previous evidence
 
@@ -76,4 +76,4 @@ Report only:
 
 Update this ticket and the E2E index with observed results/source boundaries, publish the compact report through the worker's authorized repository workflow, and release the claim. No unrelated documentation rewrite. If positively owned work is settled, remove just the newly created synthetic fixture through the normal app; if any outcome is uncertain, retain it and name the next safe action. No broad cleanup or new support/email task.
 
-Task reporting is COMPLETE once the two required cases are attempted and honestly reported, even if blocked; **product PASS requires both to pass**. Optional 03 cannot substitute for either required case. No whole-project reliability percentage or full-suite PASS is implied.
+Close the bounded run and publish its honest report after the two required cases are attempted. Mark E2E03 DONE only if both required cases PASS. Otherwise record FAIL/BLOCKED, the exact follow-up and release the claim; do not keep debugging or rerunning inside this task. Optional 03 cannot substitute for either required case. No whole-project reliability percentage or full-suite PASS is implied.
