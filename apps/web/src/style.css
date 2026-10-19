@@ -1799,3 +1799,18 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 .ke-group-filter { flex-wrap: wrap; }
 .ke-group-filter button.ke-hidden-groups-toggle { min-height: 32px; margin: 0; padding: 6px 9px; font-size: 11px; white-space: nowrap; }
 .ke-hidden-group-label { display: inline-block; margin-left: 8px; font-size: 10px; font-weight: 400; opacity: .65; }
+
+/* Consistent member cards; override generic filled button styling in both themes. */
+.ke-members-panel .ke-member-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); align-items: stretch; gap: 12px; list-style: none; }
+.ke-members-panel .ke-member-list > li { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 6px; min-width: 0; padding: 0; border: 0; }
+.ke-home .ke-members-panel button.ke-member-profile-trigger { display: flex; align-items: center; gap: 12px; box-sizing: border-box; flex: none; width: 100%; height: 84px; min-height: 84px; margin: 0; padding: 12px 14px; border: 1px solid #dce5dc; border-radius: 12px; background: #fff; color: #173c30; text-align: left; box-shadow: none; transition: background .15s, border-color .15s; }
+.ke-home .ke-members-panel button.ke-member-profile-trigger:hover { background: #f1f6ef; border-color: #aec4b1; color: #173c30; }
+.ke-members-panel .ke-member-profile-trigger .ke-member-avatar { box-sizing: border-box; flex: 0 0 40px; width: 40px; height: 40px; min-width: 40px; min-height: 40px; overflow: hidden; background: #eff4ef; border-color: #dce5dc; color: #27533f; }
+.ke-home .ke-members-panel .ke-member-profile-trigger .ke-member-name { min-width: 0; max-height: 58px; overflow: hidden; color: #173c30; font-size: 14px; line-height: 1.35; }
+.ke-home .ke-members-panel .ke-member-profile-trigger .ke-member-role { color: #53675a; font-size: 12px; }
+.ke-members-panel .ke-member-list button.ke-remove-member { align-self: flex-start; max-width: 100%; min-height: 30px; margin: 0; padding: 5px 7px; font-size: 11px; overflow-wrap: anywhere; }
+:root[data-theme="dark"] .ke-home .ke-members-panel button.ke-member-profile-trigger { background: #1c2b21; border-color: #405244; color: #e0eee4; }
+:root[data-theme="dark"] .ke-home .ke-members-panel button.ke-member-profile-trigger:hover { background: #293d30; border-color: #68856f; color: #e0eee4; }
+:root[data-theme="dark"] .ke-home .ke-members-panel .ke-member-profile-trigger .ke-member-name { color: #e0eee4; }
+:root[data-theme="dark"] .ke-home .ke-members-panel .ke-member-profile-trigger .ke-member-role { color: #b7cabc; }
+:root[data-theme="dark"] .ke-members-panel .ke-member-profile-trigger .ke-member-avatar { background: #304536; border-color: #55705d; color: #deeee1; }
