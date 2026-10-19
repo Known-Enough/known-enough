@@ -156,7 +156,7 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
     let emailConflict = false;
     const observe = (response: Response) => {
       httpStatus = response.status;
-      const id = response.headers.get('apigw-requestid') ?? response.headers.get('x-amzn-requestid');
+      const id = response.headers.get('x-request-id') ?? response.headers.get('apigw-requestid') ?? response.headers.get('x-amzn-requestid');
       reference = id && /^[A-Za-z0-9_-]{8,80}$/.test(id) ? id : null;
     };
     const diagnostic = (error: unknown) => {

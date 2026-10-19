@@ -1,6 +1,6 @@
 # E2E03 browser read recovery and early failure repair
 
-Status: CODE_READY; publication pending. User explicitly requests repair with no tests. The historical [21:52Z run](20261019T215250Z/report.md) remains BLOCKED. Its U2 answer is acknowledged and must not be submitted again before a read-only owner check.
+Status: API/worker PUBLISHED at `1117433`; frontend publication and prior schedule restoration pending. User explicitly requests repair with no tests. The historical [21:52Z run](20261019T215250Z/report.md) remains BLOCKED. Its U2 answer is acknowledged and must not be submitted again before a read-only owner check.
 
 ## Evidence
 
@@ -11,6 +11,7 @@ The browser recorded network-level failures, rather than readable HTTP error res
 - All early API fallbacks share exact configured-origin CORS, no-store, a fresh opaque UUID and a safe stage/error-category diagnostic. No wildcard origin, raw error message, request body, token or identity is logged. Signup trigger failures remain sanitized.
 - The ephemeral loopback HTTP bridge sends `Connection: close` so its one-invocation listener does not reuse pooled sockets across close/reopen boundaries. Historical pooled-socket causation is unproven; this removes that transport hazard. Retry-After/reference headers survive the bridge.
 - The browser repeats a GET at most once for a transport TypeError or HTTP502/503/504, using the original deadline and cancellation signal. It honors bounded numeric Retry-After, refuses a longer/date delay and rechecks session expiry. POSTs, approvals, consent, AI jobs and other writes are never replayed. No snapshot/cache fallback substitutes for current server data.
+- Account and decision load errors display the server’s validated opaque reference when available.
 - The bounded diagnostics reader includes early gateway/source failures. The E2E03 login wait tolerates the browser's first recoverable service response while retaining all HTTP evidence.
 
 ## Verification boundary

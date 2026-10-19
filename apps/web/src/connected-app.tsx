@@ -12,6 +12,11 @@ import { ConnectedDecision } from './connected-decision';
 import { backgroundNegotiationAvailable, pollBackgroundDecision, type BackgroundTarget } from './background-negotiation';
 import { readAppView, appViewSearch, saveIntendedView, takeIntendedView, type AppView } from './navigation';
 let callbackCompletion: ReturnType<typeof finishCognitoSignIn> | null = null;
+function decisionReadFailure(response: Response): Error & { status: number; reference?: string } {
+  const reference = response.headers.get('x-request-id');
+  return Object.assign(new Error('unavailable'), { status: response.status,
+    ...(reference && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(reference) ? { reference } : {}) });
+}
 export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
   const direct = useMemo(()=>createDirectCognito(config),[config]);
   const [session, setSession] = useState<CognitoSession | null>(() => readCognitoSession());
@@ -95,12 +100,12 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     setTarget(null); setBusy(true); setStatus(''); if (!preserve) { setSnapshot(null); setOwner(null); }
     try {
       const pub = await cognitoApiFetch(config, session, `/decisions/${id}/public`, expire, { signal: controller.signal });
-      if (!pub.ok) throw Object.assign(new Error('unavailable'), { status: pub.status }); const value = KE.PublicDecisionSnapshot.parse(await pub.json());
+      if (!pub.ok) throw decisionReadFailure(pub); const value = KE.PublicDecisionSnapshot.parse(await pub.json());
       if (value.frame.decisionId !== id) throw new Error('wrong decision');
       let privateValue: KE.OwnerDecisionSnapshot | null = null;
       if (session.kind === 'participant') {
         const response = await cognitoApiFetch(config, session, `/decisions/${id}/me`, expire, { signal: controller.signal });
-        if (!response.ok) throw Object.assign(new Error('unavailable'), { status: response.status }); privateValue = KE.OwnerDecisionSnapshot.parse(await response.json());
+        if (!response.ok) throw decisionReadFailure(response); privateValue = KE.OwnerDecisionSnapshot.parse(await response.json());
         if (privateValue.publicSnapshot.frame.decisionId !== id) throw new Error('wrong decision');
       }
       let label: string | undefined;
@@ -115,7 +120,10 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
       if (available && privateValue && value.status === 'REASONING') setTarget({ decisionId: id, contextToken: value.contextToken,
         semanticVersion: value.semanticVersion, ownerParticipantId: privateValue.ownerParticipantId, expiresAt: new Date(Date.now() + 120000).toISOString() });
     } catch (error) { if (epoch.current === current) {
-      setSnapshot(null); setOwner(null); setStatus('The shared decision is unavailable. Check your session or try again.');
+      const reference = error && typeof error === 'object' && 'reference' in error && typeof error.reference === 'string'
+        && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(error.reference) ? error.reference : null;
+      setSnapshot(null); setOwner(null); setStatus('The shared decision is unavailable. Check your session or try again.'
+        + (reference ? ` Reference: ${reference}.` : ''));
       if (session.kind === 'participant' && error && typeof error === 'object' && 'status' in error && error.status === 403) {
         try { const response = await cognitoApiFetch(config, session, '/account', expire, { signal: controller.signal });
           const value = Groups.AccountSnapshot.parse((await response.json()).account);
