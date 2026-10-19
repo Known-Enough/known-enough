@@ -431,7 +431,9 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         if (request.method === 'GET') {
           const snapshot = decision[2] === 'public' ? await application.getPublicSnapshot(principal, decision[1]!)
             : await application.getOwnerSnapshot(principal, decision[1]!);
-          send(response, 200, snapshot, decision[2] === 'public' && requestNegotiation !== undefined); return;
+          // Both authenticated projections advertise the same installed queue
+          // capability; participants need no second public read to discover it.
+          send(response, 200, snapshot, requestNegotiation !== undefined); return;
         }
         // Preserve the existing pre-body scope check; execute rechecks and joins guards at the actual commit.
         await application.getPublicSnapshot(principal, decision[1]!);

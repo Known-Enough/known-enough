@@ -26,19 +26,15 @@ export async function submitBackgroundRequest(api: DecisionApi, command: Backgro
 }
 export interface BackgroundTarget { decisionId: string; contextToken: string; semanticVersion: number; ownerParticipantId: string; expiresAt: string }
 export async function readBackgroundDecision(api: DecisionApi, target: BackgroundTarget, signal: AbortSignal) {
-  const publicResponse = await api(`/decisions/${target.decisionId}/public`, { signal });
-  if (!publicResponse.ok) throw new Error('BACKGROUND_READ_UNAVAILABLE');
-  const snapshot = KE.PublicDecisionSnapshot.parse(await publicResponse.json());
-  if (signal.aborted) throw new Error('BACKGROUND_CANCELLED');
-  if (snapshot.frame.decisionId !== target.decisionId || snapshot.contextToken !== target.contextToken
-    || snapshot.semanticVersion !== target.semanticVersion) throw new Error('BACKGROUND_CONTEXT_CHANGED');
   const response = await api(`/decisions/${target.decisionId}/me`, { signal });
   if (!response.ok) throw new Error('BACKGROUND_READ_UNAVAILABLE');
   const owner = KE.OwnerDecisionSnapshot.parse(await response.json());
   if (signal.aborted) throw new Error('BACKGROUND_CANCELLED');
+  // One authorized owner read contains a coherent shared/own result. Comparing
+  // two separate reads could reject valid progress occurring between them.
   if (owner.ownerParticipantId !== target.ownerParticipantId || owner.publicSnapshot.frame.decisionId !== target.decisionId
-    || owner.publicSnapshot.contextToken !== snapshot.contextToken || owner.publicSnapshot.semanticVersion !== snapshot.semanticVersion
-    || owner.publicSnapshot.publicRevision !== snapshot.publicRevision) throw new Error('BACKGROUND_CONTEXT_CHANGED');
+    || owner.publicSnapshot.contextToken !== target.contextToken || owner.publicSnapshot.semanticVersion !== target.semanticVersion)
+    throw new Error('BACKGROUND_CONTEXT_CHANGED');
   return { snapshot: owner.publicSnapshot, owner };
 }
 function pause(signal: AbortSignal) {

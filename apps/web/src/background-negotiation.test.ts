@@ -45,17 +45,17 @@ describe('background negotiation browser transport', () => {
     const api = vi.fn(async (path: string, init?: RequestInit) => {
       expect(init?.method).toBeUndefined();
       const snapshot = KE.PublicDecisionSnapshot.parse({ ...f.snapshot, status: rounds < 1 ? 'REASONING' : f.snapshot.status, currentProposal: rounds < 1 ? null : f.snapshot.currentProposal });
-      if (path.endsWith('/public')) return Response.json(snapshot);
+      expect(path).toBe(`/decisions/${f.target.decisionId}/me`);
       rounds++; return Response.json({ ...f.owner, publicSnapshot: snapshot, privateProposalValues: snapshot.status === 'REASONING' ? null : f.owner.privateProposalValues });
     });
     const accept = vi.fn();
     expect(await pollBackgroundDecision({ target: f.target, api, accept, signal: new AbortController().signal, now: () => 0, wait: async () => {} })).toBe('SETTLED');
-    expect(accept).toHaveBeenCalledTimes(2); expect(api).toHaveBeenCalledTimes(4);
-    expect(api.mock.calls.every(([path]) => path.endsWith('/public') || path.endsWith('/me'))).toBe(true);
+    expect(accept).toHaveBeenCalledTimes(2); expect(api).toHaveBeenCalledTimes(2);
+    expect(api.mock.calls.every(([path]) => path.endsWith('/me'))).toBe(true);
   });
   it('stops on stale context or a foreign owner without rendering that result', async () => {
     const f = await fixture(); const accept = vi.fn();
-    const stale = async () => Response.json(f.snapshot);
+    const stale = async () => Response.json(f.owner);
     expect(await pollBackgroundDecision({ target: { ...f.target, semanticVersion: f.snapshot.semanticVersion + 1 }, api: stale, accept, signal: new AbortController().signal, now: () => 0, wait: async () => {} })).toBe('CONTEXT_CHANGED');
     const foreign = async (path: string) => Response.json(path.endsWith('/public') ? f.snapshot : f.owner);
     expect(await pollBackgroundDecision({ target: { ...f.target, ownerParticipantId: 'other-owner' }, api: foreign, accept, signal: new AbortController().signal, now: () => 0, wait: async () => {} })).toBe('CONTEXT_CHANGED');

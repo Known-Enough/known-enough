@@ -138,12 +138,14 @@ export class Recorder {
     } catch (error) {
       // Capture before browser/context shutdown, even when authentication failed.
       let screenshot = 'PAGE_UNAVAILABLE';
-      const captures = fs.readdirSync(this.directory).filter(file => file.endsWith('.png')).length;
+      const currentCase = this.summary.cases['01'] !== 'PASS' ? '01' : this.summary.cases['02'] !== 'PASS' ? '02' : '03';
+      const prefix = `case${currentCase}-`;
+      const captures = fs.readdirSync(this.directory).filter(file => file.startsWith(prefix) && file.endsWith('.png')).length;
       if (page && !page.isClosed() && captures < 2) {
-        const file = action.replace(/[^a-zA-Z0-9._-]/g, '_') + '-failure.png';
+        const file = prefix + action.replace(/[^a-zA-Z0-9._-]/g, '_') + '-failure.png';
         try {
           await page.screenshot({ path: path.join(this.directory, file), timeout: 5000,
-            mask: [page.locator('input, textarea, .ke-group-list, [class*="avatar"], .ke-response-progress li')],
+            mask: [page.locator('input, textarea, .ke-group-list, [class*="avatar"], .ke-response-progress li, .ke-saved-answer-topics, .ke-outcome-private, .ke-outcome-approvals li')],
             animations: 'disabled' });
           screenshot = file;
         } catch (captureError) { screenshot = 'CAPTURE_FAILED:' + captureError.name; }
@@ -236,6 +238,14 @@ export async function serve(options, recorder) {
         actor, route, method: request.method(), code: request.failure()?.errorText || 'UNKNOWN' });
     });
     page.on('pageerror', error => recorder.event('PAGE_ERROR', { actor, code: error.name }));
+    page.on('console', message => {
+      if (!['error', 'warning'].includes(message.type())) return;
+      const text = message.text();
+      const code = /CORS policy|Access-Control-Allow-Origin|CORS request/i.test(text) ? 'CORS_BLOCKED'
+        : /Failed to load resource.*429|Too Many Requests/i.test(text) ? 'RATE_LIMIT_REPORTED' : null;
+      if (code) recorder.event('BROWSER_TRANSPORT_DIAGNOSTIC', { actor, code });
+      // Never export console text, URLs, headers or private application values.
+    });
     page.on('close', () => recorder.event('PAGE_CLOSED', { actor }));
   }
   const mark = (actor, stage) => recorder.event('STEP', { actor, stage });

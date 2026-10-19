@@ -99,26 +99,32 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     abort.current?.abort(); const controller = new AbortController(); abort.current = controller;
     setTarget(null); setBusy(true); setStatus(''); if (!preserve) { setSnapshot(null); setOwner(null); }
     try {
-      const pub = await cognitoApiFetch(config, session, `/decisions/${id}/public`, expire, { signal: controller.signal });
-      if (!pub.ok) throw decisionReadFailure(pub); const value = KE.PublicDecisionSnapshot.parse(await pub.json());
-      if (value.frame.decisionId !== id) throw new Error('wrong decision');
+      // The authenticated owner response already contains the atomic current
+      // shared snapshot. Do not make participant loading depend on a second read.
+      const response = await cognitoApiFetch(config, session, `/decisions/${id}/${session.kind === 'participant' ? 'me' : 'public'}`, expire, { signal: controller.signal });
+      if (!response.ok) throw decisionReadFailure(response);
+      const payload: unknown = await response.json();
       let privateValue: KE.OwnerDecisionSnapshot | null = null;
-      if (session.kind === 'participant') {
-        const response = await cognitoApiFetch(config, session, `/decisions/${id}/me`, expire, { signal: controller.signal });
-        if (!response.ok) throw decisionReadFailure(response); privateValue = KE.OwnerDecisionSnapshot.parse(await response.json());
-        if (privateValue.publicSnapshot.frame.decisionId !== id) throw new Error('wrong decision');
-      }
-      let label: string | undefined;
-      if (view.kind === 'decision' && view.groupId && session.kind === 'participant') {
-        try { const response = await cognitoApiFetch(config, session, `/groups/${view.groupId}`, expire, { signal: controller.signal });
-          if (response.ok) label = Groups.GroupSnapshot.parse((await response.json()).group).decisions.find(item => item.id === id)?.title;
-        } catch { /* A cosmetic label must not prevent decision recovery. */ }
-      }
+      if (session.kind === 'participant') privateValue = KE.OwnerDecisionSnapshot.parse(payload);
+      const value = privateValue?.publicSnapshot ?? KE.PublicDecisionSnapshot.parse(payload);
+      if (value.frame.decisionId !== id) throw new Error('wrong decision');
       if (epoch.current !== current || selection.current.id !== id || selection.current.token !== token) return;
-      setDecisionTitle({ id, title: label ?? value.frame.title });
-      setSnapshot(privateValue?.publicSnapshot ?? value); setOwner(privateValue); const available = backgroundNegotiationAvailable(pub); setBackground(available);
+      setDecisionTitle({ id, title: value.frame.title });
+      setSnapshot(value); setOwner(privateValue); const available = backgroundNegotiationAvailable(response); setBackground(available);
       if (available && privateValue && value.status === 'REASONING') setTarget({ decisionId: id, contextToken: value.contextToken,
         semanticVersion: value.semanticVersion, ownerParticipantId: privateValue.ownerParticipantId, expiresAt: new Date(Date.now() + 120000).toISOString() });
+      if (view.groupId && session.kind === 'participant') {
+        // A renamed list title is cosmetic: publish the decision immediately,
+        // then resolve its label with a short cancellable read, without busy UI.
+        void cognitoApiFetch(config, session, `/groups/${view.groupId}`, expire, {
+          signal: AbortSignal.any([controller.signal, AbortSignal.timeout(5000)]),
+        }).then(async result => {
+          if (!result.ok) return;
+          const label = Groups.GroupSnapshot.parse((await result.json()).group).decisions.find(item => item.id === id)?.title;
+          if (label && epoch.current === current && selection.current.id === id && selection.current.token === token)
+            setDecisionTitle({ id, title: label });
+        }).catch(() => { /* Keep the current validated frame title. */ });
+      }
     } catch (error) { if (epoch.current === current) {
       const reference = error && typeof error === 'object' && 'reference' in error && typeof error.reference === 'string'
         && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(error.reference) ? error.reference : null;
