@@ -2,9 +2,9 @@
   "runId": "20261019T170618Z",
   "state": "RUNNING",
   "startedAt": "2026-10-19T17:06:18Z",
-  "lastProgressAt": "2026-10-19T17:06:22Z",
+  "lastProgressAt": "2026-10-19T17:06:24Z",
   "endedAt": null,
-  "lastConfirmedAction": "runner.local-playwright",
+  "lastConfirmedAction": "checkpoint.preflight",
   "inFlightAction": null,
   "cases": {"01": "NOT_RUN", "02": "NOT_RUN", "03": "NOT_RUN"},
   "plannedRequests": {"outcome": 1, "assistant": 1},
@@ -13,6 +13,6 @@
   "providerUsage": {"calls": null, "tokens": null, "availability": "NOT_READ"},
   "evidence": ["events.jsonl", "preflight.json"],
   "error": {"domain": "AUTOMATION", "code": "SANDBOX_CONTEXT_UNAVAILABLE", "state": "RECOVERED", "detail": "Remote Node REPL was not attached; local Playwright is available."},
-  "nextSafeAction": "Publish this updated preflight checkpoint, then perform logged read-only browser reconciliation.",
-  "publication": {"lastConfirmedUrl": "https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/E2E03/20261019T170618Z/report.md", "unpublishedLocalChanges": true}
+  "nextSafeAction": "Sign in as U1 and verify access; then inspect the old fixture read-only.",
+  "publication": {"lastConfirmedUrl": "https://github.com/Known-Enough/known-enough/blob/50e6a4d9c917c36c8ac3a9f4e8388d7c00b70663/docs/review-artifacts/E2E03/20261019T170618Z/report.md", "unpublishedLocalChanges": true}
 }
