@@ -1,19 +1,44 @@
 {
   "runId": "20261019T190351Z",
-  "state": "RUNNING",
+  "state": "BLOCKED",
   "startedAt": "2026-10-19T19:03:51.323Z",
-  "endedAt": null,
+  "endedAt": "2026-10-19T19:06:50.190Z",
   "cases": {
-    "01": "NOT_RUN",
+    "01": "BLOCKED",
     "02": "NOT_RUN",
     "03": "NOT_RUN"
   },
-  "lastConfirmedAction": null,
+  "lastConfirmedAction": "u2.refresh",
   "inFlightAction": null,
   "observedRequests": {
     "outcome": 0,
     "assistant": 0
   },
-  "error": null,
-  "lastProgressAt": "2026-10-19T19:03:51.328Z"
+  "error": {
+    "code": "APP_HTTP_503",
+    "domain": "APP_HTTP",
+    "stage": "u2.login",
+    "route": "/account",
+    "confirmedAt": "2026-10-19T19:04:19.213Z"
+  },
+  "lastProgressAt": "2026-10-19T19:06:50.190Z",
+  "lastError": {
+    "code": "APP_HTTP_503",
+    "domain": "APP_HTTP",
+    "stage": "u2.login",
+    "route": "/account",
+    "confirmedAt": "2026-10-19T19:04:19.213Z"
+  },
+  "appWriteRequests": 0,
+  "finalReason": "U2 account 503; one read-only refresh returned groups after 139779ms; runner exited before reconciliation or answer-state read.",
+  "logReadback": {
+    "workflowRun": 39308288904,
+    "result": "DRAFT_DIAGNOSTICS_READ",
+    "cause": "SESSION_STORAGE_UNAVAILABLE",
+    "underlying": "TransactionCanceledException",
+    "correlation": "WINDOW_ONLY",
+    "subcode": "NOT_AVAILABLE",
+    "awsWrites": 0,
+    "providerCalls": 0
+  }
 }

@@ -3041,3 +3041,5 @@ FF09 CODE_READY/B — fictional guide embedded only in creation dialog, form/req
 
 
 2026-10-19 E2E03/A resumed one-run claim RELEASED after first failure. Existing fixture reconciled; account view error followed U1 navigation with intermittent `/account` and `/account/profile` 503s. No new app writes or answers. Root cause unknown. Preserve fixture; investigate account reload path before another run. [Report](review-artifacts/E2E03/20261019T181400Z/report.md).
+
+2026-10-19T19:07:30Z — A user-requested E2E03 latest-release check RELEASED / BLOCKED. Used the existing two-account runner and fixture mapping; no new group/decision. U1 login passed; U2 `/account` HTTP503 (`/account/profile`200). One read-only refresh returned six groups after139779ms; runner exited before reconcile or U2 answer-state. Bounded sanitized server log read `SESSION_STORAGE_UNAVAILABLE` / `TransactionCanceledException`, time-window correlation only, subreason unavailable. No app writes/provider calls. Independent-answer repair remains unverified. [Report](review-artifacts/E2E03/20261019T190351Z/report.md).

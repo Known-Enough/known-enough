@@ -1,8 +1,6 @@
 # E2E03 — Small regression check
 
-**Independent-answer repair PUBLISHED / manual acceptance pending.** Source `eb66a97` is installed in the frontend, API and worker. Saves now use an owner/choice/proposal-bound marker rather than rejecting ordinary peer progress. Strict real-change/approval/final-state checks remain. Static checks passed; no product tests run. [Repair](../../../../review-artifacts/E2E03/independent-answer-save-repair.md).
-
-**BLOCKED / claim released.** In latest run `20261019T183505Z`, both users opened the existing decision and all observed account/group reads returned 200. U1 saved successfully. U2 received one `409 STALE_CONTEXT`; likely stale page state after U1's save, but the exact reason is unverified. A follow-up read-only refresh timed out in the runner. No outcome or assistant request was made, and U2's save was not retried. [Latest report](../../../../review-artifacts/E2E03/20261019T183505Z/report.md); [previous account-failure run](../../../../review-artifacts/E2E03/20261019T181400Z/report.md); [runner instructions](../../../../../scripts/e2e03/README.md).
+**BLOCKED / claim released after the 2026-10-19T19:03Z check.** The latest independent-answer repair is deployed, but this run could not reach the save scenario: U2's `/account` returned 503, with a read-only refresh taking about 140 seconds. A bounded log read found `SESSION_STORAGE_UNAVAILABLE` / `TransactionCanceledException` in the same time window; exact request correlation and cancellation subreason are unavailable. No app writes or AI requests occurred. The private-answer repair remains unverified. [Latest report](../../../../review-artifacts/E2E03/20261019T190351Z/report.md); [release](../../../../review-artifacts/E2E03/independent-answer-save-repair.md).
 
 [Steps, limits and reporting](ticket.md). Reuse the existing worker and private synthetic credentials. Task creation starts no tests, agents, chats or automation.
 
