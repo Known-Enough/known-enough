@@ -1,6 +1,8 @@
+# E2E03 — Cheap, focused regression check
+
 Status: **BLOCKED / claim released** after the user-requested rerun `20261019T174036Z`. U1 signed in and loaded six groups; U2 hit `GET /account` HTTP 503 (while `/account/profile` returned 200). No decision was created and no app writes/provider calls/email requests occurred. Cases 01–03 remain NOT_RUN. The runner was corrected to report shared-body HTTP failures accurately; focused checks pass 4/4. The service cause of `/account` 503 is unknown. [Latest report](../../../../review-artifacts/E2E03/20261019T174036Z/report.md); [earlier runner repair](../../../../review-artifacts/E2E03/20261019T173235Z/report.md); [runner](../../../../../scripts/e2e03/README.md).
 
-**Next step:** investigate the authenticated `/account` 503, then start a fresh run only after the service path is corrected. Do not repeat sign-in in the blocked run.
+**Account-load repair CODE_READY — direct user request, no tests:** A added a fresh fenced account-read fallback when optional username-directory maintenance fails, plus safe request-correlated diagnostics. The historical 503 cause remains unconfirmed. Code is not deployed or tested; [repair handoff](../../../../review-artifacts/E2E03/account-load-repair.md). A claim released. No further E2E execution is authorized by this repair checkpoint.
 
 
 ## Goal and previous evidence

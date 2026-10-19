@@ -289,13 +289,27 @@ export function createPartitionGroupSession(transport: PartitionTransport,
         }, partitionIO(limits));
       });
     },
-    status(principal: TrustedPrincipal | null) {
+    status(principal: TrustedPrincipal | null, diagnosticRequestId?: string) {
       return safe(async () => {
         const who = participant(principal); const io = partitionIO(limits);
-        return repository.transaction({ accountSubjects: [who], ensureUsername: true }, state => {
+        const snapshot = (state: Groups.GroupState) => {
           const account = state.accounts.find(account => account.subject === who);
           return account ? Groups.AccountSnapshot.parse({ status: account.status, displayName: account.displayName, version: account.version }) : null;
-        }, io);
+        };
+        try {
+          return await repository.transaction({ accountSubjects: [who], ensureUsername: true }, snapshot, io);
+        } catch (error) {
+          if (error instanceof KnownEnoughApplicationError) throw error;
+          // Alias repair is derived discovery maintenance, not account admission.
+          // An unavailable or conflicting alias must not lock out its owner.
+          // Keep the original deadline and re-read current account authority;
+          // never repeat the uncertain alias write or replace a foreign claim.
+          try { console.warn(JSON.stringify({ event: 'known-enough.account-lookup-repair-deferred',
+            code: error instanceof PartitionStorageError || error instanceof PartitionSessionError ? error.code : 'SESSION_STORAGE_UNAVAILABLE',
+            ...(diagnosticRequestId && id.safeParse(diagnosticRequestId).success ? { requestId: diagnosticRequestId } : {}) })); }
+          catch { /* Diagnostics cannot replace the authoritative account read. */ }
+          return repository.transaction({ accountSubjects: [who] }, snapshot, io);
+        }
       });
     },
     invitations(principal: TrustedPrincipal | null) {

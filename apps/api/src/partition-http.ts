@@ -164,7 +164,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
     }
     if (active >= concurrency || authenticating >= concurrency) { send(response, 503, errorBody('RETRYABLE_SERVER_ERROR', requestId)); request.resume(); return; }
     active++; const requestStartedAt = Date.now(); let publicDraftRequest = false; let draftOperation: 'GENERATE' | 'EDIT' | 'CREATE' | undefined;
-    let privateAnswersRequest = false; let invitationRequest = false; let groupDeletionRequest = false;
+    let privateAnswersRequest = false; let invitationRequest = false; let groupDeletionRequest = false; let accountStatusRequest = false;
     const controller = new AbortController();
     const closed = () => { if (!response.writableEnded) controller.abort(); };
     request.once('aborted', closed); response.once('close', closed);
@@ -220,7 +220,8 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
           send(response, 200, { profile: await session.updateProfile(principal, raw, url.pathname.endsWith('/image')) }); return;
         }
         if (request.method === 'GET' && url.pathname === '/account') {
-          send(response, 200, { account: await session.status(principal) }); return;
+          accountStatusRequest = true;
+          send(response, 200, { account: await session.status(principal, requestId) }); return;
         }
         if (request.method === 'GET' && url.pathname === '/invitations') {
           send(response, 200, { invitations: await session.invitations(principal) }); return;
@@ -480,14 +481,15 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         }
         const code = error instanceof RepositoryCapacityError || (error instanceof PartitionSessionError && error.code === 'SESSION_CAPACITY') ? 'CAPACITY_EXCEEDED'
           : error instanceof KnownEnoughApplicationError ? error.code : 'RETRYABLE_SERVER_ERROR';
-        if (invitationRequest || groupDeletionRequest) { try {
+        if (accountStatusRequest || invitationRequest || groupDeletionRequest) { try {
           const causes: string[] = []; let cause: unknown = error;
           const allowed = new Set(['AccessDeniedException', 'ResourceNotFoundException', 'ThrottlingException',
             'TransactionCanceledException', 'TransactionConflictException', 'TimeoutError', 'AbortError']);
           for (let depth = 0; depth < 5 && cause instanceof Error; depth++, cause = cause.cause) {
             if (allowed.has(cause.name)) causes.push(cause.name);
           }
-          console.warn(JSON.stringify({ event: 'known-enough.group-failure', requestId, operation: groupDeletionRequest ? 'group.delete' : 'group.invite', code,
+          console.warn(JSON.stringify({ event: accountStatusRequest ? 'known-enough.account-failure' : 'known-enough.group-failure', requestId,
+            operation: accountStatusRequest ? 'account.status' : groupDeletionRequest ? 'group.delete' : 'group.invite', code,
             status: KE.DECISION_ERROR_HTTP_STATUS[code], elapsedMs: Date.now() - requestStartedAt,
             ...(error instanceof PartitionSessionError ? { sessionCode: error.code } : {}), causes }));
         } catch { /* Allowlisted categories only, without inputs, messages, stack traces or identities. */ } }
