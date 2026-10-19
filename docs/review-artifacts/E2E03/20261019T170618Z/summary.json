@@ -1,0 +1,18 @@
+{
+  "runId": "20261019T170618Z",
+  "state": "RUNNING",
+  "startedAt": "2026-10-19T17:06:18Z",
+  "lastProgressAt": "2026-10-19T17:06:18Z",
+  "endedAt": null,
+  "lastConfirmedAction": "run.start",
+  "inFlightAction": null,
+  "cases": {"01": "NOT_RUN", "02": "NOT_RUN", "03": "NOT_RUN"},
+  "plannedRequests": {"outcome": 1, "assistant": 1},
+  "observedRequests": {"outcome": 0, "assistant": 0},
+  "requestObservationComplete": true,
+  "providerUsage": {"calls": null, "tokens": null, "availability": "NOT_READ"},
+  "evidence": ["events.jsonl", "preflight.json"],
+  "error": null,
+  "nextSafeAction": "Publish this checkpoint; sign in as U1/U2 and read-only reconcile the previous shared group and any Friday activity before any write.",
+  "publication": {"lastConfirmedUrl": null, "unpublishedLocalChanges": true}
+}

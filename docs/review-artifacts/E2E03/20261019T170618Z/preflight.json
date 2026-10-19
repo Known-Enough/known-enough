@@ -1,0 +1,35 @@
+{
+  "run": "20261019T170618Z",
+  "observedAt": "2026-10-19T17:06:18Z",
+  "sourceCommit": "d93fe6d",
+  "credentials": {
+    "localFileAvailable": true,
+    "permissions": "0600",
+    "userCount": 2,
+    "userAliases": ["U1", "U2"],
+    "signIn": "NOT_YET_VERIFIED",
+    "approvedAccess": "NOT_YET_VERIFIED"
+  },
+  "lastKnownFrontend": {
+    "source": "49c460abbbdd69b149255472440a01f1782c6b4b",
+    "amplifyJob": "149",
+    "publicationRun": "39209992152",
+    "freshReadbackThisRun": false
+  },
+  "lastKnownBackend": {
+    "apiSha256": "912bb05a645eb86cb761b6dd9059a3d9aaa2f35aeed98e3a815229fa8b87374c",
+    "runtimeSource": "6082ba78c792e655b72dcc9171c18310c2285000",
+    "workerSha256": "6c4c94f8e752e0e9731cc61513d4ad3bf12121a9565ddd50d2bb165ee8d22c70",
+    "freshReadbackThisRun": false
+  },
+  "oldFixture": {
+    "groupId": "NOT_RECORDED",
+    "possibleDecision": "Friday activity",
+    "state": "UNRESOLVED",
+    "writeAllowed": false
+  },
+  "browserActions": 0,
+  "applicationRequests": 0,
+  "emailRequests": 0,
+  "providerCalls": 0
+}
