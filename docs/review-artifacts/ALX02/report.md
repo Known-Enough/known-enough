@@ -1,6 +1,8 @@
 # ALX02 — Saved group chat and private assistant
 
-Implementation is prepared for coordinated publication. Baseline: clean ff-only pull of main `1d45162`. No live deployment, participant action, AI probe, new IAM, agent, chat or automation was performed. Existing E2E02 documentation was preserved in a local stash, pulled safely, and restored with both shared histories.
+Published on 2026-10-19; [publication receipt](publication.json). Native API/worker source `4edb076` is installed with matching enabled admission and the original worker schedule restored ENABLED. The observed frontend is Amplify140/source `dd8fb8b`; ten public files match their published hashes, and chat/status route CORS and anonymous authentication checks pass. Authenticated manual chat and real-provider acceptance remain untested by this task.
+
+Implementation baseline: clean ff-only pull of main `1d45162`. Existing E2E02 documentation was preserved in a local stash, pulled safely, and restored with both shared histories. All 71 preserved handoff files and the dedicated browser spec are now published. No participant action, AI probe, new IAM, CloudShell, agent, chat or automation was performed during this task.
 
 ## Behavior
 
@@ -26,8 +28,18 @@ See [validation.json](validation.json) for exact results and current code hashes
 
 The full check is not green. Its failures are compared by full test name with a fresh `1d45162` checkout. Existing compact-decision browser failures were independently reproduced on that baseline as well. No full-suite or live-service acceptance is claimed.
 
-## Publication handoff
+## Publication evidence
 
-Publish the matching native API and worker together through the existing guarded coordinated release, declare the five authenticated chat/status and OPTIONS routes in `infra/zz/application-config.json`, then publish the matching frontend. Keep GET/POST authenticated with the current JWT integration; OPTIONS stays unauthenticated as in the existing application installer. Preserve the current native package, data, model authority, usage totals, unknown jobs and original worker schedule. Do not publish the new frontend against ALX01’s older API, or roll an older strict state reader over new chat data without a compatible package/backup. No new table, provider or IAM widening is needed by this implementation.
+The coordinated native release [39186651090](https://github.com/Known-Enough/known-enough/actions/runs/39186651090) verified API `502fb8cf` and worker `5b3519ae`, then rebound and restored empty matching admission without TOTAL writes. During the interruption, existing A frontend publications retained the ALX02 commit: [39198471205](https://github.com/Known-Enough/known-enough/actions/runs/39198471205) installed the five chat routes, and the observed [39199860877](https://github.com/Known-Enough/known-enough/actions/runs/39199860877) published Amplify140. Fresh ff-only intake preserved those later UI changes; backend, chat component and route declarations still match the checked implementation.
+
+[Schedule restoration 39200009805](https://github.com/Known-Enough/known-enough/actions/runs/39200009805) observed one ordinary empty tick and left the original rule ENABLED, reporting zero paid dispatches. [Final readback 39200144414](https://github.com/Known-Enough/known-enough/actions/runs/39200144414) confirms current-source enabled admission, zero active jobs/slots, standing authority, synthetic retention and active migration. Its `sourceMatches=false` compares the later tooling checkout with the installed runtime; the control correctly matches installed runtime `4edb076`.
+
+The aggregate reserved-token and reserved-cost counters increased by 36,864 and 20,000 respectively between the initial and final reads; runs/messages were unchanged. Attribution and actual billed charges are unverified. Publication performed no provider probe and preserved those counters; source-rebind and admission guards report unchanged totals within their checks. Do not interpret reservation ceilings as actual usage or claim initial-to-final totals were unchanged. Exact values and the two corrected pre-credential source-guard attempts are retained in the receipt.
+
+[Public readback](public-readback.json) records ten matching HTTP200 asset hashes, all five chat labels, four OPTIONS204 responses with the expected origin and four unauthenticated GET401 responses. [Runtime guards](runtime-guards.json) and [final control/queue readback](final-control-readback.json) contain finite sanitized metadata only. The earlier [validation checkpoint](validation.json) remains dated implementation evidence; its publication-pending fields describe that earlier time.
+
+## Publication constraints
+
+Matching native API and worker packages must remain coordinated with the five chat/status and OPTIONS routes in `infra/zz/application-config.json` and the frontend. GET/POST retain the current JWT integration; OPTIONS is unauthenticated as in the existing application installer. Preserve the native package, data, model authority, usage totals, unknown jobs and original worker schedule. Do not roll an older strict state reader over new chat data without a compatible package/backup. No new table, provider or IAM widening is needed by this implementation.
 
 Model integration follows the existing forced-tool mechanism documented in [Amazon Nova tool choice](https://docs.aws.amazon.com/nova/latest/userguide/tool-choice.html); local schema validation remains independent of provider compliance.
