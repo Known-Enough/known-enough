@@ -45,15 +45,16 @@ export function renderChatPlan(raw: unknown, context: ChatContext, scope: Chat.S
     }
     case 'OUTCOME': answer = status + (summary.proposalId ? '\n' + summary.choices.map(choice => `${choice.topic}: ${choice.option}`).join('\n') + '\n' + approvals : ' Everyone can add their own answers in the decision screen.'); break;
     case 'APPROVALS': answer = status + ' ' + approvals + '\n' + summary.participants.filter(person => person.required).map(person => `${person.name}: ${person.approved ? 'approved' : 'approval pending'}`).join('\n'); break;
-    case 'EXPLAIN': answer = status + ' ' + approvals + '\nThe app compares saved conditions with the shared choices. A proposal needs each required person’s explicit approval. Shared results do not explain anyone’s private reasons.'; break;
+    case 'EXPLAIN': answer = 'The app compares saved conditions with the shared choices. A proposal needs each required person’s explicit approval. Shared results do not explain anyone’s private reasons.'; break;
     case 'OPTIONS': {
       const indexes = [...new Set(plan.optionIndexes)];
       if (indexes.some(index => !context.options[index])) return fail('INVALID_COMMAND');
       const choices = indexes.length ? indexes.map(index => context.options[index]!) : context.options.slice(0, 3);
-      answer = choices.length ? 'Some existing options to consider:\n' + choices.map(choice => `• ${choice.topic}: ${choice.option}`).join('\n')
-        + '\nThese are suggestions to think about, not a result or a claim that they meet everyone’s preferences.' : 'No finite shared options are available to compare yet. You can discuss an idea here; the organizer edits the decision’s choices.'; break;
+      answer = (plan.answer ? plan.answer + '\n\n' : '') + (choices.length ? 'Some existing options to consider:\n' + choices.map(choice => `• ${choice.topic}: ${choice.option}`).join('\n')
+        + '\nThese are suggestions to think about, not a result or a claim that they meet everyone’s preferences.' : 'No finite shared options are available to compare yet. You can discuss an idea here; the organizer edits the decision’s choices.'); break;
     }
-    case 'REFLECT': answer = scope === 'private' ? 'We can work through what matters to you here. This conversation does not save your decision answers or share them with anyone.' : 'Everyone in this decision can read this conversation. Use the Private assistant to work through personal preferences.'; break;
+    case 'REFLECT': answer = (plan.answer || 'What would help make this choice work for you?') + (scope === 'group' ? '\n\nEveryone in this decision can read Group chat. Use Private assistant for personal limits.' : ''); break;
+    case 'CONVERSATION': answer = plan.answer; break;
     case 'PRIVACY': answer = 'I cannot access another person’s private answers or explain their personal reasons. I can explain shared progress, choices and results.'; break;
     case 'ACTION': answer = 'Use the decision screen to change answers, choices or permissions, or review and approve a proposal. Each person must make their own explicit choice; chat cannot do that for anyone.'; break;
     case 'ACKNOWLEDGE': answer = scope === 'private' ? 'We can explore your thoughts privately. Nothing here changes your saved answers or goes into Group chat unless you choose to post it.' : 'Your message is in Group chat. Everyone in this decision can see it. I can help explain the shared choices and current progress.'; break;

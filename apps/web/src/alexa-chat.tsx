@@ -25,6 +25,8 @@ export default function AlexaChat({ decisionId, title, endpoint, api, onClose }:
   const [share, setShare] = useState<Chat.Message | null>(null), [pending, setPending] = useState<string | null>(null);
   const [details, setDetails] = useState(false), [connection, setConnection] = useState('Not checked'), [trace, setTrace] = useState<string[]>([]);
   const [refresh, setRefresh] = useState(0);
+  const [replyStates, setReplyStates] = useState<Record<string, Chat.Receipt['state']>>({});
+  const [activity, setActivity] = useState<'sending' | 'checking' | null>(null);
   const turnVersion = useRef(0);
   const sequence = useRef(0), turnGuard = useRef(false), lifetime = useRef<AbortController | null>(null);
   const base = '/decisions/' + decisionId + '/chat/' + scope;
@@ -77,7 +79,7 @@ export default function AlexaChat({ decisionId, title, endpoint, api, onClose }:
         await client.connect(transport as Parameters<Client['connect']>[0], { timeout: 15000 });
         const result = await client.listTools({}, { timeout: 15000, signal: controller.signal });
         if (!Alexa.TOOL_NAMES.every(name => result.tools.some(tool => tool.name === name))) throw new Error('Missing tools');
-        if (!controller.signal.aborted) { setConnection('Connected'); setTrace(['Authenticated chat storage', 'MCP ' + Alexa.PROTOCOL_VERSION + ' · initialize complete', result.tools.length + ' shared read tools available', 'Natural language: Amazon Nova Lite; current facts rendered by the server']); }
+        if (!controller.signal.aborted) { setConnection('Connected'); setTrace(['Authenticated chat storage', 'MCP ' + Alexa.PROTOCOL_VERSION + ' · initialize complete', result.tools.length + ' shared read tools available', 'Natural conversation: Amazon Nova Lite; live decision status and outcomes come from the server']); }
       } catch { if (!controller.signal.aborted) setConnection('MCP connection could not be checked. Refresh to try again.'); }
     })();
     return () => { controller.abort(); void client.close().catch(() => {}); };
@@ -88,11 +90,15 @@ export default function AlexaChat({ decisionId, title, endpoint, api, onClose }:
     const value = Chat.Receipt.parse(await response.json());
     if (value.requestId !== expectedRequest || value.conversation.decisionId !== decisionId || value.conversation.scope !== scope || value.conversation.viewerId !== conversation?.viewerId) throw new Error('Wrong receipt');
     if (sequence.current !== current || lifetime.current?.signal.aborted) return;
-    setConversation(value.conversation);
+    setConversation(value.conversation); setReplyStates(states => ({ ...states, [value.requestId]: value.state }));
     const exists = value.conversation.messages.some(message => message.id === value.requestId);
     const uncertain = ['PENDING', 'UNKNOWN'].includes(value.state) || !exists;
-    if (!uncertain && sessionStorage.getItem(pendingKey(value.conversation.viewerId, scope)) === value.requestId) { sessionStorage.removeItem(pendingKey(value.conversation.viewerId, scope)); setPending(null); }
-    else setPending(value.requestId);
+    if (!uncertain) {
+      if (sessionStorage.getItem(pendingKey(value.conversation.viewerId, scope)) === value.requestId) sessionStorage.removeItem(pendingKey(value.conversation.viewerId, scope));
+      setPending(current => current === value.requestId ? null : current);
+    } else {
+      sessionStorage.setItem(pendingKey(value.conversation.viewerId, scope), value.requestId); setPending(value.requestId);
+    }
     setNotice(exists ? notices[value.state] : 'This send is still unconfirmed. It has not been resent. Check its status again.');
     return value;
   }
@@ -107,7 +113,7 @@ export default function AlexaChat({ decisionId, title, endpoint, api, onClose }:
     const selectedKey = pendingKey(conversation.viewerId, sentScope);
     // Retain only an opaque selector for an interrupted send, never message text or tokens.
     sessionStorage.setItem(selectedKey, post.requestId); setPending(post.requestId);
-    turnVersion.current++; turnGuard.current = true; setWorking(true); setNotice('');
+    turnVersion.current++; turnGuard.current = true; setWorking(true); setActivity('sending'); setNotice('');
     try {
       const response = await apiRef.current('/decisions/' + decisionId + '/chat/' + sentScope, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(post), signal: lifetime.current?.signal ?? null });
       if (shared) {
@@ -123,18 +129,18 @@ export default function AlexaChat({ decisionId, title, endpoint, api, onClose }:
     } catch {
       if (sequence.current === current && !lifetime.current?.signal.aborted) {
         if (shared) { setShare(null); setScope('group'); setAskAssistant(false); }
-        else setNotice('This send could not be confirmed. Your text is kept here. Check the send status before sending again.');
+        else { setReplyStates(states => ({ ...states, [post.requestId]: 'UNKNOWN' })); setNotice('This send could not be confirmed. Your text is kept here. Check the send status before sending again.'); }
       }
-    } finally { turnGuard.current = false; if (sequence.current === current) setWorking(false); }
+    } finally { turnGuard.current = false; if (sequence.current === current) { setWorking(false); setActivity(null); } }
   }
   async function check(requestId: string) {
     if (turnGuard.current || pending && pending !== requestId) return;
-    turnVersion.current++; const current = sequence.current; turnGuard.current = true; setWorking(true);
+    turnVersion.current++; const current = sequence.current; turnGuard.current = true; setWorking(true); setActivity('checking');
     try { await accept(await apiRef.current(base + '/requests/' + requestId, { signal: lifetime.current?.signal ?? null }), current, requestId); }
     catch { if (sequence.current === current) setNotice('The send status is unavailable. No message or AI request has been repeated.'); }
-    finally { turnGuard.current = false; if (sequence.current === current) setWorking(false); }
+    finally { turnGuard.current = false; if (sequence.current === current) { setWorking(false); setActivity(null); } }
   }
-  function changeTab(next: Chat.Scope) { if (working || next === scope) return; setScope(next); setAskAssistant(next === 'private'); }
+  function changeTab(next: Chat.Scope) { if (working || next === scope) return; setScope(next); setReplyStates({}); setAskAssistant(next === 'private'); }
   const currentConversation = conversation?.scope === scope && conversation.decisionId === decisionId ? conversation : null;
   const messages = currentConversation?.messages ?? [];
   return <Modal closeButton={false} ref={dialog} className="ke-alexa-chat ke-alexa-conversations" aria-labelledby="alexa-chat-title" onCancel={event => { event.preventDefault(); onClose(); }}>
@@ -146,21 +152,24 @@ export default function AlexaChat({ decisionId, title, endpoint, api, onClose }:
     </div>
     <div className="ke-alexa-audience"><PageIcon name={scope === 'group' ? 'Users' : 'Lock'} /><p>{scope === 'group' ? 'Everyone in this decision can see these messages.' : 'Only you can see this conversation. Nothing goes into Group chat unless you choose to post it.'}</p></div>
     <div className="ke-alexa-body" id="alexa-conversation" role="tabpanel" aria-labelledby={'alexa-tab-' + scope} aria-busy={loading}>
-      {loading ? <p role="status">Loading your conversation…</p> : !messages.length && <div className="ke-alexa-empty"><PageIcon name="MessageCircle" /><h3>{scope === 'group' ? 'A place to decide together' : 'A little space to think'}</h3><p>{scope === 'group' ? 'Talk with everyone in this decision, or ask Alexa+ to explain the shared choices and progress.' : 'Explore what matters to you, compare the shared options, or ask how the decision works.'}</p></div>}
+      {loading ? <p role="status">Loading your conversation…</p> : !messages.length && <div className="ke-alexa-empty"><PageIcon name="MessageCircle" /><h3>{scope === 'group' ? 'A place to decide together' : 'A little space to think'}</h3><p>{scope === 'group' ? 'Talk with everyone in this decision, or ask Alexa+ a question.' : 'Ask a question, explore ideas, or work through what matters to you.'}</p></div>}
       <ol className="ke-alexa-messages" role="log" aria-label={labels[scope]} aria-live="polite" aria-relevant="additions">
         {messages.map(message => <li key={message.id} className="ke-alexa-message" data-own={message.authorId === conversation?.viewerId} data-role={message.role}>
           <div className="ke-alexa-message-meta"><strong>{message.authorName}{message.authorId === conversation?.viewerId ? ' (you)' : ''}</strong><time dateTime={message.createdAt} title={new Date(message.createdAt).toLocaleString()}>{new Date(message.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</time></div>
           <p className="ke-alexa-bubble">{message.text}</p>
           {scope === 'private' && <button type="button" className="ke-alexa-share" disabled={working || !!pending} onClick={() => setShare(message)}>Share to Group chat…</button>}
-          {message.authorId === conversation?.viewerId && message.askAssistant && !messages.some(reply => reply.replyTo === message.id) && <button type="button" className="ke-alexa-share" disabled={working || !!pending && pending !== message.id} onClick={() => void check(message.id)}>Check assistant response</button>}
+          {message.authorId === conversation?.viewerId && message.askAssistant && !messages.some(reply => reply.replyTo === message.id) && <div className="ke-alexa-reply-status" role="status">
+            <span>{working && pending === message.id ? activity === 'checking' ? 'Checking reply status…' : 'Alexa+ is replying…' : replyStates[message.id] === 'UNAVAILABLE' ? 'Reply failed. Your message is saved.' : replyStates[message.id] === 'NOT_SUBMITTED' ? 'Reply did not start. Your message is saved.' : replyStates[message.id] === 'UNKNOWN' ? 'Reply status unknown. No automatic retry.' : replyStates[message.id] === 'PENDING' ? 'Reply pending.' : 'No confirmed reply yet.'}</span>
+            <button type="button" className="ke-alexa-share" disabled={working || !!pending && pending !== message.id} onClick={() => void check(message.id)}>Check reply status</button>
+          </div>}
         </li>)}
       </ol><div ref={end} />
       {scope === 'private' && share && <aside className="ke-alexa-share-preview" aria-label="Preview group message"><h3>Post this to Group chat?</h3><p>Everyone in this decision will see this text, posted with your name.</p><blockquote>{share.text}</blockquote><div className="button-row"><button type="button" disabled={working || !!pending} onClick={() => void send(share)}>Post to Group chat</button><button type="button" className="secondary" disabled={working} onClick={() => setShare(null)}>Keep private</button></div></aside>}
       {notice && <p role="status" className="ke-alexa-notice">{notice}</p>}
-      {working && <p role="status" className="ke-alexa-working">{share ? 'Posting your chosen text…' : 'Checking your conversation…'}</p>}
+      {working && <p role="status" className="ke-alexa-working">{activity === 'checking' ? 'Checking reply status…' : share ? 'Posting your chosen text…' : askAssistant ? 'Alexa+ is replying…' : 'Posting your message…'}</p>}
       {pending && <button type="button" className="secondary" disabled={working} onClick={() => void check(pending)}>Check send status</button>}
       {!conversation && !loading && <button type="button" className="secondary" disabled={working} onClick={() => setRefresh(value => value + 1)}>Refresh conversation</button>}
-      <p className="ke-alexa-history-note">Earlier replies describe the decision when sent. Ask again for current progress.</p>
+      <p className="ke-alexa-history-note">Decision details reflect the time of each reply. Ask again for current progress.</p>
       <details className="ke-alexa-trace" open={details} onToggle={event => setDetails(event.currentTarget.open)}><summary>Technical details</summary><p>{connection} · Web simulator, not a native Alexa connection.</p><ul>{trace.map(line => <li key={line}>{line}</li>)}</ul><p>No approval or private-answer tools. Questions use a language model only when you choose Ask Alexa+ and consent below.</p></details>
     </div>
     <form onSubmit={event => { event.preventDefault(); void send(); }}>

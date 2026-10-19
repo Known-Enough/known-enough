@@ -1828,3 +1828,5 @@ dialog[data-standard-close] h2 { padding-right: 30px; }
 
 /* Keep close controls above animated content/header stacking layers. */
 .ke-open-decision-dialog > button.ke-response-close, dialog button.ke-modal-dismiss { z-index: 10; pointer-events: auto; }
+
+.ke-alexa-reply-status { display: grid; gap: 3px; margin-top: 7px; color: var(--chat-muted); font-size: 11px; line-height: 1.5; }

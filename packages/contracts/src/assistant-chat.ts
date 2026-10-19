@@ -33,10 +33,11 @@ export type Post = z.infer<typeof Post>;
 export const State = z.enum(['POSTED', 'ANSWERED', 'NOT_SUBMITTED', 'PENDING', 'UNKNOWN', 'UNAVAILABLE']);
 export const Receipt = z.strictObject({ requestId: Identifier, state: State, conversation: Snapshot });
 export type Receipt = z.infer<typeof Receipt>;
-// The model interprets language; only the server renders status/approval/result facts.
+// General conversation may use model prose; live status/approval/result facts stay server-rendered.
 export const Plan = z.strictObject({
-  focus: z.enum(['PROGRESS', 'OUTCOME', 'APPROVALS', 'OPTIONS', 'EXPLAIN', 'REFLECT', 'PRIVACY', 'ACTION', 'ACKNOWLEDGE']),
+  focus: z.enum(['PROGRESS', 'OUTCOME', 'APPROVALS', 'OPTIONS', 'EXPLAIN', 'REFLECT', 'PRIVACY', 'ACTION', 'ACKNOWLEDGE', 'CONVERSATION']),
   optionIndexes: z.array(z.number().int().nonnegative().max(255)).max(3),
   question: z.enum(['NONE', 'PRIORITY', 'TRADEOFF', 'MUST_HAVE', 'FLEXIBILITY', 'COMPARE', 'NEXT_STEP']),
-});
+  answer: z.string().trim().max(2000).default(''),
+}).refine(plan => plan.focus !== 'CONVERSATION' || plan.answer.length > 0);
 export type Plan = z.infer<typeof Plan>;
