@@ -2662,3 +2662,6 @@ FF12/A layout static checkpoint: creation now has a bounded flex content wrapper
 
 
 2026-10-19 E2E03/A resumed user-requested live run BLOCKED; claim released. Startup evidence published before browser actions. U1/U2 login and exact saved-fixture reconciliation passed; both saw the existing two-member group, draft and decision. Opening U1 group resulted in “We couldn’t load your account”; observed `/account` 200x3/503x1, `/account/profile` 200x3/503x1, `/groups` 200x9. Root cause unverified. No app write requests, private answers, outcome, assistant, model or email requests in this run. Previous draft/decision retained. [Report](review-artifacts/E2E03/20261019T181400Z/report.md).
+
+
+2026-10-19 A account-read investigation: existing inspector workflow39302667670 read the recent logs, AWS/provider writes0. Within E2E03 window account.status failed in15ms with TransactionCanceledException -> SESSION_STORAGE_UNAVAILABLE/503. Exact cancellation subcode/command unavailable. Source identifies unretried activation TransactGetItems and a cached rejected per-context promise that a fallback reuses; concurrency is plausible, not established. Diagnostic-reader allowlist extended/pushed94dfcb7; syntax check only, no application tests/deployment. [Diagnosis](review-artifacts/E2E03/account-read-diagnosis-20261019.md).

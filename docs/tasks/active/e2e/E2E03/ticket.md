@@ -9,6 +9,8 @@ Previous run `20261019T180154Z`: the account-load repair was published; U1 and U
 **Runner loading repair CODE_READY:** Source confirms the loading shell and loaded decision share the heading ID. Both create/open checks now wait for the acknowledged decision ID and exact title, with a bounded `DECISION_VIEW_NOT_READY` failure. Local focused checks passed before the resumed run; [repair evidence](../../../../review-artifacts/E2E03/decision-readiness-repair.md). The resumed run passed fixture reconciliation, then stopped on account loading before opening the decision. No app deployment was needed for this runner-only repair.
 
 
+**Read-only diagnosis, 2026-10-19:** Server logs in the test window confirm `account.status` failed in 15 ms with `TransactionCanceledException`, surfaced as `SESSION_STORAGE_UNAVAILABLE`/503. Shared managed activation reads cache rejected promises and have no bounded retry; this is a concrete recovery weakness, but cancellation subcodes/command are unlogged, so exact trigger remains unverified. [Diagnosis and next repair](../../../../review-artifacts/E2E03/account-read-diagnosis-20261019.md). No new app test, data write or deployment.
+
 ## Goal and previous evidence
 
 Finish **two small scenarios**, using one decision and two existing approved synthetic users. A third scenario is optional. This is a limited regression result, not whole-project qualification.
