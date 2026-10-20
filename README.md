@@ -1,68 +1,188 @@
 # Known Enough
 
-**Live app:** [known-enough.vercel.app](https://known-enough.vercel.app/) — current frontend, existing AWS accounts/data. See [hosting details](infra/ke13-vercel-site.md).
+Known Enough helps groups choose an outcome from shared options while keeping each participant's answers private. Participants save their own choices, review a validated proposal, and approve it individually. An agreement is recorded only after every required participant approves the same proposal.
 
-**Decide together without everyone needing to know everything.** Known Enough is an AI-first group-decision facilitator: people describe a shared objective, privately explain what matters, confirm the AI's interpretation, consider proposals and individually approve an exact outcome. A small trust kernel protects identity, consent, supported hard conditions and current approval authority.
+[Open application](https://known-enough.vercel.app/) · [AWS Amplify mirror](https://main.d143q5ravxp5av.amplifyapp.com/) · [Source repository](https://github.com/Known-Enough/known-enough) · [Submission requirements and feedback](docs/hackathon-submission.md)
 
-The [product definition](docs/known-enough-product.md), [architecture direction](docs/known-enough-architecture.md) and [pivot record](docs/known-enough-pivot.md) describe the new direction: Family Christmas first, Shared Purchase Exploration as a second-domain proof. Private inputs are processed by Known Enough/its permitted AI service; other participants receive authorized public facts and disclosures, and outcomes can permit inference.
+## Functionality
 
-**Current implementation:** the retained TeamTable prototype includes the React/Vite UI, strict contracts, deterministic fixture, local application/HTTP flow and reviewed local Cognito/DynamoDB adapter code. Default UI routes use synthetic mocks; explicit local routes use fixed non-production identities. B04/B04.5 await human acceptance. Generic Known Enough AI, Bedrock/SQS runtime and cloud deployment are future tasks; KE00 changes documentation only. All demo people/data are fictional. Mock identities are not authentication.
+- Create groups and invite members by username, verified email, or a recipient-bound link.
+- Describe a decision and enter its topics and alternatives manually, or request AI suggestions and review them before use.
+- Save acceptable options and optional favourites privately. Optional AI assistance requires processing consent.
+- Request an outcome, review any individual permission requests, and approve the exact proposal. Chat cannot save answers or approve on anyone's behalf.
+- Use **Decision chat** for shared messages and **Private assistant** for a separate conversation. Sharing private text requires a preview and explicit post.
 
-Read the [task guide](docs/tasks/README.md) and [current queue](docs/task-board.md) before starting work. Earlier KE scheduling is historical; the current board governs unfinished work. Package names such as `@deal-table/...` remain intentionally unchanged during the migration.
+## Review the hosted application
 
-## Setup and launch
+Use a current desktop or mobile browser. No local installation or AWS credentials are needed.
 
-Prerequisites: Node **24.21.0**, npm **11.19.0** (exact pins), network access for initial npm/browser installation. On Linux/WSL with nvm:
+1. Open the application and sign in with an approved account. New accounts require email verification and application access; judge accounts must be arranged before evaluation.
+2. Create a group. Invite a second approved account and accept the invitation from that account's own session. Use separate browser profiles for separate participants.
+3. Create a decision with explicit alternatives, for example: restaurant **Cedar / Maple**, date **2026-11-14 / 2026-11-15**, and time **18:00 / 19:00**. Review AI suggestions individually if used.
+4. Each participant opens the decision, selects acceptable choices, and saves their own answers. Choose at least one common option per topic for a compatible example.
+5. Request an outcome. Each required participant reviews and approves the same proposal. The decision remains proposed until the last required approval.
+6. Open **Chat**. In Decision chat, select AI consent and **Post and ask AI** with “What is the outcome and who has approved?” In Private assistant, ask a personal planning question; another participant must not receive that thread. Plain **Post message** does not request AI.
+
+Judge credentials belong in the private submission testing instructions. The access and video items still requiring submission-owner action are listed in the [submission checklist](docs/hackathon-submission.md#submission-checklist).
+
+## Architecture
+
+```mermaid
+flowchart LR
+    Browser[React web application]
+    Hosting[Vercel / AWS Amplify]
+    Cognito[Amazon Cognito]
+    Gateway[Amazon API Gateway]
+    API[AWS Lambda API and MCP server]
+    Data[(Amazon DynamoDB)]
+    Timer[Amazon EventBridge]
+    Worker[AWS Lambda outcome worker]
+    Model[Amazon Bedrock / Nova Lite]
+    Artifacts[(Amazon S3 release and recovery artifacts)]
+    Hosting --> Browser
+    Browser -->|Sign in| Cognito
+    Browser -->|HTTPS with access token| Gateway
+    Gateway --> API
+    API -->|Verified identity and current permissions| Data
+    API -->|Drafting, interpretation, chat| Model
+    Timer -->|Scheduled work| Worker
+    Worker -->|Claim and complete outcome jobs| Data
+    Worker --> Model
+    Artifacts -.->|Deployment packages| API
+    Artifacts -.->|Deployment packages| Worker
+```
+
+The backend runs in AWS `us-east-1`. DynamoDB stores accounts, memberships, decisions, private state, chat, and durable job records. The outcome worker uses a one-minute EventBridge schedule; public drafting and chat use bounded API request paths. Bedrock invokes `amazon.nova-lite-v1:0` through Converse. Code validates model output and renders current progress, approval counts, and outcomes from server state. CloudWatch receives bounded operational diagnostics.
+
+| Source | Responsibility |
+| --- | --- |
+| [apps/web](apps/web) | React/Vite application, Cognito sign-in, decision forms, and chat |
+| [apps/api/src](apps/api/src) | Authenticated HTTP, MCP, and model/runtime composition |
+| [packages/contracts](packages/contracts) | Strict request, response, and model-output schemas |
+| [packages/domain](packages/domain) | Typed rules and proposal validation |
+| [packages/application](packages/application) | Decision lifecycle, permissions, approvals, and chat projections |
+| [packages/adapters](packages/adapters) | DynamoDB, Cognito, Bedrock, and durable job adapters |
+| [scripts/operations](scripts/operations) and [infra/operations](infra/operations) | Runtime packaging, infrastructure, release, and recovery tooling |
+
+## Alexa+ and MCP
+
+The Alexa+ track implementation is a **web simulation**, with a self-hosted MCP server. It is not connected to a native Alexa+ device or the gated Amazon developer console. This review path is described in the [official hackathon FAQ](https://amazonappdev2026.devpost.com/details/faqs).
+
+The [MCP server](apps/api/src/mcp-server.ts) uses the official TypeScript SDK and Streamable HTTP, protocol `2025-11-25`, at [`/mcp`](https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com/mcp). Every request requires a valid approved participant token and current resource access. An unauthenticated browser visit returns `401`; authenticated GET returns `405` because server notifications are disabled.
+
+| Read-only tool | Arguments | Result |
+| --- | --- | --- |
+| `list_groups` | Optional `cursor` | Accessible group IDs and names |
+| `list_group_decisions` | `groupId` | Accessible decision IDs and titles |
+| `get_decision_progress` | `decisionId` | Shared answer and approval status |
+| `get_decision_outcome` | `decisionId` | Current shared proposal or agreed choices |
+
+In the [web simulator](apps/web/src/alexa-chat.tsx), **About the assistant** performs MCP initialization and tool discovery. Saved conversations use authenticated chat routes and Bedrock; they do not route every message through MCP tools. A compatible MCP client can invoke the four tools directly.
+
+To exercise the complete MCP exchange, supply your own Cognito participant access token as `KE_ACCESS_TOKEN` in a private shell, then run:
 
 ```sh
+mcp_request() {
+  curl --fail-with-body --silent --show-error \
+    https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com/mcp \
+    -H "Authorization: Bearer ${KE_ACCESS_TOKEN:?Set your participant access token}" \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/json, text/event-stream' \
+    -H 'MCP-Protocol-Version: 2025-11-25' \
+    --data "$1"
+}
+mcp_request '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"review-client","version":"1.0.0"}}}'
+mcp_request '{"jsonrpc":"2.0","method":"notifications/initialized"}'
+mcp_request '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
+mcp_request '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"list_groups","arguments":{}}}'
+unset KE_ACCESS_TOKEN
+```
+
+This server is stateless and does not require a session ID between requests. The example performs shared reads and makes no model calls.
+
+## Install and run locally
+
+Requirements: Git, Node.js **24.21.0**, npm **11.19.0**, a current browser, and network access to install dependencies. The exact Node/npm versions are enforced by the repository. The commands below use Bash on Linux, macOS, or Windows with WSL; `nvm` is optional if the pinned versions are already installed.
+
+```sh
+git clone https://github.com/Known-Enough/known-enough.git
+cd known-enough
 nvm install
 nvm use
+npm install --global npm@11.19.0
 npm ci
 npm run dev
 ```
 
-Open **http://127.0.0.1:5173**. Stop with Ctrl+C. Windows users can install the pinned Node/npm directly and run the npm commands in the application folder. No Windows source paths, AWS account, API keys or environment variables are needed after import. A different Node/npm is rejected by engine-strict; change to the pinned runtime first. The root folder name need not match the app name.
-
-## Historical TeamTable demonstrations
-
-The default page is the synthetic shared table. **Open private owner demo** opens a fixed fictional owner, not a login. Shared scenarios use `/?public=collecting` (also `blocked`, `private-review`, `proposed`, `agreed`, `superseded`); owner scenarios use `/?view=owner&owner=review` (also `draft`, `approval`). Both adapters support `empty`, `failure` and `stale` recovery examples.
-
-For the connected local UI/API demonstration, use the [local negotiation tutorial](docs/tutorials/local-negotiation.md) and [API setup](apps/api/README.md). These routes exercise actual local application state with explicit non-production identity labels; they are not managed authentication or cloud evidence. Exception, disclosure and final acceptance are separate.
+In a second terminal, from the repository root with the same Node version:
 
 ```sh
-npm run demo --workspace @deal-table/test-support
+PORT=8788 node scripts/run-local-api.mjs
 ```
 
-The deterministic historical fixture has 12 structural candidates, zero feasible at baseline and two after the scoped exception; inconvenience selects B and balanced load selects A. Preserve it as regression evidence, separate from the new generic AI scenarios.
+Open [http://127.0.0.1:5173](http://127.0.0.1:5173). With the six connected-app settings below unset, this runs the retained local Christmas/TeamTable fixtures. Select a fictional test user, such as Maya or Leo. The API must report port **8788** to match this UI; its standalone default is 8787.
 
-## Checks
+Local fixtures use in-memory storage, fictional sessions, and injected model responses. They demonstrate local decision behaviour; current group management, durable chat, real Cognito authentication, and live Bedrock require the connected application. No AWS account, model key, or email is needed for the fixtures. Restarting the API clears their state. Stop both processes with Ctrl+C. See the [local account guide](docs/ke11-local-test-auth.md) for fixture invitations and session handling.
+
+### Configure the connected application
+
+For an operator-provided backend, copy the environment template and replace all six values with that installation's public configuration:
 
 ```sh
+cp apps/web/.env.example apps/web/.env.local
+```
+
+| Variable | Required value |
+| --- | --- |
+| `VITE_COGNITO_REGION` | Cognito region, currently `us-east-1` |
+| `VITE_COGNITO_USER_POOL_ID` | User pool ID |
+| `VITE_COGNITO_DOMAIN` | Cognito hosted domain, including `https://` |
+| `VITE_COGNITO_PARTICIPANT_CLIENT_ID` | Public participant app-client ID |
+| `VITE_COGNITO_DISPLAY_CLIENT_ID` | Separate public display app-client ID |
+| `VITE_API_BASE_URL` | HTTPS API base URL, without `/mcp` |
+
+Vite reads these values at startup/build time. They are browser configuration, not secrets. AWS credentials, client secrets, private runtime packages, and participant tokens must remain outside the web build.
+
+Before using another origin, the operator must configure its exact API/MCP CORS origin and any Cognito callback/logout URLs used by that sign-in flow. The current hosted API allows the two published application origins; a localhost frontend is not automatically authorized.
+
+For the complete cloud deployment, operators need AWS CLI v2, Python 3, AWS resource/IAM access, Bedrock Nova Lite access, Cognito clients, API Gateway/Lambda, DynamoDB storage, and the model-job control/retention configuration. The [API initializer](scripts/operations/partition-entry.ts), [worker initializer](scripts/operations/jobs-runtime-entry.ts), [infrastructure templates](infra/operations), and [coordinated release workflow](.github/workflows/operations-jobs-api-release.yml) define the installed composition. Private signing keys and resource manifests are generated and retained by the operator. This tooling targets the existing AWS installation; another account requires adapting its account/resource guards and provisioning new private configuration. It is not a general-purpose fresh-account installer.
+
+### Build and checks
+
+For a connected production build, configure all six variables first:
+
+```sh
+npm run build
+npm run preview --workspace @deal-table/web -- --port 4173
+```
+
+The build output is `apps/web/dist`; preview is [http://127.0.0.1:4173](http://127.0.0.1:4173). A production build without valid connected configuration displays an unavailable page. The local fixture is available through the development server.
+
+Available checks:
+
+```sh
+npm run check:references
+npm run lint
+npm run typecheck
+npm test
 npx playwright install chromium
-# On minimal Linux, if system libraries are missing:
-# npx playwright install --with-deps chromium
 npm run check
 ```
 
-`check` runs seven-reference integrity verification, the original 15-check arithmetic script, ESLint/import boundaries, TypeScript, unit/contract tests, production build/bundle marker check, and desktop/mobile Chromium smoke tests. Individual commands: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, `npm run test:e2e`, `npm run check:planning`, `npm run check:references`. Browser tests require an existing build and free port 4173. For a production preview: `npm run build` then `npm run preview --workspace @deal-table/web -- --port 4173`.
+`npm run check` includes reference/planning checks, lint, types, unit/integration tests, builds, bundle privacy checks, and browser tests. Minimal Linux installations may need `npx playwright install --with-deps chromium`; browser checks use port 4173. Existing full-suite failures are documented in the dated [ALX02 report](docs/review-artifacts/ALX02/report.md). The [E2E04 report](docs/review-artifacts/E2E04/20261020T162508Z/report.md) records six qualified cases across execution and targeted follow-up, rather than a fresh full-suite run.
 
-On a host unsupported by Playwright's bundled Chromium (such as macOS 12), an installed Google Chrome can be used explicitly: `PLAYWRIGHT_CHANNEL=chrome npm run check`. Record the actual browser/version with the results. CI continues to use pinned Playwright Chromium by default.
+## Privacy and limits
 
-See the [dated bootstrap verification evidence](docs/verification.md). It records the original local run and is not a fresh result for the current checkout. CI is defined to run the same checks without cloud credentials. The arithmetic reference is not a production solver/security audit, and passing contract shapes does not prove authorization or race safety.
+Private answers are processed by Known Enough and its permitted AI service when consent is given. Other participants receive shared facts and explicitly authorized disclosures; outcomes and timing can still allow inference. Chat AI receives the sender's bounded recent conversation and shared options, excluding other participants' messages, other private threads, and saved private answers. Chat persists for up to 30 days, shortened by retention settings or decision deletion.
 
-## Workspace and migration
+The preview supports bounded finite-choice decisions and groups of up to 16 members. Ambiguous or unsupported conditions require clarification. Unknown save/model outcomes require status checks rather than automatic replay. The application does not make bookings, purchases, or external arrangements.
 
-| Boundary | Current value / next adaptation |
-| --- | --- |
-| `apps/web` | Separate shared/private surfaces, confirmation/receipts, retry/accessibility behavior; generic shell in KE05 |
-| `packages/contracts` | Strict DTOs, commands and public hashes; generic contracts in KE01 |
-| `packages/domain` | TeamTable solver/benchmark retained; small universal kernel in KE02 |
-| `packages/application` | Commands, allowlisted snapshots, independent consent and guarded lifecycle; generic state in KE03 |
-| `packages/adapters`, `apps/api` | Retained in-memory/DynamoDB repositories, verified Cognito identity, HTTP and subject-bound invitations; human/live gates remain |
-| `apps/workers`, `infra` | Worker placeholder and infrastructure design; actual Bedrock/jobs/deployment in KE10/KE13 |
-| `packages/test-support`, `tests` | Synthetic private fixtures and regression/integration/browser tests; never import server fixtures into web |
-| `docs` | Known Enough direction, baseline contracts, immutable source evidence, current tasks and dated reviews/logs |
+## Hackathon materials
 
-Use `main` in separate clones, one active project task at a time. On clean main, successfully run `git pull --ff-only origin main` before task development, then claim the highest-priority eligible task in the [queue](docs/task-board.md). Select its named direct worker model/effort; files do not change the session model. Independent critical reviews run sequentially. The [workflow](docs/agent-workflow.md) and [authority mapping](docs/known-enough-pivot.md#authority-and-evidence) supersede historical domain, ownership, branch and scheduling instructions.
+The documented submission path is **Alexa+**, with AWS integration evidence for **AWS Builder**. See the [requirements checklist, service feedback, and remaining submission items](docs/hackathon-submission.md). Repository history begins on September 19, 2026, within the submission period; the implementation evolved from TeamTable into the current application during that period.
 
-[A handoff](docs/handoff-A.md), [B historical handoff](docs/handoff-B.md), [A log](docs/work-log-A.md), [B log](docs/work-log-B.md), [integration record](docs/main-integration.md) and [reviews](docs/reviews/README.md) retain evidence and acceptance boundaries. Check current ticket claims; local logs are not a shared lock. Human acceptance, publication, merging, deployment, spending and external messages require their own authorization. No blind repository/package rename or historical evidence rewrite is part of the pivot.
+**Demo video:** not yet recorded. The public YouTube or Vimeo link will be added when available.
+
+## License
+
+[MIT](LICENSE). Third-party dependencies retain their respective licenses.
