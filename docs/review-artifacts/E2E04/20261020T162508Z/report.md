@@ -15,7 +15,7 @@ Node v24.19.0; project Playwright1.63.0; installed Chrome. User authorized the a
 
 Serving: source0006a4d3 / API9488da66 / worker97748a77 / frontend152. Live evidence and credential readiness are recorded in the summary; a documentation commit is not a serving release.
 
-Last confirmed action: U01.closeChat.5f3404. In flight: none.
+Last confirmed action: U05.approve.e83ca1. In flight: none.
 
 Observed UI requests: {"outcome":0,"assistant":1,"aiDraft":0,"plainPosts":0}. Provider calls/tokens/billed cost: UNKNOWN unless separately recorded.
 
