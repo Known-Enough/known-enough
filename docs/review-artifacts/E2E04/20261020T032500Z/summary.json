@@ -11,11 +11,11 @@
     "05": "NOT_RUN",
     "06": "FAIL"
   },
-  "lastConfirmedAction": "U01.message.108d08",
-  "inFlightAction": "U01.replyStatus.0d8fea",
+  "lastConfirmedAction": "U15.message.a65984",
+  "inFlightAction": "U15.checkReply.0628cc",
   "observedRequests": {
     "outcome": 1,
-    "assistant": 7,
+    "assistant": 8,
     "aiDraft": 1,
     "plainPosts": 15
   },
@@ -152,7 +152,7 @@
       "initialGroups": 0,
       "joined": true,
       "answerAcknowledged": true,
-      "approvalAcknowledged": false,
+      "approvalAcknowledged": true,
       "postAcknowledged": true
     }
   },
@@ -219,6 +219,15 @@
         "height": 1600
       },
       "caption": "Fourteen approvals; U15 still required; not agreed"
+    },
+    {
+      "name": "10-assistant-summary-failure.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 900
+      },
+      "caption": "Original proposal-summary request remains failed; status read only"
     }
   ],
   "errors": [
@@ -344,7 +353,7 @@
     "override": "User explicitly authorized Node24.19 or latest installed",
     "browser": "155.0.8059.85"
   },
-  "lastProgressAt": "2026-10-20T05:37:40.297Z",
+  "lastProgressAt": "2026-10-20T05:38:47.102Z",
   "credentials": {
     "exactSet": true,
     "count": 15,
@@ -360,10 +369,10 @@
   "progress": {
     "joined": 15,
     "answersAcknowledged": 15,
-    "approvalsAcknowledged": 14,
+    "approvalsAcknowledged": 15,
     "plainPostsAcknowledged": 15,
     "distinctOwners": 15
   },
-  "optionalProfileReads": 1069,
-  "optionalProfileResponses": 965
+  "optionalProfileReads": 1088,
+  "optionalProfileResponses": 982
 }

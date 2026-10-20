@@ -15,9 +15,9 @@ Node v24.19.0; project Playwright1.63.0; installed Chrome. User authorized the a
 
 Last verified serving baseline: source1f7d441 / APIe8338c82 / workerc4258495 / frontend152. Live evidence and credential readiness are recorded in the summary; a documentation commit is not a serving release.
 
-Last confirmed action: U01.message.108d08. In flight: U01.replyStatus.0d8fea.
+Last confirmed action: U15.message.a65984. In flight: U15.checkReply.0628cc.
 
-Observed UI requests: {"outcome":1,"assistant":7,"aiDraft":1,"plainPosts":15}. Provider calls/tokens/billed cost: UNKNOWN unless separately recorded.
+Observed UI requests: {"outcome":1,"assistant":8,"aiDraft":1,"plainPosts":15}. Provider calls/tokens/billed cost: UNKNOWN unless separately recorded.
 
 - U01.invite.3ca912: APP_HTTP_409; screenshot screenshots/failure-0.png.
 - U01.suggest.a2a5b9: locator.isDisabled: Timeout 20000ms exceeded.
