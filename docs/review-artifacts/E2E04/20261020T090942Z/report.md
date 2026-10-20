@@ -6,8 +6,8 @@ Node v24.19.0; project Playwright1.63.0; installed Chrome. User authorized the a
 
 | Case | Result |
 | --- | --- |
-| 01 | NOT_RUN |
-| 02 | NOT_RUN |
+| 01 | PASS |
+| 02 | PASS |
 | 03 | NOT_RUN |
 | 04 | NOT_RUN |
 | 05 | NOT_RUN |
@@ -15,12 +15,10 @@ Node v24.19.0; project Playwright1.63.0; installed Chrome. User authorized the a
 
 Serving: source6917444a / APIb7c5fe45 / workercf6b87c2 / frontend152. Live evidence and credential readiness are recorded in the summary; a documentation commit is not a serving release.
 
-Last confirmed action: none. In flight: none.
+Last confirmed action: U01.result.53bf99. In flight: none.
 
 Observed UI requests: {"outcome":0,"assistant":0,"aiDraft":0,"plainPosts":0}. Provider calls/tokens/billed cost: UNKNOWN unless separately recorded.
 
 
 
 [Summary](summary.json) · [Events](events.jsonl)
-
-Fresh qualification after retention-gate repair: one new primary group and decision; reuse five positively owned empty pagination groups. U01 initially owns six groups, so the expected post-creation catalog count is seven. Prior agreed/partial decisions and all original failed requests remain preserved. No browser or product action yet.
