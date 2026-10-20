@@ -1,48 +1,48 @@
 {
   "runId": "20261020T085500Z",
-  "state": "RUNNING",
+  "state": "FAIL",
   "startedAt": "2026-10-20T08:55:54.939Z",
-  "endedAt": null,
+  "endedAt": "2026-10-20T09:03:48.754Z",
   "cases": {
     "01": "PASS",
     "02": "PASS",
-    "03": "NOT_RUN",
+    "03": "FAIL",
     "04": "NOT_RUN",
     "05": "NOT_RUN",
     "06": "NOT_RUN"
   },
-  "lastConfirmedAction": "U01.createDecision.a73b46",
-  "inFlightAction": "U01.saveAnswer.e29521",
+  "lastConfirmedAction": "U04.open.f12faf",
+  "inFlightAction": null,
   "observedRequests": {
     "outcome": 0,
     "assistant": 0,
     "aiDraft": 1,
-    "plainPosts": 0
+    "plainPosts": 3
   },
   "users": {
     "U01": {
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false,
+      "postAcknowledged": true,
       "authenticated": true,
       "approved": true,
       "initialGroups": 6
     },
     "U02": {
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false,
+      "postAcknowledged": true,
       "authenticated": true,
       "approved": true,
       "initialGroups": 1
     },
     "U03": {
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false,
+      "postAcknowledged": true,
       "authenticated": true,
       "approved": true,
       "initialGroups": 1
@@ -176,7 +176,17 @@
       "caption": "Search finds a group from response page 2"
     }
   ],
-  "errors": [],
+  "errors": [
+    {
+      "action": "U04.saveAnswer.a076f7",
+      "code": "APP_HTTP_503",
+      "domain": "APP_HTTP",
+      "status": 503,
+      "serverCode": "RETRYABLE_SERVER_ERROR",
+      "reference": "aeab073d-a4d8-46b6-9d25-b2f9251909d5",
+      "screenshot": "screenshots/failure-0.png"
+    }
+  ],
   "publication": "LOCAL_STARTUP",
   "serving": {
     "source": "ceeebfa33ad5833a69155f548cd74226a7b82560",
@@ -193,7 +203,7 @@
     "override": "User explicitly authorized Node24.19 or latest installed",
     "browser": "155.0.8059.85"
   },
-  "lastProgressAt": "2026-10-20T08:59:38.368Z",
+  "lastProgressAt": "2026-10-20T09:03:49.680Z",
   "fixturePlan": {
     "reuseExistingFifteenMemberGroup": true,
     "reuseFiveEmptyOwnedPaginationGroups": true,
@@ -218,11 +228,13 @@
   },
   "progress": {
     "joined": 15,
-    "answersAcknowledged": 0,
+    "answersAcknowledged": 3,
     "approvalsAcknowledged": 0,
-    "plainPostsAcknowledged": 0,
-    "distinctOwners": 0
+    "plainPostsAcknowledged": 3,
+    "distinctOwners": 4
   },
-  "optionalProfileReads": 45,
-  "optionalProfileResponses": 45
+  "optionalProfileReads": 146,
+  "optionalProfileResponses": 136,
+  "unresolvedAppWrites": [],
+  "qualification": "FAILED at U04 save; three acknowledged answers preserved"
 }

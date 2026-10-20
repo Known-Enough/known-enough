@@ -1,0 +1,39 @@
+{
+  "source": "0dcf897d66965e25abafbde7b6ab8653f681e662",
+  "awsWrites": 0,
+  "providerCalls": 0,
+  "events": [
+    {
+      "timestamp": 1792486824534,
+      "event": "PRIVATE_ANSWERS_HTTP_RESULT",
+      "requestId": "aeab073d-a4d8-46b6-9d25-b2f9251909d5",
+      "sourceSha": "ceeebfa33ad5833a69155f548cd74226a7b82560",
+      "elapsedMs": 300,
+      "result": "FAILED",
+      "code": "RETRYABLE_SERVER_ERROR",
+      "status": 503
+    }
+  ],
+  "failures": [],
+  "gateway": {
+    "stage": {
+      "result": "READ",
+      "defaultThrottle": {
+        "ThrottlingBurstLimit": 10,
+        "ThrottlingRateLimit": 5.0
+      },
+      "decisionOverrides": {},
+      "accessLoggingConfigured": false
+    },
+    "cors": {
+      "result": "UNAVAILABLE",
+      "code": "AccessDeniedException"
+    }
+  },
+  "windowStart": 1792486289670,
+  "windowEnd": 1792486889670,
+  "result": "DRAFT_DIAGNOSTICS_READ",
+  "windowComplete": true,
+  "requestReferenceCorrelation": "EXACT_REFERENCE_MATCH",
+  "workflowRun": "https://github.com/Known-Enough/known-enough/actions/runs/39397624418"
+}

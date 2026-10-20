@@ -117,6 +117,26 @@ it('constructs inactive pinned clients and rejects a foreign source/target/key b
   }
   expect(f.send).not.toHaveBeenCalled();
 });
+
+it('recovers definite conflicts on condition-only retention barriers without altering policy, consent or stamps', async () => {
+  const f = await fixture(); const beforeStamp = structuredClone(f.parsed(r.journal, 'RETENTION#iris', 'STAMP'));
+  let conflicts = 2;
+  f.before(items => {
+    expect(items.every(item => !!item.ConditionCheck)).toBe(true);
+    if (conflicts-- > 0) throw Object.assign(new Error('PRIVATE_CONFLICT_MESSAGE'), { name: 'TransactionCanceledException',
+      CancellationReasons: items.map((_item, index) => ({ Code: index === 3 ? 'TransactionConflict' : 'None' })) });
+  });
+  await expect(f.lifecycle().assertRetained(principal())).resolves.toHaveProperty('subject', 'iris');
+  expect(f.writes).toHaveLength(3); expect(f.writes[0]).toEqual(f.writes[1]); expect(f.writes[1]).toEqual(f.writes[2]);
+  expect(f.parsed(r.journal, 'RETENTION#iris', 'STAMP')).toEqual(beforeStamp);
+});
+it.each(['unknown', 'conditional', 'malformed'] as const)('never retries %s retention-barrier failures', async kind => {
+  const f = await fixture();
+  f.before(items => { throw kind === 'unknown' ? new Error('UNCERTAIN_ACK') : Object.assign(new Error('PRIVATE_DETAIL'), {
+    name: 'TransactionCanceledException', CancellationReasons: kind === 'malformed' ? [{ Code: 'TransactionConflict' }]
+      : items.map((_item, index) => ({ Code: index === 3 ? 'ConditionalCheckFailed' : 'None' })) }); });
+  await expect(f.lifecycle().assertRetained(principal())).rejects.toThrow(); expect(f.writes).toHaveLength(1);
+});
 it('uses complete paginated strong inventory and atomically rechecks activation/policy/source before owner export', async () => {
   const f = await fixture(); f.page(2); const result = await f.lifecycle().exportOwn(principal());
   expect(JSON.stringify(result)).toContain('iris-private-condition'); expect(JSON.stringify(result)).not.toContain('omar-private-condition');

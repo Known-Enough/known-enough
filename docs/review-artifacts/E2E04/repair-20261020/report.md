@@ -12,3 +12,9 @@ Status: CODE_READY; compatible publication and live qualification pending. Direc
 140 focused tests PASS, one unrelated baseline assertion excluded; TypeScript/changed-source ESLint, eight release guards, diagnostic-reader syntax and whitespace PASS. [Checks](checks.json). No full-suite PASS is claimed.
 
 Next: existing guarded API/worker publication, restore the original enabled schedule, then bounded fresh-decision qualification. Keep the prior agreed15-owner decision, original terminal failed requests and cumulative usage. No new agent/chat/automation/IAM setup.
+
+## First live qualification and retention-gate follow-up
+
+[20261020T085500Z](../20261020T085500Z/report.md) failed at U04:503, own readback not saved. Three prior saves succeeded once; one AI draft passed the explicitly stated exact labels without correction. No outcome/approval/assistant calls. The new decision diagnostic did not appear for the exact request, pointing before that path; historical raw SDK cause remains unverified.
+
+The managed lifecycle adapter also issued condition-only retention barriers with no contention recovery. These now retry only exact fully classified atomic TransactionConflict rejections, at most six attempts, retaining every source/policy/account/stamp check and charging additional physical requests to the same deadline/budget. Actual lifecycle mutations, ConditionalCheckFailed, malformed cancellation and uncertain acknowledgments are not replayed. Safe pre-decision gate diagnostics distinguish ACKNOWLEDGE and ASSERT_RETAINED without SDK messages/items or identities.210 focused tests pass/one previously reproduced unrelated baseline excluded; TypeScript, changed-source lint, reader syntax and whitespace pass.

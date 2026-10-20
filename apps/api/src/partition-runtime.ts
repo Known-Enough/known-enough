@@ -95,8 +95,24 @@ export function createPartitionRuntime(options: PartitionRuntimeOptions) {
     ...(draftArchitect ? { draftArchitect } : jobs ? { draftArchitect: createManagedPartitionDraftRuntime({ sourceSha: jobs.sourceSha, prepareGroupCommit: driver.prepareGroupCommit }) } : {}),
     ...(enqueue ? { requestNegotiation: enqueue } : {}),
     ...(service && lifecycle ? { privateAnswersSource: lifecycle.sourceSha, privateAnswersRepository: async (principal, io) => {
-      try { await service.acknowledgeSyntheticProcessing(principal); await service.assertRetained(principal); }
-      catch { throw new PartitionOwnerFailure('PROCESSING_NOT_READY'); }
+      let gateStage = 'ACKNOWLEDGE';
+      try { await service.acknowledgeSyntheticProcessing(principal); gateStage = 'ASSERT_RETAINED'; await service.assertRetained(principal); }
+      catch (error) {
+        const value = error && typeof error === 'object' ? error as { name?: unknown; code?: unknown; CancellationReasons?: unknown } : {};
+        const names = ['TransactionCanceledException', 'TransactionConflictException', 'AccessDeniedException', 'ThrottlingException',
+          'ResourceNotFoundException', 'PartitionLifecycleError', 'PartitionStorageError'];
+        const codes = ['None', 'TransactionConflict', 'ConditionalCheckFailed', 'ProvisionedThroughputExceeded', 'ThrottlingError'];
+        const gateCodes = ['LIFECYCLE_INVALID', 'LIFECYCLE_POLICY_DENIED', 'LIFECYCLE_AUTHORITY_DENIED', 'LIFECYCLE_EXPIRED',
+          'LIFECYCLE_SOURCE_CHANGED', 'LIFECYCLE_TIMEOUT', 'LIFECYCLE_REQUEST_LIMIT', 'PARTITION_TIMEOUT', 'PARTITION_REQUEST_LIMIT'];
+        try { console.warn(JSON.stringify({ event: 'known-enough.private-answer-gate', gateStage,
+          ...(io.diagnosticRequestId && /^[a-f0-9-]{36}$/.test(io.diagnosticRequestId) ? { requestId: io.diagnosticRequestId } : {}),
+          errorType: typeof value.name === 'string' && names.includes(value.name) ? value.name : 'OTHER',
+          ...(typeof value.code === 'string' && gateCodes.includes(value.code) ? { gateCode: value.code } : {}),
+          cancellationCodes: Array.isArray(value.CancellationReasons) ? value.CancellationReasons.slice(0, 100).map(reason =>
+            reason && typeof reason === 'object' && codes.includes(reason.Code) ? reason.Code : 'OTHER') : [] })); }
+        catch { /* No SDK messages, item contents, notes or identity. */ }
+        throw new PartitionOwnerFailure('PROCESSING_NOT_READY');
+      }
       const transport = driver.privateAnswerDecisions(principal.subject, () => service.retentionConditions(principal));
       const repositories = createPartitionDecisionRepository({ decisionArn: driver.decisionArn, partitionArn: driver.partitionArn,
         groups: driver.groups, transport });

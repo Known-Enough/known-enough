@@ -63,6 +63,16 @@ function activationReadConflict(error: unknown) {
     && ['None', 'TransactionConflict'].includes(reason.Code))
     && value.CancellationReasons.some(reason => reason.Code === 'TransactionConflict');
 }
+function atomicConflict(error: unknown, size: number) {
+  if (!error || typeof error !== 'object') return false;
+  const value = error as { name?: unknown; CancellationReasons?: unknown };
+  if (value.name === 'TransactionConflictException') return true;
+  return value.name === 'TransactionCanceledException' && Array.isArray(value.CancellationReasons)
+    && value.CancellationReasons.length === size
+    && value.CancellationReasons.some(reason => reason?.Code === 'TransactionConflict')
+    && value.CancellationReasons.every(reason => reason && typeof reason === 'object' && !Array.isArray(reason)
+      && ['None', 'TransactionConflict'].includes(reason.Code));
+}
 function activationReadDiagnostic(io: PartitionIOContext, attempt: number, result: 'RETRYING' | 'FAILED' | 'RECOVERED', error?: unknown) {
   const value = error && typeof error === 'object' ? error as { name?: unknown; CancellationReasons?: unknown } : {};
   const names = ['TransactionCanceledException', 'TransactionConflictException', 'AccessDeniedException', 'ResourceNotFoundException',
@@ -305,7 +315,17 @@ export function createPartitionManagedDriver(options: PartitionManagedOptions): 
       write: async (items, io) => {
         const copy = structuredClone(items);
         const TransactItems = await joined(copy, io);
-        await partitionCall(io, () => client.send(new TransactWriteItemsCommand({ TransactItems }), { abortSignal: io.signal }), false);
+        // Retention checks use condition-only transactions against shared policy
+        // rows. A definite transaction conflict applies nothing; let the competing
+        // transaction finish, retaining every exact source/policy/account check.
+        const readOnly = copy.every(item => Object.keys(item).length === 1 && item.ConditionCheck);
+        for (let attempt = 0; ; attempt++) {
+          try { await partitionCall(io, () => client.send(new TransactWriteItemsCommand({ TransactItems }), { abortSignal: io.signal }), attempt > 0); return; }
+          catch (error) {
+            if (!readOnly || attempt >= 5 || !atomicConflict(error, TransactItems.length)) throw error;
+            await partitionCall(io, () => delay(Math.min(200, 25 * 2 ** attempt) + Math.floor(Math.random() * 25), undefined, { signal: io.signal }), false);
+          }
+        }
       },
     } });
   }

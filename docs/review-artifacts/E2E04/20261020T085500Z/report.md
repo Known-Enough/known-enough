@@ -1,24 +1,9 @@
-# E2E04 20261020T085500Z
+# E2E04 first repair qualification — FAIL
 
-State: **RUNNING**. Started 2026-10-20T08:55:54.939Z. 
+Cases01/02 PASS on reused fixtures;03 FAIL;04/05/06 NOT_RUN. Backend ceeebfa3/API9585f4e7/worker8599e4ce; existing frontend152.
 
-Node v24.19.0; project Playwright1.63.0; installed Chrome. User authorized the available Node24.19 runtime. Fifteen isolated synthetic identities; at most three open pages. Scope: one primary dinner decision, up to six newly created groups, one outcome, fifteen separate saves/approvals/posts, up to eight assistant questions and one optional AI draft request. Prior E2E03 agreed fixture is preserved.
+Fifteen accounts authenticated/approved, group15 distinct members/no pending invitations, desktop/mobile roster and actual5+1 dashboard pagination/search/theme checks passed. One AI request preserved all twelve alternatives and explicit exact topic labels; individually accepted without manual normalization. One new decision was created with15 required owners.
 
-| Case | Result |
-| --- | --- |
-| 01 | PASS |
-| 02 | PASS |
-| 03 | NOT_RUN |
-| 04 | NOT_RUN |
-| 05 | NOT_RUN |
-| 06 | NOT_RUN |
+U01/U02/U03 saved once with own readback and no recovery panel, then posted three normal messages. U04 save returned503 RETRYABLE_SERVER_ERROR, reference `aeab073d-a4d8-46b6-9d25-b2f9251909d5`; own reopening confirmed NOT_STARTED/3 answered. Exact-reference log says FAILED. The new decision-storage diagnostic did not fire, pointing before that path; exact underlying SDK cause remains unverified. No save replay, outcome, approval or assistant request. Browser closed normally.
 
-Serving: sourceceeebfa3 / API9585f4e7 / worker8599e4ce / frontend152. Live evidence and credential readiness are recorded in the summary; a documentation commit is not a serving release.
-
-Last confirmed action: U01.createDecision.a73b46. In flight: U01.saveAnswer.e29521.
-
-Observed UI requests: {"outcome":0,"assistant":0,"aiDraft":1,"plainPosts":0}. Provider calls/tokens/billed cost: UNKNOWN unless separately recorded.
-
-
-
-[Summary](summary.json) · [Events](events.jsonl)
+The partial decision, acknowledged answers and AI draft remain preserved. Repair continues with condition-only retention-barrier recovery and safe gate-stage diagnostics. [Correlated readback](../repair-20261020/first-qualification-save-failure.json), [repair](../repair-20261020/report.md), [summary](summary.json), [events](events.jsonl). This failed run is not relabeled as passing.

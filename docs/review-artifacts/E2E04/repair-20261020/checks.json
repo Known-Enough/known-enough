@@ -25,5 +25,12 @@
     },
     "billedCost": "UNKNOWN"
   },
-  "recorderSyntax": "PASS"
+  "recorderSyntax": "PASS",
+  "retentionGateFollowup": {
+    "focusedPassed": 210,
+    "skippedBaseline": 1,
+    "typescript": "PASS",
+    "changedSourceLint": "PASS",
+    "firstLiveQualification": "FAIL at U04 save; exact-reference evidence retained"
+  }
 }

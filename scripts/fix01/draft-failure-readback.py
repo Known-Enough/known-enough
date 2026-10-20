@@ -13,7 +13,7 @@ UUID = re.compile(r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12
 EVENTS = {'FIX01_PUBLIC_DRAFT_FAILURE', 'FIX01_PUBLIC_DRAFT_DIAGNOSTIC', 'PUBLIC_DRAFT_HTTP_RESULT', 'PRIVATE_ANSWERS_HTTP_RESULT', 'known-enough.decision-storage',
           'known-enough.group-request', 'known-enough.group-result', 'known-enough.group-failure',
           'known-enough.account-failure', 'known-enough.account-lookup-repair-deferred', 'known-enough.storage-read',
-          'partition-storage-transition', 'known-enough.gateway-failure'}
+          'partition-storage-transition', 'known-enough.gateway-failure', 'known-enough.private-answer-gate'}
 GROUP_OPERATIONS = {'group.create', 'group.list', 'group.open', 'group.accept', 'group.invite', 'group.manage', 'group.draft', 'group.delete', 'account.read', 'account.status', 'account.register'}
 TYPES = {'string', 'number', 'boolean', 'object', 'array', 'null', 'missing', 'integer', 'int', 'unknown'}
 CODES = {'invalid_type', 'invalid_value', 'invalid_union', 'unrecognized_keys', 'too_small', 'too_big', 'invalid_format', 'not_multiple_of', 'custom'}
@@ -102,7 +102,7 @@ try:
         filter_pattern = '"' + request_id + '"' if request_id else (
             '{ $.event = "FIX01_PUBLIC_DRAFT_FAILURE" || $.event = "known-enough.group-failure" '
             '|| $.event = "known-enough.account-failure" || $.event = "known-enough.account-lookup-repair-deferred" '
-            '|| $.event = "known-enough.storage-read" || $.event = "known-enough.decision-storage" '
+            '|| $.event = "known-enough.storage-read" || $.event = "known-enough.decision-storage" || $.event = "known-enough.private-answer-gate" '
             '|| $.event = "partition-storage-transition" '
             '|| $.event = "known-enough.gateway-failure" '
             '|| ($.event = "PUBLIC_DRAFT_HTTP_RESULT" && $.result = "FAILED") '
@@ -167,7 +167,13 @@ try:
                 item['diagnostics'] = diagnostics
             if value.get('result') in {'SAVED', 'FAILED'}:
                 item['result'] = value['result']
-            if value['event'] in {'known-enough.storage-read', 'known-enough.decision-storage'}:
+            if value['event'] in {'known-enough.storage-read', 'known-enough.decision-storage', 'known-enough.private-answer-gate'}:
+                if value.get('gateStage') in {'ACKNOWLEDGE', 'ASSERT_RETAINED'}:
+                    item['gateStage'] = value['gateStage']
+                if value.get('gateCode') in {'LIFECYCLE_INVALID', 'LIFECYCLE_POLICY_DENIED', 'LIFECYCLE_AUTHORITY_DENIED',
+                        'LIFECYCLE_EXPIRED', 'LIFECYCLE_SOURCE_CHANGED', 'LIFECYCLE_TIMEOUT', 'LIFECYCLE_REQUEST_LIMIT',
+                        'PARTITION_TIMEOUT', 'PARTITION_REQUEST_LIMIT'}:
+                    item['gateCode'] = value['gateCode']
                 if value['event'] == 'known-enough.decision-storage' and value.get('phase') in {'READ', 'WRITE'}:
                     item['phase'] = value['phase']
                 if value.get('command') == 'TransactGetItems' and value.get('stage') == 'ACTIVATION':
@@ -179,13 +185,13 @@ try:
                 if value.get('errorType') in {'TransactionCanceledException', 'TransactionConflictException', 'AccessDeniedException',
                         'ResourceNotFoundException', 'ProvisionedThroughputExceededException', 'ThrottlingException',
                         'RequestLimitExceeded', 'InternalServerError', 'ValidationException', 'AbortError', 'OTHER',
-                        'ConditionalCheckFailedException', 'TransactionInProgressException'}:
+                        'ConditionalCheckFailedException', 'TransactionInProgressException', 'PartitionLifecycleError', 'PartitionStorageError'}:
                     item['errorType'] = value['errorType']
                 if isinstance(value.get('cancellationCodes'), list):
                     allowed = {'None', 'TransactionConflict', 'ConditionalCheckFailed', 'ProvisionedThroughputExceeded',
                                'ThrottlingError', 'ValidationError', 'ItemCollectionSizeLimitExceeded', 'OTHER'}
                     item['cancellationCodes'] = [code if isinstance(code, str) and code in allowed else 'OTHER'
-                                                 for code in value['cancellationCodes'][:100 if value['event'] == 'known-enough.decision-storage' else 3]]
+                                                 for code in value['cancellationCodes'][:3 if value['event'] == 'known-enough.storage-read' else 100]]
                 if bounded_number(value.get('cancellationCount'), 100) is not None:
                     item['cancellationCount'] = value['cancellationCount']
             if value.get('draftOperation') in {'GENERATE', 'EDIT', 'CREATE'}:
