@@ -1800,20 +1800,45 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 .ke-group-filter button.ke-hidden-groups-toggle { min-height: 32px; margin: 0; padding: 6px 9px; font-size: 11px; white-space: nowrap; }
 .ke-hidden-group-label { display: inline-block; margin-left: 8px; font-size: 10px; font-weight: 400; opacity: .65; }
 
-/* Consistent member cards; override generic filled button styling in both themes. */
-.ke-members-panel .ke-member-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); align-items: stretch; gap: 12px; list-style: none; }
-.ke-members-panel .ke-member-list > li { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 6px; min-width: 0; padding: 0; border: 0; }
-.ke-home .ke-members-panel button.ke-member-profile-trigger { display: flex; align-items: center; gap: 12px; box-sizing: border-box; flex: none; width: 100%; height: 84px; min-height: 84px; margin: 0; padding: 12px 14px; border: 1px solid #dce5dc; border-radius: 12px; background: #fff; color: #173c30; text-align: left; box-shadow: none; transition: background .15s, border-color .15s; }
-.ke-home .ke-members-panel button.ke-member-profile-trigger:hover { background: #f1f6ef; border-color: #aec4b1; color: #173c30; }
-.ke-members-panel .ke-member-profile-trigger .ke-member-avatar { box-sizing: border-box; flex: 0 0 40px; width: 40px; height: 40px; min-width: 40px; min-height: 40px; overflow: hidden; background: #eff4ef; border-color: #dce5dc; color: #27533f; }
-.ke-home .ke-members-panel .ke-member-profile-trigger .ke-member-name { min-width: 0; max-height: 58px; overflow: hidden; color: #173c30; font-size: 14px; line-height: 1.35; }
-.ke-home .ke-members-panel .ke-member-profile-trigger .ke-member-role { color: #53675a; font-size: 12px; }
-.ke-members-panel .ke-member-list button.ke-remove-member { align-self: flex-start; max-width: 100%; min-height: 30px; margin: 0; padding: 5px 7px; font-size: 11px; overflow-wrap: anywhere; }
-:root[data-theme="dark"] .ke-home .ke-members-panel button.ke-member-profile-trigger { background: #1c2b21; border-color: #405244; color: #e0eee4; }
-:root[data-theme="dark"] .ke-home .ke-members-panel button.ke-member-profile-trigger:hover { background: #293d30; border-color: #68856f; color: #e0eee4; }
-:root[data-theme="dark"] .ke-home .ke-members-panel .ke-member-profile-trigger .ke-member-name { color: #e0eee4; }
-:root[data-theme="dark"] .ke-home .ke-members-panel .ke-member-profile-trigger .ke-member-role { color: #b7cabc; }
+/* Compact, searchable members; only the visible page mounts avatar readers. */
+.ke-members-panel .ke-panel-heading { margin-bottom: 14px; }
+.ke-members-panel .ke-member-count { color: #687b6c; font-weight: 450; font-size: 16px; }
+.ke-members-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.ke-members-toolbar > small { margin-left: auto; color: #687b6c; font-size: 12px; white-space: nowrap; }
+.ke-member-search { width: 340px; }
+.ke-member-search input { height: 38px; padding-block: 8px; }
+.ke-members-panel .ke-member-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; gap: 10px; list-style: none; }
+.ke-members-panel .ke-member-list > li { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 3px; box-sizing: border-box; min-width: 0; min-height: 64px; padding: 5px; border: 1px solid #dce5dc; border-radius: 12px; background: #fff; transition: background .15s, border-color .15s; }
+.ke-members-panel .ke-member-list > li:hover, .ke-members-panel .ke-member-list > li:focus-within { border-color: #b5c8b7; background: #f7faf5; }
+.ke-members-panel .ke-member-list > li:focus-within { position: relative; z-index: 2; }
+.ke-home .ke-members-panel button.ke-member-profile-trigger { display: flex; align-items: center; gap: 9px; box-sizing: border-box; flex: 1; min-width: 0; width: auto; min-height: 48px; height: auto; margin: 0; padding: 5px; border: 0; border-radius: 8px; background: transparent; color: #173c30; text-align: left; box-shadow: none; text-decoration: none; }
+.ke-home .ke-members-panel button.ke-member-profile-trigger:hover { background: transparent; color: #173c30; text-decoration: none; }
+.ke-members-panel .ke-member-profile-trigger .ke-member-avatar { box-sizing: border-box; flex: 0 0 36px; width: 36px; height: 36px; min-width: 36px; min-height: 36px; overflow: hidden; background: #eff4ef; border-color: #dce5dc; color: #27533f; }
+.ke-home .ke-members-panel .ke-member-profile-trigger .ke-member-name { flex: 1; min-width: 0; max-height: none; color: #173c30; font-size: 13px; line-height: 1.35; }
+.ke-member-display-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ke-home .ke-members-panel .ke-member-profile-trigger .ke-member-role { color: #687b6c; font-size: 11px; }
+.ke-home .ke-members-panel button.ke-member-menu-trigger { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 32px; height: 32px; min-height: 32px; margin: 0; padding: 7px; border: 0; border-radius: 8px; background: transparent; color: #687b6c; box-shadow: none; }
+.ke-home .ke-members-panel button.ke-member-menu-trigger:hover { background: #eaf1e8; color: #173c30; }
+.ke-member-menu-trigger svg { width: 17px; height: 17px; }
+.ke-home .ke-members-panel button.ke-member-profile-trigger:focus-visible, .ke-home .ke-members-panel button.ke-member-menu-trigger:focus-visible { outline: 2px solid #6c9575; outline-offset: 1px; }
+.ke-member-actions-menu { width: 182px; }
+.ke-members-pagination { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 16px 0 4px; }
+.ke-members-pagination > span { color: #687b6c; font-size: 12px; white-space: nowrap; }
+.ke-home .ke-members-panel .ke-members-pagination button { min-height: 34px; margin: 0; padding: 6px 11px; border-radius: 8px; font-size: 12px; }
+.ke-member-empty { padding: 24px 12px; text-align: center; color: #687b6c; }
+.ke-member-empty h3 { margin: 0 0 6px; color: #173c30; font-size: 15px; }
+.ke-member-empty p { margin: 0 0 12px; font-size: 13px; }
+.ke-member-empty button { min-height: 34px; margin: 0; padding: 6px 11px; font-size: 12px; }
+:root[data-theme="dark"] .ke-members-panel .ke-member-list > li { background: #1c2b21; border-color: #405244; }
+:root[data-theme="dark"] .ke-members-panel .ke-member-list > li:hover, :root[data-theme="dark"] .ke-members-panel .ke-member-list > li:focus-within { background: #24362a; border-color: #637e6b; }
+:root[data-theme="dark"] .ke-home .ke-members-panel button.ke-member-profile-trigger, :root[data-theme="dark"] .ke-home .ke-members-panel button.ke-member-profile-trigger:hover { background: transparent; color: #e0eee4; }
+:root[data-theme="dark"] .ke-home .ke-members-panel .ke-member-profile-trigger .ke-member-name, :root[data-theme="dark"] .ke-member-empty h3 { color: #e0eee4; }
+:root[data-theme="dark"] .ke-home .ke-members-panel .ke-member-profile-trigger .ke-member-role, :root[data-theme="dark"] .ke-members-panel .ke-member-count, :root[data-theme="dark"] .ke-members-toolbar > small, :root[data-theme="dark"] .ke-members-pagination > span, :root[data-theme="dark"] .ke-member-empty { color: #b7cabc; }
 :root[data-theme="dark"] .ke-members-panel .ke-member-profile-trigger .ke-member-avatar { background: #304536; border-color: #55705d; color: #deeee1; }
+:root[data-theme="dark"] .ke-home .ke-members-panel button.ke-member-menu-trigger { background: transparent; color: #b7cabc; }
+:root[data-theme="dark"] .ke-home .ke-members-panel button.ke-member-menu-trigger:hover { background: #304536; color: #e0eee4; }
+@media (max-width: 920px) { .ke-members-panel .ke-member-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .ke-members-panel .ke-member-list { grid-template-columns: minmax(0, 1fr); } .ke-members-toolbar { flex-wrap: wrap; gap: 8px; } .ke-member-search { width: 100%; } .ke-home .ke-members-panel button.ke-member-menu-trigger { width: 38px; height: 38px; } }
 
 .ke-response-person .ke-member-avatar { box-sizing: border-box; flex: 0 0 29px; width: 29px; height: 29px; min-width: 29px; min-height: 29px; font-size: 11px; }
 .ke-response-person .ke-member-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }

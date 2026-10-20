@@ -1,6 +1,6 @@
 import { readDecisionListStatus, type DecisionListStatus } from './decision-list-status';
 import { Modal } from './modal';
-import { MemberAvatar } from './member-avatar';
+import { GroupMembers } from './group-members';
 import { RenameAction } from './rename-action';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GroupDecisions } from './group-decisions';
@@ -443,24 +443,13 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
           </section>
 
           <div className="ke-group-panels">
-            <section className="ke-card ke-group-panel ke-members-panel" aria-labelledby={`members-heading-${group.id}`}>
-              <header className="ke-panel-heading">
-                <div><h2 id={`members-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="Users" /></span><span>Members</span></h2><p className="ke-panel-subtitle">Manage members and membership changes.</p></div>
-                <span className="ke-count-badge" aria-label={`${group.members.length} members`}>{group.members.length}</span>
-              </header>
-              <ul className="ke-member-list">{group.members.map(member => <li key={member.id}>
-                <button type="button" className="ke-member-profile-trigger" aria-label={`View ${member.displayName}'s profile`}
-                  onClick={event => { profileTriggerRef.current = event.currentTarget; setProfileTarget({ kind: 'member', groupId: group.id, memberId: member.id }); }}>
-                  <MemberAvatar api={api} groupId={group.id} memberId={member.id} name={member.displayName} revision={avatarRevision} />
-                  <span className="ke-member-name">{member.displayName}{member.isOrganizer && <span className="ke-member-role">Organizer</span>}</span>
-                </button>
-                {group.isOrganizer && !member.isOrganizer && <button type="button" className="secondary ke-remove-member" disabled={busy}
-                  onClick={() => void action(`/groups/${group.id}/remove`, { memberId: member.id, version: group.version })}>Remove {member.displayName}</button>}
-              </li>)}</ul>
-              <details className="ke-membership-note"><summary>About membership changes</summary>
-                <p>Joining the group leaves existing decisions unchanged. The organizer can include new people in an ongoing decision without resetting earlier answers. Finished decisions keep their outcome. Removing members still requires the existing decision review.</p>
-              </details>
-            </section>
+            <GroupMembers key={group.id} group={group} api={api} revision={avatarRevision} busy={busy}
+              onProfile={(memberId, trigger) => { profileTriggerRef.current = trigger; setProfileTarget({ kind: 'member', groupId: group.id, memberId }); }}
+              onRemove={memberId => {
+                if (group.isOrganizer && group.members.some(member => member.id === memberId && !member.isOrganizer)) {
+                  void action(`/groups/${group.id}/remove`, { memberId, version: group.version });
+                }
+              }} />
 
             <GroupDecisions group={group} api={api} reload={load} openDecision={openDecision} onDirtyChange={reportChildDirty} startCollapsed />
 
