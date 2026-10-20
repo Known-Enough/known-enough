@@ -285,9 +285,13 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
   const hiddenGroupCount = groups.filter(group => !group.isOrganizer && hiddenGroups.includes(group.id)).length;
   const visibleGroups = groups.filter(group => group.isOrganizer || showHiddenGroups || !hiddenGroups.includes(group.id));
   const filteredGroups = visibleGroups.filter(group => group.name.toLocaleLowerCase().includes(groupFilter.trim().toLocaleLowerCase()));
+  // Partition each section by existing action status, retaining the API order within each priority.
+  const prioritize = (items: Groups.GroupSnapshot[]) => [
+    ...items.filter(group => !!groupActions[group.id]), ...items.filter(group => !groupActions[group.id]),
+  ];
   const groupSections = [
-    { heading: 'Groups you own', groups: filteredGroups.filter(group => group.isOrganizer) },
-    { heading: 'Groups you’re a member of', groups: filteredGroups.filter(group => !group.isOrganizer) },
+    { heading: 'Groups you own', groups: prioritize(filteredGroups.filter(group => group.isOrganizer)) },
+    { heading: 'Groups you’ve joined', groups: prioritize(filteredGroups.filter(group => !group.isOrganizer)) },
   ].filter(section => section.groups.length > 0);
   if (checking && !available) return <LoadingSkeleton kind={selectedGroupId ? 'group' : 'groups'} label={selectedGroupId ? 'Opening your group' : 'Loading your groups'}
     className={selectedGroupId ? 'ke-group-route-loading' : 'ke-group-home'} />;
@@ -301,7 +305,7 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
   return <section className={(selectedGroupId ? 'ke-group-page' : 'ke-group-home') + ' ke-load-reveal'} aria-busy={busy || checking}>
     {!selectedGroupId && <div className="ke-section-heading ke-groups-heading">
       <div className="ke-section-title"><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="UsersRound" /></span>
-        <div><h2>{account?.status === 'APPROVED' ? 'Your groups' : 'Account access'}</h2>
+        <div><h1>{account?.status === 'APPROVED' ? 'Decision groups' : 'Account access'}</h1>
           {account?.status === 'APPROVED' && <p>Open a group or start a new one.</p>}</div></div>
       <div className="ke-section-actions">
         {account?.status === 'APPROVED' && <button type="button" className={`ke-create-group-action${creating ? ' secondary' : ''}`} disabled={busy || checking}
@@ -349,8 +353,8 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
           <input ref={groupSearch} id="group-filter" type="search" aria-label="Search groups" placeholder="Search groups..." value={groupFilter} onChange={event => setGroupFilter(event.target.value)} />
           {!!groupFilter && <button type="button" className="ke-group-search-clear" aria-label="Clear group search" title="Clear search" onClick={clearGroupFilter}><PageIcon name="X" /></button>}
         </div>
-        {hiddenGroupCount > 0 && <button type="button" className="secondary ke-hidden-groups-toggle" aria-pressed={showHiddenGroups} onClick={() => setShowHiddenGroups(value => !value)}>{showHiddenGroups ? 'Hide hidden groups' : `Show hidden (${hiddenGroupCount})`}</button>}
         <small role="status">{groupFilter.trim() && filteredGroups.length !== visibleGroups.length ? `${filteredGroups.length} of ${visibleGroups.length} groups` : `${visibleGroups.length} ${visibleGroups.length === 1 ? 'group' : 'groups'}`}</small>
+        {hiddenGroupCount > 0 && <button type="button" className="secondary ke-hidden-groups-toggle" aria-pressed={showHiddenGroups} onClick={() => setShowHiddenGroups(value => !value)}>{showHiddenGroups ? 'Hide hidden groups' : `Show hidden (${hiddenGroupCount})`}</button>}
       </div>}
       {!!groups.length && !filteredGroups.length && <div className="ke-group-search-empty" role="status">
         <PageIcon name="Search" /><h3>{visibleGroups.length ? 'No matching groups' : 'Your groups are hidden'}</h3><p>{visibleGroups.length ? 'Try another name or clear your search to see all groups.' : 'You’re still a member of hidden groups. Show them again whenever you want.'}</p>

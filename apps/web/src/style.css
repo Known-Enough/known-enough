@@ -1868,3 +1868,75 @@ dialog[data-standard-close] h2 { padding-right: 30px; }
 @keyframes ke-decision-saving-spin { to { transform: rotate(360deg); } }
 :root[data-theme="dark"] .ke-decision-saving { background: #253c2d; border-color: #405c49; color: #bfdcc8; }
 @media (prefers-reduced-motion: reduce) { .ke-decision-saving > span { animation: none; } }
+
+/* Compact authenticated groups dashboard; public entry and detail routes keep their chrome. */
+.ke-home.ke-groups-dashboard { max-width: 1180px; padding-top: 12px; }
+.ke-home.ke-groups-dashboard .ke-masthead { min-height: 64px; border-bottom: 1px solid #dfe5dc; }
+.ke-groups-dashboard .ke-brand { gap: 10px; font-size: 14px; letter-spacing: .08em; }
+.ke-groups-dashboard .ke-brand img { width: 42px; height: 42px; }
+.ke-groups-dashboard .ke-header-actions { display: flex; align-items: center; gap: 10px; }
+.ke-groups-dashboard .ke-group-home { padding-top: 30px; }
+.ke-groups-dashboard .ke-groups-heading { align-items: center; gap: 16px; margin-bottom: 22px; }
+.ke-groups-dashboard .ke-section-title > .ke-heading-icon { display: none; }
+.ke-groups-dashboard .ke-groups-heading h1 { margin: 0; color: #173c30; font-size: 32px; font-weight: 650; line-height: 1.2; letter-spacing: -.035em; }
+.ke-groups-dashboard .ke-section-title p { margin-top: 6px; font-size: 13px; }
+.ke-groups-dashboard .ke-section-actions { gap: 6px; }
+.ke-groups-dashboard .ke-group-home > fieldset { gap: 16px; }
+.ke-groups-dashboard .ke-group-filter { gap: 14px; margin: 0; }
+.ke-groups-dashboard .ke-group-filter .ke-group-search { width: 320px; border-radius: 9px; }
+.ke-groups-dashboard .ke-group-filter .ke-group-search input { height: 38px; }
+.ke-groups-dashboard .ke-group-filter > small { margin-left: 0; color: #65766b; font-size: 12px; }
+.ke-groups-dashboard .ke-group-filter .ke-hidden-groups-toggle { margin-left: auto; }
+.ke-groups-dashboard .ke-group-sections { gap: 22px; }
+.ke-groups-dashboard .ke-group-section { gap: 6px; }
+.ke-groups-dashboard .ke-group-section > h3 { padding: 0 12px; color: #64766a; font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+.ke-groups-dashboard .ke-group-list { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.ke-groups-dashboard .ke-group-row { gap: 8px; padding: 4px 8px 4px 12px; border-radius: 10px; }
+.ke-groups-dashboard .ke-group-row + .ke-group-row { border-top-color: #e4e9e2; }
+.ke-groups-dashboard .ke-group-row:hover, .ke-groups-dashboard .ke-group-row:focus-within { background: #fff; }
+.ke-groups-dashboard .ke-group-row-open { min-height: 50px !important; gap: 12px; padding: 5px 0 !important; }
+.ke-groups-dashboard .ke-group-row-icon { width: 32px; height: 32px; border: 0; border-radius: 9px; background: #eaf0e8; }
+.ke-groups-dashboard .ke-group-row-icon svg { width: 18px; height: 18px; }
+.ke-groups-dashboard .ke-group-row-copy { display: flex; align-items: center; gap: 24px; }
+.ke-groups-dashboard .ke-group-row-name { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; }
+.ke-groups-dashboard .ke-group-row-meta { flex: none; min-width: 142px; font-size: 12px; }
+.ke-groups-dashboard .ke-group-row-open > .ke-group-action-chip { max-width: 34%; font-size: 11px; }
+.ke-groups-dashboard .ke-dashboard-invitations { margin-bottom: 0; padding: 16px; border-radius: 12px; box-shadow: none; }
+.ke-groups-dashboard .ke-dashboard-privacy { margin-top: 30px; }
+.ke-home.ke-groups-dashboard .ke-dashboard-privacy .ke-privacy-bar { margin: 0; border: 0; border-top: 1px solid #dfe5dc; border-radius: 0; background: transparent; box-shadow: none; font-size: 12px; }
+.ke-groups-dashboard .ke-dashboard-privacy .ke-privacy-bar summary { justify-content: flex-start; gap: 12px; padding: 14px 0; color: #64766a; font-weight: 500; }
+.ke-groups-dashboard .ke-dashboard-privacy .ke-heading-icon { width: 22px; height: 22px; background: transparent; }
+.ke-groups-dashboard .ke-dashboard-privacy .ke-heading-icon svg { width: 16px; height: 16px; }
+.ke-groups-dashboard .ke-dashboard-privacy .ke-privacy-bar p { padding: 0 0 14px; font-size: 12px; }
+:root[data-theme="dark"] .ke-home.ke-groups-dashboard .ke-masthead { border-color: var(--ke-dark-border); }
+:root[data-theme="dark"] .ke-groups-dashboard .ke-groups-heading h1 { color: var(--ke-dark-text); }
+:root[data-theme="dark"] .ke-groups-dashboard .ke-group-filter > small,
+:root[data-theme="dark"] .ke-groups-dashboard .ke-group-section > h3,
+:root[data-theme="dark"] .ke-groups-dashboard .ke-dashboard-privacy .ke-privacy-bar summary { color: var(--ke-dark-muted); }
+:root[data-theme="dark"] .ke-groups-dashboard .ke-group-list { background: transparent; border: 0; box-shadow: none; }
+:root[data-theme="dark"] .ke-groups-dashboard .ke-group-row + .ke-group-row { border-top-color: var(--ke-dark-border); }
+:root[data-theme="dark"] .ke-groups-dashboard .ke-group-row:hover,
+:root[data-theme="dark"] .ke-groups-dashboard .ke-group-row:focus-within { background: var(--ke-dark-hover-surface); }
+:root[data-theme="dark"] .ke-groups-dashboard .ke-group-row-icon { color: var(--ke-dark-green-text); background: var(--ke-dark-soft); }
+:root[data-theme="dark"] .ke-home.ke-groups-dashboard .ke-dashboard-privacy .ke-privacy-bar { background: transparent; border-top-color: var(--ke-dark-border); }
+@media (max-width: 700px) {
+  .ke-home.ke-groups-dashboard { padding: 8px 18px 32px; }
+  .ke-groups-dashboard .ke-group-home { padding-top: 24px; }
+  .ke-groups-dashboard .ke-groups-heading { gap: 12px; margin-bottom: 18px; }
+  .ke-groups-dashboard .ke-groups-heading h1 { font-size: 28px; }
+  .ke-groups-dashboard .ke-group-row-copy { display: grid; gap: 3px; }
+  .ke-groups-dashboard .ke-group-row-meta { min-width: 0; font-size: 11px; }
+  .ke-groups-dashboard .ke-group-row-open > .ke-group-action-chip { max-width: 36%; font-size: 10px; }
+}
+@media (max-width: 480px) {
+  .ke-groups-dashboard .ke-brand { gap: 7px; font-size: 12px; letter-spacing: .05em; }
+  .ke-groups-dashboard .ke-brand img { width: 38px; height: 38px; }
+  .ke-groups-dashboard .ke-header-actions { gap: 5px; }
+  .ke-groups-dashboard .ke-groups-heading { align-items: flex-start; }
+  .ke-groups-dashboard .ke-section-title { flex-basis: 100%; }
+  .ke-groups-dashboard .ke-section-actions { margin-left: auto; }
+  .ke-groups-dashboard .ke-group-filter .ke-group-search { flex: 1 0 100%; width: 100%; }
+  .ke-groups-dashboard .ke-group-row { padding-inline: 6px; }
+  .ke-groups-dashboard .ke-group-row-open { gap: 8px; }
+  .ke-groups-dashboard .ke-group-row-icon { display: none; }
+}
