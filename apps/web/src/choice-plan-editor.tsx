@@ -29,7 +29,7 @@ export function ChoicePlanEditor({ plan, onChange, busy }: {
         <details><summary>Topic details</summary><div className="ke-choice-topic-fields">
           <label>Topic name<input maxLength={120} value={topic.label} onChange={event => change(index, { label: event.target.value })} /></label>
           <label>Options format<select value={topic.kind} onChange={event => change(index, { kind: event.target.value as 'CHOICE' | 'DATE' })}>
-            <option value="CHOICE">Names</option><option value="DATE">Exact dates</option></select></label>
+            <option value="CHOICE">Text options</option><option value="DATE">Exact dates</option></select></label>
           <button type="button" className="ke-text-link" onClick={() => onChange({ ...plan, topics: plan.topics.filter((_topic, at) => at !== index) })}>Remove topic</button>
         </div></details>
       </div>
@@ -42,7 +42,7 @@ export function ChoicePlanEditor({ plan, onChange, busy }: {
             placeholder={topic.kind === 'DATE' ? 'YYYY-MM-DD' : 'Name this option'} onChange={event => change(index, { options: topic.options.map((value, oi) => oi === at ? event.target.value : value) })} />
           <button type="button" className="ke-option-edit ke-text-link" aria-label={`Edit option ${at + 1} for ${topic.label}`} onClick={() => { const input = document.getElementById(fieldId) as HTMLInputElement | null; input?.focus(); if (topic.kind !== 'DATE') input?.select(); }}><PageIcon name="Pencil" /><span>Edit</span></button>
           <button type="button" className="ke-option-remove ke-text-link" aria-label={`Remove option ${at + 1} for ${topic.label}`} onClick={() => change(index, { options: topic.options.filter((_value, oi) => oi !== at) })}><PageIcon name="X" /><span className="ke-sr-only">Remove</span></button>
-        </div>{duplicate && <small role="alert">This option is already listed.</small>}{!option.trim() && <small>Name this option or remove it.</small>}</div>;
+        </div>{duplicate && <small role="alert">This option is already listed.</small>}{!option.trim() && <small>Add a value for this option, or remove it.</small>}</div>;
       })}</div>
       {topic.kind === 'DATE' && <small>Choose the dates your group will consider.</small>}
       <button type="button" className="ke-text-link ke-icon-action" disabled={busy || topic.options.length >= 16} onClick={() => addOption(index)}><PageIcon name="Plus" />Add option</button>

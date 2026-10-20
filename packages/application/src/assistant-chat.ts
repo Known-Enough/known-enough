@@ -33,35 +33,35 @@ function valueLabel(frame: KE.PublicDecisionFrame, variable: KE.PublicDecisionFr
 export function renderChatPlan(raw: unknown, context: ChatContext, scope: Chat.Scope): string {
   const plan = Chat.Plan.parse(raw), summary = context.summary;
   const remaining = Math.max(0, summary.requiredApprovals - summary.approved);
-  const approvals = `${summary.approved} of ${summary.requiredApprovals} required approvals are recorded. ${remaining} required approval${remaining === 1 ? ' remains' : 's remain'}.`;
+  const approvals = `${summary.approved} of ${summary.requiredApprovals} required participants have approved. ${remaining} required approval${remaining === 1 ? ' remains' : 's remain'}.`;
   const choices = summary.proposalId ? '\n' + summary.choices.map(choice => `${choice.topic}: ${choice.option}`).join('\n') : '';
-  const status = summary.status === 'AGREED' ? 'The decision is agreed.' : summary.status === 'CLOSED' ? 'The decision is closed.'
-    : summary.proposalId ? 'There is a proposal to review; it is not an agreed outcome.'
-      : summary.status === 'REASONING' ? 'The app is finding an outcome from the saved answers.' : 'There is no shared outcome yet.';
+  const status = summary.status === 'AGREED' ? 'All required participants have agreed to this proposal.' : summary.status === 'CLOSED' ? 'The decision is closed.'
+    : summary.proposalId ? 'A proposal is ready to review. It hasn’t been agreed yet.'
+      : summary.status === 'REASONING' ? 'We’re finding an outcome from the saved answers.' : 'There’s no proposal yet.';
   let answer: string;
   switch (plan.focus) {
     case 'PROGRESS': {
       const waiting = summary.participants.filter(person => person.answered === false).map(person => person.name);
       answer = status + choices + '\n' + approvals + (waiting.length ? `\n${waiting.length} ${waiting.length === 1 ? 'person still needs' : 'people still need'} to answer: ` + waiting.join(', ') + '.'
-        : summary.participants.every(person => person.answered === true) ? '\nEveryone’s answers are saved.' : '\nSome response information is unavailable.'); break;
+        : summary.participants.every(person => person.answered === true) ? '\nEveryone’s answers are saved.' : '\nWe couldn’t check everyone’s progress.'); break;
     }
-    case 'OUTCOME': answer = status + choices + '\n' + approvals + (summary.proposalId ? '' : ' Everyone can add their own answers in the decision screen.'); break;
+    case 'OUTCOME': answer = status + choices + '\n' + approvals + (summary.proposalId ? '' : ' Open the decision to add your own answers.'); break;
     case 'APPROVALS': answer = status + choices + '\n' + approvals + '\n' + summary.participants.filter(person => person.required).map(person => `${person.name}: ${person.approved ? 'approved' : 'approval pending'}`).join('\n'); break;
-    case 'EXPLAIN': answer = 'The app compares saved conditions with the shared choices. A proposal needs each required person’s explicit approval. Shared results do not explain anyone’s private reasons.'; break;
+    case 'EXPLAIN': answer = 'Known Enough compares the saved answers with the group’s options. Each required participant must approve the proposal before it becomes an agreement. You can see the result, but not other people’s private reasons.'; break;
     case 'OPTIONS': {
       const indexes = [...new Set(plan.optionIndexes)];
       if (indexes.some(index => !context.options[index])) return fail('INVALID_COMMAND');
       const choices = indexes.length ? indexes.map(index => context.options[index]!) : context.options.slice(0, 3);
-      answer = (plan.answer ? plan.answer + '\n\n' : '') + (choices.length ? 'Some existing options to consider:\n' + choices.map(choice => `• ${choice.topic}: ${choice.option}`).join('\n')
-        + '\nThese are suggestions to think about, not a result or a claim that they meet everyone’s preferences.' : 'No finite shared options are available to compare yet. You can discuss an idea here; the organizer edits the decision’s choices.'); break;
+      answer = (plan.answer ? plan.answer + '\n\n' : '') + (choices.length ? 'Options from this decision:\n' + choices.map(choice => `• ${choice.topic}: ${choice.option}`).join('\n')
+        + '\nThese are ideas to discuss. They haven’t been checked against everyone’s private answers.' : 'There are no listed options to compare yet. You can discuss ideas here and ask the organizer to add options to the decision.'); break;
     }
-    case 'REFLECT': answer = (plan.answer || 'What would help make this choice work for you?') + (scope === 'group' ? '\n\nEveryone in this decision can read Group chat. Use Private assistant for personal limits.' : ''); break;
+    case 'REFLECT': answer = (plan.answer || 'What would help make this choice work for you?') + (scope === 'group' ? '\n\nEveryone in this decision can read Decision chat. Use Private assistant for personal limits.' : ''); break;
     case 'CONVERSATION': answer = plan.answer; break;
-    case 'PRIVACY': answer = 'I cannot access another person’s private answers or explain their personal reasons. I can explain shared progress, choices and results.'; break;
-    case 'ACTION': answer = 'Use the decision screen to change answers, choices or permissions, or review and approve a proposal. Each person must make their own explicit choice; chat cannot do that for anyone.'; break;
-    case 'ACKNOWLEDGE': answer = scope === 'private' ? 'We can explore your thoughts privately. Nothing here changes your saved answers or goes into Group chat unless you choose to post it.' : 'Your message is in Group chat. Everyone in this decision can see it. I can help explain the shared choices and current progress.'; break;
+    case 'PRIVACY': answer = 'I can explain the shared options, progress and results. I can’t read anyone’s saved private answers or tell you their reasons.'; break;
+    case 'ACTION': answer = 'Open the decision to change your answers, manage sharing or review a proposal. Each person must approve for themselves; chat can’t do that for anyone.'; break;
+    case 'ACKNOWLEDGE': answer = scope === 'private' ? 'We can explore your thoughts privately. Nothing here changes your saved answers or goes into Decision chat unless you choose to post it.' : 'Your message is in Decision chat. Everyone in this decision can see it. I can help explain the shared choices and current progress.'; break;
   }
-  const prompts = { NONE: '', PRIORITY: 'What matters most to you about this choice?', TRADEOFF: 'What would you gain or give up with each option?', MUST_HAVE: 'Which part is essential for you, and which part is a preference?', FLEXIBILITY: 'Where would you feel comfortable being flexible?', COMPARE: 'Which two options would you like to compare?', NEXT_STEP: 'Would you like to look at the choices or check the current progress?' };
+  const prompts = { NONE: '', PRIORITY: 'What matters most to you about this choice?', TRADEOFF: 'What would you gain or give up with each option?', MUST_HAVE: 'What do you need, and what would simply be nice to have?', FLEXIBILITY: 'Where would you feel comfortable being flexible?', COMPARE: 'Which two options would you like to compare?', NEXT_STEP: 'Would you like to look at the choices or check the current progress?' };
   return answer + (prompts[plan.question] ? '\n\n' + prompts[plan.question] : '');
 }
 

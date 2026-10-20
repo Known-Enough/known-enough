@@ -81,9 +81,9 @@ export function ProfileModal({ api, open, target, onClose, restoreFocus, onOwner
     } catch (error) {
       if (generation.current === epoch) setNotice(error instanceof Error && error.message === 'changed'
         ? 'Your profile changed in another session. Close and reopen it before saving.'
-        : error instanceof Error && error.message === 'invalid' ? 'Check the name and bio, or choose an RGB/RGBA PNG up to 128 × 128 pixels and 16 KB.'
+        : error instanceof Error && error.message === 'invalid' ? 'Check your name and bio, or try a different photo.'
         : error instanceof Error && error.message === 'denied' ? 'Your access changed. Refresh your account before editing.'
-        : 'The save result is uncertain. Close and reopen your profile before retrying.');
+        : 'We couldn’t confirm the save. Close and reopen your profile to check before trying again.');
     } finally { if (generation.current === epoch) { setBusy(false); setSaving(false); } }
   }
 
@@ -114,7 +114,7 @@ export function ProfileModal({ api, open, target, onClose, restoreFocus, onOwner
           {editing && owner ? <form className="ke-profile-edit-form" onSubmit={event => {
             event.preventDefault(); void update('/account/profile', { version: profile.version, displayName: name, description });
           }}>
-            <label htmlFor="profile-name">Display name</label>
+            <label htmlFor="profile-name">Name shown to your groups</label>
             <input id="profile-name" value={name} maxLength={80} required disabled={busy} onChange={event => setName(event.target.value)} />
             <label htmlFor="profile-description">Bio</label>
             <textarea id="profile-description" value={description} maxLength={280} disabled={busy} onChange={event => setDescription(event.target.value)} />
@@ -122,7 +122,7 @@ export function ProfileModal({ api, open, target, onClose, restoreFocus, onOwner
               <button type="button" className="secondary ke-profile-change-photo" aria-describedby="profile-picture-help" disabled={busy} onClick={() => pictureInput.current?.click()}><PageIcon name="Camera" />Change photo</button>
               <input ref={pictureInput} id="profile-picture" className="ke-profile-file-input" type="file" accept="image/png,image/jpeg,image/webp" disabled={busy} aria-describedby="profile-picture-help" onChange={event => { void upload(event.target.files?.[0]); event.target.value = ''; }} />
               {profile.image && <button type="button" className="secondary ke-profile-remove-photo" disabled={busy} onClick={() => void update('/account/profile/image', { version: profile.version, bytesBase64: null }, true)}>Remove photo</button>}
-              <p id="profile-picture-help" className="ke-profile-helper">PNG, JPEG or WebP · up to 20 MB · resized automatically to fit the saved avatar limit</p>
+              <p id="profile-picture-help" className="ke-profile-helper">PNG, JPEG or WebP · up to 20 MB · resized automatically</p>
             </div>
             <div className="ke-profile-form-actions"><button type="submit" disabled={busy || !name.trim()}><PageIcon name="Check" />Save</button>
               <button type="button" className="secondary" disabled={busy} onClick={() => setEditing(false)}>Cancel</button></div>

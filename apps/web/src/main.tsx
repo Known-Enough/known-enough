@@ -24,5 +24,5 @@ if (configured) {
   const { App } = await import('./App');
   render(<App />);
 } else {
-  render(<main><h1>Known Enough configuration is incomplete</h1><p>Contact the staging operator.</p></main>);
+  render(<main><h1>Known Enough is temporarily unavailable</h1><p>Please try again later. If this continues, ask the preview owner for help.</p></main>);
 }

@@ -4,7 +4,7 @@ export async function avatarUpload(file: File): Promise<string> {
   if (!file.size || file.size > 20 * 1024 * 1024) throw new Error('Choose an image smaller than 20 MB.');
   const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
   try {
-    if (!bitmap.width || !bitmap.height || bitmap.width * bitmap.height > 40000000) throw new Error('Choose an image with at most 40 million pixels.');
+    if (!bitmap.width || !bitmap.height || bitmap.width * bitmap.height > 40000000) throw new Error('Choose a smaller photo, up to 40 megapixels.');
     for (const limit of [128, 112, 96, 80, 64, 48]) {
       const scale = Math.min(1, limit / Math.max(bitmap.width, bitmap.height));
       const canvas = document.createElement('canvas'); canvas.width = Math.max(1, Math.round(bitmap.width * scale)); canvas.height = Math.max(1, Math.round(bitmap.height * scale));
@@ -13,6 +13,6 @@ export async function avatarUpload(file: File): Promise<string> {
       const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error('The image could not be resized.')), 'image/png'));
       if (blob.size <= 16384) return btoa(String.fromCharCode(...new Uint8Array(await blob.arrayBuffer())));
     }
-    throw new Error('This image could not fit the avatar limit. Choose a simpler image.');
+    throw new Error('We couldn’t resize this photo. Try cropping it or choosing another image.');
   } finally { bitmap.close(); }
 }

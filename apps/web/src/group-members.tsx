@@ -101,12 +101,12 @@ export function GroupMembers({ group, api, revision, busy, onProfile, onRemove }
       <button type="button" className="secondary" disabled={currentPage === pages} onClick={() => setPage(currentPage + 1)}>Next</button>
     </nav>}
     <details className="ke-membership-note"><summary>About membership changes</summary>
-      <p>New members join unfinished decisions automatically without resetting saved answers. Finished decisions keep their outcome. Removing members keeps the existing decision review safeguards.</p>
+      <p>New members join unfinished decisions automatically. Saved answers stay in place, and finished decisions keep their outcome. Removing someone may require an update to unfinished decisions.</p>
     </details>
     <Modal ref={dialog} className="ke-delete-dialog ke-group-action-dialog" aria-labelledby={`remove-member-heading-${group.id}`}
       onCancel={event => { event.preventDefault(); if (!busy) closeRemoval(); }}>
       <h2 id={`remove-member-heading-${group.id}`}>Remove from group?</h2>
-      <p>Remove {removing?.displayName} from “{group.name}”? They will lose access to this group. Linked decisions may need a membership review.</p>
+      <p>Remove {removing?.displayName} from “{group.name}”? They will lose access to this group. You may need to update unfinished decisions to reflect who is taking part.</p>
       <div className="ke-wizard-actions"><button type="button" className="secondary" disabled={busy} onClick={closeRemoval}>Cancel</button>
         <button type="button" disabled={busy || !removing} onClick={() => {
           if (!removing || busy) return;

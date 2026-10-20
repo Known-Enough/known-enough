@@ -134,9 +134,9 @@ export function PageIcon({ name }: { name: keyof typeof pageIconShapes }) {
 }
 
 export function PrivacyBar() {
-  return <details className="ke-privacy-bar"><summary><span className="ke-privacy-label"><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="ShieldCheck" /></span><span>Privacy and preview limits</span></span></summary>
-    <p>Known Enough and its authorized AI process your private inputs. Other people see only shared choices, proposals and disclosures you authorize.
-      An outcome may still reveal something about people’s needs. Use fictional, non-sensitive data in this preview.</p>
+  return <details className="ke-privacy-bar"><summary><span className="ke-privacy-label"><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="ShieldCheck" /></span><span>Privacy in this preview</span></span></summary>
+    <p>Your group can’t read your private answers. Known Enough and its AI process them to help with the decision. Other people see shared choices, proposals and details you choose to share.
+      An outcome can still hint at someone’s needs. This is a preview: use made-up, non-sensitive information.</p>
   </details>;
 }
 

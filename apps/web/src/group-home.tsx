@@ -260,15 +260,15 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
           const errorBody = await response.clone().json() as { requestId?: unknown };
           if (typeof errorBody.requestId === 'string' && /^[A-Za-z0-9_-]{8,80}$/.test(errorBody.requestId)) reference = errorBody.requestId;
         } catch { /* The HTTP status remains useful when an error body is unavailable. */ }
-        const message = response.status === 507 ? 'This pilot has reached its capacity. Ask the operator about capacity; retrying will not free space.'
-          : response.status === 404 && /\/groups\/[^/]+\/invitations$/.test(path) ? 'We couldn’t find an approved account with that username or email. Check the sign-in username, or ask the person to sign in and refresh their account once.'
-          : response.status === 409 ? 'The group or link changed. Refresh and review before trying again.'
-          : response.status === 403 ? 'Account approval or organizer access is required.'
-          : 'This action could not be completed. Check access, the recipient and link expiry.';
+        const message = response.status === 507 ? 'This preview has reached its limit. Ask the preview owner for help.'
+          : response.status === 404 && /\/groups\/[^/]+\/invitations$/.test(path) ? 'We couldn’t find an approved account with that username or email. Check the details and make sure the person has access to this preview.'
+          : response.status === 409 ? 'This group or invitation changed. Refresh before trying again.'
+          : response.status === 403 ? 'You don’t have access to this action. Check your account access and group role.'
+          : 'We couldn’t complete this action. Check your access and any invitation details before trying again.';
         setNotice(message + (reference && /^[A-Za-z0-9_-]{8,80}$/.test(reference) ? ` Reference: ${reference}.` : '')); return;
       }
       const result = await response.json() as Record<string, unknown>; if (!mounted.current) return; if (after?.(result) !== true) await load(true);
-    } catch { setNotice('The result is unknown. Refresh to check before trying again.'
+    } catch { setNotice('We couldn’t confirm the result. Refresh to check before trying again.'
       + (requestId ? ` Reference: ${requestId}.` : '')); }
     finally { setBusy(false); }
   }
@@ -301,8 +301,8 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
   return <section className={(selectedGroupId ? 'ke-group-page' : 'ke-group-home') + ' ke-load-reveal'} aria-busy={busy || checking}>
     {!selectedGroupId && <div className="ke-section-heading ke-groups-heading">
       <div className="ke-section-title"><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="UsersRound" /></span>
-        <div><h2>{account?.status === 'APPROVED' ? 'Decision groups' : 'Account access'}</h2>
-          {account?.status === 'APPROVED' && <p>Your shared decision spaces, all in one place.</p>}</div></div>
+        <div><h2>{account?.status === 'APPROVED' ? 'Your groups' : 'Account access'}</h2>
+          {account?.status === 'APPROVED' && <p>Open a group or start a new one.</p>}</div></div>
       <div className="ke-section-actions">
         {account?.status === 'APPROVED' && <button type="button" className={`ke-create-group-action${creating ? ' secondary' : ''}`} disabled={busy || checking}
           onClick={() => setCreating(value => !value)}>{creating ? <span>Cancel</span> : <><PageIcon name="Plus" /><span>Create group</span></>}</button>}
@@ -311,10 +311,10 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
     </div>}
     <fieldset className={selectedGroupId ? 'ke-group-detail-controls' : undefined} disabled={busy || checking}
       style={{border: 0, padding: 0, minWidth: 0}} aria-label={selectedGroupId ? 'Group details and actions' : 'Account and group actions'}>
-    {available && !checking && !account && <p>Your account setup is still being completed. Refresh shortly, or contact the operator if it remains unavailable.</p>}
-    {account?.status === 'PENDING' && <p>Your account is waiting for approval. You can edit your profile while the administrator reviews access.</p>}
-    {account?.status === 'REJECTED' && <p>Your access request was declined. Contact the operator outside this app.</p>}
-    {account?.status === 'DISABLED' && <p>Your access is disabled. Group and decision actions are unavailable.</p>}
+    {available && !checking && !account && <p>We couldn’t finish setting up your account. Try refreshing. If this continues, ask the preview owner for help.</p>}
+    {account?.status === 'PENDING' && <p>Your account needs approval from the preview owner. You can edit your profile while you wait.</p>}
+    {account?.status === 'REJECTED' && <p>Your access request was declined. Ask the preview owner if you think this is a mistake.</p>}
+    {account?.status === 'DISABLED' && <p>Your account access is disabled. Ask the preview owner for help.</p>}
     {account?.status === 'APPROVED' && <>
       {!selectedGroupId && <>
       {creating && <div className="ke-create-group-form"><div><label htmlFor="new-group-name">New group name</label>
@@ -327,7 +327,7 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
         onOpenGroup(group.id); return true;
       }, status => { if ((status >= 400 && status < 500) || status === 507) groupRequest.current = null; }, pending.requestId); }}>Create group</button></div>}
       {!groups.length && <div className="ke-empty-state"><span className="ke-state-icon"><GroupIcon /></span><h3>No groups yet.</h3><p>Start a group with the people you want to decide with, or accept an invitation.</p></div>}
-      {token && <><p>A group invitation is waiting. Accepting joins the group; it does not confirm a decision or approve a proposal.</p>
+      {token && <><p>You’ve been invited to a group. Accepting joins the group; it doesn’t approve any proposal.</p>
         <button disabled={busy} onClick={() => void action('/groups/accept', { token }, result => { const group = Groups.GroupSnapshot.parse(result.group); setToken(''); sessionStorage.removeItem('ke-group-invite'); onOpenGroup(group.id); return true; })}>Accept group invitation</button>
         <button className="secondary" onClick={() => { setToken(''); sessionStorage.removeItem('ke-group-invite'); }}>Decline group invitation</button></>}
       {(invitations.length > 0 || invitationFailure) && <section className="ke-card ke-dashboard-invitations" aria-labelledby="pending-invitations-heading">
@@ -353,7 +353,7 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
         <small role="status">{groupFilter.trim() && filteredGroups.length !== visibleGroups.length ? `${filteredGroups.length} of ${visibleGroups.length} groups` : `${visibleGroups.length} ${visibleGroups.length === 1 ? 'group' : 'groups'}`}</small>
       </div>}
       {!!groups.length && !filteredGroups.length && <div className="ke-group-search-empty" role="status">
-        <PageIcon name="Search" /><h3>{visibleGroups.length ? 'No matching groups' : 'Your groups are hidden'}</h3><p>{visibleGroups.length ? 'Try another name or clear your search to see all groups.' : 'Hidden groups stay joined. You can show them again at any time.'}</p>
+        <PageIcon name="Search" /><h3>{visibleGroups.length ? 'No matching groups' : 'Your groups are hidden'}</h3><p>{visibleGroups.length ? 'Try another name or clear your search to see all groups.' : 'You’re still a member of hidden groups. Show them again whenever you want.'}</p>
         <button type="button" className="secondary" onClick={visibleGroups.length ? clearGroupFilter : () => { setGroupFilter(''); setShowHiddenGroups(true); }}>{visibleGroups.length ? 'Clear search' : 'Show hidden groups'}</button>
       </div>}
       {!!filteredGroups.length && <div className="ke-group-sections">{groupSections.map(section => <section className="ke-group-section" key={section.heading}>
@@ -425,7 +425,7 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
         return <div className="ke-group-detail-stack" key={group.id}>
           <section className="ke-card ke-group-overview" aria-label="Group overview">
             <div className="ke-group-overview-copy">
-              <p className="ke-eyebrow"><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="UsersRound" /></span><span>GROUP OVERVIEW</span></p>
+              <p className="ke-eyebrow"><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="UsersRound" /></span><span>Your group</span></p>
               <h2>{group.name}</h2>{group.isOrganizer && <RenameAction name={group.name} save={async name => {
                 const response = await api(`/groups/${group.id}/name`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ version: group.version, previousName: group.name, name }) });
                 if (!response.ok) throw new Error('unavailable'); await load();
@@ -455,7 +455,7 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
 
             {group.isOrganizer && <section className="ke-card ke-group-panel ke-invitations-panel" aria-labelledby={`invitations-heading-${group.id}`}>
               <header className="ke-panel-heading"><div><h2 id={`invitations-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="Mail" /></span><span>Invite someone</span></h2>
-                <p className="ke-panel-subtitle">Enter their Known Enough username or verified email.</p></div></header>
+                <p className="ke-panel-subtitle">Use their Known Enough username or verified email. They’ll see the invitation in the app.</p></div></header>
               <div className="ke-invitation-form">
                 <div className="ke-invitation-email"><label htmlFor={`group-recipient-${group.id}`}>Username or email</label>
                   <input id={`group-recipient-${group.id}`} type="text" autoComplete="off" value={recipient} maxLength={254}
@@ -466,11 +466,11 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
                 })}><PageIcon name="UserRoundPlus" />Send invitation</button>
               </div>
               {link && <div className="ke-invitation-result" role="status">
-                <p>Invitation created. Have them check Invitations for you on their Groups page. If they don’t see it, share the private link below with the intended person.</p>
+                <p>Invitation sent. They can accept it under Invitations for you on their groups page. You can also share the link below privately.</p>
                 <details><summary>Share an invitation link</summary>
                   <label htmlFor={`group-copy-link-${group.id}`}>Private invitation link</label>
                   <input id={`group-copy-link-${group.id}`} readOnly value={link} onFocus={event => event.currentTarget.select()} />
-                  <p>Share privately with the intended person if they need a link. It expires after 24 hours.</p>
+                  <p>Share this link only with the person you invited. It expires after 24 hours.</p>
                 </details>
               </div>}
             </section>}
@@ -493,7 +493,7 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
           } catch (error) {
             const status = error instanceof Error && /^\d+$/.test(error.message) ? Number(error.message) : 0;
             setRenameGroupNotice((status === 409 ? 'The group changed. Refresh and review its current name before trying again.'
-              : status === 403 ? 'Only the organizer can rename this group.' : 'The group name could not be saved; refresh to check its current value.') + ` Reference: ${requestId}.`);
+              : status === 403 ? 'Only the organizer can rename this group.' : 'We couldn’t confirm the new name. Refresh to check it.') + ` Reference: ${requestId}.`);
           } finally { setBusy(false); }
         })();
       }}>
@@ -509,7 +509,7 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
       aria-describedby="delete-group-description" onCancel={event => { event.preventDefault(); if (!busy) setDeleteGroupId(null); }}>
       <h2 id="delete-group-heading">Delete group?</h2>
       <p id="delete-group-description">{deleteTarget ? `Delete “${deleteTarget.name}” for everyone in the group? Members will lose access to its saved decisions and drafts.` : 'This group will be removed for all its members.'}</p>
-      <p className="ke-delete-note">This cannot be undone. Historical records are retained and the group will no longer appear in anyone’s group list.</p>
+      <p className="ke-delete-note">This cannot be undone. The group disappears from everyone’s list, but saved history is retained.</p>
       {deleteGroupNotice && <><p role="status">{deleteGroupNotice}</p>
         <button type="button" className="secondary" disabled={busy} onClick={() => { setDeleteGroupId(null); void load(); }}>Refresh group list</button></>}
       <div className="ke-wizard-actions"><button type="button" className="secondary" disabled={busy} onClick={() => setDeleteGroupId(null)}>Keep group</button>
@@ -532,8 +532,8 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
               setDeleteGroupNotice((status === 409 ? 'The group changed. Refresh the group list before trying again.'
                 : status === 403 ? 'Only the organizer can delete this group.'
                   : status === 404 ? 'This group is unavailable or has already been deleted. Refresh the group list.'
-                    : status === 400 || status === 422 ? 'The deletion request could not be accepted. Refresh the group list before trying again.'
-                      : 'The result is unknown. Refresh the group list to check whether the group was deleted.') + ` Reference: ${reference}.`);
+                    : status === 400 || status === 422 ? 'We couldn’t delete this group. Refresh the list before trying again.'
+                      : 'We couldn’t confirm whether the group was deleted. Refresh the list to check.') + ` Reference: ${reference}.`);
             } finally { setBusy(false); }
           })();
         }}>Delete group</button></div>

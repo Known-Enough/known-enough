@@ -1,6 +1,6 @@
 import { KnownEnough as KE, publicChoiceOptions } from '@deal-table/contracts';
 const LIMIT = 64;
-const boundedQuestion = 'Please specify a smaller set of public choices or tighter value limits so every supported combination can be checked.';
+const boundedQuestion = 'Choose a few specific options, or narrow the range of values, so the preview can compare them.';
 export interface GenericCandidateCatalog {
   status: 'COMPLETE' | 'NEEDS_CLARIFICATION';
   candidates: KE.CandidateProposal['values'][];
@@ -21,9 +21,9 @@ export function genericCandidateCatalog(frame: KE.PublicDecisionFrame): GenericC
     return unique;
   });
   const unbounded = domains.findIndex(values => values === null);
-  if (unbounded >= 0) return clarify(`Set a finite list or tighter limits for “${frame.variables[unbounded]!.label.slice(0, 120)}”. Each public choice needs a bounded domain, and the complete decision must have at most ${LIMIT} combinations.`);
+  if (unbounded >= 0) return clarify(`Which specific options should the group consider for “${frame.variables[unbounded]!.label.slice(0, 120)}”? List a few choices, or give a smaller range of values. This preview can compare up to ${LIMIT} possible outcomes.`);
   const combinations = domains.reduce((count, values) => count * values!.length, 1);
-  if (combinations > LIMIT) return clarify(`These choices produce ${combinations} combinations (${domains.map(values => values!.length).join(' × ')}); the current limit is ${LIMIT}. Which one choice should we narrow? Keep your other options as they are.`);
+  if (combinations > LIMIT) return clarify(`These options create ${combinations} possible outcomes (${domains.map(values => values!.length).join(' × ')}). This preview can compare up to ${LIMIT}. Which topic could have fewer options? You can keep the other topics as they are.`);
   let candidates: KE.CandidateProposal['values'][] = [[]];
   for (let index = 0; index < domains.length; index++) candidates = candidates.flatMap(values => domains[index]!.map(value => value === null ? [...values] : [...values, { variableId: frame.variables[index]!.id, value }]));
   const definition = { ...frame, variables: frame.variables.map(variable => ({ ...variable, ownerParticipantId: null })) };
@@ -32,7 +32,7 @@ export function genericCandidateCatalog(frame: KE.PublicDecisionFrame): GenericC
     semanticVersion: frame.semanticVersion, proposalVersion: 1, values, permissionDependencies: [],
     createdAt: '2026-09-30T12:00:00.000Z', validation: { status: 'VALID', checkedRuleIds: [], failedRuleIds: [], unknownRuleIds: [], unsupportedConditionIds: [] }
   } }).success);
-  if (!candidates.length) return clarify('The public limits leave no supported choices. Adjust them and request a new draft.');
+  if (!candidates.length) return clarify('No listed option fits the group requirements. Update the options or requirements, then try a new draft.');
   return { status: 'COMPLETE', candidates, clarificationQuestion: null };
 }
 export function genericCandidates(frame: KE.PublicDecisionFrame): KE.CandidateProposal['values'][] {

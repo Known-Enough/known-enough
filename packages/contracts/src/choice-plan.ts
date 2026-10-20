@@ -21,7 +21,7 @@ export function compileChoicePlan(plan: ChoicePlan) {
     const id = `choice-${index + 1}`;
     if (topic.kind === 'DATE') {
       if (options.some(date => !KE.DecisionValue.safeParse({ type: 'DATE', date }).success)) {
-        questions.push(`Which exact dates work as options for “${label}”? Use YYYY-MM-DD, or change its type to named choices.`); continue;
+        questions.push(`Which dates should your group consider for “${label}”? Choose exact dates, or change the options format to Text options.`); continue;
       }
       variables.push({ id, label, type: 'DATE', visibility: 'PUBLIC', required: true });
       rules.push({ id: `domain-${index + 1}`, visibility: 'PUBLIC', operator: 'IN', variableId: id,
@@ -30,6 +30,6 @@ export function compileChoicePlan(plan: ChoicePlan) {
       options: options.map((label, option) => ({ id: `option-${index + 1}-${option + 1}`, label })) });
     combinations *= options.length;
   }
-  if (combinations > 64) questions.push(`These choices make ${combinations} combinations. Remove options or split the decision so there are at most 64.`);
+  if (combinations > 64) questions.push(`These choices make ${combinations} combinations of possible outcomes. Remove some options or split this into smaller decisions so there are no more than 64.`);
   return { variables, rules, questions, combinations };
 }

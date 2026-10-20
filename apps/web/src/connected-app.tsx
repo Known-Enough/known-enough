@@ -52,13 +52,13 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
   const epoch = useRef(0), abort = useRef<AbortController | null>(null), dirty = useRef(false);
   const selection = useRef({ id: '', token: '' }); selection.current = { id: view.kind === 'decision' ? view.decisionId : '', token: session?.accessToken ?? '' };
   function move(next: AppView, replace = false) {
-    if (dirty.current && !window.confirm('Leave this view and discard unsaved input?')) return;
+    if (dirty.current && !window.confirm('Leave without saving your changes?')) return;
     dirty.current = false; epoch.current++; abort.current?.abort(); setSnapshot(null); setOwner(null); setTarget(null); setStatus(''); setBusy(false);
     window.history[replace ? 'replaceState' : 'pushState'](null, '', window.location.pathname + appViewSearch(next)); setView(next);
   }
   useEffect(() => {
     const pop = () => {
-      if (dirty.current && !window.confirm('Leave this view and discard unsaved input?')) { window.history.pushState(null, '', window.location.pathname + appViewSearch(view)); return; }
+      if (dirty.current && !window.confirm('Leave without saving your changes?')) { window.history.pushState(null, '', window.location.pathname + appViewSearch(view)); return; }
       dirty.current = false; epoch.current++; abort.current?.abort(); setSnapshot(null); setOwner(null); setTarget(null); setBusy(false); setView(readAppView(window.location.search));
     };
     window.addEventListener('popstate', pop); return () => window.removeEventListener('popstate', pop);
@@ -76,7 +76,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
   }, [session]);
   const expire = useCallback(() => {
     direct.signOut(); epoch.current++; abort.current?.abort(); dirty.current = false; clearCognitoSession(); setSession(null); setSnapshot(null); setOwner(null); setTarget(null);
-    setStatus('Your session expired. Sign in again to continue.');
+    setStatus('Sign in to continue.');
   }, [direct]);
   useEffect(() => { if (!session) return; const timeout = window.setTimeout(expire, Math.max(0, session.expiresAt - Date.now() - 5000)); return () => window.clearTimeout(timeout); }, [session, expire]);
   useEffect(()=>{if(!session||session.method!=='SRP'||!direct.canRefresh())return;let active=true;const timer=window.setTimeout(()=>{void direct.refresh().then(value=>{if(active){sessionStorage.setItem('known-enough-cognito-session',JSON.stringify(value));setSession(value);}}).catch(()=>{if(active)expire();});},Math.max(0,session.expiresAt-Date.now()-60000));return()=>{active=false;window.clearTimeout(timer);};},[session,direct,expire]);
@@ -128,7 +128,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     } catch (error) { if (epoch.current === current) {
       const reference = error && typeof error === 'object' && 'reference' in error && typeof error.reference === 'string'
         && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(error.reference) ? error.reference : null;
-      setSnapshot(null); setOwner(null); setStatus('The shared decision is unavailable. Check your session or try again.'
+      setSnapshot(null); setOwner(null); setStatus('We couldn’t load this decision. Try again, or sign in again.'
         + (reference ? ` Reference: ${reference}.` : ''));
       if (session.kind === 'participant' && error && typeof error === 'object' && 'status' in error && error.status === 403) {
         try { const response = await cognitoApiFetch(config, session, '/account', expire, { signal: controller.signal });
@@ -146,9 +146,9 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     if (!target || !session || session.kind !== 'participant') return;
     const controller = new AbortController(), id = target.decisionId, token = session.accessToken; let active = true;
     void pollBackgroundDecision({ target, signal: controller.signal, api: (path, init) => cognitoApiFetch(config, session, path, expire, init),
-      accept: value => { if (active && selection.current.id === id && selection.current.token === token) { if (dirty.current) { setStatus('New progress is available. Finish or discard your input, then refresh.'); return; } setSnapshot(value.snapshot); setOwner(value.owner); } }
-    }).then(result => { if (active) { setTarget(null); if (result === 'UNAVAILABLE' || result === 'CONTEXT_CHANGED') { setSnapshot(null); setOwner(null); } if (result !== 'SETTLED' && result !== 'CANCELLED') setStatus('Automatic checking stopped. Refresh this decision for its latest result.'); } })
-      .catch(() => { if (active) { setTarget(null); setStatus('Automatic checking stopped. Refresh this decision for its latest result.'); } });
+      accept: value => { if (active && selection.current.id === id && selection.current.token === token) { if (dirty.current) { setStatus('There’s an update. Save or discard your changes, then refresh.'); return; } setSnapshot(value.snapshot); setOwner(value.owner); } }
+    }).then(result => { if (active) { setTarget(null); if (result === 'UNAVAILABLE' || result === 'CONTEXT_CHANGED') { setSnapshot(null); setOwner(null); } if (result !== 'SETTLED' && result !== 'CANCELLED') setStatus('Refresh this decision to see the latest progress.'); } })
+      .catch(() => { if (active) { setTarget(null); setStatus('Refresh this decision to see the latest progress.'); } });
     return () => { active = false; controller.abort(); };
   }, [target, session, config, expire]);
   if (!session) return <AuthEntry config={config} direct={direct} onSession={value=>{sessionStorage.setItem('known-enough-cognito-session',JSON.stringify(value));setSession(value);setStatus('');const wanted=takeIntendedView();if(wanted)move(wanted,true);}} notice={status} callbackPending={callbackPending} />;
@@ -167,14 +167,14 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
         {!snapshot && <section className="ke-response-header" aria-busy={busy || !status}>
           <h2 id="open-decision-title">Your decision</h2>
           {!status && <LoadingSkeleton kind="decision" label="Loading current decision" />}
-          {status && <><p role="status">{status}</p><button type="button" disabled={busy} aria-label="Refresh decision" onClick={() => { if (dirty.current && !window.confirm('Refresh and discard unsaved input?')) return; dirty.current = false; void load().catch(() => {}); }}>Try again</button></>}
+          {status && <><p role="status">{status}</p><button type="button" disabled={busy} aria-label="Refresh decision" onClick={() => { if (dirty.current && !window.confirm('Refresh and discard your unsaved changes?')) return; dirty.current = false; void load().catch(() => {}); }}>Try again</button></>}
         </section>}
         {snapshot && <div className="ke-load-reveal"><ConnectedDecision key={`${session.accessToken}:${snapshot.contextToken}`}
           snapshot={snapshot} owner={owner} backgroundNegotiation={background} staged
           mcpUrl={config.apiBaseUrl + '/mcp'} {...(view.groupId ? { groupId: view.groupId } : {})} title={decisionTitle?.id === snapshot.frame.decisionId ? decisionTitle.title : snapshot.frame.title} refreshing={busy}
-          onRefresh={() => { if (dirty.current && !window.confirm('Refresh and discard unsaved input?')) return; dirty.current = false; void load().catch(() => {}); }} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} refresh={async () => { dirty.current = false; await load(); }}
+          onRefresh={() => { if (dirty.current && !window.confirm('Refresh and discard your unsaved changes?')) return; dirty.current = false; void load().catch(() => {}); }} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} refresh={async () => { dirty.current = false; await load(); }}
           onDirtyChange={value => { dirty.current = value; }} onQueued={receipt => { if (!owner) return; setTarget({ decisionId: snapshot.frame.decisionId, contextToken: snapshot.contextToken, semanticVersion: snapshot.semanticVersion, ownerParticipantId: owner.ownerParticipantId, expiresAt: receipt.expiresAt }); }} /></div>}
-      </Modal> : session.kind === 'display' ? <section className="ke-card"><h2>Shared screen</h2><p>Open a shared decision link from your group to show its progress. This screen cannot enter private needs or approve proposals.</p></section>
+      </Modal> : session.kind === 'display' ? <section className="ke-card"><h2>Shared screen</h2><p>Open a decision link from your group to show its progress. To answer or approve, sign in with your own account.</p></section>
         : <GroupHome preferencesKey={groupPreferencesKey} key={`${session.accessToken}:${view.kind === 'group' ? view.groupId : 'home'}:${invitationEpoch}`} {...(view.kind === 'group' ? { selectedGroupId: view.groupId } : {})}
           api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} onOpenGroup={id => move({ kind: 'group', groupId: id })} onBack={() => move({ kind: 'groups' })} onDirtyChange={value => { dirty.current = value; }}
           openDecision={id => move({ kind: 'decision', decisionId: id, ...(view.kind === 'group' ? { groupId: view.groupId } : {}) })} />}

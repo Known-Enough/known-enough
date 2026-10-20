@@ -6,8 +6,8 @@ import type { Clock, IdSource, TrustedPrincipal } from './types.ts';
 const MAX_MESSAGES = 12;
 const MAX_MESSAGE_CHARS = 2_000;
 const MAX_TOTAL_CHARS = 8_000;
-const SAFE_SOURCE_SUMMARY = 'Review the structured conditions below before confirming them.';
-const SAFE_CLARIFICATION_QUESTION = 'Please clarify this condition in your own words; it has not been added to the draft.';
+const SAFE_SOURCE_SUMMARY = 'Review the suggested requirements below before saving them.';
+const SAFE_CLARIFICATION_QUESTION = 'Describe this requirement in a little more detail. It hasn’t been added to your answers yet.';
 
 export interface OwnerConversationMessage { role: 'owner' | 'assistant'; text: string }
 export interface OwnerConversationContext {
@@ -150,7 +150,7 @@ export class OwnerConversationArchitect {
         : { ...item, constraintId: `${identifierPrefix}-condition-${index}`, rule: { ...item.rule, id: `${identifierPrefix}-rule-${index}` } }),
       unsupportedConditions: interpretation.unsupportedConditions.map((_item, index) => ({
         id: `${identifierPrefix}-clarification-${index}`,
-        sourceSummary: 'An owner statement needs clarification.',
+        sourceSummary: 'Your note needs more detail.',
         clarificationQuestion: SAFE_CLARIFICATION_QUESTION,
       })),
       createdAt: new Date(createdAt).toISOString(),

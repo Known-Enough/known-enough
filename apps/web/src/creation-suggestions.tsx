@@ -15,7 +15,7 @@ export function CreationSuggestions({ review, plan, busy, onChange, onAdd, onUse
     <header><h3><PageIcon name="Sparkles" />{review.intent === 'description' ? 'A starting point' : 'Suggestions to consider'}</h3>
       <button type="button" className="ke-text-link" disabled={busy} onClick={onDismiss}>Dismiss suggestions</button></header>
     <p className="ke-creation-hint">Suggested by AI. Check names, dates and availability before using them.</p>
-    {!review.draft.choicePlan && review.intent === 'options' && <div className="ke-legacy-suggestion"><p className="ke-creation-hint">This saved draft includes shared rules. Keep those rules together when continuing it.</p><button type="button" className="secondary" disabled={busy} onClick={onUseLegacyDraft}>Use this saved draft</button></div>}
+    {!review.draft.choicePlan && review.intent === 'options' && <div className="ke-legacy-suggestion"><p className="ke-creation-hint">This saved draft keeps its options and group requirements together.</p><button type="button" className="secondary" disabled={busy} onClick={onUseLegacyDraft}>Use this saved draft</button></div>}
     {review.intent === 'description' ? <>
       <label>Suggested description<textarea rows={4} maxLength={2000} value={review.description} disabled={busy}
         onChange={event => onChange({ ...review, description: event.target.value })} /></label>
@@ -32,7 +32,7 @@ export function CreationSuggestions({ review, plan, busy, onChange, onAdd, onUse
       </div>)}
       {!topic.options.length && <p className="ke-creation-hint">No more suggestions for this topic. You can add your own options above.</p>}
     </section>)}
-    {!!questions.length && <details className="ke-creation-details"><summary>A little more detail would help</summary>
+    {!!questions.length && <details className="ke-creation-details"><summary>A few details are missing</summary>
       <p className="ke-creation-hint">Answer what you know, or edit your options directly. Keep personal preferences for later.</p>
       {questions.map((question, index) => <label key={question}>{question}<textarea rows={2} maxLength={500} disabled={busy} value={answers[index] ?? ''}
         onChange={event => setAnswers(current => ({ ...current, [index]: event.target.value }))} /></label>)}

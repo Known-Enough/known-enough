@@ -8,20 +8,20 @@ import { asRegistrationFailure, confirmEmailRegistration, MIN_REGISTRATION_PASSW
 function recoveryText(code: RegistrationCode): string {
   switch (code) {
     case 'INVALID_DETAILS': return 'Check your username and email, and use a password of at least eight characters with uppercase, lowercase, a number and a symbol.';
-    case 'PASSWORD_REJECTED': return 'This site rejected the password under its current policy. Try a different password or contact the app operator.';
-    case 'ACCOUNT_EXISTS_OR_PENDING': return 'An account may already exist or await verification. If you have a code, enter it below; otherwise try signing in.';
+    case 'PASSWORD_REJECTED': return 'Choose a different password with at least eight characters, including an uppercase letter, a lowercase letter, a number and a symbol.';
+    case 'ACCOUNT_EXISTS_OR_PENDING': return 'This username may already be in use. If you received a verification code, enter it below. Otherwise, try signing in.';
     case 'EMAIL_ALREADY_LINKED': return 'This email already has an account. Sign in with your original username, or use Forgot password on the sign-in screen.';
-    case 'ACCOUNT_SETUP_UNAVAILABLE': return 'Account setup could not finish. Sign in to check whether your email was verified and recover your access request.';
-    case 'SIGNUP_UNAVAILABLE': return 'Email registration is unavailable on this site. Contact the app operator.';
-    case 'ATTRIBUTES_REJECTED': return 'Your details or this site’s registration settings were rejected. Contact the app operator with the reference below.';
+    case 'ACCOUNT_SETUP_UNAVAILABLE': return 'We couldn’t finish setting up your account. Try signing in to check your account access.';
+    case 'SIGNUP_UNAVAILABLE': return 'Account creation is unavailable right now. Ask the preview owner for help.';
+    case 'ATTRIBUTES_REJECTED': return 'We couldn’t accept these account details. Ask the preview owner for help and include the reference below.';
     case 'NETWORK_RESULT_UNKNOWN':
-    case 'DELIVERY_UNCONFIRMED': return 'The account request result is uncertain. Avoid repeating it now. If a code arrived, enter it below; otherwise contact the app operator.';
+    case 'DELIVERY_UNCONFIRMED': return 'We couldn’t confirm whether your account was created. If you received a code, enter it below. Otherwise, ask the preview owner for help before trying again.';
     case 'INVALID_CODE':
     case 'CODE_REJECTED': return 'The verification code was not accepted. Check the code and try again.';
-    case 'CODE_EXPIRED': return 'The verification code expired. Contact the app operator to recover registration.';
+    case 'CODE_EXPIRED': return 'This code has expired. Go back to sign in, choose “Still need to verify your email?”, then request a new code.';
     case 'RATE_LIMITED': return 'Too many requests were made. Wait before trying again.';
     case 'PROVIDER_UNAVAILABLE': return 'The registration service is temporarily unavailable. Try again later.';
-    default: return 'Registration failed. Contact the app operator with the reference below.';
+    default: return 'We couldn’t complete registration. Ask the preview owner for help and include the reference below.';
   }
 }
 
@@ -61,14 +61,14 @@ export function EmailRegistration({ config, startOpen = false, onClose, onSignIn
   if (stage === 'closed') return <button type="button" className="secondary ke-auth-link" disabled={busy} onClick={() => setStage('details')}>Create account</button>;
   return <section className="ke-registration ke-auth-form" aria-label="Email registration">
     <h2 ref={heading} tabIndex={-1}>{stage === 'details' ? 'Create your account' : stage === 'verify' ? 'Verify your email' : 'Account created'}</h2>
-    <p className="ke-auth-intro">{stage === 'details' ? 'A little space for better decisions, together.' : stage === 'verify' ? 'Check your inbox and enter the six-digit code.' : 'Your email is verified. Sign in to continue.'}</p>
+    <p className="ke-auth-intro">{stage === 'details' ? 'Create an account to join your group’s decisions.' : stage === 'verify' ? 'Check your inbox and enter the six-digit code.' : 'Your email is verified. Sign in to continue.'}</p>
     {stage !== 'complete' && <form onSubmit={event => { event.preventDefault(); void submit(); }}>
       <fieldset disabled={busy} aria-busy={busy}>
         {stage === 'details' ? <>
           <label htmlFor="register-username">Username</label><input id="register-username" value={username} required maxLength={128} autoComplete="username" onChange={event => setUsername(event.target.value)} />
           <label htmlFor="register-email">Email</label><input id="register-email" type="email" value={email} required maxLength={320} autoComplete="email" onChange={event => setEmail(event.target.value)} />
           <label htmlFor="register-password">Password</label><PasswordField id="register-password" value={password} minLength={MIN_REGISTRATION_PASSWORD_LENGTH} maxLength={256} autoComplete="new-password" disabled={busy} onChange={setPassword} describedBy="register-password-help" />
-          <p id="register-password-help" className="ke-auth-help">8+ characters, with uppercase, lowercase, a number and a symbol.</p>
+          <p id="register-password-help" className="ke-auth-help">At least 8 characters, including an uppercase letter, a lowercase letter, a number and a symbol.</p>
         </> : <><label htmlFor="register-code">Verification code</label><input id="register-code" value={code} required pattern="[0-9]{6}" maxLength={6} inputMode="numeric" autoComplete="one-time-code" onChange={event => setCode(event.target.value)} /></>}
         <button type="submit">{stage === 'details' ? 'Create account' : 'Verify email'}</button>
         {busy && <LoadingSkeleton kind="inline" label={stage === 'details' ? 'Creating your account' : 'Verifying your email'} />}

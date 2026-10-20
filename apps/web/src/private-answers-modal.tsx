@@ -122,11 +122,11 @@ export function PrivateAnswersModal({ open, owner, busy, blocked, saveBlocked, n
     finally { saveGuard.current = false; setSaving(false); }
   }
   const saveHint = !complete ? 'Select at least one option for each topic, or choose “None work for me”.'
-    : !consent ? 'Confirm the processing consent to save your answers.'
+    : !consent ? 'Agree to the preview data use below to save your answers.'
     : notes.trim() ? 'Review your notes with AI, or clear them to save just your selections.'
     : 'Saving your answers does not approve a final proposal.';
-  const privacyDetails = <details className="ke-response-privacy-details"><summary>Privacy and preview limits</summary>
-    <p>Known Enough and its authorized AI process your private answers to help with the decision. Private notes are sent for AI help when you request it. Other participants see shared choices and only disclosures you authorize. An outcome may still reveal something about people’s needs. Use fictional, non-sensitive information in this preview. Updating your answers keeps other people’s answers; a revised proposal needs fresh approval.</p>
+  const privacyDetails = <details className="ke-response-privacy-details"><summary>Privacy in this preview</summary>
+    <p>Other participants can’t read your answers or notes. Known Enough processes your answers; AI processes notes when you ask for help. Shared outcomes can still hint at someone’s needs. Use made-up, non-sensitive information in this preview. Changing your answers keeps other people’s answers, but a revised proposal needs new approvals.</p>
   </details>;
   const savedAnswers = savedChoiceAnswers(owner);
   const savedSummary = <div className="ke-saved-answers">
@@ -135,7 +135,7 @@ export function PrivateAnswersModal({ open, owner, busy, blocked, saveBlocked, n
     {owner.ownInputReadiness === 'NOT_STARTED' ? <p>No saved answers.</p> : <dl className="ke-saved-answer-topics">{questions.map(({ variable, options }) => {
       const answer = savedAnswers[variable.id]!;
       return <div key={variable.id}><dt>{variable.label}</dt><dd data-selected={answer.mode === 'ANY' || answer.mode === 'SELECTED'}>{answer.mode === 'NONE' ? 'None of these options work' : answer.mode
-        ? selectedOptions(answer, options.length).map(index => label(options[index]!, variable)).join(' · ') : extras.length ? 'See saved conditions below' : 'No option selection recorded'}
+        ? selectedOptions(answer, options.length).map(index => label(options[index]!, variable)).join(' · ') : extras.length ? 'See your extra requirements below' : 'No options saved'}
         {answer.preferred !== '' && <small>Favorite: {label(options[Number(answer.preferred)]!, variable)}</small>}</dd></div>;
     })}</dl>}
     {!!extras.length && <details><summary>Saved extra conditions ({extras.length})</summary><ul>{extras.map(item => <li key={item.constraintId}>{describeCondition(item)}</li>)}</ul></details>}
@@ -149,10 +149,10 @@ export function PrivateAnswersModal({ open, owner, busy, blocked, saveBlocked, n
       {!embedded && <button type="button" className="secondary ke-wizard-close" aria-label="Close private answers" disabled={busy} onClick={onClose}><PageIcon name="X" /></button>}
     </header>
     <div className="ke-wizard-body">
-      <p className="ke-response-privacy"><PageIcon name="Lock" />Your answers and notes are private.</p>
+      <p className="ke-response-privacy"><PageIcon name="Lock" />Other participants can’t read your answers or notes.</p>
       {frameChanged && <p role="status">The options changed. Choose what works for you from the current list.</p>}
       {recovery}
-      {!questions.length && <p>No selectable options are available yet. Add a private note or ask the organizer to update the decision.</p>}
+      {!questions.length && <p>There are no options to answer yet. Ask the organizer to add some.</p>}
       <div className="ke-response-topics" data-columns={questions.length > 1 && questions.every(question => question.options.length <= 6)}>{questions.map(({ variable, options }, topicIndex) => {
         const answer = answers[variable.id] ?? { mode: '', acceptable: [], preferred: '' };
         const selected = selectedOptions(answer, options.length);
@@ -177,26 +177,26 @@ export function PrivateAnswersModal({ open, owner, busy, blocked, saveBlocked, n
         </fieldset>;
       })}</div>
 
-      <details className="ke-private-extra-notes"><summary>Anything else? · optional</summary>
-        <p className="ke-wizard-help">Add a requirement the options don’t cover. Optional AI help turns it into conditions for you to review; your selections stay unchanged.</p>
+      <details className="ke-private-extra-notes"><summary>Add a requirement with AI · optional</summary>
+        <p className="ke-wizard-help">For a requirement the options don’t cover, write a note and ask AI for suggestions. Review those suggestions before saving, or clear the note to save just your selected options.</p>
         <label htmlFor="private-extra-notes">Your private note</label>
         <textarea id="private-extra-notes" rows={3} value={notes} maxLength={2000} disabled={blocked} onChange={event => onNotes(event.target.value)} placeholder="For example: I need step-free access." />
         <small>{notes.length} / 2,000 characters · private</small>
-        {notes.trim() && <><button type="button" className="secondary" disabled={blocked || saveBlocked || notesLocked || !consent} onClick={() => void onInterpret()}>Help with my notes</button>
-          <p className="ke-response-topic-hint">Review the suggested conditions before saving. {!consent && 'Confirm the processing consent below to use AI help.'}</p>
+        {notes.trim() && <><button type="button" className="secondary" disabled={blocked || saveBlocked || notesLocked || !consent} onClick={() => void onInterpret()}>Get AI suggestions</button>
+          <p className="ke-response-topic-hint">Review the suggested requirements before saving. {!consent && 'Agree to the preview data use below to get AI help.'}</p>
           <button type="button" className="ke-text-link" disabled={blocked} onClick={() => onNotes('')}>Clear unsent notes</button></>}
       </details>
-          {!!extras.length && <details className="ke-wizard-edit"><summary>Previously saved extra conditions ({retained.length} kept)</summary><p className="ke-wizard-help">Keep any that still apply. Uncheck a condition only if you want to replace or remove it.</p>
+          {!!extras.length && <details className="ke-wizard-edit"><summary>Saved extra requirements ({retained.length} kept)</summary><p className="ke-wizard-help">Keep the requirements that still apply. Uncheck any you want to remove.</p>
             {extras.map(item => <label className="ke-private-check" key={item.constraintId}><input type="checkbox" disabled={blocked} checked={retained.includes(item.constraintId)} onChange={event => { setRetained(current => event.target.checked ? [...current, item.constraintId] : current.filter(id => id !== item.constraintId)); setChanged(true); }} />{describeCondition(item)}</label>)}</details>}
-          {owner.draft && !onlyDirectDraft && <div className="ke-wizard-edit ke-response-note-review"><h3>Review your notes</h3><p className="ke-wizard-help">Your selections above replace earlier selections for those questions. Keep only extra conditions you agree with.</p>
-            <label className="ke-private-check"><input type="checkbox" checked={replaceDraft} disabled={blocked} onChange={event => { setReplaceDraft(event.target.checked); setIncluded([]);  setChanged(true); }} />Use my current selections only; replace these earlier extra conditions.</label>
+          {owner.draft && !onlyDirectDraft && <div className="ke-wizard-edit ke-response-note-review"><h3>Review your notes</h3><p className="ke-wizard-help">Your selections replace your earlier answers. Include only the extra requirements you want to save.</p>
+            <label className="ke-private-check"><input type="checkbox" checked={replaceDraft} disabled={blocked} onChange={event => { setReplaceDraft(event.target.checked); setIncluded([]);  setChanged(true); }} />Save only my selected options and remove these earlier extra requirements.</label>
             {!replaceDraft && <>{owner.draft.proposedConstraints.filter(item => !direct(item.constraintId)).map(item => <label className="ke-private-check" key={item.constraintId}><input type="checkbox" disabled={blocked} checked={included.includes(item.constraintId)}
               onChange={event => { setIncluded(current => event.target.checked ? [...current, item.constraintId] : current.filter(id => id !== item.constraintId));  setChanged(true); }} />{describeCondition(item)}</label>)}
-              {owner.draft.unsupportedConditions.map(item => <p className="ke-wizard-save" key={item.id}>Still unresolved: {item.clarificationQuestion} Your answers can be saved, but a proposal must wait for clarification.</p>)}</>}
+              {owner.draft.unsupportedConditions.map(item => <p className="ke-wizard-save" key={item.id}>More detail needed: {item.clarificationQuestion} You can save your answers, but this needs more detail before we can find an outcome.</p>)}</>}
           </div>}
 
       {privacyDetails}
-      <label className="ke-wizard-confirm ke-response-consent"><input type="checkbox" checked={consent} disabled={blocked || saving} onChange={event => onConsent(event.target.checked)} />These are fictional test answers. I agree to their processing by Known Enough and, if I use AI help, its AI.</label>
+      <label className="ke-wizard-confirm ke-response-consent"><input type="checkbox" checked={consent} disabled={blocked || saving} onChange={event => onConsent(event.target.checked)} />I’m using made-up answers for this preview and agree to Known Enough processing them, with AI if I request help.</label>
       {notice && <p role="status" className="ke-wizard-notice">{notice}</p>}
     </div>
     <footer className="ke-response-save"><div><p id="private-save-help" className="ke-response-save-help">{saveHint}</p>

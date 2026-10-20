@@ -12,20 +12,20 @@ export function draftFailureMessage(status: number, body: unknown): string {
   const value = body && typeof body === 'object' ? body as { draftFailure?: unknown; error?: { code?: unknown } } : null;
   const category = value?.draftFailure;
   if (status === 401) return 'Your session expired. Sign in again to continue.';
-  if (status === 403) return 'Only the current approved group organizer can do this. Refresh your access and group.';
-  if (category === 'AI_AT_CAPACITY') return 'All AI processing slots are occupied. No new AI call started. Close this unfinished request to return to your saved draft; try again after service recovery.';
-  if (category === 'AI_UNAVAILABLE') return 'AI drafting is unavailable on this server. Recover the request before trying again later.';
-  if (category === 'INVALID_MODEL_OUTPUT') return 'The AI response was incomplete or did not match the supported decision format. Your saved draft and answers are kept. We will check the request’s final status before allowing another attempt.';
-  if (category === 'PROVIDER_FAILED') return 'The AI provider could not complete this request. Recover its status before trying again.';
-  if (category === 'REQUEST_PENDING') return 'This draft request is still processing. Recover its status; do not start another request.';
-  if (category === 'REQUEST_UNKNOWN') return 'The outcome is not confirmed. Recover this same request before starting another.';
+  if (status === 403) return 'Only this group’s organizer can do this. Refresh the group to check your access.';
+  if (category === 'AI_AT_CAPACITY') return 'The assistant is busy. Close this attempt to return to your draft, then try again later.';
+  if (category === 'AI_UNAVAILABLE') return 'AI suggestions are unavailable right now. Check this attempt before asking again. You can still add your own options.';
+  if (category === 'INVALID_MODEL_OUTPUT') return 'The assistant couldn’t finish a usable draft. Your saved draft is unchanged. Check this attempt, then close it to edit or try again.';
+  if (category === 'PROVIDER_FAILED') return 'The assistant couldn’t finish this attempt. Check its result before trying again.';
+  if (category === 'REQUEST_PENDING') return 'The assistant is still working. Check progress before asking again.';
+  if (category === 'REQUEST_UNKNOWN') return 'We couldn’t confirm the result. Check this attempt before asking again.';
   if (status === 404) return value?.error?.code === 'NOT_FOUND'
-    ? 'This group or draft is unavailable to your current account. Refresh the group.'
-    : 'This draft action is missing on the server. Try again after the server is updated.';
-  if (status === 409) return 'The group, draft or request changed. Refresh and review its current state.';
+    ? 'You can’t open this group or draft right now. Refresh the group to check your access.'
+    : 'This drafting feature is unavailable right now. Try again later.';
+  if (status === 409) return 'This draft changed. Refresh to see the latest version.';
   if (status === 400 || status === 422) return value?.error?.code === 'NEEDS_CLARIFICATION'
-    ? 'The draft needs supported public choices or clarification before it can continue.' : 'Enter a supported public objective and review the draft fields.';
-  if (status === 507 || status === 429) return 'Drafting is at capacity. Recover the request and try later; repeated clicks will not free space.';
-  if (status >= 500) return 'The drafting service is unavailable. Recover the original request before retrying.';
-  return 'The action could not be completed. Refresh its current state before trying again.';
+    ? 'Add the missing details or edit the listed options to continue.' : 'Describe what your group needs to decide and check the options.';
+  if (status === 507 || status === 429) return 'The drafting service is busy. Check this attempt and try again later.';
+  if (status >= 500) return 'Drafting is temporarily unavailable. Check this attempt before trying again.';
+  return 'We couldn’t complete this action. Refresh to check the result before trying again.';
 }
