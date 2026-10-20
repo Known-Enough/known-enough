@@ -4,23 +4,178 @@
   "startedAt": "2026-10-20T08:55:54.939Z",
   "endedAt": null,
   "cases": {
-    "01": "NOT_RUN",
-    "02": "NOT_RUN",
+    "01": "PASS",
+    "02": "PASS",
     "03": "NOT_RUN",
     "04": "NOT_RUN",
     "05": "NOT_RUN",
     "06": "NOT_RUN"
   },
-  "lastConfirmedAction": null,
-  "inFlightAction": null,
+  "lastConfirmedAction": "U01.createDecision.a73b46",
+  "inFlightAction": "U01.saveAnswer.e29521",
   "observedRequests": {
     "outcome": 0,
     "assistant": 0,
-    "aiDraft": 0,
+    "aiDraft": 1,
     "plainPosts": 0
   },
-  "users": {},
-  "screenshots": [],
+  "users": {
+    "U01": {
+      "joined": true,
+      "answerAcknowledged": false,
+      "approvalAcknowledged": false,
+      "postAcknowledged": false,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 6
+    },
+    "U02": {
+      "joined": true,
+      "answerAcknowledged": false,
+      "approvalAcknowledged": false,
+      "postAcknowledged": false,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 1
+    },
+    "U03": {
+      "joined": true,
+      "answerAcknowledged": false,
+      "approvalAcknowledged": false,
+      "postAcknowledged": false,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 1
+    },
+    "U04": {
+      "joined": true,
+      "answerAcknowledged": false,
+      "approvalAcknowledged": false,
+      "postAcknowledged": false,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 1
+    },
+    "U05": {
+      "joined": true,
+      "answerAcknowledged": false,
+      "approvalAcknowledged": false,
+      "postAcknowledged": false,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 1
+    },
+    "U06": {
+      "joined": true,
+      "answerAcknowledged": false,
+      "approvalAcknowledged": false,
+      "postAcknowledged": false,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 1
+    },
+    "U07": {
+      "joined": true,
+      "answerAcknowledged": false,
+      "approvalAcknowledged": false,
+      "postAcknowledged": false,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 1
+    },
+    "U08": {
+      "joined": true,
+      "answerAcknowledged": false,
+      "approvalAcknowledged": false,
+      "postAcknowledged": false,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 1
+    },
+    "U09": {
+      "joined": true,
+      "answerAcknowledged": false,
+      "approvalAcknowledged": false,
+      "postAcknowledged": false,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 1
+    },
+    "U10": {
+      "joined": true,
+      "answerAcknowledged": false,
+      "approvalAcknowledged": false,
+      "postAcknowledged": false,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 1
+    },
+    "U11": {
+      "joined": true,
+      "answerAcknowledged": false,
+      "approvalAcknowledged": false,
+      "postAcknowledged": false,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 1
+    },
+    "U12": {
+      "joined": true,
+      "answerAcknowledged": false,
+      "approvalAcknowledged": false,
+      "postAcknowledged": false,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 1
+    },
+    "U13": {
+      "joined": true,
+      "answerAcknowledged": false,
+      "approvalAcknowledged": false,
+      "postAcknowledged": false,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 1
+    },
+    "U14": {
+      "joined": true,
+      "answerAcknowledged": false,
+      "approvalAcknowledged": false,
+      "postAcknowledged": false,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 1
+    },
+    "U15": {
+      "joined": true,
+      "answerAcknowledged": false,
+      "approvalAcknowledged": false,
+      "postAcknowledged": false,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 1
+    }
+  },
+  "screenshots": [
+    {
+      "name": "01-fifteen-members.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 900
+      },
+      "caption": "Existing fifteen-member group freshly verified after repair"
+    },
+    {
+      "name": "07-later-page-search.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 390,
+        "height": 720
+      },
+      "caption": "Search finds a group from response page 2"
+    }
+  ],
   "errors": [],
   "publication": "LOCAL_STARTUP",
   "serving": {
@@ -35,9 +190,10 @@
   "runtime": {
     "node": "v24.19.0",
     "playwright": "1.63.0",
-    "override": "User explicitly authorized Node24.19 or latest installed"
+    "override": "User explicitly authorized Node24.19 or latest installed",
+    "browser": "155.0.8059.85"
   },
-  "lastProgressAt": "2026-10-20T08:55:54.953Z",
+  "lastProgressAt": "2026-10-20T08:59:38.368Z",
   "fixturePlan": {
     "reuseExistingFifteenMemberGroup": true,
     "reuseFiveEmptyOwnedPaginationGroups": true,
@@ -54,5 +210,19 @@
     "plainPosts": 15,
     "answerSaves": 15,
     "approvals": 15
-  }
+  },
+  "credentials": {
+    "exactSet": true,
+    "count": 15,
+    "source": "PRIVATE_MACHINE_LOCAL_FILE"
+  },
+  "progress": {
+    "joined": 15,
+    "answersAcknowledged": 0,
+    "approvalsAcknowledged": 0,
+    "plainPostsAcknowledged": 0,
+    "distinctOwners": 0
+  },
+  "optionalProfileReads": 45,
+  "optionalProfileResponses": 45
 }
