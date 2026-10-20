@@ -11,13 +11,13 @@
     "05": "NOT_RUN",
     "06": "NOT_RUN"
   },
-  "lastConfirmedAction": "U06.chat.8f4cd5",
-  "inFlightAction": "U06.message.ef10a1",
+  "lastConfirmedAction": "U01.closeChat.b1038d",
+  "inFlightAction": null,
   "observedRequests": {
     "outcome": 0,
-    "assistant": 0,
+    "assistant": 1,
     "aiDraft": 1,
-    "plainPosts": 5
+    "plainPosts": 7
   },
   "users": {
     "U01": {
@@ -72,25 +72,25 @@
       "joined": true,
       "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false
+      "postAcknowledged": true
     },
     "U07": {
       "authenticated": true,
       "approved": true,
       "initialGroups": 0,
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false
+      "postAcknowledged": true
     },
     "U08": {
       "authenticated": true,
       "approved": true,
       "initialGroups": 0,
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false
+      "postAcknowledged": true
     },
     "U09": {
       "authenticated": true,
@@ -183,6 +183,15 @@
         "height": 900
       },
       "caption": "U03 own readback after HTTP 503: answer remains unsaved"
+    },
+    {
+      "name": "02-seven-answers.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 900
+      },
+      "caption": "Seven saved answers; eight participants outstanding"
     }
   ],
   "errors": [
@@ -281,7 +290,7 @@
     "override": "User explicitly authorized Node24.19 or latest installed",
     "browser": "155.0.8059.85"
   },
-  "lastProgressAt": "2026-10-20T05:24:48.239Z",
+  "lastProgressAt": "2026-10-20T05:26:06.468Z",
   "credentials": {
     "exactSet": true,
     "count": 15,
@@ -296,11 +305,11 @@
   ],
   "progress": {
     "joined": 15,
-    "answersAcknowledged": 5,
+    "answersAcknowledged": 7,
     "approvalsAcknowledged": 0,
-    "plainPostsAcknowledged": 4,
-    "distinctOwners": 6
+    "plainPostsAcknowledged": 7,
+    "distinctOwners": 8
   },
-  "optionalProfileReads": 246,
-  "optionalProfileResponses": 234
+  "optionalProfileReads": 307,
+  "optionalProfileResponses": 291
 }
