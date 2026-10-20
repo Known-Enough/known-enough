@@ -11,13 +11,13 @@
     "05": "NOT_RUN",
     "06": "NOT_RUN"
   },
-  "lastConfirmedAction": "U10.closeChat.a1f91f",
+  "lastConfirmedAction": "U15.closeChat.104dca",
   "inFlightAction": null,
   "observedRequests": {
     "outcome": 0,
     "assistant": 2,
     "aiDraft": 1,
-    "plainPosts": 10
+    "plainPosts": 15
   },
   "users": {
     "U01": {
@@ -112,45 +112,45 @@
     },
     "U11": {
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false,
+      "postAcknowledged": true,
       "authenticated": true,
       "approved": true,
       "initialGroups": 2
     },
     "U12": {
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false,
+      "postAcknowledged": true,
       "authenticated": true,
       "approved": true,
       "initialGroups": 2
     },
     "U13": {
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false,
+      "postAcknowledged": true,
       "authenticated": true,
       "approved": true,
       "initialGroups": 2
     },
     "U14": {
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false,
+      "postAcknowledged": true,
       "authenticated": true,
       "approved": true,
       "initialGroups": 2
     },
     "U15": {
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false,
+      "postAcknowledged": true,
       "authenticated": true,
       "approved": true,
       "initialGroups": 2
@@ -183,6 +183,15 @@
         "height": 900
       },
       "caption": "Seven saved answers and eight outstanding; no approvals"
+    },
+    {
+      "name": "03-fifteen-answers.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 1600
+      },
+      "caption": "All fifteen answered; zero approvals; outcome not requested"
     }
   ],
   "errors": [],
@@ -203,7 +212,7 @@
     "override": "User explicitly authorized Node24.19 or latest installed",
     "browser": "155.0.8059.85"
   },
-  "lastProgressAt": "2026-10-20T16:19:59.069Z",
+  "lastProgressAt": "2026-10-20T16:21:48.206Z",
   "fixturePlan": {
     "reuseVerifiedFifteenMemberGroup": true,
     "initialOwnedGroupCount": 7,
@@ -218,11 +227,11 @@
   },
   "progress": {
     "joined": 15,
-    "answersAcknowledged": 10,
+    "answersAcknowledged": 15,
     "approvalsAcknowledged": 0,
-    "plainPostsAcknowledged": 10,
-    "distinctOwners": 10
+    "plainPostsAcknowledged": 15,
+    "distinctOwners": 15
   },
-  "optionalProfileReads": 302,
-  "optionalProfileResponses": 270
+  "optionalProfileReads": 482,
+  "optionalProfileResponses": 422
 }
