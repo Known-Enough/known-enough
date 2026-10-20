@@ -1,8 +1,8 @@
 {
   "runId": "20261020T032500Z",
-  "state": "TEN_ANSWERS_CHECKPOINT",
+  "state": "RUNNING",
   "startedAt": "2026-10-20T03:23:37.850Z",
-  "endedAt": "2026-10-20T05:27:49.252Z",
+  "endedAt": null,
   "cases": {
     "01": "PASS",
     "02": "PASS",
@@ -11,13 +11,13 @@
     "05": "NOT_RUN",
     "06": "NOT_RUN"
   },
-  "lastConfirmedAction": "U11.closeChat.c1787e",
-  "inFlightAction": null,
+  "lastConfirmedAction": "U15.closeChat.4bc5a8",
+  "inFlightAction": "U15.chat.c44f9c",
   "observedRequests": {
     "outcome": 0,
     "assistant": 2,
     "aiDraft": 1,
-    "plainPosts": 10
+    "plainPosts": 15
   },
   "users": {
     "U01": {
@@ -97,9 +97,9 @@
       "approved": true,
       "initialGroups": 0,
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false
+      "postAcknowledged": true
     },
     "U10": {
       "authenticated": true,
@@ -124,36 +124,36 @@
       "approved": true,
       "initialGroups": 0,
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false
+      "postAcknowledged": true
     },
     "U13": {
       "authenticated": true,
       "approved": true,
       "initialGroups": 0,
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false
+      "postAcknowledged": true
     },
     "U14": {
       "authenticated": true,
       "approved": true,
       "initialGroups": 0,
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false
+      "postAcknowledged": true
     },
     "U15": {
       "authenticated": true,
       "approved": true,
       "initialGroups": 0,
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false
+      "postAcknowledged": true
     }
   },
   "screenshots": [
@@ -265,6 +265,15 @@
       "serverCode": "RETRYABLE_SERVER_ERROR",
       "reference": "92a718e2-c084-4dba-a94f-2ffb2565c0f8",
       "screenshot": "NOT_AVAILABLE"
+    },
+    {
+      "action": "U13.saveAnswer.35fadf",
+      "code": "APP_HTTP_503",
+      "domain": "APP_HTTP",
+      "status": 503,
+      "serverCode": "RETRYABLE_SERVER_ERROR",
+      "reference": "60b010a1-220f-4a19-b828-8ae89bf96241",
+      "screenshot": "NOT_AVAILABLE"
     }
   ],
   "publication": "LOCAL_STARTUP",
@@ -299,7 +308,7 @@
     "override": "User explicitly authorized Node24.19 or latest installed",
     "browser": "155.0.8059.85"
   },
-  "lastProgressAt": "2026-10-20T05:27:50.257Z",
+  "lastProgressAt": "2026-10-20T05:30:20.755Z",
   "credentials": {
     "exactSet": true,
     "count": 15,
@@ -314,11 +323,11 @@
   ],
   "progress": {
     "joined": 15,
-    "answersAcknowledged": 10,
+    "answersAcknowledged": 15,
     "approvalsAcknowledged": 0,
-    "plainPostsAcknowledged": 10,
-    "distinctOwners": 11
+    "plainPostsAcknowledged": 15,
+    "distinctOwners": 15
   },
-  "optionalProfileReads": 445,
-  "optionalProfileResponses": 411
+  "optionalProfileReads": 614,
+  "optionalProfileResponses": 553
 }
