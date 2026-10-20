@@ -1,8 +1,8 @@
 # E2E04 — Fifteen people, one agreed plan
 
-**RUNNING / current user-requested execution.** The user explicitly authorized Node24.19. All fifteen exact synthetic accounts authenticated with approved app access; the fifteen-alias recorder is running. [Current report](../../../../review-artifacts/E2E04/20261020T032500Z/report.md).
+**FAIL / execution completed; claim released.** Four cases passed and two failed. All fifteen users saved their exact answers and independently approved the same correct plan, visible in9.532s. Three initial save503s required reconciled recovery; two assistant summaries remained UNAVAILABLE. The strict draft-label criterion required manual normalization. [Final report](../../../../review-artifacts/E2E04/20261020T032500Z/report.md), [precise follow-ups](../../../../review-artifacts/E2E04/20261020T032500Z/followups.md). Node24.19 used under the user’s override.
 
-One shared dinner decision will collect fifteen independent private responses and explicit approvals, with assistant/privacy, pagination and layout checks.
+The agreed demonstration, two saved drafts and five empty pagination groups are retained for inspection. Do not repeat its outcome, approvals or failed assistant requests.
 
 - [Task, steps and evidence](ticket.md)
 - [Exact synthetic response matrix](answers.csv)
@@ -16,6 +16,6 @@ The [two-user final readback passed](../../../../review-artifacts/E2E03/20261019
 That readiness review was documentation-only. The current user-requested run has since verified the exact fifteen-account file and prepared `scripts/e2e04/session-runner.mjs`; the older two-account file finding is historical. Follow the current run report for actual execution results.
 
 
-## Latest execution intake — 20261020T031040Z
+## Historical preflight — 20261020T031040Z
 
-Credentials verified privately (exact accounts, file mode 0600, directory mode 0700). Public site HEAD returned 200. Browser execution did not start because the required Node 24.21.0 runtime is unavailable; the installed Playwright package is present but was not used. All six cases remain NOT_RUN. No login, app writes, AI calls, provider calls or screenshots. Resume only after the required runtime is available on this execution machine.
+Credentials verified privately (exact accounts, file mode 0600, directory mode 0700). Public site HEAD returned 200. Browser execution did not start because the required Node 24.21.0 runtime is unavailable; the installed Playwright package is present but was not used. All six cases remain NOT_RUN. No login, app writes, AI calls, provider calls or screenshots. The later user override authorized Node24.19; see the completed run above.

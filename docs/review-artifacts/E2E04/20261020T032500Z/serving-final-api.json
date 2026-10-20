@@ -1,0 +1,9 @@
+{
+  "result": "ZZ02_SETUP_METADATA_READ",
+  "configurationWrites": 0,
+  "dataWrites": 0,
+  "providerCalls": 0,
+  "apiSha256": "e8338c82bb6314f157f743d7f27c1bf4b5e0e7d8c17aa7da5efbc1789be70436",
+  "matchesRunApi": true,
+  "workflowRun": "https://github.com/Known-Enough/known-enough/actions/runs/39376058031"
+}

@@ -1,18 +1,18 @@
 {
   "runId": "20261020T032500Z",
-  "state": "RUNNING",
+  "state": "FAIL",
   "startedAt": "2026-10-20T03:23:37.850Z",
-  "endedAt": null,
+  "endedAt": "2026-10-20T05:41:23.350Z",
   "cases": {
     "01": "PASS",
     "02": "PASS",
     "03": "FAIL",
     "04": "PASS",
-    "05": "NOT_RUN",
+    "05": "PASS",
     "06": "FAIL"
   },
-  "lastConfirmedAction": "U15.message.a65984",
-  "inFlightAction": "U15.checkReply.0628cc",
+  "lastConfirmedAction": "U01.result.714ce3",
+  "inFlightAction": null,
   "observedRequests": {
     "outcome": 1,
     "assistant": 8,
@@ -228,6 +228,24 @@
         "height": 900
       },
       "caption": "Original proposal-summary request remains failed; status read only"
+    },
+    {
+      "name": "06-agreed-fifteen-approvals.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 1600
+      },
+      "caption": "Decision agreed; exact choices and all fifteen explicit approvals"
+    },
+    {
+      "name": "08-mobile-chat.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 390,
+        "height": 720
+      },
+      "caption": "390\u00d7720 group chat: newest message, composer and close control reachable"
     }
   ],
   "errors": [
@@ -241,7 +259,7 @@
     },
     {
       "action": "U01.suggest.a2a5b9",
-      "code": "locator.isDisabled: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Suggest options', exact: true })\u001b[22m\n",
+      "code": "locator.isDisabled: Timeout 20000ms exceeded.",
       "domain": "AUTOMATION",
       "status": null,
       "serverCode": null,
@@ -259,7 +277,7 @@
     },
     {
       "action": "U01.manualOptions.a236c1",
-      "code": "locator.selectOption: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-topic=\"0\"]').getByLabel('Options format', { exact: true })\u001b[22m\n",
+      "code": "locator.selectOption: Timeout 20000ms exceeded.",
       "domain": "AUTOMATION",
       "status": null,
       "serverCode": null,
@@ -268,7 +286,7 @@
     },
     {
       "action": "U01.saveDraft.d28e3e",
-      "code": "locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Save draft', exact: true })\u001b[22m\n",
+      "code": "locator.click: Timeout 20000ms exceeded.",
       "domain": "AUTOMATION",
       "status": null,
       "serverCode": null,
@@ -313,7 +331,16 @@
     },
     {
       "action": "U01.activity.04ae4c",
-      "code": "locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.ke-decision-header-menu > summary')\u001b[22m\n\u001b[2m    - locator resolved to <summary aria-label=\"Decision actions\">…</summary>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <dialog open=\"\" data-standard-close=\"true\" class=\"ke-step-dialog ke-outcome-dialog\" aria-label=\"Review proposal and permissions\">…</dialog> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <dialog open=\"\" data-standard-close=\"true\" class=\"ke-step-dialog ke-outcome-dialog\" aria-label=\"Review proposal and permissions\">…</dialog> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    39 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <dialog open=\"\" data-standard-close=\"true\" class=\"ke-step-dialog ke-outcome-dialog\" aria-label=\"Review proposal and permissions\">…</dialog> intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+      "code": "locator.click: Timeout 20000ms exceeded.",
+      "domain": "AUTOMATION",
+      "status": null,
+      "serverCode": null,
+      "reference": null,
+      "screenshot": "NOT_AVAILABLE"
+    },
+    {
+      "action": "U01.closeDecision.9ee639",
+      "code": "locator.click: Timeout 20000ms exceeded.",
       "domain": "AUTOMATION",
       "status": null,
       "serverCode": null,
@@ -321,7 +348,10 @@
       "screenshot": "NOT_AVAILABLE"
     }
   ],
-  "publication": "LOCAL_STARTUP",
+  "publication": {
+    "state": "FINAL_PUBLICATION_PENDING",
+    "reportUrl": "https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/E2E04/20261020T032500Z/report.md"
+  },
   "serving": {
     "source": "1f7d441c4913090fb08bd216c3759d7fd2f4cd57",
     "apiSha256": "e8338c82bb6314f157f743d7f27c1bf4b5e0e7d8c17aa7da5efbc1789be70436",
@@ -345,7 +375,10 @@
       "workflow": "https://github.com/Known-Enough/known-enough/actions/runs/39365810648",
       "configurationWrites": 0
     },
-    "frontendWorkflow": "https://github.com/Known-Enough/known-enough/actions/runs/39339200904"
+    "frontendWorkflow": "https://github.com/Known-Enough/known-enough/actions/runs/39339200904",
+    "finalFrontendReadback": "serving-final-frontend.json",
+    "finalApiReadback": "serving-final-api.json",
+    "workerReadbackAvailability": "Dated publication baseline; not freshly fetched in E2E04"
   },
   "runtime": {
     "node": "v24.19.0",
@@ -353,7 +386,7 @@
     "override": "User explicitly authorized Node24.19 or latest installed",
     "browser": "155.0.8059.85"
   },
-  "lastProgressAt": "2026-10-20T05:38:47.102Z",
+  "lastProgressAt": "2026-10-20T05:41:24.249Z",
   "credentials": {
     "exactSet": true,
     "count": 15,
@@ -373,6 +406,19 @@
     "plainPostsAcknowledged": 15,
     "distinctOwners": 15
   },
-  "optionalProfileReads": 1088,
-  "optionalProfileResponses": 982
+  "optionalProfileReads": 1223,
+  "optionalProfileResponses": 1105,
+  "qualification": "FAIL; retained consensus is AGREED",
+  "unresolvedAppWrites": [],
+  "completion": "completion.json",
+  "assistantAssessment": "assistant-assessment.json",
+  "draftingAssessment": "drafting-assessment.json",
+  "providerUsage": {
+    "calls": null,
+    "tokens": null,
+    "billedCost": null,
+    "availability": "NO_PER_REQUEST_PROVIDER_USAGE_READ"
+  },
+  "claim": "RELEASED",
+  "nextSafeAction": "Repair documented failures under a separate implementation instruction; do not repeat existing outcome/approvals or failed assistant requests."
 }
