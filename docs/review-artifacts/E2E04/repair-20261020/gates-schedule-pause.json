@@ -1,0 +1,10 @@
+{
+  "result": "WORKER_SCHEDULE_DEACTIVATION_PASS",
+  "ruleEnableRequested": false,
+  "ruleDisabledReadback": true,
+  "paidDispatchReported": 0,
+  "schedule": "DISABLED",
+  "packageSource": "ceeebfa33ad5833a69155f548cd74226a7b82560",
+  "workerSha256": "8599e4ce2ce82b9e2cc8520cb5f9c124084e8d36205ea11b13f5cbe10fe7c46b",
+  "sourceSha": "6917444a9c4d95bfb032c09350f36c5214fa0983"
+}

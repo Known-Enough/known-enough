@@ -1,0 +1,12 @@
+{
+  "result": "WORKER_SCHEDULE_ACTIVATION_PASS",
+  "ruleEnableRequested": true,
+  "ruleDisabledReadback": false,
+  "paidDispatchReported": 0,
+  "matchingEmptySummaries": 1,
+  "schedule": "ENABLED",
+  "packageSource": "6917444a9c4d95bfb032c09350f36c5214fa0983",
+  "workerSha256": "cf6b87c22a6150be85ca858288568a813e7409ce48148701cb7f1e69108a27dd",
+  "sourceSha": "6917444a9c4d95bfb032c09350f36c5214fa0983",
+  "workflow": "https://github.com/Known-Enough/known-enough/actions/runs/39398600901"
+}
