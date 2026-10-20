@@ -3970,3 +3970,4 @@
 {"utc":"2026-10-20T05:41:23.901Z","run":"20261020T032500Z","event":"BROWSER_DISCONNECTED"}
 {"utc":"2026-10-20T05:41:24.249Z","run":"20261020T032500Z","event":"RUNNER_STOPPED","browserClosed":true}
 {"utc": "2026-10-20T05:42:01.976442+00:00", "run": "20261020T032500Z", "event": "FINAL_REPORT_PREPARED", "state": "FAIL", "cases": {"01": "PASS", "02": "PASS", "03": "FAIL", "04": "PASS", "05": "PASS", "06": "FAIL"}, "appWritesAfterBrowserClosed": 0, "claim": "RELEASED"}
+{"utc": "2026-10-20T05:42:56.919256+00:00", "run": "20261020T032500Z", "event": "PUBLICATION_CONFIRMED", "commit": "d29da37797daaed551d8d662906a42ef0a6208f7", "state": "FAIL", "reportUrl": "https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/E2E04/20261020T032500Z/report.md"}

@@ -349,8 +349,10 @@
     }
   ],
   "publication": {
-    "state": "FINAL_PUBLICATION_PENDING",
-    "reportUrl": "https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/E2E04/20261020T032500Z/report.md"
+    "state": "PUBLISHED",
+    "reportUrl": "https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/E2E04/20261020T032500Z/report.md",
+    "confirmedReportCommit": "d29da37797daaed551d8d662906a42ef0a6208f7",
+    "confirmedAt": "2026-10-20T05:42:56.919256+00:00"
   },
   "serving": {
     "source": "1f7d441c4913090fb08bd216c3759d7fd2f4cd57",
@@ -420,5 +422,11 @@
     "availability": "NO_PER_REQUEST_PROVIDER_USAGE_READ"
   },
   "claim": "RELEASED",
-  "nextSafeAction": "Repair documented failures under a separate implementation instruction; do not repeat existing outcome/approvals or failed assistant requests."
+  "nextSafeAction": "Repair documented failures under a separate implementation instruction; do not repeat existing outcome/approvals or failed assistant requests.",
+  "artifactPrivacyCheck": {
+    "credentialMatches": 0,
+    "privateSessionFiles": 30,
+    "allSessionFiles0600": true,
+    "privateDirectory0700": true
+  }
 }
