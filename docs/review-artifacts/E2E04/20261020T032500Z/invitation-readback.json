@@ -1,0 +1,56 @@
+{
+  "source": "f07420dda5b90d63000c534f1c5e9d5eb65ab118",
+  "awsWrites": 0,
+  "providerCalls": 0,
+  "events": [
+    {
+      "timestamp": 1792466959776,
+      "event": "known-enough.group-failure",
+      "requestId": "1e34495e-077e-477a-99ec-cdbbd24bd9be",
+      "elapsedMs": 94,
+      "operation": "group.invite",
+      "causes": [],
+      "code": "STALE_CONTEXT",
+      "status": 409
+    }
+  ],
+  "failures": [
+    {
+      "timestamp": 1792466959776,
+      "event": "known-enough.group-failure",
+      "requestId": "1e34495e-077e-477a-99ec-cdbbd24bd9be",
+      "elapsedMs": 94,
+      "operation": "group.invite",
+      "causes": [],
+      "code": "STALE_CONTEXT",
+      "status": 409
+    }
+  ],
+  "gateway": {
+    "stage": {
+      "result": "READ",
+      "defaultThrottle": {
+        "ThrottlingBurstLimit": 10,
+        "ThrottlingRateLimit": 5.0
+      },
+      "decisionOverrides": {},
+      "accessLoggingConfigured": false
+    },
+    "cors": {
+      "result": "UNAVAILABLE",
+      "code": "AccessDeniedException"
+    }
+  },
+  "windowStart": 1792466660595,
+  "windowEnd": 1792467560595,
+  "result": "DRAFT_DIAGNOSTICS_READ",
+  "windowComplete": true,
+  "requestReferenceCorrelation": "EXACT_REFERENCE_MATCH",
+  "workflow": "https://github.com/Known-Enough/known-enough/actions/runs/39365412929",
+  "rootCause": "UNVERIFIED; log confirms STALE_CONTEXT, not which guard rejected",
+  "preliminaryDiagnostic": {
+    "workflow": "https://github.com/Known-Enough/known-enough/actions/runs/39365395100",
+    "result": "REJECTED_AT_SOURCE_GUARD",
+    "reason": "Recorder operator mistyped source SHA; workflow failed before AWS credential step."
+  }
+}

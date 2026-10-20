@@ -1,17 +1,17 @@
 {
   "runId": "20261020T032500Z",
-  "state": "RUNNING",
+  "state": "PAGINATION_CHECKPOINT",
   "startedAt": "2026-10-20T03:23:37.850Z",
-  "endedAt": null,
+  "endedAt": "2026-10-20T03:41:17.110Z",
   "cases": {
     "01": "PASS",
-    "02": "NOT_RUN",
+    "02": "PASS",
     "03": "NOT_RUN",
     "04": "NOT_RUN",
     "05": "NOT_RUN",
     "06": "NOT_RUN"
   },
-  "lastConfirmedAction": "U01.result.a1b109",
+  "lastConfirmedAction": "U01.inspect.6c4c6d",
   "inFlightAction": null,
   "observedRequests": {
     "outcome": 0,
@@ -165,6 +165,15 @@
         "height": 900
       },
       "caption": "All fifteen distinct synthetic members; one organizer"
+    },
+    {
+      "name": "07-later-page-search.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 900
+      },
+      "caption": "Search finds a group from response page 2"
     }
   ],
   "errors": [
@@ -175,6 +184,15 @@
       "status": 409,
       "reference": "1e34495e-077e-477a-99ec-cdbbd24bd9be",
       "screenshot": "screenshots/failure-0.png"
+    },
+    {
+      "action": "U01.suggest.a2a5b9",
+      "code": "locator.isDisabled: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Suggest options', exact: true })\u001b[22m\n",
+      "domain": "AUTOMATION",
+      "status": null,
+      "serverCode": null,
+      "reference": null,
+      "screenshot": "screenshots/failure-1.png"
     }
   ],
   "publication": "LOCAL_STARTUP",
@@ -202,7 +220,7 @@
     "override": "User explicitly authorized Node24.19 or latest installed",
     "browser": "155.0.8059.85"
   },
-  "lastProgressAt": "2026-10-20T03:38:04.478Z",
+  "lastProgressAt": "2026-10-20T03:41:18.188Z",
   "credentials": {
     "exactSet": true,
     "count": 15,
@@ -222,6 +240,6 @@
     "plainPostsAcknowledged": 0,
     "distinctOwners": 0
   },
-  "optionalProfileReads": 15,
-  "optionalProfileResponses": 15
+  "optionalProfileReads": 35,
+  "optionalProfileResponses": 35
 }
