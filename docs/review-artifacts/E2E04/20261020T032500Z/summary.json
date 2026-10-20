@@ -11,7 +11,7 @@
     "05": "NOT_RUN",
     "06": "NOT_RUN"
   },
-  "lastConfirmedAction": null,
+  "lastConfirmedAction": "U01.catalog.7f4b29",
   "inFlightAction": null,
   "observedRequests": {
     "outcome": 0,
@@ -19,7 +19,83 @@
     "aiDraft": 0,
     "plainPosts": 0
   },
-  "users": {},
+  "users": {
+    "U01": {
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 0
+    },
+    "U02": {
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 0
+    },
+    "U03": {
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 0
+    },
+    "U04": {
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 0
+    },
+    "U05": {
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 0
+    },
+    "U06": {
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 0
+    },
+    "U07": {
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 0
+    },
+    "U08": {
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 0
+    },
+    "U09": {
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 0
+    },
+    "U10": {
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 0
+    },
+    "U11": {
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 0
+    },
+    "U12": {
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 0
+    },
+    "U13": {
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 0
+    },
+    "U14": {
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 0
+    },
+    "U15": {
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 0
+    }
+  },
   "screenshots": [],
   "errors": [],
   "publication": "LOCAL_STARTUP",
@@ -44,14 +120,13 @@
   "runtime": {
     "node": "v24.19.0",
     "playwright": "1.63.0",
-    "override": "User explicitly authorized Node24.19 or latest installed"
+    "override": "User explicitly authorized Node24.19 or latest installed",
+    "browser": "155.0.8059.85"
   },
-  "lastProgressAt": "2026-10-20T03:23:37.851Z",
+  "lastProgressAt": "2026-10-20T03:26:57.499Z",
   "credentials": {
-    "exactAccountSet": true,
+    "exactSet": true,
     "count": 15,
-    "fileMode": "0600",
-    "directoryMode": "0700",
-    "values": "PRIVATE_ONLY"
+    "source": "PRIVATE_MACHINE_LOCAL_FILE"
   }
 }
