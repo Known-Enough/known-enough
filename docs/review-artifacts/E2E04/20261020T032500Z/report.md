@@ -15,9 +15,9 @@ Node v24.19.0; project Playwright1.63.0; installed Chrome. User authorized the a
 
 Last verified serving baseline: source1f7d441 / APIe8338c82 / workerc4258495 / frontend152. Live evidence and credential readiness are recorded in the summary; a documentation commit is not a serving release.
 
-Last confirmed action: U01.createDecision.b07569. In flight: U01.saveAnswer.138948.
+Last confirmed action: U06.chat.8f4cd5. In flight: U06.message.ef10a1.
 
-Observed UI requests: {"outcome":0,"assistant":0,"aiDraft":1,"plainPosts":0}. Provider calls/tokens/billed cost: UNKNOWN unless separately recorded.
+Observed UI requests: {"outcome":0,"assistant":0,"aiDraft":1,"plainPosts":4}. Provider calls/tokens/billed cost: UNKNOWN unless separately recorded.
 
 - U01.invite.3ca912: APP_HTTP_409; screenshot screenshots/failure-0.png.
 - U01.suggest.a2a5b9: locator.isDisabled: Timeout 20000ms exceeded.
@@ -33,5 +33,7 @@ Call log:
 Call log:
 [2m  - waiting for getByRole('button', { name: 'Save draft', exact: true })[22m
 ; screenshot NOT_AVAILABLE.
+- U01.saveAnswer.138948: DECISION_VIEW_NOT_READY; screenshot NOT_AVAILABLE.
+- U03.saveAnswer.0e1558: APP_HTTP_503; screenshot NOT_AVAILABLE.
 
 [Summary](summary.json) · [Events](events.jsonl)

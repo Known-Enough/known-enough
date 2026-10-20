@@ -11,13 +11,13 @@
     "05": "NOT_RUN",
     "06": "NOT_RUN"
   },
-  "lastConfirmedAction": "U01.createDecision.b07569",
-  "inFlightAction": "U01.saveAnswer.138948",
+  "lastConfirmedAction": "U06.chat.8f4cd5",
+  "inFlightAction": "U06.message.ef10a1",
   "observedRequests": {
     "outcome": 0,
     "assistant": 0,
     "aiDraft": 1,
-    "plainPosts": 0
+    "plainPosts": 5
   },
   "users": {
     "U01": {
@@ -25,18 +25,18 @@
       "approved": true,
       "initialGroups": 0,
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false
+      "postAcknowledged": true
     },
     "U02": {
       "authenticated": true,
       "approved": true,
       "initialGroups": 0,
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false
+      "postAcknowledged": true
     },
     "U03": {
       "authenticated": true,
@@ -52,25 +52,25 @@
       "approved": true,
       "initialGroups": 0,
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false
+      "postAcknowledged": true
     },
     "U05": {
       "authenticated": true,
       "approved": true,
       "initialGroups": 0,
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false
+      "postAcknowledged": true
     },
     "U06": {
       "authenticated": true,
       "approved": true,
       "initialGroups": 0,
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
       "postAcknowledged": false
     },
@@ -174,6 +174,15 @@
         "height": 900
       },
       "caption": "Search finds a group from response page 2"
+    },
+    {
+      "name": "09-save-rejected-readback.png",
+      "actor": "U03",
+      "viewport": {
+        "width": 1365,
+        "height": 900
+      },
+      "caption": "U03 own readback after HTTP 503: answer remains unsaved"
     }
   ],
   "errors": [
@@ -220,6 +229,24 @@
       "serverCode": null,
       "reference": null,
       "screenshot": "NOT_AVAILABLE"
+    },
+    {
+      "action": "U01.saveAnswer.138948",
+      "code": "DECISION_VIEW_NOT_READY",
+      "domain": "AUTOMATION",
+      "status": null,
+      "serverCode": null,
+      "reference": null,
+      "screenshot": "NOT_AVAILABLE"
+    },
+    {
+      "action": "U03.saveAnswer.0e1558",
+      "code": "APP_HTTP_503",
+      "domain": "APP_HTTP",
+      "status": 503,
+      "serverCode": "RETRYABLE_SERVER_ERROR",
+      "reference": "783f737f-29e0-4026-a6d8-f937f4c5a85e",
+      "screenshot": "NOT_AVAILABLE"
     }
   ],
   "publication": "LOCAL_STARTUP",
@@ -254,7 +281,7 @@
     "override": "User explicitly authorized Node24.19 or latest installed",
     "browser": "155.0.8059.85"
   },
-  "lastProgressAt": "2026-10-20T05:22:09.575Z",
+  "lastProgressAt": "2026-10-20T05:24:48.239Z",
   "credentials": {
     "exactSet": true,
     "count": 15,
@@ -269,11 +296,11 @@
   ],
   "progress": {
     "joined": 15,
-    "answersAcknowledged": 0,
+    "answersAcknowledged": 5,
     "approvalsAcknowledged": 0,
-    "plainPostsAcknowledged": 0,
-    "distinctOwners": 0
+    "plainPostsAcknowledged": 4,
+    "distinctOwners": 6
   },
-  "optionalProfileReads": 99,
-  "optionalProfileResponses": 97
+  "optionalProfileReads": 246,
+  "optionalProfileResponses": 234
 }
