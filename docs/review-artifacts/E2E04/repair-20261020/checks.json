@@ -24,5 +24,6 @@
       "outputTokens": 488
     },
     "billedCost": "UNKNOWN"
-  }
+  },
+  "recorderSyntax": "PASS"
 }
