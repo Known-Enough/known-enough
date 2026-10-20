@@ -11,13 +11,13 @@
     "05": "NOT_RUN",
     "06": "NOT_RUN"
   },
-  "lastConfirmedAction": "U05.closeChat.b5ce3f",
+  "lastConfirmedAction": "U02.closeChat.237852",
   "inFlightAction": null,
   "observedRequests": {
     "outcome": 0,
-    "assistant": 0,
+    "assistant": 2,
     "aiDraft": 1,
-    "plainPosts": 5
+    "plainPosts": 7
   },
   "users": {
     "U01": {
@@ -67,18 +67,18 @@
     },
     "U06": {
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false,
+      "postAcknowledged": true,
       "authenticated": true,
       "approved": true,
       "initialGroups": 2
     },
     "U07": {
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false,
+      "postAcknowledged": true,
       "authenticated": true,
       "approved": true,
       "initialGroups": 2
@@ -174,6 +174,15 @@
         "height": 900
       },
       "caption": "Search finds a group from response page 2"
+    },
+    {
+      "name": "02-seven-answers.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 900
+      },
+      "caption": "Seven saved answers and eight outstanding; no approvals"
     }
   ],
   "errors": [],
@@ -194,7 +203,7 @@
     "override": "User explicitly authorized Node24.19 or latest installed",
     "browser": "155.0.8059.85"
   },
-  "lastProgressAt": "2026-10-20T16:17:57.880Z",
+  "lastProgressAt": "2026-10-20T16:19:18.131Z",
   "fixturePlan": {
     "reuseVerifiedFifteenMemberGroup": true,
     "initialOwnedGroupCount": 7,
@@ -209,11 +218,11 @@
   },
   "progress": {
     "joined": 15,
-    "answersAcknowledged": 5,
+    "answersAcknowledged": 7,
     "approvalsAcknowledged": 0,
-    "plainPostsAcknowledged": 5,
-    "distinctOwners": 5
+    "plainPostsAcknowledged": 7,
+    "distinctOwners": 7
   },
-  "optionalProfileReads": 142,
-  "optionalProfileResponses": 131
+  "optionalProfileReads": 245,
+  "optionalProfileResponses": 219
 }
