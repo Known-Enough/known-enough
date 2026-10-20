@@ -17,6 +17,8 @@ The public site HEAD check returned HTTP 200 (last-modified `Mon, 19 Oct 2026 23
 
 No browser session, login, account check, group/decision/message/answer/approval write, AI request, provider call, screenshot, or token-usage read occurred. The previous E2E03 agreed fixture remains untouched.
 
+**Publication:** Evidence-only commit `a17513d` was pushed to `main`.
+
 **Next:** make Node 24.21.0 available on this execution machine and resume the E2E04 preflight. The run remains BLOCKED; this is not an E2E04 product result.
 
 [Events](events.jsonl) · [Summary](summary.json)

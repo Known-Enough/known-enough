@@ -58,6 +58,8 @@
   },
   "nextSafeAction": "Provide/install the task-required Node 24.21.0 runtime on this execution machine, then resume E2E04 preflight; do not reuse credentials elsewhere.",
   "publication": {
-    "unpublishedLocalChanges": true
+    "unpublishedLocalChanges": false,
+    "lastConfirmedCommit": "a17513d",
+    "lastConfirmedUrl": "https://github.com/Known-Enough/known-enough/blob/main/docs/review-artifacts/E2E04/20261020T031040Z/report.md"
   }
 }
