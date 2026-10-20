@@ -1,0 +1,138 @@
+{
+  "workflow": "https://github.com/Known-Enough/known-enough/actions/runs/39459116458",
+  "keyOrder": [
+    "seven-answer-progress",
+    "umbrella",
+    "proposal-zero-approvals",
+    "arrival-coordination",
+    "private-support",
+    "private-boundary",
+    "ai-draft",
+    "outcome"
+  ],
+  "owned": {
+    "result": "OWNED_JOB_READ_PASS",
+    "requests": 8,
+    "mutations": 0,
+    "providerCalls": 0,
+    "runtimeSource": "86341eb9dab56fab142534b9a102c82b4cac192e",
+    "jobs": [
+      {
+        "kind": "CHAT",
+        "phase": "SUCCEEDED",
+        "reason": null,
+        "attempts": 1,
+        "failures": 0,
+        "reservedTokens": 18432,
+        "reservedCostMicros": 10000,
+        "usage": {
+          "inputTokens": 1250,
+          "outputTokens": 27
+        }
+      },
+      {
+        "kind": "CHAT",
+        "phase": "SUCCEEDED",
+        "reason": null,
+        "attempts": 1,
+        "failures": 0,
+        "reservedTokens": 18432,
+        "reservedCostMicros": 10000,
+        "usage": {
+          "inputTokens": 1253,
+          "outputTokens": 43
+        }
+      },
+      {
+        "kind": "CHAT",
+        "phase": "SUCCEEDED",
+        "reason": null,
+        "attempts": 1,
+        "failures": 0,
+        "reservedTokens": 18432,
+        "reservedCostMicros": 10000,
+        "usage": {
+          "inputTokens": 1334,
+          "outputTokens": 66
+        }
+      },
+      {
+        "kind": "CHAT",
+        "phase": "SUCCEEDED",
+        "reason": null,
+        "attempts": 1,
+        "failures": 0,
+        "reservedTokens": 18432,
+        "reservedCostMicros": 10000,
+        "usage": {
+          "inputTokens": 1256,
+          "outputTokens": 77
+        }
+      },
+      {
+        "kind": "CHAT",
+        "phase": "SUCCEEDED",
+        "reason": null,
+        "attempts": 1,
+        "failures": 0,
+        "reservedTokens": 18432,
+        "reservedCostMicros": 10000,
+        "usage": {
+          "inputTokens": 1263,
+          "outputTokens": 59
+        }
+      },
+      {
+        "kind": "CHAT",
+        "phase": "SUCCEEDED",
+        "reason": null,
+        "attempts": 1,
+        "failures": 0,
+        "reservedTokens": 18432,
+        "reservedCostMicros": 10000,
+        "usage": {
+          "inputTokens": 1396,
+          "outputTokens": 29
+        }
+      },
+      {
+        "kind": "ARCHITECT",
+        "phase": "SUCCEEDED",
+        "reason": null,
+        "attempts": 1,
+        "failures": 0,
+        "reservedTokens": 18432,
+        "reservedCostMicros": 10000,
+        "usage": {
+          "inputTokens": 1574,
+          "outputTokens": 243
+        }
+      },
+      {
+        "kind": "NEGOTIATION",
+        "phase": "SUCCEEDED",
+        "reason": null,
+        "attempts": 1,
+        "failures": 0,
+        "reservedTokens": 18432,
+        "reservedCostMicros": 10000,
+        "usage": {
+          "inputTokens": 11762,
+          "outputTokens": 28
+        }
+      }
+    ]
+  },
+  "queue": {
+    "result": "JOB_QUEUE_READ_PASS",
+    "requests": 2,
+    "mutations": 0,
+    "providerCalls": 0,
+    "controlSource": "0006a4d3587e1f5331b6c9ae1d584f55b12e0a82",
+    "enabled": true,
+    "active": 0,
+    "slots": 0,
+    "slotsExpired": 0,
+    "jobs": []
+  }
+}

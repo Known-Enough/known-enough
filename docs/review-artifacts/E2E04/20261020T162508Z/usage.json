@@ -1,0 +1,14 @@
+{
+  "jobs": 11,
+  "allSucceeded": true,
+  "recordedAttempts": 11,
+  "inputTokens": 25309,
+  "outputTokens": 658,
+  "billedCurrencyCost": "UNKNOWN",
+  "scope": "Qualification execution and targeted follow-up only; earlier attempts and original run excluded",
+  "providerDispatchCount": "NOT_SEPARATELY_RECORDED",
+  "finalAdmission": "ENABLED",
+  "finalActive": 0,
+  "finalSlots": 0,
+  "actualTokens": 25967
+}

@@ -1,6 +1,6 @@
 # E2E04 repair
 
-Status: PUBLISHED; all six cases qualify across the executed run and targeted renderer follow-up. Final owned-job usage readback pending. Direct user request covers the two failed cases among six, plus review of the strict drafting-label criterion. Own Battosai1806; pulled76549c0d first.
+Status: PUBLISHED; all six cases qualify across the executed run and targeted renderer follow-up. Exact11-job qualification usage readback PASS:25,967 actual tokens; billed cost UNKNOWN; enabled admission/active0/slots0. Direct user request covers the two failed cases among six, plus review of the strict drafting-label criterion. Own Battosai1806; pulled76549c0d first.
 
 ## Evidence and changes
 
@@ -34,3 +34,5 @@ PROGRESS, APPROVALS and OUTCOME now each render all current public proposal choi
 ## Live qualification result
 
 [Combined final report](../20261020T162508Z/report.md): six cases PASS across the fifteen-user execution and three-request targeted follow-up; not a fresh full six-case single-source run.15 first-attempt saves/15 distinct approvals, correct proposal22.142s, all eight prescribed conversation/privacy checks qualified. Browser closed normally. Backend0006a4d3/API9488da66/worker97748a77 and original ENABLED schedule confirmed; frontend152 preserved. Earlier failed/incomplete responses and fixtures remain unchanged.
+
+Claim released at 2026-10-20T16:39:36.519140+00:00. All requested bounded criteria qualified; preserve both historical agreed and partial fixtures and all original terminal requests. No automatic continuation, new monitor or broader readiness claim.

@@ -242,5 +242,20 @@
     "distinctOwners": 15
   },
   "optionalProfileReads": 526,
-  "optionalProfileResponses": 469
+  "optionalProfileResponses": 469,
+  "usage": {
+    "jobs": 11,
+    "allSucceeded": true,
+    "recordedAttempts": 11,
+    "inputTokens": 25309,
+    "outputTokens": 658,
+    "billedCurrencyCost": "UNKNOWN",
+    "scope": "Qualification execution and targeted follow-up only; earlier attempts and original run excluded",
+    "providerDispatchCount": "NOT_SEPARATELY_RECORDED",
+    "finalAdmission": "ENABLED",
+    "finalActive": 0,
+    "finalSlots": 0,
+    "actualTokens": 25967
+  },
+  "qualifiedCasesScope": "Combined executed run plus targeted renderer follow-up; not a fresh single-source full rerun"
 }

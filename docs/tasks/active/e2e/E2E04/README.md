@@ -1,5 +1,8 @@
 # E2E04 — Fifteen people, one agreed plan
 
+**DONE — six cases qualify across the fifteen-user execution and targeted repair follow-up.**15 first-attempt saves,15 exact distinct approvals,22.142s correct outcome and all eight prescribed assistant/privacy checks PASS. [Combined report and gallery](../../../../review-artifacts/E2E04/20261020T162508Z/report.md), [repair ledger](../../../../review-artifacts/E2E04/repair-20261020/report.md). Runtime0006a4d3, original schedule ENABLED; claim released. Evidence spans dated releases; no fresh full six-case single-source rerun.
+
+## Historical original execution
 **FAIL / execution completed; claim released.** Four cases passed and two failed. All fifteen users saved their exact answers and independently approved the same correct plan, visible in9.532s. Three initial save503s required reconciled recovery; two assistant summaries remained UNAVAILABLE. The strict draft-label criterion required manual normalization. [Final report](../../../../review-artifacts/E2E04/20261020T032500Z/report.md), [precise follow-ups](../../../../review-artifacts/E2E04/20261020T032500Z/followups.md). Node24.19 used under the user’s override.
 
 The agreed demonstration, two saved drafts and five empty pagination groups are retained for inspection. Do not repeat its outcome, approvals or failed assistant requests.

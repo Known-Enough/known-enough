@@ -1,0 +1,68 @@
+{
+  "workflow": "https://github.com/Known-Enough/known-enough/actions/runs/39459151108",
+  "keyOrder": [
+    "proposal-summary-repair-qualification",
+    "fourteen-approvals",
+    "agreed-summary"
+  ],
+  "owned": {
+    "result": "OWNED_JOB_READ_PASS",
+    "requests": 3,
+    "mutations": 0,
+    "providerCalls": 0,
+    "runtimeSource": "0006a4d3587e1f5331b6c9ae1d584f55b12e0a82",
+    "jobs": [
+      {
+        "kind": "CHAT",
+        "phase": "SUCCEEDED",
+        "reason": null,
+        "attempts": 1,
+        "failures": 0,
+        "reservedTokens": 18432,
+        "reservedCostMicros": 10000,
+        "usage": {
+          "inputTokens": 1448,
+          "outputTokens": 27
+        }
+      },
+      {
+        "kind": "CHAT",
+        "phase": "SUCCEEDED",
+        "reason": null,
+        "attempts": 1,
+        "failures": 0,
+        "reservedTokens": 18432,
+        "reservedCostMicros": 10000,
+        "usage": {
+          "inputTokens": 1521,
+          "outputTokens": 29
+        }
+      },
+      {
+        "kind": "CHAT",
+        "phase": "SUCCEEDED",
+        "reason": null,
+        "attempts": 1,
+        "failures": 0,
+        "reservedTokens": 18432,
+        "reservedCostMicros": 10000,
+        "usage": {
+          "inputTokens": 1252,
+          "outputTokens": 30
+        }
+      }
+    ]
+  },
+  "queue": {
+    "result": "JOB_QUEUE_READ_PASS",
+    "requests": 2,
+    "mutations": 0,
+    "providerCalls": 0,
+    "controlSource": "0006a4d3587e1f5331b6c9ae1d584f55b12e0a82",
+    "enabled": true,
+    "active": 0,
+    "slots": 0,
+    "slotsExpired": 0,
+    "jobs": []
+  }
+}

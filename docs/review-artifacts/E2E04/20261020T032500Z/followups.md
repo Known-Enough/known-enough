@@ -11,3 +11,7 @@ The invitation409 while another invitation was pending was reconciled without bl
 Recorder-only issues included native-file replacement, expired sessions, navigation confirmation, and modal/close selectors. They were resolved with durable reconciliation and isolated normal reauthentication. Existing screenshots and append-only events remain, including superseded diagnostic screenshots; masking in screenshot05 obscures some public rows, while screenshot06 clearly shows all fifteen final approvals.
 
 No product fix, deployment, account reset, schedule, budget or IAM change was performed. Keep the agreed fixture, two saved drafts and five empty pagination groups. A later implementation/rerun must preserve existing accepted writes, identity/privacy/consent and the exact proposal.
+
+## Repair qualification — 2026-10-20T16:39:36.519140+00:00
+
+The [published repair and combined qualification](../20261020T162508Z/report.md) closes the bounded follow-ups:15 first-attempt saves/no recovery panel; complete proposal/final replies plus14-approval truth; explicit topic-name request and exact date canonicalization preserve all12 alternatives without correction. Historical SDK details/raw failed model output remain unverified; no retroactive diagnosis or original-request retry is claimed. The original agreed fixture and every dated failure remain preserved.
