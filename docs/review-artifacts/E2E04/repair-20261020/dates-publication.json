@@ -1,0 +1,12 @@
+{
+  "sourceSha": "86341eb9dab56fab142534b9a102c82b4cac192e",
+  "apiSha256": "3b4f18b16b4402a33b0cc36200652e186cf16bb462720244761e45f6eebd45be",
+  "workerSha256": "af69e890eb5cbac492058bb18ab561dc1caa7858062131fcca8a64c4500df017",
+  "runtimeWorkflow": "https://github.com/Known-Enough/known-enough/actions/runs/39455263553",
+  "environment": "UNCHANGED",
+  "migration": "UNCHANGED",
+  "admissionEnabled": true,
+  "totals": "UNCHANGED",
+  "schedule": "ENABLED",
+  "scheduleRestoreWorkflow": "https://github.com/Known-Enough/known-enough/actions/runs/39455552935"
+}

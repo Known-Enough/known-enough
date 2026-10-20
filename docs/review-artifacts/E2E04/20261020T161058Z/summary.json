@@ -1,0 +1,49 @@
+{
+  "runId": "20261020T161058Z",
+  "state": "RUNNING",
+  "startedAt": "2026-10-20T16:13:45.990Z",
+  "endedAt": null,
+  "cases": {
+    "01": "NOT_RUN",
+    "02": "NOT_RUN",
+    "03": "NOT_RUN",
+    "04": "NOT_RUN",
+    "05": "NOT_RUN",
+    "06": "NOT_RUN"
+  },
+  "lastConfirmedAction": null,
+  "inFlightAction": null,
+  "observedRequests": {
+    "outcome": 0,
+    "assistant": 0,
+    "aiDraft": 0,
+    "plainPosts": 0
+  },
+  "users": {},
+  "screenshots": [],
+  "errors": [],
+  "publication": "LOCAL_STARTUP",
+  "serving": {
+    "source": "86341eb9dab56fab142534b9a102c82b4cac192e",
+    "apiSha256": "3b4f18b16b4402a33b0cc36200652e186cf16bb462720244761e45f6eebd45be",
+    "workerSha256": "af69e890eb5cbac492058bb18ab561dc1caa7858062131fcca8a64c4500df017",
+    "amplifyJob": 152,
+    "frontendSource": "1f7d441c4913090fb08bd216c3759d7fd2f4cd57",
+    "evidence": "https://github.com/Known-Enough/known-enough/actions/runs/39455263553",
+    "schedule": "ENABLED",
+    "scheduleEvidence": "https://github.com/Known-Enough/known-enough/actions/runs/39455552935"
+  },
+  "runtime": {
+    "node": "v24.19.0",
+    "playwright": "1.63.0",
+    "override": "User explicitly authorized Node24.19 or latest installed"
+  },
+  "lastProgressAt": "2026-10-20T16:13:46.003Z",
+  "fixturePlan": {
+    "reuseVerifiedFifteenMemberGroup": true,
+    "initialOwnedGroupCount": 7,
+    "plannedNewGroups": 0,
+    "freshDecision": true,
+    "priorDraftPreserved": true
+  }
+}
