@@ -11,11 +11,11 @@
     "05": "NOT_RUN",
     "06": "NOT_RUN"
   },
-  "lastConfirmedAction": "U10.approve.749296",
+  "lastConfirmedAction": "U01.closeChat.b0b64c",
   "inFlightAction": null,
   "observedRequests": {
     "outcome": 0,
-    "assistant": 1,
+    "assistant": 2,
     "aiDraft": 0,
     "plainPosts": 0
   },
@@ -113,7 +113,7 @@
     "U11": {
       "joined": true,
       "answerAcknowledged": true,
-      "approvalAcknowledged": false,
+      "approvalAcknowledged": true,
       "postAcknowledged": true,
       "authenticated": true,
       "approved": true,
@@ -122,7 +122,7 @@
     "U12": {
       "joined": true,
       "answerAcknowledged": true,
-      "approvalAcknowledged": false,
+      "approvalAcknowledged": true,
       "postAcknowledged": true,
       "authenticated": true,
       "approved": true,
@@ -131,7 +131,7 @@
     "U13": {
       "joined": true,
       "answerAcknowledged": true,
-      "approvalAcknowledged": false,
+      "approvalAcknowledged": true,
       "postAcknowledged": true,
       "authenticated": true,
       "approved": true,
@@ -140,7 +140,7 @@
     "U14": {
       "joined": true,
       "answerAcknowledged": true,
-      "approvalAcknowledged": false,
+      "approvalAcknowledged": true,
       "postAcknowledged": true,
       "authenticated": true,
       "approved": true,
@@ -156,7 +156,17 @@
       "initialGroups": 2
     }
   },
-  "screenshots": [],
+  "screenshots": [
+    {
+      "name": "05-fourteen-approvals.png",
+      "actor": "U15",
+      "viewport": {
+        "width": 1365,
+        "height": 1600
+      },
+      "caption": "Fourteen of fifteen approved: final explicit approval still required"
+    }
+  ],
   "errors": [],
   "publication": "LOCAL_STARTUP",
   "serving": {
@@ -180,7 +190,7 @@
     "override": "User explicitly authorized Node24.19 or latest installed",
     "browser": "155.0.8059.85"
   },
-  "lastProgressAt": "2026-10-20T16:32:21.673Z",
+  "lastProgressAt": "2026-10-20T16:33:43.298Z",
   "qualification": {
     "priorExecution": "20261020T161058Z",
     "preserveSameAnswersAndProposal": true,
@@ -200,10 +210,10 @@
   "progress": {
     "joined": 15,
     "answersAcknowledged": 15,
-    "approvalsAcknowledged": 10,
+    "approvalsAcknowledged": 14,
     "plainPostsAcknowledged": 15,
     "distinctOwners": 15
   },
-  "optionalProfileReads": 224,
-  "optionalProfileResponses": 202
+  "optionalProfileReads": 370,
+  "optionalProfileResponses": 332
 }
