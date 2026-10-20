@@ -1,0 +1,31 @@
+{
+  "result": "PUBLISHED_MANUAL_ACCEPTANCE_PENDING",
+  "observedAt": "2026-10-20T19:34:42.846682+00:00",
+  "url": "https://known-enough.vercel.app/",
+  "sourceSha": "da04c9526b953e55f65e0fd27798dd0d86d37676",
+  "vercelDeployment": "dpl_GA8NwSQz8c726gxxr5hUBCdf7yWw",
+  "deploymentState": "READY",
+  "publicHtmlStatus": 200,
+  "publishedCssSha256": "b72f1e047e690e2c47b1fb0efbadac5114d3654853c3311e7b9947268b99ebd9",
+  "scope": [
+    "compact responsive member cards: 3 desktop / 2 tablet / 1 mobile",
+    "public profile from avatar/name or independent keyboard-accessible menu",
+    "organizer-only non-organizer removal with confirmation, existing versioned endpoint",
+    "12 per page, organizer-first alphabetical sorting, search full returned roster before slicing",
+    "clear search, empty state, bounded page after roster changes, hidden single-page controls",
+    "reuse existing two-at-a-time avatar reader and both themes"
+  ],
+  "backendChanges": 0,
+  "awsChanges": 0,
+  "backendMemberLimit": 16,
+  "verification": {
+    "typescript": "PASS",
+    "changedSourceLint": "PASS",
+    "productionBuild": "PASS",
+    "publishedCssMatchesBuild": true,
+    "productTests": "NOT_RUN",
+    "userActions": 0,
+    "aiCalls": 0
+  },
+  "manualAcceptance": "PENDING"
+}
