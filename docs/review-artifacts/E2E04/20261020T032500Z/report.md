@@ -1,6 +1,6 @@
 # E2E04 20261020T032500Z
 
-State: **RUNNING**. Started 2026-10-20T03:23:37.850Z. 
+State: **TEN_ANSWERS_CHECKPOINT**. Started 2026-10-20T03:23:37.850Z. Ended 2026-10-20T05:27:49.252Z.
 
 Node v24.19.0; project Playwright1.63.0; installed Chrome. User authorized the available Node24.19 runtime. Fifteen isolated synthetic identities; at most three open pages. Scope: one primary dinner decision, up to six newly created groups, one outcome, fifteen separate saves/approvals/posts, up to eight assistant questions and one optional AI draft request. Prior E2E03 agreed fixture is preserved.
 
@@ -15,9 +15,9 @@ Node v24.19.0; project Playwright1.63.0; installed Chrome. User authorized the a
 
 Last verified serving baseline: source1f7d441 / APIe8338c82 / workerc4258495 / frontend152. Live evidence and credential readiness are recorded in the summary; a documentation commit is not a serving release.
 
-Last confirmed action: U01.closeChat.b1038d. In flight: none.
+Last confirmed action: U11.closeChat.c1787e. In flight: none.
 
-Observed UI requests: {"outcome":0,"assistant":1,"aiDraft":1,"plainPosts":7}. Provider calls/tokens/billed cost: UNKNOWN unless separately recorded.
+Observed UI requests: {"outcome":0,"assistant":2,"aiDraft":1,"plainPosts":10}. Provider calls/tokens/billed cost: UNKNOWN unless separately recorded.
 
 - U01.invite.3ca912: APP_HTTP_409; screenshot screenshots/failure-0.png.
 - U01.suggest.a2a5b9: locator.isDisabled: Timeout 20000ms exceeded.
@@ -35,5 +35,6 @@ Call log:
 ; screenshot NOT_AVAILABLE.
 - U01.saveAnswer.138948: DECISION_VIEW_NOT_READY; screenshot NOT_AVAILABLE.
 - U03.saveAnswer.0e1558: APP_HTTP_503; screenshot NOT_AVAILABLE.
+- U09.saveAnswer.938eb4: APP_HTTP_503; screenshot NOT_AVAILABLE.
 
 [Summary](summary.json) · [Events](events.jsonl)
