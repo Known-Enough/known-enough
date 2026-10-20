@@ -1,0 +1,102 @@
+{
+  "result": "VERCEL_PUBLICATION_AND_ORIGIN_READBACK_PASS",
+  "observedAt": "2026-10-20T19:28:02.393723+00:00",
+  "sourceSha": "b0aca8bc5f28a0fe1b9cfb564c2c1e405049e38a",
+  "publicUrl": "https://known-enough.vercel.app/",
+  "vercel": {
+    "project": "known-enough-staging",
+    "projectId": "prj_sjf1XvHqmDtSDyqJJcqrDQS8lseY",
+    "deploymentId": "dpl_FqLgwSVBx6sRgs2pYvsmDE2Yx5zz",
+    "state": "READY",
+    "productionBranch": "main",
+    "gitAutoDeployment": "VERIFIED_FOR_A_AND_B",
+    "oldUrlRedirect": {
+      "from": "https://known-enough-staging.vercel.app/",
+      "to": "https://known-enough.vercel.app/",
+      "status": 308
+    },
+    "newPaidPlan": false
+  },
+  "api": {
+    "sha256": "ef0b68ec7762111feeb6713c9a91633508369eca90db3f0ed057c87bbfa0705e",
+    "workerSha256": "cc26b4449a559b6b1ecec238742bf89dc2a2519de5b79e1bb66369a99478028b",
+    "publicationRun": "https://github.com/Known-Enough/known-enough/actions/runs/39483176642",
+    "restoreRun": "https://github.com/Known-Enough/known-enough/actions/runs/39483440694",
+    "schedule": "ENABLED",
+    "environment": "UNCHANGED",
+    "migration": "UNCHANGED",
+    "providerCalls": 0
+  },
+  "browserConnectionReadback": {
+    "observedAt": "2026-10-20T19:26:34.260596+00:00",
+    "checks": [
+      {
+        "origin": "https://known-enough.vercel.app",
+        "path": "/groups",
+        "status": 204,
+        "allowedOrigin": "https://known-enough.vercel.app"
+      },
+      {
+        "origin": "https://known-enough.vercel.app",
+        "path": "/mcp",
+        "status": 204,
+        "allowedOrigin": "https://known-enough.vercel.app"
+      },
+      {
+        "origin": "https://known-enough.vercel.app",
+        "path": "/account/export",
+        "status": 204,
+        "allowedOrigin": "https://known-enough.vercel.app"
+      },
+      {
+        "origin": "https://main.d143q5ravxp5av.amplifyapp.com",
+        "path": "/groups",
+        "status": 204,
+        "allowedOrigin": "https://main.d143q5ravxp5av.amplifyapp.com"
+      },
+      {
+        "origin": "https://untrusted.invalid",
+        "path": "/groups",
+        "status": 403,
+        "allowedOrigin": null
+      }
+    ]
+  },
+  "publicAssets": {
+    "url": "https://known-enough.vercel.app",
+    "htmlSha256": "b90d8e0fd4d847ce6e8c1440e6f6e51b6be417ca232f3df4edd39fd9f08e784f",
+    "assets": [
+      {
+        "path": "/assets/index-DHXd35C1.js",
+        "status": 200,
+        "sha256": "f67cb6caa2cc06d8e88574dcfe84453b453dfe7bb359a4dc792ae3490fb14b8f"
+      },
+      {
+        "path": "/assets/app-chrome-8QyptrKc.js",
+        "status": 200,
+        "sha256": "a6ed40468dfbd9836e65489057cc57d1ad3561d261140cfe292ab3587443e02d"
+      },
+      {
+        "path": "/assets/preload-helper-Bz3Ef5C-.js",
+        "status": 200,
+        "sha256": "c0e950f1c6235c43c01f65ad564b71c6a6283863b0759f559f5f942e358cd19e"
+      },
+      {
+        "path": "/assets/index-BYSwCStp.css",
+        "status": 200,
+        "sha256": "67903b2bd2beefbb05ce051fa62c1a1a196ee9a04947327a2fdcdbb7c7c7c891"
+      }
+    ]
+  },
+  "verification": {
+    "typescript": "PASS",
+    "changedSourceLint": "PASS",
+    "deploymentReadback": "PASS",
+    "productTests": "NOT_RUN",
+    "participantActions": 0,
+    "signup": 0,
+    "aiCalls": 0,
+    "userManualAcceptance": "PENDING",
+    "nativeAlexaAndLegacySharedDisplayOAuth": "ORIGINAL_CALLBACKS_PRESERVED_NOT_MIGRATED"
+  }
+}

@@ -1,5 +1,7 @@
 # Known Enough
 
+**Live app:** [known-enough.vercel.app](https://known-enough.vercel.app/) — current frontend, existing AWS accounts/data. See [hosting details](infra/ke13-vercel-site.md).
+
 **Decide together without everyone needing to know everything.** Known Enough is an AI-first group-decision facilitator: people describe a shared objective, privately explain what matters, confirm the AI's interpretation, consider proposals and individually approve an exact outcome. A small trust kernel protects identity, consent, supported hard conditions and current approval authority.
 
 The [product definition](docs/known-enough-product.md), [architecture direction](docs/known-enough-architecture.md) and [pivot record](docs/known-enough-pivot.md) describe the new direction: Family Christmas first, Shared Purchase Exploration as a second-domain proof. Private inputs are processed by Known Enough/its permitted AI service; other participants receive authorized public facts and disclosures, and outcomes can permit inference.
