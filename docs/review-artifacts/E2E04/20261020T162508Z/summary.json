@@ -11,15 +11,151 @@
     "05": "NOT_RUN",
     "06": "NOT_RUN"
   },
-  "lastConfirmedAction": null,
+  "lastConfirmedAction": "U01.closeChat.5f3404",
   "inFlightAction": null,
   "observedRequests": {
     "outcome": 0,
-    "assistant": 0,
+    "assistant": 1,
     "aiDraft": 0,
     "plainPosts": 0
   },
-  "users": {},
+  "users": {
+    "U01": {
+      "joined": true,
+      "answerAcknowledged": true,
+      "approvalAcknowledged": false,
+      "postAcknowledged": true,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 7
+    },
+    "U02": {
+      "joined": true,
+      "answerAcknowledged": true,
+      "approvalAcknowledged": false,
+      "postAcknowledged": true,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 2
+    },
+    "U03": {
+      "joined": true,
+      "answerAcknowledged": true,
+      "approvalAcknowledged": false,
+      "postAcknowledged": true,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 2
+    },
+    "U04": {
+      "joined": true,
+      "answerAcknowledged": true,
+      "approvalAcknowledged": false,
+      "postAcknowledged": true,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 2
+    },
+    "U05": {
+      "joined": true,
+      "answerAcknowledged": true,
+      "approvalAcknowledged": false,
+      "postAcknowledged": true,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 2
+    },
+    "U06": {
+      "joined": true,
+      "answerAcknowledged": true,
+      "approvalAcknowledged": false,
+      "postAcknowledged": true,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 2
+    },
+    "U07": {
+      "joined": true,
+      "answerAcknowledged": true,
+      "approvalAcknowledged": false,
+      "postAcknowledged": true,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 2
+    },
+    "U08": {
+      "joined": true,
+      "answerAcknowledged": true,
+      "approvalAcknowledged": false,
+      "postAcknowledged": true,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 2
+    },
+    "U09": {
+      "joined": true,
+      "answerAcknowledged": true,
+      "approvalAcknowledged": false,
+      "postAcknowledged": true,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 2
+    },
+    "U10": {
+      "joined": true,
+      "answerAcknowledged": true,
+      "approvalAcknowledged": false,
+      "postAcknowledged": true,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 2
+    },
+    "U11": {
+      "joined": true,
+      "answerAcknowledged": true,
+      "approvalAcknowledged": false,
+      "postAcknowledged": true,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 2
+    },
+    "U12": {
+      "joined": true,
+      "answerAcknowledged": true,
+      "approvalAcknowledged": false,
+      "postAcknowledged": true,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 2
+    },
+    "U13": {
+      "joined": true,
+      "answerAcknowledged": true,
+      "approvalAcknowledged": false,
+      "postAcknowledged": true,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 2
+    },
+    "U14": {
+      "joined": true,
+      "answerAcknowledged": true,
+      "approvalAcknowledged": false,
+      "postAcknowledged": true,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 2
+    },
+    "U15": {
+      "joined": true,
+      "answerAcknowledged": true,
+      "approvalAcknowledged": false,
+      "postAcknowledged": true,
+      "authenticated": true,
+      "approved": true,
+      "initialGroups": 2
+    }
+  },
   "screenshots": [],
   "errors": [],
   "publication": "LOCAL_STARTUP",
@@ -41,9 +177,10 @@
   "runtime": {
     "node": "v24.19.0",
     "playwright": "1.63.0",
-    "override": "User explicitly authorized Node24.19 or latest installed"
+    "override": "User explicitly authorized Node24.19 or latest installed",
+    "browser": "155.0.8059.85"
   },
-  "lastProgressAt": "2026-10-20T16:27:36.823Z",
+  "lastProgressAt": "2026-10-20T16:30:35.848Z",
   "qualification": {
     "priorExecution": "20261020T161058Z",
     "preserveSameAnswersAndProposal": true,
@@ -54,5 +191,19 @@
     "plannedTargetedAssistantRequests": 3,
     "earlierIncompleteReplyPreserved": true,
     "singleSourceFullRerun": false
-  }
+  },
+  "credentials": {
+    "exactSet": true,
+    "count": 15,
+    "source": "PRIVATE_MACHINE_LOCAL_FILE"
+  },
+  "progress": {
+    "joined": 15,
+    "answersAcknowledged": 15,
+    "approvalsAcknowledged": 0,
+    "plainPostsAcknowledged": 15,
+    "distinctOwners": 15
+  },
+  "optionalProfileReads": 18,
+  "optionalProfileResponses": 16
 }
