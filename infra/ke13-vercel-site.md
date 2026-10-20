@@ -10,6 +10,10 @@ Publication evidence and the user's manual acceptance are distinct. No signup, p
 
 [Publication and connection receipt](../docs/review-artifacts/hosting/vercel-migration.json): API publication39483176642 and worker restoration39483440694 succeeded; existing worker schedule is ENABLED. Exact new-origin preflights for groups/MCP/owner export and the original Amplify group origin return204 with the matching origin; an unrelated origin returns403 without an allow-origin header. TypeScript/lint passed. Product tests were not run.
 
+## Both frontend addresses stay current
+
+User direction2026-10-20: every frontend release must be published to both https://known-enough.vercel.app/ and https://main.d143q5ravxp5av.amplifyapp.com/. Vercel updates from main automatically; Amplify publication must also complete through the existing guarded workflow. Both use the same AWS accounts/data/API. A successful Vercel deployment alone is not a completed frontend publication.
+
 ## Historical setup and CLI handoff
 
 # KE13 connected site: Vercel CLI handoff
