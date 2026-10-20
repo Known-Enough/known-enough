@@ -15,7 +15,7 @@ Node v24.19.0; project Playwright1.63.0; installed Chrome. User authorized the a
 
 Last verified serving baseline: source1f7d441 / APIe8338c82 / workerc4258495 / frontend152. Live evidence and credential readiness are recorded in the summary; a documentation commit is not a serving release.
 
-Last confirmed action: U05.approve.edba06. In flight: U06.open.22719a.
+Last confirmed action: U10.approve.0cbd8d. In flight: U11.open.71311c.
 
 Observed UI requests: {"outcome":1,"assistant":6,"aiDraft":1,"plainPosts":15}. Provider calls/tokens/billed cost: UNKNOWN unless separately recorded.
 
