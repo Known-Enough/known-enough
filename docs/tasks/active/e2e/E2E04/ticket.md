@@ -1,6 +1,6 @@
 # E2E04 — Fifteen-user consensus, useful AI and polished lists
 
-Status: **READY / unclaimed**. Documentation preparation only. The existing B worker may claim this task at a genuine idle intake under standing project testing authority; do not interrupt active work or start another worker, chat, schedule or test run from task creation. This task authorizes its planned execution when claimed; the A chat remains preparation-only with no tests now.
+Status: **READY to resume after runtime prerequisite**; latest run BLOCKED before browser startup. Documentation and execution reporting are preserved. The existing B worker may claim this task at a genuine idle intake under standing project testing authority; do not interrupt active work or start another worker, chat, schedule or test run from task creation. The user directly requested this run; that instruction authorizes the current chat to perform this bounded E2E04 execution. No additional worker/chat/schedule is being started. The latest run is blocked before browser startup; see the current run report below.
 
 ## Readiness update — 2026-10-19
 
@@ -144,3 +144,8 @@ Required gallery, approximately **eight useful screenshots**, with captions, vie
 Use two additional images only when they materially explain an AI/visual failure; do not take fifteen near-identical screenshots. Include a small linked image gallery so the user can inspect these milestones without opening logs. Preserve an incremental `summary.json` checkpoint outside each browser block, then publish only its sanitized projection; raw saved sessions stay private.
 
 DONE requires all six cases to pass, including fifteen genuine distinct saved answers, fifteen explicit approvals of the same correct proposal, observed pagination and the assistant relevance/privacy checks. The speed criterion must meet its stated target or remain an explicit failing criterion. No single scenario establishes 99.9% reliability, general model intelligence, native Alexa+ integration or full-project readiness. If a criterion fails, publish FAIL/BLOCKED with its exact follow-up, update this ticket/E2E index and release the claim rather than marking it DONE. Task preparation, account provisioning and configuration are not execution evidence.
+
+
+## Latest attempt — 20261020T031040Z
+
+Execution preflight stopped before browser startup because this machine has only Node v24.19.0; the task requires Node v24.21.0. Exact credentials were verified locally and privately. All six cases remain NOT_RUN; no account login, app write, AI/provider request or screenshot occurred. See [preflight report](../../../../review-artifacts/E2E04/20261020T031040Z/report.md).
