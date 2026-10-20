@@ -17,6 +17,16 @@ const publicVariables: KE.PublicDecisionVariable[] = [
 ];
 
 describe('Bedrock role adapters', () => {
+  it('canonicalizes complete named dates from one editable-plan model response', async () => {
+    const send = vi.fn(async () => response({ title: 'Dinner', description: 'Fictional alternatives',
+      topics: [{ label: 'Date', kind: 'DATE', options: ['30 October 2026', '31 October 2026'] }] }));
+    const models = createBedrockModels({ transport: { send }, jobs: new BoundedModelJobs(), enabled: () => true });
+    const result = await models.architect.draft({ ...architectInput, generateOptions: true }, guard());
+    expect(result).toEqual({ choicePlan: { title: 'Dinner', description: 'Fictional alternatives',
+      topics: [{ label: 'Date', kind: 'DATE', options: ['2026-10-30', '2026-10-31'] }] } });
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
   const providerFailures = [
     [AccessDeniedException, 'PROVIDER_ACCESS_DENIED'], [InternalServerException, 'PROVIDER_INTERNAL'],
     [ModelErrorException, 'PROVIDER_MODEL_ERROR'], [ModelNotReadyException, 'PROVIDER_NOT_READY'],

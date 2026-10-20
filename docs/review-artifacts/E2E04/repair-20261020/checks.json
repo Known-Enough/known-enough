@@ -32,5 +32,13 @@
     "typescript": "PASS",
     "changedSourceLint": "PASS",
     "firstLiveQualification": "FAIL at U04 save; exact-reference evidence retained"
+  },
+  "namedDateFollowup": {
+    "focusedPassed": 56,
+    "baselineExcluded": 1,
+    "baselineFailure": "sends structured public scope and copies exact definitions only after all declared IDs are selected",
+    "baselineReproduced": true,
+    "typescript": "PASS",
+    "changedSourceLint": "PASS"
   }
 }

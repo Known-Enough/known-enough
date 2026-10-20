@@ -1,3 +1,4 @@
+import { normalizeChoicePlanDates } from './choice-plan-dates.ts';
 import { BedrockRuntimeClient, ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 import type { ConverseCommandInput, ConverseCommandOutput } from '@aws-sdk/client-bedrock-runtime';
 import { ChoicePlan, KnownEnough as KE } from '@deal-table/contracts';
@@ -315,7 +316,7 @@ export function createBedrockModels(options: {
           reportModelFailure(options.diagnostic, kind, 'TOOL_OUTPUT');
           throw new ModelRuntimeError('INVALID_OUTPUT');
         }
-      try { return simpleChoices ? { choicePlan: ChoicePlan.parse(result) } : normalizeToolOutput(kind, result, payload); } catch (error) {
+      try { return simpleChoices ? { choicePlan: normalizeChoicePlanDates(ChoicePlan.parse(result)) } : normalizeToolOutput(kind, result, payload); } catch (error) {
         reportModelFailure(options.diagnostic, kind, error instanceof ArchitectWireError || simpleChoices && error instanceof z.ZodError ? 'ARCHITECT_WIRE_SCHEMA' : 'TOOL_OUTPUT',
           error instanceof ArchitectWireError ? error.validation : simpleChoices && error instanceof z.ZodError ? modelValidationIssues(error.issues, result) : undefined);
         throw new ModelRuntimeError('INVALID_OUTPUT');
