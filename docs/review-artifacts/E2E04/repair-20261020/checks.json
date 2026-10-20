@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-10-20T08:52:55.968947+00:00",
+  "runtime": "Node24.19.0 Linux, official archive SHA256 verified",
+  "focused": {
+    "passed": 140,
+    "skipped": 1,
+    "baselineExcluded": "rejects stale control versions, closed decisions and substituted revision membership without binding mutation",
+    "baselineReproduced": true
+  },
+  "typescript": "PASS",
+  "changedFileEslint": "PASS",
+  "releaseGuards": {
+    "passed": 8
+  },
+  "diagnosticReaderSyntax": "PASS",
+  "whitespace": "PASS",
+  "originalChatJobs": {
+    "count": 8,
+    "attemptsEach": 1,
+    "succeeded": 6,
+    "invalidOutput": 2,
+    "usage": {
+      "inputTokens": 9821,
+      "outputTokens": 488
+    },
+    "billedCost": "UNKNOWN"
+  }
+}

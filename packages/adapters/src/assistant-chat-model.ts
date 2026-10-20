@@ -1,7 +1,27 @@
 import { ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
+import { z } from 'zod';
 import { AssistantChat as Chat } from '@deal-table/contracts';
 import type { ChatContext } from '@deal-table/application';
 import { BEDROCK_CONFIGURATION, type ConverseTransport } from './bedrock-models.ts';
+
+// Status/result requests select an intent only. A model's prose and option
+// selections cannot supply or override the server's current decision facts.
+const responsePlan = z.strictObject({
+  focus: Chat.Plan.shape.focus, question: Chat.Plan.shape.question,
+  answer: Chat.Plan.shape.answer,
+  optionIndexes: z.array(z.number().int().nonnegative().max(255)).max(64),
+});
+export function decodeAssistantChatPlan(raw: unknown): Chat.Plan | null {
+  const wire = responsePlan.safeParse(raw);
+  if (!wire.success) return null;
+  const model = wire.data;
+  const prose = ['CONVERSATION', 'REFLECT', 'OPTIONS'].includes(model.focus);
+  const parsed = Chat.Plan.safeParse({ ...model,
+    optionIndexes: model.focus === 'OPTIONS' ? model.optionIndexes : [],
+    answer: prose ? model.answer : '',
+  });
+  return parsed.success ? parsed.data : null;
+}
 
 /** Conversational prose is permitted; current app facts and all actions stay server-owned. */
 export async function interpretAssistantChat(transport: ConverseTransport, context: ChatContext, scope: Chat.Scope, signal: AbortSignal) {
@@ -13,14 +33,15 @@ export async function interpretAssistantChat(transport: ConverseTransport, conte
     messages: [{ role: 'user', content: [{ text: input }] }],
     toolConfig: { toolChoice: { tool: { name: 'response_plan' } }, tools: [{ toolSpec: { name: 'response_plan', description: 'Answer an ordinary question naturally or select the server-rendered current decision facts.', inputSchema: { json: {
       type: 'object', properties: { focus: { type: 'string', enum: Chat.Plan.shape.focus.options.filter(focus => focus !== 'ACKNOWLEDGE') },
-        optionIndexes: { type: 'array', items: { type: 'integer' } }, question: { type: 'string', enum: Chat.Plan.shape.question.options }, answer: { type: 'string', maxLength: 2000, description: 'The actual conversational reply; empty for server-rendered decision facts or action/privacy boundaries.' } },
+        optionIndexes: { type: 'array', maxItems: 3, items: { type: 'integer', minimum: 0, maximum: 255 }, description: 'Only OPTIONS uses up to three supplied indexes. For all other focuses use an empty array; OUTCOME renders every current choice on the server.' }, question: { type: 'string', enum: Chat.Plan.shape.question.options }, answer: { type: 'string', maxLength: 2000, description: 'The actual conversational reply; empty for server-rendered decision facts or action/privacy boundaries.' } },
       required: ['focus', 'optionIndexes', 'question', 'answer'],
+      additionalProperties: false,
     } } } }] },
   }), { abortSignal: signal });
   const usage = response.usage;
   if (!usage || ![usage.inputTokens, usage.outputTokens].every(value => typeof value === 'number' && Number.isSafeInteger(value) && value >= 0)) throw new Error('CHAT_USAGE_UNKNOWN');
   const tools = response.output?.message?.content?.filter(block => block.toolUse) ?? [];
   const tool = tools.length === 1 && response.stopReason === 'tool_use' ? tools[0]?.toolUse : undefined;
-  const parsed = tool?.name === 'response_plan' ? Chat.Plan.safeParse(tool.input) : null;
-  return { output: parsed?.success ? parsed.data : null, usage: { inputTokens: usage.inputTokens!, outputTokens: usage.outputTokens! } };
+  const output = tool?.name === 'response_plan' ? decodeAssistantChatPlan(tool.input) : null;
+  return { output, usage: { inputTokens: usage.inputTokens!, outputTokens: usage.outputTokens! } };
 }

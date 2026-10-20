@@ -149,6 +149,36 @@ it('never repeats an uncertain committed write and keeps the transport diagnosti
   expect(f.writes.length - before).toBe(1); expect(f.current().controlVersion).toBe(1);
 });
 
+it('backs off confirmed atomic conflicts and reloads the same decision without retrying uncertainty', async () => {
+  const f = await fixture(); const pauses: number[] = [];
+  const repository = f.factory({ pause: async (ms, signal) => { expect(signal.aborted).toBe(false); pauses.push(ms); } }).forParticipant(actor());
+  await repository.createDecision(f.initial);
+  let conflicts = 3; f.beforeRead(() => { if (conflicts-- > 0) throw cancellation(); });
+  await repository.transactionDecision('decision', record => { record!.controlVersion++; });
+  expect(pauses).toHaveLength(3);
+  pauses.forEach((ms, i) => { expect(ms).toBeGreaterThanOrEqual(25 * 2 ** i); expect(ms).toBeLessThan(25 * 2 ** i + 25); });
+  expect(f.current().controlVersion).toBe(1);
+  expect(f.reads).toHaveLength(4);
+  const before = f.reads.length;
+  f.beforeRead(() => { throw new Error('unknown transport acknowledgment'); });
+  await expect(repository.transactionDecision('decision', record => { record!.controlVersion++; })).rejects.toThrow('DECISION_STORAGE_UNAVAILABLE');
+  expect(f.reads.length - before).toBe(1); expect(pauses).toHaveLength(3);
+});
+
+it('cancels conflict backoff at the existing deadline and emits no SDK message or item contents', async () => {
+  const f = await fixture(); await f.factory().forParticipant(actor()).createDecision(f.initial);
+  const stop = new AbortController(), base = partitionIO();
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  f.beforeRead(() => { throw Object.assign(new Error('PRIVATE_SDK_CONTENT'), { name: 'TransactionCanceledException',
+    CancellationReasons: [{ Code: 'TransactionConflict', Message: 'PRIVATE_ITEM' }] }); });
+  const repository = f.factory({ pause: async (_ms, signal) => { stop.abort(); signal.throwIfAborted(); } }).forParticipant(actor(),
+    { ...base, signal: AbortSignal.any([base.signal, stop.signal]), diagnosticRequestId: '783f737f-29e0-4026-a6d8-f937f4c5a85e' });
+  await expect(repository.transactionDecision('decision', record => { record!.controlVersion++; })).rejects.toThrow();
+  expect(f.reads).toHaveLength(1); expect(f.current().controlVersion).toBe(0);
+  const logs = JSON.stringify(warn.mock.calls);
+  expect(logs).toContain('TransactionConflict'); expect(logs).not.toMatch(/PRIVATE_SDK_CONTENT|PRIVATE_ITEM/);
+});
+
 it('retains exact replay receipts and reserved counters in the same admitted write and on reconstruction', async () => {
   const f = await fixture(); await f.factory().forParticipant(actor()).createDecision(f.initial);
   const app = () => new KnownEnoughApplication({ repository: f.factory().forParticipant(actor()), clock: { now: () => '2026-10-07T15:00:00Z' }, ids: { next: () => 'synthetic' } });

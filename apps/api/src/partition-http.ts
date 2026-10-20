@@ -390,7 +390,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         }
         if (ownerConversation) {
           if (!options.ownerInterpretation || (ownerConversation[2] === 'draft' || ownerConversation[4] ? request.method !== 'POST' : request.method !== 'GET')) return reject('NOT_FOUND');
-          const io = partitionIO({ timeoutMs: 27000 }); const context = { ...io, signal: AbortSignal.any([io.signal, controller.signal]) };
+          const io = partitionIO({ timeoutMs: 27000 }); const context = { ...io, diagnosticRequestId: requestId, signal: AbortSignal.any([io.signal, controller.signal]) };
           const application = new KnownEnoughApplication({ repository: repositories.forParticipant(principal, context), clock, ids });
           const owner = await application.getOwnerSnapshot(principal, ownerConversation[1]!);
           if (ownerConversation[2] === 'draft'
@@ -467,7 +467,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
           // This explicit save binds only this owner to the current public terms.
           // execute() checks owner/version/consent under the retention fence; peers
           // do not need to complete a separate shared-frame review first.
-          const io = partitionIO({ timeoutMs: 27000 }); const context = { ...io, signal: AbortSignal.any([io.signal, controller.signal]) };
+          const io = partitionIO({ timeoutMs: 27000 }); const context = { ...io, diagnosticRequestId: requestId, signal: AbortSignal.any([io.signal, controller.signal]) };
           const retained = await options.privateAnswersRepository(principal, context);
           writer = new KnownEnoughApplication({ repository: retained, clock, ids });
         }

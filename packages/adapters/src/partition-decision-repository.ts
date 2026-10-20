@@ -1,5 +1,6 @@
 import { DynamoDBClient, TransactGetItemsCommand, TransactWriteItemsCommand,
   type TransactWriteItem, type AttributeValue } from '@aws-sdk/client-dynamodb';
+import { setTimeout as delay } from 'node:timers/promises';
 import { KnownEnoughApplicationError, RepositoryCapacityError, includeDecisionGroupMembers,
   type KnownEnoughRepository, type TrustedPrincipal, type DecisionTransactionOptions } from '@deal-table/application';
 import { currentAdmissionFence } from './admission-context.ts';
@@ -41,6 +42,20 @@ function retryable(error: unknown) {
   return value.CancellationReasons.some(reason => allowed.has(reason?.Code))
     && value.CancellationReasons.every(reason => reason && typeof reason === 'object' && !Array.isArray(reason)
       && (reason.Message === undefined || typeof reason.Message === 'string') && (reason.Code === 'None' || allowed.has(reason.Code)));
+}
+function storageDiagnostic(io: PartitionIOContext, attempt: number, phase: 'READ' | 'WRITE', retrying: boolean, error: unknown) {
+  const value = error && typeof error === 'object' ? error as { name?: unknown; CancellationReasons?: unknown } : {};
+  const names = ['TransactionCanceledException', 'TransactionConflictException', 'ConditionalCheckFailedException',
+    'TransactionInProgressException', 'ProvisionedThroughputExceededException', 'ThrottlingException', 'RequestLimitExceeded',
+    'AccessDeniedException', 'ResourceNotFoundException', 'InternalServerError', 'ValidationException', 'AbortError'];
+  const codes = ['None', 'ConditionalCheckFailed', 'TransactionConflict', 'ProvisionedThroughputExceeded', 'ThrottlingError',
+    'ValidationError', 'ItemCollectionSizeLimitExceeded'];
+  try { console.warn(JSON.stringify({ event: 'known-enough.decision-storage', attempt, phase, result: retrying ? 'RETRYING' : 'FAILED',
+    errorType: typeof value.name === 'string' && names.includes(value.name) ? value.name : 'OTHER',
+    cancellationCodes: Array.isArray(value.CancellationReasons) ? value.CancellationReasons.slice(0, 100).map(reason =>
+      reason && typeof reason === 'object' && codes.includes(reason.Code) ? reason.Code : 'OTHER') : [],
+    ...(io.diagnosticRequestId && /^[a-f0-9-]{36}$/.test(io.diagnosticRequestId) ? { requestId: io.diagnosticRequestId } : {}) })); }
+  catch { /* Diagnostic failures cannot change storage authority or expose SDK messages/items. */ }
 }
 async function safe<T>(work: () => Promise<T>): Promise<T> {
   try { return await work(); }
@@ -158,12 +173,14 @@ export function createDynamoPartitionDecisionTransport(raw: { decisionArn: strin
 }
 export function createPartitionDecisionRepository(options: { decisionArn: string; partitionArn: string;
   transport: PartitionDecisionTransport; groups: PartitionTransport; now?: () => number; timeoutMs?: number; maxRequests?: number;
+  pause?: (milliseconds: number, signal: AbortSignal) => Promise<void>;
   legacyPublicDecision?: (decisionId: string) => boolean }) {
   target(options);
   const limits = { ...(options.timeoutMs === undefined ? {} : { timeoutMs: options.timeoutMs }),
     ...(options.maxRequests === undefined ? {} : { maxRequests: options.maxRequests }) };
   const transport = options.transport; partitionIO(limits); const session = createPartitionGroupSession(options.groups, { ...limits,
     ...(options.now ? { now: options.now } : {}), ...(options.legacyPublicDecision ? { legacyPublicDecision: options.legacyPublicDecision } : {}) });
+  const pause = options.pause ?? ((milliseconds: number, signal: AbortSignal) => delay(milliseconds, undefined, { signal }));
   function conditions(fence: PartitionFence, creation = false, display?: { subject: string; roomId: string }) {
     if (fence.mutations.length < 2 || fence.mutations.length > (creation ? 21 : display ? 18 : 17)
       || (!creation && fence.mutations.some(item => item.next !== null || (item.expected < 1
@@ -184,7 +201,7 @@ export function createPartitionDecisionRepository(options: { decisionArn: string
       const guards = conditions(fence, prepared?.mutation === true || (create && prepared?.fence !== undefined),
         principal?.kind === 'display' ? { subject: principal.subject, roomId: principal.roomId } : undefined);
       for (let attempt = 0; attempt < (create ? 1 : 6); attempt++) {
-        let sdkFailure: unknown; let wrote = false; let loaded: unknown;
+        let sdkFailure: unknown; let wrote = false; let loaded: unknown; let phase: 'READ' | 'WRITE' = 'READ';
         async function send(command: Command) {
           try {
             if (command instanceof TransactGetItemsCommand) {
@@ -195,6 +212,7 @@ export function createPartitionDecisionRepository(options: { decisionArn: string
             if (!items || items.length < 2 || items.length > 3 || items.some(item => itemKey(item).table !== PARTITION_DECISION_TARGET.decisionArn
               || itemKey(item).pk !== `ROOM#${decisionId}`)) fail('DECISION_INVALID');
             const joined = [...structuredClone(guards), ...structuredClone(items)]; checkedWrite(joined);
+            phase = 'WRITE';
             const result = await partitionCall(io, () => transport.send(new TransactWriteItemsCommand({ ...command.input, TransactItems: joined }), io));
             wrote = true; return result;
           } catch (error) { sdkFailure = error; throw error; }
@@ -224,16 +242,24 @@ export function createPartitionDecisionRepository(options: { decisionArn: string
                 ExpressionAttributeValues: Object.fromEntries(Object.entries(fields).map(([field, value]) => [`:${field}`, typeof value === 'number' ? { N: String(value) } : { S: value }])) } });
             }
             const joined = [...structuredClone(guards), ...publication]; checkedWrite(joined);
+            phase = 'WRITE';
             try { await partitionCall(io, () => transport.send(new TransactWriteItemsCommand({ TransactItems: joined }), io)); }
             catch (error) { sdkFailure = error; throw error; }
           }
           return result;
         } catch (error) {
+          if (sdkFailure) storageDiagnostic(io, attempt + 1, phase, !create && attempt < 5 && retryable(sdkFailure), sdkFailure);
           if (error instanceof RepositoryCapacityError || error instanceof KnownEnoughApplicationError) throw error;
           if (sdkFailure instanceof KnownEnoughApplicationError || sdkFailure instanceof PartitionStorageError || sdkFailure instanceof PartitionDecisionError) throw sdkFailure;
           if (sdkFailure && retryable(sdkFailure)) {
             await fence.assertCurrent();
-            if (!create && attempt < 5) continue;
+            if (!create && attempt < 5) {
+              // DynamoDB rejects a conflicting transaction atomically. Let the competing
+              // operation finish, then reload under the same authority and replay key.
+              // Network/acknowledgment uncertainty never enters this branch.
+              await partitionCall(io, () => pause(Math.min(200, 25 * 2 ** attempt) + Math.floor(Math.random() * 25), io.signal), false);
+              continue;
+            }
             if (!create) fail('DECISION_CONFLICT');
           }
           if (sdkFailure) throw new PartitionDecisionError('DECISION_STORAGE_UNAVAILABLE', { cause: sdkFailure });

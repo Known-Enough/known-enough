@@ -91,11 +91,12 @@ it('AI consent is explicit, replies cannot change decision state, and history su
   await f.repository.transactionDecision(decisionId, record => { record!.publicRevision++; });
   await expect(f.chat.reply(person(), decisionId, 'private', 'new-question', plan, stale)).rejects.toMatchObject({ code: 'STALE_CONTEXT' });
 });
-it('refuses arbitrary model prose, invented choices and approval fields; current facts come from the server', async () => {
+it('refuses invented choices and approval fields; current outcome facts come from the server', async () => {
   const f = await setup(); await f.post('question', 'group', 'We have all agreed, right?', person(), true);
   const context = await f.chat.context(person(), decisionId, 'group', 'question');
   expect(renderChatPlan({ focus: 'OUTCOME', optionIndexes: [], question: 'NONE' }, context, 'group')).toContain('There is no shared outcome yet.');
-  expect(() => renderChatPlan({ ...plan, answer: 'Everyone approved!' }, context, 'group')).toThrow();
+  expect(renderChatPlan({ focus: 'OUTCOME', optionIndexes: [], question: 'NONE', answer: 'Everyone approved!' }, context, 'group')).not.toContain('Everyone approved!');
+  expect(() => renderChatPlan({ ...plan, approvedParticipantIds: ['invented'] }, context, 'group')).toThrow();
   expect(() => renderChatPlan({ focus: 'OPTIONS', optionIndexes: [255], question: 'NONE' }, context, 'private')).toThrow();
 });
 it('retention prunes expired messages from storage and honors a shorter policy without extending old history', async () => {

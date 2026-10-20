@@ -1249,7 +1249,7 @@ async function chatRuntimeFixture(options: { uncertain?: boolean; invalid?: bool
       if (options.uncertain) throw new Error('UNKNOWN_PROVIDER_RESULT');
       return { $metadata: {}, metrics: { latencyMs: 1 }, stopReason: 'tool_use', usage: { inputTokens: 20, outputTokens: 30, totalTokens: 50 },
         output: { message: { role: 'assistant', content: [{ toolUse: { toolUseId: 'chat-plan', name: 'response_plan', input: options.invalid
-          ? { focus: 'APPROVALS', optionIndexes: [], question: 'NONE', answer: 'Invented approval' }
+          ? { focus: 'APPROVALS', optionIndexes: [], question: 'NONE', answer: '', approvedParticipantIds: ['invented'] }
           : { focus: 'REFLECT', optionIndexes: [], question: 'PRIORITY' } } }] } } };
     } },
   });
@@ -1288,7 +1288,7 @@ it('an uncertain chat provider call remains unknown through repeated status/repl
   expect(Chat.Receipt.parse(await (await a.post(path, chatPost)).json()).state).toBe('UNKNOWN');
   expect(h.calls()).toBe(1); expect(h.state().totals).toEqual(totals); expect(h.state().job?.reason).toBe('PROVIDER_UNCONFIRMED');
 });
-it('invalid chat model prose is never saved but actual usage is recorded; revoked access prevents output', async () => {
+it('invalid chat model authority fields are never saved but actual usage is recorded; revoked access prevents output', async () => {
   for (const options of [{ invalid: true }, { revoke: true }]) {
     const h = await chatRuntimeFixture(options); const a = await api(h.f, { assistantChat: h.runtime });
     const response = await a.post('/decisions/decision/chat/private', chatPost);

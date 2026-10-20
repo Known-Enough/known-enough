@@ -1,6 +1,6 @@
 # E2E04 — Fifteen-user consensus, useful AI and polished lists
 
-Status: **FAIL — execution completed; claim released.** The retained dinner decision is AGREED with fifteen independent saved answers and fifteen explicit approvals. Cases01/02/04/05 PASS;03 FAIL for three initial save503s (all reconciled and recovered);06 FAIL for two UNAVAILABLE summary replies. One correct outcome took9.532s. The strict AI-draft label criterion also failed; all supplied alternatives were preserved. User runtime override honored with Node24.19.0. [Final report](../../../../review-artifacts/E2E04/20261020T032500Z/report.md), [follow-ups](../../../../review-artifacts/E2E04/20261020T032500Z/followups.md). No deployment, infrastructure change or automatic rerun.
+Status: **REPAIR IN_PROGRESS under direct user request.** Historical execution: FAIL / claim released. The retained dinner decision is AGREED with fifteen independent saved answers and fifteen explicit approvals. Cases01/02/04/05 PASS;03 FAIL for three initial save503s (all reconciled and recovered);06 FAIL for two UNAVAILABLE summary replies. One correct outcome took9.532s. The strict AI-draft label criterion also failed; all supplied alternatives were preserved. User runtime override honored with Node24.19.0. [Final report](../../../../review-artifacts/E2E04/20261020T032500Z/report.md), [follow-ups](../../../../review-artifacts/E2E04/20261020T032500Z/followups.md). No deployment, infrastructure change or automatic rerun.
 
 ## Readiness update — 2026-10-19
 
