@@ -1,3 +1,4 @@
+import { applicationOrigins } from './application-origins.ts';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { TrustedPrincipal } from '@deal-table/application';
 import * as LifecycleOwner from '@deal-table/contracts/lifecycle';
@@ -38,7 +39,7 @@ export function createLifecycleOwnerHandler(options: {
     || !Number.isSafeInteger(timeout) || timeout < 1 || timeout > 20000 || !Number.isSafeInteger(maximum) || maximum < 1 || maximum > 6) throw new Error('LIFECYCLE_HTTP_INVALID');
   const owner = { exportOwn: options.owner.exportOwn.bind(options.owner), loadOwnPlan: options.owner.loadOwnPlan.bind(options.owner),
     consent: options.owner.consent.bind(options.owner), status: options.owner.status.bind(options.owner) };
-  const authenticate = options.authenticate; const fallback = options.fallback; const allowedOrigin = origin.origin; let active = 0;
+  const authenticate = options.authenticate; const fallback = options.fallback; const allowedOrigins = applicationOrigins(origin.origin); let active = 0;
   return (request: IncomingMessage, response: ServerResponse) => {
     const url = URL.parse(request.url ?? '/', 'http://local.invalid');
     if (!url || !/^\/account\/(?:export|erasure)(?:\/|$)/.test(url.pathname)) { fallback(request, response); return; }
@@ -46,8 +47,8 @@ export function createLifecycleOwnerHandler(options: {
     const send = (status: number, value: unknown) => { if (response.writableEnded || response.destroyed) return;
       let body = JSON.stringify(value); if (Buffer.byteLength(body) > 1048576) { status = 507; body = JSON.stringify({ ok: false, error: { code: 'LIFECYCLE_CAPACITY' } }); }
       response.statusCode = status; response.setHeader('content-type', 'application/json'); response.end(body); };
-    if (request.headers.origin !== undefined && request.headers.origin !== allowedOrigin) { request.resume(); send(403, { ok: false, error: { code: 'LIFECYCLE_AUTHORITY_DENIED' } }); return; }
-    if (request.headers.origin === allowedOrigin) response.setHeader('access-control-allow-origin', allowedOrigin);
+    if (request.headers.origin !== undefined && !allowedOrigins.includes(request.headers.origin)) { request.resume(); send(403, { ok: false, error: { code: 'LIFECYCLE_AUTHORITY_DENIED' } }); return; }
+    if (request.headers.origin && allowedOrigins.includes(request.headers.origin)) response.setHeader('access-control-allow-origin', request.headers.origin);
     if (request.method === 'OPTIONS') { request.resume(); response.setHeader('access-control-allow-methods', 'GET, POST, OPTIONS'); response.setHeader('access-control-allow-headers', 'Authorization, Content-Type'); response.statusCode = 204; response.end(); return; }
     if (active >= maximum) { request.resume(); send(503, { ok: false, error: { code: 'LIFECYCLE_STORAGE_UNAVAILABLE' } }); return; }
     active++; const controller = new AbortController();

@@ -1,3 +1,4 @@
+import { applicationOrigins } from './application-origins.ts';
 import { createServer, type RequestListener } from 'node:http';
 import { randomUUID } from 'node:crypto';
 import { genericCandidates, createDynamoGroupRepository, createAwsDynamoDBRoomRepository } from '@deal-table/adapters';
@@ -58,9 +59,10 @@ export function gatewayFailure(event: HttpApiEvent, statusCode: number, allowedO
   const headers: Record<string, string> = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store',
     vary: 'Origin', 'x-request-id': requestId, ...(statusCode === 503 ? { 'retry-after': '3' } : {}) };
   const trustedOrigin = typeof allowedOrigin === 'string' ? URL.parse(allowedOrigin) : null;
+  const requestedOrigin = eventHeaders(event?.headers).origin;
   if (trustedOrigin?.protocol === 'https:' && trustedOrigin.origin === allowedOrigin && !trustedOrigin.username && !trustedOrigin.password
-    && eventHeaders(event?.headers).origin === allowedOrigin) {
-    headers['access-control-allow-origin'] = allowedOrigin;
+    && typeof requestedOrigin === 'string' && applicationOrigins(allowedOrigin).includes(requestedOrigin)) {
+    headers['access-control-allow-origin'] = requestedOrigin;
     headers['access-control-allow-methods'] = 'GET, POST, OPTIONS';
     headers['access-control-allow-headers'] = 'Authorization, Content-Type, X-Request-Id';
     headers['access-control-expose-headers'] = 'X-Request-Id, Retry-After';

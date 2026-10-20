@@ -1,3 +1,15 @@
+# Current public address — 2026-10-20
+
+The primary user-facing address is https://known-enough.vercel.app/. It is a verified production domain on the existing `known-enough-staging` Vercel project (`prj_sjf1XvHqmDtSDyqJJcqrDQS8lseY`, team `martelaxes-projects`). No new paid plan or database was created. The old Vercel address remains available as a historical deployment address, but is not an authorized API browser origin.
+
+Vercel is already connected to `Known-Enough/known-enough`, production branch `main`. Actual production deployment `dpl_5evX1Ge3qDaASqR4pi1eDnhbg155` successfully built B's commit `c01df90471c85e52a58a021659ccc3de3a6c9e48`. The earlier Hobby warning below is historical and does not describe this verified public-repository deployment. New production builds automatically serve the new project domain; no extra deployment token or impersonated commit author is needed.
+
+The frontend uses the existing primary AWS API, Cognito pool and application data. Native participant sign-in and sign-out stay inside the app and use the same accounts. The API's explicit browser allowlist includes only the existing Amplify origin and `https://known-enough.vercel.app`; it does not admit arbitrary Vercel previews or change QA origins. MCP, owner export/erasure and early Lambda error responses use the same allowlist. The installed private runtime configuration and its original Amplify origin remain intact, so the original site can continue working.
+
+Publication evidence and the user's manual acceptance are distinct. No signup, participant action, AI call or product test is part of this address change. Native Alexa/legacy hosted shared-display OAuth callbacks are not migrated by this participant-site change; their original URLs remain intact.
+
+## Historical setup and CLI handoff
+
 # KE13 connected site: Vercel CLI handoff
 
 The authenticated app runs on Vercel project `known-enough-staging` in personal team `martelaxes-projects`. It is separate from the AWS CloudFront Stage 0 mock at `https://d23eowhnwtqts3.cloudfront.net/`, which remains untouched. The Vercel app uses Cognito sign-in and the deployed AWS HTTPS API/DynamoDB slice; authenticated shared-state behavior still needs browser verification.

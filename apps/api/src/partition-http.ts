@@ -1,3 +1,4 @@
+import { applicationOrigins } from './application-origins.ts';
 import { PartitionOwnerFailure, type OwnerInterpretation } from './partition-owner-runtime.ts';
 import type { DraftRecoveryRequest } from './partition-draft-recovery.ts';
 import type { AssistantChatRuntime } from './partition-chat-runtime.ts';
@@ -110,7 +111,7 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
   const authMs = integer(options.authTimeoutMs ?? 5_000, 5_000);
   const bodyMs = integer(options.bodyTimeoutMs ?? 5_000, 5_000);
   const concurrency = integer(options.maxConcurrentRequests ?? 8, 8);
-  const origins = new Set(options.allowedOrigins);
+  const origins = new Set(options.allowedOrigins.flatMap(applicationOrigins));
   if ([...origins].some(origin => {
     const url = URL.parse(origin); return !url || url.origin !== origin || !['http:', 'https:'].includes(url.protocol);
   })) throw new Error('PARTITION_HTTP_INVALID');

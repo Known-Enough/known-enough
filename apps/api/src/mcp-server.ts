@@ -1,3 +1,4 @@
+import { applicationOrigins } from './application-origins.ts';
 import { randomUUID } from 'node:crypto';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
@@ -16,15 +17,17 @@ export function withSharedMcp(app: Handler, allowedOrigin: string): Handler {
     if (event.headers && typeof event.headers === 'object' && !Array.isArray(event.headers)) {
       for (const [key, value] of Object.entries(event.headers)) if (typeof value === 'string' && !/[\r\n]/.test(value)) headers.set(key, value);
     }
-    const cors = { 'cache-control': 'no-store', 'access-control-allow-origin': allowedOrigin,
+    const origin = headers.get('origin');
+    const origins = applicationOrigins(allowedOrigin);
+    const cors = { 'cache-control': 'no-store',
+      ...(origin && origins.includes(origin) ? { 'access-control-allow-origin': origin } : {}),
       'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'Authorization, Content-Type, Accept, MCP-Protocol-Version, MCP-Session-Id',
       'access-control-expose-headers': 'MCP-Session-Id, MCP-Protocol-Version, X-Request-Id', vary: 'Origin', 'x-request-id': requestId };
     const reply = (code: number, message: string): HttpApiResult => { status = code; return { statusCode: code, headers: { ...cors, ...(code === 405 ? { allow: 'POST, OPTIONS' } : {}), 'content-type': 'application/json' },
       body: JSON.stringify({ jsonrpc: '2.0', id: null, error: { code: -32000, message } }), isBase64Encoded: false }; };
     let server: McpServer | undefined;
     try {
-      const origin = headers.get('origin');
-      if (origin && origin !== allowedOrigin) return reply(403, 'Origin is not allowed.');
+      if (origin && !origins.includes(origin)) return reply(403, 'Origin is not allowed.');
       const method = event.requestContext?.http?.method;
       if (method === 'OPTIONS') { status = 204; return { statusCode: 204, headers: cors, body: '', isBase64Encoded: false }; }
       if (!['GET', 'POST'].includes(String(method))) return reply(405, 'Method not supported.');
