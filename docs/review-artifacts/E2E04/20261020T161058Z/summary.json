@@ -11,13 +11,13 @@
     "05": "NOT_RUN",
     "06": "NOT_RUN"
   },
-  "lastConfirmedAction": "U02.closeChat.237852",
+  "lastConfirmedAction": "U10.closeChat.a1f91f",
   "inFlightAction": null,
   "observedRequests": {
     "outcome": 0,
     "assistant": 2,
     "aiDraft": 1,
-    "plainPosts": 7
+    "plainPosts": 10
   },
   "users": {
     "U01": {
@@ -85,27 +85,27 @@
     },
     "U08": {
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false,
+      "postAcknowledged": true,
       "authenticated": true,
       "approved": true,
       "initialGroups": 2
     },
     "U09": {
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false,
+      "postAcknowledged": true,
       "authenticated": true,
       "approved": true,
       "initialGroups": 2
     },
     "U10": {
       "joined": true,
-      "answerAcknowledged": false,
+      "answerAcknowledged": true,
       "approvalAcknowledged": false,
-      "postAcknowledged": false,
+      "postAcknowledged": true,
       "authenticated": true,
       "approved": true,
       "initialGroups": 2
@@ -203,7 +203,7 @@
     "override": "User explicitly authorized Node24.19 or latest installed",
     "browser": "155.0.8059.85"
   },
-  "lastProgressAt": "2026-10-20T16:19:18.131Z",
+  "lastProgressAt": "2026-10-20T16:19:59.069Z",
   "fixturePlan": {
     "reuseVerifiedFifteenMemberGroup": true,
     "initialOwnedGroupCount": 7,
@@ -218,11 +218,11 @@
   },
   "progress": {
     "joined": 15,
-    "answersAcknowledged": 7,
+    "answersAcknowledged": 10,
     "approvalsAcknowledged": 0,
-    "plainPostsAcknowledged": 7,
-    "distinctOwners": 7
+    "plainPostsAcknowledged": 10,
+    "distinctOwners": 10
   },
-  "optionalProfileReads": 245,
-  "optionalProfileResponses": 219
+  "optionalProfileReads": 302,
+  "optionalProfileResponses": 270
 }
