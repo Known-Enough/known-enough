@@ -1,6 +1,8 @@
 # E2E04 — Fifteen people, one agreed plan
 
-**RUNNING / current user-requested execution.** Node24.19 is now explicitly authorized by the user. [Startup report](../../../../review-artifacts/E2E04/20261020T032500Z/report.md). The earlier attempt was blocked before browser startup. The latest execution preflight verified the exact fifteen-account private credential set, but this machine has Node 24.19.0; the task requires Node 24.21.0. No browser or app actions occurred. [Preflight report](../../../../review-artifacts/E2E04/20261020T031040Z/report.md). Prepare one complex shared dinner decision, collect fifteen independent private responses, find the known common outcome and obtain all fifteen approvals. Check natural assistant replies, private-chat isolation, real group pagination/search and desktop/mobile layout. Include a small screenshot gallery showing all members, responses and final agreement.
+**RUNNING / current user-requested execution.** The user explicitly authorized Node24.19. All fifteen exact synthetic accounts authenticated with approved app access; the fifteen-alias recorder is running. [Current report](../../../../review-artifacts/E2E04/20261020T032500Z/report.md).
+
+One shared dinner decision will collect fifteen independent private responses and explicit approvals, with assistant/privacy, pagination and layout checks.
 
 - [Task, steps and evidence](ticket.md)
 - [Exact synthetic response matrix](answers.csv)
@@ -11,7 +13,7 @@ Use the existing worker and the fifteen approved synthetic accounts `test04`–`
 
 The [two-user final readback passed](../../../../review-artifacts/E2E03/20261019T230825Z/report.md). The ticket now uses the current owner-snapshot/modal loading path, preserves the agreed E2E03 fixture, requires durable six-case logging and exact per-user save/approval readback, and uses the current group/private assistant buttons.
 
-Before a fifteen-user run, the worker must privately locate `test04`–`test18` credentials and adapt the two-user recorder for fifteen aliases. A's current available file contains two other accounts; the existing E2E03 runner is not directly suitable. These are explicit preparation requirements, not a request for another AWS/CloudShell installation. No E2E04 login, account/access check, AI call, app action or test was performed during this documentation review.
+That readiness review was documentation-only. The current user-requested run has since verified the exact fifteen-account file and prepared `scripts/e2e04/session-runner.mjs`; the older two-account file finding is historical. Follow the current run report for actual execution results.
 
 
 ## Latest execution intake — 20261020T031040Z

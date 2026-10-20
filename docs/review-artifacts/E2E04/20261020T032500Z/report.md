@@ -15,10 +15,10 @@ Node v24.19.0; project Playwright1.63.0; installed Chrome. User authorized the a
 
 Last verified serving baseline: source1f7d441 / APIe8338c82 / workerc4258495 / frontend152. Live evidence and credential readiness are recorded in the summary; a documentation commit is not a serving release.
 
-Last confirmed action: U01.catalog.7f4b29. In flight: none.
+Last confirmed action: U01.layout.5370ca. In flight: U01.result.a1b109.
 
 Observed UI requests: {"outcome":0,"assistant":0,"aiDraft":0,"plainPosts":0}. Provider calls/tokens/billed cost: UNKNOWN unless separately recorded.
 
-
+- U01.invite.3ca912: APP_HTTP_409; screenshot screenshots/failure-0.png.
 
 [Summary](summary.json) · [Events](events.jsonl)
