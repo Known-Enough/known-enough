@@ -123,3 +123,23 @@ it('native persistence round-trips history, keeps it out of owner/public project
   const erased = eraseDecisionOwner(decoded, 'subject-maya');
   expect(erased.assistantMessages?.map(message => message.text)).toEqual(['PRESERVE_THEIR_PRIVATE']);
 });
+
+it.each(['PROGRESS', 'APPROVALS', 'OUTCOME'] as const)('renders all current shared choices and approval counts for %s', async focus => {
+  const f = await setup(); await f.post('facts', 'group', 'What is proposed and what remains?', person(), true);
+  const context = await f.chat.context(person(), decisionId, 'group', 'facts');
+  context.summary = { ...context.summary, status: 'PROPOSED', proposalId: 'current-proposal', proposalVersion: 1,
+    requiredApprovals: 15, approved: 0,
+    choices: [{ topic: 'Restaurant', option: 'Moon Noodles' }, { topic: 'Date', option: '2026-10-31' },
+      { topic: 'Time', option: '18:30' }, { topic: 'Travel', option: 'Bus' }] };
+  const render = () => renderChatPlan({ focus, optionIndexes: [], question: 'NONE', answer: 'UNTRUSTED_FACTS' }, context, 'group');
+  const proposal = render();
+  for (const value of ['Restaurant: Moon Noodles', 'Date: 2026-10-31', 'Time: 18:30', 'Travel: Bus', '15 required approvals remain', 'not an agreed outcome']) expect(proposal).toContain(value);
+  expect(proposal).not.toContain('UNTRUSTED_FACTS');
+  context.summary.approved = 14;
+  expect(render()).toContain('1 required approval remains');
+  expect(render()).toContain('not an agreed outcome');
+  context.summary.approved = 15; context.summary.status = 'AGREED';
+  expect(render()).toContain('The decision is agreed.');
+  expect(render()).toContain('0 required approvals remain');
+  expect(render()).toContain('Travel: Bus');
+});

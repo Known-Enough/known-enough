@@ -40,5 +40,10 @@
     "baselineReproduced": true,
     "typescript": "PASS",
     "changedSourceLint": "PASS"
+  },
+  "completeFactsFollowup": {
+    "focusedPassed": 15,
+    "typescript": "PASS",
+    "changedSourceLint": "PASS"
   }
 }

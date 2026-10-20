@@ -32,7 +32,9 @@ function valueLabel(frame: KE.PublicDecisionFrame, variable: KE.PublicDecisionFr
 }
 export function renderChatPlan(raw: unknown, context: ChatContext, scope: Chat.Scope): string {
   const plan = Chat.Plan.parse(raw), summary = context.summary;
-  const approvals = `${summary.approved} of ${summary.requiredApprovals} required approvals are recorded.`;
+  const remaining = Math.max(0, summary.requiredApprovals - summary.approved);
+  const approvals = `${summary.approved} of ${summary.requiredApprovals} required approvals are recorded. ${remaining} required approval${remaining === 1 ? ' remains' : 's remain'}.`;
+  const choices = summary.proposalId ? '\n' + summary.choices.map(choice => `${choice.topic}: ${choice.option}`).join('\n') : '';
   const status = summary.status === 'AGREED' ? 'The decision is agreed.' : summary.status === 'CLOSED' ? 'The decision is closed.'
     : summary.proposalId ? 'There is a proposal to review; it is not an agreed outcome.'
       : summary.status === 'REASONING' ? 'The app is finding an outcome from the saved answers.' : 'There is no shared outcome yet.';
@@ -40,11 +42,11 @@ export function renderChatPlan(raw: unknown, context: ChatContext, scope: Chat.S
   switch (plan.focus) {
     case 'PROGRESS': {
       const waiting = summary.participants.filter(person => person.answered === false).map(person => person.name);
-      answer = status + ' ' + approvals + (waiting.length ? '\nWaiting for answers from: ' + waiting.join(', ') + '.'
+      answer = status + choices + '\n' + approvals + (waiting.length ? `\n${waiting.length} ${waiting.length === 1 ? 'person still needs' : 'people still need'} to answer: ` + waiting.join(', ') + '.'
         : summary.participants.every(person => person.answered === true) ? '\nEveryone’s answers are saved.' : '\nSome response information is unavailable.'); break;
     }
-    case 'OUTCOME': answer = status + (summary.proposalId ? '\n' + summary.choices.map(choice => `${choice.topic}: ${choice.option}`).join('\n') + '\n' + approvals : ' Everyone can add their own answers in the decision screen.'); break;
-    case 'APPROVALS': answer = status + ' ' + approvals + '\n' + summary.participants.filter(person => person.required).map(person => `${person.name}: ${person.approved ? 'approved' : 'approval pending'}`).join('\n'); break;
+    case 'OUTCOME': answer = status + choices + '\n' + approvals + (summary.proposalId ? '' : ' Everyone can add their own answers in the decision screen.'); break;
+    case 'APPROVALS': answer = status + choices + '\n' + approvals + '\n' + summary.participants.filter(person => person.required).map(person => `${person.name}: ${person.approved ? 'approved' : 'approval pending'}`).join('\n'); break;
     case 'EXPLAIN': answer = 'The app compares saved conditions with the shared choices. A proposal needs each required person’s explicit approval. Shared results do not explain anyone’s private reasons.'; break;
     case 'OPTIONS': {
       const indexes = [...new Set(plan.optionIndexes)];
