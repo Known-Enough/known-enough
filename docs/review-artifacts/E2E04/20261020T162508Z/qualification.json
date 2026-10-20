@@ -1,0 +1,59 @@
+{
+  "result": "PASS",
+  "scope": "Six cases qualified across the executed run and targeted published renderer follow-up",
+  "singleSourceFullRerun": false,
+  "executionStage": "20261020T161058Z",
+  "targetedFollowupStage": "20261020T162508Z",
+  "caseResults": {
+    "01": "PASS",
+    "02": "PASS",
+    "03": "PASS",
+    "04": "PASS",
+    "05": "PASS",
+    "06": "PASS"
+  },
+  "answerSaves": {
+    "attempts": 15,
+    "acknowledged": 15,
+    "distinctOwners": 15,
+    "allOwnSelectionsMatched": true,
+    "recoveryPanelObserved": false
+  },
+  "outcome": {
+    "requests": 1,
+    "durationMs": 22142,
+    "speedPass": true,
+    "choices": [
+      "Moon Noodles",
+      "2026-10-31",
+      "18:30",
+      "Bus"
+    ]
+  },
+  "approvals": {
+    "acknowledged": 15,
+    "distinctOwners": 15,
+    "samePinnedProposal": true,
+    "lastActor": "U15",
+    "finalStatus": "AGREED"
+  },
+  "assistant": {
+    "prescribedChecksPassed": 8,
+    "uiRequestsAcrossStages": 9,
+    "earlierIncompleteTerminalReplyPreserved": true,
+    "targetedNewRequests": 3,
+    "automaticPaidRetries": 0
+  },
+  "privacy": {
+    "ownerPrivateThreadPersisted": true,
+    "otherPrivateThreadEmpty": true,
+    "groupPrivateMarkerAbsent": true
+  },
+  "retainedFixtures": {
+    "currentAgreedGroup": "E2E04 Dinner 20261020T090942Z",
+    "previousAgreedAndPartialPreserved": true,
+    "currentGroupDrafts": 2,
+    "ownedGroupCount": 7,
+    "newGroupsInFollowup": 0
+  }
+}

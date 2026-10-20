@@ -1,21 +1,21 @@
 {
   "runId": "20261020T162508Z",
-  "state": "RUNNING",
+  "state": "PASS",
   "startedAt": "2026-10-20T16:27:36.810Z",
-  "endedAt": null,
+  "endedAt": "2026-10-20T16:36:29.747Z",
   "cases": {
-    "01": "NOT_RUN",
-    "02": "NOT_RUN",
-    "03": "NOT_RUN",
-    "04": "NOT_RUN",
-    "05": "NOT_RUN",
-    "06": "NOT_RUN"
+    "01": "PASS",
+    "02": "PASS",
+    "03": "PASS",
+    "04": "PASS",
+    "05": "PASS",
+    "06": "PASS"
   },
-  "lastConfirmedAction": "U01.closeChat.b0b64c",
+  "lastConfirmedAction": "U01.result.9cee6f",
   "inFlightAction": null,
   "observedRequests": {
     "outcome": 0,
-    "assistant": 2,
+    "assistant": 3,
     "aiDraft": 0,
     "plainPosts": 0
   },
@@ -149,7 +149,7 @@
     "U15": {
       "joined": true,
       "answerAcknowledged": true,
-      "approvalAcknowledged": false,
+      "approvalAcknowledged": true,
       "postAcknowledged": true,
       "authenticated": true,
       "approved": true,
@@ -165,6 +165,33 @@
         "height": 1600
       },
       "caption": "Fourteen of fifteen approved: final explicit approval still required"
+    },
+    {
+      "name": "06-agreed-fifteen-approvals.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 1600
+      },
+      "caption": "Decision agreed: exact choices and fifteen explicit approvals"
+    },
+    {
+      "name": "08-mobile-chat.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 390,
+        "height": 720
+      },
+      "caption": "Mobile group chat: newest message, composer and close control reachable"
+    },
+    {
+      "name": "07-later-page-search.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 900
+      },
+      "caption": "Search finds a group from response page 2"
     }
   ],
   "errors": [],
@@ -190,7 +217,7 @@
     "override": "User explicitly authorized Node24.19 or latest installed",
     "browser": "155.0.8059.85"
   },
-  "lastProgressAt": "2026-10-20T16:33:43.298Z",
+  "lastProgressAt": "2026-10-20T16:36:30.651Z",
   "qualification": {
     "priorExecution": "20261020T161058Z",
     "preserveSameAnswersAndProposal": true,
@@ -210,10 +237,10 @@
   "progress": {
     "joined": 15,
     "answersAcknowledged": 15,
-    "approvalsAcknowledged": 14,
+    "approvalsAcknowledged": 15,
     "plainPostsAcknowledged": 15,
     "distinctOwners": 15
   },
-  "optionalProfileReads": 370,
-  "optionalProfileResponses": 332
+  "optionalProfileReads": 526,
+  "optionalProfileResponses": 469
 }

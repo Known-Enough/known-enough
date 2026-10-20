@@ -1,6 +1,6 @@
 # E2E04 repair
 
-Status: CODE_READY; compatible publication and live qualification pending. Direct user request covers the two failed cases among six, plus review of the strict drafting-label criterion. Own Battosai1806; pulled76549c0d first.
+Status: PUBLISHED; all six cases qualify across the executed run and targeted renderer follow-up. Final owned-job usage readback pending. Direct user request covers the two failed cases among six, plus review of the strict drafting-label criterion. Own Battosai1806; pulled76549c0d first.
 
 ## Evidence and changes
 
@@ -30,3 +30,7 @@ The model adapter now canonicalizes only complete named-month dates with a suppl
 The [fifteen-user qualification](../20261020T161058Z/report.md) proves15 first-attempt saves200 with exact own-answer readback/no recovery panel,15 correctly authored posts, exact AI vocabulary without manual correction and the correct four-topic proposal in22.142s. Six assistant requests were terminal ANSWERED, including useful conversation/private support and the privacy refusal. However, the proposal question returned only status/counts without its four choices; this remains a failed criterion even though it no longer says UNAVAILABLE. Browser closed normally at0approvals; no original request replay.
 
 PROGRESS, APPROVALS and OUTCOME now each render all current public proposal choices plus approved/remaining counts, avoiding dependence on which shared-fact focus the model selects for a mixed question. Progress also states the numeric outstanding-answer count. All facts still come from the fresh server projection; model prose, private context and authority fields cannot supply them.15 focused chat/model tests, TypeScript and changed-source lint PASS. Continue the same retained proposal with a separately recorded, at-most-three-request targeted follow-up (proposal/14approvals/agreed), then final privacy/persistence checks and15 exact distinct-owner approvals. Earlier successful evidence remains dated; no fresh six-case single-source claim is inferred.
+
+## Live qualification result
+
+[Combined final report](../20261020T162508Z/report.md): six cases PASS across the fifteen-user execution and three-request targeted follow-up; not a fresh full six-case single-source run.15 first-attempt saves/15 distinct approvals, correct proposal22.142s, all eight prescribed conversation/privacy checks qualified. Browser closed normally. Backend0006a4d3/API9488da66/worker97748a77 and original ENABLED schedule confirmed; frontend152 preserved. Earlier failed/incomplete responses and fixtures remain unchanged.
