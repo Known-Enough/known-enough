@@ -1,0 +1,11 @@
+{
+  "result": "WORKER_SCHEDULE_DEACTIVATION_PASS",
+  "ruleEnableRequested": false,
+  "ruleDisabledReadback": true,
+  "paidDispatchReported": 0,
+  "schedule": "DISABLED",
+  "packageSource": "86341eb9dab56fab142534b9a102c82b4cac192e",
+  "workerSha256": "af69e890eb5cbac492058bb18ab561dc1caa7858062131fcca8a64c4500df017",
+  "sourceSha": "0006a4d3587e1f5331b6c9ae1d584f55b12e0a82",
+  "workflow": "https://github.com/Known-Enough/known-enough/actions/runs/39457243284"
+}
