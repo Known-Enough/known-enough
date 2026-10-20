@@ -1,0 +1,22 @@
+{
+  "uiRequests": 1,
+  "alternativesPreserved": true,
+  "actualOptionCount": 12,
+  "expectedOptionCount": 12,
+  "unnecessaryPrivateQuestionObserved": false,
+  "actualTopicLabels": [
+    "Choose one restaurant",
+    "Choose one date",
+    "Choose one start time",
+    "Choose one way to travel together"
+  ],
+  "requiredTopicLabels": [
+    "Restaurant",
+    "Date",
+    "Time",
+    "Travel"
+  ],
+  "exactFixtureDrafting": "FAIL_MANUAL_TOPIC_NORMALIZATION_REQUIRED",
+  "continuation": "Existing no-AI editor; same primary group and exact public vocabulary; AI draft/request retained",
+  "providerCalls": "UNKNOWN"
+}

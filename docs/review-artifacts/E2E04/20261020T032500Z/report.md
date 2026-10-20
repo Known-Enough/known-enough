@@ -1,6 +1,6 @@
 # E2E04 20261020T032500Z
 
-State: **PAGINATION_CHECKPOINT**. Started 2026-10-20T03:23:37.850Z. Ended 2026-10-20T03:41:17.110Z.
+State: **RUNNING**. Started 2026-10-20T03:23:37.850Z. 
 
 Node v24.19.0; project Playwright1.63.0; installed Chrome. User authorized the available Node24.19 runtime. Fifteen isolated synthetic identities; at most three open pages. Scope: one primary dinner decision, up to six newly created groups, one outcome, fifteen separate saves/approvals/posts, up to eight assistant questions and one optional AI draft request. Prior E2E03 agreed fixture is preserved.
 
@@ -15,14 +15,23 @@ Node v24.19.0; project Playwright1.63.0; installed Chrome. User authorized the a
 
 Last verified serving baseline: source1f7d441 / APIe8338c82 / workerc4258495 / frontend152. Live evidence and credential readiness are recorded in the summary; a documentation commit is not a serving release.
 
-Last confirmed action: U01.inspect.6c4c6d. In flight: none.
+Last confirmed action: U01.createDecision.b07569. In flight: U01.saveAnswer.138948.
 
-Observed UI requests: {"outcome":0,"assistant":0,"aiDraft":0,"plainPosts":0}. Provider calls/tokens/billed cost: UNKNOWN unless separately recorded.
+Observed UI requests: {"outcome":0,"assistant":0,"aiDraft":1,"plainPosts":0}. Provider calls/tokens/billed cost: UNKNOWN unless separately recorded.
 
 - U01.invite.3ca912: APP_HTTP_409; screenshot screenshots/failure-0.png.
 - U01.suggest.a2a5b9: locator.isDisabled: Timeout 20000ms exceeded.
 Call log:
 [2m  - waiting for getByRole('button', { name: 'Suggest options', exact: true })[22m
 ; screenshot screenshots/failure-1.png.
+- U01.acceptSuggestions.47ada4: AI_TOPIC_LABEL_MISMATCH; screenshot NOT_AVAILABLE.
+- U01.manualOptions.a236c1: locator.selectOption: Timeout 20000ms exceeded.
+Call log:
+[2m  - waiting for locator('[data-topic="0"]').getByLabel('Options format', { exact: true })[22m
+; screenshot NOT_AVAILABLE.
+- U01.saveDraft.d28e3e: locator.click: Timeout 20000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('button', { name: 'Save draft', exact: true })[22m
+; screenshot NOT_AVAILABLE.
 
 [Summary](summary.json) · [Events](events.jsonl)

@@ -1,8 +1,8 @@
 {
   "runId": "20261020T032500Z",
-  "state": "PAGINATION_CHECKPOINT",
+  "state": "RUNNING",
   "startedAt": "2026-10-20T03:23:37.850Z",
-  "endedAt": "2026-10-20T03:41:17.110Z",
+  "endedAt": null,
   "cases": {
     "01": "PASS",
     "02": "PASS",
@@ -11,12 +11,12 @@
     "05": "NOT_RUN",
     "06": "NOT_RUN"
   },
-  "lastConfirmedAction": "U01.inspect.6c4c6d",
-  "inFlightAction": null,
+  "lastConfirmedAction": "U01.createDecision.b07569",
+  "inFlightAction": "U01.saveAnswer.138948",
   "observedRequests": {
     "outcome": 0,
     "assistant": 0,
-    "aiDraft": 0,
+    "aiDraft": 1,
     "plainPosts": 0
   },
   "users": {
@@ -193,6 +193,33 @@
       "serverCode": null,
       "reference": null,
       "screenshot": "screenshots/failure-1.png"
+    },
+    {
+      "action": "U01.acceptSuggestions.47ada4",
+      "code": "AI_TOPIC_LABEL_MISMATCH",
+      "domain": "AUTOMATION",
+      "status": null,
+      "serverCode": null,
+      "reference": null,
+      "screenshot": "NOT_AVAILABLE"
+    },
+    {
+      "action": "U01.manualOptions.a236c1",
+      "code": "locator.selectOption: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-topic=\"0\"]').getByLabel('Options format', { exact: true })\u001b[22m\n",
+      "domain": "AUTOMATION",
+      "status": null,
+      "serverCode": null,
+      "reference": null,
+      "screenshot": "NOT_AVAILABLE"
+    },
+    {
+      "action": "U01.saveDraft.d28e3e",
+      "code": "locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Save draft', exact: true })\u001b[22m\n",
+      "domain": "AUTOMATION",
+      "status": null,
+      "serverCode": null,
+      "reference": null,
+      "screenshot": "NOT_AVAILABLE"
     }
   ],
   "publication": "LOCAL_STARTUP",
@@ -212,7 +239,14 @@
         "/assets/index-BYSwCStp.css"
       ],
       "lastModified": "Mon, 19 Oct 2026 23:04:40 GMT"
-    }
+    },
+    "freshApiReadback": {
+      "matchesPublished": true,
+      "apiSha256": "e8338c82bb6314f157f743d7f27c1bf4b5e0e7d8c17aa7da5efbc1789be70436",
+      "workflow": "https://github.com/Known-Enough/known-enough/actions/runs/39365810648",
+      "configurationWrites": 0
+    },
+    "frontendWorkflow": "https://github.com/Known-Enough/known-enough/actions/runs/39339200904"
   },
   "runtime": {
     "node": "v24.19.0",
@@ -220,7 +254,7 @@
     "override": "User explicitly authorized Node24.19 or latest installed",
     "browser": "155.0.8059.85"
   },
-  "lastProgressAt": "2026-10-20T03:41:18.188Z",
+  "lastProgressAt": "2026-10-20T05:22:09.575Z",
   "credentials": {
     "exactSet": true,
     "count": 15,
@@ -240,6 +274,6 @@
     "plainPostsAcknowledged": 0,
     "distinctOwners": 0
   },
-  "optionalProfileReads": 35,
-  "optionalProfileResponses": 35
+  "optionalProfileReads": 99,
+  "optionalProfileResponses": 97
 }
