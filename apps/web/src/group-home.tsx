@@ -16,6 +16,7 @@ function groupPage(value: { groups?: unknown[]; cursor?: unknown }) {
 export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, onOpenGroup, onBack, onDirtyChange }: { api: (path: string, init?: RequestInit) => Promise<Response>; preferencesKey?: string | undefined;
   openDecision: (id: string) => void; selectedGroupId?: string; onOpenGroup: (id: string) => void; onBack: () => void; onDirtyChange?: (dirty: boolean) => void }) {
   const [childDirty, setChildDirty] = useState(false);
+  const [inlineNameDirty, setInlineNameDirty] = useState(false);
   const [avatarRevision, setAvatarRevision] = useState(0);
   const [available, setAvailable] = useState(false);
   const [checking, setChecking] = useState(true);
@@ -91,9 +92,9 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
   const [creating, setCreating] = useState(false);
   const [recipient, setRecipient] = useState(''); const [link, setLink] = useState('');
   const reportChildDirty = useCallback((value: boolean) => {
-    setChildDirty(value); onDirtyChange?.(value || !!groupName.trim() || !!recipient.trim());
-  }, [groupName, recipient, onDirtyChange]);
-  useEffect(() => { onDirtyChange?.(childDirty || !!groupName.trim() || !!recipient.trim()); }, [childDirty, groupName, recipient, onDirtyChange]);
+    setChildDirty(value); onDirtyChange?.(value || inlineNameDirty || !!groupName.trim() || !!recipient.trim());
+  }, [groupName, recipient, inlineNameDirty, onDirtyChange]);
+  useEffect(() => { onDirtyChange?.(childDirty || inlineNameDirty || !!groupName.trim() || !!recipient.trim()); }, [childDirty, inlineNameDirty, groupName, recipient, onDirtyChange]);
   const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false);
   const [loadFailure, setLoadFailure] = useState<LoadFailure | null>(null);
   useEffect(() => { if (activeMenuGroupId) menuActionRef.current?.focus(); }, [activeMenuGroupId]);
@@ -429,14 +430,14 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
         return <div className="ke-group-detail-stack" key={group.id}>
           <section className="ke-group-overview" aria-label="Group overview">
             <nav className="ke-group-overview-actions" aria-label="Group navigation">
-              <button type="button" className="secondary ke-group-back-link" onClick={onBack}><PageIcon name="ArrowLeft" />Back to groups</button>
+              <a href="/" className="ke-group-back-link" onClick={event => { if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onBack(); } }}><PageIcon name="ArrowLeft" />All groups</a>
               <button type="button" className="secondary ke-group-refresh" aria-label="Refresh group" title="Refresh group" onClick={() => void load()}><PageIcon name="RefreshCw" /></button>
             </nav>
             <div className="ke-group-overview-copy">
-              <div className="ke-group-title-row"><h1>{group.name}</h1>{group.isOrganizer && <RenameAction name={group.name} save={async name => {
+              <div className="ke-group-title-row">{group.isOrganizer ? <RenameAction inline name={group.name} onDirtyChange={setInlineNameDirty} save={async name => {
                 const response = await api(`/groups/${group.id}/name`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ version: group.version, previousName: group.name, name }) });
                 if (!response.ok) throw new Error('unavailable'); await load();
-              }} renderTrigger={open => <button type="button" className="secondary ke-group-name-edit" aria-label="Rename group" title="Rename group" onClick={open}><PageIcon name="Pencil" /></button>} />}</div>
+              }} /> : <h1>{group.name}</h1>}</div>
               <div className="ke-group-summary">
                 <div><span>Organizer</span><strong>{organizer?.displayName ?? 'Group organizer'}</strong></div>
                 <div><strong>{group.members.length}</strong><span>{group.members.length === 1 ? 'member' : 'members'}</span></div>
