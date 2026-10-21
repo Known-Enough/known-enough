@@ -238,24 +238,24 @@ export function createDynamoModelJobLoader(options: { verifiedTarget: { account:
   if (!z.strictObject({ account: z.literal(JOB_TARGET.account), region: z.literal(JOB_TARGET.region) }).safeParse(options.verifiedTarget).success || !/^[a-f0-9]{40}$/.test(options.sourceSha)) return fail('INVALID');
   const sourceSha = options.sourceSha;
   const client = new DynamoDBClient({ region: JOB_TARGET.region, maxAttempts: 1, endpoint: 'https://dynamodb.us-east-1.amazonaws.com' });
-  let requests = 0;
-  type Ref = { table: JobPin['table']; key: JobPin['key']; attribute: JobPin['attribute'] };
-  async function read(refs: Ref[]) {
-    if (++requests > 64 || refs.length > 64 || new Set(refs.map(pinIdentity)).size !== refs.length) return fail('CAPACITY');
-    let result; try { result = await client.send(new TransactGetItemsCommand({ TransactItems: refs.map(ref => ({ Get: { TableName: ref.table, Key: attributes(ref.key) } })) }), { abortSignal: AbortSignal.timeout(20_000) }); }
-    catch { return fail('RETRYABLE'); }
-    if (result.Responses?.length !== refs.length) return fail('INVALID');
-    return refs.map((ref, index) => {
-      const item = result.Responses![index]!.Item; if (!item || item.PK?.S !== ref.key.PK || item.SK?.S !== ref.key.SK) return fail('STALE');
-      if (ref.key.SK === 'GUARD') return { ref, item, pin: null };
-      const payload = item.payload?.S; if (!payload || Buffer.byteLength(payload) > 352 * 1024) return fail('INVALID');
-      const revision = ref.attribute ? Number(item[ref.attribute]?.N) : null;
-      const parsed = pinSchema.safeParse({ ...ref, payload, revision }); if (!parsed.success) return fail('INVALID');
-      return { ref, item, pin: parsed.data };
-    });
-  }
   return async (raw: JobReference) => {
     const reference = JobSchema.shape.reference.parse(raw); if (reference.sourceSha !== sourceSha) return fail('STALE');
+    let requests = 0;
+    type Ref = { table: JobPin['table']; key: JobPin['key']; attribute: JobPin['attribute'] };
+    async function read(refs: Ref[]) {
+      if (++requests > 64 || refs.length > 64 || new Set(refs.map(pinIdentity)).size !== refs.length) return fail('CAPACITY');
+      let result; try { result = await client.send(new TransactGetItemsCommand({ TransactItems: refs.map(ref => ({ Get: { TableName: ref.table, Key: attributes(ref.key) } })) }), { abortSignal: AbortSignal.timeout(20_000) }); }
+      catch { return fail('RETRYABLE'); }
+      if (result.Responses?.length !== refs.length) return fail('INVALID');
+      return refs.map((ref, index) => {
+        const item = result.Responses![index]!.Item; if (!item || item.PK?.S !== ref.key.PK || item.SK?.S !== ref.key.SK) return fail('STALE');
+        if (ref.key.SK === 'GUARD') return { ref, item, pin: null };
+        const payload = item.payload?.S; if (!payload || Buffer.byteLength(payload) > 352 * 1024) return fail('INVALID');
+        const revision = ref.attribute ? Number(item[ref.attribute]?.N) : null;
+        const parsed = pinSchema.safeParse({ ...ref, payload, revision }); if (!parsed.success) return fail('INVALID');
+        return { ref, item, pin: parsed.data };
+      });
+    }
     const directoryRef: Ref = { table: JOB_TARGET.partitions, key: { PK: `DECISION#${reference.decisionId}`, SK: 'GROUP' }, attribute: 'revision' };
     const controlRef: Ref = { table: JOB_TARGET.partitions, key: { PK: 'MIGRATION#CONTROL', SK: 'STATE' }, attribute: 'revision' };
     const first = await read([directoryRef, controlRef]);

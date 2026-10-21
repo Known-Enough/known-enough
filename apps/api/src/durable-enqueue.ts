@@ -17,7 +17,7 @@ export function stableDeliveryId(sourceSha: string, decisionId: string, reasonin
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 const fail = (code: Extract<KE.DecisionCommandResult, { ok: false }>['error']['code']): never => { throw new KnownEnoughApplicationError(code); };
-/** Server-owned queue bridge. It cannot process deliveries, configure authority or invoke AI. */
+/** Server-owned queue bridge. It cannot configure authority or invoke AI. */
 export function createDurableEnqueue(options: {
   sourceSha: string; now: () => number; assertRetained(principal: TrustedPrincipal): Promise<unknown>;
   readJob(jobId: string): Promise<JobSnapshot>;
@@ -61,7 +61,7 @@ export function createDurableEnqueue(options: {
       && reference.decisionId === decisionId && reference.reasoningJobId === record!.job!.id
       && reference.sourceSha === sourceSha && reference.authorityHash === hash;
     const receipt = (snapshot: JobSnapshot) => {
-      if (!snapshot.job || !matches(snapshot.job.reference) || !['READY', 'LEASED', 'CALLING'].includes(snapshot.job.phase)
+      if (!snapshot.job || !matches(snapshot.job.reference) || !['READY', 'LEASED', 'CALLING', 'SUCCEEDED'].includes(snapshot.job.phase)
         || snapshot.job.reference.expiresAt <= now()) return fail('STALE_CONTEXT');
       return { jobId, state: 'QUEUED' as const, expiresAt: new Date(snapshot.job.reference.expiresAt).toISOString() };
     };
@@ -89,13 +89,24 @@ export function createManagedDurableEnqueue(options: {
 }) {
   const now = options.now ?? Date.now; const sourceSha = options.sourceSha;
   const target = { account: '092954139775', region: 'us-east-1' };
-  const store = createDynamoModelJobStore({ verifiedTarget: target, sourceSha });
-  const worker = createDurableNegotiationWorker({ now, store, load: createDynamoModelJobLoader({ verifiedTarget: target, sourceSha }),
-    publicCandidates: genericCandidates, model: async () => { throw new Error('PROVIDER_NOT_AVAILABLE_IN_REQUEST_HANDLER'); } });
-  return createDurableEnqueue({ sourceSha, now, assertRetained: options.assertRetained,
-    readJob: jobId => store.read(DeliverySchema.parse({ jobId }).jobId),
-    enqueue: (principal, reference) => {
-      if (principal.kind !== 'participant' || principal.subject !== reference.subject) return fail('FORBIDDEN');
-      return worker.enqueue(reference);
-    } });
+  // The 64-request store bound belongs to one HTTP request, not a warm Lambda.
+  return async (request: DurableEnqueueRequest) => {
+    const store = createDynamoModelJobStore({ verifiedTarget: target, sourceSha });
+    const worker = createDurableNegotiationWorker({ now, store, bounds: { leaseMs: 30_000 },
+      reportFailure: value => console.warn('model-job-inline-failure', value),
+      reportInvalidOutput: stage => console.warn('model-job-inline-output-invalid', stage), load: createDynamoModelJobLoader({ verifiedTarget: target, sourceSha }),
+      publicCandidates: genericCandidates, model: async () => { throw new Error('PROVIDER_NOT_AVAILABLE_IN_REQUEST_HANDLER'); } });
+    const enqueue = createDurableEnqueue({ sourceSha, now, assertRetained: options.assertRetained,
+      readJob: jobId => store.read(DeliverySchema.parse({ jobId }).jobId),
+      enqueue: async (principal, reference) => {
+        if (principal.kind !== 'participant' || principal.subject !== reference.subject) return fail('FORBIDDEN');
+        const result = await worker.enqueue(reference);
+        // The accepted-job receipt remains valid if a proven no-match finishes
+        // before the HTTP acknowledgement; the next owner read carries the result.
+        try { if (await worker.finishNoMatch(reference)) console.info('model-job-inline-no-match', 'APPLIED'); }
+        catch { console.warn('model-job-inline-no-match', 'DEFERRED'); /* Preserve the exact queued job. */ }
+        return result;
+      } });
+    return enqueue(request);
+  };
 }
