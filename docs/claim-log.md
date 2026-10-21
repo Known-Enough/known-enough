@@ -3185,3 +3185,6 @@ FF09 CODE_READY/B — fictional guide embedded only in creation dialog, form/req
 
 
 2026-10-21T06:59:29.218474+00:00 — A claims user-requested Decision example rename and current-flow tutorial refresh. Frontend instructional scope only: actual Describe/Options controls, explicit optional suggestions, private checkbox answers, automatic outcome progress and explicit proposal approval, saved/new draft distinction; no account/model/backend actions. Static checks/build and dual-site publication; no product tests, user manual acceptance.
+
+
+2026-10-21T07:03:58.925837+00:00 — A Decision example refresh PUBLISHED / claim released. Source2c2ce74/frontend39559243789/Amplify165/VercelREADY; both HTML200/common2+Amplify10 hashes match. Five-step current-flow walkthrough, explicit AI suggestion acceptance, private choices, automatic outcome, exact final approval and preserved/new drafts; no live example actions. Static type/lint/build/whitespace PASS; no product tests/model/user/backend/IAM/schedule changes, manual acceptance pending. [Receipt](review-artifacts/ui/decision-example-publication.json).
