@@ -23,7 +23,7 @@ def validate_candidate(report, source, package):
     return sha
 
 
-def validate_installed(config, rule, new_hash, prior_hash=OLD_HASH):
+def validate_installed(config, rule, new_hash, prior_hash=OLD_HASH, *, before_pause=False):
     if not re.fullmatch(r'[a-f0-9]{64}', prior_hash):
         raise RuntimeError('WORKER_BASELINE_REQUIRED')
     code = base64.b64decode(config.get('CodeSha256', ''), validate=True).hex()
@@ -34,7 +34,8 @@ def validate_installed(config, rule, new_hash, prior_hash=OLD_HASH):
             or config.get('LastUpdateStatus') != 'Successful' or not config.get('RevisionId')
             or code not in [prior_hash, new_hash] or rule.get('Name') != 'KnownEnoughModelJobs'
             or rule.get('Arn') != f'arn:aws:events:us-east-1:{ACCOUNT}:rule/KnownEnoughModelJobs'
-            or rule.get('State') != 'DISABLED' or rule.get('ScheduleExpression') != 'rate(1 minute)'):
+            or rule.get('State') not in (['DISABLED', 'ENABLED'] if before_pause else ['DISABLED'])
+            or rule.get('ScheduleExpression') != 'rate(1 minute)'):
         raise RuntimeError('WORKER_INSTALLED_GUARD_FAILED')
     return code
 
@@ -67,6 +68,15 @@ def main():
         expected_prior = os.environ.get('PREVIOUS_WORKER_HASH', '')
         report['priorInstalledWorkerSha256'] = base64.b64decode(config.get('CodeSha256', ''), validate=True).hex()
         report['expectedPriorWorkerSha256'] = expected_prior if re.fullmatch(r'[a-f0-9]{64}', expected_prior) else 'NOT_SUPPLIED'
+        # The queue has already passed the disabled/empty prepublication guard.
+        # Pause only this verified worker's existing schedule before replacing code.
+        validate_installed(config, rule, sha, expected_prior, before_pause=True)
+        if rule['State'] == 'ENABLED':
+            operation = 'events:DisableRule'
+            report['schedulePauseRequested'] = True
+            aws('events', 'disable-rule', '--name', 'KnownEnoughModelJobs')
+            rule = aws('events', 'describe-rule', '--name', 'KnownEnoughModelJobs')
+            config = aws('lambda', 'get-function-configuration', '--function-name', FUNCTION)
         prior_hash = validate_installed(config, rule, sha, expected_prior)
         if prior_hash != sha:
             report['codeWriteRequested'] = True
