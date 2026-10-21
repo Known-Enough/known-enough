@@ -4,6 +4,7 @@ import { GroupMembers } from './group-members';
 import { RenameAction } from './rename-action';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GroupDecisions } from './group-decisions';
+import { DashboardInvitations } from './dashboard-invitations';
 import { type CreationStep, type DecisionSection } from './navigation';
 import { Groups } from '@deal-table/contracts';
 import { GroupIcon, LoadingSkeleton, PageIcon } from './app-chrome';
@@ -91,16 +92,6 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
   const clearGroupFilter = () => { setGroupFilter(''); groupSearch.current?.focus(); };
   const [invitations, setInvitations] = useState<Groups.InvitationSnapshot[]>([]);
   const [invitationFailure, setInvitationFailure] = useState<string | null>(null);
-  const [invitationsHidden, setInvitationsHidden] = useState(() => {
-    try { return preferencesKey ? localStorage.getItem(`${preferencesKey}:invitations-hidden`) === 'true' : false; }
-    catch { return false; }
-  });
-  function toggleInvitations() {
-    const next = !invitationsHidden;
-    setInvitationsHidden(next);
-    try { if (preferencesKey) localStorage.setItem(`${preferencesKey}:invitations-hidden`, String(next)); }
-    catch { /* The preference still applies for this visit when browser storage is unavailable. */ }
-  }
   const [profileTarget, setProfileTarget] = useState<ProfileTarget | null>(null);
   const profileTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [activeMenuGroupId, setActiveMenuGroupId] = useState<string | null>(null);
@@ -359,31 +350,20 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
         onDirtyChange?.(childDirty || !!recipient.trim());
         onOpenGroup(group.id); return true;
       }, status => { if ((status >= 400 && status < 500) || status === 507) groupRequest.current = null; }, pending.requestId); }}>Create group</button></div>}
+      <DashboardInvitations api={api} invitations={invitations} token={token} preferencesKey={preferencesKey} failure={invitationFailure}
+        busy={busy || checking} onBusyChange={setBusy} onRetry={() => void load()}
+        onClearLink={expected => {
+          setToken(current => current === expected ? '' : current);
+          try {
+            const stored = JSON.parse(sessionStorage.getItem('ke-group-invite') ?? 'null') as { token?: unknown } | null;
+            if (stored?.token === expected) sessionStorage.removeItem('ke-group-invite');
+          } catch { /* Clearing one invitation must not disturb a different saved link. */ }
+        }} onAccepted={(group, invitationId) => {
+          setInvitations(current => current.filter(value => value.id !== invitationId));
+          setGroups(current => [...current.filter(value => value.id !== group.id), group]);
+          onOpenGroup(group.id);
+        }} />
       {!groups.length && <div className="ke-empty-state"><span className="ke-state-icon"><GroupIcon /></span><h3>No groups yet.</h3><p>Start a group with the people you want to decide with, or accept an invitation.</p></div>}
-      {token && <><p>You’ve been invited to a group. Accepting joins the group; it doesn’t approve any proposal.</p>
-        <button disabled={busy} onClick={() => void action('/groups/accept', { token }, result => { const group = Groups.GroupSnapshot.parse(result.group); setToken(''); sessionStorage.removeItem('ke-group-invite'); onOpenGroup(group.id); return true; })}>Accept group invitation</button>
-        <button className="secondary" onClick={() => { setToken(''); sessionStorage.removeItem('ke-group-invite'); }}>Decline group invitation</button></>}
-      {(invitations.length > 0 || invitationFailure) && <section className="ke-card ke-dashboard-invitations" data-collapsed={invitationsHidden} aria-labelledby="pending-invitations-heading">
-        <header className="ke-panel-heading"><div><h3 id="pending-invitations-heading"><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="Mail" /></span><span>Invitations for you</span></h3>
-          <p className="ke-panel-subtitle" hidden={invitationsHidden}>Invitations sent to you. Accept one to join the group.</p></div>
-          <div className="ke-invitation-heading-actions">
-            {!invitationFailure && <span className="ke-count-badge" aria-label={`${invitations.length} pending invitations for you`}>{invitations.length}</span>}
-            <button type="button" className="secondary ke-invitations-toggle" aria-expanded={!invitationsHidden} aria-controls="pending-invitations-content" onClick={toggleInvitations}>
-              <PageIcon name="ChevronRight" />{invitationsHidden ? 'Show invitations' : 'Hide invitations'}
-            </button>
-          </div></header>
-        <div id="pending-invitations-content" hidden={invitationsHidden}>
-        {invitationFailure ? <div role="status"><p>{invitationFailure}</p>
-          <button type="button" className="secondary" disabled={busy || checking} onClick={() => void load()}>Retry invitations</button></div>
-          : invitations.length ? <ul className="ke-pending-invitations">{invitations.map(invitation => <li key={invitation.id}>
-          <div><strong>{invitation.groupName}</strong><span>Invited by {invitation.organizerName}</span>
-            <small>Expires {new Date(invitation.expiresAt).toLocaleDateString()}</small></div>
-          <button type="button" disabled={busy} onClick={() => void action('/groups/accept', { groupId: invitation.groupId, invitationId: invitation.id }, result => {
-            const group = Groups.GroupSnapshot.parse(result.group); setInvitations(current => current.filter(value => value.id !== invitation.id)); onOpenGroup(group.id); return true;
-          })}>Accept invitation</button>
-        </li>)}</ul> : <p>No pending invitations.</p>}
-        </div>
-      </section>}
       {!!groups.length && <div className="ke-group-filter">
         <div className="ke-group-search"><PageIcon name="Search" />
           <input ref={groupSearch} id="group-filter" type="search" aria-label="Search groups" placeholder="Search groups..." value={groupFilter} onChange={event => setGroupFilter(event.target.value)} />
