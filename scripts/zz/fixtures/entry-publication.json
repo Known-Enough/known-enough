@@ -1,0 +1,40 @@
+{
+  "sourceSha": "6afe139f1ef01d48839bf4bfbae9648207b4309b",
+  "result": "FRONTEND_PUBLICATION_PASS",
+  "providerCalls": 0,
+  "signup": 0,
+  "apiPublication": "NOT_EXECUTED",
+  "files": [
+    {
+      "path": "/assets/connected-app-BWWWyC_y.js",
+      "sha256": "26abcd4999ea162c743b517713a28038824a34a86a71165940cab440d0d1e85e",
+      "actualSha256": "26abcd4999ea162c743b517713a28038824a34a86a71165940cab440d0d1e85e",
+      "matches": true
+    },
+    {
+      "path": "/assets/index-BukGkYKl.css",
+      "sha256": "5d09e76c8785cdfa49be9d1ddaaf4faa3411d81206e25cf4d4668fef637c31b7",
+      "actualSha256": "5d09e76c8785cdfa49be9d1ddaaf4faa3411d81206e25cf4d4668fef637c31b7",
+      "matches": true
+    },
+    {
+      "path": "/assets/index-DQOpiV3O.js",
+      "sha256": "4fa22ef94e0bd9643cac23956a8c553013afb9250b1a0d69c862d6e01318b9cc",
+      "actualSha256": "4fa22ef94e0bd9643cac23956a8c553013afb9250b1a0d69c862d6e01318b9cc",
+      "matches": true
+    },
+    {
+      "path": "/assets/jsx-runtime-K7bYKwQh.js",
+      "sha256": "b5364b5d393882b1ea20295704ed60c2193be3fbfe104c5cace8cb1aa59860db",
+      "actualSha256": "b5364b5d393882b1ea20295704ed60c2193be3fbfe104c5cace8cb1aa59860db",
+      "matches": true
+    },
+    {
+      "path": "/",
+      "sha256": "07f0ad206ffb6b7a3a7c2bd42fcef311377b01bda30976627e73c6362b2664c8",
+      "actualSha256": "07f0ad206ffb6b7a3a7c2bd42fcef311377b01bda30976627e73c6362b2664c8",
+      "matches": true
+    }
+  ],
+  "amplifyJobId": "70"
+}

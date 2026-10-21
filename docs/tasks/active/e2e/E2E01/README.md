@@ -1,3 +1,0 @@
-# E2E01 — Two-user real-app journeys
-
-Prior attempts are documented in [run-2026-10-16.md](run-2026-10-16.md), [run-2026-10-16-resume.md](run-2026-10-16-resume.md), and [run-2026-10-16-final.md](run-2026-10-16-final.md). The fresh test02/test03 run is recorded in [run-2026-10-16-test02-test03.md](run-2026-10-16-test02-test03.md): scenarios 1–2 passed, 3–10 are blocked (scenario 5 guidance inspected only). The new empty group remains; the prior test group's cleanup is still unknown and untouched. Overall qualification is blocked. [Task](ticket.md) · [Scenario checklist](scenarios.md) · [Private credentials](credentials.md).

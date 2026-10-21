@@ -9,7 +9,7 @@
       "frontend": {
         "sourceCommit": "a6254989f04e194412c5682cee6073b502777645",
         "lastVerifiedAt": "2026-09-27",
-        "evidence": "infra/staging-runbook.md and docs/reviews/KE13C.md",
+        "evidence": "https://github.com/Known-Enough/known-enough/blob/development/infra/staging-runbook.md and https://github.com/Known-Enough/known-enough/blob/development/docs/reviews/KE13C.md",
         "files": [
           {
             "path": "/",

@@ -1,9 +1,0 @@
-{
-  "result": "ZZ02_SETUP_METADATA_READ",
-  "apiSha256": "e8338c82bb6314f157f743d7f27c1bf4b5e0e7d8c17aa7da5efbc1789be70436",
-  "configurationWrites": 0,
-  "workflow": "https://github.com/Known-Enough/known-enough/actions/runs/39365810648",
-  "applySetup": false,
-  "runChecks": false,
-  "matchesPublishedApi": true
-}

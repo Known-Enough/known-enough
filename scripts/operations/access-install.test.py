@@ -14,7 +14,7 @@ spec = importlib.util.spec_from_file_location('access_install', ROOT / 'scripts/
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 TEMPLATE = json.loads((ROOT / 'infra/operations/access-setup.json').read_text())
-PARTICIPANT = json.loads((ROOT / 'docs/review-artifacts/OPS00/participant-policy-corrected.json').read_text())
+PARTICIPANT = json.loads((ROOT / 'scripts/operations/fixtures/participant-policy.json').read_text())
 STACK_ID = module.PREFIX + 'synthetic-stack'
 CHANGE_ID = f'arn:aws:cloudformation:{module.m.REGION}:{module.m.ACCOUNT}:changeSet/synthetic/test'
 

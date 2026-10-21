@@ -1,7 +1,0 @@
-{
-  "result": "DISABLED_EMPTY_QUEUE_PREPUBLICATION_PASS",
-  "awsWrites": 0,
-  "providerCalls": 0,
-  "sourceSha": "755440b658df2e8f549b41968bfc2f7e8e5a8352",
-  "workflowRun": "https://github.com/Known-Enough/known-enough/actions/runs/39093617326"
-}

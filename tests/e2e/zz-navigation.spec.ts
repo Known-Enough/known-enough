@@ -74,7 +74,7 @@ for (const width of [390, 1280]) {
       await expect(page.getByText('Optional fictional decision templates')).toHaveCount(0);
       await expect(page.getByText('SIMULATED ALEXA+', { exact: false })).toHaveCount(0);
       expect(paths.some(path => path.startsWith('/decisions/'))).toBe(false);
-      await page.screenshot({ path: `docs/review-artifacts/ZZ03/after-home-${width}.png`, fullPage: true });
+      await page.screenshot({ path: `test-results/ZZ03/after-home-${width}.png`, fullPage: true });
       const groupsUrl = page.url();
       const groupOpener = page.getByRole('button', { name: 'Open group Gallery club', exact: true });
       const groupMenu = page.getByRole('button', { name: 'Actions for Gallery club', exact: true });
@@ -110,7 +110,7 @@ for (const width of [390, 1280]) {
       await groupOpener.click();
       await expect(page.getByRole('button', { name: 'Start a decision' })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Back to groups', exact: true })).toBeVisible();
-      await page.screenshot({ path: `docs/review-artifacts/ZZ03/after-group-${width}.png`, fullPage: true });
+      await page.screenshot({ path: `test-results/ZZ03/after-group-${width}.png`, fullPage: true });
       const before = paths.length;
       await page.getByRole('button', { name: 'Open decision', exact: true }).click();
       await expect(page.getByRole('heading', { name: 'Shared frame', exact: true })).toBeVisible();
@@ -131,7 +131,7 @@ for (const width of [390, 1280]) {
       expect(writes).toEqual([]); // navigation/reload cannot enqueue/pay again
       await page.goto(url + '?demo=legacy');
       await expect(page.getByText('Optional fictional decision templates')).toBeVisible();
-      await page.screenshot({ path: `docs/review-artifacts/ZZ03/before-demo-${width}.png`, fullPage: true });
+      await page.screenshot({ path: `test-results/ZZ03/before-demo-${width}.png`, fullPage: true });
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     } finally { await context.close(); await api.close(); }
   });

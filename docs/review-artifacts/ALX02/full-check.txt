@@ -1,4 +1,0 @@
-Import/dependency boundaries passed (634 references). Tests may use server fixtures; browser source cannot.
- Test Files  15 failed | 110 passed | 1 skipped (126)
-      Tests  32 failed | 1650 passed | 2 skipped (1684)
-     Errors  1 error

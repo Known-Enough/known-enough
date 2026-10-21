@@ -8,7 +8,7 @@ import {
 import proposed from '../../../apps/web/src/mocks/public/proposed.json';
 import owner from '../../test-support/fixtures/owner-private-review.json';
 import commands from '../../test-support/fixtures/commands.json';
-import results from '../../../docs/examples/command-results.json';
+import results from '../../test-support/fixtures/command-results.json';
 
 const clone = <T>(x: T): T => structuredClone(x);
 const facts = proposed.proposal.facts;

@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { appendFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -119,7 +119,7 @@ function recordWorkflow() {
     const input = event.inputs ?? {};
     let record;
     if (!input.event || input.event === 'inspect') {
-      const legacy = latestLegacyTime(readFileSync('docs/monitor-log.md', 'utf8'));
+      const legacy = existsSync('docs/monitor-log.md') ? latestLegacyTime(readFileSync('docs/monitor-log.md', 'utf8')) : null;
       record = { ...base, ...classifyObservation(latestReceipt(), legacy, now.getTime()), legacyReportAt: legacy };
     } else {
       const receipt = validateReceipt(input, process.env.GITHUB_ACTOR_ID);
