@@ -10,6 +10,10 @@ on:
         description: Run regression tests; false performs read-only diagnosis without tests
         type: boolean
         default: true
+      decision_id:
+        description: Optional exact user-reported decision for status-only readback
+        type: string
+        default: ''
       owned_job_ids:
         description: Optional comma-separated exact owned job UUIDs for finite disposition and usage readback
         type: string
@@ -76,6 +80,7 @@ jobs:
         env:
           EXPECTED_SOURCE: ${{ inputs.source_sha }}
           OWNED_JOB_IDS: ${{ inputs.owned_job_ids }}
+          DECISION_ID: ${{ inputs.decision_id }}
           RUNTIME_SOURCE: ${{ inputs.runtime_source }}
         run: |
           umask 077
