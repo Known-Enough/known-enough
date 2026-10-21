@@ -86,6 +86,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
   const [awaitingJob, setAwaitingJob] = useState(false);
+  const automaticOutcomeAttempt = useRef<string | null>(null);
   useEffect(() => { if (snapshot.status !== 'REASONING') setAwaitingJob(false); }, [snapshot.status, owner?.controlVersion]);
   const pending = useRef<{ type: string; body: unknown } | null>(null);
   const commandGuard = useRef(false);
@@ -205,6 +206,8 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
     } finally { interpretationGuard.current = false; setBusy(false); }
   };
   const generate = async () => {
+    if (commandGuard.current) return;
+    commandGuard.current = true;
     setBusy(true); setNotice('');
     try {
       if (backgroundNegotiation && owner) {
@@ -212,14 +215,27 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
         if (pending.current.type !== 'REQUEST_NEGOTIATION') throw new Error('action pending');
         // Keep the same command after an uncertain acknowledgement; never manufacture a second job request.
         const receipt = await submitBackgroundRequest(api, pending.current.body as ReturnType<typeof backgroundRequest>);
-        pending.current = null; setPendingAction(false); setAwaitingJob(true); setNotice('Your request is queued. Keep this decision open to see progress.');
+        pending.current = null; setPendingAction(false); setAwaitingJob(true);
         if (onQueued) onQueued(receipt); else await refresh();
       } else { await request(`/decisions/${decisionId}/reasoning`, { requestId: crypto.randomUUID() }); await refresh(); }
+      onDirtyChange?.(false); setDetailStep(null);
     }
     catch { setNotice('We couldn’t load an outcome. Refresh to check progress before trying again.'); }
-    finally { setBusy(false); }
+    finally { commandGuard.current = false; setBusy(false); }
   };
   const proposal = snapshot.currentProposal;
+  useEffect(() => {
+    if (!owner || snapshot.status !== 'READY' || proposal || !allConfirmed || owner.ownInputReadiness !== 'READY'
+      || busy || pendingAction || interpretationRequest || structuredDirty || editingAnswers || text.trim() || commandGuard.current) return;
+    const identity = `${decisionId}:${snapshot.contextToken}:${snapshot.semanticVersion}:${owner.controlVersion}`;
+    if (automaticOutcomeAttempt.current === identity) return;
+    automaticOutcomeAttempt.current = identity;
+    // One attempt per ready version; an uncertain result keeps the same request
+    // for explicit recovery instead of automatically producing another job.
+    void generate();
+  }, [snapshot.status, snapshot.contextToken, snapshot.semanticVersion, owner?.controlVersion, owner?.ownInputReadiness,
+    proposal, allConfirmed, busy, pendingAction, interpretationRequest, structuredDirty, editingAnswers, text, decisionId]);
+  const findingOutcome = awaitingJob || snapshot.status === 'REASONING' || busy && pending.current?.type === 'REQUEST_NEGOTIATION';
   // An uncertain optional AI-notes request must not freeze structured answers,
   // while other decision actions remain blocked until its result is checked.
   const blocked = busy || pendingAction || !!interpretationRequest;
@@ -233,7 +249,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
     {pendingAction && <div className="ke-wizard-recovery"><p>Check whether your last action was saved before making another change.</p><button type="button" disabled={busy} onClick={() => void (pending.current!.type === 'REQUEST_NEGOTIATION' ? generate() : command(pending.current!.type, {}))}>Retry the same action</button>
       <button type="button" disabled={busy} onClick={() => { void (async () => { setBusy(true); try { await refresh(); pending.current = null; setPendingAction(false); setReviewed(false); setNotice('The latest decision is loaded. Check it before continuing.'); } catch { setNotice('We couldn’t load the latest result. Try refreshing again before making another change.'); } finally { setBusy(false); } })(); }}>Refresh decision</button></div>}
   </>;
-  const continueToProposal = !!proposal || ['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status) || !!owner?.pendingQuestions.some(question => question.status === 'PENDING') || !!owner?.disclosurePermissions.some(permission => permission.status === 'PENDING');
+  const continueToProposal = !!proposal || !!owner?.pendingQuestions.some(question => question.status === 'PENDING') || !!owner?.disclosurePermissions.some(permission => permission.status === 'PENDING');
   return <>
     <section hidden={!!detailStep} className={`ke-card ke-decision-overview ke-response-overview${staged ? ' ke-cohesive-decision-header' : ''}`}>
       {staged && <>
@@ -249,7 +265,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
       </>}
       <p className="ke-response-summary">{(snapshot.frame.description || snapshot.frame.objective).split(/(?<=[.!?])\s+/).slice(0, 2).join(' ')}</p>
       <details className={`ke-response-progress ke-compact-activity${staged ? ' ke-header-activity' : ''}`}><summary aria-label={staged ? 'Show participant activity' : undefined}>{staged ? <>
-        <span className="ke-response-phase" data-finished={['AGREED', 'CLOSED'].includes(snapshot.status)} title={decisionStatusText(snapshot.status)}>{decisionPhaseLabel(snapshot.status)}</span>
+        <span className="ke-response-phase" data-finished={['AGREED', 'CLOSED'].includes(snapshot.status)} title={decisionStatusText(snapshot.status)}>{findingOutcome ? 'Finding an outcome' : decisionPhaseLabel(snapshot.status)}</span>
         <span className="ke-response-status-divider" aria-hidden="true">·</span>
         <span className="ke-response-count">{snapshot.participantProgress ? `${snapshot.frame.participants.filter(person => snapshot.participantProgress?.some(progress => progress.participantId === person.id && progress.answersSaved)).length}/${snapshot.frame.participants.length} responded` : `${snapshot.frame.participants.length} participants`}<PageIcon name="ChevronRight" /></span>
       </> : <span><PageIcon name="Users" />Group activity<PageIcon name="ChevronRight" /></span>}</summary>
@@ -263,9 +279,8 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
       </details>
       <div className="ke-response-overview-actions">
       {owner && !editingAnswers && !structuredDirty && continueToProposal && <button type="button" disabled={blocked || awaitingJob} onClick={() => {
-        if (proposal || owner.pendingQuestions.some(question => question.status === 'PENDING') || owner.disclosurePermissions.some(permission => permission.status === 'PENDING')) setDetailStep('proposal');
-        else void generate();
-      }}>{proposal ? ['AGREED', 'CLOSED'].includes(snapshot.status) ? 'View outcome' : 'View proposal' : owner.pendingQuestions.some(question => question.status === 'PENDING') || owner.disclosurePermissions.some(permission => permission.status === 'PENDING') ? 'Review follow-up' : 'Find an outcome'}</button>}
+        setDetailStep('proposal');
+      }}>{proposal ? ['AGREED', 'CLOSED'].includes(snapshot.status) ? 'View outcome' : 'View proposal' : 'Review follow-up'}</button>}
       {staged && mcpUrl && <button type="button" className="ke-response-text-button" onClick={() => setAssistantOpen(true)}><PageIcon name="MessageCircle" />Chat</button>}
       {!staged && <button type="button" className="ke-response-text-button" onClick={() => setDetailStep('shared')}>Decision details<PageIcon name="ChevronRight" /></button>}
       {!owner && proposal && <button type="button" onClick={() => setDetailStep('proposal')}>View proposal</button>}
@@ -320,8 +335,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
       </details>
       {recoveryControls}{notice && <p role="status" className="ke-outcome-notice">{notice}</p>}
     </section>}
-    {detailStep === 'proposal' && owner && (!staged || allConfirmed) && (!proposal || ['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status) || owner.pendingQuestions.some(question => question.status === 'PENDING') || owner.negotiationPermissions.some(permission => permission.status === 'ACTIVE')) && <section className="ke-card ke-outcome-auxiliary"><h2>{proposal ? owner.pendingQuestions.some(question => question.status === 'PENDING') || owner.negotiationPermissions.some(permission => permission.status === 'ACTIVE') ? 'Your extra requirements' : 'Explore another outcome' : snapshot.status === 'REASONING' ? 'Finding an outcome' : 'Find an outcome'}</h2>
-      {!proposal && <p>Your saved private answers help find choices that work for everyone.</p>}
+    {detailStep === 'proposal' && owner && (!staged || allConfirmed) && (owner.pendingQuestions.some(question => question.status === 'PENDING') || owner.negotiationPermissions.some(permission => permission.status === 'ACTIVE')) && <section className="ke-card ke-outcome-auxiliary"><h2>Your extra requirements</h2>
       {owner.pendingQuestions.filter(question => question.status === 'PENDING').map(question => <div key={question.questionId}><h3>Would this adjustment work?</h3>
         <p>Would this work for you if it still meets your must-have requirements?</p><p>{ruleText(question.adjustment, variables)}</p>
         <p>Expires {question.expiresAt}. Allowing this adjustment doesn’t share your requirements or approve the final proposal.</p>
@@ -332,7 +346,6 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
         <p>{ruleText(permission.adjustment, variables)}</p><p>Expires {permission.expiresAt}. You can stop allowing this adjustment for future proposals.</p>
         <button disabled={blocked} onClick={() => void command('REVOKE_NEGOTIATION', { permissionId: permission.permissionId, permissionVersion: permission.permissionVersion })}>Stop allowing this adjustment</button>
       </div>)}
-      {(!staged || ['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status)) && <button disabled={blocked || awaitingJob || !['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status)} onClick={() => void generate()}>Find an outcome</button>}
     </section>}
     {detailStep === 'proposal' && owner && owner.disclosurePermissions.length > 0 && <section className="ke-card ke-outcome-auxiliary"><h2>Details you choose to share</h2>
       <p>You choose which private details to share. Declining to share doesn’t reject the proposal.</p>

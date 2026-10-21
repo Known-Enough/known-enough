@@ -473,6 +473,25 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
           writer = new KnownEnoughApplication({ repository: retained, clock, ids });
         }
         const result = await writer.execute(principal, command.data);
+        if (result.ok && requestNegotiation && ['CONFIRM_PRIVATE_ANSWERS', 'CONFIRM_CONSTRAINTS', 'CONFIRM_FRAME', 'ANSWER_NEGOTIATION'].includes(command.data.type)) {
+          // Saving the last required answer starts the existing durable job even
+          // if the browser closes immediately. A queue failure cannot undo a saved answer.
+          try {
+            const current = await writer.getOwnerSnapshot(principal, decision[1]!);
+            const shared = current.publicSnapshot;
+            if (shared.status === 'READY' && !shared.currentProposal) {
+              await requestNegotiation({ principal, decisionId: decision[1]!, signal: controller.signal,
+                expected: { contextToken: shared.contextToken, semanticVersion: shared.semanticVersion, controlVersion: current.controlVersion },
+                authorize: async () => { await application.getOwnerSnapshot(principal, decision[1]!); },
+                read: () => repository.transactionDecision(decision[1]!, record => record ? structuredClone(record) : null),
+                begin: () => application.startReasoning({ kind: 'service', subject: 'durable-negotiator', roomIds: [decision[1]!] }, decision[1]!) });
+              console.info(JSON.stringify({ event: 'AUTOMATIC_OUTCOME', requestId, result: 'QUEUED', elapsedMs: Date.now() - requestStartedAt }));
+            }
+          } catch (error) {
+            console.warn(JSON.stringify({ event: 'AUTOMATIC_OUTCOME', requestId, result: 'UNCONFIRMED',
+              code: error instanceof KnownEnoughApplicationError ? error.code : 'RETRYABLE_SERVER_ERROR', elapsedMs: Date.now() - requestStartedAt }));
+          }
+        }
         if (privateAnswersRequest) { try { console.info(JSON.stringify({ event: 'PRIVATE_ANSWERS_HTTP_RESULT', requestId,
           ...(options.privateAnswersSource ? { sourceSha: options.privateAnswersSource } : {}), result: result.ok ? 'SAVED' : 'FAILED',
           status: result.ok ? 200 : result.error.httpStatus, ...(!result.ok ? { code: result.error.code } : {}), elapsedMs: Date.now() - requestStartedAt })); } catch { /* No private selections or notes are logged. */ } }

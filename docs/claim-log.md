@@ -3160,3 +3160,6 @@ FF09 CODE_READY/B — fictional guide embedded only in creation dialog, form/req
 
 
 2026-10-21T01:36:00.452714+00:00 — A fresh decision editor PUBLISHED / claim released. Sourced713cd2, frontend39528150215 SUCCESS/Amplify162, Verceldpl_HwnRjoZCxZMwSgFmfx2kUPUMNQYj READY; both HTML200 and common2/Amplify10 asset hashes match. New blank Describe flow separated from explicit local/server draft continuation; old recovered previews suppressed in new editor without dropping unknown AI/manual-save references. Type/lint/build/boundaries666/whitespace PASS; tests NOT_RUN/user manual acceptance pending. No backend/APIec34d5a8/IAM/schedule/provider/participant/email changes. [Receipt](review-artifacts/ui/fresh-decision-publication.json).
+
+
+2026-10-21T01:42:29.263649+00:00 — A claims user-requested automatic outcome continuation. Last required saved answer should enqueue via existing authenticated durable bridge, without manual Find outcome; correct REASONING chip, return to overview while working, remove queued/duplicate privacy copy. Preserve consent, exact approvals, current version/retention/idempotency/unknown-result protections. No tests/model/signup probes; static checks and compatible runtime/dual frontend publication; no new IAM/CloudShell setup.

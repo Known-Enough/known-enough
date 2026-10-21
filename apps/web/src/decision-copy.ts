@@ -4,7 +4,7 @@ const statusText: Record<KE.PublicDecisionSnapshot['status'], string> = {
   COLLECTING_FRAME_CONFIRMATION: 'Waiting for the required participants to answer.',
   COLLECTING_PRIVATE_INPUT: 'Waiting for the required participants to save their answers.',
   NEEDS_CLARIFICATION: 'Some answers need more detail, or the group needs other options.',
-  READY: 'The required answers are saved. You can find an outcome.', REASONING: 'Finding an option that fits the saved answers.',
+  READY: 'The required answers are saved. An outcome will be prepared automatically.', REASONING: 'Finding an option that fits the saved answers.',
   PRIVATE_NEGOTIATION: 'Check your private follow-up question.', PROPOSED: 'A proposal is ready to review.',
   APPROVING: 'Waiting for the remaining approvals.', AGREED: 'All required participants approved this proposal.',
   NO_AGREEMENT: 'No agreement yet. Check the options and your answers.',
@@ -20,7 +20,7 @@ export const privateReadinessText = (status: KE.OwnerDecisionSnapshot['ownInputR
 const phaseLabel: Record<KE.PublicDecisionSnapshot['status'], string> = {
   CREATING: 'Preparing', DEFINING: 'Setting up', COLLECTING_FRAME_CONFIRMATION: 'Collecting answers',
   COLLECTING_PRIVATE_INPUT: 'Collecting answers', NEEDS_CLARIFICATION: 'Follow-up needed',
-  READY: 'Ready to find an outcome', REASONING: 'Finding an outcome', PRIVATE_NEGOTIATION: 'Private follow-up',
+  READY: 'Preparing outcome', REASONING: 'Finding an outcome', PRIVATE_NEGOTIATION: 'Private follow-up',
   PROPOSED: 'Proposal ready', APPROVING: 'Waiting for approvals', AGREED: 'Decision agreed',
   NO_AGREEMENT: 'No agreement yet', SUPERSEDED: 'Decision updated', CLOSED: 'Closed',
 };

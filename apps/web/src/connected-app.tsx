@@ -127,7 +127,8 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
       if (epoch.current !== current || selection.current.id !== id || selection.current.token !== token) return;
       setDecisionTitle({ id, title: value.frame.title });
       setSnapshot(value); setOwner(privateValue); const available = backgroundNegotiationAvailable(response); setBackground(available);
-      if (available && privateValue && value.status === 'REASONING') setTarget({ decisionId: id, contextToken: value.contextToken,
+      if (available && privateValue && (value.status === 'REASONING' || privateValue.ownInputReadiness === 'READY'
+        && ['COLLECTING_FRAME_CONFIRMATION', 'COLLECTING_PRIVATE_INPUT', 'READY'].includes(value.status))) setTarget({ decisionId: id, contextToken: value.contextToken,
         semanticVersion: value.semanticVersion, ownerParticipantId: privateValue.ownerParticipantId, expiresAt: new Date(Date.now() + 120000).toISOString() });
       if (view.groupId && session.kind === 'participant') {
         // A renamed list title is cosmetic: publish the decision immediately,
@@ -161,7 +162,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
   useEffect(() => {
     if (!target || !session || session.kind !== 'participant') return;
     const controller = new AbortController(), id = target.decisionId, token = session.accessToken; let active = true;
-    void pollBackgroundDecision({ target, signal: controller.signal, api: (path, init) => cognitoApiFetch(config, session, path, expire, init),
+    void pollBackgroundDecision({ target, signal: controller.signal, whileCollecting: true, api: (path, init) => cognitoApiFetch(config, session, path, expire, init),
       accept: value => { if (active && selection.current.id === id && selection.current.token === token) { if (dirty.current) { setStatus('There’s an update. Save or discard your changes, then refresh.'); return; } setSnapshot(value.snapshot); setOwner(value.owner); } }
     }).then(result => { if (active) { setTarget(null); if (result === 'UNAVAILABLE' || result === 'CONTEXT_CHANGED') { setSnapshot(null); setOwner(null); } if (result !== 'SETTLED' && result !== 'CANCELLED') setStatus('Refresh this decision to see the latest progress.'); } })
       .catch(() => { if (active) { setTarget(null); setStatus('Refresh this decision to see the latest progress.'); } });

@@ -141,7 +141,7 @@ export function PrivateAnswersModal({ open, owner, busy, blocked, saveBlocked, n
     {!!extras.length && <details><summary>Saved extra conditions ({extras.length})</summary><ul>{extras.map(item => <li key={item.constraintId}>{describeCondition(item)}</li>)}</ul></details>}
     {owner.ownInputReadiness === 'NEEDS_CLARIFICATION' && <p className="ke-response-topic-hint">A follow-up or different shared options are needed before an outcome can be found.</p>}
     {owner.draft && !onlyDirectDraft && <p className="ke-response-topic-hint">Your extra notes have suggestions to review. They are not saved answers yet.</p>}
-    {recovery}{notice && <p role="status">{notice}</p>}{privacyDetails}
+    {recovery}{notice && <p role="status">{notice}</p>}{!embedded && privacyDetails}
   </div>;
   const content = <div className="ke-wizard-shell ke-response-sheet">
     <header className="ke-wizard-header"><div><h2 ref={heading} tabIndex={-1} id="private-answers-title">What works for you?</h2>
@@ -195,7 +195,7 @@ export function PrivateAnswersModal({ open, owner, busy, blocked, saveBlocked, n
               {owner.draft.unsupportedConditions.map(item => <p className="ke-wizard-save" key={item.id}>More detail needed: {item.clarificationQuestion} You can save your answers, but this needs more detail before we can find an outcome.</p>)}</>}
           </div>}
 
-      {privacyDetails}
+      {!embedded && privacyDetails}
       <label className="ke-wizard-confirm ke-response-consent"><input type="checkbox" checked={consent} disabled={blocked || saving} onChange={event => onConsent(event.target.checked)} />I’m using made-up answers for this preview and agree to Known Enough processing them, with AI if I request help.</label>
       {notice && <p role="status" className="ke-wizard-notice">{notice}</p>}
     </div>

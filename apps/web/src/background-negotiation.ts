@@ -47,7 +47,7 @@ function pause(signal: AbortSignal) {
 }
 /** Read-only bounded polling. It never submits another job or invokes a model. */
 export async function pollBackgroundDecision(options: { target: BackgroundTarget; api: DecisionApi; signal: AbortSignal;
-  accept(value: Awaited<ReturnType<typeof readBackgroundDecision>>): void; now?: () => number; wait?: (signal: AbortSignal) => Promise<void> }) {
+  accept(value: Awaited<ReturnType<typeof readBackgroundDecision>>): void; whileCollecting?: boolean; now?: () => number; wait?: (signal: AbortSignal) => Promise<void> }) {
   const target = structuredClone(options.target);
   const expiresAt = Date.parse(target.expiresAt); const now = options.now ?? Date.now; const wait = options.wait ?? pause;
   if (!Number.isFinite(expiresAt)) throw new Error('BACKGROUND_DEADLINE_INVALID');
@@ -63,7 +63,8 @@ export async function pollBackgroundDecision(options: { target: BackgroundTarget
       const value = await readBackgroundDecision(options.api, target, options.signal);
       if (options.signal.aborted) return 'CANCELLED' as const;
       options.accept(value); failures = 0;
-      if (value.snapshot.status !== 'REASONING') return 'SETTLED' as const;
+      if (value.snapshot.status !== 'REASONING' && !(options.whileCollecting
+        && ['COLLECTING_FRAME_CONFIRMATION', 'COLLECTING_PRIVATE_INPUT', 'READY'].includes(value.snapshot.status))) return 'SETTLED' as const;
     } catch (error) {
       if (options.signal.aborted) return 'CANCELLED' as const;
       if (error instanceof Error && error.message === 'BACKGROUND_CONTEXT_CHANGED') return 'CONTEXT_CHANGED' as const;
