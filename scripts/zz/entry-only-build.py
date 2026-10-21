@@ -44,7 +44,7 @@ def main():
     source = os.environ['GITHUB_SHA']
     if source != os.environ['EXPECTED_SOURCE'] or not re.fullmatch(r'[a-f0-9]{40}', source):
         raise RuntimeError('ENTRY_SOURCE_INVALID')
-    publication = json.loads(Path('docs/review-artifacts/ZZ01/evidence.json').read_text())['publication']['publication']
+    publication = json.loads(Path('scripts/zz/fixtures/entry-publication.json').read_text())
     def fetch(url):
         with urllib.request.urlopen(url, timeout=15) as response:
             return response.read(5_000_000)

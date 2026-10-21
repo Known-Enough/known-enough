@@ -6,7 +6,7 @@ import {waitForGroups, waitForDecisionReady} from '../e2e03/session-runner.mjs';
 
 const root=process.cwd(), run=process.argv[3];
 if(!/^\d{8}T\d{6}Z$/.test(run||'')) throw Error('RUN_ID_REQUIRED');
-const dir=path.join(root,'docs/review-artifacts/E2E04',run);
+const dir=path.join(root,'test-results/E2E04',run);
 const privateRoot=path.resolve(root,'../..','.known-enough');
 const priv=path.join(privateRoot,'e2e04',run);
 fs.mkdirSync(dir,{recursive:true}); fs.mkdirSync(path.join(dir,'screenshots'),{recursive:true});
@@ -72,7 +72,7 @@ function response(u,method,match){const p=u.page.waitForResponse(r=>r.request().
 function once(key){if(fixture.attempted[key])throw Error('WRITE_ALREADY_ATTEMPTED_RECONCILE_ONLY');fixture.attempted[key]={at:new Date().toISOString(),phase:'INTENT'};persist();}
 const idea='Plan a fictional dinner for our fifteen-person group. Choose one restaurant: Cedar Kitchen, Moon Noodles, Garden Table or Harbor Grill. Choose one date: 30 or 31 October 2026. Choose one start time: 18:30 or 20:00. Choose one way to travel together: Walk, Bus, Train or Taxi. Each person will privately select every option that works for them. Do not ask the organizer to guess anybody\'s preferences, make reservations, or approve for anyone. Use these exact topic names: Restaurant, Date, Time, Travel.';
 const topics=[['Restaurant','CHOICE',['Cedar Kitchen','Moon Noodles','Garden Table','Harbor Grill']],['Date','DATE',['2026-10-30','2026-10-31']],['Time','CHOICE',['18:30','20:00']],['Travel','CHOICE',['Walk','Bus','Train','Taxi']]];
-const matrix=fs.readFileSync(path.join(root,'docs/tasks/active/e2e/E2E04/answers.csv'),'utf8').trim().split(/\r?\n/).slice(1).map(row=>row.split(',').slice(1).map(x=>x.split('|')));
+const matrix=fs.readFileSync(path.join(root,'scripts/e2e04/fixtures/answers.csv'),'utf8').trim().split(/\r?\n/).slice(1).map(row=>row.split(',').slice(1).map(x=>x.split('|')));
 const ops={
  async login(u){await u.page.goto(site,{waitUntil:'domcontentloaded'});await u.page.getByRole('button',{name:'Sign in',exact:true}).first().click();await u.page.getByLabel('Username',{exact:true}).fill(u.credential.username);await u.page.getByLabel('Password',{exact:true}).fill(u.credential.password);const ready=waitForGroups(u.page).then(r=>({r}),e=>({e}));await u.page.locator('form.ke-auth-form button[type=submit]').click();const got=await ready;if(got.e)throw got.e;await u.page.getByRole('heading',{name:'Decision groups',exact:true}).waitFor();await settle(u);const old=summary.users[u.actor]||{};summary.users[u.actor]={...old,authenticated:true,approved:u.latest['/account']?.account?.status==='APPROVED',initialGroups:old.initialGroups??u.groups.length};return{authenticated:true,approved:summary.users[u.actor].approved,groupCount:u.groups.length,reauthentication:!!old.authenticated};},
  async catalog(u){await catalog(u);return{groupCount:u.groups.length,responsePages:u.pages.map(p=>p.count),distinctIds:new Set(u.groups.map(g=>g.id)).size};},
