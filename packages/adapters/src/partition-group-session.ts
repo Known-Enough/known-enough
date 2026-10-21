@@ -829,7 +829,7 @@ export function createPartitionGroupSession(transport: PartitionTransport,
       });
     },
     /** Conditions MUST join the actual decision transaction; assertCurrent alone cannot authorize a write. */
-    decisionFence(principal: TrustedPrincipal | null, rawDecisionId: string, supplied?: PartitionIOContext): Promise<PartitionFence & {
+    decisionFence(principal: TrustedPrincipal | null, rawDecisionId: string, supplied?: PartitionIOContext, historicalRead = false): Promise<PartitionFence & {
       groupMembers: { subject: string; participantId: string; displayName: string }[];
     }> {
       return safe(async () => {
@@ -841,7 +841,9 @@ export function createPartitionGroupSession(transport: PartitionTransport,
           const group = current(state, who, directory.groupId);
           const binding = group.decisions.find(binding => binding.id === decisionId);
           if (!binding || binding.deleted) return deny('NOT_FOUND');
-          if (binding.version !== group.version) return deny('STALE_CONTEXT');
+          // Only the immutable historical projection may use an older binding.
+          // Normal participant operations still require the current group version.
+          if (binding.version !== group.version && !historicalRead) return deny('STALE_CONTEXT');
           groupMembers = publicRoster(state, group).map(person => ({
             subject: group.members.find(subject => partitionMemberId(subject) === person.id)!,
             participantId: person.id, displayName: person.displayName,

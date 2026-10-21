@@ -58,15 +58,13 @@ export function GroupHome({ api, preferencesKey, invitationSessionKey, openDecis
         const group = listed[index++]!;
         const visible: string[] = [];
         let action: DecisionListStatus | undefined;
-        if (group.isOrganizer && group.decisions.some(decision => !decision.current)) action = { label: 'Needs your review', tone: 'action' };
         for (const decision of group.decisions) {
           if (!active) return;
-          if (!decision.current) { visible.push(decision.id); continue; }
           try {
             const status = await readDecisionListStatus(actionApi.current, decision.id, controller.signal);
             if (!status) continue;
             visible.push(decision.id);
-            if (!action && status.tone === 'action') action = status;
+            if (decision.current && !action && status.tone === 'action') action = status;
           } catch { visible.push(decision.id); /* A failed read is not an access denial. */ }
         }
         decisions[group.id] = { group, ids: visible };
@@ -423,7 +421,7 @@ export function GroupHome({ api, preferencesKey, invitationSessionKey, openDecis
               </section>
               {visibleDecisions && <section className="ke-group-menu-section" aria-label="Decisions">
                 <h4>Decisions <span>{decisionCount ?? 0}</span></h4>
-                {visibleDecisions.length ? <ul>{visibleDecisions.map(decision => <li key={decision.id}>{decision.title ?? 'Untitled decision'}{!decision.current && <small>Needs review</small>}</li>)}</ul>
+                {visibleDecisions.length ? <ul>{visibleDecisions.map(decision => <li key={decision.id}>{decision.title ?? 'Untitled decision'}</li>)}</ul>
                   : <p className="ke-group-menu-empty">No decisions yet.</p>}
               </section>}
               <div className="ke-group-menu-actions">

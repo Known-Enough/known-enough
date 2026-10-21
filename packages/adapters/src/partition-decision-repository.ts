@@ -368,6 +368,27 @@ export function createPartitionDecisionRepository(options: { decisionArn: string
         },
       };
     },
+    /** Finished decisions keep their original participants. A historical read
+     * never adds current group members or persists projection/expiry changes. */
+    forHistoricalParticipant(rawPrincipal: TrustedPrincipal | null): KnownEnoughRepository {
+      const principal = rawPrincipal?.kind === 'participant' ? { kind: 'participant' as const, subject: rawPrincipal.subject } : null;
+      return {
+        createDecision: async () => { throw new KnownEnoughApplicationError('FORBIDDEN'); },
+        transactionDecision: (decisionId, transition, transactionOptions) => safe(async () => {
+          if (!principal || transactionOptions !== undefined) throw new KnownEnoughApplicationError('FORBIDDEN');
+          const io = partitionIO(limits);
+          const fence = await session.decisionFence(principal, decisionId, io, true);
+          return perform(principal, decisionId, false, (repository, context) => repository.transactionDecision(decisionId, record => partitionCall(context, async () => {
+            if (!record || !['AGREED', 'CLOSED'].includes(record.status)) return stale();
+            const result = await transition(structuredClone(record));
+            const snapshot = KE.OwnerDecisionSnapshot.safeParse(result);
+            if (!snapshot.success || snapshot.data.publicSnapshot.frame.decisionId !== decisionId
+              || snapshot.data.publicSnapshot.viewerParticipantId !== snapshot.data.ownerParticipantId) throw new KnownEnoughApplicationError('FORBIDDEN');
+            return structuredClone(result);
+          }, false)), { io, fence });
+        }),
+      };
+    },
     forParticipant(rawPrincipal: TrustedPrincipal | null, supplied?: PartitionIOContext): KnownEnoughRepository {
     const principal = rawPrincipal?.kind === 'participant' ? { kind: 'participant' as const, subject: rawPrincipal.subject } : null;
     return {

@@ -28,7 +28,8 @@ function DecisionRow({ decision, status, organizer, busy, onOpen, onOutcome, onR
   const [menuOpen, setMenuOpen] = useState(false);
   const root = useRef<HTMLElement>(null), trigger = useRef<HTMLButtonElement>(null);
   const name = decision.title ?? 'Untitled decision';
-  const currentStatus: DecisionListStatus | undefined = decision.current ? status : { label: organizer ? 'Needs your review' : 'Waiting for organizer', tone: organizer ? 'action' : 'waiting' };
+  const currentStatus = decision.current ? status : undefined;
+  const canOpen = decision.current || !!status && status.label !== 'Status unavailable';
   useEffect(() => {
     if (!menuOpen) return;
     const outside = (event: PointerEvent) => { if (event.target instanceof Node && !root.current?.contains(event.target)) setMenuOpen(false); };
@@ -40,7 +41,7 @@ function DecisionRow({ decision, status, organizer, busy, onOpen, onOutcome, onR
       aria-label={`Actions for ${name}`} aria-expanded={menuOpen} aria-controls={`decision-actions-${decision.id}`}
       onClick={() => setMenuOpen(current => !current)}><PageIcon name="Ellipsis" /></button>
     <div id={`decision-actions-${decision.id}`} className="ke-decision-actions-menu" hidden={!menuOpen}>
-      {currentStatus?.canViewOutcome && <button type="button" disabled={busy} onClick={() => { setMenuOpen(false); onOutcome(); }}><PageIcon name="Check" />View outcome</button>}
+      {status?.canViewOutcome && <button type="button" disabled={busy} onClick={() => { setMenuOpen(false); onOutcome(); }}><PageIcon name="Check" />View outcome</button>}
       {organizer && <>
         <button type="button" disabled={busy} onClick={() => { setMenuOpen(false); rename?.(); }}><PageIcon name="Pencil" />Rename</button>
         <button type="button" className="ke-decision-menu-delete" disabled={busy} onClick={() => { setMenuOpen(false); onDelete(); }}><PageIcon name="X" />Delete decision</button>
@@ -48,14 +49,14 @@ function DecisionRow({ decision, status, organizer, busy, onOpen, onOutcome, onR
     </div>
   </>;
   return <article ref={root} className="ke-decision-row ke-clickable-decision-row">
-    <button type="button" className="ke-decision-row-open" disabled={busy || (!decision.current && !organizer)}
-      onClick={decision.current ? onOpen : onReview}>
+    <button type="button" className="ke-decision-row-open" disabled={busy || (!canOpen && !organizer)}
+      onClick={canOpen ? onOpen : onReview}>
       <span className="ke-decision-row-content"><span className="ke-decision-row-title"><strong>{name}</strong></span>
-        {!decision.current ? <small>{organizer ? 'Update who is taking part' : 'The organizer needs to resolve a membership change.'}</small> : currentStatus?.detail && <small>{currentStatus.detail}</small>}</span>
+        {currentStatus?.detail && <small>{currentStatus.detail}</small>}</span>
       {currentStatus && <span className="ke-decision-status-chip" data-tone={currentStatus.tone}>{currentStatus.label}</span>}
       <PageIcon name="ChevronRight" />
     </button>
-    {(organizer || currentStatus?.canViewOutcome) && <div className="ke-decision-menu-wrap" onKeyDown={event => {
+    {(organizer || status?.canViewOutcome) && <div className="ke-decision-menu-wrap" onKeyDown={event => {
       if (event.key === 'Escape') { event.preventDefault(); setMenuOpen(false); trigger.current?.focus(); }
     }} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setMenuOpen(false); }}>
       {organizer ? <RenameAction name={name} save={onRename} renderTrigger={menu} /> : menu()}
@@ -70,7 +71,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
   useEffect(() => {
     const controller = new AbortController();
     let active = true, index = 0;
-    const decisions = group.decisions.filter(decision => decision.current);
+    const decisions = group.decisions;
     const statuses: Record<string, DecisionListStatus | null> = {};
     async function worker() {
       while (active && index < decisions.length) {
@@ -577,7 +578,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
   const hasLocalDraft = !!objective.trim() || !!choicePlan || !!draft || !!aiReview || !!pendingKey || !!manualPending.current;
   const visibleDecisions = group.decisions.filter(decision => listStatuses[decision.id] !== null);
   const hasSavedDrafts = group.isOrganizer && group.drafts.some(draft => !draft.created);
-  if (!starting && group.decisions.some(decision => decision.current) && statusGroup !== group) {
+  if (!starting && group.decisions.length > 0 && statusGroup !== group) {
     return <LoadingSkeleton kind="decisions" label="Loading decisions" className="ke-card ke-group-panel ke-decisions-panel" />;
   }
   return <section className={starting ? 'ke-workflow-content ke-creation-page-container' : 'ke-card ke-group-panel ke-decisions-panel'} aria-busy={busy} aria-labelledby={starting ? `decision-wizard-title-${group.id}` : `decisions-heading-${group.id}`}>
