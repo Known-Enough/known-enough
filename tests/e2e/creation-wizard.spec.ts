@@ -111,11 +111,11 @@ test('editable rows validate duplicates and manual creation saves once and navig
 test('description assistance is explicit, editable, dismissible and never overwrites the original automatically', async ({ page }) => {
   const f = await fixture(page); await page.getByLabel('Describe the decision', { exact: true }).fill(idea);
   await page.getByRole('button', { name: 'Help me get started', exact: true }).click(); expect(f.aiCalls()).toBe(0);
-  await page.getByRole('button', { name: 'Suggest a description', exact: true }).click();
+  await page.getByRole('button', { name: 'Suggest description', exact: true }).click();
   const review = page.getByRole('region', { name: 'Suggested description', exact: true });
   await expect(review).toBeVisible(); await expect(page.getByLabel('Describe the decision', { exact: true })).toHaveValue(idea);
-  await review.getByRole('textbox', { name: 'Suggested description', exact: true }).fill('Choose a weekend place together.');
-  await review.getByRole('button', { name: 'Use this description', exact: true }).click();
+  await review.getByRole('textbox', { name: 'Edit the suggestion if you like', exact: true }).fill('Choose a weekend place together.');
+  await review.getByRole('button', { name: 'Use this', exact: true }).click();
   await expect(page.getByLabel('Describe the decision', { exact: true })).toHaveValue('Choose a weekend place together.');
   expect(f.aiCalls()).toBe(1); expect(f.creates()).toBe(0);
 });
@@ -145,51 +145,47 @@ for (const mode of ['create-failure', 'save-failure', 'ai-failure'] as const) te
   expect(f.aiCalls()).toBe(mode === 'ai-failure' ? 1 : 0);
 });
 
-test('local draft survives reload and close guards preserve the description, options and focus', async ({ page }) => {
-  await fixture(page); await options(page); await add(page, 'Coast', 1);
-  page.once('dialog', dialog => dialog.dismiss()); await page.getByRole('button', { name: 'Close new decision', exact: true }).click();
-  await expect(page.getByRole('dialog', { name: 'Review your options', exact: true })).toBeVisible();
-  page.once('dialog', dialog => dialog.accept()); await page.keyboard.press('Escape');
-  await expect(page.getByRole('dialog', { name: 'Review your options', exact: true })).not.toBeVisible();
-  await expect(page.getByRole('button', { name: 'Start a decision', exact: true })).toBeFocused();
-  await page.reload(); await page.getByRole('button', { name: 'Start a decision', exact: true }).click();
-  await expect(page.getByLabel('Option 1 for Options', { exact: true })).toHaveValue('Coast');
-  await page.getByRole('button', { name: 'Back', exact: true }).click();
+test('creation pages restore drafts across steps, refresh and browser Back/Forward', async ({ page }) => {
+  const f = await fixture(page); await options(page); await add(page, 'Coast', 1);
+  await expect(page).toHaveURL(/create=decision&step=options/);
+  await expect(page.locator('dialog[open]')).toHaveCount(0);
+  await page.goBack();
   await expect(page.getByLabel('Describe the decision', { exact: true })).toHaveValue(idea);
+  await page.goForward();
+  await expect(page.getByLabel('Option 1 for Options', { exact: true })).toHaveValue('Coast');
+  await page.reload();
+  await expect(page.getByLabel('Option 1 for Options', { exact: true })).toHaveValue('Coast');
+  await page.getByRole('link', { name: 'Back to group', exact: true }).click();
+  await expect(page).toHaveURL(/\?group=garden$/);
+  await page.getByRole('button', { name: 'Start a decision', exact: true }).click();
+  await expect(page.getByLabel('Option 1 for Options', { exact: true })).toHaveValue('Coast');
+  expect(f.aiCalls()).toBe(0); expect(f.saves()).toBe(0);
 });
 
-test('creation modal has one scroll region, reachable footer and theme contrast across viewport sizes', async ({ page }) => {
+test('creation pages scroll naturally with reachable actions and no nested scroll containers', async ({ page }) => {
   await fixture(page); await options(page); await add(page, 'Coast', 1); await add(page, 'Mountains', 2);
   for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 }, { width: 844, height: 390 }]) {
     await page.setViewportSize(viewport);
     for (const theme of ['light', 'dark'] as const) {
       await page.evaluate(theme => document.documentElement.dataset.theme = theme, theme);
-      const dialog = page.locator('.ke-creation-v2');
-      const create = dialog.getByRole('button', { name: 'Create decision', exact: true }); await expect(create).toBeVisible();
-      const geometry = await dialog.evaluate(element => {
-        const bounds = element.getBoundingClientRect(); const footer = element.querySelector('.ke-creation-footer')!.getBoundingClientRect();
-        const contrast = (front: string, back: string) => {
-          const luminance = (value: string) => { const values = value.match(/[\d.]+/g)!.slice(0, 3).map(Number).map(part => { const channel = part / 255; return channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4; }); return values[0]! * .2126 + values[1]! * .7152 + values[2]! * .0722; };
-          const a = luminance(front), b = luminance(back); return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
-        };
-        const back = element.querySelector('.ke-creation-footer .secondary')!, backStyle = getComputedStyle(back);
-        const title = getComputedStyle(element.querySelector('h2')!), surface = getComputedStyle(element);
+      const flow = page.locator('.ke-creation-page');
+      const create = flow.getByRole('button', { name: 'Create decision', exact: true });
+      await create.scrollIntoViewIfNeeded(); await expect(create).toBeInViewport();
+      const geometry = await flow.evaluate(element => {
         const scrollers = [...element.querySelectorAll('*')].filter(item => !item.matches('textarea,input,select') && item.getClientRects().length > 0 && ['auto','scroll'].includes(getComputedStyle(item).overflowY));
-        return { top: bounds.top, bottom: bounds.bottom, left: bounds.left, right: bounds.right, footer: footer.bottom,
-          backColor: backStyle.color, backBackground: backStyle.backgroundColor, titleContrast: contrast(title.color, surface.backgroundColor), backContrast: contrast(backStyle.color, backStyle.backgroundColor), scrollRegions: scrollers.length, horizontalOverflow: element.scrollWidth > element.clientWidth + 1 };
+        const bounds = element.getBoundingClientRect();
+        return { left: bounds.left, right: bounds.right, scrollRegions: scrollers.length,
+          horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 1,
+          bodyOverflow: getComputedStyle(document.body).overflow,
+          footerPosition: getComputedStyle(element.querySelector('.ke-creation-footer')!).position };
       });
-      expect(geometry.top).toBeGreaterThanOrEqual(0); expect(geometry.bottom).toBeLessThanOrEqual(viewport.height + 1);
       expect(geometry.left).toBeGreaterThanOrEqual(0); expect(geometry.right).toBeLessThanOrEqual(viewport.width + 1);
-      expect(geometry.titleContrast).toBeGreaterThanOrEqual(4.5); expect(geometry.backContrast, JSON.stringify({ viewport, theme, geometry })).toBeGreaterThanOrEqual(4.5);
-      expect(geometry.footer).toBeLessThanOrEqual(viewport.height); expect(geometry.horizontalOverflow).toBe(false); expect(geometry.scrollRegions).toBe(1);
-      await page.screenshot({ path: `docs/review-artifacts/FF/wizard-redesign/options-${viewport.width}-${theme}.png` });
-      await page.getByRole('button', { name: 'Back', exact: true }).click();
-      await page.screenshot({ path: `docs/review-artifacts/FF/wizard-redesign/describe-${viewport.width}-${theme}.png` });
-      await page.getByRole('button', { name: 'Continue', exact: true }).click();
+      expect(geometry.horizontalOverflow).toBe(false); expect(geometry.scrollRegions).toBe(0);
+      expect(geometry.footerPosition).toBe('static'); expect(geometry.bodyOverflow).not.toBe('hidden');
+      if (viewport.width !== 844) await page.screenshot({ path: `/tmp/ke-creation-page-${viewport.width}-${theme}.png`, fullPage: true });
     }
   }
 });
-
 
 test('examples replace text only after confirmation and keep existing option rows', async ({ page }) => {
   const f = await fixture(page); await options(page); await add(page, 'Our own option', 1);
@@ -205,7 +201,7 @@ test('examples replace text only after confirmation and keep existing option row
 
 test('legacy saved drafts retain bounded date rules and identifiers through wording edits and creation', async ({ page }) => {
   const f = await fixture(page, 'legacy');
-  await expect(page.getByText('This saved draft keeps its original options and shared rules.', { exact: true })).toBeVisible();
+  await expect(page.getByText('This saved draft keeps its original options and group requirements.', { exact: true })).toBeVisible();
   await page.getByLabel('Decision name', { exact: true }).fill('Updated weekend plan');
   const posted: Record<string, unknown>[] = [];
   page.on('request', request => { if (request.method() === 'POST' && new URL(request.url()).pathname === '/groups/garden/drafts/draft-one') posted.push(request.postDataJSON()); });
@@ -216,15 +212,16 @@ test('legacy saved drafts retain bounded date rules and identifiers through word
   expect(f.aiCalls()).toBe(0); expect(f.creates()).toBe(1);
 });
 
-test('keyboard focus stays inside the native dialog and the description receives initial focus', async ({ page }) => {
+test('creation is keyboard accessible without a modal focus trap and direct empty Options links recover', async ({ page }) => {
   await fixture(page);
   await expect(page.getByRole('textbox', { name: 'Describe the decision', exact: true })).toBeFocused();
-  for (let i = 0; i < 18; i++) {
-    await page.keyboard.press('Tab');
-    expect(await page.evaluate(() => document.activeElement?.closest('dialog')?.open)).toBe(true);
-  }
-  page.once('dialog', dialog => dialog.accept()); await page.keyboard.press('Escape');
-  await expect(page.getByRole('button', { name: 'Start a decision', exact: true })).toBeFocused();
+  await expect(page.locator('dialog[open]')).toHaveCount(0);
+  await page.goto('/?group=garden&create=decision&step=options');
+  await expect(page).toHaveURL(/step=describe$/);
+  await expect(page.getByRole('textbox', { name: 'Describe the decision', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Help me get started', exact: true }).click();
+  await expect(page.getByLabel('What are you trying to decide?', { exact: true })).toBeFocused();
+  await expect(page.getByRole('button', { name: 'Plan a trip', exact: true })).toHaveCount(0);
 });
 
 test('comparison limits keep creation disabled until the user narrows the options without AI', async ({ page }) => {

@@ -2090,3 +2090,67 @@ dialog[data-standard-close] h2 { padding-right: 30px; }
 @media (prefers-reduced-motion: reduce) { .ke-assistance-chevron { transition: none; } .ke-description-assistance[aria-busy="true"] .ke-creation-assist-status svg { animation: none; } }
 
 :root[data-theme="dark"] .ke-home .ke-creation-v2 button.ke-creation-assist:hover { color: var(--wizard-text); background: var(--wizard-soft); text-decoration: none; }
+
+/* Major decision workflows use the document scroll; chat and quick actions retain dialogs. */
+.ke-home.ke-workflow-route { max-width: 1180px; padding-top: 12px; }
+.ke-workflow-route .ke-masthead { min-height: 64px; border-bottom: 1px solid #dfe5dc; }
+.ke-workflow-content, .ke-creation-page {
+  --wizard-surface: #fff; --wizard-soft: #f5f7f2; --wizard-border: #dce5dd;
+  --wizard-text: #173c30; --wizard-muted: #617166; --wizard-note: #edf4ec;
+  color: var(--wizard-text);
+}
+.ke-workflow-content { width: 100%; max-width: 720px; min-width: 0; margin: 0 auto; }
+.ke-workflow-route .ke-group-page, .ke-workflow-route .ke-group-detail-stack, .ke-workflow-route .ke-group-panels { display: block; margin: 0; padding: 0; }
+.ke-workflow-route [hidden], .ke-decision-page [hidden] { display: none !important; }
+.ke-workflow-content h1 { margin: 6px 0 10px; font-size: clamp(26px, 4vw, 32px); line-height: 1.2; font-weight: 650; letter-spacing: -.035em; overflow-wrap: anywhere; }
+.ke-workflow-content h1:focus { outline: none; }
+.ke-workflow-content .ke-workflow-back { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; margin: 0 0 18px; padding: 4px 0; border-radius: 4px; color: var(--wizard-muted); font-size: 12px; font-weight: 500; text-decoration: none; }
+.ke-workflow-content .ke-workflow-back:hover { color: var(--wizard-text); text-decoration: none; }
+.ke-workflow-back > svg { width: 15px; height: 15px; }
+.ke-workflow-route .ke-dashboard-privacy { max-width: 720px; margin: 32px auto 0; padding: 0; border: 0; }
+.ke-workflow-route .ke-dashboard-privacy .ke-privacy-bar { margin: 0; border: 0; border-top: 1px solid var(--wizard-border, #dfe5dc); border-radius: 0; background: transparent; box-shadow: none; }
+.ke-workflow-route .ke-dashboard-privacy .ke-privacy-bar summary { justify-content: flex-start; padding: 14px 0; gap: 10px; font-size: 12px; }
+.ke-workflow-route .ke-dashboard-privacy .ke-privacy-bar p { padding: 0 0 14px; font-size: 12px; }
+.ke-creation-page .ke-wizard-shell { display: block; height: auto; max-height: none; overflow: visible; }
+.ke-creation-page .ke-wizard-header { padding: 0 0 20px; align-items: flex-start; flex-wrap: wrap; gap: 8px 16px; }
+.ke-creation-page .ke-wizard-header > div { flex: 1; min-width: 220px; }
+.ke-creation-page .ke-wizard-header h1 { margin-top: 7px; }
+.ke-creation-page .ke-creation-stepper { padding: 0 0 14px; margin-bottom: 22px; }
+.ke-creation-page .ke-wizard-body { display: block; height: auto; max-height: none; padding: 0; overflow: visible; overscroll-behavior: auto; scrollbar-gutter: auto; }
+.ke-creation-page .ke-creation-footer { position: static; margin: 22px 0 0; padding: 16px 0 0; border-top: 1px solid var(--wizard-border); background: transparent; }
+.ke-creation-page .ke-creation-footer button { min-width: 100px; }
+.ke-page-draft-state { display: inline-flex; align-items: center; gap: 5px; margin-top: 7px; color: var(--wizard-muted); font-size: 11px; line-height: 1.5; }
+.ke-page-draft-state > svg { width: 13px; height: 13px; }
+.ke-creation-page :is(input:not([type="checkbox"]), textarea, select) { color: var(--wizard-text); background: var(--wizard-surface); border-color: var(--wizard-border); }
+.ke-creation-page .ke-description-assistance { scroll-margin-block: 24px; }
+.ke-creation-page .ke-description-assistance :is(input, textarea) { width: 100%; }
+.ke-decision-page .ke-load-reveal { gap: 0; }
+.ke-decision-page .ke-cohesive-decision-header { position: relative; margin: 0; padding: 0 0 22px; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.ke-decision-page .ke-cohesive-decision-header > h1 { margin-right: 46px; }
+.ke-decision-page .ke-decision-header-menu { top: 0; right: 0; }
+.ke-decision-page .ke-decision-header-menu-items button { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 38px; padding: 8px 10px; margin: 0; border: 0; border-radius: 7px; background: transparent; color: var(--wizard-text); text-align: left; font-size: 12px; font-weight: 500; box-shadow: none; }
+.ke-decision-page .ke-decision-header-menu-items button:hover { background: var(--wizard-soft); }
+.ke-decision-page .ke-header-activity > ul { max-width: 520px; margin: 11px 0 0; padding: 5px 12px; border: 1px solid var(--wizard-border); border-radius: 10px; background: var(--wizard-soft); }
+.ke-decision-page .ke-response-inline { margin: 0; padding: 22px 0 0; border: 0; border-top: 1px solid var(--wizard-border); border-radius: 0; background: transparent; box-shadow: none; }
+.ke-decision-page .ke-response-inline .ke-response-save { position: static; margin: 18px 0 0; padding: 16px 0 0; border-radius: 0; background: transparent; }
+.ke-decision-subpage { padding-bottom: 8px; }
+.ke-decision-subpage > .ke-shared-decision { margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; }
+.ke-decision-subpage .ke-outcome-heading h1 { font-size: clamp(26px, 4vw, 32px); }
+.ke-outcome-page .ke-outcome-auxiliary { margin: 20px 0 0; padding: 18px 0 0; border: 0; border-top: 1px solid var(--wizard-border); border-radius: 0; background: transparent; box-shadow: none; }
+.ke-outcome-page button.ke-outcome-text-action { min-height: 32px; margin: 0; padding: 4px 0; border: 0; background: transparent; color: var(--wizard-muted); font-size: 12px; box-shadow: none; }
+:root[data-theme="dark"] .ke-workflow-content, :root[data-theme="dark"] .ke-creation-page { --wizard-surface: #1b2b21; --wizard-soft: #24362a; --wizard-border: #3b5141; --wizard-text: #e0eee4; --wizard-muted: #b2c7b9; --wizard-note: #293d2e; }
+:root[data-theme="dark"] .ke-workflow-route .ke-masthead, :root[data-theme="dark"] .ke-workflow-route .ke-dashboard-privacy .ke-privacy-bar { border-color: #3b5141; }
+:root[data-theme="dark"] .ke-workflow-route .ke-dashboard-privacy .ke-privacy-bar { background: transparent; }
+:root[data-theme="dark"] .ke-decision-page .ke-cohesive-decision-header, :root[data-theme="dark"] .ke-decision-page .ke-response-inline, :root[data-theme="dark"] .ke-decision-subpage > .ke-shared-decision, :root[data-theme="dark"] .ke-outcome-page .ke-outcome-auxiliary { background: transparent; border-color: var(--wizard-border); color: var(--wizard-text); }
+:root[data-theme="dark"] .ke-decision-page .ke-decision-header-menu-items button, :root[data-theme="dark"] .ke-outcome-page button.ke-outcome-text-action { background: transparent; color: var(--wizard-text); }
+:root[data-theme="dark"] .ke-decision-page .ke-decision-header-menu-items button:hover { background: var(--wizard-soft); }
+@media (max-width: 650px) {
+  .ke-home.ke-workflow-route { padding: 8px 18px 32px; }
+  .ke-workflow-route .ke-masthead { margin-bottom: 24px; }
+  .ke-creation-page .ke-wizard-header > div { min-width: 0; flex-basis: 100%; }
+  .ke-page-draft-state { margin-top: 0; }
+  .ke-creation-page .ke-creation-subtitle { font-size: 13px; }
+  .ke-creation-page .ke-creation-footer { gap: 10px; }
+  .ke-decision-page .ke-response-save { flex-wrap: wrap; }
+  .ke-decision-page .ke-response-save-actions { flex-wrap: wrap; }
+}

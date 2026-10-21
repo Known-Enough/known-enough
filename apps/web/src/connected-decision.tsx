@@ -1,9 +1,9 @@
-import { Modal } from './modal';
 import { MemberAvatar } from './member-avatar';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { KnownEnough as KE, publicChoiceOptions } from '@deal-table/contracts';
 import { PrivateAnswersModal } from './private-answers-modal';
 import { PageIcon } from './app-chrome';
+import { type DecisionSection, appViewSearch } from './navigation';
 import { decisionPhaseLabel, decisionStatusText } from './decision-copy';
 import { backgroundRequest, submitBackgroundRequest, type BackgroundReceipt } from './background-negotiation';
 
@@ -56,7 +56,8 @@ export function ruleText(rule: KE.ValidationRule, variables: Variable[]): string
   }
 }
 
-export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNegotiation = false, onQueued, onDirtyChange, staged = false, title, onRefresh, refreshing = false, mcpUrl, groupId }: {
+export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNegotiation = false, onQueued, onDirtyChange, staged = false, title, onRefresh, refreshing = false, mcpUrl, groupId, section = 'overview', onNavigate }: {
+  section?: DecisionSection; onNavigate?: (section: DecisionSection) => void;
   mcpUrl?: string; groupId?: string; title?: string; onRefresh?: () => void; refreshing?: boolean;
   snapshot: KE.PublicDecisionSnapshot; owner: KE.OwnerDecisionSnapshot | null;
   api: (path: string, init?: RequestInit) => Promise<Response>; refresh: () => Promise<void>;
@@ -65,15 +66,19 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
   const [text, setText] = useState('');
   const [assistantOpen, setAssistantOpen] = useState(false);
   const [syntheticProcessing, setSyntheticProcessing] = useState(false);
-  const [detailStep, setDetailStep] = useState<'shared' | 'proposal' | null>(null);
-  const detailDialog = useRef<HTMLDialogElement>(null);
+  const [localSection, setLocalSection] = useState<DecisionSection>('overview');
+  const activeSection = onNavigate ? section : localSection;
+  const detailStep = activeSection === 'details' ? 'shared' : activeSection === 'outcome' ? 'proposal' : null;
+  function setDetailStep(next: 'shared' | 'proposal' | null) {
+    const destination = next === 'shared' ? 'details' : next === 'proposal' ? 'outcome' : 'overview';
+    if (onNavigate) onNavigate(destination); else setLocalSection(destination);
+  }
   const headerMenu = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
     const outside = (event: PointerEvent) => { if (event.target instanceof Node && headerMenu.current?.open && !headerMenu.current.contains(event.target)) headerMenu.current.open = false; };
     document.addEventListener('pointerdown', outside);
     return () => document.removeEventListener('pointerdown', outside);
   }, []);
-  useEffect(() => { if (detailStep) detailDialog.current?.showModal(); else detailDialog.current?.close(); }, [detailStep]);
   const [structuredDirty, setStructuredDirty] = useState(false);
   const [editingAnswers, setEditingAnswers] = useState(owner?.ownInputReadiness === 'NOT_STARTED');
   const [reviewed, setReviewed] = useState(false);
@@ -230,9 +235,9 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
   </>;
   const continueToProposal = !!proposal || ['READY', 'SUPERSEDED', 'NO_AGREEMENT'].includes(snapshot.status) || !!owner?.pendingQuestions.some(question => question.status === 'PENDING') || !!owner?.disclosurePermissions.some(permission => permission.status === 'PENDING');
   return <>
-    <section className={`ke-card ke-decision-overview ke-response-overview${staged ? ' ke-cohesive-decision-header' : ''}`}>
+    <section hidden={!!detailStep} className={`ke-card ke-decision-overview ke-response-overview${staged ? ' ke-cohesive-decision-header' : ''}`}>
       {staged && <>
-        <h2 id="open-decision-title">{title ?? snapshot.frame.title}</h2>
+        <h1 id="open-decision-title" tabIndex={-1}>{title ?? snapshot.frame.title}</h1>
         <details ref={headerMenu} className="ke-decision-header-menu" onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false; }}
           onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); event.currentTarget.open = false; event.currentTarget.querySelector('summary')?.focus(); } }}>
           <summary aria-label="Decision actions"><PageIcon name="Ellipsis" /></summary>
@@ -266,9 +271,11 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
       {!owner && proposal && <button type="button" onClick={() => setDetailStep('proposal')}>View proposal</button>}
       </div>
     </section>
-    <Modal ref={detailDialog} className={`ke-step-dialog${detailStep === 'proposal' ? ' ke-outcome-dialog' : ''}`} aria-label={detailStep === 'shared' ? 'Decision details' : 'Review proposal and permissions'} onCancel={event => { event.preventDefault(); setDetailStep(null); }}>
-      <button type="button" className={detailStep === 'proposal' ? 'ke-outcome-back' : 'secondary'} onClick={() => setDetailStep(null)}>{detailStep === 'proposal' && <PageIcon name="ArrowLeft" />}Back to overview</button>
-    {detailStep === 'shared' && <section className="ke-card ke-shared-decision"><h2>What we’re deciding</h2><p>{snapshot.frame.description || snapshot.frame.objective}</p>
+    <section hidden={!detailStep} className={`ke-decision-subpage${detailStep === 'proposal' ? ' ke-outcome-page' : ''}`} aria-label={detailStep === 'shared' ? 'Decision details' : 'Review proposal and permissions'}>
+      <a className="ke-workflow-back" href={appViewSearch({ kind: 'decision', decisionId, ...(groupId ? { groupId } : {}) })} onClick={event => {
+        if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) { event.preventDefault(); setDetailStep(null); }
+      }}><PageIcon name="ArrowLeft" />Back to decision</a>
+    {detailStep === 'shared' && <section className="ke-card ke-shared-decision"><h1 tabIndex={-1}>Decision details</h1><p>{snapshot.frame.description || snapshot.frame.objective}</p>
       {snapshot.frame.description && snapshot.frame.description !== snapshot.frame.objective && <details><summary>Original idea and shared details</summary><p className="ke-shared-original">{snapshot.frame.objective}</p></details>}
 
       <h3>Participants</h3>
@@ -281,8 +288,10 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
       {snapshot.frame.rules.length > 0 && <details className="ke-shared-rules"><summary>Group requirements ({snapshot.frame.rules.length})</summary>
         <ul aria-label="Group requirements">{snapshot.frame.rules.map(rule => <li key={rule.id}>{ruleText(rule, snapshot.frame.variables)}</li>)}</ul></details>}
     </section>}
+    {detailStep === 'proposal' && !proposal && <header className="ke-outcome-heading"><h1 tabIndex={-1}>{snapshot.status === 'REASONING' ? 'Finding an outcome' : 'No outcome yet'}</h1>
+      <p>{snapshot.status === 'REASONING' ? 'We’re comparing the saved answers. You can return to this page to check progress.' : 'An outcome will appear here once the group’s answers are ready and a proposal has been prepared.'}</p></header>}
     {detailStep === 'proposal' && proposal && <section className="ke-outcome-result" aria-labelledby="outcome-title">
-      <header className="ke-outcome-heading"><h2 id="outcome-title">{snapshot.status === 'AGREED' ? 'Decision agreed' : 'Proposed outcome'}</h2>
+      <header className="ke-outcome-heading"><h1 id="outcome-title" tabIndex={-1}>{snapshot.status === 'AGREED' ? 'Decision agreed' : 'Proposed outcome'}</h1>
         <p>{snapshot.status === 'AGREED' ? 'All required participants approved this proposal.' : 'Review the choices before giving your approval.'}</p>
       </header>
       <dl className="ke-outcome-choices" aria-label="Selected shared choices">{proposal.facts.values.map(item => {
@@ -344,11 +353,11 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
       </div>)}
     </section>}
     {detailStep === 'proposal' && !proposal && owner && <>{recoveryControls}{notice && <p role="status" className="ke-outcome-notice">{notice}</p>}</>}
-    </Modal>
+    </section>
     {assistantOpen && mcpUrl && <Suspense fallback={<p role="status">Opening assistant…</p>}><AlexaChat decisionId={decisionId} title={title ?? snapshot.frame.title} groupId={groupId} endpoint={mcpUrl} api={api} onClose={() => setAssistantOpen(false)} /></Suspense>}
-    {owner && <PrivateAnswersModal embedded open={true} owner={owner} busy={busy} blocked={answersBlocked} saveBlocked={false} notesLocked={!!interpretationRequest} notes={text} consent={syntheticProcessing} notice={notice} recovery={recoveryControls}
+    {owner && <div hidden={!!detailStep}><PrivateAnswersModal embedded open={true} owner={owner} busy={busy} blocked={answersBlocked} saveBlocked={false} notesLocked={!!interpretationRequest} notes={text} consent={syntheticProcessing} notice={notice} recovery={recoveryControls}
         onClose={() => {}} onNotes={setText} onConsent={setSyntheticProcessing} onInterpret={interpret} onDirty={setStructuredDirty} onEditingChange={setEditingAnswers}
-        onSave={payload => command('CONFIRM_PRIVATE_ANSWERS', payload)} describeValue={valueText} describeCondition={describeCondition} />}
+        onSave={payload => command('CONFIRM_PRIVATE_ANSWERS', payload)} describeValue={valueText} describeCondition={describeCondition} /></div>}
     {!owner && notice && <p role="status">{notice}</p>}
   </>;
 }

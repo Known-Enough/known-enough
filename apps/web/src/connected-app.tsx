@@ -1,4 +1,3 @@
-import { Modal } from './modal';
 import { createDirectCognito } from './cognito-direct';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Groups, KnownEnough as KE } from '@deal-table/contracts';
@@ -6,11 +5,11 @@ import { clearCognitoSession, cognitoApiFetch, cognitoLogoutUrl, finishCognitoSi
   CognitoSignInFailure, type CognitoBrowserConfig, type CognitoSession } from './cognito-session';
 import { AuthEntry } from './auth-entry';
 import { ProfileDrawer } from './profile-drawer';
-import { Brand, LoadingSkeleton, PageIcon, PrivacyBar, ThemeToggle, WelcomeHeading } from './app-chrome';
+import { Brand, LoadingSkeleton, PageIcon, PrivacyBar, ThemeToggle } from './app-chrome';
 import { GroupHome } from './group-home';
 import { ConnectedDecision } from './connected-decision';
 import { backgroundNegotiationAvailable, pollBackgroundDecision, type BackgroundTarget } from './background-negotiation';
-import { readAppView, appViewSearch, saveIntendedView, takeIntendedView, type AppView } from './navigation';
+import { readAppView, appViewSearch, sameAppWorkspace, saveIntendedView, takeIntendedView, type AppView } from './navigation';
 let callbackCompletion: ReturnType<typeof finishCognitoSignIn> | null = null;
 function decisionReadFailure(response: Response): Error & { status: number; reference?: string } {
   const reference = response.headers.get('x-request-id');
@@ -40,36 +39,53 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
   const [decisionTitle, setDecisionTitle] = useState<{ id: string; title: string } | null>(null);
   const [status, setStatus] = useState(''), [busy, setBusy] = useState(false), [background, setBackground] = useState(false);
   const [target, setTarget] = useState<BackgroundTarget | null>(null);
-  const decisionDialog = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const element = decisionDialog.current;
-    if (view.kind !== 'decision' || !session || !element) return;
-    const previous = document.activeElement;
-    if (!element.open) element.showModal();
-    const overflow = document.body.style.overflow; document.body.style.overflow = 'hidden';
-    return () => { element.close(); document.body.style.overflow = overflow; if (previous instanceof HTMLElement && previous.isConnected) previous.focus(); };
-  }, [view.kind, !!session]);
   const epoch = useRef(0), abort = useRef<AbortController | null>(null), dirty = useRef(false);
+  const historyIndex = useRef<number>(Number.isSafeInteger(window.history.state?.kePage) ? window.history.state.kePage : 0);
+  const restoringHistory = useRef(false);
+  useEffect(() => { window.history.replaceState({ ...window.history.state, kePage: historyIndex.current }, '', window.location.href); }, []);
   const selection = useRef({ id: '', token: '' }); selection.current = { id: view.kind === 'decision' ? view.decisionId : '', token: session?.accessToken ?? '' };
-  function move(next: AppView, replace = false) {
-    if (dirty.current && !window.confirm('Leave without saving your changes?')) return;
+  function leaveWorkspace(next: AppView) {
+    if (sameAppWorkspace(view, next)) return true;
+    if (dirty.current && !window.confirm('Leave without saving your changes?')) return false;
     dirty.current = false; epoch.current++; abort.current?.abort(); setSnapshot(null); setOwner(null); setTarget(null); setStatus(''); setBusy(false);
-    window.history[replace ? 'replaceState' : 'pushState'](null, '', window.location.pathname + appViewSearch(next)); setView(next);
+    return true;
+  }
+  function move(next: AppView, replace = false) {
+    if (next.kind === view.kind && appViewSearch(next) === appViewSearch(view)) return;
+    if (!leaveWorkspace(next)) return;
+    if (!replace) historyIndex.current++;
+    window.history[replace ? 'replaceState' : 'pushState']({ kePage: historyIndex.current }, '', window.location.pathname + appViewSearch(next)); setView(next);
   }
   useEffect(() => {
-    const pop = () => {
-      if (dirty.current && !window.confirm('Leave without saving your changes?')) { window.history.pushState(null, '', window.location.pathname + appViewSearch(view)); return; }
-      dirty.current = false; epoch.current++; abort.current?.abort(); setSnapshot(null); setOwner(null); setTarget(null); setBusy(false); setView(readAppView(window.location.search));
+    const pop = (event: PopStateEvent) => {
+      if (restoringHistory.current) { restoringHistory.current = false; return; }
+      const next = readAppView(window.location.search), nextIndex = Number.isSafeInteger(event.state?.kePage) ? event.state.kePage as number : null;
+      if (!leaveWorkspace(next)) {
+        if (nextIndex !== null && nextIndex !== historyIndex.current) { restoringHistory.current = true; window.history.go(historyIndex.current - nextIndex); }
+        else window.history.replaceState({ kePage: historyIndex.current }, '', window.location.pathname + appViewSearch(view));
+        return;
+      }
+      historyIndex.current = nextIndex ?? historyIndex.current;
+      setView(next);
     };
-    window.addEventListener('popstate', pop); return () => window.removeEventListener('popstate', pop);
+    const unload = (event: BeforeUnloadEvent) => { if (dirty.current) { event.preventDefault(); event.returnValue = ''; } };
+    window.addEventListener('popstate', pop); window.addEventListener('beforeunload', unload);
+    return () => { window.removeEventListener('popstate', pop); window.removeEventListener('beforeunload', unload); };
   }, [view]);
+  const selectedDecision = view.kind === 'decision' ? view.decisionId : null;
+  const selectedParent = view.kind === 'decision' ? view.groupId : undefined;
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    const frame = requestAnimationFrame(() => view.kind !== 'creation' && [...document.querySelectorAll<HTMLElement>('.ke-workflow-content h1')].find(heading => heading.getClientRects().length)?.focus({ preventScroll: true }));
+    return () => cancelAnimationFrame(frame);
+  }, [view, snapshot?.frame.decisionId]);
   useLayoutEffect(() => {
     const capture = () => {
       const fragment = new URLSearchParams(window.location.hash.slice(1)), token = fragment.get('groupInvite');
-      if (fragment.has('invite')) { fragment.delete('invite'); window.history.replaceState(null, '', window.location.pathname + window.location.search + (fragment.size ? '#' + fragment.toString() : '')); setStatus('This older invitation is unavailable here. Ask for a current group invitation.'); }
+      if (fragment.has('invite')) { fragment.delete('invite'); window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search + (fragment.size ? '#' + fragment.toString() : '')); setStatus('This older invitation is unavailable here. Ask for a current group invitation.'); }
       if (!token || !/^[A-Za-z0-9_-]{32,80}$/.test(token)) return;
       sessionStorage.setItem('ke-group-invite', JSON.stringify({ token, at: Date.now() })); setInvitationEpoch(value => value + 1); fragment.delete('groupInvite');
-      window.history.replaceState(null, '', window.location.pathname + window.location.search + (fragment.size ? '#' + fragment.toString() : ''));
+      window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search + (fragment.size ? '#' + fragment.toString() : ''));
       if (session) move({ kind: 'groups' });
     };
     capture(); window.addEventListener('hashchange', capture); return () => window.removeEventListener('hashchange', capture);
@@ -141,7 +157,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
   }
   useEffect(() => { let cancelled = false; if (view.kind === 'decision' && session) void Promise.resolve().then(() => { if (!cancelled) void load(false).catch(() => {}); }); else { epoch.current++; abort.current?.abort(); setTarget(null); setSnapshot(null); setOwner(null); setBusy(false); }
     return () => { cancelled = true; epoch.current++; abort.current?.abort(); };
-  }, [view, session]);
+  }, [selectedDecision, selectedParent, session]);
   useEffect(() => {
     if (!target || !session || session.kind !== 'participant') return;
     const controller = new AbortController(), id = target.decisionId, token = session.accessToken; let active = true;
@@ -152,31 +168,33 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     return () => { active = false; controller.abort(); };
   }, [target, session, config, expire]);
   if (!session) return <AuthEntry config={config} direct={direct} onSession={value=>{sessionStorage.setItem('known-enough-cognito-session',JSON.stringify(value));setSession(value);setStatus('');const wanted=takeIntendedView();if(wanted)move(wanted,true);}} notice={status} callbackPending={callbackPending} />;
-  return <main className={view.kind === 'group' ? 'ke-home ke-group-route' : view.kind === 'groups' ? 'ke-home ke-groups-dashboard' : 'ke-home'}>
+  return <main className={view.kind === 'group' ? 'ke-home ke-group-route' : view.kind === 'groups' ? 'ke-home ke-groups-dashboard' : view.kind === 'creation' || view.kind === 'decision' ? 'ke-home ke-workflow-route' : 'ke-home'}>
     <header className="ke-masthead"><Brand onNavigate={() => move({ kind: 'groups' })} /><div className="ke-header-actions">
       <ThemeToggle />
       {session.kind === 'participant' ? <ProfileDrawer key={session.accessToken} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} signOut={signOut} /> : <button type="button" className="secondary" onClick={signOut}>Sign out</button>}
     </div>
     </header>
-    {view.kind !== 'groups' && view.kind !== 'group' && <><WelcomeHeading /><PrivacyBar /></>}
     {view.kind !== 'decision' && status && <p role="status">{status}</p>}
     {view.kind === 'invalid' ? <section className="ke-card"><h2>This link is unavailable</h2><button onClick={() => move({ kind: 'groups' }, true)}>Back to groups</button></section>
-      : view.kind === 'decision' ? <Modal closeButton={false} ref={decisionDialog} className="ke-decision-wizard ke-open-decision-dialog" data-decision-id={snapshot?.frame.decisionId} aria-labelledby="open-decision-title" onCancel={event => { event.preventDefault(); move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' }); }}>
-        <button type="button" className="secondary ke-response-close" aria-label="Close decision" onClick={() => move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' })}><PageIcon name="X" /></button>
+      : view.kind === 'decision' ? <div className="ke-workflow-content ke-decision-page" data-decision-id={snapshot?.frame.decisionId}>
+        {(!view.section || view.section === 'overview') && <a className="ke-workflow-back" href={appViewSearch(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' }) || '/'} onClick={event => {
+          if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) { event.preventDefault(); move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' }); }
+        }}><PageIcon name="ArrowLeft" />{view.groupId ? 'Back to group' : 'All groups'}</a>}
         {!snapshot && <section className="ke-response-header" aria-busy={busy || !status}>
-          <h2 id="open-decision-title">Your decision</h2>
+          <h1 id="open-decision-title" tabIndex={-1}>Your decision</h1>
           {!status && <LoadingSkeleton kind="decision" label="Loading current decision" />}
           {status && <><p role="status">{status}</p><button type="button" disabled={busy} aria-label="Refresh decision" onClick={() => { if (dirty.current && !window.confirm('Refresh and discard your unsaved changes?')) return; dirty.current = false; void load().catch(() => {}); }}>Try again</button></>}
         </section>}
         {snapshot && <div className="ke-load-reveal"><ConnectedDecision key={`${session.accessToken}:${snapshot.contextToken}`}
-          snapshot={snapshot} owner={owner} backgroundNegotiation={background} staged
+          snapshot={snapshot} owner={owner} backgroundNegotiation={background} staged section={view.section ?? 'overview'} onNavigate={section => move({ ...view, section })}
           mcpUrl={config.apiBaseUrl + '/mcp'} {...(view.groupId ? { groupId: view.groupId } : {})} title={decisionTitle?.id === snapshot.frame.decisionId ? decisionTitle.title : snapshot.frame.title} refreshing={busy}
           onRefresh={() => { if (dirty.current && !window.confirm('Refresh and discard your unsaved changes?')) return; dirty.current = false; void load().catch(() => {}); }} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} refresh={async () => { dirty.current = false; await load(); }}
           onDirtyChange={value => { dirty.current = value; }} onQueued={receipt => { if (!owner) return; setTarget({ decisionId: snapshot.frame.decisionId, contextToken: snapshot.contextToken, semanticVersion: snapshot.semanticVersion, ownerParticipantId: owner.ownerParticipantId, expiresAt: receipt.expiresAt }); }} /></div>}
-      </Modal> : session.kind === 'display' ? <section className="ke-card"><h2>Shared screen</h2><p>Open a decision link from your group to show its progress. To answer or approve, sign in with your own account.</p></section>
-        : <GroupHome preferencesKey={groupPreferencesKey} key={`${session.accessToken}:${view.kind === 'group' ? view.groupId : 'home'}:${invitationEpoch}`} {...(view.kind === 'group' ? { selectedGroupId: view.groupId } : {})}
+      </div> : session.kind === 'display' ? <section className="ke-card"><h2>Shared screen</h2><p>Open a decision link from your group to show its progress. To answer or approve, sign in with your own account.</p></section>
+        : <GroupHome preferencesKey={groupPreferencesKey} key={`${session.accessToken}:${view.kind === 'group' || view.kind === 'creation' ? view.groupId : 'home'}:${invitationEpoch}`} {...(view.kind === 'group' || view.kind === 'creation' ? { selectedGroupId: view.groupId } : {})}
+          {...(view.kind === 'creation' ? { creationStep: view.step } : {})} onOpenCreation={(step, replace) => { if (view.kind === 'group' || view.kind === 'creation') move({ kind: 'creation', groupId: view.groupId, step }, replace); }} onCloseCreation={() => { if (view.kind === 'creation') move({ kind: 'group', groupId: view.groupId }); }}
           api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} onOpenGroup={id => move({ kind: 'group', groupId: id })} onBack={() => move({ kind: 'groups' })} onDirtyChange={value => { dirty.current = value; }}
-          openDecision={id => move({ kind: 'decision', decisionId: id, ...(view.kind === 'group' ? { groupId: view.groupId } : {}) })} />}
-    {(view.kind === 'groups' || view.kind === 'group') && <footer className="ke-dashboard-privacy"><PrivacyBar /></footer>}
+          openDecision={id => move({ kind: 'decision', decisionId: id, ...(view.kind === 'group' || view.kind === 'creation' ? { groupId: view.groupId } : {}) })} />}
+    {view.kind !== 'creation' && <footer className="ke-dashboard-privacy"><PrivacyBar /></footer>}
   </main>;
 }

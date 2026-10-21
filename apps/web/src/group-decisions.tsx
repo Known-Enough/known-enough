@@ -5,11 +5,12 @@ import { addSuggestedOption, emptyChoicePlan, suggestedChoices, type CreationSug
 import { CreationSuggestions } from './creation-suggestions';
 import { DecisionGuide } from './decision-guide';
 import { RenameAction } from './rename-action';
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChoicePlan, compileChoicePlan, Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { ruleText, variableText, valueText } from './connected-decision';
 import { readDraftRequest,saveDraftRequest,draftFailureMessage } from './draft-request-state';
 import { PageIcon } from './app-chrome';
+import { appViewSearch, type CreationStep } from './navigation';
 class UserFlowError extends Error { constructor(message: string, readonly status?: number) { super(message); } }
 function guidanceText(value: string) { return value.normalize('NFKC').toLocaleLowerCase('en-US').replace(/[^\p{L}\p{N}]+/gu, ' ').trim(); }
 function savedPublicAnswer(draft: Groups.GroupDraft | null, question: string): string | undefined {
@@ -57,7 +58,7 @@ function DecisionRow({ decision, status, organizer, busy, onOpen, onReview, onRe
     </div>}
   </article>;
 }
-export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange }: { group: Groups.GroupSnapshot;
+export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange, creationStep, onOpenCreation, onCloseCreation }: { creationStep?: CreationStep; onOpenCreation?: (step: CreationStep, replace?: boolean) => void; onCloseCreation?: () => void; group: Groups.GroupSnapshot;
   api: (path: string, init?: RequestInit) => Promise<Response>; reload: () => Promise<void>; openDecision: (id: string) => void; startCollapsed?: boolean; onDirtyChange?: (dirty: boolean) => void }) {
   const [listStatuses, setListStatuses] = useState<Record<string, DecisionListStatus>>({});
   const statusApi = useRef(api); statusApi.current = api;
@@ -84,11 +85,16 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
   const [showExample, setShowExample] = useState(false);
   const exampleTrigger = useRef<HTMLButtonElement>(null);
   const returnFromExample = () => { setShowExample(false); requestAnimationFrame(() => exampleTrigger.current?.focus()); };
-  const [starting, setStarting] = useState(false);
-  const [step, setStep] = useState<'describe' | 'options'>('describe');
+  const [localStarting, setStarting] = useState(false);
+  const [localStep, setLocalStep] = useState<CreationStep>('describe');
+  const starting = creationStep !== undefined || localStarting;
+  const step = creationStep ?? localStep;
+  function setStep(next: CreationStep) { setLocalStep(next); if (creationStep) onOpenCreation?.(next); }
+  function showWizard(next: CreationStep) {
+    setLocalStep(next);
+    if (onOpenCreation) onOpenCreation(next); else setStarting(true);
+  }
   const [aiWorking, setAiWorking] = useState(false);
-  const dialog = useRef<HTMLDialogElement>(null);
-  const wizardBody = useRef<HTMLDivElement>(null);
   const launcher = useRef<HTMLButtonElement>(null);
   const deleteDialog = useRef<HTMLDialogElement>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ kind: 'DRAFT' | 'DECISION'; id: string; title: string } | null>(null);
@@ -113,7 +119,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
   const [choicePlan, setChoicePlan] = useState<ChoicePlan | null>(() => {
     try { const cached = JSON.parse(sessionStorage.getItem(editorKey) ?? 'null'); const parsed = ChoicePlan.safeParse(cached?.plan ?? cached); return parsed.success ? parsed.data : null; } catch { return null; }
   });
-  const [choiceMode, setChoiceMode] = useState(false), [choiceSaved, setChoiceSaved] = useState(false);
+  const [choiceMode, setChoiceMode] = useState(() => !!choicePlan), [choiceSaved, setChoiceSaved] = useState(false);
   const [choiceDraft, setChoiceDraft] = useState<Groups.GroupDraft | null>(() => {
     try { const parsed = Groups.GroupDraft.safeParse(JSON.parse(sessionStorage.getItem(editorKey) ?? 'null')?.draft);
       return parsed.success && !parsed.data.createdDecisionId && !parsed.data.deleted ? parsed.data : null; } catch { return null; }
@@ -140,7 +146,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
     editorVersion.current++;
     if (!choicePlan && draft?.choicePlan) { setChoicePlan(draft.choicePlan); setChoiceDraft(draft); setChoiceSaved(true); }
     else if (!choicePlan) setChoicePlan(emptyChoicePlan(objective));
-    setChoiceMode(true); setStep('options'); setStarting(true);
+    setChoiceMode(true); showWizard('options');
   }
   async function saveChoices() {
     if (choiceConflict) throw new UserFlowError('Choose whether to load the saved version or keep your edits before saving.');
@@ -217,26 +223,21 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
       return saved.success && !saved.data.choicePlan && !saved.data.deleted && !saved.data.createdDecisionId ? saved.data : null;
     } catch { return null; }
   });
+  const [locallySaved, setLocallySaved] = useState(false);
   useEffect(() => {
     try {
       if (choicePlan || objective || aiReview || draft) sessionStorage.setItem(editorKey, JSON.stringify({ plan: choicePlan, objective, draft: choiceDraft, suggestion: aiReview, legacyDraft: draft && !draft.choicePlan ? draft : null }));
       else sessionStorage.removeItem(editorKey);
-    } catch { /* Keep in-memory work when browser storage is unavailable. */ }
+      setLocallySaved(true);
+    } catch { setLocallySaved(false); /* Keep in-memory work when browser storage is unavailable. */ }
   }, [choicePlan, objective, choiceDraft, aiReview, draft, editorKey]);
   const draftHeading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     if (!starting) return;
-    wizardBody.current?.scrollTo({ top: 0 });
-    if (dialog.current?.open) { if (step === 'describe') objectiveInput.current?.focus({ preventScroll: true }); else draftHeading.current?.focus({ preventScroll: true }); }
-  }, [starting, step, choiceMode]);
-  useEffect(() => {
-    const element = dialog.current;
-    if (starting && group.isOrganizer) { if (element && !element.open) element.showModal(); if (step === 'describe') objectiveInput.current?.focus(); else draftHeading.current?.focus(); }
-    else element?.close();
-    if (!starting || !group.isOrganizer) return;
-    const prior = document.body.style.overflow; document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = prior; };
-  }, [starting, group.isOrganizer]);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    if (step === 'describe') objectiveInput.current?.focus({ preventScroll: true });
+    else draftHeading.current?.focus({ preventScroll: true });
+  }, [starting, step]);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const answersByQuestion = useRef<Record<string, string>>({});
   useEffect(() => { setAnswers(Object.fromEntries((draft?.clarificationQuestions ?? []).map((question, index) => [index, answersByQuestion.current[question] ?? savedPublicAnswer(draft, question) ?? '']))); }, [draft?.id]);
@@ -408,32 +409,21 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
   }
   function closeWizard() {
     if (busyGuard.current) return;
-    if (dirty && !window.confirm('Close this draft? You can return to any version you’ve saved.')) return;
-    dialog.current?.close(); setStarting(false); launcher.current?.focus();
-  }
-  function keepWizardFocus(event: KeyboardEvent<HTMLDialogElement>) {
-    if (event.key !== 'Tab') return;
-    const element = event.currentTarget;
-    const controls = [...element.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href], summary, [tabindex]:not([tabindex="-1"])')]
-      .filter(control => control.getClientRects().length > 0 && !control.closest('[hidden]') && getComputedStyle(control).visibility !== 'hidden');
-    const first = controls[0], last = controls.at(-1), active = document.activeElement;
-    if (!first || !last) { event.preventDefault(); draftHeading.current?.focus(); return; }
-    if (!controls.includes(active as HTMLElement) || event.shiftKey && active === first || !event.shiftKey && active === last) {
-      event.preventDefault(); (event.shiftKey ? last : first).focus();
-    }
+    if (onCloseCreation) { onCloseCreation(); return; }
+    if (dirty && !window.confirm('Leave this draft? Your description and choices are kept on this browser.')) return;
+    setStarting(false); launcher.current?.focus();
   }
   function startWizard() {
-    setStep(draft || choicePlan ? 'options' : 'describe');
     if (choicePlan) setChoiceMode(true);
-    setStarting(true);
+    showWizard(draft || choicePlan ? 'options' : 'describe');
   }
   async function loadDraft(id: string) {
     if (dirty && !window.confirm('Open this saved draft and replace the unsaved edits in this window?')) return;
     const result = await request(`drafts/${id}`), saved = Groups.GroupDraft.parse(result.draft);
-    setDraft(saved); setObjective(saved.frame.objective); setStep('options');
+    setDraft(saved); setObjective(saved.frame.objective);
     if (saved.choicePlan) { setChoicePlan(saved.choicePlan); setChoiceDraft(saved); setChoiceSaved(true); setChoiceMode(true); }
     else { setChoicePlan(null); setChoiceDraft(null); setChoiceMode(false); setChoiceSaved(false); }
-    setChoiceConflict(null); setDirty(false); setRoster(null); setReviewed(false); setStarting(true);
+    setChoiceConflict(null); setDirty(false); setRoster(null); setReviewed(false); showWizard('options');
   }
   async function deleteItem() {
     if (!deleteTarget || !group.isOrganizer) return;
@@ -469,10 +459,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
             </details>;
   const lookupRecovery = !requestLookupAvailable && !checkingRequest && !pendingKey && (helpOpen || step === 'options') && <p className="ke-creation-hint">Suggestions are temporarily unavailable. You can add your own options. <button type="button" className="ke-text-link" disabled={busy} onClick={() => { setCheckingRequest(true); setRecoveryGeneration(value => value + 1); }}>Check again</button></p>;
   function revealAssistance() {
-    const container = wizardBody.current, panel = assistancePanel.current;
-    if (!container || !panel) return;
-    const top = panel.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop - 12;
-    container.scrollTo({ top: Math.max(0, top), behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    assistancePanel.current?.scrollIntoView({ block: 'nearest', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   }
   function closeAssistance(discard = false) {
     setHelpOpen(false);
@@ -507,7 +494,14 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
     });
     return () => cancelAnimationFrame(frame);
   }, [helpFeedback, busy, pendingKey, starting, step, helpOpen]);
-  return <section className="ke-card ke-group-panel ke-decisions-panel" aria-busy={busy} aria-labelledby={`decisions-heading-${group.id}`}>
+  useEffect(() => {
+    if (creationStep === 'options' && !objective.trim()) onOpenCreation?.('describe', true);
+    else if (creationStep === 'options' && !choicePlan && !(draft && !draft.choicePlan)) {
+      setChoicePlan(emptyChoicePlan(objective)); setChoiceMode(true);
+    }
+  }, [creationStep, objective, choicePlan, draft, onOpenCreation]);
+  return <section className={starting ? 'ke-workflow-content ke-creation-page-container' : 'ke-card ke-group-panel ke-decisions-panel'} aria-busy={busy} aria-labelledby={starting ? `decision-wizard-title-${group.id}` : `decisions-heading-${group.id}`}>
+    {!starting && <>
     <header className="ke-panel-heading"><div><h2 id={`decisions-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="ListChecks" /></span><span>Decisions</span></h2>
       <p className="ke-panel-subtitle">Choose an option that works for your group.</p></div>
       {group.isOrganizer && (group.decisions.length > 0 || group.drafts.length > 0 || pendingKey)
@@ -537,6 +531,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
         </div>
       </div>)}
     </div>}
+    </>}
     {group.isOrganizer && <Modal ref={deleteDialog} className="ke-delete-dialog" aria-labelledby={`delete-title-${group.id}`}
       aria-describedby={`delete-description-${group.id}`} onCancel={event => { event.preventDefault(); if (!busyGuard.current) setDeleteTarget(null); }}>
       <h2 id={`delete-title-${group.id}`}>Delete {deleteTarget?.kind === 'DRAFT' ? 'draft' : 'decision'}?</h2>
@@ -550,19 +545,21 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
       </div>
       {notice && <p role="status">{notice}</p>}
     </Modal>}
-    {group.isOrganizer && <Modal closeButton={false} ref={dialog} className="ke-decision-wizard ke-create-decision-dialog ke-creation-v2" aria-labelledby={`decision-wizard-title-${group.id}`}
-      aria-describedby={`decision-wizard-subtitle-${group.id}`} onKeyDown={keepWizardFocus} onCancel={event => { event.preventDefault(); closeWizard(); }}>
+    {starting && group.isOrganizer && <section className="ke-creation-v2 ke-creation-page" aria-labelledby={`decision-wizard-title-${group.id}`} aria-describedby={`decision-wizard-subtitle-${group.id}`}>
+      <a className="ke-workflow-back" href={appViewSearch({ kind: 'group', groupId: group.id })} onClick={event => {
+        if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) { event.preventDefault(); closeWizard(); }
+      }}><PageIcon name="ArrowLeft" />Back to group</a>
       <div className="ke-wizard-shell">
         <header className="ke-wizard-header"><div><span className="ke-wizard-eyebrow">New decision</span>
-          <h2 id={`decision-wizard-title-${group.id}`} ref={draftHeading} tabIndex={-1}>{showExample ? 'A decision, step by step' : step === 'describe' ? 'What are we deciding?' : 'Review your options'}</h2>
+          <h1 id={`decision-wizard-title-${group.id}`} ref={draftHeading} tabIndex={-1}>{showExample ? 'A decision, step by step' : step === 'describe' ? 'What are we deciding?' : 'Review your options'}</h1>
           <p id={`decision-wizard-subtitle-${group.id}`} className="ke-creation-subtitle">{step === 'describe' ? 'Describe the decision in your own words. Include any options you’re already considering.' : 'Add, remove, or adjust the options your group will consider.'}</p></div>
-          <button type="button" className="secondary ke-wizard-close" aria-label="Close new decision" disabled={busy} onClick={closeWizard}><PageIcon name="X" /></button>
+          {(objective.trim() || choicePlan) && <span className="ke-page-draft-state" role="status"><PageIcon name="Check" />{choiceSaved && !dirty ? 'Draft saved' : locallySaved ? 'Kept on this browser' : 'Not saved on this browser'}</span>}
         </header>
         <nav className="ke-creation-stepper" aria-label="Decision creation steps">
           <button type="button" disabled={busy && !aiWorking} aria-current={step === 'describe' ? 'step' : undefined} onClick={() => { setShowExample(false); setStep('describe'); }}>1. Describe</button>
           <PageIcon name="ArrowRight" /><button type="button" disabled={!objective.trim() || busy && !aiWorking} aria-current={step === 'options' ? 'step' : undefined} onClick={() => { setShowExample(false); continueToOptions(); }}>2. Options</button>
         </nav>
-        <div ref={wizardBody} className="ke-wizard-body" aria-busy={busy && !aiWorking}>
+        <div className="ke-wizard-body" aria-busy={busy && !aiWorking}>
           {showExample && <DecisionGuide onReturn={returnFromExample} />}
           <div className="ke-creation-form" hidden={showExample}>
             {step === 'describe' && <section className="ke-creation-describe" aria-label="Decision description">
@@ -581,7 +578,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
                   <button type="button" className="ke-text-link" onClick={() => closeAssistance(true)}>Cancel</button></>
                   : descriptionReview ? <CreationSuggestions key={descriptionReview.draft.id} review={descriptionReview} plan={choicePlan ?? emptyChoicePlan(objective)} busy={busy}
                     onChange={setAiReview} onAdd={acceptOption} onDismiss={() => closeAssistance(true)}
-                    onUseDescription={() => { changeDescription(descriptionReview.description); setAiReview(null); setHelpOpen(false); setHelpGoal(''); setHelpFeedback('idle'); requestAnimationFrame(() => { objectiveInput.current?.focus({ preventScroll: true }); wizardBody.current?.scrollTo({ top: 0, behavior: 'auto' }); }); }}
+                    onUseDescription={() => { changeDescription(descriptionReview.description); setAiReview(null); setHelpOpen(false); setHelpGoal(''); setHelpFeedback('idle'); requestAnimationFrame(() => { objectiveInput.current?.focus({ preventScroll: true }); objectiveInput.current?.scrollIntoView({ block: 'center', behavior: 'auto' }); }); }}
                     onRetry={() => askForHelp('description', descriptionSource)} retryDisabled={descriptionBlocked}
                     onUseLegacyDraft={() => {}} onFollowUp={updateSuggestions} />
                   : <>
@@ -649,8 +646,8 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
             : <button type="button" className="ke-icon-action ke-creation-primary" disabled={busy || !!choiceConflict || (choiceMode ? !choicePlan || !!compileChoicePlan(choicePlan).questions.length : !draft || !!draft.clarificationQuestions.length)} onClick={() => void action(choiceMode ? createChoices : createLegacyDraft)}>{busy && !aiWorking ? 'Creating…' : 'Create decision'}<PageIcon name="ArrowRight" /></button>}
         </footer>}
       </div>
-    </Modal>}
-    {roster && <div className="local-note"><h4>Update who is taking part</h4><p>{roster.frame.objective}</p>
+    </section>}
+    {!starting && roster && <div className="local-note"><h4>Update who is taking part</h4><p>{roster.frame.objective}</p>
       <p>New members add their own answers. Finished decisions keep their original participants and outcome. Check who is taking part after removing someone or changing the options.</p>
       <ul>{roster.participants.map(member => <li key={member.id}>{member.displayName}</li>)}</ul>
       {roster.frame.variables.map(variable => <p key={variable.id}>{variableText(variable, roster.frame)}</p>)}
@@ -662,6 +659,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
         const snapshot = KE.PublicDecisionSnapshot.parse(result.snapshot); setRoster(null); setReviewed(false); await reload(); openDecision(snapshot.frame.decisionId);
       })}>Save participants</button>
     </div>}
+    {starting && !group.isOrganizer && <section><h1 id={`decision-wizard-title-${group.id}`} tabIndex={-1}>New decision</h1><p>Only the group organizer can start a decision.</p><button type="button" onClick={closeWizard}>Back to group</button></section>}
     {!starting && !busy && notice && <p className="ke-wizard-help" role="status">{notice}</p>}
   </section>;
 }

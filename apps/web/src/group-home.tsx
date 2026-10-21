@@ -4,6 +4,7 @@ import { GroupMembers } from './group-members';
 import { RenameAction } from './rename-action';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GroupDecisions } from './group-decisions';
+import { type CreationStep } from './navigation';
 import { Groups } from '@deal-table/contracts';
 import { GroupIcon, LoadingSkeleton, PageIcon } from './app-chrome';
 import { ProfileModal, type ProfileTarget } from './profile-drawer';
@@ -13,7 +14,7 @@ function groupPage(value: { groups?: unknown[]; cursor?: unknown }) {
     || (value.cursor != null && (typeof value.cursor !== 'string' || !/^[A-Za-z0-9_-]{40,1600}$/.test(value.cursor)))) throw new Error('Invalid groups response');
   return { groups: value.groups.map(group => Groups.GroupSnapshot.parse(group)), cursor: typeof value.cursor === 'string' ? value.cursor : null };
 }
-export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, onOpenGroup, onBack, onDirtyChange }: { api: (path: string, init?: RequestInit) => Promise<Response>; preferencesKey?: string | undefined;
+export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, onOpenGroup, onBack, onDirtyChange, creationStep, onOpenCreation, onCloseCreation }: { creationStep?: CreationStep; onOpenCreation?: (step: CreationStep, replace?: boolean) => void; onCloseCreation?: () => void; api: (path: string, init?: RequestInit) => Promise<Response>; preferencesKey?: string | undefined;
   openDecision: (id: string) => void; selectedGroupId?: string; onOpenGroup: (id: string) => void; onBack: () => void; onDirtyChange?: (dirty: boolean) => void }) {
   const [childDirty, setChildDirty] = useState(false);
   const [inlineNameDirty, setInlineNameDirty] = useState(false);
@@ -126,7 +127,7 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
     const value = fragment.get('groupInvite');
     if (value && /^[A-Za-z0-9_-]{32,80}$/.test(value)) {
       sessionStorage.setItem('ke-group-invite', JSON.stringify({ token: value, at: Date.now() }));
-      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search);
     }
     try { const stored = JSON.parse(sessionStorage.getItem('ke-group-invite') ?? 'null');
       if (stored && typeof stored.token === 'string' && /^[A-Za-z0-9_-]{32,80}$/.test(stored.token)
@@ -140,7 +141,7 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
       if (!value || !/^[A-Za-z0-9_-]{32,80}$/.test(value)) return;
       sessionStorage.setItem('ke-group-invite', JSON.stringify({ token: value, at: Date.now() }));
       setToken(value);
-      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search);
     };
     window.addEventListener('hashchange', capture);
     return () => window.removeEventListener('hashchange', capture);
@@ -428,7 +429,7 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
       {selectedGroupId && groups.map(group => {
         const organizer = group.members.find(member => member.isOrganizer);
         return <div className="ke-group-detail-stack" key={group.id}>
-          <section className="ke-group-overview" aria-label="Group overview">
+          <section hidden={creationStep !== undefined} className="ke-group-overview" aria-label="Group overview">
             <nav className="ke-group-overview-actions" aria-label="Group navigation">
               <a href="/" className="ke-group-back-link" onClick={event => { if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onBack(); } }}><PageIcon name="ArrowLeft" />All groups</a>
               <button type="button" className="secondary ke-group-refresh" aria-label="Refresh group" title="Refresh group" onClick={() => void load()}><PageIcon name="RefreshCw" /></button>
@@ -447,17 +448,17 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
           </section>
 
           <div className="ke-group-panels">
-            <GroupMembers key={group.id} group={group} api={api} revision={avatarRevision} busy={busy}
+            <div hidden={creationStep !== undefined}><GroupMembers key={group.id} group={group} api={api} revision={avatarRevision} busy={busy}
               onProfile={(memberId, trigger) => { profileTriggerRef.current = trigger; setProfileTarget({ kind: 'member', groupId: group.id, memberId }); }}
               onRemove={memberId => {
                 if (group.isOrganizer && group.members.some(member => member.id === memberId && !member.isOrganizer)) {
                   void action(`/groups/${group.id}/remove`, { memberId, version: group.version });
                 }
-              }} />
+              }} /></div>
 
-            <GroupDecisions group={group} api={api} reload={load} openDecision={openDecision} onDirtyChange={reportChildDirty} startCollapsed />
+            <GroupDecisions group={group} api={api} reload={load} openDecision={openDecision} onDirtyChange={reportChildDirty} startCollapsed {...(creationStep ? { creationStep } : {})} {...(onOpenCreation ? { onOpenCreation } : {})} {...(onCloseCreation ? { onCloseCreation } : {})} />
 
-            {group.isOrganizer && <section className="ke-card ke-group-panel ke-invitations-panel" aria-labelledby={`invitations-heading-${group.id}`}>
+            {group.isOrganizer && <section hidden={creationStep !== undefined} className="ke-card ke-group-panel ke-invitations-panel" aria-labelledby={`invitations-heading-${group.id}`}>
               <header className="ke-panel-heading"><div><h2 id={`invitations-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="Mail" /></span><span>Invite someone</span></h2>
                 <p className="ke-panel-subtitle">Use their Known Enough username or verified email. They’ll see the invitation in the app.</p></div></header>
               <div className="ke-invitation-form">
