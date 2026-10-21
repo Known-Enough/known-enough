@@ -277,24 +277,40 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 .ke-empty-state p { max-width: 400px; margin: 0; color: #5f7166; font-size: 13px; line-height: 1.55; }
 .ke-group-list { margin: 0; padding: 0; overflow: visible; list-style: none; border: 1px solid #dfe6de; border-radius: 14px; background: #fff; box-shadow: 0 4px 16px #173c3006; }
 .ke-group-sections { display: grid; gap: 20px; }
-.ke-dashboard-invitations { margin: 0; padding: 0; }
-.ke-invitations-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 6px; }
+.ke-dashboard-invitations { margin: 0; padding: 18px; border: 1px solid #dfe6de; border-radius: 14px; background: #fff; }
+.ke-dashboard-invitations[data-collapsed="true"] { padding-block: 12px; }
+.ke-dashboard-invitations[data-collapsed="true"] .ke-invitations-heading { margin-bottom: 0; }
+.ke-invitations-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
 .ke-invitations-heading h2 { display: flex; align-items: center; gap: 8px; margin: 0; color: #173c30; font-size: 17px; font-weight: 600; }
 .ke-invitations-heading .ke-count-badge { min-width: 22px; height: 22px; padding: 0 6px; font-size: 11px; }
-.ke-invitation-about { max-width: 440px; color: #65766b; font-size: 12px; }
-.ke-invitation-about summary { cursor: pointer; }
-.ke-invitation-about p { margin: 6px 0 0; line-height: 1.5; }
+.ke-group-home button.ke-invitations-disclosure { display: inline-flex; align-items: center; gap: 8px; min-height: 30px; margin: 0; padding: 2px 4px; border: 0; border-radius: 6px; background: transparent; color: inherit; font-size: inherit; font-weight: inherit; }
+.ke-group-home button.ke-invitations-disclosure:hover { background: #f3f6f2; }
+.ke-invitations-disclosure > svg { width: 16px; height: 16px; color: #65766b; }
+.ke-invitations-disclosure[aria-expanded="true"] > svg { transform: rotate(90deg); }
+.ke-invitation-about { position: relative; flex: none; color: #65766b; font-size: 12px; }
+.ke-invitation-about summary { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; list-style: none; cursor: pointer; }
+.ke-invitation-about summary::-webkit-details-marker { display: none; }
+.ke-invitation-about summary:hover { color: #173c30; background: #f3f6f2; }
+.ke-invitation-about summary:focus-visible { outline: 2px solid #71927c; outline-offset: 2px; }
+.ke-invitation-about summary svg { width: 17px; height: 17px; }
+.ke-invitation-about p { position: absolute; top: calc(100% + 6px); right: 0; z-index: 6; width: min(300px, calc(100vw - 64px)); margin: 0; padding: 12px; border: 1px solid #dfe6de; border-radius: 10px; background: #fff; box-shadow: 0 6px 20px #173c3012; line-height: 1.5; }
 .ke-pending-invitations { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
-.ke-pending-invitations li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid #e8ede7; }
+.ke-pending-invitations li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid #e8ede7; border-radius: 6px; transition: background .15s; }
+.ke-pending-invitations li:hover, .ke-pending-invitations li:focus-within { background: #f8faf6; }
 .ke-pending-invitations .ke-group-row-icon { width: 34px; height: 34px; border-radius: 10px; }
 .ke-invitation-copy { display: grid; flex: 1; gap: 3px; min-width: 0; }
 .ke-invitation-copy strong { color: #294a3d; font-size: 14px; overflow-wrap: anywhere; }
 .ke-invitation-copy span, .ke-invitation-copy small { color: #65766b; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
 .ke-invitation-row-actions { display: flex; flex: none; align-items: center; gap: 8px; }
 .ke-group-home .ke-invitation-row-actions button { min-height: 34px; margin: 0; padding: 6px 12px; border-radius: 8px; font-size: 13px; }
+.ke-group-home .ke-invitation-row-actions .ke-invitation-not-now { border-color: transparent; background: transparent; color: #52685a; }
+.ke-group-home .ke-invitation-row-actions .ke-invitation-not-now:hover { background: #edf2eb; color: #173c30; }
+.ke-group-home button.ke-invitations-later { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; margin: 4px 0 0; padding: 5px 7px; border: 0; background: transparent; color: #52685a; font-size: 12px; }
+.ke-invitations-later svg { width: 14px; height: 14px; }
 .ke-invitation-feedback { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 8px 0; color: #5f7166; font-size: 13px; }
 .ke-invitation-feedback p { flex: 1; min-width: 180px; margin: 0; line-height: 1.5; }
-@media (max-width: 560px) { .ke-pending-invitations li { flex-wrap: wrap; } .ke-invitation-copy { flex-basis: calc(100% - 48px); } .ke-invitation-row-actions { margin-left: auto; } }
+@media (max-width: 640px) { .ke-dashboard-invitations { padding-inline: 16px; } .ke-pending-invitations li { flex-wrap: wrap; } .ke-invitation-copy { flex-basis: calc(100% - 48px); } .ke-invitation-row-actions { margin-left: auto; } }
+@media (prefers-reduced-motion: reduce) { .ke-pending-invitations li { transition: none; } }
 .ke-group-section { display: grid; gap: 8px; min-width: 0; }
 .ke-group-section > h3 { margin: 0; color: #52685a; font-size: 13px; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; }
 .ke-group-row { position: relative; z-index: 0; display: flex; align-items: center; gap: 10px; min-width: 0; padding: 8px 12px 8px 16px; background: transparent; transition: background .15s ease; }
@@ -654,6 +670,17 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 :root[data-theme="dark"] .ke-pending-invitations li small,
 :root[data-theme="dark"] .ke-invitation-about,
 :root[data-theme="dark"] .ke-invitation-feedback { color: var(--ke-dark-muted); }
+:root[data-theme="dark"] .ke-group-home button.ke-invitations-disclosure { color: var(--ke-dark-text); background: transparent; }
+:root[data-theme="dark"] .ke-group-home button.ke-invitations-disclosure:hover,
+:root[data-theme="dark"] .ke-invitation-about summary:hover,
+:root[data-theme="dark"] .ke-pending-invitations li:hover,
+:root[data-theme="dark"] .ke-pending-invitations li:focus-within { color: var(--ke-dark-text); background: var(--ke-dark-hover-surface); }
+:root[data-theme="dark"] .ke-invitations-disclosure > svg { color: var(--ke-dark-muted); }
+:root[data-theme="dark"] .ke-invitation-about p { color: var(--ke-dark-text); background: var(--ke-dark-raised); border-color: var(--ke-dark-border); box-shadow: 0 6px 20px #0003; }
+:root[data-theme="dark"] .ke-group-home .ke-invitation-row-actions .ke-invitation-not-now,
+:root[data-theme="dark"] .ke-group-home button.ke-invitations-later { color: var(--ke-dark-muted); background: transparent; }
+:root[data-theme="dark"] .ke-group-home .ke-invitation-row-actions .ke-invitation-not-now:hover,
+:root[data-theme="dark"] .ke-group-home button.ke-invitations-later:hover { color: var(--ke-dark-text); background: var(--ke-dark-hover-surface); }
 :root[data-theme="dark"] .ke-group-home .ke-empty-state p,
 :root[data-theme="dark"] .ke-group-home .ke-create-group-form label { color: var(--ke-dark-muted); }
 :root[data-theme="dark"] .ke-group-list { border-color: var(--ke-dark-border); background: var(--ke-dark-surface); box-shadow: 0 5px 18px #0003; }
@@ -1927,7 +1954,6 @@ dialog[data-standard-close] h2 { padding-right: 30px; }
 .ke-groups-dashboard .ke-group-row-name { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; }
 .ke-groups-dashboard .ke-group-row-meta { flex: none; min-width: 142px; font-size: 12px; }
 .ke-groups-dashboard .ke-group-row-open > .ke-group-action-chip { max-width: 34%; font-size: 11px; }
-.ke-groups-dashboard .ke-dashboard-invitations { margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 .ke-groups-dashboard .ke-dashboard-privacy { margin-top: 30px; }
 .ke-home.ke-groups-dashboard .ke-dashboard-privacy .ke-privacy-bar { margin: 0; border: 0; border-top: 1px solid #dfe5dc; border-radius: 0; background: transparent; box-shadow: none; font-size: 12px; }
 .ke-groups-dashboard .ke-dashboard-privacy .ke-privacy-bar summary { justify-content: flex-start; gap: 12px; padding: 14px 0; color: #64766a; font-weight: 500; }
