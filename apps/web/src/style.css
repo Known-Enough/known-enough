@@ -2224,3 +2224,8 @@ dialog[data-standard-close] h2 { padding-right: 30px; }
   .ke-home .ke-options-step-two button.ke-topic-remove { width: 40px; height: 44px; margin-bottom: 0; }
   .ke-topic-settings summary { min-height: 44px; padding-block: 13px; }
 }
+
+/* Starting a decision is separate from explicitly resuming a draft. */
+.ke-decision-create-actions { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.ke-decision-create-actions > button { margin: 0; }
+@media (max-width: 650px) { .ke-decision-create-actions { justify-content: flex-start; } }

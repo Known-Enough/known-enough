@@ -158,8 +158,13 @@ test('creation pages restore drafts across steps, refresh and browser Back/Forwa
   await expect(page.getByLabel('Option 1 for Options', { exact: true })).toHaveValue('Coast');
   await page.getByRole('link', { name: 'Back to group', exact: true }).click();
   await expect(page).toHaveURL(/\?group=garden$/);
-  await page.getByRole('button', { name: 'Start a decision', exact: true }).click();
+  await page.getByRole('button', { name: 'Continue unsaved draft', exact: true }).click();
   await expect(page.getByLabel('Option 1 for Options', { exact: true })).toHaveValue('Coast');
+  await page.getByRole('link', { name: 'Back to group', exact: true }).click();
+  await page.getByRole('button', { name: 'Start a decision', exact: true }).click();
+  await expect(page.getByLabel('Describe the decision', { exact: true })).toHaveValue('');
+  await expect(page).toHaveURL(/step=describe$/);
+  await expect(page.getByLabel('Option 1 for Options', { exact: true })).toHaveCount(0);
   expect(f.aiCalls()).toBe(0); expect(f.saves()).toBe(0);
 });
 

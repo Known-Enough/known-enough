@@ -137,6 +137,11 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
         ? { draft: saved.data, plan: plan.data, description: raw.description, intent: raw.intent } : null;
     } catch { return null; }
   });
+  const [hideEarlierSuggestions, setHideEarlierSuggestions] = useState(() => {
+    try { return JSON.parse(sessionStorage.getItem(editorKey) ?? 'null')?.hideEarlierSuggestions === true; } catch { return false; }
+  });
+  const earlierSuggestionsHidden = useRef(hideEarlierSuggestions); earlierSuggestionsHidden.current = hideEarlierSuggestions;
+  function hideRecoveredSuggestions(value: boolean) { earlierSuggestionsHidden.current = value; setHideEarlierSuggestions(value); }
   const [choiceConflict, setChoiceConflict] = useState<Groups.GroupDraft | null>(null);
   const editorVersion = useRef(0);
   const manualPendingKey = editorKey + ':save';
@@ -236,11 +241,11 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
   const [locallySaved, setLocallySaved] = useState(false);
   useEffect(() => {
     try {
-      if (choicePlan || objective || aiReview || draft) sessionStorage.setItem(editorKey, JSON.stringify({ plan: choicePlan, objective, draft: choiceDraft, suggestion: aiReview, titleEdited, legacyDraft: draft && !draft.choicePlan ? draft : null }));
+      if (choicePlan || objective || aiReview || draft || hideEarlierSuggestions) sessionStorage.setItem(editorKey, JSON.stringify({ plan: choicePlan, objective, draft: choiceDraft, suggestion: aiReview, titleEdited, hideEarlierSuggestions, legacyDraft: draft && !draft.choicePlan ? draft : null }));
       else sessionStorage.removeItem(editorKey);
       setLocallySaved(true);
     } catch { setLocallySaved(false); /* Keep in-memory work when browser storage is unavailable. */ }
-  }, [choicePlan, objective, choiceDraft, aiReview, draft, editorKey, titleEdited]);
+  }, [choicePlan, objective, choiceDraft, aiReview, draft, editorKey, titleEdited, hideEarlierSuggestions]);
   const draftHeading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     if (!starting) return;
@@ -272,8 +277,10 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
       || ('progress' in state && !['NOT_STARTED','IN_PROGRESS','EXPIRED','NEEDS_RECOVERY','STOPPED'].includes(String(state.progress)))) throw new Error('Invalid request status');
     setRequestState({ state: String(state.state), canRelease: state.canRelease, revision: Number(state.revision), ...('progress' in state ? { progress: String(state.progress) } : {}) });
     if (state.state === 'SAVED' && 'draft' in state) {
-      reviewSuggestions(Groups.GroupDraft.parse(state.draft)); finishRequest();
-      setNotice(aiIntent.current === 'options' ? '' : 'Your suggestions are ready. Your current draft is unchanged.'); await reload(); return 'SAVED';
+      const recovered = Groups.GroupDraft.parse(state.draft);
+      if (!earlierSuggestionsHidden.current) reviewSuggestions(recovered);
+      finishRequest();
+      setNotice(earlierSuggestionsHidden.current ? 'Your earlier draft is saved. Open it from your saved drafts to continue it.' : aiIntent.current === 'options' ? '' : 'Your suggestions are ready. Your current draft is unchanged.'); await reload(); return 'SAVED';
     }
     else if (state.state === 'FAILED' && state.canRelease) {
       // Only a confirmed terminal outcome may close automatically. Unknown or active
@@ -379,7 +386,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
   }
   function askForHelp(intent: 'description' | 'options', value = objective) {
     if (!value.trim() || pendingKey || !requestLookupAvailable || checkingRequest || busyGuard.current) return;
-    aiIntent.current = intent;
+    hideRecoveredSuggestions(false); aiIntent.current = intent;
     if (intent === 'description') setHelpFeedback('pending');
     try { sessionStorage.setItem('ke-creation-assist-intent:' + group.id, intent); } catch { /* In-memory intent remains available. */ }
     const context = choicePlan?.topics.some(topic => topic.options.length) ? choicePlan : undefined;
@@ -430,13 +437,29 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
     if (dirty && !window.confirm('Leave this draft? Your description and choices are kept on this browser.')) return;
     setStarting(false); launcher.current?.focus();
   }
-  function startWizard() {
+  function continueWizard() {
     if (choicePlan) setChoiceMode(true);
     showWizard(draft || choicePlan ? 'options' : 'describe');
+  }
+  function startWizard() {
+    if (busyGuard.current) return;
+    // An uncertain save keeps its original body/key until its result is checked.
+    if (manualPending.current) { setNotice('Check your last draft save before starting another. Choose Continue unsaved draft, then retry the same save.'); return; }
+    editorVersion.current++; recoveryEpoch.current++;
+    hideRecoveredSuggestions(true);
+    setObjective(''); setChoicePlan(null); setChoiceDraft(null); setDraft(null); setAiReview(null);
+    setChoiceMode(false); setChoiceSaved(false); setChoiceConflict(null); setTitleEdited(false);
+    setAnswers({}); answersByQuestion.current = {}; setRoster(null); setReviewed(false);
+    setHelpOpen(false); setHelpGoal(''); setHelpFeedback('idle'); setShowExample(false); setExampleToApply(null);
+    setDescriptionError(''); setNotice(''); setDirty(false);
+    // Only clear public editor presentation; AI/save recovery references stay intact.
+    try { sessionStorage.removeItem(editorKey); } catch { /* The blank in-memory editor remains usable. */ }
+    onDirtyChange?.(false); showWizard('describe');
   }
   async function loadDraft(id: string) {
     if (dirty && !window.confirm('Open this saved draft and replace the unsaved edits in this window?')) return;
     const result = await request(`drafts/${id}`), saved = Groups.GroupDraft.parse(result.draft);
+    hideRecoveredSuggestions(false); setAiReview(null); setHelpOpen(false); setShowExample(false);
     setDraft(saved); setObjective(saved.frame.objective);
     if (saved.choicePlan) { setChoicePlan(saved.choicePlan); setChoiceDraft(saved); setChoiceSaved(true); setChoiceMode(true); }
     else { setChoicePlan(null); setChoiceDraft(null); setChoiceMode(false); setChoiceSaved(false); }
@@ -530,13 +553,16 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
   const optionSuggestions = aiReview?.intent === 'options' ? <div ref={optionsPreview} className="ke-inline-options-suggestions"><CreationSuggestions key={aiReview.draft.id} review={aiReview} plan={choicePlan ?? { ...emptyChoicePlan(objective), title: draft?.frame.title ?? suggestedDecisionTitle(objective) }} busy={busy}
               onChange={setAiReview} onAdd={acceptOption} {...(choiceMode && choicePlan ? { onAddTopic: acceptTopic } : {})} onUseTitle={name => { if (choiceMode && choicePlan) changeChoices({ ...choicePlan, title: name }); else if (draft) changeFrame({ ...draft.frame, title: name }); }} onDismiss={() => setAiReview(null)} onUseDescription={() => { changeDescription(aiReview.description); setAiReview(null); setHelpOpen(false); }}
               onUseLegacyDraft={() => { setDraft(aiReview.draft); setObjective(aiReview.draft.frame.objective); setChoicePlan(null); setChoiceDraft(null); setChoiceMode(false); setAiReview(null); setDirty(false); setStep('options'); requestAnimationFrame(() => draftHeading.current?.focus()); }} onFollowUp={updateSuggestions} /></div> : null;
+  const hasLocalDraft = !!objective.trim() || !!choicePlan || !!draft || !!aiReview || !!pendingKey || !!manualPending.current;
   return <section className={starting ? 'ke-workflow-content ke-creation-page-container' : 'ke-card ke-group-panel ke-decisions-panel'} aria-busy={busy} aria-labelledby={starting ? `decision-wizard-title-${group.id}` : `decisions-heading-${group.id}`}>
     {!starting && <>
     <header className="ke-panel-heading"><div><h2 id={`decisions-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="ListChecks" /></span><span>Decisions</span></h2>
       <p className="ke-panel-subtitle">Choose an option that works for your group.</p></div>
-      {group.isOrganizer && (group.decisions.length > 0 || group.drafts.length > 0 || pendingKey)
-        && <button ref={launcher} type="button" className="ke-start-decision ke-icon-action" disabled={busy} onClick={startWizard}><PageIcon name="Plus" />{draft || pendingKey ? 'Continue your draft' : 'Start a decision'}</button>}</header>
-    {!group.decisions.length && !group.drafts.length && !pendingKey && <div className="ke-decision-empty">
+      {group.isOrganizer && (group.decisions.length > 0 || group.drafts.length > 0 || hasLocalDraft) && <div className="ke-decision-create-actions">
+        {hasLocalDraft && <button type="button" className="secondary" disabled={busy} onClick={continueWizard}>Continue unsaved draft</button>}
+        <button ref={launcher} type="button" className="ke-start-decision ke-icon-action" disabled={busy} onClick={startWizard}><PageIcon name="Plus" />Start a decision</button>
+      </div>}</header>
+    {!group.decisions.length && !group.drafts.length && !hasLocalDraft && <div className="ke-decision-empty">
       <span className="ke-decision-empty-icon" aria-hidden="true"><PageIcon name="ListChecks" /></span>
       <h3>What will you decide together?</h3><p>Describe a decision and bring your group together.</p>
       {group.isOrganizer ? <button ref={launcher} type="button" className="ke-start-decision ke-icon-action" disabled={busy} onClick={startWizard}><PageIcon name="Plus" />Start a decision</button>
