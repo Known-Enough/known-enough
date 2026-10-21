@@ -1,0 +1,134 @@
+{
+  "result": "STEP_TWO_OPTIONS_DUAL_PUBLICATION_READBACK_PASS",
+  "observedAt": "2026-10-21T01:25:33.446982+00:00",
+  "applicationSourceSha": "062ed317d6024e7282159759c015996d3833b60a",
+  "hostingSourceSha": "5a5f098899710e915f62871017b785f86cf88301",
+  "frontendRun": "https://github.com/Known-Enough/known-enough/actions/runs/39526834547",
+  "amplifyJob": "161",
+  "vercel": {
+    "sourceSha": "5a5f098899710e915f62871017b785f86cf88301",
+    "deploymentId": "dpl_9xEsq9nSiHRDFLWTmqY5skoK8HrY",
+    "state": "READY",
+    "applicationAssetsMatchAmplifySource": true
+  },
+  "scope": [
+    "Short initial names extracted locally from the description; no automatic model call",
+    "Explicit user title edits persist across steps and refresh; prior caches and saved names conservatively preserved",
+    "Decision name, Topics heading and always-visible editable topic names with options directly beneath",
+    "Compact editable option rows with remove icons; Add option and Add another topic focus the new field",
+    "Inline reviewed AI topic/option/name suggestions, explicit per-option or whole-topic acceptance without replacing named existing topics/options",
+    "Existing description/model payloads, AI request recovery and late-result safeguards retained; no detached suggestions-ready notice",
+    "Optional More settings for text/date format; compact light/dark/mobile styling and input sizing",
+    "Updated the changed Topics expectation and More settings selector for future local/E2E03 runners; neither runner executed"
+  ],
+  "verification": {
+    "typescript": "PASS",
+    "changedFileLint": "PASS",
+    "importBoundaries": "PASS_666",
+    "referenceChecks": "PASS_7",
+    "productionBuild": "PASS",
+    "shellAndRunnerSyntax": "PASS",
+    "productTests": "NOT_RUN_USER_MANUAL_ACCEPTANCE",
+    "manualAcceptance": "PENDING"
+  },
+  "preserved": {
+    "apiSha256": "ec34d5a84ecc84ed8b54c6813353d51c112c30aeb8f60d6bb5b2c6f2e1e247af",
+    "frontendConfigurationWrites": 0,
+    "backendPublication": false,
+    "iamChanges": false,
+    "scheduleChanges": false,
+    "participantActions": 0,
+    "modelCalls": 0,
+    "emailRequests": 0,
+    "draftsValidationPrivacyConsentAndRequestGuards": "PRESERVED"
+  },
+  "publicationRecovery": {
+    "amplifyFirstAttempt": {
+      "run": "https://github.com/Known-Enough/known-enough/actions/runs/39526804535",
+      "result": "FAILED_SOURCE_VERIFICATION_BEFORE_CREDENTIALS",
+      "cause": "Incorrect full SHA supplied by A; corrected run succeeded",
+      "cloudCredentialAndPublicationSteps": "SKIPPED"
+    },
+    "vercelFirstAttempt": {
+      "deploymentId": "dpl_fPsNNGdf8FMawis7cU9pwVjEggnp",
+      "result": "ERROR_EBADENGINE",
+      "actual": "Node24.22.0/npm11.19.1",
+      "required": "Node24.21.0/npm11.19.0"
+    },
+    "repair": "Vercel-only install/build wrapper reuses the existing official Node distribution and checksum pattern. Exact repository engines/engine-strict remain enabled. No application change between source and hosting commits."
+  },
+  "sites": [
+    {
+      "url": "https://known-enough.vercel.app/",
+      "httpStatus": 200,
+      "files": [
+        {
+          "path": "/assets/connected-app-DRvhOMrE.js",
+          "sha256": "a8f976563331723b5bc87009a8e90d1b5c5701ec4fb950527ee8c7445a760310",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/index-Dmf8OTiI.css",
+          "sha256": "0d236644fd1c61e532cc8888a57f11ea0873078ab5e20ff4a3f15fb7fb0ab710",
+          "matchesRelease": true
+        }
+      ]
+    },
+    {
+      "url": "https://main.d143q5ravxp5av.amplifyapp.com/",
+      "httpStatus": 200,
+      "files": [
+        {
+          "path": "/assets/alexa-chat-BteYSFi5.js",
+          "sha256": "42f864662ec4b97e3c4357debe5fc107054792ce3d5484a494b15a28f4aabec9",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/app-chrome--W4SXGVh.js",
+          "sha256": "9b7c88280aacbb265c53eceea9f91d32e590d405321f70087cae40d04d20f5dd",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/connected-app-DRvhOMrE.js",
+          "sha256": "a8f976563331723b5bc87009a8e90d1b5c5701ec4fb950527ee8c7445a760310",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/index-B8kK50Eh.js",
+          "sha256": "ad0f775cb11c1b94a472a7b9a89eb31e99189ba78aac9a12150f8904a15c02be",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/index-Dmf8OTiI.css",
+          "sha256": "0d236644fd1c61e532cc8888a57f11ea0873078ab5e20ff4a3f15fb7fb0ab710",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/preload-helper-Bz3Ef5C-.js",
+          "sha256": "c0e950f1c6235c43c01f65ad564b71c6a6283863b0759f559f5f942e358cd19e",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/src-C6BDNkdd.js",
+          "sha256": "82da0df78c6940e958a8e15b19efe611b53c8c925ce2a97605ecc698915fd2d9",
+          "matchesRelease": true
+        },
+        {
+          "path": "/cover.png",
+          "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151",
+          "matchesRelease": true
+        },
+        {
+          "path": "/",
+          "sha256": "5f21ebfccc7a57d1d746a7114e65b7ccf56106e8bc84f736332ddec616ae6105",
+          "matchesRelease": true
+        },
+        {
+          "path": "/logo.png",
+          "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb",
+          "matchesRelease": true
+        }
+      ]
+    }
+  ]
+}
