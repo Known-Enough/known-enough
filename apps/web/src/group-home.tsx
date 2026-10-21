@@ -9,6 +9,14 @@ import { Groups } from '@deal-table/contracts';
 import { GroupIcon, LoadingSkeleton, PageIcon } from './app-chrome';
 import { ProfileModal, type ProfileTarget } from './profile-drawer';
 type LoadFailure = { title: string; description: string; reference: string | null };
+type GroupDecisionView = { group: Groups.GroupSnapshot; ids: string[] };
+type GroupListSummary = {
+  groups: Groups.GroupSnapshot[];
+  hiddenGroups: string[];
+  showHiddenGroups: boolean;
+  actions: Record<string, DecisionListStatus>;
+  decisions: Record<string, GroupDecisionView>;
+};
 function groupPage(value: { groups?: unknown[]; cursor?: unknown }) {
   if (!Array.isArray(value.groups) || value.groups.length > 20
     || (value.cursor != null && (typeof value.cursor !== 'string' || !/^[A-Za-z0-9_-]{40,1600}$/.test(value.cursor)))) throw new Error('Invalid groups response');
@@ -31,15 +39,19 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
     } catch { return []; }
   });
   const [showHiddenGroups, setShowHiddenGroups] = useState(false);
-  const [groupActions, setGroupActions] = useState<Record<string, DecisionListStatus>>({});
-  const [groupDecisionViews, setGroupDecisionViews] = useState<Record<string, { group: Groups.GroupSnapshot; ids: string[] }>>({});
+  const [groupListSummary, setGroupListSummary] = useState<GroupListSummary | null>(null);
+  const groupListReady = groupListSummary !== null && groupListSummary.groups === groups
+    && groupListSummary.hiddenGroups === hiddenGroups && groupListSummary.showHiddenGroups === showHiddenGroups;
+  const groupActions: Record<string, DecisionListStatus> = groupListReady ? groupListSummary.actions : {};
+  const groupDecisionViews: Record<string, GroupDecisionView> = groupListReady ? groupListSummary.decisions : {};
   const actionApi = useRef(api); actionApi.current = api;
   useEffect(() => {
     let active = true, index = 0;
     const controller = new AbortController();
-    setGroupActions({});
     if (selectedGroupId) return () => controller.abort();
     const listed = groups.filter(group => group.isOrganizer || showHiddenGroups || !hiddenGroups.includes(group.id));
+    const actions: Record<string, DecisionListStatus> = {};
+    const decisions: Record<string, GroupDecisionView> = {};
     async function worker() {
       while (active && index < listed.length) {
         const group = listed[index++]!;
@@ -56,11 +68,13 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
             if (!action && status.tone === 'action') action = status;
           } catch { visible.push(decision.id); /* A failed read is not an access denial. */ }
         }
-        if (active) setGroupDecisionViews(current => ({ ...current, [group.id]: { group, ids: visible } }));
-        if (active && action) setGroupActions(current => ({ ...current, [group.id]: action! }));
+        decisions[group.id] = { group, ids: visible };
+        if (action) actions[group.id] = action;
       }
     }
-    void Promise.all(Array.from({ length: Math.min(3, listed.length) }, () => worker()));
+    void Promise.all(Array.from({ length: Math.min(3, listed.length) }, () => worker())).then(() => {
+      if (active) setGroupListSummary({ groups, hiddenGroups, showHiddenGroups, actions, decisions });
+    });
     return () => { active = false; controller.abort(); };
   }, [groups, selectedGroupId, hiddenGroups, showHiddenGroups]);
 
@@ -297,7 +311,8 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
     { heading: 'Groups you own', groups: prioritize(filteredGroups.filter(group => group.isOrganizer)) },
     { heading: 'Groups you’ve joined', groups: prioritize(filteredGroups.filter(group => !group.isOrganizer)) },
   ].filter(section => section.groups.length > 0);
-  if (checking && !available) return <LoadingSkeleton kind={selectedGroupId ? 'group' : 'groups'} label={selectedGroupId ? 'Opening your group' : 'Loading your groups'}
+  const loadingGroups = !selectedGroupId && (checking || account?.status === 'APPROVED' && !groupListReady);
+  if (checking && !available || loadingGroups) return <LoadingSkeleton kind={selectedGroupId ? 'group' : 'groups'} label={selectedGroupId ? 'Opening your group' : 'Loading your groups'}
     className={selectedGroupId ? 'ke-group-route-loading' : 'ke-group-home'} />;
   if (loadFailure) return <section className="ke-card ke-state-card ke-error-card" role="alert">
     <span className="ke-state-icon ke-warning-icon"><svg aria-hidden="true" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m14 6-11 19a2 2 0 0 0 2 3h22a2 2 0 0 0 2-3L18 6a2.3 2.3 0 0 0-4 0Z" /><path d="M16 13v6m0 4v1" strokeLinecap="round" /></svg></span>
