@@ -1,21 +1,25 @@
 import { useState } from 'react';
 import { type ChoicePlan } from '@deal-table/contracts';
-import { addSuggestedOption, type CreationSuggestion } from './creation-options';
+import { addSuggestedOption, addSuggestedTopic, suggestedDecisionTitle, type CreationSuggestion } from './creation-options';
 import { PageIcon } from './app-chrome';
 
-export function CreationSuggestions({ review, plan, busy, onChange, onAdd, onUseDescription, onUseLegacyDraft, onDismiss, onFollowUp, onRetry, retryDisabled = false }: {
+export function CreationSuggestions({ review, plan, busy, onChange, onAdd, onAddTopic, onUseTitle, onUseDescription, onUseLegacyDraft, onDismiss, onFollowUp, onRetry, retryDisabled = false }: {
   review: CreationSuggestion; plan: ChoicePlan; busy: boolean;
   onChange: (review: CreationSuggestion) => void;
   onRetry?: () => void; retryDisabled?: boolean;
   onAdd: (topic: ChoicePlan['topics'][number], option: string) => void;
+  onAddTopic?: (topic: ChoicePlan['topics'][number]) => void; onUseTitle?: (title: string) => void;
   onUseDescription: () => void; onUseLegacyDraft: () => void; onDismiss: () => void; onFollowUp: (answers: string[]) => void;
 }) {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const questions = review.draft.clarificationQuestions;
+  const suggestedTitle = suggestedDecisionTitle(review.plan.title || review.draft.frame.title);
   return <section className="ke-creation-suggestions" data-intent={review.intent} aria-label={review.intent === 'description' ? 'Suggested description' : 'Suggested options'}>
-    <header><h3><PageIcon name="Sparkles" />{review.intent === 'description' ? 'Suggested description' : 'Suggestions to consider'}</h3>
+    <header><h3 tabIndex={-1}><PageIcon name="Sparkles" />{review.intent === 'description' ? 'Suggested description' : 'Suggested topics and options'}</h3>
       {review.intent !== 'description' && <button type="button" className="ke-text-link" disabled={busy} onClick={onDismiss}>Dismiss suggestions</button>}</header>
-    {review.intent !== 'description' && <p className="ke-creation-hint">Suggested by AI. Check names, dates and availability before using them.</p>}
+    {review.intent !== 'description' && <p className="ke-creation-hint">Add what you like. Your current topics and options stay in place.</p>}
+    {review.intent === 'options' && onUseTitle && suggestedTitle !== 'New decision' && suggestedTitle !== plan.title && <div className="ke-suggestion-name"><span><small>Suggested name</small><strong>{suggestedTitle}</strong></span>
+      <button type="button" className="secondary" disabled={busy} onClick={() => onUseTitle(suggestedTitle)}>Use name</button></div>}
     {!review.draft.choicePlan && review.intent === 'options' && <div className="ke-legacy-suggestion"><p className="ke-creation-hint">This saved draft keeps its options and group requirements together.</p><button type="button" className="secondary" disabled={busy} onClick={onUseLegacyDraft}>Use this saved draft</button></div>}
     {review.intent === 'description' ? <>
       <label className="ke-description-result-label">Edit the suggestion if you like<textarea data-description-suggestion rows={3} maxLength={2000} value={review.description} disabled={busy}
@@ -24,7 +28,9 @@ export function CreationSuggestions({ review, plan, busy, onChange, onAdd, onUse
         {onRetry && <button type="button" className="secondary" disabled={busy || retryDisabled} onClick={onRetry}>Try again</button>}
         <button type="button" className="ke-text-link" disabled={busy} onClick={onDismiss}>Cancel</button></div>
     </> : review.plan.topics.map((topic, index) => <section key={index} className="ke-suggestion-topic" aria-label={`Suggestions for ${topic.label || 'your decision'}`}>
-      <h4>{topic.label || 'Options'}</h4>
+      <div className="ke-suggestion-topic-heading"><h4>{topic.label || 'Options'}</h4>
+        {onAddTopic && <button type="button" className="secondary" disabled={busy || !addSuggestedTopic(plan, topic)} aria-label={`Add suggested topic ${topic.label}`} onClick={() => onAddTopic(topic)}><PageIcon name="Plus" />{plan.topics.some(item => item.label.trim().toLocaleLowerCase() === topic.label.trim().toLocaleLowerCase() && item.kind === topic.kind) ? 'Add options' : 'Add topic'}</button>}
+      </div>
       {topic.options.map((option, at) => <div className="ke-suggestion-row" key={at}>
         <label className="ke-sr-only" htmlFor={`suggestion-${index}-${at}`}>Suggested option {at + 1} for {topic.label}</label>
         <input id={`suggestion-${index}-${at}`} maxLength={100} value={option} disabled={busy} onChange={event => onChange({ ...review,
@@ -33,9 +39,9 @@ export function CreationSuggestions({ review, plan, busy, onChange, onAdd, onUse
         <button type="button" className="ke-text-link" disabled={busy} aria-label={`Dismiss suggestion ${option}`} onClick={() => onChange({ ...review,
           plan: { ...review.plan, topics: review.plan.topics.map((item, ti) => ti === index ? { ...item, options: item.options.filter((_value, oi) => oi !== at) } : item) } })}>Dismiss</button>
       </div>)}
-      {!topic.options.length && <p className="ke-creation-hint">No more suggestions for this topic. You can add your own options above.</p>}
+      {!topic.options.length && <p className="ke-creation-hint">No options suggested for this topic yet. You can add your own below.</p>}
     </section>)}
-    {!!questions.length && <details className="ke-creation-details"><summary>A few details are missing</summary>
+    {!!questions.length && <details className="ke-creation-details" open={review.plan.topics.every(topic => !topic.options.length) || undefined}><summary>A few details are missing</summary>
       <p className="ke-creation-hint">Answer what you know, or edit your options directly. Keep personal preferences for later.</p>
       {questions.map((question, index) => <label key={question}>{question}<textarea rows={2} maxLength={500} disabled={busy} value={answers[index] ?? ''}
         onChange={event => setAnswers(current => ({ ...current, [index]: event.target.value }))} /></label>)}

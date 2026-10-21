@@ -87,7 +87,8 @@ test('description, examples and two-step navigation preserve input without calli
   await expect(page.getByLabel('Describe the decision', { exact: true })).toHaveValue(idea);
   await page.getByRole('button', { name: 'Keep my text', exact: true }).click();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'No options added yet', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Topics', exact: true })).toBeVisible();
+  await expect(page.getByLabel('Topic name', { exact: true })).toBeVisible();
   await add(page, 'Coast', 1); await add(page, 'Mountains', 2);
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await expect(page.getByLabel('Describe the decision', { exact: true })).toHaveValue(idea);

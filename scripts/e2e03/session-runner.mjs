@@ -376,7 +376,7 @@ export async function serve(options, recorder) {
       await page.getByRole('button', { name: 'Continue', exact: true }).click();
       await page.getByRole('heading', { name: 'Review your options', exact: true }).waitFor({ state: 'visible' });
       await page.getByLabel('Decision name', { exact: true }).fill('Friday activity');
-      await page.getByText('Topic details', { exact: true }).click();
+      await page.getByText('More settings', { exact: true }).click();
       await page.getByLabel('Topic name', { exact: true }).fill('Activity');
       const options = page.locator('[data-topic="0"] [data-option-input]');
       // New drafts can already contain blank options. Fill existing rows before adding more.

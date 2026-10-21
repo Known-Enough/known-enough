@@ -2154,3 +2154,73 @@ dialog[data-standard-close] h2 { padding-right: 30px; }
   .ke-decision-page .ke-response-save { flex-wrap: wrap; }
   .ke-decision-page .ke-response-save-actions { flex-wrap: wrap; }
 }
+
+/* Step two keeps topic names and their options together; advanced formats stay optional. */
+.ke-options-step-two { gap: 10px; }
+.ke-options-name-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 16px; }
+.ke-options-name-heading > label { margin: 0; color: var(--wizard-text); font-size: 13px; font-weight: 600; }
+.ke-creation-page .ke-options-step-two > input { width: 100%; min-height: 44px; margin: 0; padding: 10px 12px; font-size: 16px; font-weight: 550; border: 1px solid var(--wizard-border); border-radius: 9px; }
+.ke-options-name-heading .ke-creation-save-state { gap: 10px; }
+.ke-options-name-heading .ke-creation-save-state small { margin: 0; }
+.ke-topics-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; margin: 16px 0 5px; }
+.ke-topics-heading h2 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -.3px; }
+.ke-topics-heading p { margin: 5px 0 0; font-size: 12px; line-height: 1.5; color: var(--wizard-muted); }
+.ke-home .ke-options-step-two .ke-topics-heading > button { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 5px 8px; border: 1px solid var(--wizard-border); border-radius: 8px; background: var(--wizard-surface); white-space: nowrap; }
+.ke-topics-heading > button svg { width: 15px; height: 15px; }
+.ke-topics-heading > button[data-loading="true"] svg { animation: ke-decision-saving-spin 1.2s linear infinite; }
+.ke-options-step-two .ke-choice-topics { gap: 22px; }
+.ke-options-step-two .ke-option-topic + .ke-option-topic { padding-top: 20px; border-top: 1px solid var(--wizard-border); }
+.ke-options-step-two .ke-option-topic-heading { display: flex; align-items: flex-end; flex-wrap: nowrap; gap: 8px; margin: 0 0 12px; }
+.ke-options-step-two .ke-option-topic-heading > label { flex: 1; min-width: 0; margin: 0; gap: 6px; font-size: 12px; font-weight: 500; color: var(--wizard-muted); }
+.ke-creation-page .ke-options-step-two .ke-option-topic-heading input { min-height: 42px; margin: 0; padding: 9px 11px; border: 1px solid var(--wizard-border); border-radius: 8px; color: var(--wizard-text); font-size: 15px; font-weight: 550; }
+.ke-home .ke-options-step-two button.ke-topic-remove { display: inline-grid; flex: none; place-items: center; width: 32px; height: 36px; min-height: 36px; margin-bottom: 3px; padding: 8px; color: var(--wizard-muted); }
+.ke-topic-remove > svg { width: 15px; height: 15px; }
+.ke-topic-options-label { display: block; margin: 0 0 7px; font-size: 12px; font-weight: 500; color: var(--wizard-muted); }
+.ke-options-step-two .ke-option-list { gap: 7px; margin-bottom: 8px; }
+.ke-options-step-two .ke-option-row { gap: 5px; padding: 2px 6px 2px 11px; border-radius: 8px; }
+.ke-options-step-two .ke-option-row > input { min-height: 36px; }
+.ke-topic-tools { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 7px 16px; }
+.ke-home .ke-options-step-two button.ke-add-option { min-height: 34px; margin: 0; padding: 6px 10px; border: 1px dashed var(--wizard-border); border-radius: 7px; }
+.ke-topic-settings { margin-left: auto; font-size: 11px; color: var(--wizard-muted); }
+.ke-topic-settings summary { padding: 9px 0; cursor: pointer; }
+.ke-topic-settings[open] { flex-basis: 100%; margin-left: 0; }
+.ke-topic-settings .ke-choice-topic-fields { display: block; max-width: 220px; padding: 5px 0; }
+.ke-topic-settings .ke-choice-topic-fields label { gap: 6px; font-size: 12px; }
+.ke-topic-settings select { min-height: 36px; padding: 7px 9px; border-radius: 8px; font-size: 13px; }
+.ke-home .ke-options-step-two button.ke-add-topic { display: inline-flex; align-items: center; justify-content: center; justify-self: start; gap: 7px; min-height: 38px; margin: 9px 0 2px; padding: 8px 12px; border: 1px solid var(--wizard-border); border-radius: 8px; background: var(--wizard-soft); color: var(--wizard-text); font-size: 13px; font-weight: 550; }
+.ke-add-topic > svg { width: 15px; height: 15px; }
+.ke-options-step-two .ke-options-description { margin-top: 8px; font-size: 12px; }
+.ke-options-description textarea { margin-top: 8px; }
+.ke-inline-options-suggestions .ke-creation-suggestions { margin: 0 0 8px; padding: 13px 14px; border-radius: 10px; box-shadow: none; }
+.ke-inline-options-suggestions .ke-creation-suggestions h3 { font-size: 13px; }
+.ke-inline-options-suggestions h3:focus { outline: none; }
+.ke-suggestion-name { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--wizard-border); }
+.ke-suggestion-name > span { display: grid; gap: 4px; min-width: 0; }
+.ke-suggestion-name small { margin: 0; font-size: 11px; color: var(--wizard-muted); }
+.ke-suggestion-name strong { font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+.ke-suggestion-topic-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
+.ke-suggestion-topic-heading h4 { min-width: 0; margin: 0; overflow-wrap: anywhere; }
+.ke-home .ke-suggestion-name button, .ke-home .ke-suggestion-topic-heading button { display: inline-flex; align-items: center; gap: 5px; flex: none; min-height: 30px; margin: 0; padding: 5px 9px; border-radius: 7px; font-size: 11px; }
+.ke-suggestion-topic-heading svg { width: 13px; height: 13px; }
+.ke-inline-options-suggestions .ke-suggestion-row { gap: 6px; }
+.ke-inline-options-suggestions .ke-suggestion-row > input { min-height: 36px; padding: 7px 9px; }
+.ke-inline-options-suggestions .ke-suggestion-row > button { min-height: 32px; padding: 5px 6px; font-size: 11px; }
+:root[data-theme="dark"] .ke-home .ke-options-step-two button.ke-add-option, :root[data-theme="dark"] .ke-home .ke-options-step-two button.ke-add-topic, :root[data-theme="dark"] .ke-home .ke-options-step-two .ke-topics-heading > button { color: var(--wizard-text); border-color: var(--wizard-border); background: var(--wizard-soft); }
+@media (max-width: 550px) {
+  .ke-topics-heading { align-items: flex-start; }
+  .ke-topics-heading > div { flex-basis: 100%; }
+  .ke-options-step-two .ke-choice-topics { gap: 18px; }
+  .ke-options-step-two .ke-option-topic + .ke-option-topic { padding-top: 16px; }
+  .ke-inline-options-suggestions .ke-creation-suggestions { padding: 11px; }
+  .ke-suggestion-name { align-items: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) { .ke-topics-heading > button[data-loading="true"] svg { animation: none; } }
+
+.ke-home .ke-options-step-two button.ke-add-option:hover, .ke-home .ke-options-step-two button.ke-add-topic:hover, .ke-home .ke-options-step-two button.ke-topic-remove:hover, .ke-home .ke-options-step-two .ke-topics-heading > button:hover { color: var(--wizard-text); background: var(--wizard-soft); border-color: #97b39d; text-decoration: none; }
+@media (max-width: 550px) {
+  .ke-creation-page .ke-options-step-two .ke-option-topic-heading input { min-height: 44px; font-size: 16px; }
+  .ke-options-step-two .ke-option-row > input, .ke-inline-options-suggestions .ke-suggestion-row > input { min-height: 40px; font-size: 16px; }
+  .ke-home .ke-options-step-two button.ke-add-option, .ke-home .ke-options-step-two button.ke-add-topic, .ke-home .ke-options-step-two button.ke-topic-remove { min-height: 44px; }
+  .ke-home .ke-options-step-two button.ke-topic-remove { width: 40px; height: 44px; margin-bottom: 0; }
+  .ke-topic-settings summary { min-height: 44px; padding-block: 13px; }
+}
