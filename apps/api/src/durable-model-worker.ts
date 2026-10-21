@@ -88,42 +88,43 @@ export function createDurableNegotiationWorker(options: { now: () => number; sto
       && statuses.length > 0 && statuses.every(status => status === 'INVALID');
     return { values, statuses, questionTargets, exhausted };
   }
-  return createDurableModelWorker<NegotiationContext>({ now: options.now, store: options.store, ...(options.reportFailure ? { reportFailure: options.reportFailure } : {}), ...(options.reconcile ? { reconcile: options.reconcile } : {}), ...(options.bounds ? { bounds: options.bounds } : {}),
-    async reload(reference) {
-      const loaded = await options.load(reference); const fence = checkedJobFence(loaded.fence);
-      const state = fence.pins.find(pin => pin.table === JOB_TARGET.decisions)!;
-      let record: KnownEnoughRecord;
-      try { const wire = JSON.parse(state.payload); record = { ...decodeDecisionStateItem({ PK: { S: state.key.PK }, SK: { S: state.key.SK },
-        payload: { S: state.payload }, schemaVersion: { N: String(wire.schemaVersion) } }, reference.decisionId), replays: [] }; validateDecisionStateGuard(record, fence.guard); }
-      catch { throw new DurableJobError('STALE'); }
-      if (!record.job || record.job.id !== reference.reasoningJobId || record.job.epoch !== record.solveEpoch
-        || record.job.contextToken !== record.definition.contextToken || record.job.semanticVersion !== record.definition.semanticVersion
-        || record.status !== 'REASONING') throw new DurableJobError('STALE');
-      const required = record.definition.requiredParticipantIds;
-      const consentCurrent = required.every(id => record.frameConfirmations.some(value => value.participantId === id
-        && value.contextToken === record.definition.contextToken && value.semanticVersion === record.definition.semanticVersion && value.frameVersion === record.definition.frameVersion)
-        && record.owners.some(owner => owner.participantId === id && owner.readiness === 'READY'));
-      const members = record.memberships.filter(member => member.active);
-      const admissionEnabled = members.every(member => {
-        const pin = fence.pins.find(pin => pin.table === JOB_TARGET.partitions && pin.key.PK === `ACCOUNT#${member.subject}` && pin.key.SK === 'STATE');
-        if (!pin) return false;
-        try { const value = JSON.parse(pin.payload); return value.kind === 'ACCOUNT' && Groups.Account.parse(value.value).status === 'APPROVED'
-          && value.value.subject === member.subject; } catch { return false; }
-      });
-      const policyPin = fence.pins.find(pin => pin.table === JOB_TARGET.journal && pin.key.PK === 'OPERATIONS#RETENTION')!;
-      let retainedUntil: number; try { const policy = RetentionPolicy.parse(JSON.parse(policyPin.payload));
-        retainedUntil = Math.min(...members.map(member => { const stampPin = fence.pins.find(pin => pin.table === JOB_TARGET.journal && pin.key.PK === `RETENTION#${member.subject}` && pin.key.SK === 'STAMP');
-          if (!stampPin) throw new DurableJobError('STALE'); const stamp = RetentionStamp.parse(JSON.parse(stampPin.payload));
-          if (Date.parse(stamp.lastActivityAt) > options.now()) throw new DurableJobError('STALE'); return retentionDeadline(policy, stamp); })); }
-      catch { throw new DurableJobError('STALE'); }
-      const app = localApplication(record, options.now).application;
-      await app.getOwnerSnapshot(loaded.principal, reference.decisionId);
-      const context = await app.getReasoningContext({ kind: 'service', subject: 'durable-negotiator', roomIds: [reference.decisionId] }, reference.decisionId, reference.reasoningJobId);
-      return { principal: loaded.principal, admissionEnabled, consentCurrent, retainedUntil, enabled: loaded.enabled,
-        sourceSha: reference.sourceSha, controlVersion: record.controlVersion, epoch: record.solveEpoch,
-        contextToken: record.definition.contextToken, semanticVersion: record.definition.semanticVersion, consentRevision: record.controlVersion,
-        context: { record, context }, fence };
-    },
+  async function reloadAuthority(reference: JobReference) {
+    const loaded = await options.load(reference); const fence = checkedJobFence(loaded.fence);
+    const state = fence.pins.find(pin => pin.table === JOB_TARGET.decisions)!;
+    let record: KnownEnoughRecord;
+    try { const wire = JSON.parse(state.payload); record = { ...decodeDecisionStateItem({ PK: { S: state.key.PK }, SK: { S: state.key.SK },
+      payload: { S: state.payload }, schemaVersion: { N: String(wire.schemaVersion) } }, reference.decisionId), replays: [] }; validateDecisionStateGuard(record, fence.guard); }
+    catch { throw new DurableJobError('STALE'); }
+    if (!record.job || record.job.id !== reference.reasoningJobId || record.job.epoch !== record.solveEpoch
+      || record.job.contextToken !== record.definition.contextToken || record.job.semanticVersion !== record.definition.semanticVersion
+      || record.status !== 'REASONING') throw new DurableJobError('STALE');
+    const required = record.definition.requiredParticipantIds;
+    const consentCurrent = required.every(id => record.frameConfirmations.some(value => value.participantId === id
+      && value.contextToken === record.definition.contextToken && value.semanticVersion === record.definition.semanticVersion && value.frameVersion === record.definition.frameVersion)
+      && record.owners.some(owner => owner.participantId === id && owner.readiness === 'READY'));
+    const members = record.memberships.filter(member => member.active);
+    const admissionEnabled = members.every(member => {
+      const pin = fence.pins.find(pin => pin.table === JOB_TARGET.partitions && pin.key.PK === `ACCOUNT#${member.subject}` && pin.key.SK === 'STATE');
+      if (!pin) return false;
+      try { const value = JSON.parse(pin.payload); return value.kind === 'ACCOUNT' && Groups.Account.parse(value.value).status === 'APPROVED'
+        && value.value.subject === member.subject; } catch { return false; }
+    });
+    const policyPin = fence.pins.find(pin => pin.table === JOB_TARGET.journal && pin.key.PK === 'OPERATIONS#RETENTION')!;
+    let retainedUntil: number; try { const policy = RetentionPolicy.parse(JSON.parse(policyPin.payload));
+      retainedUntil = Math.min(...members.map(member => { const stampPin = fence.pins.find(pin => pin.table === JOB_TARGET.journal && pin.key.PK === `RETENTION#${member.subject}` && pin.key.SK === 'STAMP');
+        if (!stampPin) throw new DurableJobError('STALE'); const stamp = RetentionStamp.parse(JSON.parse(stampPin.payload));
+        if (Date.parse(stamp.lastActivityAt) > options.now()) throw new DurableJobError('STALE'); return retentionDeadline(policy, stamp); })); }
+    catch { throw new DurableJobError('STALE'); }
+    const app = localApplication(record, options.now).application;
+    await app.getOwnerSnapshot(loaded.principal, reference.decisionId);
+    const context = await app.getReasoningContext({ kind: 'service', subject: 'durable-negotiator', roomIds: [reference.decisionId] }, reference.decisionId, reference.reasoningJobId);
+    return { principal: loaded.principal, admissionEnabled, consentCurrent, retainedUntil, enabled: loaded.enabled,
+      sourceSha: reference.sourceSha, controlVersion: record.controlVersion, epoch: record.solveEpoch,
+      contextToken: record.definition.contextToken, semanticVersion: record.definition.semanticVersion, consentRevision: record.controlVersion,
+      context: { record, context }, fence };
+  }
+  const worker = createDurableModelWorker<NegotiationContext>({ now: options.now, store: options.store, ...(options.reportFailure ? { reportFailure: options.reportFailure } : {}), ...(options.reconcile ? { reconcile: options.reconcile } : {}), ...(options.bounds ? { bounds: options.bounds } : {}),
+    reload: reloadAuthority,
     async invoke(value, signal) {
       const { values, statuses, questionTargets, exhausted } = await catalogGuidance(value);
       // A fully enumerated, kernel-rejected catalog is a finished result. No AI
@@ -189,6 +190,22 @@ export function createDurableNegotiationWorker(options: { now: () => number; sto
         if (data.questionIntents.length !== targets.length) return rejectOutput('QUESTION_COUNT');
       } else if (data.questionIntents.length) return rejectOutput('QUESTION_TARGETS');
       return { writes: [{ key: { PK: `ROOM#${reference.decisionId}`, SK: 'STATE' }, payload: encodeDecisionStateItem(transient.result()).payload!.S! }] };
+    },
+  });
+  return Object.assign(worker, {
+    /** Optional request-side completion; the provider-less request composition
+     * can finish a proven empty feasible set without waiting on the AI queue. */
+    async finishNoMatch(reference: JobReference): Promise<boolean> {
+      const value = await reloadAuthority(reference);
+      if (value.principal?.kind !== 'participant' || value.principal.subject !== reference.subject
+        || !value.admissionEnabled || !value.consentCurrent || !value.enabled
+        || !Number.isSafeInteger(value.retainedUntil) || value.retainedUntil <= options.now()
+        || value.sourceSha !== reference.sourceSha || modelJobAuthorityHash(value) !== reference.authorityHash)
+        throw new DurableJobError('STALE');
+      if (!(await catalogGuidance(value.context)).exhausted) return false;
+      // process independently reloads every fence and the same authority hash.
+      // A changed answer cannot turn this into a different provider request.
+      return await worker.process({ jobId: reference.jobId }) === 'APPLIED';
     },
   });
 }

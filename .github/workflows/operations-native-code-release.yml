@@ -1,0 +1,138 @@
+name: Publish native API code with unchanged worker binding
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact checked main source SHA
+        required: true
+        type: string
+      previous_api_sha256:
+        description: Independently observed current API ZIP hash
+        required: true
+        type: string
+      previous_worker_sha256:
+        description: Independently observed current worker ZIP hash
+        required: true
+        type: string
+      previous_job_source:
+        description: Retained installed worker binding; no control source transition
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: known-enough-lifecycle-installation
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'Known-Enough/known-enough' && github.ref == 'refs/heads/main' && (github.actor_id == '143764700' || github.actor_id == '44531296')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      EXPECTED_SOURCE: ${{ inputs.source_sha }}
+      PREVIOUS_API_HASH: ${{ inputs.previous_api_sha256 }}
+      PREVIOUS_WORKER_HASH: ${{ inputs.previous_worker_sha256 }}
+      PREVIOUS_JOB_SOURCE: ${{ inputs.previous_job_source }}
+      AWS_MAX_ATTEMPTS: '1'
+      NODE_NO_WARNINGS: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Verify exact source and compile without application tests
+        run: |
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node scripts/operations/verify.mjs > /dev/null
+          npm ci
+          npm run typecheck
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobRelease
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          role-duration-seconds: 900
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Read and preserve the installed worker and schedule
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/native-code-release.mjs worker-before > "$RUNNER_TEMP/native-worker-before-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPrimaryRelease
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          role-duration-seconds: 900
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Back up the exact installed native API privately
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/partition-backup.mjs > "$RUNNER_TEMP/native-backup-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPartitionMigration
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          role-duration-seconds: 900
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Build code while preserving every installed private package byte
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/native-code-release.mjs prepare > "$RUNNER_TEMP/native-prepare-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubQaRelease
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          role-duration-seconds: 900
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Store immutable candidate and verify any prior identical upload
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/partition-cutover.mjs upload > "$RUNNER_TEMP/native-upload-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubPrimaryRelease
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          role-duration-seconds: 900
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Publish only API code with fresh revision and configuration guards
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/native-code-release.mjs publish > "$RUNNER_TEMP/native-publish-report.json" 2>&1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubModelJobRelease
+          aws-region: us-east-1
+          allowed-account-ids: '092954139775'
+          role-duration-seconds: 900
+          retry-max-attempts: 1
+          unset-current-credentials: true
+      - name: Verify worker code configuration and schedule remain exactly unchanged
+        run: |
+          umask 077
+          export CHECKOUT_SOURCE="$(git rev-parse HEAD)"
+          node --experimental-transform-types scripts/operations/native-code-release.mjs worker-after > "$RUNNER_TEMP/native-worker-after-report.json" 2>&1
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: native-code-release
+          path: ${{ runner.temp }}/native-*-report.json
+          if-no-files-found: warn
+          retention-days: 30
