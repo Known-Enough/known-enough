@@ -3179,3 +3179,6 @@ FF09 CODE_READY/B — fictional guide embedded only in creation dialog, form/req
 
 
 2026-10-21T06:56:03.485618+00:00 — A claims removal of decision loading chips. Frontend-only: collect all bounded status reads, reveal the decisions section atomically for the matching group snapshot, no loading fallback chip. Preserve error/permission/navigation behavior; no tests/model/participant/backend/IAM/schedule actions. Static checks/build and dual-site publication; manual acceptance by user.
+
+
+2026-10-21T06:57:39.208121+00:00 — A decision loading fix PUBLISHED / claim released. Source15133ff/frontend39558577056/Amplify164 and VercelREADY; both HTML200/common2+Amplify10 hashes match. Atomic full status batch hides decisions section until ready, no loading chip. Static type/lint/build/whitespace PASS; no product tests/model/user/backend/IAM/schedule changes, manual acceptance pending. [Receipt](review-artifacts/ui/decision-status-loading-publication.json).

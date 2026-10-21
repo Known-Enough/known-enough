@@ -1,0 +1,104 @@
+{
+  "result": "DECISION_STATUS_LOADING_PUBLICATION_READBACK_PASS",
+  "observedAt": "2026-10-21T06:57:39.208121+00:00",
+  "sourceSha": "15133ffacbd9b6f7affd888fdae4f2747a7819d3",
+  "frontendRun": "https://github.com/Known-Enough/known-enough/actions/runs/39558577056",
+  "amplifyJob": "164",
+  "vercel": {
+    "sourceSha": "15133ffacbd9b6f7affd888fdae4f2747a7819d3",
+    "deploymentId": "dpl_ciqGb1sVbCnHvFznjgNwhqSRKRSo",
+    "state": "READY"
+  },
+  "scope": "Hide the full decisions section until every bounded current-decision status read settles for this exact group snapshot, then reveal all rows together. No Loading status fallback chip. Creation pages are not blocked; existing unavailable-status results and actions remain.",
+  "verification": {
+    "typescript": "PASS",
+    "changedFileLint": "PASS",
+    "productionBuild": "PASS",
+    "whitespace": "PASS",
+    "productTests": "NOT_RUN_USER_DIRECTION",
+    "manualAcceptance": "PENDING"
+  },
+  "preserved": {
+    "apiSha256": "c2014e4f3ef1a3127e9e5b2ef481a85e78896de3d43fd1d93e54040ef184892e",
+    "frontendConfigurationWrites": 0,
+    "backendPublication": false,
+    "iamOrScheduleChanges": false,
+    "participantActions": 0,
+    "modelCalls": 0,
+    "emailRequests": 0
+  },
+  "sites": [
+    {
+      "url": "https://known-enough.vercel.app/",
+      "httpStatus": 200,
+      "files": [
+        {
+          "path": "/assets/connected-app-YOrhuIBK.js",
+          "sha256": "20c8bd7c9a597d00d52622f2a51db610b3dbe0484bdf0d079cc9bb9a58411d60",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/index-DxOlAXVx.css",
+          "sha256": "02453cfa392e65aa8c130384ce231a2bedd36cb32f18af44df5feb693aaf1d0d",
+          "matchesRelease": true
+        }
+      ]
+    },
+    {
+      "url": "https://main.d143q5ravxp5av.amplifyapp.com/",
+      "httpStatus": 200,
+      "files": [
+        {
+          "path": "/assets/alexa-chat-BteYSFi5.js",
+          "sha256": "42f864662ec4b97e3c4357debe5fc107054792ce3d5484a494b15a28f4aabec9",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/app-chrome--W4SXGVh.js",
+          "sha256": "9b7c88280aacbb265c53eceea9f91d32e590d405321f70087cae40d04d20f5dd",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/connected-app-YOrhuIBK.js",
+          "sha256": "20c8bd7c9a597d00d52622f2a51db610b3dbe0484bdf0d079cc9bb9a58411d60",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/index-BlS-IHqu.js",
+          "sha256": "95fc9fd989c5ed6544cea98ca3050a27dff3f9de00e21b5381dd08765cdc9379",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/index-DxOlAXVx.css",
+          "sha256": "02453cfa392e65aa8c130384ce231a2bedd36cb32f18af44df5feb693aaf1d0d",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/preload-helper-Bz3Ef5C-.js",
+          "sha256": "c0e950f1c6235c43c01f65ad564b71c6a6283863b0759f559f5f942e358cd19e",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/src-C6BDNkdd.js",
+          "sha256": "82da0df78c6940e958a8e15b19efe611b53c8c925ce2a97605ecc698915fd2d9",
+          "matchesRelease": true
+        },
+        {
+          "path": "/cover.png",
+          "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151",
+          "matchesRelease": true
+        },
+        {
+          "path": "/",
+          "sha256": "21978e0fc3571c975c403f264bacae503988f65db33b936eeb23b5cf44a4f077",
+          "matchesRelease": true
+        },
+        {
+          "path": "/logo.png",
+          "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb",
+          "matchesRelease": true
+        }
+      ]
+    }
+  ]
+}
