@@ -1,0 +1,89 @@
+{
+  "recordedAt": "2026-10-21T23:18:07.504052+00:00",
+  "sourceSha": "ec1b5bf7fae715413096227e01823b69fecac962",
+  "status": "PUBLISHED_MANUAL_ACCEPTANCE_PENDING",
+  "changes": [
+    "Removed old binding-based Waiting for organizer/Needs your review chips and membership-change subtitles",
+    "Older rows no longer create organizer attention chips or Needs review labels in group menus",
+    "All rows now use participant access checks, including older bindings; explicit403/404 hides an entry",
+    "Status loading skeleton also covers groups containing only older entries",
+    "Finished stale-binding decisions have a separate immutable owner-read fallback: current account/group admission plus original decision membership, no roster expansion or data mutation",
+    "Permitted older decisions open directly and keep View outcome; unfinished stale decisions and all command/write fences keep current-version checks"
+  ],
+  "api": {
+    "sourceSha": "ec1b5bf7fae715413096227e01823b69fecac962",
+    "result": "NATIVE_CODE_READBACK_PASS",
+    "apiSha256": "f8c57bec3aed82d88cd575be479cac3e78db112f4bb16b52c43337ace82661d9",
+    "priorApiSha256": "6b28f4b4345761b174076732abd45a085d506975b1b6e1bb48848932fd53a91a",
+    "retainedWorkerSource": "4c9c112b9673931122c68963cd19a8d5faee69ac",
+    "writeAcknowledged": true,
+    "privateConfiguration": "BYTE_IDENTICAL",
+    "environment": "UNCHANGED",
+    "queueConfiguration": "UNCHANGED",
+    "workerPublication": "NOT_EXECUTED",
+    "dataChanges": 0,
+    "providerCalls": 0,
+    "manualAcceptance": "PENDING"
+  },
+  "worker": {
+    "sourceSha": "ec1b5bf7fae715413096227e01823b69fecac962",
+    "result": "NATIVE_CODE_WORKER_UNCHANGED",
+    "workerSha256": "f6c738f22d2d6700c70ab73974d6be8edea804eb26adcca4378e78975b3c76bc",
+    "schedule": "ENABLED",
+    "workerWrites": 0
+  },
+  "frontend": {
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "sourceSha": "ec1b5bf7fae715413096227e01823b69fecac962",
+    "amplifyJobId": "177",
+    "servedFilesHashMatched": 10
+  },
+  "vercel": {
+    "sourceSha": "ec1b5bf7fae715413096227e01823b69fecac962",
+    "site": "https://known-enough.vercel.app",
+    "entryStatus": 200,
+    "assets": [
+      {
+        "asset": "index-DvgnKmI-.css",
+        "status": 200,
+        "hashMatches": true
+      },
+      {
+        "asset": "connected-app-D9QtEls2.js",
+        "status": 200,
+        "hashMatches": true
+      },
+      {
+        "asset": "app-chrome-FZErGB6A.js",
+        "status": 200,
+        "hashMatches": true
+      }
+    ],
+    "applicationTests": 0
+  },
+  "runs": {
+    "api": "https://github.com/Known-Enough/known-enough/actions/runs/39692222198",
+    "frontend": "https://github.com/Known-Enough/known-enough/actions/runs/39692374470"
+  },
+  "checks": {
+    "typecheck": "PASS",
+    "fullLint": "PASS",
+    "importBoundaries": 656,
+    "productionBuild": "PASS",
+    "whitespace": "PASS",
+    "applicationUnitBrowserLiveTests": "NOT_RUN_USER_DIRECTION",
+    "manualAcceptance": "PENDING_USER"
+  },
+  "preserved": [
+    "original finished decision participants and outcome",
+    "all normal mutation/approval/version/replay checks",
+    "private configuration/lifecycle/jobs package bytes",
+    "existing no-match repair",
+    "worker schedule/source and unknown-provider quarantine",
+    "IAM/Cognito/routes"
+  ],
+  "providerCalls": 0,
+  "participantActions": 0,
+  "dataWrites": 0,
+  "newCloudShellSetup": false
+}
