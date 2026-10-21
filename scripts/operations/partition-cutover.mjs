@@ -161,8 +161,17 @@ async function main(action) {
   if (action === 'upload') {
     await ownRole('KnownEnoughGithubQaRelease');
     const bytes = await readFile(join(directory, 'api.zip')); if (hash(bytes) !== candidate.sha256) return invalid();
-    await aws('s3api', 'put-object', '--bucket', bucket, '--key', `${candidate.sha256}/api.zip`,
-      '--body', join(directory, 'api.zip'), '--server-side-encryption', 'AES256', '--if-none-match', '*');
+    try {
+      await aws('s3api', 'put-object', '--bucket', bucket, '--key', `${candidate.sha256}/api.zip`,
+        '--body', join(directory, 'api.zip'), '--server-side-encryption', 'AES256', '--if-none-match', '*');
+    } catch (error) {
+      if (typeof error?.stderr !== 'string' || !/\(PreconditionFailed\)/.test(error.stderr)) throw error;
+      // A resumed publication may already have stored this immutable archive.
+      // Reuse only verified identical bytes; never overwrite an existing object.
+      const saved = join(directory, 'existing-api-private.zip');
+      await aws('s3api', 'get-object', '--bucket', bucket, '--key', `${candidate.sha256}/api.zip`, saved);
+      if (hash(await readFile(saved)) !== candidate.sha256) return invalid();
+    }
     return { sourceSha, result: 'PARTITION_PRIVATE_PACKAGE_UPLOADED', deployment: 'NOT_EXECUTED', activation: 'NOT_EXECUTED' };
   }
   if (action === 'publish') {

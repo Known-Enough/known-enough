@@ -241,13 +241,13 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
   useEffect(() => {
     if (!owner || snapshot.status !== 'READY' || proposal || !allConfirmed || owner.ownInputReadiness !== 'READY'
       || busy || pendingAction || interpretationRequest || structuredDirty || editingAnswers || text.trim() || commandGuard.current) return;
-    const identity = `${decisionId}:${snapshot.contextToken}:${snapshot.semanticVersion}:${owner.controlVersion}`;
+    const identity = `${decisionId}:${snapshot.contextToken}:${snapshot.semanticVersion}:${snapshot.publicRevision}`;
     if (automaticOutcomeAttempt.current === identity) return;
     automaticOutcomeAttempt.current = identity;
-    // One attempt per ready version; an uncertain result keeps the same request
-    // for explicit recovery instead of automatically producing another job.
+    // Retry only after saved/shared inputs change. Starting or cancelling a job
+    // changes controlVersion, but must not silently start another paid attempt.
     void generate();
-  }, [snapshot.status, snapshot.contextToken, snapshot.semanticVersion, owner?.controlVersion, owner?.ownInputReadiness,
+  }, [snapshot.status, snapshot.contextToken, snapshot.semanticVersion, snapshot.publicRevision, owner?.controlVersion, owner?.ownInputReadiness,
     proposal, allConfirmed, busy, pendingAction, interpretationRequest, structuredDirty, editingAnswers, text, decisionId]);
   const findingOutcome = awaitingJob || snapshot.status === 'REASONING' || busy && pending.current?.type === 'REQUEST_NEGOTIATION';
   // An uncertain optional AI-notes request must not freeze structured answers,
