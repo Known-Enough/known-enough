@@ -28,6 +28,9 @@ export async function readDecisionListStatus(api: (path: string, init?: RequestI
   if (!response.ok) throw new Error('Status unavailable');
   const owner = KE.OwnerDecisionSnapshot.parse(await response.json());
   if (owner.publicSnapshot.frame.decisionId !== decisionId) throw new Error('Wrong decision');
+  // Group lists show ongoing decisions. Use the saved decision state, rather
+  // than the binding's current flag, which only describes group membership.
+  if (owner.publicSnapshot.status === 'AGREED' || owner.publicSnapshot.status === 'CLOSED') return null;
   // Keep only derived labels/counts; never return/store private answers in list state.
   return decisionListStatus(owner);
 }

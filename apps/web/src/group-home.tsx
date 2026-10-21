@@ -422,7 +422,7 @@ export function GroupHome({ api, preferencesKey, invitationSessionKey, openDecis
               {visibleDecisions && <section className="ke-group-menu-section" aria-label="Decisions">
                 <h4>Decisions <span>{decisionCount ?? 0}</span></h4>
                 {visibleDecisions.length ? <ul>{visibleDecisions.map(decision => <li key={decision.id}>{decision.title ?? 'Untitled decision'}</li>)}</ul>
-                  : <p className="ke-group-menu-empty">No decisions yet.</p>}
+                  : <p className="ke-group-menu-empty">No ongoing decisions.</p>}
               </section>}
               <div className="ke-group-menu-actions">
                 <button type="button" className="secondary ke-group-menu-item" role="menuitem" ref={menuActionRef}
