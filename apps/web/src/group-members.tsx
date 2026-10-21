@@ -64,11 +64,13 @@ export function GroupMembers({ group, api, revision, busy, onProfile, onRemove }
 }) {
   const [query, setQuery] = useState(''), [page, setPage] = useState(1), [removingId, setRemovingId] = useState<string | null>(null);
   const search = useRef<HTMLInputElement>(null), dialog = useRef<HTMLDialogElement>(null), removeTrigger = useRef<HTMLButtonElement | null>(null);
+  const canSearch = group.members.length > 8;
+  useEffect(() => { if (!canSearch) { setQuery(''); setPage(1); } }, [canSearch]);
   const filtered = useMemo(() => {
-    const value = query.normalize('NFKC').trim().toLocaleLowerCase();
+    const value = canSearch ? query.normalize('NFKC').trim().toLocaleLowerCase() : '';
     return group.members.filter(member => member.displayName.normalize('NFKC').toLocaleLowerCase().includes(value))
       .sort((a, b) => Number(b.isOrganizer) - Number(a.isOrganizer) || names.compare(a.displayName, b.displayName) || a.id.localeCompare(b.id));
-  }, [group.members, query]);
+  }, [group.members, query, canSearch]);
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)), currentPage = Math.min(page, pages);
   const visible = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
   const removing = group.isOrganizer ? group.members.find(member => member.id === removingId && !member.isOrganizer) : undefined;
@@ -79,16 +81,16 @@ export function GroupMembers({ group, api, revision, busy, onProfile, onRemove }
   function closeRemoval() { dialog.current?.close(); setRemovingId(null); removeTrigger.current?.focus(); }
   function clearSearch() { setQuery(''); setPage(1); search.current?.focus(); }
   return <section className="ke-card ke-group-panel ke-members-panel" aria-labelledby={`members-heading-${group.id}`}>
-    <header className="ke-panel-heading"><h2 id={`members-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="Users" /></span>
-      <span>Members <span className="ke-member-count">· {group.members.length}</span></span></h2></header>
-    <div className="ke-members-toolbar">
+    <header className="ke-panel-heading ke-members-heading"><h2 id={`members-heading-${group.id}`}>Members
+      <span className="ke-member-count" aria-label={`${group.members.length} ${group.members.length === 1 ? 'member' : 'members'}`}>{group.members.length}</span></h2>
+    {canSearch && <div className="ke-members-toolbar">
       <div className="ke-group-search ke-member-search"><PageIcon name="Search" />
         <input ref={search} type="search" aria-label="Search members" placeholder="Search members..." value={query}
           onChange={event => { setQuery(event.target.value); setPage(1); }} />
         {!!query && <button type="button" className="ke-group-search-clear" aria-label="Clear member search" title="Clear search" onClick={clearSearch}><PageIcon name="X" /></button>}
       </div>
       {!!query.trim() && <small role="status">{filtered.length} {filtered.length === 1 ? 'match' : 'matches'}</small>}
-    </div>
+    </div>}</header>
     {visible.length ? <ul className="ke-member-list">{visible.map(member => <MemberCard key={member.id} member={member} groupId={group.id} api={api} revision={revision}
       canRemove={group.isOrganizer && !member.isOrganizer} busy={busy} onProfile={onProfile} onRemove={(target, trigger) => {
         removeTrigger.current = trigger;

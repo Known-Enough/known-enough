@@ -427,23 +427,22 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
       {selectedGroupId && groups.map(group => {
         const organizer = group.members.find(member => member.isOrganizer);
         return <div className="ke-group-detail-stack" key={group.id}>
-          <section className="ke-card ke-group-overview" aria-label="Group overview">
+          <section className="ke-group-overview" aria-label="Group overview">
+            <nav className="ke-group-overview-actions" aria-label="Group navigation">
+              <button type="button" className="secondary ke-group-back-link" onClick={onBack}><PageIcon name="ArrowLeft" />Back to groups</button>
+              <button type="button" className="secondary ke-group-refresh" aria-label="Refresh group" title="Refresh group" onClick={() => void load()}><PageIcon name="RefreshCw" /></button>
+            </nav>
             <div className="ke-group-overview-copy">
-              <p className="ke-eyebrow"><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="UsersRound" /></span><span>Your group</span></p>
-              <h2>{group.name}</h2>{group.isOrganizer && <RenameAction name={group.name} save={async name => {
+              <div className="ke-group-title-row"><h1>{group.name}</h1>{group.isOrganizer && <RenameAction name={group.name} save={async name => {
                 const response = await api(`/groups/${group.id}/name`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ version: group.version, previousName: group.name, name }) });
                 if (!response.ok) throw new Error('unavailable'); await load();
-              }} />}
+              }} renderTrigger={open => <button type="button" className="secondary ke-group-name-edit" aria-label="Rename group" title="Rename group" onClick={open}><PageIcon name="Pencil" /></button>} />}</div>
               <div className="ke-group-summary">
                 <div><span>Organizer</span><strong>{organizer?.displayName ?? 'Group organizer'}</strong></div>
-                <div><span>Members</span><strong>{group.members.length} {group.members.length === 1 ? 'member' : 'members'}</strong></div>
-                <div><span>Pending invitations</span><strong>{group.pendingInvitations}</strong></div>
+                <div><strong>{group.members.length}</strong><span>{group.members.length === 1 ? 'member' : 'members'}</span></div>
+                <div><strong>{group.pendingInvitations}</strong><span>{group.pendingInvitations === 1 ? 'pending invitation' : 'pending invitations'}</span></div>
               </div>
             </div>
-            <nav className="ke-group-overview-actions" aria-label="Group navigation">
-              <button type="button" className="secondary ke-icon-action" onClick={onBack}><PageIcon name="ArrowLeft" />Back to groups</button>
-              <button type="button" className="ke-refresh-button ke-icon-action" onClick={() => void load()}><PageIcon name="RefreshCw" />Refresh group</button>
-            </nav>
           </section>
 
           <div className="ke-group-panels">
