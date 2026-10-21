@@ -28,7 +28,7 @@ function DecisionRow({ decision, status, organizer, busy, onOpen, onReview, onRe
   const [menuOpen, setMenuOpen] = useState(false);
   const root = useRef<HTMLElement>(null), trigger = useRef<HTMLButtonElement>(null);
   const name = decision.title ?? 'Untitled decision';
-  const currentStatus: DecisionListStatus = decision.current ? status ?? { label: 'Loading status', tone: 'muted' } : { label: organizer ? 'Needs your review' : 'Waiting for organizer', tone: organizer ? 'action' : 'waiting' };
+  const currentStatus: DecisionListStatus | undefined = decision.current ? status : { label: organizer ? 'Needs your review' : 'Waiting for organizer', tone: organizer ? 'action' : 'waiting' };
   useEffect(() => {
     if (!menuOpen) return;
     const outside = (event: PointerEvent) => { if (event.target instanceof Node && !root.current?.contains(event.target)) setMenuOpen(false); };
@@ -39,8 +39,8 @@ function DecisionRow({ decision, status, organizer, busy, onOpen, onReview, onRe
     <button type="button" className="ke-decision-row-open" disabled={busy || (!decision.current && !organizer)}
       onClick={decision.current ? onOpen : onReview}>
       <span className="ke-decision-row-content"><span className="ke-decision-row-title"><strong>{name}</strong></span>
-        {!decision.current ? <small>{organizer ? 'Update who is taking part' : 'The organizer needs to resolve a membership change.'}</small> : currentStatus.detail && <small>{currentStatus.detail}</small>}</span>
-      <span className="ke-decision-status-chip" data-tone={currentStatus.tone}>{currentStatus.label}</span>
+        {!decision.current ? <small>{organizer ? 'Update who is taking part' : 'The organizer needs to resolve a membership change.'}</small> : currentStatus?.detail && <small>{currentStatus.detail}</small>}</span>
+      {currentStatus && <span className="ke-decision-status-chip" data-tone={currentStatus.tone}>{currentStatus.label}</span>}
       <PageIcon name="ChevronRight" />
     </button>
     {organizer && <div className="ke-decision-menu-wrap" onKeyDown={event => {
@@ -61,25 +61,28 @@ function DecisionRow({ decision, status, organizer, busy, onOpen, onReview, onRe
 export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange, creationStep, onOpenCreation, onCloseCreation }: { creationStep?: CreationStep; onOpenCreation?: (step: CreationStep, replace?: boolean) => void; onCloseCreation?: () => void; group: Groups.GroupSnapshot;
   api: (path: string, init?: RequestInit) => Promise<Response>; reload: () => Promise<void>; openDecision: (id: string) => void; startCollapsed?: boolean; onDirtyChange?: (dirty: boolean) => void }) {
   const [listStatuses, setListStatuses] = useState<Record<string, DecisionListStatus>>({});
+  const [statusGroup, setStatusGroup] = useState<Groups.GroupSnapshot | null>(null);
   const statusApi = useRef(api); statusApi.current = api;
   useEffect(() => {
     const controller = new AbortController();
     let active = true, index = 0;
     const decisions = group.decisions.filter(decision => decision.current);
-    setListStatuses({});
+    const statuses: Record<string, DecisionListStatus> = {};
     async function worker() {
       while (active && index < decisions.length) {
         const decision = decisions[index++]!;
         try {
           // Project immediately; private answers never enter list state or browser storage.
           const status = await readDecisionListStatus(statusApi.current, decision.id, controller.signal);
-          if (active) setListStatuses(current => ({ ...current, [decision.id]: status }));
+          statuses[decision.id] = status;
         } catch {
-          if (active) setListStatuses(current => ({ ...current, [decision.id]: { label: 'Status unavailable', tone: 'muted' } }));
+          statuses[decision.id] = { label: 'Status unavailable', tone: 'muted' };
         }
       }
     }
-    void Promise.all(Array.from({ length: Math.min(3, decisions.length) }, () => worker()));
+    void Promise.all(Array.from({ length: Math.min(3, decisions.length) }, () => worker())).then(() => {
+      if (active) { setListStatuses(statuses); setStatusGroup(group); }
+    });
     return () => { active = false; controller.abort(); };
   }, [group]);
   const [showExample, setShowExample] = useState(false);
@@ -554,6 +557,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
               onChange={setAiReview} onAdd={acceptOption} {...(choiceMode && choicePlan ? { onAddTopic: acceptTopic } : {})} onUseTitle={name => { if (choiceMode && choicePlan) changeChoices({ ...choicePlan, title: name }); else if (draft) changeFrame({ ...draft.frame, title: name }); }} onDismiss={() => setAiReview(null)} onUseDescription={() => { changeDescription(aiReview.description); setAiReview(null); setHelpOpen(false); }}
               onUseLegacyDraft={() => { setDraft(aiReview.draft); setObjective(aiReview.draft.frame.objective); setChoicePlan(null); setChoiceDraft(null); setChoiceMode(false); setAiReview(null); setDirty(false); setStep('options'); requestAnimationFrame(() => draftHeading.current?.focus()); }} onFollowUp={updateSuggestions} /></div> : null;
   const hasLocalDraft = !!objective.trim() || !!choicePlan || !!draft || !!aiReview || !!pendingKey || !!manualPending.current;
+  if (!starting && group.decisions.some(decision => decision.current) && statusGroup !== group) return null;
   return <section className={starting ? 'ke-workflow-content ke-creation-page-container' : 'ke-card ke-group-panel ke-decisions-panel'} aria-busy={busy} aria-labelledby={starting ? `decision-wizard-title-${group.id}` : `decisions-heading-${group.id}`}>
     {!starting && <>
     <header className="ke-panel-heading"><div><h2 id={`decisions-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="ListChecks" /></span><span>Decisions</span></h2>
