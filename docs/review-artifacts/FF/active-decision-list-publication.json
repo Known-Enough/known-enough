@@ -1,0 +1,62 @@
+{
+  "recordedAt": "2026-10-21T23:23:14.550051+00:00",
+  "sourceSha": "194e7823c059f33d62a9308a7cfd6384ca4b90ef",
+  "status": "PUBLISHED_MANUAL_ACCEPTANCE_PENDING",
+  "supersedes": "Prior historical visibility presentation: active group lists now omit finished decisions for everyone, including original participants.",
+  "visibility": {
+    "hiddenStatuses": [
+      "AGREED",
+      "CLOSED"
+    ],
+    "unfinished": "PRESERVED_SUBJECT_TO_EXISTING_ACCESS_CHECKS",
+    "directLinksAndStoredHistory": "UNCHANGED"
+  },
+  "scope": [
+    "Shared list projection filters the actual public snapshot status, not group binding current",
+    "Group details, dashboard counts and group menu use the same projection",
+    "Empty group menu says No ongoing decisions"
+  ],
+  "frontend": {
+    "run": "https://github.com/Known-Enough/known-enough/actions/runs/39692919139",
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "amplifyJobId": "178",
+    "servedFilesHashMatched": 10
+  },
+  "vercel": {
+    "sourceSha": "194e7823c059f33d62a9308a7cfd6384ca4b90ef",
+    "site": "https://known-enough.vercel.app",
+    "assets": [
+      {
+        "name": "connected-app-BZfDC015.js",
+        "status": 200,
+        "hashMatches": true
+      },
+      {
+        "name": "index-DvgnKmI-.css",
+        "status": 200,
+        "hashMatches": true
+      },
+      {
+        "name": "app-chrome-FZErGB6A.js",
+        "status": 200,
+        "hashMatches": true
+      }
+    ],
+    "applicationTests": 0
+  },
+  "checks": {
+    "typecheck": "PASS",
+    "fullLint": "PASS",
+    "boundaries": 656,
+    "productionBuild": "PASS",
+    "whitespace": "PASS",
+    "applicationUnitBrowserLiveTests": "NOT_RUN_USER_DIRECTION",
+    "manualAcceptance": "PENDING_USER"
+  },
+  "configurationWrites": 0,
+  "apiSha256": "f8c57bec3aed82d88cd575be479cac3e78db112f4bb16b52c43337ace82661d9",
+  "apiPublication": "NOT_EXECUTED",
+  "dataWrites": 0,
+  "providerCalls": 0,
+  "newCloudShellSetup": false
+}
