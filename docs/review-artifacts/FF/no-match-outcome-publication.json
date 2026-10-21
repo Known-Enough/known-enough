@@ -1,0 +1,160 @@
+{
+  "recordedAt": "2026-10-21T23:08:43.565302+00:00",
+  "status": "PUBLISHED_MANUAL_ACCEPTANCE_PENDING",
+  "sourceSha": "d45f838876cb69f201fea5c0664e659316778b28",
+  "codeCommits": [
+    "a8503e3ae2459d575dbb61550d286c848a312762",
+    "5b2bea55c8b5bd7ea787893adf51d925c3a150e4",
+    "d45f838876cb69f201fea5c0664e659316778b28"
+  ],
+  "diagnosis": {
+    "workerLogs": "KERNEL_INVALID: an all-invalid checked catalog was discarded rather than committing NO_AGREEMENT",
+    "browser": "Automatic attempt identity included controlVersion, so failure cancellation could enqueue unchanged answers again",
+    "requestBounds": "Warm API composition reused a bounded job store; rebuild it per HTTP request and count loader reads per reload",
+    "reportedDecision": {
+      "hash": "525a43f296a6f05bb12d74aa47a4a3bb9c4824a23a56398c62f759d9eb5a97bb",
+      "observedBeforePublication": "READY",
+      "participants": 2,
+      "answered": 2,
+      "reasoningActive": false,
+      "privateAnswersReadOrPublished": false
+    }
+  },
+  "publication": {
+    "sourceSha": "d45f838876cb69f201fea5c0664e659316778b28",
+    "result": "NATIVE_CODE_READBACK_PASS",
+    "apiSha256": "6b28f4b4345761b174076732abd45a085d506975b1b6e1bb48848932fd53a91a",
+    "priorApiSha256": "c2014e4f3ef1a3127e9e5b2ef481a85e78896de3d43fd1d93e54040ef184892e",
+    "retainedWorkerSource": "4c9c112b9673931122c68963cd19a8d5faee69ac",
+    "writeAcknowledged": true,
+    "privateConfiguration": "BYTE_IDENTICAL",
+    "environment": "UNCHANGED",
+    "queueConfiguration": "UNCHANGED",
+    "workerPublication": "NOT_EXECUTED",
+    "dataChanges": 0,
+    "providerCalls": 0,
+    "manualAcceptance": "PENDING"
+  },
+  "workerReadback": {
+    "sourceSha": "d45f838876cb69f201fea5c0664e659316778b28",
+    "result": "NATIVE_CODE_WORKER_UNCHANGED",
+    "workerSha256": "f6c738f22d2d6700c70ab73974d6be8edea804eb26adcca4378e78975b3c76bc",
+    "schedule": "ENABLED",
+    "workerWrites": 0
+  },
+  "frontend": {
+    "sourceSha": "d45f838876cb69f201fea5c0664e659316778b28",
+    "result": "FRONTEND_PUBLICATION_PASS",
+    "providerCalls": 0,
+    "signup": 0,
+    "apiPublication": "NOT_EXECUTED",
+    "files": [
+      {
+        "path": "/assets/alexa-chat-BXF5CaKs.js",
+        "sha256": "25aa08885e9f7cbde96aea7dbe946c901ae1a4419c1d34cc541ce00c30e331ff"
+      },
+      {
+        "path": "/assets/app-chrome-FZErGB6A.js",
+        "sha256": "410d3e9cd512a9cfe3cef105f1631fbf69961ee53fe69f954ac29937b28ff279"
+      },
+      {
+        "path": "/assets/connected-app-NhE9ddlG.js",
+        "sha256": "8959703356950cfdfb9a585741d720e2aa82826e3c151fd4284604ea760c523c"
+      },
+      {
+        "path": "/assets/index-CzAyvB4N.js",
+        "sha256": "d57e78f083c7b1f114f7999c05720eba2cf237cdf0fb81e1198a169d7401f0ec"
+      },
+      {
+        "path": "/assets/index-DvgnKmI-.css",
+        "sha256": "421803fa6e3b4e1b9e986ef2082ea695b880b7f7fca6ebe8d1b562302a6e4e63"
+      },
+      {
+        "path": "/assets/preload-helper-Bz3Ef5C-.js",
+        "sha256": "c0e950f1c6235c43c01f65ad564b71c6a6283863b0759f559f5f942e358cd19e"
+      },
+      {
+        "path": "/assets/src-DRuafgFj.js",
+        "sha256": "65dbc08deb9ad678b4af82389f1c03786314038d32d263d5408a2faebff1c612"
+      },
+      {
+        "path": "/cover.png",
+        "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151"
+      },
+      {
+        "path": "/",
+        "sha256": "aa782745b6ab862dc8e4be14c51f9b85c98e56fb622febd4d6fa0ea7b1bccb79"
+      },
+      {
+        "path": "/logo.png",
+        "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb"
+      }
+    ],
+    "amplifyJobId": "176"
+  },
+  "vercel": {
+    "sourceSha": "d45f838876cb69f201fea5c0664e659316778b28",
+    "site": "https://known-enough.vercel.app",
+    "entryStatus": 200,
+    "assets": [
+      {
+        "asset": "index-DvgnKmI-.css",
+        "status": 200,
+        "hashMatches": true
+      },
+      {
+        "asset": "connected-app-NhE9ddlG.js",
+        "status": 200,
+        "hashMatches": true
+      },
+      {
+        "asset": "app-chrome-FZErGB6A.js",
+        "status": 200,
+        "hashMatches": true
+      }
+    ],
+    "applicationTests": 0
+  },
+  "runs": {
+    "diagnosis": "https://github.com/Known-Enough/known-enough/actions/runs/39688000780",
+    "exactDecisionAndQueueRead": "https://github.com/Known-Enough/known-enough/actions/runs/39689308953",
+    "apiPublication": "https://github.com/Known-Enough/known-enough/actions/runs/39691148853",
+    "frontendPublication": "https://github.com/Known-Enough/known-enough/actions/runs/39691152343",
+    "earlierCoordinatedAttemptsStoppedBeforeRuntimeWrites": [
+      39688488820,
+      39689073742,
+      39689306013
+    ]
+  },
+  "behavior": [
+    "A complete finite public catalog must be independently kernel-invalid for every candidate before claiming no match",
+    "The provider-less API request composition may finish only this proven no-match through current authority, state/guard and durable transaction checks",
+    "No matching outcome plus edit-answers guidance reveals no individual answer, rejected choice or conflict reason",
+    "Clarification remains a distinct terminal state; invalid model picks cannot create false no-match results",
+    "Automatic outcome attempts no longer repeat solely because a failed job changed controlVersion"
+  ],
+  "unchanged": [
+    "all installed private configuration/package bytes",
+    "worker source/code/schedule",
+    "quarantined provider-uncertain job and slot",
+    "participant answers",
+    "consent/privacy/version/replay/source and accounting guards",
+    "Cognito/IAM/API routes"
+  ],
+  "checks": {
+    "typecheck": "PASS",
+    "fullLint": "PASS",
+    "importBoundaries": 656,
+    "productionBuild": "PASS",
+    "workflowSyntax": "PASS",
+    "whitespace": "PASS",
+    "applicationUnitBrowserLiveTests": "NOT_RUN_USER_DIRECTION",
+    "providerProbes": 0,
+    "userFlowAcceptance": "PENDING_USER"
+  },
+  "remaining": [
+    "Fresh user verification after reopening the linked decision has not been performed by A",
+    "The coordinated background-worker upgrade is not installed: a separate DEAD/PROVIDER_UNCONFIRMED job remains quarantined; no timeout-based release, accounting reset or provider replay was performed",
+    "Feasible/AI-assisted outcomes continue through the existing worker; this publication does not prove resolution of every unrelated queued job"
+  ]
+}
