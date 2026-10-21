@@ -2052,3 +2052,41 @@ dialog[data-standard-close] h2 { padding-right: 30px; }
 :root[data-theme="dark"] .ke-inline-name-notice { color: #e9ad9a; }
 @media (max-width: 650px) { .ke-home.ke-group-route .ke-inline-name-row input.ke-inline-name-input { font-size: 28px; } }
 @media (prefers-reduced-motion: reduce) { .ke-inline-name-control[data-saving="true"] svg { animation: none; } }
+
+/* Step-one writing assistance stays beside the description, in the modal scroll area. */
+.ke-creation-v2 .ke-creation-describe > textarea { min-height: 112px; max-height: 220px; padding: 11px 12px; line-height: 1.55; }
+.ke-creation-v2 .ke-wizard-body { scroll-padding-block: 16px; padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+.ke-creation-v2 .ke-description-meta { gap: 10px; margin: 8px 0 12px; }
+.ke-home .ke-creation-v2 button.ke-creation-assist { display: inline-flex; align-items: center; gap: 7px; margin: 8px 0 0; padding: 6px 9px; min-height: 34px; border: 1px solid transparent; border-radius: 8px; font-size: 12px; text-decoration: none; }
+.ke-home .ke-creation-v2 button.ke-creation-assist:hover { background: var(--wizard-soft); text-decoration: none; }
+.ke-home .ke-creation-v2 button.ke-creation-assist[data-active="true"] { border-color: var(--wizard-border); background: var(--wizard-soft); color: var(--wizard-text); }
+.ke-assistance-chevron { display: inline-flex; margin-left: 3px; transition: transform .15s; }
+.ke-assistance-chevron svg { width: 14px; height: 14px; }
+.ke-creation-assist[aria-expanded="true"] .ke-assistance-chevron { transform: rotate(90deg); }
+.ke-creation-v2 .ke-description-assistance { margin: 8px 0 10px; padding: 12px 14px; border-radius: 10px; scroll-margin-block: 12px; }
+.ke-description-assistance:focus { outline: none; }
+.ke-description-assistance > label { margin: 0 0 12px; gap: 6px; }
+.ke-description-assistance input { min-height: 38px; padding: 8px 10px; }
+.ke-description-assistance > .ke-creation-hint { margin: 0 0 12px; }
+.ke-description-assistance .ke-creation-suggestions { margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.ke-description-assistance .ke-creation-suggestions > header { margin-bottom: 8px; }
+.ke-description-assistance .ke-creation-suggestions h3 { font-size: 13px; }
+.ke-description-assistance .ke-description-result-label { margin: 0 0 10px; color: var(--wizard-muted); font-size: 12px; }
+.ke-description-assistance textarea[data-description-suggestion] { min-height: 96px; max-height: 220px; padding: 10px 11px; resize: vertical; font-size: 14px; line-height: 1.55; }
+.ke-description-assistance-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.ke-home .ke-creation-v2 .ke-description-assistance-actions button { min-height: 36px; margin: 0; padding: 7px 12px; font-size: 12px; }
+.ke-home .ke-creation-v2 .ke-description-assistance-actions button.ke-text-link { padding-inline: 5px; }
+.ke-description-assistance .ke-creation-assist-status { margin: 0 0 8px; padding: 4px 0; }
+.ke-description-assistance[aria-busy="true"] .ke-creation-assist-status svg { animation: ke-decision-saving-spin 1.2s linear infinite; }
+.ke-assistance-feedback { margin: 10px 0 0; padding: 9px 10px; border: 1px solid var(--wizard-border); border-radius: 8px; color: var(--wizard-text); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.ke-assistance-privacy { margin: 10px 0 0; color: var(--wizard-muted); font-size: 11px; line-height: 1.5; }
+.ke-description-assistance .ke-creation-recovery { margin-top: 10px; padding: 9px 10px; }
+.ke-description-assistance .ke-creation-recovery p { margin-block: 6px; }
+.ke-description-assistance .ke-creation-details { margin-top: 10px; }
+.ke-creation-v2 .ke-creation-inspiration { margin-block: 10px; }
+:root[data-theme="dark"] .ke-home .ke-creation-v2 button.ke-creation-assist[data-active="true"] { border-color: var(--wizard-border); color: var(--wizard-text); background: var(--wizard-soft); }
+:root[data-theme="dark"] .ke-description-assistance .ke-creation-suggestions { background: transparent; }
+@media (max-width: 550px) { .ke-creation-v2 .ke-description-assistance { padding: 11px; } .ke-description-assistance-actions { gap: 6px; } .ke-creation-v2 .ke-description-meta { margin-bottom: 10px; } }
+@media (prefers-reduced-motion: reduce) { .ke-assistance-chevron { transition: none; } .ke-description-assistance[aria-busy="true"] .ke-creation-assist-status svg { animation: none; } }
+
+:root[data-theme="dark"] .ke-home .ke-creation-v2 button.ke-creation-assist:hover { color: var(--wizard-text); background: var(--wizard-soft); text-decoration: none; }

@@ -101,6 +101,9 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
   const objectiveInput = useRef<HTMLTextAreaElement>(null);
   const [helpOpen, setHelpOpen] = useState(false);
   const [helpGoal, setHelpGoal] = useState('');
+  const [helpFeedback, setHelpFeedback] = useState<'idle' | 'pending' | 'ready' | 'failed'>('idle');
+  const helpToggle = useRef<HTMLButtonElement>(null), helpField = useRef<HTMLInputElement>(null), helpAction = useRef<HTMLButtonElement>(null);
+  const assistancePanel = useRef<HTMLElement>(null);
   const [descriptionError, setDescriptionError] = useState('');
   const [exampleToApply, setExampleToApply] = useState<string | null>(null);
   const aiIntent = useRef<'description' | 'options'>((() => {
@@ -324,6 +327,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
       setNotice(editorVersion.current !== startedVersion ? 'These suggestions use your earlier description. Your newer edits are kept.' : 'Suggestions are ready. Add only what you want to use.');
       await reload().catch(() => {});
     } catch (error) {
+      if (aiIntent.current === 'description') setHelpFeedback('failed');
       // A failed acknowledgement is followed by a status read, never a second paid call.
       try {
         const recovered = await recoverRequest(pending.current?.idempotencyKey);
@@ -358,12 +362,14 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
     openChoices();
   }
   function reviewSuggestions(prepared: Groups.GroupDraft) {
+    if (aiIntent.current === 'description') setHelpFeedback('ready');
     setAiReview({ draft: prepared, plan: suggestedChoices(prepared), intent: aiIntent.current,
       description: prepared.choicePlan?.description.trim() || prepared.frame.description.trim() || prepared.frame.objective });
   }
   function askForHelp(intent: 'description' | 'options', value = objective) {
     if (!value.trim() || pendingKey || !requestLookupAvailable || checkingRequest || busyGuard.current) return;
     aiIntent.current = intent;
+    if (intent === 'description') setHelpFeedback('pending');
     try { sessionStorage.setItem('ke-creation-assist-intent:' + group.id, intent); } catch { /* In-memory intent remains available. */ }
     const context = choicePlan?.topics.some(topic => topic.options.length) ? choicePlan : undefined;
     void action(() => draftObjective(value, undefined, context));
@@ -454,6 +460,53 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
     finishRequest(); setStep(draft || choicePlan ? 'options' : 'describe');
     setNotice('That attempt is closed. You can continue editing your draft.');
   }
+  const descriptionReview = aiReview?.intent === 'description' ? aiReview : null;
+  const descriptionSource = objective.trim() ? objective : helpGoal;
+  const descriptionBlocked = busy || !!pendingKey || checkingRequest || !requestLookupAvailable || !descriptionSource.trim();
+  const requestRecovery = pendingKey && !aiWorking && <details className="ke-creation-recovery"><summary>Check earlier suggestions</summary><p>{requestState?.state === 'UNKNOWN' ? 'We couldn’t confirm the result. Check this attempt before asking again. You can still edit your options.' : 'Check the earlier attempt before asking again. Your draft stays unchanged.'}</p>
+              <button type="button" className="secondary" disabled={busy || checkingRequest} onClick={() => void action(() => recoverRequest())}>Check progress</button>
+              {requestState?.canRelease && <button type="button" className="ke-text-link" disabled={busy} onClick={() => void action(releaseRequest)}>Close attempt</button>}
+            </details>;
+  const lookupRecovery = !requestLookupAvailable && !checkingRequest && !pendingKey && (helpOpen || step === 'options') && <p className="ke-creation-hint">Suggestions are temporarily unavailable. You can add your own options. <button type="button" className="ke-text-link" disabled={busy} onClick={() => { setCheckingRequest(true); setRecoveryGeneration(value => value + 1); }}>Check again</button></p>;
+  function revealAssistance() {
+    const container = wizardBody.current, panel = assistancePanel.current;
+    if (!container || !panel) return;
+    const top = panel.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop - 12;
+    container.scrollTo({ top: Math.max(0, top), behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  }
+  function closeAssistance(discard = false) {
+    setHelpOpen(false);
+    if (discard) { setAiReview(current => current?.intent === 'description' ? null : current); setHelpGoal(''); setHelpFeedback('idle'); }
+    requestAnimationFrame(() => helpToggle.current?.focus({ preventScroll: true }));
+  }
+  useEffect(() => {
+    if (!starting || step !== 'describe' || !helpOpen || showExample) return;
+    const frame = requestAnimationFrame(() => {
+      const target = assistancePanel.current?.querySelector<HTMLTextAreaElement>('[data-description-suggestion]') ?? helpField.current ?? helpAction.current ?? assistancePanel.current;
+      const focusTarget = target && 'disabled' in target && target.disabled ? assistancePanel.current : target;
+      focusTarget?.focus({ preventScroll: true }); revealAssistance();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [helpOpen, starting, step, showExample]);
+  useEffect(() => {
+    if (!starting || step !== 'describe' || !helpOpen || !descriptionReview || busy || aiWorking) return;
+    const frame = requestAnimationFrame(() => {
+      const panel = assistancePanel.current;
+      if (!panel || document.activeElement !== document.body && !panel.contains(document.activeElement)) return;
+      panel.querySelector<HTMLTextAreaElement>('[data-description-suggestion]')?.focus({ preventScroll: true }); revealAssistance();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [descriptionReview?.draft.id, busy, aiWorking, starting, step, helpOpen]);
+  useEffect(() => {
+    if (!starting || step !== 'describe' || !helpOpen || busy || helpFeedback !== 'failed') return;
+    const frame = requestAnimationFrame(() => {
+      const panel = assistancePanel.current;
+      if (!panel || document.activeElement !== document.body && !panel.contains(document.activeElement)) return;
+      const target = pendingKey ? panel.querySelector<HTMLButtonElement>('.ke-creation-recovery button') : helpAction.current;
+      (target && !target.disabled ? target : panel).focus({ preventScroll: true }); revealAssistance();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [helpFeedback, busy, pendingKey, starting, step, helpOpen]);
   return <section className="ke-card ke-group-panel ke-decisions-panel" aria-busy={busy} aria-labelledby={`decisions-heading-${group.id}`}>
     <header className="ke-panel-heading"><div><h2 id={`decisions-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="ListChecks" /></span><span>Decisions</span></h2>
       <p className="ke-panel-subtitle">Choose an option that works for your group.</p></div>
@@ -514,25 +567,45 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
           <div className="ke-creation-form" hidden={showExample}>
             {step === 'describe' && <section className="ke-creation-describe" aria-label="Decision description">
               <label htmlFor={`group-objective-${group.id}`}>Describe the decision</label>
-              <textarea ref={objectiveInput} id={`group-objective-${group.id}`} rows={6} value={objective} maxLength={2000}
+              <textarea ref={objectiveInput} id={`group-objective-${group.id}`} rows={4} value={objective} maxLength={2000}
                 placeholder="e.g. We’re planning a weekend trip together and need to decide where to go."
                 aria-invalid={!!descriptionError} aria-describedby={`description-help-${group.id}${descriptionError ? ` description-error-${group.id}` : ''}`}
                 disabled={busy && !aiWorking} onChange={event => changeDescription(event.target.value)} />
+              <button ref={helpToggle} type="button" className="ke-text-link ke-icon-action ke-creation-assist" aria-expanded={helpOpen}
+                aria-controls={`description-assistance-${group.id}`} data-active={helpOpen} disabled={busy && !aiWorking}
+                onClick={() => { if (helpOpen) closeAssistance(); else { setExampleToApply(null); setHelpOpen(true); } }}>
+                <PageIcon name="Sparkles" />Help me get started<span className="ke-assistance-chevron"><PageIcon name="ChevronRight" /></span>
+              </button>
+              {helpOpen && <section ref={assistancePanel} id={`description-assistance-${group.id}`} className="ke-description-assistance" aria-label="Description assistance" tabIndex={-1} aria-busy={aiWorking}>
+                {aiWorking ? <><p className="ke-creation-assist-status" role="status"><PageIcon name="RefreshCw" />Writing a suggestion…</p>
+                  <button type="button" className="ke-text-link" onClick={() => closeAssistance(true)}>Cancel</button></>
+                  : descriptionReview ? <CreationSuggestions key={descriptionReview.draft.id} review={descriptionReview} plan={choicePlan ?? emptyChoicePlan(objective)} busy={busy}
+                    onChange={setAiReview} onAdd={acceptOption} onDismiss={() => closeAssistance(true)}
+                    onUseDescription={() => { changeDescription(descriptionReview.description); setAiReview(null); setHelpOpen(false); setHelpGoal(''); setHelpFeedback('idle'); requestAnimationFrame(() => { objectiveInput.current?.focus({ preventScroll: true }); wizardBody.current?.scrollTo({ top: 0, behavior: 'auto' }); }); }}
+                    onRetry={() => askForHelp('description', descriptionSource)} retryDisabled={descriptionBlocked}
+                    onUseLegacyDraft={() => {}} onFollowUp={updateSuggestions} />
+                  : <>
+                    {objective.trim() ? <p className="ke-creation-hint">We’ll use the description above.</p> : <label htmlFor={`description-goal-${group.id}`}>What are you trying to decide?
+                      <input ref={helpField} id={`description-goal-${group.id}`} value={helpGoal} maxLength={2000} disabled={busy} placeholder="For example, choose a place for our next trip" onChange={event => setHelpGoal(event.target.value)} /></label>}
+                    <div className="ke-description-assistance-actions"><button ref={helpAction} type="button" className="ke-icon-action" disabled={descriptionBlocked} onClick={() => askForHelp('description', descriptionSource)}><PageIcon name="Sparkles" />{helpFeedback === 'failed' ? 'Try again' : 'Suggest description'}</button>
+                      <button type="button" className="ke-text-link" onClick={() => closeAssistance(true)}>Cancel</button></div>
+                  </>}
+                {!aiWorking && notice && <p className="ke-assistance-feedback" role="status">{notice}</p>}
+                {requestRecovery}{lookupRecovery}
+                <p className="ke-assistance-privacy">Shared with your group. Use made-up details in this preview.</p>
+              </section>}
               <div className="ke-description-meta"><p id={`description-help-${group.id}`} className="ke-creation-privacy"><PageIcon name="Lock" />Your description and options will be shared with the group. Personal preferences come later.</p>
                 <small>{objective.length.toLocaleString()} / 2,000</small></div>
               {descriptionError && <p id={`description-error-${group.id}`} className="ke-creation-error" role="alert">{descriptionError}</p>}
-              <div className="ke-creation-inspiration"><span>Need inspiration?</span>{[
+              {!helpOpen && <div className="ke-creation-inspiration"><span>Need inspiration?</span>{[
                 ['Plan a trip', 'We want to plan a weekend trip together. We’re considering the coast, the mountains or a city break, and haven’t picked a date yet.'],
                 ['Choose a restaurant', 'Our group is choosing a restaurant for Saturday dinner. We’re considering Cedar Kitchen, Moon Noodles and Garden Table.'],
                 ['Compare a purchase', 'We want to buy something together and compare two shortlisted options. We need to decide which one best fits the group.'],
-              ].map(([label, example]) => <button type="button" key={label} className="secondary" disabled={busy && !aiWorking} onClick={() => { if (objective.trim()) setExampleToApply(example!); else changeDescription(example!); }}>{label}</button>)}</div>
-              {exampleToApply && <div className="ke-example-confirm" role="group" aria-label="Replace description with example"><p>Replace your description with this example? Your options will stay.</p>
+              ].map(([label, example]) => <button type="button" key={label} className="secondary" disabled={busy && !aiWorking} onClick={() => { if (objective.trim()) setExampleToApply(example!); else changeDescription(example!); }}>{label}</button>)}</div>}
+              {!helpOpen && exampleToApply && <div className="ke-example-confirm" role="group" aria-label="Replace description with example"><p>Replace your description with this example? Your options will stay.</p>
                 <button type="button" className="secondary" onClick={() => { changeDescription(exampleToApply); setExampleToApply(null); }}>Use this example</button>
                 <button type="button" className="ke-text-link" onClick={() => setExampleToApply(null)}>Keep my text</button></div>}
-              <button type="button" className="ke-text-link ke-icon-action ke-creation-assist" aria-expanded={helpOpen} disabled={busy} onClick={() => { setHelpGoal(objective); setHelpOpen(value => !value); }}><PageIcon name="Sparkles" />Help me get started</button>
-              {helpOpen && <section className="ke-description-assistance" aria-label="Writing assistance"><label>A few words about the decision<input value={helpGoal} maxLength={2000} disabled={busy} placeholder="e.g. Choose a holiday destination" onChange={event => setHelpGoal(event.target.value)} /></label>
-                <p className="ke-creation-hint">AI will use this shared text and your current options. Your description stays unchanged until you accept a suggestion.</p>
-                <button type="button" className="secondary ke-icon-action" disabled={busy || !!pendingKey || checkingRequest || !requestLookupAvailable || !helpGoal.trim()} onClick={() => askForHelp('description', helpGoal)}><PageIcon name="Sparkles" />Suggest a description</button></section>}
+
             </section>}
             {step === 'options' && <section className="ke-creation-options" aria-label="Review your options">
               {choiceMode && choicePlan ? <>
@@ -559,18 +632,15 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
               </section>}
               <p className="ke-creation-privacy"><PageIcon name="Lock" />These options are shared. Everyone adds their own preferences privately after creation.</p>
             </section>}
-            {aiWorking && <p className="ke-creation-assist-status" role="status"><PageIcon name="Sparkles" />Preparing suggestions. You can keep editing.</p>}
-            {aiReview && ((step === 'describe' && aiReview.intent === 'description') || (step === 'options' && aiReview.intent === 'options')) && <CreationSuggestions key={aiReview.draft.id} review={aiReview} plan={choicePlan ?? emptyChoicePlan(objective)} busy={busy}
+            {aiWorking && (step !== 'describe' || !helpOpen) && <p className="ke-creation-assist-status" role="status"><PageIcon name="Sparkles" />Preparing suggestions. You can keep editing.</p>}
+            {aiReview && step === 'options' && aiReview.intent === 'options' && <CreationSuggestions key={aiReview.draft.id} review={aiReview} plan={choicePlan ?? emptyChoicePlan(objective)} busy={busy}
               onChange={setAiReview} onAdd={acceptOption} onDismiss={() => setAiReview(null)} onUseDescription={() => { changeDescription(aiReview.description); setAiReview(null); setHelpOpen(false); }}
               onUseLegacyDraft={() => { setDraft(aiReview.draft); setObjective(aiReview.draft.frame.objective); setChoicePlan(null); setChoiceDraft(null); setChoiceMode(false); setAiReview(null); setDirty(false); setStep('options'); requestAnimationFrame(() => draftHeading.current?.focus()); }} onFollowUp={updateSuggestions} />}
-            {pendingKey && !aiWorking && <details className="ke-creation-recovery"><summary>Check earlier suggestions</summary><p>{requestState?.state === 'UNKNOWN' ? 'We couldn’t confirm the result. Check this attempt before asking again. You can still edit your options.' : 'Check the earlier attempt before asking again. Your draft stays unchanged.'}</p>
-              <button type="button" className="secondary" disabled={busy || checkingRequest} onClick={() => void action(() => recoverRequest())}>Check progress</button>
-              {requestState?.canRelease && <button type="button" className="ke-text-link" disabled={busy} onClick={() => void action(releaseRequest)}>Close attempt</button>}
-            </details>}
-            {!requestLookupAvailable && !checkingRequest && !pendingKey && (helpOpen || step === 'options') && <p className="ke-creation-hint">Suggestions are temporarily unavailable. You can add your own options. <button type="button" className="ke-text-link" disabled={busy} onClick={() => { setCheckingRequest(true); setRecoveryGeneration(value => value + 1); }}>Check again</button></p>}
-            {!busy && notice && <div className="ke-wizard-notice" role="status">{notice}</div>}
+            {(step !== 'describe' || !helpOpen) && requestRecovery}
+            {(step !== 'describe' || !helpOpen) && lookupRecovery}
+            {!busy && notice && (step !== 'describe' || !helpOpen) && <div className="ke-wizard-notice" role="status">{notice}</div>}
             <details className="ke-creation-details ke-creation-privacy-details"><summary>Privacy in this preview</summary><p>Your group can see the description and options. AI uses them when you ask for suggestions. Save personal limits for your private answers, and use made-up, non-sensitive information in this preview. Check suggested prices, dates and availability yourself. Keep the choices small: this preview can compare up to 64 possible outcomes across six topics, with up to sixteen options per topic. Creating a decision doesn’t approve a proposal or answer for anyone.</p></details>
-            {step === 'describe' && <button ref={exampleTrigger} type="button" className="ke-text-link ke-creation-example-link" onClick={() => setShowExample(true)}>How decisions work</button>}
+            {step === 'describe' && !helpOpen && <button ref={exampleTrigger} type="button" className="ke-text-link ke-creation-example-link" onClick={() => setShowExample(true)}>How decisions work</button>}
           </div>
         </div>
         {!showExample && <footer className="ke-creation-footer">

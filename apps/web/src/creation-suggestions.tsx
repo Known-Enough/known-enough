@@ -3,23 +3,26 @@ import { type ChoicePlan } from '@deal-table/contracts';
 import { addSuggestedOption, type CreationSuggestion } from './creation-options';
 import { PageIcon } from './app-chrome';
 
-export function CreationSuggestions({ review, plan, busy, onChange, onAdd, onUseDescription, onUseLegacyDraft, onDismiss, onFollowUp }: {
+export function CreationSuggestions({ review, plan, busy, onChange, onAdd, onUseDescription, onUseLegacyDraft, onDismiss, onFollowUp, onRetry, retryDisabled = false }: {
   review: CreationSuggestion; plan: ChoicePlan; busy: boolean;
   onChange: (review: CreationSuggestion) => void;
+  onRetry?: () => void; retryDisabled?: boolean;
   onAdd: (topic: ChoicePlan['topics'][number], option: string) => void;
   onUseDescription: () => void; onUseLegacyDraft: () => void; onDismiss: () => void; onFollowUp: (answers: string[]) => void;
 }) {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const questions = review.draft.clarificationQuestions;
-  return <section className="ke-creation-suggestions" aria-label={review.intent === 'description' ? 'Suggested description' : 'Suggested options'}>
-    <header><h3><PageIcon name="Sparkles" />{review.intent === 'description' ? 'A starting point' : 'Suggestions to consider'}</h3>
-      <button type="button" className="ke-text-link" disabled={busy} onClick={onDismiss}>Dismiss suggestions</button></header>
-    <p className="ke-creation-hint">Suggested by AI. Check names, dates and availability before using them.</p>
+  return <section className="ke-creation-suggestions" data-intent={review.intent} aria-label={review.intent === 'description' ? 'Suggested description' : 'Suggested options'}>
+    <header><h3><PageIcon name="Sparkles" />{review.intent === 'description' ? 'Suggested description' : 'Suggestions to consider'}</h3>
+      {review.intent !== 'description' && <button type="button" className="ke-text-link" disabled={busy} onClick={onDismiss}>Dismiss suggestions</button>}</header>
+    {review.intent !== 'description' && <p className="ke-creation-hint">Suggested by AI. Check names, dates and availability before using them.</p>}
     {!review.draft.choicePlan && review.intent === 'options' && <div className="ke-legacy-suggestion"><p className="ke-creation-hint">This saved draft keeps its options and group requirements together.</p><button type="button" className="secondary" disabled={busy} onClick={onUseLegacyDraft}>Use this saved draft</button></div>}
     {review.intent === 'description' ? <>
-      <label>Suggested description<textarea rows={4} maxLength={2000} value={review.description} disabled={busy}
+      <label className="ke-description-result-label">Edit the suggestion if you like<textarea data-description-suggestion rows={3} maxLength={2000} value={review.description} disabled={busy}
         onChange={event => onChange({ ...review, description: event.target.value })} /></label>
-      <button type="button" className="secondary" disabled={busy || !review.description.trim()} onClick={onUseDescription}>Use this description</button>
+      <div className="ke-description-assistance-actions"><button type="button" disabled={busy || !review.description.trim()} onClick={onUseDescription}>Use this</button>
+        {onRetry && <button type="button" className="secondary" disabled={busy || retryDisabled} onClick={onRetry}>Try again</button>}
+        <button type="button" className="ke-text-link" disabled={busy} onClick={onDismiss}>Cancel</button></div>
     </> : review.plan.topics.map((topic, index) => <section key={index} className="ke-suggestion-topic" aria-label={`Suggestions for ${topic.label || 'your decision'}`}>
       <h4>{topic.label || 'Options'}</h4>
       {topic.options.map((option, at) => <div className="ke-suggestion-row" key={at}>
