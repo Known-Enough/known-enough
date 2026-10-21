@@ -3148,3 +3148,6 @@ FF09 CODE_READY/B — fictional guide embedded only in creation dialog, form/req
 
 
 2026-10-21T01:13:41.809994+00:00 — A claims user-requested Step2 options refinement. Frontend-only scope: concise initial title suggestions with persisted user-edited protection, prominent topic names/options, compact editable rows and focused additions, explicit inline AI topic/option/name acceptance, optional More settings and scoped light/dark CSS. Preserve public draft/request storage, validation and exact API contracts, permissions/privacy/consent/unknown-call guards. Static checks/build and dual-site publication; user manual acceptance, no tests/provider/participant/backend/IAM/CloudShell/schedule actions.
+
+
+2026-10-21 — Same Step2 publication scope includes a bounded Vercel build correction: deployed provider upgraded to Node24.22.0/npm11.19.1 and npm ci failed EBADENGINE against required24.21.0/11.19.0. Use the existing project exact Node distribution/checksum pattern for Vercel install/build; retain package engines/engine-strict and all application/backend settings. Initial Amplify dispatch39526804535 failed source verification before credentials after an incorrect supplied full SHA; corrected39526834547 succeeded. No tests or provider/product calls.
