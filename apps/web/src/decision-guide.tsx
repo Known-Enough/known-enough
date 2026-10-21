@@ -8,7 +8,7 @@ export function DecisionGuide({ onReturn }: { onReturn: () => void }) {
   useEffect(() => {
     heading.current?.focus();
   }, [step]);
-  const steps = ['Describe', 'Options', 'Private answers', 'Automatic outcome', 'Approve together'];
+  const steps = ['Describe', 'Choices', 'Private answers', 'Automatic outcome', 'Approve together'];
   return <section className="ke-guide ke-guide-embedded" aria-label="Fictional decision example">
     <button type="button" className="secondary" onClick={onReturn}>Back to my draft</button>
     <section className="ke-guide-intro"><span className="ke-guide-badge">Made-up example</span><h3>Alex and Sam plan dinner.</h3>
@@ -20,20 +20,20 @@ export function DecisionGuide({ onReturn }: { onReturn: () => void }) {
     <article className="ke-guide-scene" aria-labelledby="guide-scene-title">
       <p className="ke-guide-step-count">Step {step + 1} of {steps.length}</p><h2 ref={heading} tabIndex={-1} id="guide-scene-title">{steps[step]}</h2>
       {step === 0 && <>
-        <p>On <strong>What are we deciding?</strong>, write the shared idea and the options you already have. Keep each person’s preferences for their private answers later.</p>
+        <p>On <strong>What are we deciding?</strong>, write the shared idea and the choices you already have. Keep each person’s preferences for their private answers later.</p>
         <blockquote>“We want to have dinner together on 23 or 24 October 2026. We’re considering Olive Room, Noodle Corner and Garden Table. We need to choose a restaurant and a day.”</blockquote>
-        <div className="ke-guide-note"><strong>Next: Continue</strong><p>This opens the Options page. You’ll check and add the actual topics and choices there.</p></div>
+        <div className="ke-guide-note"><strong>Next: Continue</strong><p>This opens the Choices page. You’ll add your questions and choices there.</p></div>
         <details><summary>Need help describing the idea?</summary><p>Open <strong>Help me get started</strong>, then choose <strong>Suggest description</strong>. It uses the text you’ve already entered, or asks for a short idea if the field is empty. Read the suggestion and choose <strong>Use this</strong>, <strong>Try again</strong> or <strong>Cancel</strong>. Your description changes only when you choose Use this.</p></details>
       </>}
       {step === 1 && <>
-        <p>On <strong>Review your options</strong>, check the suggested <strong>Decision name</strong> or edit it. Then give each topic a clear name and add its options.</p>
-        <p>A <strong>topic</strong> is one thing to choose, such as the restaurant. Its <strong>options</strong> are the alternatives, such as Olive Room or Noodle Corner.</p>
+        <p>On <strong>Review your choices</strong>, check the suggested <strong>Decision name</strong> or edit it. Under <strong>Questions and choices</strong>, give each question a title and add its choices.</p>
+        <p>A <strong>question</strong> is something your group needs to decide, such as “Where should we eat?” Its <strong>choices</strong> are the alternatives, such as Olive Room or Noodle Corner.</p>
         <div className="ke-guide-sample"><span className="ke-guide-view-label">Shared decision</span><h3>Dinner together</h3>
           <dl><div><dt>Restaurant</dt><dd>Olive Room · Noodle Corner · Garden Table</dd></div><div><dt>Date</dt><dd>23 October 2026 · 24 October 2026</dd></div><div><dt>People</dt><dd>Alex and Sam</dd></div></dl>
         </div>
-        <p>Use <strong>Add option</strong> beneath a topic and <strong>Add another topic</strong> for a separate choice. Remove unwanted rows with the X. For calendar dates, open <strong>More settings</strong> and select <strong>Exact dates</strong>.</p>
-        <details><summary>How do suggestions become actual options?</summary><p>Your description is the starting point. Enter the options yourself, or choose <strong>Suggest options</strong>. Suggestions appear separately: choose <strong>Add topic</strong>, <strong>Add options</strong> or <strong>Add</strong> beside an individual suggestion to include it. You can edit the choices before creating the decision. AI help is optional.</p></details>
-        <div className="ke-guide-note"><strong>Next: Create decision</strong><p>Check the name, topics and options, then create the decision. Everyone in it adds their own private answers next.</p></div>
+        <p>Use <strong>Add choice</strong> beneath a question and <strong>Add question</strong> for a separate question. Remove unwanted rows with the X. For calendar dates, open <strong>More settings</strong> and select <strong>Exact dates</strong>.</p>
+        <details><summary>How do suggestions become actual choices?</summary><p>Your description is the starting point. Enter the choices yourself, or choose <strong>Suggest choices</strong>. Suggestions appear separately: choose <strong>Add question</strong>, <strong>Add choices</strong> or <strong>Add choice</strong> beside an individual suggestion to include it. You can edit the choices before creating the decision. AI help is optional.</p></details>
+        <div className="ke-guide-note"><strong>Next: Create decision</strong><p>Check the name, questions and choices, then create the decision. Fix any highlighted fields; the summary beside Create decision links to each problem. Everyone in it adds their own private answers next.</p></div>
         <details><summary>Want to finish the draft later?</summary><p><strong>Save draft</strong> saves it to your group. <strong>Continue draft</strong> reopens a saved draft; <strong>Continue unsaved draft</strong> restores the form kept in this browser. <strong>Start a decision</strong> always opens a blank form. Previously saved drafts stay available.</p></details>
         <p className="ke-guide-disclaimer">These places and dates are made up. Check real prices, availability and other important details before relying on a proposal.</p>
       </>}
