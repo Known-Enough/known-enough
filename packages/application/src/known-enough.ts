@@ -1021,6 +1021,8 @@ export class KnownEnoughApplication {
         decision.publicProposal = null;
         decision.status = evaluation.status === 'NEEDS_PERMISSION' ? 'PRIVATE_NEGOTIATION'
           : evaluation.status === 'NEEDS_CLARIFICATION' ? 'NEEDS_CLARIFICATION' : 'NO_AGREEMENT';
+        if (decision.status === 'NO_AGREEMENT') decision.pendingCandidate = null;
+        decision.publicRevision += 1;
         return evaluation.status;
       }
       const validatedCandidate = KE.CandidateProposal.parse({

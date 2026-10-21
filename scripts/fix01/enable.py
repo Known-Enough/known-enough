@@ -1,6 +1,6 @@
 """Source-bound model control for public drafts. Preserves private retention and schedule."""
-import argparse,base64,datetime,json,os,pathlib,re,runpy,subprocess
-p=argparse.ArgumentParser();p.add_argument('phase',choices=['api','worker','logging','enable','disable']);p.add_argument('--api-sha256');p.add_argument('--worker-sha256');p.add_argument('--control-source');p.add_argument('--expected-enabled',choices=['true','false']);args=p.parse_args()
+import argparse,base64,datetime,json,os,pathlib,re,runpy,subprocess,time
+p=argparse.ArgumentParser();p.add_argument('phase',choices=['api','worker','logging','enable','disable']);p.add_argument('--api-sha256');p.add_argument('--worker-sha256');p.add_argument('--control-source');p.add_argument('--expected-enabled',choices=['true','false']);p.add_argument('--wait-idle',action='store_true');args=p.parse_args()
 A='092954139775';SOURCE=os.environ['EXPECTED_SOURCE'];ROOT=pathlib.Path(os.environ['RUNNER_TEMP'])
 report={'utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'source':SOURCE,'phase':args.phase,'controlWrites':0,'dataWrites':0,'providerCalls':0}
 def call(service,op,*argv):
@@ -37,6 +37,18 @@ try:
   state=json.loads(current['payload']['S']);standing=json.loads(auth['payload']['S']);policy=json.loads(retention['payload']['S'])
   control_source=args.control_source or SOURCE
   if not re.fullmatch('[a-f0-9]{40}',control_source) or (args.phase=='enable' and control_source!=SOURCE):raise ValueError('CONTROL_SOURCE_INVALID')
+  if args.wait_idle:
+   if args.phase!='disable':raise ValueError('IDLE_WAIT_DISABLE_ONLY')
+   deadline=time.monotonic()+150
+   while state.get('sourceSha')==control_source and state.get('enabled') is True and (state.get('active') or state.get('slots')):
+    if time.monotonic()>=deadline:raise ValueError('ACTIVE_JOBS_DID_NOT_FINISH')
+    time.sleep(1)
+    current=item('KnownEnoughOperationsJournal','OPERATIONS#MODEL_JOBS')
+    if not current:raise ValueError('CURRENT_CONTROLS_MISSING')
+    state=json.loads(current['payload']['S'])
+   # Take the usage baseline after existing jobs finish; the guarded pause never
+   # cancels their work, erases a slot, changes totals or retries a model call.
+   totals=item('KnownEnoughQaControl','TOTAL')
   expected_enabled=args.expected_enabled
   if expected_enabled is not None and state.get('enabled') is not (expected_enabled=='true'):raise ValueError('CONTROL_ENABLED_STATE_CHANGED')
   report['observedControl']={'sourceSha':state.get('sourceSha'),'enabled':state.get('enabled'),'activeCount':len(state.get('active',[])),'slotCount':len(state.get('slots',[]))}

@@ -33,6 +33,8 @@ export function createDurableModelWorker<Context>(options: { now: () => number; 
 import { randomUUID } from 'node:crypto';
 import { KnownEnoughApplication, type KnownEnoughRecord, type KnownEnoughRepository, type DecisionNegotiationContext, type DecisionNegotiationModel } from '@deal-table/application';
 import { KnownEnough as KE, Groups } from '@deal-table/contracts';
+import { genericCandidateCatalog } from '@deal-table/adapters';
+import { isDeepStrictEqual } from 'node:util';
 import { decodeDecisionStateItem, encodeDecisionStateItem, validateDecisionStateGuard } from '@deal-table/adapters/durable-model-runtime';
 import { JOB_TARGET } from '@deal-table/adapters/durable-model-runtime';
 import { RetentionPolicy, RetentionStamp, retentionDeadline } from '@deal-table/adapters/durable-model-runtime';
@@ -59,6 +61,33 @@ export function createDurableNegotiationWorker(options: { now: () => number; sto
     try { options.reportInvalidOutput?.(stage); } catch { /* Diagnostics cannot change validation, retry or publication. */ }
     throw new DurableJobError('INVALID_OUTPUT');
   };
+  async function catalogGuidance(value: NegotiationContext) {
+    const catalog = options.publicCandidates(structuredClone(value.context.publicSnapshot.frame));
+    if (!catalog.length || catalog.length > 64 || Buffer.byteLength(JSON.stringify(catalog)) > 256 * 1024) throw new DurableJobError('INVALID');
+    const publicIds = new Set(value.context.publicSnapshot.frame.variables.filter(v => v.visibility === 'PUBLIC').map(v => v.id));
+    const values = catalog.map(item => KE.PublicProposalFacts.shape.values.parse(item));
+    if (values.some(items => items.some(item => !publicIds.has(item.variableId)))) throw new DurableJobError('INVALID');
+    // The model selects among checked combinations; it is not the authority for mandatory rules.
+    // Keep the full public vocabulary and final current-state validation independent of this preview.
+    const preview = localApplication(value.record, options.now).application;
+    const service: TrustedPrincipal = { kind: 'service', subject: 'durable-negotiator', roomIds: [value.record.decisionId] };
+    const statuses: string[] = [];
+    const questionTargets: NonNullable<Parameters<DecisionNegotiationModel>[0]['candidateQuestionTargets']> = [];
+    for (let offset = 0; offset < values.length; offset += 16) {
+      const candidates = values.slice(offset, offset + 16).map((assignments, index) => KE.CandidateProposal.parse({
+        schemaVersion: KE.KE_SCHEMA_VERSION, proposalId: `durable-preview-${offset + index}`, decisionId: value.record.decisionId,
+        contextToken: value.context.job.contextToken, semanticVersion: value.context.job.semanticVersion,
+        proposalVersion: value.context.proposalVersion, values: assignments, permissionDependencies: [],
+        createdAt: new Date(options.now()).toISOString(), validation: { status: 'VALID', checkedRuleIds: [], failedRuleIds: [], unknownRuleIds: [], unsupportedConditionIds: [] },
+      }));
+      const guidance = await preview.previewReasoningCatalogGuidance(service, value.record.decisionId, value.context.job.id, candidates);
+      statuses.push(...guidance.statuses); questionTargets.push(...guidance.questionTargets);
+    }
+    const complete = genericCandidateCatalog(value.context.publicSnapshot.frame);
+    const exhausted = complete.status === 'COMPLETE' && isDeepStrictEqual(values, complete.candidates)
+      && statuses.length > 0 && statuses.every(status => status === 'INVALID');
+    return { values, statuses, questionTargets, exhausted };
+  }
   return createDurableModelWorker<NegotiationContext>({ now: options.now, store: options.store, ...(options.reportFailure ? { reportFailure: options.reportFailure } : {}), ...(options.reconcile ? { reconcile: options.reconcile } : {}), ...(options.bounds ? { bounds: options.bounds } : {}),
     async reload(reference) {
       const loaded = await options.load(reference); const fence = checkedJobFence(loaded.fence);
@@ -96,27 +125,11 @@ export function createDurableNegotiationWorker(options: { now: () => number; sto
         context: { record, context }, fence };
     },
     async invoke(value, signal) {
-      const catalog = options.publicCandidates(structuredClone(value.context.publicSnapshot.frame));
-      if (!catalog.length || catalog.length > 64 || Buffer.byteLength(JSON.stringify(catalog)) > 256 * 1024) throw new DurableJobError('INVALID');
-      const publicIds = new Set(value.context.publicSnapshot.frame.variables.filter(v => v.visibility === 'PUBLIC').map(v => v.id));
-      const values = catalog.map(item => KE.PublicProposalFacts.shape.values.parse(item));
-      if (values.some(items => items.some(item => !publicIds.has(item.variableId)))) throw new DurableJobError('INVALID');
-      // The model selects among checked combinations; it is not the authority for mandatory rules.
-      // Keep the full public vocabulary and final current-state validation independent of this preview.
-      const preview = localApplication(value.record, options.now).application;
-      const service: TrustedPrincipal = { kind: 'service', subject: 'durable-negotiator', roomIds: [value.record.decisionId] };
-      const statuses: string[] = [];
-      const questionTargets: NonNullable<Parameters<DecisionNegotiationModel>[0]['candidateQuestionTargets']> = [];
-      for (let offset = 0; offset < values.length; offset += 16) {
-        const candidates = values.slice(offset, offset + 16).map((assignments, index) => KE.CandidateProposal.parse({
-          schemaVersion: KE.KE_SCHEMA_VERSION, proposalId: `durable-preview-${offset + index}`, decisionId: value.record.decisionId,
-          contextToken: value.context.job.contextToken, semanticVersion: value.context.job.semanticVersion,
-          proposalVersion: value.context.proposalVersion, values: assignments, permissionDependencies: [],
-          createdAt: new Date(options.now()).toISOString(), validation: { status: 'VALID', checkedRuleIds: [], failedRuleIds: [], unknownRuleIds: [], unsupportedConditionIds: [] },
-        }));
-        const guidance = await preview.previewReasoningCatalogGuidance(service, value.record.decisionId, value.context.job.id, candidates);
-        statuses.push(...guidance.statuses); questionTargets.push(...guidance.questionTargets);
-      }
+      const { values, statuses, questionTargets, exhausted } = await catalogGuidance(value);
+      // A fully enumerated, kernel-rejected catalog is a finished result. No AI
+      // call can make incompatible mandatory answers viable or reveal their reasons.
+      if (exhausted) return { output: { values: values[0]!, permissionDependencies: [], questionIntents: [] },
+        usage: { inputTokens: 0, outputTokens: 0 } };
       const eligible = values.flatMap((_, index) => ['VALID', 'NEEDS_PERMISSION'].includes(statuses[index]!) ? [index] : []);
       const indices = eligible.length ? eligible : values.map((_, index) => index);
       const result = await options.model({ context: value.context, publicCandidates: indices.map(index => values[index]!),
@@ -149,8 +162,9 @@ export function createDurableNegotiationWorker(options: { now: () => number; sto
       const outcome = await transient.application.completeReasoning(service, reference.decisionId, reference.reasoningJobId, candidate.data,
         { principal: { kind: 'participant', subject: reference.subject }, controlVersion: value.context.controlVersion, expiresAt: reference.expiresAt });
       if (outcome === 'STALE') return rejectOutput('KERNEL_STALE');
-      if (outcome === 'INVALID') return rejectOutput('KERNEL_INVALID');
-      if (outcome === 'NEEDS_CLARIFICATION') return rejectOutput('KERNEL_CLARIFICATION');
+      if (outcome === 'INVALID' && !(await catalogGuidance(value)).exhausted) return rejectOutput('KERNEL_INVALID');
+      // A real clarification result must also leave REASONING. It is not a
+      // malformed model response and must not trigger another automatic job.
       // Preserve the existing consent workflow. An atomic pending proposal is useful only with exact valid questions.
       if (outcome === 'NEEDS_PERMISSION') {
         const targets = await transient.application.getPendingNegotiationFailures(service, reference.decisionId);

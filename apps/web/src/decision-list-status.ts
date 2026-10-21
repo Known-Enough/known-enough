@@ -17,7 +17,7 @@ export function decisionListStatus(owner: KE.OwnerDecisionSnapshot): DecisionLis
   if (!required) return { label: 'Waiting for others', tone: 'waiting', detail: answered };
   if (owner.ownInputReadiness !== 'READY') return { label: 'Needs your answer', tone: 'action', detail: answered };
   if (snapshot.status === 'READY') return { label: 'Preparing outcome', tone: 'waiting', detail: answered };
-  if (snapshot.status === 'NO_AGREEMENT') return { label: 'No matching outcome', tone: 'muted' };
+  if (snapshot.status === 'NO_AGREEMENT') return { label: 'No matching outcome', tone: 'action', detail: 'You can edit your answers' };
   if (snapshot.status === 'SUPERSEDED') return { label: 'Decision updated', tone: 'muted', detail: answered };
   return { label: 'Waiting for others', tone: 'waiting', detail: answered };
 }
