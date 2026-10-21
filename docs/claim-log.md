@@ -3200,3 +3200,6 @@ FF09 CODE_READY/B — fictional guide embedded only in creation dialog, form/req
 
 
 2026-10-21T07:19:05.434276+00:00 — A agreed-outcome menu/late-joiner visibility PUBLISHED / claim released. Sourcec5ece42/frontend39560998224/Amplify167/VercelREADY; both HTML200/common2+Amplify10 hashes match. Authorized agreed outcome menu in row/header, direct modal section; current owner403/404 hidden from UI lists/group previews/counts, existing backend grants/frozen rosters/group DTO unchanged. Static type/lint/build/boundaries668/whitespace PASS; no product tests/model/user/backend/IAM/schedule changes, manual acceptance pending. [Receipt](review-artifacts/ui/agreed-outcome-menu-publication.json).
+
+
+2026-10-21T07:59:46.769949+00:00 — A documentation-branch split: preserve all 1,317 documentation files on new development, remove tracked documentation from main, relocate only executable fixtures and adjust direct documentation dependencies. Non-document code-clutter audit is read-only and reported in chat; no product tests/provider/cloud/data actions. Original dirty checkout and untracked user drafts preserved.
