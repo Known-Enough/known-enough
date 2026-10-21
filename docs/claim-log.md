@@ -3170,3 +3170,6 @@ FF09 CODE_READY/B — fictional guide embedded only in creation dialog, form/req
 
 
 2026-10-21 — Automatic-outcome publication39557320046 stopped at WORKER_INSTALLED_GUARD_FAILED before either code replacement: existing worker schedule was ENABLED while the release required DISABLED. Existing disabled-empty control preflight passed; control is now paused on prior8cfb0e8. Add a source/hash/target-verified schedule pause in the existing worker publisher after queue preflight, retain strict disabled readback before code write, then resume cutover and restore original enabled schedule. No new permissions, tests or provider probes.
+
+
+2026-10-21 — Publication39557505982 paused the verified existing schedule but its CLI helper tried to JSON-decode the successful no-output DisableRule response. No worker/API code write was attempted. Accept empty successful CLI output as an empty object; subsequent exact state readback still required. Resume paused publication with unchanged prior source/hash; no tests or provider probes.

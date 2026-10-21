@@ -49,7 +49,7 @@ def main():
         if result.returncode:
             code = re.search(rb'\(([A-Za-z0-9]+)\)', result.stderr)
             raise RuntimeError(code.group(1).decode() if code else 'AWS_CLI_FAILED')
-        return json.loads(result.stdout)
+        return json.loads(result.stdout) if result.stdout.strip() else {}
     try:
         source = os.environ['GITHUB_SHA']
         prepared = json.loads((root/'partition-prepare-report.json').read_text())
