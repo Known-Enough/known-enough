@@ -3191,3 +3191,6 @@ FF09 CODE_READY/B — fictional guide embedded only in creation dialog, form/req
 
 
 2026-10-21T07:06:25.641830+00:00 — A claims user correction: only decision creation remains a dedicated page. Restore existing native decision/details/outcome modals with X/backdrop/Escape, focus and scroll management; keep current URL/history, private answers, automatic outcomes and approval/state guards. No product tests; static checks/build and dual frontend publication. No backend/IAM/provider/user/schedule changes.
+
+
+2026-10-21T07:10:49.104441+00:00 — A creation-only-page correction PUBLISHED / claim released. Sourceb8e41cb/frontend39560004429/Amplify166/VercelREADY; both HTML200/common2+Amplify10 hashes match. Only creation remains a page; current decision/answers/details/outcome/permissions restored to existing native modals with guarded dismiss/focus/scroll, URL/history state and single privacy disclosure; tutorial updated. Static type/lint/build/boundaries668/whitespace PASS; no product tests/model/user/backend/IAM/schedule changes, manual acceptance pending. [Receipt](review-artifacts/ui/decision-modals-publication.json).

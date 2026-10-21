@@ -1,0 +1,111 @@
+{
+  "result": "DECISION_MODALS_PUBLICATION_READBACK_PASS",
+  "observedAt": "2026-10-21T07:10:49.104441+00:00",
+  "sourceSha": "b8e41cbd3de8ef241d7160d8df282f8d79b39ceb",
+  "frontendRun": "https://github.com/Known-Enough/known-enough/actions/runs/39560004429",
+  "amplifyJob": "166",
+  "vercel": {
+    "sourceSha": "b8e41cbd3de8ef241d7160d8df282f8d79b39ceb",
+    "deploymentId": "dpl_6bU8emQLphXYjrnWx2pZMSb1xWQC",
+    "state": "READY"
+  },
+  "scope": [
+    "Decision creation Describe/Options remains a dedicated page, including its inline Decision example.",
+    "Existing decision overview/private-answer form restored inside the native decision modal. Details/outcome/proposal/permissions restored to the existing child modal, chat and quick-action dialogs retained.",
+    "Existing query URLs and Back/Forward remain supported as modal navigation. Same-decision transitions keep owner edits/requests in memory. Root X/backdrop/Escape follows current unsaved-change guard; child dismissal returns to the decision modal.",
+    "Root modal locks body scrolling; active modal headings receive focus and child close restores the prior connected focus target. Reuse compact modal styling and keep a single privacy disclosure inside the decision modal.",
+    "Tutorial wording updated for creation page and existing-decision windows. Recent automatic outcomes, status loading, answer/consent/approval/backend behavior preserved."
+  ],
+  "verification": {
+    "typescript": "PASS",
+    "changedFileLint": "PASS",
+    "productionBuild": "PASS",
+    "importBoundaries": "PASS_668",
+    "whitespace": "PASS",
+    "productTests": "NOT_RUN_USER_DIRECTION",
+    "manualAcceptance": "PENDING"
+  },
+  "preserved": {
+    "apiSha256": "c2014e4f3ef1a3127e9e5b2ef481a85e78896de3d43fd1d93e54040ef184892e",
+    "frontendConfigurationWrites": 0,
+    "backendPublication": false,
+    "iamOrScheduleChanges": false,
+    "participantActions": 0,
+    "modelCalls": 0,
+    "emailRequests": 0
+  },
+  "sites": [
+    {
+      "url": "https://known-enough.vercel.app/",
+      "httpStatus": 200,
+      "files": [
+        {
+          "path": "/assets/connected-app-brlSUc8e.js",
+          "sha256": "2d163f5f05b10c826f3cff68d2041f2cdf4a5b9bbc19bf0a22dbbbd4e694a60f",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/index-Dpg5AE5v.css",
+          "sha256": "d29f0bec964451207059dc6d027e86dcbff7129db071c17fc4b62434929c737b",
+          "matchesRelease": true
+        }
+      ]
+    },
+    {
+      "url": "https://main.d143q5ravxp5av.amplifyapp.com/",
+      "httpStatus": 200,
+      "files": [
+        {
+          "path": "/assets/alexa-chat-BteYSFi5.js",
+          "sha256": "42f864662ec4b97e3c4357debe5fc107054792ce3d5484a494b15a28f4aabec9",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/app-chrome--W4SXGVh.js",
+          "sha256": "9b7c88280aacbb265c53eceea9f91d32e590d405321f70087cae40d04d20f5dd",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/connected-app-brlSUc8e.js",
+          "sha256": "2d163f5f05b10c826f3cff68d2041f2cdf4a5b9bbc19bf0a22dbbbd4e694a60f",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/index-Bst7u8Wd.js",
+          "sha256": "01ef740d269cf4e7ecfb064f3dad4d74888318c45228180e525c862deaafff32",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/index-Dpg5AE5v.css",
+          "sha256": "d29f0bec964451207059dc6d027e86dcbff7129db071c17fc4b62434929c737b",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/preload-helper-Bz3Ef5C-.js",
+          "sha256": "c0e950f1c6235c43c01f65ad564b71c6a6283863b0759f559f5f942e358cd19e",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/src-C6BDNkdd.js",
+          "sha256": "82da0df78c6940e958a8e15b19efe611b53c8c925ce2a97605ecc698915fd2d9",
+          "matchesRelease": true
+        },
+        {
+          "path": "/cover.png",
+          "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151",
+          "matchesRelease": true
+        },
+        {
+          "path": "/",
+          "sha256": "82b6126eeec9ce4b3e18a11de5d94a51637e6ee0c4bf5947e7096ed6ca97af5c",
+          "matchesRelease": true
+        },
+        {
+          "path": "/logo.png",
+          "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb",
+          "matchesRelease": true
+        }
+      ]
+    }
+  ]
+}
