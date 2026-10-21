@@ -733,6 +733,11 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 .ke-skeleton-group-row + .ke-skeleton-group-row { border-top: 1px solid #e8ede7; }
 .ke-skeleton-group-row > span:nth-child(2) { display: grid; flex: 1; gap: 7px; min-width: 0; }
 .ke-skeleton-bar.is-menu-trigger { flex: none; width: 36px; height: 36px; border-radius: 10px; }
+.ke-skeleton-decision-list { display: grid; gap: 6px; }
+.ke-skeleton-decision-row { display: flex; align-items: center; gap: 14px; min-width: 0; min-height: 54px; padding: 10px; }
+.ke-loading-decisions .ke-skeleton-section-heading > .ke-skeleton-identity { flex: 1; }
+.ke-loading-decisions .ke-skeleton-section-heading > .is-button { flex: none; width: min(34%, 142px); }
+.ke-skeleton-bar.is-decision-status { flex: none; width: 100px; height: 25px; }
 .ke-loading-group { display: grid; gap: 14px; }
 .ke-loading-group.ke-group-route-loading { max-width: 1280px; }
 .ke-skeleton-group-overview { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; min-height: 134px; padding: 24px 28px; border: 1px solid #dfe5dc; border-radius: 20px; background: #fff; box-shadow: 0 8px 32px #173c3005, 0 1px 3px #173c3003; }

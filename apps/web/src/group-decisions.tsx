@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ChoicePlan, compileChoicePlan, Groups, KnownEnough as KE } from '@deal-table/contracts';
 import { ruleText, variableText, valueText } from './connected-decision';
 import { readDraftRequest,saveDraftRequest,draftFailureMessage } from './draft-request-state';
-import { PageIcon } from './app-chrome';
+import { LoadingSkeleton, PageIcon } from './app-chrome';
 import { appViewSearch, type CreationStep, type DecisionSection } from './navigation';
 class UserFlowError extends Error { constructor(message: string, readonly status?: number) { super(message); } }
 function guidanceText(value: string) { return value.normalize('NFKC').toLocaleLowerCase('en-US').replace(/[^\p{L}\p{N}]+/gu, ' ').trim(); }
@@ -563,7 +563,9 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
   const hasLocalDraft = !!objective.trim() || !!choicePlan || !!draft || !!aiReview || !!pendingKey || !!manualPending.current;
   const visibleDecisions = group.decisions.filter(decision => listStatuses[decision.id] !== null);
   const hasSavedDrafts = group.isOrganizer && group.drafts.some(draft => !draft.created);
-  if (!starting && group.decisions.some(decision => decision.current) && statusGroup !== group) return null;
+  if (!starting && group.decisions.some(decision => decision.current) && statusGroup !== group) {
+    return <LoadingSkeleton kind="decisions" label="Loading decisions" className="ke-card ke-group-panel ke-decisions-panel" />;
+  }
   return <section className={starting ? 'ke-workflow-content ke-creation-page-container' : 'ke-card ke-group-panel ke-decisions-panel'} aria-busy={busy} aria-labelledby={starting ? `decision-wizard-title-${group.id}` : `decisions-heading-${group.id}`}>
     {!starting && <>
     <header className="ke-panel-heading"><div><h2 id={`decisions-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="ListChecks" /></span><span>Decisions</span></h2>
