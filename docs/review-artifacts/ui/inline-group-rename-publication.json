@@ -1,0 +1,117 @@
+{
+  "result": "INLINE_GROUP_RENAME_DUAL_PUBLICATION_READBACK_PASS",
+  "observedAt": "2026-10-21T00:36:28.745106+00:00",
+  "sourceSha": "c2301d7d6cd13068e328170d95abfc5ccb6f3cc3",
+  "frontendRun": "https://github.com/Known-Enough/known-enough/actions/runs/39522144693",
+  "amplifyJob": "158",
+  "vercel": {
+    "sourceSha": "c2301d7d6cd13068e328170d95abfc5ccb6f3cc3",
+    "deploymentId": "dpl_2UoNhFAagXRRmCGfKBVQaokHNjxG",
+    "state": "READY"
+  },
+  "scope": [
+    "Header-only inline mode in the existing RenameAction; other rename dialogs retained",
+    "Autofocus and selected current name; Enter submit and Escape/cancel discard with focus restoration",
+    "Check/X controls, guarded single save, spinner and accessible busy status",
+    "1\u201380 trimmed character validation and original captured version/previousName API payload/error message",
+    "Measured title height and viewport-bounded comfortable editor width; existing metadata retained",
+    "Unsaved header edits included in existing navigation guard",
+    "Small All groups link supports existing SPA back action and modified-link navigation; refresh tooltip retained"
+  ],
+  "verification": {
+    "typescript": "PASS",
+    "changedSourceLint": "PASS",
+    "productionBuild": "PASS",
+    "productTests": "NOT_RUN_USER_DIRECTION",
+    "manualAcceptance": "PENDING"
+  },
+  "preserved": {
+    "apiSha256": "ec34d5a84ecc84ed8b54c6813353d51c112c30aeb8f60d6bb5b2c6f2e1e247af",
+    "frontendConfigurationWrites": 0,
+    "backendPublication": false,
+    "iamChanges": false,
+    "scheduleChanges": false,
+    "participantActions": 0,
+    "modelCalls": 0,
+    "permissions": "UNCHANGED"
+  },
+  "sites": [
+    {
+      "url": "https://known-enough.vercel.app/",
+      "httpStatus": 200,
+      "files": [
+        {
+          "path": "/assets/connected-app-B_D1pxHL.js",
+          "sha256": "0e3cb1ead6890fc9732e72df4874aeff2ffe78fa93e2b748a7b7a19a38b9cc3d",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/index-DvRHMK7O.css",
+          "sha256": "253074ff7b5a2fd28c77427883f3b1646d95c346734381498f83a101a902689f",
+          "matchesRelease": true
+        }
+      ]
+    },
+    {
+      "url": "https://main.d143q5ravxp5av.amplifyapp.com/",
+      "httpStatus": 200,
+      "files": [
+        {
+          "path": "/assets/alexa-chat-BteYSFi5.js",
+          "sha256": "42f864662ec4b97e3c4357debe5fc107054792ce3d5484a494b15a28f4aabec9",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/app-chrome--W4SXGVh.js",
+          "sha256": "9b7c88280aacbb265c53eceea9f91d32e590d405321f70087cae40d04d20f5dd",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/connected-app-B_D1pxHL.js",
+          "sha256": "0e3cb1ead6890fc9732e72df4874aeff2ffe78fa93e2b748a7b7a19a38b9cc3d",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/index-DjgCgzNp.js",
+          "sha256": "d10071d7e0234ba0fbfac73601765e6531e6f052b44b3b83964b1ba92d5a6557",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/index-DvRHMK7O.css",
+          "sha256": "253074ff7b5a2fd28c77427883f3b1646d95c346734381498f83a101a902689f",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/preload-helper-Bz3Ef5C-.js",
+          "sha256": "c0e950f1c6235c43c01f65ad564b71c6a6283863b0759f559f5f942e358cd19e",
+          "matchesRelease": true
+        },
+        {
+          "path": "/assets/src-C6BDNkdd.js",
+          "sha256": "82da0df78c6940e958a8e15b19efe611b53c8c925ce2a97605ecc698915fd2d9",
+          "matchesRelease": true
+        },
+        {
+          "path": "/cover.png",
+          "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151",
+          "matchesRelease": true
+        },
+        {
+          "path": "/",
+          "sha256": "9365c658a72dfdc79dc8673f931eb8687e13910b8bcab6b84653fae973e3a2c0",
+          "matchesRelease": true
+        },
+        {
+          "path": "/logo.png",
+          "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb",
+          "matchesRelease": true
+        }
+      ]
+    }
+  ],
+  "supersededFrontendRun": {
+    "url": "https://github.com/Known-Enough/known-enough/actions/runs/39522020604",
+    "conclusion": "CANCELLED",
+    "reason": "Final short-name editor sizing adjustment; current publication and served hashes verified independently."
+  }
+}
