@@ -212,7 +212,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
         : <GroupHome preferencesKey={groupPreferencesKey} key={`${session.accessToken}:${view.kind === 'group' || view.kind === 'creation' ? view.groupId : 'home'}:${invitationEpoch}`} {...(view.kind === 'group' || view.kind === 'creation' ? { selectedGroupId: view.groupId } : {})}
           {...(view.kind === 'creation' ? { creationStep: view.step } : {})} onOpenCreation={(step, replace) => { if (view.kind === 'group' || view.kind === 'creation') move({ kind: 'creation', groupId: view.groupId, step }, replace); }} onCloseCreation={() => { if (view.kind === 'creation') move({ kind: 'group', groupId: view.groupId }); }}
           api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} onOpenGroup={id => move({ kind: 'group', groupId: id })} onBack={() => move({ kind: 'groups' })} onDirtyChange={value => { dirty.current = value; }}
-          openDecision={id => move({ kind: 'decision', decisionId: id, ...(view.kind === 'group' || view.kind === 'creation' ? { groupId: view.groupId } : {}) })} />}
+          openDecision={(id, section) => move({ kind: 'decision', decisionId: id, ...(section ? { section } : {}), ...(view.kind === 'group' || view.kind === 'creation' ? { groupId: view.groupId } : {}) })} />}
     {view.kind !== 'creation' && view.kind !== 'decision' && <footer className="ke-dashboard-privacy"><PrivacyBar /></footer>}
   </main>;
 }

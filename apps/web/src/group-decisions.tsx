@@ -10,7 +10,7 @@ import { ChoicePlan, compileChoicePlan, Groups, KnownEnough as KE } from '@deal-
 import { ruleText, variableText, valueText } from './connected-decision';
 import { readDraftRequest,saveDraftRequest,draftFailureMessage } from './draft-request-state';
 import { PageIcon } from './app-chrome';
-import { appViewSearch, type CreationStep } from './navigation';
+import { appViewSearch, type CreationStep, type DecisionSection } from './navigation';
 class UserFlowError extends Error { constructor(message: string, readonly status?: number) { super(message); } }
 function guidanceText(value: string) { return value.normalize('NFKC').toLocaleLowerCase('en-US').replace(/[^\p{L}\p{N}]+/gu, ' ').trim(); }
 function savedPublicAnswer(draft: Groups.GroupDraft | null, question: string): string | undefined {
@@ -21,9 +21,9 @@ function publicChoiceValues(variable: KE.PublicDecisionFrame['variables'][number
   const rule = frame.rules.find(item => 'variableId' in item && item.variableId === variable.id && (item.operator === 'IN' || item.operator === 'COMPARE' && item.comparison === 'EQ'));
   return rule?.operator === 'IN' ? rule.values.map(value => valueText(value, variable)) : rule?.operator === 'COMPARE' ? [valueText(rule.value, variable)] : [];
 }
-function DecisionRow({ decision, status, organizer, busy, onOpen, onReview, onRename, onDelete }: {
+function DecisionRow({ decision, status, organizer, busy, onOpen, onOutcome, onReview, onRename, onDelete }: {
   decision: Groups.GroupSnapshot['decisions'][number]; status: DecisionListStatus | undefined; organizer: boolean; busy: boolean;
-  onOpen: () => void; onReview: () => void; onRename: (name: string) => Promise<void>; onDelete: () => void;
+  onOpen: () => void; onOutcome: () => void; onReview: () => void; onRename: (name: string) => Promise<void>; onDelete: () => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const root = useRef<HTMLElement>(null), trigger = useRef<HTMLButtonElement>(null);
@@ -35,6 +35,18 @@ function DecisionRow({ decision, status, organizer, busy, onOpen, onReview, onRe
     document.addEventListener('pointerdown', outside);
     return () => document.removeEventListener('pointerdown', outside);
   }, [menuOpen]);
+  const menu = (rename?: () => void) => <>
+    <button ref={trigger} type="button" className="ke-group-menu-trigger" disabled={busy}
+      aria-label={`Actions for ${name}`} aria-expanded={menuOpen} aria-controls={`decision-actions-${decision.id}`}
+      onClick={() => setMenuOpen(current => !current)}><PageIcon name="Ellipsis" /></button>
+    <div id={`decision-actions-${decision.id}`} className="ke-decision-actions-menu" hidden={!menuOpen}>
+      {currentStatus?.canViewOutcome && <button type="button" disabled={busy} onClick={() => { setMenuOpen(false); onOutcome(); }}><PageIcon name="Check" />View outcome</button>}
+      {organizer && <>
+        <button type="button" disabled={busy} onClick={() => { setMenuOpen(false); rename?.(); }}><PageIcon name="Pencil" />Rename</button>
+        <button type="button" className="ke-decision-menu-delete" disabled={busy} onClick={() => { setMenuOpen(false); onDelete(); }}><PageIcon name="X" />Delete decision</button>
+      </>}
+    </div>
+  </>;
   return <article ref={root} className="ke-decision-row ke-clickable-decision-row">
     <button type="button" className="ke-decision-row-open" disabled={busy || (!decision.current && !organizer)}
       onClick={decision.current ? onOpen : onReview}>
@@ -43,31 +55,23 @@ function DecisionRow({ decision, status, organizer, busy, onOpen, onReview, onRe
       {currentStatus && <span className="ke-decision-status-chip" data-tone={currentStatus.tone}>{currentStatus.label}</span>}
       <PageIcon name="ChevronRight" />
     </button>
-    {organizer && <div className="ke-decision-menu-wrap" onKeyDown={event => {
+    {(organizer || currentStatus?.canViewOutcome) && <div className="ke-decision-menu-wrap" onKeyDown={event => {
       if (event.key === 'Escape') { event.preventDefault(); setMenuOpen(false); trigger.current?.focus(); }
     }} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setMenuOpen(false); }}>
-      <RenameAction name={name} save={onRename} renderTrigger={rename => <>
-        <button ref={trigger} type="button" className="ke-group-menu-trigger" disabled={busy}
-          aria-label={`Actions for ${name}`} aria-expanded={menuOpen} aria-controls={`decision-actions-${decision.id}`}
-          onClick={() => setMenuOpen(current => !current)}><PageIcon name="Ellipsis" /></button>
-        <div id={`decision-actions-${decision.id}`} className="ke-decision-actions-menu" hidden={!menuOpen}>
-          <button type="button" disabled={busy} onClick={() => { setMenuOpen(false); rename(); }}><PageIcon name="Pencil" />Rename</button>
-          <button type="button" className="ke-decision-menu-delete" disabled={busy} onClick={() => { setMenuOpen(false); onDelete(); }}><PageIcon name="X" />Delete decision</button>
-        </div>
-      </>} />
+      {organizer ? <RenameAction name={name} save={onRename} renderTrigger={menu} /> : menu()}
     </div>}
   </article>;
 }
 export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange, creationStep, onOpenCreation, onCloseCreation }: { creationStep?: CreationStep; onOpenCreation?: (step: CreationStep, replace?: boolean) => void; onCloseCreation?: () => void; group: Groups.GroupSnapshot;
-  api: (path: string, init?: RequestInit) => Promise<Response>; reload: () => Promise<void>; openDecision: (id: string) => void; startCollapsed?: boolean; onDirtyChange?: (dirty: boolean) => void }) {
-  const [listStatuses, setListStatuses] = useState<Record<string, DecisionListStatus>>({});
+  api: (path: string, init?: RequestInit) => Promise<Response>; reload: () => Promise<void>; openDecision: (id: string, section?: DecisionSection) => void; startCollapsed?: boolean; onDirtyChange?: (dirty: boolean) => void }) {
+  const [listStatuses, setListStatuses] = useState<Record<string, DecisionListStatus | null>>({});
   const [statusGroup, setStatusGroup] = useState<Groups.GroupSnapshot | null>(null);
   const statusApi = useRef(api); statusApi.current = api;
   useEffect(() => {
     const controller = new AbortController();
     let active = true, index = 0;
     const decisions = group.decisions.filter(decision => decision.current);
-    const statuses: Record<string, DecisionListStatus> = {};
+    const statuses: Record<string, DecisionListStatus | null> = {};
     async function worker() {
       while (active && index < decisions.length) {
         const decision = decisions[index++]!;
@@ -557,23 +561,26 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
               onChange={setAiReview} onAdd={acceptOption} {...(choiceMode && choicePlan ? { onAddTopic: acceptTopic } : {})} onUseTitle={name => { if (choiceMode && choicePlan) changeChoices({ ...choicePlan, title: name }); else if (draft) changeFrame({ ...draft.frame, title: name }); }} onDismiss={() => setAiReview(null)} onUseDescription={() => { changeDescription(aiReview.description); setAiReview(null); setHelpOpen(false); }}
               onUseLegacyDraft={() => { setDraft(aiReview.draft); setObjective(aiReview.draft.frame.objective); setChoicePlan(null); setChoiceDraft(null); setChoiceMode(false); setAiReview(null); setDirty(false); setStep('options'); requestAnimationFrame(() => draftHeading.current?.focus()); }} onFollowUp={updateSuggestions} /></div> : null;
   const hasLocalDraft = !!objective.trim() || !!choicePlan || !!draft || !!aiReview || !!pendingKey || !!manualPending.current;
+  const visibleDecisions = group.decisions.filter(decision => listStatuses[decision.id] !== null);
+  const hasSavedDrafts = group.isOrganizer && group.drafts.some(draft => !draft.created);
   if (!starting && group.decisions.some(decision => decision.current) && statusGroup !== group) return null;
   return <section className={starting ? 'ke-workflow-content ke-creation-page-container' : 'ke-card ke-group-panel ke-decisions-panel'} aria-busy={busy} aria-labelledby={starting ? `decision-wizard-title-${group.id}` : `decisions-heading-${group.id}`}>
     {!starting && <>
     <header className="ke-panel-heading"><div><h2 id={`decisions-heading-${group.id}`}><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="ListChecks" /></span><span>Decisions</span></h2>
       <p className="ke-panel-subtitle">Choose an option that works for your group.</p></div>
-      {group.isOrganizer && (group.decisions.length > 0 || group.drafts.length > 0 || hasLocalDraft) && <div className="ke-decision-create-actions">
+      {group.isOrganizer && (visibleDecisions.length > 0 || hasSavedDrafts || hasLocalDraft) && <div className="ke-decision-create-actions">
         {hasLocalDraft && <button type="button" className="secondary" disabled={busy} onClick={continueWizard}>Continue unsaved draft</button>}
         <button ref={launcher} type="button" className="ke-start-decision ke-icon-action" disabled={busy} onClick={startWizard}><PageIcon name="Plus" />Start a decision</button>
       </div>}</header>
-    {!group.decisions.length && !group.drafts.length && !hasLocalDraft && <div className="ke-decision-empty">
+    {!visibleDecisions.length && !hasSavedDrafts && !hasLocalDraft && <div className="ke-decision-empty">
       <span className="ke-decision-empty-icon" aria-hidden="true"><PageIcon name="ListChecks" /></span>
       <h3>What will you decide together?</h3><p>Describe a decision and bring your group together.</p>
       {group.isOrganizer ? <button ref={launcher} type="button" className="ke-start-decision ke-icon-action" disabled={busy} onClick={startWizard}><PageIcon name="Plus" />Start a decision</button>
         : <p>Your group organizer can start a decision.</p>}
     </div>}
-    <div className="ke-decision-list">{group.decisions.map(decision => <DecisionRow key={decision.id} decision={decision} status={listStatuses[decision.id]} organizer={group.isOrganizer} busy={busy}
+    <div className="ke-decision-list">{visibleDecisions.map(decision => <DecisionRow key={decision.id} decision={decision} status={listStatuses[decision.id] ?? undefined} organizer={group.isOrganizer} busy={busy}
       onOpen={() => openDecision(decision.id)}
+      onOutcome={() => openDecision(decision.id, 'outcome')}
       onReview={() => void action(async () => {
         const result = await request(`decisions/${decision.id}/review`);
         setDraft(null); setDirty(false); setRoster({ id: decision.id, frame: KE.PublicDecisionFrame.parse(result.frame), controlVersion: result.controlVersion as number,

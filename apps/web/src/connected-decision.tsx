@@ -272,6 +272,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
           onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); event.currentTarget.open = false; event.currentTarget.querySelector('summary')?.focus(); } }}>
           <summary aria-label="Decision actions"><PageIcon name="Ellipsis" /></summary>
           <div className="ke-decision-header-menu-items">
+            {snapshot.status === 'AGREED' && proposal && <button type="button" onClick={() => { if (headerMenu.current) headerMenu.current.open = false; setDetailStep('proposal'); }}><PageIcon name="Check" />View outcome</button>}
             <button type="button" onClick={() => { if (headerMenu.current) headerMenu.current.open = false; setDetailStep('shared'); }}><PageIcon name="ListChecks" />Decision details</button>
             <button type="button" aria-label="Refresh decision" disabled={busy || refreshing} onClick={() => { if (headerMenu.current) headerMenu.current.open = false; if (onRefresh) onRefresh(); else void refresh(); }}><PageIcon name="RefreshCw" />{refreshing ? 'Refreshing…' : 'Refresh'}</button>
           </div>

@@ -1,11 +1,11 @@
 import { KnownEnough as KE } from '@deal-table/contracts';
 
-export type DecisionListStatus = { label: string; tone: 'action' | 'waiting' | 'agreed' | 'muted'; detail?: string | undefined };
+export type DecisionListStatus = { label: string; tone: 'action' | 'waiting' | 'agreed' | 'muted'; detail?: string | undefined; canViewOutcome?: boolean };
 export function decisionListStatus(owner: KE.OwnerDecisionSnapshot): DecisionListStatus {
   const snapshot = owner.publicSnapshot;
   const required = snapshot.frame.requiredParticipantIds.includes(owner.ownerParticipantId);
   const answered = snapshot.participantProgress ? `${snapshot.participantProgress.filter(item => item.answersSaved).length} of ${snapshot.frame.participants.length} answered` : undefined;
-  if (snapshot.status === 'AGREED') return { label: 'Decision agreed', tone: 'agreed' };
+  if (snapshot.status === 'AGREED') return { label: 'Decision agreed', tone: 'agreed', canViewOutcome: !!snapshot.currentProposal };
   if (snapshot.status === 'CLOSED') return { label: 'Decision closed', tone: 'muted' };
   if (['CREATING', 'DEFINING'].includes(snapshot.status)) return { label: 'Draft', tone: 'muted' };
   if (snapshot.status === 'REASONING') return { label: 'Finding an outcome', tone: 'waiting' };
@@ -21,8 +21,10 @@ export function decisionListStatus(owner: KE.OwnerDecisionSnapshot): DecisionLis
   if (snapshot.status === 'SUPERSEDED') return { label: 'Decision updated', tone: 'muted', detail: answered };
   return { label: 'Waiting for others', tone: 'waiting', detail: answered };
 }
-export async function readDecisionListStatus(api: (path: string, init?: RequestInit) => Promise<Response>, decisionId: string, signal: AbortSignal): Promise<DecisionListStatus> {
+export async function readDecisionListStatus(api: (path: string, init?: RequestInit) => Promise<Response>, decisionId: string, signal: AbortSignal): Promise<DecisionListStatus | null> {
   const response = await api(`/decisions/${decisionId}/me`, { signal: AbortSignal.any([signal, AbortSignal.timeout(10000)]) });
+  // An explicit access denial hides the entry; transport/server failures remain errors.
+  if (response.status === 403 || response.status === 404) return null;
   if (!response.ok) throw new Error('Status unavailable');
   const owner = KE.OwnerDecisionSnapshot.parse(await response.json());
   if (owner.publicSnapshot.frame.decisionId !== decisionId) throw new Error('Wrong decision');

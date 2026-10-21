@@ -4,7 +4,7 @@ import { GroupMembers } from './group-members';
 import { RenameAction } from './rename-action';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GroupDecisions } from './group-decisions';
-import { type CreationStep } from './navigation';
+import { type CreationStep, type DecisionSection } from './navigation';
 import { Groups } from '@deal-table/contracts';
 import { GroupIcon, LoadingSkeleton, PageIcon } from './app-chrome';
 import { ProfileModal, type ProfileTarget } from './profile-drawer';
@@ -15,7 +15,7 @@ function groupPage(value: { groups?: unknown[]; cursor?: unknown }) {
   return { groups: value.groups.map(group => Groups.GroupSnapshot.parse(group)), cursor: typeof value.cursor === 'string' ? value.cursor : null };
 }
 export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, onOpenGroup, onBack, onDirtyChange, creationStep, onOpenCreation, onCloseCreation }: { creationStep?: CreationStep; onOpenCreation?: (step: CreationStep, replace?: boolean) => void; onCloseCreation?: () => void; api: (path: string, init?: RequestInit) => Promise<Response>; preferencesKey?: string | undefined;
-  openDecision: (id: string) => void; selectedGroupId?: string; onOpenGroup: (id: string) => void; onBack: () => void; onDirtyChange?: (dirty: boolean) => void }) {
+  openDecision: (id: string, section?: DecisionSection) => void; selectedGroupId?: string; onOpenGroup: (id: string) => void; onBack: () => void; onDirtyChange?: (dirty: boolean) => void }) {
   const [childDirty, setChildDirty] = useState(false);
   const [inlineNameDirty, setInlineNameDirty] = useState(false);
   const [avatarRevision, setAvatarRevision] = useState(0);
@@ -32,6 +32,7 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
   });
   const [showHiddenGroups, setShowHiddenGroups] = useState(false);
   const [groupActions, setGroupActions] = useState<Record<string, DecisionListStatus>>({});
+  const [groupDecisionViews, setGroupDecisionViews] = useState<Record<string, { group: Groups.GroupSnapshot; ids: string[] }>>({});
   const actionApi = useRef(api); actionApi.current = api;
   useEffect(() => {
     let active = true, index = 0;
@@ -42,19 +43,20 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
     async function worker() {
       while (active && index < listed.length) {
         const group = listed[index++]!;
+        const visible: string[] = [];
         let action: DecisionListStatus | undefined;
         if (group.isOrganizer && group.decisions.some(decision => !decision.current)) action = { label: 'Needs your review', tone: 'action' };
-        else for (const decision of group.decisions) {
+        for (const decision of group.decisions) {
           if (!active) return;
-          if (!decision.current) continue;
+          if (!decision.current) { visible.push(decision.id); continue; }
           try {
             const status = await readDecisionListStatus(actionApi.current, decision.id, controller.signal);
-            if (status.tone === 'action') {
-              action = status;
-              break;
-            }
-          } catch { /* Unavailable reads never manufacture an action or reveal private details. */ }
+            if (!status) continue;
+            visible.push(decision.id);
+            if (!action && status.tone === 'action') action = status;
+          } catch { visible.push(decision.id); /* A failed read is not an access denial. */ }
         }
+        if (active) setGroupDecisionViews(current => ({ ...current, [group.id]: { group, ids: visible } }));
         if (active && action) setGroupActions(current => ({ ...current, [group.id]: action! }));
       }
     }
@@ -364,7 +366,9 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
       </div>}
       {!!filteredGroups.length && <div className="ke-group-sections">{groupSections.map(section => <section className="ke-group-section" key={section.heading}>
         <h3>{section.heading}</h3><ul className="ke-group-list" aria-label={section.heading}>{section.groups.map(group => {
-        const decisionCount = Array.isArray(group.decisions) ? group.decisions.length : null;
+        const decisionView = groupDecisionViews[group.id];
+        const visibleDecisions = decisionView?.group === group ? group.decisions.filter(decision => decisionView.ids.includes(decision.id)) : null;
+        const decisionCount = visibleDecisions?.length ?? null;
         const menuOpen = activeMenuGroupId === group.id;
         const menuId = `group-actions-${group.id}`;
         return <li key={group.id} className={`ke-group-row${menuOpen ? ' ke-group-row-menu-open' : ''}`}>
@@ -405,11 +409,11 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
                 <h4>Members <span>{group.members.length}</span></h4>
                 <ul>{group.members.map(member => <li key={member.id}>{member.displayName}{member.isOrganizer ? <small>Organizer</small> : null}</li>)}</ul>
               </section>
-              <section className="ke-group-menu-section" aria-label="Decisions">
+              {visibleDecisions && <section className="ke-group-menu-section" aria-label="Decisions">
                 <h4>Decisions <span>{decisionCount ?? 0}</span></h4>
-                {group.decisions.length ? <ul>{group.decisions.map(decision => <li key={decision.id}>{decision.title ?? 'Untitled decision'}{!decision.current && <small>Needs review</small>}</li>)}</ul>
+                {visibleDecisions.length ? <ul>{visibleDecisions.map(decision => <li key={decision.id}>{decision.title ?? 'Untitled decision'}{!decision.current && <small>Needs review</small>}</li>)}</ul>
                   : <p className="ke-group-menu-empty">No decisions yet.</p>}
-              </section>
+              </section>}
               <div className="ke-group-menu-actions">
                 <button type="button" className="secondary ke-group-menu-item" role="menuitem" ref={menuActionRef}
                   onClick={event => { event.stopPropagation(); setActiveMenuGroupId(null); onOpenGroup(group.id); }}>Open group</button>

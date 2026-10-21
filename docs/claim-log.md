@@ -3194,3 +3194,6 @@ FF09 CODE_READY/B — fictional guide embedded only in creation dialog, form/req
 
 
 2026-10-21T07:10:49.104441+00:00 — A creation-only-page correction PUBLISHED / claim released. Sourceb8e41cb/frontend39560004429/Amplify166/VercelREADY; both HTML200/common2+Amplify10 hashes match. Only creation remains a page; current decision/answers/details/outcome/permissions restored to existing native modals with guarded dismiss/focus/scroll, URL/history state and single privacy disclosure; tutorial updated. Static type/lint/build/boundaries668/whitespace PASS; no product tests/model/user/backend/IAM/schedule changes, manual acceptance pending. [Receipt](review-artifacts/ui/decision-modals-publication.json).
+
+
+2026-10-21T07:14:03.154737+00:00 — A claims agreed-outcome menu and late-joiner list visibility. Frontend-only: expose permitted View outcome in decision row/header menus, project explicit 403/404 owner-read denial to hidden entries in decision lists and group previews/counts, retain visible real service failures and existing frozen finished rosters/access. No product tests/provider/participant/backend/IAM/schedule changes; static checks/build and dual frontend publication, user manual acceptance.
