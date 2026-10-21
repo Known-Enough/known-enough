@@ -91,6 +91,16 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
   const clearGroupFilter = () => { setGroupFilter(''); groupSearch.current?.focus(); };
   const [invitations, setInvitations] = useState<Groups.InvitationSnapshot[]>([]);
   const [invitationFailure, setInvitationFailure] = useState<string | null>(null);
+  const [invitationsHidden, setInvitationsHidden] = useState(() => {
+    try { return preferencesKey ? localStorage.getItem(`${preferencesKey}:invitations-hidden`) === 'true' : false; }
+    catch { return false; }
+  });
+  function toggleInvitations() {
+    const next = !invitationsHidden;
+    setInvitationsHidden(next);
+    try { if (preferencesKey) localStorage.setItem(`${preferencesKey}:invitations-hidden`, String(next)); }
+    catch { /* The preference still applies for this visit when browser storage is unavailable. */ }
+  }
   const [profileTarget, setProfileTarget] = useState<ProfileTarget | null>(null);
   const profileTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [activeMenuGroupId, setActiveMenuGroupId] = useState<string | null>(null);
@@ -353,10 +363,16 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
       {token && <><p>You’ve been invited to a group. Accepting joins the group; it doesn’t approve any proposal.</p>
         <button disabled={busy} onClick={() => void action('/groups/accept', { token }, result => { const group = Groups.GroupSnapshot.parse(result.group); setToken(''); sessionStorage.removeItem('ke-group-invite'); onOpenGroup(group.id); return true; })}>Accept group invitation</button>
         <button className="secondary" onClick={() => { setToken(''); sessionStorage.removeItem('ke-group-invite'); }}>Decline group invitation</button></>}
-      {(invitations.length > 0 || invitationFailure) && <section className="ke-card ke-dashboard-invitations" aria-labelledby="pending-invitations-heading">
+      {(invitations.length > 0 || invitationFailure) && <section className="ke-card ke-dashboard-invitations" data-collapsed={invitationsHidden} aria-labelledby="pending-invitations-heading">
         <header className="ke-panel-heading"><div><h3 id="pending-invitations-heading"><span className="ke-heading-icon" aria-hidden="true"><PageIcon name="Mail" /></span><span>Invitations for you</span></h3>
-          <p className="ke-panel-subtitle">Invitations sent to you. Accept one to join the group.</p></div>
-          {!invitationFailure && <span className="ke-count-badge" aria-label={`${invitations.length} pending invitations for you`}>{invitations.length}</span>}</header>
+          <p className="ke-panel-subtitle" hidden={invitationsHidden}>Invitations sent to you. Accept one to join the group.</p></div>
+          <div className="ke-invitation-heading-actions">
+            {!invitationFailure && <span className="ke-count-badge" aria-label={`${invitations.length} pending invitations for you`}>{invitations.length}</span>}
+            <button type="button" className="secondary ke-invitations-toggle" aria-expanded={!invitationsHidden} aria-controls="pending-invitations-content" onClick={toggleInvitations}>
+              <PageIcon name="ChevronRight" />{invitationsHidden ? 'Show invitations' : 'Hide invitations'}
+            </button>
+          </div></header>
+        <div id="pending-invitations-content" hidden={invitationsHidden}>
         {invitationFailure ? <div role="status"><p>{invitationFailure}</p>
           <button type="button" className="secondary" disabled={busy || checking} onClick={() => void load()}>Retry invitations</button></div>
           : invitations.length ? <ul className="ke-pending-invitations">{invitations.map(invitation => <li key={invitation.id}>
@@ -366,6 +382,7 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
             const group = Groups.GroupSnapshot.parse(result.group); setInvitations(current => current.filter(value => value.id !== invitation.id)); onOpenGroup(group.id); return true;
           })}>Accept invitation</button>
         </li>)}</ul> : <p>No pending invitations.</p>}
+        </div>
       </section>}
       {!!groups.length && <div className="ke-group-filter">
         <div className="ke-group-search"><PageIcon name="Search" />

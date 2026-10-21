@@ -278,8 +278,13 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 .ke-group-list { margin: 0; padding: 0; overflow: visible; list-style: none; border: 1px solid #dfe6de; border-radius: 14px; background: #fff; box-shadow: 0 4px 16px #173c3006; }
 .ke-group-sections { display: grid; gap: 20px; }
 .ke-dashboard-invitations { margin: 0 0 20px; padding: 18px; }
-.ke-dashboard-invitations .ke-panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.ke-dashboard-invitations .ke-panel-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
 .ke-dashboard-invitations .ke-panel-heading h3 { display: flex; align-items: center; gap: 9px; margin: 0; color: #173c30; font-size: 17px; }
+.ke-dashboard-invitations[data-collapsed="true"] .ke-panel-heading { margin-bottom: 0; }
+.ke-invitation-heading-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.ke-group-home button.ke-invitations-toggle { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; margin: 0; padding: 5px 8px; border-color: transparent; font-size: 13px; }
+.ke-invitations-toggle svg { width: 15px; height: 15px; }
+.ke-invitations-toggle[aria-expanded="true"] svg { transform: rotate(90deg); }
 .ke-pending-invitations { display: grid; gap: 8px; margin: 14px 0 0; padding: 0; list-style: none; }
 .ke-pending-invitations li { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0 0; border-top: 1px solid #e8ede7; }
 .ke-pending-invitations li > div { display: grid; gap: 3px; min-width: 0; }
