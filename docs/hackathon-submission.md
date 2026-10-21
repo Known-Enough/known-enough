@@ -10,10 +10,10 @@ The [official submission requirements](https://amazonappdev2026.devpost.com/) ar
 
 | Item | Coverage or remaining action |
 | --- | --- |
-| Project description | [README](../README.md#functionality): functionality and operation |
-| GitHub source, assets, setup/run instructions | Public [repository](https://github.com/Known-Enough/known-enough); [local and connected setup](../README.md#install-and-run-locally) |
+| Project description | [README](../README.md#features): functionality and operation |
+| GitHub source, assets, setup/run instructions | Public [repository](https://github.com/Known-Enough/known-enough); [local and connected setup](development.md) |
 | Public open-source license | [MIT license](../LICENSE), selected by the maintainer |
-| Primary track | **Alexa+ web simulation**; [source and MCP instructions](../README.md#alexa-and-mcp). Select this track in Devpost. |
+| Primary track | **Alexa+ web simulation**; [source and MCP instructions](mcp.md). Select this track in Devpost. |
 | Mini challenge | **AWS Builder** integration documented below; select it in Devpost if entering. No separate Open Source contribution is claimed. |
 | Working platform demonstration | Hosted browser app and MCP exchange documented; the submitted video must demonstrate them. |
 | Public English YouTube/Vimeo video, under three minutes | **Not yet recorded**, confirmed by the maintainer; use only media the team may publish. |
@@ -22,7 +22,7 @@ The [official submission requirements](https://amazonappdev2026.devpost.com/) ar
 | English materials | README and this document are in English; apply the same requirement to the video and submission. |
 | New work during the event | Repository history begins September 19, 2026; manual/AI creation, private answers, proposals, approvals, durable chat, and MCP were implemented during the event. |
 
-Architecture diagrams are included for review clarity; the checked pages do not prescribe a README-specific diagram format. Optional feature requests and friction logs are not mandatory. The [existing friction log](friction-log.md) contains no completed service entries; it is not presented as submitted feedback.
+The README includes a simplified architecture diagram and an options-editor screenshot. The checked pages do not prescribe a README-specific diagram format. Optional feature requests and friction logs are not mandatory. The [existing friction log](friction-log.md) contains no completed service entries; it is not presented as submitted feedback.
 
 The [FAQ](https://amazonappdev2026.devpost.com/details/faqs) permits the web simulation without gated Alexa+ tooling or physical hardware. The public repository includes an MIT license and does not require private-repository reviewer invitations.
 
