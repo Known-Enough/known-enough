@@ -8,10 +8,6 @@ on:
       api_sha256:
         description: Independently verified current API hash after coordinated FIX publication
         type: string
-      entry_only:
-        description: Hide shared-screen entry on the verified live frontend without unpublished dashboard changes
-        type: boolean
-        default: false
       run_checks:
         description: Run regression tests; false preserves source/build guards for user-directed publication
         type: boolean
@@ -54,20 +50,13 @@ jobs:
         if: inputs.run_checks
         run: |
           python3 -B scripts/zz/frontend-release.test.py
-          python3 -B scripts/zz/entry-only-build.test.py
           python3 -B scripts/zz/post-confirmation-setup.test.py
           python3 -B scripts/zz/install-application-config.test.py
       - name: Build public frontend
         run: |
           npm ci
           npm run build
-      - name: Prepare only the verified live entry change
-        if: inputs.entry_only
-        run: |
-          npx playwright install --with-deps chromium
-          python3 -B scripts/zz/entry-only-build.py
       - name: Application configuration access
-        if: ${{ !inputs.entry_only }}
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
           role-to-assume: arn:aws:iam::092954139775:role/KnownEnoughGithubApplicationConfig
@@ -77,7 +66,6 @@ jobs:
           retry-max-attempts: 1
           unset-current-credentials: true
       - name: Reconcile and verify declared application configuration before publication
-        if: ${{ !inputs.entry_only }}
         env:
           CHECKED_API_HASH: ${{ inputs.api_sha256 }}
         run: |
@@ -95,12 +83,7 @@ jobs:
           retry-max-attempts: 1
           unset-current-credentials: true
       - name: Publish only primary frontend and verify completion
-        env:
-          ENTRY_ONLY: ${{ inputs.entry_only }}
         run: |
-          if [ "$ENTRY_ONLY" = true ]; then
-            python3 -B scripts/zz/entry-only-build.py verify-live
-          fi
           python3 -B scripts/zz/frontend-release.py
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
@@ -108,7 +91,6 @@ jobs:
           name: zz-frontend-release
           path: |
             ${{ runner.temp }}/zz-frontend-release.json
-            ${{ runner.temp }}/zz-entry-only-build.json
             ${{ runner.temp }}/zz02-setup-report.json
           if-no-files-found: warn
           retention-days: 30

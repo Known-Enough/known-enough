@@ -86,11 +86,9 @@ export async function createGroup(page: Page, name: string) {
 /** Observe existing reads and await committed load; never retry or retain response contents. */
 export async function loadSharedDecision(page: Page, apiUrl: string, id: string, record: (status: string) => void = () => {}) {
   const publicUrl=apiUrl+`/decisions/${id}/public`, ownerUrl=apiUrl+`/decisions/${id}/me`;
-  const legacy = new URL(page.url()).searchParams.get('demo') === 'legacy';
-  if (legacy) await page.getByLabel('Decision ID from your invitation').fill(id);
-  const button=page.getByRole('button',{name:legacy?'Load shared decision':'Refresh decision',exact:true});
+  const button=page.getByRole('button',{name:'Refresh decision',exact:true});
   await trackOperation(page,publicUrl,()=>trackOperation(page,ownerUrl,async()=>{
-    const [response]=await Promise.all([page.waitForResponse(r=>r.request().method()==='GET' && r.url()===publicUrl,{timeout:45000}),legacy ? button.click() : new URL(page.url()).searchParams.get('decision') === id ? button.click() : page.goto(new URL('?decision='+encodeURIComponent(id),page.url()).href)]);
+    const [response]=await Promise.all([page.waitForResponse(r=>r.request().method()==='GET' && r.url()===publicUrl,{timeout:45000}),new URL(page.url()).searchParams.get('decision') === id ? button.click() : page.goto(new URL('?decision='+encodeURIComponent(id),page.url()).href)]);
     await expect(button).toBeEnabled();
     expect(response.ok()).toBe(true);
     await expect(page.getByText('The shared decision is unavailable. Check your session or try again.',{exact:true})).toHaveCount(0);

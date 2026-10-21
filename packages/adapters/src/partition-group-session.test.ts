@@ -6,7 +6,7 @@ import type { TrustedPrincipal, DecisionArchitectRequest, DecisionArchitectureDr
 import { createPartitionGroupSession, partitionMemberId } from './partition-group-session.ts';
 import { preparePartitionMigration } from './partition-migration.ts';
 import { partitionMembershipKey } from './partition-membership-contract.ts';
-import { createPartitionedGroupRepository, partitionIO, PartitionStorageError, type PartitionTransport, type PartitionMutation, type PartitionKey } from './partitioned-group-repository.ts';
+import { createPartitionedGroupRepository, partitionIO, type PartitionTransport, type PartitionMutation, type PartitionKey } from './partitioned-group-repository.ts';
 
 const participant = (subject = 'iris'): TrustedPrincipal => ({ kind: 'participant', subject });
 const code = (key: PartitionKey) => `${key.PK}/${key.SK}`;

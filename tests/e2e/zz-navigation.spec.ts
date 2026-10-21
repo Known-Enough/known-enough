@@ -129,10 +129,6 @@ for (const width of [390, 1280]) {
       await expect(page.getByLabel('Explain your limits and preferences privately')).toHaveCount(0);
       expect(await page.evaluate(() => JSON.stringify({ ...sessionStorage, ...localStorage }))).not.toContain('ZZ_UNSAVED_LOCAL_TEXT');
       expect(writes).toEqual([]); // navigation/reload cannot enqueue/pay again
-      await page.goto(url + '?demo=legacy');
-      await expect(page.getByText('Optional fictional decision templates')).toBeVisible();
-      await page.screenshot({ path: `test-results/ZZ03/before-demo-${width}.png`, fullPage: true });
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     } finally { await context.close(); await api.close(); }
   });
 }

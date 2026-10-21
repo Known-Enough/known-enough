@@ -17,9 +17,8 @@ if (search.get('guide') === 'decision' && !['code', 'state', 'error'].some(key =
   window.history.replaceState(null, '', window.location.pathname + (search.size ? '?' + search.toString() : '') + window.location.hash);
 }
 if (configured) {
-  if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('demo') === 'legacy') {
-    const { ConnectedDemo } = await import('./connected-demo'); render(<ConnectedDemo config={configured} />);
-  } else { const { ConnectedApp } = await import('./connected-app'); render(<ConnectedApp config={configured} />); }
+  const { ConnectedApp } = await import('./connected-app');
+  render(<ConnectedApp config={configured} />);
 } else if (import.meta.env.DEV) {
   const { App } = await import('./App');
   render(<App />);
