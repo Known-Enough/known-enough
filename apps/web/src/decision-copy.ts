@@ -7,7 +7,7 @@ const statusText: Record<KE.PublicDecisionSnapshot['status'], string> = {
   READY: 'The required answers are saved. An outcome will be prepared automatically.', REASONING: 'Finding an option that fits the saved answers.',
   PRIVATE_NEGOTIATION: 'Check your private follow-up question.', PROPOSED: 'A proposal is ready to review.',
   APPROVING: 'Waiting for the remaining approvals.', AGREED: 'All required participants approved this proposal.',
-  NO_AGREEMENT: 'No agreement yet. Check the options and your answers.',
+  NO_AGREEMENT: 'No matching outcome. You can edit your answers and try again.',
   SUPERSEDED: 'The decision changed. Check the updated options before continuing.', CLOSED: 'This decision is closed.',
 };
 export const decisionStatusText = (status: KE.PublicDecisionSnapshot['status']) => statusText[status];
@@ -22,6 +22,6 @@ const phaseLabel: Record<KE.PublicDecisionSnapshot['status'], string> = {
   COLLECTING_PRIVATE_INPUT: 'Collecting answers', NEEDS_CLARIFICATION: 'Follow-up needed',
   READY: 'Preparing outcome', REASONING: 'Finding an outcome', PRIVATE_NEGOTIATION: 'Private follow-up',
   PROPOSED: 'Proposal ready', APPROVING: 'Waiting for approvals', AGREED: 'Decision agreed',
-  NO_AGREEMENT: 'No agreement yet', SUPERSEDED: 'Decision updated', CLOSED: 'Closed',
+  NO_AGREEMENT: 'No matching outcome', SUPERSEDED: 'Decision updated', CLOSED: 'Closed',
 };
 export const decisionPhaseLabel = (status: KE.PublicDecisionSnapshot['status']) => phaseLabel[status];

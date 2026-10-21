@@ -2361,3 +2361,9 @@ dialog[data-standard-close] h2 { padding-right: 30px; }
 .ke-decision-modal-privacy .ke-privacy-bar { margin: 0; border: 0; border-top: 1px solid var(--wizard-border); border-radius: 0; background: transparent; box-shadow: none; }
 .ke-decision-modal-privacy .ke-privacy-bar summary { padding: 12px 0; font-size: 12px; }
 .ke-decision-modal-privacy .ke-privacy-bar p { padding: 0 0 4px; }
+
+.ke-no-matching-outcome { margin: 1rem 0; padding: 1rem 1.25rem; border: 1px solid var(--ke-border, #dce5de); border-radius: 12px; }
+.ke-no-matching-outcome h2 { margin: 0 0 .35rem; font-size: 1rem; }
+.ke-no-matching-outcome p { margin: 0; color: var(--ke-muted, #66766d); }
+:root[data-theme="dark"] .ke-no-matching-outcome { border-color: var(--ke-dark-border); }
+:root[data-theme="dark"] .ke-no-matching-outcome p { color: var(--ke-dark-muted); }

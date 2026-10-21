@@ -301,6 +301,9 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
       {!owner && proposal && <button type="button" onClick={() => setDetailStep('proposal')}>View proposal</button>}
       </div>
     </section>
+    {snapshot.status === 'NO_AGREEMENT' && <section className="ke-no-matching-outcome" role="status">
+      <h2>No matching outcome</h2><p>You can edit your answers and try again.</p>
+    </section>}
     <Modal ref={detailDialog} className={`ke-step-dialog ke-decision-detail-modal${detailStep === 'proposal' ? ' ke-outcome-dialog' : ''}`}
       aria-label={detailStep === 'shared' ? 'Decision details' : 'Review proposal and permissions'} onCancel={event => { event.preventDefault(); setDetailStep(null); }}>
       <button type="button" className="ke-outcome-back" onClick={() => setDetailStep(null)}><PageIcon name="ArrowLeft" />Back to decision</button>
@@ -317,8 +320,8 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
       {snapshot.frame.rules.length > 0 && <details className="ke-shared-rules"><summary>Group requirements ({snapshot.frame.rules.length})</summary>
         <ul aria-label="Group requirements">{snapshot.frame.rules.map(rule => <li key={rule.id}>{ruleText(rule, snapshot.frame.variables)}</li>)}</ul></details>}
     </section>}
-    {detailStep === 'proposal' && !proposal && <header className="ke-outcome-heading"><h1 tabIndex={-1}>{snapshot.status === 'REASONING' ? 'Finding an outcome' : 'No outcome yet'}</h1>
-      <p>{snapshot.status === 'REASONING' ? 'We’re comparing the saved answers. You can return to this page to check progress.' : 'An outcome will appear here once the group’s answers are ready and a proposal has been prepared.'}</p></header>}
+    {detailStep === 'proposal' && !proposal && <header className="ke-outcome-heading"><h1 tabIndex={-1}>{snapshot.status === 'REASONING' ? 'Finding an outcome' : snapshot.status === 'NO_AGREEMENT' ? 'No matching outcome' : 'No outcome yet'}</h1>
+      <p>{snapshot.status === 'REASONING' ? 'We’re comparing the saved answers. You can return to this page to check progress.' : snapshot.status === 'NO_AGREEMENT' ? 'You can edit your answers and try again.' : 'An outcome will appear here once the group’s answers are ready and a proposal has been prepared.'}</p></header>}
     {detailStep === 'proposal' && proposal && <section className="ke-outcome-result" aria-labelledby="outcome-title">
       <header className="ke-outcome-heading"><h1 id="outcome-title" tabIndex={-1}>{snapshot.status === 'AGREED' ? 'Decision agreed' : 'Proposed outcome'}</h1>
         <p>{snapshot.status === 'AGREED' ? 'All required participants approved this proposal.' : 'Review the choices before giving your approval.'}</p>
