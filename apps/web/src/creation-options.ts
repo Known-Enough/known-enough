@@ -19,7 +19,7 @@ export function suggestedDecisionTitle(description: string): string {
 
 export function emptyChoicePlan(objective: string): ChoicePlan {
   return { title: suggestedDecisionTitle(objective), description: '',
-    topics: [{ label: 'Options', kind: 'CHOICE', options: [] }] };
+    topics: [{ label: '', kind: 'CHOICE', options: [] }] };
 }
 
 /** A whole topic is accepted explicitly; existing named topics and options are never replaced. */
@@ -28,7 +28,7 @@ export function addSuggestedTopic(plan: ChoicePlan, topic: ChoicePlan['topics'][
   const next = structuredClone(plan);
   let index = next.topics.findIndex(item => normalized(item.label) === normalized(topic.label) && item.kind === topic.kind);
   if (index < 0) {
-    const initial = next.topics.length === 1 && next.topics[0]!.label === 'Options' && !next.topics[0]!.options.length;
+    const initial = next.topics.length === 1 && (!next.topics[0]!.label.trim() || next.topics[0]!.label === 'Options') && !next.topics[0]!.options.length;
     if (initial) { next.topics[0] = { label: topic.label, kind: topic.kind, options: [] }; index = 0; }
     else {
       if (next.topics.length >= 6) return null;
@@ -61,7 +61,7 @@ export function addSuggestedOption(plan: ChoicePlan, topic: ChoicePlan['topics']
   if (!value || value.length > 100) return null;
   const next = structuredClone(plan);
   let index = next.topics.findIndex(item => normalized(item.label) === normalized(topic.label) && item.kind === topic.kind);
-  if (index < 0 && next.topics.length === 1 && next.topics[0]!.label === 'Options' && (!next.topics[0]!.options.length || next.topics[0]!.kind === topic.kind)) {
+  if (index < 0 && next.topics.length === 1 && (!next.topics[0]!.label.trim() || next.topics[0]!.label === 'Options') && (!next.topics[0]!.options.length || next.topics[0]!.kind === topic.kind)) {
     if (!next.topics[0]!.options.length) { next.topics[0]!.label = topic.label; next.topics[0]!.kind = topic.kind; }
     index = 0;
   }

@@ -14,7 +14,7 @@ export function draftFailureMessage(status: number, body: unknown): string {
   if (status === 401) return 'Your session expired. Sign in again to continue.';
   if (status === 403) return 'Only this group’s organizer can do this. Refresh the group to check your access.';
   if (category === 'AI_AT_CAPACITY') return 'The assistant is busy. Close this attempt to return to your draft, then try again later.';
-  if (category === 'AI_UNAVAILABLE') return 'AI suggestions are unavailable right now. Check this attempt before asking again. You can still add your own options.';
+  if (category === 'AI_UNAVAILABLE') return 'AI suggestions are unavailable right now. Check this attempt before asking again. You can still add your own choices.';
   if (category === 'INVALID_MODEL_OUTPUT') return 'The assistant couldn’t finish a usable draft. Your saved draft is unchanged. Check this attempt, then close it to edit or try again.';
   if (category === 'PROVIDER_FAILED') return 'The assistant couldn’t finish this attempt. Check its result before trying again.';
   if (category === 'REQUEST_PENDING') return 'The assistant is still working. Check progress before asking again.';
@@ -24,7 +24,7 @@ export function draftFailureMessage(status: number, body: unknown): string {
     : 'This drafting feature is unavailable right now. Try again later.';
   if (status === 409) return 'This draft changed. Refresh to see the latest version.';
   if (status === 400 || status === 422) return value?.error?.code === 'NEEDS_CLARIFICATION'
-    ? 'Add the missing details or edit the listed options to continue.' : 'Describe what your group needs to decide and check the options.';
+    ? 'Add the missing details or edit the listed choices to continue.' : 'Describe what your group needs to decide and check the choices.';
   if (status === 507 || status === 429) return 'The drafting service is busy. Check this attempt and try again later.';
   if (status >= 500) return 'Drafting is temporarily unavailable. Check this attempt before trying again.';
   return 'We couldn’t complete this action. Refresh to check the result before trying again.';
