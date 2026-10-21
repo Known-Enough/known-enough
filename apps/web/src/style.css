@@ -1075,8 +1075,18 @@ h4:focus { outline: 3px solid #e7a846; outline-offset: 4px; }
 
 .ke-guide-embedded { margin: 12px 0; max-width: 100%; }
 .ke-guide-embedded .ke-guide-intro { padding: 12px 0; }
-.ke-guide-embedded .ke-guide-nav { flex-wrap: wrap; }
+.ke-guide-embedded .ke-guide-nav { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.ke-guide-embedded .ke-guide-nav button { display: flex; flex-direction: column; align-items: flex-start; width: 100%; min-height: 78px; padding: 10px; gap: 8px; font-size: 12px; text-align: left; white-space: normal; }
+.ke-guide-embedded .ke-guide-nav button[aria-current="step"] { outline: 2px solid #588166; outline-offset: -2px; }
+.ke-guide-embedded .ke-guide-scene > ol { padding-left: 22px; }
+.ke-guide-embedded .ke-guide-scene > ol li + li { margin-top: 8px; }
+.ke-guide-embedded .ke-guide-intro h3 { color: inherit; }
 .ke-guide-embedded .ke-guide-controls { flex-wrap: wrap; gap: 8px; }
+@media (max-width: 650px) {
+  .ke-guide-embedded .ke-guide-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ke-guide-embedded .ke-guide-nav li:last-child { grid-column: 1 / -1; }
+  .ke-guide-embedded .ke-guide-nav button { flex-direction: row; align-items: center; min-height: 52px; }
+}
 
 /* One decision modal with direct answers, without a separate review wizard. */
 .ke-open-decision-dialog { width: min(760px, calc(100vw - 32px)); overflow: auto; padding: 24px; }

@@ -611,14 +611,14 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
       }}><PageIcon name="ArrowLeft" />Back to group</a>
       <div className="ke-wizard-shell">
         <header className="ke-wizard-header"><div><span className="ke-wizard-eyebrow">New decision</span>
-          <h1 id={`decision-wizard-title-${group.id}`} ref={draftHeading} tabIndex={-1}>{showExample ? 'A decision, step by step' : step === 'describe' ? 'What are we deciding?' : 'Review your options'}</h1>
-          <p id={`decision-wizard-subtitle-${group.id}`} className="ke-creation-subtitle">{step === 'describe' ? 'Describe the decision in your own words. Include any options you’re already considering.' : 'Name the decision, then add the topics and options your group will consider.'}</p></div>
-          {(objective.trim() || choicePlan) && <span className="ke-page-draft-state" role="status"><PageIcon name="Check" />{choiceSaved && !dirty ? 'Draft saved' : locallySaved ? 'Kept on this browser' : 'Not saved on this browser'}</span>}
+          <h1 id={`decision-wizard-title-${group.id}`} ref={draftHeading} tabIndex={-1}>{showExample ? 'Decision example' : step === 'describe' ? 'What are we deciding?' : 'Review your options'}</h1>
+          <p id={`decision-wizard-subtitle-${group.id}`} className="ke-creation-subtitle">{showExample ? 'Follow a dinner decision from the first idea to everyone’s approval.' : step === 'describe' ? 'Describe the decision in your own words. Include any options you’re already considering.' : 'Name the decision, then add the topics and options your group will consider.'}</p></div>
+          {!showExample && (objective.trim() || choicePlan) && <span className="ke-page-draft-state" role="status"><PageIcon name="Check" />{choiceSaved && !dirty ? 'Draft saved' : locallySaved ? 'Kept on this browser' : 'Not saved on this browser'}</span>}
         </header>
-        <nav className="ke-creation-stepper" aria-label="Decision creation steps">
+        {!showExample && <nav className="ke-creation-stepper" aria-label="Decision creation steps">
           <button type="button" disabled={busy && !aiWorking} aria-current={step === 'describe' ? 'step' : undefined} onClick={() => { setShowExample(false); setStep('describe'); }}>1. Describe</button>
           <PageIcon name="ArrowRight" /><button type="button" disabled={!objective.trim() || busy && !aiWorking} aria-current={step === 'options' ? 'step' : undefined} onClick={() => { setShowExample(false); continueToOptions(); }}>2. Options</button>
-        </nav>
+        </nav>}
         <div className="ke-wizard-body" aria-busy={busy && !aiWorking}>
           {showExample && <DecisionGuide onReturn={returnFromExample} />}
           <div className="ke-creation-form" hidden={showExample}>
@@ -696,7 +696,7 @@ export function GroupDecisions({ group, api, reload, openDecision, onDirtyChange
             {(step !== 'describe' || !helpOpen) && lookupRecovery}
             {!busy && notice && (step !== 'describe' || !helpOpen) && <div className="ke-wizard-notice" role="status">{notice}</div>}
             <details className="ke-creation-details ke-creation-privacy-details"><summary>Privacy in this preview</summary><p>Your group can see the description and options. AI uses them when you ask for suggestions. Save personal limits for your private answers, and use made-up, non-sensitive information in this preview. Check suggested prices, dates and availability yourself. Keep the choices small: this preview can compare up to 64 possible outcomes across six topics, with up to sixteen options per topic. Creating a decision doesn’t approve a proposal or answer for anyone.</p></details>
-            {step === 'describe' && !helpOpen && <button ref={exampleTrigger} type="button" className="ke-text-link ke-creation-example-link" onClick={() => setShowExample(true)}>How decisions work</button>}
+            {step === 'describe' && !helpOpen && <button ref={exampleTrigger} type="button" className="ke-text-link ke-creation-example-link" onClick={() => setShowExample(true)}>Decision example</button>}
           </div>
         </div>
         {!showExample && <footer className="ke-creation-footer">
