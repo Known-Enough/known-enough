@@ -3197,3 +3197,6 @@ FF09 CODE_READY/B — fictional guide embedded only in creation dialog, form/req
 
 
 2026-10-21T07:14:03.154737+00:00 — A claims agreed-outcome menu and late-joiner list visibility. Frontend-only: expose permitted View outcome in decision row/header menus, project explicit 403/404 owner-read denial to hidden entries in decision lists and group previews/counts, retain visible real service failures and existing frozen finished rosters/access. No product tests/provider/participant/backend/IAM/schedule changes; static checks/build and dual frontend publication, user manual acceptance.
+
+
+2026-10-21T07:19:05.434276+00:00 — A agreed-outcome menu/late-joiner visibility PUBLISHED / claim released. Sourcec5ece42/frontend39560998224/Amplify167/VercelREADY; both HTML200/common2+Amplify10 hashes match. Authorized agreed outcome menu in row/header, direct modal section; current owner403/404 hidden from UI lists/group previews/counts, existing backend grants/frozen rosters/group DTO unchanged. Static type/lint/build/boundaries668/whitespace PASS; no product tests/model/user/backend/IAM/schedule changes, manual acceptance pending. [Receipt](review-artifacts/ui/agreed-outcome-menu-publication.json).
