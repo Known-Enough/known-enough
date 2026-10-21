@@ -13,7 +13,13 @@ export function RenameAction({ name, save, renderTrigger, inline = false, onDirt
   const restoreFocus = () => requestAnimationFrame(() => trigger.current?.focus());
   const open = () => {
     setValue(name); setNotice('');
-    if (inline) { inlineSave.current = save; const box = display.current?.getBoundingClientRect(); if (box) dimensions.current = { width: box.width, height: box.height }; setEditing(true); }
+    if (inline) {
+      inlineSave.current = save;
+      const box = display.current?.getBoundingClientRect();
+      const available = display.current?.closest('.ke-group-title-row')?.getBoundingClientRect().width;
+      if (box) dimensions.current = { width: Math.min(available || box.width, Math.max(320, box.width)), height: box.height };
+      setEditing(true);
+    }
     else dialog.current?.showModal();
   };
   function cancelInline() {
