@@ -430,8 +430,15 @@ export function createPartitionParticipantApiHandler(options: PartitionParticipa
         const repository = repositories.forParticipant(principal);
         const application = new KnownEnoughApplication({ repository, clock, ids });
         if (request.method === 'GET') {
-          const snapshot = decision[2] === 'public' ? await application.getPublicSnapshot(principal, decision[1]!)
-            : await application.getOwnerSnapshot(principal, decision[1]!);
+          let snapshot;
+          try {
+            snapshot = decision[2] === 'public' ? await application.getPublicSnapshot(principal, decision[1]!)
+              : await application.getOwnerSnapshot(principal, decision[1]!);
+          } catch (error) {
+            if (decision[2] !== 'me' || !(error instanceof KnownEnoughApplicationError) || error.code !== 'STALE_CONTEXT') throw error;
+            const historical = new KnownEnoughApplication({ repository: repositories.forHistoricalParticipant(principal), clock, ids });
+            snapshot = await historical.getOwnerSnapshot(principal, decision[1]!);
+          }
           // Both authenticated projections advertise the same installed queue
           // capability; participants need no second public read to discover it.
           send(response, 200, snapshot, requestNegotiation !== undefined); return;
