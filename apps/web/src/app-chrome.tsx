@@ -115,6 +115,7 @@ const pageIconShapes = {
   RefreshCw: <><path d="M20 7v5h-5M4 17v-5h5" /><path d="M5.64 5.64A9 9 0 0 1 20 12M4 12a9 9 0 0 0 14.36 6.36" /></>,
   ArrowRight: <><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></>,
   ChevronRight: <><path d="m9 18 6-6-6-6" /></>,
+  Info: <><circle cx="12" cy="12" r="10" /><path d="M12 16v-4m0-4h.01" /></>,
   Search: <><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></>,
   Ellipsis: <><circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /></>,
   Plus: <><path d="M12 5v14M5 12h14" /></>,

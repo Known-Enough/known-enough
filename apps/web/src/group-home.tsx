@@ -23,7 +23,7 @@ function groupPage(value: { groups?: unknown[]; cursor?: unknown }) {
     || (value.cursor != null && (typeof value.cursor !== 'string' || !/^[A-Za-z0-9_-]{40,1600}$/.test(value.cursor)))) throw new Error('Invalid groups response');
   return { groups: value.groups.map(group => Groups.GroupSnapshot.parse(group)), cursor: typeof value.cursor === 'string' ? value.cursor : null };
 }
-export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, onOpenGroup, onBack, onDirtyChange, creationStep, onOpenCreation, onCloseCreation }: { creationStep?: CreationStep; onOpenCreation?: (step: CreationStep, replace?: boolean) => void; onCloseCreation?: () => void; api: (path: string, init?: RequestInit) => Promise<Response>; preferencesKey?: string | undefined;
+export function GroupHome({ api, preferencesKey, invitationSessionKey, openDecision, selectedGroupId, onOpenGroup, onBack, onDirtyChange, creationStep, onOpenCreation, onCloseCreation }: { creationStep?: CreationStep; onOpenCreation?: (step: CreationStep, replace?: boolean) => void; onCloseCreation?: () => void; api: (path: string, init?: RequestInit) => Promise<Response>; preferencesKey?: string | undefined; invitationSessionKey?: string | undefined;
   openDecision: (id: string, section?: DecisionSection) => void; selectedGroupId?: string; onOpenGroup: (id: string) => void; onBack: () => void; onDirtyChange?: (dirty: boolean) => void }) {
   const [childDirty, setChildDirty] = useState(false);
   const [inlineNameDirty, setInlineNameDirty] = useState(false);
@@ -350,7 +350,7 @@ export function GroupHome({ api, preferencesKey, openDecision, selectedGroupId, 
         onDirtyChange?.(childDirty || !!recipient.trim());
         onOpenGroup(group.id); return true;
       }, status => { if ((status >= 400 && status < 500) || status === 507) groupRequest.current = null; }, pending.requestId); }}>Create group</button></div>}
-      <DashboardInvitations api={api} invitations={invitations} token={token} preferencesKey={preferencesKey} failure={invitationFailure}
+      <DashboardInvitations api={api} invitations={invitations} token={token} preferencesKey={preferencesKey} sessionKey={invitationSessionKey} failure={invitationFailure}
         busy={busy || checking} onBusyChange={setBusy} onRetry={() => void load()}
         onClearLink={expected => {
           setToken(current => current === expected ? '' : current);
