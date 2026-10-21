@@ -2101,7 +2101,7 @@ dialog[data-standard-close] h2 { padding-right: 30px; }
 
 :root[data-theme="dark"] .ke-home .ke-creation-v2 button.ke-creation-assist:hover { color: var(--wizard-text); background: var(--wizard-soft); text-decoration: none; }
 
-/* Major decision workflows use the document scroll; chat and quick actions retain dialogs. */
+/* Decision creation uses the document scroll; existing decisions use dialogs. */
 .ke-home.ke-workflow-route { max-width: 1180px; padding-top: 12px; }
 .ke-workflow-route .ke-masthead { min-height: 64px; border-bottom: 1px solid #dfe5dc; }
 .ke-workflow-content, .ke-creation-page {
@@ -2239,3 +2239,15 @@ dialog[data-standard-close] h2 { padding-right: 30px; }
 .ke-decision-create-actions { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .ke-decision-create-actions > button { margin: 0; }
 @media (max-width: 650px) { .ke-decision-create-actions { justify-content: flex-start; } }
+
+/* Existing decision views retain their compact modal presentation. */
+.ke-open-decision-dialog, .ke-decision-detail-modal { overscroll-behavior: contain; }
+.ke-open-decision-dialog .ke-cohesive-decision-header > h1 { margin: 0 86px 9px 0; color: var(--wizard-text); font-size: clamp(24px, 3vw, 29px); font-weight: 650; letter-spacing: -.6px; line-height: 1.25; overflow-wrap: anywhere; }
+.ke-open-decision-dialog h1:focus, .ke-decision-detail-modal h1:focus { outline: none; }
+.ke-decision-detail-modal h1 { margin: 0 38px 12px 0; color: var(--wizard-text); font-size: clamp(24px, 3vw, 29px); font-weight: 650; line-height: 1.25; letter-spacing: -.035em; }
+.ke-decision-detail-modal > .ke-shared-decision { margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; }
+.ke-decision-detail-modal button.ke-outcome-back { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; margin: 0 0 14px; padding: 0; border: 0; background: transparent; color: var(--wizard-muted); font-size: 12px; font-weight: 450; box-shadow: none; }
+.ke-decision-modal-privacy { margin-top: 24px; }
+.ke-decision-modal-privacy .ke-privacy-bar { margin: 0; border: 0; border-top: 1px solid var(--wizard-border); border-radius: 0; background: transparent; box-shadow: none; }
+.ke-decision-modal-privacy .ke-privacy-bar summary { padding: 12px 0; font-size: 12px; }
+.ke-decision-modal-privacy .ke-privacy-bar p { padding: 0 0 4px; }

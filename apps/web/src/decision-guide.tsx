@@ -14,7 +14,7 @@ export function DecisionGuide({ onReturn }: { onReturn: () => void }) {
     <section className="ke-guide-intro"><span className="ke-guide-badge">Made-up example</span><h3>Alex and Sam plan dinner.</h3>
       <p>Follow one decision from the first idea to an outcome they both approve.</p>
       <p className="ke-guide-disclaimer">Everything here is an example. Your draft stays as it is; these steps don’t save answers, call AI or change your group.</p>
-      <p>In your own group, the organizer chooses <strong>Start a decision</strong>. Group members can then open the created decision from their own accounts.</p>
+      <p>In your own group, the organizer chooses <strong>Start a decision</strong> to open the creation page. Once created, the decision opens in a window where each member can add their answers.</p>
     </section>
     <nav aria-label="Example decision steps"><ol className="ke-guide-nav">{steps.map((label, index) => <li key={label}><button type="button" className="secondary" aria-current={step === index ? 'step' : undefined} onClick={() => setStep(index)}><span aria-hidden="true">{index + 1}</span>{label}</button></li>)}</ol></nav>
     <article className="ke-guide-scene" aria-labelledby="guide-scene-title">
@@ -52,7 +52,7 @@ export function DecisionGuide({ onReturn }: { onReturn: () => void }) {
         <p className="ke-guide-disclaimer">Here you can view both example answers. In your own group, you can’t read other people’s private answers. A shared outcome can still hint at what people need.</p>
       </>}
       {step === 3 && <>
-        <p>Once everyone required for the decision has saved usable answers, Known Enough starts finding an outcome automatically. There’s no button to press and you can leave the page and return later.</p>
+        <p>Once everyone required for the decision has saved usable answers, Known Enough starts finding an outcome automatically. There’s no button to press. You can close the decision window and open it again later.</p>
         <div className="ke-guide-sample"><span className="ke-guide-view-label">Example progress</span><dl>
           <div><dt>Alex has answered; Sam has not</dt><dd>Collecting answers · 1/2 responded</dd></div>
           <div><dt>Both have answered</dt><dd>Finding an outcome · 2/2 responded</dd></div>
@@ -63,7 +63,7 @@ export function DecisionGuide({ onReturn }: { onReturn: () => void }) {
         <details><summary>What if there’s no option that works for everyone?</summary><p>The app may ask for more detail or an optional adjustment, or the group may need different options. Each person decides whether to allow an adjustment or share a private detail. Those choices are separate from approving a proposal.</p></details>
       </>}
       {step === 4 && <>
-        <p>Choose <strong>View proposal</strong> to review the specific outcome. Each required participant completes this step from their own account.</p>
+        <p>Choose <strong>View proposal</strong> to review the specific outcome in a window. Close it or choose <strong>Back to decision</strong> to return to your answers. Each required participant approves from their own account.</p>
         <div className="ke-guide-sample"><span className="ke-guide-view-label">Proposed outcome</span><h3>Dinner together</h3><dl>
           <div><dt>Restaurant</dt><dd>Noodle Corner</dd></div><div><dt>Date</dt><dd>24 October 2026</dd></div>
         </dl></div>

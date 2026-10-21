@@ -8,6 +8,7 @@ import { ProfileDrawer } from './profile-drawer';
 import { Brand, LoadingSkeleton, PageIcon, PrivacyBar, ThemeToggle } from './app-chrome';
 import { GroupHome } from './group-home';
 import { ConnectedDecision } from './connected-decision';
+import { Modal } from './modal';
 import { backgroundNegotiationAvailable, pollBackgroundDecision, type BackgroundTarget } from './background-negotiation';
 import { readAppView, appViewSearch, sameAppWorkspace, saveIntendedView, takeIntendedView, type AppView } from './navigation';
 let callbackCompletion: ReturnType<typeof finishCognitoSignIn> | null = null;
@@ -39,6 +40,18 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
   const [decisionTitle, setDecisionTitle] = useState<{ id: string; title: string } | null>(null);
   const [status, setStatus] = useState(''), [busy, setBusy] = useState(false), [background, setBackground] = useState(false);
   const [target, setTarget] = useState<BackgroundTarget | null>(null);
+  const decisionDialog = useRef<HTMLDialogElement>(null);
+  useLayoutEffect(() => {
+    const element = decisionDialog.current;
+    if (view.kind !== 'decision' || !session || !element) return;
+    const previous = document.activeElement;
+    if (!element.open) element.showModal();
+    const overflow = document.body.style.overflow; document.body.style.overflow = 'hidden';
+    return () => {
+      element.close(); document.body.style.overflow = overflow;
+      if (previous instanceof HTMLElement && previous.isConnected) previous.focus();
+    };
+  }, [view.kind, !!session]);
   const epoch = useRef(0), abort = useRef<AbortController | null>(null), dirty = useRef(false);
   const historyIndex = useRef<number>(Number.isSafeInteger(window.history.state?.kePage) ? window.history.state.kePage : 0);
   const restoringHistory = useRef(false);
@@ -75,8 +88,12 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
   const selectedDecision = view.kind === 'decision' ? view.decisionId : null;
   const selectedParent = view.kind === 'decision' ? view.groupId : undefined;
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
-    const frame = requestAnimationFrame(() => view.kind !== 'creation' && [...document.querySelectorAll<HTMLElement>('.ke-workflow-content h1')].find(heading => heading.getClientRects().length)?.focus({ preventScroll: true }));
+    if (view.kind !== 'decision') window.scrollTo({ top: 0, behavior: 'instant' });
+    const frame = requestAnimationFrame(() => {
+      if (view.kind !== 'decision') return;
+      const current = decisionDialog.current?.querySelector<HTMLDialogElement>('dialog[open]') ?? decisionDialog.current;
+      if (current) { current.scrollTop = 0; [...current.querySelectorAll<HTMLElement>('h1')].find(heading => heading.getClientRects().length)?.focus({ preventScroll: true }); }
+    });
     return () => cancelAnimationFrame(frame);
   }, [view, snapshot?.frame.decisionId]);
   useLayoutEffect(() => {
@@ -169,7 +186,7 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     return () => { active = false; controller.abort(); };
   }, [target, session, config, expire]);
   if (!session) return <AuthEntry config={config} direct={direct} onSession={value=>{sessionStorage.setItem('known-enough-cognito-session',JSON.stringify(value));setSession(value);setStatus('');const wanted=takeIntendedView();if(wanted)move(wanted,true);}} notice={status} callbackPending={callbackPending} />;
-  return <main className={view.kind === 'group' ? 'ke-home ke-group-route' : view.kind === 'groups' ? 'ke-home ke-groups-dashboard' : view.kind === 'creation' || view.kind === 'decision' ? 'ke-home ke-workflow-route' : 'ke-home'}>
+  return <main className={view.kind === 'group' ? 'ke-home ke-group-route' : view.kind === 'groups' ? 'ke-home ke-groups-dashboard' : view.kind === 'creation' ? 'ke-home ke-workflow-route' : 'ke-home'}>
     <header className="ke-masthead"><Brand onNavigate={() => move({ kind: 'groups' })} /><div className="ke-header-actions">
       <ThemeToggle />
       {session.kind === 'participant' ? <ProfileDrawer key={session.accessToken} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} signOut={signOut} /> : <button type="button" className="secondary" onClick={signOut}>Sign out</button>}
@@ -177,10 +194,9 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
     </header>
     {view.kind !== 'decision' && status && <p role="status">{status}</p>}
     {view.kind === 'invalid' ? <section className="ke-card"><h2>This link is unavailable</h2><button onClick={() => move({ kind: 'groups' }, true)}>Back to groups</button></section>
-      : view.kind === 'decision' ? <div className="ke-workflow-content ke-decision-page" data-decision-id={snapshot?.frame.decisionId}>
-        {(!view.section || view.section === 'overview') && <a className="ke-workflow-back" href={appViewSearch(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' }) || '/'} onClick={event => {
-          if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) { event.preventDefault(); move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' }); }
-        }}><PageIcon name="ArrowLeft" />{view.groupId ? 'Back to group' : 'All groups'}</a>}
+      : view.kind === 'decision' ? <Modal closeButton={false} ref={decisionDialog} className="ke-decision-wizard ke-open-decision-dialog" data-decision-id={snapshot?.frame.decisionId}
+        aria-labelledby="open-decision-title" onCancel={event => { event.preventDefault(); move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' }); }}>
+        <button type="button" className="secondary ke-response-close" aria-label="Close decision" onClick={() => move(view.groupId ? { kind: 'group', groupId: view.groupId } : { kind: 'groups' })}><PageIcon name="X" /></button>
         {!snapshot && <section className="ke-response-header" aria-busy={busy || !status}>
           <h1 id="open-decision-title" tabIndex={-1}>Your decision</h1>
           {!status && <LoadingSkeleton kind="decision" label="Loading current decision" />}
@@ -191,11 +207,12 @@ export function ConnectedApp({ config }: { config: CognitoBrowserConfig }) {
           mcpUrl={config.apiBaseUrl + '/mcp'} {...(view.groupId ? { groupId: view.groupId } : {})} title={decisionTitle?.id === snapshot.frame.decisionId ? decisionTitle.title : snapshot.frame.title} refreshing={busy}
           onRefresh={() => { if (dirty.current && !window.confirm('Refresh and discard your unsaved changes?')) return; dirty.current = false; void load().catch(() => {}); }} api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} refresh={async () => { dirty.current = false; await load(); }}
           onDirtyChange={value => { dirty.current = value; }} onQueued={receipt => { if (!owner) return; setTarget({ decisionId: snapshot.frame.decisionId, contextToken: snapshot.contextToken, semanticVersion: snapshot.semanticVersion, ownerParticipantId: owner.ownerParticipantId, expiresAt: receipt.expiresAt }); }} /></div>}
-      </div> : session.kind === 'display' ? <section className="ke-card"><h2>Shared screen</h2><p>Open a decision link from your group to show its progress. To answer or approve, sign in with your own account.</p></section>
+        <div className="ke-decision-modal-privacy"><PrivacyBar /></div>
+      </Modal> : session.kind === 'display' ? <section className="ke-card"><h2>Shared screen</h2><p>Open a decision link from your group to show its progress. To answer or approve, sign in with your own account.</p></section>
         : <GroupHome preferencesKey={groupPreferencesKey} key={`${session.accessToken}:${view.kind === 'group' || view.kind === 'creation' ? view.groupId : 'home'}:${invitationEpoch}`} {...(view.kind === 'group' || view.kind === 'creation' ? { selectedGroupId: view.groupId } : {})}
           {...(view.kind === 'creation' ? { creationStep: view.step } : {})} onOpenCreation={(step, replace) => { if (view.kind === 'group' || view.kind === 'creation') move({ kind: 'creation', groupId: view.groupId, step }, replace); }} onCloseCreation={() => { if (view.kind === 'creation') move({ kind: 'group', groupId: view.groupId }); }}
           api={(path, init) => cognitoApiFetch(config, session, path, expire, init)} onOpenGroup={id => move({ kind: 'group', groupId: id })} onBack={() => move({ kind: 'groups' })} onDirtyChange={value => { dirty.current = value; }}
           openDecision={id => move({ kind: 'decision', decisionId: id, ...(view.kind === 'group' || view.kind === 'creation' ? { groupId: view.groupId } : {}) })} />}
-    {view.kind !== 'creation' && <footer className="ke-dashboard-privacy"><PrivacyBar /></footer>}
+    {view.kind !== 'creation' && view.kind !== 'decision' && <footer className="ke-dashboard-privacy"><PrivacyBar /></footer>}
   </main>;
 }
