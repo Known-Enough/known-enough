@@ -1,0 +1,163 @@
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {createRequire} from 'node:module';
+import {createInterface} from 'node:readline';
+import {atomicJson, safeRoute, waitForGroups, waitForDecisionReady} from '../e2e03/session-runner.mjs';
+
+const run = process.argv[3];
+if (!/^\d{8}T\d{6}Z$/.test(run || '')) throw Error('RUN_ID_REQUIRED');
+const out = path.resolve('docs/review-artifacts/E2E04/five-' + run);
+const priv = path.join(os.homedir(), '.known-enough/e2e04-five', run);
+fs.mkdirSync(path.join(out, 'screenshots'), {recursive: true});
+fs.mkdirSync(priv, {recursive: true, mode: 0o700});
+const summaryPath = path.join(out, 'summary.json');
+const summary = fs.existsSync(summaryPath) ? JSON.parse(fs.readFileSync(summaryPath)) : {
+  runId: run, variant: 'E2E04-five-account', state: 'RUNNING', startedAt: new Date().toISOString(),
+  endedAt: null, cases: Object.fromEntries(['01','02','03','04','05','06'].map(c => [c,'NOT_RUN'])),
+  observedRequests: {outcome: 0, assistant: 0, aiDraft: 0, plainPosts: 0}, errors: [], screenshots: [],
+  providerUsage: 'UNKNOWN: request counts are not provider-call/token/billing evidence',
+};
+function report() {
+  atomicJson(summaryPath, summary);
+  fs.writeFileSync(path.join(out, 'report.md'), `# E2E04 — five-account live check\n\nState: **${summary.state}**. Started ${summary.startedAt}; ended ${summary.endedAt || 'pending'}.\n\nFive isolated synthetic accounts; new owned dinner fixture, four questions and 64 possible plans. Current automatic outcome and explicit independent approvals. No account creation, deployment, setup, schedule changes or old-fixture writes. Five-user execution; twelve-per-page member pagination is outside this small run.\n\n| Case | Result |\n| --- | --- |\n${Object.entries(summary.cases).map(([c,v])=>`| ${c} | ${v} |`).join('\n')}\n\nLast action: ${summary.lastConfirmedAction || 'none'}. In flight: ${summary.inFlightAction || 'none'}.\n\nObserved requests: ${JSON.stringify(summary.observedRequests)}. Provider usage: ${summary.providerUsage}.\n\n${summary.errors.map(e=>`- ${e.action}: ${e.code}; ${e.screenshot || 'screenshot unavailable'}.`).join('\n')}\n\n[Summary](summary.json) · [Events](events.jsonl)\n`);
+}
+function event(name, data = {}) {
+  const row = {utc: new Date().toISOString(), run, event: name, ...data};
+  const fd = fs.openSync(path.join(out,'events.jsonl'),'a',0o600);
+  try {fs.writeSync(fd,JSON.stringify(row)+'\n');fs.fsyncSync(fd);} finally {fs.closeSync(fd);}
+  if (!name.startsWith('HTTP_')) report();
+}
+if (process.argv[2] === '--prepare') {event('RUN_STARTED',{scope:'Five-account current-release regression'}); console.log(JSON.stringify({state:'PREPARED',run,out}));process.exit(0);}
+const sourceCredentials = JSON.parse(fs.readFileSync(process.env.E2E04_CREDENTIALS)).users;
+const credentials = ['test04','test05','test06','test07','test08'].map(username=>sourceCredentials.find(u=>u.username===username));
+if(credentials.some(u=>!u?.password)||new Set(credentials.map(u=>u.username)).size!==5)throw Error('FIVE_SYNTHETIC_CREDENTIALS_REQUIRED');
+const actorIndex = actor => Number(actor.slice(1))-1;
+const require = createRequire(path.resolve(process.env.E2E04_DEPENDENCIES,'package.json'));
+const {chromium} = require('playwright');
+const browser = await chromium.launch({headless:true,executablePath:process.env.E2E04_CHROMIUM});
+summary.runtime = {node:process.version,browser:browser.version()};
+summary.credentials = {count:5,distinct:true,synthetic:true};
+summary.productionSource='601394ab09d9dd6888ba6d71ac3f3790083c3b3f';
+const site = 'https://known-enough.vercel.app/';
+const fixturePath = path.join(priv,'fixture.json');
+const fixture = fs.existsSync(fixturePath) ? JSON.parse(fs.readFileSync(fixturePath)) : {groupName:'E2E04 Five '+run,title:'Dinner Together Plan',attempted:{},saved:{},approved:{},owners:{}};
+const persist = () => atomicJson(fixturePath,fixture);
+const users = new Map(); let active;
+const pause = ms => new Promise(r=>setTimeout(r,ms));
+const topics = [['Restaurant','CHOICE',['Cedar Kitchen','Moon Noodles','Garden Table','Harbor Grill']],['Date','DATE',['2026-10-30','2026-10-31']],['Time','CHOICE',['18:30','20:00']],['Travel','CHOICE',['Walk','Bus','Train','Taxi']]];
+const answers = [
+[['Cedar Kitchen','Moon Noodles'],['2026-10-30','2026-10-31'],['18:30'],['Walk','Bus']],
+[['Moon Noodles','Garden Table'],['2026-10-31'],['18:30','20:00'],['Bus','Train']],
+[['Moon Noodles','Harbor Grill'],['2026-10-30','2026-10-31'],['18:30'],['Bus','Taxi']],
+[['Cedar Kitchen','Moon Noodles','Garden Table'],['2026-10-31'],['18:30','20:00'],['Walk','Bus','Train']],
+[['Moon Noodles','Garden Table','Harbor Grill'],['2026-10-30','2026-10-31'],['18:30'],['Bus','Train','Taxi']]
+];
+const idea = 'Plan a fictional dinner for five people. Choose one restaurant: Cedar Kitchen, Moon Noodles, Garden Table or Harbor Grill. Choose one date: 30 or 31 October 2026. Choose one start time: 18:30 or 20:00. Choose one way to travel: Walk, Bus, Train or Taxi. Each person will select their own private answers. Use question names Restaurant, Date, Time and Travel. Do not make bookings or guess personal preferences.';
+function once(key) {if(fixture.attempted[key]) throw Error('WRITE_ALREADY_ATTEMPTED_RECONCILE_ONLY');fixture.attempted[key]={utc:new Date().toISOString()};persist();}
+async function getUser(actor) {
+  if(!/^U0[1-5]$/.test(actor))throw Error('ACTOR_INVALID');
+  if(active&&active.actor!==actor&&!active.page.isClosed()){
+    active.savedUrl=active.page.url();
+    active.savedSession=await active.page.evaluate(()=>Object.fromEntries(Object.entries(sessionStorage)));
+    atomicJson(path.join(priv,active.actor+'-session-private.json'),active.savedSession);
+    await active.page.close();event('SESSION_SUSPENDED',{actor:active.actor,openPages:0});
+  }
+  if(users.has(actor)){
+    const u=users.get(actor);active=u;
+    if(u.page.isClosed()){
+      u.page=await u.context.newPage();u.page.setDefaultTimeout(20000);
+      await u.page.addInitScript(s=>{for(const[k,v]of Object.entries(s))sessionStorage.setItem(k,v);},u.savedSession||{});
+      u.page.on('pageerror',e=>event('PAGE_ERROR',{actor,code:e.name}));
+      u.page.on('dialog',async d=>{event('BROWSER_DIALOG',{actor,type:d.type(),action:'DISMISSED'});await d.dismiss();});
+      await u.page.goto(u.savedUrl||site);
+      if(fixture.decisionId&&u.savedUrl?.includes('decision='+fixture.decisionId))await waitForDecisionReady(u.page,fixture.decisionId,fixture.title,45000);
+      else await u.page.getByRole('heading',{name:'Decision groups',exact:true}).waitFor({timeout:45000});
+      event('SESSION_RESTORED',{actor,openPages:1});
+    }
+    return u;
+  }
+  const context=await browser.newContext({viewport:{width:1365,height:1000},colorScheme:'light',serviceWorkers:'block'});
+  const u={actor,context,page:await context.newPage(),credential:credentials[actorIndex(actor)],bodies:new Map(),groups:new Map(),pages:[],pending:new Set()};
+  u.page.setDefaultTimeout(20000);
+  await context.route('**/decisions/*/commands',async route=>{
+    const d=route.request().postDataJSON();
+    if(d?.type==='APPROVE_PROPOSAL'&&(!fixture.proposal||!Object.entries(fixture.proposal).every(([k,v])=>d.payload?.[k]===v))){event('WRONG_PROPOSAL_BLOCKED',{actor});await route.abort();return;}
+    if(d?.type==='REQUEST_NEGOTIATION'){fixture.outcome={...(fixture.outcome||{}),requestId:d.requestId,dispatchedAt:Date.now()};persist();event('OUTCOME_REQUEST_PINNED',{actor,reference:d.requestId});}
+    await route.continue();
+  });
+  context.on('request',r=>{const normalized=safeRoute(r.url());if(!normalized)return;if(new URL(r.url()).pathname==='/mcp'&&r.method()==='POST'){try{const d=r.postDataJSON();event('MCP_REQUEST',{actor,method:d.method,tool:d.method==='tools/call'?d.params?.name:undefined});}catch{}}
+    if(r.method()==='POST'){const d=r.postDataJSON();if(d?.type==='REQUEST_NEGOTIATION')summary.observedRequests.outcome++;if(/\/chat\/(group|private)$/.test(normalized))summary.observedRequests[d?.askAssistant?'assistant':'plainPosts']++;if(/\/drafts$/.test(normalized)&&d?.objective&&!d.choicePlan)summary.observedRequests.aiDraft++;}
+    event('HTTP_REQUEST',{actor,route:normalized,method:r.method()});
+  });
+  context.on('response',r=>{const normalized=safeRoute(r.url());if(!normalized)return;event('HTTP_RESPONSE',{actor,route:normalized,method:r.request().method(),status:r.status()});
+    const task=r.json().then(b=>{u.bodies.set(new URL(r.url()).pathname,b);if(r.request().method()==='GET'&&new URL(r.url()).pathname==='/groups'&&r.ok()){u.pages.push((b.groups||[]).length);for(const g of b.groups||[])u.groups.set(g.id,g);}if(r.status()>=400)event('HTTP_FAILURE_DETAILS',{actor,route:normalized,status:r.status(),code:/^[A-Z_]{1,60}$/.test(b.error?.code||'')?b.error.code:null,reference:/^[a-f0-9-]{36}$/.test(b.requestId||'')?b.requestId:null});}).catch(()=>{}).finally(()=>u.pending.delete(task));u.pending.add(task);
+  });
+  context.on('requestfailed',r=>{const route=safeRoute(r.url());if(route)event('HTTP_FAILED',{actor,route,code:r.failure()?.errorText});});
+  u.page.on('pageerror',e=>event('PAGE_ERROR',{actor,code:e.name}));
+  u.page.on('dialog',async d=>{event('BROWSER_DIALOG',{actor,type:d.type(),action:'DISMISSED'});await d.dismiss();});
+  users.set(actor,u);active=u;return u;
+}
+const settle=async u=>{await Promise.allSettled([...u.pending]);};
+function expectedResponse(u,method,predicate){const p=u.page.waitForResponse(r=>r.request().method()===method&&predicate(new URL(r.url()).pathname,r),{timeout:45000});p.catch(()=>{});return p;}
+async function ack(r){const b=await r.json();if(!r.ok())throw Object.assign(Error('APP_HTTP_'+r.status()),{status:r.status(),serverCode:b.error?.code,reference:b.requestId});return b;}
+async function catalog(u){u.groups.clear();u.pages=[];const ready=waitForGroups(u.page);ready.catch(()=>{});await u.page.goto(site);await ready;await u.page.getByRole('heading',{name:'Decision groups',exact:true}).waitFor();await u.page.getByRole('button',{name:'Create group',exact:true}).first().waitFor();await pause(1000);await settle(u);return [...u.groups.values()];}
+async function group(u){await catalog(u);await u.page.getByRole('button',{name:'Open group '+fixture.groupName,exact:true}).click();await u.page.getByRole('heading',{name:fixture.groupName,exact:true}).waitFor();await settle(u);}
+async function decision(u){await u.page.goto(site+'?group='+fixture.groupId+'&decision='+fixture.decisionId);await waitForDecisionReady(u.page,fixture.decisionId,fixture.title,45000);await settle(u);return read(u);}
+async function read(u){
+  const session=await u.page.evaluate(()=>JSON.parse(sessionStorage.getItem('known-enough-cognito-session')||'null'));
+  if(!session?.accessToken)throw Error('OWN_SESSION_MISSING');
+  const r=await u.context.request.get('https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com/decisions/'+fixture.decisionId+'/me',{headers:{authorization:'Bearer '+session.accessToken,origin:site.slice(0,-1)}});
+  event('OWNER_READBACK',{actor:u.actor,route:'/decisions/:id/me',status:r.status()});const o=await ack(r);if(o.publicSnapshot?.frame?.decisionId!==fixture.decisionId||!o.ownerParticipantId)throw Error('OWN_IDENTITY_MISMATCH');
+  if(fixture.owners[u.actor]&&fixture.owners[u.actor]!==o.ownerParticipantId)throw Error('OWNER_CHANGED');fixture.owners[u.actor]=o.ownerParticipantId;persist();if(new Set(Object.values(fixture.owners)).size!==Object.keys(fixture.owners).length)throw Error('OWNERS_NOT_DISTINCT');u.owner=o;return o;
+}
+function matches(o,u){if(o.ownInputReadiness!=='READY')return null;return topics.every(([label,,options],i)=>{const v=o.publicSnapshot.frame.variables.find(v=>v.label===label);if(!v)return false;const c=o.confirmedConstraints.find(c=>c.status==='ACTIVE'&&c.constraintId.startsWith('answer-')&&c.kind!=='PREFERENCE'&&c.rule?.operator==='IN'&&c.rule.variableId===v.id);const actual=c?c.rule.values.map(x=>x.type==='DATE'?x.date:v.options?.find(y=>y.id===x.optionId)?.label):options;return JSON.stringify([...actual].sort())===JSON.stringify([...answers[actorIndex(u.actor)][i]].sort());});}
+function state(o,u){const s=o.publicSnapshot;return {status:s.status,required:s.frame.requiredParticipantIds.length,answered:s.participantProgress?.filter(p=>p.answersSaved).length,approved:s.approvedParticipantIds.length,ownReady:o.ownInputReadiness==='READY',ownMatches:matches(o,u),ownApproved:!!o.ownApproval,proposal:!!s.currentProposal};}
+async function shot(u,c){
+  const name=c.name.replace(/[^a-zA-Z0-9_-]/g,'_')+'.png';
+  if(await u.page.locator('.ke-alexa-chat').isVisible()&&await u.page.getByRole('tab',{name:'Private assistant',exact:true}).getAttribute('aria-selected')==='true'&&c.target!=='card')return {screenshot:'WITHHELD_PRIVATE_CHAT'};
+  const loc=c.target==='card'?u.page.locator('.ke-chat-decision-card'):c.target==='chat'?u.page.locator('.ke-alexa-chat'):c.target==='outcome'?u.page.locator('dialog[open]').last():u.page;
+  await loc.screenshot({path:path.join(out,'screenshots',name),...(loc===u.page?{fullPage:!!c.fullPage}:{}),animations:'disabled',maskColor:'#e9eeeb',mask:[u.page.locator('input[type=password],.ke-alexa-share-preview,.ke-saved-answer-topics,.ke-outcome-private')],style:'.ke-group-row:not(:has(button[aria-label*="E2E04 Five"])) {visibility:hidden!important;}'});
+  summary.screenshots.push({file:'screenshots/'+name,actor:u.actor,viewport:u.page.viewportSize(),caption:c.caption||c.name});return {screenshot:'screenshots/'+name};
+}
+const ops={
+  async login(u){await u.page.goto(site);await u.page.getByRole('button',{name:'Sign in',exact:true}).click();await u.page.locator('input[autocomplete=username]').fill(u.credential.username);await u.page.locator('input[autocomplete=current-password]').fill(u.credential.password);const ready=waitForGroups(u.page);ready.catch(()=>{});await u.page.getByRole('button',{name:'Sign in',exact:true}).last().click();await ready;await u.page.getByRole('heading',{name:'Decision groups',exact:true}).waitFor();await pause(2000);await settle(u);const account=u.bodies.get('/account');return {authenticated:true,approved:account?.account?.status==='APPROVED',groups:u.groups.size};},
+  async createGroup(u){await catalog(u);once('create-group');await u.page.getByRole('button',{name:'Create group',exact:true}).first().click();await u.page.getByLabel('New group name',{exact:true}).fill(fixture.groupName);const p=expectedResponse(u,'POST',p=>p==='/groups');await u.page.locator('.ke-create-group-form').getByRole('button',{name:'Create group',exact:true}).click();const b=await ack(await p);fixture.groupId=b.group?.id;if(!fixture.groupId)throw Error('GROUP_ACK_MISSING');persist();await u.page.getByRole('heading',{name:fixture.groupName,exact:true}).waitFor();return {acknowledged:true,members:b.group.members.length};},
+  async invite(u,c){if(!/^U0[2-5]$/.test(c.target))throw Error('INVITEE_INVALID');await group(u);once('invite-'+c.target);await u.page.getByLabel('Username or email',{exact:true}).fill(credentials[actorIndex(c.target)].username);const p=expectedResponse(u,'POST',p=>p===`/groups/${fixture.groupId}/invitations`);await u.page.getByRole('button',{name:'Send invitation',exact:true}).click();await ack(await p);return {acknowledged:true,target:c.target,channel:'username'};},
+  async join(u){await catalog(u);const button=u.page.getByRole('button',{name:'Accept invitation to '+fixture.groupName,exact:true});await button.waitFor();once('join-'+u.actor);const p=expectedResponse(u,'POST',p=>p==='/groups/accept');await button.click();const b=await ack(await p);if(b.group?.id!==fixture.groupId)throw Error('JOIN_MISMATCH');return {acknowledged:true,members:b.group.members.length};},
+  async roster(u){await group(u);const g=u.groups.get(fixture.groupId);return {members:g.members.length,distinct:new Set(g.members.map(m=>m.id)).size,organizers:g.members.filter(m=>m.isOrganizer).length,pending:g.pendingInvitations,visibleCards:await u.page.locator('.ke-member-list > li').count()};},
+  async prepare(u){await group(u);await u.page.getByRole('button',{name:'Start a decision',exact:true}).click();await u.page.getByLabel('Describe the decision',{exact:true}).fill(idea);await u.page.getByRole('button',{name:'Continue',exact:true}).click();await u.page.getByRole('heading',{name:'Questions and choices',exact:true}).waitFor();return {dedicatedPage:true,questionCount:await u.page.locator('[data-topic]').count()};},
+  async suggest(u){once('ai-draft');const p=expectedResponse(u,'POST',p=>/\/groups\/[^/]+\/drafts$/.test(p));await u.page.getByRole('button',{name:'Suggest choices',exact:true}).click();await ack(await p);await u.page.locator('.ke-creation-suggestions').waitFor({timeout:90000});const suggested=await u.page.locator('.ke-suggestion-topic').evaluateAll(es=>es.map(e=>({label:e.querySelector('h4')?.textContent,options:[...e.querySelectorAll('input')].map(i=>i.value)})));atomicJson(path.join(priv,'suggested.json'),suggested);return {visible:true,topics:suggested,followUps:await u.page.locator('.ke-creation-suggestions textarea').count()};},
+  async acceptSuggestions(u){const suggested=JSON.parse(fs.readFileSync(path.join(priv,'suggested.json')));if(suggested.length!==4||!topics.every(([label,,options])=>suggested.some(t=>t.label===label&&JSON.stringify([...t.options].sort())===JSON.stringify([...options].sort()))))throw Error('AI_VOCABULARY_MISMATCH');for(const[label]of topics)await u.page.getByRole('button',{name:'Add suggested question and choices: '+label,exact:true}).click();await u.page.locator('#creation-decision-name').fill(fixture.title);return {acceptedFourQuestions:true};},
+  async manual(u){const p=u.page;const dismiss=p.getByRole('button',{name:'Dismiss suggestions',exact:true});if(await dismiss.isVisible())await dismiss.click();await p.locator('#creation-decision-name').fill(fixture.title);while(await p.locator('[data-topic]').count()){await p.locator('[data-topic]').last().locator('.ke-topic-remove').click();}for(const[i,[label,kind,choices]]of topics.entries()){await p.getByRole('button',{name:'Add question',exact:true}).click();const t=p.locator(`[data-topic="${i}"]`);await p.locator('#creation-topic-'+i).fill(label);if(kind==='DATE'){await t.locator('.ke-topic-settings summary').click();await t.locator('select').selectOption(kind);}for(const[j,value]of choices.entries()){await t.getByRole('button',{name:'Add choice',exact:true}).click();await p.locator(`#creation-option-${i}-${j}`).fill(value);}}return {questions:4,choices:12,combinations:64};},
+  async createDecision(u){once('create-decision');const p=expectedResponse(u,'POST',p=>/\/drafts\/[^/]+\/create$/.test(p));await u.page.getByRole('button',{name:'Create decision',exact:true}).click();const b=await ack(await p);fixture.decisionId=b.snapshot?.frame?.decisionId;if(!fixture.decisionId)throw Error('DECISION_ACK_MISSING');persist();await waitForDecisionReady(u.page,fixture.decisionId,fixture.title,45000);return {created:true,required:b.snapshot.frame.requiredParticipantIds.length};},
+  async open(u){return state(await decision(u),u);},
+  async read(u){return state(await read(u),u);},
+  async save(u){const o=await decision(u);if(o.ownInputReadiness==='READY')throw Error('ANSWER_ALREADY_PRESENT');for(const[i,[label,,options]]of topics.entries()){const g=u.page.getByRole('group',{name:'Acceptable options for '+label,exact:true});const rows=g.locator('.ke-response-option');if(await rows.count()!==options.length)throw Error('OPTION_COUNT_MISMATCH');for(const[j,value]of options.entries())await rows.nth(j).locator('input').setChecked(answers[actorIndex(u.actor)][i].includes(value));}await u.page.locator('.ke-response-consent input').check();once('save-'+u.actor);const p=expectedResponse(u,'POST',(p,r)=>p.endsWith('/commands')&&r.request().postDataJSON()?.type==='CONFIRM_PRIVATE_ANSWERS');await u.page.getByRole('button',{name:'Save answers',exact:true}).click();const r=await p;await ack(r);fixture.saved[u.actor]={acknowledgedAt:Date.now()};persist();await u.page.locator('.ke-saved-answers').waitFor();const fresh=await read(u);if(matches(fresh,u)!==true)throw Error('OWN_SELECTIONS_MISMATCH');return {...state(fresh,u),statusCode:r.status()};},
+  async activity(u){const d=u.page.locator('.ke-compact-activity');if(!await d.getAttribute('open'))await d.locator('summary').click();return {rows:await d.locator('li').count()};},
+  async proposal(u){const o=await read(u),p=o.publicSnapshot.currentProposal;if(!p)throw Error('PROPOSAL_NOT_READY');const pin={proposalId:p.proposalId,proposalVersion:p.facts.proposalVersion,publicHash:p.publicHash};if(fixture.proposal&&JSON.stringify(pin)!==JSON.stringify(fixture.proposal))throw Error('PROPOSAL_CHANGED');fixture.proposal=pin;persist();if(o.publicSnapshot.status==='AGREED'){await u.page.locator('.ke-decision-header-menu summary').click();}await u.page.getByRole('button',{name:o.publicSnapshot.status==='AGREED'?'View outcome':'View proposal',exact:true}).last().click();await u.page.locator('#outcome-title').waitFor();const choices=await u.page.locator('.ke-outcome-choices dd').allTextContents();return {...state(o,u),choices,pinned:true,elapsedSinceLastSaveMs:Date.now()-Math.max(...Object.values(fixture.saved).map(s=>s.acknowledgedAt))};},
+  async approve(u,c){const o=await read(u);if(!fixture.proposal||o.ownApproval)throw Error('APPROVAL_NOT_SAFE');if(c.after409&&!fixture.reconciledApproval?.[u.actor])throw Error('CONFIRMED_REJECTION_REQUIRED');once('approve-'+u.actor+(c.after409?'-after-confirmed409':''));await u.page.getByRole('checkbox',{name:'I’ve reviewed this exact proposal, including any details shown only to me.',exact:true}).check();const p=expectedResponse(u,'POST',(p,r)=>p.endsWith('/commands')&&r.request().postDataJSON()?.type==='APPROVE_PROPOSAL');await u.page.getByRole('button',{name:'Approve proposal',exact:true}).click();const r=await p;await ack(r);fixture.approved[u.actor]=true;persist();await u.page.getByText('You approved this outcome.',{exact:true}).waitFor();const fresh=await read(u);if(!fresh.ownApproval)throw Error('APPROVAL_READBACK_FAILED');return {...state(fresh,u),statusCode:r.status()};},
+  async reconcileApproval(u){const e=summary.errors.find(e=>e.action===u.actor+'.approve'&&e.status===409&&e.serverCode==='STALE_CONTEXT');if(!e)throw Error('EXACT_409_REQUIRED');const o=await decision(u),p=o.publicSnapshot.currentProposal;if(o.ownApproval||!p||p.proposalId!==fixture.proposal?.proposalId||p.publicHash!==fixture.proposal.publicHash||p.facts.proposalVersion!==fixture.proposal.proposalVersion)throw Error('APPROVAL_RECONCILIATION_MISMATCH');fixture.reconciledApproval??={};fixture.reconciledApproval[u.actor]={reference:e.reference,approved:false,currentProposalUnchanged:true};persist();return {...state(o,u),knownRejectedReference:e.reference,freshUiLoaded:true,requestNotReplayed:true};},
+  async back(u){await u.page.getByRole('button',{name:'Back to decision',exact:true}).click();return {returned:true};},
+  async chat(u,c){if(!await u.page.locator('.ke-alexa-chat').isVisible())await u.page.getByRole('button',{name:'Chat',exact:true}).click();await u.page.getByRole('tab',{name:c.scope==='private'?'Private assistant':'Decision chat',exact:true}).click();await u.page.locator('.ke-alexa-body[aria-busy=false]').waitFor();await settle(u);return {scope:c.scope||'group',messages:await u.page.locator('.ke-alexa-message').count()};},
+  async closeChat(u){await u.page.getByRole('button',{name:'Close chat',exact:true}).click();return {closed:true};},
+  async message(u,c){if(c.ask&&summary.observedRequests.assistant>=8)throw Error('ASSISTANT_LIMIT');once('message-'+c.key);await u.page.locator('#alexa-question').fill(c.text);if(c.ask)await u.page.locator('.ke-alexa-consent input').check();const p=expectedResponse(u,'POST',p=>/\/chat\/(group|private)$/.test(p));await u.page.getByRole('button',{name:c.ask?(c.scope==='private'?'Ask assistant':'Post and ask AI'):'Post message',exact:true}).click();const r=await p,b=await ack(r);fixture.chatReceipts??={};fixture.chatReceipts[c.key]={actor:u.actor,scope:c.scope||'group',requestId:b.requestId,state:b.state};persist();const reply=b.conversation?.messages?.find(m=>m.replyTo===b.requestId&&m.role==='assistant');if(reply)atomicJson(path.join(priv,c.key+'-reply.json'),{text:reply.text});return {status:r.status(),receiptState:b.state,replyAvailable:!!reply,reply:c.scope==='private'?undefined:reply?.text?.replaceAll('violet-lantern-84','[PRIVATE_MARKER_REDACTED]')};},
+  async chatRead(u,c){await settle(u);const raw=u.bodies.get(`/decisions/${fixture.decisionId}/chat/${c.scope||'group'}`);const b=raw?.conversation||raw;if(!b?.messages)throw Error('CHAT_SNAPSHOT_MISSING');atomicJson(path.join(priv,u.actor+'-'+(c.scope||'group')+'-chat.json'),b);return {messages:b.messages.length,plainPosts:b.messages.filter(m=>/^Ready — user/.test(m.text)).length,distinctPlainAuthors:new Set(b.messages.filter(m=>/^Ready — user/.test(m.text)).map(m=>m.authorId)).size,privateMarkerPresent:b.messages.some(m=>m.text.includes('violet-lantern-84')),assistantReplies:b.messages.filter(m=>m.role==='assistant').length};},
+  async checkReply(u,c){const saved=fixture.chatReceipts[c.key];if(!saved||saved.actor!==u.actor)throw Error('OWN_RECEIPT_REQUIRED');const p=expectedResponse(u,'GET',p=>p.endsWith('/requests/'+saved.requestId));await u.page.getByRole('button',{name:/Check (reply status|assistant response)/}).last().click();const b=await ack(await p);const reply=b.conversation?.messages?.find(m=>m.replyTo===saved.requestId&&m.role==='assistant');if(reply)atomicJson(path.join(priv,c.key+'-reply.json'),{text:reply.text});return {state:b.state,replyAvailable:!!reply,reply:saved.scope==='private'?undefined:reply?.text?.replaceAll('violet-lantern-84','[PRIVATE_MARKER_REDACTED]')};},
+  async layout(u,c){await u.page.setViewportSize(c.mobile?{width:390,height:720}:{width:1365,height:1000});return {viewport:u.page.viewportSize(),overflow:await u.page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),memberRows:await u.page.locator('.ke-member-list > li').count(),memberPagination:await u.page.locator('.ke-member-pagination').count()};},
+  async search(u){await catalog(u);const search=u.page.getByRole('searchbox',{name:'Search groups',exact:true});await search.fill(fixture.groupName);await u.page.getByRole('button',{name:'Open group '+fixture.groupName,exact:true}).waitFor();await shot(u,{name:'dashboard-search',caption:'Search finds this run’s own group'});await u.page.getByRole('button',{name:'Clear group search',exact:true}).click();await search.fill('e2e04-absent-'+run);await u.page.locator('.ke-group-search-empty').waitFor();await u.page.getByRole('button',{name:'Clear group search',exact:true}).click();return {searchFound:true,noMatch:true,clear:true,responsePages:u.pages,distinctGroups:u.groups.size};},
+  async theme(u,c){const current=await u.page.locator('html').getAttribute('data-theme');if((current==='dark')!==!!c.dark)await u.page.getByRole('button',{name:'Dark mode',exact:true}).click();return {theme:await u.page.locator('html').getAttribute('data-theme'),overflow:await u.page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)};},
+  async activeList(u){await group(u);return {agreedRowVisible:await u.page.locator('.ke-decision-row-open').filter({has:u.page.getByText(fixture.title,{exact:true})}).count(),ownGroupStillAccessible:true};},
+  async inspect(u){const body=await u.page.locator('body').innerText();atomicJson(path.join(priv,u.actor+'-inspection.json'),{text:body,controls:await u.page.locator('button,input,textarea').evaluateAll(es=>es.filter(e=>e.getClientRects().length).map(e=>({id:e.id,tag:e.tagName,type:e.type,text:e.innerText||e.getAttribute('aria-label'),label:e.labels?.[0]?.textContent,disabled:e.disabled})))});return {inspection:'PRIVATE_FILE'};},
+  async capture(u,c){return shot(u,c);},
+  async liveCard(u){await u.page.locator('.ke-chat-decision-card').waitFor({timeout:45000});const o=await read(u);const card=u.page.locator('.ke-chat-decision-card');return {publicText:await card.innerText(),ownerStatus:o.publicSnapshot.status,ownerApproved:o.publicSnapshot.approvedParticipantIds.length,ownerRequired:o.publicSnapshot.frame.requiredParticipantIds.length,links:await card.getByRole('button').allTextContents()};},
+  async cardOutcome(u){const card=u.page.locator('.ke-chat-decision-card');await card.getByRole('button',{name:/Review proposal|View agreed outcome/}).click();await u.page.locator('#outcome-title').waitFor();return {opened:true,title:await u.page.locator('#outcome-title').innerText(),choices:await u.page.locator('.ke-outcome-choices dd').allTextContents()};},
+  async waitOutcome(u){const start=Date.now();let o;while(Date.now()-start<120000){o=await read(u);if(o.publicSnapshot.currentProposal||['NO_SOLUTION','NO_OUTCOME','AGREED'].includes(o.publicSnapshot.status))break;await pause(5000);}return {...state(o,u),elapsedSinceLastSaveMs:Date.now()-Math.max(...Object.values(fixture.saved).map(s=>s.acknowledgedAt)),observationMs:Date.now()-start};},
+  async extraGroup(u,c){await catalog(u);const name=fixture.groupName+' Catalog '+c.number;once('extra-group-'+c.number);await u.page.getByRole('button',{name:'Create group',exact:true}).first().click();await u.page.getByLabel('New group name',{exact:true}).fill(name);const p=expectedResponse(u,'POST',p=>p==='/groups');await u.page.locator('.ke-create-group-form').getByRole('button',{name:'Create group',exact:true}).click();const b=await ack(await p);fixture.extraGroups??=[];fixture.extraGroups.push(b.group.id);persist();return {acknowledged:true,catalogNumber:c.number};},
+  async pagination(u){await catalog(u);const before=await u.page.locator('.ke-group-row').count();const next=u.page.getByRole('button',{name:/Next page|Next groups|Next/});const count=await next.count();atomicJson(path.join(priv,'pagination-inspection.json'),{buttons:await u.page.getByRole('button').allTextContents()});return {responsePages:u.pages,total:u.groups.size,visibleRows:before,nextButtons:count};},
+  async result(u,c){summary.cases[c.case]=c.result;return {case:c.case,result:c.result};},
+};
+summary.state='RUNNING';summary.endedAt=null;event('BROWSER_STARTED',{version:browser.version(),pages:0});console.log(JSON.stringify({ready:true,run}));
+const lines=createInterface({input:process.stdin,terminal:false});
+for await(const line of lines){let c,u;try{c=JSON.parse(line);if(c.operation==='finish'){summary.state=c.state;summary.endedAt=new Date().toISOString();event('RUN_ENDED',{state:summary.state});break;}if(!Object.hasOwn(ops,c.operation))throw Error('OPERATION_INVALID');summary.inFlightAction=c.action||c.actor+'.'+c.operation;event('ACTION_INTENT',{actor:c.actor,action:summary.inFlightAction});u=await getUser(c.actor);const start=Date.now();const result=await ops[c.operation](u,c);summary.lastConfirmedAction=summary.inFlightAction;summary.inFlightAction=null;event('ACTION_RESULT',{actor:c.actor,action:summary.lastConfirmedAction,state:'VERIFIED',durationMs:Date.now()-start,actual:result});console.log(JSON.stringify({state:'VERIFIED',operation:c.operation,actor:c.actor,actual:result}));}catch(e){let screenshot=null;if(u&&summary.errors.length<3){try{screenshot=(await shot(u,{name:'failure-'+summary.errors.length})).screenshot;}catch{}}const error={action:summary.inFlightAction,code:String(e.message).split('\n')[0].slice(0,130),domain:e.status?'APP_HTTP':'AUTOMATION',status:e.status||null,serverCode:e.serverCode||null,reference:e.reference||null,screenshot};summary.errors.push(error);atomicJson(path.join(priv,'last-error.json'),{name:e.name,message:e.message,stack:e.stack});summary.inFlightAction=null;event('ACTION_FAILED',error);console.log(JSON.stringify({state:'FAILED',...error}));}}
+for(const u of users.values())await u.context.close();await browser.close();event('RUNNER_STOPPED',{browserClosed:true});process.stdin.pause();process.stdin.unref?.();
