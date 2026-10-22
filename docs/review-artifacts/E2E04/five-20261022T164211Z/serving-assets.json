@@ -1,0 +1,19 @@
+{
+  "utc": "2026-10-22T16:55:20.683495+00:00",
+  "sites": [
+    {
+      "url": "https://known-enough.vercel.app/",
+      "status": 200,
+      "scripts": [
+        "/assets/index-DUXnZloD.js"
+      ]
+    },
+    {
+      "url": "https://main.d143q5ravxp5av.amplifyapp.com/",
+      "status": 200,
+      "scripts": [
+        "/assets/index-CeSKg8pw.js"
+      ]
+    }
+  ]
+}

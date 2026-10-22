@@ -5,20 +5,223 @@
   "startedAt": "2026-10-22T16:42:11.809Z",
   "endedAt": null,
   "cases": {
-    "01": "NOT_RUN",
-    "02": "NOT_RUN",
-    "03": "NOT_RUN",
-    "04": "NOT_RUN",
-    "05": "NOT_RUN",
-    "06": "NOT_RUN"
+    "01": "PASS_WITH_INVITATION_REJECTION",
+    "02": "PASS_SMALL_GROUP_AND_TWO_PAGE_CATALOG",
+    "03": "PASS_CANONICAL_OWNER_READBACK",
+    "04": "CORRECT_RESULT_SLOW_66_5_SECONDS",
+    "05": "IN_PROGRESS_FOUR_OF_FIVE_APPROVED",
+    "06": "IN_PROGRESS_FINAL_SUMMARY_PENDING"
   },
   "observedRequests": {
     "outcome": 0,
-    "assistant": 0,
-    "aiDraft": 0,
-    "plainPosts": 0
+    "assistant": 7,
+    "aiDraft": 1,
+    "plainPosts": 5
   },
-  "errors": [],
-  "screenshots": [],
-  "providerUsage": "UNKNOWN: request counts are not provider-call/token/billing evidence"
+  "errors": [
+    {
+      "action": "U01.invite",
+      "code": "APP_HTTP_409",
+      "domain": "APP_HTTP",
+      "status": 409,
+      "serverCode": "STALE_CONTEXT",
+      "reference": "d0e0aa2a-e6ba-43be-9cfe-8265ef1927f8",
+      "screenshot": "screenshots/failure-0.png"
+    },
+    {
+      "action": "U01.invite",
+      "code": "page.goto: net::ERR_ABORTED at https://known-enough.vercel.app/",
+      "domain": "AUTOMATION",
+      "status": null,
+      "serverCode": null,
+      "reference": null,
+      "screenshot": "screenshots/failure-1.png"
+    },
+    {
+      "action": "U01.invite",
+      "code": "page.goto: net::ERR_ABORTED at https://known-enough.vercel.app/",
+      "domain": "AUTOMATION",
+      "status": null,
+      "serverCode": null,
+      "reference": null,
+      "screenshot": "screenshots/failure-2.png"
+    },
+    {
+      "action": "U01.invite",
+      "code": "locator.waitFor: Timeout 45000ms exceeded.",
+      "domain": "AUTOMATION",
+      "status": null,
+      "serverCode": null,
+      "reference": null,
+      "screenshot": null
+    },
+    {
+      "action": "U04.join",
+      "code": "locator.waitFor: Timeout 20000ms exceeded.",
+      "domain": "AUTOMATION",
+      "status": null,
+      "serverCode": null,
+      "reference": null,
+      "screenshot": null
+    },
+    {
+      "action": "U02.save",
+      "code": "OWN_SELECTIONS_MISMATCH",
+      "domain": "AUTOMATION",
+      "status": null,
+      "serverCode": null,
+      "reference": null,
+      "screenshot": null
+    },
+    {
+      "action": "U04.save",
+      "code": "OWN_SELECTIONS_MISMATCH",
+      "domain": "AUTOMATION",
+      "status": null,
+      "serverCode": null,
+      "reference": null,
+      "screenshot": null
+    },
+    {
+      "action": "U01.open",
+      "code": "DECISION_VIEW_NOT_READY",
+      "domain": "AUTOMATION",
+      "status": null,
+      "serverCode": null,
+      "reference": null,
+      "screenshot": null
+    },
+    {
+      "action": "U01.open",
+      "code": "DECISION_VIEW_NOT_READY",
+      "domain": "AUTOMATION",
+      "status": null,
+      "serverCode": null,
+      "reference": null,
+      "screenshot": null
+    },
+    {
+      "action": "U01.chatRead",
+      "code": "CHAT_SNAPSHOT_MISSING",
+      "domain": "AUTOMATION",
+      "status": null,
+      "serverCode": null,
+      "reference": null,
+      "screenshot": null
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "screenshots/failure-0.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "failure-0"
+    },
+    {
+      "file": "screenshots/failure-1.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "failure-1"
+    },
+    {
+      "file": "screenshots/failure-2.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "failure-2"
+    },
+    {
+      "file": "screenshots/five-member-roster.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "Five distinct members, one organizer, no pending invitations"
+    },
+    {
+      "file": "screenshots/mobile-roster.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 390,
+        "height": 720
+      },
+      "caption": "Five-member roster on a 390px screen"
+    },
+    {
+      "file": "screenshots/dark-roster.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "Five-member roster in dark mode"
+    },
+    {
+      "file": "screenshots/dashboard-search.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "Search finds this run’s own group"
+    },
+    {
+      "file": "screenshots/ai-questions-and-choices.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "Four AI-generated questions accepted into the decision editor"
+    },
+    {
+      "file": "screenshots/proposal-zero-of-five.png",
+      "actor": "U05",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "Correct common plan proposed; zero of five approvals"
+    },
+    {
+      "file": "screenshots/live-card-zero-of-five.png",
+      "actor": "U05",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "Live MCP card matches the proposal and zero of five approvals"
+    },
+    {
+      "file": "screenshots/live-card-four-of-five.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "Still proposed at four of five approvals; one person remains"
+    }
+  ],
+  "providerUsage": "UNKNOWN: request counts are not provider-call/token/billing evidence",
+  "runtime": {
+    "node": "v24.21.0",
+    "browser": "153.0.8010.12"
+  },
+  "credentials": {
+    "count": 5,
+    "distinct": true,
+    "synthetic": true
+  },
+  "productionSource": "601394ab09d9dd6888ba6d71ac3f3790083c3b3f",
+  "inFlightAction": null,
+  "lastConfirmedAction": "U01.result"
 }
