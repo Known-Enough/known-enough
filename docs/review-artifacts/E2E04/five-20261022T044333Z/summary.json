@@ -1,0 +1,77 @@
+{
+  "runId": "20261022T044333Z",
+  "variant": "E2E04-five-account",
+  "state": "BLOCKED",
+  "blocker": "FIVE_ACCOUNT_CREDENTIALS_UNAVAILABLE",
+  "startedAt": "2026-10-22T04:43:33.562253+00:00",
+  "endedAt": "2026-10-22T04:43:35.826009+00:00",
+  "documentationBase": "2cbe8a3f1d0d5911672565a804b06bfd1c34d623",
+  "observedOriginMain": "194e7823c059f33d62a9308a7cfd6384ca4b90ef",
+  "plannedParticipants": 5,
+  "credentials": {
+    "filePresent": true,
+    "entriesObserved": 2,
+    "distinctUsernames": 2,
+    "requestedEntriesPresent": 0,
+    "requiredEntries": 5,
+    "authentication": "NOT_EXECUTED"
+  },
+  "cases": {
+    "01": {
+      "name": "Authentication, five members and invitations",
+      "result": "BLOCKED",
+      "execution": "NOT_RUN",
+      "reason": "Five usable distinct synthetic accounts not available"
+    },
+    "02": {
+      "name": "Dashboard search and small-group responsive layout",
+      "result": "BLOCKED",
+      "execution": "NOT_RUN",
+      "reason": "Five usable distinct synthetic accounts not available"
+    },
+    "03": {
+      "name": "Five independent private saves and plain messages",
+      "result": "BLOCKED",
+      "execution": "NOT_RUN",
+      "reason": "Five usable distinct synthetic accounts not available"
+    },
+    "04": {
+      "name": "One automatic compatible outcome",
+      "result": "BLOCKED",
+      "execution": "NOT_RUN",
+      "reason": "Five usable distinct synthetic accounts not available"
+    },
+    "05": {
+      "name": "Five distinct approvals and final direct-link readbacks",
+      "result": "BLOCKED",
+      "execution": "NOT_RUN",
+      "reason": "Five usable distinct synthetic accounts not available"
+    },
+    "06": {
+      "name": "Assistant accuracy and private-thread isolation",
+      "result": "BLOCKED",
+      "execution": "NOT_RUN",
+      "reason": "Five usable distinct synthetic accounts not available"
+    }
+  },
+  "executed": {
+    "authenticatedUsers": 0,
+    "browserSessions": 0,
+    "appWrites": 0,
+    "aiRequests": 0,
+    "emails": 0,
+    "deployments": 0
+  },
+  "publicHttpChecks": "PASS",
+  "publicHttpEvidence": "public-readback.json",
+  "screenshots": {
+    "state": "NOT_CAPTURED",
+    "reason": "No authenticated browser run started; public HTTP checks only"
+  },
+  "providerUsage": {
+    "calls": 0,
+    "tokens": 0,
+    "reason": "No authentication, app request or model request dispatched by this run"
+  },
+  "nextAction": "Owner provides a private local credentials file with five usable synthetic accounts. Never guess passwords or provision replacement users."
+}

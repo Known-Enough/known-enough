@@ -22,3 +22,8 @@ That readiness review was documentation-only. The current user-requested run has
 ## Historical preflight — 20261020T031040Z
 
 Credentials verified privately (exact accounts, file mode 0600, directory mode 0700). Public site HEAD returned 200. Browser execution did not start because the required Node 24.21.0 runtime is unavailable; the installed Playwright package is present but was not used. All six cases remain NOT_RUN. No login, app writes, AI calls, provider calls or screenshots. The later user override authorized Node24.19; see the completed run above.
+
+
+## Latest requested five-account check
+
+[Reduced procedure](five-account-check.md). [Preflight report](../../../../review-artifacts/E2E04/five-20261022T044333Z/report.md): BLOCKED before login; only two local credential entries are available. Public pages/assets respond, but authenticated app functionality has not been retested. The historical fifteen-account result above is unchanged.

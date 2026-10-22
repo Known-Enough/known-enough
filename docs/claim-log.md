@@ -3229,3 +3229,5 @@ FF09 CODE_READY/B — fictional guide embedded only in creation dialog, form/req
 
 
 2026-10-21T07:59:46.769949+00:00 — A documentation-branch split: preserve all 1,317 documentation files on new development, remove tracked documentation from main, relocate only executable fixtures and adjust direct documentation dependencies. Non-document code-clutter audit is read-only and reported in chat; no product tests/provider/cloud/data actions. Original dirty checkout and untracked user drafts preserved.
+
+2026-10-22T04:44:00.299001+00:00 — E2E04 five-account/A user-requested preflight BLOCKED / claim released. Development-only reduced procedure/report; two distinct local credential entries, five requested entries unavailable. No login/browser/app writes/AI/email/deployment/cleanup. Both public HTML pages and eight referenced assets HTTP200, anonymous availability only. Existing15-user evidence preserved. Next: owner provides private local five-account file, then current-host/current-control harness and fresh run. [Report](review-artifacts/E2E04/five-20261022T044333Z/report.md).

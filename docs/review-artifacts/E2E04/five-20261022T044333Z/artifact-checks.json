@@ -1,0 +1,6 @@
+{
+  "jsonAndEvents": "PASS",
+  "localLinks": "PASS",
+  "fiveRowUniqueOutcome": "PASS",
+  "scope": "Evidence/fixture consistency only; not application tests"
+}

@@ -1,0 +1,4 @@
+{"utc": "2026-10-22T04:43:33.562253+00:00", "run": "20261022T044333Z", "event": "RUN_STARTED", "scope": "Five-account E2E04 subset; user-requested fresh check"}
+{"utc": "2026-10-22T04:43:33.562253+00:00", "run": "20261022T044333Z", "event": "CREDENTIAL_PREFLIGHT", "result": "BLOCKED", "availableEntries": 2, "requiredEntries": 5, "authenticationAttempted": false}
+{"utc": "2026-10-22T04:43:35.826009+00:00", "run": "20261022T044333Z", "event": "PUBLIC_READBACK", "result": "PASS", "sites": 2, "authenticated": false}
+{"utc": "2026-10-22T04:43:35.826009+00:00", "run": "20261022T044333Z", "event": "RUN_ENDED", "state": "BLOCKED", "applicationConclusion": "NOT_TESTED", "nextAction": "Provide private five-account credentials file"}
