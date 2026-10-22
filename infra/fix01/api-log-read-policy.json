@@ -1,1 +1,0 @@
-{"Version":"2012-10-17","Statement":[{"Sid":"FIX01ReadOnlyPrimaryApiRequestWindow","Effect":"Allow","Action":"logs:FilterLogEvents","Resource":"arn:aws:logs:us-east-1:092954139775:log-group:/aws/lambda/known-enough-stage-api:*"}]}
