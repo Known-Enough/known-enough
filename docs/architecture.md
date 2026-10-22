@@ -6,9 +6,9 @@ The browser is a React/Vite application. Cognito authenticates users; API Gatewa
 
 Amazon Bedrock Converse invokes `amazon.nova-lite-v1:0` for suggestions, private interpretation, outcome reasoning, and chat. Drafting and chat run through API request handlers. Outcome work runs in a separate Lambda on a one-minute EventBridge schedule, using DynamoDB job records.
 
-Code checks model output against strict schemas and validates proposals before publication. Current progress, approval counts, and outcomes are rendered from server state. The model does not grant permissions or approve proposals.
+Code checks model output against strict schemas and validates proposals before publication. Structured progress, approval counts, outcomes and the live chat card are rendered from saved server state. Free-form conversation remains model-generated. The model does not grant permissions or approve proposals.
 
-The [MCP server](mcp.md) shares the existing access checks and exposes four read-only tools. The web chat uses authenticated application routes; opening **About the assistant** checks MCP initialization and tool discovery.
+The [MCP server](mcp.md) shares the existing access checks and exposes four read-only tools. The web chat uses authenticated application routes; the live decision card uses MCP initialization, tool discovery and `get_decision_outcome` reads. **About the assistant** shows connection/read status.
 
 ## Supporting services
 

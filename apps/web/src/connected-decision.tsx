@@ -384,7 +384,7 @@ export function ConnectedDecision({ snapshot, owner, api, refresh, backgroundNeg
     </section>}
     {detailStep === 'proposal' && !proposal && owner && <>{recoveryControls}{notice && <p role="status" className="ke-outcome-notice">{notice}</p>}</>}
     </Modal>
-    {assistantOpen && mcpUrl && <Suspense fallback={<p role="status">Opening assistant…</p>}><AlexaChat decisionId={decisionId} title={title ?? snapshot.frame.title} groupId={groupId} endpoint={mcpUrl} api={api} onClose={() => setAssistantOpen(false)} /></Suspense>}
+    {assistantOpen && mcpUrl && <Suspense fallback={<p role="status">Opening assistant…</p>}><AlexaChat decisionId={decisionId} title={title ?? snapshot.frame.title} groupId={groupId} endpoint={mcpUrl} api={api} onClose={() => setAssistantOpen(false)} reviewBlocked={blocked || structuredDirty || !!text.trim()} onReviewOutcome={async () => { if (blocked || structuredDirty || text.trim()) return; await refresh(); setAssistantOpen(false); setDetailStep('proposal'); }} /></Suspense>}
     {owner && <div><PrivateAnswersModal embedded open={true} owner={owner} busy={busy} blocked={answersBlocked} saveBlocked={false} notesLocked={!!interpretationRequest} notes={text} consent={syntheticProcessing} notice={notice} recovery={recoveryControls}
         onClose={() => {}} onNotes={setText} onConsent={setSyntheticProcessing} onInterpret={interpret} onDirty={setStructuredDirty} onEditingChange={setEditingAnswers}
         onSave={payload => command('CONFIRM_PRIVATE_ANSWERS', payload)} describeValue={valueText} describeCondition={describeCondition} /></div>}

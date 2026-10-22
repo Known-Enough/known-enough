@@ -20,7 +20,7 @@ An unauthenticated request returns `401`. Authenticated GET returns `405` becaus
 | `get_decision_progress` | `decisionId` | Shared answer and approval status |
 | `get_decision_outcome` | `decisionId` | Current shared proposal or agreed choices |
 
-The tools cannot read private answers, save answers, grant permissions, or approve proposals. The [web chat](../apps/web/src/alexa-chat.tsx) uses application chat routes and Bedrock. Its **About the assistant** panel performs MCP initialization and tool discovery; it does not execute a tool for every chat message.
+The tools cannot read private answers, save answers, grant permissions, or approve proposals. The [web chat](../apps/web/src/alexa-chat.tsx) uses application chat routes and Bedrock. Its live decision card initializes an MCP client, discovers the shared tools and calls `get_decision_outcome`. It refreshes every 20 seconds while visible, on focus/return online, after message receipts and when the user selects Refresh. **About the assistant** shows this connection and read status. Chat replies continue to use application routes; a card read does not invoke a model.
 
 ## Client example
 
@@ -44,3 +44,9 @@ unset KE_ACCESS_TOKEN
 ```
 
 The exchange initializes a client, discovers tools, and reads accessible groups. It makes no model calls. Use the returned group/decision IDs as arguments when invoking the other tools. Implementation: [server](../apps/api/src/mcp-server.ts) and [protocol contracts](../packages/contracts/src/alexa.ts).
+
+## Live decision card
+
+The card displays shared choices, proposal/agreement status and the recorded approval count from the structured tool result. Its short explanation is derived from that saved state, independently of generated conversation text. Results must match the open decision and the public schema; denied, malformed or mismatched results clear old card values. Private answers and owner snapshots are not accepted.
+
+View agreed outcome / Review proposal refreshes the decision and opens the existing outcome modal. It sends no approval command. Unsaved decision edits and pending actions must be resolved before navigating through the card. Earlier conversation messages remain dated history; the card is a separate current read, not a rewritten message.

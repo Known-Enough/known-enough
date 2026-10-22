@@ -13,6 +13,7 @@ Known Enough helps groups reach a decision without sharing everyone's private pr
 - Review proposals checked against confirmed requirements and permissions you have granted.
 - Approve for yourself; AI cannot finalize an agreement or approve for anyone.
 - Discuss shared choices in Decision chat; share from Private assistant only after previewing the message.
+- Read the current proposal and approvals in a live decision card, then open the outcome for review.
 
 ## How it works
 
@@ -46,7 +47,7 @@ The React/Vite frontend uses an AWS backend for authentication, decision state, 
 
 ## Alexa+ integration
 
-Decision chat supports questions about shared progress and outcomes. This Alexa+ web simulation uses Bedrock for conversation; its self-hosted MCP server provides four read-only tools for accessible groups, decision lists, progress, and outcomes. Native Alexa+ devices are not connected. See the [MCP guide](https://github.com/Known-Enough/known-enough/blob/development/docs/mcp.md) for the API and a runnable client example.
+Decision chat supports questions about shared progress and outcomes. This Alexa+ web simulation uses Bedrock for conversation; its self-hosted MCP server provides four read-only tools for accessible groups, decision lists, progress, and outcomes. The live decision card calls `get_decision_outcome` through MCP and refreshes shared choices and approval counts. Native Alexa+ devices are not connected. See the [MCP guide](https://github.com/Known-Enough/known-enough/blob/development/docs/mcp.md) for the API and a runnable client example.
 
 ## Technical implementation
 
@@ -65,7 +66,7 @@ Backend region: `us-east-1`.
 
 Decision rules use typed values and a finite operator set. The validation kernel checks candidates against confirmed conditions and applicable permissions. Final approval is bound to the exact proposal ID, version and public hash. A model response cannot approve a proposal.
 
-The MCP endpoint uses Streamable HTTP, protocol `2025-11-25` and the official TypeScript SDK. Tools: `list_groups`, `list_group_decisions`, `get_decision_progress`, `get_decision_outcome`. Tools are read-only and reuse application access checks. Web chat uses separate application routes; MCP initialization and discovery do not imply a tool call for every message.
+The MCP endpoint uses Streamable HTTP, protocol `2025-11-25` and the official TypeScript SDK. Tools: `list_groups`, `list_group_decisions`, `get_decision_progress`, `get_decision_outcome`. Tools are read-only and reuse application access checks. Chat messages use application routes. The live decision card calls `get_decision_outcome` over MCP; card reads do not invoke a model.
 
 ## Run the local demo
 

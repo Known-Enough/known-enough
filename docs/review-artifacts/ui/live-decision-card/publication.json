@@ -1,0 +1,155 @@
+{
+  "recordedAt": "2026-10-22T07:01:19.544973+00:00",
+  "sourceSha": "601394ab09d9dd6888ba6d71ac3f3790083c3b3f",
+  "status": "PUBLISHED_READ_ONLY_LIVE_PROOF_PASS",
+  "scope": "Frontend live MCP decision card; no API/worker publication or protocol/storage changes.",
+  "implementation": {
+    "tool": "get_decision_outcome",
+    "transport": "Streamable HTTP",
+    "pollIntervalSeconds": 20,
+    "refreshTriggers": [
+      "chat open",
+      "visible interval",
+      "window focus",
+      "visible return",
+      "online",
+      "message receipt",
+      "manual refresh"
+    ],
+    "stateAuthority": "Strict public structured tool result; decision identity and proposal/count checks. No model prose used for card facts.",
+    "navigation": "Fresh decision read, then existing outcome modal. No approval command; pending actions/unsaved edits block the link.",
+    "history": "Original messages preserved; live card is transient current state, not a stored/revised chat message."
+  },
+  "checks": {
+    "unit": {
+      "passed": 5,
+      "file": "apps/web/src/live-decision.test.ts"
+    },
+    "browser": {
+      "passed": 5,
+      "file": "tests/e2e/live-decision-card.spec.ts",
+      "externalServices": "MOCKED"
+    },
+    "typecheck": "PASS",
+    "lintAndBoundaries": "PASS: 662 references",
+    "productionBuild": "PASS",
+    "whitespace": "PASS",
+    "fullSuite": "NOT_RUN"
+  },
+  "live": {
+    "result": "LIVE_DECISION_CARD_READBACK_PASS",
+    "host": "https://known-enough.vercel.app/",
+    "savedState": "AGREED",
+    "approvalCountMatches": true,
+    "approval": "2 of 2 approved",
+    "visibleChoices": 4,
+    "mcpMethods": [
+      {
+        "method": "initialize",
+        "tool": null
+      },
+      {
+        "method": "notifications/initialized",
+        "tool": null
+      },
+      {
+        "method": "tools/list",
+        "tool": null
+      },
+      {
+        "method": "tools/call",
+        "tool": "get_decision_outcome"
+      }
+    ],
+    "blockedWrites": 0,
+    "newMessages": 0,
+    "modelCallsRequested": 0,
+    "checkedAt": "2026-10-22T06:58:13.791Z"
+  },
+  "publication": {
+    "frontendRun": "https://github.com/Known-Enough/known-enough/actions/runs/39737129347",
+    "amplifyJob": "179",
+    "amplify": {
+      "host": "https://main.d143q5ravxp5av.amplifyapp.com/",
+      "sourceSha": "601394ab09d9dd6888ba6d71ac3f3790083c3b3f",
+      "result": "SERVED_HASHES_PASS",
+      "files": [
+        {
+          "path": "/assets/alexa-chat-vkq-62qU.js",
+          "sha256": "6c489fee6097e0c842bda1b151848ffae6cebe918f1855b7c03fb2a1c24bce58",
+          "http": 200
+        },
+        {
+          "path": "/assets/app-chrome-FZErGB6A.js",
+          "sha256": "410d3e9cd512a9cfe3cef105f1631fbf69961ee53fe69f954ac29937b28ff279",
+          "http": 200
+        },
+        {
+          "path": "/assets/connected-app-CtMcaMoo.js",
+          "sha256": "7132b5b3074257adb2c03b964352db5858d7dcb306c8f47f83d1bebae8c98c4f",
+          "http": 200
+        },
+        {
+          "path": "/assets/index-CaHiONaQ.css",
+          "sha256": "f3c5ff168415cc5f46acae5666e9bf7cca6385c7fb259024c701be04a27d8962",
+          "http": 200
+        },
+        {
+          "path": "/assets/index-CeSKg8pw.js",
+          "sha256": "3c1c45910ef94aba1b20b954c9bd721fc04d65fcfd775fce0d019451afc51db3",
+          "http": 200
+        },
+        {
+          "path": "/assets/preload-helper-Bz3Ef5C-.js",
+          "sha256": "c0e950f1c6235c43c01f65ad564b71c6a6283863b0759f559f5f942e358cd19e",
+          "http": 200
+        },
+        {
+          "path": "/assets/src-DC_Q1N3b.js",
+          "sha256": "adc269219527f83543dd36836ab39a4ea35a95e084411bf1465decb3a5d9006d",
+          "http": 200
+        },
+        {
+          "path": "/cover.png",
+          "sha256": "43fdb0ce0d8b1b828e03feed39ccd24a1f278ad6bf271193856f112a77cc7151",
+          "http": 200
+        },
+        {
+          "path": "/",
+          "sha256": "858db1baa0cde8e03092c5bc2f1110e42915218e8a05c854f02cc36c6186b249",
+          "http": 200
+        },
+        {
+          "path": "/logo.png",
+          "sha256": "735bf56399cfd04d19cca95c32a259b7cc94b8b7b25d4e2eab7c9e59336065fb",
+          "http": 200
+        }
+      ]
+    },
+    "vercel": {
+      "sourceSha": "601394ab09d9dd6888ba6d71ac3f3790083c3b3f",
+      "githubStatus": "success",
+      "url": "https://known-enough.vercel.app/",
+      "actualCardRead": "PASS"
+    },
+    "configuration": {
+      "result": "ZZ02_SETUP_READBACK_PASS",
+      "configurationWrites": 0,
+      "dataWrites": 0,
+      "providerCalls": 0,
+      "apiSha256": "f8c57bec3aed82d88cd575be479cac3e78db112f4bb16b52c43337ace82661d9"
+    },
+    "initialStop": {
+      "run": "https://github.com/Known-Enough/known-enough/actions/runs/39736748923",
+      "code": "CHECKED_RUNTIME_HASH_REQUIRED",
+      "writes": 0,
+      "resolution": "Observed API hash matched the prior native-code readback receipt; supplied that checked hash to the unchanged guard on the next publication."
+    }
+  },
+  "limits": [
+    "General generated chat prose is unchanged and can still be inaccurate. The live card is the current authoritative shared read.",
+    "No new model requests, chat messages, signups, emails or participant changes were made by the live readback.",
+    "No completed-history or calendar feature added in this change.",
+    "Focused browser coverage and one existing agreed fixture do not establish broad reliability or a security audit."
+  ]
+}
