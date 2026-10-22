@@ -1,0 +1,24 @@
+{
+  "runId": "20261022T045400Z",
+  "variant": "E2E04-two-account",
+  "state": "RUNNING",
+  "startedAt": "2026-10-22T04:49:28.496Z",
+  "endedAt": null,
+  "cases": {
+    "01": "NOT_RUN",
+    "02": "NOT_RUN",
+    "03": "NOT_RUN",
+    "04": "NOT_RUN",
+    "05": "NOT_RUN",
+    "06": "NOT_RUN"
+  },
+  "observedRequests": {
+    "outcome": 0,
+    "assistant": 0,
+    "aiDraft": 0,
+    "plainPosts": 0
+  },
+  "errors": [],
+  "screenshots": [],
+  "providerUsage": "UNKNOWN: request counts are not provider-call/token/billing evidence"
+}
