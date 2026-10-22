@@ -1,20 +1,20 @@
 {
   "runId": "20261022T045400Z",
   "variant": "E2E04-two-account",
-  "state": "RUNNING",
+  "state": "PARTIAL_CHECKPOINT",
   "startedAt": "2026-10-22T04:49:28.496Z",
-  "endedAt": null,
+  "endedAt": "2026-10-22T04:58:19.707Z",
   "cases": {
     "01": "PASS",
     "02": "PASS",
-    "03": "NOT_RUN",
+    "03": "PASS",
     "04": "NOT_RUN",
     "05": "NOT_RUN",
     "06": "NOT_RUN"
   },
   "observedRequests": {
     "outcome": 1,
-    "assistant": 1,
+    "assistant": 2,
     "aiDraft": 1,
     "plainPosts": 2
   },
@@ -27,6 +27,15 @@
       "serverCode": null,
       "reference": null,
       "screenshot": "screenshots/failure-0.png"
+    },
+    {
+      "action": "U02.approve",
+      "code": "APP_HTTP_409",
+      "domain": "APP_HTTP",
+      "status": 409,
+      "serverCode": "STALE_CONTEXT",
+      "reference": "9fa718f5-ed68-44fb-aac6-0f9cff1ac974",
+      "screenshot": "screenshots/failure-1.png"
     }
   ],
   "screenshots": [
@@ -83,6 +92,33 @@
         "height": 1000
       },
       "caption": "failure-0"
+    },
+    {
+      "file": "screenshots/05-proposal-zero-approvals.png",
+      "actor": "U02",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "Correct four-choice proposal; zero of two approvals"
+    },
+    {
+      "file": "screenshots/06-one-of-two-approvals.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "One approved; proposal correctly remains unagreed"
+    },
+    {
+      "file": "screenshots/failure-1.png",
+      "actor": "U02",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "failure-1"
     }
   ],
   "providerUsage": "UNKNOWN: request counts are not provider-call/token/billing evidence",
@@ -96,5 +132,5 @@
     "synthetic": true
   },
   "inFlightAction": null,
-  "lastConfirmedAction": "U02.read"
+  "lastConfirmedAction": "U02.proposal"
 }
