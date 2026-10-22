@@ -6,14 +6,14 @@ Two isolated synthetic accounts; new owned dinner fixture, four questions and64 
 
 | Case | Result |
 | --- | --- |
-| 01 | NOT_RUN |
-| 02 | NOT_RUN |
+| 01 | PASS |
+| 02 | PASS |
 | 03 | NOT_RUN |
 | 04 | NOT_RUN |
 | 05 | NOT_RUN |
 | 06 | NOT_RUN |
 
-Last action: none. In flight: none.
+Last action: U01.prepare. In flight: none.
 
 Observed requests: {"outcome":0,"assistant":0,"aiDraft":0,"plainPosts":0}. Provider usage: UNKNOWN: request counts are not provider-call/token/billing evidence.
 

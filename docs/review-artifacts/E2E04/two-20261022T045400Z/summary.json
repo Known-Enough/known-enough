@@ -5,8 +5,8 @@
   "startedAt": "2026-10-22T04:49:28.496Z",
   "endedAt": null,
   "cases": {
-    "01": "NOT_RUN",
-    "02": "NOT_RUN",
+    "01": "PASS",
+    "02": "PASS",
     "03": "NOT_RUN",
     "04": "NOT_RUN",
     "05": "NOT_RUN",
@@ -19,6 +19,45 @@
     "plainPosts": 0
   },
   "errors": [],
-  "screenshots": [],
-  "providerUsage": "UNKNOWN: request counts are not provider-call/token/billing evidence"
+  "screenshots": [
+    {
+      "file": "screenshots/01-two-members.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "Two distinct members, one organizer, no pending invitations"
+    },
+    {
+      "file": "screenshots/02-mobile-members.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 390,
+        "height": 720
+      },
+      "caption": "390px mobile roster; no horizontal overflow or unnecessary pagination"
+    },
+    {
+      "file": "screenshots/dashboard-search.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "Search finds this run’s own group"
+    }
+  ],
+  "providerUsage": "UNKNOWN: request counts are not provider-call/token/billing evidence",
+  "runtime": {
+    "node": "v24.21.0",
+    "browser": "153.0.8010.12"
+  },
+  "credentials": {
+    "count": 2,
+    "distinct": true,
+    "synthetic": true
+  },
+  "inFlightAction": null,
+  "lastConfirmedAction": "U01.prepare"
 }

@@ -1,0 +1,63 @@
+{
+  "observedAt": "2026-10-22T04:51:15.602998+00:00",
+  "sourceBranchHead": "194e7823c059f33d62a9308a7cfd6384ca4b90ef",
+  "branchHeadIsNotDeploymentProof": true,
+  "apiOrigin": "https://u94iyvt6p9.execute-api.us-east-1.amazonaws.com",
+  "backendCodeHashReadback": "NOT_EXECUTED",
+  "sites": [
+    {
+      "url": "https://known-enough.vercel.app/",
+      "status": 200,
+      "htmlSha256": "ff4dfc6ddb8ff2ce889a61b56c4f6483df93c26a051930a1d05a6f351dc6d779",
+      "assets": [
+        {
+          "path": "/assets/index-Dmuh-Q1i.js",
+          "status": 200,
+          "sha256": "6e332863774c1e7c2b09d9963df141909400e91e58cfe0dc1e5400930f534229"
+        },
+        {
+          "path": "/assets/app-chrome-FZErGB6A.js",
+          "status": 200,
+          "sha256": "410d3e9cd512a9cfe3cef105f1631fbf69961ee53fe69f954ac29937b28ff279"
+        },
+        {
+          "path": "/assets/preload-helper-Bz3Ef5C-.js",
+          "status": 200,
+          "sha256": "c0e950f1c6235c43c01f65ad564b71c6a6283863b0759f559f5f942e358cd19e"
+        },
+        {
+          "path": "/assets/index-DvgnKmI-.css",
+          "status": 200,
+          "sha256": "421803fa6e3b4e1b9e986ef2082ea695b880b7f7fca6ebe8d1b562302a6e4e63"
+        }
+      ]
+    },
+    {
+      "url": "https://main.d143q5ravxp5av.amplifyapp.com/",
+      "status": 200,
+      "htmlSha256": "319146ea3ec2bfe59d4f942d04870f3fbf71c5a23072c1c38c616c5de67aa4a8",
+      "assets": [
+        {
+          "path": "/assets/index-BrCbZZSL.js",
+          "status": 200,
+          "sha256": "2f3c259704880dad808fdac597ccac2f1d63b0755b4c44cbaaf2419990ab18fd"
+        },
+        {
+          "path": "/assets/app-chrome-FZErGB6A.js",
+          "status": 200,
+          "sha256": "410d3e9cd512a9cfe3cef105f1631fbf69961ee53fe69f954ac29937b28ff279"
+        },
+        {
+          "path": "/assets/preload-helper-Bz3Ef5C-.js",
+          "status": 200,
+          "sha256": "c0e950f1c6235c43c01f65ad564b71c6a6283863b0759f559f5f942e358cd19e"
+        },
+        {
+          "path": "/assets/index-DvgnKmI-.css",
+          "status": 200,
+          "sha256": "421803fa6e3b4e1b9e986ef2082ea695b880b7f7fca6ebe8d1b562302a6e4e63"
+        }
+      ]
+    }
+  ]
+}
