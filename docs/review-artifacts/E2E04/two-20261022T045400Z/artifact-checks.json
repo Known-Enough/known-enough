@@ -1,0 +1,10 @@
+{
+  "jsonAndJournal": "PASS",
+  "reportLinks": "PASS",
+  "terminalRunAndBrowserCloseRecorded": true,
+  "credentialAndJwtTextScan": "PASS",
+  "privateInputScreenshotWithheld": true,
+  "recorderSyntax": "PASS",
+  "diffWhitespace": "PASS",
+  "applicationSuite": "NOT_RUN_OUTSIDE_SCOPE"
+}

@@ -27,3 +27,8 @@ Credentials verified privately (exact accounts, file mode 0600, directory mode 0
 ## Latest requested five-account check
 
 [Reduced procedure](five-account-check.md). [Preflight report](../../../../review-artifacts/E2E04/five-20261022T044333Z/report.md): BLOCKED before login; only two local credential entries are available. Public pages/assets respond, but authenticated app functionality has not been retested. The historical fifteen-account result above is unchanged.
+
+
+## Latest two-account execution — 2026-10-22 UTC
+
+User authorized the available two accounts after the five-account credential blocker. [Live report](../../../../review-artifacts/E2E04/two-20261022T045400Z/report.md): full flow reached AGREED with both owners, but outcome speed missed30s, second approval needed a fresh view after409 STALE_CONTEXT, and assistant incorrectly reported zero approvals after agreement. Privacy and exact public choices passed. Original fifteen-user qualification remains dated historical evidence; current two-user result is ISSUES_FOUND. No application/deployment/configuration changes.

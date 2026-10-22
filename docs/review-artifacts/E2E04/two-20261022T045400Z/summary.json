@@ -1,20 +1,20 @@
 {
   "runId": "20261022T045400Z",
   "variant": "E2E04-two-account",
-  "state": "PARTIAL_CHECKPOINT",
+  "state": "ISSUES_FOUND",
   "startedAt": "2026-10-22T04:49:28.496Z",
-  "endedAt": "2026-10-22T04:58:19.707Z",
+  "endedAt": "2026-10-22T05:07:39.072Z",
   "cases": {
     "01": "PASS",
     "02": "PASS",
     "03": "PASS",
-    "04": "NOT_RUN",
-    "05": "NOT_RUN",
-    "06": "NOT_RUN"
+    "04": "FAIL_SPEED_TARGET",
+    "05": "RECOVERED_AFTER_REFRESH",
+    "06": "FAIL_AGREED_SUMMARY"
   },
   "observedRequests": {
     "outcome": 1,
-    "assistant": 2,
+    "assistant": 5,
     "aiDraft": 1,
     "plainPosts": 2
   },
@@ -36,6 +36,24 @@
       "serverCode": "STALE_CONTEXT",
       "reference": "9fa718f5-ed68-44fb-aac6-0f9cff1ac974",
       "screenshot": "screenshots/failure-1.png"
+    },
+    {
+      "action": "U02.message",
+      "code": "locator.click: Timeout 20000ms exceeded.",
+      "domain": "AUTOMATION",
+      "status": null,
+      "serverCode": null,
+      "reference": null,
+      "screenshot": "WITHHELD_PRIVATE_TEST_INPUT"
+    },
+    {
+      "action": "U01.theme",
+      "code": "locator.click: Timeout 20000ms exceeded.",
+      "domain": "AUTOMATION",
+      "status": null,
+      "serverCode": null,
+      "reference": null,
+      "screenshot": null
     }
   ],
   "screenshots": [
@@ -64,7 +82,7 @@
         "width": 1365,
         "height": 1000
       },
-      "caption": "Search finds this run’s own group"
+      "caption": "Search finds this run\u2019s own group"
     },
     {
       "file": "screenshots/03-ai-questions.png",
@@ -119,6 +137,56 @@
         "height": 1000
       },
       "caption": "failure-1"
+    },
+    {
+      "file": "screenshots/07-agreed-two-approvals.png",
+      "actor": "U02",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "Same proposal agreed by both independent participants after known-rejection refresh"
+    },
+    {
+      "file": "screenshots/08-incorrect-agreed-summary.png",
+      "actor": "U02",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "Assistant incorrectly says zero approvals; fresh owner read confirms AGREED with two"
+    },
+    {
+      "file": "screenshots/failure-2.png",
+      "actor": "U02",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "failure-2"
+    },
+    {
+      "file": "screenshots/09-final-outcome-clear.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 1100
+      },
+      "caption": "Final agreed proposal with all four choices and two distinct approvals; read-only recapture"
+    },
+    {
+      "file": "screenshots/10-mobile-chat.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 390,
+        "height": 720
+      },
+      "caption": "Mobile shared chat; close/composer reachable; ten messages persisted"
+    },
+    {
+      "file": "screenshots/11-incorrect-reply-clear.png",
+      "actor": "U01",
+      "caption": "Read-only cropped copy of the actual incorrect assistant reply; original message unchanged"
     }
   ],
   "providerUsage": "UNKNOWN: request counts are not provider-call/token/billing evidence",
@@ -132,5 +200,47 @@
     "synthetic": true
   },
   "inFlightAction": null,
-  "lastConfirmedAction": "U02.proposal"
+  "lastConfirmedAction": "U01.result",
+  "finalizedAt": "2026-10-22T05:12:50.934818+00:00",
+  "finalReadback": "final-readback.json",
+  "scope": "Two distinct existing synthetic accounts, one new dinner decision, current live Vercel UI; historical 5/15-user capacity excluded.",
+  "findings": [
+    {
+      "id": "assistant-current-state",
+      "severity": "HIGH",
+      "result": "CONFIRMED",
+      "description": "New agreed-summary response incorrectly said no approvals while fresh own state was AGREED with2 approvals.",
+      "requestReference": "1a547bd6-41eb-42d0-9cc9-947c9cd40431"
+    },
+    {
+      "id": "outcome-latency",
+      "severity": "MEDIUM",
+      "result": "CONFIRMED",
+      "description": "Not ready at34.3seconds; first confirmed ready66.2seconds after last save; missed30second target."
+    },
+    {
+      "id": "stale-approval-view",
+      "severity": "MEDIUM",
+      "result": "RECOVERED",
+      "description": "U02 initial approval409 STALE_CONTEXT; fresh view and new explicit approval200. Guard prevented stale write."
+    }
+  ],
+  "retainedFixture": {
+    "newGroupCount": 1,
+    "newDecisionCount": 1,
+    "state": "AGREED",
+    "privateMapping": "Machine-local fixture.json retained",
+    "existingFixturesChanged": false
+  },
+  "productCodeOrConfigurationChanged": false,
+  "manualOutcomeButtonClicks": 0,
+  "internalProviderUsage": "UNKNOWN: no token/attempt/billing readback",
+  "outcomeCountMeaning": "One observed automatic browser command and one compatible proposal; internal provider job/attempt count not established.",
+  "harnessNotes": [
+    "A POST receipt wrapper replaced the cached GET snapshot; read-only reopen recovered chat verification.",
+    "Private button label changed from Send to Ask assistant. No private POST occurred before selector correction; fresh empty history was checked first.",
+    "Theme button has a constant Dark mode accessible name and toggles by aria-pressed; restored light using that existing toggle.",
+    "Recorder checkpoints closed browsers safely, then resumed the same owned fixture. No original accepted write/model request replayed.",
+    "Private-input failure screenshot withheld; original retained outside repository. Early masked outcome images obscured foreground rows; final read-only dialog screenshot is the clear authoritative gallery image."
+  ]
 }

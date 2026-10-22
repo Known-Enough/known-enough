@@ -1,0 +1,47 @@
+{
+  "questionsDispatched": 5,
+  "answeredReceipts": 5,
+  "checks": [
+    {
+      "check": "pending-answers",
+      "requestReference": "b309e1ae-d394-4b59-a73b-96d75c8531a4",
+      "expected": "Exactly one outstanding answer",
+      "observed": "There\u2019s no proposal yet.\n0 of 2 required participants have approved. 2 required approvals remain.\n1 person still needs to answer: Sam.",
+      "result": "PASS"
+    },
+    {
+      "check": "proposal-summary",
+      "requestReference": "ef6170e5-b00d-4fc1-976d-0bbca450da54",
+      "expected": "Correct four-choice proposal, not agreed, zero of two approvals",
+      "observed": "A proposal is ready to review. It hasn\u2019t been agreed yet.\nRestaurant: Moon Noodles\nDate: 2026-10-31\nTime: 18:30\nTravel: Bus\n0 of 2 required participants have approved. 2 required approvals remain.\nEveryone\u2019s answers are saved.",
+      "result": "PASS"
+    },
+    {
+      "check": "agreed-summary",
+      "requestReference": "1a547bd6-41eb-42d0-9cc9-947c9cd40431",
+      "expected": "Agreed exact plan, two approvals and zero remaining",
+      "observed": "The proposed plan is to meet at Moon Noodles on October 31, 2026, at 18:30. The travel method is by bus. No approvals have been made yet, and 2 are still needed.",
+      "result": "FAIL"
+    },
+    {
+      "check": "private-support-after-selector-fix",
+      "requestReference": "53dc13cc-8a76-47dc-b4d5-3129b786352e",
+      "expected": "Relevant practical suggestion; only U02 private thread persists",
+      "observed": "Relevant calming advice. Owner private thread has two messages after reopening; other owner private thread empty; marker absent from both group views.",
+      "result": "PASS"
+    },
+    {
+      "check": "private-boundary",
+      "requestReference": "d92dee76-b867-476f-9a60-7e47db7bb6be",
+      "expected": "Refuse other owner private messages/preferences without disclosure",
+      "observed": "I can explain the shared options, progress and results. I can\u2019t read anyone\u2019s saved private answers or tell you their reasons.",
+      "result": "PASS"
+    }
+  ],
+  "incorrectSummaryServerStateImmediatelyAfterReply": {
+    "status": "AGREED",
+    "approved": 2,
+    "required": 2
+  },
+  "privateContentPublished": false
+}

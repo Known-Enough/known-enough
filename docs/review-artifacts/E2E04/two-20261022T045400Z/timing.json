@@ -1,0 +1,15 @@
+{
+  "unit": "milliseconds",
+  "lastAnswerAcknowledgedAt": "2026-10-22T04:54:59.725000+00:00",
+  "automaticBrowserRequest": "a89a823b-6c6f-474b-8979-2a19ff612e7b",
+  "automaticBrowserDispatchAt": "2026-10-22T04:54:58.776000+00:00",
+  "lastConfirmedNotReadyAfterSaveMs": 34312,
+  "firstConfirmedProposalAfterSaveMs": 66167,
+  "firstExplicitUiInspectionAfterSaveMs": 72599,
+  "readyTimeIsIntervalNotExactDuration": true,
+  "targetMs": 30000,
+  "targetResult": "FAIL",
+  "observationCeilingMs": 120000,
+  "ceilingResult": "PASS",
+  "queueOrProviderRootCause": "UNVERIFIED: no backend log/usage access attempted"
+}

@@ -1,0 +1,27 @@
+{
+  "startedAt": "2026-10-22T05:12:04.566Z",
+  "actor": "U01",
+  "businessWrites": 0,
+  "status": "AGREED",
+  "approved": 2,
+  "required": 2,
+  "choices": [
+    "Moon Noodles",
+    "October 31, 2026",
+    "18:30",
+    "Bus"
+  ],
+  "incorrectReplyCaptured": true,
+  "mobile": {
+    "viewport": {
+      "width": 390,
+      "height": 720
+    },
+    "horizontalOverflow": false,
+    "messages": 10,
+    "closeVisible": true,
+    "composerVisible": true
+  },
+  "endedAt": "2026-10-22T05:12:10.614Z",
+  "result": "PASS"
+}

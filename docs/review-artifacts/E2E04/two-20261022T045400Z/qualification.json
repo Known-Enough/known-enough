@@ -1,0 +1,47 @@
+{
+  "authDistinctApprovedUsers": 2,
+  "ownAnswerMatches": {
+    "U01": true,
+    "U02": true
+  },
+  "exactVocabularyAiSuggestion": "PASS: four questions/twelve choices/no follow-up",
+  "requiredParticipants": 2,
+  "compatibleTuple": [
+    "Moon Noodles",
+    "October 31, 2026",
+    "18:30",
+    "Bus"
+  ],
+  "samePinnedProposalGuard": "PASS: every approval payload checked before dispatch",
+  "approvalAttempts": 3,
+  "approvalAcknowledgments": 2,
+  "rejectedAttempt": {
+    "status": 409,
+    "code": "STALE_CONTEXT",
+    "reference": "9fa718f5-ed68-44fb-aac6-0f9cff1ac974"
+  },
+  "reconciliation": "Own read confirmed not approved and unchanged proposal; full fresh UI loaded; new explicit approval request200, original rejected command not replayed.",
+  "oneOfTwoState": "APPROVING",
+  "finalOwnViews": {
+    "U01": "AGREED/2 approvals/own selections match",
+    "U02": "AGREED/2 approvals/own selections match"
+  },
+  "agreedHiddenFromActiveList": true,
+  "plainSharedPosts": 2,
+  "distinctPlainAuthors": 2,
+  "sharedMessagesAtEnd": 10,
+  "otherOwnerPrivateThreadEmpty": true,
+  "groupMarkerAbsentForBothOwners": true,
+  "mobile": {
+    "viewport": {
+      "width": 390,
+      "height": 720
+    },
+    "horizontalOverflow": false,
+    "messages": 10,
+    "closeVisible": true,
+    "composerVisible": true
+  },
+  "largerScaleAndNativeAlexa": "NOT_TESTED",
+  "billedCostAndProviderAttempts": "UNKNOWN"
+}
