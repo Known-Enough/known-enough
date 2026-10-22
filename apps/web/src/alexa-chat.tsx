@@ -1,9 +1,8 @@
 import { Modal } from './modal';
 import { useEffect, useRef, useState } from 'react';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { Alexa, AssistantChat as Chat } from '@deal-table/contracts';
 import { PageIcon } from './app-chrome';
+import { LiveDecisionCard, useLiveDecision } from './live-decision-card';
 
 const labels = { group: 'Decision chat', private: 'Private assistant' };
 const notices: Record<Chat.Receipt['state'], string> = {
@@ -12,18 +11,21 @@ const notices: Record<Chat.Receipt['state'], string> = {
   UNKNOWN: 'Your message is posted, but we couldn’t confirm the reply. You can check it or post another message.',
   UNAVAILABLE: 'Your message is posted, but the assistant couldn’t finish replying. You can ask a new question.',
 };
-export default function AlexaChat({ decisionId, title, endpoint, api, onClose }: {
+export default function AlexaChat({ decisionId, title, endpoint, api, onClose, onReviewOutcome, reviewBlocked = false }: {
   decisionId: string; title: string; groupId?: string | undefined; endpoint: string;
-  api: (path: string, init?: RequestInit) => Promise<Response>; onClose: () => void;
+  api: (path: string, init?: RequestInit) => Promise<Response>; onClose: () => void; onReviewOutcome: () => Promise<void>; reviewBlocked?: boolean;
 }) {
   const dialog = useRef<HTMLDialogElement>(null), input = useRef<HTMLTextAreaElement>(null), end = useRef<HTMLDivElement>(null);
   const apiRef = useRef(api); apiRef.current = api;
+  const liveDecision = useLiveDecision(decisionId, endpoint, api);
   const [scope, setScope] = useState<Chat.Scope>('group');
   const [conversation, setConversation] = useState<Chat.Snapshot | null>(null), [loading, setLoading] = useState(true);
   const [drafts, setDrafts] = useState({ group: '', private: '' }), [working, setWorking] = useState(false), [notice, setNotice] = useState('');
   const [consent, setConsent] = useState(false);
   const [share, setShare] = useState<Chat.Message | null>(null), [pending, setPending] = useState<string | null>(null);
-  const [details, setDetails] = useState(false), [connection, setConnection] = useState('Not checked'), [trace, setTrace] = useState<string[]>([]);
+  const [details, setDetails] = useState(false);
+  const connection = liveDecision.connected ? 'Connected' : liveDecision.failed ? 'Current decision unavailable' : 'Checking connection…';
+  const trace = liveDecision.connected ? ['MCP ' + Alexa.PROTOCOL_VERSION + ' · initialize complete', Alexa.TOOL_NAMES.length + ' shared read tools available', 'tools/call · get_decision_outcome · complete', 'Card facts come from the saved decision. Reads make no AI calls.'] : [];
   const [refresh, setRefresh] = useState(0);
   const [replyStates, setReplyStates] = useState<Record<string, Chat.Receipt['state']>>({});
   const [activity, setActivity] = useState<'sending' | 'asking' | 'checking' | null>(null);
@@ -63,27 +65,6 @@ export default function AlexaChat({ decisionId, title, endpoint, api, onClose }:
     return () => { controller.abort(); window.clearInterval(timer); window.removeEventListener('focus', onFocus); };
   }, [base, decisionId, scope, refresh]);
   useEffect(() => { end.current?.scrollIntoView({ block: 'nearest' }); }, [conversation?.messages.length, scope]);
-  useEffect(() => {
-    if (!details) return;
-    const controller = new AbortController();
-    const client = new Client({ name: 'known-enough-web-simulator', version: '2.0.0' });
-    setConnection('Checking connection…');
-    const transport = new StreamableHTTPClientTransport(URL.parse(endpoint)!, {
-      fetch: async (url, init) => {
-        if ((typeof url === 'string' ? url : url.href) !== endpoint) throw new Error('Unexpected endpoint');
-        return apiRef.current('/mcp', { ...init, signal: init?.signal ? AbortSignal.any([init.signal, controller.signal]) : controller.signal });
-      }, reconnectionOptions: { maxRetries: 0, initialReconnectionDelay: 1000, maxReconnectionDelay: 1000, reconnectionDelayGrowFactor: 1 },
-    });
-    void (async () => {
-      try {
-        await client.connect(transport as Parameters<Client['connect']>[0], { timeout: 15000 });
-        const result = await client.listTools({}, { timeout: 15000, signal: controller.signal });
-        if (!Alexa.TOOL_NAMES.every(name => result.tools.some(tool => tool.name === name))) throw new Error('Missing tools');
-        if (!controller.signal.aborted) { setConnection('Connected'); setTrace(['Messages saved to your account', 'MCP ' + Alexa.PROTOCOL_VERSION + ' · initialize complete', result.tools.length + ' shared read tools available', 'AI model: Amazon Nova Lite. Decision progress and outcomes come from the saved decision.']); }
-      } catch { if (!controller.signal.aborted) setConnection('We couldn’t check the assistant connection. Refresh to try again.'); }
-    })();
-    return () => { controller.abort(); void client.close().catch(() => {}); };
-  }, [details, endpoint]);
 
   async function accept(response: Response, current: number, expectedRequest: string) {
     if (!response.ok) throw new Error('Send unavailable');
@@ -102,6 +83,7 @@ export default function AlexaChat({ decisionId, title, endpoint, api, onClose }:
       sessionStorage.setItem(pendingKey(value.conversation.viewerId, scope), value.requestId); setPending(value.requestId);
     }
     setNotice(exists ? notices[value.state] : 'We haven’t confirmed whether this message was posted. Check again before sending it again.');
+    void liveDecision.refresh();
     return value;
   }
   async function send(shared?: Chat.Message, requestAssistant = scope === 'private') {
@@ -166,13 +148,14 @@ export default function AlexaChat({ decisionId, title, endpoint, api, onClose }:
             <button type="button" className="ke-alexa-share" disabled={working || !!pending && pending !== message.id} onClick={() => void check(message.id)}>Check reply status</button>
           </div>}
         </li>)}
+        {currentConversation && <li className="ke-chat-decision-message"><LiveDecisionCard live={liveDecision} onReview={onReviewOutcome} disabled={working || reviewBlocked} reviewBlocked={reviewBlocked} /></li>}
       </ol><div ref={end} />
       {scope === 'private' && share && <aside className="ke-alexa-share-preview" aria-label="Preview group message"><h3>Post this to Decision chat?</h3><p>Everyone in this decision will see this text, posted with your name.</p><blockquote>{share.text}</blockquote><div className="button-row"><button type="button" disabled={working || !!pending} onClick={() => void send(share)}>Post to Decision chat</button><button type="button" className="secondary" disabled={working} onClick={() => setShare(null)}>Keep private</button></div></aside>}
       {notice && <p role="status" className="ke-alexa-notice">{notice}</p>}
       {working && <p role="status" className="ke-alexa-working">{activity === 'checking' ? 'Checking reply status…' : share ? 'Posting your chosen text…' : activity === 'asking' ? 'Assistant is replying…' : 'Posting your message…'}</p>}
       {pending && <button type="button" className="secondary" disabled={working} onClick={() => void check(pending)}>Check send status</button>}
       {!conversation && !loading && <button type="button" className="secondary" disabled={working} onClick={() => setRefresh(value => value + 1)}>Refresh conversation</button>}
-      <p className="ke-alexa-history-note">Replies describe the decision when sent. Open the decision for the latest progress.</p>
+      <p className="ke-alexa-history-note">Messages reflect when they were sent. The live card shows the latest saved decision.</p>
       <details className="ke-alexa-trace" open={details} onToggle={event => setDetails(event.currentTarget.open)}><summary>About the assistant</summary><p>{connection} · Connected to your decision.</p><ul>{trace.map(line => <li key={line}>{line}</li>)}</ul><p>The assistant uses your recent messages in this conversation and the shared options. It can’t read other participants’ messages or saved private answers, change your answers, or approve a proposal for anyone. This web preview is not a native Alexa+ connection.</p></details>
     </div>
     <form onSubmit={event => { event.preventDefault(); void send(); }}>
