@@ -13,10 +13,10 @@ Two isolated synthetic accounts; new owned dinner fixture, four questions and64 
 | 05 | NOT_RUN |
 | 06 | NOT_RUN |
 
-Last action: U01.prepare. In flight: none.
+Last action: U02.read. In flight: none.
 
-Observed requests: {"outcome":0,"assistant":0,"aiDraft":0,"plainPosts":0}. Provider usage: UNKNOWN: request counts are not provider-call/token/billing evidence.
+Observed requests: {"outcome":1,"assistant":1,"aiDraft":1,"plainPosts":2}. Provider usage: UNKNOWN: request counts are not provider-call/token/billing evidence.
 
-
+- U02.chatRead: CHAT_SNAPSHOT_MISSING; screenshots/failure-0.png.
 
 [Summary](summary.json) · [Events](events.jsonl)

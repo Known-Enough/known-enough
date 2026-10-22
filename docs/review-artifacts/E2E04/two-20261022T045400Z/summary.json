@@ -13,12 +13,22 @@
     "06": "NOT_RUN"
   },
   "observedRequests": {
-    "outcome": 0,
-    "assistant": 0,
-    "aiDraft": 0,
-    "plainPosts": 0
+    "outcome": 1,
+    "assistant": 1,
+    "aiDraft": 1,
+    "plainPosts": 2
   },
-  "errors": [],
+  "errors": [
+    {
+      "action": "U02.chatRead",
+      "code": "CHAT_SNAPSHOT_MISSING",
+      "domain": "AUTOMATION",
+      "status": null,
+      "serverCode": null,
+      "reference": null,
+      "screenshot": "screenshots/failure-0.png"
+    }
+  ],
   "screenshots": [
     {
       "file": "screenshots/01-two-members.png",
@@ -46,6 +56,33 @@
         "height": 1000
       },
       "caption": "Search finds this run’s own group"
+    },
+    {
+      "file": "screenshots/03-ai-questions.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "One AI drafting request returned all four questions and exact choices; accepted individually"
+    },
+    {
+      "file": "screenshots/04-one-of-two-answers.png",
+      "actor": "U01",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "One of two answered; no proposal or approval yet"
+    },
+    {
+      "file": "screenshots/failure-0.png",
+      "actor": "U02",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "failure-0"
     }
   ],
   "providerUsage": "UNKNOWN: request counts are not provider-call/token/billing evidence",
@@ -59,5 +96,5 @@
     "synthetic": true
   },
   "inFlightAction": null,
-  "lastConfirmedAction": "U01.prepare"
+  "lastConfirmedAction": "U02.read"
 }
