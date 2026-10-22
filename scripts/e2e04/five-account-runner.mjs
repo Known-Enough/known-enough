@@ -122,7 +122,7 @@ async function shot(u,c){
   const name=c.name.replace(/[^a-zA-Z0-9_-]/g,'_')+'.png';
   if(await u.page.locator('.ke-alexa-chat').isVisible()&&await u.page.getByRole('tab',{name:'Private assistant',exact:true}).getAttribute('aria-selected')==='true'&&c.target!=='card')return {screenshot:'WITHHELD_PRIVATE_CHAT'};
   const loc=c.target==='card'?u.page.locator('.ke-chat-decision-card'):c.target==='chat'?u.page.locator('.ke-alexa-chat'):c.target==='outcome'?u.page.locator('dialog[open]').last():u.page;
-  await loc.screenshot({path:path.join(out,'screenshots',name),...(loc===u.page?{fullPage:!!c.fullPage}:{}),animations:'disabled',maskColor:'#e9eeeb',mask:[u.page.locator('input[type=password],.ke-alexa-share-preview,.ke-saved-answer-topics,.ke-outcome-private')],style:'.ke-group-row:not(:has(button[aria-label*="E2E04 Five"])) {visibility:hidden!important;}'});
+  await loc.screenshot({path:path.join(out,'screenshots',name),...(loc===u.page?{fullPage:!!c.fullPage}:{}),animations:'disabled',maskColor:'#e9eeeb',mask:[loc===u.page?u.page.locator('input[type=password],.ke-alexa-share-preview,.ke-saved-answer-topics,.ke-outcome-private'):loc.locator('.ke-alexa-share-preview,.ke-outcome-private')],style:'.ke-group-row:not(:has(button[aria-label*="E2E04 Five"])) {visibility:hidden!important;}'});
   summary.screenshots.push({file:'screenshots/'+name,actor:u.actor,viewport:u.page.viewportSize(),caption:c.caption||c.name});return {screenshot:'screenshots/'+name};
 }
 const ops={

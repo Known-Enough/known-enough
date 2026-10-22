@@ -1,0 +1,111 @@
+{
+  "utc": "2026-10-22T17:10:23.419396+00:00",
+  "readOnly": true,
+  "ownersDistinct": true,
+  "checks": [
+    {
+      "actor": "U01",
+      "utc": "2026-10-22T17:10:21.844802+00:00",
+      "required": 5,
+      "answered": 5,
+      "approved": 5,
+      "status": "AGREED",
+      "ownReady": true,
+      "ownApproval": true,
+      "ownSelectionsMatch": true,
+      "questions": [
+        "Restaurant",
+        "Date",
+        "Time",
+        "Travel"
+      ],
+      "containsPrivateMarker": false
+    },
+    {
+      "actor": "U02",
+      "utc": "2026-10-22T17:10:22.198157+00:00",
+      "required": 5,
+      "answered": 5,
+      "approved": 5,
+      "status": "AGREED",
+      "ownReady": true,
+      "ownApproval": true,
+      "ownSelectionsMatch": true,
+      "questions": [
+        "Restaurant",
+        "Date",
+        "Time",
+        "Travel"
+      ],
+      "containsPrivateMarker": false
+    },
+    {
+      "actor": "U03",
+      "utc": "2026-10-22T17:10:22.601809+00:00",
+      "required": 5,
+      "answered": 5,
+      "approved": 5,
+      "status": "AGREED",
+      "ownReady": true,
+      "ownApproval": true,
+      "ownSelectionsMatch": true,
+      "questions": [
+        "Restaurant",
+        "Date",
+        "Time",
+        "Travel"
+      ],
+      "containsPrivateMarker": false
+    },
+    {
+      "actor": "U04",
+      "utc": "2026-10-22T17:10:23.060077+00:00",
+      "required": 5,
+      "answered": 5,
+      "approved": 5,
+      "status": "AGREED",
+      "ownReady": true,
+      "ownApproval": true,
+      "ownSelectionsMatch": true,
+      "questions": [
+        "Restaurant",
+        "Date",
+        "Time",
+        "Travel"
+      ],
+      "containsPrivateMarker": false
+    },
+    {
+      "actor": "U05",
+      "utc": "2026-10-22T17:10:23.419168+00:00",
+      "required": 5,
+      "answered": 5,
+      "approved": 5,
+      "status": "AGREED",
+      "ownReady": true,
+      "ownApproval": true,
+      "ownSelectionsMatch": true,
+      "questions": [
+        "Restaurant",
+        "Date",
+        "Time",
+        "Travel"
+      ],
+      "containsPrivateMarker": false
+    }
+  ],
+  "sharedIntersection": [
+    [
+      "Moon Noodles"
+    ],
+    [
+      "2026-10-31"
+    ],
+    [
+      "18:30"
+    ],
+    [
+      "Bus"
+    ]
+  ]
+}

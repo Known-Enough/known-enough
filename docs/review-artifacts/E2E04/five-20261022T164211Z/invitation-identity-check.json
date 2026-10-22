@@ -1,0 +1,10 @@
+{
+  "utc": "2026-10-22T17:12:59.238293+00:00",
+  "operation": "Cognito own GetUser per supplied test account",
+  "reads": 5,
+  "allFiveShareVerifiedEmail": true,
+  "emailValuesPublished": false,
+  "mutations": 0,
+  "emailSends": 0,
+  "errors": []
+}

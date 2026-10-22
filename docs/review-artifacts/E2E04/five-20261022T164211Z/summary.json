@@ -1,20 +1,20 @@
 {
   "runId": "20261022T164211Z",
   "variant": "E2E04-five-account",
-  "state": "RUNNING",
+  "state": "COMPLETED_WITH_FINDINGS",
   "startedAt": "2026-10-22T16:42:11.809Z",
-  "endedAt": null,
+  "endedAt": "2026-10-22T17:10:21.174Z",
   "cases": {
     "01": "PASS_WITH_INVITATION_REJECTION",
     "02": "PASS_SMALL_GROUP_AND_TWO_PAGE_CATALOG",
     "03": "PASS_CANONICAL_OWNER_READBACK",
     "04": "CORRECT_RESULT_SLOW_66_5_SECONDS",
-    "05": "IN_PROGRESS_FOUR_OF_FIVE_APPROVED",
-    "06": "IN_PROGRESS_FINAL_SUMMARY_PENDING"
+    "05": "PASS_FIVE_INDEPENDENT_APPROVALS_AND_FRESH_READBACKS",
+    "06": "PASS_EIGHT_ASSISTANT_REPLIES_MCP_CARD_AND_PRIVATE_ISOLATION"
   },
   "observedRequests": {
     "outcome": 0,
-    "assistant": 7,
+    "assistant": 8,
     "aiDraft": 1,
     "plainPosts": 5
   },
@@ -172,7 +172,7 @@
         "width": 1365,
         "height": 1000
       },
-      "caption": "Search finds this run’s own group"
+      "caption": "Search finds this run\u2019s own group"
     },
     {
       "file": "screenshots/ai-questions-and-choices.png",
@@ -209,6 +209,60 @@
         "height": 1000
       },
       "caption": "Still proposed at four of five approvals; one person remains"
+    },
+    {
+      "file": "screenshots/agreed-five-approvals.png",
+      "actor": "U05",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "All five participants approved the exact same plan"
+    },
+    {
+      "file": "screenshots/agreed-live-card.png",
+      "actor": "U05",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "Live MCP card agrees with fresh owner state: decision agreed, five of five approved"
+    },
+    {
+      "file": "screenshots/mobile-agreed-card.png",
+      "actor": "U05",
+      "viewport": {
+        "width": 390,
+        "height": 720
+      },
+      "caption": "Agreed live decision card on a 390px screen"
+    },
+    {
+      "file": "screenshots/agreed-card-final-readback.png",
+      "actor": "U05",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "Read-only final capture: five of five approved; all four public choices"
+    },
+    {
+      "file": "screenshots/mobile-card-final-readback.png",
+      "actor": "U05",
+      "viewport": {
+        "width": 390,
+        "height": 720
+      },
+      "caption": "Read-only final capture at 390px: all public choices and five approvals"
+    },
+    {
+      "file": "screenshots/agreed-outcome-final-readback.png",
+      "actor": "U05",
+      "viewport": {
+        "width": 1365,
+        "height": 1000
+      },
+      "caption": "Read-only agreed outcome with all five approvals; private details withheld"
     }
   ],
   "providerUsage": "UNKNOWN: request counts are not provider-call/token/billing evidence",
@@ -223,5 +277,95 @@
   },
   "productionSource": "601394ab09d9dd6888ba6d71ac3f3790083c3b3f",
   "inFlightAction": null,
-  "lastConfirmedAction": "U01.result"
+  "lastConfirmedAction": "U04.result",
+  "finalCapture": {
+    "utc": "2026-10-22T17:11:38.574Z",
+    "applicationWrites": 0,
+    "assistantRequests": 0,
+    "mcpPosts": 4
+  },
+  "findings": [
+    {
+      "id": "F01",
+      "severity": "MEDIUM",
+      "result": "OPEN",
+      "issue": "Username invitations for distinct synthetic accounts sharing one verified email conflict while another invitation to that email is pending.",
+      "evidence": "HTTP 409 STALE_CONTEXT, reference d0e0aa2a-e6ba-43be-9cfe-8265ef1927f8; five own Cognito reads confirm shared verified email; joining sequentially succeeds.",
+      "next": "Distinguish exact username recipients by verified account identity while preserving email invitation ownership checks."
+    },
+    {
+      "id": "F02",
+      "severity": "MEDIUM",
+      "result": "OPEN",
+      "issue": "Correct automatic outcome first observed 66.549 seconds after final answer acknowledgment; misses <=30 second target.",
+      "evidence": "Five answers saved; REASONING then PROPOSED with exact unique intersection; no manual outcome request or duplicate submission.",
+      "next": "Correlate automatic-job enqueue, scheduling and worker start timestamps before changing solver behavior."
+    }
+  ],
+  "automationCorrections": [
+    {
+      "error": "EARLY_INVITATION_NAVIGATION",
+      "explanation": "Failed invitation retained unsaved recipient input. Dismissed beforeunload correctly blocked two queued navigations; no extra invitation write occurred."
+    },
+    {
+      "error": "RESTORED_GROUP_VIEW_WAIT",
+      "explanation": "Runner originally waited for dashboard heading while restoring a group page. Fixed restore readiness; one later join wait had no invitation because preceding runner action had failed."
+    },
+    {
+      "error": "OWN_SELECTIONS_MISMATCH",
+      "explanation": "Two false negatives: model represented date choices as ENUM labels, while the assertion expected ISO dates. Canonical authenticated owner reads confirm all five intended selections; no answer was replayed or changed."
+    },
+    {
+      "error": "DECISION_VIEW_NOT_READY",
+      "explanation": "Runner restored expired access tokens and initially reinjected stale session state after navigation. Reauthenticated, restricted restoration to valid sessions and stopped overwriting an existing session. No app authentication behavior was changed or classified as an app outage."
+    },
+    {
+      "error": "CHAT_SNAPSHOT_MISSING",
+      "explanation": "Runner inspected immediately after tab change before the new response arrived. Later complete read confirmed the shared history; no message was resent."
+    },
+    {
+      "error": "SCREENSHOT_MASK_OCCLUSION",
+      "explanation": "Background private-answer mask covered foreground card/outcome regions in initial screenshots. Original files retained with this limitation. Final card, mobile card and outcome were recaptured read-only with component-scoped redaction; use the final-readback images."
+    }
+  ],
+  "finalOwnerChecks": {
+    "utc": "2026-10-22T17:10:23.419396+00:00",
+    "owners": 5,
+    "distinct": true,
+    "allAgreed": true,
+    "allOwnAnswersMatch": true,
+    "allOwnApprovalsPresent": true,
+    "approved": 5,
+    "required": 5
+  },
+  "observations": {
+    "actualAiDraftRequests": 1,
+    "assistantSendRequests": 8,
+    "assistantAnsweredReceipts": 8,
+    "plainPosts": 5,
+    "automaticOutcomeFirstObservedMs": 66549,
+    "clientExplicitOutcomeCommands": 0,
+    "clientExplicitOutcomeExplanation": "Fifth answer triggered backend automatic processing; no manual REQUEST_NEGOTIATION command was dispatched.",
+    "proposalPinnedForAllFiveApprovals": true,
+    "mcpTool": "get_decision_outcome",
+    "mainRunObservedMcpToolCalls": 42,
+    "privateOwnerMessages": 2,
+    "otherOwnerPrivateMessages": 0,
+    "sharedMessages": 19,
+    "sharedPrivateMarkerPresent": false,
+    "groupCatalogPages": [
+      5,
+      4
+    ],
+    "memberPagination": "NOT_EXERCISED: five members fit on one page",
+    "browserConcurrentPages": 1
+  },
+  "scopeLimits": [
+    "One five-user happy path and bounded conversation/privacy checks; no statistical reliability guarantee.",
+    "Vercel full flow; Amplify root HTTP/assets only, not a second authenticated full flow.",
+    "No native Alexa+ client, new signups, email delivery, disjoint/no-solution case, withdrawal, deletion, or >12 member pagination tested in this variant.",
+    "No fresh AWS package/worker attestation or provider billing/token telemetry. Observed request counts are not billed invocation counts.",
+    "No application code, deployed settings, IAM, schedules or existing fixtures changed. Test accounts and new owned fixture remain available for review."
+  ],
+  "artifactFinalizedAt": "2026-10-22T17:15:18.228691+00:00"
 }
