@@ -1,0 +1,48 @@
+{
+  "images": [
+    {
+      "file": "media/01-vision-and-negotiation.png",
+      "sha256": "ae4ae009a7af4516f05a59a6c4e9a3ed8f3fffc3dbb5ac42c65e8f3e2011ffd8",
+      "alt": "Known Enough brings private answers, a shared proposal, and individual approvals into one decision workflow.",
+      "caption": "The idea in one view: private answers become a proposal people review together. Illustrative overview with fictional data."
+    },
+    {
+      "file": "media/04-actual-options-editor.png",
+      "sha256": "3f0dd32e6ee1a9dcd47fcf72807c79393ab2c3a3675fa39569063cb16e048854",
+      "alt": "The current options editor lets an organizer name a decision, add topics, and review restaurant alternatives.",
+      "caption": "Define what the group is choosing before asking what works for each person. Actual interface rendered locally with fictional data."
+    },
+    {
+      "file": "media/07-actual-private-answers.png",
+      "sha256": "1f1c0d20079020520294b2562c0c8895b978bbf11edc44740f6a4858952de44e",
+      "alt": "A participant privately selects acceptable restaurants and a date in the What works for you form.",
+      "caption": "People can accept several options without sharing their complete answers with the group. Actual interface rendered locally with fictional data."
+    },
+    {
+      "file": "media/06-actual-chat-interface.png",
+      "sha256": "c8874117eb8372d8a07a2948efdf87309b38efbf0bdc927e0c226518e85243ed",
+      "alt": "Decision chat and Private assistant provide separate conversation spaces in the current web interface.",
+      "caption": "The conversation supports the decision rather than replacing it. Actual component with fictional local messages; this capture does not demonstrate a live model response."
+    },
+    {
+      "file": "media/03-architecture-and-principles.png",
+      "sha256": "d05868a27bcc880233ac013e459ae7b80803e812e08f7499457cdb8ac5c6f808",
+      "alt": "The React app uses Cognito, an API Gateway and Lambda backend, DynamoDB state, and a bounded Bedrock assistance branch.",
+      "caption": "AI suggests, application rules validate, and people approve. This simplified architecture shows Bedrock assisting the backend without granting it approval authority."
+    },
+    {
+      "file": "media/02-privacy-and-assistance.png",
+      "sha256": "54410a839fd558c6c3391c342f5f2cf1068ebff659473be1054af5e9864a3bff",
+      "alt": "Private answers, optional AI assistance, explicit sharing, and separate conversations make the privacy boundaries visible.",
+      "caption": "Privacy is expressed through specific choices: saving answers, requesting AI help, and allowing a disclosure are separate actions. Illustrative product overview."
+    },
+    {
+      "file": "media/05-actual-agreed-outcome.png",
+      "sha256": "2dbf1fe05e856429a40214343d6497db5ae43277130165e8c1c46fa84b04ee77",
+      "alt": "The actual application records Decision agreed after all fifteen test participants approve the same dinner outcome.",
+      "caption": "The last required approval changes the result to Decision agreed. Preserved application capture from the 20 October qualification with fifteen fictional test accounts."
+    }
+  ],
+  "story_sha256": "723675012c6e3970bd33f1004a4fa169dd480b344a31d06e20e9be34909d9473",
+  "capture_source_commit": "8cea65e484177ae9bd0720cb8a3bd2e002ad645b"
+}

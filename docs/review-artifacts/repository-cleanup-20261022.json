@@ -1,0 +1,184 @@
+{
+  "mainSource": "5160308ab4b20637c3348ab1334602188c959d2f",
+  "developmentSource": "3943df412670facb214ee2e23b47eb84d038c1de",
+  "archivedOnDevelopment": [
+    {
+      "path": "infra/fix01/api-log-read-policy.json",
+      "sha256": "f9df39762ebff8c258582131ada684223f3811b5796092800b982809faabd0ee"
+    },
+    {
+      "path": "infra/live-qa/authorization.example.json",
+      "sha256": "82616ae9182909e0d648c23b3fcb3e1b04c21e948707b08d52d95c253122c89a"
+    },
+    {
+      "path": "infra/live-qa/installed-target.example.json",
+      "sha256": "1b918d963b8773a7c20f854405b0bbcc92689c3d8337b25a5cd410a47e91646f"
+    },
+    {
+      "path": "infra/permissions/ke13-amplify-github-trust.json",
+      "sha256": "9c9099311e871637f77eaf04672da06643f706883fff08aa3a27350369d4c4dc"
+    },
+    {
+      "path": "infra/permissions/ke13a-stage0-provisioner.json",
+      "sha256": "eb88bb397bd6d57ffe811d39f3c600096880f63051af6a3984ba5256800992b3"
+    },
+    {
+      "path": "infra/permissions/ke13c-preview-bucket-policy.json",
+      "sha256": "70d0dc01c9558334fbb7e95e00035dc5d58c282d0950dfb7581247302bc5d63f"
+    },
+    {
+      "path": "infra/permissions/ke13c-stage0-deploy.json",
+      "sha256": "f734984f18e28b04c841cd1524ef811e45e6f705a9f5e8f966ec4bdafaec5a83"
+    },
+    {
+      "path": "infra/permissions/np00-model-disable-temporary.json",
+      "sha256": "2564b69ca862d8e906dd8e35776c87e6d7a9e4904ae0c115736652c76e8628da"
+    },
+    {
+      "path": "infra/permissions/shared-staging-github-inspect.json",
+      "sha256": "f5b12007c5df14306cd9e3534466d529858c6160b3cf8e17e0bf52b4f0f4079f"
+    },
+    {
+      "path": "scripts/cloudshell-commands/05-enable-decision-drafting.py",
+      "sha256": "d5eeacf3487b52302612008b32898ac40583dd5c522f73b4962734ab71546834"
+    },
+    {
+      "path": "scripts/cloudshell-commands/06-private-interpretation-access.py",
+      "sha256": "b3088e26b93399e0682d26f90f29a559bd05539f1535344a86f416beaad63f5b"
+    },
+    {
+      "path": "scripts/e2e03/session-runner.mjs",
+      "sha256": "e55aeeac35ec64c8aae73fb075557260ea987ed17de01f98b7e9cdc96af3504e"
+    },
+    {
+      "path": "scripts/e2e03/session-runner.test.mjs",
+      "sha256": "077ff640e6753b0b77f0df7c945d0244242ad665a611dc94958904db0eed935d"
+    },
+    {
+      "path": "scripts/fix01/install-api-log-read.py",
+      "sha256": "934bd3df8670d061d7acf5ef857fcefaebc9366643cac5e1ac9f99d745959703"
+    },
+    {
+      "path": "scripts/group-operator.mjs",
+      "sha256": "18c14de4be9a36f5e6e28b9bf12227600fcf54b5fc9d6b9ad2b233232f087d1e"
+    },
+    {
+      "path": "scripts/live-qa/browser-recovery.mjs",
+      "sha256": "2f4d3dee9857d795ff84311fb9de3ae11a8ff0ce4ec1142096742317a13caa51"
+    },
+    {
+      "path": "scripts/live-qa/browser-recovery.test.mjs",
+      "sha256": "b0fa00678a6fb1583e1f54862b393f2d50f0c7b29264835015592f29ff170b2b"
+    },
+    {
+      "path": "scripts/operations/archive-access-repair.py",
+      "sha256": "306e62895615bb2f20c68934c59263df5eb4a8764f31092978e035c7bb0a7d76"
+    },
+    {
+      "path": "scripts/operations/archive-access-repair.test.py",
+      "sha256": "5ba6b48acce9b59ff58a98ac54a8946eb1c40cf9d9f4796128aa56fae7a4edb9"
+    },
+    {
+      "path": "scripts/operations/lifecycle-owner-access.py",
+      "sha256": "969245363a50eb9ce9d1ab5bca1bd6033a1e6acb19ed8e98b912b501a1ccbe5a"
+    },
+    {
+      "path": "scripts/operations/lifecycle-owner-access.test.py",
+      "sha256": "fa20981d2e844cc228bbd7e8dac5083898a8a2b37dd31d4bcd81d8d6e93d9058"
+    },
+    {
+      "path": "scripts/operations/lifecycle-owner-routes.py",
+      "sha256": "0138143adb684be3321eff3af386976137261cb7e6d899974d947dc50390136d"
+    },
+    {
+      "path": "scripts/operations/lifecycle-owner-routes.test.py",
+      "sha256": "6799c9a7c1a5f814b6d6899952c2373c0b76e5582d931f0591c7da57d08751dc"
+    },
+    {
+      "path": "scripts/operations/lifecycle-owner-setup.py",
+      "sha256": "b3a310c4e72b34c20abc3d65e15762fa7be393f25b98d30d09d519d3b4b6b630"
+    },
+    {
+      "path": "scripts/operations/lifecycle-owner-setup.test.py",
+      "sha256": "24ecf3f979818bfe3a80165814b6a895484bac7f4dd67d53e2508fd5bb9eabd7"
+    },
+    {
+      "path": "scripts/zz/account-review.mjs",
+      "sha256": "b478e9cb34b059e00f83574f05467e4a728386251b1aff6aff5b08006297c861"
+    }
+  ],
+  "submissionAssets": {
+    "source": "23cb3856ce0314b4a512093c2c015074c608a689",
+    "files": [
+      {
+        "path": "submission-assets/devpost-story/README.md",
+        "sha256": "164b297cfc07b5b9fec0cbdcd09b94ad758804c5ed43113436f4257c957c0672"
+      },
+      {
+        "path": "submission-assets/devpost-story/asset-manifest.json",
+        "sha256": "6e68305233ceafa0ad9b8ef6b3068a9f9a189e3d0ced964c41fbaa2f15288fd9"
+      },
+      {
+        "path": "submission-assets/devpost-story/media/01-vision-and-negotiation.png",
+        "sha256": "ae4ae009a7af4516f05a59a6c4e9a3ed8f3fffc3dbb5ac42c65e8f3e2011ffd8"
+      },
+      {
+        "path": "submission-assets/devpost-story/media/02-privacy-and-assistance.png",
+        "sha256": "54410a839fd558c6c3391c342f5f2cf1068ebff659473be1054af5e9864a3bff"
+      },
+      {
+        "path": "submission-assets/devpost-story/media/03-architecture-and-principles.png",
+        "sha256": "d05868a27bcc880233ac013e459ae7b80803e812e08f7499457cdb8ac5c6f808"
+      },
+      {
+        "path": "submission-assets/devpost-story/media/04-actual-options-editor.png",
+        "sha256": "3f0dd32e6ee1a9dcd47fcf72807c79393ab2c3a3675fa39569063cb16e048854"
+      },
+      {
+        "path": "submission-assets/devpost-story/media/05-actual-agreed-outcome.png",
+        "sha256": "2dbf1fe05e856429a40214343d6497db5ae43277130165e8c1c46fa84b04ee77"
+      },
+      {
+        "path": "submission-assets/devpost-story/media/06-actual-chat-interface.png",
+        "sha256": "c8874117eb8372d8a07a2948efdf87309b38efbf0bdc927e0c226518e85243ed"
+      },
+      {
+        "path": "submission-assets/devpost-story/media/07-actual-private-answers.png",
+        "sha256": "1f1c0d20079020520294b2562c0c8895b978bbf11edc44740f6a4858952de44e"
+      },
+      {
+        "path": "submission-assets/devpost-story/story.md",
+        "sha256": "723675012c6e3970bd33f1004a4fa169dd480b344a31d06e20e9be34909d9473"
+      }
+    ]
+  },
+  "scope": "Repository files only; no application/runtime/workflow/configuration/IAM changes.",
+  "checks": {
+    "referenceScan": "PASS: no retained code/workflow reference edges to archived files; imports, quoted paths, sibling modules and basenames inspected.",
+    "archiveBytes": "PASS: all 26 files already exist unchanged at the same development paths.",
+    "staticChecks": {
+      "typecheck": "PASS",
+      "lintAndDependencyBoundaries": "PASS: 656 references",
+      "productionBuild": "PASS"
+    },
+    "submissionManifest": "PASS: all 10 files match the cited source; seven image hashes and story hash match the original manifest.",
+    "readme": "PASS: identical across branches.",
+    "whitespace": "PASS"
+  },
+  "applicationTests": "NOT_RUN",
+  "cloudOperations": "NOT_RUN",
+  "verifiedAt": "2026-10-22T06:29:35.611139+00:00",
+  "counts": {
+    "scriptsArchivedFromMain": 17,
+    "infrastructureFilesArchivedFromMain": 9,
+    "submissionFilesPreserved": 10,
+    "submissionImagesPreserved": 7
+  },
+  "retained": "Application packages, workflows, build/local tooling, runtime packaging and publication, active tests, account-management commands, declaration files and referenced infrastructure. access-profiles.json retained because verification scripts reference it.",
+  "archiveCategories": [
+    "Historical preview/provisioning and one-time permission templates",
+    "One-time setup and permission repair commands",
+    "Legacy aggregate account operator and superseded account review helper",
+    "Manual browser session/recovery harnesses, retained on development with their companion tests"
+  ]
+}
